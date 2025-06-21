@@ -100,7 +100,7 @@ function ExportContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
+      <nav className="bg-white border-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
@@ -137,7 +137,7 @@ function ExportContent() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Format Selection */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white shadow rounded-lg p-6">
+              <div className="bg-white border rounded-lg p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                   Select Format
                 </h3>
@@ -206,7 +206,7 @@ function ExportContent() {
               </div>
 
               {/* Export Options */}
-              <div className="bg-white shadow rounded-lg p-6">
+              <div className="bg-white border rounded-lg p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                   Export Options
                 </h3>
@@ -216,7 +216,7 @@ function ExportContent() {
                       Custom Filename (optional)
                     </label>
                     <input
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md border-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                       onChange={(e) =>
                         setExportOptions({
                           ...exportOptions,
@@ -302,7 +302,7 @@ function ExportContent() {
 
             {/* Preview & Actions */}
             <div className="space-y-6">
-              <div className="bg-white shadow rounded-lg p-6">
+              <div className="bg-white border rounded-lg p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                   Preview
                 </h3>
@@ -335,7 +335,7 @@ function ExportContent() {
                 </div>
               </div>
 
-              <div className="bg-white shadow rounded-lg p-6">
+              <div className="bg-white border rounded-lg p-6">
                 <Button
                   className="w-full"
                   disabled={!selectedFormat}

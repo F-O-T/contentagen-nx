@@ -1,54 +1,18 @@
-import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { FileText, Plus, Settings, TrendingUp, Users } from "lucide-react";
+import {
+  BookOpen,
+  Bot,
+  FileText,
+  Plus,
+  Settings,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Dashboard,
 });
-
-// Mock data for the prototype
-const mockProjects = [
-  {
-    agents: [
-      {
-        audience: "Tech enthusiasts",
-        drafts: 3,
-        id: 1,
-        name: "AI News Agent",
-        published: 12,
-        status: "active",
-        tone: "Professional",
-      },
-      {
-        audience: "Developers",
-        drafts: 1,
-        id: 2,
-        name: "Tutorial Agent",
-        published: 5,
-        status: "draft",
-        tone: "Educational",
-      },
-    ],
-    id: 1,
-    name: "Tech Blog",
-  },
-  {
-    agents: [
-      {
-        audience: "Customers",
-        drafts: 2,
-        id: 3,
-        name: "Product Updates",
-        published: 8,
-        status: "active",
-        tone: "Conversational",
-      },
-    ],
-    id: 2,
-    name: "Marketing Blog",
-  },
-];
 
 function Dashboard() {
   return (
@@ -99,9 +63,7 @@ function Dashboard() {
         <div className="px-4 py-6 sm:px-0">
           {/* Header */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Project Dashboard
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
             <p className="mt-1 text-sm text-gray-600">
               Manage your AI content agents and track their performance
             </p>
@@ -109,7 +71,7 @@ function Dashboard() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-white overflow-hidden border rounded-lg">
               <div className="p-5">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -127,7 +89,7 @@ function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-white overflow-hidden border rounded-lg">
               <div className="p-5">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -145,7 +107,7 @@ function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-white overflow-hidden border rounded-lg">
               <div className="p-5">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -163,7 +125,7 @@ function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="bg-white overflow-hidden border rounded-lg">
               <div className="p-5">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -172,9 +134,9 @@ function Dashboard() {
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">
-                        Projects
+                        Total Articles
                       </dt>
-                      <dd className="text-lg font-medium text-gray-900">2</dd>
+                      <dd className="text-lg font-medium text-gray-900">47</dd>
                     </dl>
                   </div>
                 </div>
@@ -182,75 +144,51 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Projects */}
-          <div className="space-y-6">
-            {mockProjects.map((project) => (
-              <div className="bg-white shadow rounded-lg" key={project.id}>
-                <div className="px-4 py-5 sm:px-6">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">
-                    {project.name}
-                  </h3>
-                  <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                    {project.agents.length} agent
-                    {project.agents.length !== 1 ? "s" : ""}
-                  </p>
-                </div>
-                <div className="border-t border-gray-200">
-                  <div className="px-4 py-5 sm:p-6">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      {project.agents.map((agent) => (
-                        <div
-                          className="relative rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm hover:border-gray-400"
-                          key={agent.id}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center justify-between">
-                                <p className="text-sm font-medium text-gray-900">
-                                  {agent.name}
-                                </p>
-                                <Badge
-                                  variant={
-                                    agent.status === "active"
-                                      ? "default"
-                                      : "secondary"
-                                  }
-                                >
-                                  {agent.status}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-gray-500 mt-1">
-                                {agent.tone} • {agent.audience}
-                              </p>
-                              <div className="mt-2 flex text-sm text-gray-500">
-                                <span>{agent.drafts} drafts</span>
-                                <span className="mx-2">•</span>
-                                <span>{agent.published} published</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-4 flex space-x-2">
-                            <Link
-                              search={{ agentId: agent.id }}
-                              to="/content/generate"
-                            >
-                              <Button size="sm" variant="outline">
-                                Generate
-                              </Button>
-                            </Link>
-                            <Link search={{ id: agent.id }} to="/agents/edit">
-                              <Button size="sm" variant="ghost">
-                                Edit
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+          {/* Navigation Cards */}
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
+            {/* Agents Card */}
+            <Link className="group" to="/agents">
+              <div className="bg-white overflow-hidden rounded-lg transition-all duration-200 cursor-pointer border hover:border-blue-200">
+                <div className="p-8">
+                  <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-lg mb-6 mx-auto group-hover:bg-blue-200 transition-colors">
+                    <Bot className="h-8 w-8 text-blue-600 group-hover:text-blue-700" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-900">
+                      Manage Agents
+                    </h3>
+                    <p className="text-gray-600 mb-4 group-hover:text-gray-700">
+                      Create, edit, and configure your AI content agents
+                    </p>
+                    <p className="text-sm text-blue-600 font-medium group-hover:text-blue-700">
+                      Click to view →
+                    </p>
                   </div>
                 </div>
               </div>
-            ))}
+            </Link>
+
+            {/* Articles Card */}
+            <Link className="group" to="/content">
+              <div className="bg-white overflow-hidden rounded-lg transition-all duration-200 cursor-pointer border hover:border-green-200">
+                <div className="p-8">
+                  <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-lg mb-6 mx-auto group-hover:bg-green-200 transition-colors">
+                    <BookOpen className="h-8 w-8 text-green-600 group-hover:text-green-700" />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-green-900">
+                      Manage Articles
+                    </h3>
+                    <p className="text-gray-600 mb-4 group-hover:text-green-700">
+                      Review, edit, and publish your generated content
+                    </p>
+                    <p className="text-sm text-green-600 font-medium group-hover:text-green-700">
+                      Click to view →
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
           </div>
         </div>
       </main>
