@@ -12,7 +12,7 @@ export const Route = createFileRoute("/agents/edit")({
   component: EditAgent,
   validateSearch: (search: Record<string, unknown>) => {
     return {
-      id: Number(search.id) || 1,
+      id: String(search.id),
     };
   },
 });

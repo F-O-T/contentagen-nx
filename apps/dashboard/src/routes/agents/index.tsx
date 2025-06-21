@@ -1,56 +1,22 @@
+import { createQueryKey } from "@packages/eden";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 import { Edit, Plus, Settings } from "lucide-react";
 
 export const Route = createFileRoute("/agents/")({
   component: Agents,
 });
 
-// Mock data for agents
-const mockAgents = [
-  {
-    audience: "Tech enthusiasts",
-    drafts: 3,
-    id: 1,
-    lastGenerated: "2024-01-15",
-    name: "AI News Agent",
-    project: "Tech Blog",
-    published: 12,
-    seoKeywords: ["artificial intelligence", "tech news", "innovation"],
-    status: "active",
-    tone: "Professional",
-    topics: ["AI", "Machine Learning", "Technology"],
-  },
-  {
-    audience: "Developers",
-    drafts: 1,
-    id: 2,
-    lastGenerated: "2024-01-14",
-    name: "Tutorial Agent",
-    project: "Tech Blog",
-    published: 5,
-    seoKeywords: ["coding", "programming", "development"],
-    status: "draft",
-    tone: "Educational",
-    topics: ["Programming", "Web Development", "Tutorials"],
-  },
-  {
-    audience: "Customers",
-    drafts: 2,
-    id: 3,
-    lastGenerated: "2024-01-16",
-    name: "Product Updates",
-    project: "Marketing Blog",
-    published: 8,
-    seoKeywords: ["product", "updates", "features"],
-    status: "active",
-    tone: "Conversational",
-    topics: ["Product Updates", "Features", "Announcements"],
-  },
-];
-
 function Agents() {
+  const { eden } = useRouteContext({ from: "/agents/" });
+  const { data: agents } = useQuery({
+    queryFn: () => eden.agents.get(),
+    queryKey: createQueryKey("agents"),
+    select: data => data.data
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
@@ -109,7 +75,7 @@ function Agents() {
 
           {/* Agents Grid */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {mockAgents.map((agent) => (
+            {agents?.map((agent) => (
               <div
                 className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
                 key={agent.id}
@@ -121,10 +87,10 @@ function Agents() {
                     </h3>
                     <Badge
                       variant={
-                        agent.status === "active" ? "default" : "secondary"
+                        agent.isActive ? "default" : "secondary"
                       }
                     >
-                      {agent.status}
+                      {agent.isActive ? "Active" : "Inactive"}
                     </Badge>
                   </div>
 
@@ -132,21 +98,21 @@ function Agents() {
                     <div>
                       <p className="text-sm text-gray-500">Project</p>
                       <p className="text-sm font-medium text-gray-900">
-                        {agent.project}
+                        {agent.project?.name}
                       </p>
                     </div>
 
                     <div>
                       <p className="text-sm text-gray-500">Voice & Audience</p>
                       <p className="text-sm font-medium text-gray-900">
-                        {agent.tone} • {agent.audience}
+                        {agent.voiceTone} • {agent.targetAudience}
                       </p>
                     </div>
 
                     <div>
                       <p className="text-sm text-gray-500">Topics</p>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {agent.topics.slice(0, 2).map((topic) => (
+                        {agent.topics?.slice(0, 2).map((topic) => (
                           <span
                             className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
                             key={topic}
@@ -154,7 +120,7 @@ function Agents() {
                             {topic}
                           </span>
                         ))}
-                        {agent.topics.length > 2 && (
+                        {agent.topics?.length && agent.topics.length > 2 && (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                             +{agent.topics.length - 2}
                           </span>
@@ -166,13 +132,13 @@ function Agents() {
                       <div>
                         <p className="text-gray-500">Drafts</p>
                         <p className="font-medium text-gray-900">
-                          {agent.drafts}
+                          {agent.totalDrafts}
                         </p>
                       </div>
                       <div>
                         <p className="text-gray-500">Published</p>
                         <p className="font-medium text-gray-900">
-                          {agent.published}
+                          {agent.totalPublished}
                         </p>
                       </div>
                     </div>

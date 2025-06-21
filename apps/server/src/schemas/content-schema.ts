@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -81,7 +82,9 @@ export const agent = pgTable("agent", {
   description: text("description"),
   formattingStyle:
     formattingStyleEnum("formatting_style").default("structured"),
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
 
   isActive: boolean("is_active").default(true),
   lastGeneratedAt: timestamp("last_generated_at"),

@@ -2,19 +2,28 @@ import cors from "@elysiajs/cors";
 import swagger from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 import { env } from "./config/env";
-import { authService } from "./integrations/auth";
+import { authMiddleware, OpenAPI } from "./integrations/auth";
+import { agentRoutes } from "./routes/agent-routes";
 
 const app = new Elysia()
-  .use(authService)
+  .use(authMiddleware)
   .use(
     cors({
       allowedHeaders: ["Content-Type", "Authorization"],
       credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
       origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
     }),
   )
-  .use(swagger())
+  .use(
+    swagger({
+      documentation: {
+        components: await OpenAPI.components,
+        paths: await OpenAPI.getPaths(),
+      },
+    }),
+  )
+  .use(agentRoutes)
   .get("/works", () => {
     return { message: "Eden WORKS!" };
   })

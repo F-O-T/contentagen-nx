@@ -7,7 +7,7 @@ export const Route = createFileRoute("/content/generate")({
   component: GenerateContent,
   validateSearch: (search: Record<string, unknown>) => {
     return {
-      agentId: Number(search.agentId) || undefined,
+      agentId: String(search.agentId) || undefined,
     };
   },
 });
