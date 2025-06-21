@@ -322,9 +322,6 @@ function EditAgent() {
                     <input
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                       onChange={(e) => setCurrentTopic(e.target.value)}
-                      onKeyPress={(e) =>
-                        e.key === "Enter" && (e.preventDefault(), addTopic())
-                      }
                       placeholder="Add a topic..."
                       type="text"
                       value={currentTopic}
@@ -360,9 +357,6 @@ function EditAgent() {
                     <input
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                       onChange={(e) => setCurrentKeyword(e.target.value)}
-                      onKeyPress={(e) =>
-                        e.key === "Enter" && (e.preventDefault(), addKeyword())
-                      }
                       placeholder="Add a keyword..."
                       type="text"
                       value={currentKeyword}
