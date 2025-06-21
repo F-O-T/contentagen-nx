@@ -9,38 +9,153 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ContentIndexRouteImport } from './routes/content/index'
+import { Route as AgentsIndexRouteImport } from './routes/agents/index'
+import { Route as ContentReviewRouteImport } from './routes/content/review'
+import { Route as ContentGenerateRouteImport } from './routes/content/generate'
+import { Route as ContentExportRouteImport } from './routes/content/export'
+import { Route as AgentsEditRouteImport } from './routes/agents/edit'
+import { Route as AgentsCreateRouteImport } from './routes/agents/create'
 
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContentIndexRoute = ContentIndexRouteImport.update({
+  id: '/content/',
+  path: '/content/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsIndexRoute = AgentsIndexRouteImport.update({
+  id: '/agents/',
+  path: '/agents/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContentReviewRoute = ContentReviewRouteImport.update({
+  id: '/content/review',
+  path: '/content/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContentGenerateRoute = ContentGenerateRouteImport.update({
+  id: '/content/generate',
+  path: '/content/generate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContentExportRoute = ContentExportRouteImport.update({
+  id: '/content/export',
+  path: '/content/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsEditRoute = AgentsEditRouteImport.update({
+  id: '/agents/edit',
+  path: '/agents/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsCreateRoute = AgentsCreateRouteImport.update({
+  id: '/agents/create',
+  path: '/agents/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRoute
+  '/agents/create': typeof AgentsCreateRoute
+  '/agents/edit': typeof AgentsEditRoute
+  '/content/export': typeof ContentExportRoute
+  '/content/generate': typeof ContentGenerateRoute
+  '/content/review': typeof ContentReviewRoute
+  '/agents': typeof AgentsIndexRoute
+  '/content': typeof ContentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRoute
+  '/agents/create': typeof AgentsCreateRoute
+  '/agents/edit': typeof AgentsEditRoute
+  '/content/export': typeof ContentExportRoute
+  '/content/generate': typeof ContentGenerateRoute
+  '/content/review': typeof ContentReviewRoute
+  '/agents': typeof AgentsIndexRoute
+  '/content': typeof ContentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/onboarding': typeof OnboardingRoute
+  '/agents/create': typeof AgentsCreateRoute
+  '/agents/edit': typeof AgentsEditRoute
+  '/content/export': typeof ContentExportRoute
+  '/content/generate': typeof ContentGenerateRoute
+  '/content/review': typeof ContentReviewRoute
+  '/agents/': typeof AgentsIndexRoute
+  '/content/': typeof ContentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/onboarding'
+    | '/agents/create'
+    | '/agents/edit'
+    | '/content/export'
+    | '/content/generate'
+    | '/content/review'
+    | '/agents'
+    | '/content'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/onboarding'
+    | '/agents/create'
+    | '/agents/edit'
+    | '/content/export'
+    | '/content/generate'
+    | '/content/review'
+    | '/agents'
+    | '/content'
+  id:
+    | '__root__'
+    | '/'
+    | '/onboarding'
+    | '/agents/create'
+    | '/agents/edit'
+    | '/content/export'
+    | '/content/generate'
+    | '/content/review'
+    | '/agents/'
+    | '/content/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  OnboardingRoute: typeof OnboardingRoute
+  AgentsCreateRoute: typeof AgentsCreateRoute
+  AgentsEditRoute: typeof AgentsEditRoute
+  ContentExportRoute: typeof ContentExportRoute
+  ContentGenerateRoute: typeof ContentGenerateRoute
+  ContentReviewRoute: typeof ContentReviewRoute
+  AgentsIndexRoute: typeof AgentsIndexRoute
+  ContentIndexRoute: typeof ContentIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +163,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/content/': {
+      id: '/content/'
+      path: '/content'
+      fullPath: '/content'
+      preLoaderRoute: typeof ContentIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents/': {
+      id: '/agents/'
+      path: '/agents'
+      fullPath: '/agents'
+      preLoaderRoute: typeof AgentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/content/review': {
+      id: '/content/review'
+      path: '/content/review'
+      fullPath: '/content/review'
+      preLoaderRoute: typeof ContentReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/content/generate': {
+      id: '/content/generate'
+      path: '/content/generate'
+      fullPath: '/content/generate'
+      preLoaderRoute: typeof ContentGenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/content/export': {
+      id: '/content/export'
+      path: '/content/export'
+      fullPath: '/content/export'
+      preLoaderRoute: typeof ContentExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents/edit': {
+      id: '/agents/edit'
+      path: '/agents/edit'
+      fullPath: '/agents/edit'
+      preLoaderRoute: typeof AgentsEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents/create': {
+      id: '/agents/create'
+      path: '/agents/create'
+      fullPath: '/agents/create'
+      preLoaderRoute: typeof AgentsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  OnboardingRoute: OnboardingRoute,
+  AgentsCreateRoute: AgentsCreateRoute,
+  AgentsEditRoute: AgentsEditRoute,
+  ContentExportRoute: ContentExportRoute,
+  ContentGenerateRoute: ContentGenerateRoute,
+  ContentReviewRoute: ContentReviewRoute,
+  AgentsIndexRoute: AgentsIndexRoute,
+  ContentIndexRoute: ContentIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
