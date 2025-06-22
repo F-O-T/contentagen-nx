@@ -1,0 +1,104 @@
+
+---
+import { Button } from "@packages/ui/components/button";
+import { Icon } from "@packages/ui/components/icon";
+import { Card } from "@packages/ui/components/card";
+const scrollToWaitlist = () => {
+  if (typeof window !== "undefined") {
+    document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" });
+  }
+};
+---
+
+<section class="snap-start py-10 sm:py-16 md:py-20 bg-gradient-to-br from-purple-600 to-pink-600 text-white">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto text-center">
+      <span class="inline-flex items-center mb-6 px-4 py-2 bg-white/20 text-white border border-white/30 rounded-full text-sm font-medium">
+        <Icon name="Zap" className="w-4 h-4 mr-2" />
+        Early Access Available Now
+      </span>
+
+      <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+        Don't Let Another Week Pass
+        <span class="block">Struggling with Content Creation</span>
+      </h2>
+
+      <p class="text-base sm:text-lg md:text-xl text-purple-100 mb-8 max-w-2xl mx-auto leading-relaxed">
+        Join 2,800+ creators who've already secured their spot. Get early access to the AI-powered blog automation
+        that's transforming content workflows worldwide.
+      </p>
+
+      <!-- Benefits Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div class="flex flex-col items-center text-center">
+          <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-3">
+            <Icon name="Clock" className="w-6 h-6 text-white" />
+          </div>
+          <div class="font-semibold mb-1">Early Access</div>
+          <div class="text-sm text-purple-100">Skip the line completely</div>
+        </div>
+        <div class="flex flex-col items-center text-center">
+          <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-3">
+            <Icon name="Shield" className="w-6 h-6 text-white" />
+          </div>
+          <div class="font-semibold mb-1">50% Off</div>
+          <div class="text-sm text-purple-100">First 3 months discount</div>
+        </div>
+        <div class="flex flex-col items-center text-center">
+          <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-3">
+            <Icon name="Zap" className="w-6 h-6 text-white" />
+          </div>
+          <div class="font-semibold mb-1">Exclusive Onboarding</div>
+          <div class="text-sm text-purple-100">Personal setup assistance</div>
+        </div>
+        <div class="flex flex-col items-center text-center">
+          <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-3">
+            <Icon name="CheckCircle" className="w-6 h-6 text-white" />
+          </div>
+          <div class="font-semibold mb-1">No Commitment</div>
+          <div class="text-sm text-purple-100">Cancel anytime</div>
+        </div>
+      </div>
+
+      <!-- Main CTA -->
+      <div class="mb-8">
+        <Button
+          type="button"
+          className="w-full sm:w-auto bg-white text-purple-600 hover:bg-gray-100 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded group flex items-center justify-center mx-auto"
+          onClick={scrollToWaitlist}
+        >
+          Join the Waitlist Now
+          <Icon name="ArrowRight" className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+        </Button>
+      </div>
+
+      <!-- Trust Indicators -->
+      <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-8 text-xs sm:text-sm text-purple-100">
+        <div class="flex items-center">
+          <Icon name="CheckCircle" className="w-4 h-4 mr-2" />
+          <span>2,847 creators already joined</span>
+        </div>
+        <div class="flex items-center">
+          <Icon name="CheckCircle" className="w-4 h-4 mr-2" />
+          <span>50,000+ blog posts generated</span>
+        </div>
+        <div class="flex items-center">
+          <Icon name="CheckCircle" className="w-4 h-4 mr-2" />
+          <span>4.9/5 user satisfaction</span>
+        </div>
+      </div>
+
+      <!-- Urgency Element -->
+      <div class="mt-8 sm:mt-12 bg-white/10 rounded-2xl p-4 sm:p-6 max-w-xl sm:max-w-2xl mx-auto">
+        <div class="flex items-center justify-center mb-3">
+          <div class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+          <span class="text-xs sm:text-sm font-medium">Limited Early Access Spots</span>
+        </div>
+        <p class="text-purple-100 text-xs sm:text-sm">
+          We're accepting a limited number of early access users to ensure the best onboarding experience. Secure
+          your spot before we reach capacity.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

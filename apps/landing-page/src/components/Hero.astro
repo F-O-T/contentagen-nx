@@ -1,35 +1,100 @@
 ---
-import { ArrowRight, Sparkles } from "@lucide/astro";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
+import { Icon } from "@packages/ui/components/icon";
+import { Input } from "@packages/ui/components/input";
+import { Select } from "@packages/ui/components/select";
 ---
 
-<section class="min-h-screen md:h-screen snap-start flex items-center justify-center ">
-  <div class="container mx-auto flex flex-col gap-4 justify-center items-center">
-    <Badge className="items-center space-x-2 bg-amber-950 border border-orange-500/30 rounded-full px-4 py-2 ">
-      Supercharge Your Content Workflow
+<section class="snap-start pt-10 sm:pt-16 md:pt-20 pb-10 sm:pb-14 md:pb-16 container mx-auto min-h-screen flex flex-col items-center justify-center">
+  <div class="w-full text-center px-4 sm:px-6">
+    <!-- Announcement Badge -->
+    <Badge variant="outline" className="mb-4 sm:mb-6 px-3 sm:px-4 py-1.5 sm:py-2 bg-purple-100 text-purple-700 border-purple-200 inline-flex items-center justify-center text-xs sm:text-sm">
+      <Icon name="Sparkles" className="w-4 h-4 mr-2" />
+      Early Access Now Available
     </Badge>
-      <div class="flex items-center justify-center space-x-2">
-        <Sparkles class="w-10 h-10 text-yellow-400" />
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-white via-orange-200 via-amber-200 to-yellow-200 bg-clip-text text-transparent leading-tight">
-          Automate Your Blog Content in Minutes
-        </h1>
+
+    <!-- Main Headline -->
+    <h1 class="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
+      Automate Your Blog Content
+      <span class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent block">
+        With AI That Learns Your Voice
+      </span>
+    </h1>
+
+    <!-- Subheadline -->
+    <p class="text-base xs:text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
+      Stop struggling with writer's block and inconsistent posting. Create AI-powered content agents that generate
+      on-brand blog posts in your unique voice—saving you 15+ hours per week while maintaining perfect
+      consistency.
+    </p>
+
+    <!-- Social Proof Stats -->
+    <div class="flex flex-col xs:flex-row flex-wrap justify-center gap-4 sm:gap-8 mb-8 sm:mb-12 text-xs xs:text-sm text-gray-600">
+      <div class="flex items-center justify-center">
+        <Icon name="Users" className="w-5 h-5 mr-2 text-purple-600" />
+        <span>
+          <strong class="text-gray-900">2,847</strong> creators on waitlist
+        </span>
       </div>
-      <p class="text-gray-300 text-lg md:text-xl max-w-2xl text-center">
-        Struggling with inspiration, consistency, or SEO? Instantly generate, review, and publish tailored articles with AI-powered agents—no more blank pages or missed deadlines.
-      </p>
-      <a href="#start-trial" tabindex="0">
-        <Button size="lg" className="inline-flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-orange-400 text-white font-semibold  rounded-lg shadow-md hover:shadow-lg hover:from-orange-600 hover:to-orange-500 transition-all duration-300">
-            <span>Start Free Trial</span>
-            <ArrowRight />
-        </Button>
-      </a>
-      <div class="mt-8 w-full flex justify-center">
-        <!-- Placeholder for dashboard visual -->
-        <div class="w-full max-w-2xl aspect-video bg-gradient-to-br from-orange-900/30 via-amber-800/20 to-slate-800/40 rounded-3xl border-2 border-orange-300/20 flex items-center justify-center shadow-lg">
-          <span class="text-orange-200/70 text-lg">[Dashboard Preview Coming Soon]</span>
+      <div class="flex items-center justify-center">
+        <Icon name="Clock" className="w-5 h-5 mr-2 text-purple-600" />
+        <span>
+          <strong class="text-gray-900">15+ hours</strong> saved per week
+        </span>
+      </div>
+      <div class="flex items-center justify-center">
+        <Icon name="Target" className="w-5 h-5 mr-2 text-purple-600" />
+        <span>
+          <strong class="text-gray-900">94%</strong> SEO score average
+        </span>
+      </div>
+    </div>
+
+    <!-- Waitlist Form (static) -->
+    <div id="waitlist" class="w-full max-w-xs xs:max-w-sm sm:max-w-md mx-auto">
+      <form class="space-y-3 sm:space-y-4">
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <!-- NOTE: Replace this input with design system Input if available -->
+          <Input type="email" placeholder="Enter your email" required className="flex-1 w-full" />
+          <Button type="submit" variant="default" className="w-full sm:w-auto">
+            Join Waitlist
+          </Button>
+        </div>
+
+        <!-- NOTE: Replace this select with design system Select if available -->
+        <Select>
+          <option selected disabled>What describes you best? (Optional)</option>
+          <option value="individual-blogger">Individual Blogger</option>
+          <option value="marketing-team">Marketing Team</option>
+          <option value="freelancer">Freelance Writer</option>
+          <option value="business-owner">Business Owner</option>
+          <option value="other">Other</option>
+        </Select>
+
+        <p class="text-xs sm:text-sm text-gray-500">
+          🎯 <strong>Early Access Perk:</strong> Skip the line + 50% off your first 3 months + exclusive onboarding
+        </p>
+      </form>
+      <!--
+        To add interactivity later, use Astro Islands or hydrate this form with a client-side framework.
+      -->
+    </div>
+
+    <!-- Trust Indicators -->
+    <div class="mt-8 sm:mt-12 flex flex-col xs:flex-row flex-wrap justify-center items-center gap-4 sm:gap-8 opacity-60">
+      <span class="text-xs sm:text-sm text-gray-500">Trusted by teams at:</span>
+      <div class="flex items-center gap-4 sm:gap-6">
+        <div class="h-8 w-20 bg-gray-200 rounded flex items-center justify-center text-xs font-medium">
+          TechCorp
+        </div>
+        <div class="h-8 w-20 bg-gray-200 rounded flex items-center justify-center text-xs font-medium">
+          StartupXYZ
+        </div>
+        <div class="h-8 w-20 bg-gray-200 rounded flex items-center justify-center text-xs font-medium">
+          AgencyPro
         </div>
       </div>
+    </div>
   </div>
 </section>
-

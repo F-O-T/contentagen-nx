@@ -1,0 +1,93 @@
+---
+import { useCases, commonBenefits } from "../data/sections/useCases";
+---
+
+<section id="use-cases" class="snap-start py-20 bg-white">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Built for Every Content Creator</h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        Whether you're scaling an agency or growing your personal blog, BlogGenius adapts to your unique needs and
+        workflow—delivering results that matter.
+      </p>
+    </div>
+
+    <!-- Main Use Cases -->
+    <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-6xl mx-auto mb-10 sm:mb-14 md:mb-16">
+      {useCases.map(useCase => (
+        <div class="border-0 shadow-lg hover:shadow-xl transition-all duration-300 group rounded-2xl bg-white">
+          <div class="p-5 sm:p-6 md:p-8">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-0">
+              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3 sm:mb-0 sm:mr-4 group-hover:scale-110 transition-transform" set:html={useCase.icon}></div>
+              <div>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900">{useCase.title}</h3>
+                <p class="text-purple-600 font-medium">{useCase.subtitle}</p>
+              </div>
+            </div>
+            <p class="text-gray-600 mb-4 sm:mb-6 leading-relaxed text-base sm:text-base md:text-lg">{useCase.description}</p>
+
+            <!-- Benefits -->
+            <div class="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+              {useCase.benefits.map(benefit => (
+                <div class="flex items-start text-sm text-gray-700">
+                  <div class="w-1.5 h-1.5 bg-purple-600 rounded-full mr-3 mt-2 flex-shrink-0"></div>
+                  {benefit}
+                </div>
+              ))}
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+              {useCase.stats.map(stat => (
+                <div class="text-center p-2 sm:p-3 bg-purple-50 rounded-lg">
+                  <div class="text-base sm:text-lg font-bold text-purple-600">{stat.value}</div>
+                  <div class="text-xs text-gray-600">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+            <div class="w-full justify-center py-2 bg-purple-100 text-purple-700 border border-purple-200 rounded-lg text-center font-semibold text-sm sm:text-base">
+              {useCase.cta}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Common Benefits Bridge -->
+    <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-5 sm:p-8 mb-8 sm:mb-12">
+      <div class="text-center mb-6 sm:mb-8">
+        <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Universal Benefits for All Creators</h3>
+        <p class="text-gray-600 text-base">Core advantages that transform every content creation workflow</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+        {commonBenefits.map(benefit => (
+          <div class="text-center">
+            <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-sm" set:html={benefit.icon}></div>
+            <h4 class="font-semibold text-gray-900 mb-1 sm:mb-2">{benefit.title}</h4>
+            <p class="text-sm text-gray-600 leading-relaxed">{benefit.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Seamless CTA -->
+    <div class="text-center">
+      <div class="max-w-xl sm:max-w-2xl mx-auto">
+        <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Ready to Transform Your Content Strategy?</h3>
+        <p class="text-gray-600 mb-4 sm:mb-6">
+          Join the waitlist and be among the first to experience AI-powered blog automation that actually works
+        </p>
+        <button
+          class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white px-6 sm:px-8 py-3 rounded-lg text-base sm:text-lg font-semibold group transition-colors duration-200 flex items-center justify-center mx-auto"
+          onclick="document.getElementById('waitlist')?.scrollIntoView({behavior:'smooth'})"
+        >
+          Secure Your Early Access
+          <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+        </button>
+        <p class="text-xs sm:text-sm text-gray-500 mt-2 sm:mt-3">
+          2,847 creators already on the waitlist • Limited early access spots
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

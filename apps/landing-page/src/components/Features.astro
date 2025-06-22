@@ -1,47 +1,71 @@
 ---
-// Features.astro – Blog Automation SaaS Features Overview
-import { Bot, PencilLine, FileText, LayoutDashboard } from "@lucide/astro";
+import { ArrowRight } from "@lucide/astro";
+import { features } from "../data/sections/features";
+import { Badge } from "@packages/ui/components/badge";
+import { Button } from "@packages/ui/components/button";
+import { Icon } from "@packages/ui/components/icon";
+import { Card } from "@packages/ui/components/card";
 ---
-<section id="features" class="container mx-auto min-h-[60vh] py-20 flex flex-col items-center justify-center gap-8 snap-start">
-  <div class="flex flex-col gap-4 items-center text-center">
-    <h2 class="text-4xl md:text-5xl font-bold text-white">Powerful Features</h2>
-    <p class="text-base md:text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-      Everything you need to automate content creation while maintaining quality and control
-    </p>
-  </div>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
-    <!-- AI Agent Creation -->
-    <div class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-700/20 via-orange-900/10 to-slate-900/30 border border-orange-500/20 shadow-lg p-7 flex flex-col items-center text-center hover:scale-105 transition-transform duration-300">
-      <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl mb-4 shadow-xl">
-        <Bot class="w-6 h-6 text-white" />
-      </div>
-      <h3 class="text-xl font-bold text-white mb-2">AI Agent Creation</h3>
-      <p class="text-gray-300 text-sm mb-2">Define tone, audience, topics & SEO keywords for each agent. Personalize content for every project.</p>
+<section id="features" class="snap-start py-20 bg-white">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <Badge variant="outline" className="mb-4 px-4 py-2 bg-purple-100 text-purple-700 border-purple-200 rounded-full font-medium text-sm sm:text-base">
+        Powerful Features
+      </Badge>
+      <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        Everything You Need to
+        <span class="block text-purple-600">Automate Blog Content</span>
+      </h2>
+      <p class="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+        From AI agent configuration to content export, our platform handles every step of your content creation
+        workflow—so you can focus on what matters most.
+      </p>
     </div>
-    <!-- Draft Generation Workflow -->
-    <div class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-700/20 via-orange-800/10 to-slate-900/30 border border-amber-500/20 shadow-lg p-7 flex flex-col items-center text-center hover:scale-105 transition-transform duration-300">
-      <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-400 rounded-xl mb-4 shadow-xl">
-        <PencilLine class="w-6 h-6 text-white" />
-      </div>
-      <h3 class="text-xl font-bold text-white mb-2">Draft Generation Workflow</h3>
-      <p class="text-gray-300 text-sm mb-2">Go from brief to draft in seconds. AI generates full-length articles from your specifications.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 md:gap-8 max-w-6xl mx-auto mb-8 md:mb-12">
+      {features.map(feature => (
+        <Card className="shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group rounded-2xl bg-white border-0">
+          <div class="p-0">
+            <div class="h-32 sm:h-40 p-4 sm:p-6 group-hover:scale-105 transition-transform duration-300" set:html={feature.visual}></div>
+            <div class="p-4 sm:p-6 pt-0">
+              <div class="flex flex-col sm:flex-row items-start justify-between mb-4 gap-2">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4">
+                    <Icon name={feature.icon?.name || "Sparkles"} className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-1">{feature.title}</h3>
+                    <Badge className="text-xs inline-block px-2 py-1 bg-gray-100 rounded font-medium text-gray-700">{feature.badge}</Badge>
+                  </div>
+                </div>
+              </div>
+              <p class="text-gray-600 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{feature.description}</p>
+              <div class="space-y-2">
+                {feature.benefits.map(benefit => (
+                  <div class="flex items-center text-xs sm:text-sm text-gray-700">
+                    <div class="w-1.5 h-1.5 bg-purple-600 rounded-full mr-2 sm:mr-3"></div>
+                    {benefit}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Card>
+      ))}
     </div>
-    <!-- Manual Review & Export -->
-    <div class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-700/20 via-blue-900/10 to-slate-900/30 border border-blue-500/20 shadow-lg p-7 flex flex-col items-center text-center hover:scale-105 transition-transform duration-300">
-      <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-xl mb-4 shadow-xl">
-        <FileText class="w-6 h-6 text-white" />
+    <!-- Connecting Bridge (Call-to-Action) -->
+    <div class="text-center">
+      <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 max-w-3xl mx-auto">
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">See How It All Works Together</h3>
+        <p class="text-gray-600 mb-6">
+          These features combine to create a seamless content creation workflow that saves you hours every week
+        </p>
+        <a href="#waitlist" class="inline-flex items-center bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-full font-semibold transition group">
+          Get Early Access
+          <span class="ml-2">
+            <Icon name="ArrowRight" className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </span>
+        </a>
       </div>
-      <h3 class="text-xl font-bold text-white mb-2">Manual Review & Export</h3>
-      <p class="text-gray-300 text-sm mb-2">Review, edit, and approve drafts. Export to Markdown, HTML, or DOCX in a single click.</p>
-    </div>
-    <!-- Project Dashboard -->
-    <div class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-700/20 via-violet-900/10 to-slate-900/30 border border-violet-500/20 shadow-lg p-7 flex flex-col items-center text-center hover:scale-105 transition-transform duration-300">
-      <div class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-violet-400 to-fuchsia-400 rounded-xl mb-4 shadow-xl">
-        <LayoutDashboard class="w-6 h-6 text-white" />
-      </div>
-      <h3 class="text-xl font-bold text-white mb-2">Project Dashboard</h3>
-      <p class="text-gray-300 text-sm mb-2">Manage agents and projects, track content progress, and collaborate with your team.</p>
     </div>
   </div>
 </section>
-

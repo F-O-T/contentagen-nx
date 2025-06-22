@@ -1,65 +1,117 @@
 ---
-import { Heart } from "@lucide/astro";
-import { navItems } from "../data/navItems";
+import { ArrowRight, Heart } from "@lucide/astro";
 
 const year = new Date().getFullYear();
-const resources = [
-  { href: "#", name: "Documentation" },
-  { href: "#", name: "Templates Library" },
-  { href: "#", name: "Support" },
+
+const productLinks = [
+  { href: "#features", name: "Features" },
+  { href: "#how-it-works", name: "How It Works" },
+  { href: "#use-cases", name: "Use Cases" },
+  { href: "#", name: "Pricing" },
+  { href: "#", name: "API Documentation" },
 ];
+
+const resourceLinks = [
+  { href: "#", name: "Templates Library" },
+  { href: "#", name: "Blog Writing Guide" },
+  { href: "#", name: "SEO Best Practices" },
+  { href: "#", name: "Support Center" },
+  { href: "#", name: "Community" },
+];
+
+const bottomLinks = [
+  { href: "#", name: "Privacy Policy" },
+  { href: "#", name: "Terms of Service" },
+  { href: "#", name: "Contact" },
+];
+
+function scrollToWaitlist(e) {
+  e.preventDefault();
+  if (typeof window !== "undefined") {
+    document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" });
+  }
+}
 ---
 
-  <footer id="footer" class="snap-start w-full bg-orange-950/50 border-t border-orange-800 py-8">
-    <div class="max-w-6xl mx-auto relative z-10">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
-      <!-- Enhanced Brand -->
-      <div class="md:col-span-2">
-        <h3 class="text-3xl md:text-4xl font-black bg-gradient-to-r from-white via-orange-200 to-amber-200 bg-clip-text text-transparent mb-3">
-          ✨ Blog Automation Platform
-        </h3>
-        <p class="text-gray-400 mb-4 leading-relaxed">
-          AI-powered content automation for agencies and bloggers. Fast, consistent, and SEO-optimized publishing—customizable workflows and easy export.
-        </p>
+<footer class="snap-start bg-gray-900 text-white py-16">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto">
+      <!-- Main Footer Content -->
+      <div class="grid md:grid-cols-4 gap-8 mb-12">
+        <!-- Brand Column -->
+        <div class="md:col-span-2">
+          <div class="mb-6">
+            <span class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              BlogGenius
+            </span>
+          </div>
+          <p class="text-gray-300 mb-6 max-w-md">
+            The most advanced AI-powered blog automation platform for content agencies and individual creators.
+            Transform your content workflow and save 15+ hours every week.
+          </p>
+          <button
+            onclick={scrollToWaitlist}
+            class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 group rounded flex items-center"
+            type="button"
+          >
+            Join Waitlist
+            <ArrowRight class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+
+        <!-- Product Links -->
+        <div>
+          <h4 class="font-semibold text-white mb-4">Product</h4>
+          <ul class="space-y-2 text-gray-300">
+            {productLinks.map(link => (
+              <li>
+                <a href={link.href} class="hover:text-white transition-colors">{link.name}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Resources Links -->
+        <div>
+          <h4 class="font-semibold text-white mb-4">Resources</h4>
+          <ul class="space-y-2 text-gray-300">
+            {resourceLinks.map(link => (
+              <li>
+                <a href={link.href} class="hover:text-white transition-colors">{link.name}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
-      <!-- Enhanced Quick Links -->
-      <div>
-        <h4 class="text-white font-bold mb-4 text-lg">Quick Links</h4>
-        <ul class="flex flex-col gap-2">
-          {navItems.map(link => (
-            <li>
-              <a href={link.link} class="text-gray-400 hover:text-orange-400 transition-colors hover:translate-x-1 inline-block transition-transform duration-200">
-                {link.name}
-              </a>
-            </li>
-          ))}
-        </ul>
+      <!-- Final CTA Section -->
+      <div class="border-t border-gray-800 pt-8 mb-8">
+        <div class="text-center">
+          <h3 class="text-xl font-bold mb-2">Ready to Transform Your Content Creation?</h3>
+          <p class="text-gray-300 mb-4">
+            Join thousands of creators who've already secured their early access spot
+          </p>
+          <button
+            onclick={scrollToWaitlist}
+            class="border border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white px-6 py-2 rounded transition-colors"
+            type="button"
+          >
+            Get Early Access Now
+          </button>
+        </div>
       </div>
 
-      <!-- Enhanced Resources -->
-      <div>
-        <h4 class="text-white font-bold mb-4 text-lg">Resources</h4>
-        <ul class="flex flex-col gap-2">
-          {resources.map(link => (
-            <li>
-              <a href={link.href} class="text-gray-400 hover:text-amber-400 transition-colors hover:translate-x-1 inline-block transition-transform duration-200">
-                {link.name}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-
-    <!-- Enhanced Bottom -->
-    <div class="border-t border-white/20 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between">
-      <p class="text-gray-400">
-        © {year} EAR Stack. Made with TypeScript and love.
-      </p>
-      <div class="flex items-center text-gray-400 mt-4 md:mt-0 gap-2">
-        <span>Made with</span> <Heart class="w-4 h-4 text-red-400 fill-red-400 animate-pulse" /> <span>by developers, for developers</span>
+      <!-- Bottom Footer -->
+      <div class="border-t border-gray-800 pt-8">
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div class="text-sm text-gray-400">© {year} BlogGenius. All rights reserved.</div>
+          <div class="flex gap-6 text-sm text-gray-400">
+            {bottomLinks.map(link => (
+              <a href={link.href} class="hover:text-white transition-colors">{link.name}</a>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   </div>
-    </footer>
+</footer>

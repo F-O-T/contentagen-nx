@@ -22,7 +22,7 @@
     "astro": "bunx --bun astro",
     "build": "bunx --bun astro build",
     "check": "bunx --bun biome check --write ./src ",
-    "dev": "bunx  astro dev",
+    "dev": "bunx astro dev",
     "preview": "bunx --bun astro preview",
     "typecheck": "bunx --bun astro check"
   },

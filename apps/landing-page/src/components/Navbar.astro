@@ -1,53 +1,141 @@
 ---
-import { Sparkles } from "@lucide/astro";
-
-const { className = "" } = Astro.props;
-
-import { navItems } from "../data/navItems";
+// Navbar ported from React Header component
 ---
-
-<section class="snap-start flex items-center justify-center py-6 min-h-[80px] bg-transparent">
-  <nav class={`bg-orange-950/[0.5] flex max-w-fit fixed top-8 inset-x-0 mx-auto border border-orange-500/30 dark:border-white/[0.2] rounded-full z-[5000] items-center justify-center transition-all duration-300  backdrop-blur-lg ${className} px-4 py-2 space-x-4 shadow-2xl`}
-       id="floating-navbar"
-       >
-       <div class="flex items-center justify-center space-x-2">
-        <Sparkles class="w-5 h-5 text-yellow-400" />
-        <h1 class="text-lg md:text-xl font-black bg-gradient-to-r from-white via-orange-200 via-amber-200 to-yellow-200 bg-clip-text text-transparent leading-tight">
-          EAR Stack
-        </h1>
+<header id="astro-header" class="fixed top-0 w-full z-50 transition-all duration-300 bg-transparent" style="opacity:1;">
+  <div class="container mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <span class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">BlogGenius</span>
+        </div>
       </div>
-    {navItems.map((navItem) => (
-      <a
-        href={navItem.link}
-        class="relative items-center flex space-x-2 text-white hover:text-orange-300 font-semibold text-sm transition-colors duration-300 px-3 py-1 rounded-full hover:bg-orange-900/30"
-      >
-        <span>{navItem.name}</span>
-      </a>
-    ))}
-  </nav>
-</section>
-
+      <nav class="hidden md:block">
+        <div class="ml-4 sm:ml-8 md:ml-10 flex items-baseline space-x-4 sm:space-x-6 md:space-x-8">
+          <button onClick="scrollToSection('features')" class="text-gray-700 hover:text-purple-600 transition-colors">Features</button>
+          <button onClick="scrollToSection('how-it-works')" class="text-gray-700 hover:text-purple-600 transition-colors">How It Works</button>
+          <button onClick="scrollToSection('use-cases')" class="text-gray-700 hover:text-purple-600 transition-colors">Use Cases</button>
+          <button onClick="scrollToSection('faq')" class="text-gray-700 hover:text-purple-600 transition-colors">FAQ</button>
+        </div>
+      </nav>
+      <div class="hidden md:flex items-center space-x-2 sm:space-x-4">
+        <button onclick="scrollToSection('demo')" class="border border-purple-600 text-purple-600 hover:bg-purple-50 rounded px-3 sm:px-4 py-2 transition-colors text-sm sm:text-base">Book Demo</button>
+        <button onclick="scrollToSection('trial')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 sm:px-6 py-2 rounded transition-colors text-sm sm:text-base">Start Free Trial</button>
+      </div>
+      <div class="md:hidden">
+        <button id="menu-toggle" aria-label="Open menu" class="p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500">
+          <svg id="menu-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg id="close-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div id="mobile-menu" class="md:hidden fixed inset-0 z-40 hidden bg-black/40">
+      <div class="absolute top-0 right-0 w-4/5 max-w-xs h-full bg-white border-l shadow-lg flex flex-col">
+        <div class="flex justify-end p-4">
+          <button id="close-mobile-menu" aria-label="Close menu" class="p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="flex-1 px-4 pt-2 pb-6 space-y-1">
+          <button onClick="scrollToSection('features')" class="block w-full text-left px-3 py-3 text-gray-700 hover:text-purple-600 rounded transition-colors">Features</button>
+          <button onClick="scrollToSection('how-it-works')" class="block w-full text-left px-3 py-3 text-gray-700 hover:text-purple-600 rounded transition-colors">How It Works</button>
+          <button onClick="scrollToSection('use-cases')" class="block w-full text-left px-3 py-3 text-gray-700 hover:text-purple-600 rounded transition-colors">Use Cases</button>
+          <button onClick="scrollToSection('faq')" class="block w-full text-left px-3 py-3 text-gray-700 hover:text-purple-600 rounded transition-colors">FAQ</button>
+          <div class="pt-4 space-y-2">
+            <button onclick="scrollToSection('demo')" class="w-full border border-purple-600 text-purple-600 hover:bg-purple-50 rounded px-4 py-2 transition-colors">Book Demo</button>
+            <button onclick="scrollToSection('trial')" class="w-full bg-purple-600 hover:bg-purple-700 text-white rounded px-6 py-2 transition-colors">Start Free Trial</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
 <script>
-  // Show navbar only after scrolling past the hero section (min-h-screen)
-  let lastScroll = window.scrollY;
-  const navbar = document.getElementById('floating-navbar');
-  function updateNavbar() {
-    const current = window.scrollY;
-    // Show after 90vh (matches Hero min-h-screen)
-    if (current > window.innerHeight * 0.9) {
-      if (navbar) {
-        navbar.style.opacity = "1";
-        navbar.style.transform = "translateY(0)";
-      }
-    } else {
-      if (navbar) {
-        navbar.style.opacity = "0";
-        navbar.style.transform = "translateY(-40px)";
-      }
+// State
+let isScrolled = false;
+let isMobileMenuOpen = false;
+
+// DOM references
+const header = document.getElementById('astro-header');
+const menuToggle = document.getElementById('menu-toggle');
+const mobileMenu = document.getElementById('mobile-menu');
+const menuIcon = document.getElementById('menu-icon');
+const closeIcon = document.getElementById('close-icon');
+
+function onScroll() {
+  if (window.scrollY > 10) {
+    if (!isScrolled) {
+      isScrolled = true;
+      header.classList.add('bg-white/95', 'backdrop-blur-sm', 'shadow-sm');
+      header.classList.remove('bg-transparent');
     }
-    lastScroll = current;
+  } else {
+    if (isScrolled) {
+      isScrolled = false;
+      header.classList.remove('bg-white/95', 'backdrop-blur-sm', 'shadow-sm');
+      header.classList.add('bg-transparent');
+    }
   }
-  window.addEventListener('scroll', updateNavbar, { passive: true });
-  // Initial state
-  updateNavbar();
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+
+function scrollToSection(sectionId) {
+  const el = document.getElementById(sectionId);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+    if (isMobileMenuOpen) {
+      closeMobileMenu();
+    }
+  }
+}
+
+function openMobileMenu() {
+  if (!isMobileMenuOpen) {
+    mobileMenu.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+    menuIcon.classList.add('hidden');
+    closeIcon.classList.remove('hidden');
+    isMobileMenuOpen = true;
+  }
+}
+
+function closeMobileMenu() {
+  if (isMobileMenuOpen) {
+    mobileMenu.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+    menuIcon.classList.remove('hidden');
+    closeIcon.classList.add('hidden');
+    isMobileMenuOpen = false;
+  }
+}
+
+menuToggle && menuToggle.addEventListener('click', () => {
+  if (isMobileMenuOpen) {
+    closeMobileMenu();
+  } else {
+    openMobileMenu();
+  }
+});
+
+const closeMobileMenuBtn = document.getElementById('close-mobile-menu');
+if (closeMobileMenuBtn) {
+  closeMobileMenuBtn.addEventListener('click', closeMobileMenu);
+}
+
+// Close mobile menu when clicking outside the drawer
+if (mobileMenu) {
+  mobileMenu.addEventListener('click', (e) => {
+    if (e.target === mobileMenu) {
+      closeMobileMenu();
+    }
+  });
+}
+
+// Initial state
+onScroll();
 </script>
