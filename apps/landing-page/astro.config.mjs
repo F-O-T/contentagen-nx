@@ -18,5 +18,11 @@ export default defineConfig({
   output: "server",
   vite: {
     plugins: [tailwindcss()],
+    resolve: process.env.NODE_ENV === "production" ? {
+      alias: {
+        "react-dom/server": "react-dom/server.edge",
+        "react-dom/server.browser": "react-dom/server.edge",
+      },
+    } : {},
   },
 });
