@@ -1,15 +1,17 @@
 ---
-import Hero from "../components/Hero.astro";
-import Features from "../components/Features.astro";
-import TrustSection from "../components/TrustSection.astro";
-import HowItWorks from "../components/HowItWorks.astro";
-import UseCasesBenefits from "../components/UseCasesBenefits.astro";
-import UseCasesSection from "../components/UseCasesSection.astro";
-import FAQ from "../components/FAQSection.astro";
-import CTA from "../components/CTA.astro";
+import Hero from "../sections/Hero.astro";
+import Features from "../sections/Features.astro";
+import TrustSection from "../sections/TrustSection.astro";
+import HowItWorks from "../sections/HowItWorks.astro";
+import UseCasesSection from "../sections/UseCasesSection.astro";
+import FAQ from "../sections/FAQSection.astro";
+import CTA from "../sections/CTA.astro";
 import Layout from "../layouts/Landing.astro";
+import Navbar from "../sections/Navbar.astro";
+import Footer from "../sections/Footer.astro";
 ---
 <Layout>
+  <Navbar />
   <Hero />
   <TrustSection />
   <Features />
@@ -17,4 +19,5 @@ import Layout from "../layouts/Landing.astro";
   <UseCasesSection />
   <FAQ/>
   <CTA/>
+  <Footer />
 </Layout>

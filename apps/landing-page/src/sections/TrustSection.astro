@@ -1,0 +1,44 @@
+---
+import { Quote } from "@lucide/astro";
+import { testimonials } from "@/data/sections/testimonials";
+import StarRating from "../components/StarRating.astro";
+---
+
+<section class="snap-start container mx-auto min-h-screen flex items-center justify-center flex-col gap-4 p-4">
+    <div class="text-center space-y-4">
+      <h2 class="text-3xl md:text-4xl font-bold text-foreground">
+        Join 2,800+ Creators Who've Already Made The Switch
+      </h2>
+      <div class="flex items-center justify-center gap-4">
+        <StarRating count={5} />
+        <span class="text-muted-foreground text-sm">4.9/5 from 847 reviews</span>
+      </div>
+      <p class="text-muted-foreground max-w-2xl mx-auto text-base md:text-lg">
+        See how content creators and agencies are transforming their workflow with AI-powered blog automation
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      {testimonials.map((testimonial) => (
+      <div class="shadow-md   bg-accent/20 flex flex-col h-full">
+          <div class="p-4 flex flex-col h-full gap-4">
+            <div class="flex items-center">
+              <StarRating count={testimonial.rating} size="w-4 h-4" />
+            </div>
+            <Quote class="w-8 h-8 text-primary " />
+            <p class="text-foreground leading-relaxed">"{testimonial.content}"</p>
+        <div class="bg-accent/60 rounded-lg p-4 mt-auto">
+              <div class="text-sm font-semibold text-muted-foreground">Results:</div>
+              <div class="text-sm text-foreground">{testimonial.results}</div>
+        </div>
+        <div class="border-t"></div>
+            <div class="">
+              <p class="font-semibold text-foreground text-base">{testimonial.name}</p>
+              <p class="text-sm text-muted-foreground">{testimonial.role}</p>
+              <p class="text-sm text-muted-foreground">{testimonial.company}</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+</section>

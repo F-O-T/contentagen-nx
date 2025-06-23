@@ -1,0 +1,229 @@
+---
+import { Badge } from "@packages/ui/components/badge";
+import {
+  CardContent,
+  Card,
+  CardTitle,
+  CardDescription,
+  CardHeader,
+} from "@packages/ui/components/card";
+import {
+  UserPlus,
+  Settings,
+  FileText,
+  Rocket,
+  ArrowRight,
+  ArrowUp,
+  Play,
+  Plus,
+  Sparkles,
+  Globe,
+  Bot,
+} from "@lucide/astro";
+
+interface FeatureStep {
+  title: string;
+  description: string;
+  details: string[];
+}
+
+const steps: FeatureStep[] = [
+  {
+    title: "Quick Onboarding",
+    description:
+      "Sign up and complete our 2-minute setup wizard. Connect your existing tools and platforms for seamless integration.",
+    details: [
+      "Account setup in under 2 minutes",
+      "Platform integrations (WordPress, Medium, etc.)",
+      "Team member invitations",
+      "Initial preferences configuration",
+    ],
+  },
+  {
+    title: "Configure AI Agents",
+    description:
+      "Create custom content agents tailored to your brand voice, audience, and content goals.",
+    details: [
+      "Define brand voice and tone",
+      "Set target audience parameters",
+      "Configure SEO keywords and topics",
+      "Establish content guidelines and rules",
+    ],
+  },
+  {
+    title: "Generate & Review Drafts",
+    description:
+      "Input your content brief and watch as your AI agent creates comprehensive, SEO-optimized blog posts.",
+    details: [
+      "Simple brief input (topic + requirements)",
+      "AI generates full blog post draft",
+      "Built-in editing and refinement tools",
+      "SEO optimization suggestions",
+    ],
+  },
+  {
+    title: "Publish & Scale",
+    description:
+      "Export your content in multiple formats or publish directly to your platforms. Scale your content production effortlessly.",
+    details: [
+      "Multi-format export (MD, HTML, DOCX)",
+      "Direct publishing to platforms",
+      "Automated scheduling options",
+      "Performance tracking and analytics",
+    ],
+  },
+];
+---
+
+<section id="how-it-works" class="snap-start container mx-auto min-h-screen grid gap-4">
+      <div class="flex flex-col items-center text-center gap-4">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
+          From Setup to Published Post
+          <span class=" bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            in 4 Simple Steps
+          </span>
+        </h2>
+        <p class="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+          Our streamlined workflow takes you from idea to published blog post faster than you ever thought possible
+        </p>
+      </div>
+
+      <!-- Bento Grid -->
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <Card className="bg-accent/30 text-foreground border-0 col-span-full">
+      <CardHeader>
+        <CardTitle>
+          <div class="flex items-center gap-4">
+            <UserPlus class="text-primary size-6" />
+            {steps[0]?.title}
+          </div>
+        </CardTitle>
+        <CardDescription>
+          {steps[0]?.description}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="h-full w-full  flex items-center justify-center">
+          <div class="space-y-4 w-full max-w-md">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+                <UserPlus class="w-5 h-5 text-white" />
+              </div>
+              <div class="flex-1 h-3 bg-purple-200 rounded-full">
+                <div class="h-full w-3/4 bg-purple-600 rounded-full"></div>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="h-2 bg-gray-200 rounded w-full"></div>
+              <div class="h-2 bg-gray-200 rounded w-2/3"></div>
+              <div class="h-2 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+      </CardContent>
+    </Card>
+
+          <!-- Second Feature -->
+          <Card className="bg-accent/30 text-foreground border-0">
+            <CardHeader>
+              <CardTitle>
+                <div class="flex items-center gap-4">
+                  <Settings class="text-primary size-6" />
+                  {steps[1]?.title}
+                </div>
+              </CardTitle>
+              <CardDescription>
+                {steps[1]?.description}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-6 rounded-xl border mx-4 aspect-video">
+              <div class="mb-0.5 text-sm font-semibold">AI Agent Configuration</div>
+              <div class="mb-4 flex gap-2 text-sm">
+                <span class="text-muted-foreground">Brand Voice Setup</span>
+              </div>
+              <div class="mb-2 flex -space-x-1.5">
+                <div class="flex -space-x-1.5">
+                  <div class="bg-background size-7 rounded-full border p-0.5 shadow shadow-zinc-950/5 flex items-center justify-center">
+                    <Bot class="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div class="bg-background size-7 rounded-full border p-0.5 shadow shadow-zinc-950/5 flex items-center justify-center">
+                    <Bot class="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div class="bg-background size-7 rounded-full border p-0.5 shadow shadow-zinc-950/5 flex items-center justify-center">
+                    <Bot class="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div class="bg-background size-7 rounded-full border p-0.5 shadow shadow-zinc-950/5 flex items-center justify-center">
+                    <Bot class="w-5 h-5 text-purple-600" />
+                  </div>
+                </div>
+              </div>
+              <div class="text-muted-foreground text-sm font-medium">Content Strategy Meeting</div>
+            </CardContent>
+          </Card>
+
+          <!-- Third Feature -->
+          <Card className="bg-accent/30 text-foreground border-0">
+            <CardHeader>
+              <CardTitle>
+                <div class="flex items-center gap-4">
+                  <FileText class="text-primary size-6" />
+                  {steps[2]?.title}
+                </div>
+              </CardTitle>
+              <CardDescription>
+                {steps[2]?.description}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-6 rounded-xl border py-6 shadow-sm mt-9 aspect-video p-4">
+              <div class="mb-0.5 text-sm font-semibold">AI Draft Generator</div>
+              <div class="mb-4 flex gap-2 text-sm">
+                <span class="text-muted-foreground">Draft Generation</span>
+              </div>
+              <div class="mb-2 flex -space-x-1.5">
+                <div class="flex -space-x-1.5">
+                  <div class="bg-background size-7 rounded-full border p-0.5 shadow shadow-zinc-950/5 flex items-center justify-center">
+                    <Sparkles class="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div class="bg-background size-7 rounded-full border p-0.5 shadow shadow-zinc-950/5 flex items-center justify-center">
+                    <Sparkles class="w-5 h-5 text-purple-600" />
+                  </div>
+                </div>
+              </div>
+              <div class="text-muted-foreground text-sm font-medium">Draft Refinement</div>
+            </CardContent>
+          </Card>
+
+          <!-- Fourth Feature -->
+          <Card className="bg-accent/30 text-foreground border-0">
+            <CardHeader>
+              <CardTitle>
+                <div class="flex items-center gap-4">
+                  <Rocket class="text-primary size-6" />
+                  {steps[3]?.title}
+                </div>
+              </CardTitle>
+              <CardDescription>
+                {steps[3]?.description}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-6 rounded-xl border py-6 shadow-sm mt-9 aspect-video p-4">
+              <div class="mb-0.5 text-sm font-semibold">Publishing Dashboard</div>
+              <div class="mb-4 flex gap-2 text-sm">
+                <span class="text-muted-foreground">Ready to publish your content?</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex gap-2">
+                  <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground size-9 size-7 rounded-2xl bg-transparent shadow-none">
+                    <Plus />
+                  </button>
+                  <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground size-9 size-7 rounded-2xl bg-transparent shadow-none">
+                    <Globe />
+                  </button>
+                </div>
+
+                <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 size-9 size-7 rounded-2xl bg-purple-600 hover:bg-purple-700">
+                  <ArrowUp stroke-width="3" />
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+</section>

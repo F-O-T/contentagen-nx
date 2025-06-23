@@ -1,0 +1,48 @@
+---
+import { Badge } from "@packages/ui/components/badge";
+import { WaitlistForm } from "../components/waitlist-form";
+
+const socialProofStats = [
+  { value: "2,847", description: "creators on waitlist" },
+  { value: "15+ hours", description: "saved per week" },
+  { value: "94%", description: "SEO score average" },
+];
+---
+
+<section class="snap-start container mx-auto min-h-screen flex items-center justify-center flex-col gap-4 p-4">
+    <Badge variant="outline" className="px-4 py-2 border-primary  text-foreground border-1 ">
+      Early Access Now Available
+    </Badge>
+
+    <!-- Main Headline -->
+    <h1 class="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center leading-tight text-foreground">
+      Automate Your Blog Content
+      <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent block">
+        With AI That Learns Your Voice
+      </span>
+    </h1>
+
+    <!-- Subheadline -->
+    <p class="text-base xs:text-lg sm:text-xl  max-w-3xl mx-auto text-center text-muted-foreground leading-relaxed">
+      Stop struggling with writer's block and inconsistent posting. Create AI-powered content agents that generate
+      on-brand blog posts in your unique voice—saving you 15+ hours per week while maintaining perfect
+      consistency.
+    </p>
+
+    <!-- Social Proof Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {socialProofStats.map((stat) => (
+        <Badge className="bg-accent p-2 flex items-center justify-center text-center">
+          <span class=" text-foreground">
+            <strong >{stat.value}</strong> {stat.description}
+          </span>
+        </Badge>
+      ))}
+  </div>
+  <div>
+
+
+    <WaitlistForm client:load /> 
+  </div>
+    </div>
+</section>

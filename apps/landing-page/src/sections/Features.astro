@@ -1,0 +1,123 @@
+---
+import { Badge } from "@packages/ui/components/badge";
+import { Sparkles, Edit, Folder } from "@lucide/astro";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@packages/ui/components/card";
+
+/** Feature card data array for mapping */
+const features = [
+  {
+    title: "Instant AI Draft Generation",
+    badge: {
+      text: "Fast & Smart",
+    },
+    description:
+      "Generate high-quality content drafts in seconds using advanced AI models tailored to your needs.",
+    bullets: [
+      {
+        text: "Context-aware suggestions",
+        dotClass: "w-2 h-2 bg-purple-600 rounded-full mr-3",
+      },
+      {
+        text: "Multiple draft options",
+        dotClass: "w-2 h-2 bg-purple-600 rounded-full mr-3",
+      },
+      {
+        text: "One-click generation",
+        dotClass: "w-2 h-2 bg-purple-600 rounded-full mr-3",
+      },
+    ],
+  },
+  {
+    title: "Effortless Draft Editing",
+    badge: {
+      text: "Flexible",
+    },
+    description:
+      "Refine, rewrite, and iterate on drafts with intuitive editing tools and real-time AI feedback.",
+    bullets: [
+      {
+        text: "Inline AI suggestions",
+        dotClass: "w-2 h-2 bg-pink-600 rounded-full mr-3",
+      },
+      {
+        text: "Version history",
+        dotClass: "w-2 h-2 bg-pink-600 rounded-full mr-3",
+      },
+      {
+        text: "Collaborative editing",
+        dotClass: "w-2 h-2 bg-pink-600 rounded-full mr-3",
+      },
+    ],
+  },
+  {
+    title: "Organized Draft Management",
+    badge: {
+      text: "Control",
+    },
+    description:
+      "Keep all your drafts organized, track progress, and export content when ready—all from a unified dashboard.",
+    bullets: [
+      {
+        text: "Tag & categorize drafts",
+        dotClass: "w-2 h-2 bg-gray-700 rounded-full mr-3",
+      },
+      {
+        text: "Progress tracking",
+        dotClass: "w-2 h-2 bg-gray-700 rounded-full mr-3",
+      },
+      {
+        text: "Easy export options",
+        dotClass: "w-2 h-2 bg-gray-700 rounded-full mr-3",
+      },
+    ],
+  },
+];
+---
+
+<section id="features" class="snap-start container mx-auto min-h-screen flex flex-col justify-center items-center gap-4 p-4">
+  <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-foreground">
+    Seamless AI-Powered Content Creation
+    <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent block">
+      Generate, Edit, and Manage Drafts Effortlessly
+    </span>
+  </h2>
+  <p class="text-base sm:text-lg md:text-xl max-w-3xl mx-auto text-center text-muted-foreground leading-relaxed">
+    Experience a streamlined workflow for creating, refining, and managing AI-generated drafts—all in one place.
+  </p>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 w-full ">
+    {features.map(feature => (
+    <Card className="bg-accent/20 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border-0"
+>
+      <CardHeader>
+        <CardTitle>
+          <div class="flex items-center justify-between ">
+
+            {feature.title}
+            <Badge>{feature.badge.text}</Badge>
+          </div>
+        </CardTitle>
+        <CardDescription>
+          {feature.description}
+        </CardDescription>
+      </CardHeader> 
+        <CardContent>
+          <ul class="space-y-4">
+            {feature.bullets.map(bullet => (
+              <li class="flex items-center text-xs sm:text-sm text-foreground">
+                <span class={bullet.dotClass}></span>
+                {bullet.text}
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+</section>
