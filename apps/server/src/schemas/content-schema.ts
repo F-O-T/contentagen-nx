@@ -1,0 +1,295 @@
+import { randomUUID } from "node:crypto";
+import { relations } from "drizzle-orm";
+import {
+  boolean,
+  integer,
+  json,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core";
+import { user } from "./auth-schema";
+
+export const contentTypeEnum = pgEnum("content_type", [
+  "blog_posts",
+  "social_media",
+  "marketing_copy",
+  "technical_docs",
+]);
+export type ContentType = typeof contentTypeEnum.enumValues[number];
+
+export const voiceToneEnum = pgEnum("voice_tone", [
+  "professional",
+  "conversational",
+  "educational",
+  "creative",
+]);
+export type VoiceTone = typeof voiceToneEnum.enumValues[number];
+
+export const targetAudienceEnum = pgEnum("target_audience", [
+  "general_public",
+  "professionals",
+  "beginners",
+  "customers",
+]);
+export type TargetAudience = typeof targetAudienceEnum.enumValues[number];
+
+export const formattingStyleEnum = pgEnum("formatting_style", [
+  "structured",
+  "narrative",
+  "list_based",
+]);
+export type FormattingStyle = typeof formattingStyleEnum.enumValues[number];
+
+export const contentStatusEnum = pgEnum("content_status", [
+  "draft",
+  "review",
+  "published",
+  "archived",
+]);
+export type ContentStatus = typeof contentStatusEnum.enumValues[number];
+
+export const contentLengthEnum = pgEnum("content_length", [
+  "short",
+  "medium",
+  "long",
+]);
+export type ContentLength = typeof contentLengthEnum.enumValues[number];
+
+export const priorityEnum = pgEnum("priority", [
+  "low",
+  "normal",
+  "high",
+  "urgent",
+]);
+export type Priority = typeof priorityEnum.enumValues[number];
+
+export const project = pgTable("project", {
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  description: text("description"),
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+});
+
+export const agent = pgTable("agent", {
+  contentType: contentTypeEnum("content_type").notNull(),
+
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  description: text("description"),
+  formattingStyle:
+    formattingStyleEnum("formatting_style").default("structured"),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
+
+  isActive: boolean("is_active").default(true),
+  lastGeneratedAt: timestamp("last_generated_at"),
+  name: text("name").notNull(),
+  projectId: text("project_id").references(() => project.id, {
+    onDelete: "cascade",
+  }),
+  seoKeywords: json("seo_keywords").$type<string[]>().default([]),
+  targetAudience: targetAudienceEnum("target_audience").notNull(),
+
+  topics: json("topics").$type<string[]>().default([]),
+
+  totalDrafts: integer("total_drafts").default(0),
+  totalPublished: integer("total_published").default(0),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  voiceTone: voiceToneEnum("voice_tone").notNull(),
+});
+
+export const content = pgTable("content", {
+  agentId: text("agent_id")
+    .notNull()
+    .references(() => agent.id, { onDelete: "cascade" }),
+  body: text("body").notNull(),
+
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  excerpt: text("excerpt"),
+  id: text("id").primaryKey(),
+
+  metaDescription: text("meta_description"),
+
+  publishedAt: timestamp("published_at"),
+  readTimeMinutes: integer("read_time_minutes").default(0),
+  scheduledAt: timestamp("scheduled_at"),
+  slug: text("slug"),
+
+  status: contentStatusEnum("status").default("draft"),
+  tags: json("tags").$type<string[]>().default([]),
+  title: text("title").notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+
+  wordCount: integer("word_count").default(0),
+});
+
+export const contentRequest = pgTable("content_request", {
+  agentId: text("agent_id")
+    .notNull()
+    .references(() => agent.id, { onDelete: "cascade" }),
+  briefDescription: text("brief_description").notNull(),
+
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+
+  generatedContentId: text("generated_content_id").references(
+    () => content.id,
+    { onDelete: "set null" },
+  ),
+  id: text("id").primaryKey(),
+  includeImages: boolean("include_images").default(false),
+  isCompleted: boolean("is_completed").default(false),
+  priority: priorityEnum("priority").default("normal"),
+  targetLength: contentLengthEnum("target_length").default("medium"),
+  topic: text("topic").notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+});
+
+export const comment = pgTable("comment", {
+  content: text("content").notNull(),
+
+  contentId: text("content_id")
+    .notNull()
+    .references(() => content.id, { onDelete: "cascade" }),
+
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  id: text("id").primaryKey(),
+
+  isResolved: boolean("is_resolved").default(false),
+  parentCommentId: text("parent_comment_id"),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+});
+
+export const exportLog = pgTable("export_log", {
+  contentId: text("content_id")
+    .notNull()
+    .references(() => content.id, { onDelete: "cascade" }),
+
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  filename: text("filename").notNull(),
+  format: text("format").notNull(),
+  id: text("id").primaryKey(),
+  options: json("options").$type<Record<string, unknown>>().default({}),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+});
+
+export const projectRelations = relations(project, ({ one, many }) => ({
+  agents: many(agent),
+  user: one(user, {
+    fields: [project.userId],
+    references: [user.id],
+  }),
+}));
+
+export const agentRelations = relations(agent, ({ one, many }) => ({
+  content: many(content),
+  contentRequests: many(contentRequest),
+  project: one(project, {
+    fields: [agent.projectId],
+    references: [project.id],
+  }),
+  user: one(user, {
+    fields: [agent.userId],
+    references: [user.id],
+  }),
+}));
+
+export const contentRelations = relations(content, ({ one, many }) => ({
+  agent: one(agent, {
+    fields: [content.agentId],
+    references: [agent.id],
+  }),
+  comments: many(comment),
+  exports: many(exportLog),
+  generationRequest: one(contentRequest, {
+    fields: [content.id],
+    references: [contentRequest.generatedContentId],
+  }),
+  user: one(user, {
+    fields: [content.userId],
+    references: [user.id],
+  }),
+}));
+
+export const contentRequestRelations = relations(contentRequest, ({ one }) => ({
+  agent: one(agent, {
+    fields: [contentRequest.agentId],
+    references: [agent.id],
+  }),
+  generatedContent: one(content, {
+    fields: [contentRequest.generatedContentId],
+    references: [content.id],
+  }),
+  user: one(user, {
+    fields: [contentRequest.userId],
+    references: [user.id],
+  }),
+}));
+
+export const commentRelations = relations(comment, ({ one, many }) => ({
+  content: one(content, {
+    fields: [comment.contentId],
+    references: [content.id],
+  }),
+  parentComment: one(comment, {
+    fields: [comment.parentCommentId],
+    references: [comment.id],
+  }),
+  replies: many(comment),
+  user: one(user, {
+    fields: [comment.userId],
+    references: [user.id],
+  }),
+}));
+
+export const exportLogRelations = relations(exportLog, ({ one }) => ({
+  content: one(content, {
+    fields: [exportLog.contentId],
+    references: [content.id],
+  }),
+  user: one(user, {
+    fields: [exportLog.userId],
+    references: [user.id],
+  }),
+}));
