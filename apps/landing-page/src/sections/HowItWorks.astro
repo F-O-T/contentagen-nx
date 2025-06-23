@@ -1,30 +1,19 @@
 ---
 import { Badge } from "@packages/ui/components/badge";
 import {
-  CardContent,
   Card,
   CardTitle,
   CardDescription,
   CardHeader,
+  CardContent,
 } from "@packages/ui/components/card";
-import {
-  UserPlus,
-  Settings,
-  FileText,
-  Rocket,
-  ArrowRight,
-  ArrowUp,
-  Play,
-  Plus,
-  Sparkles,
-  Globe,
-  Bot,
-} from "@lucide/astro";
+import { UserPlus, Settings, Sparkles, Rocket } from "@lucide/astro";
 
 interface FeatureStep {
   title: string;
   description: string;
   details: string[];
+  icon: any;
 }
 
 const steps: FeatureStep[] = [
@@ -38,6 +27,7 @@ const steps: FeatureStep[] = [
       "Team member invitations",
       "Initial preferences configuration",
     ],
+    icon: UserPlus,
   },
   {
     title: "Configure AI Agents",
@@ -49,6 +39,7 @@ const steps: FeatureStep[] = [
       "Configure SEO keywords and topics",
       "Establish content guidelines and rules",
     ],
+    icon: Settings,
   },
   {
     title: "Generate & Review Drafts",
@@ -60,6 +51,7 @@ const steps: FeatureStep[] = [
       "Built-in editing and refinement tools",
       "SEO optimization suggestions",
     ],
+    icon: Sparkles,
   },
   {
     title: "Publish & Scale",
@@ -71,159 +63,87 @@ const steps: FeatureStep[] = [
       "Automated scheduling options",
       "Performance tracking and analytics",
     ],
+    icon: Rocket,
   },
 ];
 ---
 
-<section id="how-it-works" class="snap-start container mx-auto min-h-screen grid gap-4">
-      <div class="flex flex-col items-center text-center gap-4">
-        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
-          From Setup to Published Post
-          <span class=" bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            in 4 Simple Steps
-          </span>
-        </h2>
-        <p class="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-          Our streamlined workflow takes you from idea to published blog post faster than you ever thought possible
-        </p>
-      </div>
+<section id="how-it-works" class="snap-start container mx-auto min-h-screen grid items-center ">
+  <div class="flex flex-col items-center justify-center text-center gap-4">
+    <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
+      From Setup to Published Post
+      <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        in 4 Simple Steps
+      </span>
+    </h2>
+    <p class="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl">
+      Our streamlined workflow takes you from idea to published blog post faster than you ever thought possible
+    </p>
+  </div>
 
-      <!-- Bento Grid -->
-  <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-    <Card className="bg-accent/30 text-foreground border-0 col-span-full">
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <Card className="bg-accent/30 text-foreground border-0 flex flex-col h-full col-span-full">
       <CardHeader>
-        <CardTitle>
-          <div class="flex items-center gap-4">
-            <UserPlus class="text-primary size-6" />
-            {steps[0]?.title}
-          </div>
-        </CardTitle>
-        <CardDescription>
-          {steps[0]?.description}
-        </CardDescription>
+        <div class="flex items-center gap-4 mb-2">
+          <UserPlus class="text-primary size-7" />
+          <CardTitle>{steps[0]?.title}</CardTitle>
+        </div>
+        <CardDescription>{steps[0]?.description}</CardDescription>
       </CardHeader>
-      <CardContent className="h-full w-full  flex items-center justify-center">
-          <div class="space-y-4 w-full max-w-md">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
-                <UserPlus class="w-5 h-5 text-white" />
-              </div>
-              <div class="flex-1 h-3 bg-purple-200 rounded-full">
-                <div class="h-full w-3/4 bg-purple-600 rounded-full"></div>
-              </div>
-            </div>
-            <div class="space-y-2">
-              <div class="h-2 bg-gray-200 rounded w-full"></div>
-              <div class="h-2 bg-gray-200 rounded w-2/3"></div>
-              <div class="h-2 bg-gray-200 rounded w-1/2"></div>
-            </div>
-          </div>
+      <CardContent>
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader>
+            <CardTitle>
+              {steps[0]?.title}
+            </CardTitle>
+            <CardDescription>
+              {steps[0]?.description}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul class="list-disc list-inside space-y-1 text-left mt-2">
+              {steps[0]?.details?.map((detail) => (
+                <li>{detail}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       </CardContent>
     </Card>
-
-          <!-- Second Feature -->
-          <Card className="bg-accent/30 text-foreground border-0">
+    <>
+      {steps.slice(1).map((step) => {
+        const Icon = step.icon;
+        return (
+          <Card className="bg-accent/30 text-foreground border-0 flex flex-col h-full">
             <CardHeader>
-              <CardTitle>
-                <div class="flex items-center gap-4">
-                  <Settings class="text-primary size-6" />
-                  {steps[1]?.title}
-                </div>
-              </CardTitle>
-              <CardDescription>
-                {steps[1]?.description}
-              </CardDescription>
+              <div class="flex items-center gap-4 mb-2">
+                <Icon class="text-primary size-7" />
+                <CardTitle>{step.title}</CardTitle>
+              </div>
+              <CardDescription>{step.description}</CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col gap-6 rounded-xl border mx-4 aspect-video">
-              <div class="mb-0.5 text-sm font-semibold">AI Agent Configuration</div>
-              <div class="mb-4 flex gap-2 text-sm">
-                <span class="text-muted-foreground">Brand Voice Setup</span>
-              </div>
-              <div class="mb-2 flex -space-x-1.5">
-                <div class="flex -space-x-1.5">
-                  <div class="bg-background size-7 rounded-full border p-0.5 shadow shadow-zinc-950/5 flex items-center justify-center">
-                    <Bot class="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div class="bg-background size-7 rounded-full border p-0.5 shadow shadow-zinc-950/5 flex items-center justify-center">
-                    <Bot class="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div class="bg-background size-7 rounded-full border p-0.5 shadow shadow-zinc-950/5 flex items-center justify-center">
-                    <Bot class="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div class="bg-background size-7 rounded-full border p-0.5 shadow shadow-zinc-950/5 flex items-center justify-center">
-                    <Bot class="w-5 h-5 text-purple-600" />
-                  </div>
-                </div>
-              </div>
-              <div class="text-muted-foreground text-sm font-medium">Content Strategy Meeting</div>
+            <CardContent>
+              <Card className="border-primary/20 bg-primary/5">
+                <CardHeader>
+                  <CardTitle>
+                    {step.title}
+                  </CardTitle>
+                  <CardDescription>
+                    {step.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul class="list-disc list-inside space-y-1 text-left mt-2">
+                    {step.details.map((detail) => (
+                      <li>{detail}</li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
-
-          <!-- Third Feature -->
-          <Card className="bg-accent/30 text-foreground border-0">
-            <CardHeader>
-              <CardTitle>
-                <div class="flex items-center gap-4">
-                  <FileText class="text-primary size-6" />
-                  {steps[2]?.title}
-                </div>
-              </CardTitle>
-              <CardDescription>
-                {steps[2]?.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-6 rounded-xl border py-6 shadow-sm mt-9 aspect-video p-4">
-              <div class="mb-0.5 text-sm font-semibold">AI Draft Generator</div>
-              <div class="mb-4 flex gap-2 text-sm">
-                <span class="text-muted-foreground">Draft Generation</span>
-              </div>
-              <div class="mb-2 flex -space-x-1.5">
-                <div class="flex -space-x-1.5">
-                  <div class="bg-background size-7 rounded-full border p-0.5 shadow shadow-zinc-950/5 flex items-center justify-center">
-                    <Sparkles class="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div class="bg-background size-7 rounded-full border p-0.5 shadow shadow-zinc-950/5 flex items-center justify-center">
-                    <Sparkles class="w-5 h-5 text-purple-600" />
-                  </div>
-                </div>
-              </div>
-              <div class="text-muted-foreground text-sm font-medium">Draft Refinement</div>
-            </CardContent>
-          </Card>
-
-          <!-- Fourth Feature -->
-          <Card className="bg-accent/30 text-foreground border-0">
-            <CardHeader>
-              <CardTitle>
-                <div class="flex items-center gap-4">
-                  <Rocket class="text-primary size-6" />
-                  {steps[3]?.title}
-                </div>
-              </CardTitle>
-              <CardDescription>
-                {steps[3]?.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-6 rounded-xl border py-6 shadow-sm mt-9 aspect-video p-4">
-              <div class="mb-0.5 text-sm font-semibold">Publishing Dashboard</div>
-              <div class="mb-4 flex gap-2 text-sm">
-                <span class="text-muted-foreground">Ready to publish your content?</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <div class="flex gap-2">
-                  <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground size-9 size-7 rounded-2xl bg-transparent shadow-none">
-                    <Plus />
-                  </button>
-                  <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground size-9 size-7 rounded-2xl bg-transparent shadow-none">
-                    <Globe />
-                  </button>
-                </div>
-
-                <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 size-9 size-7 rounded-2xl bg-purple-600 hover:bg-purple-700">
-                  <ArrowUp stroke-width="3" />
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        );
+      })}
+    </>
+  </div>
 </section>
