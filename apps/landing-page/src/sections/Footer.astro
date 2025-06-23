@@ -1,117 +1,57 @@
 ---
-import { ArrowRight, Heart } from "@lucide/astro";
+import brandConfig from "@packages/brand";
+
+const links = [
+  { title: "Features", href: "#" },
+  { title: "Solution", href: "#" },
+  { title: "Customers", href: "#" },
+  { title: "Pricing", href: "#" },
+  { title: "Help", href: "#" },
+  { title: "About", href: "#" },
+];
+
+const socialLinks = [
+  {
+    href: "#",
+    label: "Instagram",
+    svg: `<svg class="size-6" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4zm9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3"></path></svg>`,
+  },
+  {
+    href: "#",
+    label: "TikTok",
+    svg: `<svg class="size-6" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M16.6 5.82s.51.5 0 0A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6c0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64c0 3.33 2.76 5.7 5.69 5.7c3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48"></path></svg>`,
+  },
+];
 
 const year = new Date().getFullYear();
-
-const productLinks = [
-  { href: "#features", name: "Features" },
-  { href: "#how-it-works", name: "How It Works" },
-  { href: "#use-cases", name: "Use Cases" },
-  { href: "#", name: "Pricing" },
-  { href: "#", name: "API Documentation" },
-];
-
-const resourceLinks = [
-  { href: "#", name: "Templates Library" },
-  { href: "#", name: "Blog Writing Guide" },
-  { href: "#", name: "SEO Best Practices" },
-  { href: "#", name: "Support Center" },
-  { href: "#", name: "Community" },
-];
-
-const bottomLinks = [
-  { href: "#", name: "Privacy Policy" },
-  { href: "#", name: "Terms of Service" },
-  { href: "#", name: "Contact" },
-];
-
-function scrollToWaitlist(e) {
-  e.preventDefault();
-  if (typeof window !== "undefined") {
-    document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" });
-  }
-}
 ---
 
-<footer class="snap-start bg-gray-900 text-white py-16">
-  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="max-w-6xl mx-auto">
-      <!-- Main Footer Content -->
-      <div class="grid md:grid-cols-4 gap-8 mb-12">
-        <!-- Brand Column -->
-        <div class="md:col-span-2">
-          <div class="mb-6">
-            <span class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              BlogGenius
-            </span>
-          </div>
-          <p class="text-gray-300 mb-6 max-w-md">
-            The most advanced AI-powered blog automation platform for content agencies and individual creators.
-            Transform your content workflow and save 15+ hours every week.
-          </p>
-          <button
-            onclick={scrollToWaitlist}
-            class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 group rounded flex items-center"
-            type="button"
-          >
-            Join Waitlist
-            <ArrowRight class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-          </button>
-        </div>
-
-        <!-- Product Links -->
-        <div>
-          <h4 class="font-semibold text-white mb-4">Product</h4>
-          <ul class="space-y-2 text-gray-300">
-            {productLinks.map(link => (
-              <li>
-                <a href={link.href} class="hover:text-white transition-colors">{link.name}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <!-- Resources Links -->
-        <div>
-          <h4 class="font-semibold text-white mb-4">Resources</h4>
-          <ul class="space-y-2 text-gray-300">
-            {resourceLinks.map(link => (
-              <li>
-                <a href={link.href} class="hover:text-white transition-colors">{link.name}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      <!-- Final CTA Section -->
-      <div class="border-t border-gray-800 pt-8 mb-8">
-        <div class="text-center">
-          <h3 class="text-xl font-bold mb-2">Ready to Transform Your Content Creation?</h3>
-          <p class="text-gray-300 mb-4">
-            Join thousands of creators who've already secured their early access spot
-          </p>
-          <button
-            onclick={scrollToWaitlist}
-            class="border border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white px-6 py-2 rounded transition-colors"
-            type="button"
-          >
-            Get Early Access Now
-          </button>
-        </div>
-      </div>
-
-      <!-- Bottom Footer -->
-      <div class="border-t border-gray-800 pt-8">
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div class="text-sm text-gray-400">© {year} BlogGenius. All rights reserved.</div>
-          <div class="flex gap-6 text-sm text-gray-400">
-            {bottomLinks.map(link => (
-              <a href={link.href} class="hover:text-white transition-colors">{link.name}</a>
-            ))}
-          </div>
-        </div>
-      </div>
+<footer class="py-16 md:py-32">
+  <div class="mx-auto max-w-5xl px-6">
+    <a href="/" aria-label="go home" class="mx-auto block size-fit">
+      {brandConfig.name} 
+    </a>
+    <div class="my-8 flex flex-wrap justify-center gap-6 text-sm">
+      {links.map(link => (
+        <a href={link.href} class="text-muted-foreground hover:text-primary block duration-150">
+          <span>{link.title}</span>
+        </a>
+      ))}
     </div>
+    <div class="my-8 flex flex-wrap justify-center gap-6 text-sm">
+      {socialLinks.map(social => (
+        <a
+          href={social.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={social.label}
+          class="text-muted-foreground hover:text-primary block"
+          set:html={social.svg}
+        />
+      ))}
+    </div>
+    <span class="text-muted-foreground block text-center text-sm">
+      © {year} {brandConfig.name}, All rights reserved
+    </span>
   </div>
 </footer>

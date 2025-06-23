@@ -1,14 +1,18 @@
 ---
 import "@packages/ui/globals.css";
+import PostHog from "../components/posthog.astro";
+import brandConfig from "@packages/brand";
 ---
 <!doctype html>
-<html lang="en" class="overflow-y-scroll scroll-smooth snap-y snap-mandatory ">
+<html lang="en" class="overflow-y-scroll scroll-smooth ">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>EAR Stack</title>
+		    <PostHog />
+
+		<title>{brandConfig.name}</title>
 	</head>
 	<body >
 	  <!-- Enhanced animated background elements -->

@@ -12,13 +12,13 @@ interface Props {
   }[];
 }
 
-export function Accordion({ data }: Props) {
+export function AstroAccordion({ data }: Props) {
   return (
-    <BaseAccordion className="w-full space-y-4" collapsible type="single">
+    <BaseAccordion className=" space-y-4" collapsible type="single">
       {data.map((item, i) => {
         return (
           <AccordionItem
-            className="bg-card/70 backdrop-blur-sm border border-primary/20 rounded-xl p-4 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300"
+            className="bg-accent/30  border border-primary/20 rounded-xl p-4 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300"
             key={`item-${i.toFixed()}`}
             value={`item-${i.toFixed()}`}
           >
