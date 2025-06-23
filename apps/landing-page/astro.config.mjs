@@ -5,24 +5,18 @@ import { defineConfig, envField } from "astro/config";
 // https://astro.build/config
 export default defineConfig({
   adapter: cloudflare(),
-  integrations: [react()],
-  output: "server",
   env: {
     schema: {
       VITE_SERVER_URL: envField.string({
-        context: "client",
         access: "public",
+        context: "client",
         default: "https://content-writer-b9gq.onrender.com",
       }),
     },
   },
+  integrations: [react()],
+  output: "server",
   vite: {
     plugins: [tailwindcss()],
-    resolve: {
-      alias: {
-        "react-dom/server": "react-dom/server.edge",
-        "react-dom/server.browser": "react-dom/server.edge",
-      },
-    },
   },
 });

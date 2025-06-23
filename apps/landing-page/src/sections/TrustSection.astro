@@ -20,14 +20,14 @@ import StarRating from "../components/StarRating.astro";
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       {testimonials.map((testimonial) => (
-      <div class="shadow-md   bg-accent/20 flex flex-col h-full">
+      <div class="shadow-md   bg-accent rounded-lg flex flex-col h-full">
           <div class="p-4 flex flex-col h-full gap-4">
             <div class="flex items-center">
               <StarRating count={testimonial.rating} size="w-4 h-4" />
             </div>
             <Quote class="w-8 h-8 text-primary " />
             <p class="text-foreground leading-relaxed">"{testimonial.content}"</p>
-        <div class="bg-accent/60 rounded-lg p-4 mt-auto">
+        <div class="bg-white rounded-lg p-4 mt-auto">
               <div class="text-sm font-semibold text-muted-foreground">Results:</div>
               <div class="text-sm text-foreground">{testimonial.results}</div>
         </div>

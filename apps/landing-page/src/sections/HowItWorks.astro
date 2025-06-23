@@ -82,7 +82,7 @@ const steps: FeatureStep[] = [
   </div>
 
   <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-    <Card className="bg-accent/30 text-foreground border-0 flex flex-col h-full col-span-full">
+    <Card className="bg-accent text-foreground border-0 flex flex-col h-full col-span-full">
       <CardHeader>
         <div class="flex items-center gap-4 mb-2">
           <UserPlus class="text-primary size-7" />
@@ -91,7 +91,7 @@ const steps: FeatureStep[] = [
         <CardDescription>{steps[0]?.description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <Card className="border-primary/20 bg-primary/5">
+        <Card className="border-primary bg-white">
           <CardHeader>
             <CardTitle>
               {steps[0]?.title}
@@ -114,7 +114,7 @@ const steps: FeatureStep[] = [
       {steps.slice(1).map((step) => {
         const Icon = step.icon;
         return (
-          <Card className="bg-accent/30 text-foreground border-0 flex flex-col h-full">
+          <Card className="bg-accent text-foreground border-0 flex flex-col h-full">
             <CardHeader>
               <div class="flex items-center gap-4 mb-2">
                 <Icon class="text-primary size-7" />
@@ -123,7 +123,7 @@ const steps: FeatureStep[] = [
               <CardDescription>{step.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <Card className="border-primary/20 bg-primary/5">
+              <Card className="border-primary bg-white">
                 <CardHeader>
                   <CardTitle>
                     {step.title}
