@@ -9,15 +9,19 @@ import CTA from "../sections/CTA.astro";
 import Layout from "../layouts/Landing.astro";
 import Navbar from "../sections/Navbar.astro";
 import Footer from "../sections/Footer.astro";
+import PostHogLayout from "../layouts/PostHogLayout.astro";
 ---
-<Layout>
-  <Navbar />
-  <Hero />
-  <TrustSection />
-  <Features />
-  <HowItWorks />
-  <UseCasesSection />
-  <FAQ/>
-  <CTA/>
-  <Footer />
-</Layout>
+<PostHogLayout>
+  <Layout>
+    <Navbar />
+    <Hero />
+    <TrustSection />
+    <Features />
+    <HowItWorks />
+    <UseCasesSection />
+    <FAQ/>
+    <CTA/>
+    <Footer />
+  </Layout>
+</PostHogLayout>
+
