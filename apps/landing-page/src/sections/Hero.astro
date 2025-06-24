@@ -1,6 +1,7 @@
 ---
-import { Image } from "astro:assets";
+import { Picture } from "astro:assets";
 import { Badge } from "@packages/ui/components/badge";
+import dashboardImage from "../assets/dashboard.png";
 import Navbar from "../sections/Navbar.astro";
 ---
 
@@ -9,7 +10,7 @@ import Navbar from "../sections/Navbar.astro";
   <section class="relative overflow-hidden before:absolute before:inset-1 before:h-[calc(100%-8rem)] before:rounded-2xl sm:before:inset-2 md:before:rounded-[2rem] lg:before:h-[calc(100%-14rem)] py-24">
     <div class="container mx-auto px-6 p-4">
       <div class="relative z-10 mx-auto max-w-5xl text-center">
-        <div>
+        <div class="space-y-4">
           <a
             href="#"
             class="hover:bg-foreground/5 mx-auto flex w-fit items-center justify-center gap-2 rounded-md py-0.5 pl-1 pr-3 transition-colors duration-150">
@@ -22,11 +23,11 @@ import Navbar from "../sections/Navbar.astro";
                 <!-- Sparkle icon replacement -->
                 <svg class="size-3 fill-white stroke-white drop-shadow" viewBox="0 0 24 24"><path d="M12 2l2.09 6.26L20 9.27l-5 3.64L16.18 20 12 16.77 7.82 20 9 12.91l-5-3.64 5.91-.91z"/></svg>
               </div>
-              Introducing Mist Agents
+              Introducing Contenta Agents
             </Badge>
           </a>
-          <h1 class="mx-auto mt-8 max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl">Build 10x Faster with Mist</h1>
-          <p class="text-muted-foreground mx-auto my-6 max-w-xl text-balance text-xl">Craft. Build. Ship Modern Websites With AI Support.</p>
+          <h1 class="mx-auto max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl">AI Blog Posts, Instantly</h1>
+          <p class="text-muted-foreground mx-auto max-w-xl text-balance text-xl">Automated, SEO-ready content for creators and agencies.</p>
           <div class="flex items-center justify-center gap-3">
             <a href="#link" class="inline-block rounded-xl px-5 py-2 text-base font-semibold bg-primary text-white hover:bg-primary/90 transition-all">Start Building</a>
             <a href="#link" class="inline-block rounded-xl px-5 py-2 text-base font-semibold border border-primary text-primary bg-transparent hover:bg-primary/10 transition-all">Watch Video</a>
@@ -37,12 +38,9 @@ import Navbar from "../sections/Navbar.astro";
         <div class="relative z-10 mx-auto max-w-5xl">
           <div class="mt-12 md:mt-16">
             <div class="bg-background rounded-2xl relative mx-auto overflow-hidden border border-transparent shadow-lg shadow-black/10 ring-1 ring-black/10">
-              <Image
-                src="https://via.placeholder.com/400"
+              <Picture
+                src={dashboardImage}
                 alt="app screen"
-                width={400}
-                height={400}
-                class="aspect-[15/8] w-full object-cover"
               />
             </div>
           </div>
