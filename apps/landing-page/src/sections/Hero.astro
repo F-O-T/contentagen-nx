@@ -1,48 +1,96 @@
 ---
 import { Badge } from "@packages/ui/components/badge";
 import { WaitlistForm } from "../components/waitlist-form";
-
-const socialProofStats = [
-  { value: "2,847", description: "creators on waitlist" },
-  { value: "15+ hours", description: "saved per week" },
-  { value: "94%", description: "SEO score average" },
+import Navbar from "../sections/Navbar.astro";
+const customerLogos = [
+  {
+    src: "https://html.tailus.io/blocks/customers/nvidia.svg",
+    alt: "Nvidia Logo",
+    height: 20,
+  },
+  {
+    src: "https://html.tailus.io/blocks/customers/column.svg",
+    alt: "Column Logo",
+    height: 16,
+  },
+  {
+    src: "https://html.tailus.io/blocks/customers/github.svg",
+    alt: "GitHub Logo",
+    height: 16,
+  },
+  {
+    src: "https://html.tailus.io/blocks/customers/nike.svg",
+    alt: "Nike Logo",
+    height: 20,
+  },
+  {
+    src: "https://html.tailus.io/blocks/customers/lemonsqueezy.svg",
+    alt: "Lemon Squeezy Logo",
+    height: 20,
+  },
+  {
+    src: "https://html.tailus.io/blocks/customers/laravel.svg",
+    alt: "Laravel Logo",
+    height: 16,
+  },
+  {
+    src: "https://html.tailus.io/blocks/customers/lilly.svg",
+    alt: "Lilly Logo",
+    height: 28,
+  },
+  {
+    src: "https://html.tailus.io/blocks/customers/openai.svg",
+    alt: "OpenAI Logo",
+    height: 24,
+  },
 ];
 ---
 
-<section class="container mx-auto min-h-screen flex items-center justify-center flex-col gap-4 p-4">
-    <Badge variant="outline" className="px-4 py-2 border-primary  text-foreground border-1 ">
-      Early Access Now Available
-    </Badge>
-
-    <!-- Main Headline -->
-    <h1 class="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center leading-tight text-foreground">
-      Automate Your Blog Content
-      <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent block">
-        With AI That Learns Your Voice
-      </span>
-    </h1>
-
-    <!-- Subheadline -->
-    <p class="text-base xs:text-lg sm:text-xl  max-w-3xl mx-auto text-center text-muted-foreground leading-relaxed">
-      Stop struggling with writer's block and inconsistent posting. Create AI-powered content agents that generate
-      on-brand blog posts in your unique voice—saving you 15+ hours per week while maintaining perfect
-      consistency.
-    </p>
-
-    <!-- Social Proof Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {socialProofStats.map((stat) => (
-        <Badge className="bg-accent p-2 flex items-center justify-center text-center">
-          <span class=" text-foreground">
-            <strong >{stat.value}</strong> {stat.description}
-          </span>
-        </Badge>
-      ))}
-  </div>
-  <div>
-
-
-    <WaitlistForm client:load /> 
-  </div>
+<!-- Optional: <HeroHeader /> -->
+<main>
+  <Navbar />
+  <section class="before:bg-muted border-e-foreground relative overflow-hidden before:absolute before:inset-1 before:h-[calc(100%-8rem)] before:rounded-2xl sm:before:inset-2 md:before:rounded-[2rem] lg:before:h-[calc(100%-14rem)]">
+    <div class="py-20 md:py-36">
+      <div class="relative z-10 mx-auto max-w-5xl px-6 text-center">
+        <div>
+          <a
+            href="#"
+            class="hover:bg-foreground/5 mx-auto flex w-fit items-center justify-center gap-2 rounded-md py-0.5 pl-1 pr-3 transition-colors duration-150">
+            <div
+              aria-hidden
+              class="border-background bg-gradient-to-b from-primary to-foreground dark:inset-shadow-2xs relative flex size-5 items-center justify-center rounded border shadow-md shadow-black/20 ring-1 ring-black/10">
+              <div class="absolute inset-x-0 inset-y-1.5 border-y border-dotted border-white/25"></div>
+              <div class="absolute inset-x-1.5 inset-y-0 border-x border-dotted border-white/25"></div>
+              <!-- Sparkle icon replacement -->
+              <svg class="size-3 fill-white stroke-white drop-shadow" viewBox="0 0 24 24"><path d="M12 2l2.09 6.26L20 9.27l-5 3.64L16.18 20 12 16.77 7.82 20 9 12.91l-5-3.64 5.91-.91z"/></svg>
+            </div>
+            <span class="font-medium">Introducing Mist Agents</span>
+          </a>
+          <h1 class="mx-auto mt-8 max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl">Build 10x Faster with Mist</h1>
+          <p class="text-muted-foreground mx-auto my-6 max-w-xl text-balance text-xl">Craft. Build. Ship Modern Websites With AI Support.</p>
+          <div class="flex items-center justify-center gap-3">
+            <a href="#link" class="inline-block rounded-xl px-5 py-2 text-base font-semibold bg-primary text-white hover:bg-primary/90 transition-all">Start Building</a>
+            <a href="#link" class="inline-block rounded-xl px-5 py-2 text-base font-semibold border border-primary text-primary bg-transparent hover:bg-primary/10 transition-all">Watch Video</a>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <div class="relative z-10 mx-auto max-w-5xl px-6">
+          <div class="mt-12 md:mt-16">
+            <div class="bg-background rounded-2xl relative mx-auto overflow-hidden border border-transparent shadow-lg shadow-black/10 ring-1 ring-black/10">
+              <img
+                src="/mist/tailark-2.png"
+                alt="app screen"
+                width="2880"
+                height="1842"
+                loading="lazy"
+                class="aspect-[15/8] w-full object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-</section>
+  </section>
+
+</main>

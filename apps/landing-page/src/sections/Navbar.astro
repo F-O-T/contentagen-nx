@@ -1,119 +1,105 @@
 ---
 import brandConfig from "@packages/brand";
 ---
-<header id="astro-header" class="fixed top-0 w-full z-50 transition-all duration-300 bg-transparent" style="opacity:1;">
-  <div class="container mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16">
-      <div class="flex items-center">
-        <div class="flex-shrink-0">
-          <span class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{brandConfig.name}</span>
-        </div>
-      </div>
-      <nav class="hidden md:block">
-        <div class="ml-4 sm:ml-8 md:ml-10 flex items-baseline space-x-4 sm:space-x-6 md:space-x-8">
-          <button onClick="scrollToSection('features')" class="text-gray-700 hover:text-purple-600 transition-colors">Features</button>
-          <button onClick="scrollToSection('how-it-works')" class="text-gray-700 hover:text-purple-600 transition-colors">How It Works</button>
-          <button onClick="scrollToSection('use-cases')" class="text-gray-700 hover:text-purple-600 transition-colors">Use Cases</button>
-          <button onClick="scrollToSection('faq')" class="text-gray-700 hover:text-purple-600 transition-colors">FAQ</button>
-        </div>
-      </nav>
-      <div class="hidden md:flex items-center space-x-2 sm:space-x-4">
-        <button onclick="scrollToSection('demo')" class="border border-purple-600 text-purple-600 hover:bg-purple-50 rounded px-3 sm:px-4 py-2 transition-colors text-sm sm:text-base">Book Demo</button>
-        <button onclick="scrollToSection('trial')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 sm:px-6 py-2 rounded transition-colors text-sm sm:text-base">Start Free Trial</button>
-      </div>
-      <div class="md:hidden">
-        <button id="menu-toggle" aria-label="Open menu" class="p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500">
-          <svg id="menu-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          <svg id="close-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-    </div>
-    <div id="mobile-menu" class="md:hidden fixed inset-0 z-40 hidden bg-black/40">
-      <div class="absolute top-0 right-0 w-4/5 max-w-xs h-full bg-white border-l shadow-lg flex flex-col">
-        <div class="flex justify-end p-4">
-          <button id="close-mobile-menu" aria-label="Close menu" class="p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+<header>
+  <nav id="astro-navbar" class="fixed z-20 w-full transition-all duration-300">
+    <div class="mx-auto max-w-5xl px-6">
+      <div id="navbar-inner" class="relative flex flex-wrap items-center justify-between gap-6 py-6 transition-all duration-200 lg:gap-0">
+        <div class="flex w-full justify-between gap-6 lg:w-auto">
+          <a href="/" aria-label="home" class="flex items-center space-x-2">
+            <!-- Swap for your logo component if available -->
+            <span class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{brandConfig.name}</span>
+          </a>
+          <button id="menu-toggle" aria-label="Open Menu" class="relative z-20 -m-2.5 -mr-4 block cursor-pointer p-2.5 lg:hidden">
+            <!-- Menu icon -->
+            <svg id="menu-icon" xmlns="http://www.w3.org/2000/svg" class="in-data-[state=active]:rotate-180 in-data-[state=active]:scale-0 in-data-[state=active]:opacity-0 m-auto size-6 duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <!-- Close icon -->
+            <svg id="close-icon" xmlns="http://www.w3.org/2000/svg" class="in-data-[state=active]:rotate-0 in-data-[state=active]:scale-100 in-data-[state=active]:opacity-100 absolute inset-0 m-auto size-6 -rotate-180 scale-0 opacity-0 duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
+          <div class="m-auto hidden size-fit lg:block">
+            <ul class="flex gap-1">
+              <li><a href="#features" class="text-base"><span>Features</span></a></li>
+              <li><a href="#pricing" class="text-base"><span>Pricing</span></a></li>
+              <li><a href="#about" class="text-base"><span>About</span></a></li>
+            </ul>
+          </div>
         </div>
-        <div class="flex-1 px-4 pt-2 pb-6 space-y-1">
-          <button onClick="scrollToSection('features')" class="block w-full text-left px-3 py-3 text-gray-700 hover:text-purple-600 rounded transition-colors">Features</button>
-          <button onClick="scrollToSection('how-it-works')" class="block w-full text-left px-3 py-3 text-gray-700 hover:text-purple-600 rounded transition-colors">How It Works</button>
-          <button onClick="scrollToSection('use-cases')" class="block w-full text-left px-3 py-3 text-gray-700 hover:text-purple-600 rounded transition-colors">Use Cases</button>
-          <button onClick="scrollToSection('faq')" class="block w-full text-left px-3 py-3 text-gray-700 hover:text-purple-600 rounded transition-colors">FAQ</button>
-          <div class="pt-4 space-y-2">
-            <button onclick="scrollToSection('demo')" class="w-full border border-purple-600 text-purple-600 hover:bg-purple-50 rounded px-4 py-2 transition-colors">Book Demo</button>
-            <button onclick="scrollToSection('trial')" class="w-full bg-purple-600 hover:bg-purple-700 text-white rounded px-6 py-2 transition-colors">Start Free Trial</button>
+        <div id="navbar-buttons" class="bg-background in-data-[state=active]:block lg:in-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
+          <div class="lg:hidden">
+            <ul class="space-y-6 text-base">
+              <li><a href="#features" class="text-muted-foreground hover:text-accent-foreground block duration-150"><span>Features</span></a></li>
+              <li><a href="#pricing" class="text-muted-foreground hover:text-accent-foreground block duration-150"><span>Pricing</span></a></li>
+              <li><a href="#about" class="text-muted-foreground hover:text-accent-foreground block duration-150"><span>About</span></a></li>
+            </ul>
+          </div>
+          <div class="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
+            <a href="#" class="border border-primary text-primary hover:bg-primary/10 rounded px-4 py-2 text-sm transition-all lg:hidden">Login</a>
+            <a href="#" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded text-sm transition-all lg:hidden">Sign Up</a>
+            <a id="get-started-btn" href="#" class="hidden bg-accent text-accent-foreground px-4 py-2 rounded text-sm font-semibold transition-all lg:inline-flex">Get Started</a>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </nav>
 </header>
 <script>
 // State
 let isScrolled = false;
 let isMobileMenuOpen = false;
 
-// DOM references
-const header = document.getElementById('astro-header');
+const navbar = document.getElementById('astro-navbar');
+const navbarInner = document.getElementById('navbar-inner');
 const menuToggle = document.getElementById('menu-toggle');
-const mobileMenu = document.getElementById('mobile-menu');
 const menuIcon = document.getElementById('menu-icon');
 const closeIcon = document.getElementById('close-icon');
+const navbarButtons = document.getElementById('navbar-buttons');
+const getStartedBtn = document.getElementById('get-started-btn');
 
 function onScroll() {
-  if (window.scrollY > 10) {
+  if (window.scrollY > 50) {
     if (!isScrolled) {
       isScrolled = true;
-      header.classList.add('bg-white/95', 'backdrop-blur-sm', 'shadow-sm');
-      header.classList.remove('bg-transparent');
+      navbar.classList.add('bg-background/75', 'border-b', 'border-black/5', 'backdrop-blur-lg');
+      navbarInner.classList.add('py-3');
+      navbarInner.classList.remove('py-6');
+      if (getStartedBtn) getStartedBtn.classList.remove('hidden');
     }
   } else {
     if (isScrolled) {
       isScrolled = false;
-      header.classList.remove('bg-white/95', 'backdrop-blur-sm', 'shadow-sm');
-      header.classList.add('bg-transparent');
+      navbar.classList.remove('bg-background/75', 'border-b', 'border-black/5', 'backdrop-blur-lg');
+      navbarInner.classList.remove('py-3');
+      navbarInner.classList.add('py-6');
+      if (getStartedBtn) getStartedBtn.classList.add('hidden');
     }
   }
 }
 window.addEventListener('scroll', onScroll, { passive: true });
 
-function scrollToSection(sectionId) {
-  const el = document.getElementById(sectionId);
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth' });
-    if (isMobileMenuOpen) {
-      closeMobileMenu();
-    }
-  }
-}
-
 function openMobileMenu() {
   if (!isMobileMenuOpen) {
-    mobileMenu.classList.remove('hidden');
+    navbarButtons.classList.remove('hidden');
+    navbar.setAttribute('data-state', 'active');
     document.body.classList.add('overflow-hidden');
     menuIcon.classList.add('hidden');
     closeIcon.classList.remove('hidden');
     isMobileMenuOpen = true;
   }
 }
-
 function closeMobileMenu() {
   if (isMobileMenuOpen) {
-    mobileMenu.classList.add('hidden');
+    navbarButtons.classList.add('hidden');
+    navbar.removeAttribute('data-state');
     document.body.classList.remove('overflow-hidden');
     menuIcon.classList.remove('hidden');
     closeIcon.classList.add('hidden');
     isMobileMenuOpen = false;
   }
 }
-
 menuToggle && menuToggle.addEventListener('click', () => {
   if (isMobileMenuOpen) {
     closeMobileMenu();
@@ -121,21 +107,12 @@ menuToggle && menuToggle.addEventListener('click', () => {
     openMobileMenu();
   }
 });
-
-const closeMobileMenuBtn = document.getElementById('close-mobile-menu');
-if (closeMobileMenuBtn) {
-  closeMobileMenuBtn.addEventListener('click', closeMobileMenu);
-}
-
-// Close mobile menu when clicking outside the drawer
-if (mobileMenu) {
-  mobileMenu.addEventListener('click', (e) => {
-    if (e.target === mobileMenu) {
-      closeMobileMenu();
-    }
-  });
-}
-
+// Hide menu on desktop resize
+window.addEventListener('resize', () => {
+  if (window.innerWidth >= 1024) {
+    closeMobileMenu();
+  }
+});
 // Initial state
 onScroll();
 </script>

@@ -1,6 +1,6 @@
 ---
 import { Badge } from "@packages/ui/components/badge";
-import { Sparkles, Edit, Folder } from "@lucide/astro";
+import { Sparkles, Edit, Folder, ArrowUp, Globe, Plus } from "@lucide/astro";
 import {
   Card,
   CardContent,
@@ -9,115 +9,81 @@ import {
   CardTitle,
 } from "@packages/ui/components/card";
 
-/** Feature card data array for mapping */
+const stats = [
+  { value: '90+', emoji: '⭐️', label: 'Integrations' },
+  { value: '56%', emoji: '👨🏽‍💻', label: 'Productivity Boost' },
+  { value: '24/7', emoji: '🦜', label: 'Customer Support' },
+];
+
 const features = [
   {
-    title: "Instant AI Draft Generation",
-    badge: {
-      text: "Fast & Smart",
-    },
-    description:
-      "Generate high-quality content drafts in seconds using advanced AI models tailored to your needs.",
-    bullets: [
-      {
-        text: "Context-aware suggestions",
-        dotClass: "w-2 h-2 bg-purple-600 rounded-full mr-3",
-      },
-      {
-        text: "Multiple draft options",
-        dotClass: "w-2 h-2 bg-purple-600 rounded-full mr-3",
-      },
-      {
-        text: "One-click generation",
-        dotClass: "w-2 h-2 bg-purple-600 rounded-full mr-3",
-      },
-    ],
+    title: "Generate Ideas",
+    description: "Spark creativity with AI-powered content suggestions and inspiration.",
   },
   {
-    title: "Effortless Draft Editing",
-    badge: {
-      text: "Flexible",
-    },
-    description:
-      "Refine, rewrite, and iterate on drafts with intuitive editing tools and real-time AI feedback.",
-    bullets: [
-      {
-        text: "Inline AI suggestions",
-        dotClass: "w-2 h-2 bg-pink-600 rounded-full mr-3",
-      },
-      {
-        text: "Version history",
-        dotClass: "w-2 h-2 bg-pink-600 rounded-full mr-3",
-      },
-      {
-        text: "Collaborative editing",
-        dotClass: "w-2 h-2 bg-pink-600 rounded-full mr-3",
-      },
-    ],
+    title: "Improve Writing",
+    description: "Enhance your text with smart editing suggestions and style refinements.",
   },
   {
-    title: "Organized Draft Management",
-    badge: {
-      text: "Control",
-    },
-    description:
-      "Keep all your drafts organized, track progress, and export content when ready—all from a unified dashboard.",
-    bullets: [
-      {
-        text: "Tag & categorize drafts",
-        dotClass: "w-2 h-2 bg-gray-700 rounded-full mr-3",
-      },
-      {
-        text: "Progress tracking",
-        dotClass: "w-2 h-2 bg-gray-700 rounded-full mr-3",
-      },
-      {
-        text: "Easy export options",
-        dotClass: "w-2 h-2 bg-gray-700 rounded-full mr-3",
-      },
-    ],
+    title: "Design Layouts",
+    description: "Create visually appealing layouts that capture your audience's attention.",
   },
 ];
 ---
 
-<section id="features" class="container mx-auto h-screen flex flex-col justify-center items-center gap-4 p-4">
-  <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-foreground">
-    Seamless AI-Powered Content Creation
-    <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent block">
-      Generate, Edit, and Manage Drafts Effortlessly
-    </span>
-  </h2>
-  <p class="text-base sm:text-lg md:text-xl max-w-3xl mx-auto text-center text-muted-foreground leading-relaxed">
-    Experience a streamlined workflow for creating, refining, and managing AI-generated drafts—all in one place.
-  </p>
-
-  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 w-full ">
-    {features.map(feature => (
-    <Card className="bg-accent rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border-0"
->
-      <CardHeader>
-        <CardTitle>
-          <div class="flex items-center justify-between ">
-
-            {feature.title}
-            <Badge>{feature.badge.text}</Badge>
-          </div>
-        </CardTitle>
-        <CardDescription>
-          {feature.description}
-        </CardDescription>
-      </CardHeader> 
-        <CardContent>
-          <ul class="space-y-4">
-            {feature.bullets.map(bullet => (
-              <li class="flex items-center text-xs sm:text-sm text-foreground">
-                <span class={bullet.dotClass}></span>
-                {bullet.text}
-              </li>
-            ))}
-          </ul>
-        </CardContent>
+<section class="py-24">
+  <div class="mx-auto w-full max-w-3xl px-6">
+    <h2 class="text-foreground text-balance text-3xl font-semibold md:text-4xl">
+      <span class="text-muted-foreground">Empowering Marketing teams with</span> AI-driven solutions
+    </h2>
+    <div class="@container mt-12 space-y-12">
+      <Card variant="soft" class="relative overflow-hidden p-0 sm:col-span-2">
+        <img
+          src="https://images.unsplash.com/photo-1635776062043-223faf322554?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          alt=""
+          class="absolute inset-0 size-full object-cover opacity-30"
+        />
+        <div class="relative m-auto max-w-md p-4 sm:p-12 z-10">
+          <Card aria-hidden class="relative space-y-4 p-6 bg-white/80 backdrop-blur">
+            <div class="w-fit">
+              <Sparkles class="size-4 fill-purple-300 stroke-purple-300" />
+              <p class="mt-2 line-clamp-2 text-sm">How can I optimize my neural network to reduce inference time while maintaining accuracy?</p>
+              <ul role="list" class="text-muted-foreground mt-3 space-y-2 text-sm">
+                {stats.map(stat => (
+                  <li class="-ml-0.5 flex items-center gap-2" key={stat.label}>
+                    <span>{stat.emoji}</span>
+                    <span class="text-foreground font-medium">{stat.value}</span> {stat.label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div class="bg-foreground/5 -mx-3 -mb-3 space-y-3 rounded-lg p-3">
+              <div class="text-muted-foreground text-sm">Ask AI Assistant</div>
+              <div class="flex justify-between">
+                <div class="flex gap-2">
+                  <button class="size-7 rounded-2xl bg-transparent shadow-none border border-border flex items-center justify-center">
+                    <Plus class="size-4" />
+                  </button>
+                  <button class="size-7 rounded-2xl bg-transparent shadow-none border border-border flex items-center justify-center">
+                    <Globe class="size-4" />
+                  </button>
+                </div>
+                <button class="size-7 rounded-2xl bg-black flex items-center justify-center">
+                  <ArrowUp class="stroke-white" stroke-width="3" />
+                </button>
+              </div>
+            </div>
+          </Card>
+        </div>
       </Card>
-    ))}
+      <div class="@sm:grid-cols-2 @2xl:grid-cols-3 grid gap-6">
+        {features.map(feature => (
+          <div class="space-y-2" key={feature.title}>
+            <h3 class="text-xl font-medium">{feature.title}</h3>
+            <p class="text-muted-foreground">{feature.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   </div>
 </section>

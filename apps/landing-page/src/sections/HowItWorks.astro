@@ -68,82 +68,48 @@ const steps: FeatureStep[] = [
 ];
 ---
 
-<section id="how-it-works" class="container mx-auto min-h-screen grid items-center ">
-  <div class="flex flex-col items-center justify-center text-center gap-4">
-    <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
-      From Setup to Published Post
-      <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-        in 4 Simple Steps
-      </span>
-    </h2>
-    <p class="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl">
-      Our streamlined workflow takes you from idea to published blog post faster than you ever thought possible
-    </p>
-  </div>
-
-  <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-    <Card className="bg-accent text-foreground border-0 flex flex-col h-full col-span-full">
-      <CardHeader>
-        <div class="flex items-center gap-4 mb-2">
-          <UserPlus class="text-primary size-7" />
-          <CardTitle>{steps[0]?.title}</CardTitle>
-        </div>
-        <CardDescription>{steps[0]?.description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Card className="border-primary bg-white">
-          <CardHeader>
-            <CardTitle>
-              {steps[0]?.title}
-            </CardTitle>
-            <CardDescription>
-              {steps[0]?.description}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul class="list-disc list-inside space-y-1 text-left mt-2">
-              {steps[0]?.details?.map((detail) => (
-                <li>{detail}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      </CardContent>
-    </Card>
-    <>
-      {steps.slice(1).map((step) => {
+<section class="bg-muted/50 py-24">
+  <div class="mx-auto w-full max-w-5xl px-6">
+    <div class="text-center mb-16">
+      <span class="text-primary font-medium">How It Works</span>
+      <h2 class="text-foreground mt-4 text-4xl font-semibold">
+        From Setup to Published Post in 4 Simple Steps
+      </h2>
+      <p class="text-muted-foreground mb-12 mt-4 text-lg">
+        Our streamlined workflow takes you from idea to published blog post faster
+        than you ever thought possible.
+      </p>
+    </div>
+    <div class="space-y-12">
+      {steps.map((step, idx) => {
         const Icon = step.icon;
+        const isEven = idx % 2 === 0;
         return (
-          <Card className="bg-accent text-foreground border-0 flex flex-col h-full">
-            <CardHeader>
-              <div class="flex items-center gap-4 mb-2">
-                <Icon class="text-primary size-7" />
-                <CardTitle>{step.title}</CardTitle>
+          <div class={`grid sm:grid-cols-5 sm:gap-8 items-center`.trim()}>
+            <div class={`sm:col-span-2 flex items-center justify-center ${!isEven ? 'sm:order-2' : ''}`}>
+              <div class="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full h-32 w-32 flex items-center justify-center">
+                <Icon class="text-primary size-16" />
               </div>
-              <CardDescription>{step.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Card className="border-primary bg-white">
-                <CardHeader>
-                  <CardTitle>
-                    {step.title}
-                  </CardTitle>
-                  <CardDescription>
-                    {step.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul class="list-disc list-inside space-y-1 text-left mt-2">
-                    {step.details.map((detail) => (
-                      <li>{detail}</li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </CardContent>
-          </Card>
+            </div>
+            <div class={`mt-8 sm:mt-0 sm:col-span-3 ${!isEven ? 'sm:order-1 sm:border-r sm:pr-12' : 'sm:border-l sm:pl-12'}`.trim()}>
+              <div class="flex items-center gap-3 mb-2">
+                <Icon class="text-primary size-7" />
+                <h3 class="text-foreground text-xl font-semibold">
+                  {step.title}
+                </h3>
+              </div>
+              <p class="text-muted-foreground mt-2 text-lg">
+                {step.description}
+              </p>
+              <ul class="list-disc list-inside space-y-1 text-left mt-4">
+                {step.details.map((detail) => (
+                  <li>{detail}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
         );
       })}
-    </>
+    </div>
   </div>
 </section>
