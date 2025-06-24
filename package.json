@@ -14,7 +14,7 @@
   "name": "elysiajs-monorepo",
   "private": true,
   "scripts": {
-    "build": "nx run-many -t build --parallel=5",
+    "build:all": "nx run-many -t build --parallel=5",
     "check": "nx run-many -t check --parallel=5",
     "dev:all": "nx run-many -t dev --parallel=5",
     "dev:content-apps": "nx run-many -t dev --parallel=5 -p  landing-page blog docs",

@@ -1,16 +1,23 @@
-FROM oven/bun:1 AS build
+FROM oven/bun:latest AS build
+ARG DATABASE_URL
+ARG BETTER_AUTH_SECRET
+ARG BETTER_AUTH_TRUSTED_ORIGINS
 
 WORKDIR /app
 
-# Cache packages
-COPY package.json package.json
-COPY bun.lock bun.lock
+# Copy root package files
+COPY package.json bun.lock ./
 
+# Copy server package files
 COPY /apps/server/package.json ./apps/server/package.json
-
+COPY /tooling/typescript/package.json ./tooling/typescript/package.json
+# Install all dependencies (monorepo-aware)
 RUN bun install
 
+
+# Copy server source code
 COPY /apps/server ./apps/server
+COPY /tooling/typescript ./tooling/typescript
 
 ENV NODE_ENV=production
 
@@ -20,7 +27,7 @@ RUN bun build \
 	--minify-syntax \
 	--target bun \
 	--outfile server \
-	./src/index.ts
+./apps/server/src/index.ts
 
 FROM gcr.io/distroless/base
 
@@ -30,6 +37,7 @@ COPY --from=build /app/server server
 
 ENV NODE_ENV=production
 
-CMD ["./server"]
+ARG PORT
 
-EXPOSE 3000
+CMD ["./server"]
+EXPOSE ${PORT}
