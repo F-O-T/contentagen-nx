@@ -4,7 +4,9 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, envField } from "astro/config";
 // https://astro.build/config
 export default defineConfig({
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    imageService: "cloudflare",
+  }),
   env: {
     schema: {
       VITE_SERVER_URL: envField.string({
@@ -18,11 +20,14 @@ export default defineConfig({
   output: "server",
   vite: {
     plugins: [tailwindcss()],
-    resolve: process.env.NODE_ENV === "production" ? {
-      alias: {
-        "react-dom/server": "react-dom/server.edge",
-        "react-dom/server.browser": "react-dom/server.edge",
-      },
-    } : {},
+    resolve:
+      process.env.NODE_ENV === "production"
+        ? {
+          alias: {
+            "react-dom/server": "react-dom/server.edge",
+            "react-dom/server.browser": "react-dom/server.edge",
+          },
+        }
+        : {},
   },
 });
