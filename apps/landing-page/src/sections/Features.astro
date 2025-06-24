@@ -1,6 +1,7 @@
 ---
 import { Badge } from "@packages/ui/components/badge";
 import { Sparkles, Edit, Folder, ArrowUp, Globe, Plus } from "@lucide/astro";
+
 import {
   Card,
   CardContent,
@@ -8,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@packages/ui/components/card";
+import { Image } from "astro:assets";
 
 const stats = [
   { value: '90+', emoji: '⭐️', label: 'Integrations' },
@@ -38,9 +40,11 @@ const features = [
     </h2>
     <div class="@container mt-12 space-y-12">
       <Card variant="soft" class="relative overflow-hidden p-0 sm:col-span-2">
-        <img
-          src="https://images.unsplash.com/photo-1635776062043-223faf322554?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+        <Image
+          src="https://via.placeholder.com/400"
           alt=""
+          width={400}
+          height={400}
           class="absolute inset-0 size-full object-cover opacity-30"
         />
         <div class="relative m-auto max-w-md p-4 sm:p-12 z-10">

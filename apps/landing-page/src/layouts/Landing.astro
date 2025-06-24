@@ -4,7 +4,7 @@ import PostHog from "../components/posthog.astro";
 import brandConfig from "@packages/brand";
 ---
 <!doctype html>
-<html lang="en" class="overflow-y-scroll scroll-smooth ">
+<html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
@@ -15,23 +15,7 @@ import brandConfig from "@packages/brand";
 		<title>{brandConfig.name}</title>
 	</head>
 	<body >
-	  <!-- Enhanced animated background elements -->
-	  <div class="fixed inset-0 w-full h-full pointer-events-none">
-	    <div class="absolute top-1/4 left-1/4 w-[300px] h-[300px] bg-purple-200/30 rounded-full blur-3xl animate-pulse"></div>
-	    <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-pink-200/25 rounded-full blur-3xl animate-pulse delay-1000"></div>
-	    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-purple-200/15 to-pink-200/15 rounded-full blur-3xl"></div>
-	    <div class="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-500"></div>
-	  </div>
-	  <div class="fixed inset-0 h-full bg-[linear-gradient(rgba(255,255,255,.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.03)_1px,transparent_1px)] bg-[size:60px_60px] pointer-events-none"></div>
 	  <slot />
 	</body>
 </html>
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
