@@ -1,5 +1,6 @@
-@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 @import "tw-animate-css";
+@import "tailwindcss";
 
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../../../components/**/*.{ts,tsx}";
@@ -8,108 +9,106 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.98 0.01 335.69);
-  --foreground: oklch(0.22 0 0);
-  --card: oklch(0.96 0.01 335.69);
-  --card-foreground: oklch(0.14 0 0);
-  --popover: oklch(0.95 0.01 316.67);
-  --popover-foreground: oklch(0.4 0.04 309.35);
-  --primary: oklch(0.51 0.21 286.5);
+  --background: oklch(0.98 0.01 93.48);
+  --foreground: oklch(0.34 0.03 94.42);
+  --card: oklch(0.98 0.01 93.48);
+  --card-foreground: oklch(0.19 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.27 0.02 99.7);
+  --primary: oklch(0.62 0.14 39.15);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.49 0.04 300.23);
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.96 0.01 335.69);
-  --muted-foreground: oklch(0.14 0 0);
-  --accent: oklch(0.92 0.04 303.47);
-  --accent-foreground: oklch(0.14 0 0);
-  --destructive: oklch(0.57 0.23 29.21);
-  --border: oklch(0.83 0.02 308.26);
-  --input: oklch(0.57 0.02 309.68);
-  --ring: oklch(0.5 0.13 293.77);
-  --chart-1: oklch(0.61 0.21 279.42);
-  --chart-2: oklch(0.72 0.15 157.67);
-  --chart-3: oklch(0.66 0.17 324.24);
-  --chart-4: oklch(0.81 0.15 127.91);
-  --chart-5: oklch(0.68 0.17 258.25);
-  --sidebar: oklch(0.99 0 0);
-  --sidebar-foreground: oklch(0.15 0 0);
-  --sidebar-primary: oklch(0.56 0.11 228.27);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.95 0 0);
-  --sidebar-accent-foreground: oklch(0.25 0 0);
-  --sidebar-border: oklch(0.9 0 0);
-  --sidebar-ring: oklch(0.56 0.11 228.27);
+  --secondary: oklch(0.92 0.01 87.42);
+  --secondary-foreground: oklch(0.43 0.02 99.33);
+  --muted: oklch(0.93 0.02 91.55);
+  --muted-foreground: oklch(0.61 0.01 91.49);
+  --accent: oklch(0.92 0.01 87.42);
+  --accent-foreground: oklch(0.27 0.02 99.7);
+  --destructive: oklch(0.19 0 0);
+  --border: oklch(0.88 0.01 100.76);
+  --input: oklch(0.76 0.02 96.91);
+  --ring: oklch(0.59 0.17 252.92);
+  --chart-1: oklch(0.56 0.13 42.95);
+  --chart-2: oklch(0.69 0.16 290.29);
+  --chart-3: oklch(0.88 0.03 91.64);
+  --chart-4: oklch(0.88 0.04 298.21);
+  --chart-5: oklch(0.56 0.13 41.94);
+  --sidebar: oklch(0.97 0.01 93.49);
+  --sidebar-foreground: oklch(0.36 0.01 106.85);
+  --sidebar-primary: oklch(0.62 0.14 39.15);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.92 0.01 87.42);
+  --sidebar-accent-foreground: oklch(0.33 0 0);
+  --sidebar-border: oklch(0.94 0 0);
+  --sidebar-ring: oklch(0.77 0 0);
 
-  --font-sans: Nunito, sans-serif;
-  --font-serif: Nunito, sans-serif;
+  --font-sans:
+    "Geist", "Geist Fallback", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-serif: "Geist", "Geist Fallback", ui-serif, Georgia, Cambria,
+    "Times New Roman", Times, serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular,
     Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  --radius: 0.4rem;
+  --radius: 0.5rem;
 
-  --shadow-2xs: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01);
-  --shadow-xs: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01);
-  --shadow-sm: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01), 0px 1px 2px -1px
-    oklch(0 0 0 / 1% / 0.01);
-  --shadow: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01), 0px 1px 2px -1px
-    oklch(0 0 0 / 1% / 0.01);
-  --shadow-md: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01), 0px 2px 4px -1px
-    oklch(0 0 0 / 1% / 0.01);
-  --shadow-lg: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01), 0px 4px 6px -1px
-    oklch(0 0 0 / 1% / 0.01);
-  --shadow-xl: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01), 0px 8px 10px -1px
-    oklch(0 0 0 / 1% / 0.01);
-  --shadow-2xl: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.03);
-
-  --tracking-normal: 0.025em;
+  --shadow-2xs: 0 1px 3px 0px oklch(0 0 0 / 0.05);
+  --shadow-xs: 0 1px 3px 0px oklch(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0px oklch(0 0 0 / 0.1), 0 1px 2px -1px
+    oklch(0 0 0 / 0.1);
+  --shadow: 0 1px 3px 0px oklch(0 0 0 / 0.1), 0 1px 2px -1px oklch(0 0 0 / 0.1);
+  --shadow-md: 0 1px 3px 0px oklch(0 0 0 / 0.1), 0 2px 4px -1px
+    oklch(0 0 0 / 0.1);
+  --shadow-lg: 0 1px 3px 0px oklch(0 0 0 / 0.1), 0 4px 6px -1px
+    oklch(0 0 0 / 0.1);
+  --shadow-xl: 0 1px 3px 0px oklch(0 0 0 / 0.1), 0 8px 10px -1px
+    oklch(0 0 0 / 0.1);
+  --shadow-2xl: 0 1px 3px 0px oklch(0 0 0 / 0.25);
 }
 
 .dark {
-  --background: oklch(0.15 0.01 317.69);
-  --foreground: oklch(0.95 0.01 321.5);
-  --card: oklch(0.22 0.02 322.13);
-  --card-foreground: oklch(0.95 0.01 321.5);
-  --popover: oklch(0.22 0.02 322.13);
-  --popover-foreground: oklch(0.95 0.01 321.5);
-  --primary: oklch(0.6 0.22 279.81);
-  --primary-foreground: oklch(0.98 0.01 321.51);
-  --secondary: oklch(0.45 0.03 294.79);
-  --secondary-foreground: oklch(0.95 0.01 321.5);
-  --muted: oklch(0.22 0.01 319.5);
-  --muted-foreground: oklch(0.7 0.01 320.7);
-  --accent: oklch(0.35 0.06 299.57);
-  --accent-foreground: oklch(0.95 0.01 321.5);
-  --destructive: oklch(0.57 0.23 29.21);
-  --border: oklch(0.4 0.04 309.35);
-  --input: oklch(0.4 0.04 309.35);
-  --ring: oklch(0.5 0.15 294.97);
-  --chart-1: oklch(0.5 0.25 274.99);
-  --chart-2: oklch(0.6 0.15 150.16);
-  --chart-3: oklch(0.65 0.2 309.96);
-  --chart-4: oklch(0.6 0.17 132.98);
-  --chart-5: oklch(0.6 0.2 255.25);
-  --sidebar: oklch(0.2 0.01 317.74);
-  --sidebar-foreground: oklch(0.95 0.01 321.5);
-  --sidebar-primary: oklch(0.59 0.11 225.82);
-  --sidebar-primary-foreground: oklch(0.95 0.01 321.5);
-  --sidebar-accent: oklch(0.3 0.01 319.52);
-  --sidebar-accent-foreground: oklch(0.95 0.01 321.5);
-  --sidebar-border: oklch(0.35 0.01 319.53 / 30%);
-  --sidebar-ring: oklch(0.59 0.11 225.82);
+  --background: oklch(0.27 0 0);
+  --foreground: oklch(0.81 0.01 93.53);
+  --card: oklch(0.27 0 0);
+  --card-foreground: oklch(0.98 0.01 93.48);
+  --popover: oklch(0.31 0 0);
+  --popover-foreground: oklch(0.92 0 0);
+  --primary: oklch(0.67 0.13 38.92);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.98 0.01 93.48);
+  --secondary-foreground: oklch(0.31 0 0);
+  --muted: oklch(0.22 0 0);
+  --muted-foreground: oklch(0.77 0.02 100.64);
+  --accent: oklch(0.21 0.01 88.79);
+  --accent-foreground: oklch(0.97 0.01 93.49);
+  --destructive: oklch(0.64 0.21 25.39);
+  --border: oklch(0.36 0.01 106.85);
+  --input: oklch(0.43 0.01 99.03);
+  --ring: oklch(0.59 0.17 252.92);
+  --chart-1: oklch(0.56 0.13 42.95);
+  --chart-2: oklch(0.69 0.16 290.29);
+  --chart-3: oklch(0.21 0.01 88.79);
+  --chart-4: oklch(0.31 0.05 289.74);
+  --chart-5: oklch(0.56 0.13 41.94);
+  --sidebar: oklch(0.24 0 0);
+  --sidebar-foreground: oklch(0.81 0.01 93.53);
+  --sidebar-primary: oklch(0.33 0 0);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.17 0 0);
+  --sidebar-accent-foreground: oklch(0.81 0.01 93.53);
+  --sidebar-border: oklch(0.94 0 0);
+  --sidebar-ring: oklch(0.77 0 0);
 
-  --shadow-2xs: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01);
-  --shadow-xs: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01);
-  --shadow-sm: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01), 0px 1px 2px -1px
-    oklch(0 0 0 / 1% / 0.01);
-  --shadow: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01), 0px 1px 2px -1px
-    oklch(0 0 0 / 1% / 0.01);
-  --shadow-md: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01), 0px 2px 4px -1px
-    oklch(0 0 0 / 1% / 0.01);
-  --shadow-lg: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01), 0px 4px 6px -1px
-    oklch(0 0 0 / 1% / 0.01);
-  --shadow-xl: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.01), 0px 8px 10px -1px
-    oklch(0 0 0 / 1% / 0.01);
-  --shadow-2xl: 0px 1px 3px 0px oklch(0 0 0 / 1% / 0.03);
+  --shadow-2xs: 0 1px 3px 0px oklch(0 0 0 / 0.05);
+  --shadow-xs: 0 1px 3px 0px oklch(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0px oklch(0 0 0 / 0.1), 0 1px 2px -1px
+    oklch(0 0 0 / 0.1);
+  --shadow: 0 1px 3px 0px oklch(0 0 0 / 0.1), 0 1px 2px -1px oklch(0 0 0 / 0.1);
+  --shadow-md: 0 1px 3px 0px oklch(0 0 0 / 0.1), 0 2px 4px -1px
+    oklch(0 0 0 / 0.1);
+  --shadow-lg: 0 1px 3px 0px oklch(0 0 0 / 0.1), 0 4px 6px -1px
+    oklch(0 0 0 / 0.1);
+  --shadow-xl: 0 1px 3px 0px oklch(0 0 0 / 0.1), 0 8px 10px -1px
+    oklch(0 0 0 / 0.1);
+  --shadow-2xl: 0 1px 3px 0px oklch(0 0 0 / 0.25);
 }
 
 @theme inline {
@@ -162,15 +161,40 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
-
-  --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
-  --tracking-tight: calc(var(--tracking-normal) - 0.025em);
-  --tracking-normal: var(--tracking-normal);
-  --tracking-wide: calc(var(--tracking-normal) + 0.025em);
-  --tracking-wider: calc(var(--tracking-normal) + 0.05em);
-  --tracking-widest: calc(var(--tracking-normal) + 0.1em);
 }
 
-body {
-  letter-spacing: var(--tracking-normal);
+@layer base {
+  * {
+    @apply border-border outline-ring/50; /* Uses --color-border and --color-ring (with 50% alpha for outline) */
+  }
+  html {
+    @apply bg-background; /* Uses --color-background */
+  }
+  body {
+    @apply max-w-full overflow-x-hidden bg-background text-foreground; /* Uses --color-background and --color-foreground */
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400; /* You can often omit this if 400 is your desired normal weight */
+    font-style: normal; /* You can often omit this if normal is your desired style */
+    overscroll-behavior-y: contain; /* Specific to body as per your v3 config */
+  }
+
+  html,
+  body {
+    @apply h-full w-full overflow-auto; /* overscroll-none was here, but might conflict with body's overscroll-behavior-y: contain. Adjusted to allow scrolling. */
+    /* If you specifically need overscroll-none on html/body, and overscroll-behavior-y: contain on body,
+       the html,body rule might override the body-specific one for the y-axis.
+       Consider `overscroll-x-none` if only horizontal pull-to-refresh is an issue.
+       Or set `overscroll-behavior: none;` on html and `overscroll-behavior-y: contain;` on body.
+    */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

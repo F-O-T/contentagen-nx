@@ -14,63 +14,29 @@ function Agents() {
   const { data: agents } = useQuery({
     queryFn: () => eden.agents.get(),
     queryKey: createQueryKey("agents"),
-    select: data => data.data
+    select: (data) => data.data,
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Link to="/">
-                  <h1 className="text-xl font-bold text-gray-900">BlogAI</h1>
-                </Link>
-              </div>
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <Link
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                  to="/"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  className="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                  to="/agents"
-                >
-                  Agents
-                </Link>
-                <Link
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                  to="/content"
-                >
-                  Content
-                </Link>
-              </div>
-            </div>
-            <div className="flex items-center">
-              <Link to="/agents/create">
-                <Button className="ml-3">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Agent
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
+    <div className="min-h-screen">
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
+      <main className="mx-auto sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-0">
           {/* Header */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">AI Agents</h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Manage your AI content agents and their configurations
-            </p>
+          <div className="mb-8 flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">AI Agents</h2>
+              <p className="mt-1 text-sm text-gray-600">
+                Manage your AI content agents and their configurations
+              </p>
+            </div>
+
+            <Link to="/agents/create">
+              <Button className="ml-3">
+                <Plus className="w-4 h-4 mr-2" />
+                New Agent
+              </Button>
+            </Link>
           </div>
 
           {/* Agents Grid */}
@@ -85,11 +51,7 @@ function Agents() {
                     <h3 className="text-lg font-medium text-gray-900">
                       {agent.name}
                     </h3>
-                    <Badge
-                      variant={
-                        agent.isActive ? "default" : "secondary"
-                      }
-                    >
+                    <Badge variant={agent.isActive ? "default" : "secondary"}>
                       {agent.isActive ? "Active" : "Inactive"}
                     </Badge>
                   </div>
@@ -165,12 +127,12 @@ function Agents() {
 
             {/* Add New Agent Card */}
             <Link to="/agents/create">
-              <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-gray-400 transition-colors cursor-pointer h-full flex flex-col items-center justify-center">
-                <Plus className="w-12 h-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <div className="bg-card border-2 border-dashed border-border rounded-lg p-6 hover:border-accent transition-colors cursor-pointer h-full flex flex-col items-center justify-center hover:bg-accent/5">
+                <Plus className="w-12 h-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">
                   Create New Agent
                 </h3>
-                <p className="text-sm text-gray-500 text-center">
+                <p className="text-sm text-muted-foreground text-center">
                   Set up a new AI agent with custom voice and topics
                 </p>
               </div>

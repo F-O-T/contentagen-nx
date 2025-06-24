@@ -5,8 +5,6 @@ import * as TanstackQuery from "./integrations/tanstack-query";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 
-import "@packages/ui/globals.css";
-
 // Create a new router instance
 export const createRouter = () => {
   const router = routerWithQueryClient(

@@ -1,3 +1,9 @@
+import type {
+  ContentType,
+  FormattingStyle,
+  TargetAudience,
+  VoiceTone,
+} from "@api/schemas/content-schema";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -13,7 +19,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Save, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 import { useCreateAgent } from "./lib/use-create-agent";
-import type { ContentType, FormattingStyle, TargetAudience, VoiceTone } from "@api/schemas/content-schema";
 
 export const Route = createFileRoute("/agents/create")({
   component: CreateAgent,
@@ -82,55 +87,42 @@ function CreateAgent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/">
-                <h1 className="text-xl font-bold text-gray-900">BlogAI</h1>
-              </Link>
-              <div className="ml-6">
-                <span className="text-gray-500">/ Create Agent</span>
+    <div className="min-h-screen bg-background">
+      {/* Main Content */}
+      <main className="px-4 sm:px-6 lg:px-8">
+        <div className="space-y-8">
+          {/* Header */}
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                    Create AI Agent
+                  </h1>
+                  <p className="text-muted-foreground">
+                    Configure your AI agent with specific voice, audience, and
+                    content preferences.
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center">
-              <Link to="/agents">
-                <Button variant="outline">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Agents
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <Sparkles className="h-8 w-8 text-indigo-600 mr-3" />
-              <h2 className="text-2xl font-bold text-gray-900">
-                Create AI Agent
-              </h2>
-            </div>
-            <p className="text-gray-600">
-              Configure your AI agent with specific voice, audience, and content
-              preferences.
-            </p>
+            <Link to="/agents">
+              <Button className="gap-2" variant="outline">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Agents
+              </Button>
+            </Link>
           </div>
 
           {/* Form */}
           <form className="space-y-8" onSubmit={handleSubmit}>
             {/* Basic Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
-                <CardDescription>
+            <Card className="border-border bg-card shadow-sm">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-xl font-semibold text-card-foreground">
+                  Basic Information
+                </CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Set up the basic details for your AI agent
                 </CardDescription>
               </CardHeader>
@@ -145,8 +137,11 @@ function CreateAgent() {
                   >
                     {(field) => (
                       <field.FieldContainer>
-                        <field.FieldLabel>Agent Name *</field.FieldLabel>
+                        <field.FieldLabel className="text-sm font-medium text-foreground">
+                          Agent Name *
+                        </field.FieldLabel>
                         <Input
+                          className="mt-1.5"
                           id={field.name}
                           name={field.name}
                           onBlur={field.handleBlur}
@@ -162,8 +157,11 @@ function CreateAgent() {
                   <form.AppField name="project">
                     {(field) => (
                       <field.FieldContainer>
-                        <field.FieldLabel>Project</field.FieldLabel>
+                        <field.FieldLabel className="text-sm font-medium text-foreground">
+                          Project
+                        </field.FieldLabel>
                         <Input
+                          className="mt-1.5"
                           id={field.name}
                           name={field.name}
                           onBlur={field.handleBlur}
@@ -180,8 +178,11 @@ function CreateAgent() {
                 <form.AppField name="description">
                   {(field) => (
                     <field.FieldContainer>
-                      <field.FieldLabel>Description</field.FieldLabel>
+                      <field.FieldLabel className="text-sm font-medium text-foreground">
+                        Description
+                      </field.FieldLabel>
                       <Textarea
+                        className="mt-1.5 resize-none"
                         id={field.name}
                         name={field.name}
                         onBlur={field.handleBlur}
@@ -198,14 +199,16 @@ function CreateAgent() {
             </Card>
 
             {/* Content Configuration */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Content Configuration</CardTitle>
-                <CardDescription>
+            <Card className="border-border bg-card shadow-sm">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-xl font-semibold text-card-foreground">
+                  Content Configuration
+                </CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Define how your agent should write and format content
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-8">
                 <form.AppField
                   name="contentType"
                   validators={{
@@ -215,14 +218,16 @@ function CreateAgent() {
                 >
                   {(field) => (
                     <field.FieldContainer>
-                      <field.FieldLabel>Content Type *</field.FieldLabel>
-                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      <field.FieldLabel className="text-sm font-medium text-foreground">
+                        Content Type *
+                      </field.FieldLabel>
+                      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                         {CONTENT_TYPES.map((type) => (
                           <button
-                            className={`p-3 text-sm rounded-lg border-2 transition-all ${
+                            className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${
                               field.state.value === type.value
-                                ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                                : "border-gray-200 hover:border-gray-300"
+                                ? "border-primary bg-primary/5 text-primary shadow-sm"
+                                : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
                             }`}
                             key={type.value}
                             onClick={() => field.handleChange(type.value)}
@@ -246,14 +251,16 @@ function CreateAgent() {
                 >
                   {(field) => (
                     <field.FieldContainer>
-                      <field.FieldLabel>Voice Tone *</field.FieldLabel>
-                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      <field.FieldLabel className="text-sm font-medium text-foreground">
+                        Voice Tone *
+                      </field.FieldLabel>
+                      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                         {VOICE_TONES.map((tone) => (
                           <button
-                            className={`p-3 text-sm rounded-lg border-2 transition-all ${
+                            className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${
                               field.state.value === tone.value
-                                ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                                : "border-gray-200 hover:border-gray-300"
+                                ? "border-primary bg-primary/5 text-primary shadow-sm"
+                                : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
                             }`}
                             key={tone.value}
                             onClick={() => field.handleChange(tone.value)}
@@ -277,14 +284,16 @@ function CreateAgent() {
                 >
                   {(field) => (
                     <field.FieldContainer>
-                      <field.FieldLabel>Target Audience *</field.FieldLabel>
-                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      <field.FieldLabel className="text-sm font-medium text-foreground">
+                        Target Audience *
+                      </field.FieldLabel>
+                      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                         {TARGET_AUDIENCES.map((audience) => (
                           <button
-                            className={`p-3 text-sm rounded-lg border-2 transition-all ${
+                            className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${
                               field.state.value === audience.value
-                                ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                                : "border-gray-200 hover:border-gray-300"
+                                ? "border-primary bg-primary/5 text-primary shadow-sm"
+                                : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
                             }`}
                             key={audience.value}
                             onClick={() => field.handleChange(audience.value)}
@@ -302,14 +311,16 @@ function CreateAgent() {
                 <form.AppField name="formattingStyle">
                   {(field) => (
                     <field.FieldContainer>
-                      <field.FieldLabel>Formatting Style</field.FieldLabel>
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      <field.FieldLabel className="text-sm font-medium text-foreground">
+                        Formatting Style
+                      </field.FieldLabel>
+                      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
                         {FORMATTING_STYLES.map((style) => (
                           <button
-                            className={`p-3 text-sm rounded-lg border-2 transition-all text-left ${
+                            className={`group relative rounded-lg border-2 p-4 text-left text-sm font-medium transition-all hover:shadow-sm ${
                               field.state.value === style.value
-                                ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                                : "border-gray-200 hover:border-gray-300"
+                                ? "border-primary bg-primary/5 text-primary shadow-sm"
+                                : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
                             }`}
                             key={style.value}
                             onClick={() => field.handleChange(style.value)}
@@ -327,20 +338,25 @@ function CreateAgent() {
             </Card>
 
             {/* Topics & SEO */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Topics & SEO</CardTitle>
-                <CardDescription>
+            <Card className="border-border bg-card shadow-sm">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-xl font-semibold text-card-foreground">
+                  Topics & SEO
+                </CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Define preferred topics and SEO keywords for your content
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-8">
                 <form.AppField name="topics">
                   {(field) => (
                     <field.FieldContainer>
-                      <field.FieldLabel>Preferred Topics</field.FieldLabel>
-                      <div className="flex space-x-2 mb-3">
+                      <field.FieldLabel className="text-sm font-medium text-foreground">
+                        Preferred Topics
+                      </field.FieldLabel>
+                      <div className="mt-3 flex gap-3">
                         <Input
+                          className="flex-1"
                           onChange={(e) => setCurrentTopic(e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
@@ -355,30 +371,33 @@ function CreateAgent() {
                           onClick={() => addTopic(field.state.value)}
                           size="sm"
                           type="button"
+                          variant="outline"
                         >
                           Add
                         </Button>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {field.state.value.map((topic) => (
-                          <Badge
-                            className="flex items-center gap-1"
-                            key={topic}
-                            variant="secondary"
-                          >
-                            {topic}
-                            <button
-                              className="ml-1 hover:text-destructive"
-                              onClick={() =>
-                                removeTopic(topic, field.state.value)
-                              }
-                              type="button"
+                      {field.state.value.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {field.state.value.map((topic) => (
+                            <Badge
+                              className="flex items-center gap-1.5 bg-secondary/50 text-secondary-foreground hover:bg-secondary/70"
+                              key={topic}
+                              variant="secondary"
                             >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
+                              {topic}
+                              <button
+                                className="ml-0.5 rounded-sm hover:text-destructive"
+                                onClick={() =>
+                                  removeTopic(topic, field.state.value)
+                                }
+                                type="button"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                       <field.FieldMessage />
                     </field.FieldContainer>
                   )}
@@ -387,9 +406,12 @@ function CreateAgent() {
                 <form.AppField name="seoKeywords">
                   {(field) => (
                     <field.FieldContainer>
-                      <field.FieldLabel>SEO Keywords</field.FieldLabel>
-                      <div className="flex space-x-2 mb-3">
+                      <field.FieldLabel className="text-sm font-medium text-foreground">
+                        SEO Keywords
+                      </field.FieldLabel>
+                      <div className="mt-3 flex gap-3">
                         <Input
+                          className="flex-1"
                           onChange={(e) => setCurrentKeyword(e.target.value)}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
@@ -404,30 +426,33 @@ function CreateAgent() {
                           onClick={() => addKeyword(field.state.value)}
                           size="sm"
                           type="button"
+                          variant="outline"
                         >
                           Add
                         </Button>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {field.state.value.map((keyword) => (
-                          <Badge
-                            className="flex items-center gap-1"
-                            key={keyword}
-                            variant="outline"
-                          >
-                            {keyword}
-                            <button
-                              className="ml-1 hover:text-destructive"
-                              onClick={() =>
-                                removeKeyword(keyword, field.state.value)
-                              }
-                              type="button"
+                      {field.state.value.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {field.state.value.map((keyword) => (
+                            <Badge
+                              className="flex items-center gap-1.5 border-border bg-background text-foreground hover:bg-accent/50"
+                              key={keyword}
+                              variant="outline"
                             >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
+                              {keyword}
+                              <button
+                                className="ml-0.5 rounded-sm hover:text-destructive"
+                                onClick={() =>
+                                  removeKeyword(keyword, field.state.value)
+                                }
+                                type="button"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                       <field.FieldMessage />
                     </field.FieldContainer>
                   )}
@@ -436,13 +461,16 @@ function CreateAgent() {
             </Card>
 
             {/* Submit */}
-            <div className="flex justify-end space-x-3">
-              <Link to="/agents">
-                <Button variant="outline">Cancel</Button>
+            <div className="flex flex-col gap-4 pt-4 sm:flex-row sm:justify-end">
+              <Link className="sm:order-1" to="/agents">
+                <Button className="w-full sm:w-auto" variant="outline">
+                  Cancel
+                </Button>
               </Link>
               <form.Subscribe>
                 {(formState) => (
                   <Button
+                    className="w-full gap-2 sm:order-2 sm:w-auto"
                     disabled={
                       !formState.canSubmit ||
                       formState.isSubmitting ||
@@ -450,7 +478,7 @@ function CreateAgent() {
                     }
                     type="submit"
                   >
-                    <Save className="w-4 h-4 mr-2" />
+                    <Save className="h-4 w-4" />
                     {isLoading ? "Creating..." : "Create Agent"}
                   </Button>
                 )}
