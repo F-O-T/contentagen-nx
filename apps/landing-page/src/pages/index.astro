@@ -14,7 +14,13 @@ import ContentSection from "../sections/ContentSection.astro";
 import Navbar from "../sections/Navbar.astro";
 ---
 <Layout>
-  <Navbar />
-      <Hero />
+  <div class="flex flex-col space-y-4">
+    <Navbar />
+    <Hero />
+    <Integration />
+    <Features />
+    <TrustSection />
+    <Footer />
+  </div>
   </Layout>
 

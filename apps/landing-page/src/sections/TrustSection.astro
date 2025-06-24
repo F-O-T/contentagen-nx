@@ -1,20 +1,17 @@
 ---
 import { Quote } from "@lucide/astro";
-import StarRating from "../components/StarRating.astro";
-import { testimonials } from "../data/sections/testimonials.ts";
 ---
 
 
-<section class="py-24 bg-muted">
-  <div class="container mx-auto px-6 p-4">
-    <div class="max-w-xl mx-auto text-center">
-      <Quote class="fill-background stroke-background mx-auto w-8 h-8 drop-shadow-sm" />
-      <blockquote class="mt-6">
+<section class="bg-accent p-4">
+  <div class="container mx-auto   flex flex-col items-center justify-center space-y-4">
+      <Quote class="fill-background stroke-background w-8 h-8 " />
+      <blockquote class=" text-center space-y-4">
         <p class="text-foreground text-xl">
-          Trusted by leading startups, agencies, and creators worldwide.<br>
-          See why professionals rely on us for their content needs.
+          Trusted by agencies and creators to automate blog content with AI.<br>
+          Save hours, publish consistently, and maintain quality—see how industry leaders streamline their workflow with us.
         </p>
-        <footer class="mt-6 flex flex-col items-center justify-center">
+        <footer class="flex flex-col items-center justify-center">
           <div class="ring-foreground/10 w-12 h-12 border border-transparent shadow ring-1 rounded-full overflow-hidden flex items-center justify-center bg-white">
             <img
               src="https://avatars.githubusercontent.com/u/68236786?v=4"
@@ -28,5 +25,4 @@ import { testimonials } from "../data/sections/testimonials.ts";
         </footer>
       </blockquote>
     </div>
-  </div>
 </section>

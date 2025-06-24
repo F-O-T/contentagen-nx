@@ -1,37 +1,26 @@
 ---
-// You can import SVGs or use inline SVGs for logos if available
+import { Image } from "astro:assets";
+import { Button } from "@packages/ui/components/button";
+import githubImage from "../assets/integrations/github.png";
+
+const logos = [
+  {
+    img: githubImage,
+    name: "GitHub",
+  },
+];
 ---
-<section class="py-24">
-  <div class="container mx-auto px-6 p-4">
-    <div class="space-y-6 text-center">
-      <h2 class="text-foreground text-2xl font-semibold">Integrate with your favorite tools :</h2>
-      <div class="*:bg-foreground/5 mx-auto flex max-w-xl flex-wrap justify-center gap-4 *:rounded *:p-6 *:first:rounded-l-xl *:last:rounded-r-xl">
-        <div>
-          <!-- Gemini Logo Placeholder -->
-          <svg class="m-auto size-8" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#7C3AED"/></svg>
-        </div>
-        <div>
-          <!-- GooglePaLM Logo Placeholder -->
-          <svg class="m-auto size-8" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="16" fill="#F59E42"/></svg>
-        </div>
-        <div>
-          <!-- Replit Logo Placeholder -->
-          <svg class="m-auto size-8" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="16" fill="#F87171"/></svg>
-        </div>
-        <div>
-          <!-- MediaWiki Logo Placeholder -->
-          <svg class="m-auto size-8" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="16" fill="#60A5FA"/></svg>
-        </div>
-        <div>
-          <!-- MagicUI Logo Placeholder -->
-          <svg class="m-auto size-8" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="16" fill="#34D399"/></svg>
-        </div>
-        <div>
-          <!-- VSCodium Logo Placeholder -->
-          <svg class="m-auto size-8" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="16" fill="#6366F1"/></svg>
-        </div>
+<section class="flex flex-col items-center justify-center bg-accent h-full">
+  <div class="container mx-auto p-4">
+    <div class="flex flex-col items-center space-y-4 text-center">
+      <h2 class="text-foreground text-2xl font-semibold">Automate Your Blog Workflow</h2>
+      <p class="text-muted-foreground max-w-xl ">Connect your favorite tools to automate content creation, export, and publishing.</p>
+        {logos.map(({ name, img }) => (
+        <Button variant={"ghost"} className="px-4 py-8 bg-background rounded-full"  key={name}>
+          <Image src={img} alt={name + ' logo'} class="h-10 w-10" />
+        </Button>
+        ))}
       </div>
-      <a href="#" class="inline-block border border-primary text-primary hover:bg-primary/10 rounded px-4 py-2 text-sm transition-all">More Integrations</a>
     </div>
   </div>
 </section>

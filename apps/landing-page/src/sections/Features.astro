@@ -1,93 +1,56 @@
 ---
-import { Badge } from "@packages/ui/components/badge";
-import { Sparkles, Edit, Folder, ArrowUp, Globe, Plus } from "@lucide/astro";
 
+import { Picture } from "astro:assets";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@packages/ui/components/card";
-import { Image } from "astro:assets";
-
-const stats = [
-  { value: '90+', emoji: '⭐️', label: 'Integrations' },
-  { value: '56%', emoji: '👨🏽‍💻', label: 'Productivity Boost' },
-  { value: '24/7', emoji: '🦜', label: 'Customer Support' },
-];
+import agentImage from "../assets/agent.png";
 
 const features = [
   {
-    title: "Generate Ideas",
-    description: "Spark creativity with AI-powered content suggestions and inspiration.",
+    description:
+      "Define tone, audience, topics, and SEO keywords for content that fits your strategy perfectly.",
+    title: "Custom AI Writing Agents",
   },
   {
-    title: "Improve Writing",
-    description: "Enhance your text with smart editing suggestions and style refinements.",
+    description:
+      "Go from briefing to draft in under two minutes with automated content tailored to your needs.",
+    title: "Fast Draft Generation",
   },
   {
-    title: "Design Layouts",
-    description: "Create visually appealing layouts that capture your audience's attention.",
+    description:
+      "Edit, comment, and export your posts to Markdown or DOCX in a single, streamlined interface.",
+    title: "Seamless Editing & Export",
   },
 ];
 ---
 
-<section class="py-24">
-  <div class="container mx-auto px-6 p-4 max-w-3xl">
-    <h2 class="text-foreground text-balance text-3xl font-semibold md:text-4xl">
-      <span class="text-muted-foreground">Empowering Marketing teams with</span> AI-driven solutions
+<section class="container mx-auto p-4 flex flex-col items-center justify-center space-y-4">
+  <div class="w-full mx-auto text-center">
+    <h2 class="text-foreground text-4xl font-bold ">
+      AI-Powered Blog Creation, Personalized for You
     </h2>
-    <div class="@container mt-12 space-y-12">
-      <Card variant="soft" class="relative overflow-hidden p-0 sm:col-span-2">
-        <Image
-          src="https://via.placeholder.com/400"
-          alt=""
-          width={400}
-          height={400}
-          class="absolute inset-0 size-full object-cover opacity-30"
-        />
-        <div class="relative m-auto max-w-md p-4 sm:p-12 z-10">
-          <Card aria-hidden class="relative space-y-4 p-6 bg-white/80 backdrop-blur">
-            <div class="w-fit">
-              <Sparkles class="size-4 fill-purple-300 stroke-purple-300" />
-              <p class="mt-2 line-clamp-2 text-sm">How can I optimize my neural network to reduce inference time while maintaining accuracy?</p>
-              <ul role="list" class="text-muted-foreground mt-3 space-y-2 text-sm">
-                {stats.map(stat => (
-                  <li class="-ml-0.5 flex items-center gap-2" key={stat.label}>
-                    <span>{stat.emoji}</span>
-                    <span class="text-foreground font-medium">{stat.value}</span> {stat.label}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div class="bg-foreground/5 -mx-3 -mb-3 space-y-3 rounded-lg p-3">
-              <div class="text-muted-foreground text-sm">Ask AI Assistant</div>
-              <div class="flex justify-between">
-                <div class="flex gap-2">
-                  <button class="size-7 rounded-2xl bg-transparent shadow-none border border-border flex items-center justify-center">
-                    <Plus class="size-4" />
-                  </button>
-                  <button class="size-7 rounded-2xl bg-transparent shadow-none border border-border flex items-center justify-center">
-                    <Globe class="size-4" />
-                  </button>
-                </div>
-                <button class="size-7 rounded-2xl bg-black flex items-center justify-center">
-                  <ArrowUp class="stroke-white" stroke-width="3" />
-                </button>
-              </div>
-            </div>
-          </Card>
-        </div>
+    <p class="text-muted-foreground text-lg font-normal ">
+      Build, customize, and publish standout blog content in minutes with smart automation and agent-driven workflows.
+    </p>
+  </div>
+    <Picture
+      class="rounded-xl shadow-xl ring-2 ring-black/10 w-full max-w-4xl "
+      formats={['webp']}
+      src={agentImage}
+      alt="Feature illustration"
+    />
+  <div class="grid gap-4 grid-cols-1 md:grid-cols-3 w-full ">
+    {features.map(feature => (
+      <Card >
+        <CardHeader >
+          <CardTitle >{feature.title}</CardTitle>
+          <CardDescription >{feature.description}</CardDescription>
+        </CardHeader>
       </Card>
-      <div class="@sm:grid-cols-2 @2xl:grid-cols-3 grid gap-4">
-        {features.map(feature => (
-          <div class="space-y-2" key={feature.title}>
-            <h3 class="text-xl font-medium">{feature.title}</h3>
-            <p class="text-muted-foreground">{feature.description}</p>
-          </div>
-        ))}
-      </div>
-    </div>
+    ))}
   </div>
 </section>

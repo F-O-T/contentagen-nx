@@ -1,20 +1,21 @@
 ---
 import { Picture } from "astro:assets";
+import { Sparkles } from "@lucide/astro";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
-import { Sparkles } from "@lucide/astro";
 import dashboardImage from "../assets/dashboard.png";
 ---
 
-  <section id="hero-section" class="flex flex-col items-center justify-center min-h-screen container mx-auto p-4">
-      <div class="relative z-10 text-center">
-        <div class="space-y-4 flex flex-col items-center justify-center text-center">
-            <Badge className="flex gap-2 px-4 py-2 items-center">
-              <Sparkles class="size-4" />
+  <section id="hero-section" class="flex flex-col items-center justify-center min-h-screen container mx-auto p-4 space-y-8">
+        <div class="space-y-4 flex flex-col items-center justify-center text-center  ">
+            <Badge className="flex gap-2 px-4 py-2 items-center font-semibold" >
+              <Sparkles  />
               Introducing Contenta Agents
             </Badge>
-          <h1 class="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl text-foreground">AI Blog Posts, Instantly</h1>
-          <p class=" max-w-xl text-xl text-muted-foreground">Automated, SEO-ready content for creators and agencies.</p>
+    <h1 class="text-4xl font-bold  sm:text-5xl text-foreground">AI Blog Posts, <span class="text-primary">Instantly
+
+    </span></h1>
+          <p class="text-xl text-muted-foreground">Automated, SEO-ready content for creators and agencies.</p>
           <div class="flex items-center justify-center gap-4">
             <Button>
               Start Building
@@ -24,18 +25,10 @@ import dashboardImage from "../assets/dashboard.png";
             </Button>
           </div>
         </div>
-      </div>
-      <div class="relative">
-        <div class="relative z-10">
-          <div class="mt-12 md:mt-16">
-            <div class="bg-background rounded-2xl relative mx-auto overflow-hidden border border-transparent shadow-lg shadow-black/10 ring-1 ring-black/10">
-              <Picture
+    <Picture
+                class="rounded-xl shadow-xl ring-2 ring-black/10"
                 formats={['webp']}
                 src={dashboardImage}
                 alt="dashboard-image"
               />
-            </div>
-          </div>
-        </div>
-      </div>
   </section>
