@@ -32,7 +32,7 @@ const features = [
 ---
 
 <section class="py-24">
-  <div class="mx-auto w-full max-w-3xl px-6">
+  <div class="container mx-auto px-6 p-4 max-w-3xl">
     <h2 class="text-foreground text-balance text-3xl font-semibold md:text-4xl">
       <span class="text-muted-foreground">Empowering Marketing teams with</span> AI-driven solutions
     </h2>
@@ -76,7 +76,7 @@ const features = [
           </Card>
         </div>
       </Card>
-      <div class="@sm:grid-cols-2 @2xl:grid-cols-3 grid gap-6">
+      <div class="@sm:grid-cols-2 @2xl:grid-cols-3 grid gap-4">
         {features.map(feature => (
           <div class="space-y-2" key={feature.title}>
             <h3 class="text-xl font-medium">{feature.title}</h3>

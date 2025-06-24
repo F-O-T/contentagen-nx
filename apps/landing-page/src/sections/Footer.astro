@@ -26,10 +26,10 @@ const socialLinks = [
 const year = new Date().getFullYear();
 ---
 
-<footer class="py-16 md:py-32">
-  <div class="mx-auto max-w-5xl px-6">
+<footer class="py-32">
+  <div class="container mx-auto px-6 p-4 max-w-5xl">
     <a href="/" aria-label="go home" class="mx-auto block size-fit">
-      {brandConfig.name} 
+      {brandConfig.name}
     </a>
     <div class="my-8 flex flex-wrap justify-center gap-6 text-sm">
       {links.map(link => (
@@ -51,7 +51,7 @@ const year = new Date().getFullYear();
       ))}
     </div>
     <span class="text-muted-foreground block text-center text-sm">
-      © {year} {brandConfig.name}, All rights reserved
+      © {year} Contentagen. All rights reserved. | Privacy Policy | Terms of Service
     </span>
   </div>
 </footer>

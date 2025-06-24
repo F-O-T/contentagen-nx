@@ -68,8 +68,8 @@ const steps: FeatureStep[] = [
 ];
 ---
 
-<section class="bg-muted/50 py-24">
-  <div class="mx-auto w-full max-w-5xl px-6">
+<section class="py-24 bg-muted/50">
+  <div class="container mx-auto px-6 p-4">
     <div class="text-center mb-16">
       <span class="text-primary font-medium">How It Works</span>
       <h2 class="text-foreground mt-4 text-4xl font-semibold">
@@ -85,7 +85,7 @@ const steps: FeatureStep[] = [
         const Icon = step.icon;
         const isEven = idx % 2 === 0;
         return (
-          <div class={`grid sm:grid-cols-5 sm:gap-8 items-center`.trim()}>
+          <div class={`grid sm:grid-cols-5 sm:gap-4 items-center`.trim()}>
             <div class={`sm:col-span-2 flex items-center justify-center ${!isEven ? 'sm:order-2' : ''}`}>
               <div class="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full h-32 w-32 flex items-center justify-center">
                 <Icon class="text-primary size-16" />
