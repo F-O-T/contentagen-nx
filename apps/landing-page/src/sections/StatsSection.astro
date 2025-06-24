@@ -1,22 +1,32 @@
 ---
+const stats = [
+  {
+    value: "500k+",
+    label: "Words Generated Weekly",
+  },
+  {
+    value: "98%",
+    label: "Customer Satisfaction",
+  },
+];
 ---
-
-<section class="py-24">
-  <div class="container mx-auto px-6 p-4 max-w-5xl">
-    <h2 class="sr-only">Platform Usage Stats</h2>
-    <div class="grid grid-cols-1 gap-8 md:grid-cols-3 text-center">
-      <div>
-        <div class="text-primary text-4xl font-bold">10,000+</div>
-        <p class="text-muted-foreground">Users Creating Daily</p>
-      </div>
-      <div>
-        <div class="text-primary text-4xl font-bold">1M+</div>
-        <p class="text-muted-foreground">Words Generated Weekly</p>
-      </div>
-      <div>
-        <div class="text-primary text-4xl font-bold">98%</div>
-        <p class="text-muted-foreground">Customer Satisfaction</p>
-      </div>
+<section class="bg-accent p-4">
+  <div class="container mx-auto flex flex-col text-center items-center space-y-8">
+    <div class="">
+      <h2 class="text-3xl md:text-4xl font-extrabold text-primary ">Our Impact in Numbers</h2>
+      <p class="text-lg text-muted-foreground max-w-xl ">See how our platform empowers creators and businesses with proven results every day.</p>
+    </div>
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {stats.map((stat) => (
+        <div class="p-4 space-y-4">
+          <div class="text-primary text-5xl font-extrabold ">
+            {stat.value}
+          </div>
+          <p class="text-muted-foreground text-lg font-medium">
+            {stat.label}
+          </p>
+        </div>
+      ))}
     </div>
   </div>
 </section>

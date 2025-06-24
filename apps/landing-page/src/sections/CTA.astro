@@ -1,19 +1,14 @@
 ---
+import { WaitlistForm } from "../components/waitlist-form";
 ---
-
-<!-- CTA Section for Landing Page -->
-<section class="py-24">
-  <div class="container mx-auto px-6 p-4 max-w-5xl">
-    <div class="flex flex-wrap items-center justify-between gap-4">
-      <div>
-        <h2 class="text-foreground text-balance text-3xl font-semibold lg:text-4xl">
-          Start Your Free Trial Today
-        </h2>
-      </div>
-      <div class="flex justify-end gap-3">
-        <a href="#" class="button button-outline button-lg">Get a Demo</a>
-        <a href="#" class="button button-lg">Experience the future of content creation</a>
-      </div>
-    </div>
+<section class="container mx-auto p-4 flex flex-col items-center justify-center space-y-8 text-center">
+  <div class="space-y-4">
+    <h2 class="text-foreground text-balance text-3xl font-semibold lg:text-4xl">
+      Unlock Effortless Blog Creation with AI
+    </h2>
+    <p class="">
+      Get early access to the all-in-one platform for agencies and bloggers: generate long-form, SEO-optimized posts in minutes, personalize your content, and streamline your production workflow. Sign up to revolutionize how you create and manage blog content!
+    </p>
   </div>
+        <WaitlistForm client:load />
 </section>

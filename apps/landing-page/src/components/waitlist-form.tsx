@@ -26,7 +26,7 @@ export const WaitlistForm = () => {
 
   const form = useAppForm({
     defaultState: {
-      isValid: false,
+      canSubmit: false,
     },
     defaultValues: {
       email: "",
