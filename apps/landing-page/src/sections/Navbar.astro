@@ -1,14 +1,19 @@
 ---
 import brandConfig from "@packages/brand";
+import { Button } from "@packages/ui/components/button";
+
+const menuItems = [
+  { name: "Features", href: "#features" },
+  { name: "Pricing", href: "#pricing" },
+  { name: "About", href: "#about" },
+];
 ---
-<header>
-  <nav id="astro-navbar" class="fixed z-20 w-full transition-all duration-300">
-    <div class="mx-auto max-w-5xl px-6">
+  <nav id="navbar" class="container mx-auto">
       <div id="navbar-inner" class="relative flex flex-wrap items-center justify-between gap-6 py-6 transition-all duration-200 lg:gap-0">
-        <div class="flex w-full justify-between gap-6 lg:w-auto">
+        <div class="flex w-full justify-between gap-4 lg:w-auto">
           <a href="/" aria-label="home" class="flex items-center space-x-2">
             <!-- Swap for your logo component if available -->
-            <span class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{brandConfig.name}</span>
+            <span class="">{brandConfig.name}</span>
           </a>
           <button id="menu-toggle" aria-label="Open Menu" class="relative z-20 -m-2.5 -mr-4 block cursor-pointer p-2.5 lg:hidden">
             <!-- Menu icon -->
@@ -22,9 +27,13 @@ import brandConfig from "@packages/brand";
           </button>
           <div class="m-auto hidden size-fit lg:block">
             <ul class="flex gap-1">
-              <li><a href="#features" class="text-base"><span>Features</span></a></li>
-              <li><a href="#pricing" class="text-base"><span>Pricing</span></a></li>
-              <li><a href="#about" class="text-base"><span>About</span></a></li>
+              {menuItems.map((item) => (
+                <li>
+                  <a href={item.href} class="text-muted-foreground hover:text-accent-foreground block duration-150 px-3 py-2 rounded text-base transition-colors">
+                    <span>{item.name}</span>
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -37,82 +46,8 @@ import brandConfig from "@packages/brand";
             </ul>
           </div>
           <div class="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
-            <a href="#" class="border border-primary text-primary hover:bg-primary/10 rounded px-4 py-2 text-sm transition-all lg:hidden">Login</a>
-            <a href="#" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded text-sm transition-all lg:hidden">Sign Up</a>
-            <a id="get-started-btn" href="#" class="hidden bg-accent text-accent-foreground px-4 py-2 rounded text-sm font-semibold transition-all lg:inline-flex">Get Started</a>
+            <Button id="get-started-btn">Get Started</Button>
           </div>
         </div>
       </div>
-    </div>
   </nav>
-</header>
-<script>
-// State
-let isScrolled = false;
-let isMobileMenuOpen = false;
-
-const navbar = document.getElementById('astro-navbar');
-const navbarInner = document.getElementById('navbar-inner');
-const menuToggle = document.getElementById('menu-toggle');
-const menuIcon = document.getElementById('menu-icon');
-const closeIcon = document.getElementById('close-icon');
-const navbarButtons = document.getElementById('navbar-buttons');
-const getStartedBtn = document.getElementById('get-started-btn');
-
-function onScroll() {
-  if (window.scrollY > 50) {
-    if (!isScrolled) {
-      isScrolled = true;
-      navbar.classList.add('bg-background/75', 'border-b', 'border-black/5', 'backdrop-blur-lg');
-      navbarInner.classList.add('py-3');
-      navbarInner.classList.remove('py-6');
-      if (getStartedBtn) getStartedBtn.classList.remove('hidden');
-    }
-  } else {
-    if (isScrolled) {
-      isScrolled = false;
-      navbar.classList.remove('bg-background/75', 'border-b', 'border-black/5', 'backdrop-blur-lg');
-      navbarInner.classList.remove('py-3');
-      navbarInner.classList.add('py-6');
-      if (getStartedBtn) getStartedBtn.classList.add('hidden');
-    }
-  }
-}
-window.addEventListener('scroll', onScroll, { passive: true });
-
-function openMobileMenu() {
-  if (!isMobileMenuOpen) {
-    navbarButtons.classList.remove('hidden');
-    navbar.setAttribute('data-state', 'active');
-    document.body.classList.add('overflow-hidden');
-    menuIcon.classList.add('hidden');
-    closeIcon.classList.remove('hidden');
-    isMobileMenuOpen = true;
-  }
-}
-function closeMobileMenu() {
-  if (isMobileMenuOpen) {
-    navbarButtons.classList.add('hidden');
-    navbar.removeAttribute('data-state');
-    document.body.classList.remove('overflow-hidden');
-    menuIcon.classList.remove('hidden');
-    closeIcon.classList.add('hidden');
-    isMobileMenuOpen = false;
-  }
-}
-menuToggle && menuToggle.addEventListener('click', () => {
-  if (isMobileMenuOpen) {
-    closeMobileMenu();
-  } else {
-    openMobileMenu();
-  }
-});
-// Hide menu on desktop resize
-window.addEventListener('resize', () => {
-  if (window.innerWidth >= 1024) {
-    closeMobileMenu();
-  }
-});
-// Initial state
-onScroll();
-</script>

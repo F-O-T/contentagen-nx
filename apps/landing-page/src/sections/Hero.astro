@@ -1,52 +1,41 @@
 ---
 import { Picture } from "astro:assets";
 import { Badge } from "@packages/ui/components/badge";
+import { Button } from "@packages/ui/components/button";
+import { Sparkles } from "@lucide/astro";
 import dashboardImage from "../assets/dashboard.png";
-import Navbar from "../sections/Navbar.astro";
 ---
 
-<main>
-  <Navbar />
-  <section class="relative overflow-hidden before:absolute before:inset-1 before:h-[calc(100%-8rem)] before:rounded-2xl sm:before:inset-2 md:before:rounded-[2rem] lg:before:h-[calc(100%-14rem)] py-24">
-    <div class="container mx-auto px-6 p-4">
-      <div class="relative z-10 mx-auto max-w-5xl text-center">
-        <div class="space-y-4">
-          <a
-            href="#"
-            class="hover:bg-foreground/5 mx-auto flex w-fit items-center justify-center gap-2 rounded-md py-0.5 pl-1 pr-3 transition-colors duration-150">
-            <Badge  className="flex gap-4 px-4 py-2">
-              <div
-                aria-hidden
-                class="border-background bg-gradient-to-b from-primary to-foreground dark:inset-shadow-2xs relative flex size-5 items-center justify-center rounded border shadow-md shadow-black/20 ring-1 ring-black/10">
-                <div class="absolute inset-x-0 inset-y-1.5 border-y border-dotted border-white/25"></div>
-                <div class="absolute inset-x-1.5 inset-y-0 border-x border-dotted border-white/25"></div>
-                <!-- Sparkle icon replacement -->
-                <svg class="size-3 fill-white stroke-white drop-shadow" viewBox="0 0 24 24"><path d="M12 2l2.09 6.26L20 9.27l-5 3.64L16.18 20 12 16.77 7.82 20 9 12.91l-5-3.64 5.91-.91z"/></svg>
-              </div>
+  <section id="hero-section" class="flex flex-col items-center justify-center min-h-screen container mx-auto p-4">
+      <div class="relative z-10 text-center">
+        <div class="space-y-4 flex flex-col items-center justify-center text-center">
+            <Badge className="flex gap-2 px-4 py-2 items-center">
+              <Sparkles class="size-4" />
               Introducing Contenta Agents
             </Badge>
-          </a>
-          <h1 class="mx-auto max-w-3xl text-balance text-4xl font-bold tracking-tight sm:text-5xl">AI Blog Posts, Instantly</h1>
-          <p class="text-muted-foreground mx-auto max-w-xl text-balance text-xl">Automated, SEO-ready content for creators and agencies.</p>
-          <div class="flex items-center justify-center gap-3">
-            <a href="#link" class="inline-block rounded-xl px-5 py-2 text-base font-semibold bg-primary text-white hover:bg-primary/90 transition-all">Start Building</a>
-            <a href="#link" class="inline-block rounded-xl px-5 py-2 text-base font-semibold border border-primary text-primary bg-transparent hover:bg-primary/10 transition-all">Watch Video</a>
+          <h1 class="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl text-foreground">AI Blog Posts, Instantly</h1>
+          <p class=" max-w-xl text-xl text-muted-foreground">Automated, SEO-ready content for creators and agencies.</p>
+          <div class="flex items-center justify-center gap-4">
+            <Button>
+              Start Building
+            </Button>
+            <Button variant="outline">
+              Watch Video
+            </Button>
           </div>
         </div>
       </div>
       <div class="relative">
-        <div class="relative z-10 mx-auto max-w-5xl">
+        <div class="relative z-10">
           <div class="mt-12 md:mt-16">
             <div class="bg-background rounded-2xl relative mx-auto overflow-hidden border border-transparent shadow-lg shadow-black/10 ring-1 ring-black/10">
               <Picture
                 formats={['webp']}
                 src={dashboardImage}
-                alt="app screen"
+                alt="dashboard-image"
               />
             </div>
           </div>
         </div>
       </div>
-    </div>
   </section>
-</main>
