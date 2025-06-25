@@ -50,7 +50,7 @@ export function useAgentForm() {
   const { eden } = useRouteContext({ from: "/agents/create" });
 
   const agentMutation = useMutation({
-    mutationFn: eden.agents.post,
+    mutationFn: eden.api.v1.agents.post,
     onSuccess: () => {
       navigate({ to: "/agents" });
     },
