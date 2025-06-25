@@ -2,19 +2,38 @@ import { env } from "@api/config/env";
 import * as authSchema from "@api/schemas/auth-schema";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { openAPI } from "better-auth/plugins";
+import { emailOTP, openAPI, organization } from "better-auth/plugins";
 import Elysia from "elysia";
 import { db } from "./database";
+import { sendEmailOTP } from "@api/services/resend";
 
 export const auth = betterAuth({
+  basePath: "/api/v1/auth",
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema: authSchema,
+    schema: {
+      ...authSchema,
+    },
   }),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
   },
-  plugins: [openAPI()],
+  emailVerification: {
+    autoSignInAfterVerification: true,
+    sendOnSignUp: true,
+  },
+  plugins: [
+    emailOTP({
+      expiresIn: 60 * 10,
+      otpLength: 6,
+      sendVerificationOnSignUp: true,
+      async sendVerificationOTP({ email, otp, type }) {
+        await sendEmailOTP(email, otp, type);
+      },
+    }),
+    openAPI(),
+  ],
   secret: env.BETTER_AUTH_SECRET,
   trustedOrigins: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
 });
@@ -70,4 +89,4 @@ export const OpenAPI = {
       return reference;
       // biome-ignore lint/suspicious/noExplicitAny: Explicit type declaration needed for dynamic API operations
     }) as Promise<any>,
-} as const;
+};

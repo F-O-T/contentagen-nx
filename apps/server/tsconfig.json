@@ -1,17 +1,22 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "baseUrl": ".",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "module": "ES2022",
     "moduleResolution": "node",
     "paths": {
-      "@api/*": ["./src/*"]
+      "@api/*": [
+        "./src/*"
+      ]
     },
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2021",
-    "types": ["bun-types"]
+    "types": [
+      "bun-types"
+    ]
   },
   "extends": "@tooling/typescript/base.json"
 }

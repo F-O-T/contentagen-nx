@@ -10,18 +10,28 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ContentIndexRouteImport } from './routes/content/index'
 import { Route as AgentsIndexRouteImport } from './routes/agents/index'
 import { Route as ContentReviewRouteImport } from './routes/content/review'
 import { Route as ContentGenerateRouteImport } from './routes/content/generate'
 import { Route as ContentExportRouteImport } from './routes/content/export'
+import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
+import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
+import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-verification'
 import { Route as AgentsEditRouteImport } from './routes/agents/edit'
 import { Route as AgentsCreateRouteImport } from './routes/agents/create'
 
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -54,6 +64,26 @@ const ContentExportRoute = ContentExportRouteImport.update({
   path: '/content/export',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthSignUpRoute = AuthSignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSignInRoute = AuthSignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthEmailVerificationRoute = AuthEmailVerificationRouteImport.update({
+  id: '/email-verification',
+  path: '/email-verification',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AgentsEditRoute = AgentsEditRouteImport.update({
   id: '/agents/edit',
   path: '/agents/edit',
@@ -67,9 +97,14 @@ const AgentsCreateRoute = AgentsCreateRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/agents/create': typeof AgentsCreateRoute
   '/agents/edit': typeof AgentsEditRoute
+  '/auth/email-verification': typeof AuthEmailVerificationRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-up': typeof AuthSignUpRoute
   '/content/export': typeof ContentExportRoute
   '/content/generate': typeof ContentGenerateRoute
   '/content/review': typeof ContentReviewRoute
@@ -78,9 +113,14 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/agents/create': typeof AgentsCreateRoute
   '/agents/edit': typeof AgentsEditRoute
+  '/auth/email-verification': typeof AuthEmailVerificationRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-up': typeof AuthSignUpRoute
   '/content/export': typeof ContentExportRoute
   '/content/generate': typeof ContentGenerateRoute
   '/content/review': typeof ContentReviewRoute
@@ -90,9 +130,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/agents/create': typeof AgentsCreateRoute
   '/agents/edit': typeof AgentsEditRoute
+  '/auth/email-verification': typeof AuthEmailVerificationRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-up': typeof AuthSignUpRoute
   '/content/export': typeof ContentExportRoute
   '/content/generate': typeof ContentGenerateRoute
   '/content/review': typeof ContentReviewRoute
@@ -103,9 +148,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/onboarding'
     | '/agents/create'
     | '/agents/edit'
+    | '/auth/email-verification'
+    | '/auth/forgot-password'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
     | '/content/export'
     | '/content/generate'
     | '/content/review'
@@ -114,9 +164,14 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/onboarding'
     | '/agents/create'
     | '/agents/edit'
+    | '/auth/email-verification'
+    | '/auth/forgot-password'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
     | '/content/export'
     | '/content/generate'
     | '/content/review'
@@ -125,9 +180,14 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/onboarding'
     | '/agents/create'
     | '/agents/edit'
+    | '/auth/email-verification'
+    | '/auth/forgot-password'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
     | '/content/export'
     | '/content/generate'
     | '/content/review'
@@ -137,6 +197,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   AgentsCreateRoute: typeof AgentsCreateRoute
   AgentsEditRoute: typeof AgentsEditRoute
@@ -154,6 +215,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -198,6 +266,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContentExportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/sign-up': {
+      id: '/auth/sign-up'
+      path: '/sign-up'
+      fullPath: '/auth/sign-up'
+      preLoaderRoute: typeof AuthSignUpRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/sign-in': {
+      id: '/auth/sign-in'
+      path: '/sign-in'
+      fullPath: '/auth/sign-in'
+      preLoaderRoute: typeof AuthSignInRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/forgot-password': {
+      id: '/auth/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/auth/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/email-verification': {
+      id: '/auth/email-verification'
+      path: '/email-verification'
+      fullPath: '/auth/email-verification'
+      preLoaderRoute: typeof AuthEmailVerificationRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/agents/edit': {
       id: '/agents/edit'
       path: '/agents/edit'
@@ -215,8 +311,25 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthRouteChildren {
+  AuthEmailVerificationRoute: typeof AuthEmailVerificationRoute
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
+  AuthSignInRoute: typeof AuthSignInRoute
+  AuthSignUpRoute: typeof AuthSignUpRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthEmailVerificationRoute: AuthEmailVerificationRoute,
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
+  AuthSignInRoute: AuthSignInRoute,
+  AuthSignUpRoute: AuthSignUpRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   AgentsCreateRoute: AgentsCreateRoute,
   AgentsEditRoute: AgentsEditRoute,

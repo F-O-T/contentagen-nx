@@ -36,6 +36,9 @@
         "@lucide/astro": "^0.511.0",
         "astro": "5.10.0"
       },
+      "auth": {
+        "better-auth": "^1.2.8"
+      },
       "development": {
         "typescript": "5.8.3"
       },
