@@ -1,9 +1,10 @@
 import { authMiddleware } from "@api/integrations/auth";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-typebox";
 import { Elysia, t } from "elysia";
 import { db } from "../integrations/database";
 import { agent as agentTable } from "../schemas/content-schema";
+import { NotFoundError } from "../shared/errors";
 
 const _createAgent = createInsertSchema(agentTable);
 
@@ -30,34 +31,69 @@ export const agentRoutes = new Elysia({
   )
   .patch(
     "/:id",
-    async ({ params, body }) => {
-      const agent = await db
+    async ({ params, body, user }) => {
+      const updated = await db
         .update(agentTable)
         .set(body)
-        .where(eq(agentTable.id, params.id))
+        .where(and(eq(agentTable.id, params.id), eq(agentTable.userId, user.id)))
         .returning();
-      return { agent };
+      if (!updated.length) {
+        throw new NotFoundError("Agent not found", "AGENT_NOT_FOUND");
+      }
+      return { agent: updated[0] };
     },
     {
-      body: t.Omit(_createAgent, ["id", "createdAt", "updatedAt", "userId"]),
+      auth: true,
+      params: t.Object({ id: t.String() }),
+      body: t.Partial(t.Omit(_createAgent, ["id", "createdAt", "updatedAt", "userId"])),
     },
   )
-  .get("/", async () => {
-    return await db.query.agent.findMany({
+  .get("/", async ({ user }) => {
+    const agents = await db.query.agent.findMany({
+      where: eq(agentTable.userId, user.id),
       with: {
         project: true,
       },
     });
+    return { agents };
+  },{
+  auth: true,
   })
   .get(
     "/:id",
-    async ({ params }) => {
+    async ({ params, user }) => {
       const agent = await db.query.agent.findFirst({
-        where: eq(agentTable.id, params.id),
+        where: and(eq(agentTable.id, params.id), eq(agentTable.userId, user.id)),
+        with: {
+          project: true,
+        },
       });
+      if (!agent) {
+        throw new NotFoundError("Agent not found", "AGENT_NOT_FOUND");
+      }
       return { agent };
     },
     {
+      auth: true,
+      params: t.Object({
+        id: t.String(),
+      }),
+    },
+  )
+  .delete(
+    "/:id",
+    async ({ params, user }) => {
+      const deleted = await db
+        .delete(agentTable)
+        .where(and(eq(agentTable.id, params.id), eq(agentTable.userId, user.id)))
+        .returning();
+      if (!deleted.length) {
+        throw new NotFoundError("Agent not found", "AGENT_NOT_FOUND");
+      }
+      return new Response(null, { status: 204 });
+    },
+    {
+      auth: true,
       params: t.Object({
         id: t.String(),
       }),
