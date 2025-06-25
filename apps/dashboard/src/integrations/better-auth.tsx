@@ -1,11 +1,10 @@
 import { emailOTPClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
-import { reactStartCookies } from "better-auth/react-start";
 import { createContext, useContext, useState } from "react";
 import { env } from "@/config/env";
 export const betterAuthClient = createAuthClient({
 	baseURL: `${env.VITE_SERVER_URL}/api/v1/auth`,
-	plugins: [reactStartCookies(), emailOTPClient()],
+	plugins: [emailOTPClient()],
 });
 export type Session = typeof betterAuthClient.$Infer.Session;
 

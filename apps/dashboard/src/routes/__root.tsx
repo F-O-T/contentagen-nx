@@ -8,11 +8,9 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
-import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
 import { QueryProvider } from "@/integrations/tanstack-query";
 
-interface MyRouterContext {
+export interface MyRouterContext {
   eden: EdenClientType;
   queryClient: QueryClient;
 }
@@ -29,9 +27,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
             } as React.CSSProperties
           }
         >
-          <AppSidebar variant="inset" />
           <SidebarInset>
-            <SiteHeader />
             <div className="flex flex-1 flex-col max-h-[calc(95dvh-var(--header-height))] overflow-y-auto">
               <div className="@container/main flex flex-1 flex-col gap-2">
                 <div className="flex flex-col gap-4">

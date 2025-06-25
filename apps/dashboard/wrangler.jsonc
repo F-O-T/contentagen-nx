@@ -1,9 +1,0 @@
-{
-  "compatibility_date": "2025-03-25",
-  "name": "conentagen-landing-page",
-  "compatibility_flags": [
-    "nodejs_compat-imports",
-    "nodejs_compat",
-    "nodejs_compat_populate_process_env"
-  ]
-}

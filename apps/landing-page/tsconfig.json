@@ -3,6 +3,7 @@
     "baseUrl": ".",
     "jsx": "react-jsx",
     "jsxImportSource": "react",
+    "moduleResolution": "bundler",
     "paths": {
       "@/*": [
         "./src/*"
@@ -19,11 +20,14 @@
     }
   },
   "exclude": [
+    "node_modules",
     "dist"
   ],
   "extends": "@tooling/typescript/astro.json",
   "include": [
     ".astro/types.d.ts",
-    "**/*"
+    "**/*.ts",
+    "**/*.astro",
+    "**/*.tsx"
   ]
 }

@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "jsx": "react",
     "baseUrl": ".",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
     "module": "ES2022",
     "moduleResolution": "node",
     "paths": {

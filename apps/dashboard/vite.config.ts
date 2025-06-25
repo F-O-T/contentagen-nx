@@ -10,6 +10,21 @@ export default defineConfig({
     }),
     tanstackStart(),
   ],
+  ssr: {
+    // Explicitly list packages that should NOT be externalized (i.e., should be bundled)
+    // for the SSR build. This ensures Node.js built-ins within them are handled correctly
+    // for the server environment, preventing "browser compatibility" issues during build.
+    noExternal: [
+      "@tanstack/react-start",
+      // If other TanStack or server-related packages also cause similar issues,
+      // you might need to add them here.
+    ],
+    external: [
+      "node:stream",
+      "node:stream/web",
+      "node:async_hooks",
+    ]
+  },
   server: {
     port: 3000,
   },

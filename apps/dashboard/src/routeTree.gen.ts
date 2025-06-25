@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as ContentIndexRouteImport } from './routes/content/index'
 import { Route as AgentsIndexRouteImport } from './routes/agents/index'
 import { Route as ContentReviewRouteImport } from './routes/content/review'
@@ -26,11 +25,6 @@ import { Route as AgentsCreateRouteImport } from './routes/agents/create'
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContentIndexRoute = ContentIndexRouteImport.update({
@@ -90,7 +84,6 @@ const AgentsCreateRoute = AgentsCreateRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/agents/create': typeof AgentsCreateRoute
   '/agents/edit': typeof AgentsEditRoute
@@ -105,7 +98,6 @@ export interface FileRoutesByFullPath {
   '/content': typeof ContentIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/agents/create': typeof AgentsCreateRoute
   '/agents/edit': typeof AgentsEditRoute
@@ -121,7 +113,6 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/agents/create': typeof AgentsCreateRoute
   '/agents/edit': typeof AgentsEditRoute
@@ -138,7 +129,6 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/auth'
     | '/agents/create'
     | '/agents/edit'
@@ -153,7 +143,6 @@ export interface FileRouteTypes {
     | '/content'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/auth'
     | '/agents/create'
     | '/agents/edit'
@@ -168,7 +157,6 @@ export interface FileRouteTypes {
     | '/content'
   id:
     | '__root__'
-    | '/'
     | '/auth'
     | '/agents/create'
     | '/agents/edit'
@@ -184,7 +172,6 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   AgentsCreateRoute: typeof AgentsCreateRoute
   AgentsEditRoute: typeof AgentsEditRoute
@@ -202,13 +189,6 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/content/': {
@@ -308,7 +288,6 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   AgentsCreateRoute: AgentsCreateRoute,
   AgentsEditRoute: AgentsEditRoute,
