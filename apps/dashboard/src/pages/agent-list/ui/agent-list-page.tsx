@@ -8,7 +8,7 @@ import { Edit, Plus, Settings } from "lucide-react";
 export function AgentListPage() {
   const { eden } = useRouteContext({ from: "/agents/" });
   const { data: agents } = useSuspenseQuery({
-    queryFn: () => eden.agents.get(),
+    queryFn: () => eden.api.v1.agents.get(),
     queryKey: createQueryKey("agents"),
     select: (data) => data.data,
   });

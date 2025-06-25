@@ -11,6 +11,7 @@ COPY package.json bun.lock ./
 # Copy server package files
 COPY /apps/server/package.json ./apps/server/package.json
 COPY /tooling/typescript/package.json ./tooling/typescript/package.json
+COPY /packages/brand/package.json ./packages/brand/package.json
 # Install all dependencies (monorepo-aware)
 RUN bun install
 
@@ -18,16 +19,16 @@ RUN bun install
 # Copy server source code
 COPY /apps/server ./apps/server
 COPY /tooling/typescript ./tooling/typescript
-
+COPY /packages/brand ./packages/brand
 ENV NODE_ENV=production
 
 RUN bun build \
-	--compile \
-	--minify-whitespace \
-	--minify-syntax \
-	--target bun \
-	--outfile server \
-./apps/server/src/index.ts
+  --compile \
+  --minify-whitespace \
+  --minify-syntax \
+  --target bun \
+  --outfile server \
+  ./apps/server/src/index.ts
 
 FROM gcr.io/distroless/base
 
