@@ -1,6 +1,3 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
-import { QueryProvider } from "@/integrations/tanstack-query";
 import type { EdenClientType } from "@packages/eden";
 import { SidebarInset, SidebarProvider } from "@packages/ui/components/sidebar";
 import appCss from "@packages/ui/globals.css?url";
@@ -11,6 +8,9 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SiteHeader } from "@/components/site-header";
+import { QueryProvider } from "@/integrations/tanstack-query";
 
 interface MyRouterContext {
   eden: EdenClientType;

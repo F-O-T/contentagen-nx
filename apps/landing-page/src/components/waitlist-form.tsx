@@ -15,7 +15,6 @@ import type React from "react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-
 type LeadType = Parameters<
   EdenClientType["api"]["v1"]["waitlist"]["post"]
 >["0"]["leadType"];

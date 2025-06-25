@@ -4,11 +4,11 @@
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "paths": {
-      "@api": [
-        "../../apps/server/src/index"
-      ],
       "@/*": [
         "./src/*"
+      ],
+      "@api": [
+        "../../apps/server/src/index"
       ],
       "@api/*": [
         "../../apps/server/src/*"
