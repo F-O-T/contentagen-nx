@@ -1,4 +1,5 @@
 node_modules
+.tanstack
 .DS_Store
 dist
 dist-ssr
