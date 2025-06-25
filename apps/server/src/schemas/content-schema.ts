@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -8,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uuid,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
@@ -17,7 +17,7 @@ export const contentTypeEnum = pgEnum("content_type", [
   "marketing_copy",
   "technical_docs",
 ]);
-export type ContentType = typeof contentTypeEnum.enumValues[number];
+export type ContentType = (typeof contentTypeEnum.enumValues)[number];
 
 export const voiceToneEnum = pgEnum("voice_tone", [
   "professional",
@@ -25,7 +25,7 @@ export const voiceToneEnum = pgEnum("voice_tone", [
   "educational",
   "creative",
 ]);
-export type VoiceTone = typeof voiceToneEnum.enumValues[number];
+export type VoiceTone = (typeof voiceToneEnum.enumValues)[number];
 
 export const targetAudienceEnum = pgEnum("target_audience", [
   "general_public",
@@ -33,14 +33,14 @@ export const targetAudienceEnum = pgEnum("target_audience", [
   "beginners",
   "customers",
 ]);
-export type TargetAudience = typeof targetAudienceEnum.enumValues[number];
+export type TargetAudience = (typeof targetAudienceEnum.enumValues)[number];
 
 export const formattingStyleEnum = pgEnum("formatting_style", [
   "structured",
   "narrative",
   "list_based",
 ]);
-export type FormattingStyle = typeof formattingStyleEnum.enumValues[number];
+export type FormattingStyle = (typeof formattingStyleEnum.enumValues)[number];
 
 export const contentStatusEnum = pgEnum("content_status", [
   "draft",
@@ -48,14 +48,14 @@ export const contentStatusEnum = pgEnum("content_status", [
   "published",
   "archived",
 ]);
-export type ContentStatus = typeof contentStatusEnum.enumValues[number];
+export type ContentStatus = (typeof contentStatusEnum.enumValues)[number];
 
 export const contentLengthEnum = pgEnum("content_length", [
   "short",
   "medium",
   "long",
 ]);
-export type ContentLength = typeof contentLengthEnum.enumValues[number];
+export type ContentLength = (typeof contentLengthEnum.enumValues)[number];
 
 export const priorityEnum = pgEnum("priority", [
   "low",
@@ -63,14 +63,14 @@ export const priorityEnum = pgEnum("priority", [
   "high",
   "urgent",
 ]);
-export type Priority = typeof priorityEnum.enumValues[number];
+export type Priority = (typeof priorityEnum.enumValues)[number];
 
 export const project = pgTable("project", {
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),
   description: text("description"),
-  id: text("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   updatedAt: timestamp("updated_at")
     .$defaultFn(() => new Date())
@@ -89,14 +89,12 @@ export const agent = pgTable("agent", {
   description: text("description"),
   formattingStyle:
     formattingStyleEnum("formatting_style").default("structured"),
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => randomUUID()),
+  id: uuid("id").primaryKey().defaultRandom(),
 
   isActive: boolean("is_active").default(true),
   lastGeneratedAt: timestamp("last_generated_at"),
   name: text("name").notNull(),
-  projectId: text("project_id").references(() => project.id, {
+  projectId: uuid("project_id").references(() => project.id, {
     onDelete: "cascade",
   }),
   seoKeywords: json("seo_keywords").$type<string[]>().default([]),
@@ -116,7 +114,7 @@ export const agent = pgTable("agent", {
 });
 
 export const content = pgTable("content", {
-  agentId: text("agent_id")
+  agentId: uuid("agent_id")
     .notNull()
     .references(() => agent.id, { onDelete: "cascade" }),
   body: text("body").notNull(),
@@ -125,7 +123,7 @@ export const content = pgTable("content", {
     .$defaultFn(() => new Date())
     .notNull(),
   excerpt: text("excerpt"),
-  id: text("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
 
   metaDescription: text("meta_description"),
 
@@ -148,7 +146,7 @@ export const content = pgTable("content", {
 });
 
 export const contentRequest = pgTable("content_request", {
-  agentId: text("agent_id")
+  agentId: uuid("agent_id")
     .notNull()
     .references(() => agent.id, { onDelete: "cascade" }),
   briefDescription: text("brief_description").notNull(),
@@ -157,7 +155,7 @@ export const contentRequest = pgTable("content_request", {
     .$defaultFn(() => new Date())
     .notNull(),
 
-  generatedContentId: text("generated_content_id").references(
+  generatedContentId: uuid("generated_content_id").references(
     () => content.id,
     { onDelete: "set null" },
   ),
@@ -178,7 +176,7 @@ export const contentRequest = pgTable("content_request", {
 export const comment = pgTable("comment", {
   content: text("content").notNull(),
 
-  contentId: text("content_id")
+  contentId: uuid("content_id")
     .notNull()
     .references(() => content.id, { onDelete: "cascade" }),
 
@@ -188,7 +186,7 @@ export const comment = pgTable("comment", {
   id: text("id").primaryKey(),
 
   isResolved: boolean("is_resolved").default(false),
-  parentCommentId: text("parent_comment_id"),
+  parentCommentId: uuid("parent_comment_id"),
   updatedAt: timestamp("updated_at")
     .$defaultFn(() => new Date())
     .notNull(),
@@ -198,7 +196,7 @@ export const comment = pgTable("comment", {
 });
 
 export const exportLog = pgTable("export_log", {
-  contentId: text("content_id")
+  contentId: uuid("content_id")
     .notNull()
     .references(() => content.id, { onDelete: "cascade" }),
 
