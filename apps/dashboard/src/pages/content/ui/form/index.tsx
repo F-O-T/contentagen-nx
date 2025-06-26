@@ -62,10 +62,19 @@ export type WriteInstructionsFormData = z.infer<
 >;
 export type ArticleExampleFormData = z.infer<typeof ArticleExampleFormSchema>;
 
+enum ContentFormStep {
+  TemplateSelection = 1,
+  ConfigureAgent = 2,
+  WriteInstructions = 3,
+  ArticleExample = 4,
+}
+
 export function CreateContentForm() {
   const { eden } = useRouteContext({ from: "/content/generate" });
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState<ContentFormStep>(
+    ContentFormStep.TemplateSelection,
+  );
 
   const totalSteps = 4;
   const progress = (currentStep / totalSteps) * 100;
@@ -138,28 +147,28 @@ export function CreateContentForm() {
 
   const validateCurrentStep = async () => {
     switch (currentStep) {
-      case 1:
+      case ContentFormStep.TemplateSelection:
         try {
           TemplateSelectionFormSchema.parse(templateSelectionForm.state.values);
           return true;
         } catch {
           return false;
         }
-      case 2:
+      case ContentFormStep.ConfigureAgent:
         try {
           ConfigureAgentFormSchema.parse(configureAgentForm.state.values);
           return true;
         } catch {
           return false;
         }
-      case 3:
+      case ContentFormStep.WriteInstructions:
         try {
           WriteInstructionsFormSchema.parse(writeInstructionsForm.state.values);
           return true;
         } catch {
           return false;
         }
-      case 4:
+      case ContentFormStep.ArticleExample:
         try {
           ArticleExampleFormSchema.parse(articleExampleForm.state.values);
           return true;
@@ -208,13 +217,13 @@ export function CreateContentForm() {
 
   const isStepValid = () => {
     switch (currentStep) {
-      case 1:
+      case ContentFormStep.TemplateSelection:
         return templateSelectionForm.state.isValid;
-      case 2:
+      case ContentFormStep.ConfigureAgent:
         return configureAgentForm.state.isValid;
-      case 3:
+      case ContentFormStep.WriteInstructions:
         return writeInstructionsForm.state.isValid;
-      case 4:
+      case ContentFormStep.ArticleExample:
         return articleExampleForm.state.isValid;
       default:
         return false;
@@ -241,25 +250,25 @@ export function CreateContentForm() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <form className="space-y-4" onSubmit={handleFinalSubmit}>
-          {currentStep === 1 && (
+          {currentStep === ContentFormStep.TemplateSelection && (
             <TemplateSelection
               form={templateSelectionForm as FormApi<TemplateSelectionFormData>}
             />
           )}
 
-          {currentStep === 2 && (
+          {currentStep === ContentFormStep.ConfigureAgent && (
             <ConfigureAgent
               form={configureAgentForm as FormApi<ConfigureAgentFormData>}
             />
           )}
 
-          {currentStep === 3 && (
+          {currentStep === ContentFormStep.WriteInstructions && (
             <WriteInstructions
               form={writeInstructionsForm as FormApi<WriteInstructionsFormData>}
             />
           )}
 
-          {currentStep === 4 && (
+          {currentStep === ContentFormStep.ArticleExample && (
             <ArticleExample
               form={articleExampleForm as FormApi<ArticleExampleFormData>}
             />
