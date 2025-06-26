@@ -34,7 +34,7 @@ export function NavMain({
               className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
               tooltip="Quick Create"
             >
-              <Link className="flex items-center gap-2" to="/agents/create">
+              <Link className="flex items-center gap-2" to="/agents/choice">
                 <PlusCircleIcon />
                 <span>Quick agent creation</span>
               </Link>
@@ -44,8 +44,8 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem
-              key={item.title}
               className={`${isActive(item.url) ? "bg-primary/10 text-primary rounded-lg" : ""}`}
+              key={item.title}
             >
               <SidebarMenuButton asChild tooltip={item.title}>
                 <Link className="flex items-center gap-2" to={item.url}>

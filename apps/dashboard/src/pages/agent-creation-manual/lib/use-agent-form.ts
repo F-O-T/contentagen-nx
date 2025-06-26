@@ -13,7 +13,7 @@ import {
 import { useAppForm } from "@packages/ui/components/form";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useRouteContext } from "@tanstack/react-router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { z } from "zod";
 
 interface AgentFormData {
@@ -28,24 +28,11 @@ interface AgentFormData {
   seoKeywords: string[];
 }
 
-export type AgentFormStep =
-  | "step-basic-info"
-  | "step-content-config"
-  | "step-topics-seo"
-  | "step-review-submit";
-
-const AGENT_FORM_STEPS: AgentFormStep[] = [
-  "step-basic-info",
-  "step-content-config",
-  "step-topics-seo",
-  "step-review-submit",
-];
-
 const agentFormSchema = z.object({
   contentType: z.enum(contentTypeEnum.enumValues, {
     required_error: "Content type is required",
   }),
-  description: z.string(),
+  description: z.string().min(1, "Description is required"),
   formattingStyle: z.enum(formattingStyleEnum.enumValues).optional(),
   name: z.string().min(1, "Agent name is required"),
   projectId: z.string().optional(),
@@ -82,7 +69,7 @@ export function useAgentForm() {
       topics: [],
       voiceTone: "professional",
     } as AgentFormData,
-    onSubmit: async ({ value }) => {
+    onSubmit: async ({ value, formApi }) => {
       const result = agentFormSchema.safeParse(value);
       if (!result.success) {
         const firstError = Object.values(result.error.flatten().fieldErrors)
@@ -93,26 +80,21 @@ export function useAgentForm() {
       await agentMutation.mutateAsync({
         ...result.data,
       });
+      formApi.reset();
     },
     validators: {
-      onChange: ({ value }) => {
-        const result = agentFormSchema.safeParse(value);
-        if (!result.success) {
-          const firstError = Object.values(result.error.flatten().fieldErrors)
-            .flat()
-            .find(Boolean);
-          return firstError;
-        }
-        return undefined;
-      },
+      onBlur: agentFormSchema,
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    form.handleSubmit();
-  };
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      form.handleSubmit();
+    },
+    [form],
+  );
 
   return {
     form,

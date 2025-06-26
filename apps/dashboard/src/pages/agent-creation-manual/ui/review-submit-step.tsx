@@ -1,5 +1,5 @@
 // ReviewSubmitStep.tsx
-import { useAgentForm } from "../lib/use-agent-form";
+import { useAgentForm } from "../lib/use-agent-form.js";
 
 export function ReviewSubmitStep() {
   const { form } = useAgentForm();
@@ -25,13 +25,15 @@ export function ReviewSubmitStep() {
         <strong>Target Audience:</strong> {form.getFieldValue("targetAudience")}
       </div>
       <div>
-        <strong>Formatting Style:</strong> {form.getFieldValue("formattingStyle")}
+        <strong>Formatting Style:</strong>{" "}
+        {form.getFieldValue("formattingStyle")}
       </div>
       <div>
         <strong>Topics:</strong> {form.getFieldValue("topics")?.join(", ")}
       </div>
       <div>
-        <strong>SEO Keywords:</strong> {form.getFieldValue("seoKeywords")?.join(", ")}
+        <strong>SEO Keywords:</strong>{" "}
+        {form.getFieldValue("seoKeywords")?.join(", ")}
       </div>
     </>
   );

@@ -1,6 +1,6 @@
 // TopicsSeoStep.tsx
 import { useState } from "react";
-import { useAgentForm } from "../lib/use-agent-form";
+import { useAgentForm } from "../lib/use-agent-form.js";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
@@ -42,8 +42,8 @@ export function TopicsSeoStep() {
   return (
     <>
       <form.AppField name="topics">
-        {(field: any) => (
-          <field.FieldContainer>
+        {(field) => (
+          <field.FieldContainer id="topics-field">
             <field.FieldLabel className="text-sm font-medium text-foreground">
               Preferred Topics
             </field.FieldLabel>
@@ -94,8 +94,8 @@ export function TopicsSeoStep() {
         )}
       </form.AppField>
       <form.AppField name="seoKeywords">
-        {(field: any) => (
-          <field.FieldContainer>
+        {(field) => (
+          <field.FieldContainer id="seo-keywords-field">
             <field.FieldLabel className="text-sm font-medium text-foreground">
               SEO Keywords
             </field.FieldLabel>
