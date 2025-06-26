@@ -9,14 +9,10 @@ import type {
 } from "@api/schemas/content-schema";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
-import {
-  Card,
-  CardContent,
- 
-} from "@packages/ui/components/card";
+import { Card, CardContent } from "@packages/ui/components/card";
 import { Input } from "@packages/ui/components/input";
 import { Textarea } from "@packages/ui/components/textarea";
-import {  Save, X } from "lucide-react";
+import { Save, X } from "lucide-react";
 import { useState } from "react";
 import { useAgentForm } from "../lib/use-agent-form";
 import { defineStepper } from "@packages/ui/components/stepper";
@@ -180,11 +176,10 @@ export function CreateAgentPage() {
                           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                             {CONTENT_TYPES.map((type) => (
                               <button
-                                className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${
-                                  field.state.value === type.value
+                                className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${field.state.value === type.value
                                     ? "border-primary bg-primary/5 text-primary shadow-sm"
                                     : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                                }`}
+                                  }`}
                                 key={type.value}
                                 onClick={() => field.handleChange(type.value)}
                                 type="button"
@@ -212,11 +207,10 @@ export function CreateAgentPage() {
                           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                             {VOICE_TONES.map((tone) => (
                               <button
-                                className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${
-                                  field.state.value === tone.value
+                                className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${field.state.value === tone.value
                                     ? "border-primary bg-primary/5 text-primary shadow-sm"
                                     : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                                }`}
+                                  }`}
                                 key={tone.value}
                                 onClick={() => field.handleChange(tone.value)}
                                 type="button"
@@ -244,13 +238,14 @@ export function CreateAgentPage() {
                           <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                             {TARGET_AUDIENCES.map((audience) => (
                               <button
-                                className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${
-                                  field.state.value === audience.value
+                                className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${field.state.value === audience.value
                                     ? "border-primary bg-primary/5 text-primary shadow-sm"
                                     : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                                }`}
+                                  }`}
                                 key={audience.value}
-                                onClick={() => field.handleChange(audience.value)}
+                                onClick={() =>
+                                  field.handleChange(audience.value)
+                                }
                                 type="button"
                               >
                                 {audience.label}
@@ -270,11 +265,10 @@ export function CreateAgentPage() {
                           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
                             {FORMATTING_STYLES.map((style) => (
                               <button
-                                className={`group relative rounded-lg border-2 p-4 text-left text-sm font-medium transition-all hover:shadow-sm ${
-                                  field.state.value === style.value
+                                className={`group relative rounded-lg border-2 p-4 text-left text-sm font-medium transition-all hover:shadow-sm ${field.state.value === style.value
                                     ? "border-primary bg-primary/5 text-primary shadow-sm"
                                     : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                                }`}
+                                  }`}
                                 key={style.value}
                                 onClick={() => field.handleChange(style.value)}
                                 type="button"
@@ -355,7 +349,9 @@ export function CreateAgentPage() {
                           <div className="mt-3 flex gap-3">
                             <Input
                               className="flex-1"
-                              onChange={(e) => setCurrentKeyword(e.target.value)}
+                              onChange={(e) =>
+                                setCurrentKeyword(e.target.value)
+                              }
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
                                   e.preventDefault();
@@ -409,28 +405,36 @@ export function CreateAgentPage() {
                       <strong>Name:</strong> {form.getFieldValue("name")}
                     </div>
                     <div>
-                      <strong>Project ID:</strong> {form.getFieldValue("projectId")}
+                      <strong>Project ID:</strong>{" "}
+                      {form.getFieldValue("projectId")}
                     </div>
                     <div>
-                      <strong>Description:</strong> {form.getFieldValue("description")}
+                      <strong>Description:</strong>{" "}
+                      {form.getFieldValue("description")}
                     </div>
                     <div>
-                      <strong>Content Type:</strong> {form.getFieldValue("contentType")}
+                      <strong>Content Type:</strong>{" "}
+                      {form.getFieldValue("contentType")}
                     </div>
                     <div>
-                      <strong>Voice Tone:</strong> {form.getFieldValue("voiceTone")}
+                      <strong>Voice Tone:</strong>{" "}
+                      {form.getFieldValue("voiceTone")}
                     </div>
                     <div>
-                      <strong>Target Audience:</strong> {form.getFieldValue("targetAudience")}
+                      <strong>Target Audience:</strong>{" "}
+                      {form.getFieldValue("targetAudience")}
                     </div>
                     <div>
-                      <strong>Formatting Style:</strong> {form.getFieldValue("formattingStyle")}
+                      <strong>Formatting Style:</strong>{" "}
+                      {form.getFieldValue("formattingStyle")}
                     </div>
                     <div>
-                      <strong>Topics:</strong> {form.getFieldValue("topics")?.join(", ")}
+                      <strong>Topics:</strong>{" "}
+                      {form.getFieldValue("topics")?.join(", ")}
                     </div>
                     <div>
-                      <strong>SEO Keywords:</strong> {form.getFieldValue("seoKeywords")?.join(", ")}
+                      <strong>SEO Keywords:</strong>{" "}
+                      {form.getFieldValue("seoKeywords")?.join(", ")}
                     </div>
                   </>
                 ),
@@ -479,3 +483,4 @@ export function CreateAgentPage() {
     </Stepper.Provider>
   );
 }
+

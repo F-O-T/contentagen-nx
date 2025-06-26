@@ -6,7 +6,7 @@ import { Link, useRouteContext } from "@tanstack/react-router";
 import { Edit, Plus, Settings } from "lucide-react";
 
 export function AgentListPage() {
-  const { eden } = useRouteContext({ from: "/agents/" });
+  const { eden } = useRouteContext({ from: "/_dashboard/agents/" });
   const { data: agents } = useSuspenseQuery({
     queryFn: () => eden.api.v1.agents.get(),
     queryKey: createQueryKey("agents"),

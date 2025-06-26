@@ -10,46 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ContentIndexRouteImport } from './routes/content/index'
-import { Route as AgentsIndexRouteImport } from './routes/agents/index'
-import { Route as ContentReviewRouteImport } from './routes/content/review'
-import { Route as ContentGenerateRouteImport } from './routes/content/generate'
-import { Route as ContentExportRouteImport } from './routes/content/export'
+import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-verification'
-import { Route as AgentsEditRouteImport } from './routes/agents/edit'
-import { Route as AgentsCreateRouteImport } from './routes/agents/create'
+import { Route as DashboardContentIndexRouteImport } from './routes/_dashboard/content/index'
+import { Route as DashboardAgentsIndexRouteImport } from './routes/_dashboard/agents/index'
+import { Route as DashboardContentReviewRouteImport } from './routes/_dashboard/content/review'
+import { Route as DashboardContentGenerateRouteImport } from './routes/_dashboard/content/generate'
+import { Route as DashboardContentExportRouteImport } from './routes/_dashboard/content/export'
+import { Route as DashboardAgentsEditRouteImport } from './routes/_dashboard/agents/edit'
+import { Route as DashboardAgentsCreateRouteImport } from './routes/_dashboard/agents/create'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ContentIndexRoute = ContentIndexRouteImport.update({
-  id: '/content/',
-  path: '/content/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AgentsIndexRoute = AgentsIndexRouteImport.update({
-  id: '/agents/',
-  path: '/agents/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContentReviewRoute = ContentReviewRouteImport.update({
-  id: '/content/review',
-  path: '/content/review',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContentGenerateRoute = ContentGenerateRouteImport.update({
-  id: '/content/generate',
-  path: '/content/generate',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContentExportRoute = ContentExportRouteImport.update({
-  id: '/content/export',
-  path: '/content/export',
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/_dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
@@ -72,70 +52,97 @@ const AuthEmailVerificationRoute = AuthEmailVerificationRouteImport.update({
   path: '/email-verification',
   getParentRoute: () => AuthRoute,
 } as any)
-const AgentsEditRoute = AgentsEditRouteImport.update({
+const DashboardContentIndexRoute = DashboardContentIndexRouteImport.update({
+  id: '/content/',
+  path: '/content/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAgentsIndexRoute = DashboardAgentsIndexRouteImport.update({
+  id: '/agents/',
+  path: '/agents/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardContentReviewRoute = DashboardContentReviewRouteImport.update({
+  id: '/content/review',
+  path: '/content/review',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardContentGenerateRoute =
+  DashboardContentGenerateRouteImport.update({
+    id: '/content/generate',
+    path: '/content/generate',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardContentExportRoute = DashboardContentExportRouteImport.update({
+  id: '/content/export',
+  path: '/content/export',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAgentsEditRoute = DashboardAgentsEditRouteImport.update({
   id: '/agents/edit',
   path: '/agents/edit',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => DashboardRoute,
 } as any)
-const AgentsCreateRoute = AgentsCreateRouteImport.update({
+const DashboardAgentsCreateRoute = DashboardAgentsCreateRouteImport.update({
   id: '/agents/create',
   path: '/agents/create',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => DashboardRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteWithChildren
-  '/agents/create': typeof AgentsCreateRoute
-  '/agents/edit': typeof AgentsEditRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/content/export': typeof ContentExportRoute
-  '/content/generate': typeof ContentGenerateRoute
-  '/content/review': typeof ContentReviewRoute
-  '/agents': typeof AgentsIndexRoute
-  '/content': typeof ContentIndexRoute
+  '/agents/create': typeof DashboardAgentsCreateRoute
+  '/agents/edit': typeof DashboardAgentsEditRoute
+  '/content/export': typeof DashboardContentExportRoute
+  '/content/generate': typeof DashboardContentGenerateRoute
+  '/content/review': typeof DashboardContentReviewRoute
+  '/agents': typeof DashboardAgentsIndexRoute
+  '/content': typeof DashboardContentIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
-  '/agents/create': typeof AgentsCreateRoute
-  '/agents/edit': typeof AgentsEditRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/content/export': typeof ContentExportRoute
-  '/content/generate': typeof ContentGenerateRoute
-  '/content/review': typeof ContentReviewRoute
-  '/agents': typeof AgentsIndexRoute
-  '/content': typeof ContentIndexRoute
+  '/agents/create': typeof DashboardAgentsCreateRoute
+  '/agents/edit': typeof DashboardAgentsEditRoute
+  '/content/export': typeof DashboardContentExportRoute
+  '/content/generate': typeof DashboardContentGenerateRoute
+  '/content/review': typeof DashboardContentReviewRoute
+  '/agents': typeof DashboardAgentsIndexRoute
+  '/content': typeof DashboardContentIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/_dashboard': typeof DashboardRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/agents/create': typeof AgentsCreateRoute
-  '/agents/edit': typeof AgentsEditRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/content/export': typeof ContentExportRoute
-  '/content/generate': typeof ContentGenerateRoute
-  '/content/review': typeof ContentReviewRoute
-  '/agents/': typeof AgentsIndexRoute
-  '/content/': typeof ContentIndexRoute
+  '/_dashboard/agents/create': typeof DashboardAgentsCreateRoute
+  '/_dashboard/agents/edit': typeof DashboardAgentsEditRoute
+  '/_dashboard/content/export': typeof DashboardContentExportRoute
+  '/_dashboard/content/generate': typeof DashboardContentGenerateRoute
+  '/_dashboard/content/review': typeof DashboardContentReviewRoute
+  '/_dashboard/agents/': typeof DashboardAgentsIndexRoute
+  '/_dashboard/content/': typeof DashboardContentIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/auth'
-    | '/agents/create'
-    | '/agents/edit'
     | '/auth/email-verification'
     | '/auth/forgot-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/agents/create'
+    | '/agents/edit'
     | '/content/export'
     | '/content/generate'
     | '/content/review'
@@ -144,12 +151,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
-    | '/agents/create'
-    | '/agents/edit'
     | '/auth/email-verification'
     | '/auth/forgot-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/agents/create'
+    | '/agents/edit'
     | '/content/export'
     | '/content/generate'
     | '/content/review'
@@ -157,29 +164,24 @@ export interface FileRouteTypes {
     | '/content'
   id:
     | '__root__'
+    | '/_dashboard'
     | '/auth'
-    | '/agents/create'
-    | '/agents/edit'
     | '/auth/email-verification'
     | '/auth/forgot-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
-    | '/content/export'
-    | '/content/generate'
-    | '/content/review'
-    | '/agents/'
-    | '/content/'
+    | '/_dashboard/agents/create'
+    | '/_dashboard/agents/edit'
+    | '/_dashboard/content/export'
+    | '/_dashboard/content/generate'
+    | '/_dashboard/content/review'
+    | '/_dashboard/agents/'
+    | '/_dashboard/content/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  DashboardRoute: typeof DashboardRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
-  AgentsCreateRoute: typeof AgentsCreateRoute
-  AgentsEditRoute: typeof AgentsEditRoute
-  ContentExportRoute: typeof ContentExportRoute
-  ContentGenerateRoute: typeof ContentGenerateRoute
-  ContentReviewRoute: typeof ContentReviewRoute
-  AgentsIndexRoute: typeof AgentsIndexRoute
-  ContentIndexRoute: typeof ContentIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -191,39 +193,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/content/': {
-      id: '/content/'
-      path: '/content'
-      fullPath: '/content'
-      preLoaderRoute: typeof ContentIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/agents/': {
-      id: '/agents/'
-      path: '/agents'
-      fullPath: '/agents'
-      preLoaderRoute: typeof AgentsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/content/review': {
-      id: '/content/review'
-      path: '/content/review'
-      fullPath: '/content/review'
-      preLoaderRoute: typeof ContentReviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/content/generate': {
-      id: '/content/generate'
-      path: '/content/generate'
-      fullPath: '/content/generate'
-      preLoaderRoute: typeof ContentGenerateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/content/export': {
-      id: '/content/export'
-      path: '/content/export'
-      fullPath: '/content/export'
-      preLoaderRoute: typeof ContentExportRouteImport
+    '/_dashboard': {
+      id: '/_dashboard'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/sign-up': {
@@ -254,22 +228,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthEmailVerificationRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/agents/edit': {
-      id: '/agents/edit'
+    '/_dashboard/content/': {
+      id: '/_dashboard/content/'
+      path: '/content'
+      fullPath: '/content'
+      preLoaderRoute: typeof DashboardContentIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/agents/': {
+      id: '/_dashboard/agents/'
+      path: '/agents'
+      fullPath: '/agents'
+      preLoaderRoute: typeof DashboardAgentsIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/content/review': {
+      id: '/_dashboard/content/review'
+      path: '/content/review'
+      fullPath: '/content/review'
+      preLoaderRoute: typeof DashboardContentReviewRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/content/generate': {
+      id: '/_dashboard/content/generate'
+      path: '/content/generate'
+      fullPath: '/content/generate'
+      preLoaderRoute: typeof DashboardContentGenerateRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/content/export': {
+      id: '/_dashboard/content/export'
+      path: '/content/export'
+      fullPath: '/content/export'
+      preLoaderRoute: typeof DashboardContentExportRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/agents/edit': {
+      id: '/_dashboard/agents/edit'
       path: '/agents/edit'
       fullPath: '/agents/edit'
-      preLoaderRoute: typeof AgentsEditRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof DashboardAgentsEditRouteImport
+      parentRoute: typeof DashboardRoute
     }
-    '/agents/create': {
-      id: '/agents/create'
+    '/_dashboard/agents/create': {
+      id: '/_dashboard/agents/create'
       path: '/agents/create'
       fullPath: '/agents/create'
-      preLoaderRoute: typeof AgentsCreateRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof DashboardAgentsCreateRouteImport
+      parentRoute: typeof DashboardRoute
     }
   }
 }
+
+interface DashboardRouteChildren {
+  DashboardAgentsCreateRoute: typeof DashboardAgentsCreateRoute
+  DashboardAgentsEditRoute: typeof DashboardAgentsEditRoute
+  DashboardContentExportRoute: typeof DashboardContentExportRoute
+  DashboardContentGenerateRoute: typeof DashboardContentGenerateRoute
+  DashboardContentReviewRoute: typeof DashboardContentReviewRoute
+  DashboardAgentsIndexRoute: typeof DashboardAgentsIndexRoute
+  DashboardContentIndexRoute: typeof DashboardContentIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardAgentsCreateRoute: DashboardAgentsCreateRoute,
+  DashboardAgentsEditRoute: DashboardAgentsEditRoute,
+  DashboardContentExportRoute: DashboardContentExportRoute,
+  DashboardContentGenerateRoute: DashboardContentGenerateRoute,
+  DashboardContentReviewRoute: DashboardContentReviewRoute,
+  DashboardAgentsIndexRoute: DashboardAgentsIndexRoute,
+  DashboardContentIndexRoute: DashboardContentIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
 
 interface AuthRouteChildren {
   AuthEmailVerificationRoute: typeof AuthEmailVerificationRoute
@@ -288,14 +321,8 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  DashboardRoute: DashboardRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
-  AgentsCreateRoute: AgentsCreateRoute,
-  AgentsEditRoute: AgentsEditRoute,
-  ContentExportRoute: ContentExportRoute,
-  ContentGenerateRoute: ContentGenerateRoute,
-  ContentReviewRoute: ContentReviewRoute,
-  AgentsIndexRoute: AgentsIndexRoute,
-  ContentIndexRoute: ContentIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

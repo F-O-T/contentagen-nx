@@ -3,7 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Sparkles, Wand2 } from "lucide-react";
 import { useId, useState } from "react";
 
-export const Route = createFileRoute("/content/generate")({
+export const Route = createFileRoute("/_dashboard/content/generate")({
   component: GenerateContent,
   validateSearch: (search: Record<string, unknown>) => {
     return {

@@ -8,7 +8,7 @@ import {
 import { ArrowLeft, MessageCircle, Save, Share2 } from "lucide-react";
 import { useId, useState } from "react";
 
-export const Route = createFileRoute("/content/review")({
+export const Route = createFileRoute("/_dashboard/content/review")({
   component: ReviewContent,
   validateSearch: (search: Record<string, unknown>) => {
     return {

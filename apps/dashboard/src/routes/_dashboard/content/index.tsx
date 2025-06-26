@@ -3,7 +3,7 @@ import { Button } from "@packages/ui/components/button";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Download, Eye, FileText, Plus } from "lucide-react";
 
-export const Route = createFileRoute("/content/")({
+export const Route = createFileRoute("/_dashboard/content/")({
   component: Content,
 });
 

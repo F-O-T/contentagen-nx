@@ -3,7 +3,7 @@ import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Download, FileText, Globe, Hash } from "lucide-react";
 import { useState } from "react";
 
-export const Route = createFileRoute("/content/export")({
+export const Route = createFileRoute("/_dashboard/content/export")({
   component: ExportContent,
   validateSearch: (search: Record<string, unknown>) => {
     return {

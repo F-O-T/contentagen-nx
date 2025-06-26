@@ -47,7 +47,7 @@ const agentFormSchema = z.object({
 
 export function useAgentForm() {
   const navigate = useNavigate();
-  const { eden } = useRouteContext({ from: "/agents/create" });
+  const { eden } = useRouteContext({ from: "/_dashboard/agents/create" });
 
   const agentMutation = useMutation({
     mutationFn: eden.api.v1.agents.post,
