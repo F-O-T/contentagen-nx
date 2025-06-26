@@ -46,7 +46,7 @@ export const useSignIn = () => {
 							id: "sign-in-toast",
 						});
 						router.navigate({
-							to: "/dashboard",
+							to: "/agents",
 						});
 					},
 				},
