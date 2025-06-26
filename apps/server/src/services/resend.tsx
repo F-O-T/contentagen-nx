@@ -1,5 +1,6 @@
 import { env } from "@api/config/env";
 import OTPEmail from "@api/emails/otp";
+import brandConfig from "@packages/brand/index.json";
 // biome-ignore lint/correctness/noUnusedImports: <sim>
 import React from "react";
 import { Resend } from "resend";
@@ -24,7 +25,7 @@ export const sendEmailOTP = async (
 		}
 	};
 	await resendClient.emails.send({
-		from: "Enduro For Tri <suporte@endurofortri.com>",
+		from: `${brandConfig.name} <suport@contentagen.com>`,
 		react: <OTPEmail otp={otp} type={type} />,
 		subject: getSubject(),
 		to: email,

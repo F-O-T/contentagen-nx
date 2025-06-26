@@ -4,7 +4,6 @@ import {
   Brain,
   ListChecks,
   MessageCircle,
-  PenLine,
   Settings,
   Shield,
   Users,
@@ -12,7 +11,7 @@ import {
 
 // No props needed for this feature section
 
-const topCards = [
+const _topCards = [
   {
     description:
       "Each AI agent is tailored to your workflow, brand voice, and audience. Define tone, topics, SEO keywords, and formatting for every agent in your content team.",
@@ -40,7 +39,7 @@ const topCards = [
   },
 ];
 
-const bottomCards = [
+const _bottomCards = [
   {
     left: {
       description:
@@ -91,7 +90,7 @@ const bottomCards = [
     <div>
       <div class="relative z-10 grid grid-cols-6 gap-4">
         <!-- Render top cards -->
-        {topCards.map((card, i) => (
+        {_topCards.map((card) => (
           card.type === "customizable" ? (
             <div class="relative col-span-full flex overflow-hidden lg:col-span-2 bg-background rounded-2xl shadow-xl border border-foreground/10 p-4">
               <div class="relative size-fit space-y-4 w-full h-full flex flex-col">
@@ -118,7 +117,7 @@ const bottomCards = [
           )
         ))}
         <!-- Render bottom cards -->
-        {bottomCards.map((card, i) => (
+        {_bottomCards.map((card, i) => (
           <div class="card variant-outlined relative col-span-full overflow-hidden lg:col-span-3 bg-background rounded-2xl shadow-xl border border-foreground/10 p-4">
             <div class="grid pt-6 sm:grid-cols-2 h-full">
               <div class="relative z-10 flex flex-col justify-between space-y-12 lg:space-y-6">

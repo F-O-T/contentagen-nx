@@ -15,8 +15,9 @@ import type React from "react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-
-type LeadType = Parameters<EdenClientType["waitlist"]["post"]>["0"]["leadType"];
+type LeadType = Parameters<
+  EdenClientType["api"]["v1"]["waitlist"]["post"]
+>["0"]["leadType"];
 export const WaitlistForm = () => {
   const eden = createEdenAdapter(VITE_SERVER_URL);
 
@@ -40,7 +41,7 @@ export const WaitlistForm = () => {
       leadType: "",
     },
     onSubmit: async (data) => {
-      await eden.waitlist.post({
+      await eden.api.v1.waitlist.post({
         email: data.value.email,
         leadType: data.value.leadType as LeadType,
       });

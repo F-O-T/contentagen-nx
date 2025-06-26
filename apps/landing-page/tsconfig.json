@@ -3,12 +3,13 @@
     "baseUrl": ".",
     "jsx": "react-jsx",
     "jsxImportSource": "react",
+    "moduleResolution": "bundler",
     "paths": {
-      "@api": [
-        "../../apps/server/src/index"
-      ],
       "@/*": [
         "./src/*"
+      ],
+      "@api": [
+        "../../apps/server/src/index"
       ],
       "@api/*": [
         "../../apps/server/src/*"
@@ -19,11 +20,14 @@
     }
   },
   "exclude": [
+    "node_modules",
     "dist"
   ],
   "extends": "@tooling/typescript/astro.json",
   "include": [
     ".astro/types.d.ts",
-    "**/*"
+    "**/*.ts",
+    "**/*.astro",
+    "**/*.tsx"
   ]
 }

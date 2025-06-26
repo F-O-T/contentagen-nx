@@ -82,7 +82,7 @@ export const useEmailVerification = () => {
 							id: "email-verification-toast",
 						});
 						router.navigate({
-							to: "/",
+							to: "/agents",
 						});
 					},
 				},

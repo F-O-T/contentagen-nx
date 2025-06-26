@@ -15,7 +15,12 @@
     "target": "ESNext",
     "verbatimModuleSyntax": true
   },
-  "exclude": ["${configDir}/dist"],
+  "exclude": [
+    "${configDir}/dist"
+  ],
   "extends": "./base.json",
-  "include": ["${configDir}/.astro/types.d.ts", "${configDir}/**/*"]
+  "include": [
+    "${configDir}/.astro/types.d.ts",
+    "${configDir}/**/*"
+  ]
 }

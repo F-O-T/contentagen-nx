@@ -1,8 +1,5 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
-import { QueryProvider } from "@/integrations/tanstack-query";
+import brandConfig from "@packages/brand/index.json";
 import type { EdenClientType } from "@packages/eden";
-import { SidebarInset, SidebarProvider } from "@packages/ui/components/sidebar";
 import appCss from "@packages/ui/globals.css?url";
 import type { QueryClient } from "@tanstack/react-query";
 import {
@@ -11,8 +8,9 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
+import { QueryProvider } from "@/integrations/tanstack-query";
 
-interface MyRouterContext {
+export interface MyRouterContext {
   eden: EdenClientType;
   queryClient: QueryClient;
 }
@@ -21,26 +19,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <RootDocument>
       <QueryProvider>
-        <SidebarProvider
-          style={
-            {
-              "--header-height": "calc(var(--spacing) * 12)",
-              "--sidebar-width": "calc(var(--spacing) * 72)",
-            } as React.CSSProperties
-          }
-        >
-          <AppSidebar variant="inset" />
-          <SidebarInset>
-            <SiteHeader />
-            <div className="flex flex-1 flex-col max-h-[calc(95dvh-var(--header-height))] overflow-y-auto">
-              <div className="@container/main flex flex-1 flex-col gap-2">
-                <div className="flex flex-col gap-4">
-                  <Outlet />
-                </div>
-              </div>
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
+        <Outlet />
       </QueryProvider>
     </RootDocument>
   ),
@@ -60,7 +39,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         name: "viewport",
       },
       {
-        title: "TanStack Start Starter",
+        title: brandConfig.name,
       },
     ],
   }),

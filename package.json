@@ -31,8 +31,9 @@
   "workspaces": {
     "catalogs": {
       "astro": {
-        "@astrojs/cloudflare": "^12.6.0",
+        "@astrojs/node": "^9.2.2",
         "@astrojs/react": "^4.3.0",
+        "@astrojs/sitemap": "^3.4.1",
         "@lucide/astro": "^0.511.0",
         "astro": "5.10.0"
       },

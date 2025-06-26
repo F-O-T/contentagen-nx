@@ -18,10 +18,10 @@ export function SignInPage() {
 		<Card className="border shadow-xl transition-all duration-300 border-muted/50 bg-card backdrop-blur-xl animate-in fade-in-50 slide-in-from-bottom-6">
 			<CardHeader>
 				<CardTitle className="text-3xl font-bold tracking-tight text-center ">
-					Login
+					Sign In
 				</CardTitle>
 				<CardDescription className="text-base text-center text-muted-foreground/60">
-					Insira seus dados para acessar sua conta.
+					Enter your details to access your account.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -29,7 +29,7 @@ export function SignInPage() {
 					<form.AppField name="email">
 						{(field) => (
 							<field.FieldContainer>
-								<field.FieldLabel>E-mail</field.FieldLabel>
+								<field.FieldLabel>Email</field.FieldLabel>
 								<Input
 									autoComplete="email"
 									id={field.name}
@@ -47,7 +47,7 @@ export function SignInPage() {
 					<form.AppField name="password">
 						{(field) => (
 							<field.FieldContainer>
-								<field.FieldLabel>Senha</field.FieldLabel>
+								<field.FieldLabel>Password</field.FieldLabel>
 								<PasswordInput
 									autoComplete="current-password"
 									id={field.name}
@@ -69,7 +69,7 @@ export function SignInPage() {
 								type="submit"
 								variant="default"
 							>
-								Entrar
+								Sign In
 								<ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
 							</Button>
 						)}
@@ -81,15 +81,15 @@ export function SignInPage() {
 					className="text-sm block underline text-muted-foreground text-center"
 					to="/auth/forgot-password"
 				>
-					Esqueceu sua senha
+					Forgot your password
 				</Link>
 				<p className="text-sm text-center">
-					Não tem uma conta?
+					Don't have an account?
 					<Link
 						className="ml-1 underline text-muted-foreground"
 						to="/auth/sign-up"
 					>
-						Criar conta
+						Create account
 					</Link>
 				</p>
 			</CardFooter>

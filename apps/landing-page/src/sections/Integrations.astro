@@ -2,7 +2,7 @@
 import { Github } from "@lucide/astro";
 import { Button } from "@packages/ui/components/button";
 
-const integrations = [
+const _integrations = [
   {
     icon: Github,
     name: "GitHub",
@@ -16,7 +16,7 @@ const integrations = [
         <h2 class="text-foreground text-2xl font-semibold">Automate Your Blog Workflow</h2>
         <p class="text-muted-foreground max-w-xl ">Integrate with your favorite tools to automate the publishing of your content.</p>
       </div>
-        {integrations.map(({ name, icon: Icon }) => (
+        {_integrations.map(({ name, icon: Icon }) => (
         <Button variant={"ghost"} className="px-4 py-8 bg-background rounded-full" key={name} disabled>
           <Icon class="size-10 text-muted-foreground" />
         </Button>

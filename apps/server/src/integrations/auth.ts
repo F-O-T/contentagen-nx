@@ -1,11 +1,11 @@
 import { env } from "@api/config/env";
 import * as authSchema from "@api/schemas/auth-schema";
+import { sendEmailOTP } from "@api/services/resend";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { emailOTP, openAPI, organization } from "better-auth/plugins";
+import { emailOTP, openAPI } from "better-auth/plugins";
 import Elysia from "elysia";
 import { db } from "./database";
-import { sendEmailOTP } from "@api/services/resend";
 
 export const auth = betterAuth({
   basePath: "/api/v1/auth",

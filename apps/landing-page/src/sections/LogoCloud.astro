@@ -1,9 +1,9 @@
 ---
-import { Image, Picture } from "astro:assets";
-import duomeLogo from "../assets/teams/duome-logo.png";
-import enduroLogo from "../assets/teams/enduro-logo.png";
+import { Picture } from "astro:assets";
+import duomeLogo from "../assets/teams/duome-logo.webp";
+import enduroLogo from "../assets/teams/enduro-logo.webp";
 
-const partners = [
+const _partners = [
   {
     alt: "Enduro for Tri Logo",
     logo: enduroLogo,
@@ -24,7 +24,7 @@ const partners = [
 	
 			<p class="text-muted-foreground text-lg">Trusted by teams at :</p>
 			<div class="flex items-center justify-center gap-4">
-				{partners.map((partner) => (
+				{_partners.map((partner) => (
 					<div class="flex">
 						<a
 							href={partner.url}
