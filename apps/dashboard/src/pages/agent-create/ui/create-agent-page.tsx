@@ -1,6 +1,3 @@
-// React component for the agent creation page, extracted from routes/agents/create.tsx
-// Uses stepperize pattern and expects use-agent-form to be moved to ../lib/use-agent-form.ts
-
 import type {
   ContentType,
   FormattingStyle,
@@ -11,11 +8,11 @@ import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Card, CardContent } from "@packages/ui/components/card";
 import { Input } from "@packages/ui/components/input";
+import { defineStepper } from "@packages/ui/components/stepper";
 import { Textarea } from "@packages/ui/components/textarea";
 import { Save, X } from "lucide-react";
 import { useState } from "react";
 import { useAgentForm } from "../lib/use-agent-form";
-import { defineStepper } from "@packages/ui/components/stepper";
 
 type LabeledValue<T> = { label: string; value: T };
 
@@ -109,13 +106,13 @@ export function CreateAgentPage() {
                         <field.FieldContainer>
                           <field.FieldLabel>Agent Name</field.FieldLabel>
                           <Input
-                            value={field.state.value}
+                            autoComplete="off"
                             id={field.name}
                             name={field.name}
-                            placeholder="e.g., Tech News Agent"
-                            autoComplete="off"
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
+                            placeholder="e.g., Tech News Agent"
+                            value={field.state.value}
                           />
                           <field.FieldMessage />
                         </field.FieldContainer>
@@ -126,13 +123,13 @@ export function CreateAgentPage() {
                         <field.FieldContainer>
                           <field.FieldLabel>Project ID</field.FieldLabel>
                           <Input
-                            value={field.state.value}
+                            autoComplete="off"
                             id={field.name}
                             name={field.name}
-                            placeholder="e.g., Tech Blog"
-                            autoComplete="off"
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
+                            placeholder="e.g., Tech Blog"
+                            value={field.state.value}
                           />
                           <field.FieldMessage />
                         </field.FieldContainer>
@@ -143,14 +140,14 @@ export function CreateAgentPage() {
                         <field.FieldContainer>
                           <field.FieldLabel>Description</field.FieldLabel>
                           <Textarea
-                            value={field.state.value}
+                            autoComplete="off"
                             id={field.name}
                             name={field.name}
-                            placeholder="Describe what this agent will do..."
-                            rows={3}
-                            autoComplete="off"
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
+                            placeholder="Describe what this agent will do..."
+                            rows={3}
+                            value={field.state.value}
                           />
                           <field.FieldMessage />
                         </field.FieldContainer>
@@ -283,6 +280,46 @@ export function CreateAgentPage() {
                     </form.AppField>
                   </>
                 ),
+                "review-submit": () => (
+                  <>
+                    {/* Review & Submit Step */}
+                    <div>
+                      <strong>Name:</strong> {form.getFieldValue("name")}
+                    </div>
+                    <div>
+                      <strong>Project ID:</strong>{" "}
+                      {form.getFieldValue("projectId")}
+                    </div>
+                    <div>
+                      <strong>Description:</strong>{" "}
+                      {form.getFieldValue("description")}
+                    </div>
+                    <div>
+                      <strong>Content Type:</strong>{" "}
+                      {form.getFieldValue("contentType")}
+                    </div>
+                    <div>
+                      <strong>Voice Tone:</strong>{" "}
+                      {form.getFieldValue("voiceTone")}
+                    </div>
+                    <div>
+                      <strong>Target Audience:</strong>{" "}
+                      {form.getFieldValue("targetAudience")}
+                    </div>
+                    <div>
+                      <strong>Formatting Style:</strong>{" "}
+                      {form.getFieldValue("formattingStyle")}
+                    </div>
+                    <div>
+                      <strong>Topics:</strong>{" "}
+                      {form.getFieldValue("topics")?.join(", ")}
+                    </div>
+                    <div>
+                      <strong>SEO Keywords:</strong>{" "}
+                      {form.getFieldValue("seoKeywords")?.join(", ")}
+                    </div>
+                  </>
+                ),
                 "topics-seo": () => (
                   <>
                     {/* Topics & SEO Step */}
@@ -398,53 +435,13 @@ export function CreateAgentPage() {
                     </form.AppField>
                   </>
                 ),
-                "review-submit": () => (
-                  <>
-                    {/* Review & Submit Step */}
-                    <div>
-                      <strong>Name:</strong> {form.getFieldValue("name")}
-                    </div>
-                    <div>
-                      <strong>Project ID:</strong>{" "}
-                      {form.getFieldValue("projectId")}
-                    </div>
-                    <div>
-                      <strong>Description:</strong>{" "}
-                      {form.getFieldValue("description")}
-                    </div>
-                    <div>
-                      <strong>Content Type:</strong>{" "}
-                      {form.getFieldValue("contentType")}
-                    </div>
-                    <div>
-                      <strong>Voice Tone:</strong>{" "}
-                      {form.getFieldValue("voiceTone")}
-                    </div>
-                    <div>
-                      <strong>Target Audience:</strong>{" "}
-                      {form.getFieldValue("targetAudience")}
-                    </div>
-                    <div>
-                      <strong>Formatting Style:</strong>{" "}
-                      {form.getFieldValue("formattingStyle")}
-                    </div>
-                    <div>
-                      <strong>Topics:</strong>{" "}
-                      {form.getFieldValue("topics")?.join(", ")}
-                    </div>
-                    <div>
-                      <strong>SEO Keywords:</strong>{" "}
-                      {form.getFieldValue("seoKeywords")?.join(", ")}
-                    </div>
-                  </>
-                ),
               })}
               <Stepper.Controls className="flex w-full justify-between">
                 <Button
-                  variant="outline"
-                  onClick={methods.prev}
                   disabled={methods.isFirst || isLoading}
+                  onClick={methods.prev}
                   type="button"
+                  variant="outline"
                 >
                   Previous
                 </Button>
@@ -452,14 +449,14 @@ export function CreateAgentPage() {
                   <form.Subscribe>
                     {(formState: any) => (
                       <Button
+                        className="shadow-lg transition-all duration-300 group bg-primary shadow-primary/20 hover:bg-primary/90 flex gap-2 items-center justify-center"
                         disabled={
                           !formState.canSubmit ||
                           formState.isSubmitting ||
                           isLoading
                         }
-                        variant="default"
-                        className="shadow-lg transition-all duration-300 group bg-primary shadow-primary/20 hover:bg-primary/90 flex gap-2 items-center justify-center"
                         type="submit"
+                        variant="default"
                       >
                         <Save className="h-4 w-4" />
                         {isLoading ? "Creating..." : "Create Agent"}
@@ -468,9 +465,9 @@ export function CreateAgentPage() {
                   </form.Subscribe>
                 ) : (
                   <Button
+                    disabled={isLoading}
                     onClick={methods.next}
                     type="button"
-                    disabled={isLoading}
                   >
                     Next
                   </Button>
@@ -483,4 +480,3 @@ export function CreateAgentPage() {
     </Stepper.Provider>
   );
 }
-

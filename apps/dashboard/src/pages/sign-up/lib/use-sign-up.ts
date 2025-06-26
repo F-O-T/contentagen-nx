@@ -11,20 +11,22 @@ export const useSignUp = () => {
 	const router = useRouter();
 	const schema = z
 		.object({
-			name: z.string().min(2, "Insira um nome válido"),
-			email: z.string().email("Insira um email válido"),
-			password: z.string().min(8, "Insira uma senha com no mínimo 8 caracteres"),
 			confirmPassword: z.string(),
+			email: z.string().email("Please enter a valid email"),
+			name: z.string().min(2, "Please enter a valid name"),
+			password: z
+				.string()
+				.min(8, "Please enter a password with at least 8 characters"),
 		})
 		.refine((data) => data.password === data.confirmPassword, {
-			message: "As senhas não coincidem",
+			message: "Passwords do not match",
 			path: ["confirmPassword"],
 		});
 
 	const getErrorMessage = useMemo(
 		() => ({
-			USER_ALREADY_EXISTS: "Este email já está cadastrado",
-			default: "Erro desconhecido",
+			default: "Unknown error",
+			USER_ALREADY_EXISTS: "This email is already registered",
 		}),
 		[],
 	);
@@ -33,29 +35,32 @@ export const useSignUp = () => {
 		async ({ name, email, password }: z.infer<typeof schema>) => {
 			await betterAuthClient.signUp.email(
 				{
-					name,
 					email,
+					name,
 					password,
 				},
 				{
+					onError: ({ error }) => {
+						toast.error(
+							getErrorMessage[error.code as codes] || "Unknown error",
+							{
+								id: "sign-up-toast",
+							},
+						);
+					},
+					onRequest: () => {
+						toast.loading("Signing up...", {
+							id: "sign-up-toast",
+						});
+					},
 					onSuccess: ({ data }) => {
-						toast.success("Cadastro realizado com sucesso", {
-							description: `Bem vindo ao Enduro for tri ${data.user.name}`,
+						toast.success("Sign up successful", {
+							description: `Welcome to Enduro for tri ${data.user.name}`,
 							id: "sign-up-toast",
 						});
 						router.navigate({
-							to: "/auth/email-verification",
 							search: { email: data.user.email },
-						});
-					},
-					onError: ({ error }) => {
-						toast.error(getErrorMessage[error.code as codes] || "Erro desconhecido", {
-							id: "sign-up-toast",
-						});
-					},
-					onRequest: () => {
-						toast.loading("Realizando cadastro...", {
-							id: "sign-up-toast",
+							to: "/auth/email-verification",
 						});
 					},
 				},
@@ -66,10 +71,10 @@ export const useSignUp = () => {
 
 	const form = useAppForm({
 		defaultValues: {
-			name: "",
-			email: "",
-			password: "",
 			confirmPassword: "",
+			email: "",
+			name: "",
+			password: "",
 		},
 		onSubmit: async ({ value, formApi }) => {
 			await handleSignUp(value);
@@ -89,5 +94,5 @@ export const useSignUp = () => {
 		[form],
 	);
 
-	return { handleSubmit, form };
+	return { form, handleSubmit };
 };

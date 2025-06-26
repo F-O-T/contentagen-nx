@@ -13,13 +13,13 @@ export const useEmailVerification = () => {
 		select: (s) => s.email,
 	});
 	const schema = z.object({
-		otp: z.string().min(6, "Insira um código de 6 dígitos").max(6),
+		otp: z.string().min(6, "Enter a 6-digit code").max(6),
 	});
 
 	const getErrorMessage = useMemo(
 		() => ({
-			default: "Erro desconhecido",
-			INVALID_OTP: "Código de verificação inválido",
+			default: "Unknown error",
+			INVALID_OTP: "Invalid verification code",
 		}),
 		[],
 	);
@@ -35,20 +35,20 @@ export const useEmailVerification = () => {
 				onError: ({ error }) => {
 					toast.error(
 						getErrorMessage[error.code as codes] ||
-						"Ocorreu um erro ao verificar o email",
+						"An error occurred while verifying the email",
 						{
 							id: "verification-code-toast",
 						},
 					);
 				},
 				onRequest: () => {
-					toast.loading("Aguarde enquanto enviamos o código...", {
+					toast.loading("Please wait while we send the code...", {
 						id: "verification-code-toast",
 					});
 				},
 				onSuccess: () => {
-					toast.success("Código enviado com sucesso", {
-						description: "Verifique seu email para continuar.",
+					toast.success("Code sent successfully", {
+						description: "Check your email to continue.",
 						id: "verification-code-toast",
 					});
 				},
@@ -65,20 +65,20 @@ export const useEmailVerification = () => {
 				{
 					onError: ({ error }) => {
 						toast.error(
-							getErrorMessage[error.code as codes] || "Erro desconhecido",
+							getErrorMessage[error.code as codes] || "Unknown error",
 							{
 								id: "email-verification-toast",
 							},
 						);
 					},
 					onRequest: () => {
-						toast.loading("Validando o código, por favor aguarde...", {
+						toast.loading("Validating the code, please wait...", {
 							id: "email-verification-toast",
 						});
 					},
 					onSuccess: () => {
-						toast.success("Email verificado com sucesso", {
-							description: "Você será redirecionado para o login.",
+						toast.success("Email verified successfully", {
+							description: "You will be redirected to login.",
 							id: "email-verification-toast",
 						});
 						router.navigate({

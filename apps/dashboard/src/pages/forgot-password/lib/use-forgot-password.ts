@@ -10,13 +10,13 @@ export function useForgotPassword() {
 	const [sendingOtp, setSendingOtp] = useState(false);
 	const schema = z
 		.object({
-			email: z.string().email("Insira um email válido"),
-			otp: z.string().min(6, "O código deve ter 6 dígitos"),
-			password: z.string().min(8, "A senha deve ter no mínimo 8 caracteres"),
 			confirmPassword: z.string(),
+			email: z.string().email("Enter a valid email"),
+			otp: z.string().min(6, "The code must be 6 digits"),
+			password: z.string().min(8, "The password must be at least 8 characters"),
 		})
 		.refine((data) => data.password === data.confirmPassword, {
-			message: "As senhas não coincidem",
+			message: "Passwords do not match",
 			path: ["confirmPassword"],
 		});
 
@@ -37,22 +37,22 @@ export function useForgotPassword() {
 					password,
 				},
 				{
-					onSuccess: () => {
-						toast.success("Senha redefinida com sucesso!", {
-							id: "forgot-password-toast",
-						});
-						router.navigate({
-							to: "/auth/sign-in",
-						});
-					},
 					onError: () => {
-						toast.error("Erro ao redefinir senha", {
+						toast.error("Error resetting password", {
 							id: "forgot-password-toast",
 						});
 					},
 					onRequest: () => {
-						toast.loading("Redefinindo senha...", {
+						toast.loading("Resetting password...", {
 							id: "forgot-password-toast",
+						});
+					},
+					onSuccess: () => {
+						toast.success("Password reset successfully!", {
+							id: "forgot-password-toast",
+						});
+						router.navigate({
+							to: "/auth/sign-in",
 						});
 					},
 				},
@@ -62,10 +62,10 @@ export function useForgotPassword() {
 	);
 	const form = useAppForm({
 		defaultValues: {
+			confirmPassword: "",
 			email: "",
 			otp: "",
 			password: "",
-			confirmPassword: "",
 		},
 		onSubmit: async ({ value }) => {
 			await handleResetPassword(value);
@@ -83,21 +83,21 @@ export function useForgotPassword() {
 			},
 
 			{
-				onSuccess: () => {
-					setSendingOtp(false);
-					toast.success("Código enviado para seu email.", {
-						id: "send-otp-toast",
-					});
-				},
 				onError: () => {
 					setSendingOtp(false);
-					toast.error("Erro ao enviar código de recuperação", {
+					toast.error("Error sending recovery code", {
 						id: "send-otp-toast",
 					});
 				},
 				onRequest: () => {
 					setSendingOtp(true);
-					toast.loading("Enviando código de recuperação...", {
+					toast.loading("Sending recovery code...", {
+						id: "send-otp-toast",
+					});
+				},
+				onSuccess: () => {
+					setSendingOtp(false);
+					toast.success("Code sent to your email.", {
 						id: "send-otp-toast",
 					});
 				},
@@ -114,8 +114,8 @@ export function useForgotPassword() {
 	);
 	return {
 		form,
-		sendOtp,
 		handleSubmit,
 		sendingOtp,
+		sendOtp,
 	};
 }

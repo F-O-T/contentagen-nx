@@ -1,21 +1,22 @@
+import brandConfig from "@packages/brand/index.json";
 import { useAppForm } from "@packages/ui/components/form";
 import { useRouter } from "@tanstack/react-router";
 import { type FormEvent, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { betterAuthClient } from "@/integrations/better-auth";
-import brandConfig from "@packages/brand/index.json";
+
 type codes = "INVALID_EMAIL_OR_PASSWORD" | "default";
 export const useSignIn = () => {
 	const schema = z.object({
-		email: z.string().email("Insira um email válido"),
-		password: z.string().min(8, "Insira uma senha com no mínimo 8 caracteres"),
+		email: z.string().email("Enter a valid email"),
+		password: z.string().min(8, "Enter a password with at least 8 characters"),
 	});
 	const router = useRouter();
 	const getErrorMessage = useMemo(
 		() => ({
-			default: "Erro desconhecido",
-			INVALID_EMAIL_OR_PASSWORD: "Email ou senha inválidos",
+			default: "Unknown error",
+			INVALID_EMAIL_OR_PASSWORD: "Invalid email or password",
 		}),
 		[],
 	);
@@ -29,20 +30,20 @@ export const useSignIn = () => {
 				{
 					onError: ({ error }) => {
 						toast.error(
-							getErrorMessage[error.code as codes] || "Erro desconhecido",
+							getErrorMessage[error.code as codes] || "Unknown error",
 							{
 								id: "sign-in-toast",
 							},
 						);
 					},
 					onRequest: () => {
-						toast.loading("Realizando Login...", {
+						toast.loading("Signing in...", {
 							id: "sign-in-toast",
 						});
 					},
 					onSuccess: ({ data }) => {
-						toast.success("Login realizado com sucesso", {
-							description: `Bem vindo ao ${brandConfig.name} ${data.user.name}`,
+						toast.success("Sign in successful", {
+							description: `Welcome to ${brandConfig.name} ${data.user.name}`,
 							id: "sign-in-toast",
 						});
 						router.navigate({
