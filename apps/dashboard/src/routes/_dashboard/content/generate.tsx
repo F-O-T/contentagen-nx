@@ -1,8 +1,7 @@
 import { CreateContentForm } from "@/pages/content/ui/form";
 import { Button } from "@packages/ui/components/button";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { useId, useState } from "react";
 
 export const Route = createFileRoute("/_dashboard/content/generate")({
   component: GenerateContent,
@@ -14,42 +13,6 @@ export const Route = createFileRoute("/_dashboard/content/generate")({
 });
 
 function GenerateContent() {
-  const topicFieldId = useId();
-  const briefDescriptionFieldId = useId();
-  const targetLengthFieldId = useId();
-  const urgencyFieldId = useId();
-  const includeImagesFieldId = useId();
-
-  const navigate = useNavigate();
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [formData, setFormData] = useState({
-    briefDescription: "",
-    includeImages: false,
-    targetLength: "medium",
-    topic: "",
-    urgency: "normal",
-  });
-
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsGenerating(true);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
-    setIsGenerating(false);
-    navigate({ search: { generated: true, id: 999 }, to: "/content/review" });
-  };
-
-  // Sample article for demonstration
-  const sampleArticle = {
-    excerpt:
-      "Artificial intelligence is revolutionizing how we create, edit, and distribute content across digital platforms...",
-    readTime: "6 min read",
-    title: "The Rise of AI-Powered Content Creation",
-    wordCount: 1500,
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}

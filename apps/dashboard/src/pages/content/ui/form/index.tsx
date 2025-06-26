@@ -3,9 +3,10 @@ import { Button } from "@packages/ui/components/button";
 import { useAppForm } from "@packages/ui/components/form";
 import { Progress } from "@packages/ui/components/progress";
 import { useMutation } from "@tanstack/react-query";
-import { useRouteContext } from "@tanstack/react-router";
+import { useNavigate, useRouteContext } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Bot } from "lucide-react";
 import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
 import { ArticleExample } from "./article-example";
 import { ConfigureAgent } from "./configure-agent";
@@ -70,7 +71,8 @@ enum ContentFormStep {
 }
 
 export function CreateContentForm() {
-  const { eden } = useRouteContext({ from: "/content/generate" });
+  const { eden } = useRouteContext({ from: "/_dashboard/content/generate" });
+  const navigate = useNavigate();
 
   const [currentStep, setCurrentStep] = useState<ContentFormStep>(
     ContentFormStep.TemplateSelection,
@@ -93,7 +95,8 @@ export function CreateContentForm() {
         topics: [],
       }),
     onSuccess: (data) => {
-      console.log("Agent created successfully:", data);
+      toast.success("Agent created successfully");
+      navigate({ to: "/content" });
     },
   });
 
