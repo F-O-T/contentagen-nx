@@ -13,6 +13,7 @@ import {
 import { useAppForm } from "@packages/ui/components/form";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useRouteContext } from "@tanstack/react-router";
+import { useState } from "react";
 import { z } from "zod";
 
 interface AgentFormData {
@@ -26,6 +27,19 @@ interface AgentFormData {
   topics: string[];
   seoKeywords: string[];
 }
+
+export type AgentFormStep =
+  | "step-basic-info"
+  | "step-content-config"
+  | "step-topics-seo"
+  | "step-review-submit";
+
+const AGENT_FORM_STEPS: AgentFormStep[] = [
+  "step-basic-info",
+  "step-content-config",
+  "step-topics-seo",
+  "step-review-submit",
+];
 
 const agentFormSchema = z.object({
   contentType: z.enum(contentTypeEnum.enumValues, {
@@ -47,7 +61,7 @@ const agentFormSchema = z.object({
 
 export function useAgentForm() {
   const navigate = useNavigate();
-  const { eden } = useRouteContext({ from: "/_dashboard/agents/create" });
+  const { eden } = useRouteContext({ from: "/_dashboard/agents/_flow/manual" });
 
   const agentMutation = useMutation({
     mutationFn: eden.api.v1.agents.post,
