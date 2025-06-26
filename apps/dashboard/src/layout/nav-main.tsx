@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@packages/ui/components/button";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -8,8 +7,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@packages/ui/components/sidebar";
-import { Link } from "@tanstack/react-router";
-import { type LucideIcon, MailIcon, PlusCircleIcon } from "lucide-react";
+import { Link, useLocation } from "@tanstack/react-router";
+import { type LucideIcon, PlusCircleIcon } from "lucide-react";
 
 export function NavMain({
   items,
@@ -20,6 +19,11 @@ export function NavMain({
     icon?: LucideIcon;
   }[];
 }) {
+  const { pathname } = useLocation();
+  const isActive = (url: string) => {
+    return pathname.startsWith(url);
+  };
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -39,7 +43,10 @@ export function NavMain({
         </SidebarMenu>
         <SidebarMenu>
           {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
+            <SidebarMenuItem
+              key={item.title}
+              className={`${isActive(item.url) ? "bg-primary/10 text-primary rounded-lg" : ""}`}
+            >
               <SidebarMenuButton asChild tooltip={item.title}>
                 <Link className="flex items-center gap-2" to={item.url}>
                   {item.icon && <item.icon />}

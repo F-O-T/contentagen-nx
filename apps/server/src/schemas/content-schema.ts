@@ -82,6 +82,8 @@ export const project = pgTable("project", {
 
 export const agent = pgTable("agent", {
   contentType: contentTypeEnum("content_type").notNull(),
+  basePrompt: text("base_prompt"),
+  exampleArticle: text("example_article"),
 
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
@@ -97,6 +99,7 @@ export const agent = pgTable("agent", {
   projectId: uuid("project_id").references(() => project.id, {
     onDelete: "cascade",
   }),
+  seoFocus: boolean("seo_focus").default(false),
   seoKeywords: json("seo_keywords").$type<string[]>().default([]),
   targetAudience: targetAudienceEnum("target_audience").notNull(),
 
@@ -111,6 +114,7 @@ export const agent = pgTable("agent", {
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   voiceTone: voiceToneEnum("voice_tone").notNull(),
+  wordCount: integer("word_count").default(1000),
 });
 
 export const content = pgTable("content", {
