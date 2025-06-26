@@ -104,7 +104,7 @@ function ExportContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link to="/">
+              <Link to="/auth">
                 <h1 className="text-xl font-bold text-gray-900">BlogAI</h1>
               </Link>
               <div className="ml-6">
@@ -146,51 +146,46 @@ function ExportContent() {
                     const Icon = format.icon;
                     return (
                       <div
-                        className={`relative rounded-lg border-2 p-4 cursor-pointer transition-all ${
-                          selectedFormat === format.id
-                            ? "border-indigo-500 bg-indigo-50"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
+                        className={`relative rounded-lg border-2 p-4 cursor-pointer transition-all ${selectedFormat === format.id
+                          ? "border-indigo-500 bg-indigo-50"
+                          : "border-gray-200 hover:border-gray-300"
+                          }`}
                         key={format.id}
                         onClick={() => setSelectedFormat(format.id)}
                       >
                         <div className="flex items-start">
                           <div className="flex-shrink-0">
                             <Icon
-                              className={`h-6 w-6 ${
-                                selectedFormat === format.id
-                                  ? "text-indigo-600"
-                                  : "text-gray-400"
-                              }`}
+                              className={`h-6 w-6 ${selectedFormat === format.id
+                                ? "text-indigo-600"
+                                : "text-gray-400"
+                                }`}
                             />
                           </div>
                           <div className="ml-4 flex-1">
                             <h4
-                              className={`text-lg font-medium ${
-                                selectedFormat === format.id
-                                  ? "text-indigo-900"
-                                  : "text-gray-900"
-                              }`}
+                              className={`text-lg font-medium ${selectedFormat === format.id
+                                ? "text-indigo-900"
+                                : "text-gray-900"
+                                }`}
                             >
                               {format.name}
                             </h4>
                             <p
-                              className={`text-sm ${
-                                selectedFormat === format.id
-                                  ? "text-indigo-700"
-                                  : "text-gray-600"
-                              }`}
+                              className={`text-sm ${selectedFormat === format.id
+                                ? "text-indigo-700"
+                                : "text-gray-600"
+                                }`}
                             >
                               {format.description}
                             </p>
                             <div className="mt-2 flex flex-wrap gap-2">
                               {format.features.map((feature) => (
                                 <span
-                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                    selectedFormat === format.id
-                                      ? "bg-indigo-100 text-indigo-800"
-                                      : "bg-gray-100 text-gray-800"
-                                  }`}
+                                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${selectedFormat === format.id
+                                    ? "bg-indigo-100 text-indigo-800"
+                                    : "bg-gray-100 text-gray-800"
+                                    }`}
                                   key={feature}
                                 >
                                   {feature}
@@ -318,7 +313,7 @@ function ExportContent() {
                     <span className="ml-2 text-sm font-medium text-gray-900">
                       {selectedFormat
                         ? exportFormats.find((f) => f.id === selectedFormat)
-                            ?.name
+                          ?.name
                         : "Not selected"}
                     </span>
                   </div>
@@ -328,7 +323,7 @@ function ExportContent() {
                       {exportOptions.customFilename || `content-${id}`}
                       {selectedFormat
                         ? exportFormats.find((f) => f.id === selectedFormat)
-                            ?.extension
+                          ?.extension
                         : ""}
                     </span>
                   </div>

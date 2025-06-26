@@ -86,7 +86,7 @@ export function EditAgentPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link to="/">
+              <Link to="/agents">
                 <h1 className="text-xl font-bold text-gray-900">BlogAI</h1>
               </Link>
               <div className="ml-6">
@@ -193,11 +193,10 @@ export function EditAgentPage() {
                       "Technical Docs",
                     ].map((type) => (
                       <button
-                        className={`p-3 text-sm rounded-lg border-2 transition-all ${
-                          formData.contentType === type
+                        className={`p-3 text-sm rounded-lg border-2 transition-all ${formData.contentType === type
                             ? "border-indigo-500 bg-indigo-50 text-indigo-700"
                             : "border-gray-200 hover:border-gray-300"
-                        }`}
+                          }`}
                         key={type}
                         onClick={() =>
                           setFormData({ ...formData, contentType: type })
@@ -222,11 +221,10 @@ export function EditAgentPage() {
                       "Creative",
                     ].map((tone) => (
                       <button
-                        className={`p-3 text-sm rounded-lg border-2 transition-all ${
-                          formData.tone === tone
+                        className={`p-3 text-sm rounded-lg border-2 transition-all ${formData.tone === tone
                             ? "border-indigo-500 bg-indigo-50 text-indigo-700"
                             : "border-gray-200 hover:border-gray-300"
-                        }`}
+                          }`}
                         key={tone}
                         onClick={() => setFormData({ ...formData, tone })}
                         type="button"
@@ -249,11 +247,10 @@ export function EditAgentPage() {
                       "Customers",
                     ].map((audience) => (
                       <button
-                        className={`p-3 text-sm rounded-lg border-2 transition-all ${
-                          formData.audience === audience
+                        className={`p-3 text-sm rounded-lg border-2 transition-all ${formData.audience === audience
                             ? "border-indigo-500 bg-indigo-50 text-indigo-700"
                             : "border-gray-200 hover:border-gray-300"
-                        }`}
+                          }`}
                         key={audience}
                         onClick={() => setFormData({ ...formData, audience })}
                         type="button"
@@ -275,11 +272,10 @@ export function EditAgentPage() {
                       "List-based (numbered/bulleted)",
                     ].map((style) => (
                       <button
-                        className={`p-3 text-sm rounded-lg border-2 transition-all text-left ${
-                          formData.formattingStyle === style
+                        className={`p-3 text-sm rounded-lg border-2 transition-all text-left ${formData.formattingStyle === style
                             ? "border-indigo-500 bg-indigo-50 text-indigo-700"
                             : "border-gray-200 hover:border-gray-300"
-                        }`}
+                          }`}
                         key={style}
                         onClick={() =>
                           setFormData({ ...formData, formattingStyle: style })
