@@ -1,40 +1,36 @@
-// ReviewSubmitStep.tsx
-import { useAgentForm } from "../lib/use-agent-form.js";
+import { useAgentForm } from "../lib/use-agent-form";
 
-export function ReviewSubmitStep() {
-  const { form } = useAgentForm();
+export function ReviewSubmitStep({form}:{form:AgentForm}) {
 
   return (
-    <>
+    <div className="grid grid-cols-2 gap-4 text-sm">
       <div>
-        <strong>Name:</strong> {form.getFieldValue("name")}
+        <span className="font-bold">Name:</span> {form.getFieldValue("name")}
       </div>
       <div>
-        <strong>Project ID:</strong> {form.getFieldValue("projectId")}
+        <span className="font-bold">Project ID:</span> {form.getFieldValue("projectId")}
       </div>
       <div>
-        <strong>Description:</strong> {form.getFieldValue("description")}
+        <span className="font-bold">Description:</span> {form.getFieldValue("description")}
       </div>
       <div>
-        <strong>Content Type:</strong> {form.getFieldValue("contentType")}
+        <span className="font-bold">Content Type:</span> {form.getFieldValue("contentType")}
       </div>
       <div>
-        <strong>Voice Tone:</strong> {form.getFieldValue("voiceTone")}
+        <span className="font-bold">Voice Tone:</span> {form.getFieldValue("voiceTone")}
       </div>
       <div>
-        <strong>Target Audience:</strong> {form.getFieldValue("targetAudience")}
+        <span className="font-bold">Target Audience:</span> {form.getFieldValue("targetAudience")}
       </div>
       <div>
-        <strong>Formatting Style:</strong>{" "}
-        {form.getFieldValue("formattingStyle")}
+        <span className="font-bold">Formatting Style:</span> {form.getFieldValue("formattingStyle")}
       </div>
       <div>
-        <strong>Topics:</strong> {form.getFieldValue("topics")?.join(", ")}
+        <span className="font-bold">Topics:</span> {form.getFieldValue("topics")?.join(", ")}
       </div>
       <div>
-        <strong>SEO Keywords:</strong>{" "}
-        {form.getFieldValue("seoKeywords")?.join(", ")}
+        <span className="font-bold">SEO Keywords:</span> {form.getFieldValue("seoKeywords")?.join(", ")}
       </div>
-    </>
+    </div>
   );
 }

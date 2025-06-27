@@ -13,7 +13,7 @@ import {
 import { useAppForm } from "@packages/ui/components/form";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useRouteContext } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { z } from "zod";
 
 interface AgentFormData {
@@ -69,17 +69,8 @@ export function useAgentForm() {
       topics: [],
       voiceTone: "professional",
     } as AgentFormData,
-    onSubmit: async ({ value, formApi }) => {
-      const result = agentFormSchema.safeParse(value);
-      if (!result.success) {
-        const firstError = Object.values(result.error.flatten().fieldErrors)
-          .flat()
-          .find(Boolean);
-        return firstError || "Invalid form data";
-      }
-      await agentMutation.mutateAsync({
-        ...result.data,
-      });
+    onSubmit: async ({ value, formApi }) => {   
+      await agentMutation.mutateAsync(value);
       formApi.reset();
     },
     validators: {
@@ -102,3 +93,4 @@ export function useAgentForm() {
     isLoading: agentMutation.isPending,
   };
 }
+export type AgentForm = ReturnType<typeof useAgentForm>['form']

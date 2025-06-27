@@ -1,4 +1,3 @@
-import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import { Button } from "@packages/ui/components/button";
@@ -11,7 +10,7 @@ import {
   CardTitle,
 } from "@packages/ui/components/card";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Info, Settings, HelpCircle } from "lucide-react";
+import { ArrowRight, Settings, HelpCircle } from "lucide-react";
 import mascot from "@packages/brand/logo.svg";
 
 export function AgentCreationFlowPage() {

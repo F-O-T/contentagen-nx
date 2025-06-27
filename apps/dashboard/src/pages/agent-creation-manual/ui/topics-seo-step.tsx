@@ -1,13 +1,12 @@
-// TopicsSeoStep.tsx
-import { useState } from "react";
-import { useAgentForm } from "../lib/use-agent-form.js";
+import { useAgentForm } from "../lib/use-agent-form";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
 import { X } from "lucide-react";
+import { useState } from "react";
 
-export function TopicsSeoStep() {
-  const { form } = useAgentForm();
+export default function TopicsSeoStep({form}:{form:AgentForm}) {
+ 
   const [currentTopic, setCurrentTopic] = useState("");
   const [currentKeyword, setCurrentKeyword] = useState("");
 
@@ -21,7 +20,7 @@ export function TopicsSeoStep() {
   const removeTopic = (topicToRemove: string, topics: string[]) => {
     form.setFieldValue(
       "topics",
-      topics.filter((topic) => topic !== topicToRemove),
+      topics.filter((topic: string) => topic !== topicToRemove),
     );
   };
 
@@ -35,15 +34,15 @@ export function TopicsSeoStep() {
   const removeKeyword = (keywordToRemove: string, keywords: string[]) => {
     form.setFieldValue(
       "seoKeywords",
-      keywords.filter((keyword) => keyword !== keywordToRemove),
+      keywords.filter((keyword: string) => keyword !== keywordToRemove),
     );
   };
 
   return (
     <>
       <form.AppField name="topics">
-        {(field) => (
-          <field.FieldContainer id="topics-field">
+        {(field: { state: { value: string[] }; FieldContainer: any; FieldLabel: any; FieldMessage: any; name: string }) => (
+          <field.FieldContainer>
             <field.FieldLabel className="text-sm font-medium text-foreground">
               Preferred Topics
             </field.FieldLabel>
@@ -94,8 +93,8 @@ export function TopicsSeoStep() {
         )}
       </form.AppField>
       <form.AppField name="seoKeywords">
-        {(field) => (
-          <field.FieldContainer id="seo-keywords-field">
+        {(field: { state: { value: string[] }; FieldContainer: any; FieldLabel: any; FieldMessage: any; name: string }) => (
+          <field.FieldContainer>
             <field.FieldLabel className="text-sm font-medium text-foreground">
               SEO Keywords
             </field.FieldLabel>

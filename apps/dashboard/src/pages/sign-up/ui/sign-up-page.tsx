@@ -40,7 +40,7 @@ export function SignUpPage() {
 						<Stepper.Navigation>
 							{steps.map((step) => (
 								<Stepper.Step key={step.id} of={step.id}>
-									<Stepper.Title>{step.title}</Stepper.Title>
+									
 								</Stepper.Step>
 							))}
 						</Stepper.Navigation>

@@ -147,6 +147,7 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
 							date-component="stepper-step"
 						>
 							<CircleStepIndicator
+					
 								currentStep={stepIndex + 1}
 								totalSteps={steps.length}
 							/>
