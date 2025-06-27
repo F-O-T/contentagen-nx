@@ -18,7 +18,7 @@ const data = {
     {
       icon: LayoutDashboardIcon,
       title: "Agents",
-      url: "/agents/",
+      url: "/agents",
     },
     {
       icon: FileTextIcon,

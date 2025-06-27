@@ -18,6 +18,7 @@ import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-verification'
+import { Route as DashboardProfileIndexRouteImport } from './routes/_dashboard/profile/index'
 import { Route as DashboardContentIndexRouteImport } from './routes/_dashboard/content/index'
 import { Route as DashboardAgentsIndexRouteImport } from './routes/_dashboard/agents/index'
 import { Route as DashboardContentReviewRouteImport } from './routes/_dashboard/content/review'
@@ -25,6 +26,8 @@ import { Route as DashboardContentGenerateRouteImport } from './routes/_dashboar
 import { Route as DashboardContentExportRouteImport } from './routes/_dashboard/content/export'
 import { Route as DashboardAgentsEditRouteImport } from './routes/_dashboard/agents/edit'
 import { Route as DashboardAgentsFlowRouteImport } from './routes/_dashboard/agents/_flow'
+import { Route as DashboardProfilePreferencesIndexRouteImport } from './routes/_dashboard/profile/preferences/index'
+import { Route as DashboardProfileBillingIndexRouteImport } from './routes/_dashboard/profile/billing/index'
 import { Route as DashboardAgentsFlowManualRouteImport } from './routes/_dashboard/agents/_flow/manual'
 import { Route as DashboardAgentsFlowChoiceRouteImport } from './routes/_dashboard/agents/_flow/choice'
 
@@ -69,6 +72,11 @@ const AuthEmailVerificationRoute = AuthEmailVerificationRouteImport.update({
   path: '/email-verification',
   getParentRoute: () => AuthRoute,
 } as any)
+const DashboardProfileIndexRoute = DashboardProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardContentIndexRoute = DashboardContentIndexRouteImport.update({
   id: '/content/',
   path: '/content/',
@@ -104,6 +112,18 @@ const DashboardAgentsFlowRoute = DashboardAgentsFlowRouteImport.update({
   id: '/_flow',
   getParentRoute: () => DashboardAgentsRoute,
 } as any)
+const DashboardProfilePreferencesIndexRoute =
+  DashboardProfilePreferencesIndexRouteImport.update({
+    id: '/profile/preferences/',
+    path: '/profile/preferences/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardProfileBillingIndexRoute =
+  DashboardProfileBillingIndexRouteImport.update({
+    id: '/profile/billing/',
+    path: '/profile/billing/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardAgentsFlowManualRoute =
   DashboardAgentsFlowManualRouteImport.update({
     id: '/manual',
@@ -131,8 +151,11 @@ export interface FileRoutesByFullPath {
   '/content/review': typeof DashboardContentReviewRoute
   '/agents/': typeof DashboardAgentsIndexRoute
   '/content': typeof DashboardContentIndexRoute
+  '/profile': typeof DashboardProfileIndexRoute
   '/agents/choice': typeof DashboardAgentsFlowChoiceRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
+  '/profile/billing': typeof DashboardProfileBillingIndexRoute
+  '/profile/preferences': typeof DashboardProfilePreferencesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -147,8 +170,11 @@ export interface FileRoutesByTo {
   '/content/generate': typeof DashboardContentGenerateRoute
   '/content/review': typeof DashboardContentReviewRoute
   '/content': typeof DashboardContentIndexRoute
+  '/profile': typeof DashboardProfileIndexRoute
   '/agents/choice': typeof DashboardAgentsFlowChoiceRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
+  '/profile/billing': typeof DashboardProfileBillingIndexRoute
+  '/profile/preferences': typeof DashboardProfilePreferencesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -167,8 +193,11 @@ export interface FileRoutesById {
   '/_dashboard/content/review': typeof DashboardContentReviewRoute
   '/_dashboard/agents/': typeof DashboardAgentsIndexRoute
   '/_dashboard/content/': typeof DashboardContentIndexRoute
+  '/_dashboard/profile/': typeof DashboardProfileIndexRoute
   '/_dashboard/agents/_flow/choice': typeof DashboardAgentsFlowChoiceRoute
   '/_dashboard/agents/_flow/manual': typeof DashboardAgentsFlowManualRoute
+  '/_dashboard/profile/billing/': typeof DashboardProfileBillingIndexRoute
+  '/_dashboard/profile/preferences/': typeof DashboardProfilePreferencesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -186,8 +215,11 @@ export interface FileRouteTypes {
     | '/content/review'
     | '/agents/'
     | '/content'
+    | '/profile'
     | '/agents/choice'
     | '/agents/manual'
+    | '/profile/billing'
+    | '/profile/preferences'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -202,8 +234,11 @@ export interface FileRouteTypes {
     | '/content/generate'
     | '/content/review'
     | '/content'
+    | '/profile'
     | '/agents/choice'
     | '/agents/manual'
+    | '/profile/billing'
+    | '/profile/preferences'
   id:
     | '__root__'
     | '/'
@@ -221,8 +256,11 @@ export interface FileRouteTypes {
     | '/_dashboard/content/review'
     | '/_dashboard/agents/'
     | '/_dashboard/content/'
+    | '/_dashboard/profile/'
     | '/_dashboard/agents/_flow/choice'
     | '/_dashboard/agents/_flow/manual'
+    | '/_dashboard/profile/billing/'
+    | '/_dashboard/profile/preferences/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -289,6 +327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthEmailVerificationRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_dashboard/profile/': {
+      id: '/_dashboard/profile/'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof DashboardProfileIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/content/': {
       id: '/_dashboard/content/'
       path: '/content'
@@ -337,6 +382,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/agents'
       preLoaderRoute: typeof DashboardAgentsFlowRouteImport
       parentRoute: typeof DashboardAgentsRoute
+    }
+    '/_dashboard/profile/preferences/': {
+      id: '/_dashboard/profile/preferences/'
+      path: '/profile/preferences'
+      fullPath: '/profile/preferences'
+      preLoaderRoute: typeof DashboardProfilePreferencesIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/profile/billing/': {
+      id: '/_dashboard/profile/billing/'
+      path: '/profile/billing'
+      fullPath: '/profile/billing'
+      preLoaderRoute: typeof DashboardProfileBillingIndexRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/_dashboard/agents/_flow/manual': {
       id: '/_dashboard/agents/_flow/manual'
@@ -390,6 +449,9 @@ interface DashboardRouteChildren {
   DashboardContentGenerateRoute: typeof DashboardContentGenerateRoute
   DashboardContentReviewRoute: typeof DashboardContentReviewRoute
   DashboardContentIndexRoute: typeof DashboardContentIndexRoute
+  DashboardProfileIndexRoute: typeof DashboardProfileIndexRoute
+  DashboardProfileBillingIndexRoute: typeof DashboardProfileBillingIndexRoute
+  DashboardProfilePreferencesIndexRoute: typeof DashboardProfilePreferencesIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
@@ -398,6 +460,9 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardContentGenerateRoute: DashboardContentGenerateRoute,
   DashboardContentReviewRoute: DashboardContentReviewRoute,
   DashboardContentIndexRoute: DashboardContentIndexRoute,
+  DashboardProfileIndexRoute: DashboardProfileIndexRoute,
+  DashboardProfileBillingIndexRoute: DashboardProfileBillingIndexRoute,
+  DashboardProfilePreferencesIndexRoute: DashboardProfilePreferencesIndexRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
