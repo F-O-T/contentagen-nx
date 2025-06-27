@@ -1,5 +1,3 @@
-import { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
 import {
   Avatar,
   AvatarFallback,
@@ -20,6 +18,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@packages/ui/components/sidebar";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import {
   BellIcon,
   CreditCardIcon,
@@ -27,8 +26,9 @@ import {
   MoreVerticalIcon,
   UserCircleIcon,
 } from "lucide-react";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { betterAuthClient } from "@/integrations/better-auth";
-import { Skeleton } from "@packages/ui/components/skeleton";
 
 // Simple ErrorBoundary implementation
 function NavUserErrorFallback() {
@@ -61,7 +61,6 @@ function NavUserSkeleton() {
 function NavUserContent() {
   const { isMobile } = useSidebar();
   const { data: session, isPending, error } = betterAuthClient.useSession();
-
   if (error) throw error;
   if (isPending) return <NavUserSkeleton />;
 
@@ -154,4 +153,3 @@ export function NavUser() {
     </ErrorBoundary>
   );
 }
-

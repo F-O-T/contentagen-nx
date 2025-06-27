@@ -8,12 +8,13 @@ import {
   Outlet,
   Scripts,
 } from "@tanstack/react-router";
+import type { sessionMiddleware } from "@/integrations/better-auth";
 import { QueryProvider } from "@/integrations/tanstack-query";
 import { ThemeProvider } from "@/layout/theme-provider";
-
 export interface MyRouterContext {
   eden: EdenClientType;
   queryClient: QueryClient;
+  sessionMiddleware: typeof sessionMiddleware;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
