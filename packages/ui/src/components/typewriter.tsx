@@ -1,4 +1,3 @@
-// Reusable Typewriter hook and component
 import { useEffect, useRef, useState } from "react";
 
 export function useTypewriter(text: string, speed = 30) {

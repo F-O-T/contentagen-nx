@@ -1,17 +1,14 @@
-import mascot from "@packages/brand/logo.svg";
 import { Button } from "@packages/ui/components/button";
-
 import { defineStepper } from "@packages/ui/components/stepper";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
+import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { useAgentForm } from "../lib/use-agent-form";
 import { FormattingStyleStep, TargetAudienceStep } from "./audience-style-step";
 import { BasicInfoStep } from "./basic-info-step";
 import { ContentTypeStep } from "./content-type-step";
 import { ReviewSubmitStep } from "./review-submit-step";
 import TopicsSeoStep from "./topics-seo-step";
-import { Typewriter } from "./typewriter";
 import VoiceToneStep from "./voice-tone-step";
 
 const steps = [
@@ -69,23 +66,7 @@ export function CreateAgentPage() {
             ))}
           </Stepper.Navigation>
 
-          <div className="flex items-start gap-4 w-full" id="mascot-speech">
-            <div className="flex-shrink-0">
-              <div className="relative">
-                <img
-                  alt="Content Agent Mascot"
-                  className="w-10 h-10 rounded-full shadow-lg "
-                  src={mascot}
-                />
-              </div>
-            </div>
-            <div className=" flex-1 px-4 py-2 text-foreground bg-accent  rounded-2xl shadow-lg border border-primary transition-all duration-300 ease-in-out">
-              <Typewriter
-                key={methods.current.id}
-                message={getMascotMessage(methods.current.id)}
-              />
-            </div>
-          </div>
+          <TalkingMascot message={getMascotMessage(methods.current.id)} />
 
           {methods.current.id === "step-review-submit" ? (
             <form onSubmit={handleSubmit}>
