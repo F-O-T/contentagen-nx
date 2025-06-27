@@ -9,9 +9,12 @@ import { db } from "./database";
 
 export const auth = betterAuth({
   basePath: "/api/v1/auth",
+  appName: "ContentaGen-Auth",
+  baseURL: "https://contentagen.com",
   advanced: {
     crossSubDomainCookies: {
       enabled: true,
+
       cookieDomain: ".contentagen.com",
     },
   },
