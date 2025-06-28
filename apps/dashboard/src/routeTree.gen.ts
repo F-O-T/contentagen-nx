@@ -21,12 +21,8 @@ import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-v
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard/home'
 import { Route as DashboardProfileIndexRouteImport } from './routes/_dashboard/profile/index'
 import { Route as DashboardAgentsIndexRouteImport } from './routes/_dashboard/agents/index'
-import { Route as DashboardAgentsEditRouteImport } from './routes/_dashboard/agents/edit'
 import { Route as DashboardAgentsFlowRouteImport } from './routes/_dashboard/agents/_flow'
-import { Route as DashboardProfilePreferencesIndexRouteImport } from './routes/_dashboard/profile/preferences/index'
-import { Route as DashboardProfileBillingIndexRouteImport } from './routes/_dashboard/profile/billing/index'
 import { Route as DashboardAgentsFlowManualRouteImport } from './routes/_dashboard/agents/_flow/manual'
-import { Route as DashboardAgentsFlowChoiceRouteImport } from './routes/_dashboard/agents/_flow/choice'
 
 const DashboardAgentsRouteImport = createFileRoute('/_dashboard/agents')()
 
@@ -84,37 +80,14 @@ const DashboardAgentsIndexRoute = DashboardAgentsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardAgentsRoute,
 } as any)
-const DashboardAgentsEditRoute = DashboardAgentsEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => DashboardAgentsRoute,
-} as any)
 const DashboardAgentsFlowRoute = DashboardAgentsFlowRouteImport.update({
   id: '/_flow',
   getParentRoute: () => DashboardAgentsRoute,
 } as any)
-const DashboardProfilePreferencesIndexRoute =
-  DashboardProfilePreferencesIndexRouteImport.update({
-    id: '/profile/preferences/',
-    path: '/profile/preferences/',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardProfileBillingIndexRoute =
-  DashboardProfileBillingIndexRouteImport.update({
-    id: '/profile/billing/',
-    path: '/profile/billing/',
-    getParentRoute: () => DashboardRoute,
-  } as any)
 const DashboardAgentsFlowManualRoute =
   DashboardAgentsFlowManualRouteImport.update({
     id: '/manual',
     path: '/manual',
-    getParentRoute: () => DashboardAgentsFlowRoute,
-  } as any)
-const DashboardAgentsFlowChoiceRoute =
-  DashboardAgentsFlowChoiceRouteImport.update({
-    id: '/choice',
-    path: '/choice',
     getParentRoute: () => DashboardAgentsFlowRoute,
   } as any)
 
@@ -127,13 +100,9 @@ export interface FileRoutesByFullPath {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/agents': typeof DashboardAgentsFlowRouteWithChildren
-  '/agents/edit': typeof DashboardAgentsEditRoute
   '/agents/': typeof DashboardAgentsIndexRoute
   '/profile': typeof DashboardProfileIndexRoute
-  '/agents/choice': typeof DashboardAgentsFlowChoiceRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
-  '/profile/billing': typeof DashboardProfileBillingIndexRoute
-  '/profile/preferences': typeof DashboardProfilePreferencesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -144,12 +113,8 @@ export interface FileRoutesByTo {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/agents': typeof DashboardAgentsIndexRoute
-  '/agents/edit': typeof DashboardAgentsEditRoute
   '/profile': typeof DashboardProfileIndexRoute
-  '/agents/choice': typeof DashboardAgentsFlowChoiceRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
-  '/profile/billing': typeof DashboardProfileBillingIndexRoute
-  '/profile/preferences': typeof DashboardProfilePreferencesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -163,13 +128,9 @@ export interface FileRoutesById {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/_dashboard/agents': typeof DashboardAgentsRouteWithChildren
   '/_dashboard/agents/_flow': typeof DashboardAgentsFlowRouteWithChildren
-  '/_dashboard/agents/edit': typeof DashboardAgentsEditRoute
   '/_dashboard/agents/': typeof DashboardAgentsIndexRoute
   '/_dashboard/profile/': typeof DashboardProfileIndexRoute
-  '/_dashboard/agents/_flow/choice': typeof DashboardAgentsFlowChoiceRoute
   '/_dashboard/agents/_flow/manual': typeof DashboardAgentsFlowManualRoute
-  '/_dashboard/profile/billing/': typeof DashboardProfileBillingIndexRoute
-  '/_dashboard/profile/preferences/': typeof DashboardProfilePreferencesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -182,13 +143,9 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/agents'
-    | '/agents/edit'
     | '/agents/'
     | '/profile'
-    | '/agents/choice'
     | '/agents/manual'
-    | '/profile/billing'
-    | '/profile/preferences'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -199,12 +156,8 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/agents'
-    | '/agents/edit'
     | '/profile'
-    | '/agents/choice'
     | '/agents/manual'
-    | '/profile/billing'
-    | '/profile/preferences'
   id:
     | '__root__'
     | '/'
@@ -217,13 +170,9 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/_dashboard/agents'
     | '/_dashboard/agents/_flow'
-    | '/_dashboard/agents/edit'
     | '/_dashboard/agents/'
     | '/_dashboard/profile/'
-    | '/_dashboard/agents/_flow/choice'
     | '/_dashboard/agents/_flow/manual'
-    | '/_dashboard/profile/billing/'
-    | '/_dashboard/profile/preferences/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -311,33 +260,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAgentsIndexRouteImport
       parentRoute: typeof DashboardAgentsRoute
     }
-    '/_dashboard/agents/edit': {
-      id: '/_dashboard/agents/edit'
-      path: '/edit'
-      fullPath: '/agents/edit'
-      preLoaderRoute: typeof DashboardAgentsEditRouteImport
-      parentRoute: typeof DashboardAgentsRoute
-    }
     '/_dashboard/agents/_flow': {
       id: '/_dashboard/agents/_flow'
       path: '/agents'
       fullPath: '/agents'
       preLoaderRoute: typeof DashboardAgentsFlowRouteImport
       parentRoute: typeof DashboardAgentsRoute
-    }
-    '/_dashboard/profile/preferences/': {
-      id: '/_dashboard/profile/preferences/'
-      path: '/profile/preferences'
-      fullPath: '/profile/preferences'
-      preLoaderRoute: typeof DashboardProfilePreferencesIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/_dashboard/profile/billing/': {
-      id: '/_dashboard/profile/billing/'
-      path: '/profile/billing'
-      fullPath: '/profile/billing'
-      preLoaderRoute: typeof DashboardProfileBillingIndexRouteImport
-      parentRoute: typeof DashboardRoute
     }
     '/_dashboard/agents/_flow/manual': {
       id: '/_dashboard/agents/_flow/manual'
@@ -346,23 +274,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAgentsFlowManualRouteImport
       parentRoute: typeof DashboardAgentsFlowRoute
     }
-    '/_dashboard/agents/_flow/choice': {
-      id: '/_dashboard/agents/_flow/choice'
-      path: '/choice'
-      fullPath: '/agents/choice'
-      preLoaderRoute: typeof DashboardAgentsFlowChoiceRouteImport
-      parentRoute: typeof DashboardAgentsFlowRoute
-    }
   }
 }
 
 interface DashboardAgentsFlowRouteChildren {
-  DashboardAgentsFlowChoiceRoute: typeof DashboardAgentsFlowChoiceRoute
   DashboardAgentsFlowManualRoute: typeof DashboardAgentsFlowManualRoute
 }
 
 const DashboardAgentsFlowRouteChildren: DashboardAgentsFlowRouteChildren = {
-  DashboardAgentsFlowChoiceRoute: DashboardAgentsFlowChoiceRoute,
   DashboardAgentsFlowManualRoute: DashboardAgentsFlowManualRoute,
 }
 
@@ -371,13 +290,11 @@ const DashboardAgentsFlowRouteWithChildren =
 
 interface DashboardAgentsRouteChildren {
   DashboardAgentsFlowRoute: typeof DashboardAgentsFlowRouteWithChildren
-  DashboardAgentsEditRoute: typeof DashboardAgentsEditRoute
   DashboardAgentsIndexRoute: typeof DashboardAgentsIndexRoute
 }
 
 const DashboardAgentsRouteChildren: DashboardAgentsRouteChildren = {
   DashboardAgentsFlowRoute: DashboardAgentsFlowRouteWithChildren,
-  DashboardAgentsEditRoute: DashboardAgentsEditRoute,
   DashboardAgentsIndexRoute: DashboardAgentsIndexRoute,
 }
 
@@ -389,16 +306,12 @@ interface DashboardRouteChildren {
   DashboardHomeRoute: typeof DashboardHomeRoute
   DashboardAgentsRoute: typeof DashboardAgentsRouteWithChildren
   DashboardProfileIndexRoute: typeof DashboardProfileIndexRoute
-  DashboardProfileBillingIndexRoute: typeof DashboardProfileBillingIndexRoute
-  DashboardProfilePreferencesIndexRoute: typeof DashboardProfilePreferencesIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHomeRoute: DashboardHomeRoute,
   DashboardAgentsRoute: DashboardAgentsRouteWithChildren,
   DashboardProfileIndexRoute: DashboardProfileIndexRoute,
-  DashboardProfileBillingIndexRoute: DashboardProfileBillingIndexRoute,
-  DashboardProfilePreferencesIndexRoute: DashboardProfilePreferencesIndexRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

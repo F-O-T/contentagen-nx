@@ -36,7 +36,7 @@ export function NavMain({
                   >
                      <Link
                         className="flex items-center gap-2"
-                        to="/agents/choice"
+                        to="/agents/manual"
                      >
                         <PlusCircleIcon />
                         <span>Quick agent creation</span>
