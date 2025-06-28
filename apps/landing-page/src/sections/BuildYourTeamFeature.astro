@@ -1,84 +1,84 @@
 ---
 import {
-  BookOpenCheck,
-  Brain,
-  ListChecks,
-  MessageCircle,
-  Settings,
-  Shield,
-  Users,
+   BookOpenCheck,
+   Brain,
+   ListChecks,
+   MessageCircle,
+   Settings,
+   Shield,
+   Users,
 } from "@lucide/astro";
 
 // No props needed for this feature section
 
 const _topCards = [
-  {
-    description:
-      "Each AI agent is tailored to your workflow, brand voice, and audience. Define tone, topics, SEO keywords, and formatting for every agent in your content team.",
-    title: "Truly Custom Agents",
-    type: "customizable",
-  },
-  {
-    description:
-      "Each agent’s settings and content are securely separated, so you can manage multiple clients or projects with confidence.",
-    icon: Shield,
-    iconClass: "m-auto size-8 text-primary",
-    iconWrapperClass:
-      "relative mx-auto flex aspect-square size-32 rounded-full border before:absolute before:-inset-2 before:rounded-full before:border dark:border-white/10 dark:before:border-white/5",
-    title: "Private & Isolated Profiles",
-    type: "icon",
-  },
-  {
-    description:
-      "Step-by-step tutorials and ready-made templates help you launch new agents for any niche or project in minutes.",
-    icon: BookOpenCheck,
-    iconClass: "mx-auto size-12 text-primary",
-    iconWrapperClass: "pt-6 lg:px-6",
-    title: "Fast Agent Onboarding",
-    type: "icon",
-  },
+   {
+      description:
+         "Each AI agent is tailored to your workflow, brand voice, and audience. Define tone, topics, SEO keywords, and formatting for every agent in your content team.",
+      title: "Truly Custom Agents",
+      type: "customizable",
+   },
+   {
+      description:
+         "Each agent’s settings and content are securely separated, so you can manage multiple clients or projects with confidence.",
+      icon: Shield,
+      iconClass: "m-auto size-8 text-primary",
+      iconWrapperClass:
+         "relative mx-auto flex aspect-square size-32 rounded-full border before:absolute before:-inset-2 before:rounded-full before:border dark:border-white/10 dark:before:border-white/5",
+      title: "Private & Isolated Profiles",
+      type: "icon",
+   },
+   {
+      description:
+         "Step-by-step tutorials and ready-made templates help you launch new agents for any niche or project in minutes.",
+      icon: BookOpenCheck,
+      iconClass: "mx-auto size-12 text-primary",
+      iconWrapperClass: "pt-6 lg:px-6",
+      title: "Fast Agent Onboarding",
+      type: "icon",
+   },
 ];
 
 const _bottomCards = [
-  {
-    left: {
-      description:
-        "Create, manage, and deploy multiple AI agents—each with their own expertise, voice, and content pipeline. Scale your content operation like a true editorial team.",
-      icon: Users,
-      iconClass:
-        "relative flex aspect-square size-12 rounded-full border before:absolute before:-inset-2 before:rounded-full before:border dark:border-white/10 dark:before:border-white/10",
-      title: "Your AI Content Team",
-    },
-    right: {
-      dots: true,
-      icon: Brain,
-      iconClass: "mx-auto size-10 text-muted-foreground",
-      wrapperClass:
-        "rounded-tl-(--radius) relative -mb-6 -mr-6 mt-6 h-fit border-l border-t p-6 py-6 sm:ml-6",
-    },
-  },
-  {
-    left: {
-      description:
-        "Empower agents to optimize posts for search performance and align content with your brand.",
-      icon: Settings,
-      iconClass:
-        "relative flex aspect-square size-12 rounded-full border before:absolute before:-inset-2 before:rounded-full before:border dark:border-white/10 dark:before:border-white/10",
-      title: "SEO & Content Customization",
-    },
-    right: {
-      dots: false,
-      icon: null,
-      iconClass: "",
-      wrapperClass:
-        "before:bg-(--color-border) relative mt-6 before:absolute before:inset-0 before:mx-auto before:w-px sm:-my-6 sm:-mr-6",
-    },
-  },
+   {
+      left: {
+         description:
+            "Create, manage, and deploy multiple AI agents—each with their own expertise, voice, and content pipeline. Scale your content operation like a true editorial team.",
+         icon: Users,
+         iconClass:
+            "relative flex aspect-square size-12 rounded-full border before:absolute before:-inset-2 before:rounded-full before:border dark:border-white/10 dark:before:border-white/10",
+         title: "Your AI Content Team",
+      },
+      right: {
+         dots: true,
+         icon: Brain,
+         iconClass: "mx-auto size-10 text-muted-foreground",
+         wrapperClass:
+            "rounded-tl-(--radius) relative -mb-6 -mr-6 mt-6 h-fit border-l border-t p-6 py-6 sm:ml-6",
+      },
+   },
+   {
+      left: {
+         description:
+            "Empower agents to optimize posts for search performance and align content with your brand.",
+         icon: Settings,
+         iconClass:
+            "relative flex aspect-square size-12 rounded-full border before:absolute before:-inset-2 before:rounded-full before:border dark:border-white/10 dark:before:border-white/10",
+         title: "SEO & Content Customization",
+      },
+      right: {
+         dots: false,
+         icon: null,
+         iconClass: "",
+         wrapperClass:
+            "before:bg-(--color-border) relative mt-6 before:absolute before:inset-0 before:mx-auto before:w-px sm:-my-6 sm:-mr-6",
+      },
+   },
 ];
 ---
 
 <section class="bg-accent">
-  <div class="flex flex-col items-center justify-center container mx-auto px-4 py-8 space-y-8">
+  <div class="flex flex-col items-center justify-center container mx-auto px-4 py-16 space-y-8">
     <div class="space-y-4 text-center">
       <h2 class="text-foreground text-4xl font-bold ">
         Build Your Own AI Content Team
