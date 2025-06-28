@@ -1,7 +1,7 @@
 import { env } from "@api/config/env";
 import * as authSchema from "@api/schemas/auth-schema";
 import { sendEmailOTP } from "@api/services/resend";
-import { checkout, polar, portal, usage } from "@polar-sh/better-auth";
+import { checkout, polar } from "@polar-sh/better-auth";
 import { Polar } from "@polar-sh/sdk";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
