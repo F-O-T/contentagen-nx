@@ -11,15 +11,7 @@ import {
 } from "lucide-react";
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Button } from "@packages/ui/components/button";
-
-function formatLabelValue(val: string) {
-   return val
-      .replace(/_/g, " ")
-      .replace(
-         /\w\S*/g,
-         (txt) => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase(),
-      );
-}
+import { formatValueToTitleCase } from "@packages/ui/lib/utils";
 
 export function ReviewSubmitStep({ form }: { form: AgentForm }) {
    const infoItems = [
@@ -36,7 +28,7 @@ export function ReviewSubmitStep({ form }: { form: AgentForm }) {
       {
          icon: <LayoutGridIcon className="w-4 h-4" />,
          label: "Content Type",
-         value: formatLabelValue(
+         value: formatValueToTitleCase(
             String(form.getFieldValue("contentType") ?? ""),
          ),
       },
@@ -48,14 +40,14 @@ export function ReviewSubmitStep({ form }: { form: AgentForm }) {
       {
          icon: <UsersIcon className="w-4 h-4" />,
          label: "Target Audience",
-         value: formatLabelValue(
+         value: formatValueToTitleCase(
             String(form.getFieldValue("targetAudience") ?? ""),
          ),
       },
       {
          icon: <PaintbrushIcon className="w-4 h-4" />,
          label: "Formatting Style",
-         value: formatLabelValue(
+         value: formatValueToTitleCase(
             String(form.getFieldValue("formattingStyle") ?? ""),
          ),
       },
