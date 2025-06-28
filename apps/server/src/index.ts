@@ -7,33 +7,33 @@ import { agentRoutes } from "./routes/agent-routes";
 import { waitlistRoutes } from "./routes/waitlist-routes";
 
 const app = new Elysia({
-  prefix: "/api/v1",
+   prefix: "/api/v1",
 })
-  .use(
-    cors({
-      allowedHeaders: ["Content-Type", "Authorization"],
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-      origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
-    }),
-  )
-  .use(authMiddleware)
-  .use(
-    swagger({
-      documentation: {
-        components: await OpenAPI.components,
-        paths: await OpenAPI.getPaths(),
-      },
-    }),
-  )
-  .use(agentRoutes)
-  .use(waitlistRoutes)
-  .get("/works", () => {
-    return { message: "Eden WORKS!" };
-  })
-  .listen(process.env.PORT ?? 9876);
+   .use(
+      cors({
+         allowedHeaders: ["Content-Type", "Authorization"],
+         credentials: true,
+         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+         origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
+      }),
+   )
+   .use(authMiddleware)
+   .use(
+      swagger({
+         documentation: {
+            components: await OpenAPI.components,
+            paths: await OpenAPI.getPaths(),
+         },
+      }),
+   )
+   .use(agentRoutes)
+   .use(waitlistRoutes)
+   .get("/works", () => {
+      return { message: "Eden WORKS!" };
+   })
+   .listen(process.env.PORT ?? 9876);
 
 console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
+   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`,
 );
 export type App = typeof app;

@@ -4,15 +4,15 @@ import { AppSidebar } from "./app-sidebar";
 import { SiteHeader } from "./site-header";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <SidebarProvider>
-      <AppSidebar variant="inset" />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="p-4 max-h-[calc(100vh-48px)] flex-1 overflow-y-auto">
-          {children}
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
-  );
+   return (
+      <SidebarProvider>
+         <AppSidebar variant="inset" />
+         <SidebarInset>
+            <SiteHeader />
+            <div className="p-4 max-h-[calc(100vh-48px)] flex-1 overflow-y-auto">
+               {children}
+            </div>
+         </SidebarInset>
+      </SidebarProvider>
+   );
 }

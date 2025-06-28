@@ -1,44 +1,44 @@
 {
-  "dependencies": {
-    "@elysiajs/cors": "^1.3.3",
-    "@elysiajs/opentelemetry": "^1.3.0",
-    "@elysiajs/swagger": "^1.3.0",
-    "@neondatabase/serverless": "^1.0.0",
-    "@polar-sh/better-auth": "catalog:auth",
-    "@polar-sh/sdk": "^0.34.2",
-    "@react-email/components": "^0.1.1",
-    "@sinclair/typebox": "^0.34.35",
-    "better-auth": "catalog:auth",
-    "dotenv": "^16.5.0",
-    "drizzle-orm": "^0.43.1",
-    "drizzle-typebox": "^0.3.3",
-    "elysia": "catalog:server",
-    "react": "catalog:react",
-    "react-dom": "catalog:react",
-    "resend": "^4.6.0",
-    "wrangler": "^4.20.5"
-  },
-  "devDependencies": {
-    "@tooling/typescript": "workspace:*",
-    "@types/bun": "latest",
-    "drizzle-kit": "^0.31.1",
-    "react-email": "^4.0.17",
-    "tsx": "^4.19.4",
-    "typescript": "catalog:development"
-  },
-  "name": "server",
-  "scripts": {
-    "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile server ./src/index.ts",
-    "check": "bunx --bun biome check --write .",
-    "deploy": "wrangler deploy",
-    "dev": "bun run --watch src/index.ts",
-    "format": "biome format",
-    "generate": "bunx drizzle-kit generate",
-    "migrate": "bunx drizzle-kit migrate",
-    "push": "bunx drizzle-kit push",
-    "start": "./server",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "typecheck": "bunx --bun tsc --noEmit "
-  },
-  "version": "1.0.50"
+   "dependencies": {
+      "@elysiajs/cors": "^1.3.3",
+      "@elysiajs/opentelemetry": "^1.3.0",
+      "@elysiajs/swagger": "^1.3.0",
+      "@neondatabase/serverless": "^1.0.0",
+      "@polar-sh/better-auth": "catalog:auth",
+      "@polar-sh/sdk": "^0.34.2",
+      "@react-email/components": "^0.1.1",
+      "@sinclair/typebox": "^0.34.35",
+      "better-auth": "catalog:auth",
+      "dotenv": "^16.5.0",
+      "drizzle-orm": "^0.43.1",
+      "drizzle-typebox": "^0.3.3",
+      "elysia": "catalog:server",
+      "react": "catalog:react",
+      "react-dom": "catalog:react",
+      "resend": "^4.6.0",
+      "wrangler": "^4.20.5"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "@types/bun": "latest",
+      "drizzle-kit": "^0.31.1",
+      "react-email": "^4.0.17",
+      "tsx": "^4.19.4",
+      "typescript": "catalog:development"
+   },
+   "name": "server",
+   "scripts": {
+      "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile server ./src/index.ts",
+      "check": "bunx --bun biome check --write .",
+      "deploy": "wrangler deploy",
+      "dev": "bun run --watch src/index.ts",
+      "format": "biome format",
+      "generate": "bunx drizzle-kit generate",
+      "migrate": "bunx drizzle-kit migrate",
+      "push": "bunx drizzle-kit push",
+      "start": "./server",
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "typecheck": "bunx --bun tsc --noEmit "
+   },
+   "version": "1.0.50"
 }

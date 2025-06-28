@@ -1,41 +1,41 @@
 {
-  "dialect": "postgresql",
-  "entries": [
-    {
-      "breakpoints": true,
-      "idx": 0,
-      "tag": "0000_friendly_wrecker",
-      "version": "7",
-      "when": 1748393572865
-    },
-    {
-      "breakpoints": true,
-      "idx": 1,
-      "tag": "0001_wandering_reavers",
-      "version": "7",
-      "when": 1750535514958
-    },
-    {
-      "breakpoints": true,
-      "idx": 2,
-      "tag": "0002_hesitant_inhumans",
-      "version": "7",
-      "when": 1750615990331
-    },
-    {
-      "breakpoints": true,
-      "idx": 3,
-      "tag": "0003_square_ulik",
-      "version": "7",
-      "when": 1750621261594
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1750956477692,
-      "tag": "0004_overconfident_wildside",
-      "breakpoints": true
-    }
-  ],
-  "version": "7"
+   "dialect": "postgresql",
+   "entries": [
+      {
+         "breakpoints": true,
+         "idx": 0,
+         "tag": "0000_friendly_wrecker",
+         "version": "7",
+         "when": 1748393572865
+      },
+      {
+         "breakpoints": true,
+         "idx": 1,
+         "tag": "0001_wandering_reavers",
+         "version": "7",
+         "when": 1750535514958
+      },
+      {
+         "breakpoints": true,
+         "idx": 2,
+         "tag": "0002_hesitant_inhumans",
+         "version": "7",
+         "when": 1750615990331
+      },
+      {
+         "breakpoints": true,
+         "idx": 3,
+         "tag": "0003_square_ulik",
+         "version": "7",
+         "when": 1750621261594
+      },
+      {
+         "idx": 4,
+         "version": "7",
+         "when": 1750956477692,
+         "tag": "0004_overconfident_wildside",
+         "breakpoints": true
+      }
+   ],
+   "version": "7"
 }

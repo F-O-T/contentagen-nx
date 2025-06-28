@@ -6,20 +6,20 @@ import { Elysia, t } from "elysia";
 const _createWaitlist = createInsertSchema(waitlist);
 
 export const waitlistRoutes = new Elysia({
-  prefix: "/waitlist",
+   prefix: "/waitlist",
 }).post(
-  "/",
-  async ({ body }) => {
-    const leadCreated = await db
-      .insert(waitlist)
-      .values({
-        email: body.email,
-        leadType: body.leadType,
-      })
-      .returning();
-    return { leadCreated };
-  },
-  {
-    body: t.Omit(_createWaitlist, ["id", "createdAt"]),
-  },
+   "/",
+   async ({ body }) => {
+      const leadCreated = await db
+         .insert(waitlist)
+         .values({
+            email: body.email,
+            leadType: body.leadType,
+         })
+         .returning();
+      return { leadCreated };
+   },
+   {
+      body: t.Omit(_createWaitlist, ["id", "createdAt"]),
+   },
 );
