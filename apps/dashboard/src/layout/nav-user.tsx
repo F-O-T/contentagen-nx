@@ -139,24 +139,21 @@ function NavUserContent() {
                   <DropdownMenuGroup>
                      <DropdownMenuItem asChild>
                         <Link to="/profile">
-                           <UserCircleIcon />
-                           Account
+                           <Button
+                              className="w-full items-center cursor-pointer justify-start flex gap-2"
+                              variant="ghost"
+                           >
+                              <UserCircleIcon />
+                              Account
+                           </Button>
                         </Link>
-                     </DropdownMenuItem>
-                     <DropdownMenuItem>
-                        <CreditCardIcon />
-                        Billing
-                     </DropdownMenuItem>
-                     <DropdownMenuItem>
-                        <BellIcon />
-                        Notifications
                      </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                      <Button
                         onClick={handleLogout}
-                        className="w-full"
+                        className="w-full cursor-pointer items-center justify-start flex gap-2"
                         variant="ghost"
                      >
                         <LogOutIcon />
