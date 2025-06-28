@@ -6,6 +6,7 @@ import {
    SidebarMenu,
    SidebarMenuButton,
    SidebarMenuItem,
+   useSidebar,
 } from "@packages/ui/components/sidebar";
 import { Link, useLocation } from "@tanstack/react-router";
 import { type LucideIcon, PlusCircleIcon } from "lucide-react";
@@ -20,10 +21,11 @@ export function NavMain({
    }[];
 }) {
    const { pathname } = useLocation();
+   const { setOpenMobile } = useSidebar();
    const isActive = (url: string) => {
       return pathname.startsWith(url);
    };
-
+ 
    return (
       <SidebarGroup>
          <SidebarGroupContent className="flex flex-col gap-2">
@@ -37,6 +39,7 @@ export function NavMain({
                      <Link
                         className="flex items-center gap-2"
                         to="/agents/manual"
+                        onClick={() => setOpenMobile(false)}
                      >
                         <PlusCircleIcon />
                         <span>Quick agent creation</span>
@@ -51,7 +54,11 @@ export function NavMain({
                      key={item.title}
                   >
                      <SidebarMenuButton asChild tooltip={item.title}>
-                        <Link className="flex items-center gap-2" to={item.url}>
+                        <Link
+                           className="flex items-center gap-2"
+                           to={item.url}
+                           onClick={() => setOpenMobile(false)}
+                        >
                            {item.icon && <item.icon />}
                            <span>{item.title}</span>
                         </Link>

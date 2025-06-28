@@ -21,17 +21,41 @@ import {
 } from "@packages/ui/components/sidebar";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { Link } from "@tanstack/react-router";
-import {
-   BellIcon,
-   CreditCardIcon,
-   LogOutIcon,
-   MoreVerticalIcon,
-   UserCircleIcon,
-} from "lucide-react";
+import { LogOutIcon, MoreVerticalIcon, UserCircleIcon } from "lucide-react";
 import { Suspense, useCallback } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { betterAuthClient } from "@/integrations/better-auth";
 import { Button } from "@packages/ui/components/button";
+function UserAvatarInfo({
+   name,
+   email,
+   image,
+   grayscale,
+}: {
+   name?: string;
+   email?: string;
+   image?: string;
+   grayscale?: boolean;
+}) {
+   return (
+      <>
+         <Avatar
+            className={`h-8 w-8 rounded-lg${grayscale ? " grayscale" : ""}`}
+         >
+            <AvatarImage alt={name} src={image ?? undefined} />
+            <AvatarFallback className="rounded-lg">
+               {name?.charAt(0) || "?"}
+            </AvatarFallback>
+         </Avatar>
+         <div className="grid flex-1 text-left text-sm leading-tight">
+            <span className="truncate font-medium">{name}</span>
+            <span className="truncate text-xs text-muted-foreground">
+               {email}
+            </span>
+         </div>
+      </>
+   );
+}
 
 // Simple ErrorBoundary implementation
 function NavUserErrorFallback() {
@@ -62,11 +86,11 @@ function NavUserSkeleton() {
 
 // Extracted content with Suspense logic
 function NavUserContent() {
-   const { isMobile } = useSidebar();
+   const { isMobile, setOpenMobile } = useSidebar();
    const router = useRouter();
    const { data: session, error, isPending } = betterAuthClient.useSession();
    const handleLogout = useCallback(async () => {
-      return await betterAuthClient.signOut({
+      await betterAuthClient.signOut({
          fetchOptions: {
             onSuccess: () => {
                router.navigate({
@@ -75,7 +99,8 @@ function NavUserContent() {
             },
          },
       });
-   }, [router]);
+      setOpenMobile(false);
+   }, [router, setOpenMobile]);
    if (error) throw error;
    if (isPending) return <NavUserSkeleton />;
 
@@ -88,23 +113,12 @@ function NavUserContent() {
                      className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                      size="lg"
                   >
-                     <Avatar className="h-8 w-8 rounded-lg grayscale">
-                        <AvatarImage
-                           alt={session?.user.name}
-                           src={session?.user.image ?? undefined}
-                        />
-                        <AvatarFallback className="rounded-lg">
-                           CN
-                        </AvatarFallback>
-                     </Avatar>
-                     <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-medium">
-                           {session?.user.name}
-                        </span>
-                        <span className="truncate text-xs text-muted-foreground">
-                           {session?.user.email}
-                        </span>
-                     </div>
+                     <UserAvatarInfo
+                        name={session?.user.name}
+                        email={session?.user.email}
+                        image={session?.user.image ?? ""}
+                        grayscale
+                     />
                      <MoreVerticalIcon className="ml-auto size-4" />
                   </SidebarMenuButton>
                </DropdownMenuTrigger>
@@ -116,23 +130,11 @@ function NavUserContent() {
                >
                   <DropdownMenuLabel className="p-0 font-normal">
                      <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                        <Avatar className="h-8 w-8 rounded-lg">
-                           <AvatarImage
-                              alt={session?.user?.name}
-                              src={session?.user?.image ?? undefined}
-                           />
-                           <AvatarFallback className="rounded-lg">
-                              CN
-                           </AvatarFallback>
-                        </Avatar>
-                        <div className="grid flex-1 text-left text-sm leading-tight">
-                           <span className="truncate font-medium">
-                              {session?.user.name}
-                           </span>
-                           <span className="truncate text-xs text-muted-foreground">
-                              {session?.user.email}
-                           </span>
-                        </div>
+                        <UserAvatarInfo
+                           name={session?.user.name}
+                           email={session?.user.email}
+                           image={session?.user.image ?? ""}
+                        />
                      </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -142,6 +144,7 @@ function NavUserContent() {
                            <Button
                               className="w-full items-center cursor-pointer justify-start flex gap-2"
                               variant="ghost"
+                              onClick={() => setOpenMobile(false)}
                            >
                               <UserCircleIcon />
                               Account
