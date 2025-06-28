@@ -31,10 +31,16 @@ export function EditAgentPage() {
       },
    });
 
+   if (!agent?.agent) {
+      return null;
+   }
+
    return (
       <AgentCreationManualForm
-         onSubmit={(values) => agentMutation.mutateAsync(values)}
-         defaultValues={{ ...agent?.agent }}
+         onSubmit={async (values) => {
+            await agentMutation.mutateAsync(values);
+         }}
+         defaultValues={{ ...agent.agent }}
       />
    );
 }
