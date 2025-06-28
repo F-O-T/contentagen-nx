@@ -8,7 +8,7 @@ import {
    SidebarMenu,
    SidebarMenuItem,
 } from "@packages/ui/components/sidebar";
-import { FileTextIcon, LayoutDashboardIcon } from "lucide-react";
+import { LayoutDashboardIcon } from "lucide-react";
 import type * as React from "react";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
@@ -20,17 +20,7 @@ const data = {
          title: "Agents",
          url: "/agents",
       },
-      {
-         icon: FileTextIcon,
-         title: "Content",
-         url: "/content",
-      },
    ],
-   user: {
-      avatar: "/avatars/shadcn.jpg",
-      email: "m@example.com",
-      name: "shadcn",
-   },
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

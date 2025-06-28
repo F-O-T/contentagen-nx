@@ -7,6 +7,7 @@ import {
    TARGET_AUDIENCES,
 } from "../lib/agent-form-constants.js";
 import type { AgentForm } from "../lib/use-agent-form";
+import { Button } from "@packages/ui/components/button";
 
 export function TargetAudienceStep({ form }: { form: AgentForm }) {
    return (
@@ -73,5 +74,40 @@ export function FormattingStyleStep({ form }: { form: AgentForm }) {
             </field.FieldContainer>
          )}
       </form.AppField>
+   );
+}
+export function TargetAudienceStepSubscribe({
+   form,
+   next,
+}: {
+   form: AgentForm;
+   next: () => void;
+}) {
+   return (
+      <form.Subscribe>
+         {() => (
+            <Button type="button" onClick={next}>
+               Next
+            </Button>
+         )}
+      </form.Subscribe>
+   );
+}
+
+export function FormattingStyleStepSubscribe({
+   form,
+   next,
+}: {
+   form: AgentForm;
+   next: () => void;
+}) {
+   return (
+      <form.Subscribe>
+         {() => (
+            <Button type="button" onClick={next}>
+               Next
+            </Button>
+         )}
+      </form.Subscribe>
    );
 }

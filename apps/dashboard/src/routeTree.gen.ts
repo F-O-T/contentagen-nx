@@ -20,11 +20,7 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-pas
 import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-verification'
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard/home'
 import { Route as DashboardProfileIndexRouteImport } from './routes/_dashboard/profile/index'
-import { Route as DashboardContentIndexRouteImport } from './routes/_dashboard/content/index'
 import { Route as DashboardAgentsIndexRouteImport } from './routes/_dashboard/agents/index'
-import { Route as DashboardContentReviewRouteImport } from './routes/_dashboard/content/review'
-import { Route as DashboardContentGenerateRouteImport } from './routes/_dashboard/content/generate'
-import { Route as DashboardContentExportRouteImport } from './routes/_dashboard/content/export'
 import { Route as DashboardAgentsEditRouteImport } from './routes/_dashboard/agents/edit'
 import { Route as DashboardAgentsFlowRouteImport } from './routes/_dashboard/agents/_flow'
 import { Route as DashboardProfilePreferencesIndexRouteImport } from './routes/_dashboard/profile/preferences/index'
@@ -83,31 +79,10 @@ const DashboardProfileIndexRoute = DashboardProfileIndexRouteImport.update({
   path: '/profile/',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardContentIndexRoute = DashboardContentIndexRouteImport.update({
-  id: '/content/',
-  path: '/content/',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardAgentsIndexRoute = DashboardAgentsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardAgentsRoute,
-} as any)
-const DashboardContentReviewRoute = DashboardContentReviewRouteImport.update({
-  id: '/content/review',
-  path: '/content/review',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardContentGenerateRoute =
-  DashboardContentGenerateRouteImport.update({
-    id: '/content/generate',
-    path: '/content/generate',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardContentExportRoute = DashboardContentExportRouteImport.update({
-  id: '/content/export',
-  path: '/content/export',
-  getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardAgentsEditRoute = DashboardAgentsEditRouteImport.update({
   id: '/edit',
@@ -153,11 +128,7 @@ export interface FileRoutesByFullPath {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/agents': typeof DashboardAgentsFlowRouteWithChildren
   '/agents/edit': typeof DashboardAgentsEditRoute
-  '/content/export': typeof DashboardContentExportRoute
-  '/content/generate': typeof DashboardContentGenerateRoute
-  '/content/review': typeof DashboardContentReviewRoute
   '/agents/': typeof DashboardAgentsIndexRoute
-  '/content': typeof DashboardContentIndexRoute
   '/profile': typeof DashboardProfileIndexRoute
   '/agents/choice': typeof DashboardAgentsFlowChoiceRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
@@ -174,10 +145,6 @@ export interface FileRoutesByTo {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/agents': typeof DashboardAgentsIndexRoute
   '/agents/edit': typeof DashboardAgentsEditRoute
-  '/content/export': typeof DashboardContentExportRoute
-  '/content/generate': typeof DashboardContentGenerateRoute
-  '/content/review': typeof DashboardContentReviewRoute
-  '/content': typeof DashboardContentIndexRoute
   '/profile': typeof DashboardProfileIndexRoute
   '/agents/choice': typeof DashboardAgentsFlowChoiceRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
@@ -197,11 +164,7 @@ export interface FileRoutesById {
   '/_dashboard/agents': typeof DashboardAgentsRouteWithChildren
   '/_dashboard/agents/_flow': typeof DashboardAgentsFlowRouteWithChildren
   '/_dashboard/agents/edit': typeof DashboardAgentsEditRoute
-  '/_dashboard/content/export': typeof DashboardContentExportRoute
-  '/_dashboard/content/generate': typeof DashboardContentGenerateRoute
-  '/_dashboard/content/review': typeof DashboardContentReviewRoute
   '/_dashboard/agents/': typeof DashboardAgentsIndexRoute
-  '/_dashboard/content/': typeof DashboardContentIndexRoute
   '/_dashboard/profile/': typeof DashboardProfileIndexRoute
   '/_dashboard/agents/_flow/choice': typeof DashboardAgentsFlowChoiceRoute
   '/_dashboard/agents/_flow/manual': typeof DashboardAgentsFlowManualRoute
@@ -220,11 +183,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/agents'
     | '/agents/edit'
-    | '/content/export'
-    | '/content/generate'
-    | '/content/review'
     | '/agents/'
-    | '/content'
     | '/profile'
     | '/agents/choice'
     | '/agents/manual'
@@ -241,10 +200,6 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/agents'
     | '/agents/edit'
-    | '/content/export'
-    | '/content/generate'
-    | '/content/review'
-    | '/content'
     | '/profile'
     | '/agents/choice'
     | '/agents/manual'
@@ -263,11 +218,7 @@ export interface FileRouteTypes {
     | '/_dashboard/agents'
     | '/_dashboard/agents/_flow'
     | '/_dashboard/agents/edit'
-    | '/_dashboard/content/export'
-    | '/_dashboard/content/generate'
-    | '/_dashboard/content/review'
     | '/_dashboard/agents/'
-    | '/_dashboard/content/'
     | '/_dashboard/profile/'
     | '/_dashboard/agents/_flow/choice'
     | '/_dashboard/agents/_flow/manual'
@@ -353,40 +304,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProfileIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/_dashboard/content/': {
-      id: '/_dashboard/content/'
-      path: '/content'
-      fullPath: '/content'
-      preLoaderRoute: typeof DashboardContentIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/_dashboard/agents/': {
       id: '/_dashboard/agents/'
       path: '/'
       fullPath: '/agents/'
       preLoaderRoute: typeof DashboardAgentsIndexRouteImport
       parentRoute: typeof DashboardAgentsRoute
-    }
-    '/_dashboard/content/review': {
-      id: '/_dashboard/content/review'
-      path: '/content/review'
-      fullPath: '/content/review'
-      preLoaderRoute: typeof DashboardContentReviewRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/_dashboard/content/generate': {
-      id: '/_dashboard/content/generate'
-      path: '/content/generate'
-      fullPath: '/content/generate'
-      preLoaderRoute: typeof DashboardContentGenerateRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/_dashboard/content/export': {
-      id: '/_dashboard/content/export'
-      path: '/content/export'
-      fullPath: '/content/export'
-      preLoaderRoute: typeof DashboardContentExportRouteImport
-      parentRoute: typeof DashboardRoute
     }
     '/_dashboard/agents/edit': {
       id: '/_dashboard/agents/edit'
@@ -465,10 +388,6 @@ const DashboardAgentsRouteWithChildren = DashboardAgentsRoute._addFileChildren(
 interface DashboardRouteChildren {
   DashboardHomeRoute: typeof DashboardHomeRoute
   DashboardAgentsRoute: typeof DashboardAgentsRouteWithChildren
-  DashboardContentExportRoute: typeof DashboardContentExportRoute
-  DashboardContentGenerateRoute: typeof DashboardContentGenerateRoute
-  DashboardContentReviewRoute: typeof DashboardContentReviewRoute
-  DashboardContentIndexRoute: typeof DashboardContentIndexRoute
   DashboardProfileIndexRoute: typeof DashboardProfileIndexRoute
   DashboardProfileBillingIndexRoute: typeof DashboardProfileBillingIndexRoute
   DashboardProfilePreferencesIndexRoute: typeof DashboardProfilePreferencesIndexRoute
@@ -477,10 +396,6 @@ interface DashboardRouteChildren {
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHomeRoute: DashboardHomeRoute,
   DashboardAgentsRoute: DashboardAgentsRouteWithChildren,
-  DashboardContentExportRoute: DashboardContentExportRoute,
-  DashboardContentGenerateRoute: DashboardContentGenerateRoute,
-  DashboardContentReviewRoute: DashboardContentReviewRoute,
-  DashboardContentIndexRoute: DashboardContentIndexRoute,
   DashboardProfileIndexRoute: DashboardProfileIndexRoute,
   DashboardProfileBillingIndexRoute: DashboardProfileBillingIndexRoute,
   DashboardProfilePreferencesIndexRoute: DashboardProfilePreferencesIndexRoute,

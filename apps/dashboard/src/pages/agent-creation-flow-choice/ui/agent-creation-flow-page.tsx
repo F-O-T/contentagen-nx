@@ -55,7 +55,7 @@ export function AgentCreationFlowPage() {
 
          <Link to="/agents/manual">
             <SquaredIconButton id="manual-card">
-               <Settings className="h-10 w-10 text-slate-600 transition-all duration-300 group-hover:text-white" />
+               <Settings />
                Custom Agent Builder
             </SquaredIconButton>
          </Link>

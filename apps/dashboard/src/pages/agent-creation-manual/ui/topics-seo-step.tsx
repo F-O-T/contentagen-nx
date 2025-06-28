@@ -4,8 +4,9 @@ import { Input } from "@packages/ui/components/input";
 import { X } from "lucide-react";
 import { useState } from "react";
 import type { AgentForm } from "../lib/use-agent-form";
+import { Button } from "@packages/ui/components/button";
 
-export default function TopicsSeoStep({ form }: { form: AgentForm }) {
+export function TopicsSeoStep({ form }: { form: AgentForm }) {
    const [currentTopic, setCurrentTopic] = useState("");
    const [currentKeyword, setCurrentKeyword] = useState("");
 
@@ -151,5 +152,45 @@ export default function TopicsSeoStep({ form }: { form: AgentForm }) {
             )}
          </form.AppField>
       </>
+   );
+}
+export function TopicsSeoStepSubscribe({
+   form,
+   next,
+}: {
+   form: AgentForm;
+   next: () => void;
+}) {
+   return (
+      <form.Subscribe
+         selector={(state) => ({
+            topics: state.values.topics,
+            seoKeywords: state.values.seoKeywords,
+            topicsErrors: state.fieldMeta?.topics?.errors,
+            seoKeywordsErrors: state.fieldMeta?.seoKeywords?.errors,
+         })}
+      >
+         {({ topics, seoKeywords, topicsErrors, seoKeywordsErrors }) => {
+            const isTopicsValid =
+               Array.isArray(topics) &&
+               topics.length > 0 &&
+               (!topicsErrors || topicsErrors.length === 0);
+            const isSeoKeywordsValid =
+               Array.isArray(seoKeywords) &&
+               seoKeywords.length > 0 &&
+               (!seoKeywordsErrors || seoKeywordsErrors.length === 0);
+            const canGoNext = isTopicsValid && isSeoKeywordsValid;
+            return (
+               <Button
+                  className="gap-4"
+                  onClick={next}
+                  type="button"
+                  disabled={!canGoNext}
+               >
+                  Next
+               </Button>
+            );
+         }}
+      </form.Subscribe>
    );
 }

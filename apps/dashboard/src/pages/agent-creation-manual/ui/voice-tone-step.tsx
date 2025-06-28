@@ -1,8 +1,9 @@
 import type { VoiceTone } from "@api/schemas/content-schema";
 import { VOICE_TONES } from "../lib/agent-form-constants";
 import type { AgentForm } from "../lib/use-agent-form";
+import { Button } from "@packages/ui/components/button";
 
-export default function VoiceToneStep({ form }: { form: AgentForm }) {
+export function VoiceToneStep({ form }: { form: AgentForm }) {
    return (
       <form.AppField name="voiceTone">
          {(field) => (
@@ -29,5 +30,22 @@ export default function VoiceToneStep({ form }: { form: AgentForm }) {
             </field.FieldContainer>
          )}
       </form.AppField>
+   );
+}
+export function VoiceToneStepSubscribe({
+   form,
+   next,
+}: {
+   form: AgentForm;
+   next: () => void;
+}) {
+   return (
+      <form.Subscribe>
+         {() => (
+            <Button type="button" onClick={next}>
+               Next
+            </Button>
+         )}
+      </form.Subscribe>
    );
 }

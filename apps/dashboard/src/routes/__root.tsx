@@ -20,7 +20,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
    component: () => (
       <RootDocument>
          <QueryProvider>
-            <ThemeProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                <Outlet />
             </ThemeProvider>
          </QueryProvider>

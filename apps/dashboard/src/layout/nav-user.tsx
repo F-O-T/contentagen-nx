@@ -3,6 +3,7 @@ import {
    AvatarFallback,
    AvatarImage,
 } from "@packages/ui/components/avatar";
+import { useRouter } from "@tanstack/react-router";
 import {
    DropdownMenu,
    DropdownMenuContent,
@@ -27,9 +28,10 @@ import {
    MoreVerticalIcon,
    UserCircleIcon,
 } from "lucide-react";
-import { Suspense } from "react";
+import { Suspense, useCallback } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { betterAuthClient } from "@/integrations/better-auth";
+import { Button } from "@packages/ui/components/button";
 
 // Simple ErrorBoundary implementation
 function NavUserErrorFallback() {
@@ -61,7 +63,19 @@ function NavUserSkeleton() {
 // Extracted content with Suspense logic
 function NavUserContent() {
    const { isMobile } = useSidebar();
+   const router = useRouter();
    const { data: session, error, isPending } = betterAuthClient.useSession();
+   const handleLogout = useCallback(async () => {
+      return await betterAuthClient.signOut({
+         fetchOptions: {
+            onSuccess: () => {
+               router.navigate({
+                  to: "/",
+               });
+            },
+         },
+      });
+   }, [router]);
    if (error) throw error;
    if (isPending) return <NavUserSkeleton />;
 
@@ -139,9 +153,15 @@ function NavUserContent() {
                      </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                     <LogOutIcon />
-                     Log out
+                  <DropdownMenuItem asChild>
+                     <Button
+                        onClick={handleLogout}
+                        className="w-full"
+                        variant="ghost"
+                     >
+                        <LogOutIcon />
+                        Log out
+                     </Button>
                   </DropdownMenuItem>
                </DropdownMenuContent>
             </DropdownMenu>
