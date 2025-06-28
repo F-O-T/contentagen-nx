@@ -1,4 +1,4 @@
-import { useBetterAuthSession } from "@/integrations/better-auth";
+import { betterAuthClient } from "@/integrations/better-auth";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_dashboard/profile/")({
 });
 
 function ProfilePage() {
-   const { session } = useBetterAuthSession();
+   const { data: session } = betterAuthClient.useSession();
    const [activeTab, setActiveTab] = useState("profile");
 
    const [profileData, setProfileData] = useState({
@@ -35,7 +35,7 @@ function ProfilePage() {
       company: "",
    });
 
-   const handleSaveProfile = async () => {};
+   const handleSaveProfile = async () => { };
 
    return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

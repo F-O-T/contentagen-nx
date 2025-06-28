@@ -1,8 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { betterAuthClient } from "@/integrations/better-auth";
 export const Route = createFileRoute("/")({
-  beforeLoad: async ({ context }) => {
-    const session = await context.sessionMiddleware();
-    if (session?.session?.token) {
+  beforeLoad: async () => {
+    const { data } = await betterAuthClient.getSession();
+    if (data?.session?.token) {
       throw redirect({ to: "/home" });
     }
     throw redirect({ to: "/auth/sign-in" });

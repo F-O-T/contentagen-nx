@@ -1,4 +1,3 @@
-import { BetterAuthSessionProvider } from "@/integrations/better-auth";
 import { QueryProvider } from "@/integrations/tanstack-query";
 import { ThemeProvider } from "@/layout/theme-provider";
 import brandConfig from "@packages/brand/index.json";
@@ -21,11 +20,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
    component: () => (
       <RootDocument>
          <QueryProvider>
-            <BetterAuthSessionProvider>
-               <ThemeProvider>
-                  <Outlet />
-               </ThemeProvider>
-            </BetterAuthSessionProvider>
+            <ThemeProvider>
+               <Outlet />
+            </ThemeProvider>
          </QueryProvider>
       </RootDocument>
    ),

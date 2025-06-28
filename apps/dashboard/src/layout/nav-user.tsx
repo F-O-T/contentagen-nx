@@ -1,4 +1,3 @@
-import { useBetterAuthSession } from "@/integrations/better-auth";
 import {
    Avatar,
    AvatarFallback,
@@ -20,12 +19,13 @@ import {
    useSidebar,
 } from "@packages/ui/components/sidebar";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { Link } from "@tanstack/react-router";
 import {
-  BellIcon,
-  CreditCardIcon,
-  LogOutIcon,
-  MoreVerticalIcon,
-  UserCircleIcon,
+   BellIcon,
+   CreditCardIcon,
+   LogOutIcon,
+   MoreVerticalIcon,
+   UserCircleIcon,
 } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -61,10 +61,9 @@ function NavUserSkeleton() {
 // Extracted content with Suspense logic
 function NavUserContent() {
    const { isMobile } = useSidebar();
-   const { session, isLoading, error } = useBetterAuthSession();
-
+   const { data: session, error, isPending } = betterAuthClient.useSession();
    if (error) throw error;
-   if (isLoading) return <NavUserSkeleton />;
+   if (isPending) return <NavUserSkeleton />;
 
    return (
       <SidebarMenu>
