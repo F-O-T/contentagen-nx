@@ -22,7 +22,6 @@ import {
    MoreVertical,
    Folder,
    Users,
-   BookOpen,
    FileText,
    CheckCircle2,
 } from "lucide-react";
@@ -44,14 +43,6 @@ export function AgentCard({ agent }: AgentCardProps) {
             icon: <Users />,
             label: "Voice & Audience",
             value: `${formatValueToTitleCase(agent.voiceTone)} • ${formatValueToTitleCase(agent.targetAudience)}`,
-         },
-         {
-            icon: <BookOpen />,
-            label: "Topics",
-            value:
-               (agent.topics?.length || 0) > 2
-                  ? `${agent?.topics?.slice(0, 2).join(", ")}, +${agent?.topics?.length ?? 0 - 2}`
-                  : agent.topics?.join(", ") || "-",
          },
       ],
       [agent],

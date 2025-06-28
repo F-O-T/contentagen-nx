@@ -100,11 +100,7 @@ export const agent = pgTable("agent", {
       onDelete: "cascade",
    }),
    seoFocus: boolean("seo_focus").default(false),
-   seoKeywords: json("seo_keywords").$type<string[]>().default([]),
    targetAudience: targetAudienceEnum("target_audience").notNull(),
-
-   topics: json("topics").$type<string[]>().default([]),
-
    totalDrafts: integer("total_drafts").default(0),
    totalPublished: integer("total_published").default(0),
    updatedAt: timestamp("updated_at")

@@ -21,8 +21,9 @@ import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-v
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard/home'
 import { Route as DashboardProfileIndexRouteImport } from './routes/_dashboard/profile/index'
 import { Route as DashboardAgentsIndexRouteImport } from './routes/_dashboard/agents/index'
-import { Route as DashboardAgentsFlowRouteImport } from './routes/_dashboard/agents/_flow'
+import { Route as DashboardAgentsFlowRouteImport } from './routes/_dashboard/agents/$agentId.editw'
 import { Route as DashboardAgentsFlowManualRouteImport } from './routes/_dashboard/agents/_flow/manual'
+import { Route as DashboardAgentsAgentIdEditRouteImport } from './routes/_dashboard/agents/$agentId.edit'
 
 const DashboardAgentsRouteImport = createFileRoute('/_dashboard/agents')()
 
@@ -90,6 +91,12 @@ const DashboardAgentsFlowManualRoute =
     path: '/manual',
     getParentRoute: () => DashboardAgentsFlowRoute,
   } as any)
+const DashboardAgentsAgentIdEditRoute =
+  DashboardAgentsAgentIdEditRouteImport.update({
+    id: '/$agentId/edit',
+    path: '/$agentId/edit',
+    getParentRoute: () => DashboardAgentsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/agents': typeof DashboardAgentsFlowRouteWithChildren
   '/agents/': typeof DashboardAgentsIndexRoute
   '/profile': typeof DashboardProfileIndexRoute
+  '/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
 }
 export interface FileRoutesByTo {
@@ -114,6 +122,7 @@ export interface FileRoutesByTo {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/agents': typeof DashboardAgentsIndexRoute
   '/profile': typeof DashboardProfileIndexRoute
+  '/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
 }
 export interface FileRoutesById {
@@ -130,49 +139,53 @@ export interface FileRoutesById {
   '/_dashboard/agents/_flow': typeof DashboardAgentsFlowRouteWithChildren
   '/_dashboard/agents/': typeof DashboardAgentsIndexRoute
   '/_dashboard/profile/': typeof DashboardProfileIndexRoute
+  '/_dashboard/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
   '/_dashboard/agents/_flow/manual': typeof DashboardAgentsFlowManualRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/auth'
-    | '/home'
-    | '/auth/email-verification'
-    | '/auth/forgot-password'
-    | '/auth/sign-in'
-    | '/auth/sign-up'
-    | '/agents'
-    | '/agents/'
-    | '/profile'
-    | '/agents/manual'
+  | '/'
+  | '/auth'
+  | '/home'
+  | '/auth/email-verification'
+  | '/auth/forgot-password'
+  | '/auth/sign-in'
+  | '/auth/sign-up'
+  | '/agents'
+  | '/agents/'
+  | '/profile'
+  | '/agents/$agentId/edit'
+  | '/agents/manual'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/auth'
-    | '/home'
-    | '/auth/email-verification'
-    | '/auth/forgot-password'
-    | '/auth/sign-in'
-    | '/auth/sign-up'
-    | '/agents'
-    | '/profile'
-    | '/agents/manual'
+  | '/'
+  | '/auth'
+  | '/home'
+  | '/auth/email-verification'
+  | '/auth/forgot-password'
+  | '/auth/sign-in'
+  | '/auth/sign-up'
+  | '/agents'
+  | '/profile'
+  | '/agents/$agentId/edit'
+  | '/agents/manual'
   id:
-    | '__root__'
-    | '/'
-    | '/_dashboard'
-    | '/auth'
-    | '/_dashboard/home'
-    | '/auth/email-verification'
-    | '/auth/forgot-password'
-    | '/auth/sign-in'
-    | '/auth/sign-up'
-    | '/_dashboard/agents'
-    | '/_dashboard/agents/_flow'
-    | '/_dashboard/agents/'
-    | '/_dashboard/profile/'
-    | '/_dashboard/agents/_flow/manual'
+  | '__root__'
+  | '/'
+  | '/_dashboard'
+  | '/auth'
+  | '/_dashboard/home'
+  | '/auth/email-verification'
+  | '/auth/forgot-password'
+  | '/auth/sign-in'
+  | '/auth/sign-up'
+  | '/_dashboard/agents'
+  | '/_dashboard/agents/_flow'
+  | '/_dashboard/agents/'
+  | '/_dashboard/profile/'
+  | '/_dashboard/agents/$agentId/edit'
+  | '/_dashboard/agents/_flow/manual'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -274,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAgentsFlowManualRouteImport
       parentRoute: typeof DashboardAgentsFlowRoute
     }
+    '/_dashboard/agents/$agentId/edit': {
+      id: '/_dashboard/agents/$agentId/edit'
+      path: '/$agentId/edit'
+      fullPath: '/agents/$agentId/edit'
+      preLoaderRoute: typeof DashboardAgentsAgentIdEditRouteImport
+      parentRoute: typeof DashboardAgentsRoute
+    }
   }
 }
 
@@ -291,11 +311,13 @@ const DashboardAgentsFlowRouteWithChildren =
 interface DashboardAgentsRouteChildren {
   DashboardAgentsFlowRoute: typeof DashboardAgentsFlowRouteWithChildren
   DashboardAgentsIndexRoute: typeof DashboardAgentsIndexRoute
+  DashboardAgentsAgentIdEditRoute: typeof DashboardAgentsAgentIdEditRoute
 }
 
 const DashboardAgentsRouteChildren: DashboardAgentsRouteChildren = {
   DashboardAgentsFlowRoute: DashboardAgentsFlowRouteWithChildren,
   DashboardAgentsIndexRoute: DashboardAgentsIndexRoute,
+  DashboardAgentsAgentIdEditRoute: DashboardAgentsAgentIdEditRoute,
 }
 
 const DashboardAgentsRouteWithChildren = DashboardAgentsRoute._addFileChildren(
