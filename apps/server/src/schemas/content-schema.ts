@@ -82,9 +82,6 @@ export const project = pgTable("project", {
 
 export const agent = pgTable("agent", {
    contentType: contentTypeEnum("content_type").notNull(),
-   basePrompt: text("base_prompt"),
-   exampleArticle: text("example_article"),
-
    createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
       .notNull(),
@@ -110,7 +107,6 @@ export const agent = pgTable("agent", {
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
    voiceTone: voiceToneEnum("voice_tone").notNull(),
-   wordCount: integer("word_count").default(1000),
 });
 
 export const content = pgTable("content", {
@@ -122,10 +118,7 @@ export const content = pgTable("content", {
    createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
       .notNull(),
-   excerpt: text("excerpt"),
    id: uuid("id").primaryKey().defaultRandom(),
-
-   metaDescription: text("meta_description"),
 
    publishedAt: timestamp("published_at"),
    readTimeMinutes: integer("read_time_minutes").default(0),
@@ -133,7 +126,7 @@ export const content = pgTable("content", {
    slug: text("slug"),
 
    status: contentStatusEnum("status").default("draft"),
-   tags: json("tags").$type<string[]>().default([]),
+   tags: json("tags").$type<string[]>(),
    title: text("title").notNull(),
    updatedAt: timestamp("updated_at")
       .$defaultFn(() => new Date())
@@ -141,8 +134,7 @@ export const content = pgTable("content", {
    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-
-   wordCount: integer("word_count").default(0),
+   wordsCount: integer("words_count"),
 });
 
 export const contentRequest = pgTable("content_request", {
@@ -157,13 +149,11 @@ export const contentRequest = pgTable("content_request", {
 
    generatedContentId: uuid("generated_content_id").references(
       () => content.id,
-      { onDelete: "set null" },
+      { onDelete: "cascade" },
    ),
-   id: text("id").primaryKey(),
-   includeImages: boolean("include_images").default(false),
+   id: uuid("id").primaryKey().defaultRandom(),
    isCompleted: boolean("is_completed").default(false),
-   priority: priorityEnum("priority").default("normal"),
-   targetLength: contentLengthEnum("target_length").default("medium"),
+   targetLength: contentLengthEnum("target_length").default("medium").notNull(),
    topic: text("topic").notNull(),
    updatedAt: timestamp("updated_at")
       .$defaultFn(() => new Date())

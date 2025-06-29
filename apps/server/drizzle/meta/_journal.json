@@ -42,6 +42,13 @@
       "when": 1751140110045,
       "tag": "0005_narrow_bulldozer",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1751162145217,
+      "tag": "0006_known_microchip",
+      "breakpoints": true
     }
   ],
   "version": "7"

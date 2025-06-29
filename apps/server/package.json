@@ -1,5 +1,7 @@
 {
    "dependencies": {
+      "@bull-board/api": "^6.10.1",
+      "@bull-board/elysia": "^6.10.1",
       "@elysiajs/cors": "^1.3.3",
       "@elysiajs/opentelemetry": "^1.3.0",
       "@elysiajs/swagger": "^1.3.0",
@@ -9,10 +11,12 @@
       "@react-email/components": "^0.1.1",
       "@sinclair/typebox": "^0.34.35",
       "better-auth": "catalog:auth",
+      "bullmq": "^5.56.0",
       "dotenv": "^16.5.0",
       "drizzle-orm": "^0.43.1",
       "drizzle-typebox": "^0.3.3",
       "elysia": "catalog:server",
+      "openai": "^5.8.2",
       "react": "catalog:react",
       "react-dom": "catalog:react",
       "resend": "^4.6.0",
