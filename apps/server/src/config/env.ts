@@ -11,6 +11,7 @@ const EnvSchema = Type.Object({
    REDIS_URL: Type.String(),
    OPENROUTER_API_KEY: Type.String(),
    OPENAI_API_KEY: Type.String(),
+   BULL_BOARD_PASSWORD: Type.String(),
 });
 
 function parseEnv(env: NodeJS.ProcessEnv): Static<typeof EnvSchema> {

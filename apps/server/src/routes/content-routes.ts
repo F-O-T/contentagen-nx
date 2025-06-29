@@ -1,17 +1,122 @@
 import { Elysia, t } from "elysia";
 import { db } from "../integrations/database";
 import { contentRequest, content } from "../schemas/content-schema";
-import { createInsertSchema } from "drizzle-typebox";
+import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
 import { authMiddleware } from "../integrations/auth";
 import { contentGenerationQueue } from "@api/workers/content-generation";
-import { embeddingService } from "../services/embedding";
-
+import { categorizeSimilarity, embeddingService } from "../services/embedding";
 import { and, desc, eq, gt, ne, sql, cosineDistance } from "drizzle-orm";
 
-const _createContentRequest = createInsertSchema(contentRequest);
+// OpenAPI Tags for route organization
+enum ApiTags {
+   CONTENT_REQUESTS = "Content Requests",
+   CONTENT_MANAGEMENT = "Content Management", 
+   CONTENT = "Content",
+   AI_ANALYSIS = "Vector Analysis",
+   MAINTENANCE = "Maintenance"
+}
 
+const _createContentRequest = createInsertSchema(contentRequest);
+const _selectContentRequest = createSelectSchema(contentRequest);
+const _selectContent = createSelectSchema(content);
+
+// Specific schemas for different endpoints
+const _contentRequestParams = t.Object({
+   id: t.String({ format: "uuid" }),
+});
+
+const _contentParams = t.Object({
+   contentId: t.String({ format: "uuid" }),
+});
+
+const _listContentRequestsQuery = t.Object({
+   page: t.Optional(t.Number({ minimum: 1 })),
+   limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
+   status: t.Optional(t.Union([
+      t.Literal("pending"),
+      t.Literal("approved"), 
+      t.Literal("rejected")
+   ])),
+});
+
+const _approveRejectResponse = t.Object({
+   request: _selectContentRequest,
+});
+
+const _listContentRequestsResponse = t.Object({
+   requests: t.Array(t.Pick(_selectContentRequest, [
+      'id', 'topic', 'briefDescription', 'targetLength', 
+      'status', 'isCompleted', 'createdAt', 'updatedAt', 
+      'agentId', 'generatedContentId'
+   ])),
+   pagination: t.Object({
+      page: t.Number(),
+      limit: t.Number(),
+      total: t.Number(),
+   }),
+});
+
+const _contentRequestDetailsResponse = t.Object({
+   request: t.Intersect([
+      _selectContentRequest,
+      t.Object({
+         generatedContent: t.Optional(t.Nullable(_selectContent)),
+      }),
+   ]),
+});
+
+const _similarityResponse = t.Object({
+   similarRequests: t.Array(t.Pick(_selectContentRequest, [
+      'id', 'topic', 'briefDescription', 'status', 'createdAt'
+   ])),
+   similarity: t.Number(),
+   category: t.Union([
+      t.Literal("info"),
+      t.Literal("warning"),
+      t.Literal("error"),
+   ]),
+   message: t.String(),
+});
+
+const _contentSimilarityResponse = t.Object({
+   similarContent: t.Array(t.Intersect([
+      t.Pick(_selectContent, [
+         'id', 'title', 'body', 'status', 'createdAt', 'agentId'
+      ]),
+      t.Object({
+         similarity: t.Optional(t.Number()),
+      }),
+   ])),
+   similarity: t.Number(),
+   category: t.Union([
+      t.Literal("info"),
+      t.Literal("warning"),
+      t.Literal("error"),
+   ]),
+   message: t.String(),
+});
+
+const _regenerateEmbeddingsResponse = t.Object({
+   message: t.String(),
+   stats: t.Object({
+      updatedRequests: t.Number(),
+      updatedContent: t.Number(),
+      totalRequests: t.Number(),
+      totalContent: t.Number(),
+   }),
+});
+
+const _generateEmbeddingResponse = t.Object({
+   message: t.String(),
+   content: _selectContent,
+});
+
+const _errorResponse = t.Object({
+   message: t.String(),
+});
 export const contentRoutes = new Elysia({
    prefix: "/content/request",
+   tags: [ApiTags.CONTENT_REQUESTS],
 })
    .use(authMiddleware)
    .post(
@@ -58,6 +163,16 @@ export const contentRoutes = new Elysia({
       },
       {
          auth: true,
+         detail: {
+            summary: "Create a new content request",
+            description: "Generate a new content request with embedding for similarity analysis. The system will automatically generate embeddings for the topic and brief description to enable content similarity detection.",
+            tags: [ApiTags.CONTENT_REQUESTS],
+            responses: {
+               201: {
+                  description: "Content request created successfully",
+               },
+            },
+         },
          body: t.Omit(_createContentRequest, [
             "id",
             "updatedAt",
@@ -68,6 +183,11 @@ export const contentRoutes = new Elysia({
             "status",
             "embedding",
          ]),
+         response: {
+            201: t.Object({
+               request: _selectContentRequest,
+            }),
+         },
       },
    )
    .post(
@@ -97,9 +217,24 @@ export const contentRoutes = new Elysia({
       },
       {
          auth: true,
-         params: t.Object({
-            id: t.String(),
-         }),
+         detail: {
+            summary: "Approve a content request",
+            description: "Approve a pending content request and queue it for content generation. This will change the request status to 'approved' and trigger the content generation worker.",
+            tags: [ApiTags.CONTENT_REQUESTS, ApiTags.CONTENT_MANAGEMENT],
+            responses: {
+               202: {
+                  description: "Content request approved and queued for generation",
+               },
+               404: {
+                  description: "Content request not found",
+               },
+            },
+         },
+         params: _contentRequestParams,
+         response: {
+            202: _approveRejectResponse,
+            404: _errorResponse,
+         },
       },
    )
    .post(
@@ -124,9 +259,24 @@ export const contentRoutes = new Elysia({
       },
       {
          auth: true,
-         params: t.Object({
-            id: t.String(),
-         }),
+         detail: {
+            summary: "Reject a content request",
+            description: "Reject a pending content request. This will change the request status to 'rejected' and prevent it from being processed for content generation.",
+            tags: [ApiTags.CONTENT_REQUESTS, ApiTags.CONTENT_MANAGEMENT],
+            responses: {
+               200: {
+                  description: "Content request rejected successfully",
+               },
+               404: {
+                  description: "Content request not found",
+               },
+            },
+         },
+         params: _contentRequestParams,
+         response: {
+            200: _approveRejectResponse,
+            404: _errorResponse,
+         },
       },
    )
    .get(
@@ -171,15 +321,20 @@ export const contentRoutes = new Elysia({
       },
       {
          auth: true,
-         query: t.Object({
-            page: t.Optional(t.Number({ minimum: 1 })),
-            limit: t.Optional(t.Number({ minimum: 1, maximum: 50 })),
-            status: t.Optional(t.Union([
-               t.Literal("pending"),
-               t.Literal("approved"), 
-               t.Literal("rejected")
-            ])),
-         }),
+         detail: {
+            summary: "List content requests",
+            description: "Retrieve a paginated list of content requests for the authenticated user. Supports filtering by status (pending, approved, rejected) and includes pagination metadata.",
+            tags: [ApiTags.CONTENT_REQUESTS],
+            responses: {
+               200: {
+                  description: "List of content requests retrieved successfully",
+               },
+            },
+         },
+         query: _listContentRequestsQuery,
+         response: {
+            200: _listContentRequestsResponse,
+         },
       },
    )
    .get(
@@ -212,9 +367,24 @@ export const contentRoutes = new Elysia({
       },
       {
          auth: true,
-         params: t.Object({
-            id: t.String(),
-         }),
+         detail: {
+            summary: "Get content request details",
+            description: "Retrieve detailed information about a specific content request, including any generated content associated with it. Only returns requests belonging to the authenticated user.",
+            tags: [ApiTags.CONTENT_REQUESTS],
+            responses: {
+               200: {
+                  description: "Content request details retrieved successfully",
+               },
+               404: {
+                  description: "Content request not found or doesn't belong to user",
+               },
+            },
+         },
+         params: _contentRequestParams,
+         response: {
+            200: _contentRequestDetailsResponse,
+            404: _errorResponse,
+         },
       },
    )
    .get(
@@ -281,7 +451,7 @@ export const contentRoutes = new Elysia({
          const maxSimilarity = similarRequests[0]?.similarity || 0;
          
          // Use embedding service to categorize similarity
-         const { category, message } = embeddingService.categorizeSimilarity(maxSimilarity);
+         const { category, message } = categorizeSimilarity(maxSimilarity);
 
          return {
             similarRequests,
@@ -292,9 +462,24 @@ export const contentRoutes = new Elysia({
       },
       {
          auth: true,
-         params: t.Object({
-            id: t.String(),
-         }),
+         detail: {
+            summary: "Find similar content requests",
+            description: "Analyze and find content requests similar to the specified request using vector embeddings. Returns similarity scores and categorizes the level of similarity (info, warning, error) to help identify potential duplicate or related content.",
+            tags: [ApiTags.CONTENT_REQUESTS, ApiTags.AI_ANALYSIS],
+            responses: {
+               200: {
+                  description: "Similar content requests found and analyzed",
+               },
+               404: {
+                  description: "Content request not found or doesn't belong to user",
+               },
+            },
+         },
+         params: _contentRequestParams,
+         response: {
+            200: _similarityResponse,
+            404: _errorResponse,
+         },
       },
    )
    .get(
@@ -364,7 +549,7 @@ export const contentRoutes = new Elysia({
          const maxSimilarity = similarContent[0]?.similarity || 0;
          
          // Use embedding service to categorize similarity
-         const { category, message } = embeddingService.categorizeSimilarity(maxSimilarity);
+         const { category, message } = categorizeSimilarity(maxSimilarity);
 
          return {
             similarContent,
@@ -375,9 +560,24 @@ export const contentRoutes = new Elysia({
       },
       {
          auth: true,
-         params: t.Object({
-            contentId: t.String(),
-         }),
+         detail: {
+            summary: "Find similar content",
+            description: "Analyze and find content pieces similar to the specified content using vector embeddings. This helps identify duplicate content, related articles, or content that covers similar topics to avoid redundancy.",
+            tags: [ApiTags.CONTENT, ApiTags.AI_ANALYSIS],
+            responses: {
+               200: {
+                  description: "Similar content found and analyzed",
+               },
+               404: {
+                  description: "Content not found or doesn't belong to user",
+               },
+            },
+         },
+         params: _contentParams,
+         response: {
+            200: _contentSimilarityResponse,
+            404: _errorResponse,
+         },
       },
    )
    .post(
@@ -459,6 +659,23 @@ export const contentRoutes = new Elysia({
       },
       {
          auth: true,
+         detail: {
+            summary: "Regenerate missing embeddings",
+            description: "Batch regenerate vector embeddings for content requests and content that are missing embeddings. This is useful for data migration or when embedding generation previously failed. Returns statistics about the regeneration process.",
+            tags: [ApiTags.AI_ANALYSIS, ApiTags.MAINTENANCE],
+            responses: {
+               200: {
+                  description: "Embeddings regeneration completed successfully",
+               },
+               500: {
+                  description: "Failed to regenerate embeddings",
+               },
+            },
+         },
+         response: {
+            200: _regenerateEmbeddingsResponse,
+            500: _errorResponse,
+         },
       },
    )
    .post(
@@ -511,8 +728,27 @@ export const contentRoutes = new Elysia({
       },
       {
          auth: true,
-         params: t.Object({
-            contentId: t.String(),
-         }),
+         detail: {
+            summary: "Generate embedding for specific content",
+            description: "Generate or regenerate a vector embedding for a specific piece of content using its title and body. This enables similarity analysis and content relationship detection for the specified content.",
+            tags: [ApiTags.CONTENT, ApiTags.AI_ANALYSIS],
+            responses: {
+               200: {
+                  description: "Embedding generated successfully for the content",
+               },
+               404: {
+                  description: "Content not found or doesn't belong to user",
+               },
+               500: {
+                  description: "Failed to generate embedding",
+               },
+            },
+         },
+         params: _contentParams,
+         response: {
+            200: _generateEmbeddingResponse,
+            404: _errorResponse,
+            500: _errorResponse,
+         },
       },
    );
