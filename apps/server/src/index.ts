@@ -17,8 +17,11 @@ createBullBoard({
    queues: [new BullMQAdapter(contentGenerationQueue)],
    serverAdapter,
    options: {
-      uiBasePath:"node_modules/@bull-board/ui",
-   }
+      uiBasePath:
+         process.env.NODE_ENV === "production"
+            ? "node_modules/@bull-board/ui"
+            : "",
+   },
 });
 
 const app = new Elysia()

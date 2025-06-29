@@ -3,8 +3,8 @@ import * as LabelPrimitive from "@radix-ui/react-label";
 import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
 import { LoaderCircle } from "lucide-react";
 import React from "react";
-import { cn } from "../lib/utils.js";
-import { Button } from "./button.js";
+import { cn } from "@packages/ui/lib/utils";
+import { Button } from "@packages/ui/components/button";
 
 const { fieldContext, formContext, useFieldContext, useFormContext } =
    createFormHookContexts();
@@ -66,6 +66,16 @@ export const FieldMessage = React.forwardRef<
    const formatErrorMessage = (error: unknown) => {
       if (typeof error === "string") return error;
       if (error instanceof Error) return error.message;
+      if (Array.isArray(error) && error.length > 0) {
+         const firstError = error[0];
+         if (
+            typeof firstError === "object" &&
+            firstError !== null &&
+            "message" in firstError
+         ) {
+            return String(firstError.message);
+         }
+      }
       if (typeof error === "object" && error !== null && "message" in error) {
          return String(error.message);
       }

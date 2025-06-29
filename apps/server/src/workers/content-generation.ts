@@ -5,6 +5,7 @@ import { openRouter } from "../integrations/openrouter";
 import type { agent as Agent, ContentLength } from "../schemas/content-schema";
 import { content, contentRequest, type agent } from "../schemas/content-schema";
 import { redis } from "../services/redis";
+import { embeddingService } from "../services/embedding";
 
 export type ContentRequestWithAgent = typeof contentRequest.$inferSelect & {
    agent: typeof agent.$inferSelect;
@@ -12,7 +13,6 @@ export type ContentRequestWithAgent = typeof contentRequest.$inferSelect & {
 
 export const contentGenerationQueue = new Queue("content-generation", {
    connection: redis,
-   
 });
 
 contentGenerationQueue.on("error", (err) => {
@@ -47,29 +47,39 @@ function generateAgentPrompt(
    return `
 You are an expert copywriter and SEO strategist. Your job is to craft high-quality, engaging, and SEO-optimized content tailored to the agent profile and the content request below. Use advanced copywriting techniques, ensure clarity, and maximize the content's discoverability.
 
-**Agent Profile:**
-- **Name:** ${agent.name}
-- **Description:** ${agent.description}
-- **Content Type:** ${agent.contentType}
-- **Voice Tone:** ${agent.voiceTone}
-- **Target Audience:** ${agent.targetAudience}
-- **Formatting Style:** ${agent.formattingStyle}
-- **SEO Focus:** ${agent.seoFocus}
+Follow these instructions strictly:
+1. Carefully analyze the agent profile and content request. Adapt your writing style, tone, and structure to match the agent's requirements and the target audience.
+2. Use advanced copywriting strategies (e.g., compelling headlines, strong introductions, clear structure, persuasive language, and effective calls to action if relevant).
+3. Ensure the content is highly relevant, original, and provides real value to the reader.
+4. Optimize for SEO:
+   - Naturally incorporate the SEO focus and related keywords throughout the content.
+   - Use semantic keywords and variations.
+   - Structure the content with clear headings, subheadings, and bullet points if appropriate.
+   - Write a meta description (max 155 characters) at the top of the content.
+5. The content must be well-formatted according to the agent's formattingStyle (e.g., Markdown, HTML, etc.).
+6. The output must be a valid JSON object with two keys: "content" and "tags".
+   - "content": The full, SEO-optimized text, including the meta description at the top.
+   - "tags": An array of highly relevant tags as strings (3-8 tags, no duplicates, all lowercase, related to the topic and SEO focus).
+7. Do not include any explanations, notes, or extra text outside the JSON object.
 
-**Content Request:**
-- **Topic:** ${params.topic}
-- **Brief Description:** ${params.briefDescription}
-- **Target Length:** ${params.targetLength} (${
-      lengthDescriptions[params.targetLength]
-   })
+---
+Agent Profile:
+- Name: ${agent.name}
+- Description: ${agent.description}
+- Content Type: ${agent.contentType}
+- Voice Tone: ${agent.voiceTone}
+- Target Audience: ${agent.targetAudience}
+- Formatting Style: ${agent.formattingStyle}
+- SEO Focus: ${agent.seoFocus}
 
-**IMPORTANT:** Your response must be a valid JSON object with two keys: "content" and "tags".
-- "content": The full, SEO-optimized text.
-- "tags": An array of relevant tags as strings.
+Content Request:
+- Topic: ${params.topic}
+- Brief Description: ${params.briefDescription}
+- Target Length: ${params.targetLength} (${lengthDescriptions[params.targetLength]})
 
-Example output:
+Output format example:
 {
-  "content": "This is the full text of the article...",
+  "content": "Meta description here.\n\n# Title...\nFull article...",
   "tags": ["seo", "copywriting", "digital marketing"]
 }
 `;
@@ -137,6 +147,18 @@ async function saveContent(
    const wordsCount = calculateWordsCount(generatedContent.content);
    const timeToRead = calculateTimeToRead(wordsCount);
 
+   let embedding: number[] | undefined;
+   try {
+      // Generate embedding for the content
+      embedding = await embeddingService.generateContentEmbedding(
+         request.topic,
+         generatedContent.content,
+      );
+   } catch (error) {
+      console.error("Failed to generate embedding for content:", error);
+      // Continue without embedding - can be generated later
+   }
+
    const [newContent] = await db
       .insert(content)
       .values({
@@ -148,6 +170,7 @@ async function saveContent(
          tags,
          wordsCount,
          readTimeMinutes: timeToRead,
+         embedding,
       })
       .returning();
 

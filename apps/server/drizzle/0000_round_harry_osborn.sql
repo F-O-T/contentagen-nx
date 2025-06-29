@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS vector;
+
 CREATE OR REPLACE FUNCTION increment_agent_drafts()
 RETURNS trigger AS $$
 BEGIN

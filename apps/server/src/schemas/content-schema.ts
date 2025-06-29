@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
    boolean,
+   index,
    integer,
    json,
    pgEnum,
@@ -8,6 +9,7 @@ import {
    text,
    timestamp,
    uuid,
+   vector,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 
@@ -109,59 +111,88 @@ export const agent = pgTable("agent", {
    voiceTone: voiceToneEnum("voice_tone").notNull(),
 });
 
-export const content = pgTable("content", {
-   agentId: uuid("agent_id")
-      .notNull()
-      .references(() => agent.id, { onDelete: "cascade" }),
-   body: text("body").notNull(),
+export const content = pgTable(
+   "content",
+   {
+      agentId: uuid("agent_id")
+         .notNull()
+         .references(() => agent.id, { onDelete: "cascade" }),
+      body: text("body").notNull(),
 
-   createdAt: timestamp("created_at")
-      .$defaultFn(() => new Date())
-      .notNull(),
-   id: uuid("id").primaryKey().defaultRandom(),
+      createdAt: timestamp("created_at")
+         .$defaultFn(() => new Date())
+         .notNull(),
+      id: uuid("id").primaryKey().defaultRandom(),
 
-   publishedAt: timestamp("published_at"),
-   readTimeMinutes: integer("read_time_minutes").default(0),
-   scheduledAt: timestamp("scheduled_at"),
-   slug: text("slug"),
+      publishedAt: timestamp("published_at"),
+      readTimeMinutes: integer("read_time_minutes").default(0),
+      scheduledAt: timestamp("scheduled_at"),
+      slug: text("slug"),
 
-   status: contentStatusEnum("status").default("draft"),
-   tags: json("tags").$type<string[]>(),
-   title: text("title").notNull(),
-   updatedAt: timestamp("updated_at")
-      .$defaultFn(() => new Date())
-      .notNull(),
-   userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-   wordsCount: integer("words_count"),
-});
+      status: contentStatusEnum("status").default("draft"),
+      tags: json("tags").$type<string[]>(),
+      title: text("title").notNull(),
+      updatedAt: timestamp("updated_at")
+         .$defaultFn(() => new Date())
+         .notNull(),
+      userId: text("user_id")
+         .notNull()
+         .references(() => user.id, { onDelete: "cascade" }),
+      wordsCount: integer("words_count"),
+      embedding: vector("embedding", { dimensions: 1536 }),
+   },
+   (table) => ([
+      index("content_embedding_idx").using(
+         "hnsw",
+         table.embedding.op("vector_cosine_ops"),
+      ),
+   ]),
+);
 
-export const contentRequest = pgTable("content_request", {
-   agentId: uuid("agent_id")
-      .notNull()
-      .references(() => agent.id, { onDelete: "cascade" }),
-   briefDescription: text("brief_description").notNull(),
+export const contentRequestStatusEnum = pgEnum("content_request_status", [
+   "pending",
+   "approved",
+   "rejected",
+]);
+export type ContentRequestStatus = (typeof contentRequestStatusEnum.enumValues)[number];
 
-   createdAt: timestamp("created_at")
-      .$defaultFn(() => new Date())
-      .notNull(),
+export const contentRequest = pgTable(
+   "content_request",
+   {
+      agentId: uuid("agent_id")
+         .notNull()
+         .references(() => agent.id, { onDelete: "cascade" }),
+      briefDescription: text("brief_description").notNull(),
 
-   generatedContentId: uuid("generated_content_id").references(
-      () => content.id,
-      { onDelete: "cascade" },
-   ),
-   id: uuid("id").primaryKey().defaultRandom(),
-   isCompleted: boolean("is_completed").default(false),
-   targetLength: contentLengthEnum("target_length").default("medium").notNull(),
-   topic: text("topic").notNull(),
-   updatedAt: timestamp("updated_at")
-      .$defaultFn(() => new Date())
-      .notNull(),
-   userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-});
+      createdAt: timestamp("created_at")
+         .$defaultFn(() => new Date())
+         .notNull(),
+      embedding: vector("embedding", { dimensions: 1536 }),
+      generatedContentId: uuid("generated_content_id").references(
+         () => content.id,
+         { onDelete: "cascade" },
+      ),
+      id: uuid("id").primaryKey().defaultRandom(),
+      isCompleted: boolean("is_completed").default(false),
+      status: contentRequestStatusEnum("status").default("pending").notNull(),
+      targetLength: contentLengthEnum("target_length")
+         .default("medium")
+         .notNull(),
+      topic: text("topic").notNull(),
+      updatedAt: timestamp("updated_at")
+         .$defaultFn(() => new Date())
+         .notNull(),
+      userId: text("user_id")
+         .notNull()
+         .references(() => user.id, { onDelete: "cascade" }),
+   },
+   (table) => ([
+      index("content_request_embedding_idx").using(
+         "hnsw",
+         table.embedding.op("vector_cosine_ops"),
+      ),
+   ]),
+);
 
 export const comment = pgTable("comment", {
    content: text("content").notNull(),
