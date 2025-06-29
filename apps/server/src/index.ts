@@ -4,7 +4,7 @@ import { ElysiaAdapter } from "@bull-board/elysia";
 import cors from "@elysiajs/cors";
 import swagger from "@elysiajs/swagger";
 import { Elysia } from "elysia";
-import { env } from "./config/env";
+import { env, isProduction } from "./config/env";
 import { authMiddleware, OpenAPI } from "./integrations/auth";
 import { agentRoutes } from "./routes/agent-routes";
 import { contentRoutes } from "./routes/content-routes";
@@ -17,10 +17,7 @@ createBullBoard({
    queues: [new BullMQAdapter(contentGenerationQueue)],
    serverAdapter,
    options: {
-      uiBasePath:
-         process.env.NODE_ENV === "production"
-            ? "node_modules/@bull-board/ui"
-            : "",
+      uiBasePath: isProduction ? "node_modules/@bull-board/ui" : "",
    },
 });
 

@@ -8,7 +8,7 @@ import {
    SidebarMenu,
    SidebarMenuItem,
 } from "@packages/ui/components/sidebar";
-import { LayoutDashboardIcon } from "lucide-react";
+import { LayoutDashboardIcon,FilesIcon } from "lucide-react";
 import type * as React from "react";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
@@ -17,8 +17,13 @@ const data = {
    navMain: [
       {
          icon: LayoutDashboardIcon,
-         title: "Agents",
+         title: "Your Agents",
          url: "/agents",
+      },
+      {
+         icon: FilesIcon,
+         title: "Your Content",
+         url: "/content",
       },
    ],
 };

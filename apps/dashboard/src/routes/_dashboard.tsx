@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useLocation } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_dashboard")({
    component: RouteComponent,
@@ -9,9 +9,15 @@ import { Outlet } from "@tanstack/react-router";
 import { DashboardLayout } from "@/layout/dashboard-layout";
 
 function RouteComponent() {
+   const location = useLocation();
    return (
       <DashboardLayout>
-         <Outlet />
+         <div
+            className="duration-700 animate-in slide-in-from-bottom-4 fade-in"
+            key={location.pathname}
+         >
+            <Outlet />
+         </div>
       </DashboardLayout>
    );
 }

@@ -1,4 +1,4 @@
-import { env } from "@api/config/env";
+import { env, isProduction } from "@api/config/env";
 import * as authSchema from "@api/schemas/auth-schema";
 import { sendEmailOTP } from "@api/services/resend";
 import { checkout, polar, portal } from "@polar-sh/better-auth";
@@ -11,7 +11,7 @@ import { db } from "./database";
 
 const polarClient = new Polar({
    accessToken: env.POLAR_ACCESS_TOKEN,
-   server: "sandbox",
+   server: isProduction ? "production" : "sandbox",
 });
 
 export const auth = betterAuth({

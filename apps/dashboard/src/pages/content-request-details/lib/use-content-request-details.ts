@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouteContext } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { formatValueToTitleCase } from "@packages/ui/lib/utils";
 
 interface ContentSimilarityData {
   similarity: number;
@@ -31,10 +30,10 @@ export function useContentRequestDetails() {
     error: requestError,
   } = useQuery({
     queryKey: ["content-request-details", requestId],
-    queryFn:  eden.api.v1.content.request.details({ id: requestId }).get,
+    queryFn: () => eden.api.v1.content.request.details({ id: requestId }).get(),
   });
 
-  const request = requestData;
+  const request = requestData?.data?.request;
 
   // Fetch content similarity data
   const {
@@ -53,7 +52,7 @@ export function useContentRequestDetails() {
     error: contentError,
   } = useQuery({
     queryKey: ["generated-content", request?.generatedContentId],
-    queryFn: () => eden.api.v1.content.get({ id: request?.generatedContentId! }),
+    queryFn: async () => await eden.api.v1.content.request.details({ id: request?.generatedContentId! }).get(),
     enabled: !!request?.generatedContentId && request?.status === "approved" && !!request?.isCompleted,
   });
 
@@ -69,28 +68,35 @@ export function useContentRequestDetails() {
 
   const similarity = similarityData?.data as ContentSimilarityData | undefined;
   const contentSimilarity = contentSimilarityData?.data as ContentSimilarityData | undefined;
-  const content = contentData?.data?.content;
+  const content = contentData?.data?.request?.generatedContent;
 
   const handleCopyContent = async () => {
-    if (!content?.text) {
+    if (!content?.body) {
       toast.error("No content available to copy");
       return;
     }
     
     try {
-      const textToCopy = `# ${request?.topic}\n\n${content.text}`;
+      const textToCopy = request?.topic 
+        ? `# ${request.topic}\n\n${content.body}`
+        : content.body;
       
       await navigator.clipboard.writeText(textToCopy);
       toast.success("Content copied to clipboard!");
     } catch (error) {
       console.error("Copy error:", error);
-      toast.error("Failed to copy content");
+      toast.error("Failed to copy content. Please try again or copy manually.");
     }
   };
 
   const handleExportContent = async (format: "txt" | "md" | "docx") => {
-    if (!content?.text) {
+    if (!content?.body) {
       toast.error("No content available to export");
+      return;
+    }
+
+    if (!request?.topic) {
+      toast.error("No topic available for filename");
       return;
     }
 
@@ -100,21 +106,26 @@ export function useContentRequestDetails() {
       let filename = "";
       let mimeType = "";
 
+      // Create a safe filename from the topic
+      const safeTopicName = request.topic.replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '_').toLowerCase();
+
       switch (format) {
         case "txt":
-          fileContent = content.text;
-          filename = `${request?.topic?.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
+          fileContent = content.body;
+          filename = `${safeTopicName}.txt`;
           mimeType = "text/plain";
           break;
         case "md":
-          fileContent = `# ${request?.topic}\n\n${content.text}`;
-          filename = `${request?.topic?.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
+          fileContent = `# ${request.topic}\n\n${content.body}`;
+          filename = `${safeTopicName}.md`;
           mimeType = "text/markdown";
           break;
         case "docx":
-          fileContent = `${request?.topic}\n\n${content.text}`;
-          filename = `${request?.topic?.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
-          mimeType = "text/plain";
+          // For docx, we'll create a simple text format for now
+          // In a real implementation, you'd want to use a library like docx or mammoth
+          fileContent = `${request.topic}\n${'='.repeat(request.topic.length)}\n\n${content.body}`;
+          filename = `${safeTopicName}.docx`;
+          mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
           break;
       }
 
@@ -123,10 +134,15 @@ export function useContentRequestDetails() {
       const a = document.createElement("a");
       a.href = url;
       a.download = filename;
+      a.style.display = "none";
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
 
       toast.success(`Content exported as ${format.toUpperCase()}!`);
     } catch (error) {
@@ -138,15 +154,35 @@ export function useContentRequestDetails() {
   };
 
   const handleShareContent = async () => {
+    if (!request?.topic && !request?.briefDescription) {
+      toast.error("No content information available to share");
+      return;
+    }
+
     try {
-      await navigator.share({
-        title: request?.topic,
-        text: request?.briefDescription,
-        url: window.location.href,
-      });
+      // Check if Web Share API is supported
+      if (navigator.share) {
+        await navigator.share({
+          title: request?.topic || "Content Request",
+          text: request?.briefDescription || "Check out this content request",
+          url: window.location.href,
+        });
+        toast.success("Content shared successfully!");
+      } else {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard!");
+      }
     } catch (error) {
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied to clipboard!");
+      console.error("Share error:", error);
+      // Fallback to clipboard if sharing fails
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard!");
+      } catch (clipboardError) {
+        console.error("Clipboard error:", clipboardError);
+        toast.error("Failed to share content. Please copy the URL manually.");
+      }
     }
   };
 

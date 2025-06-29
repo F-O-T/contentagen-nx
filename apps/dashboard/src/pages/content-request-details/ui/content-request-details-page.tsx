@@ -257,11 +257,11 @@ export function ContentRequestDetailsPage() {
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4 min-h-[300px] flex items-center justify-center">
                     <p className="text-red-600">Failed to load generated content. Please try again.</p>
                   </div>
-                ) : content?.text ? (
+                ) : content?.body ? (
                   <div className="bg-white rounded-lg border p-6 min-h-[300px]">
                     <div className="prose max-w-none">
                       <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                        {content.text}
+                        {content.body}
                       </div>
                     </div>
                   </div>
