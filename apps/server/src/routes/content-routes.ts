@@ -41,6 +41,7 @@ export const contentRoutes = new Elysia({
             "createdAt",
             "isCompleted",
             "generatedContentId",
+            "userId",
          ]),
       },
    );

@@ -1,4 +1,4 @@
-import { AgentCreationManualForm } from "@/features/agent-creation-manual-form/ui/agent-creation-manual-form";
+import { AgentCreationManualForm } from "@/features/manual-agent-creation-form/ui/agent-creation-manual-form";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useRouteContext } from "@tanstack/react-router";

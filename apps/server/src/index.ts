@@ -18,29 +18,31 @@ createBullBoard({
    serverAdapter,
 });
 
-const app = new Elysia().use(serverAdapter.registerPlugin()).use(
-   swagger({
-      path: "/docs", // Swagger UI will be at /docs, JSON at /docs/json
-      documentation: {
-         components: await OpenAPI.components,
-         paths: await OpenAPI.getPaths(),
-      },
-   }),
-)
+const app = new Elysia()
+   .use(
+      cors({
+         allowedHeaders: ["Content-Type", "Authorization"],
+         credentials: true,
+         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+         origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
+      }),
+   )
+   .use(serverAdapter.registerPlugin())
+   .use(
+      swagger({
+         path: "/docs", // Swagger UI will be at /docs, JSON at /docs/json
+         documentation: {
+            components: await OpenAPI.components,
+            paths: await OpenAPI.getPaths(),
+         },
+      }),
+   )
    .group(
       "/api/v1",
       (
          api, // Group all API routes under /api/v1
       ) =>
          api
-            .use(
-               cors({
-                  allowedHeaders: ["Content-Type", "Authorization"],
-                  credentials: true,
-                  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-                  origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
-               }),
-            )
             .use(authMiddleware)
             .use(agentRoutes)
             .use(contentRoutes)

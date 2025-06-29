@@ -1,14 +1,7 @@
-import { AgentCreationManualForm } from "@/features/agent-creation-manual-form/ui/agent-creation-manual-form";
-import type { EdenClientType } from "@packages/eden";
+import { AgentCreationManualForm } from "@/features/manual-agent-creation-form/ui/agent-creation-manual-form";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useRouteContext } from "@tanstack/react-router";
-type Values = Partial<
-   Omit<
-      Awaited<EdenClientType["api"]["v1"]["agents"]["post"]>["data"],
-      "id" | "createdAt" | "ownerId"
-   >
->;
 export function CreateAgentPage() {
    const navigate = useNavigate();
    const { eden } = useRouteContext({
@@ -16,7 +9,7 @@ export function CreateAgentPage() {
    });
 
    const agentMutation = useMutation({
-      mutationFn: (values: Values) => eden.api.v1.agents.post(values),
+      mutationFn: eden.api.v1.agents.post,
       onSuccess: () => {
          navigate({ to: "/agents" });
       },
@@ -24,6 +17,9 @@ export function CreateAgentPage() {
    return (
       <AgentCreationManualForm
          onSubmit={async (values) => {
+            if (values) {
+               return;
+            }
             await agentMutation.mutateAsync(values);
          }}
       />

@@ -30,7 +30,6 @@ import { Link } from "@tanstack/react-router";
 import {
    Edit,
    MoreVertical,
-
    Users,
    FileText,
    CheckCircle2,
@@ -103,15 +102,15 @@ export function AgentCard({ agent }: AgentCardProps) {
             <CardAction>
                <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                   <DropdownMenuTrigger asChild>
- <Button
-                     size="icon"
-                     variant="ghost"
-                     onClick={() => setDropdownOpen(true)}
-                  >
-                     <MoreVertical className="w-5 h-5" />
-                  </Button>
+                     <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setDropdownOpen(true)}
+                     >
+                        <MoreVertical className="w-5 h-5" />
+                     </Button>
                   </DropdownMenuTrigger>
-                 
+
                   <DropdownMenuContent align="end">
                      <DropdownMenuItem asChild>
                         <Link
@@ -179,7 +178,11 @@ export function AgentCard({ agent }: AgentCardProps) {
          </CardContent>
 
          <CardFooter className="">
-            <Link to={`/agents`} className="flex-1">
+            <Link
+               to={`/agents/$agentId/content/request`}
+               params={{ agentId: agent.id }}
+               className="flex-1"
+            >
                <Button className="w-full" size="sm" variant="outline">
                   Generate
                </Button>

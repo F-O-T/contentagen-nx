@@ -37,25 +37,30 @@ function generateAgentPrompt(
       targetLength: ContentLength;
    },
 ): string {
+   // Map ContentLength to detailed descriptions
+   const lengthDescriptions: Record<ContentLength, string> = {
+      short: "Quick and concise content (500-800 words)",
+      medium: "Balanced content with good detail (800-1500 words)",
+      long: "Comprehensive and in-depth content (1500+ words)",
+   };
    return `
-        **Agent Profile:**
-        - **Name:** ${agent.name}
-        - **Description:** ${agent.description}
-        - **Content Type:** ${agent.contentType}
-        - **Voice Tone:** ${agent.voiceTone}
-        - **Target Audience:** ${agent.targetAudience}
-        - **Formatting Style:** ${agent.formattingStyle}
-        - **SEO Focus:** ${agent.seoFocus}
+You are an expert copywriter and SEO strategist. Your job is to craft high-quality, engaging, and SEO-optimized content tailored to the agent profile and the content request below. Use advanced copywriting techniques, ensure clarity, and maximize the content's discoverability.
 
-        **Content Request:**
-        - **Topic:** ${params.topic}
-        - **Brief Description:** ${params.briefDescription}
-         - **Target Length:** ${params.targetLength} 
+**Agent Profile:**
+- **Name:** ${agent.name}
+- **Description:** ${agent.description}
+- **Content Type:** ${agent.contentType}
+- **Voice Tone:** ${agent.voiceTone}
+- **Target Audience:** ${agent.targetAudience}
+- **Formatting Style:** ${agent.formattingStyle}
+- **SEO Focus:** ${agent.seoFocus}
 
-        Please generate content based on the agent profile and content request.
-        Also, provide a comma-separated list of relevant tags for this content.
-        The output should be a JSON object with two keys: "content" and "tags".
-    `;
+**Content Request:**
+- **Topic:** ${params.topic}
+- **Brief Description:** ${params.briefDescription}
+- **Target Length:** ${params.targetLength} (${lengthDescriptions[params.targetLength]})
+
+Please generate content based on the agent profile and content request. Also, provide a comma-separated list of relevant tags for this content. The output should be a JSON object with two keys: "content" and "tags".`;
 }
 
 async function generateContent(prompt: string) {
@@ -176,4 +181,3 @@ async function gracefulShutdown(signal: string) {
 
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-
