@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@packages/ui/components/card";
 import { Badge } from "@packages/ui/components/badge";
-import { SimilarityBanner } from "@packages/ui/components/similarity-banner";
+
 import { FileText, Clock, User } from "lucide-react";
 import { useMemo } from "react";
 import { formatValueToTitleCase } from "@packages/ui/lib/utils";
@@ -112,12 +112,21 @@ export function ContentRequestCard({
 
         {/* Similarity Banner */}
         {similarity && !isLoading && (
-          <SimilarityBanner
-            similarity={similarity.similarity}
-            category={similarity.category}
-            message={similarity.message}
-            className="my-3"
-          />
+        
+          <div className="mb-2">
+            <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <span className="font-semibold text-yellow-800">
+          Request Similarity:
+              </span>
+              <span className="text-yellow-700">
+          {similarity.message}
+              </span>
+              <span className="ml-auto text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+          {Math.round(similarity.similarity * 100)}%
+              </span>
+            </div>
+          </div>
+
         )}
 
         {isLoading && (
