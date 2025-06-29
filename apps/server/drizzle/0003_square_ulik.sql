@@ -1,2 +1,0 @@
-CREATE TYPE "public"."lead_type" AS ENUM('individual blogger', 'marketing team', 'freelance writer', 'business owner', 'other');--> statement-breakpoint
-ALTER TABLE "waitlist" ADD COLUMN "lead_type" "lead_type" NOT NULL;

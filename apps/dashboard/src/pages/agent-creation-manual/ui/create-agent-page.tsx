@@ -17,9 +17,6 @@ export function CreateAgentPage() {
    return (
       <AgentCreationManualForm
          onSubmit={async (values) => {
-            if (values) {
-               return;
-            }
             await agentMutation.mutateAsync(values);
          }}
       />

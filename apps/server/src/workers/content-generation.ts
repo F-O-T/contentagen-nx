@@ -58,9 +58,20 @@ You are an expert copywriter and SEO strategist. Your job is to craft high-quali
 **Content Request:**
 - **Topic:** ${params.topic}
 - **Brief Description:** ${params.briefDescription}
-- **Target Length:** ${params.targetLength} (${lengthDescriptions[params.targetLength]})
+- **Target Length:** ${params.targetLength} (${
+      lengthDescriptions[params.targetLength]
+   })
 
-Please generate content based on the agent profile and content request. Also, provide a comma-separated list of relevant tags for this content. The output should be a JSON object with two keys: "content" and "tags".`;
+**IMPORTANT:** Your response must be a valid JSON object with two keys: "content" and "tags".
+- "content": The full, SEO-optimized text.
+- "tags": An array of relevant tags as strings.
+
+Example output:
+{
+  "content": "This is the full text of the article...",
+  "tags": ["seo", "copywriting", "digital marketing"]
+}
+`;
 }
 
 async function generateContent(prompt: string) {
@@ -93,12 +104,35 @@ function calculateTimeToRead(wordsCount: number): number {
    return Math.ceil(wordsCount / wordsPerMinute);
 }
 
+function extractTags(
+   generatedTags: string[] | string,
+   topic: string,
+): string[] {
+   let tags: string[] = [];
+   if (typeof generatedTags === "string" && generatedTags.length > 0) {
+      tags = generatedTags
+         .split(",")
+         .map((tag) => tag.trim())
+         .filter((tag) => tag.length > 0);
+   } else if (Array.isArray(generatedTags) && generatedTags.length > 0) {
+      tags = generatedTags
+         .map((tag) => String(tag).trim())
+         .filter((tag) => tag.length > 0);
+   }
+
+   if (tags.length === 0) {
+      tags = topic.split(" ").map((tag) => tag.trim().toLowerCase());
+   }
+
+   return tags;
+}
+
 async function saveContent(
    request: ContentRequestWithAgent,
-   generatedContent: { content: string; tags: string },
+   generatedContent: { content: string; tags: string[] | string },
 ) {
    const slug = slugify(request.topic);
-   const tags = generatedContent.tags.split(",").map((tag) => tag.trim());
+   const tags = extractTags(generatedContent.tags, request.topic);
    const wordsCount = calculateWordsCount(generatedContent.content);
    const timeToRead = calculateTimeToRead(wordsCount);
 

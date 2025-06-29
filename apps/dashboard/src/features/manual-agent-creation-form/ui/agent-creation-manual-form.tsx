@@ -58,7 +58,7 @@ export type Agent = NonNullable<
 const { Stepper } = defineStepper(...steps);
 export type AgentCreationManualForm = {
    defaultValues?: Agent;
-   onSubmit: (values: Partial<AgentFormData>) => Promise<void>;
+   onSubmit: (values: AgentFormData) => Promise<void>;
 };
 
 export function AgentCreationManualForm({
