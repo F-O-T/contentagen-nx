@@ -1,6 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 @import "tw-animate-css";
 @import "tailwindcss";
+@import "tailwindcss/typography";
+
 
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../../../components/**/*.{ts,tsx}";
@@ -169,25 +171,13 @@
 
 @layer base {
    * {
-      @apply border-border outline-ring/50; /* Uses --color-border and --color-ring (with 50% alpha for outline) */
+      @apply border-border outline-ring/50;
    }
-   html {
-      @apply bg-background; /* Uses --color-background */
-   }
-   body {
-      @apply max-w-full overflow-x-hidden bg-background text-foreground; /* Uses --color-background and --color-foreground */
-      font-family: "Montserrat", sans-serif;
-      font-optical-sizing: auto;
-      font-weight: 400; /* You can often omit this if 400 is your desired normal weight */
-      font-style: normal; /* You can often omit this if normal is your desired style */
-      overscroll-behavior-y: contain; /* Specific to body as per your v3 config */
-   }
-
    html {
       @apply h-full w-full overflow-x-hidden bg-background;
    }
    body {
-      @apply min-h-screen w-full bg-background text-foreground;
+      @apply min-h-screen w-full bg-background text-foreground max-w-full overflow-x-hidden;
       font-family: "Montserrat", sans-serif;
       font-optical-sizing: auto;
       font-weight: 400;
@@ -196,11 +186,53 @@
    }
 }
 
-@layer base {
-   * {
-      @apply border-border outline-ring/50;
+/* Ensure Typography plugin styles work properly */
+@layer components {
+   .prose {
+      color: var(--color-foreground) !important;
    }
-   body {
-      @apply bg-background text-foreground;
+   .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+      color: var(--color-foreground) !important;
+      margin-top: 1.5em !important;
+      margin-bottom: 0.5em !important;
+      font-weight: 600 !important;
+   }
+   .prose p {
+      color: var(--color-foreground) !important;
+      margin-top: 1em !important;
+      margin-bottom: 1em !important;
+      line-height: 1.6 !important;
+   }
+   .prose strong {
+      color: var(--color-foreground) !important;
+      font-weight: 600 !important;
+   }
+   .prose a {
+      color: var(--color-primary) !important;
+      text-decoration: none !important;
+   }
+   .prose a:hover {
+      text-decoration: underline !important;
+   }
+   .prose ul, .prose ol {
+      margin-top: 1em !important;
+      margin-bottom: 1em !important;
+      padding-left: 1.5em !important;
+   }
+   .prose li {
+      margin-top: 0.25em !important;
+      margin-bottom: 0.25em !important;
+   }
+   .prose blockquote {
+      border-left: 4px solid var(--color-border) !important;
+      padding-left: 1em !important;
+      margin: 1.5em 0 !important;
+      font-style: italic !important;
+   }
+   .prose code {
+      background-color: var(--color-muted) !important;
+      padding: 0.125em 0.25em !important;
+      border-radius: 0.25rem !important;
+      font-size: 0.875em !important;
    }
 }

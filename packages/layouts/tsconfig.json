@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@packages/ui/*": ["../../ui/src/*"]
+    }
+  },
+ "exclude": ["dist"],
+  "extends": "@tooling/typescript/astro.json",
+  "include": [".astro/types.d.ts", "**/*"]
+}

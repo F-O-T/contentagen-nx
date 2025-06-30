@@ -17,6 +17,12 @@ export default defineConfig({
     mode: "standalone",
   }),
   vite: {
+    ssr: {
+      noExternal: [
+        "@packages/layouts"
+      ]
+    },
+
     plugins: [tailwindcss()],
   },
 });

@@ -62,7 +62,8 @@
     "packages": [
       "tooling/*",
       "packages/*",
-      "apps/*"
+      "apps/*",
+      "packages/layouts"
     ]
   },
   "dependencies": {

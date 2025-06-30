@@ -16,6 +16,9 @@
       ],
       "@packages/ui/*": [
         "../../packages/ui/src/*"
+      ],
+      "@packages/layouts/*": [
+        "../../packages/layouts/src/*"
       ]
     }
   },

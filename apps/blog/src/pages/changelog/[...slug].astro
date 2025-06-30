@@ -1,0 +1,23 @@
+---
+export const prerender = true;
+
+import { type CollectionEntry, getCollection, render } from "astro:content";
+import ChangelogLayout from "../../layouts/ChangelogLayout.astro";
+
+export async function getStaticPaths() {
+   const entries = await getCollection("changelog");
+   return entries.map((entry) => ({
+      params: { slug: entry.id },
+      props: entry,
+   }));
+}
+
+type Props = CollectionEntry<"changelog">;
+
+const entry = Astro.props;
+const { Content } = await render(entry);
+---
+
+<ChangelogLayout {...entry.data}>
+  <Content />
+</ChangelogLayout>

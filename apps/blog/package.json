@@ -7,6 +7,7 @@
     "@astrojs/rss": "^4.0.11",
     "@astrojs/sitemap": "catalog:astro",
     "@packages/ui": "workspace:*",
+    "@packages/layouts": "workspace:*",
     "@tailwindcss/vite": "^4.1.8",
     "astro": "catalog:astro",
     "react": "catalog:react",
