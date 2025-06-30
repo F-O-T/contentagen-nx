@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
+   CardAction,
    CardContent,
    CardDescription,
    CardFooter,
@@ -86,6 +87,31 @@ const MarkdownComponents: Components = {
    ),
 };
 
+// Internal loading component for content generation
+function GenerationLoadingState() {
+   return (
+      <div className="text-center py-12">
+         <div className="relative">
+            <div className="absolute inset-0 flex items-center justify-center">
+               <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            </div>
+            <div className="w-16 h-16 mx-auto mb-6"></div>
+         </div>
+         <div className="space-y-3">
+            <p className="text-lg font-medium text-primary">AI Content Generation in Progress</p>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+               Our AI agent is crafting your content. This may take a few minutes depending on the complexity and length requested.
+            </p>
+            <div className="flex justify-center space-x-1 mt-4">
+               <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+               <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+               <div className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+         </div>
+      </div>
+   );
+}
+
 interface GeneratedContentDisplayProps {
    generatedContent?: {
       body: string;
@@ -116,12 +142,10 @@ export function GeneratedContentDisplay({
    return (
       <Card className={`h-fit   ${isGenerating ? 'animate-pulse' : ''}`}>
          <CardHeader>
-            <div className="flex items-center justify-between">
-               <div>
-                  <CardTitle className="text-lg flex items-center gap-2">
+            <CardTitle className="text-lg flex items-center gap-2">
                      Generated Content
                      {isGenerating && (
-                        <div className="flex items-center gap-1 text-blue-600">
+                        <div className="flex items-center gap-1 text-primary">
                            <Sparkles className="h-4 w-4 animate-spin" />
                            <span className="text-sm font-normal">Generating...</span>
                         </div>
@@ -130,8 +154,9 @@ export function GeneratedContentDisplay({
                   <CardDescription>
                      Your AI-generated content with export and copy options
                   </CardDescription>
-               </div>
-               {generatedContent && (
+           
+                {generatedContent && (
+                   <CardAction>
                   <DropdownMenu>
                      <DropdownMenuTrigger asChild>
                         <Button size="sm" variant="outline" disabled={isExporting}>
@@ -157,8 +182,9 @@ export function GeneratedContentDisplay({
                         </DropdownMenuItem>
                      </DropdownMenuContent>
                   </DropdownMenu>
+                       </CardAction>
                )}
-            </div>
+       
          </CardHeader>
          <CardContent className="bg-muted mx-4 rounded-lg py-4">
             {!generatedContent && !isGenerating ? (
@@ -170,25 +196,7 @@ export function GeneratedContentDisplay({
                   </p>
                </div>
             ) : !generatedContent && isGenerating ? (
-               <div className="text-center py-12">
-                  <div className="relative">
-                     <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-                     </div>
-                     <div className="w-16 h-16 mx-auto mb-6"></div>
-                  </div>
-                  <div className="space-y-3">
-                     <p className="text-lg font-medium text-blue-600">AI Content Generation in Progress</p>
-                     <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                        Our AI agent is crafting your content. This may take a few minutes depending on the complexity and length requested.
-                     </p>
-                     <div className="flex justify-center space-x-1 mt-4">
-                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                     </div>
-                  </div>
-               </div>
+               <GenerationLoadingState />
             ) : (
                <div className="space-y-4">
                   <div className="text-sm">

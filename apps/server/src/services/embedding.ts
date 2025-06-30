@@ -1,6 +1,6 @@
 import { openai } from "@api/integrations/openai";
 
-type SimilarityCategory = "success" | "info" | "warning" | "error";
+type SimilarityCategory = "info" | "warning" | "error";
 
 type SimilarityCategorization = {
   category: SimilarityCategory;
@@ -91,7 +91,7 @@ const categorizeSimilarity = (similarity: number): SimilarityCategorization => {
     };
   } else {
     return {
-      category: "success",
+      category: "info",
       message: "Low similarity - content appears unique",
     };
   }

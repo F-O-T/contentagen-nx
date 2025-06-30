@@ -5,7 +5,6 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
-import { Badge } from "@packages/ui/components/badge";
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Separator } from "@packages/ui/components/separator";
 import {
@@ -13,7 +12,6 @@ import {
    Target,
    Clock,
    BookOpen,
-   Hash,
    FileText,
    MessageSquare,
 } from "lucide-react";
@@ -59,19 +57,20 @@ export function RequestDetailsCard({ request }: RequestDetailsCardProps) {
                label="Description"
                value={request.briefDescription}
             />
-            
+
             <Separator />
-            
-            <InfoItem
-               icon={<Calendar className="h-4 w-4" />}
-               label="Created At"
-               value={new Date(request.createdAt).toLocaleDateString()}
-            />
-            <InfoItem
-               icon={<Target className="h-4 w-4" />}
-               label="Target Length"
-               value={formatValueToTitleCase(request.targetLength)}
-            />
+            <div className="grid grid-cols-2 gap-4">
+               <InfoItem
+                  icon={<Calendar className="h-4 w-4" />}
+                  label="Created At"
+                  value={new Date(request.createdAt).toLocaleDateString()}
+               />
+               <InfoItem
+                  icon={<Target className="h-4 w-4" />}
+                  label="Target Length"
+                  value={formatValueToTitleCase(request.targetLength)}
+               />
+            </div>
          </CardContent>
       </Card>
    );
@@ -90,38 +89,17 @@ export function ContentStatsCard({ generatedContent }: ContentStatsCardProps) {
                Statistics and metadata about your generated content
             </CardDescription>
          </CardHeader>
-         <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-               <InfoItem
-                  icon={<BookOpen className="h-4 w-4" />}
-                  label="Word Count"
-                  value={generatedContent.wordsCount?.toString() || "0"}
-               />
-               <InfoItem
-                  icon={<Clock className="h-4 w-4" />}
-                  label="Read Time"
-                  value={`${generatedContent.readTimeMinutes || 0} min`}
-               />
-            </div>
-            {generatedContent.tags && generatedContent.tags.length > 0 && (
-               <>
-                  <Separator />
-                  <div className="space-y-2">
-                     <InfoItem
-                        icon={<Hash className="h-4 w-4" />}
-                        label="Tags"
-                        value=""
-                     />
-                     <div className="flex flex-wrap gap-2">
-                        {generatedContent.tags.map((tag: string, index: number) => (
-                           <Badge key={index} variant="secondary" className="text-xs">
-                              {tag}
-                           </Badge>
-                        ))}
-                     </div>
-                  </div>
-               </>
-            )}
+         <CardContent className="grid grid-cols-2 gap-4">
+            <InfoItem
+               icon={<BookOpen className="h-4 w-4" />}
+               label="Word Count"
+               value={generatedContent.wordsCount?.toString() || "0"}
+            />
+            <InfoItem
+               icon={<Clock className="h-4 w-4" />}
+               label="Read Time"
+               value={`${generatedContent.readTimeMinutes || 0} min`}
+            />
          </CardContent>
       </Card>
    );
