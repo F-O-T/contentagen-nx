@@ -104,20 +104,23 @@ export function ContentStatsCard({ generatedContent }: ContentStatsCardProps) {
                />
             </div>
             {generatedContent.tags && generatedContent.tags.length > 0 && (
-               <div className="space-y-2">
-                  <InfoItem
-                     icon={<Hash className="h-4 w-4" />}
-                     label="Tags"
-                     value=""
-                  />
-                  <div className="flex flex-wrap gap-2 ml-6">
-                     {generatedContent.tags.map((tag: string, index: number) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                           {tag}
-                        </Badge>
-                     ))}
+               <>
+                  <Separator />
+                  <div className="space-y-2">
+                     <InfoItem
+                        icon={<Hash className="h-4 w-4" />}
+                        label="Tags"
+                        value=""
+                     />
+                     <div className="flex flex-wrap gap-2">
+                        {generatedContent.tags.map((tag: string, index: number) => (
+                           <Badge key={index} variant="secondary" className="text-xs">
+                              {tag}
+                           </Badge>
+                        ))}
+                     </div>
                   </div>
-               </div>
+               </>
             )}
          </CardContent>
       </Card>
