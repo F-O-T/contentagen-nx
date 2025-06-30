@@ -16,10 +16,10 @@ export function SquaredIconButton({
       <Button
          className={
             "w-full h-full flex flex-col items-center justify-center p-2 py-8 text-center cursor-pointer border-dashed" +
-            (destructive ? "bg-primary/10 " : "") +
+            (destructive ? "border-primary/10 " : "") +
             className
          }
-         variant={destructive ? "destructive" : "outline"}
+         variant={"outline"}
          {...props}
       >
          {children}

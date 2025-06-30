@@ -64,5 +64,9 @@
       "packages/*",
       "apps/*"
     ]
+  },
+  "dependencies": {
+    "react-markdown": "^10.1.0",
+    "rehype-raw": "^7.0.0"
   }
 }

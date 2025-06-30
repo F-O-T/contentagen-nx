@@ -1,7 +1,24 @@
 import type { ContentLength } from "@api/schemas/content-schema";
-import { CONTENT_LENGTHS } from "../lib/content-request-constants";
 import type { ContentRequestForm } from "../lib/use-content-request-form";
 import { Button } from "@packages/ui/components/button";
+
+const CONTENT_LENGTHS = [
+   {
+      value: "short" as const,
+      label: "Short",
+      description: "Quick and concise content (500-800 words)",
+   },
+   {
+      value: "medium" as const,
+      label: "Medium", 
+      description: "Balanced content with good detail (800-1500 words)",
+   },
+   {
+      value: "long" as const,
+      label: "Long",
+      description: "Comprehensive and in-depth content (1500+ words)",
+   },
+];
 
 export function TargetLengthStep({ form }: { form: ContentRequestForm }) {
    return (

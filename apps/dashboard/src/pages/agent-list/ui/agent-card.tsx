@@ -183,17 +183,8 @@ export function AgentCard({ agent }: AgentCardProps) {
                params={{ agentId: agent.id }}
                className="flex-1"
             >
-               <Button className="w-full" size="sm" variant="outline">
-                  Generate
-               </Button>
-            </Link>
-            <Link
-               to="/content"
-               search={{ agentId: agent.id }}
-               className="flex-1"
-            >
-               <Button className="w-full" size="sm" variant="secondary">
-                  View Requests
+               <Button className="w-full" size="sm">
+                  Request new content
                </Button>
             </Link>
          </CardFooter>

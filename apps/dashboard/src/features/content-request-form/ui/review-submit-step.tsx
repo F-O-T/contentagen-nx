@@ -4,6 +4,7 @@ import { InfoItem } from "@packages/ui/components/info-item";
 import { Button } from "@packages/ui/components/button";
 import { formatValueToTitleCase } from "@packages/ui/lib/utils";
 import { useMemo } from "react";
+import { useLocation } from "@tanstack/react-router";
 
 export function ReviewSubmitStep({ form }: { form: ContentRequestForm }) {
    const infoItems = useMemo(
@@ -52,6 +53,15 @@ export function ReviewSubmitStepSubscribe({
 }: {
    form: ContentRequestForm;
 }) {
+   const pathname = useLocation({
+      select: (location) => location.pathname,
+   });
+   const buttonTexts = useMemo(() => {
+      const match = pathname.match(/^\/content\/requests\/[^/]+\/edit$/);
+      return match
+         ? { idle: "Edit Request", loading: "Editing..." }
+         : { idle: "Create Request", loading: "Creating..." };
+   }, [pathname]);
    return (
       <form.Subscribe
          selector={(state) => ({
@@ -61,7 +71,7 @@ export function ReviewSubmitStepSubscribe({
       >
          {({ canSubmit, isSubmitting }) => (
             <Button type="submit" disabled={!canSubmit || isSubmitting}>
-               {isSubmitting ? "Requesting Content..." : "Request Content"}
+               {isSubmitting ? buttonTexts.loading : buttonTexts.idle}
             </Button>
          )}
       </form.Subscribe>

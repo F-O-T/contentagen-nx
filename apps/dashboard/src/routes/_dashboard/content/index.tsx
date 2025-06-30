@@ -1,6 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { ContentRequestsPage } from '@/pages/content-requests/ui/content-requests-page'
+import { createFileRoute } from "@tanstack/react-router";
+import { ContentListPage } from "@/pages/content-list/ui/content-list-page";
 
-export const Route = createFileRoute('/_dashboard/content/')({
-  component: ContentRequestsPage,
-})
+export const Route = createFileRoute("/_dashboard/content/")({
+   component: ContentListPage,
+});
