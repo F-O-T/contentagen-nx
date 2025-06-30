@@ -36,3 +36,4 @@ CREATE TRIGGER upd_status_trigger
   FOR EACH ROW
   WHEN (OLD.status = 'draft' AND NEW.status = 'published')
   EXECUTE FUNCTION move_draft_to_published();
+
