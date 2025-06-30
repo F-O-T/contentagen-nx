@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
+
    CardAction,
+
    CardContent,
    CardDescription,
    CardFooter,
@@ -87,7 +89,7 @@ const MarkdownComponents: Components = {
    ),
 };
 
-// Internal loading component for content generation
+
 function GenerationLoadingState() {
    return (
       <div className="text-center py-12">
@@ -111,6 +113,7 @@ function GenerationLoadingState() {
       </div>
    );
 }
+
 
 interface GeneratedContentDisplayProps {
    generatedContent?: {
@@ -142,10 +145,12 @@ export function GeneratedContentDisplay({
    return (
       <Card className={`h-fit   ${isGenerating ? 'animate-pulse' : ''}`}>
          <CardHeader>
+
             <CardTitle className="text-lg flex items-center gap-2">
                      Generated Content
                      {isGenerating && (
                         <div className="flex items-center gap-1 text-primary">
+
                            <Sparkles className="h-4 w-4 animate-spin" />
                            <span className="text-sm font-normal">Generating...</span>
                         </div>
@@ -154,9 +159,11 @@ export function GeneratedContentDisplay({
                   <CardDescription>
                      Your AI-generated content with export and copy options
                   </CardDescription>
+
            
                 {generatedContent && (
                    <CardAction>
+
                   <DropdownMenu>
                      <DropdownMenuTrigger asChild>
                         <Button size="sm" variant="outline" disabled={isExporting}>
@@ -182,9 +189,11 @@ export function GeneratedContentDisplay({
                         </DropdownMenuItem>
                      </DropdownMenuContent>
                   </DropdownMenu>
+
                        </CardAction>
                )}
        
+
          </CardHeader>
          <CardContent className="bg-muted mx-4 rounded-lg py-4">
             {!generatedContent && !isGenerating ? (
@@ -196,7 +205,9 @@ export function GeneratedContentDisplay({
                   </p>
                </div>
             ) : !generatedContent && isGenerating ? (
+
                <GenerationLoadingState />
+
             ) : (
                <div className="space-y-4">
                   <div className="text-sm">

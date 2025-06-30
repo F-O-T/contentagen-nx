@@ -5,6 +5,8 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
+
+
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Separator } from "@packages/ui/components/separator";
 import {
@@ -12,6 +14,8 @@ import {
    Target,
    Clock,
    BookOpen,
+
+
    FileText,
    MessageSquare,
 } from "lucide-react";
@@ -58,6 +62,7 @@ export function RequestDetailsCard({ request }: RequestDetailsCardProps) {
                value={request.briefDescription}
             />
 
+
             <Separator />
             <div className="grid grid-cols-2 gap-4">
                <InfoItem
@@ -71,6 +76,7 @@ export function RequestDetailsCard({ request }: RequestDetailsCardProps) {
                   value={formatValueToTitleCase(request.targetLength)}
                />
             </div>
+
          </CardContent>
       </Card>
    );
@@ -89,6 +95,7 @@ export function ContentStatsCard({ generatedContent }: ContentStatsCardProps) {
                Statistics and metadata about your generated content
             </CardDescription>
          </CardHeader>
+
          <CardContent className="grid grid-cols-2 gap-4">
             <InfoItem
                icon={<BookOpen className="h-4 w-4" />}
@@ -100,6 +107,7 @@ export function ContentStatsCard({ generatedContent }: ContentStatsCardProps) {
                label="Read Time"
                value={`${generatedContent.readTimeMinutes || 0} min`}
             />
+
          </CardContent>
       </Card>
    );

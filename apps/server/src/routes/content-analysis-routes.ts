@@ -110,7 +110,7 @@ export const ContentAnalysisRoutes = new Elysia({
                message: "This is your only content request. Create more requests to see similarity analysis.",
             };
          }
-         
+
          const similarity = sql<number>`1 - (${cosineDistance(
             contentRequest.embedding,
             originalRequest.embedding,
