@@ -28,7 +28,7 @@ export function AgentContentRequestPage() {
       },
       onSuccess: () => {
          toast.success("Content request submitted successfully!");
-         navigate({ to: "/agents" });
+         navigate({ to: "/content" });
       },
       onError: () => {
          toast.error("Failed to submit content request");
