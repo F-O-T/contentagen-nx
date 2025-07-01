@@ -1,6 +1,5 @@
 import { Section, Text } from "@react-email/components";
-// biome-ignore lint/correctness/noUnusedImports: <sim>
-import React from "react";
+
 import { DefaultFooter } from "./default-footer";
 import { DefaultHeading } from "./default-heading";
 import { DefaultEmailLayout } from "./default-layout";

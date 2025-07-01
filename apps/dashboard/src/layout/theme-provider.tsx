@@ -145,9 +145,7 @@ const Theme = ({
 
    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
    const handleMediaQuery = React.useCallback(
-      (e: MediaQueryListEvent | MediaQueryList) => {
-         const resolved = getSystemTheme(e);
-
+      () => {
          if (theme === "system" && enableSystem && !forcedTheme) {
             applyTheme("system");
          }
@@ -161,7 +159,7 @@ const Theme = ({
 
       // Intentionally use deprecated listener methods to support iOS & old browsers
       media.addListener(handleMediaQuery);
-      handleMediaQuery(media);
+      handleMediaQuery();
 
       return () => media.removeListener(handleMediaQuery);
    }, [handleMediaQuery]);

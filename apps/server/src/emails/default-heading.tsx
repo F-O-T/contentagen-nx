@@ -1,7 +1,7 @@
 import brand from "@packages/brand/index.json";
 import { Heading, Img, Section } from "@react-email/components";
-// biome-ignore lint/correctness/noUnusedImports: <this is a React component>
-import React from "react";
+
+
 export const DefaultHeading = () => {
    return (
       <Section>

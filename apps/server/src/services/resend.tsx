@@ -1,8 +1,6 @@
 import { env } from "@api/config/env";
 import OTPEmail from "@api/emails/otp";
 import brandConfig from "@packages/brand/index.json";
-// biome-ignore lint/correctness/noUnusedImports: <sim>
-import React from "react";
 import { Resend } from "resend";
 
 const resendClient = new Resend(env.RESEND_API_KEY);

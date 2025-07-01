@@ -1,5 +1,5 @@
 import { VITE_SERVER_URL } from "astro:env/client";
-import { createEdenAdapter, type EdenClientType } from "@packages/eden";
+import { createEdenAdapter } from "@packages/eden";
 import { Button } from "@packages/ui/components/button";
 import { useAppForm } from "@packages/ui/components/form";
 import { Input } from "@packages/ui/components/input";
@@ -15,30 +15,32 @@ import type React from "react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-type LeadType = Parameters<
-   EdenClientType["api"]["v1"]["waitlist"]["post"]
->["0"]["leadType"];
+
+type LeadType = "individual blogger" | "marketing team" | "freelance writer" | "business owner" | "other";
+
 export const WaitlistForm = () => {
    const eden = createEdenAdapter(VITE_SERVER_URL);
 
-   const [leadTypes] = useState([
+   const [leadTypes] = useState<LeadType[]>([
       "individual blogger",
       "marketing team",
       "freelance writer",
       "business owner",
       "other",
    ]);
+   
    const schema = z.object({
       email: z.string().email("Please enter a valid email address"),
-      leadType: z.enum(leadTypes as [LeadType, ...LeadType[]], {
+      leadType: z.enum(["individual blogger", "marketing team", "freelance writer", "business owner", "other"], {
          errorMap: () => ({ message: "Please select a lead type" }),
       }),
    });
+
    const form = useAppForm({
       defaultState: {},
       defaultValues: {
          email: "",
-         leadType: "",
+         leadType: "" as LeadType,
       },
       onSubmit: async (data) => {
          await eden.api.v1.waitlist.post({
@@ -49,9 +51,17 @@ export const WaitlistForm = () => {
          data.formApi.reset();
       },
       validators: {
-         onChange: schema,
-         onMount: (state) => {
-            return schema.safeParse(state.value);
+         onChange: ({ value }) => {
+            const result = schema.safeParse(value);
+            if (!result.success) {
+               return result.error.formErrors.fieldErrors;
+            }
+         },
+         onMount: ({ value }) => {
+            const result = schema.safeParse(value);
+            if (!result.success) {
+               return result.error.formErrors.fieldErrors;
+            }
          },
       },
    });
@@ -87,7 +97,7 @@ export const WaitlistForm = () => {
             {(field) => (
                <field.FieldContainer className="w-full">
                   <Select
-                     onValueChange={(value) => field.handleChange(value)}
+                     onValueChange={(value ) => field.handleChange(value as LeadType)}
                      value={field.state.value}
                   >
                      <SelectTrigger

@@ -3,7 +3,7 @@
       "baseUrl": ".",
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
-      "jsx": "react",
+      "jsx": "react-jsx",
       "module": "ES2022",
       "moduleResolution": "node",
       "paths": {

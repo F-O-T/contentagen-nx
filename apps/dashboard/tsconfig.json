@@ -6,7 +6,9 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "../../apps/server/**/*",
+    "../../apps/server/src/*"
   ],
   "compilerOptions": {
     "baseUrl": ".",
