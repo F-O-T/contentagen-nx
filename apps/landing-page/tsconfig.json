@@ -1,36 +1,17 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
-    "moduleResolution": "bundler",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@api": [
-        "../../apps/server/src/index"
-      ],
-      "@api/*": [
-        "../../apps/server/src/*"
-      ],
-      "@packages/ui/*": [
-        "../../packages/ui/src/*"
-      ],
-      "@packages/layouts/*": [
-        "../../packages/layouts/src/*"
-      ]
-    }
-  },
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
-  "extends": "@tooling/typescript/astro.json",
-  "include": [
-    ".astro/types.d.ts",
-    "**/*.ts",
-    "**/*.astro",
-    "**/*.tsx"
-  ]
+   "compilerOptions": {
+      "baseUrl": ".",
+      "jsx": "react-jsx",
+      "jsxImportSource": "react",
+      "moduleResolution": "bundler",
+      "paths": {
+         "@/*": ["./src/*"],
+         "@api": ["../../apps/server/src/index"],
+         "@api/*": ["../../apps/server/src/*"],
+         "@packages/ui/*": ["../../packages/ui/src/*"]
+      }
+   },
+   "exclude": ["node_modules", "dist"],
+   "extends": "@tooling/typescript/astro.json",
+   "include": [".astro/types.d.ts", "**/*.ts", "**/*.astro", "**/*.tsx"]
 }

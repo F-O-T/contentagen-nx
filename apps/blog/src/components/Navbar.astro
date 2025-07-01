@@ -1,0 +1,32 @@
+---
+import Logo from "../components/Logo.astro";
+import brandConfig from "@packages/brand/index.json";
+import ThemeToggler from "../components/ThemeToggler.astro";
+
+---
+  <nav id="navbar" class="bg-muted">
+    <div id="navbar-inner" class="container mx-auto  flex  items-center justify-between gap-4 p-4 ">
+     
+       <div class="flex items-center gap-4 justify-center">
+
+      <Logo class="size-12 text-primary" />
+      <span class="font-bold text-xl text-primary">{brandConfig.name}</span>
+    </div>
+   
+     
+      
+     
+          
+          
+     
+        
+  
+      <div class="flex items-center gap-4">
+          <ThemeToggler />
+     
+  
+        </div>
+    </div>
+  </nav>
+
+

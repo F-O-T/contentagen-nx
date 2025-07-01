@@ -1,24 +1,16 @@
 {
-  "baseUrl": ".",
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@packages/layouts/*": [
-        "../../packages/layouts/src/*"
-      ]
-    }
-  },
-  "exclude": [
-    "dist"
-  ],
-  "extends": "@tooling/typescript/astro.json",
-  "include": [
-    ".astro/types.d.ts",
-    "**/*"
-  ]
+   "baseUrl": ".",
+   "compilerOptions": {
+      "jsx": "react-jsx",
+      "jsxImportSource": "react",
+      "baseUrl": ".",
+      "paths": {
+         "@/*": ["./src/*"],
+         "@packages/ui/*": ["../../packages/ui/src/*"]
+      }
+   },
+   "exclude": ["dist"],
+   "extends": "@tooling/typescript/astro.json",
+   "include": [".astro/types.d.ts", "**/*"]
 }
+
