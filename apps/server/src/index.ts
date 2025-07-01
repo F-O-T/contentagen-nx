@@ -10,7 +10,9 @@ import { authMiddleware, OpenAPI } from "./integrations/auth";
 import { agentRoutes } from "./routes/agent-routes";
 import { ContentAnalysisRoutes } from "./routes/content-analysis-routes";
 import { contentManagementRoutes } from "./routes/content-management-routes";
+import { generatedRequestRoutes } from "./routes/generated-request-routes";
 import { contentRequestRoutes } from "./routes/content-request-routes";
+import { fileRoutes } from "./routes/file-routes";
 import { waitlistRoutes } from "./routes/waitlist-routes";
 import { contentGenerationQueue } from "./workers/content-generation";
 
@@ -25,14 +27,16 @@ createBullBoard({
 });
 
 const app = new Elysia()
-   .use(
-      cors({
-         allowedHeaders: ["Content-Type", "Authorization"],
-         credentials: true,
-         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-         origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
-      }),
-   )
+    .use(generatedRequestRoutes)
+    .use(contentRequestRoutes)
+    .use(
+        cors({
+            allowedHeaders: ["Content-Type", "Authorization"],
+            credentials: true,
+            methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+            origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
+        }),
+    )
    .onBeforeHandle(({ request }) => {
       const url = new URL(request.url);
       if (url.pathname.startsWith("/ui")) {
@@ -57,6 +61,7 @@ const app = new Elysia()
          api
             .use(authMiddleware)
             .use(agentRoutes)
+            .use(fileRoutes)
             .group("/content", (content) =>
                content
                   .use(ContentAnalysisRoutes)

@@ -13,6 +13,10 @@ const EnvSchema = Type.Object({
    OPENAI_API_KEY: Type.String(),
    AP_QUEUE_UI_PASSWORD: Type.String(),
    AP_QUEUE_UI_USERNAME: Type.String(),
+   MINIO_ENDPOINT: Type.String(),
+   MINIO_ACCESS_KEY: Type.String(),
+   MINIO_SECRET_KEY: Type.String(),
+   MINIO_BUCKET: Type.String(),
 });
 
 function parseEnv(env: NodeJS.ProcessEnv): Static<typeof EnvSchema> {

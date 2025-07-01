@@ -17,6 +17,7 @@
       "drizzle-orm": "^0.44.2",
       "drizzle-typebox": "^0.3.3",
       "elysia": "catalog:server",
+      "minio": "^8.0.5",
       "openai": "^5.8.2",
       "pg": "^8.16.3",
       "react": "catalog:react",

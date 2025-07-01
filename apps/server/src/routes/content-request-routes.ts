@@ -75,79 +75,6 @@ export const contentRequestRoutes = new Elysia({
    tags: [ApiTags.CONTENT_REQUESTS],
 })
    .use(authMiddleware)
-   .post(
-      "/generate",
-      async ({ body, set, user }) => {
-         const { id: userId } = user;
-
-         try {
-            // Generate embedding for the content request
-            const embedding =
-               await embeddingService.generateContentRequestEmbedding(
-                  body.topic,
-                  body.briefDescription,
-               );
-
-            const [request] = await db
-               .insert(contentRequest)
-               .values({
-                  ...body,
-                  userId,
-                  embedding,
-               })
-               .returning();
-
-            set.status = 201;
-            return {
-               request,
-            };
-         } catch (error) {
-            console.error("Error generating content request embedding:", error);
-            // Fallback: create request without embedding
-            const [request] = await db
-               .insert(contentRequest)
-               .values({
-                  ...body,
-                  userId,
-               })
-               .returning();
-
-            set.status = 201;
-            return {
-               request,
-            };
-         }
-      },
-      {
-         auth: true,
-         detail: {
-            summary: "Create a new content request",
-            description:
-               "Generate a new content request with embedding for similarity analysis. The system will automatically generate embeddings for the topic and brief description to enable content similarity detection.",
-            tags: [ApiTags.CONTENT_REQUESTS],
-            responses: {
-               201: {
-                  description: "Content request created successfully",
-               },
-            },
-         },
-         body: t.Omit(_createContentRequest, [
-            "id",
-            "updatedAt",
-            "createdAt",
-            "isCompleted",
-            "generatedContentId",
-            "userId",
-            "status",
-            "embedding",
-         ]),
-         response: {
-            201: t.Object({
-               request: _selectContentRequest,
-            }),
-         },
-      },
-   )
    .get(
       "/list",
       async ({ user, query }) => {
@@ -332,9 +259,16 @@ export const contentRequestRoutes = new Elysia({
                throw new Error("Content request not found");
             }
 
-            // Prepare update data
-            const updateData: any = {
+            // Validate and extract the new fields, preserving existing values if not provided
+            const validatedUpdateData: any = {
                ...body,
+               generateTags: body.generateTags !== undefined ? body.generateTags : existingRequest.generateTags,
+               tags: body.tags !== undefined ? body.tags : existingRequest.tags,
+               internalLinkFormat: body.internalLinkFormat !== undefined ? body.internalLinkFormat : existingRequest.internalLinkFormat,
+               includeMetaTags: body.includeMetaTags !== undefined ? body.includeMetaTags : existingRequest.includeMetaTags,
+               includeMetaDescription: body.includeMetaDescription !== undefined ? body.includeMetaDescription : existingRequest.includeMetaDescription,
+               frontmatterFormatting: body.frontmatterFormatting !== undefined ? body.frontmatterFormatting : existingRequest.frontmatterFormatting,
+               approved: body.approved !== undefined ? body.approved : existingRequest.approved,
                updatedAt: new Date(),
             };
 
@@ -348,7 +282,7 @@ export const contentRequestRoutes = new Elysia({
                      topic,
                      briefDescription,
                   );
-                  updateData.embedding = embedding;
+                  validatedUpdateData.embedding = embedding;
                } catch (error) {
                   console.error("Error updating embedding:", error);
                   // Continue with update without embedding if embedding generation fails
@@ -358,7 +292,7 @@ export const contentRequestRoutes = new Elysia({
             // Update the request
             const [updatedRequest] = await db
                .update(contentRequest)
-               .set(updateData)
+               .set(validatedUpdateData)
                .where(eq(contentRequest.id, body.id))
                .returning();
             if (!updatedRequest) {
@@ -377,8 +311,59 @@ export const contentRequestRoutes = new Elysia({
          detail: {
             summary: "Update a content request",
             description:
-               "Update an existing content request. Only the owner can update their requests.",
+               "Update an existing content request. Only the owner can update their requests. Supports updating all content generation options including tag generation, meta tags, internal link formatting, and frontmatter formatting.",
             tags: [ApiTags.CONTENT_REQUESTS],
+            parameters: [
+               {
+                  name: "generateTags",
+                  in: "body",
+                  description: "Whether to automatically generate tags for the content",
+                  required: false,
+                  schema: { type: "boolean" }
+               },
+               {
+                  name: "tags",
+                  in: "body",
+                  description: "Array of predefined tags for the content",
+                  required: false,
+                  schema: { type: "array", items: { type: "string" } }
+               },
+               {
+                  name: "internalLinkFormat",
+                  in: "body",
+                  description: "Format for internal links: 'mdx' or 'html'",
+                  required: false,
+                  schema: { type: "string", enum: ["mdx", "html"] }
+               },
+               {
+                  name: "includeMetaTags",
+                  in: "body",
+                  description: "Whether to include meta tags in the generated content",
+                  required: false,
+                  schema: { type: "boolean" }
+               },
+               {
+                  name: "includeMetaDescription",
+                  in: "body",
+                  description: "Whether to include meta description in the generated content",
+                  required: false,
+                  schema: { type: "boolean" }
+               },
+               {
+                  name: "frontmatterFormatting",
+                  in: "body",
+                  description: "Whether to format output with YAML frontmatter",
+                  required: false,
+                  schema: { type: "boolean" }
+               },
+               {
+                  name: "approved",
+                  in: "body",
+                  description: "Whether the content request is approved for generation",
+                  required: false,
+                  schema: { type: "boolean" }
+               }
+            ],
          },
 
          body: t.Omit(_updateContentRequest, [

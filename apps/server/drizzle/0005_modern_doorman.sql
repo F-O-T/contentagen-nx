@@ -1,0 +1,1 @@
+ALTER TABLE "agent" ALTER COLUMN "base_prompt" DROP NOT NULL;

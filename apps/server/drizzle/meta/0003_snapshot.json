@@ -1,6 +1,6 @@
 {
-  "id": "19b075bf-ede4-4d53-a245-3a6fdf0e88e9",
-  "prevId": "0f8b23bc-08a0-4d8e-bf97-cc039829b857",
+  "id": "8c308b4a-8c0e-47f6-a068-7b2408542203",
+  "prevId": "873b2405-e8ed-4078-8c9d-06170e87120c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -414,9 +414,32 @@
           "primaryKey": false,
           "notNull": false,
           "default": "'[]'::json"
+        },
+        "knowledge_base": {
+          "name": "knowledge_base",
+          "type": "vector(1536)",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "agent_knowledge_base_idx": {
+          "name": "agent_knowledge_base_idx",
+          "columns": [
+            {
+              "expression": "knowledge_base",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last",
+              "opclass": "vector_cosine_ops"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hnsw",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "agent_user_id_user_id_fk": {
           "name": "agent_user_id_user_id_fk",

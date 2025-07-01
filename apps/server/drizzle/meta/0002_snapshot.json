@@ -1,6 +1,6 @@
 {
-  "id": "e77b8a34-aedc-4759-bb8f-0cd5d57e6972",
-  "prevId": "47082c42-eea0-427b-85a8-554f4d07a2f4",
+  "id": "873b2405-e8ed-4078-8c9d-06170e87120c",
+  "prevId": "19b075bf-ede4-4d53-a245-3a6fdf0e88e9",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -361,12 +361,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "project_id": {
-          "name": "project_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "seo_focus": {
           "name": "seo_focus",
           "type": "boolean",
@@ -413,115 +407,20 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
+        },
+        "uploaded_files": {
+          "name": "uploaded_files",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::json"
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "agent_project_id_project_id_fk": {
-          "name": "agent_project_id_project_id_fk",
-          "tableFrom": "agent",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "tableTo": "project",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
         "agent_user_id_user_id_fk": {
           "name": "agent_user_id_user_id_fk",
           "tableFrom": "agent",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.comment": {
-      "name": "comment",
-      "schema": "",
-      "columns": {
-        "content": {
-          "name": "content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "content_id": {
-          "name": "content_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "is_resolved": {
-          "name": "is_resolved",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
-        },
-        "parent_comment_id": {
-          "name": "parent_comment_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "comment_content_id_content_id_fk": {
-          "name": "comment_content_id_content_id_fk",
-          "tableFrom": "comment",
-          "columnsFrom": [
-            "content_id"
-          ],
-          "tableTo": "content",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "comment_user_id_user_id_fk": {
-          "name": "comment_user_id_user_id_fk",
-          "tableFrom": "comment",
           "columnsFrom": [
             "user_id"
           ],
@@ -904,70 +803,6 @@
         "export_log_user_id_user_id_fk": {
           "name": "export_log_user_id_user_id_fk",
           "tableFrom": "export_log",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "tableTo": "user",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.project": {
-      "name": "project",
-      "schema": "",
-      "columns": {
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "project_user_id_user_id_fk": {
-          "name": "project_user_id_user_id_fk",
-          "tableFrom": "project",
           "columnsFrom": [
             "user_id"
           ],

@@ -177,7 +177,17 @@ export function AgentCard({ agent }: AgentCardProps) {
             </div>
          </CardContent>
 
-         <CardFooter className="flex gap-2">
+         <CardFooter className="grid grid-cols-2 gap-2">
+            <Link
+               to={`/agents/$agentId`}
+               params={{ agentId: agent.id }}
+               className="flex-1"
+            >
+               <Button className="w-full" size="sm">
+                  View details
+               </Button>
+            </Link>
+
             <Link
                to={`/agents/$agentId/content/request`}
                params={{ agentId: agent.id }}

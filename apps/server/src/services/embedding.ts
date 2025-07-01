@@ -52,6 +52,42 @@ const generateContentEmbedding = async (title: string, body: string): Promise<nu
   }
 };
 
+const generateFileContentEmbedding = async (content: string): Promise<number[]> => {
+  try {
+    const response = await openai.embeddings.create({
+      input: content,
+      model: "text-embedding-3-small",
+    });
+
+    const embedding = response.data[0]?.embedding;
+    if (!embedding) {
+      throw new Error("No embedding returned from OpenAI");
+    }
+
+    return embedding;
+  } catch (error) {
+    console.error("Error generating file content embedding:", error);
+    throw error;
+  }
+};
+
+const averageEmbeddings = (embeddings: number[][]): number[] => {
+  if (embeddings.length === 0) {
+    return new Array(1536).fill(0); // Return zero vector for empty input
+  }
+
+  const dimensions = embeddings[0]?.length || 1536;
+  const averaged = new Array(dimensions).fill(0);
+
+  for (const embedding of embeddings) {
+    for (let i = 0; i < dimensions; i++) {
+      averaged[i] += (embedding[i] || 0) / embeddings.length;
+    }
+  }
+
+  return averaged;
+};
+
 const calculateCosineSimilarity = (embedding1: number[], embedding2: number[]): number => {
   if (embedding1.length !== embedding2.length) {
     throw new Error("Embeddings must have the same length");
@@ -106,10 +142,12 @@ const categorizeSimilarity = (similarity: number): SimilarityCategorization => {
 const embeddingService = {
   generateContentRequestEmbedding,
   generateContentEmbedding,
+  generateFileContentEmbedding,
 };
 
-export { 
+export {
+  averageEmbeddings,
   calculateCosineSimilarity,
   categorizeSimilarity,
-  embeddingService 
+  embeddingService
 };

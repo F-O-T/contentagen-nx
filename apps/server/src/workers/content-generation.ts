@@ -36,6 +36,11 @@ function generateAgentPrompt(
       topic: string;
       briefDescription: string;
       targetLength: ContentLength;
+      generateTags: boolean;
+      internalLinkFormat: 'mdx' | 'html';
+      includeMetaTags: boolean;
+      includeMetaDescription: boolean;
+      frontmatterFormatting: boolean;
    },
 ): string {
    // Map ContentLength to detailed descriptions
@@ -44,48 +49,93 @@ function generateAgentPrompt(
       medium: "Balanced content with good detail (800-1500 words)",
       long: "Comprehensive and in-depth content (1500+ words)",
    };
-   return `
-You are an expert copywriter and SEO strategist. Your job is to craft high-quality, engaging, and SEO-optimized content tailored to the agent profile and the content request below. Use advanced copywriting techniques, ensure clarity, and maximize the content's discoverability.
 
-Follow these instructions strictly:
-1. Carefully analyze the agent profile and content request. Adapt your writing style, tone, and structure to match the agent's requirements and the target audience.
-2. Use advanced copywriting strategies (e.g., compelling headlines, strong introductions, clear structure, persuasive language, and effective calls to action if relevant).
-3. Ensure the content is highly relevant, original, and provides real value to the reader.
-4. Optimize for SEO:
-   - Naturally incorporate the SEO focus and related keywords throughout the content.
-   - Use semantic keywords and variations.
-   - Structure the content with clear headings, subheadings, and bullet points if appropriate.
-   - Write a meta description (max 155 characters) at the top of the content.
-5. The content must be well-formatted according to the agent's formattingStyle (e.g., Markdown, HTML, etc.).
-6. The output must be a valid JSON object with two keys: "content" and "tags".
-   - "content": The full, SEO-optimized text, including the meta description at the top.
-   - "tags": An array of highly relevant tags as strings (3-8 tags, no duplicates, all lowercase, related to the topic and SEO focus).
-7. Do not include any explanations, notes, or extra text outside the JSON object.
+   // Build base prompt without tag placeholders
+   let prompt = `
+${agent.basePrompt || `You are ${agent.name}, an expert content creator specializing in ${agent.contentType} with a ${agent.voiceTone} tone for ${agent.targetAudience}.`}
 
 ---
-Agent Profile:
-- Name: ${agent.name}
-- Description: ${agent.description}
-- Content Type: ${agent.contentType}
-- Voice Tone: ${agent.voiceTone}
-- Target Audience: ${agent.targetAudience}
-- Formatting Style: ${agent.formattingStyle}
-- SEO Focus: ${agent.seoFocus}
 
-Content Request:
-- Topic: ${params.topic}
-- Brief Description: ${params.briefDescription}
-- Target Length: ${params.targetLength} (${lengthDescriptions[params.targetLength]})
+## Content Request Details
 
-Output format example:
+You have received a new content request. Please create content according to your agent profile and the specifications below:
+
+**Topic**: ${params.topic}
+**Brief Description**: ${params.briefDescription}
+**Target Length**: ${params.targetLength} (${lengthDescriptions[params.targetLength]})
+
+## Additional Instructions
+
+1. Follow your established voice, tone, and style guidelines
+2. Ensure the content provides genuine value to your target audience
+3. Structure the content according to your formatting preferences
+4. Make the content engaging and actionable`;
+
+   // Add meta tags and description instructions if requested
+   if (params.includeMetaTags || params.includeMetaDescription) {
+      prompt += `\n5. Include relevant meta information:`;
+      if (params.includeMetaTags) {
+         prompt += `\n   - Add appropriate meta tags for SEO optimization`;
+      }
+      if (params.includeMetaDescription) {
+         prompt += `\n   - Include a compelling meta description (150-160 characters)`;
+      }
+   }
+
+   // Add internal link formatting instructions
+   prompt += `\n6. Format internal links using ${params.internalLinkFormat.toUpperCase()} format:`;
+   if (params.internalLinkFormat === 'mdx') {
+      prompt += `\n   - Use MDX link syntax: [Link Text](./relative-path)`;
+   } else {
+      prompt += `\n   - Use HTML link syntax: <a href="./relative-path">Link Text</a>`;
+   }
+
+   // Add frontmatter formatting instructions
+   if (params.frontmatterFormatting) {
+      prompt += `\n7. Format output as MDX/Markdown with YAML frontmatter containing title, description, and other metadata`;
+   }
+
+   // Build output requirements
+   prompt += `\n\n## Output Requirements\n\n`;
+   
+   if (params.generateTags) {
+      prompt += `The output must be a valid JSON object with exactly two keys:
+- "content": The complete content as a string, properly formatted in Markdown${params.frontmatterFormatting ? ' with YAML frontmatter' : ''}
+- "tags": An array of 3-8 relevant lowercase tags (no duplicates)
+
+Example output format:
 {
-  "content": "Meta description here.\n\n# Title...\nFull article...",
-  "tags": ["seo", "copywriting", "digital marketing"]
-}
-`;
+  "content": "${params.frontmatterFormatting ? '---\\ntitle: Article Title\\ndescription: Brief description\\n---\\n\\n# Article Title\\n\\nYour complete article content here...' : '# Article Title\\n\\nYour complete article content here...'}",
+  "tags": ["content-marketing", "copywriting", "seo"]
+}`;
+   } else {
+      prompt += `The output must be a valid JSON object with exactly one key:
+- "content": The complete content as a string, properly formatted in Markdown${params.frontmatterFormatting ? ' with YAML frontmatter' : ''}
+
+Example output format:
+{
+  "content": "${params.frontmatterFormatting ? '---\\ntitle: Article Title\\ndescription: Brief description\\n---\\n\\n# Article Title\\n\\nYour complete article content here...' : '# Article Title\\n\\nYour complete article content here...'}"
+}`;
+   }
+
+   prompt += `\n\nDo not include any explanations or additional text outside the JSON object.`;
+
+   // Append tag generation instructions if enabled
+   if (params.generateTags) {
+      prompt += `\n\n## Tag Generation Instructions
+
+Generate 3-8 relevant tags that:
+- Are lowercase and use hyphens for multi-word tags
+- Accurately represent the content's main topics and themes
+- Include both broad category tags and specific topic tags
+- Avoid duplicates and overly generic terms
+- Help with content discovery and categorization`;
+   }
+
+   return prompt;
 }
 
-async function generateContent(prompt: string) {
+async function generateContent(prompt: string, generateTags: boolean) {
    const response = await openRouter.chat.completions.create({
       model: "qwen/qwen3-30b-a3b-04-28",
       messages: [{ role: "user", content: prompt }],
@@ -99,7 +149,16 @@ async function generateContent(prompt: string) {
    }
 
    try {
-      return JSON.parse(generatedText);
+      const result = JSON.parse(generatedText);
+      
+      // Ensure tags array exists based on generateTags setting
+      if (generateTags && !result.tags) {
+         result.tags = [];
+      } else if (!generateTags) {
+         result.tags = [];
+      }
+      
+      return result;
    } catch (error) {
       console.error("Failed to parse JSON response from AI:", error);
       throw new Error("Invalid JSON response from AI");
@@ -143,7 +202,18 @@ async function saveContent(
    generatedContent: { content: string; tags: string[] | string },
 ) {
    const slug = slugify(request.topic);
-   const tags = extractTags(generatedContent.tags, request.topic);
+   
+   // Use generated tags if generateTags is true, otherwise use existing request tags or extract from topic
+   const generateTags = request.generateTags ?? false;
+   let tags: string[] = [];
+   
+   if (generateTags) {
+      tags = extractTags(generatedContent.tags, request.topic);
+   } else {
+      // Use existing tags from request, or empty array if none
+      tags = request.tags || [];
+   }
+   
    const wordsCount = calculateWordsCount(generatedContent.content);
    const timeToRead = calculateTimeToRead(wordsCount);
 
@@ -174,11 +244,15 @@ async function saveContent(
       })
       .returning();
 
+   // Update request with tags, approved status and completion
+   // Note: We don't include embedding in the update to avoid sending vectors in the payload
    await db
       .update(contentRequest)
       .set({
          isCompleted: true,
          generatedContentId: newContent?.id,
+         approved: true, // Set approved = true after content updates
+         tags: tags, // Set the tags array based on generation or existing
       })
       .where(eq(contentRequest.id, request.id));
 
@@ -203,15 +277,32 @@ export const contentGenerationWorker = new Worker(
             throw new Error("Request or agent not found");
          }
 
-         const { agent, topic, briefDescription, targetLength } = request;
+         const {
+            agent,
+            topic,
+            briefDescription,
+            targetLength
+         } = request;
+
+         // Handle nullable boolean and enum values with proper defaults
+         const generateTags = request.generateTags ?? false;
+         const internalLinkFormat = request.internalLinkFormat ?? 'mdx';
+         const includeMetaTags = request.includeMetaTags ?? false;
+         const includeMetaDescription = request.includeMetaDescription ?? false;
+         const frontmatterFormatting = request.frontmatterFormatting ?? false;
 
          const prompt = generateAgentPrompt(agent, {
             topic,
             briefDescription,
             targetLength,
+            generateTags,
+            internalLinkFormat,
+            includeMetaTags,
+            includeMetaDescription,
+            frontmatterFormatting,
          });
 
-         const generatedContent = await generateContent(prompt);
+         const generatedContent = await generateContent(prompt, generateTags);
 
          await saveContent(request, generatedContent);
 

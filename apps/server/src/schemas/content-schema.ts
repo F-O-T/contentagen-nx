@@ -67,20 +67,11 @@ export const priorityEnum = pgEnum("priority", [
 ]);
 export type Priority = (typeof priorityEnum.enumValues)[number];
 
-export const project = pgTable("project", {
-   createdAt: timestamp("created_at")
-      .$defaultFn(() => new Date())
-      .notNull(),
-   description: text("description"),
-   id: uuid("id").primaryKey().defaultRandom(),
-   name: text("name").notNull(),
-   updatedAt: timestamp("updated_at")
-      .$defaultFn(() => new Date())
-      .notNull(),
-   userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-});
+export const internalLinkFormatEnum = pgEnum("internal_link_format", [
+   "mdx",
+   "html",
+]);
+export type InternalLinkFormat = (typeof internalLinkFormatEnum.enumValues)[number];
 
 export const agent = pgTable("agent", {
    contentType: contentTypeEnum("content_type").notNull(),
@@ -95,10 +86,6 @@ export const agent = pgTable("agent", {
    isActive: boolean("is_active").default(true),
    lastGeneratedAt: timestamp("last_generated_at"),
    name: text("name").notNull(),
-   projectId: uuid("project_id").references(() => project.id, {
-      onDelete: "cascade",
-   }),
-   seoFocus: boolean("seo_focus").default(false),
    targetAudience: targetAudienceEnum("target_audience").notNull(),
    totalDrafts: integer("total_drafts").default(0),
    totalPublished: integer("total_published").default(0),
@@ -109,7 +96,15 @@ export const agent = pgTable("agent", {
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
    voiceTone: voiceToneEnum("voice_tone").notNull(),
-});
+   uploadedFiles: json("uploaded_files").$type<{ fileName: string; fileUrl: string; uploadedAt: string }[]>().default([]),
+   knowledgeBase: vector("knowledge_base", { dimensions: 1536 }),
+   basePrompt: text("base_prompt"),
+}, (table) => ([
+   index("agent_knowledge_base_idx").using(
+      "hnsw",
+      table.knowledgeBase.op("vector_cosine_ops"),
+   ),
+]));
 
 export const content = pgTable(
    "content",
@@ -185,6 +180,13 @@ export const contentRequest = pgTable(
       userId: text("user_id")
          .notNull()
          .references(() => user.id, { onDelete: "cascade" }),
+      generateTags: boolean("generate_tags").default(false),
+      tags: json("tags").$type<string[]>().default([]),
+      internalLinkFormat: internalLinkFormatEnum("internal_link_format").default("mdx"),
+      includeMetaTags: boolean("include_meta_tags").default(false),
+      includeMetaDescription: boolean("include_meta_description").default(false),
+      frontmatterFormatting: boolean("frontmatter_formatting").default(false),
+      approved: boolean("approved").default(true),
    },
    (table) => ([
       index("content_request_embedding_idx").using(
@@ -194,27 +196,6 @@ export const contentRequest = pgTable(
    ]),
 );
 
-export const comment = pgTable("comment", {
-   content: text("content").notNull(),
-
-   contentId: uuid("content_id")
-      .notNull()
-      .references(() => content.id, { onDelete: "cascade" }),
-
-   createdAt: timestamp("created_at")
-      .$defaultFn(() => new Date())
-      .notNull(),
-   id: text("id").primaryKey(),
-
-   isResolved: boolean("is_resolved").default(false),
-   parentCommentId: uuid("parent_comment_id"),
-   updatedAt: timestamp("updated_at")
-      .$defaultFn(() => new Date())
-      .notNull(),
-   userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-});
 
 export const exportLog = pgTable("export_log", {
    contentId: uuid("content_id")
@@ -233,21 +214,11 @@ export const exportLog = pgTable("export_log", {
       .references(() => user.id, { onDelete: "cascade" }),
 });
 
-export const projectRelations = relations(project, ({ one, many }) => ({
-   agents: many(agent),
-   user: one(user, {
-      fields: [project.userId],
-      references: [user.id],
-   }),
-}));
+
 
 export const agentRelations = relations(agent, ({ one, many }) => ({
    content: many(content),
    contentRequests: many(contentRequest),
-   project: one(project, {
-      fields: [agent.projectId],
-      references: [project.id],
-   }),
    user: one(user, {
       fields: [agent.userId],
       references: [user.id],
@@ -259,7 +230,7 @@ export const contentRelations = relations(content, ({ one, many }) => ({
       fields: [content.agentId],
       references: [agent.id],
    }),
-   comments: many(comment),
+
    exports: many(exportLog),
    generationRequest: one(contentRequest, {
       fields: [content.id],
@@ -286,21 +257,6 @@ export const contentRequestRelations = relations(contentRequest, ({ one }) => ({
    }),
 }));
 
-export const commentRelations = relations(comment, ({ one, many }) => ({
-   content: one(content, {
-      fields: [comment.contentId],
-      references: [content.id],
-   }),
-   parentComment: one(comment, {
-      fields: [comment.parentCommentId],
-      references: [comment.id],
-   }),
-   replies: many(comment),
-   user: one(user, {
-      fields: [comment.userId],
-      references: [user.id],
-   }),
-}));
 
 export const exportLogRelations = relations(exportLog, ({ one }) => ({
    content: one(content, {
