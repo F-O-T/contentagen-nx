@@ -1,22 +1,16 @@
-// Route: POST /request/generate (extracted from content-request-routes.ts)
-
 import { Elysia, t } from "elysia";
 import { db } from "../integrations/database";
-import { contentRequest } from "../schemas/content-schema";
-import { createInsertSchema } from "drizzle-typebox";
+import { content } from "../schemas/content-schema";
+import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
 import { authMiddleware } from "../integrations/auth";
 import { embeddingService } from "../services/embedding";
 
-// OpenAPI Tags for route organization
 enum ApiTags {
    CONTENT_REQUESTS = "Content Requests",
 }
 
-// Schemas for this endpoint
-const _createContentRequest = createInsertSchema(contentRequest);
-const _selectContentRequest = /* @ts-ignore */ (contentRequest as any).$selectSchema
-   ? (contentRequest as any).$selectSchema
-   : (() => { throw new Error("Select schema not available") })();
+const _createContentRequest = createInsertSchema(content);
+const _selectContentRequest = createSelectSchema(content);
 
 // Exported route
 export const generatedRequestRoutes = new Elysia({
@@ -35,7 +29,7 @@ export const generatedRequestRoutes = new Elysia({
                ...body,
                generateTags: body.generateTags ?? false,
                tags: body.tags ?? [],
-               internalLinkFormat: body.internalLinkFormat ?? 'mdx',
+               internalLinkFormat: body.internalLinkFormat ?? "mdx",
                includeMetaTags: body.includeMetaTags ?? false,
                includeMetaDescription: body.includeMetaDescription ?? false,
                frontmatterFormatting: body.frontmatterFormatting ?? false,
@@ -69,7 +63,7 @@ export const generatedRequestRoutes = new Elysia({
                ...body,
                generateTags: body.generateTags ?? false,
                tags: body.tags ?? [],
-               internalLinkFormat: body.internalLinkFormat ?? 'mdx',
+               internalLinkFormat: body.internalLinkFormat ?? "mdx",
                includeMetaTags: body.includeMetaTags ?? false,
                includeMetaDescription: body.includeMetaDescription ?? false,
                frontmatterFormatting: body.frontmatterFormatting ?? false,
@@ -101,52 +95,58 @@ export const generatedRequestRoutes = new Elysia({
                {
                   name: "generateTags",
                   in: "body",
-                  description: "Whether to automatically generate tags for the content (default: false)",
+                  description:
+                     "Whether to automatically generate tags for the content (default: false)",
                   required: false,
-                  schema: { type: "boolean" }
+                  schema: { type: "boolean" },
                },
                {
                   name: "tags",
                   in: "body",
                   description: "Array of predefined tags for the content",
                   required: false,
-                  schema: { type: "array", items: { type: "string" } }
+                  schema: { type: "array", items: { type: "string" } },
                },
                {
                   name: "internalLinkFormat",
                   in: "body",
-                  description: "Format for internal links: 'mdx' or 'html' (default: 'mdx')",
+                  description:
+                     "Format for internal links: 'mdx' or 'html' (default: 'mdx')",
                   required: false,
-                  schema: { type: "string", enum: ["mdx", "html"] }
+                  schema: { type: "string", enum: ["mdx", "html"] },
                },
                {
                   name: "includeMetaTags",
                   in: "body",
-                  description: "Whether to include meta tags in the generated content (default: false)",
+                  description:
+                     "Whether to include meta tags in the generated content (default: false)",
                   required: false,
-                  schema: { type: "boolean" }
+                  schema: { type: "boolean" },
                },
                {
                   name: "includeMetaDescription",
                   in: "body",
-                  description: "Whether to include meta description in the generated content (default: false)",
+                  description:
+                     "Whether to include meta description in the generated content (default: false)",
                   required: false,
-                  schema: { type: "boolean" }
+                  schema: { type: "boolean" },
                },
                {
                   name: "frontmatterFormatting",
                   in: "body",
-                  description: "Whether to format output with YAML frontmatter (default: false)",
+                  description:
+                     "Whether to format output with YAML frontmatter (default: false)",
                   required: false,
-                  schema: { type: "boolean" }
+                  schema: { type: "boolean" },
                },
                {
                   name: "approved",
                   in: "body",
-                  description: "Whether the content request is approved for generation (default: true)",
+                  description:
+                     "Whether the content request is approved for generation (default: true)",
                   required: false,
-                  schema: { type: "boolean" }
-               }
+                  schema: { type: "boolean" },
+               },
             ],
             responses: {
                201: {
@@ -171,3 +171,4 @@ export const generatedRequestRoutes = new Elysia({
          },
       },
    );
+

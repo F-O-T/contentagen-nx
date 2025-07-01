@@ -1,6 +1,4 @@
-// apps/dashboard/src/pages/agent-details/ui/agent-details-knowledge-base-card.tsx
 
-import React from "react";
 import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
 import {
@@ -28,29 +26,26 @@ type UploadedFile = {
 
 
 
+import useFileUpload from "../lib/use-file-upload";
+
 interface AgentDetailsKnowledgeBaseCardProps {
   uploadedFiles: UploadedFile[];
-  canAddMore: boolean;
-  remainingSlots: number;
-  deletePending: boolean;
-  onSelectClick: () => void;
-  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onViewFile: (fileName: string, fileUrl: string) => void;
-  onDeleteFile: (fileName: string) => void;
-  fileInputRef: React.Ref<HTMLInputElement>;
 }
 
 export function AgentDetailsKnowledgeBaseCard({
   uploadedFiles,
-  canAddMore,
-  remainingSlots,
-  deletePending,
-  onSelectClick,
-  onFileChange,
   onViewFile,
-  onDeleteFile,
-  fileInputRef,
 }: AgentDetailsKnowledgeBaseCardProps) {
+  const {
+    fileInputRef,
+    handleFileSelect,
+    handleButtonClick,
+    handleDeleteFile,
+    canAddMore,
+    remainingSlots,
+  } = useFileUpload(uploadedFiles);
+
   return (
     <Card>
       <CardHeader className="flex items-center justify-between">
@@ -94,7 +89,7 @@ export function AgentDetailsKnowledgeBaseCard({
                     <DropdownMenuItem onSelect={() => onViewFile(file.fileName, file.fileUrl)}>
                       View
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => onDeleteFile(file.fileName)} disabled={deletePending}>
+                    <DropdownMenuItem onSelect={() => handleDeleteFile(file.fileName)}>
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -118,7 +113,7 @@ export function AgentDetailsKnowledgeBaseCard({
         type="file"
         accept=".md"
         multiple
-        onChange={onFileChange}
+        onChange={handleFileSelect}
         className="hidden"
       />
       <CardFooter>
@@ -127,7 +122,7 @@ export function AgentDetailsKnowledgeBaseCard({
             variant="outline"
             size="sm"
             className="w-full flex items-center justify-center gap-2"
-            onClick={onSelectClick}
+            onClick={handleButtonClick}
           >
             <Upload className="w-4 h-4" />
             Upload Files

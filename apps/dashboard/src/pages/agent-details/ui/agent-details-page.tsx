@@ -11,36 +11,21 @@ import { AgentPersonaCard } from "./agent-persona-card";
 import { FileViewerModal } from "./file-viewer-modal";
 import { AgentStatsCard } from "./agent-stats-card";
 import useAgentDetails from "../lib/use-agent-details";
-
-interface SelectedFile {
-   file: File;
-   id: string;
-}
+import useFileViewer from "../lib/use-file-viewer";
 
 export function AgentDetailsPage() {
+   const {
+      isOpen,
+      fileName,
+      fileContent,
+      isLoading: isFileLoading,
+      open,
+      close,
+   } = useFileViewer();
    const {
       agent,
       isLoading,
       uploadedFiles,
-      selectedFiles,
-      setSelectedFiles,
-      isViewerOpen,
-      setIsViewerOpen,
-      viewingFileContent,
-      setViewingFileContent,
-      viewingFileName,
-      setViewingFileName,
-      isLoadingContent,
-      setIsLoadingContent,
-      fileInputRef,
-      handleFileSelect,
-      handleButtonClick,
-      handleViewFile,
-      handleDeleteFile,
-      handleCloseViewer,
-      canAddMore,
-      remainingSlots,
-      totalUploadedFiles,
    } = useAgentDetails();
 
    if (isLoading) {
@@ -67,48 +52,39 @@ export function AgentDetailsPage() {
    }
 
    return (
-      <main className="h-full w-full flex flex-col gap-6 p-6">
+      <main className="h-full w-full flex flex-col gap-4 ">
          <TalkingMascot message="Manage your agent’s configuration and knowledge base." />
 
-         <div className=" w-full space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-               <div className="space-y-6 md:col-span-1">
-                  <AgentStatsCard
-                     totalDrafts={agent.totalDrafts ?? 0}
-                     totalPublished={agent.totalPublished ?? 0}
-                  />
-                  <AgentDetailsKnowledgeBaseCard
-                     uploadedFiles={uploadedFiles}
-                     canAddMore={canAddMore}
-                     remainingSlots={remainingSlots}
-                     onDeleteFile={handleDeleteFile}
-                     fileInputRef={fileInputRef}
-                     onSelectClick={handleButtonClick}
-                     onFileChange={handleFileSelect}
-                     onViewFile={handleViewFile}
-                     deletePending={false}
-                  />
-                  <AgentPersonaCard
-                     name={agent.name}
-                     description={agent.description ?? ""}
-                     contentType={agent.contentType ?? ""}
-                     voiceTone={agent.voiceTone ?? ""}
-                     targetAudience={agent.targetAudience ?? ""}
-                     formattingStyle={agent.formattingStyle ?? ""}
-                  />
-               </div>
-               <div className="md:col-span-2">
-                  <AgentDetailsPromptCard basePrompt={agent.basePrompt ?? ""} />
-               </div>
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-4 md:col-span-1">
+               <AgentStatsCard
+                  totalDrafts={agent.totalDrafts ?? 0}
+                  totalPublished={agent.totalPublished ?? 0}
+               />
+               <AgentDetailsKnowledgeBaseCard
+                  uploadedFiles={uploadedFiles}
+                  onViewFile={open}
+               />
+               <AgentPersonaCard
+                  name={agent.name}
+                  description={agent.description ?? ""}
+                  contentType={agent.contentType ?? ""}
+                  voiceTone={agent.voiceTone ?? ""}
+                  targetAudience={agent.targetAudience ?? ""}
+                  formattingStyle={agent.formattingStyle ?? ""}
+               />
+            </div>
+            <div className="md:col-span-2">
+               <AgentDetailsPromptCard basePrompt={agent.basePrompt ?? ""} />
             </div>
          </div>
 
          <FileViewerModal
-            open={isViewerOpen}
-            fileName={viewingFileName}
-            fileContent={viewingFileContent}
-            loading={isLoadingContent}
-            onClose={handleCloseViewer}
+            open={isOpen}
+            fileName={fileName}
+            fileContent={fileContent}
+            loading={isFileLoading}
+            onClose={close}
          />
       </main>
    );
