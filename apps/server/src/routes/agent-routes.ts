@@ -19,14 +19,24 @@ export const agentRoutes = new Elysia({
       "/",
       async ({ body, user }) => {
          // Generate default base prompt for the agent
-         const basePrompt = generateDefaultBasePrompt({
-            name: body.name,
-            description: body.description,
-            contentType: body.contentType,
-            voiceTone: body.voiceTone,
-            targetAudience: body.targetAudience,
-            formattingStyle: body.formattingStyle || "structured",
-         });
+         const agentConfig = {
+            ...body,
+            description: body.description ?? null,
+            formattingStyle: body.formattingStyle ?? "structured",
+            isActive: body.isActive ?? true,
+            totalDrafts: body.totalDrafts ?? 0,
+            totalPublished: body.totalPublished ?? 0,
+            lastGeneratedAt: body.lastGeneratedAt ?? null,
+            // Add required fields that will be set by the database
+            id: "",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            userId: user.id,
+            basePrompt: null,
+            uploadedFiles: [],
+            knowledgeBase: null,
+         };
+         const basePrompt = generateDefaultBasePrompt(agentConfig);
 
          const agent = await db
             .insert(agentTable)
@@ -102,14 +112,7 @@ export const agentRoutes = new Elysia({
 
          // Generate base prompt if it doesn't exist
          if (!agent.basePrompt) {
-            const basePrompt = generateDefaultBasePrompt({
-               name: agent.name,
-               description: agent.description,
-               contentType: agent.contentType,
-               voiceTone: agent.voiceTone,
-               targetAudience: agent.targetAudience,
-               formattingStyle: agent.formattingStyle ?? "structured",
-            });
+            const basePrompt = generateDefaultBasePrompt(agent);
 
             // Update the agent with the generated base prompt
             await db
