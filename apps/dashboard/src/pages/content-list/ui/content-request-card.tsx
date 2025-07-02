@@ -123,16 +123,11 @@ export function ContentRequestCard({ request }: { request: ContentRequest }) {
                </AlertDialog>
             </CardAction>
          </CardHeader>
-         <CardContent className="grid grid-cols-2 gap-2 ">
+         <CardContent className="grid grid-cols-1 gap-2 ">
             <InfoItem
                icon={<Activity className="h-4 w-4" />}
                label="Status"
                value={request.isCompleted ? "Completed" : "Generating"}
-            />
-            <InfoItem
-               icon={<Hash className="h-4 w-4" />}
-               label="Target Length"
-               value={`${request.targetLength}`}
             />
          </CardContent>
          <CardFooter>
