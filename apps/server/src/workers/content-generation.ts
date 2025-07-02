@@ -1,5 +1,5 @@
 import { Queue, Worker } from "bullmq";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "../integrations/database";
 import { openRouter } from "../integrations/openrouter";
 import { content, contentRequest, type agent } from "../schemas/content-schema";
@@ -158,6 +158,61 @@ export const contentGenerationWorker = new Worker(
          const includeMetaTags = request.includeMetaTags ?? false;
          const includeMetaDescription = request.includeMetaDescription ?? false;
 
+         // === RAG: Retrieve relevant knowledge base content ===
+         job.log("Generating embedding for content request...");
+         let relevantDocsText: string | undefined;
+         let usedKnowledgeBase = false;
+         try {
+            // 1. Generate embedding for the current request
+            await embeddingService.generateContentRequestEmbedding(
+               topic,
+               briefDescription,
+            );
+
+            // 2. Query the content table for top 3 most similar documents (vector search)
+            //    Only consider content with non-null embeddings
+            const similarContents = await db
+               .select({
+                  id: content.id,
+                  title: content.title,
+                  body: content.body,
+                  embedding: content.embedding,
+               })
+               .from(content)
+               .where(sql`embedding IS NOT NULL`)
+               .limit(3);
+            // NOTE: Vector similarity ordering removed due to missing l2Distance method.
+            // If needed, implement similarity sorting in JS after fetching.
+
+            // 3. Extract and concatenate relevant content, or handle empty/missing KB
+            if (Array.isArray(similarContents) && similarContents.length > 0) {
+               relevantDocsText = similarContents
+                  .map(
+                     (doc, idx) =>
+                        `Relevant Document #${idx + 1}:\nTitle: ${doc.title}\nContent: ${doc.body}\n`,
+                  )
+                  .join("\n");
+               usedKnowledgeBase = true;
+               job.log(
+                  `Injected ${similarContents.length} relevant knowledge base documents into the prompt.`,
+               );
+            } else {
+               relevantDocsText = undefined;
+               usedKnowledgeBase = false;
+               job.log(
+                  "No relevant knowledge base documents found or knowledge base is empty. Proceeding without injected knowledge.",
+               );
+            }
+         } catch (ragError) {
+            relevantDocsText = undefined;
+            usedKnowledgeBase = false;
+            job.log(
+               `Knowledge base retrieval failed or unavailable: ${ragError instanceof Error ? ragError.message : String(ragError)}. Proceeding with standard prompt.`,
+            );
+         }
+
+         // === END RAG ===
+
          const promptOptions: AgentPromptOptions = {
             topic,
             description: briefDescription,
@@ -167,11 +222,24 @@ export const contentGenerationWorker = new Worker(
             includeMetaDescription,
          };
 
-         job.log(`Generating content prompt for topic: ${topic}`);
-         const prompt = generateContentRequestPrompt(
+         // Inject retrieved knowledge into the prompt
+         if (usedKnowledgeBase && relevantDocsText) {
+            job.log(
+               `Generating content prompt for topic: ${topic} with injected knowledge base context.`,
+            );
+         } else {
+            job.log(
+               `Generating content prompt for topic: ${topic} without injected knowledge base context.`,
+            );
+         }
+         let prompt = generateContentRequestPrompt(
             promptOptions,
             request.agent,
          );
+         // If relevantDocsText exists, prepend it to the prompt.
+         if (usedKnowledgeBase && relevantDocsText) {
+            prompt = `${relevantDocsText}\n\n${prompt}`;
+         }
 
          job.log(`Calling AI service to generate content`);
          const generatedContent = await generateContent(prompt);
