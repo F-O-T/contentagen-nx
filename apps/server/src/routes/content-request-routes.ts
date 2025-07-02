@@ -281,7 +281,9 @@ export const contentRequestRoutes = new Elysia({
             }
 
             // Validate and extract the new fields, preserving existing values if not provided
-            const validatedUpdateData: any = {
+            const validatedUpdateData: Partial<
+               typeof contentRequest.$inferInsert
+            > = {
                ...body,
 
                internalLinkFormat:

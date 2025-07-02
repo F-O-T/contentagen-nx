@@ -1,4 +1,4 @@
-import type { VoiceTone } from "@api/schemas/content-schema";
+import type { VoiceTone } from "@api/schemas/agent-schema";
 import { VOICE_TONES } from "../lib/agent-form-constants";
 import type { AgentForm } from "../lib/use-agent-form";
 import { Button } from "@packages/ui/components/button";

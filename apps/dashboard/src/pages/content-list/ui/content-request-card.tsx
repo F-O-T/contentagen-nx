@@ -63,8 +63,8 @@ export function ContentRequestCard({ request }: { request: ContentRequest }) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>{request.topic}</CardTitle>
-            <CardDescription className="text-ellipsis w-full">
+            <CardTitle className="line-clamp-1">{request.topic}</CardTitle>
+            <CardDescription className="line-clamp-1">
                {request.briefDescription}
             </CardDescription>
             <CardAction>

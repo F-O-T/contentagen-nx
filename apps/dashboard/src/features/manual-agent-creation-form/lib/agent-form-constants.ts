@@ -3,7 +3,7 @@ import {
    voiceToneEnum,
    targetAudienceEnum,
    formattingStyleEnum,
-} from "@api/schemas/content-schema";
+} from "@api/schemas/agent-schema";
 
 /**
  * Converts a snake_case or underscore string to Title Case.

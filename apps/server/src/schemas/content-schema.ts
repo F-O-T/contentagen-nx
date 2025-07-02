@@ -1,7 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
    boolean,
-   index,
    integer,
    json,
    pgEnum,
@@ -9,41 +8,9 @@ import {
    text,
    timestamp,
    uuid,
-   vector,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
 import { agent } from "./agent-schema";
-
-export const contentTypeEnum = pgEnum("content_type", [
-   "blog_posts",
-   "social_media",
-   "marketing_copy",
-   "technical_docs",
-]);
-export type ContentType = (typeof contentTypeEnum.enumValues)[number];
-
-export const voiceToneEnum = pgEnum("voice_tone", [
-   "professional",
-   "conversational",
-   "educational",
-   "creative",
-]);
-export type VoiceTone = (typeof voiceToneEnum.enumValues)[number];
-
-export const targetAudienceEnum = pgEnum("target_audience", [
-   "general_public",
-   "professionals",
-   "beginners",
-   "customers",
-]);
-export type TargetAudience = (typeof targetAudienceEnum.enumValues)[number];
-
-export const formattingStyleEnum = pgEnum("formatting_style", [
-   "structured",
-   "narrative",
-   "list_based",
-]);
-export type FormattingStyle = (typeof formattingStyleEnum.enumValues)[number];
 
 export const contentStatusEnum = pgEnum("content_status", [
    "draft",
@@ -53,68 +20,37 @@ export const contentStatusEnum = pgEnum("content_status", [
 ]);
 export type ContentStatus = (typeof contentStatusEnum.enumValues)[number];
 
-export const contentLengthEnum = pgEnum("content_length", [
-   "short",
-   "medium",
-   "long",
-]);
-export type ContentLength = (typeof contentLengthEnum.enumValues)[number];
-
-export const priorityEnum = pgEnum("priority", [
-   "low",
-   "normal",
-   "high",
-   "urgent",
-]);
-export type Priority = (typeof priorityEnum.enumValues)[number];
-
-export const internalLinkFormatEnum = pgEnum("internal_link_format", [
-   "mdx",
-   "html",
-]);
-export type InternalLinkFormat =
-   (typeof internalLinkFormatEnum.enumValues)[number];
-
-export const content = pgTable(
-   "content",
-   {
-      agentId: uuid("agent_id")
-         .notNull()
-         .references(() => agent.id, { onDelete: "cascade" }),
-      body: text("body").notNull(),
-
-      createdAt: timestamp("created_at")
-         .$defaultFn(() => new Date())
-         .notNull(),
-      id: uuid("id").primaryKey().defaultRandom(),
-      readTimeMinutes: integer("read_time_minutes").default(0),
-      slug: text("slug"),
-      status: contentStatusEnum("status").default("draft"),
-      tags: json("tags").$type<string[]>(),
-      title: text("title").notNull(),
-      updatedAt: timestamp("updated_at")
-         .$defaultFn(() => new Date())
-         .notNull(),
-      userId: text("user_id")
-         .notNull()
-         .references(() => user.id, { onDelete: "cascade" }),
-      wordsCount: integer("words_count"),
-      embedding: vector("embedding", { dimensions: 1536 }),
-   },
-   (table) => [
-      index("content_embedding_idx").using(
-         "hnsw",
-         table.embedding.op("vector_cosine_ops"),
-      ),
-   ],
-);
+export const content = pgTable("content", {
+   agentId: uuid("agent_id")
+      .notNull()
+      .references(() => agent.id, { onDelete: "cascade" }),
+   body: text("body").notNull(),
+   createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+   id: uuid("id").primaryKey().defaultRandom(),
+   readTimeMinutes: integer("read_time_minutes").default(0),
+   slug: text("slug"),
+   status: contentStatusEnum("status").default("draft"),
+   tags: json("tags").$type<string[]>(),
+   title: text("title").notNull(),
+   updatedAt: timestamp("updated_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+   userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+   wordsCount: integer("words_count"),
+   qualityScore: integer("quality_score"),
+   topics: json("topics").$type<string[]>(),
+   sources: json("sources").$type<string[]>(),
+});
 
 export const contentRequest = pgTable("content_request", {
    agentId: uuid("agent_id")
       .notNull()
       .references(() => agent.id, { onDelete: "cascade" }),
    briefDescription: text("brief_description").notNull(),
-
    createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
       .notNull(),
@@ -124,7 +60,6 @@ export const contentRequest = pgTable("content_request", {
    ),
    id: uuid("id").primaryKey().defaultRandom(),
    isCompleted: boolean("is_completed").default(false),
-   targetLength: contentLengthEnum("target_length").default("medium").notNull(),
    topic: text("topic").notNull(),
    updatedAt: timestamp("updated_at")
       .$defaultFn(() => new Date())
@@ -132,12 +67,14 @@ export const contentRequest = pgTable("content_request", {
    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-   internalLinkFormat: internalLinkFormatEnum("internal_link_format").default(
-      "mdx",
-   ),
-   includeMetaTags: boolean("include_meta_tags").default(false),
-   includeMetaDescription: boolean("include_meta_description").default(false),
    approved: boolean("approved").default(true),
+   // --- Custom fields for advanced content requests ---
+   targetLength: integer("target_length"),
+   internalLinkFormat: text("internal_link_format"),
+   includeMetaTags: boolean("include_meta_tags"),
+   includeMetaDescription: boolean("include_meta_description"),
+   // Add embedding to contentRequest schema for compatibility with update logic
+   embedding: json("embedding").$type<number[]>(),
 });
 
 export const exportLog = pgTable("export_log", {

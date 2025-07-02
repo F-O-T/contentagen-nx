@@ -23,7 +23,7 @@ import {
    formattingStyleEnum,
    targetAudienceEnum,
    voiceToneEnum,
-} from "@api/schemas/content-schema";
+} from "@api/schemas/agent-schema";
 import { z } from "zod";
 import type { EdenClientType } from "@packages/eden";
 export const agentFormSchema = z.object({
