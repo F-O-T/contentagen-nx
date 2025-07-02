@@ -3,7 +3,7 @@ import starlight from "@astrojs/starlight";
 import tailwindcss from "@tailwindcss/vite";
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/astro";
 
-import { defineConfig, passthroughImageService } from "astro/config";
+import { defineConfig, envField, passthroughImageService } from "astro/config";
 
 // https://astro.build/config
 export default defineConfig({
