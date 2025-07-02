@@ -47,7 +47,6 @@ async function generateContent(prompt: string): Promise<{ content: string }> {
    }
 
    try {
-      console.log(generatedText);
       const result = JSON.parse(generatedText);
 
       // Verify result.content is a string before returning
