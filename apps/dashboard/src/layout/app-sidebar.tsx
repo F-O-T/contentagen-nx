@@ -8,7 +8,7 @@ import {
    SidebarMenu,
    SidebarMenuItem,
 } from "@packages/ui/components/sidebar";
-import { LayoutDashboardIcon,FilesIcon } from "lucide-react";
+import { LayoutDashboardIcon, FilesIcon } from "lucide-react";
 import type * as React from "react";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";

@@ -1,55 +1,55 @@
 {
-  "version": "7",
-  "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1751386876589,
-      "tag": "0000_flat_blue_shield",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1751386881771,
-      "tag": "0001_natural_joshua_kane",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1751386885730,
-      "tag": "0002_magical_tigra",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1751389675872,
-      "tag": "0003_exotic_phil_sheldon",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1751390459727,
-      "tag": "0004_typical_micromacro",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1751390581347,
-      "tag": "0005_modern_doorman",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1751414265839,
-      "tag": "0006_lovely_moon_knight",
-      "breakpoints": true
-    }
-  ]
+   "version": "7",
+   "dialect": "postgresql",
+   "entries": [
+      {
+         "idx": 0,
+         "version": "7",
+         "when": 1751386876589,
+         "tag": "0000_flat_blue_shield",
+         "breakpoints": true
+      },
+      {
+         "idx": 1,
+         "version": "7",
+         "when": 1751386881771,
+         "tag": "0001_natural_joshua_kane",
+         "breakpoints": true
+      },
+      {
+         "idx": 2,
+         "version": "7",
+         "when": 1751386885730,
+         "tag": "0002_magical_tigra",
+         "breakpoints": true
+      },
+      {
+         "idx": 3,
+         "version": "7",
+         "when": 1751389675872,
+         "tag": "0003_exotic_phil_sheldon",
+         "breakpoints": true
+      },
+      {
+         "idx": 4,
+         "version": "7",
+         "when": 1751390459727,
+         "tag": "0004_typical_micromacro",
+         "breakpoints": true
+      },
+      {
+         "idx": 5,
+         "version": "7",
+         "when": 1751390581347,
+         "tag": "0005_modern_doorman",
+         "breakpoints": true
+      },
+      {
+         "idx": 6,
+         "version": "7",
+         "when": 1751414265839,
+         "tag": "0006_lovely_moon_knight",
+         "breakpoints": true
+      }
+   ]
 }

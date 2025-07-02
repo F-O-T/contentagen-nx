@@ -1,5 +1,5 @@
 import { cn } from "@packages/ui/lib/utils";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export interface InfoItemProps {
    icon: ReactNode;
@@ -27,4 +27,3 @@ export function InfoItem({ icon, label, value, className }: InfoItemProps) {
       </div>
    );
 }
-

@@ -1,8 +1,6 @@
 import brand from "@packages/brand/index.json";
 import { Container, Text } from "@react-email/components";
 
-
-
 export const DefaultFooter = () => {
    return (
       <Container className="bg-neutral-100 rounded-b-lg">

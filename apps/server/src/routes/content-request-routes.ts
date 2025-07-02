@@ -81,7 +81,7 @@ const _createContentRequestBody = t.Omit(_createContentRequest, [
    "tags",
    "status",
    "isCompleted",
-   "generatedContentId"
+   "generatedContentId",
 ]);
 
 export const contentRequestRoutes = new Elysia({
@@ -94,12 +94,12 @@ export const contentRequestRoutes = new Elysia({
       async ({ body, user, set }) => {
          try {
             const { id: userId } = user;
-            
+
             const [newRequest] = await db
                .insert(contentRequest)
                .values({
                   ...body,
-                  userId
+                  userId,
                })
                .returning();
 
@@ -159,7 +159,6 @@ export const contentRequestRoutes = new Elysia({
          const offset = (page - 1) * limit;
 
          const whereClause = eq(contentRequest.userId, userId);
-     
 
          const requests = await db.query.contentRequest.findMany({
             columns: {
@@ -284,7 +283,7 @@ export const contentRequestRoutes = new Elysia({
             // Validate and extract the new fields, preserving existing values if not provided
             const validatedUpdateData: any = {
                ...body,
-         
+
                internalLinkFormat:
                   body.internalLinkFormat !== undefined
                      ? body.internalLinkFormat
@@ -297,7 +296,7 @@ export const contentRequestRoutes = new Elysia({
                   body.includeMetaDescription !== undefined
                      ? body.includeMetaDescription
                      : existingRequest.includeMetaDescription,
-               
+
                approved:
                   body.approved !== undefined
                      ? body.approved

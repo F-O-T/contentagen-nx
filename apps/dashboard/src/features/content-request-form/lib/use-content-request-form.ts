@@ -1,7 +1,10 @@
 import { useAppForm } from "@packages/ui/components/form";
 import { type FormEvent, useCallback } from "react";
 import { z } from "zod";
-import { contentLengthEnum, internalLinkFormatEnum } from "@api/schemas/content-schema";
+import {
+   contentLengthEnum,
+   internalLinkFormatEnum,
+} from "@api/schemas/content-schema";
 
 export const contentRequestFormSchema = z.object({
    topic: z.string().min(1, "Topic is required"),
@@ -57,4 +60,6 @@ export function useContentRequestForm({
    };
 }
 
-export type ContentRequestForm = ReturnType<typeof useContentRequestForm>["form"];
+export type ContentRequestForm = ReturnType<
+   typeof useContentRequestForm
+>["form"];

@@ -1,7 +1,6 @@
 import { Body, Container, Head, Html, Tailwind } from "@react-email/components";
 import type { ReactNode } from "react";
 
-
 export const DefaultEmailLayout = ({ children }: { children: ReactNode }) => {
    return (
       <Html>

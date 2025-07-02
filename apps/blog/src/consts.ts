@@ -3,4 +3,3 @@
 
 export const SITE_TITLE = "ContentaGen Blog";
 export const SITE_DESCRIPTION = "Welcome to our blog!";
- 

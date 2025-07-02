@@ -7,7 +7,7 @@ import {
    useSidebar,
 } from "@packages/ui/components/sidebar";
 import { Link, useLocation } from "@tanstack/react-router";
-import { type LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export function NavMain({
    items,
@@ -23,11 +23,10 @@ export function NavMain({
    const isActive = (url: string) => {
       return pathname.startsWith(url);
    };
- 
+
    return (
       <SidebarGroup>
          <SidebarGroupContent className="flex flex-col gap-2">
-            
             <SidebarMenu>
                {items.map((item) => (
                   <SidebarMenuItem

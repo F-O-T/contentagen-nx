@@ -88,4 +88,3 @@ export const AgentPersonaCard: React.FC<AgentPersonaCardProps> = ({
       </Card>
    );
 };
-

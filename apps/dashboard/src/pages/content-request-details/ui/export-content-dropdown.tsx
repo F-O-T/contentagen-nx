@@ -34,11 +34,7 @@ export function ExportContentDropdown({
 
    return (
       <div className="flex items-center gap-2">
-         <Button
-            size="sm"
-            variant="outline"
-            onClick={handleCopyContent}
-         >
+         <Button size="sm" variant="outline" onClick={handleCopyContent}>
             <Copy className="h-4 w-4 mr-2" />
             Copy
          </Button>

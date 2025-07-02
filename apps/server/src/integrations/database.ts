@@ -5,10 +5,8 @@ import * as waitlistSchema from "@api/schemas/waitlist-schema";
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 
-
-
 const client = new Pool({
-  connectionString: env.DATABASE_URL,
+   connectionString: env.DATABASE_URL,
 });
 export const db = drizzle({
    client,

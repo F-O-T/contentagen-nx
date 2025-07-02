@@ -144,14 +144,11 @@ const Theme = ({
    );
 
    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-   const handleMediaQuery = React.useCallback(
-      () => {
-         if (theme === "system" && enableSystem && !forcedTheme) {
-            applyTheme("system");
-         }
-      },
-      [theme, forcedTheme],
-   );
+   const handleMediaQuery = React.useCallback(() => {
+      if (theme === "system" && enableSystem && !forcedTheme) {
+         applyTheme("system");
+      }
+   }, [theme, forcedTheme]);
 
    // Always listen to System preference
    React.useEffect(() => {

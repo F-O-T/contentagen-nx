@@ -8,7 +8,6 @@ import {
    CardTitle,
 } from "@packages/ui/components/card";
 
-
 import {
    AlertDialog,
    AlertDialogAction,
@@ -109,7 +108,7 @@ export function ContentRequestDetailsPage() {
    return (
       <main className="h-full w-full flex flex-col gap-6">
          <TalkingMascot message="Here's your content request details! You can review, edit, and manage your generated content. Use the export options to get your content in different formats." />
-         {request.status === "pending" && (
+         {!request.approved && (
             <Card>
                <CardHeader>
                   <CardTitle>Request Status</CardTitle>
@@ -131,14 +130,10 @@ export function ContentRequestDetailsPage() {
                      {isRejecting ? "Rejecting..." : "Reject"}
                   </SquaredIconButton>
                </CardContent>
-
-            </Card>   
+            </Card>
          )}
-       
-         
 
          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
             {/* Request Details */}
             <div className="lg:col-span-1 space-y-4">
                <RequestDetailsCard request={request} />
@@ -150,9 +145,7 @@ export function ContentRequestDetailsPage() {
                <GeneratedContentDisplay
                   generatedContent={generatedContent}
                   isExporting={isExporting}
-                  isGenerating={
-                     request.status === "approved" && !request.isCompleted
-                  }
+                  isGenerating={!request.isCompleted}
                   onExport={handleExportContent}
                />
             </div>

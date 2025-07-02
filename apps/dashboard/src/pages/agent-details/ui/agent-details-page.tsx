@@ -22,11 +22,7 @@ export function AgentDetailsPage() {
       open,
       close,
    } = useFileViewer();
-   const {
-      agent,
-      isLoading,
-      uploadedFiles,
-   } = useAgentDetails();
+   const { agent, isLoading, uploadedFiles } = useAgentDetails();
 
    if (isLoading) {
       return (

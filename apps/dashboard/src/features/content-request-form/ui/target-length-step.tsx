@@ -10,7 +10,7 @@ const CONTENT_LENGTHS = [
    },
    {
       value: "medium" as const,
-      label: "Medium", 
+      label: "Medium",
       description: "Balanced content with good detail (800-1500 words)",
    },
    {

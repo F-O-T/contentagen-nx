@@ -127,7 +127,7 @@ export function ContentRequestCard({ request }: { request: ContentRequest }) {
             <InfoItem
                icon={<Activity className="h-4 w-4" />}
                label="Status"
-               value={request.status}
+               value={request.isCompleted ? "Completed" : "Generating"}
             />
             <InfoItem
                icon={<Hash className="h-4 w-4" />}

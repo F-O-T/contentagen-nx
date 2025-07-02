@@ -55,4 +55,3 @@ export function bullAuth(request: Request) {
       headers: { "Content-Type": "application/json" },
    });
 }
-

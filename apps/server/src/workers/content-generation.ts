@@ -5,7 +5,10 @@ import { openRouter } from "../integrations/openrouter";
 import { content, contentRequest, type agent } from "../schemas/content-schema";
 import { redis } from "../services/redis";
 import { embeddingService } from "../services/embedding";
-import { generateContentRequestPrompt, type AgentPromptOptions } from "../services/agent-prompt";
+import {
+   generateContentRequestPrompt,
+   type AgentPromptOptions,
+} from "../services/agent-prompt";
 
 export type ContentRequestWithAgent = typeof contentRequest.$inferSelect & {
    agent: typeof agent.$inferSelect;
@@ -30,7 +33,6 @@ function slugify(text: string) {
       .replace(/-+$/, ""); // Trim - from end of text
 }
 
-
 async function generateContent(prompt: string): Promise<{ content: string }> {
    const response = await openRouter.chat.completions.create({
       model: "qwen/qwen3-30b-a3b-04-28",
@@ -45,14 +47,14 @@ async function generateContent(prompt: string): Promise<{ content: string }> {
    }
 
    try {
-      console.log(generatedText)
+      console.log(generatedText);
       const result = JSON.parse(generatedText);
-      
+
       // Verify result.content is a string before returning
-      if (typeof result.content !== 'string') {
+      if (typeof result.content !== "string") {
          throw new Error("AI response does not contain valid content string");
       }
-      
+
       // Return only content
       return { content: result.content };
    } catch (error) {
@@ -62,7 +64,7 @@ async function generateContent(prompt: string): Promise<{ content: string }> {
 }
 
 function calculateWordsCount(text: string | undefined | null): number {
-   if (typeof text !== 'string') return 0;
+   if (typeof text !== "string") return 0;
    return text.split(/\s+/).length;
 }
 
@@ -76,7 +78,7 @@ async function saveContent(
    generatedContent: { content: string },
 ) {
    const slug = slugify(request.topic);
-   
+
    const wordsCount = calculateWordsCount(generatedContent.content);
    const timeToRead = calculateTimeToRead(wordsCount);
 
@@ -124,7 +126,9 @@ async function saveContent(
       return newContent;
    } catch (error) {
       console.error("Database error while saving content:", error);
-      throw new Error(`Failed to save content: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+         `Failed to save content: ${error instanceof Error ? error.message : String(error)}`,
+      );
    }
 }
 
@@ -148,14 +152,10 @@ export const contentGenerationWorker = new Worker(
             throw new Error(errorMsg);
          }
 
-         const {
-            topic,
-            briefDescription,
-            targetLength
-         } = request;
+         const { topic, briefDescription, targetLength } = request;
 
          // Handle nullable boolean and enum values with proper defaults
-         const internalLinkFormat = request.internalLinkFormat ?? 'mdx';
+         const internalLinkFormat = request.internalLinkFormat ?? "mdx";
          const includeMetaTags = request.includeMetaTags ?? false;
          const includeMetaDescription = request.includeMetaDescription ?? false;
 
@@ -169,7 +169,10 @@ export const contentGenerationWorker = new Worker(
          };
 
          job.log(`Generating content prompt for topic: ${topic}`);
-         const prompt = generateContentRequestPrompt(promptOptions, request.agent);
+         const prompt = generateContentRequestPrompt(
+            promptOptions,
+            request.agent,
+         );
 
          job.log(`Calling AI service to generate content`);
          const generatedContent = await generateContent(prompt);
@@ -177,21 +180,27 @@ export const contentGenerationWorker = new Worker(
          job.log(`Saving generated content to database`);
          const savedContent = await saveContent(request, generatedContent);
 
-         job.log(`Successfully processed content for request: ${requestId}, generated content ID: ${savedContent?.id}`);
-         
+         job.log(
+            `Successfully processed content for request: ${requestId}, generated content ID: ${savedContent?.id}`,
+         );
+
          // Return the generated content ID for job completion tracking
          return {
             success: true,
             requestId,
-            generatedContentId: savedContent?.id
+            generatedContentId: savedContent?.id,
          };
       } catch (error) {
          const errorMsg = `Failed to process content for request: ${requestId}`;
          console.error(errorMsg, error);
-         job.log(`ERROR: ${errorMsg} - ${error instanceof Error ? error.message : String(error)}`);
-         
+         job.log(
+            `ERROR: ${errorMsg} - ${error instanceof Error ? error.message : String(error)}`,
+         );
+
          // Re-throw to ensure job fails and can be retried if needed
-         throw new Error(`${errorMsg}: ${error instanceof Error ? error.message : String(error)}`);
+         throw new Error(
+            `${errorMsg}: ${error instanceof Error ? error.message : String(error)}`,
+         );
       }
    },
    { connection: redis },

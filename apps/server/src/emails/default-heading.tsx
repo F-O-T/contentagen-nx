@@ -1,7 +1,6 @@
 import brand from "@packages/brand/index.json";
 import { Heading, Img, Section } from "@react-email/components";
 
-
 export const DefaultHeading = () => {
    return (
       <Section>

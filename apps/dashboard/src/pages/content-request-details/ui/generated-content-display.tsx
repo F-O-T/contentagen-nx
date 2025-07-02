@@ -161,10 +161,7 @@ export function GeneratedContentDisplay({
                         </ReactMarkdown>
                      ) : (
                         <div className="relative">
-                           <ReactMarkdown
-                        
-                 
-                           >
+                           <ReactMarkdown>
                               {(generatedContent?.body?.length || 0) > 2000
                                  ? generatedContent?.body?.substring(0, 2000) +
                                    "..."

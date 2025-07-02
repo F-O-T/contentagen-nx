@@ -26,15 +26,14 @@ createBullBoard({
 
 const app = new Elysia()
 
-
-    .use(
-        cors({
-            allowedHeaders: ["Content-Type", "Authorization"],
-            credentials: true,
-            methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-            origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
-        }),
-    )
+   .use(
+      cors({
+         allowedHeaders: ["Content-Type", "Authorization"],
+         credentials: true,
+         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+         origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
+      }),
+   )
    .onBeforeHandle(({ request }) => {
       const url = new URL(request.url);
       if (url.pathname.startsWith("/ui")) {
@@ -62,10 +61,7 @@ const app = new Elysia()
             .use(fileRoutes)
 
             .group("/content", (content) =>
-               content
-
-                  .use(contentManagementRoutes)
-                  .use(contentRequestRoutes)
+               content.use(contentManagementRoutes).use(contentRequestRoutes),
             )
             .use(waitlistRoutes)
             .get("/works", () => {

@@ -40,7 +40,7 @@ export function FeatureTogglesStep({ form }: { form: ContentRequestForm }) {
                <LinkIcon className="w-5 h-5" />
                Content Features
             </h3>
-            
+
             <div className="space-y-4">
                {FEATURE_TOGGLES.map((toggle) => (
                   <form.AppField key={toggle.name} name={toggle.name}>
@@ -119,4 +119,3 @@ export function FeatureTogglesStepSubscribe({
       </form.Subscribe>
    );
 }
-

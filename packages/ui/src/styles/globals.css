@@ -198,8 +198,6 @@
 }
 
 @layer base {
-
-
    /* Custom prose styles that respect the design system with higher specificity */
    .prose {
       color: var(--color-foreground) !important;

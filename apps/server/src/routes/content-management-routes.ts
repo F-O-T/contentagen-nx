@@ -38,7 +38,7 @@ export const contentManagementRoutes = new Elysia({
 
          const [request] = await db
             .update(contentRequest)
-            .set({ status: "approved" })
+            .set({ approved: true })
             .where(eq(contentRequest.id, id))
             .returning();
 
@@ -60,11 +60,13 @@ export const contentManagementRoutes = new Elysia({
          auth: true,
          detail: {
             summary: "Approve a content request",
-            description: "Approve a pending content request and queue it for content generation. This will change the request status to 'approved' and trigger the content generation worker.",
+            description:
+               "Approve a pending content request and queue it for content generation. This will change the request status to 'approved' and trigger the content generation worker.",
             tags: [ApiTags.CONTENT_MANAGEMENT],
             responses: {
                202: {
-                  description: "Content request approved and queued for generation",
+                  description:
+                     "Content request approved and queued for generation",
                },
                404: {
                   description: "Content request not found",
@@ -85,7 +87,7 @@ export const contentManagementRoutes = new Elysia({
 
          const [request] = await db
             .update(contentRequest)
-            .set({ status: "rejected" })
+            .set({ approved: false })
             .where(eq(contentRequest.id, id))
             .returning();
 
@@ -102,7 +104,8 @@ export const contentManagementRoutes = new Elysia({
          auth: true,
          detail: {
             summary: "Reject a content request",
-            description: "Reject a pending content request. This will change the request status to 'rejected' and prevent it from being processed for content generation.",
+            description:
+               "Reject a pending content request. This will change the request status to 'rejected' and prevent it from being processed for content generation.",
             tags: [ApiTags.CONTENT_MANAGEMENT],
             responses: {
                200: {

@@ -13,7 +13,7 @@ export const fileRoutes = new Elysia({
          try {
             // Get file info for headers
             const fileInfo = await getFileInfo(params.filename);
-            
+
             // Get file stream
             const stream = await getFile(params.filename);
 
@@ -21,7 +21,7 @@ export const fileRoutes = new Elysia({
             set.headers["Content-Type"] = fileInfo.contentType;
             set.headers["Content-Length"] = fileInfo.size.toString();
             set.headers["Cache-Control"] = "public, max-age=31536000"; // Cache for 1 year
-            
+
             return new Response(stream as any, {
                headers: {
                   "Content-Type": fileInfo.contentType,

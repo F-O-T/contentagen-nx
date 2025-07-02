@@ -16,7 +16,12 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-type LeadType = "individual blogger" | "marketing team" | "freelance writer" | "business owner" | "other";
+type LeadType =
+   | "individual blogger"
+   | "marketing team"
+   | "freelance writer"
+   | "business owner"
+   | "other";
 
 export const WaitlistForm = () => {
    const eden = createEdenAdapter(VITE_SERVER_URL);
@@ -28,12 +33,21 @@ export const WaitlistForm = () => {
       "business owner",
       "other",
    ]);
-   
+
    const schema = z.object({
       email: z.string().email("Please enter a valid email address"),
-      leadType: z.enum(["individual blogger", "marketing team", "freelance writer", "business owner", "other"], {
-         errorMap: () => ({ message: "Please select a lead type" }),
-      }),
+      leadType: z.enum(
+         [
+            "individual blogger",
+            "marketing team",
+            "freelance writer",
+            "business owner",
+            "other",
+         ],
+         {
+            errorMap: () => ({ message: "Please select a lead type" }),
+         },
+      ),
    });
 
    const form = useAppForm({
@@ -97,7 +111,9 @@ export const WaitlistForm = () => {
             {(field) => (
                <field.FieldContainer className="w-full">
                   <Select
-                     onValueChange={(value ) => field.handleChange(value as LeadType)}
+                     onValueChange={(value) =>
+                        field.handleChange(value as LeadType)
+                     }
                      value={field.state.value}
                   >
                      <SelectTrigger

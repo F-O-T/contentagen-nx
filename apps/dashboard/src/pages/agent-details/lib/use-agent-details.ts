@@ -1,7 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useParams, useRouteContext } from "@tanstack/react-router";
 
-
 export default function useAgentDetails() {
    // Get agentId from URL params
    const { agentId } = useParams({ from: "/_dashboard/agents/$agentId/" });
@@ -17,7 +16,7 @@ export default function useAgentDetails() {
    });
 
    const agent = agentData?.agent;
-   const uploadedFiles = agent?.uploadedFiles || []
+   const uploadedFiles = agent?.uploadedFiles || [];
 
    return {
       agent,
@@ -25,4 +24,3 @@ export default function useAgentDetails() {
       uploadedFiles,
    };
 }
-

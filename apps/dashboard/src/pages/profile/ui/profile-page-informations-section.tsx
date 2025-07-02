@@ -35,4 +35,3 @@ export function ProfileInformation() {
       </Card>
    );
 }
-
