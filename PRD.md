@@ -1,19 +1,16 @@
-## Product Requirements Document (PRD): Blog Automation Application
 
-### 1. Visão Geral do Produto
+# Product Requirements Document (PRD): Blog Automation Application
+
+## 1. Visão Geral do Produto
 
 Aplicação de automação para criação de conteúdo de blogs, permitindo que agências de marketing de conteúdo e blogueiros individuais definam e utilizem agentes de IA para gerar posts de blog longos e textos otimizados para SEO de forma rápida e personalizada.
 
----
-
-### 2. Público-Alvo
+## 2. Público-Alvo
 
 - Agências de marketing de conteúdo
 - Blogueiros individuais
 
----
-
-### 3. Problemas a Resolver
+## 3. Problemas a Resolver
 
 - Falta de inspiração para pautas e temas
 - Dificuldade em manter um calendário editorial consistente
@@ -52,7 +49,7 @@ Aplicação de automação para criação de conteúdo de blogs, permitindo que 
 
 ---
 
-### 5. Fluxo de Usuário (User Flow)
+## 6. Critérios de Aceitação (High-Level)
 
 1. **Onboarding:** Tutorial guiado explica como criar e configurar um agente. **[Partially Done]**
 2. **Configuração de agente:** Definição de tom, público, tópicos e ativação de módulos específicos. **[Done]**
@@ -65,7 +62,7 @@ Aplicação de automação para criação de conteúdo de blogs, permitindo que 
 
 ---
 
-### 6. Critérios de Aceitação (High-Level)
+## 7. Exclusões (Escopo Fora)
 
 - **[Done]** Usuário consegue criar um agente e gerar um rascunho em menos de 2 minutos.
 - **[Not Done]** A interface de revisão permite edição direta do texto gerado.
@@ -73,7 +70,7 @@ Aplicação de automação para criação de conteúdo de blogs, permitindo que 
 
 ---
 
-### 7. Exclusões (Escopo Fora)
+## 8. Evolução do Produto (v2.0)
 
 - **[Not Done]** Integrações automáticas com plataformas de publicação (ex.: WordPress).
 - **[Not Done]** Funções avançadas de analítica ou métricas de performance de posts.

@@ -8,6 +8,7 @@ import {
    CardTitle,
 } from "@packages/ui/components/card";
 
+import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import {
    AlertDialog,
    AlertDialogAction,
@@ -18,15 +19,14 @@ import {
    AlertDialogHeader,
    AlertDialogTitle,
 } from "@packages/ui/components/alert-dialog";
-import { useNavigate, useRouteContext } from "@tanstack/react-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
-import { useContentRequestDetails } from "../lib/use-content-request-details";
-import { useContentExport } from "../lib/use-content-export";
-import { GeneratedContentDisplay } from "./generated-content-display";
-import { RequestDetailsCard, ContentStatsCard } from "./request-details-cards";
 import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useRouteContext } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { useContentExport } from "../lib/use-content-export";
+import { useContentRequestDetails } from "../lib/use-content-request-details";
+import { GeneratedContentDisplay } from "./generated-content-display";
+import { ContentStatsCard, RequestDetailsCard } from "./request-details-cards";
 
 export function ContentRequestDetailsPage() {
    const navigate = useNavigate();
@@ -34,7 +34,7 @@ export function ContentRequestDetailsPage() {
    const { eden } = useRouteContext({
       from: "/_dashboard/content/requests/$requestId/",
    });
-   const { request, generatedContent } = useContentRequestDetails();
+   const { request, generatedContent, isLoading } = useContentRequestDetails();
    const { exportContent, isExporting } = useContentExport();
 
    const [alertOpen, setAlertOpen] = useState(false);
@@ -91,11 +91,17 @@ export function ContentRequestDetailsPage() {
       rejectRequest(request.id);
    };
 
-   const handleExportContent = (format: "html" | "markdown" | "mdx") => {
-      if (!generatedContent?.body || !request?.topic) return;
+   const handleExportContent = (
+      format: "html" | "markdown" | "mdx",
+      content?: string,
+   ) => {
+      // Use the provided content (edited) or fall back to original generated content
+      const contentToExport = content || generatedContent?.body;
+
+      if (!contentToExport || !request?.topic) return;
 
       exportContent({
-         content: generatedContent.body,
+         content: contentToExport,
          format,
          filename: request.topic.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase(),
       });

@@ -97,8 +97,10 @@ export function AgentCard({ agent }: AgentCardProps) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>{agent.name}</CardTitle>
-            <CardDescription>{agent.description}</CardDescription>
+            <CardTitle className="truncate w-full">{agent.name}</CardTitle>
+            <CardDescription className="truncate w-full">
+               {agent.description}
+            </CardDescription>
             <CardAction>
                <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                   <DropdownMenuTrigger asChild>

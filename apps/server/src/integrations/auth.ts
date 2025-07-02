@@ -47,13 +47,7 @@ export const auth = betterAuth({
          use: [
             portal(),
             checkout({
-               products: [
-                  {
-                     productId: "fbe8829c-4cf2-4771-8309-8caa97c3b3fc",
-                     slug: "teste-1",
-                  },
-               ],
-               successUrl: env.POLAR_SUCCESS_URL,
+               successUrl: "http://localhost:3000/profile",
                authenticatedUsersOnly: true,
             }),
          ],

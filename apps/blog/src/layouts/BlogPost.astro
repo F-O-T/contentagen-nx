@@ -9,12 +9,13 @@ import FormattedDate from "../components/FormattedDate.astro";
 
 type Props = CollectionEntry<"blog">["data"];
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, keywords } =
+   Astro.props;
 ---
 
 <html lang="en">
 	<head>
-		<BaseHead title={title} description={description} />
+		<BaseHead title={title} description={description} image={heroImage} keywords={keywords} />
 	</head>
 
 	<body>
@@ -28,8 +29,8 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 							alt={title}
 							width={1020}
 							height={510}
-							class={"rounded-lg"}
-							format="avif"
+							class={"rounded-lg aspect-video object-cover"}
+							format="webp"
 							loading="lazy"
 						/>
 					</div>

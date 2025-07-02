@@ -1,5 +1,24 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import TurndownService from "turndown";
+
+// Initialize turndown service for HTML to Markdown conversion
+const turndownService = new TurndownService({
+   headingStyle: "atx",
+   codeBlockStyle: "fenced",
+   bulletListMarker: "-",
+});
+
+// Helper function to detect if content is HTML
+const isHtmlContent = (content: string): boolean => {
+   // Simple check for HTML tags
+   return /<[^>]+>/.test(content);
+};
+
+// Helper function to convert HTML to Markdown
+const convertHtmlToMarkdown = (htmlContent: string): string => {
+   return turndownService.turndown(htmlContent);
+};
 
 // Helper function to process content with internal linking
 const processInternalLinks = (
@@ -36,7 +55,18 @@ export function useContentExport() {
          format: "html" | "markdown" | "mdx";
          filename: string;
       }) => {
-         const processedContent = processInternalLinks(content, format);
+         let processedContent = content;
+
+         // If exporting as markdown/mdx and content is HTML, convert it first
+         if (
+            (format === "markdown" || format === "mdx") &&
+            isHtmlContent(content)
+         ) {
+            processedContent = convertHtmlToMarkdown(content);
+         }
+
+         // Process internal links
+         processedContent = processInternalLinks(processedContent, format);
 
          if (format === "markdown") {
             // Create markdown file
@@ -63,8 +93,13 @@ export function useContentExport() {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
          } else if (format === "html") {
+            // For HTML export, use the content as-is if it's already HTML, or wrap it if it's markdown
+            const htmlContent = isHtmlContent(processedContent)
+               ? processedContent
+               : `<div>${processedContent.replace(/\n/g, "<br>")}</div>`;
+
             // Create HTML file with proper styling and internal link support
-            const htmlContent = `<!DOCTYPE html>
+            const fullHtmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -137,7 +172,7 @@ export function useContentExport() {
     </style>
 </head>
 <body>
-    <div class="content">${processedContent}</div>
+    <div class="content">${htmlContent}</div>
     <script>
         // Smooth scroll for internal links
         document.querySelectorAll('.internal-link').forEach(link => {
@@ -152,7 +187,7 @@ export function useContentExport() {
     </script>
 </body>
 </html>`;
-            const blob = new Blob([htmlContent], { type: "text/html" });
+            const blob = new Blob([fullHtmlContent], { type: "text/html" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
