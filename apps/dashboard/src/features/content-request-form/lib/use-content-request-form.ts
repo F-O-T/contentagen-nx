@@ -1,7 +1,7 @@
 import { useAppForm } from "@packages/ui/components/form";
 import { type FormEvent, useCallback } from "react";
 import { z } from "zod";
-import { contentLengthEnum } from "@api/schemas/content-schema";
+import { contentLengthEnum, internalLinkFormatEnum } from "@api/schemas/content-schema";
 
 export const contentRequestFormSchema = z.object({
    topic: z.string().min(1, "Topic is required"),
@@ -9,6 +9,9 @@ export const contentRequestFormSchema = z.object({
    targetLength: z.enum(contentLengthEnum.enumValues, {
       required_error: "Target length is required",
    }),
+   internalLinkFormat: z.enum(internalLinkFormatEnum.enumValues),
+   includeMetaTags: z.boolean(),
+   includeMetaDescription: z.boolean(),
 });
 
 export type ContentRequestFormData = z.infer<typeof contentRequestFormSchema>;
@@ -27,6 +30,9 @@ export function useContentRequestForm({
          topic: defaultValues?.topic || "",
          briefDescription: defaultValues?.briefDescription || "",
          targetLength: defaultValues?.targetLength || "medium",
+         internalLinkFormat: defaultValues?.internalLinkFormat || "mdx",
+         includeMetaTags: defaultValues?.includeMetaTags || false,
+         includeMetaDescription: defaultValues?.includeMetaDescription || false,
       } as ContentRequestFormData,
       onSubmit: async ({ value }) => {
          await onSubmit(value);

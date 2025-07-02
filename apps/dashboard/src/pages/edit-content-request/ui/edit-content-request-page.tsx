@@ -56,6 +56,9 @@ export function EditContentRequestPage() {
             topic: requestData?.request.topic,
             briefDescription: requestData?.request.briefDescription,
             targetLength: requestData?.request.targetLength,
+            internalLinkFormat: requestData?.request.internalLinkFormat ?? "html",
+            includeMetaTags: requestData?.request.includeMetaTags?? false,
+            includeMetaDescription: requestData?.request.includeMetaDescription?? false,
          }}
          onSubmit={handleSubmit}
       />

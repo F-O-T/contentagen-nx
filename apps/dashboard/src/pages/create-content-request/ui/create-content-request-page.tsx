@@ -20,7 +20,7 @@ export function AgentContentRequestPage() {
    // Create mutation for content request
    const contentRequestMutation = useMutation({
       mutationFn: async (values: ContentRequestFormData) => {
-         const response = await eden.api.v1.content.request.generate.post({
+         const response = await eden.api.v1.content.request.post({
             ...values,
             agentId,
          });
@@ -45,6 +45,9 @@ export function AgentContentRequestPage() {
             topic: "",
             briefDescription: "",
             targetLength: "medium",
+            internalLinkFormat: "mdx",
+            includeMetaTags: false,
+            includeMetaDescription: false,
          }}
          onSubmit={handleSubmit}
       />

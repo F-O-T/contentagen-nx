@@ -27,25 +27,10 @@ import {
    AlertDialogTitle,
 } from "@packages/ui/components/alert-dialog";
 import { Link, useRouteContext } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { EdenClientType } from "@packages/eden";
-import {
-   MoreVertical,
-   Edit,
-   Trash,
-   AlertTriangle,
-   CheckCircle,
-   Info,
-   XCircle,
-   Activity,
-   Hash,
-} from "lucide-react";
-import {
-   Alert,
-   AlertTitle,
-   AlertDescription,
-} from "@packages/ui/components/alert";
+import { MoreVertical, Edit, Trash, Activity, Hash } from "lucide-react";
 type ContentRequest = NonNullable<
    Awaited<
       ReturnType<
@@ -56,32 +41,6 @@ type ContentRequest = NonNullable<
 export function ContentRequestCard({ request }: { request: ContentRequest }) {
    const queryClient = useQueryClient();
    const { eden } = useRouteContext({ from: "/_dashboard/content/" });
-
-   // Helper function to get icon based on similarity category
-   const getSimilarityIcon = (category?: string) => {
-      switch (category) {
-         case "error":
-            return <XCircle className="h-4 w-4" />;
-         case "warning":
-            return <AlertTriangle className="h-4 w-4" />;
-         case "success":
-            return <CheckCircle className="h-4 w-4" />;
-         default:
-            return <Info className="h-4 w-4" />;
-      }
-   };
-
-   // Fetch similarity data for the request
-   const { data: similarityData } = useQuery({
-      queryKey: ["content-request-similarity", request.id],
-      queryFn: async () => {
-         const response = await eden.api.v1.content.ai
-            .similarities({ id: request.id })
-            .get();
-         return response.data;
-      },
-      enabled: !!request.id,
-   });
 
    const { mutate: deleteContentRequest, isPending } = useMutation({
       mutationFn: async (id: string) =>
@@ -105,7 +64,9 @@ export function ContentRequestCard({ request }: { request: ContentRequest }) {
       <Card>
          <CardHeader>
             <CardTitle>{request.topic}</CardTitle>
-            <CardDescription>{request.briefDescription}</CardDescription>
+            <CardDescription className="text-ellipsis w-full">
+               {request.briefDescription}
+            </CardDescription>
             <CardAction>
                <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                   <DropdownMenuTrigger asChild>
@@ -162,27 +123,17 @@ export function ContentRequestCard({ request }: { request: ContentRequest }) {
                </AlertDialog>
             </CardAction>
          </CardHeader>
-         <CardContent>
-            <Alert variant="default">
-               {getSimilarityIcon(similarityData?.category)}
-               <AlertTitle className="capitalize">
-                  {similarityData?.category}
-               </AlertTitle>
-
-               <AlertDescription>{similarityData?.message}</AlertDescription>
-            </Alert>
-            <div className="grid grid-cols-2 gap-2 mt-4">
-               <InfoItem
-                  icon={<Activity className="h-4 w-4" />}
-                  label="Status"
-                  value={request.status}
-               />
-               <InfoItem
-                  icon={<Hash className="h-4 w-4" />}
-                  label="Target Length"
-                  value={`${request.targetLength}`}
-               />
-            </div>
+         <CardContent className="grid grid-cols-2 gap-2 ">
+            <InfoItem
+               icon={<Activity className="h-4 w-4" />}
+               label="Status"
+               value={request.status}
+            />
+            <InfoItem
+               icon={<Hash className="h-4 w-4" />}
+               label="Target Length"
+               value={`${request.targetLength}`}
+            />
          </CardContent>
          <CardFooter>
             <Button className="w-full" variant="outline" asChild>

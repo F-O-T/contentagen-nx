@@ -40,7 +40,13 @@ export const agentRoutes = new Elysia({
       },
       {
          auth: true,
-         body: t.Omit(_createAgent, ["id", "createdAt", "updatedAt", "userId", "basePrompt"]),
+         body: t.Omit(_createAgent, [
+            "id",
+            "createdAt",
+            "updatedAt",
+            "userId",
+            "basePrompt",
+         ]),
       },
    )
    .patch(
@@ -73,7 +79,7 @@ export const agentRoutes = new Elysia({
       "/",
       async ({ user }) => {
          const agents = await db.query.agent.findMany({
-            where: eq(agentTable.userId, user.id)
+            where: eq(agentTable.userId, user.id),
          });
          return { agents };
       },
@@ -88,8 +94,7 @@ export const agentRoutes = new Elysia({
             where: and(
                eq(agentTable.id, params.id),
                eq(agentTable.userId, user.id),
-            )
-
+            ),
          });
          if (!agent) {
             throw new NotFoundError("Agent not found", "AGENT_NOT_FOUND");
@@ -103,11 +108,11 @@ export const agentRoutes = new Elysia({
                contentType: agent.contentType,
                voiceTone: agent.voiceTone,
                targetAudience: agent.targetAudience,
-               formattingStyle: agent.formattingStyle,
+               formattingStyle: agent.formattingStyle ?? "structured",
             });
 
             // Update the agent with the generated base prompt
-            const [updatedAgent] = await db
+            await db
                .update(agentTable)
                .set({ basePrompt })
                .where(eq(agentTable.id, params.id))
@@ -159,7 +164,7 @@ export const agentRoutes = new Elysia({
                eq(agentTable.userId, user.id),
             ),
          });
-         
+
          if (!agent) {
             throw new NotFoundError("Agent not found", "AGENT_NOT_FOUND");
          }
@@ -187,26 +192,30 @@ export const agentRoutes = new Elysia({
          // Rebuild knowledge base vector from all uploaded files
          try {
             const fileContents: string[] = [];
-            
+
             // Fetch content for all files
             for (const file of updatedFiles) {
-               const fileName = file.fileUrl.split('/').pop();
+               const fileName = file.fileUrl.split("/").pop();
                if (fileName) {
                   const stream = await getFile(fileName);
                   const chunks: Buffer[] = [];
-                  
+
                   for await (const chunk of stream) {
-                     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+                     chunks.push(
+                        Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk),
+                     );
                   }
-                  
-                  const content = Buffer.concat(chunks).toString('utf-8');
+
+                  const content = Buffer.concat(chunks).toString("utf-8");
                   fileContents.push(content);
                }
             }
 
             // Generate embeddings for all file contents
             const embeddings = await Promise.all(
-               fileContents.map(content => embeddingService.generateFileContentEmbedding(content))
+               fileContents.map((content) =>
+                  embeddingService.generateFileContentEmbedding(content),
+               ),
             );
 
             // Average the embeddings to create knowledge base vector
@@ -229,8 +238,11 @@ export const agentRoutes = new Elysia({
                agent: updatedAgent[0],
             };
          } catch (embeddingError) {
-            console.error("Error generating knowledge base embedding:", embeddingError);
-            
+            console.error(
+               "Error generating knowledge base embedding:",
+               embeddingError,
+            );
+
             // Fall back to updating without knowledge base if embedding fails
             const updatedAgent = await db
                .update(agentTable)
@@ -269,15 +281,15 @@ export const agentRoutes = new Elysia({
                eq(agentTable.userId, user.id),
             ),
          });
-         
+
          if (!agent) {
             throw new NotFoundError("Agent not found", "AGENT_NOT_FOUND");
          }
 
          // Find and remove the file from uploadedFiles array
          const currentFiles = agent.uploadedFiles || [];
-         const updatedFiles = currentFiles.filter(file =>
-            !file.fileUrl.includes(params.filename)
+         const updatedFiles = currentFiles.filter(
+            (file) => !file.fileUrl.includes(params.filename),
          );
 
          if (currentFiles.length === updatedFiles.length) {
@@ -287,29 +299,33 @@ export const agentRoutes = new Elysia({
          // Rebuild knowledge base vector from remaining files
          try {
             let knowledgeBaseVector: number[] = [];
-            
+
             if (updatedFiles.length > 0) {
                const fileContents: string[] = [];
-               
+
                // Fetch content for remaining files
                for (const file of updatedFiles) {
-                  const fileName = file.fileUrl.split('/').pop();
+                  const fileName = file.fileUrl.split("/").pop();
                   if (fileName) {
                      const stream = await getFile(fileName);
                      const chunks: Buffer[] = [];
-                     
+
                      for await (const chunk of stream) {
-                        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+                        chunks.push(
+                           Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk),
+                        );
                      }
-                     
-                     const content = Buffer.concat(chunks).toString('utf-8');
+
+                     const content = Buffer.concat(chunks).toString("utf-8");
                      fileContents.push(content);
                   }
                }
 
                // Generate embeddings for remaining file contents
                const embeddings = await Promise.all(
-                  fileContents.map(content => embeddingService.generateFileContentEmbedding(content))
+                  fileContents.map((content) =>
+                     embeddingService.generateFileContentEmbedding(content),
+                  ),
                );
 
                // Average the embeddings to create knowledge base vector
@@ -335,8 +351,11 @@ export const agentRoutes = new Elysia({
                agent: updatedAgent[0],
             };
          } catch (embeddingError) {
-            console.error("Error rebuilding knowledge base after deletion:", embeddingError);
-            
+            console.error(
+               "Error rebuilding knowledge base after deletion:",
+               embeddingError,
+            );
+
             // Fall back to updating without knowledge base if embedding fails
             const updatedAgent = await db
                .update(agentTable)

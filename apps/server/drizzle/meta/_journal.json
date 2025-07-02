@@ -43,6 +43,13 @@
       "when": 1751390581347,
       "tag": "0005_modern_doorman",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1751414265839,
+      "tag": "0006_lovely_moon_knight",
+      "breakpoints": true
     }
   ]
 }

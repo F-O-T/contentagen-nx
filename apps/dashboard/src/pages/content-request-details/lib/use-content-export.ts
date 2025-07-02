@@ -2,14 +2,20 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 // Helper function to process content with internal linking
-const processInternalLinks = (content: string, format: "html" | "markdown" | "mdx") => {
+const processInternalLinks = (
+   content: string,
+   format: "html" | "markdown" | "mdx",
+) => {
    // Convert [[link]] or [[link|display text]] syntax to appropriate format
-   const internalLinkRegex = /\[\[([^\|\]]+)(?:\|([^\]]+))?\]\]/g;
-   
+   const internalLinkRegex = /\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g;
+
    return content.replace(internalLinkRegex, (_, link, displayText) => {
       const text = displayText || link;
-      const slug = link.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
-      
+      const slug = link
+         .toLowerCase()
+         .replace(/\s+/g, "-")
+         .replace(/[^\w-]/g, "");
+
       if (format === "html") {
          return `<a href="#${slug}" class="internal-link">${text}</a>`;
       } else {
@@ -31,10 +37,12 @@ export function useContentExport() {
          filename: string;
       }) => {
          const processedContent = processInternalLinks(content, format);
-         
+
          if (format === "markdown") {
             // Create markdown file
-            const blob = new Blob([processedContent], { type: "text/markdown" });
+            const blob = new Blob([processedContent], {
+               type: "text/markdown",
+            });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;

@@ -8,6 +8,7 @@ import {
 } from "drizzle-typebox";
 import { authMiddleware } from "../integrations/auth";
 import { embeddingService } from "../services/embedding";
+import { enqueueContentRequest } from "../services/worker-enqueue";
 import { and, desc, eq } from "drizzle-orm";
 
 // OpenAPI Tags for route organization
@@ -70,22 +71,95 @@ const _errorResponse = t.Object({
    message: t.String(),
 });
 
+// Schema for creating content request (omitting tags field)
+const _createContentRequestBody = t.Omit(_createContentRequest, [
+   "id",
+   "userId",
+   "createdAt",
+   "updatedAt",
+   "embedding",
+   "tags",
+   "status",
+   "isCompleted",
+   "generatedContentId"
+]);
+
 export const contentRequestRoutes = new Elysia({
    prefix: "/request",
    tags: [ApiTags.CONTENT_REQUESTS],
 })
    .use(authMiddleware)
+   .post(
+      "/",
+      async ({ body, user, set }) => {
+         try {
+            const { id: userId } = user;
+            
+            const [newRequest] = await db
+               .insert(contentRequest)
+               .values({
+                  ...body,
+                  userId
+               })
+               .returning();
+
+            if (!newRequest) {
+               throw new Error("Failed to create content request");
+            }
+
+            // Enqueue the content request for processing
+            await enqueueContentRequest({
+               requestId: newRequest.id,
+               approved: false,
+               isCompleted: false,
+            });
+
+            set.status = 201;
+            return {
+               request: newRequest,
+            };
+         } catch (error) {
+            console.error("Error creating content request:", error);
+            set.status = 400;
+            return {
+               message: "Failed to create content request",
+            };
+         }
+      },
+      {
+         auth: true,
+         detail: {
+            summary: "Create a content request",
+            description:
+               "Create a new content request that will be processed by the system. The request includes topic, description, and various formatting options. Once created, it triggers the content generation workflow where an assigned agent will process the request and generate the requested content.",
+            tags: [ApiTags.CONTENT_REQUESTS],
+            responses: {
+               201: {
+                  description: "Content request created successfully",
+               },
+               400: {
+                  description: "Invalid request data or creation failed",
+               },
+            },
+         },
+         body: _createContentRequestBody,
+         response: {
+            201: t.Object({
+               request: _selectContentRequest,
+            }),
+            400: _errorResponse,
+         },
+      },
+   )
    .get(
       "/list",
       async ({ user, query }) => {
          const { id: userId } = user;
-         const { page = 1, limit = 10, status } = query;
+         const { page = 1, limit = 10 } = query;
          const offset = (page - 1) * limit;
 
-         let whereClause = eq(contentRequest.userId, userId);
-         if (status) {
-            whereClause = and(whereClause, eq(contentRequest.status, status))!;
-         }
+         const whereClause = eq(contentRequest.userId, userId);
+     
 
          const requests = await db.query.contentRequest.findMany({
             columns: {
@@ -93,7 +167,6 @@ export const contentRequestRoutes = new Elysia({
                topic: true,
                briefDescription: true,
                targetLength: true,
-               status: true,
                isCompleted: true,
                createdAt: true,
                updatedAt: true,
@@ -187,57 +260,6 @@ export const contentRequestRoutes = new Elysia({
          },
       },
    )
-   .get(
-      "/similarities/:id",
-      async ({ params, user, set }) => {
-         const { id } = params;
-         const { id: userId } = user;
-
-         try {
-            const targetRequest = await db.query.contentRequest.findFirst({
-               where: and(
-                  eq(contentRequest.id, id),
-                  eq(contentRequest.userId, userId),
-               ),
-            });
-
-            if (!targetRequest || !targetRequest.embedding) {
-               set.status = 404;
-               return {
-                  message:
-                     "Content request not found or no embedding available",
-               };
-            }
-
-            // Calculate similarity with a mock value for now
-            // In a real implementation, you'd compare embeddings
-            return {
-               similarity: 0.75, // Mock similarity score
-            };
-         } catch (error) {
-            console.error("Error calculating similarity:", error);
-            set.status = 500;
-            return { message: "Failed to calculate similarity" };
-         }
-      },
-      {
-         auth: true,
-         detail: {
-            summary: "Get content request similarities",
-            description:
-               "Calculate similarity scores for a content request against other requests",
-            tags: [ApiTags.CONTENT_REQUESTS],
-         },
-         params: _contentRequestParams,
-         response: {
-            200: t.Object({
-               similarity: t.Number(),
-            }),
-            404: _errorResponse,
-            500: _errorResponse,
-         },
-      },
-   )
    .patch(
       "/",
       async ({ body, user }) => {
@@ -262,13 +284,24 @@ export const contentRequestRoutes = new Elysia({
             // Validate and extract the new fields, preserving existing values if not provided
             const validatedUpdateData: any = {
                ...body,
-               generateTags: body.generateTags !== undefined ? body.generateTags : existingRequest.generateTags,
-               tags: body.tags !== undefined ? body.tags : existingRequest.tags,
-               internalLinkFormat: body.internalLinkFormat !== undefined ? body.internalLinkFormat : existingRequest.internalLinkFormat,
-               includeMetaTags: body.includeMetaTags !== undefined ? body.includeMetaTags : existingRequest.includeMetaTags,
-               includeMetaDescription: body.includeMetaDescription !== undefined ? body.includeMetaDescription : existingRequest.includeMetaDescription,
-               frontmatterFormatting: body.frontmatterFormatting !== undefined ? body.frontmatterFormatting : existingRequest.frontmatterFormatting,
-               approved: body.approved !== undefined ? body.approved : existingRequest.approved,
+         
+               internalLinkFormat:
+                  body.internalLinkFormat !== undefined
+                     ? body.internalLinkFormat
+                     : existingRequest.internalLinkFormat,
+               includeMetaTags:
+                  body.includeMetaTags !== undefined
+                     ? body.includeMetaTags
+                     : existingRequest.includeMetaTags,
+               includeMetaDescription:
+                  body.includeMetaDescription !== undefined
+                     ? body.includeMetaDescription
+                     : existingRequest.includeMetaDescription,
+               
+               approved:
+                  body.approved !== undefined
+                     ? body.approved
+                     : existingRequest.approved,
                updatedAt: new Date(),
             };
 
@@ -276,12 +309,14 @@ export const contentRequestRoutes = new Elysia({
             if (body.topic || body.briefDescription) {
                try {
                   const topic = body.topic || existingRequest.topic;
-                  const briefDescription = body.briefDescription || existingRequest.briefDescription;
-                  
-                  const embedding = await embeddingService.generateContentRequestEmbedding(
-                     topic,
-                     briefDescription,
-                  );
+                  const briefDescription =
+                     body.briefDescription || existingRequest.briefDescription;
+
+                  const embedding =
+                     await embeddingService.generateContentRequestEmbedding(
+                        topic,
+                        briefDescription,
+                     );
                   validatedUpdateData.embedding = embedding;
                } catch (error) {
                   console.error("Error updating embedding:", error);
@@ -317,52 +352,56 @@ export const contentRequestRoutes = new Elysia({
                {
                   name: "generateTags",
                   in: "body",
-                  description: "Whether to automatically generate tags for the content",
+                  description:
+                     "Whether to automatically generate tags for the content",
                   required: false,
-                  schema: { type: "boolean" }
+                  schema: { type: "boolean" },
                },
                {
                   name: "tags",
                   in: "body",
                   description: "Array of predefined tags for the content",
                   required: false,
-                  schema: { type: "array", items: { type: "string" } }
+                  schema: { type: "array", items: { type: "string" } },
                },
                {
                   name: "internalLinkFormat",
                   in: "body",
                   description: "Format for internal links: 'mdx' or 'html'",
                   required: false,
-                  schema: { type: "string", enum: ["mdx", "html"] }
+                  schema: { type: "string", enum: ["mdx", "html"] },
                },
                {
                   name: "includeMetaTags",
                   in: "body",
-                  description: "Whether to include meta tags in the generated content",
+                  description:
+                     "Whether to include meta tags in the generated content",
                   required: false,
-                  schema: { type: "boolean" }
+                  schema: { type: "boolean" },
                },
                {
                   name: "includeMetaDescription",
                   in: "body",
-                  description: "Whether to include meta description in the generated content",
+                  description:
+                     "Whether to include meta description in the generated content",
                   required: false,
-                  schema: { type: "boolean" }
+                  schema: { type: "boolean" },
                },
                {
                   name: "frontmatterFormatting",
                   in: "body",
                   description: "Whether to format output with YAML frontmatter",
                   required: false,
-                  schema: { type: "boolean" }
+                  schema: { type: "boolean" },
                },
                {
                   name: "approved",
                   in: "body",
-                  description: "Whether the content request is approved for generation",
+                  description:
+                     "Whether the content request is approved for generation",
                   required: false,
-                  schema: { type: "boolean" }
-               }
+                  schema: { type: "boolean" },
+               },
             ],
          },
 

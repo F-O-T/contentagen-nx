@@ -118,12 +118,8 @@ export const content = pgTable(
          .$defaultFn(() => new Date())
          .notNull(),
       id: uuid("id").primaryKey().defaultRandom(),
-
-      publishedAt: timestamp("published_at"),
       readTimeMinutes: integer("read_time_minutes").default(0),
-      scheduledAt: timestamp("scheduled_at"),
       slug: text("slug"),
-
       status: contentStatusEnum("status").default("draft"),
       tags: json("tags").$type<string[]>(),
       title: text("title").notNull(),
@@ -144,12 +140,6 @@ export const content = pgTable(
    ]),
 );
 
-export const contentRequestStatusEnum = pgEnum("content_request_status", [
-   "pending",
-   "approved",
-   "rejected",
-]);
-export type ContentRequestStatus = (typeof contentRequestStatusEnum.enumValues)[number];
 
 export const contentRequest = pgTable(
    "content_request",
@@ -162,14 +152,12 @@ export const contentRequest = pgTable(
       createdAt: timestamp("created_at")
          .$defaultFn(() => new Date())
          .notNull(),
-      embedding: vector("embedding", { dimensions: 1536 }),
       generatedContentId: uuid("generated_content_id").references(
          () => content.id,
          { onDelete: "cascade" },
       ),
       id: uuid("id").primaryKey().defaultRandom(),
       isCompleted: boolean("is_completed").default(false),
-      status: contentRequestStatusEnum("status").default("pending").notNull(),
       targetLength: contentLengthEnum("target_length")
          .default("medium")
          .notNull(),
@@ -180,20 +168,12 @@ export const contentRequest = pgTable(
       userId: text("user_id")
          .notNull()
          .references(() => user.id, { onDelete: "cascade" }),
-      generateTags: boolean("generate_tags").default(false),
-      tags: json("tags").$type<string[]>().default([]),
       internalLinkFormat: internalLinkFormatEnum("internal_link_format").default("mdx"),
       includeMetaTags: boolean("include_meta_tags").default(false),
       includeMetaDescription: boolean("include_meta_description").default(false),
-      frontmatterFormatting: boolean("frontmatter_formatting").default(false),
       approved: boolean("approved").default(true),
-   },
-   (table) => ([
-      index("content_request_embedding_idx").using(
-         "hnsw",
-         table.embedding.op("vector_cosine_ops"),
-      ),
-   ]),
+   }
+   
 );
 
 

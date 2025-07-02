@@ -2,10 +2,10 @@ import { Queue, Worker } from "bullmq";
 import { eq } from "drizzle-orm";
 import { db } from "../integrations/database";
 import { openRouter } from "../integrations/openrouter";
-import type { agent as Agent, ContentLength } from "../schemas/content-schema";
 import { content, contentRequest, type agent } from "../schemas/content-schema";
 import { redis } from "../services/redis";
 import { embeddingService } from "../services/embedding";
+import { generateContentRequestPrompt, type AgentPromptOptions } from "../services/agent-prompt";
 
 export type ContentRequestWithAgent = typeof contentRequest.$inferSelect & {
    agent: typeof agent.$inferSelect;
@@ -30,112 +30,8 @@ function slugify(text: string) {
       .replace(/-+$/, ""); // Trim - from end of text
 }
 
-function generateAgentPrompt(
-   agent: typeof Agent.$inferSelect,
-   params: {
-      topic: string;
-      briefDescription: string;
-      targetLength: ContentLength;
-      generateTags: boolean;
-      internalLinkFormat: 'mdx' | 'html';
-      includeMetaTags: boolean;
-      includeMetaDescription: boolean;
-      frontmatterFormatting: boolean;
-   },
-): string {
-   // Map ContentLength to detailed descriptions
-   const lengthDescriptions: Record<ContentLength, string> = {
-      short: "Quick and concise content (500-800 words)",
-      medium: "Balanced content with good detail (800-1500 words)",
-      long: "Comprehensive and in-depth content (1500+ words)",
-   };
 
-   // Build base prompt without tag placeholders
-   let prompt = `
-${agent.basePrompt || `You are ${agent.name}, an expert content creator specializing in ${agent.contentType} with a ${agent.voiceTone} tone for ${agent.targetAudience}.`}
-
----
-
-## Content Request Details
-
-You have received a new content request. Please create content according to your agent profile and the specifications below:
-
-**Topic**: ${params.topic}
-**Brief Description**: ${params.briefDescription}
-**Target Length**: ${params.targetLength} (${lengthDescriptions[params.targetLength]})
-
-## Additional Instructions
-
-1. Follow your established voice, tone, and style guidelines
-2. Ensure the content provides genuine value to your target audience
-3. Structure the content according to your formatting preferences
-4. Make the content engaging and actionable`;
-
-   // Add meta tags and description instructions if requested
-   if (params.includeMetaTags || params.includeMetaDescription) {
-      prompt += `\n5. Include relevant meta information:`;
-      if (params.includeMetaTags) {
-         prompt += `\n   - Add appropriate meta tags for SEO optimization`;
-      }
-      if (params.includeMetaDescription) {
-         prompt += `\n   - Include a compelling meta description (150-160 characters)`;
-      }
-   }
-
-   // Add internal link formatting instructions
-   prompt += `\n6. Format internal links using ${params.internalLinkFormat.toUpperCase()} format:`;
-   if (params.internalLinkFormat === 'mdx') {
-      prompt += `\n   - Use MDX link syntax: [Link Text](./relative-path)`;
-   } else {
-      prompt += `\n   - Use HTML link syntax: <a href="./relative-path">Link Text</a>`;
-   }
-
-   // Add frontmatter formatting instructions
-   if (params.frontmatterFormatting) {
-      prompt += `\n7. Format output as MDX/Markdown with YAML frontmatter containing title, description, and other metadata`;
-   }
-
-   // Build output requirements
-   prompt += `\n\n## Output Requirements\n\n`;
-   
-   if (params.generateTags) {
-      prompt += `The output must be a valid JSON object with exactly two keys:
-- "content": The complete content as a string, properly formatted in Markdown${params.frontmatterFormatting ? ' with YAML frontmatter' : ''}
-- "tags": An array of 3-8 relevant lowercase tags (no duplicates)
-
-Example output format:
-{
-  "content": "${params.frontmatterFormatting ? '---\\ntitle: Article Title\\ndescription: Brief description\\n---\\n\\n# Article Title\\n\\nYour complete article content here...' : '# Article Title\\n\\nYour complete article content here...'}",
-  "tags": ["content-marketing", "copywriting", "seo"]
-}`;
-   } else {
-      prompt += `The output must be a valid JSON object with exactly one key:
-- "content": The complete content as a string, properly formatted in Markdown${params.frontmatterFormatting ? ' with YAML frontmatter' : ''}
-
-Example output format:
-{
-  "content": "${params.frontmatterFormatting ? '---\\ntitle: Article Title\\ndescription: Brief description\\n---\\n\\n# Article Title\\n\\nYour complete article content here...' : '# Article Title\\n\\nYour complete article content here...'}"
-}`;
-   }
-
-   prompt += `\n\nDo not include any explanations or additional text outside the JSON object.`;
-
-   // Append tag generation instructions if enabled
-   if (params.generateTags) {
-      prompt += `\n\n## Tag Generation Instructions
-
-Generate 3-8 relevant tags that:
-- Are lowercase and use hyphens for multi-word tags
-- Accurately represent the content's main topics and themes
-- Include both broad category tags and specific topic tags
-- Avoid duplicates and overly generic terms
-- Help with content discovery and categorization`;
-   }
-
-   return prompt;
-}
-
-async function generateContent(prompt: string, generateTags: boolean) {
+async function generateContent(prompt: string): Promise<{ content: string }> {
    const response = await openRouter.chat.completions.create({
       model: "qwen/qwen3-30b-a3b-04-28",
       messages: [{ role: "user", content: prompt }],
@@ -149,23 +45,24 @@ async function generateContent(prompt: string, generateTags: boolean) {
    }
 
    try {
+      console.log(generatedText)
       const result = JSON.parse(generatedText);
       
-      // Ensure tags array exists based on generateTags setting
-      if (generateTags && !result.tags) {
-         result.tags = [];
-      } else if (!generateTags) {
-         result.tags = [];
+      // Verify result.content is a string before returning
+      if (typeof result.content !== 'string') {
+         throw new Error("AI response does not contain valid content string");
       }
       
-      return result;
+      // Return only content
+      return { content: result.content };
    } catch (error) {
       console.error("Failed to parse JSON response from AI:", error);
       throw new Error("Invalid JSON response from AI");
    }
 }
 
-function calculateWordsCount(text: string): number {
+function calculateWordsCount(text: string | undefined | null): number {
+   if (typeof text !== 'string') return 0;
    return text.split(/\s+/).length;
 }
 
@@ -174,45 +71,11 @@ function calculateTimeToRead(wordsCount: number): number {
    return Math.ceil(wordsCount / wordsPerMinute);
 }
 
-function extractTags(
-   generatedTags: string[] | string,
-   topic: string,
-): string[] {
-   let tags: string[] = [];
-   if (typeof generatedTags === "string" && generatedTags.length > 0) {
-      tags = generatedTags
-         .split(",")
-         .map((tag) => tag.trim())
-         .filter((tag) => tag.length > 0);
-   } else if (Array.isArray(generatedTags) && generatedTags.length > 0) {
-      tags = generatedTags
-         .map((tag) => String(tag).trim())
-         .filter((tag) => tag.length > 0);
-   }
-
-   if (tags.length === 0) {
-      tags = topic.split(" ").map((tag) => tag.trim().toLowerCase());
-   }
-
-   return tags;
-}
-
 async function saveContent(
    request: ContentRequestWithAgent,
-   generatedContent: { content: string; tags: string[] | string },
+   generatedContent: { content: string },
 ) {
    const slug = slugify(request.topic);
-   
-   // Use generated tags if generateTags is true, otherwise use existing request tags or extract from topic
-   const generateTags = request.generateTags ?? false;
-   let tags: string[] = [];
-   
-   if (generateTags) {
-      tags = extractTags(generatedContent.tags, request.topic);
-   } else {
-      // Use existing tags from request, or empty array if none
-      tags = request.tags || [];
-   }
    
    const wordsCount = calculateWordsCount(generatedContent.content);
    const timeToRead = calculateTimeToRead(wordsCount);
@@ -229,34 +92,40 @@ async function saveContent(
       // Continue without embedding - can be generated later
    }
 
-   const [newContent] = await db
-      .insert(content)
-      .values({
-         agentId: request.agentId,
-         body: generatedContent.content,
-         title: request.topic,
-         userId: request.userId,
-         slug,
-         tags,
-         wordsCount,
-         readTimeMinutes: timeToRead,
-         embedding,
-      })
-      .returning();
+   try {
+      const [newContent] = await db
+         .insert(content)
+         .values({
+            agentId: request.agentId,
+            body: generatedContent.content,
+            title: request.topic,
+            userId: request.userId,
+            slug,
+            wordsCount,
+            readTimeMinutes: timeToRead,
+            embedding,
+         })
+         .returning();
 
-   // Update request with tags, approved status and completion
-   // Note: We don't include embedding in the update to avoid sending vectors in the payload
-   await db
-      .update(contentRequest)
-      .set({
-         isCompleted: true,
-         generatedContentId: newContent?.id,
-         approved: true, // Set approved = true after content updates
-         tags: tags, // Set the tags array based on generation or existing
-      })
-      .where(eq(contentRequest.id, request.id));
+      if (!newContent) {
+         throw new Error("Failed to create content record");
+      }
 
-   return newContent;
+      // Update request with completion
+      // Note: approved field is left as-is (remains false)
+      await db
+         .update(contentRequest)
+         .set({
+            isCompleted: true,
+            generatedContentId: newContent.id,
+         })
+         .where(eq(contentRequest.id, request.id));
+
+      return newContent;
+   } catch (error) {
+      console.error("Database error while saving content:", error);
+      throw new Error(`Failed to save content: ${error instanceof Error ? error.message : String(error)}`);
+   }
 }
 
 export const contentGenerationWorker = new Worker(
@@ -274,45 +143,55 @@ export const contentGenerationWorker = new Worker(
          });
 
          if (!request || !request.agent) {
-            throw new Error("Request or agent not found");
+            const errorMsg = `Request ${requestId} or associated agent not found`;
+            job.log(errorMsg);
+            throw new Error(errorMsg);
          }
 
          const {
-            agent,
             topic,
             briefDescription,
             targetLength
          } = request;
 
          // Handle nullable boolean and enum values with proper defaults
-         const generateTags = request.generateTags ?? false;
          const internalLinkFormat = request.internalLinkFormat ?? 'mdx';
          const includeMetaTags = request.includeMetaTags ?? false;
          const includeMetaDescription = request.includeMetaDescription ?? false;
-         const frontmatterFormatting = request.frontmatterFormatting ?? false;
 
-         const prompt = generateAgentPrompt(agent, {
+         const promptOptions: AgentPromptOptions = {
             topic,
-            briefDescription,
+            description: briefDescription,
             targetLength,
-            generateTags,
-            internalLinkFormat,
+            linkFormat: internalLinkFormat,
             includeMetaTags,
             includeMetaDescription,
-            frontmatterFormatting,
-         });
+         };
 
-         const generatedContent = await generateContent(prompt, generateTags);
+         job.log(`Generating content prompt for topic: ${topic}`);
+         const prompt = generateContentRequestPrompt(promptOptions, request.agent);
 
-         await saveContent(request, generatedContent);
+         job.log(`Calling AI service to generate content`);
+         const generatedContent = await generateContent(prompt);
 
-         job.log(`Successfully processed content for request: ${requestId}`);
+         job.log(`Saving generated content to database`);
+         const savedContent = await saveContent(request, generatedContent);
+
+         job.log(`Successfully processed content for request: ${requestId}, generated content ID: ${savedContent?.id}`);
+         
+         // Return the generated content ID for job completion tracking
+         return {
+            success: true,
+            requestId,
+            generatedContentId: savedContent?.id
+         };
       } catch (error) {
-         console.error(
-            `Failed to process content for request: ${requestId}`,
-            error,
-         );
-         throw error;
+         const errorMsg = `Failed to process content for request: ${requestId}`;
+         console.error(errorMsg, error);
+         job.log(`ERROR: ${errorMsg} - ${error instanceof Error ? error.message : String(error)}`);
+         
+         // Re-throw to ensure job fails and can be retried if needed
+         throw new Error(`${errorMsg}: ${error instanceof Error ? error.message : String(error)}`);
       }
    },
    { connection: redis },

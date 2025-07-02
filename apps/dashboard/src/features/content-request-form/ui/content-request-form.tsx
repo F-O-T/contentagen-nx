@@ -13,6 +13,10 @@ import {
    TargetLengthStepSubscribe,
 } from "./target-length-step";
 import {
+   FeatureTogglesStep,
+   FeatureTogglesStepSubscribe,
+} from "./feature-toggles-step";
+import {
    ReviewSubmitStep,
    ReviewSubmitStepSubscribe,
 } from "./review-submit-step";
@@ -20,6 +24,7 @@ import {
 const steps = [
    { id: "step-basic-info", title: "Basic Info" },
    { id: "step-target-length", title: "Target Length" },
+   { id: "step-feature-toggles", title: "Content Features" },
    { id: "step-review-submit", title: "Review & Submit" },
 ] as const;
 
@@ -45,6 +50,8 @@ export function ContentRequestForm({
             return "Let's start by defining what content you'd like to create!";
          case "step-target-length":
             return "How long should your content be?";
+         case "step-feature-toggles":
+            return "Let's configure some extra features for your content!";
          case "step-review-submit":
             return "Perfect! Let's review your content request before submitting!";
          default:
@@ -103,6 +110,9 @@ export function ContentRequestForm({
                         "step-target-length": () => (
                           <TargetLengthStep form={form} />
                         ),
+                        "step-feature-toggles": () => (
+                          <FeatureTogglesStep form={form} />
+                        ),
                         "step-review-submit": () => (
                           <ReviewSubmitStep form={form} />
                         ),
@@ -138,6 +148,12 @@ export function ContentRequestForm({
                       ),
                       "step-target-length": () => (
                         <TargetLengthStepSubscribe
+                          form={form}
+                          next={methods.next}
+                        />
+                      ),
+                      "step-feature-toggles": () => (
+                        <FeatureTogglesStepSubscribe
                           form={form}
                           next={methods.next}
                         />
