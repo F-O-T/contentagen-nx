@@ -3,10 +3,10 @@ import { and, eq } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-typebox";
 import { Elysia, t } from "elysia";
 import { db } from "../integrations/database";
-import { agent as agentTable } from "../schemas/content-schema";
+import { agent as agentTable } from "../schemas/agent-schema";
 import { NotFoundError } from "../shared/errors";
-import { uploadFile, getFile } from "../integrations/minio";
-import { embeddingService, averageEmbeddings } from "../services/embedding";
+import { uploadFile } from "../integrations/minio";
+import { distillQueue } from "../workers/distill-worker";
 import { generateDefaultBasePrompt } from "../services/agent-prompt";
 
 const _createAgent = createInsertSchema(agentTable);
@@ -34,7 +34,6 @@ export const agentRoutes = new Elysia({
             userId: user.id,
             basePrompt: null,
             uploadedFiles: [],
-            knowledgeBase: null,
          };
          const basePrompt = generateDefaultBasePrompt(agentConfig);
 
@@ -186,6 +185,18 @@ export const agentRoutes = new Elysia({
          const fileBuffer = Buffer.from(await file.arrayBuffer());
          const fileUrl = await uploadFile(file.name, fileBuffer, file.type);
 
+         // Read file content for distillation
+         const fileContent = fileBuffer.toString("utf-8");
+
+         // Enqueue distillation job
+         await distillQueue.add("distill-knowledge", {
+            agentId: agent.id,
+            rawText: fileContent,
+            source: file.name,
+            sourceType: file.type,
+            sourceIdentifier: fileUrl,
+         });
+
          // Update agent with new file
          const uploadedFile = {
             fileName: file.name,
@@ -196,77 +207,22 @@ export const agentRoutes = new Elysia({
          const currentFiles = agent.uploadedFiles || [];
          const updatedFiles = [...currentFiles, uploadedFile];
 
-         // Rebuild knowledge base vector from all uploaded files
-         try {
-            const fileContents: string[] = [];
+         // Only update uploadedFiles, do not update knowledgeBase
+         const updatedAgent = await db
+            .update(agentTable)
+            .set({
+               uploadedFiles: updatedFiles,
+               updatedAt: new Date(),
+            })
+            .where(eq(agentTable.id, params.id))
+            .returning();
 
-            // Fetch content for all files
-            for (const file of updatedFiles) {
-               const fileName = file.fileUrl.split("/").pop();
-               if (fileName) {
-                  const stream = await getFile(fileName);
-                  const chunks: Buffer[] = [];
-
-                  for await (const chunk of stream) {
-                     chunks.push(
-                        Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk),
-                     );
-                  }
-
-                  const content = Buffer.concat(chunks).toString("utf-8");
-                  fileContents.push(content);
-               }
-            }
-
-            // Generate embeddings for all file contents
-            const embeddings = await Promise.all(
-               fileContents.map((content) =>
-                  embeddingService.generateFileContentEmbedding(content),
-               ),
-            );
-
-            // Average the embeddings to create knowledge base vector
-            const knowledgeBaseVector = averageEmbeddings(embeddings);
-
-            // Update agent with new files and knowledge base
-            const updatedAgent = await db
-               .update(agentTable)
-               .set({
-                  uploadedFiles: updatedFiles,
-                  knowledgeBase: knowledgeBaseVector,
-                  updatedAt: new Date(),
-               })
-               .where(eq(agentTable.id, params.id))
-               .returning();
-
-            return {
-               success: true,
-               file: uploadedFile,
-               agent: updatedAgent[0],
-            };
-         } catch (embeddingError) {
-            console.error(
-               "Error generating knowledge base embedding:",
-               embeddingError,
-            );
-
-            // Fall back to updating without knowledge base if embedding fails
-            const updatedAgent = await db
-               .update(agentTable)
-               .set({
-                  uploadedFiles: updatedFiles,
-                  updatedAt: new Date(),
-               })
-               .where(eq(agentTable.id, params.id))
-               .returning();
-
-            return {
-               success: true,
-               file: uploadedFile,
-               agent: updatedAgent[0],
-               warning: "File uploaded but knowledge base embedding failed",
-            };
-         }
+         return {
+            success: true,
+            file: uploadedFile,
+            agent: updatedAgent[0],
+            distillQueued: true,
+         };
       },
       {
          auth: true,
@@ -303,82 +259,20 @@ export const agentRoutes = new Elysia({
             throw new NotFoundError("File not found", "FILE_NOT_FOUND");
          }
 
-         // Rebuild knowledge base vector from remaining files
-         try {
-            let knowledgeBaseVector: number[] = [];
+         // No knowledgeBase update, just update uploadedFiles
+         const updatedAgent = await db
+            .update(agentTable)
+            .set({
+               uploadedFiles: updatedFiles,
+               updatedAt: new Date(),
+            })
+            .where(eq(agentTable.id, params.id))
+            .returning();
 
-            if (updatedFiles.length > 0) {
-               const fileContents: string[] = [];
-
-               // Fetch content for remaining files
-               for (const file of updatedFiles) {
-                  const fileName = file.fileUrl.split("/").pop();
-                  if (fileName) {
-                     const stream = await getFile(fileName);
-                     const chunks: Buffer[] = [];
-
-                     for await (const chunk of stream) {
-                        chunks.push(
-                           Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk),
-                        );
-                     }
-
-                     const content = Buffer.concat(chunks).toString("utf-8");
-                     fileContents.push(content);
-                  }
-               }
-
-               // Generate embeddings for remaining file contents
-               const embeddings = await Promise.all(
-                  fileContents.map((content) =>
-                     embeddingService.generateFileContentEmbedding(content),
-                  ),
-               );
-
-               // Average the embeddings to create knowledge base vector
-               knowledgeBaseVector = averageEmbeddings(embeddings);
-            } else {
-               // No files left, use zero vector
-               knowledgeBaseVector = new Array(1536).fill(0);
-            }
-
-            // Update agent with remaining files and new knowledge base
-            const updatedAgent = await db
-               .update(agentTable)
-               .set({
-                  uploadedFiles: updatedFiles,
-                  knowledgeBase: knowledgeBaseVector,
-                  updatedAt: new Date(),
-               })
-               .where(eq(agentTable.id, params.id))
-               .returning();
-
-            return {
-               success: true,
-               agent: updatedAgent[0],
-            };
-         } catch (embeddingError) {
-            console.error(
-               "Error rebuilding knowledge base after deletion:",
-               embeddingError,
-            );
-
-            // Fall back to updating without knowledge base if embedding fails
-            const updatedAgent = await db
-               .update(agentTable)
-               .set({
-                  uploadedFiles: updatedFiles,
-                  updatedAt: new Date(),
-               })
-               .where(eq(agentTable.id, params.id))
-               .returning();
-
-            return {
-               success: true,
-               agent: updatedAgent[0],
-               warning: "File deleted but knowledge base rebuilding failed",
-            };
-         }
+         return {
+            success: true,
+            agent: updatedAgent[0],
+         };
       },
       {
          auth: true,

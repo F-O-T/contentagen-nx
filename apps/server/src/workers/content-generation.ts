@@ -2,7 +2,8 @@ import { Queue, Worker } from "bullmq";
 import { eq, sql } from "drizzle-orm";
 import { db } from "../integrations/database";
 import { openRouter } from "../integrations/openrouter";
-import { content, contentRequest, type agent } from "../schemas/content-schema";
+import { content, contentRequest } from "../schemas/content-schema";
+import type { agent } from "../schemas/agent-schema";
 import { redis } from "../services/redis";
 import { embeddingService } from "../services/embedding";
 import {

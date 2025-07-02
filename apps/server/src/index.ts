@@ -13,11 +13,14 @@ import { contentRequestRoutes } from "./routes/content-request-routes";
 import { fileRoutes } from "./routes/file-routes";
 import { waitlistRoutes } from "./routes/waitlist-routes";
 import { contentGenerationQueue } from "./workers/content-generation";
-
+import { distillQueue } from "./workers/distill-worker";
 const serverAdapter = new ElysiaAdapter("/ui");
 
 createBullBoard({
-   queues: [new BullMQAdapter(contentGenerationQueue)],
+   queues: [
+      new BullMQAdapter(contentGenerationQueue),
+      new BullMQAdapter(distillQueue),
+   ],
    serverAdapter,
    options: {
       uiBasePath: isProduction ? "node_modules/@bull-board/ui" : "",

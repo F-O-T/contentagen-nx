@@ -12,6 +12,7 @@ import {
    vector,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
+import { agent } from "./agent-schema";
 
 export const contentTypeEnum = pgEnum("content_type", [
    "blog_posts",
@@ -73,45 +74,6 @@ export const internalLinkFormatEnum = pgEnum("internal_link_format", [
 ]);
 export type InternalLinkFormat =
    (typeof internalLinkFormatEnum.enumValues)[number];
-
-export const agent = pgTable(
-   "agent",
-   {
-      contentType: contentTypeEnum("content_type").notNull(),
-      createdAt: timestamp("created_at")
-         .$defaultFn(() => new Date())
-         .notNull(),
-      description: text("description"),
-      formattingStyle:
-         formattingStyleEnum("formatting_style").default("structured"),
-      id: uuid("id").primaryKey().defaultRandom(),
-
-      isActive: boolean("is_active").default(true),
-      lastGeneratedAt: timestamp("last_generated_at"),
-      name: text("name").notNull(),
-      targetAudience: targetAudienceEnum("target_audience").notNull(),
-      totalDrafts: integer("total_drafts").default(0),
-      totalPublished: integer("total_published").default(0),
-      updatedAt: timestamp("updated_at")
-         .$defaultFn(() => new Date())
-         .notNull(),
-      userId: text("user_id")
-         .notNull()
-         .references(() => user.id, { onDelete: "cascade" }),
-      voiceTone: voiceToneEnum("voice_tone").notNull(),
-      uploadedFiles: json("uploaded_files")
-         .$type<{ fileName: string; fileUrl: string; uploadedAt: string }[]>()
-         .default([]),
-      knowledgeBase: vector("knowledge_base", { dimensions: 1536 }),
-      basePrompt: text("base_prompt"),
-   },
-   (table) => [
-      index("agent_knowledge_base_idx").using(
-         "hnsw",
-         table.knowledgeBase.op("vector_cosine_ops"),
-      ),
-   ],
-);
 
 export const content = pgTable(
    "content",
@@ -194,15 +156,6 @@ export const exportLog = pgTable("export_log", {
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
 });
-
-export const agentRelations = relations(agent, ({ one, many }) => ({
-   content: many(content),
-   contentRequests: many(contentRequest),
-   user: one(user, {
-      fields: [agent.userId],
-      references: [user.id],
-   }),
-}));
 
 export const contentRelations = relations(content, ({ one, many }) => ({
    agent: one(agent, {
