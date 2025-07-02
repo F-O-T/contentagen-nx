@@ -24,7 +24,6 @@ interface RequestDetailsCardProps {
       topic: string;
       briefDescription: string;
       createdAt: Date;
-      targetLength: string;
       agentId?: string;
    };
 }
