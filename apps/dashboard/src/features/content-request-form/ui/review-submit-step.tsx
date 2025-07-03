@@ -27,9 +27,8 @@ export function ReviewSubmitStep({ form }: { form: ContentRequestForm }) {
    );
 
    return (
-      <div className="space-y-6">
+      <div className="space-y-4">
          <div>
-            <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
                {basicInfoItems.map((item) => (
                   <div className={item.className} key={item.label}>

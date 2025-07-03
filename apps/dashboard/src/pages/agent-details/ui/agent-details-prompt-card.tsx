@@ -61,7 +61,7 @@ export function AgentDetailsPromptCard({
          </CardHeader>
          <CardContent className="space-y-4">
             <div
-               className={`${expanded ? "" : "max-h-96 overflow-y-auto"} border rounded-lg p-4 bg-muted/30 transition-all`}
+               className={`${expanded ? "" : "h-full overflow-y-auto"} border rounded-lg p-4 bg-muted/30 transition-all`}
             >
                <div className="prose prose-sm max-w-none dark:prose-invert">
                   <ReactMarkdown>

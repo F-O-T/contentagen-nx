@@ -1,9 +1,10 @@
 import { authMiddleware } from "@api/integrations/auth";
-import { and, eq } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-typebox";
 import { Elysia, t } from "elysia";
 import { db } from "../integrations/database";
 import { agent as agentTable, knowledgeChunk } from "../schemas/agent-schema";
+import { contentRequest } from "../schemas/content-schema";
 import { NotFoundError } from "../shared/errors";
 import { uploadFile } from "../integrations/minio";
 import { distillQueue } from "../workers/distill-worker";
@@ -312,5 +313,103 @@ export const agentRoutes = new Elysia({
             id: t.String(),
             filename: t.String(),
          }),
+      },
+   )
+   // List all knowledge chunks for an agent
+   .get(
+      "/:id/chunks",
+      async ({ params, user }) => {
+         // Ensure agent belongs to user
+         const agent = await db.query.agent.findFirst({
+            where: and(
+               eq(agentTable.id, params.id),
+               eq(agentTable.userId, user.id),
+            ),
+         });
+         if (!agent) {
+            throw new NotFoundError("Agent not found", "AGENT_NOT_FOUND");
+         }
+         // Fetch all knowledge chunks for this agent
+         const chunks = await db.query.knowledgeChunk.findMany({
+            where: eq(knowledgeChunk.agentId, params.id),
+         });
+         return { chunks };
+      },
+      {
+         auth: true,
+         params: t.Object({ id: t.String() }),
+      },
+   )
+   // Delete a specific knowledge chunk
+   .delete(
+      "/:id/chunks/:chunkId",
+      async ({ params, user }) => {
+         // Ensure agent belongs to user
+         const agent = await db.query.agent.findFirst({
+            where: and(
+               eq(agentTable.id, params.id),
+               eq(agentTable.userId, user.id),
+            ),
+         });
+         if (!agent) {
+            throw new NotFoundError("Agent not found", "AGENT_NOT_FOUND");
+         }
+         // Ensure chunk exists and belongs to this agent
+         const chunk = await db.query.knowledgeChunk.findFirst({
+            where: and(
+               eq(knowledgeChunk.id, params.chunkId),
+               eq(knowledgeChunk.agentId, params.id),
+            ),
+         });
+         if (!chunk) {
+            throw new NotFoundError("Chunk not found", "CHUNK_NOT_FOUND");
+         }
+         // Delete the chunk (enqueue for deletion if needed)
+         await knowledgeChunkQueue.add("delete", {
+            action: "delete",
+            chunkId: chunk.id,
+         });
+         return { success: true };
+      },
+      {
+         auth: true,
+         params: t.Object({ id: t.String(), chunkId: t.String() }),
+      },
+   )
+   // List all content-requests for an agent
+   .get(
+      "/:id/content-requests",
+      async ({ params, user }) => {
+         // Ensure agent belongs to user
+         const agent = await db.query.agent.findFirst({
+            where: and(
+               eq(agentTable.id, params.id),
+               eq(agentTable.userId, user.id),
+            ),
+         });
+         if (!agent) {
+            throw new NotFoundError("Agent not found", "AGENT_NOT_FOUND");
+         }
+         // Fetch all content-requests for this agent
+         const requests = await db.query.contentRequest.findMany({
+            where: eq(contentRequest.agentId, params.id),
+            columns: {
+               id: true,
+               topic: true,
+               briefDescription: true,
+               targetLength: true,
+               isCompleted: true,
+               createdAt: true,
+               updatedAt: true,
+               agentId: true,
+               generatedContentId: true,
+            },
+            orderBy: desc(contentRequest.createdAt),
+         });
+         return { requests };
+      },
+      {
+         auth: true,
+         params: t.Object({ id: t.String() }),
       },
    );

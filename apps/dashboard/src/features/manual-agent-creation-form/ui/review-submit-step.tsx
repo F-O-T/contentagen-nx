@@ -6,6 +6,7 @@ import {
    MicIcon,
    UsersIcon,
    PaintbrushIcon,
+   Brain,
 } from "lucide-react";
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Button } from "@packages/ui/components/button";
@@ -49,7 +50,15 @@ export function ReviewSubmitStep({ form }: { form: AgentForm }) {
          value: formatValueToTitleCase(
             String(form.getFieldValue("formattingStyle") ?? ""),
          ),
-         className: "col-span-2",
+         className: "",
+      },
+      {
+         icon: <Brain className="w-4 h-4" />,
+         label: "Brand integration",
+         value: formatValueToTitleCase(
+            String(form.getFieldValue("brandIntegration") ?? ""),
+         ),
+         className: "",
       },
       {
          icon: <FileTextIcon className="w-4 h-4" />,

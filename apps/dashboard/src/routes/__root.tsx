@@ -51,7 +51,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
          },
       ],
    }),
-   loader: async () => {
+   beforeLoad: async () => {
       const decision = await arcjetProtect();
 
       if (!decision) return;

@@ -52,7 +52,7 @@ const CONTENT_CONFIG = {
    QWEN_MODEL: "google/gemini-2.0-flash-001",
    RETRY_ATTEMPTS: 3,
    RETRY_DELAY: 1000, // ms
-   MAX_KNOWLEDGE_CHUNKS: 5,
+   MAX_KNOWLEDGE_CHUNKS: 10,
    MAX_SIMILAR_CONTENT: 3,
    MIN_CONTENT_LENGTH: 100,
    MAX_CONTENT_LENGTH: 50000,
@@ -210,6 +210,136 @@ async function retrieveRelevantKnowledge(
       );
    }
 
+   return { knowledgeText, usedSources };
+}
+
+// Retrieve only brand-related knowledge chunks
+async function retrieveBrandKnowledge(
+   agentId: string,
+   job: Job,
+   options: ContentGenerationJobData["options"] = {},
+): Promise<{
+   knowledgeText?: string;
+   usedSources: string[];
+}> {
+   const maxKnowledgeChunks =
+      options.maxKnowledgeChunks || CONTENT_CONFIG.MAX_KNOWLEDGE_CHUNKS;
+   let knowledgeText: string | undefined;
+   const usedSources: string[] = [];
+   try {
+      job.log("Retrieving brand-related knowledge chunks...");
+      const brandKnowledge = await db
+         .select({
+            id: knowledgeChunk.id,
+            content: knowledgeChunk.content,
+            summary: knowledgeChunk.summary,
+            category: knowledgeChunk.category,
+            keywords: knowledgeChunk.keywords,
+            source: knowledgeChunk.source,
+            embedding: knowledgeChunk.embedding,
+         })
+         .from(knowledgeChunk)
+         .where(
+            and(
+               eq(knowledgeChunk.agentId, agentId),
+               isNotNull(knowledgeChunk.embedding),
+               eq(knowledgeChunk.category, "brand_guideline"),
+            ),
+         )
+         .limit(maxKnowledgeChunks);
+      if (brandKnowledge.length > 0) {
+         knowledgeText = brandKnowledge
+            .map(
+               (chunk, idx) =>
+                  `Brand Knowledge ${idx + 1} (${chunk.category}):\n` +
+                  `Summary: ${chunk.summary || "N/A"}\n` +
+                  `Content: ${chunk.content}\n` +
+                  `Keywords: ${chunk.keywords ? chunk.keywords.join(", ") : "N/A"}\n`,
+            )
+            .join("\n---\n\n");
+         usedSources.push(
+            ...brandKnowledge
+               .map((k) => k.source || "brand_knowledge_base")
+               .filter(Boolean),
+         );
+         job.log(`Retrieved ${brandKnowledge.length} brand knowledge chunks`);
+      }
+   } catch (error) {
+      job.log(
+         `Brand knowledge retrieval failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+   }
+   return { knowledgeText, usedSources };
+}
+
+// Retrieve only topic/description-relevant knowledge chunks (excluding brand)
+async function retrieveTopicKnowledge(
+   agentId: string,
+   topic: string,
+   briefDescription: string,
+   job: Job,
+   options: ContentGenerationJobData["options"] = {},
+): Promise<{
+   knowledgeText?: string;
+   usedSources: string[];
+}> {
+   const maxKnowledgeChunks =
+      options.maxKnowledgeChunks || CONTENT_CONFIG.MAX_KNOWLEDGE_CHUNKS;
+   let knowledgeText: string | undefined;
+   const usedSources: string[] = [];
+   try {
+      job.log("Generating query embedding for topic knowledge retrieval...");
+      const queryText = `${topic}. ${briefDescription || ""}`.trim();
+      const queryEmbedding =
+         await embeddingService.generateFileContentEmbedding(queryText);
+      if (!queryEmbedding) {
+         throw new Error("Failed to generate query embedding");
+      }
+      job.log(
+         `Searching for topic-relevant knowledge chunks (limit: ${maxKnowledgeChunks})...`,
+      );
+      const topicKnowledge = await db
+         .select({
+            id: knowledgeChunk.id,
+            content: knowledgeChunk.content,
+            summary: knowledgeChunk.summary,
+            category: knowledgeChunk.category,
+            keywords: knowledgeChunk.keywords,
+            source: knowledgeChunk.source,
+            embedding: knowledgeChunk.embedding,
+         })
+         .from(knowledgeChunk)
+         .where(
+            and(
+               eq(knowledgeChunk.agentId, agentId),
+               isNotNull(knowledgeChunk.embedding),
+               sql`(category IS NULL OR category != 'brand')`,
+            ),
+         )
+         .orderBy(sql`embedding <-> ${JSON.stringify(queryEmbedding)}::vector`)
+         .limit(maxKnowledgeChunks);
+      if (topicKnowledge.length > 0) {
+         knowledgeText = topicKnowledge
+            .map(
+               (chunk, idx) =>
+                  `Knowledge Source ${idx + 1} (${chunk.category || "general"}):\n` +
+                  `Summary: ${chunk.summary || "N/A"}\n` +
+                  `Content: ${chunk.content}\n` +
+                  `Keywords: ${chunk.keywords ? chunk.keywords.join(", ") : "N/A"}\n`,
+            )
+            .join("\n---\n\n");
+         usedSources.push(
+            ...topicKnowledge
+               .map((k) => k.source || "knowledge_base")
+               .filter(Boolean),
+         );
+         job.log(`Retrieved ${topicKnowledge.length} topic knowledge chunks`);
+      }
+   } catch (error) {
+      job.log(
+         `Topic knowledge retrieval failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+   }
    return { knowledgeText, usedSources };
 }
 
@@ -446,18 +576,26 @@ export const contentGenerationWorker = new Worker(
          job.updateProgress(10);
 
          const { topic, briefDescription } = request;
-         job.log(`Processing request for topic: "${topic}"`);
+         job.log(`Processing request for topic: \"${topic}\"`);
 
-         // Enhanced RAG knowledge retrieval
+         // Enhanced RAG knowledge retrieval (brand and topic)
          let knowledgeContext = "";
          let usedSources: string[] = [];
 
          if (options.includeKnowledgeBase !== false) {
             // Default to true
-            job.log("Retrieving relevant knowledge and content...");
+            job.log("Retrieving brand and topic knowledge...");
             job.updateProgress(20);
 
-            const ragResults = await retrieveRelevantKnowledge(
+            // Fetch brand knowledge
+            const brandResults = await retrieveBrandKnowledge(
+               request.agentId,
+               job,
+               options,
+            );
+
+            // Fetch topic/description knowledge
+            const topicResults = await retrieveTopicKnowledge(
                request.agentId,
                topic,
                briefDescription || "",
@@ -465,27 +603,27 @@ export const contentGenerationWorker = new Worker(
                options,
             );
 
-            if (ragResults.knowledgeText) {
-               const contextParts = [];
-
-               if (ragResults.knowledgeText) {
-                  contextParts.push(
-                     "=== RELEVANT KNOWLEDGE BASE ===\n" +
-                        ragResults.knowledgeText,
-                  );
-               }
-
-               knowledgeContext = contextParts.join("\n\n");
-               usedSources = ragResults.usedSources;
-
-               job.log(
-                  `Knowledge context prepared: ${knowledgeContext.length} characters from ${usedSources.length} sources`,
-               );
-            } else {
-               job.log(
-                  "No relevant knowledge found, proceeding with base agent knowledge",
+            const contextParts = [];
+            if (brandResults.knowledgeText) {
+               contextParts.push(
+                  `=== BRAND KNOWLEDGE ===\n${brandResults.knowledgeText}`,
                );
             }
+            if (topicResults.knowledgeText) {
+               contextParts.push(
+                  "=== RELEVANT KNOWLEDGE BASE ===\n" +
+                     topicResults.knowledgeText,
+               );
+            }
+            knowledgeContext = contextParts.join("\n\n");
+            usedSources = [
+               ...(brandResults.usedSources || []),
+               ...(topicResults.usedSources || []),
+            ];
+
+            job.log(
+               `Knowledge context prepared: ${knowledgeContext.length} characters from ${usedSources.length} sources`,
+            );
          }
 
          job.updateProgress(40);
@@ -703,6 +841,8 @@ process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 export {
    generateContent,
    retrieveRelevantKnowledge,
+   retrieveBrandKnowledge,
+   retrieveTopicKnowledge,
    calculateContentMetrics,
    slugify,
    CONTENT_CONFIG,

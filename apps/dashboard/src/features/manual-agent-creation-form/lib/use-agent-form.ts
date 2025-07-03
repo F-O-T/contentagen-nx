@@ -18,6 +18,8 @@ export function useAgentForm({
          name: "",
          targetAudience: "general_public",
          voiceTone: "professional",
+         brandIntegration: "strict_guideline",
+         language: "english",
          ...defaultValues,
       } as AgentFormData,
       onSubmit: async ({ value, formApi }) => {

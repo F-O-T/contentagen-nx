@@ -45,6 +45,17 @@ export const formattingStyleEnum = pgEnum("formatting_style", [
 ]);
 export type FormattingStyle = (typeof formattingStyleEnum.enumValues)[number];
 
+export const languageEnum = pgEnum("language", ["english", "portuguese"]);
+export type Language = (typeof languageEnum.enumValues)[number];
+
+export const brandIntegrationEnum = pgEnum("brand_integration", [
+   "strict_guideline",
+   "flexible_guideline",
+   "reference_only",
+   "creative_blend",
+]);
+export type BrandIntegration = (typeof brandIntegrationEnum.enumValues)[number];
+
 // Agent table (without knowledgeBase, to be added: knowledge_chunk table)
 export const agent = pgTable(
    "agent",
@@ -74,6 +85,8 @@ export const agent = pgTable(
          .$type<{ fileName: string; fileUrl: string; uploadedAt: string }[]>()
          .default([]),
       basePrompt: text("base_prompt"),
+      language: languageEnum("language").notNull(), // New field
+      brandIntegration: brandIntegrationEnum("brand_integration").notNull(), // New field
    },
    (table) => [index("agent_user_id_idx").on(table.userId)],
 );

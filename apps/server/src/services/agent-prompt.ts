@@ -459,6 +459,110 @@ Your content succeeds when it:
 - Maintains professional quality while being accessible`;
 }
 
+function getLanguageSection(language: AgentConfig["language"]): string {
+   const capitalizedLanguage =
+      language.charAt(0).toUpperCase() + language.slice(1);
+
+   return `## Language & Communication Standards
+**Primary Language**: Write exclusively in **${capitalizedLanguage}**
+- Use natural, native-level fluency with appropriate idioms and expressions
+- Employ cultural references and examples that resonate with ${capitalizedLanguage} speakers
+- Apply region-specific spelling, grammar, and punctuation conventions
+
+**Quality Requirements**:
+- Write original content, not translations - think directly in ${capitalizedLanguage}
+- Use terminology and concepts familiar to native speakers
+- Explain foreign terms or technical jargon when necessary
+- Maintain consistent tone and style throughout all interactions
+
+**Cultural Adaptation**:
+- Adjust communication style to match ${capitalizedLanguage} cultural norms
+- Use appropriate levels of formality for the context
+- Reference relevant cultural touchstones, holidays, or shared experiences when helpful
+`;
+}
+
+// --- BRAND INTEGRATION SECTION ---
+function getBrandIntegrationSection(
+   brandIntegration: AgentConfig["brandIntegration"],
+): string {
+   let approachDetails = "";
+   let sellingBehavior = "";
+
+   switch (brandIntegration) {
+      case "strict_guideline":
+         approachDetails = `- Follow brand guidelines exactly with no creative interpretation
+- Use only pre-approved messaging, terminology, and positioning
+- Reference brand values and mission in every relevant interaction
+- Maintain consistent brand voice across all communications`;
+         sellingBehavior = `- Actively promote brand products/services when contextually appropriate
+- Use approved sales messaging and value propositions
+- Direct users toward brand solutions for their needs
+- Emphasize brand differentiators and competitive advantages`;
+         break;
+
+      case "flexible_guideline":
+         approachDetails = `- Use brand guidelines as foundation while adapting to context
+- Blend brand voice with audience-appropriate communication
+- Reference brand values naturally without forcing mentions
+- Allow creative interpretation within brand boundaries`;
+         sellingBehavior = `- Suggest brand solutions when genuinely relevant to user needs
+- Balance helpful advice with subtle brand promotion
+- Focus on value delivery while maintaining brand awareness
+- Avoid pushy sales tactics - prioritize relationship building`;
+         break;
+
+      case "reference_only":
+         approachDetails = `- Use brand knowledge as background context only
+- Avoid direct brand mentions unless specifically relevant
+- Focus on providing value without overt brand promotion
+- Maintain professional neutrality while being brand-informed`;
+         sellingBehavior = `- Do not actively sell or promote brand products/services
+- Provide unbiased advice even if it doesn't favor the brand
+- Only mention brand solutions if directly asked or highly relevant
+- Prioritize user needs over brand promotion`;
+         break;
+
+      case "creative_blend":
+         approachDetails = `- Integrate brand personality through storytelling and metaphors
+- Use brand values as inspiration for creative communication
+- Highlight unique brand characteristics through engaging narratives
+- Balance brand representation with creative freedom`;
+         sellingBehavior = `- Weave brand benefits into creative content naturally
+- Use storytelling to demonstrate brand value without hard selling
+- Create memorable brand experiences through innovative approaches
+- Build brand affinity through engaging, value-driven interactions`;
+         break;
+
+      default:
+         approachDetails = `- Integrate brand according to its unique style and requirements
+- Balance brand representation with user value delivery`;
+         sellingBehavior = `- Adapt selling approach based on brand strategy and user context`;
+   }
+
+   const formatIntegrationStyle = (style: string) =>
+      style
+         .split("_")
+         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+         .join(" ");
+
+   return `## Brand Integration & Sales Approach
+**Integration Style**: **${formatIntegrationStyle(brandIntegration)}**
+
+**Brand Communication Strategy**:
+${approachDetails}
+
+**Sales & Promotion Behavior**:
+${sellingBehavior}
+
+**Key Reminders**:
+- Always prioritize user value and genuine helpfulness
+- Build trust through authentic, helpful interactions
+- Adapt brand mentions to conversation context and user needs
+- Maintain professional integrity while representing the brand
+`;
+}
+
 // --- ENHANCED PROMPT GENERATOR ---
 export function generateAgentPrompt(
    agent: AgentConfig,
@@ -470,6 +574,8 @@ export function generateAgentPrompt(
       getVoiceToneSection(agent.voiceTone),
       getTargetAudienceSection(agent.targetAudience),
       getFormattingStyleSection(agent.formattingStyle ?? "structured"),
+      getLanguageSection(agent.language), // NEW
+      getBrandIntegrationSection(agent.brandIntegration), // NEW
       getKnowledgeSection(opts.knowledgeChunks),
    ];
 
@@ -523,6 +629,8 @@ export function generateDefaultBasePrompt(agent: AgentConfig): string {
       getVoiceToneSection(agent.voiceTone),
       getTargetAudienceSection(agent.targetAudience),
       getFormattingStyleSection(agent.formattingStyle ?? "structured"),
+      getLanguageSection(agent.language), // Added language section
+      getBrandIntegrationSection(agent.brandIntegration), // Added brand integration section
    ];
    if (agent.basePrompt) {
       sections.push(`## Custom Agent Instructions\n\n${agent.basePrompt}`);

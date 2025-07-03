@@ -12,6 +12,8 @@ import { FileViewerModal } from "./file-viewer-modal";
 import { AgentStatsCard } from "./agent-stats-card";
 import useAgentDetails from "../lib/use-agent-details";
 import useFileViewer from "../lib/use-file-viewer";
+import { AgentDetailsKnowledgeChunksCard } from "./agent-details-knowledge-chunks-card";
+import { AgentDetailsContentRequestsCard } from "./agent-details-content-requests-card";
 
 export function AgentDetailsPage() {
    const {
@@ -48,18 +50,16 @@ export function AgentDetailsPage() {
    }
 
    return (
-      <main className="h-full w-full flex flex-col gap-4 ">
+      <main className="space-y-4">
          <TalkingMascot message="Manage your agent’s configuration and knowledge base." />
-
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-4 md:col-span-1">
+         <div className="grid grid-cols-5 gap-4">
+            <div className="col-span-5">
+               <AgentDetailsContentRequestsCard />
+            </div>
+            <div className="col-span-5 md:col-span-2 space-y-4 ">
                <AgentStatsCard
                   totalDrafts={agent.totalDrafts ?? 0}
                   totalPublished={agent.totalPublished ?? 0}
-               />
-               <AgentDetailsKnowledgeBaseCard
-                  uploadedFiles={uploadedFiles}
-                  onViewFile={open}
                />
                <AgentPersonaCard
                   name={agent.name}
@@ -68,9 +68,17 @@ export function AgentDetailsPage() {
                   voiceTone={agent.voiceTone ?? ""}
                   targetAudience={agent.targetAudience ?? ""}
                   formattingStyle={agent.formattingStyle ?? ""}
+                  language={agent.language ?? ""}
+                  brandIntegration={agent.brandIntegration ?? ""}
                />
+               <AgentDetailsKnowledgeBaseCard
+                  uploadedFiles={uploadedFiles}
+                  onViewFile={open}
+               />
+               <AgentDetailsKnowledgeChunksCard />
             </div>
-            <div className="md:col-span-2">
+
+            <div className="col-span-5 md:col-span-3">
                <AgentDetailsPromptCard basePrompt={agent.basePrompt ?? ""} />
             </div>
          </div>
