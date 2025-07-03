@@ -1,14 +1,16 @@
+import { env } from "@api/config/env";
+import { auth } from "@api/integrations/auth";
 import { Queue, Worker } from "bullmq";
 import { eq, sql } from "drizzle-orm";
 import { db } from "../integrations/database";
 import { openRouter } from "../integrations/openrouter";
 import { content, contentRequest, type agent } from "../schemas/content-schema";
-import { redis } from "../services/redis";
-import { embeddingService } from "../services/embedding";
 import {
    generateContentRequestPrompt,
    type AgentPromptOptions,
 } from "../services/agent-prompt";
+import { embeddingService } from "../services/embedding";
+import { redis } from "../services/redis";
 
 export type ContentRequestWithAgent = typeof contentRequest.$inferSelect & {
    agent: typeof agent.$inferSelect;
@@ -121,6 +123,8 @@ async function saveContent(
             generatedContentId: newContent.id,
          })
          .where(eq(contentRequest.id, request.id));
+
+      await updateUserUsageForContentGeneration();
 
       return newContent;
    } catch (error) {
@@ -282,6 +286,34 @@ async function gracefulShutdown(signal: string) {
    console.log(`Received ${signal}, closing worker...`);
    await contentGenerationWorker.close();
    process.exit(0);
+}
+
+async function updateUserUsageForContentGeneration() {
+   const user = await auth.api.subscriptions({
+      query: {
+         active: true,
+      },
+   });
+
+   if (user.length === 0) {
+      await auth.api.checkout({
+         body: {
+            metadata: {
+               usage: 10,
+            },
+         },
+      });
+   } else {
+      await auth.api.ingestion({
+         body: {
+            event: "generated-content",
+            metadata: {
+               productId: env.POLAR_PREMIUM_PLAN,
+               amount: 10,
+            },
+         },
+      });
+   }
 }
 
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));

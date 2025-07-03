@@ -1,7 +1,7 @@
 import { env, isProduction } from "@api/config/env";
 import * as authSchema from "@api/schemas/auth-schema";
 import { sendEmailOTP } from "@api/services/resend";
-import { checkout, polar, portal } from "@polar-sh/better-auth";
+import { checkout, polar, portal, usage } from "@polar-sh/better-auth";
 import { Polar } from "@polar-sh/sdk";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -49,6 +49,22 @@ export const auth = betterAuth({
             checkout({
                successUrl: "http://localhost:3000/profile",
                authenticatedUsersOnly: true,
+            }),
+            usage({
+               creditProducts: [
+                  {
+                     productId: env.POLAR_FREE_PLAN,
+                     slug: "free",
+                  },
+                  {
+                     productId: env.POLAR_PREMIUM_PLAN,
+                     slug: "premium",
+                  },
+                  {
+                     productId: env.POLAR_PRO_PLAN,
+                     slug: "pro",
+                  },
+               ],
             }),
          ],
       }),

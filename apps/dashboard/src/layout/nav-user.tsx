@@ -1,9 +1,10 @@
+import { betterAuthClient } from "@/integrations/better-auth";
 import {
    Avatar,
    AvatarFallback,
    AvatarImage,
 } from "@packages/ui/components/avatar";
-import { useRouter } from "@tanstack/react-router";
+import { Button } from "@packages/ui/components/button";
 import {
    DropdownMenu,
    DropdownMenuContent,
@@ -20,12 +21,10 @@ import {
    useSidebar,
 } from "@packages/ui/components/sidebar";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { LogOutIcon, MoreVerticalIcon, UserCircleIcon } from "lucide-react";
 import { Suspense, useCallback } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { betterAuthClient } from "@/integrations/better-auth";
-import { Button } from "@packages/ui/components/button";
 function UserAvatarInfo({
    name,
    email,

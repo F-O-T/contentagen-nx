@@ -21,6 +21,7 @@ import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-v
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard/home'
 import { Route as DashboardProfileIndexRouteImport } from './routes/_dashboard/profile/index'
 import { Route as DashboardContentIndexRouteImport } from './routes/_dashboard/content/index'
+import { Route as DashboardBillingIndexRouteImport } from './routes/_dashboard/billing/index'
 import { Route as DashboardAgentsIndexRouteImport } from './routes/_dashboard/agents/index'
 import { Route as DashboardAgentsFlowRouteImport } from './routes/_dashboard/agents/_flow'
 import { Route as DashboardAgentsAgentIdIndexRouteImport } from './routes/_dashboard/agents/$agentId/index'
@@ -87,6 +88,11 @@ const DashboardContentIndexRoute = DashboardContentIndexRouteImport.update({
   path: '/content/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardBillingIndexRoute = DashboardBillingIndexRouteImport.update({
+  id: '/billing/',
+  path: '/billing/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAgentsIndexRoute = DashboardAgentsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/agents': typeof DashboardAgentsFlowRouteWithChildren
   '/agents/': typeof DashboardAgentsIndexRoute
+  '/billing': typeof DashboardBillingIndexRoute
   '/content': typeof DashboardContentIndexRoute
   '/profile': typeof DashboardProfileIndexRoute
   '/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/agents': typeof DashboardAgentsIndexRoute
+  '/billing': typeof DashboardBillingIndexRoute
   '/content': typeof DashboardContentIndexRoute
   '/profile': typeof DashboardProfileIndexRoute
   '/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/_dashboard/agents': typeof DashboardAgentsRouteWithChildren
   '/_dashboard/agents/_flow': typeof DashboardAgentsFlowRouteWithChildren
   '/_dashboard/agents/': typeof DashboardAgentsIndexRoute
+  '/_dashboard/billing/': typeof DashboardBillingIndexRoute
   '/_dashboard/content/': typeof DashboardContentIndexRoute
   '/_dashboard/profile/': typeof DashboardProfileIndexRoute
   '/_dashboard/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/agents'
     | '/agents/'
+    | '/billing'
     | '/content'
     | '/profile'
     | '/agents/$agentId/edit'
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/agents'
+    | '/billing'
     | '/content'
     | '/profile'
     | '/agents/$agentId/edit'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/_dashboard/agents'
     | '/_dashboard/agents/_flow'
     | '/_dashboard/agents/'
+    | '/_dashboard/billing/'
     | '/_dashboard/content/'
     | '/_dashboard/profile/'
     | '/_dashboard/agents/$agentId/edit'
@@ -348,6 +360,13 @@ declare module '@tanstack/react-router' {
       path: '/content'
       fullPath: '/content'
       preLoaderRoute: typeof DashboardContentIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/billing/': {
+      id: '/_dashboard/billing/'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof DashboardBillingIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/_dashboard/agents/': {
@@ -454,6 +473,7 @@ const DashboardAgentsRouteWithChildren = DashboardAgentsRoute._addFileChildren(
 interface DashboardRouteChildren {
   DashboardHomeRoute: typeof DashboardHomeRoute
   DashboardAgentsRoute: typeof DashboardAgentsRouteWithChildren
+  DashboardBillingIndexRoute: typeof DashboardBillingIndexRoute
   DashboardContentIndexRoute: typeof DashboardContentIndexRoute
   DashboardProfileIndexRoute: typeof DashboardProfileIndexRoute
   DashboardContentRequestsRequestIdEditRoute: typeof DashboardContentRequestsRequestIdEditRoute
@@ -463,6 +483,7 @@ interface DashboardRouteChildren {
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHomeRoute: DashboardHomeRoute,
   DashboardAgentsRoute: DashboardAgentsRouteWithChildren,
+  DashboardBillingIndexRoute: DashboardBillingIndexRoute,
   DashboardContentIndexRoute: DashboardContentIndexRoute,
   DashboardProfileIndexRoute: DashboardProfileIndexRoute,
   DashboardContentRequestsRequestIdEditRoute:
