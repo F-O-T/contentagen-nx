@@ -21,6 +21,12 @@ export function ProfilePageBilling() {
       return await betterAuthClient.customer.portal();
    }, []);
 
+   const goToCheckout = useCallback(async () => {
+      return await betterAuthClient.checkout({
+         products: ["fbe8829c-4cf2-4771-8309-8caa97c3b3fc"],
+      });
+   }, []);
+
    if (isLoading) {
       return (
          <Card>
@@ -97,7 +103,10 @@ export function ProfilePageBilling() {
                </CardDescription>
             </CardHeader>
             <CardContent>
-               <Button>Subscribe to a Plan</Button>
+               <Button onClick={goToCheckout}>
+                  <Crown />
+                  Go to Premium
+               </Button>
             </CardContent>
          </Card>
       );
