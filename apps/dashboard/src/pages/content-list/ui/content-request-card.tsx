@@ -63,8 +63,8 @@ export function ContentRequestCard({ request }: { request: ContentRequest }) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>{request.topic}</CardTitle>
-            <CardDescription className="text-ellipsis w-full">
+            <CardTitle className="line-clamp-1">{request.topic}</CardTitle>
+            <CardDescription className="line-clamp-1">
                {request.briefDescription}
             </CardDescription>
             <CardAction>
@@ -123,16 +123,11 @@ export function ContentRequestCard({ request }: { request: ContentRequest }) {
                </AlertDialog>
             </CardAction>
          </CardHeader>
-         <CardContent className="grid grid-cols-2 gap-2 ">
+         <CardContent className="grid grid-cols-1 gap-2 ">
             <InfoItem
                icon={<Activity className="h-4 w-4" />}
                label="Status"
                value={request.isCompleted ? "Completed" : "Generating"}
-            />
-            <InfoItem
-               icon={<Hash className="h-4 w-4" />}
-               label="Target Length"
-               value={`${request.targetLength}`}
             />
          </CardContent>
          <CardFooter>

@@ -7,17 +7,23 @@ import { Elysia } from "elysia";
 import { env, isProduction } from "./config/env";
 import { bullAuth } from "./guards/bull-auth-guard";
 import { authMiddleware, OpenAPI } from "./integrations/auth";
+import { ArcjetShield } from "./integrations/arcjet";
 import { agentRoutes } from "./routes/agent-routes";
 import { contentManagementRoutes } from "./routes/content-management-routes";
 import { contentRequestRoutes } from "./routes/content-request-routes";
 import { fileRoutes } from "./routes/file-routes";
 import { waitlistRoutes } from "./routes/waitlist-routes";
 import { contentGenerationQueue } from "./workers/content-generation";
-
+import { distillQueue } from "./workers/distill-worker";
+import { knowledgeChunkQueue } from "./workers/knowledge-chunk-worker";
 const serverAdapter = new ElysiaAdapter("/ui");
 
 createBullBoard({
-   queues: [new BullMQAdapter(contentGenerationQueue)],
+   queues: [
+      new BullMQAdapter(contentGenerationQueue),
+      new BullMQAdapter(distillQueue),
+      new BullMQAdapter(knowledgeChunkQueue), // Register the Elysia adapter queue
+   ],
    serverAdapter,
    options: {
       uiBasePath: isProduction ? "node_modules/@bull-board/ui" : "",
@@ -50,6 +56,7 @@ const app = new Elysia()
          },
       }),
    )
+   .use(ArcjetShield)
    .group(
       "/api/v1",
       (

@@ -1,12 +1,12 @@
 import type {
    FormattingStyle,
    TargetAudience,
-} from "@api/schemas/content-schema";
+} from "@api/schemas/agent-schema";
 import {
    FORMATTING_STYLES,
    TARGET_AUDIENCES,
-} from "../lib/agent-form-constants.js";
-import type { AgentForm } from "../lib/use-agent-form.js";
+} from "../lib/agent-form-constants";
+import type { AgentForm } from "../lib/use-agent-form";
 import { Button } from "@packages/ui/components/button";
 
 export function TargetAudienceStep({ form }: { form: AgentForm }) {

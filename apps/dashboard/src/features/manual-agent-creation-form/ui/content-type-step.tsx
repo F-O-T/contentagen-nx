@@ -1,4 +1,4 @@
-import type { ContentType } from "@api/schemas/content-schema";
+import type { ContentType } from "@api/schemas/agent-schema";
 import { CONTENT_TYPES } from "../lib/agent-form-constants.js";
 import type { AgentForm } from "../lib/use-agent-form.js";
 import { Button } from "@packages/ui/components/button";
