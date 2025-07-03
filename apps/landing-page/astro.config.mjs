@@ -18,11 +18,8 @@ export default defineConfig({
             access: "public",
             context: "client",
          }),
-         ARCJET_KEY: envField.string({
-            access: "secret",
-            context: "server",
-         }),
       },
+      validateSecrets: true,
    },
    integrations: [
       react(),
