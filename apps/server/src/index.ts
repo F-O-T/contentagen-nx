@@ -66,7 +66,6 @@ const app = new Elysia()
             .use(authMiddleware)
             .use(agentRoutes)
             .use(fileRoutes)
-
             .group("/content", (content) =>
                content.use(contentManagementRoutes).use(contentRequestRoutes),
             )

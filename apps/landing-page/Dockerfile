@@ -25,6 +25,7 @@ COPY . .
 # The build output will be in /app/apps/landing-page/dist
 ENV NODE_ENV=production
 ARG VITE_SERVER_URL
+ARG ARCJET_KEY
 RUN bun run --filter=landing-page build
 
 # ---

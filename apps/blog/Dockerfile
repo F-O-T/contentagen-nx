@@ -24,6 +24,8 @@ COPY . .
 # Build the blog application.
 # The build output will be in /app/apps/blog/dist
 ENV NODE_ENV=production
+ARG ARCJET_KEY
+
 RUN bun run --filter=blog build
 
 # ---
@@ -52,6 +54,7 @@ FROM node:lts-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+
 
 # Copy the pruned, production-only node_modules from the 'deps' stage.
 # This will solve the original 'module not found' error.

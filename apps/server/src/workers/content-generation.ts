@@ -31,7 +31,7 @@ export type ContentGenerationJobData = {
 
 export type GeneratedContentResult = {
    content: string;
-   metadata: ContentQualityMetrics & {
+   metadata?: ContentQualityMetrics & {
       topics?: string[];
       confidence?: number;
    };
@@ -49,7 +49,8 @@ type ContentQualityMetrics = {
 
 // Enhanced configuration
 const CONTENT_CONFIG = {
-   MODEL: "qwen/qwen3-30b-a3b-04-28",
+   LARGE_MODEL: "google/gemini-2.0-flash-001", // Replace with actual large model name
+   QWEN_MODEL: "google/gemini-2.0-flash-001",
    RETRY_ATTEMPTS: 3,
    RETRY_DELAY: 1000, // ms
    MAX_KNOWLEDGE_CHUNKS: 5,
@@ -217,19 +218,24 @@ async function retrieveRelevantKnowledge(
 async function generateContent(
    prompt: string,
    job: Job,
+   model: string, // Add model parameter
    attempt: number = 1,
+   outputType: "article" | "tags" = "article", // Add outputType for context-aware validation
 ): Promise<GeneratedContentResult> {
    const maxAttempts = CONTENT_CONFIG.RETRY_ATTEMPTS;
 
    try {
-      job.log(`Content generation attempt ${attempt}/${maxAttempts}`);
+      job.log(
+         `Content generation attempt ${attempt}/${maxAttempts} using model: ${model}`,
+      );
 
       const response = (await Promise.race([
          openRouter.chat.completions.create({
-            model: CONTENT_CONFIG.MODEL,
+            model: model,
             messages: [{ role: "user", content: prompt }],
-            response_format: { type: "json_object" },
-            temperature: 0.7, // Balance creativity with consistency
+            response_format:
+               outputType === "tags" ? { type: "json_object" } : undefined,
+            temperature: 0.7,
             max_tokens: 4000,
          }),
          new Promise((_, reject) =>
@@ -250,58 +256,48 @@ async function generateContent(
          throw new Error("Empty response from content generation model");
       }
 
-      // Enhanced JSON parsing with multiple strategies
-      let result: { content: string; confidence?: number; topics?: string[] };
-      try {
-         result = JSON.parse(generatedText);
-      } catch {
-         // Try to extract JSON from potential markdown or text wrapping
-         const jsonMatch =
-            generatedText.match(/```(?:json)?\s*({[\s\S]*?})\s*```/) ||
-            generatedText.match(/({[\s\S]*})/);
-         if (jsonMatch && typeof jsonMatch[1] === "string") {
-            result = JSON.parse(jsonMatch[1]);
-         } else {
-            throw new Error("Could not parse JSON from AI response");
+      if (outputType === "article") {
+         // No validation: just return the string as content
+         return {
+            content: generatedText,
+         };
+      } else if (outputType === "tags") {
+         // No validation: just parse and return the JSON
+         let result: {
+            content?: string;
+            confidence?: number;
+            topics?: string[];
+         };
+         try {
+            result = JSON.parse(generatedText);
+         } catch {
+            // Try to extract JSON from potential markdown or text wrapping
+            const jsonMatch =
+               generatedText.match(/```(?:json)?\s*({[\s\S]*?})\s*```/) ||
+               generatedText.match(/({[\s\S]*})/);
+            if (jsonMatch && typeof jsonMatch[1] === "string") {
+               result = JSON.parse(jsonMatch[1]);
+            } else {
+               // If parsing fails, return empty topics
+               result = { topics: [] };
+            }
          }
+         return {
+            content: result.content || "",
+            metadata: {
+               wordCount: 0,
+               readingTime: 0,
+               paragraphCount: 0,
+               sentenceCount: 0,
+               avgWordsPerSentence: 0,
+               readabilityScore: 0,
+               confidence: result.confidence || 0.8,
+               topics: result.topics || [],
+            },
+         };
+      } else {
+         throw new Error(`Unknown outputType: ${outputType}`);
       }
-
-      // Validate and extract content
-      if (typeof result.content !== "string" || !result.content.trim()) {
-         throw new Error("AI response does not contain valid content string");
-      }
-
-      const contentText = result.content.trim();
-
-      // Content quality validation
-      if (contentText.length < CONTENT_CONFIG.MIN_CONTENT_LENGTH) {
-         throw new Error(
-            `Generated content too short: ${contentText.length} characters`,
-         );
-      }
-
-      if (contentText.length > CONTENT_CONFIG.MAX_CONTENT_LENGTH) {
-         job.log(
-            `Warning: Generated content is very long (${contentText.length} chars), truncating...`,
-         );
-         // Could implement smart truncation here
-      }
-
-      // Calculate content metrics
-      const metrics = calculateContentMetrics(contentText);
-
-      job.log(
-         `Generated content: ${metrics.wordCount} words, ${metrics.readingTime} min read time`,
-      );
-
-      return {
-         content: contentText,
-         metadata: {
-            ...metrics,
-            confidence: result.confidence || 0.8, // Default confidence
-            topics: result.topics || [],
-         },
-      };
    } catch (error) {
       const errorMsg = `Content generation attempt ${attempt} failed: ${error instanceof Error ? error.message : String(error)}`;
       job.log(errorMsg);
@@ -317,7 +313,7 @@ async function generateContent(
          setTimeout(resolve, CONTENT_CONFIG.RETRY_DELAY * attempt),
       );
 
-      return generateContent(prompt, job, attempt + 1);
+      return generateContent(prompt, job, model, attempt + 1, outputType);
    }
 }
 
@@ -373,7 +369,7 @@ async function saveContent(
             readTimeMinutes: metrics.readingTime,
             qualityScore: metrics.readabilityScore,
             topics: generatedContent.metadata?.topics || [],
-            sources: usedSources,
+            sources: usedSources || [],
          })
          .returning();
 
@@ -493,8 +489,8 @@ export const contentGenerationWorker = new Worker(
 
          job.updateProgress(40);
 
-         // Build enhanced agent prompt
-         job.log("Building content generation prompt...");
+         // Build enhanced agent prompt for article body
+         job.log("Building content generation prompt for article body...");
          const agentPromptOptions: AgentPromptOptions = {
             contentRequest: {
                topic,
@@ -506,21 +502,72 @@ export const contentGenerationWorker = new Worker(
                : undefined,
          };
 
-         const prompt = generateAgentPrompt(request.agent, agentPromptOptions);
-
-         job.log(`Generated prompt length: ${prompt.length} characters`);
+         const articlePrompt = generateAgentPrompt(
+            request.agent,
+            agentPromptOptions,
+         );
+         job.log(
+            `Generated article prompt length: ${articlePrompt.length} characters`,
+         );
          job.updateProgress(50);
 
-         // Generate content
-         job.log("Generating content with AI...");
-         const generatedContent = await generateContent(prompt, job);
-         job.updateProgress(80);
+         // Generate article body with large model
+         job.log("Generating article body with large model...");
+         const articleContent = await generateContent(
+            articlePrompt,
+            job,
+            CONTENT_CONFIG.LARGE_MODEL,
+            1,
+            "article",
+         );
+         job.updateProgress(60);
+
+         // Build prompt for tags/metadata (strict JSON output)
+         job.log(
+            "Building strict content generation prompt for tags/metadata...",
+         );
+         const tagsPrompt = buildStrictTagsPrompt(articleContent.content);
+         job.log(
+            `Generated tags prompt length: ${tagsPrompt.length} characters`,
+         );
+         job.updateProgress(65);
+
+         // Generate tags/metadata with Qwen model
+         job.log("Generating tags/metadata with Qwen model...");
+         const tagsContent = await generateContent(
+            tagsPrompt,
+            job,
+            CONTENT_CONFIG.QWEN_MODEL,
+            1,
+            "tags",
+         );
+         job.updateProgress(70);
+
+         // Merge results: use articleContent.content as body, tagsContent.metadata.topics as tags, etc.
+         const mergedContent = {
+            ...articleContent,
+            metadata: {
+               wordCount: articleContent.metadata?.wordCount ?? 0,
+               readingTime: articleContent.metadata?.readingTime ?? 0,
+               paragraphCount: articleContent.metadata?.paragraphCount ?? 0,
+               sentenceCount: articleContent.metadata?.sentenceCount ?? 0,
+               avgWordsPerSentence:
+                  articleContent.metadata?.avgWordsPerSentence ?? 0,
+               readabilityScore: articleContent.metadata?.readabilityScore ?? 0,
+               confidence: articleContent.metadata?.confidence ?? 0.8,
+               topics:
+                  tagsContent.metadata &&
+                  Array.isArray(tagsContent.metadata.topics)
+                     ? tagsContent.metadata.topics
+                     : [],
+            },
+         };
 
          // Save content to database
          job.log("Saving generated content...");
          const savedContent = await saveContent(
             request,
-            generatedContent,
+            mergedContent,
             usedSources,
             job,
          );
@@ -539,11 +586,11 @@ export const contentGenerationWorker = new Worker(
             generatedContentId: savedContent.id,
             contentSlug: savedContent.slug,
             metrics: {
-               processingTimeMs: processingTime,
-               wordCount: generatedContent.metadata?.wordCount || 0,
-               readingTime: generatedContent.metadata?.readingTime || 0,
+               processingTimeMs: Date.now() - startTime,
+               wordCount: mergedContent.metadata?.wordCount || 0,
+               readingTime: mergedContent.metadata?.readingTime || 0,
                sourcesUsed: usedSources.length,
-               qualityScore: generatedContent.metadata?.readabilityScore || 0,
+               qualityScore: mergedContent.metadata?.readabilityScore || 0,
             },
             sources: usedSources,
          };
@@ -582,6 +629,27 @@ export const contentGenerationWorker = new Worker(
       },
    },
 );
+
+// Strict prompt for tags/metadata generation
+function buildStrictTagsPrompt(article: string): string {
+   return `You are an expert content classifier and metadata generator. Your task is to analyze the following article and output ONLY a valid JSON object with the following structure:
+
+{
+  "topics": ["tag1", "tag2", "tag3", ...]
+}
+
+Rules:
+- Output ONLY the JSON object, with no extra text, markdown, or explanations.
+- The topics array must contain 3-8 relevant, concise, lowercase tags (single words or short phrases, no sentences).
+- Do NOT include the article text in your response.
+- Do NOT add any comments or formatting outside the JSON object.
+- If you are unsure, output an empty array for topics.
+
+Here is the article:
+"""
+${article}
+"""`;
+}
 
 // Enhanced event handlers
 contentGenerationWorker.on("error", (err) => {

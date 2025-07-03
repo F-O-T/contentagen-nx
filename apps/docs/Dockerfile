@@ -24,6 +24,7 @@ COPY . .
 # Build the docs application.
 # The build output will be in /app/apps/docs/dist
 ENV NODE_ENV=production
+ARG ARCJET_KEY
 RUN bun run --filter=docs build
 
 # ---
