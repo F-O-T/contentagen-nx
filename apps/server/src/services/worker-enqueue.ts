@@ -72,5 +72,7 @@ async function isPremiumUser(headers: Headers): Promise<boolean> {
       },
    });
 
-   return subscriptions?.result?.items?.length > 0;
+   const product = subscriptions?.result?.items[0]?.product;
+
+   return product?.id === env.POLAR_PREMIUM_PLAN || false;
 }
