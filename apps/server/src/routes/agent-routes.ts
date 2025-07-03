@@ -3,11 +3,12 @@ import { and, eq } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-typebox";
 import { Elysia, t } from "elysia";
 import { db } from "../integrations/database";
-import { agent as agentTable } from "../schemas/agent-schema";
+import { agent as agentTable, knowledgeChunk } from "../schemas/agent-schema";
 import { NotFoundError } from "../shared/errors";
 import { uploadFile } from "../integrations/minio";
 import { distillQueue } from "../workers/distill-worker";
 import { generateDefaultBasePrompt } from "../services/agent-prompt";
+import { knowledgeChunkQueue } from "@api/workers/knowledge-chunk-worker";
 
 const _createAgent = createInsertSchema(agentTable);
 
@@ -257,6 +258,37 @@ export const agentRoutes = new Elysia({
 
          if (currentFiles.length === updatedFiles.length) {
             throw new NotFoundError("File not found", "FILE_NOT_FOUND");
+         }
+
+         // Also delete all knowledge chunks with sourceIdentifier matching the file's URL
+         const deletedFile = currentFiles.find((file) =>
+            file.fileUrl.includes(params.filename),
+         );
+         if (deletedFile) {
+            // Debug log for troubleshooting
+            console.log(
+               "Deleting knowledge chunks for fileUrl:",
+               deletedFile.fileUrl,
+            );
+            // Query for all knowledge chunks with this sourceIdentifier (normalize for safety)
+            const chunks = await db.query.knowledgeChunk.findMany({
+               where: eq(
+                  knowledgeChunk.sourceIdentifier,
+                  deletedFile.fileUrl.trim(),
+               ),
+               columns: { id: true, sourceIdentifier: true },
+            });
+            for (const chunk of chunks) {
+               console.log(
+                  "Found knowledge chunk for deletion:",
+                  chunk.id,
+                  chunk.sourceIdentifier,
+               );
+               await knowledgeChunkQueue.add("delete", {
+                  action: "delete",
+                  chunkId: chunk.id,
+               });
+            }
          }
 
          // No knowledgeBase update, just update uploadedFiles

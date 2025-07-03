@@ -28,10 +28,9 @@ export type KnowledgeChunkJobData =
         sourceType?: string;
         sourceIdentifier?: string;
         embedding?: number[];
-        isActive?: boolean;
      }
    | {
-        action: "deactivate";
+        action: "delete";
         chunkId: string;
      };
 
@@ -78,7 +77,6 @@ export const knowledgeChunkWorker = new Worker(
                sourceType,
                sourceIdentifier,
                embedding,
-               isActive: true,
             })
             .returning();
          if (!created) throw new Error("Failed to create knowledge chunk");
@@ -96,16 +94,14 @@ export const knowledgeChunkWorker = new Worker(
          job.log(`Knowledge chunk updated: ${updated.id}`);
          return { id: updated.id };
       }
-      if (action === "deactivate") {
+      if (action === "delete") {
          const { chunkId } = job.data;
-         const [updated] = await db
-            .update(knowledgeChunk)
-            .set({ isActive: false, updatedAt: new Date() })
-            .where(eq(knowledgeChunk.id, chunkId))
-            .returning();
-         if (!updated) throw new Error("Failed to deactivate knowledge chunk");
-         job.log(`Knowledge chunk deactivated: ${updated.id}`);
-         return { id: updated.id };
+         const deleted = await db
+            .delete(knowledgeChunk)
+            .where(eq(knowledgeChunk.id, chunkId));
+         if (!deleted) throw new Error("Failed to delete knowledge chunk");
+         job.log(`Knowledge chunk deleted: ${chunkId}`);
+         return { id: chunkId };
       }
       throw new Error(`Unknown action: ${action}`);
    },

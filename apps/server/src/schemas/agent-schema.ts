@@ -100,7 +100,6 @@ export const knowledgeChunk = pgTable(
       updatedAt: timestamp("updated_at")
          .$defaultFn(() => new Date())
          .notNull(),
-      isActive: boolean("is_active").default(true),
    },
    (table) => [
       index("knowledge_chunk_agent_id_idx").on(table.agentId),

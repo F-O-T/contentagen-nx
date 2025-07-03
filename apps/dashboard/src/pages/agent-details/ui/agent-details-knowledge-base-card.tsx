@@ -18,6 +18,8 @@ import {
 import { Upload, FileText, MoreHorizontal } from "lucide-react";
 import useFileUpload, { type UploadedFile } from "../lib/use-file-upload";
 
+const FILE_UPLOAD_LIMIT = 5;
+
 interface AgentDetailsKnowledgeBaseCardProps {
    uploadedFiles: UploadedFile[];
    onViewFile: (fileName: string, fileUrl: string) => void;
@@ -34,19 +36,21 @@ export function AgentDetailsKnowledgeBaseCard({
       handleDeleteFile,
       canAddMore,
       remainingSlots,
-   } = useFileUpload(uploadedFiles);
+   } = useFileUpload(uploadedFiles, { fileLimit: FILE_UPLOAD_LIMIT });
 
    return (
       <Card>
          <CardHeader className="flex items-center justify-between">
             <div>
-               <CardTitle>Knowledge Base Files</CardTitle>
+               <CardTitle>Knowledge Files</CardTitle>
                <CardDescription>
                   Files that inform your agent's responses
                </CardDescription>
             </div>
             <div className="flex items-center">
-               <Badge variant="outline">{remainingSlots}/3</Badge>
+               <Badge variant="outline">
+                  {remainingSlots}/{FILE_UPLOAD_LIMIT}
+               </Badge>
             </div>
          </CardHeader>
          <CardContent>

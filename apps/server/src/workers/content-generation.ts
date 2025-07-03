@@ -178,7 +178,7 @@ async function retrieveRelevantKnowledge(
             and(
                eq(knowledgeChunk.agentId, agentId),
                isNotNull(knowledgeChunk.embedding),
-               eq(knowledgeChunk.isActive, true),
+               // eq(knowledgeChunk.isActive, true), // removed
             ),
          )
          .orderBy(sql`embedding <-> ${JSON.stringify(queryEmbedding)}::vector`)

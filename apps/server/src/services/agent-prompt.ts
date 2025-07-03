@@ -715,10 +715,8 @@ export function getAllAgentKnowledgeChunks(
    contentRequest: ContentRequest,
 ): KnowledgeChunk[] {
    // This would typically be called from your database layer
-   // Filter chunks by agentId and active status
-   const agentChunks = allChunks.filter(
-      (chunk) => chunk.agentId === agentId && chunk.isActive !== false,
-   );
+   // Filter chunks by agentId only (isActive removed)
+   const agentChunks = allChunks.filter((chunk) => chunk.agentId === agentId);
 
    // Optimize and return the best chunks for this specific request
    return optimizeKnowledgeChunks(

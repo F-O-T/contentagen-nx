@@ -32,7 +32,7 @@ export type DistillJobData = {
 
 // Enhanced configuration
 const DISTILL_CONFIG = {
-   MODEL: "qwen/qwen3-30b-a3b-04-28",
+   MODEL: "google/gemini-2.0-flash-001",
    MAX_TEXT_LENGTH: 50000, // Prevent context overflow
    MIN_CONTENT_LENGTH: 50, // Skip trivial content
    MAX_CHUNKS_PER_BATCH: 10, // Process in batches
