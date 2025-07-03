@@ -1,5 +1,3 @@
-import { env } from "@api/config/env";
-import { auth } from "@api/integrations/auth";
 import { knowledgeChunk } from "@api/schemas/agent-schema";
 import { Queue, Worker, type Job } from "bullmq";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
@@ -387,8 +385,6 @@ async function saveContent(
          })
          .where(eq(contentRequest.id, request.id));
 
-      await updateUserUsageForContentGeneration();
-
       return newContent;
    } catch (error) {
       const errorMsg = `Database error while saving content: ${error instanceof Error ? error.message : String(error)}`;
@@ -693,34 +689,6 @@ async function gracefulShutdown(signal: string) {
    }
 
    process.exit(0);
-}
-
-async function updateUserUsageForContentGeneration() {
-   const user = await auth.api.subscriptions({
-      query: {
-         active: true,
-      },
-   });
-
-   if (user.length === 0) {
-      await auth.api.checkout({
-         body: {
-            metadata: {
-               usage: 10,
-            },
-         },
-      });
-   } else {
-      await auth.api.ingestion({
-         body: {
-            event: "generated-content",
-            metadata: {
-               productId: env.POLAR_PREMIUM_PLAN,
-               amount: 10,
-            },
-         },
-      });
-   }
 }
 
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));

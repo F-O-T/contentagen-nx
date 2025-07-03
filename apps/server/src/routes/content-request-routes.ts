@@ -1,15 +1,15 @@
-import { Elysia, t } from "elysia";
-import { db } from "../integrations/database";
-import { contentRequest } from "../schemas/content-schema";
+import { and, desc, eq } from "drizzle-orm";
 import {
    createInsertSchema,
    createSelectSchema,
    createUpdateSchema,
 } from "drizzle-typebox";
+import { Elysia, t } from "elysia";
 import { authMiddleware } from "../integrations/auth";
+import { db } from "../integrations/database";
+import { contentRequest } from "../schemas/content-schema";
 import { embeddingService } from "../services/embedding";
 import { enqueueContentRequest } from "../services/worker-enqueue";
-import { and, desc, eq } from "drizzle-orm";
 
 // OpenAPI Tags for route organization
 enum ApiTags {
@@ -91,7 +91,7 @@ export const contentRequestRoutes = new Elysia({
    .use(authMiddleware)
    .post(
       "/",
-      async ({ body, user, set }) => {
+      async ({ body, user, set, headers }) => {
          try {
             const { id: userId } = user;
 
@@ -112,6 +112,7 @@ export const contentRequestRoutes = new Elysia({
                requestId: newRequest.id,
                approved: false,
                isCompleted: false,
+               headers: headers as unknown as Headers,
             });
 
             set.status = 201;
