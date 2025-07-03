@@ -18,6 +18,7 @@ export default defineConfig({
       mode: "standalone",
    }),
    env: {
+      validateSecrets: true,
       schema: {
          ARCJET_KEY: envField.string({
             access: "secret",
@@ -47,6 +48,7 @@ export default defineConfig({
                }),
                // Create a token bucket rate limit. Other algorithms are supported.
                tokenBucket({
+                  characteristics: ["ip.src"], // Track requests by IP
                   mode: "LIVE",
                   refillRate: 5, // Refill 5 tokens per interval
                   interval: 10, // Refill every 10 seconds

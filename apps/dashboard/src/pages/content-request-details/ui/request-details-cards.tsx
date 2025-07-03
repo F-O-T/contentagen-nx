@@ -10,13 +10,11 @@ import { InfoItem } from "@packages/ui/components/info-item";
 import { Separator } from "@packages/ui/components/separator";
 import {
    Calendar,
-   Target,
    Clock,
    BookOpen,
    FileText,
    MessageSquare,
 } from "lucide-react";
-import { formatValueToTitleCase } from "@packages/ui/lib/utils";
 
 interface RequestDetailsCardProps {
    request: {

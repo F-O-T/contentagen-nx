@@ -30,7 +30,7 @@ import { Link, useRouteContext } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { EdenClientType } from "@packages/eden";
-import { MoreVertical, Edit, Trash, Activity, Hash } from "lucide-react";
+import { MoreVertical, Edit, Trash, Activity } from "lucide-react";
 type ContentRequest = NonNullable<
    Awaited<
       ReturnType<

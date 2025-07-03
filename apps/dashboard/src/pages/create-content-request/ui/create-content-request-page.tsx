@@ -44,10 +44,6 @@ export function AgentContentRequestPage() {
          defaultValues={{
             topic: "",
             briefDescription: "",
-            targetLength: "medium",
-            internalLinkFormat: "mdx",
-            includeMetaTags: false,
-            includeMetaDescription: false,
          }}
          onSubmit={handleSubmit}
       />
