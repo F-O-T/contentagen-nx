@@ -1,3 +1,4 @@
+import { arcjetProtect } from "@/integrations/arcjet";
 import { QueryProvider } from "@/integrations/tanstack-query";
 import { ThemeProvider } from "@/layout/theme-provider";
 import brandConfig from "@packages/brand/index.json";
@@ -8,6 +9,7 @@ import {
    createRootRouteWithContext,
    HeadContent,
    Outlet,
+   redirect,
    Scripts,
 } from "@tanstack/react-router";
 
@@ -47,6 +49,15 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
          },
       ],
    }),
+   beforeLoad: async () => {
+      const decision = await arcjetProtect();
+
+      if (!decision) return;
+
+      if (decision.isDenied()) {
+         throw redirect({ to: "/auth/sign-in" });
+      }
+   },
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {

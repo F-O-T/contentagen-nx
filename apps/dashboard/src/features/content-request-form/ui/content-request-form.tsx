@@ -9,22 +9,12 @@ import {
 } from "../lib/use-content-request-form";
 import { BasicInfoStep, BasicInfoStepSubscribe } from "./basic-info-step";
 import {
-   TargetLengthStep,
-   TargetLengthStepSubscribe,
-} from "./target-length-step";
-import {
-   FeatureTogglesStep,
-   FeatureTogglesStepSubscribe,
-} from "./feature-toggles-step";
-import {
    ReviewSubmitStep,
    ReviewSubmitStepSubscribe,
 } from "./review-submit-step";
 
 const steps = [
    { id: "step-basic-info", title: "Basic Info" },
-   { id: "step-target-length", title: "Target Length" },
-   { id: "step-feature-toggles", title: "Content Features" },
    { id: "step-review-submit", title: "Review & Submit" },
 ] as const;
 
@@ -107,12 +97,6 @@ export function ContentRequestForm({
                            "step-basic-info": () => (
                               <BasicInfoStep form={form} />
                            ),
-                           "step-target-length": () => (
-                              <TargetLengthStep form={form} />
-                           ),
-                           "step-feature-toggles": () => (
-                              <FeatureTogglesStep form={form} />
-                           ),
                            "step-review-submit": () => (
                               <ReviewSubmitStep form={form} />
                            ),
@@ -142,18 +126,6 @@ export function ContentRequestForm({
                      {methods.switch({
                         "step-basic-info": () => (
                            <BasicInfoStepSubscribe
-                              form={form}
-                              next={methods.next}
-                           />
-                        ),
-                        "step-target-length": () => (
-                           <TargetLengthStepSubscribe
-                              form={form}
-                              next={methods.next}
-                           />
-                        ),
-                        "step-feature-toggles": () => (
-                           <FeatureTogglesStepSubscribe
                               form={form}
                               next={methods.next}
                            />

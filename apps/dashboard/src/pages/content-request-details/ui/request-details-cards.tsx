@@ -10,13 +10,11 @@ import { InfoItem } from "@packages/ui/components/info-item";
 import { Separator } from "@packages/ui/components/separator";
 import {
    Calendar,
-   Target,
    Clock,
    BookOpen,
    FileText,
    MessageSquare,
 } from "lucide-react";
-import { formatValueToTitleCase } from "@packages/ui/lib/utils";
 
 interface RequestDetailsCardProps {
    request: {
@@ -24,7 +22,6 @@ interface RequestDetailsCardProps {
       topic: string;
       briefDescription: string;
       createdAt: Date;
-      targetLength: string;
       agentId?: string;
    };
 }
@@ -59,16 +56,11 @@ export function RequestDetailsCard({ request }: RequestDetailsCardProps) {
             />
 
             <Separator />
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
                <InfoItem
                   icon={<Calendar className="h-4 w-4" />}
                   label="Created At"
                   value={new Date(request.createdAt).toLocaleDateString()}
-               />
-               <InfoItem
-                  icon={<Target className="h-4 w-4" />}
-                  label="Target Length"
-                  value={formatValueToTitleCase(request.targetLength)}
                />
             </div>
          </CardContent>

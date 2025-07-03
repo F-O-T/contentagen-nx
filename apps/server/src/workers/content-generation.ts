@@ -1,101 +1,366 @@
 import { env } from "@api/config/env";
 import { auth } from "@api/integrations/auth";
-import { Queue, Worker } from "bullmq";
-import { eq, sql } from "drizzle-orm";
+import { knowledgeChunk } from "@api/schemas/agent-schema";
+import { Job, Queue, Worker } from "bullmq";
+import { and, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "../integrations/database";
 import { openRouter } from "../integrations/openrouter";
 import { content, contentRequest, type agent } from "../schemas/content-schema";
 import {
-   generateContentRequestPrompt,
+   generateAgentPrompt,
    type AgentPromptOptions,
 } from "../services/agent-prompt";
 import { embeddingService } from "../services/embedding";
 import { redis } from "../services/redis";
 
+// Enhanced types
 export type ContentRequestWithAgent = typeof contentRequest.$inferSelect & {
    agent: typeof agent.$inferSelect;
 };
 
-export const contentGenerationQueue = new Queue("content-generation", {
-   connection: redis,
-});
+export type ContentGenerationJobData = {
+   requestId: string;
+   options?: {
+      maxRetries?: number;
+      includeKnowledgeBase?: boolean;
+      maxKnowledgeChunks?: number;
+      maxSimilarContent?: number;
+      customPromptInstructions?: string;
+   };
+};
 
-contentGenerationQueue.on("error", (err) => {
-   console.error("Content generation queue error:", err);
-});
+export type GeneratedContentResult = {
+   content: string;
+   metadata: ContentQualityMetrics & {
+      topics?: string[];
+      confidence?: number;
+   };
+};
 
-function slugify(text: string) {
+// Content quality metrics
+type ContentQualityMetrics = {
+   wordCount: number;
+   readingTime: number;
+   paragraphCount: number;
+   sentenceCount: number;
+   avgWordsPerSentence: number;
+   readabilityScore: number;
+};
+
+// Enhanced configuration
+const CONTENT_CONFIG = {
+   MODEL: "qwen/qwen3-30b-a3b-04-28",
+   RETRY_ATTEMPTS: 3,
+   RETRY_DELAY: 1000, // ms
+   MAX_KNOWLEDGE_CHUNKS: 5,
+   MAX_SIMILAR_CONTENT: 3,
+   MIN_CONTENT_LENGTH: 100,
+   MAX_CONTENT_LENGTH: 50000,
+   WORDS_PER_MINUTE: 200, // Reading speed
+   EMBEDDING_SIMILARITY_THRESHOLD: 0.7,
+   CONTENT_GENERATION_TIMEOUT: 120000, // 2 minutes
+} as const;
+
+// Utility functions
+function slugify(text: string): string {
    return text
       .toString()
       .toLowerCase()
-      .replace(/\s+/g, "-") // Replace spaces with -
-      .replace(/[^\w-]+/g, "") // Remove all non-word chars
-      .replace(/--+/g, "-") // Replace multiple - with single -
-      .replace(/^-+/, "") // Trim - from start of text
-      .replace(/-+$/, ""); // Trim - from end of text
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+/, "")
+      .replace(/-+$/, "")
+      .substring(0, 100); // Limit slug length
 }
 
-async function generateContent(prompt: string): Promise<{ content: string }> {
-   const response = await openRouter.chat.completions.create({
-      model: "qwen/qwen3-30b-a3b-04-28",
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
-   });
-
-   const generatedText = response.choices[0]?.message?.content;
-
-   if (!generatedText) {
-      throw new Error("Content generation failed");
+function calculateContentMetrics(text: string): ContentQualityMetrics {
+   if (!text || typeof text !== "string") {
+      return {
+         wordCount: 0,
+         readingTime: 0,
+         paragraphCount: 0,
+         sentenceCount: 0,
+         avgWordsPerSentence: 0,
+         readabilityScore: 0,
+      };
    }
 
-   try {
-      const result = JSON.parse(generatedText);
+   const words = text
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0);
+   const wordCount = words.length;
+   const readingTime = Math.ceil(wordCount / CONTENT_CONFIG.WORDS_PER_MINUTE);
 
-      // Verify result.content is a string before returning
-      if (typeof result.content !== "string") {
+   const paragraphs = text.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
+   const paragraphCount = paragraphs.length;
+
+   const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+   const sentenceCount = sentences.length;
+
+   const avgWordsPerSentence =
+      sentenceCount > 0 ? wordCount / sentenceCount : 0;
+
+   // Simple readability score (Flesch-like approximation)
+   const avgSentenceLength = avgWordsPerSentence;
+   const avgSyllablesPerWord =
+      words.reduce((sum, word) => {
+         return (
+            sum +
+            Math.max(1, word.toLowerCase().replace(/[^aeiou]/g, "").length)
+         );
+      }, 0) / wordCount;
+
+   const readabilityScore = Math.max(
+      0,
+      206.835 - 1.015 * avgSentenceLength - 84.6 * avgSyllablesPerWord,
+   );
+
+   return {
+      wordCount,
+      readingTime,
+      paragraphCount,
+      sentenceCount,
+      avgWordsPerSentence: Math.round(avgWordsPerSentence * 100) / 100,
+      readabilityScore: Math.round(readabilityScore * 100) / 100,
+   };
+}
+
+// Enhanced RAG retrieval with proper vector similarity
+async function retrieveRelevantKnowledge(
+   agentId: string,
+   topic: string,
+   briefDescription: string,
+   job: Job,
+   options: ContentGenerationJobData["options"] = {},
+): Promise<{
+   knowledgeText?: string;
+   usedSources: string[];
+}> {
+   const maxKnowledgeChunks =
+      options.maxKnowledgeChunks || CONTENT_CONFIG.MAX_KNOWLEDGE_CHUNKS;
+
+   let knowledgeText: string | undefined;
+   const usedSources: string[] = [];
+
+   try {
+      job.log("Generating query embedding for knowledge retrieval...");
+
+      // Create a comprehensive query string
+      const queryText = `${topic}. ${briefDescription || ""}`.trim();
+      const queryEmbedding =
+         await embeddingService.generateFileContentEmbedding(queryText);
+
+      if (!queryEmbedding) {
+         throw new Error("Failed to generate query embedding");
+      }
+
+      // Retrieve relevant knowledge chunks with vector similarity
+      job.log(
+         `Searching for relevant knowledge chunks (limit: ${maxKnowledgeChunks})...`,
+      );
+
+      const relevantKnowledge = await db
+         .select({
+            id: knowledgeChunk.id,
+            content: knowledgeChunk.content,
+            summary: knowledgeChunk.summary,
+            category: knowledgeChunk.category,
+            keywords: knowledgeChunk.keywords,
+            source: knowledgeChunk.source,
+            embedding: knowledgeChunk.embedding,
+         })
+         .from(knowledgeChunk)
+         .where(
+            and(
+               eq(knowledgeChunk.agentId, agentId),
+               isNotNull(knowledgeChunk.embedding),
+               eq(knowledgeChunk.isActive, true),
+            ),
+         )
+         .orderBy(sql`embedding <-> ${JSON.stringify(queryEmbedding)}::vector`)
+         .limit(maxKnowledgeChunks);
+
+      if (relevantKnowledge.length > 0) {
+         knowledgeText = relevantKnowledge
+            .map(
+               (chunk, idx) =>
+                  `Knowledge Source ${idx + 1} (${chunk.category || "general"}):\n` +
+                  `Summary: ${chunk.summary || "N/A"}\n` +
+                  `Content: ${chunk.content}\n` +
+                  `Keywords: ${chunk.keywords ? chunk.keywords.join(", ") : "N/A"}\n`,
+            )
+            .join("\n---\n\n");
+
+         usedSources.push(
+            ...relevantKnowledge
+               .map((k) => k.source || "knowledge_base")
+               .filter(Boolean),
+         );
+         job.log(
+            `Retrieved ${relevantKnowledge.length} relevant knowledge chunks`,
+         );
+      }
+   } catch (error) {
+      job.log(
+         `Knowledge retrieval failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+   }
+
+   return { knowledgeText, usedSources };
+}
+
+// Enhanced content generation with better error handling
+async function generateContent(
+   prompt: string,
+   job: Job,
+   attempt: number = 1,
+): Promise<GeneratedContentResult> {
+   const maxAttempts = CONTENT_CONFIG.RETRY_ATTEMPTS;
+
+   try {
+      job.log(`Content generation attempt ${attempt}/${maxAttempts}`);
+
+      const response = (await Promise.race([
+         openRouter.chat.completions.create({
+            model: CONTENT_CONFIG.MODEL,
+            messages: [{ role: "user", content: prompt }],
+            response_format: { type: "json_object" },
+            temperature: 0.7, // Balance creativity with consistency
+            max_tokens: 4000,
+         }),
+         new Promise((_, reject) =>
+            setTimeout(
+               () => reject(new Error("Content generation timeout")),
+               CONTENT_CONFIG.CONTENT_GENERATION_TIMEOUT,
+            ),
+         ),
+      ])) as {
+         choices: Array<{
+            message: { content: string };
+         }>;
+      };
+
+      const generatedText = response.choices[0]?.message?.content;
+      console.log(generatedText);
+      if (!generatedText) {
+         throw new Error("Empty response from content generation model");
+      }
+
+      // Enhanced JSON parsing with multiple strategies
+      let result: { content: string; confidence?: number; topics?: string[] };
+      try {
+         result = JSON.parse(generatedText);
+      } catch {
+         // Try to extract JSON from potential markdown or text wrapping
+         const jsonMatch =
+            generatedText.match(/```(?:json)?\s*({[\s\S]*?})\s*```/) ||
+            generatedText.match(/({[\s\S]*})/);
+         if (jsonMatch && typeof jsonMatch[1] === "string") {
+            result = JSON.parse(jsonMatch[1]);
+         } else {
+            throw new Error("Could not parse JSON from AI response");
+         }
+      }
+
+      // Validate and extract content
+      if (typeof result.content !== "string" || !result.content.trim()) {
          throw new Error("AI response does not contain valid content string");
       }
 
-      // Return only content
-      return { content: result.content };
+      const contentText = result.content.trim();
+
+      // Content quality validation
+      if (contentText.length < CONTENT_CONFIG.MIN_CONTENT_LENGTH) {
+         throw new Error(
+            `Generated content too short: ${contentText.length} characters`,
+         );
+      }
+
+      if (contentText.length > CONTENT_CONFIG.MAX_CONTENT_LENGTH) {
+         job.log(
+            `Warning: Generated content is very long (${contentText.length} chars), truncating...`,
+         );
+         // Could implement smart truncation here
+      }
+
+      // Calculate content metrics
+      const metrics = calculateContentMetrics(contentText);
+
+      job.log(
+         `Generated content: ${metrics.wordCount} words, ${metrics.readingTime} min read time`,
+      );
+
+      return {
+         content: contentText,
+         metadata: {
+            ...metrics,
+            confidence: result.confidence || 0.8, // Default confidence
+            topics: result.topics || [],
+         },
+      };
    } catch (error) {
-      console.error("Failed to parse JSON response from AI:", error);
-      throw new Error("Invalid JSON response from AI");
+      const errorMsg = `Content generation attempt ${attempt} failed: ${error instanceof Error ? error.message : String(error)}`;
+      job.log(errorMsg);
+
+      if (attempt >= maxAttempts) {
+         throw new Error(
+            `Content generation failed after ${maxAttempts} attempts: ${error instanceof Error ? error.message : String(error)}`,
+         );
+      }
+
+      // Wait before retry with exponential backoff
+      await new Promise((resolve) =>
+         setTimeout(resolve, CONTENT_CONFIG.RETRY_DELAY * attempt),
+      );
+
+      return generateContent(prompt, job, attempt + 1);
    }
 }
 
-function calculateWordsCount(text: string | undefined | null): number {
-   if (typeof text !== "string") return 0;
-   return text.split(/\s+/).length;
-}
-
-function calculateTimeToRead(wordsCount: number): number {
-   const wordsPerMinute = 200; // Average reading speed
-   return Math.ceil(wordsCount / wordsPerMinute);
-}
-
+// Enhanced content saving with better error handling and metadata
 async function saveContent(
    request: ContentRequestWithAgent,
-   generatedContent: { content: string },
-) {
+   generatedContent: GeneratedContentResult,
+   usedSources: string[],
+   job: Job,
+): Promise<typeof content.$inferSelect> {
    const slug = slugify(request.topic);
-
-   const wordsCount = calculateWordsCount(generatedContent.content);
-   const timeToRead = calculateTimeToRead(wordsCount);
-
-   let embedding: number[] | undefined;
-   try {
-      // Generate embedding for the content
-      embedding = await embeddingService.generateContentEmbedding(
-         request.topic,
-         generatedContent.content,
-      );
-   } catch (error) {
-      console.error("Failed to generate embedding for content:", error);
-      // Continue without embedding - can be generated later
-   }
+   const metrics: ContentQualityMetrics =
+      generatedContent.metadata &&
+      typeof generatedContent.metadata.readabilityScore === "number"
+         ? (generatedContent.metadata as ContentQualityMetrics)
+         : calculateContentMetrics(generatedContent.content);
 
    try {
+      job.log("Saving content to database...");
+
+      // Check for slug conflicts and make unique if necessary
+      let uniqueSlug = slug;
+      let counter = 1;
+
+      while (true) {
+         const existing = await db.query.content.findFirst({
+            where: eq(content.slug, uniqueSlug),
+            columns: { id: true },
+         });
+
+         if (!existing) break;
+
+         uniqueSlug = `${slug}-${counter}`;
+         counter++;
+
+         if (counter > 100) {
+            // Prevent infinite loop
+            uniqueSlug = `${slug}-${Date.now()}`;
+            break;
+         }
+      }
+
+      // Create content record with enhanced metadata
       const [newContent] = await db
          .insert(content)
          .values({
@@ -103,24 +368,26 @@ async function saveContent(
             body: generatedContent.content,
             title: request.topic,
             userId: request.userId,
-            slug,
-            wordsCount,
-            readTimeMinutes: timeToRead,
-            embedding,
+            slug: uniqueSlug,
+            wordsCount: metrics.wordCount,
+            readTimeMinutes: metrics.readingTime,
+            qualityScore: metrics.readabilityScore,
+            topics: generatedContent.metadata?.topics || [],
+            sources: usedSources,
          })
          .returning();
 
       if (!newContent) {
-         throw new Error("Failed to create content record");
+         throw new Error("Failed to create content record - no data returned");
       }
 
-      // Update request with completion
-      // Note: approved field is left as-is (remains false)
+      // Update the content request
       await db
          .update(contentRequest)
          .set({
             isCompleted: true,
             generatedContentId: newContent.id,
+            // completedAt: new Date(), // If your schema has this field
          })
          .where(eq(contentRequest.id, request.id));
 
@@ -128,20 +395,44 @@ async function saveContent(
 
       return newContent;
    } catch (error) {
-      console.error("Database error while saving content:", error);
-      throw new Error(
-         `Failed to save content: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      const errorMsg = `Database error while saving content: ${error instanceof Error ? error.message : String(error)}`;
+      job.log(errorMsg);
+      throw new Error(errorMsg);
    }
 }
 
+// Enhanced queue configuration
+export const contentGenerationQueue = new Queue("content-generation", {
+   connection: redis,
+   defaultJobOptions: {
+      removeOnComplete: 25, // Keep more completed jobs for analytics
+      removeOnFail: 50, // Keep failed jobs for debugging
+      attempts: 3,
+      backoff: {
+         type: "exponential",
+         delay: 5000,
+      },
+      delay: 1000, // Small delay to prevent overwhelming the API
+   },
+});
+
+contentGenerationQueue.on("error", (err) => {
+   console.error("Content generation queue error:", err);
+});
+
+// Enhanced worker with comprehensive error handling and monitoring
 export const contentGenerationWorker = new Worker(
    "content-generation",
-   async (job) => {
-      const { requestId } = job.data;
-      job.log(`Processing content generation for request: ${requestId}`);
+   async (job: Job<ContentGenerationJobData>) => {
+      const { requestId, options = {} } = job.data;
+      const startTime = Date.now();
+
+      job.log(`Starting content generation for request: ${requestId}`);
+      job.updateProgress(0);
 
       try {
+         // Fetch request with agent data
+         job.log("Fetching content request and agent data...");
          const request = await db.query.contentRequest.findFirst({
             where: eq(contentRequest.id, requestId),
             with: {
@@ -150,141 +441,189 @@ export const contentGenerationWorker = new Worker(
          });
 
          if (!request || !request.agent) {
-            const errorMsg = `Request ${requestId} or associated agent not found`;
-            job.log(errorMsg);
-            throw new Error(errorMsg);
+            throw new Error(
+               `Request ${requestId} or associated agent not found`,
+            );
          }
 
-         const { topic, briefDescription, targetLength } = request;
+         job.updateProgress(10);
 
-         // Handle nullable boolean and enum values with proper defaults
-         const internalLinkFormat = request.internalLinkFormat ?? "mdx";
-         const includeMetaTags = request.includeMetaTags ?? false;
-         const includeMetaDescription = request.includeMetaDescription ?? false;
+         const { topic, briefDescription } = request;
+         job.log(`Processing request for topic: "${topic}"`);
 
-         // === RAG: Retrieve relevant knowledge base content ===
-         job.log("Generating embedding for content request...");
-         let relevantDocsText: string | undefined;
-         let usedKnowledgeBase = false;
-         try {
-            // 1. Generate embedding for the current request
-            await embeddingService.generateContentRequestEmbedding(
+         // Enhanced RAG knowledge retrieval
+         let knowledgeContext = "";
+         let usedSources: string[] = [];
+
+         if (options.includeKnowledgeBase !== false) {
+            // Default to true
+            job.log("Retrieving relevant knowledge and content...");
+            job.updateProgress(20);
+
+            const ragResults = await retrieveRelevantKnowledge(
+               request.agentId,
                topic,
-               briefDescription,
+               briefDescription || "",
+               job,
+               options,
             );
 
-            // 2. Query the content table for top 3 most similar documents (vector search)
-            //    Only consider content with non-null embeddings
-            const similarContents = await db
-               .select({
-                  id: content.id,
-                  title: content.title,
-                  body: content.body,
-                  embedding: content.embedding,
-               })
-               .from(content)
-               .where(sql`embedding IS NOT NULL`)
-               .limit(3);
-            // NOTE: Vector similarity ordering removed due to missing l2Distance method.
-            // If needed, implement similarity sorting in JS after fetching.
+            if (ragResults.knowledgeText) {
+               const contextParts = [];
 
-            // 3. Extract and concatenate relevant content, or handle empty/missing KB
-            if (Array.isArray(similarContents) && similarContents.length > 0) {
-               relevantDocsText = similarContents
-                  .map(
-                     (doc, idx) =>
-                        `Relevant Document #${idx + 1}:\nTitle: ${doc.title}\nContent: ${doc.body}\n`,
-                  )
-                  .join("\n");
-               usedKnowledgeBase = true;
+               if (ragResults.knowledgeText) {
+                  contextParts.push(
+                     "=== RELEVANT KNOWLEDGE BASE ===\n" +
+                        ragResults.knowledgeText,
+                  );
+               }
+
+               knowledgeContext = contextParts.join("\n\n");
+               usedSources = ragResults.usedSources;
+
                job.log(
-                  `Injected ${similarContents.length} relevant knowledge base documents into the prompt.`,
+                  `Knowledge context prepared: ${knowledgeContext.length} characters from ${usedSources.length} sources`,
                );
             } else {
-               relevantDocsText = undefined;
-               usedKnowledgeBase = false;
                job.log(
-                  "No relevant knowledge base documents found or knowledge base is empty. Proceeding without injected knowledge.",
+                  "No relevant knowledge found, proceeding with base agent knowledge",
                );
             }
-         } catch (ragError) {
-            relevantDocsText = undefined;
-            usedKnowledgeBase = false;
-            job.log(
-               `Knowledge base retrieval failed or unavailable: ${ragError instanceof Error ? ragError.message : String(ragError)}. Proceeding with standard prompt.`,
-            );
          }
 
-         // === END RAG ===
+         job.updateProgress(40);
 
-         const promptOptions: AgentPromptOptions = {
-            topic,
-            description: briefDescription,
-            targetLength,
-            linkFormat: internalLinkFormat,
-            includeMetaTags,
-            includeMetaDescription,
+         // Build enhanced agent prompt
+         job.log("Building content generation prompt...");
+         const agentPromptOptions: AgentPromptOptions = {
+            contentRequest: {
+               topic,
+               briefDescription,
+            },
+            additionalContext: knowledgeContext || undefined,
+            specificRequirements: options.customPromptInstructions
+               ? [options.customPromptInstructions]
+               : undefined,
          };
 
-         // Inject retrieved knowledge into the prompt
-         if (usedKnowledgeBase && relevantDocsText) {
-            job.log(
-               `Generating content prompt for topic: ${topic} with injected knowledge base context.`,
-            );
-         } else {
-            job.log(
-               `Generating content prompt for topic: ${topic} without injected knowledge base context.`,
-            );
-         }
-         let prompt = generateContentRequestPrompt(promptOptions, {
-            ...request.agent,
-            contentType: request.agent.contentType ?? "blog_posts",
-            formattingStyle: request.agent.formattingStyle ?? "structured",
-         });
-         // If relevantDocsText exists, prepend it to the prompt.
-         if (usedKnowledgeBase && relevantDocsText) {
-            prompt = `${relevantDocsText}\n\n${prompt}`;
-         }
+         const prompt = generateAgentPrompt(request.agent, agentPromptOptions);
 
-         job.log(`Calling AI service to generate content`);
-         const generatedContent = await generateContent(prompt);
+         job.log(`Generated prompt length: ${prompt.length} characters`);
+         job.updateProgress(50);
 
-         job.log(`Saving generated content to database`);
-         const savedContent = await saveContent(request, generatedContent);
+         // Generate content
+         job.log("Generating content with AI...");
+         const generatedContent = await generateContent(prompt, job);
+         job.updateProgress(80);
 
-         job.log(
-            `Successfully processed content for request: ${requestId}, generated content ID: ${savedContent?.id}`,
+         // Save content to database
+         job.log("Saving generated content...");
+         const savedContent = await saveContent(
+            request,
+            generatedContent,
+            usedSources,
+            job,
          );
+         job.updateProgress(95);
 
-         // Return the generated content ID for job completion tracking
+         const endTime = Date.now();
+         const processingTime = endTime - startTime;
+
+         job.updateProgress(100);
+         job.log(`Content generation completed in ${processingTime}ms`);
+
+         // Return comprehensive result
          return {
             success: true,
             requestId,
-            generatedContentId: savedContent?.id,
+            generatedContentId: savedContent.id,
+            contentSlug: savedContent.slug,
+            metrics: {
+               processingTimeMs: processingTime,
+               wordCount: generatedContent.metadata?.wordCount || 0,
+               readingTime: generatedContent.metadata?.readingTime || 0,
+               sourcesUsed: usedSources.length,
+               qualityScore: generatedContent.metadata?.readabilityScore || 0,
+            },
+            sources: usedSources,
          };
       } catch (error) {
-         const errorMsg = `Failed to process content for request: ${requestId}`;
-         console.error(errorMsg, error);
-         job.log(
-            `ERROR: ${errorMsg} - ${error instanceof Error ? error.message : String(error)}`,
-         );
+         const processingTime = Date.now() - startTime;
+         const errorMsg = `Content generation failed for request ${requestId} after ${processingTime}ms`;
+         const fullError =
+            error instanceof Error ? error.message : String(error);
 
-         // Re-throw to ensure job fails and can be retried if needed
-         throw new Error(
-            `${errorMsg}: ${error instanceof Error ? error.message : String(error)}`,
-         );
+         job.log(`ERROR: ${errorMsg} - ${fullError}`);
+
+         // Update request status to indicate failure
+         try {
+            await db
+               .update(contentRequest)
+               .set({
+                  isCompleted: false,
+                  // failureReason: fullError, // If your schema supports this
+               })
+               .where(eq(contentRequest.id, requestId));
+         } catch (dbError) {
+            job.log(
+               `Failed to update request status: ${dbError instanceof Error ? dbError.message : String(dbError)}`,
+            );
+         }
+
+         throw new Error(`${errorMsg}: ${fullError}`);
       }
    },
-   { connection: redis },
+   {
+      connection: redis,
+      concurrency: 3, // Limit concurrent content generation
+      limiter: {
+         max: 20, // Max jobs per duration
+         duration: 60000, // 1 minute
+      },
+   },
 );
 
+// Enhanced event handlers
 contentGenerationWorker.on("error", (err) => {
    console.error("Content generation worker error:", err);
 });
 
+contentGenerationWorker.on("failed", (job, err) => {
+   console.error(`Content generation job ${job?.id} failed:`, err);
+});
+
+contentGenerationWorker.on("completed", (job, result) => {
+   console.log(`Content generation job ${job.id} completed:`, {
+      requestId: result.requestId,
+      contentId: result.generatedContentId,
+      processingTime: result.metrics?.processingTimeMs,
+      wordCount: result.metrics?.wordCount,
+   });
+});
+
+contentGenerationWorker.on("progress", (job, progress) => {
+   if (typeof progress === "number" && progress % 25 === 0) {
+      // Log every 25% progress
+      console.log(`Content generation job ${job.id} progress: ${progress}%`);
+   }
+});
+
+// Graceful shutdown with better cleanup
 async function gracefulShutdown(signal: string) {
-   console.log(`Received ${signal}, closing worker...`);
-   await contentGenerationWorker.close();
+   console.log(`Received ${signal}, initiating graceful shutdown...`);
+
+   try {
+      console.log("Closing content generation worker...");
+      await contentGenerationWorker.close();
+
+      console.log("Closing content generation queue...");
+      await contentGenerationQueue.close();
+
+      console.log("Content generation services closed gracefully");
+   } catch (error) {
+      console.error("Error during shutdown:", error);
+   }
+
    process.exit(0);
 }
 
@@ -318,3 +657,12 @@ async function updateUserUsageForContentGeneration() {
 
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+
+// Export utility functions for testing and external use
+export {
+   calculateContentMetrics,
+   CONTENT_CONFIG,
+   generateContent,
+   retrieveRelevantKnowledge,
+   slugify,
+};

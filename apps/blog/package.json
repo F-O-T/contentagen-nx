@@ -1,5 +1,6 @@
 {
    "dependencies": {
+      "@arcjet/astro": "catalog:astro",
       "@lucide/astro": "catalog:astro",
       "@astrojs/node": "catalog:astro",
       "@astrojs/check": "catalog:astro",

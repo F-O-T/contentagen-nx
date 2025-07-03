@@ -97,8 +97,8 @@ export function AgentCard({ agent }: AgentCardProps) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle className="truncate w-full">{agent.name}</CardTitle>
-            <CardDescription className="truncate w-full">
+            <CardTitle className="line-clamp-1">{agent.name}</CardTitle>
+            <CardDescription className="line-clamp-1">
                {agent.description}
             </CardDescription>
             <CardAction>
