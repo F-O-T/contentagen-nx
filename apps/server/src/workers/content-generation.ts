@@ -1,11 +1,11 @@
 import { env } from "@api/config/env";
 import { auth } from "@api/integrations/auth";
 import { knowledgeChunk } from "@api/schemas/agent-schema";
-import { Job, Queue, Worker } from "bullmq";
+import { Queue, Worker, type Job } from "bullmq";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "../integrations/database";
 import { openRouter } from "../integrations/openrouter";
-import { content, contentRequest, type agent } from "../schemas/content-schema";
+import { content, contentRequest, type Agent } from "../schemas/content-schema";
 import {
    generateAgentPrompt,
    type AgentPromptOptions,
@@ -15,7 +15,7 @@ import { redis } from "../services/redis";
 
 // Enhanced types
 export type ContentRequestWithAgent = typeof contentRequest.$inferSelect & {
-   agent: typeof agent.$inferSelect;
+   agent: Agent;
 };
 
 export type ContentGenerationJobData = {

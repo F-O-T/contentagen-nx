@@ -9,8 +9,8 @@ import {
    timestamp,
    uuid,
 } from "drizzle-orm/pg-core";
-import { user } from "./auth-schema";
 import { agent } from "./agent-schema";
+import { user } from "./auth-schema";
 
 export const contentStatusEnum = pgEnum("content_status", [
    "draft",
@@ -19,6 +19,7 @@ export const contentStatusEnum = pgEnum("content_status", [
    "archived",
 ]);
 export type ContentStatus = (typeof contentStatusEnum.enumValues)[number];
+export type Agent = typeof agent.$inferSelect;
 
 export const content = pgTable("content", {
    agentId: uuid("agent_id")
