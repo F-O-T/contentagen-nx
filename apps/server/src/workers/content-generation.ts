@@ -53,6 +53,7 @@ const CONTENT_CONFIG = {
    RETRY_ATTEMPTS: 3,
    RETRY_DELAY: 1000, // ms
    MAX_KNOWLEDGE_CHUNKS: 10,
+   MAX_KNOWLEDGE_CHUNKS: 10,
    MAX_SIMILAR_CONTENT: 3,
    MIN_CONTENT_LENGTH: 100,
    MAX_CONTENT_LENGTH: 50000,
@@ -178,6 +179,7 @@ async function retrieveRelevantKnowledge(
             and(
                eq(knowledgeChunk.agentId, agentId),
                isNotNull(knowledgeChunk.embedding),
+               // eq(knowledgeChunk.isActive, true), // removed
                // eq(knowledgeChunk.isActive, true), // removed
             ),
          )
@@ -577,7 +579,9 @@ export const contentGenerationWorker = new Worker(
 
          const { topic, briefDescription } = request;
          job.log(`Processing request for topic: \"${topic}\"`);
+         job.log(`Processing request for topic: \"${topic}\"`);
 
+         // Enhanced RAG knowledge retrieval (brand and topic)
          // Enhanced RAG knowledge retrieval (brand and topic)
          let knowledgeContext = "";
          let usedSources: string[] = [];
@@ -585,8 +589,18 @@ export const contentGenerationWorker = new Worker(
          if (options.includeKnowledgeBase !== false) {
             // Default to true
             job.log("Retrieving brand and topic knowledge...");
+            job.log("Retrieving brand and topic knowledge...");
             job.updateProgress(20);
 
+            // Fetch brand knowledge
+            const brandResults = await retrieveBrandKnowledge(
+               request.agentId,
+               job,
+               options,
+            );
+
+            // Fetch topic/description knowledge
+            const topicResults = await retrieveTopicKnowledge(
             // Fetch brand knowledge
             const brandResults = await retrieveBrandKnowledge(
                request.agentId,
@@ -620,7 +634,27 @@ export const contentGenerationWorker = new Worker(
                ...(brandResults.usedSources || []),
                ...(topicResults.usedSources || []),
             ];
+            const contextParts = [];
+            if (brandResults.knowledgeText) {
+               contextParts.push(
+                  `=== BRAND KNOWLEDGE ===\n${brandResults.knowledgeText}`,
+               );
+            }
+            if (topicResults.knowledgeText) {
+               contextParts.push(
+                  "=== RELEVANT KNOWLEDGE BASE ===\n" +
+                     topicResults.knowledgeText,
+               );
+            }
+            knowledgeContext = contextParts.join("\n\n");
+            usedSources = [
+               ...(brandResults.usedSources || []),
+               ...(topicResults.usedSources || []),
+            ];
 
+            job.log(
+               `Knowledge context prepared: ${knowledgeContext.length} characters from ${usedSources.length} sources`,
+            );
             job.log(
                `Knowledge context prepared: ${knowledgeContext.length} characters from ${usedSources.length} sources`,
             );
@@ -841,6 +875,8 @@ process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 export {
    generateContent,
    retrieveRelevantKnowledge,
+   retrieveBrandKnowledge,
+   retrieveTopicKnowledge,
    retrieveBrandKnowledge,
    retrieveTopicKnowledge,
    calculateContentMetrics,

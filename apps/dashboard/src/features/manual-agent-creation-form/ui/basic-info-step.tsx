@@ -64,6 +64,39 @@ export function BasicInfoStep({ form }: { form: AgentForm }) {
                </field.FieldContainer>
             )}
          </form.AppField>
+         <form.AppField name="language">
+            {(field) => (
+               <field.FieldContainer>
+                  <field.FieldLabel>Language *</field.FieldLabel>
+                  <Select
+                     value={field.state.value || ""}
+                     onValueChange={(value) =>
+                        field.handleChange(
+                           value as (typeof languageEnum.enumValues)[number],
+                        )
+                     }
+                     name={field.name}
+                  >
+                     <SelectTrigger id={field.name} className="w-full">
+                        {field.state.value
+                           ? languageEnum.enumValues
+                                .find((lang) => lang === field.state.value)
+                                ?.charAt(0)
+                                .toUpperCase() + field.state.value.slice(1)
+                           : "Select a language"}
+                     </SelectTrigger>
+                     <SelectContent>
+                        {languageEnum.enumValues.map((lang) => (
+                           <SelectItem key={lang} value={lang}>
+                              {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                           </SelectItem>
+                        ))}
+                     </SelectContent>
+                  </Select>
+                  <field.FieldMessage />
+               </field.FieldContainer>
+            )}
+         </form.AppField>
          <form.AppField name="description">
             {(field) => (
                <field.FieldContainer>

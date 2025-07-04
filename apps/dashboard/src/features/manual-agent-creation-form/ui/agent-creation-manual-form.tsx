@@ -21,6 +21,10 @@ import {
    BrandIntegrationStep,
    BrandIntegrationStepSubscribe,
 } from "./brand-integration-step";
+import {
+   BrandIntegrationStep,
+   BrandIntegrationStepSubscribe,
+} from "./brand-integration-step";
 
 import {
    contentTypeEnum,
@@ -64,6 +68,7 @@ const steps = [
    { id: "step-voice-tone", title: "Voice Tone" },
    { id: "step-target-audience", title: "Target Audience" },
    { id: "step-formatting-style", title: "Formatting Style" },
+   { id: "step-brand-integration", title: "Brand Integration" }, // New step
    { id: "step-brand-integration", title: "Brand Integration" }, // New step
    { id: "step-review-submit", title: "Review & Submit" },
 ] as const;
@@ -170,6 +175,9 @@ export function AgentCreationManualForm({
                            "step-brand-integration": () => (
                               <BrandIntegrationStep form={form} />
                            ),
+                           "step-brand-integration": () => (
+                              <BrandIntegrationStep form={form} />
+                           ),
                            "step-review-submit": () => (
                               <ReviewSubmitStep form={form} />
                            ),
@@ -222,6 +230,12 @@ export function AgentCreationManualForm({
                         ),
                         "step-formatting-style": () => (
                            <FormattingStyleStepSubscribe
+                              form={form}
+                              next={methods.next}
+                           />
+                        ),
+                        "step-brand-integration": () => (
+                           <BrandIntegrationStepSubscribe
                               form={form}
                               next={methods.next}
                            />
