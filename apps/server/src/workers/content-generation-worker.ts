@@ -789,6 +789,5 @@ export {
    retrieveRelevantKnowledge,
    retrieveBrandKnowledge,
    retrieveTopicKnowledge,
-   calculateContentMetrics,
    slugify,
 };
