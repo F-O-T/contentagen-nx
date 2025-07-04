@@ -19,6 +19,8 @@ interface AgentPersonaCardProps {
    voiceTone: string;
    targetAudience: string;
    formattingStyle: string;
+   language: string;
+   brandIntegration: string;
 }
 
 function formatValue(value: string) {
@@ -32,6 +34,8 @@ export const AgentPersonaCard: React.FC<AgentPersonaCardProps> = ({
    voiceTone,
    targetAudience,
    formattingStyle,
+   language,
+   brandIntegration,
 }) => {
    const items = useMemo(
       () => [
@@ -55,8 +59,25 @@ export const AgentPersonaCard: React.FC<AgentPersonaCardProps> = ({
             value: formatValue(formattingStyle),
             icon: Type,
          },
+         {
+            label: "Language",
+            value: formatValue(language),
+            icon: Type,
+         },
+         {
+            label: "Brand Integration",
+            value: formatValue(brandIntegration),
+            icon: Bot,
+         },
       ],
-      [contentType, voiceTone, targetAudience, formattingStyle],
+      [
+         contentType,
+         voiceTone,
+         targetAudience,
+         formattingStyle,
+         language,
+         brandIntegration,
+      ],
    );
 
    return (

@@ -1,6 +1,4 @@
-import { env } from "@api/config/env";
-import { auth } from "@api/integrations/auth";
-import { contentGenerationQueue } from "../workers/content-generation";
+import { contentGenerationQueue } from "../workers/content-generation-worker";
 
 export interface EnqueueContentRequestPayload {
    requestId: string;

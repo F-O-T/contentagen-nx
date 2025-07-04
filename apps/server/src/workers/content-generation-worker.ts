@@ -51,7 +51,7 @@ const CONTENT_CONFIG = {
    QWEN_MODEL: "google/gemini-2.0-flash-001",
    RETRY_ATTEMPTS: 3,
    RETRY_DELAY: 1000, // ms
-   MAX_KNOWLEDGE_CHUNKS: 5,
+   MAX_KNOWLEDGE_CHUNKS: 10,
    MAX_SIMILAR_CONTENT: 3,
    MIN_CONTENT_LENGTH: 100,
    MAX_CONTENT_LENGTH: 50000,
@@ -87,10 +87,9 @@ function calculateContentMetrics(text: string): ContentQualityMetrics {
       };
    }
 
-   const words = text
-      .trim()
-      .split(/\s+/)
-      .filter((word) => word.length > 0);
+   // Improved word count: match word boundaries using regex
+   // This matches sequences of alphanumeric characters (including apostrophes for contractions)
+   const words = text.match(/\b[\w'-]+\b/g) || [];
    const wordCount = words.length;
    const readingTime = Math.ceil(wordCount / CONTENT_CONFIG.WORDS_PER_MINUTE);
 
@@ -109,9 +108,9 @@ function calculateContentMetrics(text: string): ContentQualityMetrics {
       words.reduce((sum, word) => {
          return (
             sum +
-            Math.max(1, word.toLowerCase().replace(/[^aeiou]/g, "").length)
+            Math.max(1, word.toLowerCase().replace(/[^aeiouy]/g, "").length)
          );
-      }, 0) / wordCount;
+      }, 0) / (wordCount || 1);
 
    const readabilityScore = Math.max(
       0,
@@ -177,7 +176,7 @@ async function retrieveRelevantKnowledge(
             and(
                eq(knowledgeChunk.agentId, agentId),
                isNotNull(knowledgeChunk.embedding),
-               eq(knowledgeChunk.isActive, true),
+               // eq(knowledgeChunk.isActive, true), // removed
             ),
          )
          .orderBy(sql`embedding <-> ${JSON.stringify(queryEmbedding)}::vector`)
@@ -209,6 +208,136 @@ async function retrieveRelevantKnowledge(
       );
    }
 
+   return { knowledgeText, usedSources };
+}
+
+// Retrieve only brand-related knowledge chunks
+async function retrieveBrandKnowledge(
+   agentId: string,
+   job: Job,
+   options: ContentGenerationJobData["options"] = {},
+): Promise<{
+   knowledgeText?: string;
+   usedSources: string[];
+}> {
+   const maxKnowledgeChunks =
+      options.maxKnowledgeChunks || CONTENT_CONFIG.MAX_KNOWLEDGE_CHUNKS;
+   let knowledgeText: string | undefined;
+   const usedSources: string[] = [];
+   try {
+      job.log("Retrieving brand-related knowledge chunks...");
+      const brandKnowledge = await db
+         .select({
+            id: knowledgeChunk.id,
+            content: knowledgeChunk.content,
+            summary: knowledgeChunk.summary,
+            category: knowledgeChunk.category,
+            keywords: knowledgeChunk.keywords,
+            source: knowledgeChunk.source,
+            embedding: knowledgeChunk.embedding,
+         })
+         .from(knowledgeChunk)
+         .where(
+            and(
+               eq(knowledgeChunk.agentId, agentId),
+               isNotNull(knowledgeChunk.embedding),
+               eq(knowledgeChunk.source, "brand_knowledge"), // Fetch all brand knowledge by source
+            ),
+         )
+         .limit(maxKnowledgeChunks);
+      if (brandKnowledge.length > 0) {
+         knowledgeText = brandKnowledge
+            .map(
+               (chunk, idx) =>
+                  `Brand Knowledge ${idx + 1} (${chunk.category || "brand"}):\n` +
+                  `Summary: ${chunk.summary || "N/A"}\n` +
+                  `Content: ${chunk.content}\n` +
+                  `Keywords: ${chunk.keywords ? chunk.keywords.join(", ") : "N/A"}\n`,
+            )
+            .join("\n---\n\n");
+         usedSources.push(
+            ...brandKnowledge
+               .map((k) => k.source || "brand_knowledge_base")
+               .filter(Boolean),
+         );
+         job.log(`Retrieved ${brandKnowledge.length} brand knowledge chunks`);
+      }
+   } catch (error) {
+      job.log(
+         `Brand knowledge retrieval failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+   }
+   return { knowledgeText, usedSources };
+}
+
+// Retrieve only topic/description-relevant knowledge chunks (excluding brand)
+async function retrieveTopicKnowledge(
+   agentId: string,
+   topic: string,
+   briefDescription: string,
+   job: Job,
+   options: ContentGenerationJobData["options"] = {},
+): Promise<{
+   knowledgeText?: string;
+   usedSources: string[];
+}> {
+   const maxKnowledgeChunks =
+      options.maxKnowledgeChunks || CONTENT_CONFIG.MAX_KNOWLEDGE_CHUNKS;
+   let knowledgeText: string | undefined;
+   const usedSources: string[] = [];
+   try {
+      job.log("Generating query embedding for topic knowledge retrieval...");
+      const queryText = `${topic}. ${briefDescription || ""}`.trim();
+      const queryEmbedding =
+         await embeddingService.generateFileContentEmbedding(queryText);
+      if (!queryEmbedding) {
+         throw new Error("Failed to generate query embedding");
+      }
+      job.log(
+         `Searching for topic-relevant knowledge chunks (limit: ${maxKnowledgeChunks})...`,
+      );
+      const topicKnowledge = await db
+         .select({
+            id: knowledgeChunk.id,
+            content: knowledgeChunk.content,
+            summary: knowledgeChunk.summary,
+            category: knowledgeChunk.category,
+            keywords: knowledgeChunk.keywords,
+            source: knowledgeChunk.source,
+            embedding: knowledgeChunk.embedding,
+         })
+         .from(knowledgeChunk)
+         .where(
+            and(
+               eq(knowledgeChunk.agentId, agentId),
+               isNotNull(knowledgeChunk.embedding),
+               sql`(category IS NULL OR category != 'brand')`,
+            ),
+         )
+         .orderBy(sql`embedding <-> ${JSON.stringify(queryEmbedding)}::vector`)
+         .limit(maxKnowledgeChunks);
+      if (topicKnowledge.length > 0) {
+         knowledgeText = topicKnowledge
+            .map(
+               (chunk, idx) =>
+                  `Knowledge Source ${idx + 1} (${chunk.category || "general"}):\n` +
+                  `Summary: ${chunk.summary || "N/A"}\n` +
+                  `Content: ${chunk.content}\n` +
+                  `Keywords: ${chunk.keywords ? chunk.keywords.join(", ") : "N/A"}\n`,
+            )
+            .join("\n---\n\n");
+         usedSources.push(
+            ...topicKnowledge
+               .map((k) => k.source || "knowledge_base")
+               .filter(Boolean),
+         );
+         job.log(`Retrieved ${topicKnowledge.length} topic knowledge chunks`);
+      }
+   } catch (error) {
+      job.log(
+         `Topic knowledge retrieval failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+   }
    return { knowledgeText, usedSources };
 }
 
@@ -354,6 +483,11 @@ async function saveContent(
          }
       }
 
+      // Ensure tags is always an array (default to empty array)
+      const tags: string[] = [];
+      // Ensure qualityScore is an integer
+      const qualityScore = Math.round(metrics.readabilityScore);
+
       // Create content record with enhanced metadata
       const [newContent] = await db
          .insert(content)
@@ -365,9 +499,10 @@ async function saveContent(
             slug: uniqueSlug,
             wordsCount: metrics.wordCount,
             readTimeMinutes: metrics.readingTime,
-            qualityScore: metrics.readabilityScore,
+            qualityScore: qualityScore,
             topics: generatedContent.metadata?.topics || [],
             sources: usedSources || [],
+            tags: tags, // Always provide tags
          })
          .returning();
 
@@ -441,18 +576,26 @@ export const contentGenerationWorker = new Worker(
          job.updateProgress(10);
 
          const { topic, briefDescription } = request;
-         job.log(`Processing request for topic: "${topic}"`);
+         job.log(`Processing request for topic: \"${topic}\"`);
 
-         // Enhanced RAG knowledge retrieval
+         // Enhanced RAG knowledge retrieval (brand and topic)
          let knowledgeContext = "";
          let usedSources: string[] = [];
 
          if (options.includeKnowledgeBase !== false) {
             // Default to true
-            job.log("Retrieving relevant knowledge and content...");
+            job.log("Retrieving brand and topic knowledge...");
             job.updateProgress(20);
 
-            const ragResults = await retrieveRelevantKnowledge(
+            // Fetch brand knowledge
+            const brandResults = await retrieveBrandKnowledge(
+               request.agentId,
+               job,
+               options,
+            );
+
+            // Fetch topic/description knowledge
+            const topicResults = await retrieveTopicKnowledge(
                request.agentId,
                topic,
                briefDescription || "",
@@ -460,27 +603,27 @@ export const contentGenerationWorker = new Worker(
                options,
             );
 
-            if (ragResults.knowledgeText) {
-               const contextParts = [];
-
-               if (ragResults.knowledgeText) {
-                  contextParts.push(
-                     "=== RELEVANT KNOWLEDGE BASE ===\n" +
-                        ragResults.knowledgeText,
-                  );
-               }
-
-               knowledgeContext = contextParts.join("\n\n");
-               usedSources = ragResults.usedSources;
-
-               job.log(
-                  `Knowledge context prepared: ${knowledgeContext.length} characters from ${usedSources.length} sources`,
-               );
-            } else {
-               job.log(
-                  "No relevant knowledge found, proceeding with base agent knowledge",
+            const contextParts = [];
+            if (brandResults.knowledgeText) {
+               contextParts.push(
+                  `=== BRAND KNOWLEDGE ===\n${brandResults.knowledgeText}`,
                );
             }
+            if (topicResults.knowledgeText) {
+               contextParts.push(
+                  "=== RELEVANT KNOWLEDGE BASE ===\n" +
+                     topicResults.knowledgeText,
+               );
+            }
+            knowledgeContext = contextParts.join("\n\n");
+            usedSources = [
+               ...(brandResults.usedSources || []),
+               ...(topicResults.usedSources || []),
+            ];
+
+            job.log(
+               `Knowledge context prepared: ${knowledgeContext.length} characters from ${usedSources.length} sources`,
+            );
          }
 
          job.updateProgress(40);
@@ -518,49 +661,14 @@ export const contentGenerationWorker = new Worker(
          );
          job.updateProgress(60);
 
-         // Build prompt for tags/metadata (strict JSON output)
-         job.log(
-            "Building strict content generation prompt for tags/metadata...",
-         );
-         const tagsPrompt = buildStrictTagsPrompt(articleContent.content);
-         job.log(
-            `Generated tags prompt length: ${tagsPrompt.length} characters`,
-         );
-         job.updateProgress(65);
-
-         // Generate tags/metadata with Qwen model
-         job.log("Generating tags/metadata with Qwen model...");
-         const tagsContent = await generateContent(
-            tagsPrompt,
-            job,
-            CONTENT_CONFIG.QWEN_MODEL,
-            1,
-            "tags",
-         );
-         job.updateProgress(70);
-
-         // Merge results: use articleContent.content as body, tagsContent.metadata.topics as tags, etc.
-         const mergedContent = {
-            ...articleContent,
-            metadata: {
-               wordCount: articleContent.metadata?.wordCount ?? 0,
-               readingTime: articleContent.metadata?.readingTime ?? 0,
-               paragraphCount: articleContent.metadata?.paragraphCount ?? 0,
-               sentenceCount: articleContent.metadata?.sentenceCount ?? 0,
-               avgWordsPerSentence:
-                  articleContent.metadata?.avgWordsPerSentence ?? 0,
-               readabilityScore: articleContent.metadata?.readabilityScore ?? 0,
-               confidence: articleContent.metadata?.confidence ?? 0.8,
-               topics:
-                  tagsContent.metadata &&
-                  Array.isArray(tagsContent.metadata.topics)
-                     ? tagsContent.metadata.topics
-                     : [],
-            },
-         };
-
          // Save content to database
          job.log("Saving generated content...");
+         // Always calculate metrics to ensure all required fields are present and of type number
+         const metrics = calculateContentMetrics(articleContent.content);
+         const mergedContent = {
+            ...articleContent,
+            metadata: metrics,
+         };
          const savedContent = await saveContent(
             request,
             mergedContent,
@@ -626,27 +734,6 @@ export const contentGenerationWorker = new Worker(
    },
 );
 
-// Strict prompt for tags/metadata generation
-function buildStrictTagsPrompt(article: string): string {
-   return `You are an expert content classifier and metadata generator. Your task is to analyze the following article and output ONLY a valid JSON object with the following structure:
-
-{
-  "topics": ["tag1", "tag2", "tag3", ...]
-}
-
-Rules:
-- Output ONLY the JSON object, with no extra text, markdown, or explanations.
-- The topics array must contain 3-8 relevant, concise, lowercase tags (single words or short phrases, no sentences).
-- Do NOT include the article text in your response.
-- Do NOT add any comments or formatting outside the JSON object.
-- If you are unsure, output an empty array for topics.
-
-Here is the article:
-"""
-${article}
-"""`;
-}
-
 // Enhanced event handlers
 contentGenerationWorker.on("error", (err) => {
    console.error("Content generation worker error:", err);
@@ -700,5 +787,8 @@ export {
    CONTENT_CONFIG,
    generateContent,
    retrieveRelevantKnowledge,
+   retrieveBrandKnowledge,
+   retrieveTopicKnowledge,
+   calculateContentMetrics,
    slugify,
 };

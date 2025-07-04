@@ -34,6 +34,7 @@ const _listContentRequestsQuery = t.Object({
          t.Literal("rejected"),
       ]),
    ),
+   agentId: t.Optional(t.String()),
 });
 
 const _listContentRequestsResponse = t.Object({
@@ -156,10 +157,14 @@ export const contentRequestRoutes = new Elysia({
       "/list",
       async ({ user, query }) => {
          const { id: userId } = user;
-         const { page = 1, limit = 10 } = query;
+         const { page = 1, limit = 10, agentId } = query;
          const offset = (page - 1) * limit;
 
-         const whereClause = eq(contentRequest.userId, userId);
+         const conditions = [eq(contentRequest.userId, userId)];
+         if (typeof agentId === "string" && agentId) {
+            conditions.push(eq(contentRequest.agentId, agentId));
+         }
+         const whereClause = and(...conditions);
 
          const requests = await db.query.contentRequest.findMany({
             columns: {

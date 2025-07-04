@@ -18,6 +18,8 @@ import {
 import { Upload, FileText, MoreHorizontal } from "lucide-react";
 import useFileUpload, { type UploadedFile } from "../lib/use-file-upload";
 
+const FILE_UPLOAD_LIMIT = 5;
+
 interface AgentDetailsKnowledgeBaseCardProps {
    uploadedFiles: UploadedFile[];
    onViewFile: (fileName: string, fileUrl: string) => void;
@@ -34,19 +36,21 @@ export function AgentDetailsKnowledgeBaseCard({
       handleDeleteFile,
       canAddMore,
       remainingSlots,
-   } = useFileUpload(uploadedFiles);
+   } = useFileUpload(uploadedFiles, { fileLimit: FILE_UPLOAD_LIMIT });
 
    return (
       <Card>
          <CardHeader className="flex items-center justify-between">
             <div>
-               <CardTitle>Knowledge Base Files</CardTitle>
+               <CardTitle>Brand Knowledge</CardTitle>
                <CardDescription>
-                  Files that inform your agent's responses
+                  Upload files about your brand for your agent to use.
                </CardDescription>
             </div>
             <div className="flex items-center">
-               <Badge variant="outline">{remainingSlots}/3</Badge>
+               <Badge variant="outline">
+                  {remainingSlots}/{FILE_UPLOAD_LIMIT}
+               </Badge>
             </div>
          </CardHeader>
          <CardContent>
@@ -104,9 +108,10 @@ export function AgentDetailsKnowledgeBaseCard({
             ) : (
                <div className="text-center py-8 text-muted-foreground">
                   <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No files uploaded yet</p>
+                  <p>No brand files yet</p>
                   <p className="text-sm">
-                     Upload Markdown files to build your agent's knowledge base
+                     Upload Markdown files with your brand’s values, voice, or
+                     guidelines.
                   </p>
                </div>
             )}

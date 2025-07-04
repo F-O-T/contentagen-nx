@@ -38,10 +38,6 @@ export function ContentRequestForm({
       switch (step) {
          case "step-basic-info":
             return "Let's start by defining what content you'd like to create!";
-         case "step-target-length":
-            return "How long should your content be?";
-         case "step-feature-toggles":
-            return "Let's configure some extra features for your content!";
          case "step-review-submit":
             return "Perfect! Let's review your content request before submitting!";
          default:

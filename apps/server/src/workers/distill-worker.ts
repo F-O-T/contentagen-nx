@@ -3,13 +3,14 @@ import { openRouter } from "../integrations/openrouter";
 import { redis } from "../services/redis";
 import { embeddingService } from "../services/embedding";
 import { knowledgeChunkQueue } from "./knowledge-chunk-worker";
+import type { KnowledgeSource } from "../schemas/agent-schema";
 
 // Enhanced type definitions
 export type KnowledgePoint = {
    summary: string;
    category?: string;
    keywords?: string[];
-   source?: string;
+   source?: KnowledgeSource; // Use enum
    source_type?: string;
    source_identifier?: string;
    content: string;
@@ -32,7 +33,7 @@ export type DistillJobData = {
 
 // Enhanced configuration
 const DISTILL_CONFIG = {
-   MODEL: "qwen/qwen3-30b-a3b-04-28",
+   MODEL: "google/gemini-2.0-flash-001",
    MAX_TEXT_LENGTH: 50000, // Prevent context overflow
    MIN_CONTENT_LENGTH: 50, // Skip trivial content
    MAX_CHUNKS_PER_BATCH: 10, // Process in batches
@@ -443,8 +444,7 @@ distillQueue.on("error", (err) => {
 export const distillWorker = new Worker(
    "distill-knowledge",
    async (job: Job<DistillJobData>) => {
-      const { agentId, rawText, source, sourceType, sourceIdentifier } =
-         job.data;
+      const { agentId, rawText, sourceType, sourceIdentifier } = job.data;
 
       job.log(`Starting distillation for agent: ${agentId}`);
       job.log(`Input text: ${rawText.length} characters`);
@@ -492,7 +492,7 @@ export const distillWorker = new Worker(
                summary: kp.summary,
                category: kp.category,
                keywords: kp.keywords,
-               source: kp.source || source,
+               source: "brand_knowledge", // Explicitly set the enum value
                sourceType: kp.source_type || sourceType,
                sourceIdentifier: kp.source_identifier || sourceIdentifier,
                embedding,

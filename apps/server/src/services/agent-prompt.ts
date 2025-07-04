@@ -3,8 +3,10 @@ import type {
    VoiceTone,
    TargetAudience,
    FormattingStyle,
+   knowledgeChunk,
+   agent,
 } from "../schemas/agent-schema";
-import type { knowledgeChunk, agent } from "../schemas/agent-schema";
+
 // --- CORE TYPES ---
 type KnowledgeChunk = typeof knowledgeChunk.$inferSelect;
 type AgentConfig = typeof agent.$inferSelect;
@@ -21,7 +23,6 @@ export interface AgentPromptOptions {
    specificRequirements?: string[];
 }
 
-// --- OPTIMIZED CONTENT TYPE PROMPTS ---
 function getContentTypeSection(
    contentType: ContentType,
    request: ContentRequest,
@@ -347,7 +348,13 @@ function getFormattingStyleSection(style: FormattingStyle): string {
 
 // --- BRAND-FOCUSED KNOWLEDGE INTEGRATION ---
 function getKnowledgeSection(knowledgeChunks?: KnowledgeChunk[]): string {
-   if (!knowledgeChunks || knowledgeChunks.length === 0) {
+   // Only use brand knowledge chunks
+   const brandChunks: KnowledgeChunk[] =
+      knowledgeChunks?.filter(
+         (chunk: KnowledgeChunk) => chunk.source === "brand_knowledge",
+      ) ?? [];
+
+   if (brandChunks.length === 0) {
       return `## ⚠️ BRAND KNOWLEDGE: MISSING CRITICAL INFORMATION
 
 **MAJOR LIMITATION**: No brand knowledge has been provided. This severely limits the content's value and authenticity.
@@ -374,37 +381,35 @@ function getKnowledgeSection(knowledgeChunks?: KnowledgeChunk[]): string {
 
 **Available Brand Knowledge**:\n`;
 
-   // Group knowledge chunks by category for better organization
-   const categorizedChunks = knowledgeChunks.reduce(
-      (acc, chunk) => {
-         const category = chunk.category || "Brand Guidelines";
-         if (!acc[category]) acc[category] = [];
-         acc[category].push(chunk);
-         return acc;
+   // Group brand knowledge chunks by category for better organization
+   const categorizedChunks: Record<string, KnowledgeChunk[]> =
+      brandChunks.reduce(
+         (acc: Record<string, KnowledgeChunk[]>, chunk: KnowledgeChunk) => {
+            const category = chunk.category || "Brand Guidelines";
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(chunk);
+            return acc;
+         },
+         {} as Record<string, KnowledgeChunk[]>,
+      );
+
+   Object.entries(categorizedChunks).forEach(
+      ([category, chunks]: [string, KnowledgeChunk[]]) => {
+         knowledgeSection += `\n### 📋 ${category}\n`;
+         chunks.forEach((chunk: KnowledgeChunk, index: number) => {
+            knowledgeSection += `\n**Brand Source ${index + 1}**:`;
+            if (chunk.sourceType) knowledgeSection += ` (${chunk.sourceType})`;
+            knowledgeSection += `\n`;
+            if (chunk.summary) {
+               knowledgeSection += `**Key Points**: ${chunk.summary}\n`;
+            }
+            if (chunk.keywords && chunk.keywords.length > 0) {
+               knowledgeSection += `**Brand Keywords to Use**: ${chunk.keywords.join(", ")}\n`;
+            }
+            knowledgeSection += `**Brand Content to Reference**: ${chunk.content}\n\n`;
+         });
       },
-      {} as Record<string, KnowledgeChunk[]>,
    );
-
-   Object.entries(categorizedChunks).forEach(([category, chunks]) => {
-      knowledgeSection += `\n### 📋 ${category}\n`;
-
-      chunks.forEach((chunk, index) => {
-         knowledgeSection += `\n**Brand Source ${index + 1}**:`;
-         if (chunk.source) knowledgeSection += ` ${chunk.source}`;
-         if (chunk.sourceType) knowledgeSection += ` (${chunk.sourceType})`;
-         knowledgeSection += `\n`;
-
-         if (chunk.summary) {
-            knowledgeSection += `**Key Points**: ${chunk.summary}\n`;
-         }
-
-         if (chunk.keywords && chunk.keywords.length > 0) {
-            knowledgeSection += `**Brand Keywords to Use**: ${chunk.keywords.join(", ")}\n`;
-         }
-
-         knowledgeSection += `**Brand Content to Reference**: ${chunk.content}\n\n`;
-      });
-   });
 
    knowledgeSection += `**🚨 MANDATORY BRAND INTEGRATION CHECKLIST**:
 ✅ **Brand Voice**: Every paragraph should reflect the brand's unique voice and perspective
@@ -459,6 +464,162 @@ Your content succeeds when it:
 - Maintains professional quality while being accessible`;
 }
 
+function getLanguageSection(language: AgentConfig["language"]): string {
+   const capitalizedLanguage =
+      language.charAt(0).toUpperCase() + language.slice(1);
+
+   return `## Language & Communication Standards
+**Primary Language**: Write exclusively in **${capitalizedLanguage}**
+- Use natural, native-level fluency with appropriate idioms and expressions
+- Employ cultural references and examples that resonate with ${capitalizedLanguage} speakers
+- Apply region-specific spelling, grammar, and punctuation conventions
+
+**Quality Requirements**:
+- Write original content, not translations - think directly in ${capitalizedLanguage}
+- Use terminology and concepts familiar to native speakers
+- Explain foreign terms or technical jargon when necessary
+- Maintain consistent tone and style throughout all interactions
+
+**Cultural Adaptation**:
+- Adjust communication style to match ${capitalizedLanguage} cultural norms
+- Use appropriate levels of formality for the context
+- Reference relevant cultural touchstones, holidays, or shared experiences when helpful
+`;
+}
+
+// --- BRAND INTEGRATION SECTION ---
+function getBrandIntegrationSection(
+   brandIntegration: AgentConfig["brandIntegration"],
+): string {
+   let approachDetails = "";
+   let sellingBehavior = "";
+
+   switch (brandIntegration) {
+      case "strict_guideline":
+         approachDetails = `- Follow brand guidelines exactly with no creative interpretation
+- Use only pre-approved messaging, terminology, and positioning
+- Reference brand values and mission in every relevant interaction
+- Maintain consistent brand voice across all communications`;
+         sellingBehavior = `- Actively promote brand products/services when contextually appropriate
+- Use approved sales messaging and value propositions
+- Direct users toward brand solutions for their needs
+- Emphasize brand differentiators and competitive advantages`;
+         break;
+
+      case "flexible_guideline":
+         approachDetails = `- Use brand guidelines as foundation while adapting to context
+- Blend brand voice with audience-appropriate communication
+- Reference brand values naturally without forcing mentions
+- Allow creative interpretation within brand boundaries`;
+         sellingBehavior = `- Suggest brand solutions when genuinely relevant to user needs
+- Balance helpful advice with subtle brand promotion
+- Focus on value delivery while maintaining brand awareness
+- Avoid pushy sales tactics - prioritize relationship building`;
+         break;
+
+      case "reference_only":
+         approachDetails = `- Use brand knowledge as background context only
+- Avoid direct brand mentions unless specifically relevant
+- Focus on providing value without overt brand promotion
+- Maintain professional neutrality while being brand-informed`;
+         sellingBehavior = `- Do not actively sell or promote brand products/services
+- Provide unbiased advice even if it doesn't favor the brand
+- Only mention brand solutions if directly asked or highly relevant
+- Prioritize user needs over brand promotion`;
+         break;
+
+      case "creative_blend":
+         approachDetails = `- Integrate brand personality through storytelling and metaphors
+- Use brand values as inspiration for creative communication
+- Highlight unique brand characteristics through engaging narratives
+- Balance brand representation with creative freedom`;
+         sellingBehavior = `- Weave brand benefits into creative content naturally
+- Use storytelling to demonstrate brand value without hard selling
+- Create memorable brand experiences through innovative approaches
+- Build brand affinity through engaging, value-driven interactions`;
+         break;
+
+      default:
+         approachDetails = `- Integrate brand according to its unique style and requirements
+- Balance brand representation with user value delivery`;
+         sellingBehavior = `- Adapt selling approach based on brand strategy and user context`;
+   }
+
+   const formatIntegrationStyle = (style: string) =>
+      style
+         .split("_")
+         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+         .join(" ");
+
+   return `## Brand Integration & Sales Approach
+**Integration Style**: **${formatIntegrationStyle(brandIntegration)}**
+
+**Brand Communication Strategy**:
+${approachDetails}
+
+**Sales & Promotion Behavior**:
+${sellingBehavior}
+
+**Key Reminders**:
+- Always prioritize user value and genuine helpfulness
+- Build trust through authentic, helpful interactions
+- Adapt brand mentions to conversation context and user needs
+- Maintain professional integrity while representing the brand
+`;
+}
+
+// --- COMMUNICATION STYLE SECTION ---
+function getCommunicationStyleSection(
+   communicationStyle: AgentConfig["communicationStyle"],
+): string {
+   switch (communicationStyle) {
+      case "first_person":
+         return `## Communication Style: First Person Perspective
+
+**Core Approach**:
+- Write as the brand or individual, using "I", "me", and "my" throughout all content
+- Present insights, experiences, and recommendations as if they are coming directly from the brand or expert
+- Use a personal, authentic, and authoritative voice that builds trust and connection
+- Share stories, lessons, and opinions from a first-hand point of view
+- Take ownership of statements, advice, and brand promises
+
+**Example Language Patterns**:
+- "In my experience..."
+- "I recommend..."
+- "We've found that..."
+- "My approach is..."
+- "I believe..."
+
+**Key Reminders**:
+- Avoid referring to the brand or individual in the third person
+- Maintain consistency in first-person language across all sections
+- Use direct, confident statements that reflect personal expertise and accountability`;
+      case "third_person":
+         return `## Communication Style: Third Person Perspective
+
+**Core Approach**:
+- Communicate from an external viewpoint, referring to the brand or individual by name or as "they", "he", "she", or "it"
+- Present information, insights, and recommendations as observations about the brand or expert
+- Maintain a professional, objective, and slightly detached tone
+- Attribute actions, beliefs, and expertise to the brand or individual, not the writer
+- Use third-person pronouns and proper nouns consistently
+
+**Example Language Patterns**:
+- "[Brand] recommends..."
+- "They have found that..."
+- "According to [Brand], ..."
+- "Their approach is..."
+- "[Brand] believes..."
+
+**Key Reminders**:
+- Avoid using "I", "me", or "my" in any context
+- Ensure all statements are attributed to the brand or individual, not the writer
+- Maintain third-person perspective throughout the content`;
+      default:
+         return "";
+   }
+}
+
 // --- ENHANCED PROMPT GENERATOR ---
 export function generateAgentPrompt(
    agent: AgentConfig,
@@ -470,6 +631,9 @@ export function generateAgentPrompt(
       getVoiceToneSection(agent.voiceTone),
       getTargetAudienceSection(agent.targetAudience),
       getFormattingStyleSection(agent.formattingStyle ?? "structured"),
+      getLanguageSection(agent.language), // NEW
+      getCommunicationStyleSection(agent.communicationStyle), // NEW
+      getBrandIntegrationSection(agent.brandIntegration), // NEW
       getKnowledgeSection(opts.knowledgeChunks),
    ];
 
@@ -486,7 +650,7 @@ export function generateAgentPrompt(
    // Add specific requirements if provided
    if (opts.specificRequirements && opts.specificRequirements.length > 0) {
       sections.push(
-         `## Specific Requirements\n\n${opts.specificRequirements.map((req) => `- ${req}`).join("\n")}`,
+         `## Specific Requirements\n\n${opts.specificRequirements.map((req: string) => `- ${req}`).join("\n")}`,
       );
    }
 
@@ -523,6 +687,9 @@ export function generateDefaultBasePrompt(agent: AgentConfig): string {
       getVoiceToneSection(agent.voiceTone),
       getTargetAudienceSection(agent.targetAudience),
       getFormattingStyleSection(agent.formattingStyle ?? "structured"),
+      getCommunicationStyleSection(agent.communicationStyle),
+      getLanguageSection(agent.language), // Added language section
+      getBrandIntegrationSection(agent.brandIntegration), // Added brand integration section
    ];
    if (agent.basePrompt) {
       sections.push(`## Custom Agent Instructions\n\n${agent.basePrompt}`);
@@ -618,7 +785,7 @@ export function optimizeKnowledgeChunks(
       if (chunk.keywords) {
          relevanceScore +=
             chunk.keywords.filter(
-               (keyword) =>
+               (keyword: string) =>
                   topicLower.includes(keyword.toLowerCase()) ||
                   descriptionLower.includes(keyword.toLowerCase()),
             ).length * 15;
@@ -715,10 +882,9 @@ export function getAllAgentKnowledgeChunks(
    contentRequest: ContentRequest,
 ): KnowledgeChunk[] {
    // This would typically be called from your database layer
-   // Filter chunks by agentId and active status
-   const agentChunks = allChunks.filter(
-      (chunk) => chunk.agentId === agentId && chunk.isActive !== false,
-   );
+   // Filter chunks by agentId only (isActive removed)
+   // Filter chunks by agentId only (isActive removed)
+   const agentChunks = allChunks.filter((chunk) => chunk.agentId === agentId);
 
    // Optimize and return the best chunks for this specific request
    return optimizeKnowledgeChunks(

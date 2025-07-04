@@ -12,6 +12,7 @@ import {
    redirect,
    Scripts,
 } from "@tanstack/react-router";
+import { Toaster } from "sonner";
 
 export interface MyRouterContext {
    eden: EdenClientType;
@@ -23,6 +24,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       <RootDocument>
          <QueryProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+               <Toaster />
                <Outlet />
             </ThemeProvider>
          </QueryProvider>
@@ -49,7 +51,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
          },
       ],
    }),
-   loader: async () => {
+   beforeLoad: async () => {
       const decision = await arcjetProtect();
 
       if (!decision) return;

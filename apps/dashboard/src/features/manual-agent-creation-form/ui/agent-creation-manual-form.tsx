@@ -17,12 +17,19 @@ import {
    ReviewSubmitStepSubscribe,
 } from "./review-submit-step";
 import { VoiceToneStep, VoiceToneStepSubscribe } from "./voice-tone-step";
+import {
+   BrandIntegrationStep,
+   BrandIntegrationStepSubscribe,
+} from "./brand-integration-step";
 
 import {
    contentTypeEnum,
    formattingStyleEnum,
    targetAudienceEnum,
    voiceToneEnum,
+   languageEnum,
+   brandIntegrationEnum,
+   communicationStyleEnum, // <-- Add this import
 } from "@api/schemas/agent-schema";
 import { z } from "zod";
 import type { EdenClientType } from "@packages/eden";
@@ -39,6 +46,15 @@ export const agentFormSchema = z.object({
    voiceTone: z.enum(voiceToneEnum.enumValues, {
       required_error: "Voice tone is required",
    }),
+   language: z.enum(languageEnum.enumValues, {
+      required_error: "Language is required",
+   }),
+   brandIntegration: z.enum(brandIntegrationEnum.enumValues, {
+      required_error: "Brand integration is required",
+   }),
+   communicationStyle: z.enum(communicationStyleEnum.enumValues, {
+      required_error: "Communication style is required",
+   }), // <-- Add this field
 });
 export type AgentFormData = z.infer<typeof agentFormSchema>;
 export type AgentForm = ReturnType<typeof useAgentForm>;
@@ -48,6 +64,7 @@ const steps = [
    { id: "step-voice-tone", title: "Voice Tone" },
    { id: "step-target-audience", title: "Target Audience" },
    { id: "step-formatting-style", title: "Formatting Style" },
+   { id: "step-brand-integration", title: "Brand Integration" }, // New step
    { id: "step-review-submit", title: "Review & Submit" },
 ] as const;
 
@@ -79,8 +96,8 @@ export function AgentCreationManualForm({
             return "Who will be reading your content?";
          case "step-formatting-style":
             return "How should your content be structured?";
-         case "step-topics-seo":
-            return "Let's add topics and keywords for SEO!";
+         case "step-brand-integration":
+            return "How closely should your agent follow your brand guidelines? Also, choose how your agent should communicate: as a singular person or in third person.";
          case "step-review-submit":
             return "Almost there! Let's review everything before creating your agent!";
          default:
@@ -148,6 +165,9 @@ export function AgentCreationManualForm({
                            "step-formatting-style": () => (
                               <FormattingStyleStep form={form} />
                            ),
+                           "step-brand-integration": () => (
+                              <BrandIntegrationStep form={form} />
+                           ),
                            "step-review-submit": () => (
                               <ReviewSubmitStep form={form} />
                            ),
@@ -200,6 +220,12 @@ export function AgentCreationManualForm({
                         ),
                         "step-formatting-style": () => (
                            <FormattingStyleStepSubscribe
+                              form={form}
+                              next={methods.next}
+                           />
+                        ),
+                        "step-brand-integration": () => (
+                           <BrandIntegrationStepSubscribe
                               form={form}
                               next={methods.next}
                            />

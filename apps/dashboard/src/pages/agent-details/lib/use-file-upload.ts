@@ -1,6 +1,6 @@
 // apps/dashboard/src/pages/agent-details/lib/use-file-upload.ts
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouteContext } from "@tanstack/react-router";
@@ -10,13 +10,10 @@ export type UploadedFile = {
    fileUrl: string;
    uploadedAt: string;
 };
-interface SelectedFile {
-   file: File;
-   id: string;
-}
 
 export interface UseFileUploadOptions {
    onUploadComplete?: (newFiles: UploadedFile[]) => void;
+   fileLimit?: number;
 }
 
 export default function useFileUpload(
@@ -24,11 +21,10 @@ export default function useFileUpload(
    options?: UseFileUploadOptions,
 ) {
    const { agentId } = useParams({ from: "/_dashboard/agents/$agentId/" });
-   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
-   const [uploading, setUploading] = useState(false);
    const fileInputRef = useRef<HTMLInputElement>(null);
    const queryClient = useQueryClient();
    const { eden } = useRouteContext({ from: "/_dashboard/agents/$agentId/" });
+   const fileLimit = options?.fileLimit ?? 5;
 
    // Delete file mutation
    const deleteFileMutation = useMutation({
@@ -53,6 +49,23 @@ export default function useFileUpload(
       },
    });
 
+   // Upload file mutation
+   const uploadFileMutation = useMutation({
+      mutationFn: async (file: File) => {
+         const { data, error } = await eden.api.v1
+            .agents({ id: agentId })
+            .upload.post({ file });
+         if (error) {
+            throw new Error("Upload failed");
+         }
+         return data.file;
+      },
+      onError: (_err: unknown, file: File) => {
+         console.error("File upload error:", _err);
+         toast.error(`Failed to upload ${file.name}`);
+      },
+   });
+
    const handleFileSelect = async (
       event: React.ChangeEvent<HTMLInputElement>,
    ) => {
@@ -68,44 +81,31 @@ export default function useFileUpload(
       }
 
       // Check if adding these files would exceed the limit
-      const totalFiles =
-         selectedFiles.length + files.length + (uploadedFiles?.length || 0);
-      if (totalFiles > 3) {
-         toast.error("Maximum 3 files allowed.");
+      const totalFiles = uploadedFiles.length + files.length;
+      if (totalFiles > fileLimit) {
+         toast.error(`Maximum ${fileLimit} files allowed.`);
          return;
       }
 
-      setUploading(true);
+      toast.info("Uploading file(s)...");
 
       const uploaded: UploadedFile[] = [];
       for (const file of files) {
          try {
-            const formData = new FormData();
-            formData.append("file", file);
-
-            const { data, error } = await eden.api.v1
-               .agents({ id: agentId })
-               .upload.post({
-                  file,
-               });
-            if (error) {
-               throw new Error("Upload failed");
+            const uploadedFile = await uploadFileMutation.mutateAsync(file);
+            if (uploadedFile) {
+               uploaded.push(uploadedFile);
             }
-
-            if (data) {
-               uploaded.push(data.file);
-            }
-         } catch (err) {
-            console.error("File upload error:", err);
-            toast.error(`Failed to upload ${file.name}`);
+         } catch {
+            // Error handled in mutation's onError
          }
       }
 
-      setUploading(false);
-
       if (uploaded.length > 0) {
          options?.onUploadComplete?.(uploaded);
-         toast.success(`${uploaded.length} file(s) uploaded successfully.`);
+         toast.success(
+            `${uploaded.length} file(s) uploaded successfully and sent for knowledge chunk processing!`,
+         );
          queryClient.invalidateQueries({ queryKey: ["agent", agentId] });
       }
 
@@ -131,19 +131,15 @@ export default function useFileUpload(
       }
    };
 
-   const canAddMore = selectedFiles.length + (uploadedFiles?.length || 0) < 3;
-   const remainingSlots =
-      3 - (uploadedFiles?.length || 0) - selectedFiles.length;
+   const canAddMore = uploadedFiles.length < fileLimit;
+   const remainingSlots = fileLimit - uploadedFiles.length;
 
    return {
-      selectedFiles,
-      setSelectedFiles,
       fileInputRef,
       handleFileSelect,
       handleButtonClick,
       handleDeleteFile,
       canAddMore,
       remainingSlots,
-      uploading,
    };
 }

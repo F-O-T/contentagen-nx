@@ -2,6 +2,14 @@ import { Input } from "@packages/ui/components/input";
 import { Textarea } from "@packages/ui/components/textarea";
 import type { AgentForm } from "../lib/use-agent-form";
 import { Button } from "@packages/ui/components/button";
+import { languageEnum } from "@api/schemas/agent-schema";
+import {
+   Select,
+   SelectTrigger,
+   SelectContent,
+   SelectItem,
+} from "@packages/ui/components/select";
+import { COMMUNICATION_STYLES } from "../lib/agent-form-constants";
 
 export function BasicInfoStep({ form }: { form: AgentForm }) {
    return (
@@ -23,6 +31,39 @@ export function BasicInfoStep({ form }: { form: AgentForm }) {
                </field.FieldContainer>
             )}
          </form.AppField>
+         <form.AppField name="language">
+            {(field) => (
+               <field.FieldContainer>
+                  <field.FieldLabel>Language *</field.FieldLabel>
+                  <Select
+                     value={field.state.value || ""}
+                     onValueChange={(value) =>
+                        field.handleChange(
+                           value as (typeof languageEnum.enumValues)[number],
+                        )
+                     }
+                     name={field.name}
+                  >
+                     <SelectTrigger id={field.name} className="w-full">
+                        {field.state.value
+                           ? languageEnum.enumValues
+                                .find((lang) => lang === field.state.value)
+                                ?.charAt(0)
+                                .toUpperCase() + field.state.value.slice(1)
+                           : "Select a language"}
+                     </SelectTrigger>
+                     <SelectContent>
+                        {languageEnum.enumValues.map((lang) => (
+                           <SelectItem key={lang} value={lang}>
+                              {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                           </SelectItem>
+                        ))}
+                     </SelectContent>
+                  </Select>
+                  <field.FieldMessage />
+               </field.FieldContainer>
+            )}
+         </form.AppField>
          <form.AppField name="description">
             {(field) => (
                <field.FieldContainer>
@@ -36,6 +77,39 @@ export function BasicInfoStep({ form }: { form: AgentForm }) {
                      rows={3}
                      value={field.state.value}
                   />
+                  <field.FieldMessage />
+               </field.FieldContainer>
+            )}
+         </form.AppField>
+         {/* Communication Style Section - now in BasicInfoStep */}
+         <form.AppField name="communicationStyle">
+            {(field) => (
+               <field.FieldContainer
+                  id="communication-style-field"
+                  className="space-y-2"
+               >
+                  <div className="text-base text-foreground">
+                     How should your agent communicate?
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-2 mx-auto">
+                     {COMMUNICATION_STYLES.map((option) => (
+                        <button
+                           className={`group relative rounded-lg border-2 p-4 text-left text-sm font-medium transition-all hover:shadow-sm ${
+                              field.state.value === option.value
+                                 ? "border-primary bg-primary/5 text-primary shadow-sm"
+                                 : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                           }`}
+                           key={option.value}
+                           onClick={() => field.handleChange(option.value)}
+                           type="button"
+                        >
+                           {option.label}
+                           <div className="text-xs text-muted-foreground mt-1">
+                              {option.description}
+                           </div>
+                        </button>
+                     ))}
+                  </div>
                   <field.FieldMessage />
                </field.FieldContainer>
             )}

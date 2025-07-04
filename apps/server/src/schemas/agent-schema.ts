@@ -12,6 +12,7 @@ import {
    vector,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
+import { z } from "zod";
 
 // Enums (copied from content-schema for now, can be refactored later)
 export const contentTypeEnum = pgEnum("content_type", [
@@ -45,6 +46,24 @@ export const formattingStyleEnum = pgEnum("formatting_style", [
 ]);
 export type FormattingStyle = (typeof formattingStyleEnum.enumValues)[number];
 
+export const languageEnum = pgEnum("language", ["english", "portuguese"]);
+export type Language = (typeof languageEnum.enumValues)[number];
+
+export const brandIntegrationEnum = pgEnum("brand_integration", [
+   "strict_guideline",
+   "flexible_guideline",
+   "reference_only",
+   "creative_blend",
+]);
+export type BrandIntegration = (typeof brandIntegrationEnum.enumValues)[number];
+
+export const communicationStyleEnum = pgEnum("communication_style", [
+   "first_person",
+   "third_person",
+]);
+export type CommunicationStyle =
+   (typeof communicationStyleEnum.enumValues)[number];
+
 // Agent table (without knowledgeBase, to be added: knowledge_chunk table)
 export const agent = pgTable(
    "agent",
@@ -74,11 +93,22 @@ export const agent = pgTable(
          .$type<{ fileName: string; fileUrl: string; uploadedAt: string }[]>()
          .default([]),
       basePrompt: text("base_prompt"),
+      language: languageEnum("language").notNull(), // New field
+      brandIntegration: brandIntegrationEnum("brand_integration").notNull(), // New field
+      communicationStyle: communicationStyleEnum("communication_style")
+         .default("first_person")
+         .notNull(), // Now uses enum
    },
    (table) => [index("agent_user_id_idx").on(table.userId)],
 );
 
 // Knowledge chunk table for Brand Brain
+export const knowledgeSourceEnum = pgEnum("knowledge_source", [
+   "brand_knowledge",
+   "knowledge_point",
+]);
+export type KnowledgeSource = (typeof knowledgeSourceEnum.enumValues)[number];
+
 export const knowledgeChunk = pgTable(
    "knowledge_chunk",
    {
@@ -90,7 +120,7 @@ export const knowledgeChunk = pgTable(
       summary: text("summary"),
       category: text("category"),
       keywords: json("keywords").$type<string[]>(),
-      source: text("source"),
+      source: knowledgeSourceEnum("source").notNull(),
       sourceType: text("source_type"),
       sourceIdentifier: text("source_identifier"),
       embedding: vector("embedding", { dimensions: 1536 }),
@@ -100,7 +130,6 @@ export const knowledgeChunk = pgTable(
       updatedAt: timestamp("updated_at")
          .$defaultFn(() => new Date())
          .notNull(),
-      isActive: boolean("is_active").default(true),
    },
    (table) => [
       index("knowledge_chunk_agent_id_idx").on(table.agentId),
@@ -110,6 +139,24 @@ export const knowledgeChunk = pgTable(
       ),
    ],
 );
+
+// --- ZOD SCHEMAS FOR KNOWLEDGE CHUNK ---
+export const knowledgeChunkSchema = z.object({
+   id: z.string().uuid(),
+   agentId: z.string().uuid(),
+   source: z.enum(["brand_knowledge", "knowledge_point"]),
+   content: z.string(),
+   summary: z.string().optional(),
+   category: z.string().optional(),
+   keywords: z.array(z.string()).optional(),
+   sourceType: z.string().optional(),
+   sourceIdentifier: z.string().optional(),
+   embedding: z.any().optional(),
+   createdAt: z.date().or(z.string()),
+   updatedAt: z.date().or(z.string()),
+});
+
+export type KnowledgeChunk = z.infer<typeof knowledgeChunkSchema>;
 
 // Agent relations (moved from content-schema)
 export const agentRelations = relations(agent, ({ one, many }) => ({
