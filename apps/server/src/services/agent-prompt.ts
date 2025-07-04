@@ -3,8 +3,10 @@ import type {
    VoiceTone,
    TargetAudience,
    FormattingStyle,
+   knowledgeChunk,
+   agent,
 } from "../schemas/agent-schema";
-import type { knowledgeChunk, agent } from "../schemas/agent-schema";
+
 // --- CORE TYPES ---
 type KnowledgeChunk = typeof knowledgeChunk.$inferSelect;
 type AgentConfig = typeof agent.$inferSelect;
@@ -21,7 +23,6 @@ export interface AgentPromptOptions {
    specificRequirements?: string[];
 }
 
-// --- OPTIMIZED CONTENT TYPE PROMPTS ---
 function getContentTypeSection(
    contentType: ContentType,
    request: ContentRequest,
@@ -347,7 +348,13 @@ function getFormattingStyleSection(style: FormattingStyle): string {
 
 // --- BRAND-FOCUSED KNOWLEDGE INTEGRATION ---
 function getKnowledgeSection(knowledgeChunks?: KnowledgeChunk[]): string {
-   if (!knowledgeChunks || knowledgeChunks.length === 0) {
+   // Only use brand knowledge chunks
+   const brandChunks: KnowledgeChunk[] =
+      knowledgeChunks?.filter(
+         (chunk: KnowledgeChunk) => chunk.source === "brand_knowledge",
+      ) ?? [];
+
+   if (brandChunks.length === 0) {
       return `## ⚠️ BRAND KNOWLEDGE: MISSING CRITICAL INFORMATION
 
 **MAJOR LIMITATION**: No brand knowledge has been provided. This severely limits the content's value and authenticity.
@@ -374,37 +381,35 @@ function getKnowledgeSection(knowledgeChunks?: KnowledgeChunk[]): string {
 
 **Available Brand Knowledge**:\n`;
 
-   // Group knowledge chunks by category for better organization
-   const categorizedChunks = knowledgeChunks.reduce(
-      (acc, chunk) => {
-         const category = chunk.category || "Brand Guidelines";
-         if (!acc[category]) acc[category] = [];
-         acc[category].push(chunk);
-         return acc;
+   // Group brand knowledge chunks by category for better organization
+   const categorizedChunks: Record<string, KnowledgeChunk[]> =
+      brandChunks.reduce(
+         (acc: Record<string, KnowledgeChunk[]>, chunk: KnowledgeChunk) => {
+            const category = chunk.category || "Brand Guidelines";
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(chunk);
+            return acc;
+         },
+         {} as Record<string, KnowledgeChunk[]>,
+      );
+
+   Object.entries(categorizedChunks).forEach(
+      ([category, chunks]: [string, KnowledgeChunk[]]) => {
+         knowledgeSection += `\n### 📋 ${category}\n`;
+         chunks.forEach((chunk: KnowledgeChunk, index: number) => {
+            knowledgeSection += `\n**Brand Source ${index + 1}**:`;
+            if (chunk.sourceType) knowledgeSection += ` (${chunk.sourceType})`;
+            knowledgeSection += `\n`;
+            if (chunk.summary) {
+               knowledgeSection += `**Key Points**: ${chunk.summary}\n`;
+            }
+            if (chunk.keywords && chunk.keywords.length > 0) {
+               knowledgeSection += `**Brand Keywords to Use**: ${chunk.keywords.join(", ")}\n`;
+            }
+            knowledgeSection += `**Brand Content to Reference**: ${chunk.content}\n\n`;
+         });
       },
-      {} as Record<string, KnowledgeChunk[]>,
    );
-
-   Object.entries(categorizedChunks).forEach(([category, chunks]) => {
-      knowledgeSection += `\n### 📋 ${category}\n`;
-
-      chunks.forEach((chunk, index) => {
-         knowledgeSection += `\n**Brand Source ${index + 1}**:`;
-         if (chunk.source) knowledgeSection += ` ${chunk.source}`;
-         if (chunk.sourceType) knowledgeSection += ` (${chunk.sourceType})`;
-         knowledgeSection += `\n`;
-
-         if (chunk.summary) {
-            knowledgeSection += `**Key Points**: ${chunk.summary}\n`;
-         }
-
-         if (chunk.keywords && chunk.keywords.length > 0) {
-            knowledgeSection += `**Brand Keywords to Use**: ${chunk.keywords.join(", ")}\n`;
-         }
-
-         knowledgeSection += `**Brand Content to Reference**: ${chunk.content}\n\n`;
-      });
-   });
 
    knowledgeSection += `**🚨 MANDATORY BRAND INTEGRATION CHECKLIST**:
 ✅ **Brand Voice**: Every paragraph should reflect the brand's unique voice and perspective
@@ -563,6 +568,58 @@ ${sellingBehavior}
 `;
 }
 
+// --- COMMUNICATION STYLE SECTION ---
+function getCommunicationStyleSection(
+   communicationStyle: AgentConfig["communicationStyle"],
+): string {
+   switch (communicationStyle) {
+      case "first_person":
+         return `## Communication Style: First Person Perspective
+
+**Core Approach**:
+- Write as the brand or individual, using "I", "me", and "my" throughout all content
+- Present insights, experiences, and recommendations as if they are coming directly from the brand or expert
+- Use a personal, authentic, and authoritative voice that builds trust and connection
+- Share stories, lessons, and opinions from a first-hand point of view
+- Take ownership of statements, advice, and brand promises
+
+**Example Language Patterns**:
+- "In my experience..."
+- "I recommend..."
+- "We've found that..."
+- "My approach is..."
+- "I believe..."
+
+**Key Reminders**:
+- Avoid referring to the brand or individual in the third person
+- Maintain consistency in first-person language across all sections
+- Use direct, confident statements that reflect personal expertise and accountability`;
+      case "third_person":
+         return `## Communication Style: Third Person Perspective
+
+**Core Approach**:
+- Communicate from an external viewpoint, referring to the brand or individual by name or as "they", "he", "she", or "it"
+- Present information, insights, and recommendations as observations about the brand or expert
+- Maintain a professional, objective, and slightly detached tone
+- Attribute actions, beliefs, and expertise to the brand or individual, not the writer
+- Use third-person pronouns and proper nouns consistently
+
+**Example Language Patterns**:
+- "[Brand] recommends..."
+- "They have found that..."
+- "According to [Brand], ..."
+- "Their approach is..."
+- "[Brand] believes..."
+
+**Key Reminders**:
+- Avoid using "I", "me", or "my" in any context
+- Ensure all statements are attributed to the brand or individual, not the writer
+- Maintain third-person perspective throughout the content`;
+      default:
+         return "";
+   }
+}
+
 // --- ENHANCED PROMPT GENERATOR ---
 export function generateAgentPrompt(
    agent: AgentConfig,
@@ -575,6 +632,7 @@ export function generateAgentPrompt(
       getTargetAudienceSection(agent.targetAudience),
       getFormattingStyleSection(agent.formattingStyle ?? "structured"),
       getLanguageSection(agent.language), // NEW
+      getCommunicationStyleSection(agent.communicationStyle), // NEW
       getBrandIntegrationSection(agent.brandIntegration), // NEW
       getKnowledgeSection(opts.knowledgeChunks),
    ];
@@ -592,7 +650,7 @@ export function generateAgentPrompt(
    // Add specific requirements if provided
    if (opts.specificRequirements && opts.specificRequirements.length > 0) {
       sections.push(
-         `## Specific Requirements\n\n${opts.specificRequirements.map((req) => `- ${req}`).join("\n")}`,
+         `## Specific Requirements\n\n${opts.specificRequirements.map((req: string) => `- ${req}`).join("\n")}`,
       );
    }
 
@@ -629,6 +687,7 @@ export function generateDefaultBasePrompt(agent: AgentConfig): string {
       getVoiceToneSection(agent.voiceTone),
       getTargetAudienceSection(agent.targetAudience),
       getFormattingStyleSection(agent.formattingStyle ?? "structured"),
+      getCommunicationStyleSection(agent.communicationStyle),
       getLanguageSection(agent.language), // Added language section
       getBrandIntegrationSection(agent.brandIntegration), // Added brand integration section
    ];
@@ -726,7 +785,7 @@ export function optimizeKnowledgeChunks(
       if (chunk.keywords) {
          relevanceScore +=
             chunk.keywords.filter(
-               (keyword) =>
+               (keyword: string) =>
                   topicLower.includes(keyword.toLowerCase()) ||
                   descriptionLower.includes(keyword.toLowerCase()),
             ).length * 15;

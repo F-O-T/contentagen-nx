@@ -7,6 +7,7 @@ import {
    UsersIcon,
    PaintbrushIcon,
    Brain,
+   SpeakerIcon,
 } from "lucide-react";
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Button } from "@packages/ui/components/button";
@@ -52,6 +53,7 @@ export function ReviewSubmitStep({ form }: { form: AgentForm }) {
          ),
          className: "",
       },
+
       {
          icon: <Brain className="w-4 h-4" />,
          label: "Brand integration",
@@ -59,6 +61,14 @@ export function ReviewSubmitStep({ form }: { form: AgentForm }) {
             String(form.getFieldValue("brandIntegration") ?? ""),
          ),
          className: "",
+      },
+      {
+         icon: <SpeakerIcon className="w-4 h-4" />,
+         label: "Communication Style",
+         value: formatValueToTitleCase(
+            String(form.getFieldValue("communicationStyle") ?? ""),
+         ),
+         className: "col-span-2",
       },
       {
          icon: <FileTextIcon className="w-4 h-4" />,

@@ -9,6 +9,7 @@ import {
    SelectContent,
    SelectItem,
 } from "@packages/ui/components/select";
+import { COMMUNICATION_STYLES } from "../lib/agent-form-constants";
 
 export function BasicInfoStep({ form }: { form: AgentForm }) {
    return (
@@ -76,6 +77,39 @@ export function BasicInfoStep({ form }: { form: AgentForm }) {
                      rows={3}
                      value={field.state.value}
                   />
+                  <field.FieldMessage />
+               </field.FieldContainer>
+            )}
+         </form.AppField>
+         {/* Communication Style Section - now in BasicInfoStep */}
+         <form.AppField name="communicationStyle">
+            {(field) => (
+               <field.FieldContainer
+                  id="communication-style-field"
+                  className="space-y-2"
+               >
+                  <div className="text-base text-foreground">
+                     How should your agent communicate?
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-2 mx-auto">
+                     {COMMUNICATION_STYLES.map((option) => (
+                        <button
+                           className={`group relative rounded-lg border-2 p-4 text-left text-sm font-medium transition-all hover:shadow-sm ${
+                              field.state.value === option.value
+                                 ? "border-primary bg-primary/5 text-primary shadow-sm"
+                                 : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                           }`}
+                           key={option.value}
+                           onClick={() => field.handleChange(option.value)}
+                           type="button"
+                        >
+                           {option.label}
+                           <div className="text-xs text-muted-foreground mt-1">
+                              {option.description}
+                           </div>
+                        </button>
+                     ))}
+                  </div>
                   <field.FieldMessage />
                </field.FieldContainer>
             )}

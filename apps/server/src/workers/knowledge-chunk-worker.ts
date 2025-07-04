@@ -2,6 +2,7 @@ import { Queue, Worker, type Job } from "bullmq";
 import { eq } from "drizzle-orm";
 import { db } from "../integrations/database";
 import { knowledgeChunk } from "../schemas/agent-schema";
+import type { KnowledgeSource } from "../schemas/agent-schema";
 import { redis } from "../services/redis";
 
 export type KnowledgeChunkJobData =
@@ -12,7 +13,7 @@ export type KnowledgeChunkJobData =
         summary?: string;
         category?: string;
         keywords?: string[];
-        source?: string;
+        source: KnowledgeSource;
         sourceType?: string;
         sourceIdentifier?: string;
         embedding: number[];
@@ -24,7 +25,7 @@ export type KnowledgeChunkJobData =
         summary?: string;
         category?: string;
         keywords?: string[];
-        source?: string;
+        source?: KnowledgeSource;
         sourceType?: string;
         sourceIdentifier?: string;
         embedding?: number[];

@@ -88,10 +88,9 @@ function calculateContentMetrics(text: string): ContentQualityMetrics {
       };
    }
 
-   const words = text
-      .trim()
-      .split(/\s+/)
-      .filter((word) => word.length > 0);
+   // Improved word count: match word boundaries using regex
+   // This matches sequences of alphanumeric characters (including apostrophes for contractions)
+   const words = text.match(/\b[\w'-]+\b/g) || [];
    const wordCount = words.length;
    const readingTime = Math.ceil(wordCount / CONTENT_CONFIG.WORDS_PER_MINUTE);
 
@@ -110,9 +109,9 @@ function calculateContentMetrics(text: string): ContentQualityMetrics {
       words.reduce((sum, word) => {
          return (
             sum +
-            Math.max(1, word.toLowerCase().replace(/[^aeiou]/g, "").length)
+            Math.max(1, word.toLowerCase().replace(/[^aeiouy]/g, "").length)
          );
-      }, 0) / wordCount;
+      }, 0) / (wordCount || 1);
 
    const readabilityScore = Math.max(
       0,
@@ -485,6 +484,11 @@ async function saveContent(
          }
       }
 
+      // Ensure tags is always an array (default to empty array)
+      const tags: string[] = [];
+      // Ensure qualityScore is an integer
+      const qualityScore = Math.round(metrics.readabilityScore);
+
       // Create content record with enhanced metadata
       const [newContent] = await db
          .insert(content)
@@ -496,9 +500,10 @@ async function saveContent(
             slug: uniqueSlug,
             wordsCount: metrics.wordCount,
             readTimeMinutes: metrics.readingTime,
-            qualityScore: metrics.readabilityScore,
+            qualityScore: qualityScore,
             topics: generatedContent.metadata?.topics || [],
             sources: usedSources || [],
+            tags: tags, // Always provide tags
          })
          .returning();
 
@@ -661,49 +666,14 @@ export const contentGenerationWorker = new Worker(
          );
          job.updateProgress(60);
 
-         // Build prompt for tags/metadata (strict JSON output)
-         job.log(
-            "Building strict content generation prompt for tags/metadata...",
-         );
-         const tagsPrompt = buildStrictTagsPrompt(articleContent.content);
-         job.log(
-            `Generated tags prompt length: ${tagsPrompt.length} characters`,
-         );
-         job.updateProgress(65);
-
-         // Generate tags/metadata with Qwen model
-         job.log("Generating tags/metadata with Qwen model...");
-         const tagsContent = await generateContent(
-            tagsPrompt,
-            job,
-            CONTENT_CONFIG.QWEN_MODEL,
-            1,
-            "tags",
-         );
-         job.updateProgress(70);
-
-         // Merge results: use articleContent.content as body, tagsContent.metadata.topics as tags, etc.
-         const mergedContent = {
-            ...articleContent,
-            metadata: {
-               wordCount: articleContent.metadata?.wordCount ?? 0,
-               readingTime: articleContent.metadata?.readingTime ?? 0,
-               paragraphCount: articleContent.metadata?.paragraphCount ?? 0,
-               sentenceCount: articleContent.metadata?.sentenceCount ?? 0,
-               avgWordsPerSentence:
-                  articleContent.metadata?.avgWordsPerSentence ?? 0,
-               readabilityScore: articleContent.metadata?.readabilityScore ?? 0,
-               confidence: articleContent.metadata?.confidence ?? 0.8,
-               topics:
-                  tagsContent.metadata &&
-                  Array.isArray(tagsContent.metadata.topics)
-                     ? tagsContent.metadata.topics
-                     : [],
-            },
-         };
-
          // Save content to database
          job.log("Saving generated content...");
+         // Always calculate metrics to ensure all required fields are present and of type number
+         const metrics = calculateContentMetrics(articleContent.content);
+         const mergedContent = {
+            ...articleContent,
+            metadata: metrics,
+         };
          const savedContent = await saveContent(
             request,
             mergedContent,
@@ -768,27 +738,6 @@ export const contentGenerationWorker = new Worker(
       },
    },
 );
-
-// Strict prompt for tags/metadata generation
-function buildStrictTagsPrompt(article: string): string {
-   return `You are an expert content classifier and metadata generator. Your task is to analyze the following article and output ONLY a valid JSON object with the following structure:
-
-{
-  "topics": ["tag1", "tag2", "tag3", ...]
-}
-
-Rules:
-- Output ONLY the JSON object, with no extra text, markdown, or explanations.
-- The topics array must contain 3-8 relevant, concise, lowercase tags (single words or short phrases, no sentences).
-- Do NOT include the article text in your response.
-- Do NOT add any comments or formatting outside the JSON object.
-- If you are unsure, output an empty array for topics.
-
-Here is the article:
-"""
-${article}
-"""`;
-}
 
 // Enhanced event handlers
 contentGenerationWorker.on("error", (err) => {

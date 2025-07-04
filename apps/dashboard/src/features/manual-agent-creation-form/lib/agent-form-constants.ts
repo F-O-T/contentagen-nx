@@ -4,7 +4,10 @@ import {
    targetAudienceEnum,
    formattingStyleEnum,
 } from "@api/schemas/agent-schema";
-import type { brandIntegrationEnum } from "@api/schemas/agent-schema";
+import type {
+   brandIntegrationEnum,
+   communicationStyleEnum,
+} from "@api/schemas/agent-schema";
 
 /**
  * Converts a snake_case or underscore string to Title Case.
@@ -72,5 +75,22 @@ export const BRAND_INTEGRATIONS: readonly {
       value: "creative_blend",
       label: "Creative Blend",
       description: "Blend brand guidelines creatively for unique content.",
+   },
+];
+
+export const COMMUNICATION_STYLES: readonly {
+   value: (typeof communicationStyleEnum.enumValues)[number];
+   label: string;
+   description: string;
+}[] = [
+   {
+      value: "first_person",
+      label: "First Person",
+      description: "The AI communicates as a singular person (I/me/my).",
+   },
+   {
+      value: "third_person",
+      label: "Third Person",
+      description: "The AI communicates in third person (he/she/they/it).",
    },
 ];

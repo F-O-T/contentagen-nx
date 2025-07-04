@@ -21,7 +21,7 @@ export const agentRoutes = new Elysia({
       "/",
       async ({ body, user }) => {
          // Generate default base prompt for the agent
-         const agentConfig = {
+         const agentConfig: typeof agentTable.$inferSelect = {
             ...body,
             description: body.description ?? null,
             formattingStyle: body.formattingStyle ?? "structured",
@@ -29,6 +29,8 @@ export const agentRoutes = new Elysia({
             totalDrafts: body.totalDrafts ?? 0,
             totalPublished: body.totalPublished ?? 0,
             lastGeneratedAt: body.lastGeneratedAt ?? null,
+            communicationStyle: body.communicationStyle ?? "first_person",
+            brandIntegration: body.brandIntegration ?? "strict_guideline",
             // Add required fields that will be set by the database
             id: "",
             createdAt: new Date(),
@@ -63,6 +65,7 @@ export const agentRoutes = new Elysia({
    .patch(
       "/:id",
       async ({ params, body, user }) => {
+         // Update the agent fields
          const updated = await db
             .update(agentTable)
             .set(body)
@@ -76,7 +79,77 @@ export const agentRoutes = new Elysia({
          if (!updated.length) {
             throw new NotFoundError("Agent not found", "AGENT_NOT_FOUND");
          }
-         return { agent: updated[0] };
+         // Fetch the updated agent (direct index access with type assertion)
+         const agent = updated[0] as NonNullable<(typeof updated)[0]>;
+
+         // List of fields that affect the prompt
+         const promptFields = [
+            "description",
+            "formattingStyle",
+            "contentType",
+            "name",
+            "targetAudience",
+            "voiceTone",
+            "language",
+            "brandIntegration",
+            "communicationStyle",
+            "isActive",
+            "uploadedFiles",
+         ];
+         // Check if any prompt-relevant field was updated
+         // Use keyof typeof agent for better type safety
+         const shouldRegeneratePrompt = promptFields.some((field) => {
+            type AgentKey = keyof typeof agent;
+            type BodyKey = keyof typeof body;
+
+            if (field in agent && field in body) {
+               const agentKey = field as AgentKey;
+               const bodyKey = field as BodyKey;
+               return (
+                  body[bodyKey] !== undefined &&
+                  body[bodyKey] !== agent[agentKey]
+               );
+            }
+            return false;
+         });
+
+         let finalAgent = agent;
+         if (shouldRegeneratePrompt) {
+            // Ensure communicationStyle is always set
+            const communicationStyle =
+               agent.communicationStyle || "first_person";
+            // Regenerate the basePrompt with the latest config, ensuring all required fields are present
+            const basePrompt = generateDefaultBasePrompt({
+               ...agent,
+               description: agent.description ?? "",
+               formattingStyle: agent.formattingStyle ?? "structured",
+               contentType: agent.contentType ?? "blog_posts",
+               name: agent.name ?? "Agent",
+               createdAt: agent.createdAt ?? new Date(),
+               targetAudience: agent.targetAudience ?? "general_public",
+               voiceTone: agent.voiceTone ?? "professional",
+               language: agent.language ?? "english",
+               brandIntegration: agent.brandIntegration ?? "strict_guideline",
+               communicationStyle,
+               isActive: agent.isActive ?? true,
+               totalDrafts: agent.totalDrafts ?? 0,
+               totalPublished: agent.totalPublished ?? 0,
+               lastGeneratedAt: agent.lastGeneratedAt ?? null,
+               updatedAt: agent.updatedAt ?? new Date(),
+               userId: agent.userId ?? "",
+               uploadedFiles: agent.uploadedFiles ?? [],
+               basePrompt: agent.basePrompt ?? null,
+               id: agent.id,
+            });
+            // Update the agent's basePrompt in the database
+            const [finalAgentRaw] = await db
+               .update(agentTable)
+               .set({ basePrompt })
+               .where(eq(agentTable.id, params.id))
+               .returning();
+            finalAgent = finalAgentRaw ?? agent;
+         }
+         return { agent: finalAgent };
       },
       {
          auth: true,
@@ -194,7 +267,7 @@ export const agentRoutes = new Elysia({
          await distillQueue.add("distill-knowledge", {
             agentId: agent.id,
             rawText: fileContent,
-            source: file.name,
+            source: "brand_knowledge",
             sourceType: file.type,
             sourceIdentifier: fileUrl,
          });

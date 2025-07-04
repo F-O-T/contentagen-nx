@@ -13,7 +13,7 @@ import { contentManagementRoutes } from "./routes/content-management-routes";
 import { contentRequestRoutes } from "./routes/content-request-routes";
 import { fileRoutes } from "./routes/file-routes";
 import { waitlistRoutes } from "./routes/waitlist-routes";
-import { contentGenerationQueue } from "./workers/content-generation";
+import { contentGenerationQueue } from "./workers/content-generation-worker";
 import { distillQueue } from "./workers/distill-worker";
 import { knowledgeChunkQueue } from "./workers/knowledge-chunk-worker";
 const serverAdapter = new ElysiaAdapter("/ui");

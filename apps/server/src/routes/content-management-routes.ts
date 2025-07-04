@@ -3,7 +3,7 @@ import { db } from "../integrations/database";
 import { contentRequest } from "../schemas/content-schema";
 import { createSelectSchema } from "drizzle-typebox";
 import { authMiddleware } from "../integrations/auth";
-import { contentGenerationQueue } from "@api/workers/content-generation";
+import { contentGenerationQueue } from "@api/workers/content-generation-worker";
 import { eq } from "drizzle-orm";
 
 // OpenAPI Tags for route organization
