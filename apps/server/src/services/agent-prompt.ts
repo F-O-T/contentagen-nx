@@ -883,7 +883,6 @@ export function getAllAgentKnowledgeChunks(
 ): KnowledgeChunk[] {
    // This would typically be called from your database layer
    // Filter chunks by agentId only (isActive removed)
-   const agentChunks = allChunks.filter((chunk) => chunk.agentId === agentId);
    // Filter chunks by agentId only (isActive removed)
    const agentChunks = allChunks.filter((chunk) => chunk.agentId === agentId);
 

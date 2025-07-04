@@ -21,10 +21,6 @@ import {
    BrandIntegrationStep,
    BrandIntegrationStepSubscribe,
 } from "./brand-integration-step";
-import {
-   BrandIntegrationStep,
-   BrandIntegrationStepSubscribe,
-} from "./brand-integration-step";
 
 import {
    contentTypeEnum,
@@ -175,9 +171,6 @@ export function AgentCreationManualForm({
                            "step-brand-integration": () => (
                               <BrandIntegrationStep form={form} />
                            ),
-                           "step-brand-integration": () => (
-                              <BrandIntegrationStep form={form} />
-                           ),
                            "step-review-submit": () => (
                               <ReviewSubmitStep form={form} />
                            ),
@@ -230,12 +223,6 @@ export function AgentCreationManualForm({
                         ),
                         "step-formatting-style": () => (
                            <FormattingStyleStepSubscribe
-                              form={form}
-                              next={methods.next}
-                           />
-                        ),
-                        "step-brand-integration": () => (
-                           <BrandIntegrationStepSubscribe
                               form={form}
                               next={methods.next}
                            />

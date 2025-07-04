@@ -267,7 +267,7 @@ export function GeneratedContentDisplay({
                         <div className="relative prose prose-sm max-w-none dark:prose-invert">
                            <ReactMarkdown>
                               {(displayContent?.length || 0) > 2000
-                                 ? displayContent?.substring(0, 2000) + "..."
+                                 ? `${displayContent?.substring(0, 2000)}...`
                                  : displayContent || ""}
                            </ReactMarkdown>
                            {(displayContent?.length || 0) > 2000 && (
