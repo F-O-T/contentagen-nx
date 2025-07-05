@@ -17,8 +17,9 @@ export function CreateAgentPage() {
       },
       onSuccess: () => {
          toast.success("Agent created successfully!");
-
-         navigate({ to: "/agents" });
+         navigate({
+            to: "/agents",
+         });
       },
    });
    return (

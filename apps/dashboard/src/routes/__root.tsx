@@ -12,7 +12,7 @@ import {
    redirect,
    Scripts,
 } from "@tanstack/react-router";
-import { Toaster } from "sonner";
+import { Toaster } from "@packages/ui/components/sonner";
 
 export interface MyRouterContext {
    eden: EdenClientType;
