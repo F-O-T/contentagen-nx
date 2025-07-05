@@ -57,7 +57,7 @@ async function updateUserUsageForContentGeneration(headers: Headers) {
       body: {
          event: "generated-content",
          metadata: {
-            productId: isPremium ? env.POLAR_PREMIUM_PLAN : env.POLAR_FREE_PLAN,
+            productId: isPremium ? env.POLAR_PREMIUM_PLAN : "",
             amount: 10,
          },
       },

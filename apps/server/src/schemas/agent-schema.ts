@@ -12,8 +12,6 @@ import {
    vector,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema";
-import { z } from "zod";
-
 // Enums (copied from content-schema for now, can be refactored later)
 export const contentTypeEnum = pgEnum("content_type", [
    "blog_posts",
@@ -140,23 +138,8 @@ export const knowledgeChunk = pgTable(
    ],
 );
 
-// --- ZOD SCHEMAS FOR KNOWLEDGE CHUNK ---
-export const knowledgeChunkSchema = z.object({
-   id: z.string().uuid(),
-   agentId: z.string().uuid(),
-   source: z.enum(["brand_knowledge", "knowledge_point"]),
-   content: z.string(),
-   summary: z.string().optional(),
-   category: z.string().optional(),
-   keywords: z.array(z.string()).optional(),
-   sourceType: z.string().optional(),
-   sourceIdentifier: z.string().optional(),
-   embedding: z.any().optional(),
-   createdAt: z.date().or(z.string()),
-   updatedAt: z.date().or(z.string()),
-});
-
-export type KnowledgeChunk = z.infer<typeof knowledgeChunkSchema>;
+export type KnowledgeChunkSelect = typeof knowledgeChunk.$inferSelect;
+export type KnowledgeChunkInsert = typeof knowledgeChunk.$inferInsert;
 
 // Agent relations (moved from content-schema)
 export const agentRelations = relations(agent, ({ one, many }) => ({

@@ -93,7 +93,7 @@ function NavUserContent() {
          fetchOptions: {
             onSuccess: () => {
                router.navigate({
-                  to: "/",
+                  to: "/auth/sign-in",
                });
             },
          },

@@ -53,10 +53,6 @@ export const auth = betterAuth({
             usage({
                creditProducts: [
                   {
-                     productId: env.POLAR_FREE_PLAN,
-                     slug: "free",
-                  },
-                  {
                      productId: env.POLAR_PREMIUM_PLAN,
                      slug: "premium",
                   },
