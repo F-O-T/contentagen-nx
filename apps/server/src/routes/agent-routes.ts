@@ -65,10 +65,54 @@ export const agentRoutes = new Elysia({
    .patch(
       "/:id",
       async ({ params, body, user }) => {
-         // Update the agent fields
-         const updated = await db
+         // Fetch the agent to ensure it exists and belongs to the user
+         const agent = await db.query.agent.findFirst({
+            where: and(
+               eq(agentTable.id, params.id),
+               eq(agentTable.userId, user.id),
+            ),
+         });
+         if (!agent) {
+            throw new NotFoundError("Agent not found", "AGENT_NOT_FOUND");
+         }
+         // Always regenerate the basePrompt with the latest config
+         const updatedAgentConfig = {
+            ...agent,
+            ...body,
+            description: body.description ?? agent.description ?? "",
+            formattingStyle:
+               body.formattingStyle ?? agent.formattingStyle ?? "structured",
+            contentType: body.contentType ?? agent.contentType ?? "blog_posts",
+            name: body.name ?? agent.name ?? "Agent",
+            createdAt: agent.createdAt ?? new Date(),
+            targetAudience:
+               body.targetAudience ?? agent.targetAudience ?? "general_public",
+            voiceTone: body.voiceTone ?? agent.voiceTone ?? "professional",
+            language: body.language ?? agent.language ?? "english",
+            brandIntegration:
+               body.brandIntegration ??
+               agent.brandIntegration ??
+               "strict_guideline",
+            communicationStyle:
+               body.communicationStyle ??
+               agent.communicationStyle ??
+               "first_person",
+            isActive: body.isActive ?? agent.isActive ?? true,
+            totalDrafts: body.totalDrafts ?? agent.totalDrafts ?? 0,
+            totalPublished: body.totalPublished ?? agent.totalPublished ?? 0,
+            lastGeneratedAt:
+               body.lastGeneratedAt ?? agent.lastGeneratedAt ?? null,
+            updatedAt: new Date(),
+            userId: agent.userId,
+            uploadedFiles: body.uploadedFiles ?? agent.uploadedFiles ?? [],
+            basePrompt: null, // will be set below
+            id: agent.id,
+         };
+         const basePrompt = generateDefaultBasePrompt(updatedAgentConfig);
+         // Update the agent in the database with the new basePrompt and body fields
+         const [updated] = await db
             .update(agentTable)
-            .set(body)
+            .set({ ...body, basePrompt, updatedAt: new Date() })
             .where(
                and(
                   eq(agentTable.id, params.id),
@@ -76,80 +120,13 @@ export const agentRoutes = new Elysia({
                ),
             )
             .returning();
-         if (!updated.length) {
-            throw new NotFoundError("Agent not found", "AGENT_NOT_FOUND");
+         if (!updated) {
+            throw new NotFoundError(
+               "Agent not found after update",
+               "AGENT_NOT_FOUND",
+            );
          }
-         // Fetch the updated agent (direct index access with type assertion)
-         const agent = updated[0] as NonNullable<(typeof updated)[0]>;
-
-         // List of fields that affect the prompt
-         const promptFields = [
-            "description",
-            "formattingStyle",
-            "contentType",
-            "name",
-            "targetAudience",
-            "voiceTone",
-            "language",
-            "brandIntegration",
-            "communicationStyle",
-            "isActive",
-            "uploadedFiles",
-         ];
-         // Check if any prompt-relevant field was updated
-         // Use keyof typeof agent for better type safety
-         const shouldRegeneratePrompt = promptFields.some((field) => {
-            type AgentKey = keyof typeof agent;
-            type BodyKey = keyof typeof body;
-
-            if (field in agent && field in body) {
-               const agentKey = field as AgentKey;
-               const bodyKey = field as BodyKey;
-               return (
-                  body[bodyKey] !== undefined &&
-                  body[bodyKey] !== agent[agentKey]
-               );
-            }
-            return false;
-         });
-
-         let finalAgent = agent;
-         if (shouldRegeneratePrompt) {
-            // Ensure communicationStyle is always set
-            const communicationStyle =
-               agent.communicationStyle || "first_person";
-            // Regenerate the basePrompt with the latest config, ensuring all required fields are present
-            const basePrompt = generateDefaultBasePrompt({
-               ...agent,
-               description: agent.description ?? "",
-               formattingStyle: agent.formattingStyle ?? "structured",
-               contentType: agent.contentType ?? "blog_posts",
-               name: agent.name ?? "Agent",
-               createdAt: agent.createdAt ?? new Date(),
-               targetAudience: agent.targetAudience ?? "general_public",
-               voiceTone: agent.voiceTone ?? "professional",
-               language: agent.language ?? "english",
-               brandIntegration: agent.brandIntegration ?? "strict_guideline",
-               communicationStyle,
-               isActive: agent.isActive ?? true,
-               totalDrafts: agent.totalDrafts ?? 0,
-               totalPublished: agent.totalPublished ?? 0,
-               lastGeneratedAt: agent.lastGeneratedAt ?? null,
-               updatedAt: agent.updatedAt ?? new Date(),
-               userId: agent.userId ?? "",
-               uploadedFiles: agent.uploadedFiles ?? [],
-               basePrompt: agent.basePrompt ?? null,
-               id: agent.id,
-            });
-            // Update the agent's basePrompt in the database
-            const [finalAgentRaw] = await db
-               .update(agentTable)
-               .set({ basePrompt })
-               .where(eq(agentTable.id, params.id))
-               .returning();
-            finalAgent = finalAgentRaw ?? agent;
-         }
-         return { agent: finalAgent };
+         return { agent: updated };
       },
       {
          auth: true,

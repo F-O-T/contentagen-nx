@@ -8,7 +8,7 @@ import { CreateNewAgentButton } from "./create-new-agent-button";
 export function AgentListPage() {
    const { eden } = useRouteContext({ from: "/_dashboard/agents/" });
    const { data } = useSuspenseQuery({
-      queryFn: () => eden.api.v1.agents.get(),
+      queryFn: async () => await eden.api.v1.agents.get(),
       queryKey: createQueryKey("eden.api.v1.agents.get"),
       select: (data) => data.data,
    });

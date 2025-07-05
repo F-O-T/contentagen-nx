@@ -83,8 +83,10 @@ export const AgentPersonaCard: React.FC<AgentPersonaCardProps> = ({
    return (
       <Card>
          <CardHeader>
-            <CardTitle>Agent Persona</CardTitle>
-            <CardDescription>Configuration summary</CardDescription>
+            <CardTitle className="line-clamp-1">Agent Persona</CardTitle>
+            <CardDescription className="line-clamp-1">
+               Configuration summary
+            </CardDescription>
          </CardHeader>
          <CardContent className="flex flex-col gap-4">
             <div className="flex items-center gap-4 rounded-lg bg-muted p-4 ">

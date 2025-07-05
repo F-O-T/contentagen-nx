@@ -167,7 +167,7 @@ export function AgentCard({ agent }: AgentCardProps) {
                   value={item.value}
                />
             ))}
-            <div className="flex gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                {statsItems.map((item) => (
                   <InfoItem
                      key={item.label}

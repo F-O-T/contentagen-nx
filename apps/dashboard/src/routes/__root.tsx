@@ -51,12 +51,17 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
          },
       ],
    }),
-   beforeLoad: async () => {
+   beforeLoad: async ({ location }) => {
       const decision = await arcjetProtect();
 
       if (!decision) return;
 
       if (decision.isDenied()) {
+         throw redirect({ to: "/auth/sign-in" });
+      }
+
+      // Redirect from root path to sign-in
+      if (location.pathname === "/") {
          throw redirect({ to: "/auth/sign-in" });
       }
    },

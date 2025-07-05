@@ -1,3 +1,4 @@
+import { createQueryKey } from "@packages/eden";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useParams, useRouteContext } from "@tanstack/react-router";
 
@@ -8,7 +9,7 @@ export default function useAgentDetails() {
 
    // Fetch agent data
    const { data: agentData, isLoading } = useSuspenseQuery({
-      queryKey: ["agent", agentId],
+      queryKey: createQueryKey("eden.api.v1.agents({ id: agentId }).get"),
       queryFn: async () => {
          const response = await eden.api.v1.agents({ id: agentId }).get();
          return response.data;

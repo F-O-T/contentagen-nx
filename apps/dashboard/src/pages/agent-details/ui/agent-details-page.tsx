@@ -39,16 +39,16 @@ export function AgentDetailsPage() {
    if (!agent) {
       return (
          <main className="h-full w-full flex flex-col gap-6 p-6">
-            <Alert variant="destructive">
+            <Alert>
                <AlertTitle>Agent not found</AlertTitle>
                <AlertDescription>
-                  The requested agent could not be found.
+                  The agent you are trying to view does not exist or has been
+                  deleted.
                </AlertDescription>
             </Alert>
          </main>
       );
    }
-
    return (
       <main className="space-y-4">
          <TalkingMascot message="Manage your agent’s configuration and knowledge base." />
@@ -58,18 +58,18 @@ export function AgentDetailsPage() {
             </div>
             <div className="col-span-5 md:col-span-2 space-y-4 ">
                <AgentStatsCard
-                  totalDrafts={agent.totalDrafts ?? 0}
-                  totalPublished={agent.totalPublished ?? 0}
+                  totalDrafts={agent?.totalDrafts ?? 0}
+                  totalPublished={agent?.totalPublished ?? 0}
                />
                <AgentPersonaCard
-                  name={agent.name}
-                  description={agent.description ?? ""}
-                  contentType={agent.contentType ?? ""}
-                  voiceTone={agent.voiceTone ?? ""}
-                  targetAudience={agent.targetAudience ?? ""}
-                  formattingStyle={agent.formattingStyle ?? ""}
-                  language={agent.language ?? ""}
-                  brandIntegration={agent.brandIntegration ?? ""}
+                  name={agent?.name ?? ""}
+                  description={agent?.description ?? ""}
+                  contentType={agent?.contentType ?? ""}
+                  voiceTone={agent?.voiceTone ?? ""}
+                  targetAudience={agent?.targetAudience ?? ""}
+                  formattingStyle={agent?.formattingStyle ?? ""}
+                  language={agent?.language ?? ""}
+                  brandIntegration={agent?.brandIntegration ?? ""}
                />
                <AgentDetailsKnowledgeBaseCard
                   uploadedFiles={uploadedFiles}
@@ -79,7 +79,7 @@ export function AgentDetailsPage() {
             </div>
 
             <div className="col-span-5 md:col-span-3">
-               <AgentDetailsPromptCard basePrompt={agent.basePrompt ?? ""} />
+               <AgentDetailsPromptCard basePrompt={agent?.basePrompt ?? ""} />
             </div>
          </div>
 
