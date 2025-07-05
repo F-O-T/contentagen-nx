@@ -9,7 +9,7 @@ import type {
 
 // --- CORE TYPES ---
 type KnowledgeChunk = typeof knowledgeChunk.$inferSelect;
-type AgentConfig = typeof agent.$inferSelect;
+export type AgentConfig = typeof agent.$inferSelect;
 
 export interface ContentRequest {
    topic: string;
