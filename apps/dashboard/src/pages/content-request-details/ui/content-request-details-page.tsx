@@ -169,7 +169,7 @@ export function ContentRequestDetailsPage() {
                   <AlertDialogFooter>
                      <AlertDialogCancel>Cancel</AlertDialogCancel>
                      <AlertDialogAction
-                        onClick={() => deleteContentRequest(request?.id)}
+                        onClick={() => deleteContentRequest(request?.id ?? "")}
                         disabled={isDeleting}
                      >
                         {isDeleting ? "Deleting..." : "Delete"}
