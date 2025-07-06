@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import {
    Card,
@@ -34,7 +34,7 @@ export function ContentRequestDetailsPage() {
    const { eden } = useRouteContext({
       from: "/_dashboard/content/requests/$requestId/",
    });
-   const { request, generatedContent, isLoading } = useContentRequestDetails();
+   const { request, generatedContent } = useContentRequestDetails();
    const { exportContent, isExporting } = useContentExport();
 
    const [alertOpen, setAlertOpen] = useState(false);
@@ -107,85 +107,77 @@ export function ContentRequestDetailsPage() {
       });
    };
 
-   if (isLoading) {
-      return (
-         <div className="h-full w-full flex items-center justify-center">
-            Loading...
-         </div>
-      );
-   }
-
-   if (!request) {
-      return <div>Content request not found</div>;
-   }
-
    return (
-      <main className="h-full w-full flex flex-col gap-6">
-         <TalkingMascot message="Here's your content request details! You can review, edit, and manage your generated content. Use the export options to get your content in different formats." />
-         {!request.approved && (
-            <Card>
-               <CardHeader>
-                  <CardTitle>Request Status</CardTitle>
-                  <CardDescription>
-                     Approve or reject the generation of this content request
-                  </CardDescription>
-               </CardHeader>
-               <CardContent className="grid grid-cols-2 gap-4">
-                  <SquaredIconButton
-                     onClick={handleApproveRequest}
-                     disabled={isApproving}
-                  >
-                     {isApproving ? "Approving..." : "Approve"}
-                  </SquaredIconButton>
-                  <SquaredIconButton
-                     onClick={handleRejectRequest}
-                     disabled={isRejecting}
-                  >
-                     {isRejecting ? "Rejecting..." : "Reject"}
-                  </SquaredIconButton>
-               </CardContent>
-            </Card>
-         )}
+      <Suspense fallback={<div>Loading...</div>}>
+         <main className="h-full w-full flex flex-col gap-6">
+            <TalkingMascot message="Here's your content request details! You can review, edit, and manage your generated content. Use the export options to get your content in different formats." />
+            {!request?.approved && (
+               <Card>
+                  <CardHeader>
+                     <CardTitle>Request Status</CardTitle>
+                     <CardDescription>
+                        Approve or reject the generation of this content request
+                     </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-2 gap-4">
+                     <SquaredIconButton
+                        onClick={handleApproveRequest}
+                        disabled={isApproving}
+                     >
+                        {isApproving ? "Approving..." : "Approve"}
+                     </SquaredIconButton>
+                     <SquaredIconButton
+                        onClick={handleRejectRequest}
+                        disabled={isRejecting}
+                     >
+                        {isRejecting ? "Rejecting..." : "Reject"}
+                     </SquaredIconButton>
+                  </CardContent>
+               </Card>
+            )}
 
-         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Request Details */}
-            <div className="lg:col-span-1 space-y-4">
-               <RequestDetailsCard request={request} />
-               <ContentStatsCard generatedContent={generatedContent} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+               {/* Request Details */}
+               <div className="lg:col-span-1 space-y-4">
+                  {request && <RequestDetailsCard request={request} />}
+                  <ContentStatsCard generatedContent={generatedContent} />
+               </div>
+
+               {/* Generated Content */}
+               <div className="lg:col-span-2">
+                  <GeneratedContentDisplay
+                     generatedContent={generatedContent}
+                     isExporting={isExporting}
+                     isGenerating={!request?.isCompleted}
+                     onExport={handleExportContent}
+                  />
+               </div>
             </div>
 
-            {/* Generated Content */}
-            <div className="lg:col-span-2">
-               <GeneratedContentDisplay
-                  generatedContent={generatedContent}
-                  isExporting={isExporting}
-                  isGenerating={!request.isCompleted}
-                  onExport={handleExportContent}
-               />
-            </div>
-         </div>
-
-         {/* Delete Confirmation Dialog */}
-         <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-            <AlertDialogContent>
-               <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                     This action cannot be undone. This will permanently delete
-                     your content request and all associated data.
-                  </AlertDialogDescription>
-               </AlertDialogHeader>
-               <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                     onClick={() => deleteContentRequest(request.id)}
-                     disabled={isDeleting}
-                  >
-                     {isDeleting ? "Deleting..." : "Delete"}
-                  </AlertDialogAction>
-               </AlertDialogFooter>
-            </AlertDialogContent>
-         </AlertDialog>
-      </main>
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+               <AlertDialogContent>
+                  <AlertDialogHeader>
+                     <AlertDialogTitle>
+                        Are you absolutely sure?
+                     </AlertDialogTitle>
+                     <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete your content request and all associated data.
+                     </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                     <AlertDialogCancel>Cancel</AlertDialogCancel>
+                     <AlertDialogAction
+                        onClick={() => deleteContentRequest(request?.id)}
+                        disabled={isDeleting}
+                     >
+                        {isDeleting ? "Deleting..." : "Delete"}
+                     </AlertDialogAction>
+                  </AlertDialogFooter>
+               </AlertDialogContent>
+            </AlertDialog>
+         </main>
+      </Suspense>
    );
 }
