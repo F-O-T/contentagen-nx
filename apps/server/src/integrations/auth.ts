@@ -51,6 +51,7 @@ export const auth = betterAuth({
       polar({
          client: polarClient,
          createCustomerOnSignUp: true,
+         // @ts-ignore
          getCustomerCreateParams: () => ({
             metadata: {
                freeGenerationLimit: 3,
