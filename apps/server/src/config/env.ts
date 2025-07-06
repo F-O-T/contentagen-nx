@@ -12,6 +12,8 @@ const EnvSchema = Type.Object({
    POLAR_PRO_PLAN: Type.String(),
    REDIS_URL: Type.String(),
    OPENROUTER_API_KEY: Type.String(),
+   BETTER_AUTH_GOOGLE_CLIENT_ID: Type.String(),
+   BETTER_AUTH_GOOGLE_CLIENT_SECRET: Type.String(),
    OPENAI_API_KEY: Type.String(),
    AP_QUEUE_UI_PASSWORD: Type.String(),
    AP_QUEUE_UI_USERNAME: Type.String(),

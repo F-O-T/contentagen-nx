@@ -13,8 +13,15 @@ const polarClient = new Polar({
    accessToken: env.POLAR_ACCESS_TOKEN,
    server: isProduction ? "production" : "sandbox",
 });
-
+//TODO: setar a url certa em prod
 export const auth = betterAuth({
+   socialProviders: {
+      google: {
+         prompt: "select_account",
+         clientId: env.BETTER_AUTH_GOOGLE_CLIENT_ID,
+         clientSecret: env.BETTER_AUTH_GOOGLE_CLIENT_SECRET,
+      },
+   },
    basePath: "/api/v1/auth",
    appName: "ContentaGen-Auth",
    database: drizzleAdapter(db, {

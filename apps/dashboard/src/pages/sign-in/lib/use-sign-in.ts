@@ -22,6 +22,30 @@ export const useSignIn = () => {
       }),
       [],
    );
+   //TODO: setar a url certa em prod
+   const handleGoogleSignIn = useCallback(async () => {
+      await betterAuthClient.signIn.social(
+         {
+            provider: "google",
+            callbackURL: `http://localhost:3000/agents`,
+         },
+         {
+            onError: ({ error }) => {
+               toast.error(
+                  getErrorMessage[error.code as codes] || "Unknown error",
+                  {
+                     id: "sign-in-toast",
+                  },
+               );
+            },
+            onRequest: () => {
+               toast.loading("Signing in...", {
+                  id: "sign-in-toast",
+               });
+            },
+         },
+      );
+   }, [getErrorMessage]);
    const handleSignIn = useCallback(
       async ({ email, password }: z.infer<typeof schema>) => {
          await betterAuthClient.signIn.email(
@@ -79,5 +103,5 @@ export const useSignIn = () => {
       },
       [form],
    );
-   return { form, handleSubmit };
+   return { form, handleSubmit, handleGoogleSignIn };
 };

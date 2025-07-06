@@ -26,13 +26,9 @@ function AuthLayout() {
                <header className="flex flex-col justify-center items-center space-y-2 text-center">
                   <div className="flex gap-2 justify-center items-center">
                      <figure className="text-primary">
-                        <img
-                           alt="Project logo"
-                           className="w-12 h-12"
-                           src={logo}
-                        />
+                        <img alt="Project logo" className="size-8" src={logo} />
                      </figure>
-                     <h1 className="text-3xl font-bold tracking-tight text-primary">
+                     <h1 className="font-bold tracking-tight text-primary text-2xl">
                         {brand.name}
                      </h1>
                   </div>
