@@ -1,3 +1,4 @@
+import { handleContentGenerationInsgestion } from "@api/modules/billing/billing-service";
 import { contentGenerationQueue } from "../workers/content-generation-worker";
 
 export interface EnqueueContentRequestPayload {
@@ -11,6 +12,7 @@ export async function enqueueContentRequest(
    payload: EnqueueContentRequestPayload,
 ): Promise<void> {
    try {
+      await handleContentGenerationInsgestion(payload.headers);
       await contentGenerationQueue.add("process-content-request", payload);
 
       console.log(

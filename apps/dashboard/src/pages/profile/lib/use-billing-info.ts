@@ -12,6 +12,7 @@ export const useBillingInfo = () => {
       setIsLoading(true);
       const { data } = await betterAuthClient.customer.subscriptions.list({
          query: {
+            active: true,
             page: 1,
             limit: 10,
          },

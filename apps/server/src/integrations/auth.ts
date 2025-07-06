@@ -9,7 +9,7 @@ import { emailOTP, openAPI } from "better-auth/plugins";
 import Elysia from "elysia";
 import { db } from "./database";
 
-const polarClient = new Polar({
+export const polarClient = new Polar({
    accessToken: env.POLAR_ACCESS_TOKEN,
    server: isProduction ? "production" : "sandbox",
 });
@@ -51,24 +51,18 @@ export const auth = betterAuth({
       polar({
          client: polarClient,
          createCustomerOnSignUp: true,
+         getCustomerCreateParams: () => ({
+            metadata: {
+               freeGenerationLimit: 3,
+            },
+         }),
          use: [
             portal(),
             checkout({
                successUrl: "http://localhost:3000/profile",
                authenticatedUsersOnly: true,
             }),
-            usage({
-               creditProducts: [
-                  {
-                     productId: env.POLAR_PREMIUM_PLAN,
-                     slug: "premium",
-                  },
-                  {
-                     productId: env.POLAR_PRO_PLAN,
-                     slug: "pro",
-                  },
-               ],
-            }),
+            usage(),
          ],
       }),
    ],

@@ -32,7 +32,6 @@ export function ProfilePageBilling() {
          <Card>
             <CardHeader>
                <CardTitle className="flex items-center">
-                  <Crown className="h-5 w-5 mr-2 text-yellow-600" />
                   <div className="flex items-center gap-2">
                      Current Plan
                      <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
@@ -147,14 +146,12 @@ export function ProfilePageBilling() {
    };
 
    return (
-      <Card className="bg-secondary/10 border-none">
+      <Card>
          <CardHeader>
-            <CardTitle className="flex items-center">
-               <Crown className="h-5 w-5 mr-2 text-yellow-600" />
-               Current Plan
-            </CardTitle>
-            <CardDescription className="text-foreground/80">
-               You're currently on the {currentPlan.product.name}.
+            <CardTitle className="">Current Plan</CardTitle>
+            <CardDescription className="">
+               This is your current subscription plan details. You can manage
+               your subscription or view usage metrics below.
             </CardDescription>
          </CardHeader>
          <CardContent>
