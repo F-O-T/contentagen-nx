@@ -12,9 +12,14 @@ import { LayoutDashboardIcon, FilesIcon } from "lucide-react";
 import type * as React from "react";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
-
-const data = {
-   navMain: [
+import type { FileRoutesByTo } from "@/routeTree.gen";
+type NavigationItems = {
+   url: keyof FileRoutesByTo;
+   title: string;
+   icon: typeof LayoutDashboardIcon;
+};
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+   const navMain: NavigationItems[] = [
       {
          icon: LayoutDashboardIcon,
          title: "Your Agents",
@@ -25,10 +30,7 @@ const data = {
          title: "Your Content",
          url: "/content",
       },
-   ],
-};
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+   ];
    return (
       <Sidebar collapsible="offcanvas" {...props}>
          <SidebarHeader>
@@ -51,7 +53,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
          </SidebarHeader>
          <SidebarContent>
-            <NavMain items={data.navMain} />
+            <NavMain items={navMain} />
          </SidebarContent>
          <SidebarFooter>
             <NavUser />

@@ -10,18 +10,13 @@ export default function useAgentDetails() {
    // Fetch agent data
    const { data: agentData, isLoading } = useSuspenseQuery({
       queryKey: createQueryKey("eden.api.v1.agents({ id: agentId }).get"),
-      queryFn: async () => {
-         const response = await eden.api.v1.agents({ id: agentId }).get();
-         return response.data;
-      },
+      queryFn: async () => await eden.api.v1.agents({ id: agentId }).get(),
+      select: (data) => data.data,
    });
 
-   const agent = agentData?.agent;
-   const uploadedFiles = agent?.uploadedFiles || [];
-
    return {
-      agent,
+      agent: agentData?.agent,
       isLoading,
-      uploadedFiles,
+      uploadedFiles: agentData?.agent?.uploadedFiles || [],
    };
 }

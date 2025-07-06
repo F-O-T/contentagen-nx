@@ -64,9 +64,7 @@ export function AgentDetailsPromptCard({
                className={`${expanded ? "" : "h-full overflow-y-auto"} border rounded-lg p-4 bg-muted/30 transition-all`}
             >
                <div className="prose prose-sm max-w-none dark:prose-invert">
-                  <ReactMarkdown>
-                     {draft || "No base prompt configured"}
-                  </ReactMarkdown>
+                  <ReactMarkdown>{basePrompt}</ReactMarkdown>
                </div>
             </div>
          </CardContent>

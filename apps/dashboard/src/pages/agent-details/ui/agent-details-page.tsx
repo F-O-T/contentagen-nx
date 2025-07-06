@@ -1,10 +1,4 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
-import {
-   Alert,
-   AlertDescription,
-   AlertTitle,
-} from "@packages/ui/components/alert";
-import { Loader2 } from "lucide-react";
 import { AgentDetailsKnowledgeBaseCard } from "./agent-details-knowledge-base-card";
 import { AgentDetailsPromptCard } from "./agent-details-prompt-card";
 import { AgentPersonaCard } from "./agent-persona-card";
@@ -14,6 +8,7 @@ import useAgentDetails from "../lib/use-agent-details";
 import useFileViewer from "../lib/use-file-viewer";
 import { AgentDetailsKnowledgeChunksCard } from "./agent-details-knowledge-chunks-card";
 import { AgentDetailsContentRequestsCard } from "./agent-details-content-requests-card";
+import { Suspense } from "react";
 
 export function AgentDetailsPage() {
    const {
@@ -24,72 +19,53 @@ export function AgentDetailsPage() {
       open,
       close,
    } = useFileViewer();
-   const { agent, isLoading, uploadedFiles } = useAgentDetails();
+   const { agent, uploadedFiles } = useAgentDetails();
 
-   if (isLoading) {
-      return (
-         <main className="h-full w-full flex flex-col gap-6 p-6">
-            <div className="flex items-center justify-center h-64">
-               <Loader2 className="w-8 h-8 animate-spin" />
-            </div>
-         </main>
-      );
-   }
-
-   if (!agent) {
-      return (
-         <main className="h-full w-full flex flex-col gap-6 p-6">
-            <Alert>
-               <AlertTitle>Agent not found</AlertTitle>
-               <AlertDescription>
-                  The agent you are trying to view does not exist or has been
-                  deleted.
-               </AlertDescription>
-            </Alert>
-         </main>
-      );
-   }
    return (
-      <main className="space-y-4">
-         <TalkingMascot message="Manage your agent’s configuration and knowledge base." />
-         <div className="grid grid-cols-5 gap-4">
-            <div className="col-span-5">
-               <AgentDetailsContentRequestsCard />
-            </div>
-            <div className="col-span-5 md:col-span-2 space-y-4 ">
-               <AgentStatsCard
-                  totalDrafts={agent?.totalDrafts ?? 0}
-                  totalPublished={agent?.totalPublished ?? 0}
-               />
-               <AgentPersonaCard
-                  name={agent?.name ?? ""}
-                  description={agent?.description ?? ""}
-                  contentType={agent?.contentType ?? ""}
-                  voiceTone={agent?.voiceTone ?? ""}
-                  targetAudience={agent?.targetAudience ?? ""}
-                  formattingStyle={agent?.formattingStyle ?? ""}
-                  language={agent?.language ?? ""}
-                  brandIntegration={agent?.brandIntegration ?? ""}
-               />
-               <AgentDetailsKnowledgeBaseCard
-                  uploadedFiles={uploadedFiles}
-                  onViewFile={open}
-               />
-               <AgentDetailsKnowledgeChunksCard />
+      <Suspense>
+         <main className="space-y-4">
+            <TalkingMascot message="Manage your agent’s configuration and knowledge base." />
+            <div className="grid grid-cols-5 gap-4">
+               <div className="col-span-5">
+                  <AgentDetailsContentRequestsCard />
+               </div>
+               <div className="col-span-5 md:col-span-2 space-y-4 ">
+                  <AgentStatsCard
+                     totalDrafts={agent?.totalDrafts ?? 0}
+                     totalPublished={agent?.totalPublished ?? 0}
+                  />
+                  <AgentPersonaCard
+                     name={agent?.name ?? ""}
+                     description={agent?.description ?? ""}
+                     contentType={agent?.contentType ?? ""}
+                     voiceTone={agent?.voiceTone ?? ""}
+                     targetAudience={agent?.targetAudience ?? ""}
+                     formattingStyle={agent?.formattingStyle ?? ""}
+                     language={agent?.language ?? ""}
+                     brandIntegration={agent?.brandIntegration ?? ""}
+                  />
+                  <AgentDetailsKnowledgeBaseCard
+                     uploadedFiles={uploadedFiles}
+                     onViewFile={open}
+                  />
+                  <AgentDetailsKnowledgeChunksCard />
+               </div>
+
+               <div className="col-span-5 md:col-span-3">
+                  <AgentDetailsPromptCard
+                     basePrompt={agent?.basePrompt ?? ""}
+                  />
+               </div>
             </div>
 
-            <div className="col-span-5 md:col-span-3">
-               <AgentDetailsPromptCard basePrompt={agent?.basePrompt ?? ""} />
-            </div>
-         </div>
-
-         <FileViewerModal
-            open={isOpen}
-            fileName={fileName}
-            fileContent={fileContent}
-            loading={isFileLoading}
-            onClose={close}
-         />
-      </main>
+            <FileViewerModal
+               open={isOpen}
+               fileName={fileName}
+               fileContent={fileContent}
+               loading={isFileLoading}
+               onClose={close}
+            />
+         </main>
+      </Suspense>
    );
 }
