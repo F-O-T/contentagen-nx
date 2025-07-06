@@ -32,12 +32,13 @@ async function userHasFreeGenerationLimit(headers: Headers) {
          limit: 1,
       },
    });
-   if (user?.metadata?.freeGenerationLimit >= 1) {
+   if (Number(user?.metadata?.freeGenerationLimit) >= 1) {
       await polarClient.customers.update({
          id: user.id,
          customerUpdate: {
             metadata: {
-               freeGenerationLimit: user.metadata.freeGenerationLimit - 1,
+               freeGenerationLimit:
+                  Number(user?.metadata?.freeGenerationLimit) - 1,
             },
          },
       });
