@@ -1,5 +1,3 @@
-// Remove this file after migration is complete. Constants are now in @billing-limits.
-
 export const BILLING_EVENTS = {
    AGENT_SLOTS: "agent_slots",
    GENERATE_CONTENT: "generated_content",
