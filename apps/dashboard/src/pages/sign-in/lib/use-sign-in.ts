@@ -27,7 +27,7 @@ export const useSignIn = () => {
       await betterAuthClient.signIn.social(
          {
             provider: "google",
-            callbackURL: `http://localhost:3000/agents`,
+            callbackURL: `${window.location.origin}/agents`,
          },
          {
             onError: ({ error }) => {
