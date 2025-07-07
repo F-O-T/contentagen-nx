@@ -1,33 +1,17 @@
 import { betterAuthClient } from "@/integrations/better-auth";
-import type { IPolarSubscription } from "@/types";
-import { useCallback, useEffect, useState } from "react";
+import { createQueryKey } from "@packages/eden";
+import { useQuery } from "@tanstack/react-query";
 
 export const useBillingInfo = () => {
-   const [currentPlan, setCurrentPlan] = useState<IPolarSubscription | null>(
-      null,
-   );
-   const [isLoading, setIsLoading] = useState(false);
-
-   const getCurrentPlan = useCallback(async () => {
-      setIsLoading(true);
-      const { data } = await betterAuthClient.customer.subscriptions.list({
-         query: {
-            active: true,
-            page: 1,
-            limit: 10,
-         },
-      });
-
-      setCurrentPlan(data?.result?.items[0] as IPolarSubscription);
-      setIsLoading(false);
-   }, []);
-
-   useEffect(() => {
-      getCurrentPlan();
-   }, [getCurrentPlan]);
+   const { data: customerState, isLoading: isLoadingCustomerState } = useQuery({
+      queryKey: createQueryKey("betterAuthClient.customer.state"),
+      queryFn: () => betterAuthClient.customer.state(),
+   });
 
    return {
-      currentPlan,
-      isLoading,
+      customerState,
+      activeSubscription: customerState?.data?.activeSubscriptions[0],
+      activeMeters: customerState?.data?.activeMeters[0],
+      isLoading: isLoadingCustomerState,
    };
 };

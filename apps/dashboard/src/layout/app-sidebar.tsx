@@ -1,3 +1,5 @@
+import { useBillingInfo } from "@/pages/profile/lib/use-billing-info";
+import type { FileRoutesByTo } from "@/routeTree.gen";
 import brandConfig from "@packages/brand/index.json";
 import logo from "@packages/brand/logo.svg";
 import {
@@ -8,16 +10,18 @@ import {
    SidebarMenu,
    SidebarMenuItem,
 } from "@packages/ui/components/sidebar";
-import { LayoutDashboardIcon, FilesIcon } from "lucide-react";
+import { Skeleton } from "@packages/ui/components/skeleton";
+import { FilesIcon, LayoutDashboardIcon } from "lucide-react";
 import type * as React from "react";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
-import type { FileRoutesByTo } from "@/routeTree.gen";
+
 type NavigationItems = {
    url: keyof FileRoutesByTo;
    title: string;
    icon: typeof LayoutDashboardIcon;
 };
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
    const navMain: NavigationItems[] = [
       {
@@ -31,6 +35,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
          url: "/content",
       },
    ];
+
    return (
       <Sidebar collapsible="offcanvas" {...props}>
          <SidebarHeader>
@@ -56,8 +61,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <NavMain items={navMain} />
          </SidebarContent>
          <SidebarFooter>
+            <div className="flex justify-end">
+               <UserUsage />
+            </div>
             <NavUser />
          </SidebarFooter>
       </Sidebar>
    );
+}
+
+// TODO: Get rid of the magical number "3", we have to develop a way to get the free user usage limits in a more clever way.
+function UserUsage() {
+   const { activeMeters, customerState, isLoading } = useBillingInfo();
+
+   const total = activeMeters?.creditedUnits ?? 3;
+   const used =
+      activeMeters?.consumedUnits ??
+      3 - Number(customerState?.data?.metadata?.freeGenerationLimit);
+
+   return isLoading ? <Skeleton className="w-10 h-4" /> : `${used} / ${total}`;
 }
