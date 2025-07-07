@@ -139,16 +139,17 @@ function NavUserContent() {
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                      <DropdownMenuItem asChild>
-                        <Link to="/profile">
-                           <Button
-                              className="w-full items-center cursor-pointer justify-start flex gap-2"
-                              variant="ghost"
-                              onClick={() => setOpenMobile(false)}
-                           >
+                        <Button
+                           className="w-full items-center cursor-pointer justify-start flex gap-2 h-12"
+                           variant="ghost"
+                           onClick={() => setOpenMobile(false)}
+                           asChild
+                        >
+                           <Link to="/profile">
                               <UserCircleIcon />
                               Account
-                           </Button>
-                        </Link>
+                           </Link>
+                        </Button>
                      </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
