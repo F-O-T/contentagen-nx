@@ -11,7 +11,7 @@ export const useBillingInfo = () => {
    return {
       customerState,
       activeSubscription: customerState?.data?.activeSubscriptions[0],
-      activeMeters: customerState?.data?.activeMeters[0],
+      activeMeter: customerState?.data?.activeMeters[0],
       isLoading: isLoadingCustomerState,
    };
 };

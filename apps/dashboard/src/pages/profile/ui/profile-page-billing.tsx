@@ -11,11 +11,11 @@ import {
 } from "@packages/ui/components/card";
 import { Progress } from "@packages/ui/components/progress";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { AlertCircle, Check, Crown, Loader2 } from "lucide-react";
+import { AlertCircle, Crown, Loader2 } from "lucide-react";
 import { useCallback } from "react";
 
 export function ProfilePageBilling() {
-   const { currentPlan, isLoading } = useBillingInfo();
+   const { activeSubscription, activeMeter, isLoading } = useBillingInfo();
 
    const handleManageSubscription = useCallback(async () => {
       return await betterAuthClient.customer.portal();
@@ -33,7 +33,7 @@ export function ProfilePageBilling() {
             <CardHeader>
                <CardTitle className="flex items-center">
                   <div className="flex items-center gap-2">
-                     Current Plan
+                     Current plan
                      <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
                   </div>
                </CardTitle>
@@ -92,11 +92,11 @@ export function ProfilePageBilling() {
       );
    }
 
-   if (!currentPlan) {
+   if (!activeSubscription) {
       return (
          <Card>
             <CardHeader>
-               <CardTitle>No Active Plan</CardTitle>
+               <CardTitle>No active plan</CardTitle>
                <CardDescription>
                   You don't have an active subscription plan.
                </CardDescription>
@@ -145,10 +145,16 @@ export function ProfilePageBilling() {
       }
    };
 
+   const usagePercentage = calculateUsagePercentage(
+      activeMeter?.consumedUnits ?? 0,
+      activeMeter?.creditedUnits ?? 0,
+   );
+   const isNearLimit = usagePercentage > 80;
+
    return (
       <Card>
          <CardHeader>
-            <CardTitle className="">Current Plan</CardTitle>
+            <CardTitle className="">Current plan</CardTitle>
             <CardDescription className="">
                This is your current subscription plan details. You can manage
                your subscription or view usage metrics below.
@@ -158,97 +164,53 @@ export function ProfilePageBilling() {
             <div className="flex items-center justify-between mb-6">
                <div>
                   <h3 className="text-2xl font-bold text-foreground">
-                     {formatCurrency(currentPlan.amount, currentPlan.currency)}
+                     {formatCurrency(
+                        activeSubscription.amount,
+                        activeSubscription.currency,
+                     )}
                      <span className="text-base font-normal text-foreground/70">
-                        /{currentPlan.recurringInterval}
+                        /{activeSubscription.recurringInterval}
                      </span>
                   </h3>
                   <p className="text-sm text-foreground/70">
                      Next billing date:{" "}
-                     {formatDate(currentPlan.currentPeriodEnd)}
+                     {formatDate(activeSubscription.currentPeriodEnd)}
                   </p>
                </div>
                <Badge
                   variant="secondary"
-                  className={getStatusColor(currentPlan.status)}
+                  className={getStatusColor(activeSubscription.status)}
                >
-                  {currentPlan.status.charAt(0).toUpperCase() +
-                     currentPlan.status.slice(1)}
+                  {activeSubscription.status.charAt(0).toUpperCase() +
+                     activeSubscription.status.slice(1)}
                </Badge>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <div>
                   <h4 className="font-medium text-foreground mb-3">
-                     Plan Features
-                  </h4>
-                  <ul className="space-y-2">
-                     {currentPlan.product.benefits.map((benefit) => (
-                        <li
-                           key={benefit.id}
-                           className="flex items-center text-sm text-foreground/80"
-                        >
-                           <Check className="h-4 w-4 text-green-500 mr-2" />
-                           {benefit.description}
-                        </li>
-                     ))}
-                  </ul>
-                  {currentPlan.product.description && (
-                     <p className="text-sm text-foreground/70 mt-3">
-                        {currentPlan.product.description}
-                     </p>
-                  )}
-               </div>
-
-               <div>
-                  <h4 className="font-medium text-foreground mb-3">
-                     Usage This Month
+                     Usage this month
                   </h4>
                   <div className="space-y-4">
-                     {currentPlan.meters.map((meterUsage) => {
-                        const usagePercentage = calculateUsagePercentage(
-                           meterUsage.consumedUnits,
-                           meterUsage.creditedUnits,
-                        );
-                        const isNearLimit = usagePercentage > 80;
-
-                        return (
-                           <div key={meterUsage.id}>
-                              <div className="flex justify-between text-sm mb-1">
-                                 <span>{meterUsage.meter.name}</span>
-                                 <span>
-                                    {meterUsage.consumedUnits.toLocaleString()}{" "}
-                                    /{" "}
-                                    {meterUsage.creditedUnits === -1
-                                       ? "∞"
-                                       : meterUsage.creditedUnits.toLocaleString()}
-                                 </span>
-                              </div>
-                              <Progress
-                                 value={usagePercentage}
-                                 className="h-2"
-                              />
-                              {isNearLimit &&
-                                 meterUsage.creditedUnits !== -1 && (
-                                    <p className="text-xs text-orange-600 mt-1 flex items-center">
-                                       <AlertCircle className="h-3 w-3 mr-1" />
-                                       Approaching limit
-                                    </p>
-                                 )}
-                              {meterUsage.amount > 0 && (
-                                 <p className="text-xs text-foreground/60 mt-1">
-                                    Cost:{" "}
-                                    {formatCurrency(
-                                       meterUsage.amount,
-                                       currentPlan.currency,
-                                    )}
-                                 </p>
-                              )}
+                     {activeMeter ? (
+                        <div key={activeMeter.id}>
+                           <div className="flex justify-between text-sm mb-1">
+                              <span>
+                                 {activeMeter.consumedUnits.toLocaleString()} /{" "}
+                                 {activeMeter.creditedUnits === -1
+                                    ? "∞"
+                                    : activeMeter.creditedUnits.toLocaleString()}
+                              </span>
                            </div>
-                        );
-                     })}
-
-                     {currentPlan.meters.length === 0 && (
+                           <Progress value={usagePercentage} className="h-2" />
+                           {isNearLimit && activeMeter.creditedUnits !== -1 && (
+                              <p className="text-xs text-orange-600 mt-1 flex items-center">
+                                 <AlertCircle className="h-3 w-3 mr-1" />
+                                 Approaching limit
+                              </p>
+                           )}
+                        </div>
+                     ) : (
                         <p className="text-sm text-foreground/60">
                            No usage meters available for this plan.
                         </p>
@@ -259,7 +221,7 @@ export function ProfilePageBilling() {
 
             <div className="flex space-x-3 mt-6">
                <Button onClick={handleManageSubscription} variant="outline">
-                  Manage Subscription
+                  Manage subscription
                </Button>
             </div>
          </CardContent>

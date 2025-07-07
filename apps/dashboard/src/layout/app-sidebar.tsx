@@ -72,7 +72,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
 // TODO: Get rid of the magical number "3", we have to develop a way to get the free user usage limits in a more clever way.
 function UserUsage() {
-   const { activeMeters, customerState, isLoading } = useBillingInfo();
+   const {
+      activeMeter: activeMeters,
+      customerState,
+      isLoading,
+   } = useBillingInfo();
 
    const total = activeMeters?.creditedUnits ?? 3;
    const used =
