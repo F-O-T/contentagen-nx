@@ -16,6 +16,8 @@ COPY package.json ./
 COPY apps/server/package.json ./apps/server/
 COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/brand/package.json ./packages/brand/
+COPY packages/billing-limits/package.json ./packages/billing-limits/
+
 
 # Install all dependencies (monorepo-aware)
 RUN bun install
@@ -43,7 +45,7 @@ COPY package.json ./
 COPY apps/server/package.json ./apps/server/
 COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/brand/package.json ./packages/brand/
-
+COPY packages/billing-limits/package.json ./packages/billing-limits/
 # Install only production dependencies.
 RUN bun install 
 
