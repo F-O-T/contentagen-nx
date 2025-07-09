@@ -1,21 +1,38 @@
 import { auth, polarClient } from "@api/integrations/auth";
-import { BILLING_EVENTS } from "./billing-constants";
+import {
+   POLAR_BILLING_EVENTS,
+   handleContentMonthlyLimit,
+   getPolarPlanBasedOnValue,
+} from "@packages/billing-limits";
+
+async function getUserState(headers: Headers) {
+   const user = await auth.api.state({
+      headers,
+      query: { page: 1, limit: 1 },
+   });
+   if (!user) {
+      throw new Error("User not found");
+   }
+   const plan = getPolarPlanBasedOnValue(Number(user.acttiveSubscription[0].amount || 0));
+   return { user, plan };
+}
 
 export async function handleContentGenerationInsgestion(headers: Headers) {
    const hasFreeLimit = await userHasFreeGenerationLimit(headers);
    if (hasFreeLimit) {
       return;
    }
-   const hasExceededLimit = await userHasAlreadyExceededLimit(headers);
-   if (hasExceededLimit) {
-      throw new Error(
-         "You have exceeded your content generation limit for this month.",
-      );
-   }
+   const { plan } = await getUserState(headers);
+   const meters = await auth.api.meters({
+      headers,
+      query: { page: 1, limit: 1 },
+   });
+   const usage = meters?.result?.items[0]?.consumedUnits ?? 0;
+   handleContentMonthlyLimit(usage, plan);
    await auth.api.ingestion({
       headers,
       body: {
-         event: BILLING_EVENTS.GENERATE_CONTENT,
+         event: POLAR_BILLING_EVENTS.GENERATE_CONTENT,
          metadata: {
             amount: 1,
          },
@@ -25,37 +42,20 @@ export async function handleContentGenerationInsgestion(headers: Headers) {
 }
 
 async function userHasFreeGenerationLimit(headers: Headers) {
-   const user = await auth.api.state({
-      headers,
-      query: {
-         page: 1,
-         limit: 1,
-      },
-   });
-   if (Number(user?.metadata?.freeGenerationLimit) >= 1) {
-      await polarClient.customers.update({
-         id: user.id,
-         customerUpdate: {
-            metadata: {
-               freeGenerationLimit:
-                  Number(user?.metadata?.freeGenerationLimit) - 1,
-            },
-         },
-      });
-      return true;
+   const { user, plan } = await getUserState(headers);
+   const generated = Number(user?.metadata?.generated) || 0;
+   try {
+      handleContentMonthlyLimit(generated, plan);
+   } catch {
+      return false;
    }
-   return false;
-}
-
-async function userHasAlreadyExceededLimit(headers: Headers) {
-   const meters = await auth.api.meters({
-      headers,
-      query: {
-         page: 1,
-         limit: 1,
+   await polarClient.customers.update({
+      id: user.id,
+      customerUpdate: {
+         metadata: {
+            generated: generated + 1,
+         },
       },
    });
-   const usage = meters?.result?.items[0]?.consumedUnits ?? 0;
-   const limit = meters?.result?.items[0]?.creditedUnits ?? 0;
-   return usage >= limit;
+   return true;
 }

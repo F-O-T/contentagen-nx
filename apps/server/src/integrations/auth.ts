@@ -54,7 +54,7 @@ export const auth = betterAuth({
          // @ts-ignore
          getCustomerCreateParams: () => ({
             metadata: {
-               freeGenerationLimit: 3,
+               generated: 0,
             },
          }),
          use: [
@@ -65,7 +65,7 @@ export const auth = betterAuth({
                products: [
                   {
                      productId: env.POLAR_PREMIUM_PLAN,
-                     slug: "premium",
+                     slug: "pro",
                   },
                ],
             }),
@@ -87,6 +87,11 @@ export const authMiddleware = new Elysia({ name: "better-auth-middleware" })
             const session = await auth.api.getSession({
                headers,
             });
+            const user = await auth.api.state({
+               headers,
+               query: { page: 1, limit: 1 },
+            });
+            console.log("User state from auth middleware:", user);
             if (!session)
                return status(401, {
                   message:

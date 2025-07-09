@@ -1,10 +1,24 @@
+export function getPolarPlanBasedOnValue(value: number): POLAR_PLAN_SLUGS {
+   if (value >= POLAR_PLAN_VALUES.ULTRA) {
+      return POLAR_PLAN_SLUGS.ULTRA;
+   }
+   if (value >= POLAR_PLAN_VALUES.PRO) {
+      return POLAR_PLAN_SLUGS.PRO;
+   }
+   return POLAR_PLAN_SLUGS.FREE;
+}
+export const POLAR_PLAN_VALUES = {
+   PRO: 1500,
+   ULTRA: 6000,
+};
 export const POLAR_PLAN_SLUGS = {
    FREE: "free",
    PRO: "pro",
+   ULTRA: "ultra",
 };
 export type POLAR_PLAN_SLUGS =
    (typeof POLAR_PLAN_SLUGS)[keyof typeof POLAR_PLAN_SLUGS];
-export const BILLING_EVENTS = {
+export const POLAR_BILLING_EVENTS = {
    GENERATE_CONTENT: "generated_content",
    KNOWLEDGE_CHUNK_PROCESSING: "knowledge_chunk_processing",
 };
@@ -19,6 +33,17 @@ export const POLAR_PRO_PLAN_FIXED_LIMITS = {
    AGENT_SLOTS: 3,
    KNOWLEDGE_CHUNK_SLOTS: 100,
    AGENT_FILE_UPLOAD_SLOTS: 3,
+};
+
+export const POLAR_ULTRA_PLAN_FIXED_LIMITS = {
+   AGENT_SLOTS: 10,
+   KNOWLEDGE_CHUNK_SLOTS: 500,
+   AGENT_FILE_UPLOAD_SLOTS: 5,
+};
+
+export const POLAR_ULTRA_PLAN_MONTHLY_LIMITS = {
+   GENERATE_CONTENT: 800,
+   KNOWLEDGE_CHUNK_GENERATION: 50,
 };
 
 export const POLAR_PRO_PLAN_MONTHLY_LIMITS = {
@@ -40,6 +65,10 @@ export function getPlanLimits(plan: POLAR_PLAN_SLUGS) {
       [POLAR_PLAN_SLUGS.PRO]: {
          fixed: POLAR_PRO_PLAN_FIXED_LIMITS,
          monthly: POLAR_PRO_PLAN_MONTHLY_LIMITS,
+      },
+      [POLAR_PLAN_SLUGS.ULTRA]: {
+         fixed: POLAR_ULTRA_PLAN_FIXED_LIMITS,
+         monthly: POLAR_ULTRA_PLAN_MONTHLY_LIMITS,
       },
    };
    if (!plans[plan]) {
