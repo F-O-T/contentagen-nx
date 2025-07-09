@@ -6,15 +6,15 @@ import {
 } from "@packages/billing-limits";
 
 async function getUserState(headers: Headers) {
-   const user = await auth.api.state({
+   const state = await auth.api.state({
       headers,
       query: { page: 1, limit: 1 },
    });
-   if (!user) {
+   if (!state) {
       throw new Error("User not found");
    }
-   const plan = getPolarPlanBasedOnValue(Number(user.acttiveSubscription[0].amount || 0));
-   return { user, plan };
+   const plan = getPolarPlanBasedOnValue(Number(state.acttiveSubscription[0].amount || 0));
+   return { state, plan };
 }
 
 export async function handleContentGenerationInsgestion(headers: Headers) {
@@ -42,15 +42,15 @@ export async function handleContentGenerationInsgestion(headers: Headers) {
 }
 
 async function userHasFreeGenerationLimit(headers: Headers) {
-   const { user, plan } = await getUserState(headers);
-   const generated = Number(user?.metadata?.generated) || 0;
+   const { state, plan } = await getUserState(headers);
+   const generated = Number(state?.metadata?.generated) || 0;
    try {
       handleContentMonthlyLimit(generated, plan);
    } catch {
       return false;
    }
    await polarClient.customers.update({
-      id: user.id,
+      id: state.id,
       customerUpdate: {
          metadata: {
             generated: generated + 1,

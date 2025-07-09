@@ -1,7 +1,6 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { useContentList } from "../lib/use-content-list";
 import { ContentRequestCard } from "./content-request-card";
-import { CreateNewContentRequestButton } from "./create-new-content-request-button";
 
 export function ContentListPage() {
    const { requests } = useContentList();
@@ -13,7 +12,6 @@ export function ContentListPage() {
             {requests.map((request) => (
                <ContentRequestCard key={request.id} request={request} />
             ))}
-            <CreateNewContentRequestButton />
          </div>
       </main>
    );
