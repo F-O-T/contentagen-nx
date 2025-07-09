@@ -14,7 +14,7 @@ async function getUserState(headers: Headers) {
       throw new Error("User not found");
    }
    const plan = getPolarPlanBasedOnValue(
-      Number(state.activeSubscriptions[0].amount || 0),
+      Number(state?.activeSubscriptions[0]?.amount || 0),
    );
    return { state, plan };
 }
