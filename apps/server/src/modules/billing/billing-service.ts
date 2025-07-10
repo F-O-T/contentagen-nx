@@ -66,7 +66,7 @@ async function userHasFreeGenerationLimit(headers: Headers) {
 export async function handleAgentSlots(headers: Headers) {
    const { state, plan } = await getUserState(headers);
 
-   const agentSlots = state?.metadata?.agents || 0;
+   const agentSlots = Number(state?.metadata?.agents || 0);
 
    handleAgentSlotsLimit(agentSlots, plan);
 

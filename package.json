@@ -30,7 +30,7 @@
       "dev:server": "nx run-many -t dev --parallel=1 -p server ",
       "dev:dashboard-only": "nx run-many -t dev --parallel=1 -p dashboard",
       "format": "biome check --write .",
-      "typecheck": "nx run-many -t typecheck --parallel=5"
+      "typecheck": "nx run-many -t typecheck --parallel=3"
    },
    "trustedDependencies": [
       "@parcel/watcher",
