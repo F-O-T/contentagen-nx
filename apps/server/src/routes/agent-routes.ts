@@ -5,7 +5,7 @@ import { Elysia, t } from "elysia";
 import { db } from "../integrations/database";
 import { agent as agentTable, knowledgeChunk } from "../schemas/agent-schema";
 import { contentRequest } from "../schemas/content-schema";
-import { NotFoundError, propagateError } from "../shared/errors";
+import { NotFoundError } from "../shared/errors";
 import { uploadFile } from "../integrations/minio";
 import { distillQueue } from "../workers/distill-worker";
 import { generateDefaultBasePrompt } from "../services/agent-prompt";
@@ -43,6 +43,7 @@ export const agentRoutes = new Elysia({
          try {
             await handleAgentSlots(request.headers);
          } catch (error) {
+            console.error("Error handling agent slots:", error);
             set.status = 402;
             return "Agent slots limit reached. Please upgrade your plan.";
          }

@@ -1,5 +1,4 @@
 import { auth, polarClient } from "@api/integrations/auth";
-import { propagateError } from "@api/shared/errors";
 import {
    POLAR_BILLING_EVENTS,
    handleContentMonthlyLimit,
