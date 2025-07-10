@@ -1,11 +1,11 @@
 ---
-import { Picture } from "astro:assets";
+import lightHero from "../assets/light/light-hero.webp";
+import darkHero from "../assets/dark/dark-hero.webp";
 import { Sparkles } from "@lucide/astro";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
-import dashboardImage from "../assets/dashboard.png";
 import LogoCloud from "../sections/LogoCloud.astro";
-//
+import { Image } from "astro:assets";
 ---
 
   <section id="hero-section" class=" flex flex-col items-center justify-center container mx-auto px-4 py-16 space-y-8">
@@ -24,14 +24,25 @@ import LogoCloud from "../sections/LogoCloud.astro";
       </Button>
           </div>
         </div>
-    <Picture
-                class="rounded-xl shadow-xl ring-2 ring-black/10"
-    formats={['webp']}
-    loading={"lazy"}
-                src={dashboardImage}
-                alt="dashboard-image"
-              />
-              <LogoCloud />
+    <div class="relative w-full flex justify-center">
+      <Image
+        src={lightHero}
+        alt="hero-image light"
+        class="rounded-xl shadow-xl ring-2 ring-black/10 block dark:hidden"
+        width={lightHero.width}
+        height={lightHero.height}
+        loading="lazy"
+      />
+      <Image
+        src={darkHero}
+        alt="hero-image dark"
+        class="rounded-xl shadow-xl ring-2 ring-black/10 hidden dark:block"
+        width={darkHero.width}
+        height={darkHero.height}
+        loading="lazy"
+      />
+    </div>
+    <LogoCloud />
   </section>
 
 <script>
