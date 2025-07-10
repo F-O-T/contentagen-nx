@@ -5,7 +5,7 @@
    },
    "license": "MIT",
    "main": "./src/index.ts",
-   "name": "@packages/billing-limits",
+   "name": "@packages/polar-billing",
    "scripts": {
       "check": "biome check --write ./src"
    },

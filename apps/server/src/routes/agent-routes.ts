@@ -5,11 +5,12 @@ import { Elysia, t } from "elysia";
 import { db } from "../integrations/database";
 import { agent as agentTable, knowledgeChunk } from "../schemas/agent-schema";
 import { contentRequest } from "../schemas/content-schema";
-import { NotFoundError } from "../shared/errors";
+import { NotFoundError, propagateError } from "../shared/errors";
 import { uploadFile } from "../integrations/minio";
 import { distillQueue } from "../workers/distill-worker";
 import { generateDefaultBasePrompt } from "../services/agent-prompt";
 import { knowledgeChunkQueue } from "@api/workers/knowledge-chunk-worker";
+import { handleAgentSlots } from "@api/modules/billing/billing-service";
 
 const _createAgent = createInsertSchema(agentTable);
 
@@ -19,8 +20,7 @@ export const agentRoutes = new Elysia({
    .use(authMiddleware)
    .post(
       "/",
-      async ({ body, user }) => {
-         // Generate default base prompt for the agent
+      async ({ body, set, user, request }) => {
          const agentConfig: typeof agentTable.$inferSelect = {
             ...body,
             description: body.description ?? null,
@@ -40,7 +40,12 @@ export const agentRoutes = new Elysia({
             uploadedFiles: [],
          };
          const basePrompt = generateDefaultBasePrompt(agentConfig);
-
+         try {
+            await handleAgentSlots(request.headers);
+         } catch (error) {
+            set.status = 402;
+            return "Agent slots limit reached. Please upgrade your plan.";
+         }
          const agent = await db
             .insert(agentTable)
             .values({

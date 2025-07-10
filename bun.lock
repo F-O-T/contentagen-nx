@@ -176,7 +176,7 @@
         "@elysiajs/swagger": "^1.3.0",
         "@huggingface/inference": "^4.1.0",
         "@neondatabase/serverless": "^1.0.0",
-        "@packages/billing-limits": "workspace:*",
+        "@packages/polar-billing": "workspace:*",
         "@polar-sh/better-auth": "catalog:auth",
         "@polar-sh/sdk": "^0.34.2",
         "@react-email/components": "^0.1.1",
@@ -205,14 +205,6 @@
         "typescript": "catalog:development",
       },
     },
-    "packages/billing-limits": {
-      "name": "@packages/billing-limits",
-      "version": "0.0.0",
-      "devDependencies": {
-        "@tooling/typescript": "workspace:*",
-        "typescript": "catalog:development",
-      },
-    },
     "packages/brand": {
       "name": "@packages/brand",
       "version": "0.0.0",
@@ -226,6 +218,14 @@
       "devDependencies": {
         "@tooling/typescript": "workspace:*",
         "elysia": "catalog:server",
+        "typescript": "catalog:development",
+      },
+    },
+    "packages/polar-billing": {
+      "name": "@packages/polar-billing",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@tooling/typescript": "workspace:*",
         "typescript": "catalog:development",
       },
     },
@@ -1080,11 +1080,11 @@
 
     "@oslojs/encoding": ["@oslojs/encoding@1.1.0", "", {}, "sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ=="],
 
-    "@packages/billing-limits": ["@packages/billing-limits@workspace:packages/billing-limits"],
-
     "@packages/brand": ["@packages/brand@workspace:packages/brand"],
 
     "@packages/eden": ["@packages/eden@workspace:packages/eden"],
+
+    "@packages/polar-billing": ["@packages/polar-billing@workspace:packages/polar-billing"],
 
     "@packages/ui": ["@packages/ui@workspace:packages/ui"],
 
