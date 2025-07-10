@@ -159,3 +159,6 @@ export const knowledgeChunkRelations = relations(knowledgeChunk, ({ one }) => ({
       references: [agent.id],
    }),
 }));
+
+export type AgentSelect = typeof agent.$inferSelect;
+export type AgentInsert = typeof agent.$inferInsert;
