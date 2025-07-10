@@ -29,16 +29,16 @@ import { Image } from "astro:assets";
         src={lightHero}
         alt="hero-image light"
         class="rounded-xl shadow-xl ring-2 ring-black/10 block dark:hidden"
-        width={lightHero.width}
-        height={lightHero.height}
+        width={Number(lightHero.width)}
+        height={Number(lightHero.height)}
         loading="lazy"
       />
       <Image
         src={darkHero}
         alt="hero-image dark"
         class="rounded-xl shadow-xl ring-2 ring-black/10 hidden dark:block"
-        width={darkHero.width}
-        height={darkHero.height}
+        width={Number(darkHero.width)}
+        height={Number(darkHero.height)}
         loading="lazy"
       />
     </div>

@@ -43,16 +43,17 @@ const features = [
         src={lightAgent}
         alt="hero-image light"
         class="rounded-xl shadow-xl ring-2 ring-black/10 w-full max-w-4xl  block dark:hidden"
-        width={lightAgent.width}
-        height={lightAgent.height}
+        width={Number(lightAgent.width)}
+        height={Number(lightAgent.height) }
         loading="lazy"
       />
       <Image
         src={darkAgent}
         alt="hero-image dark"
         class="rounded-xl shadow-xl ring-2 ring-black/10 w-full max-w-4xl  hidden dark:block"
-        width={darkAgent.width}
-        height={darkAgent.height}
+        width={Number(darkAgent.width)}
+
+        height={Number(darkAgent.height)}
         loading="lazy"
       />
     </div>
