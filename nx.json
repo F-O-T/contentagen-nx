@@ -1,55 +1,33 @@
 {
-  "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "defaultBase": "master",
-  "targetDefaults": {
-    "build": {
-      "cache": true,
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "{projectRoot}/**/*",
-        "{projectRoot}/.env*"
-      ],
-      "outputs": [
-        "{projectRoot}/.next/**",
-        "!{projectRoot}/.next/cache/**"
-      ]
-    },
-    "check-types": {
-      "cache": true,
-      "dependsOn": [
-        "^check-types"
-      ]
-    },
-    "dev": {
-      "cache": false
-    },
-    "lint": {
-      "cache": true,
-      "dependsOn": [
-        "^lint"
-      ]
-    }
-  },
-  "tui": {
-    "enabled": true
-  },
-  "plugins": [
-    {
-      "plugin": "@nx/js/typescript",
-      "options": {
-        "typecheck": {
-          "targetName": "tsc:typecheck"
-        },
-        "build": {
-          "targetName": "build",
-          "configName": "tsconfig.lib.json",
-          "buildDepsName": "build-deps",
-          "watchDepsName": "watch-deps"
-        }
+   "$schema": "./node_modules/nx/schemas/nx-schema.json",
+   "defaultBase": "master",
+   "targetDefaults": {
+      "build": {
+         "cache": true,
+         "dependsOn": ["^build"],
+         "inputs": ["{projectRoot}/**/*", "{projectRoot}/.env*"],
+         "outputs": ["{projectRoot}/dist/**"]
+      },
+      "typecheck": {
+         "cache": true,
+         "dependsOn": ["^typecheck"],
+         "inputs": ["{projectRoot}/**/*", "{projectRoot}/.env*"],
+         "outputs": []
+      },
+      
+      "check": {
+         "cache": true,
+         "dependsOn": ["^check"],
+         "inputs": ["{projectRoot}/**/*", "{projectRoot}/.env*"],
+         "outputs": []
+      },
+      "dev": {
+         "cache": false
+         
       }
-    }
-  ],
-  "nxCloudId": "686fef677067d8bfb336fab7"
+   },
+   "tui": {
+      "enabled": true
+   },
+   "nxCloudId": "686fef677067d8bfb336fab7"
 }
