@@ -2,12 +2,6 @@
    "$schema": "./node_modules/nx/schemas/nx-schema.json",
    "defaultBase": "master",
    "targetDefaults": {
-      "build": {
-         "cache": true,
-         "dependsOn": ["^build"],
-         "inputs": ["{projectRoot}/**/*", "{projectRoot}/.env*"],
-         "outputs": ["{projectRoot}/dist/**"]
-      },
       "typecheck": {
          "cache": true,
          "dependsOn": ["^typecheck"],
