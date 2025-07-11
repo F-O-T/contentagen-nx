@@ -8,7 +8,6 @@ import { env, isProduction } from "./config/env";
 import { bullAuth } from "./guards/bull-auth-guard";
 import { authMiddleware, OpenAPI } from "./integrations/auth";
 import { ArcjetShield } from "./integrations/arcjet";
-import { agentRoutes } from "./routes/agent-routes";
 import { contentManagementRoutes } from "./routes/content-management-routes";
 import { contentRequestRoutes } from "./routes/content-request-routes";
 import { fileRoutes } from "./routes/file-routes";
@@ -16,6 +15,10 @@ import { waitlistRoutes } from "./routes/waitlist-routes";
 import { contentGenerationQueue } from "./workers/content-generation-worker";
 import { distillQueue } from "./workers/distill-worker";
 import { knowledgeChunkQueue } from "./workers/knowledge-chunk-worker";
+import { agentChunkRoutes } from "./routes/agent-chunk-routes";
+import { agentContentRequestRoutes } from "./routes/agent-content-request-routes";
+import { agentCrudRoutes } from "./routes/agent-crud-routes";
+import { agentFileRoutes } from "./routes/agent-file-routes";
 const serverAdapter = new ElysiaAdapter("/ui");
 
 createBullBoard({
@@ -64,7 +67,13 @@ const app = new Elysia()
       ) =>
          api
             .use(authMiddleware)
-            .use(agentRoutes)
+            .group("/agents", (agents) =>
+               agents
+                  .use(agentCrudRoutes)
+                  .use(agentFileRoutes)
+                  .use(agentChunkRoutes)
+                  .use(agentContentRequestRoutes),
+            )
             .use(fileRoutes)
             .group("/content", (content) =>
                content.use(contentManagementRoutes).use(contentRequestRoutes),
