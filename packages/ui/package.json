@@ -50,7 +50,8 @@
   "name": "@packages/ui",
   "private": true,
   "scripts": {
-    "check": "biome check --write ./src"
+    "check": "biome check --write ./src",
+    "typecheck": "bunx --bun tsc --noEmit "
   },
   "type": "module",
   "version": "0.0.0"
