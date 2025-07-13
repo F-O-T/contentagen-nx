@@ -114,6 +114,9 @@ export const contentRequestRoutes = new Elysia({
                approved: false,
                isCompleted: false,
                headers: headers as unknown as Headers,
+               options: {
+                  useTavilyWebSearch: true,
+               },
             });
 
             set.status = 201;

@@ -9,6 +9,7 @@ import {
    type AgentPromptOptions,
 } from "../services/agent-prompt";
 import { embeddingService } from "../services/embedding";
+import { tavilyWebSearch } from "../modules/RAG/rag-service";
 import { redis } from "../services/redis";
 
 // Enhanced types
@@ -24,6 +25,8 @@ export type ContentGenerationJobData = {
       maxKnowledgeChunks?: number;
       maxSimilarContent?: number;
       customPromptInstructions?: string;
+      useTavilyWebSearch?: boolean;
+      tavilyMaxResults?: number;
    };
 };
 
@@ -578,9 +581,11 @@ export const contentGenerationWorker = new Worker(
          const { topic, briefDescription } = request;
          job.log(`Processing request for topic: \"${topic}\"`);
 
-         // Enhanced RAG knowledge retrieval (brand and topic)
+         // Enhanced RAG knowledge retrieval (brand, topic, and Tavily web search)
          let knowledgeContext = "";
          let usedSources: string[] = [];
+
+         const contextParts = [];
 
          if (options.includeKnowledgeBase !== false) {
             // Default to true
@@ -603,7 +608,6 @@ export const contentGenerationWorker = new Worker(
                options,
             );
 
-            const contextParts = [];
             if (brandResults.knowledgeText) {
                contextParts.push(
                   `=== BRAND KNOWLEDGE ===\n${brandResults.knowledgeText}`,
@@ -615,16 +619,57 @@ export const contentGenerationWorker = new Worker(
                      topicResults.knowledgeText,
                );
             }
-            knowledgeContext = contextParts.join("\n\n");
             usedSources = [
                ...(brandResults.usedSources || []),
                ...(topicResults.usedSources || []),
             ];
-
-            job.log(
-               `Knowledge context prepared: ${knowledgeContext.length} characters from ${usedSources.length} sources`,
-            );
          }
+
+         // Tavily web search integration
+         if (options.useTavilyWebSearch) {
+            job.log("Retrieving Tavily web search results...");
+            try {
+               const tavilyResults = await tavilyWebSearch(topic, {
+                  maxResults: options.tavilyMaxResults || 3,
+                  includeAnswer: true,
+                  searchDepth: "basic",
+                  topic: "general",
+               });
+               console.log(tavilyResults);
+               if (tavilyResults) {
+                  let tavilyContext = "=== TAVILY WEB SEARCH RESULTS ===\n";
+                  if (tavilyResults.answer) {
+                     tavilyContext += `Answer: ${tavilyResults.answer}\n`;
+                  }
+                  if (Array.isArray(tavilyResults.results)) {
+                     type TavilyResult = {
+                        title: string;
+                        url: string;
+                        content: string;
+                     };
+                     (tavilyResults.results as TavilyResult[]).forEach(
+                        (result, idx) => {
+                           tavilyContext += `Result ${idx + 1}:\nTitle: ${result.title}\nURL: ${result.url}\nContent: ${result.content}\n\n`;
+                        },
+                     );
+                  }
+                  contextParts.push(tavilyContext);
+                  usedSources.push("tavily_web_search");
+                  job.log(
+                     `Tavily web search context added (${tavilyResults.results?.length || 0} results)`,
+                  );
+               }
+            } catch (err) {
+               job.log(
+                  `Tavily web search failed: ${err instanceof Error ? err.message : String(err)}`,
+               );
+            }
+         }
+
+         knowledgeContext = contextParts.join("\n\n");
+         job.log(
+            `Knowledge context prepared: ${knowledgeContext.length} characters from ${usedSources.length} sources`,
+         );
 
          job.updateProgress(40);
 

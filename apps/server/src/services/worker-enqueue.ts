@@ -6,6 +6,11 @@ export interface EnqueueContentRequestPayload {
    approved: boolean;
    isCompleted: boolean;
    headers: Headers;
+   options?: {
+      useTavilyWebSearch?: boolean;
+      tavilyMaxResults?: number;
+      // add other options as needed
+   };
 }
 
 export async function enqueueContentRequest(
@@ -13,7 +18,17 @@ export async function enqueueContentRequest(
 ): Promise<void> {
    try {
       await handleContentGenerationInsgestion(payload.headers);
-      await contentGenerationQueue.add("process-content-request", payload);
+      // Wrap options if not already present
+      const jobPayload = {
+         ...payload,
+         options: {
+            ...(payload.options || {}),
+            useTavilyWebSearch: payload.options?.useTavilyWebSearch,
+            tavilyMaxResults: payload.options?.tavilyMaxResults,
+            // add other options as needed
+         },
+      };
+      await contentGenerationQueue.add("process-content-request", jobPayload);
 
       console.log(
          `Successfully enqueued content request: ${payload.requestId}`,
