@@ -153,11 +153,7 @@ Output ONLY the two markdown documents, separated by '---'. Do NOT include any i
       : [];
 
    // Helper to upload and enqueue
-   async function uploadAndEnqueue(
-      fileName: string,
-      content: string,
-      category: string,
-   ) {
+   async function uploadAndEnqueue(fileName: string, content: string) {
       const buffer = Buffer.from(content.trim(), "utf-8");
       const fileUrl = await uploadFile(fileName, buffer, "text/markdown");
       uploadedFiles.push({
@@ -182,8 +178,8 @@ Output ONLY the two markdown documents, separated by '---'. Do NOT include any i
             docs,
          );
       }
-      await uploadAndEnqueue("about-app.md", docs[0], "brand");
-      await uploadAndEnqueue("products-services.md", docs[1], "product");
+      await uploadAndEnqueue("about-app.md", docs[0]);
+      await uploadAndEnqueue("products-services.md", docs[1]);
       await db
          .update(agentTable)
          .set({ uploadedFiles })
@@ -193,7 +189,7 @@ Output ONLY the two markdown documents, separated by '---'. Do NOT include any i
          "LLM output warning: Did not receive two markdown docs. Output:",
          llmAnswer,
       );
-      await uploadAndEnqueue("brand-website.md", llmAnswer, "brand");
+      await uploadAndEnqueue("brand-website.md", llmAnswer);
       await db
          .update(agentTable)
          .set({ uploadedFiles })
