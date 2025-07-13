@@ -1,7 +1,6 @@
 name: Biome check
 
 on:
-
   pull_request:
     branches: ["*"]
 

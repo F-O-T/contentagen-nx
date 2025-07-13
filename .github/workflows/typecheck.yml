@@ -1,7 +1,6 @@
 name: Typescript typechecking
 
 on:
-
   pull_request:
     branches: ["*"]
 
