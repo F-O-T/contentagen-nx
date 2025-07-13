@@ -19,7 +19,7 @@ export function AgentDetailsPage() {
       open,
       close,
    } = useFileViewer();
-   const { agent, uploadedFiles } = useAgentDetails();
+   const { agent, uploadedFiles, agentId } = useAgentDetails();
 
    return (
       <Suspense>
@@ -47,6 +47,7 @@ export function AgentDetailsPage() {
                   <AgentDetailsKnowledgeBaseCard
                      uploadedFiles={uploadedFiles}
                      onViewFile={open}
+                     agentId={agentId}
                   />
                   <AgentDetailsKnowledgeChunksCard />
                </div>

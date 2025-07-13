@@ -18,5 +18,7 @@ export default function useAgentDetails() {
       agent: agentData?.agent,
       isLoading,
       uploadedFiles: agentData?.agent?.uploadedFiles || [],
+      eden,
+      agentId,
    };
 }
