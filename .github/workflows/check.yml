@@ -47,7 +47,7 @@ jobs:
 
 
       - name: Run Nx affected check
-        run: npx nx affected -t check --base=main --head=HEAD
+        run: npx nx affected -t check --base=origin/master --head=HEAD
 
       - name: Self-Healing CI
         run: npx nx-cloud fix-ci
