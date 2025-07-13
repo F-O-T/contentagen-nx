@@ -1,0 +1,32 @@
+name: 'Setup Bun & Nx'
+description: 'Setup Bun, install dependencies, cache, and configure Nx'
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: latest
+
+    - name: Cache Bun dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.bun/install/cache
+          ~/.bun/install
+          **/node_modules
+        key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+        restore-keys: ${{ runner.os }}-bun-
+
+    - name: Install dependencies
+      run: bun install --frozen-lockfile
+      shell: bash
+
+    - name: Set Nx SHAs
+      uses: nrwl/nx-set-shas@v4
+      with:
+        main-branch-name: master
+
+    - name: Connect to Nx Cloud
+      run: npx nx connect
+      shell: bash
