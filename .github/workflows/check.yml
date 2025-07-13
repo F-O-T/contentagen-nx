@@ -20,14 +20,18 @@ jobs:
           
 
 
+
+      - name: Get Bun version
+        id: bun-version
+        run: echo "version=$(bun --version)" >> $GITHUB_OUTPUT
+
       - name: Cache Bun dependencies
         uses: actions/cache@v4
         with:
           path: |
-            ~/.bun/install/cache
-            ~/.bun/install
+            ~/.bun
             node_modules
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          key: ${{ runner.os }}-bun-${{ steps.bun-version.outputs.version }}-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
@@ -43,7 +47,7 @@ jobs:
 
 
       - name: Run Nx affected check
-        run: npx nx affected -t check 
+        run: npx nx affected -t check --base=master --head=HEAD
 
       - name: Self-Healing CI
         run: npx nx-cloud fix-ci
