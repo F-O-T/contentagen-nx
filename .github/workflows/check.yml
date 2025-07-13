@@ -40,8 +40,10 @@ jobs:
       - name: Set Nx SHAs
         uses: nrwl/nx-set-shas@v4
 
+
+
       - name: Run Nx affected check
-        run: npx nx affected -t check --base=origin/master --head=HEAD
+        run: npx nx affected -t check 
 
       - name: Self-Healing CI
         run: npx nx-cloud fix-ci
