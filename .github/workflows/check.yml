@@ -18,8 +18,19 @@ jobs:
         with:
           bun-version: latest
           
+
       - name: Install dependencies
-        run: bun install 
-        
-      - name: Run check
-        run: bun run check
+        run: bun install
+
+      - name: Connect to Nx Cloud
+        run: npx nx connect
+
+      - name: Set Nx SHAs
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Run Nx affected check
+        run: npx nx affected -t check
+
+      - name: Self-Healing CI
+        run: npx nx-cloud fix-ci
+        if: always()
