@@ -29,7 +29,7 @@ jobs:
         uses: nrwl/nx-set-shas@v4
 
       - name: Run Nx affected check
-        run: npx nx affected -t check
+        run: npx nx affected -t check --base=origin/main --head=HEAD
 
       - name: Self-Healing CI
         run: npx nx-cloud fix-ci
