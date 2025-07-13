@@ -2,6 +2,7 @@ export function getPolarPlanBasedOnValue(value: number): POLAR_PLAN_SLUGS {
    if (value >= POLAR_PLAN_VALUES.ULTRA) {
       return POLAR_PLAN_SLUGS.ULTRA;
    }
+
    if (value >= POLAR_PLAN_VALUES.PRO) {
       return POLAR_PLAN_SLUGS.PRO;
    }
