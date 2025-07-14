@@ -8,6 +8,13 @@ export function getElysiaPosthogConfig() {
    });
    return internalPosthog;
 }
+
+export function getReactPosthogConfig() {
+   return {
+      api_host: posthogHost,
+      api_key: posthogPublicKey,
+   };
+}
 export function getAstroPosthogConfig() {
    return `
 <script is:inline>

@@ -17,6 +17,8 @@ COPY apps/server/package.json ./apps/server/
 COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/brand/package.json ./packages/brand/
 COPY packages/polar-billing/package.json ./packages/polar-billing/
+COPY packages/posthog/package.json ./packages/posthog/
+
 
 
 # Install all dependencies (monorepo-aware)
@@ -46,6 +48,8 @@ COPY apps/server/package.json ./apps/server/
 COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/brand/package.json ./packages/brand/
 COPY packages/polar-billing/package.json ./packages/polar-billing/
+COPY packages/posthog/package.json ./packages/posthog/
+
 # Install only production dependencies.
 RUN bun install 
 
