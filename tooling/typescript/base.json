@@ -1,32 +1,25 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "compilerOptions": {
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "baseUrl": "../../",
-    "declaration": true,
-    "declarationMap": true,
-    "esModuleInterop": true,
-    "incremental": false,
-    "isolatedModules": true,
-    "lib": [
-      "es2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "module": "NodeNext",
-    "moduleDetection": "force",
-    "moduleResolution": "NodeNext",
-    "noUncheckedIndexedAccess": true,
-    "paths": {
-      "@api": [
-        "apps/server/src/index"
-      ]
-    },
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "ES2022"
-  },
-  "display": "Default"
+   "$schema": "https://json.schemastore.org/tsconfig",
+   "compilerOptions": {
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "target": "ES2022",
+      "lib": ["ES2022"],
+      "allowJs": true,
+      "resolveJsonModule": true,
+      "moduleDetection": "force",
+      "verbatimModuleSyntax": true,
+      "isolatedModules": true,
+      "incremental": true,
+      "disableSourceOfProjectReferenceRedirect": true,
+      "tsBuildInfoFile": "${configDir}/.cache/tsbuildinfo.json",
+      "strict": true,
+      "noUncheckedIndexedAccess": true,
+      "checkJs": true,
+      "module": "es2022",
+      "moduleResolution": "bundler",
+      "noEmit": true
+   },
+   "exclude": ["node_modules", "build", "dist"],
+   "display": "Default"
 }

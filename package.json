@@ -39,6 +39,10 @@
    ],
    "workspaces": {
       "catalogs": {
+         "enviroment": {
+            "dotenv-cli": "8.0.0",
+            "shx": "0.4.0"
+         },
          "astro": {
             "@astrojs/check": "^0.9.4",
             "@astrojs/node": "^9.2.2",
@@ -47,6 +51,14 @@
             "@lucide/astro": "^0.511.0",
             "astro": "5.10.0",
             "@arcjet/astro": "^1.0.0-beta.8"
+         },
+         "database": {
+            "drizzle-orm": "^0.44.2",
+            "drizzle-typebox": "^0.3.3",
+            "@sinclair/typebox": "^0.34.35",
+            "pg": "^8.16.3",
+            "@types/pg": "^8.15.4",
+            "drizzle-kit": "^0.31.4"
          },
          "auth": {
             "better-auth": "^1.2.8",

@@ -1,0 +1,42 @@
+{
+   "name": "@packages/database",
+   "private": true,
+   "type": "module",
+   "exports": {
+      ".": {
+         "types": "./dist/src/index.d.ts",
+         "default": "./src/index.ts"
+      },
+      "./client": {
+         "types": "./dist/src/client.d.ts",
+         "default": "./src/client.ts"
+      },
+      "./schema": {
+         "types": "./dist/src/schema.d.ts",
+         "default": "./src/schema.ts"
+      }
+   },
+   "scripts": {
+      "env:copy-example": "shx -- cp -n .env.example .env",
+      "env:remove": "shx -- rm -f .env",
+      "env:run": "dotenv --",
+      "check": "biome check --write ./src",
+      "push": "bunx --bun env:run drizzle-kit push",
+      "studio": "bunx --bun env:run drizzle-kit studio",
+      "typecheck": "tsc --build --noEmit --emitDeclarationOnly false"
+   },
+   "dependencies": {
+      "drizzle-orm": "catalog:database",
+      "drizzle-typebox": "catalog:database",
+      "pg": "catalog:database",
+      "@sinclair/typebox": "catalog:database"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "@types/pg": "catalog:database",
+      "dotenv-cli": "catalog:enviroment",
+      "drizzle-kit": "catalog:database",
+      "shx": "catalog:enviroment",
+      "typescript": "catalog:development"
+   }
+}
