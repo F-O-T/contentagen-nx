@@ -1,7 +1,7 @@
 ---
 import "@packages/ui/globals.css";
 import brandConfig from "@packages/brand/index.json";
-import PostHog from "../components/posthog.astro";
+import { getAstroPosthogConfig } from "@packages/posthog";
 ---
 <!doctype html>
 <html lang="en" class="scrolsmooth">
@@ -22,8 +22,8 @@ import PostHog from "../components/posthog.astro";
 		<meta property="og:image" content="/og-image.png" />
 		<meta property="og:url" content="https://contentagen.com" />
 		<meta property="og:type" content="website" />
-		    <PostHog />
 
+{import.meta.env.PROD && getAstroPosthogConfig()}
 		<title>{brandConfig.name} - Modern Solutions for Your Needs</title>
 	</head>
 	<body>

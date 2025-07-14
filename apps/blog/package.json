@@ -1,7 +1,9 @@
 {
    "dependencies": {
+      "@packages/posthog": "workspace:*",
       "@arcjet/astro": "catalog:astro",
       "@lucide/astro": "catalog:astro",
+      "@astrojs/ts-plugin": "catalog:astro",
       "@astrojs/node": "catalog:astro",
       "@astrojs/check": "catalog:astro",
       "@astrojs/mdx": "^4.3.0",

@@ -1,11 +1,13 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@packages/ui/*": ["./src/*"]
-    }
-  },
-  "exclude": ["node_modules", "dist"],
-  "extends": "@tooling/typescript/react-library.json",
-  "include": ["."]
+   "extends": "@tooling/typescript/internal-package.json",
+   "compilerOptions": {
+      "baseUrl": ".",
+      "paths": {
+         "@packages/ui/*": ["./src/*"]
+      },
+      "lib": ["ES2022", "dom", "dom.iterable"],
+      "jsx": "preserve"
+   },
+   "include": ["src"],
+   "exclude": ["node_modules"]
 }

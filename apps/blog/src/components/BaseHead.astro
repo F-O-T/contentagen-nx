@@ -1,8 +1,7 @@
 ---
 import "@packages/ui/globals.css";
-import Posthog from "./posthog.astro";
 import { SITE_TITLE } from "../consts";
-
+import { getAstroPosthogConfig } from "@packages/posthog";
 interface Props {
    title: string;
    description: string;
@@ -21,7 +20,7 @@ const {
 ---
 
 <!-- Global Metadata -->
-<Posthog />
+{import.meta.env.PROD && getAstroPosthogConfig()}
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

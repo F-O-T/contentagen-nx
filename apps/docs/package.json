@@ -1,5 +1,6 @@
 {
    "dependencies": {
+      "@astrojs/ts-plugin": "catalog:astro",
       "@arcjet/astro": "catalog:astro",
       "@astrojs/node": "catalog:astro",
       "@astrojs/check": "catalog:astro",

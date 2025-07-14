@@ -105,7 +105,8 @@ export async function allLLM({
       throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
    }
    const data = await response.json();
-   const answer = data.choices?.[0]?.message?.content || "";
+   //@ts-ignore
+   const answer = data?.choices?.[0]?.message?.content || "";
    return { answer, choices: [{ text: answer }] };
    // End of allLLM function
 }
