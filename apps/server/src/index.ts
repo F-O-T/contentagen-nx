@@ -21,6 +21,7 @@ import { agentContentRequestRoutes } from "./routes/agent-content-request-routes
 import { agentCrudRoutes } from "./routes/agent-crud-routes";
 import { agentFileRoutes } from "./routes/agent-file-routes";
 import { agentBrandWebsiteRoutes } from "./routes/agent-brand-website-routes";
+import { posthogPlugin } from "./integrations/posthog";
 const serverAdapter = new ElysiaAdapter("/ui");
 
 createBullBoard({
@@ -62,6 +63,7 @@ const app = new Elysia()
       }),
    )
    .use(ArcjetShield)
+   .use(posthogPlugin)
    .group(
       "/api/v1",
       (

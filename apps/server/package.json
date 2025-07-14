@@ -1,5 +1,6 @@
 {
    "dependencies": {
+      "@packages/posthog": "workspace:*",
       "@arcjet/bun": "^1.0.0-beta.8",
       "@bull-board/api": "^6.10.1",
       "@bull-board/elysia": "^6.10.1",

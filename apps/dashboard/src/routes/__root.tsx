@@ -13,19 +13,27 @@ import {
    Scripts,
 } from "@tanstack/react-router";
 import { Toaster } from "@packages/ui/components/sonner";
-
+import { getReactPosthogConfig } from "@packages/posthog";
+import { PostHogProvider } from "posthog-js/react";
 export interface MyRouterContext {
    eden: EdenClientType;
    queryClient: QueryClient;
 }
-
+const posthogConfig = getReactPosthogConfig();
 export const Route = createRootRouteWithContext<MyRouterContext>()({
    component: () => (
       <RootDocument>
          <QueryProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-               <Toaster />
-               <Outlet />
+               <PostHogProvider
+                  apiKey={posthogConfig.api_key}
+                  options={{
+                     api_host: posthogConfig.api_host,
+                     defaults: "2025-05-24",
+                  }}
+               >
+                  <Toaster /> <Outlet />
+               </PostHogProvider>
             </ThemeProvider>
          </QueryProvider>
       </RootDocument>
