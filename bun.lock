@@ -215,6 +215,20 @@
         "typescript": "catalog:development",
       },
     },
+    "packages/arcjet": {
+      "name": "@packages/arcjet",
+      "version": "0.0.0",
+      "dependencies": {
+        "@arcjet/astro": "^1.0.0-beta.8",
+        "@arcjet/bun": "^1.0.0-beta.8",
+        "@arcjet/inspect": "^1.0.0-beta.8",
+        "@arcjet/node": "^1.0.0-beta.8",
+      },
+      "devDependencies": {
+        "@tooling/typescript": "workspace:*",
+        "typescript": "catalog:development",
+      },
+    },
     "packages/authentication": {
       "name": "@packages/authentication",
       "version": "0.1.0",
@@ -277,6 +291,9 @@
     "packages/errors": {
       "name": "@packages/errors",
       "version": "0.0.0",
+      "dependencies": {
+        "@sinclair/typebox": "catalog:database",
+      },
       "devDependencies": {
         "@tooling/typescript": "workspace:*",
         "typescript": "catalog:development",
@@ -294,8 +311,8 @@
         "typescript": "catalog:development",
       },
     },
-    "packages/open-ai": {
-      "name": "@packages/open-ai",
+    "packages/openrouter": {
+      "name": "@packages/openrouter",
       "version": "0.1.0",
       "dependencies": {
         "@openrouter/ai-sdk-provider": "^1.0.0-beta.1",
@@ -1249,6 +1266,8 @@
 
     "@oslojs/encoding": ["@oslojs/encoding@1.1.0", "", {}, "sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ=="],
 
+    "@packages/arcjet": ["@packages/arcjet@workspace:packages/arcjet"],
+
     "@packages/authentication": ["@packages/authentication@workspace:packages/authentication"],
 
     "@packages/brand": ["@packages/brand@workspace:packages/brand"],
@@ -1263,7 +1282,7 @@
 
     "@packages/files": ["@packages/files@workspace:packages/files"],
 
-    "@packages/open-ai": ["@packages/open-ai@workspace:packages/open-ai"],
+    "@packages/openrouter": ["@packages/openrouter@workspace:packages/openrouter"],
 
     "@packages/payment": ["@packages/payment@workspace:packages/payment"],
 

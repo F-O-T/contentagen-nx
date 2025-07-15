@@ -1,13 +1,16 @@
 {
-   "dependencies": {
-      "@sinclair/typebox": "catalog:database"
-   },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
       "typescript": "catalog:development"
    },
+   "dependencies": {
+      "@arcjet/astro": "^1.0.0-beta.8",
+      "@arcjet/inspect": "^1.0.0-beta.8",
+      "@arcjet/node": "^1.0.0-beta.8",
+      "@arcjet/bun": "^1.0.0-beta.8"
+   },
    "license": "MIT",
-   "name": "@packages/errors",
+   "name": "@packages/arcjet",
    "scripts": {
       "check": "biome check --write ./src",
       "typecheck": "bunx --bun tsc --noEmit "
