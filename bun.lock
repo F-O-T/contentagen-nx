@@ -288,6 +288,17 @@
         "typescript": "catalog:development",
       },
     },
+    "packages/enviroment": {
+      "name": "@packages/enviroment",
+      "version": "0.0.0",
+      "dependencies": {
+        "@sinclair/typebox": "catalog:database",
+      },
+      "devDependencies": {
+        "@tooling/typescript": "workspace:*",
+        "typescript": "catalog:development",
+      },
+    },
     "packages/errors": {
       "name": "@packages/errors",
       "version": "0.0.0",
@@ -1277,6 +1288,8 @@
     "@packages/database": ["@packages/database@workspace:packages/database"],
 
     "@packages/eden": ["@packages/eden@workspace:packages/eden"],
+
+    "@packages/enviroment": ["@packages/enviroment@workspace:packages/enviroment"],
 
     "@packages/errors": ["@packages/errors@workspace:packages/errors"],
 
