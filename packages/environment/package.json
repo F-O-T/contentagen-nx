@@ -7,7 +7,7 @@
       "typescript": "catalog:development"
    },
    "license": "MIT",
-   "name": "@packages/enviroment",
+   "name": "@packages/environment",
    "scripts": {
       "check": "biome check --write ./src",
       "typecheck": "bunx --bun tsc --noEmit "
