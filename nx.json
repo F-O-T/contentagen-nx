@@ -4,24 +4,32 @@
    "targetDefaults": {
       "typecheck": {
          "cache": true,
-         "dependsOn": ["^typecheck"],
-         "inputs": ["{projectRoot}/**/*", "{projectRoot}/.env*"],
+         "dependsOn": [
+            "^typecheck"
+         ],
+         "inputs": [
+            "{projectRoot}/**/*",
+            "{projectRoot}/.env*"
+         ],
          "outputs": []
       },
-      
       "check": {
          "cache": true,
-         "dependsOn": ["^check"],
-         "inputs": ["{projectRoot}/**/*", "{projectRoot}/.env*"],
+         "dependsOn": [
+            "^check"
+         ],
+         "inputs": [
+            "{projectRoot}/**/*",
+            "{projectRoot}/.env*"
+         ],
          "outputs": []
       },
       "dev": {
          "cache": false
-         
       }
    },
    "tui": {
       "enabled": true
    },
-   "nxCloudId": "686fef677067d8bfb336fab7"
+   "nxCloudId": "68764c70cd9e0f817920735b"
 }
