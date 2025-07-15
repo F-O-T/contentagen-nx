@@ -17,7 +17,7 @@
    "private": true,
    "type": "module",
    "exports": {
-      "./triggers/*": "./src/triggers/*.ts"
+      "./triggers/*": "./src/trigger/*.ts"
    },
    "version": "0.0.0"
 }

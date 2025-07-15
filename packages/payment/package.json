@@ -17,6 +17,6 @@
    },
    "version": "0.0.0",
    "dependencies": {
-      "@polar-sh/sdk": "^0.34.5"
+      "@polar-sh/sdk": "catalog:payment"
    }
 }

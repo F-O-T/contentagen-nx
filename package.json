@@ -39,6 +39,9 @@
    ],
    "workspaces": {
       "catalogs": {
+         "payment": {
+            "@polar-sh/sdk": "^0.34.5"
+         },
          "enviroment": {
             "dotenv-cli": "8.0.0",
             "shx": "0.4.0"
