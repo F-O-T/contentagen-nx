@@ -11,6 +11,7 @@ import { db } from "./database";
 
 export const polarClient = new Polar({
    accessToken: env.POLAR_ACCESS_TOKEN,
+
    server: isProduction ? "production" : "sandbox",
 });
 //TODO: setar a url certa em prod
