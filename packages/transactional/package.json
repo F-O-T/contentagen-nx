@@ -1,7 +1,8 @@
 {
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
-      "typescript": "catalog:development"
+      "typescript": "catalog:development",
+      "react-email": "^4.0.17"
    },
    "license": "MIT",
    "main": "./src/index.ts",
@@ -18,6 +19,10 @@
    },
    "version": "0.0.0",
    "dependencies": {
+      "react": "catalog:react",
+      "react-dom": "catalog:react",
+      "resend": "^4.6.0",
+      "@react-email/components": "^0.1.1",
       "@packages/brand": "workspace:*"
    }
 }
