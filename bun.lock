@@ -286,6 +286,17 @@
         "typescript": "catalog:development",
       },
     },
+    "packages/open-ai": {
+      "name": "@packages/open-ai",
+      "version": "0.1.0",
+      "dependencies": {
+        "openai": "^5.8.2",
+      },
+      "devDependencies": {
+        "@tooling/typescript": "workspace:*",
+        "typescript": "catalog:development",
+      },
+    },
     "packages/payment": {
       "name": "@packages/payment",
       "version": "0.0.0",
@@ -1229,6 +1240,8 @@
     "@packages/eden": ["@packages/eden@workspace:packages/eden"],
 
     "@packages/files": ["@packages/files@workspace:packages/files"],
+
+    "@packages/open-ai": ["@packages/open-ai@workspace:packages/open-ai"],
 
     "@packages/payment": ["@packages/payment@workspace:packages/payment"],
 
