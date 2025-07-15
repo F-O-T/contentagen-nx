@@ -1,0 +1,26 @@
+{
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "typescript": "catalog:development"
+   },
+   "license": "MIT",
+   "main": "./src/index.ts",
+   "name": "@packages/files",
+   "scripts": {
+      "check": "biome check --write ./src",
+      "typecheck": "bunx --bun tsc --noEmit "
+   },
+   "private": true,
+   "type": "module",
+   "exports": {
+      "./client": "./src/client.ts",
+      "./image-helper": "./src/image-helper.ts",
+      "./text-file-helper": "./src/text-file-helper.ts"
+   },
+   "version": "0.0.0",
+   "dependencies": {
+      "fflate": "^0.8.2",
+      "posthog-node": "^5.5.0",
+      "sharp": "^0.34.3"
+   }
+}
