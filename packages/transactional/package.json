@@ -13,7 +13,8 @@
    "private": true,
    "type": "module",
    "exports": {
-      "./client": "./src/client.ts"
+      "./client": "./src/client.ts",
+      "./push-notifications": "./src/push-notifications.ts"
    },
    "version": "0.0.0",
    "dependencies": {
