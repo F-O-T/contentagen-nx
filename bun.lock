@@ -279,7 +279,6 @@
       "version": "0.0.0",
       "dependencies": {
         "fflate": "^0.8.2",
-        "posthog-node": "^5.5.0",
         "sharp": "^0.34.3",
       },
       "devDependencies": {
@@ -311,6 +310,17 @@
       "version": "0.0.0",
       "dependencies": {
         "posthog-node": "^5.5.0",
+      },
+      "devDependencies": {
+        "@tooling/typescript": "workspace:*",
+        "typescript": "catalog:development",
+      },
+    },
+    "packages/tavily": {
+      "name": "@packages/tavily",
+      "version": "0.0.0",
+      "dependencies": {
+        "@tavily/core": "^0.5.9",
       },
       "devDependencies": {
         "@tooling/typescript": "workspace:*",
@@ -1225,6 +1235,8 @@
     "@packages/polar-billing": ["@packages/polar-billing@workspace:packages/polar-billing"],
 
     "@packages/posthog": ["@packages/posthog@workspace:packages/posthog"],
+
+    "@packages/tavily": ["@packages/tavily@workspace:packages/tavily"],
 
     "@packages/transactional": ["@packages/transactional@workspace:packages/transactional"],
 
