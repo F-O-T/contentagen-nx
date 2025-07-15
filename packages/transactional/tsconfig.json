@@ -1,0 +1,6 @@
+{
+   "extends": "@tooling/typescript/internal-package.json",
+   "compilerOptions": {
+      "jsx": "react-jsx"
+   }
+}
