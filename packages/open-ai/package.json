@@ -1,0 +1,21 @@
+{
+   "name": "@packages/open-ai",
+   "version": "0.1.0",
+   "private": true,
+   "type": "module",
+   "exports": {
+      "./client": "./src/client.ts",
+      "./helpers": "./src/helpers.ts"
+   },
+   "dependencies": {
+      "openai": "^5.8.2"
+   },
+   "scripts": {
+      "check": "biome check --write ./src",
+      "typecheck": "bunx --bun tsc --noEmit "
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "typescript": "catalog:development"
+   }
+}
