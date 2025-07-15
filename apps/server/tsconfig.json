@@ -5,16 +5,12 @@
       "forceConsistentCasingInFileNames": true,
       "jsx": "react-jsx",
       "paths": {
-         "@api/*": [
-            "./src/*"
-         ]
+         "@api/*": ["./src/*"]
       },
       "skipLibCheck": true,
       "strict": true,
       "target": "ES2021",
-      "types": [
-         "bun-types"
-      ]
+      "types": ["bun-types"]
    },
    "extends": "@tooling/typescript/base.json"
 }

@@ -14,6 +14,8 @@
    },
    "dependencies": {
       "@packages/database": "workspace:*",
+      "@packages/payment": "workspace:*",
+      "@polar-sh/better-auth": "catalog:auth",
       "better-auth": "catalog:auth"
    },
    "devDependencies": {

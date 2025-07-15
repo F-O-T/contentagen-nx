@@ -5,7 +5,7 @@
    },
    "license": "MIT",
    "main": "./src/index.ts",
-   "name": "@packages/posthog",
+   "name": "@packages/payment",
    "scripts": {
       "check": "biome check --write ./src",
       "typecheck": "bunx --bun tsc --noEmit "
@@ -14,10 +14,10 @@
    "type": "module",
    "exports": {
       "./client": "./src/client.ts",
-      "./server": "./src/server.ts"
+      "./plans": "./src/plans.ts"
    },
    "version": "0.0.0",
    "dependencies": {
-      "posthog-node": "^5.5.0"
+      "@polar-sh/sdk": "^0.34.5"
    }
 }
