@@ -1,8 +1,9 @@
 {
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
-      "typescript": "catalog:development",
-      "react-email": "^4.0.17"
+      "@types/web-push": "^3.6.4",
+      "react-email": "^4.0.17",
+      "typescript": "catalog:development"
    },
    "license": "MIT",
    "name": "@packages/transactional",
