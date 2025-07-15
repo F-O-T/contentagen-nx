@@ -22,7 +22,7 @@ export interface AuthOptions {
 export const getBaseOptions = (db: DatabaseInstance) => ({
    database: getDatabaseAdapter(db, {}),
 });
-
+export type AuthInstance = ReturnType<typeof createAuth>;
 export const createAuth = ({
    db,
    authSchema,
