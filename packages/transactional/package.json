@@ -5,7 +5,6 @@
       "react-email": "^4.0.17"
    },
    "license": "MIT",
-   "main": "./src/index.ts",
    "name": "@packages/transactional",
    "scripts": {
       "check": "biome check --write ./src",
@@ -14,8 +13,7 @@
    "private": true,
    "type": "module",
    "exports": {
-      "./client": "./src/client.ts",
-      "./server": "./src/server.ts"
+      "./client": "./src/client.ts"
    },
    "version": "0.0.0",
    "dependencies": {

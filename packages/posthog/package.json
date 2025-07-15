@@ -4,7 +4,6 @@
       "typescript": "catalog:development"
    },
    "license": "MIT",
-   "main": "./src/index.ts",
    "name": "@packages/posthog",
    "scripts": {
       "check": "biome check --write ./src",
