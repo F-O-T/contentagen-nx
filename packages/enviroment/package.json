@@ -1,10 +1,13 @@
 {
+   "dependencies": {
+      "@sinclair/typebox": "catalog:database"
+   },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
       "typescript": "catalog:development"
    },
    "license": "MIT",
-   "name": "@packages/tavily",
+   "name": "@packages/enviroment",
    "scripts": {
       "check": "biome check --write ./src",
       "typecheck": "bunx --bun tsc --noEmit "
@@ -12,11 +15,7 @@
    "private": true,
    "type": "module",
    "exports": {
-      "./client": "./src/client.ts",
       "./helpers": "./src/helpers.ts"
    },
-   "version": "0.0.0",
-   "dependencies": {
-      "@tavily/core": "^0.5.9"
-   }
+   "version": "0.0.0"
 }

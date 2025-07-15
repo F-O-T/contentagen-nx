@@ -18,7 +18,8 @@
    "private": true,
    "type": "module",
    "exports": {
-      "./client": "./src/client.ts",
+      "./astro": "./src/astro.ts",
+      "./dashboard": "./src/dashboard.ts",
       "./server": "./src/server.ts"
    },
    "version": "0.0.0"
