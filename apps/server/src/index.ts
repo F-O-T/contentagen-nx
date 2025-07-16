@@ -22,6 +22,7 @@ const app = new Elysia()
    )
    .use(ArcjetShield)
    .use(posthogPlugin)
+   .mount(auth.handler)
    .all(
       "/trpc/*",
       async (opts) => {
