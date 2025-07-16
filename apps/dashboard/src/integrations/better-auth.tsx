@@ -1,11 +1,7 @@
 import { env } from "@/config/env";
-import { polarClient } from "@polar-sh/better-auth";
-import { emailOTPClient } from "better-auth/client/plugins";
-import { createAuthClient } from "better-auth/react";
-
+import { createAuthClient } from "@packages/authentication/client";
 export const betterAuthClient = createAuthClient({
-   baseURL: `${env.VITE_SERVER_URL}/api/v1/auth`,
-   plugins: [emailOTPClient(), polarClient()],
+   apiBaseUrl: env.VITE_SERVER_URL,
 });
 
 export type Session = typeof betterAuthClient.$Infer.Session;

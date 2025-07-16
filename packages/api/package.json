@@ -17,7 +17,8 @@
       "build": "tsc",
       "dev": "tsc",
       "check": "biome check --write ./src",
-      "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+      "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+      "test": "vitest run"
    },
    "dependencies": {
       "@packages/authentication": "workspace:*",
@@ -25,6 +26,7 @@
       "@sinclair/typebox": "catalog:database",
       "@trpc/client": "^11.4.3",
       "@trpc/server": "^11.4.3",
+      "@typeschema/typebox": "^0.14.0",
       "superjson": "^2.2.2",
       "url-join": "^5.0.0"
    },

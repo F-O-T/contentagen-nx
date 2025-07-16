@@ -4,24 +4,20 @@
    "targetDefaults": {
       "typecheck": {
          "cache": true,
-         "dependsOn": [
-            "^typecheck"
-         ],
-         "inputs": [
-            "{projectRoot}/**/*",
-            "{projectRoot}/.env*"
-         ],
+         "dependsOn": ["^typecheck"],
+         "inputs": ["{projectRoot}/**/*", "{projectRoot}/.env*"],
          "outputs": []
       },
       "check": {
          "cache": true,
-         "dependsOn": [
-            "^check"
-         ],
-         "inputs": [
-            "{projectRoot}/**/*",
-            "{projectRoot}/.env*"
-         ],
+         "dependsOn": ["^check"],
+         "inputs": ["{projectRoot}/**/*", "{projectRoot}/.env*"],
+         "outputs": []
+      },
+      "test": {
+         "cache": true,
+         "dependsOn": ["^test"],
+         "inputs": ["{projectRoot}/**/*", "{projectRoot}/.env*"],
          "outputs": []
       },
       "dev": {

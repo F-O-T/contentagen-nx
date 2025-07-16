@@ -1,6 +1,6 @@
 {
    "extends": "@tooling/typescript/internal-package.json",
-   "include": ["src"],
+   "include": ["src", "__tests__/waitlist.test.ts"],
    "exclude": ["node_modules"],
    "compilerOptions": {
       "types": ["vite/client"]

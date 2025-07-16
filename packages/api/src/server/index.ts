@@ -1,21 +1,24 @@
 import type { AuthInstance } from "@packages/authentication/server";
 import type { DatabaseInstance } from "@packages/database/client";
 import { createTRPCContext as createTRPCContextInternal, router } from "./trpc";
+import { waitlistRouter } from "./router/waitlist";
 
-export const appRouter = router({});
+export const appRouter = router({
+   waitlist: waitlistRouter,
+});
 
 export const createApi = ({
-  auth,
-  db,
+   auth,
+   db,
 }: {
-  auth: AuthInstance;
-  db: DatabaseInstance;
+   auth: AuthInstance;
+   db: DatabaseInstance;
 }) => {
-  return {
-    trpcRouter: appRouter,
-    createTRPCContext: ({ headers }: { headers: Headers }) =>
-      createTRPCContextInternal({ auth, db, headers }),
-  };
+   return {
+      trpcRouter: appRouter,
+      createTRPCContext: ({ headers }: { headers: Headers }) =>
+         createTRPCContextInternal({ auth, db, headers }),
+   };
 };
 
 export type AppRouter = typeof appRouter;
