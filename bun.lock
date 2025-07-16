@@ -182,8 +182,10 @@
         "@packages/arcjet": "workspace:*",
         "@packages/authentication": "workspace:*",
         "@packages/database": "workspace:*",
+        "@packages/payment": "workspace:*",
         "@packages/polar-billing": "workspace:*",
         "@packages/posthog": "workspace:*",
+        "@packages/transactional": "workspace:*",
         "@polar-sh/better-auth": "catalog:auth",
         "@polar-sh/sdk": "catalog:payment",
         "@react-email/components": "^0.1.1",
@@ -466,6 +468,14 @@
         "@types/react-dom": "catalog:react",
         "tailwindcss": "^4.0.8",
         "typescript": "catalog:development",
+      },
+    },
+    "tooling/tailwind": {
+      "name": "@tooling/tailwind",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@tailwindcss/typography": "^0.5.16",
+        "tailwindcss": "^4.0.8",
       },
     },
     "tooling/typescript": {
@@ -1891,6 +1901,8 @@
     "@tokenizer/inflate": ["@tokenizer/inflate@0.2.7", "", { "dependencies": { "debug": "^4.4.0", "fflate": "^0.8.2", "token-types": "^6.0.0" } }, "sha512-MADQgmZT1eKjp06jpI2yozxaU9uVs4GzzgSL+uEq7bVcJ9V1ZXQkeGNql1fsSI0gMy1vhvNTNbUqrx+pZfJVmg=="],
 
     "@tokenizer/token": ["@tokenizer/token@0.3.0", "", {}, "sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A=="],
+
+    "@tooling/tailwind": ["@tooling/tailwind@workspace:tooling/tailwind"],
 
     "@tooling/typescript": ["@tooling/typescript@workspace:tooling/typescript"],
 
