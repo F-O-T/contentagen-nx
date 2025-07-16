@@ -1,0 +1,13 @@
+{
+  "license": "PROPRIETARY",
+  "name": "@tooling/tailwind",
+  "private": true,
+  "devDependencies": {
+    "tailwindcss": "^4.0.8",
+    "@tailwindcss/typography": "^0.5.16"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.0.0"
+}
