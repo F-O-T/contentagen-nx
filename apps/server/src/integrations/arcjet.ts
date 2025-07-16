@@ -1,28 +1,7 @@
-import { env, isProduction } from "@api/config/env";
-import arcjet, { shield, detectBot, tokenBucket } from "@arcjet/bun";
 import { Elysia } from "elysia";
-
-const aj = arcjet({
-   key: env.ARCJET_KEY,
-   rules: [
-      detectBot({
-         allow: [],
-         mode: isProduction ? "LIVE" : "DRY_RUN",
-      }),
-      tokenBucket({
-         mode: isProduction ? "LIVE" : "DRY_RUN",
-         refillRate: 5,
-         interval: 10,
-         capacity: 10,
-         characteristics: ["ip.src"],
-      }),
-      shield({
-         mode: isProduction ? "LIVE" : "DRY_RUN",
-      }),
-   ],
-});
-
-// This is the correct, idiomatic ElysiaJS approach
+import { createArcjetServer } from "@packages/arcjet/server";
+import { env } from "@api/config/env";
+const aj = createArcjetServer(env.ARCJET_KEY);
 export const ArcjetShield = new Elysia({ name: "arcjet-shield" }).onRequest(
    // Get the `ip` from Elysia's context
    async ({ request, set }) => {

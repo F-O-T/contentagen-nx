@@ -11,29 +11,22 @@ import {
    type EnvSchema,
 } from "./helpers";
 import type { Static } from "@sinclair/typebox";
+import { sendEmailOTP } from "@packages/transactional/client";
 export interface AuthOptions {
    db: DatabaseInstance;
-   authSchema: Record<string, unknown>;
-   sendEmailOTP: (email: string, otp: string, type: string) => Promise<void>;
    polarClient: Polar;
    env: Static<typeof EnvSchema>;
 }
 
 export const getBaseOptions = (db: DatabaseInstance) => ({
-   database: getDatabaseAdapter(db, {}),
+   database: getDatabaseAdapter(db),
 });
 export type AuthInstance = ReturnType<typeof createAuth>;
-export const createAuth = ({
-   db,
-   authSchema,
-   sendEmailOTP,
-   polarClient,
-   env,
-}: AuthOptions) => {
+export const createAuth = ({ db, polarClient, env }: AuthOptions) => {
    return betterAuth({
       socialProviders: getSocialProviders(env),
       appName: "ContentaGen-Auth",
-      database: getDatabaseAdapter(db, authSchema),
+      database: getDatabaseAdapter(db),
       emailAndPassword: getEmailAndPasswordOptions(),
       emailVerification: getEmailVerificationOptions(),
       plugins: getPlugins(sendEmailOTP, polarClient),

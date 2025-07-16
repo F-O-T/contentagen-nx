@@ -28,15 +28,9 @@ export function getSocialProviders(env: Static<typeof EnvSchema>) {
 }
 
 // Database Adapter
-export function getDatabaseAdapter(
-   db: DatabaseInstance,
-   authSchema: Record<string, unknown>,
-) {
+export function getDatabaseAdapter(db: DatabaseInstance) {
    return drizzleAdapter(db, {
       provider: "pg",
-      schema: {
-         ...authSchema,
-      },
    });
 }
 
