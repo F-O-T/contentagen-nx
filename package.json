@@ -20,6 +20,7 @@
   "private": true,
   "scripts": {
     "build:all": "nx run-many -t build --parallel=3",
+    "studio": "nx run-many -t studio -p server",
     "check": "nx run-many -t check --parallel=3",
     "dev:all": "nx run-many -t dev --parallel=5",
     "dev:content-apps": "nx run-many -t dev --parallel=3 -p  landing-page blog docs",
