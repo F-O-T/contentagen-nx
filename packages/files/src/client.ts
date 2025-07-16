@@ -36,7 +36,7 @@ export function getMinioClient(env: Static<typeof EnvSchema>) {
    });
    return internalClient;
 }
-type MinioClient = ReturnType<typeof getMinioClient>;
+export type MinioClient = ReturnType<typeof getMinioClient>;
 export async function uploadFile(
    fileName: string,
    fileBuffer: Buffer,
