@@ -84,8 +84,7 @@
     "format": "bunx --bun biome format",
     "lint": "bunx --bun biome lint",
     "serve": "bunx --bun vite preview",
-    "start": "bunx --bun vite",
-    "test": "bunx --bun vitest run"
+    "start": "bunx --bun vite"
   },
   "type": "module"
 }
