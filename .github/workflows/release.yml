@@ -38,22 +38,21 @@ jobs:
         id: get_tag
         run: echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
 
-       - name: Get last merged PR description
-         id: get_pr
-         run: |
-           pr_body=$(gh pr list --state merged --sort merged-desc --limit 1 --json body | jq -r '.[0].body')
-           echo "pr_body<<EOF" >> $GITHUB_OUTPUT
-           echo "$pr_body" >> $GITHUB_OUTPUT
-           echo "EOF" >> $GITHUB_OUTPUT
-         env:
-           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get last merged PR description
+        id: get_pr
+        run: |
+          pr_body=$(gh pr list --state merged --sort merged-desc --limit 1 --json body | jq -r '.[0].body')
+          echo "pr_body<<EOF" >> $GITHUB_OUTPUT
+          echo "$pr_body" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-       - name: Create GitHub Release
-         uses: softprops/action-gh-release@v2
-         with:
-           tag_name: ${{ steps.get_tag.outputs.tag }}
-           name: ${{ steps.get_tag.outputs.tag }}
-           body: ${{ steps.get_pr.outputs.pr_body }}
-         env:
-           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          name: ${{ steps.get_tag.outputs.tag }}
+          body: ${{ steps.get_pr.outputs.pr_body }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
