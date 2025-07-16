@@ -2,12 +2,12 @@ import OTPEmail from "./emails/otp";
 import brandConfig from "@packages/brand/index.json";
 import { Resend } from "resend";
 
-interface SendEmailOTPOptions {
+export interface SendEmailOTPOptions {
    email: string;
    otp: string;
    type: "sign-in" | "email-verification" | "forget-password";
 }
-
+export type ResendClient = ReturnType<typeof getResendClient>;
 export const getResendClient = (RESEND_API_KEY: string) => {
    if (!RESEND_API_KEY) {
       throw new Error("RESEND_API_KEY is not defined");

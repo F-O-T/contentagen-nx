@@ -13,6 +13,7 @@
       "typecheck": "tsc --build --noEmit --emitDeclarationOnly false"
    },
    "dependencies": {
+      "@packages/transactional": "workspace:*",
       "@packages/database": "workspace:*",
       "@packages/payment": "workspace:*",
       "@polar-sh/better-auth": "catalog:auth",

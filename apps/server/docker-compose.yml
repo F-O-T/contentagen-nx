@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   db:
-    image: docker.io/pgvector/pgvector:pg15
+    image: postgres:15
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -11,13 +11,6 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-
-  redis:
-    image: docker.io/library/redis:7-alpine
-    volumes:
-      - redisdata:/data
-    ports:
-      - "6379:6379"
 
   minio:
     image: docker.io/minio/minio:latest
@@ -29,8 +22,8 @@ services:
     volumes:
       - miniodata:/data
     ports:
-      - "9000:9000"  # S3 API
-      - "9001:9001"  # Web Console
+      - "9000:9000" # S3 API
+      - "9001:9001" # Web Console
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -39,5 +32,4 @@ services:
 
 volumes:
   pgdata:
-  redisdata:
   miniodata:

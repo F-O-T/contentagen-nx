@@ -1,5 +1,10 @@
 import type { DatabaseInstance } from "@packages/database/client";
 import { POLAR_PLANS } from "@packages/payment/plans";
+import {
+   sendEmailOTP,
+   type SendEmailOTPOptions,
+   type ResendClient,
+} from "@packages/transactional/client";
 import { checkout, polar, portal, usage } from "@polar-sh/better-auth";
 import type { Polar } from "@polar-sh/sdk";
 import type { Static } from "@sinclair/typebox";
@@ -28,15 +33,9 @@ export function getSocialProviders(env: Static<typeof EnvSchema>) {
 }
 
 // Database Adapter
-export function getDatabaseAdapter(
-   db: DatabaseInstance,
-   authSchema: Record<string, unknown>,
-) {
+export function getDatabaseAdapter(db: DatabaseInstance) {
    return drizzleAdapter(db, {
       provider: "pg",
-      schema: {
-         ...authSchema,
-      },
    });
 }
 
@@ -56,12 +55,9 @@ export function getEmailVerificationOptions() {
    };
 }
 
-export function getPlugins(
-   sendEmailOTP: (email: string, otp: string, type: string) => Promise<void>,
-   polarClient: Polar,
-) {
+export function getPlugins(client: ResendClient, polarClient: Polar) {
    return [
-      getEmailOTPPlugin(sendEmailOTP),
+      getEmailOTPPlugin(client),
       getOpenAPIPlugin(),
       getPolarPlugin(polarClient),
       getAPIKeyPlugin(),
@@ -75,23 +71,13 @@ export function getTrustedOrigins(env: Static<typeof EnvSchema>) {
 }
 
 // Helper for emailOTP plugin
-export function getEmailOTPPlugin(
-   sendEmailOTP: (email: string, otp: string, type: string) => Promise<void>,
-) {
+export function getEmailOTPPlugin(client: ResendClient) {
    return emailOTP({
       expiresIn: 60 * 10,
       otpLength: 6,
       sendVerificationOnSignUp: true,
-      async sendVerificationOTP({
-         email,
-         otp,
-         type,
-      }: {
-         email: string;
-         otp: string;
-         type: string;
-      }) {
-         await sendEmailOTP(email, otp, type);
+      async sendVerificationOTP({ email, otp, type }: SendEmailOTPOptions) {
+         await sendEmailOTP(client, { email, otp, type });
       },
    });
 }

@@ -1,43 +1,17 @@
-import { createBullBoard } from "@bull-board/api";
-import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
-import { ElysiaAdapter } from "@bull-board/elysia";
 import cors from "@elysiajs/cors";
-import swagger from "@elysiajs/swagger";
 import { Elysia } from "elysia";
-import { env, isProduction } from "./config/env";
-import { bullAuth } from "./guards/bull-auth-guard";
-import { authMiddleware, OpenAPI } from "./integrations/auth";
+import { env } from "./config/env";
 import { ArcjetShield } from "./integrations/arcjet";
-import { contentManagementRoutes } from "./routes/content-management-routes";
-import { contentRequestRoutes } from "./routes/content-request-routes";
-import { contentExportRoutes } from "./routes/content-export-routes";
-import { fileRoutes } from "./routes/file-routes";
-import { waitlistRoutes } from "./routes/waitlist-routes";
-import { contentGenerationQueue } from "./workers/content-generation-worker";
-import { distillQueue } from "./workers/distill-worker";
-import { knowledgeChunkQueue } from "./workers/knowledge-chunk-worker";
-import { agentChunkRoutes } from "./routes/agent-chunk-routes";
-import { agentContentRequestRoutes } from "./routes/agent-content-request-routes";
-import { agentCrudRoutes } from "./routes/agent-crud-routes";
-import { agentFileRoutes } from "./routes/agent-file-routes";
-import { agentBrandWebsiteRoutes } from "./routes/agent-brand-website-routes";
 import { posthogPlugin } from "./integrations/posthog";
-const serverAdapter = new ElysiaAdapter("/ui");
-
-createBullBoard({
-   queues: [
-      new BullMQAdapter(contentGenerationQueue),
-      new BullMQAdapter(distillQueue),
-      new BullMQAdapter(knowledgeChunkQueue), // Register the Elysia adapter queue
-   ],
-   serverAdapter,
-   options: {
-      uiBasePath: isProduction ? "node_modules/@bull-board/ui" : "",
-   },
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { createApi } from "@packages/api/server";
+import { auth } from "./integrations/auth";
+import { db } from "./integrations/database";
+const trpcApi = createApi({
+   auth,
+   db,
 });
-
 const app = new Elysia()
-
    .use(
       cors({
          allowedHeaders: ["Content-Type", "Authorization"],
@@ -46,50 +20,24 @@ const app = new Elysia()
          origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
       }),
    )
-   .onBeforeHandle(({ request }) => {
-      const url = new URL(request.url);
-      if (url.pathname.startsWith("/ui")) {
-         return bullAuth(request);
-      }
-   })
-   .use(serverAdapter.registerPlugin())
-   .use(
-      swagger({
-         path: "/docs", // Swagger UI will be at /docs, JSON at /docs/json
-         documentation: {
-            components: await OpenAPI.components,
-            paths: await OpenAPI.getPaths(),
-         },
-      }),
-   )
    .use(ArcjetShield)
    .use(posthogPlugin)
-   .group(
-      "/api/v1",
-      (
-         api, // Group all API routes under /api/v1
-      ) =>
-         api
-            .use(authMiddleware)
-            .group("/agents", (agents) =>
-               agents
-                  .use(agentCrudRoutes)
-                  .use(agentFileRoutes)
-                  .use(agentChunkRoutes)
-                  .use(agentContentRequestRoutes)
-                  .use(agentBrandWebsiteRoutes),
-            )
-            .use(fileRoutes)
-            .group("/content", (content) =>
-               content
-                  .use(contentManagementRoutes)
-                  .use(contentRequestRoutes)
-                  .use(contentExportRoutes),
-            )
-            .use(waitlistRoutes)
-            .get("/works", () => {
-               return { message: "Eden WORKS!" };
-            }),
+   .all(
+      "/trpc/*",
+      async (opts) => {
+         const res = await fetchRequestHandler({
+            endpoint: "/api/trpc",
+            router: trpcApi.trpcRouter,
+            req: opts.request,
+            createContext: (c) =>
+               trpcApi.createTRPCContext({ headers: c.req.headers }),
+         });
+
+         return res;
+      },
+      {
+         parse: "none",
+      },
    )
    .listen(process.env.PORT ?? 9876);
 

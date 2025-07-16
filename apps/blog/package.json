@@ -1,36 +1,36 @@
 {
-   "dependencies": {
-      "@packages/posthog": "workspace:*",
-      "@arcjet/astro": "catalog:astro",
-      "@lucide/astro": "catalog:astro",
-      "@astrojs/ts-plugin": "catalog:astro",
-      "@astrojs/node": "catalog:astro",
-      "@astrojs/check": "catalog:astro",
-      "@astrojs/mdx": "^4.3.0",
-      "@astrojs/react": "catalog:astro",
-      "@astrojs/rss": "^4.0.11",
-      "@astrojs/sitemap": "catalog:astro",
-      "@packages/ui": "workspace:*",
-      "@tailwindcss/vite": "^4.1.8",
-      "astro": "catalog:astro",
-      "react": "catalog:react",
-      "react-dom": "catalog:react"
-   },
-   "devDependencies": {
-      "@tooling/typescript": "workspace:*",
-      "@types/react": "catalog:react",
-      "@types/react-dom": "catalog:react",
-      "typescript": "catalog:development"
-   },
-   "name": "blog",
-   "scripts": {
-      "astro": "bunx --bun astro",
-      "build": "bunx --bun astro build",
-      "check": "bunx --bun biome check --write ./src ",
-      "dev": "bunx astro dev --port 4321",
-      "preview": "bunx --bun astro preview",
-      "typecheck": "bunx --bun astro check"
-   },
-   "type": "module",
-   "version": "0.0.1"
+  "dependencies": {
+    "@packages/posthog": "workspace:*",
+    "@arcjet/astro": "catalog:astro",
+    "@lucide/astro": "catalog:astro",
+    "@astrojs/ts-plugin": "catalog:astro",
+    "@astrojs/node": "catalog:astro",
+    "@astrojs/check": "catalog:astro",
+    "@astrojs/mdx": "^4.3.0",
+    "@astrojs/react": "catalog:astro",
+    "@astrojs/rss": "^4.0.11",
+    "@astrojs/sitemap": "catalog:astro",
+    "@packages/ui": "workspace:*",
+    "@tailwindcss/vite": "^4.1.8",
+    "astro": "catalog:astro",
+    "react": "catalog:react",
+    "react-dom": "catalog:react"
+  },
+  "devDependencies": {
+    "@tooling/typescript": "workspace:*",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "typescript": "catalog:development"
+  },
+  "name": "blog",
+  "scripts": {
+    "astro": "bunx --bun astro",
+    "build": "bunx --bun astro build",
+    "check": "bunx --bun biome check --write ./src ",
+    "dev": "bunx astro dev --port 4321",
+    "preview": "bunx --bun astro preview",
+    "typecheck": "bunx --bun astro check"
+  },
+  "type": "module",
+  "version": "0.1.0"
 }
