@@ -11,42 +11,13 @@ import { TRPCError } from "@trpc/server";
 import { wrap } from "@typeschema/typebox";
 
 import { protectedProcedure, router } from "../trpc";
-
-// Input schemas
 import {
-  ContentMetaSchema,
-  ContentRequestSchema,
-  ContentStatsSchema,
+  ContentInsertSchema,
+  ContentUpdateSchema,
 } from "@packages/database/schema";
 
-const ContentStatusEnum = Type.Union([
-  Type.Literal("draft"),
-  Type.Literal("approved"),
-  Type.Literal("generating"),
-]);
-
-const CreateContentInput = Type.Object({
-  agentId: Type.String({ format: "uuid" }),
-  userId: Type.String(),
-  title: Type.String(),
-  body: Type.String(),
-  status: Type.Optional(ContentStatusEnum),
-  meta: Type.Optional(ContentMetaSchema),
-  request: ContentRequestSchema,
-  stats: Type.Optional(ContentStatsSchema),
-});
-
-const UpdateContentInput = Type.Object({
-  id: Type.String({ format: "uuid" }),
-  agentId: Type.Optional(Type.String({ format: "uuid" })),
-  userId: Type.Optional(Type.String()),
-  title: Type.Optional(Type.String()),
-  body: Type.Optional(Type.String()),
-  status: Type.Optional(ContentStatusEnum),
-  meta: Type.Optional(ContentMetaSchema),
-  request: Type.Optional(ContentRequestSchema),
-  stats: Type.Optional(ContentStatsSchema),
-});
+const CreateContentInput = ContentInsertSchema;
+const UpdateContentInput = ContentUpdateSchema;
 
 const DeleteContentInput = Type.Object({
   id: Type.String({ format: "uuid" }),
@@ -76,6 +47,12 @@ export const contentRouter = router({
     .input(wrap(UpdateContentInput))
     .mutation(async ({ ctx, input }) => {
       const { id, ...updateFields } = input;
+      if (!id) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Content ID is required for update.",
+        });
+      }
       try {
         await updateContent(ctx.db, id, updateFields);
         return { success: true };

@@ -243,3 +243,13 @@ export const agentRelations = relations(agent, ({ one }) => ({
 
 export type AgentSelect = typeof agent.$inferSelect;
 export type AgentInsert = typeof agent.$inferInsert;
+
+import {
+   createInsertSchema,
+   createSelectSchema,
+   createUpdateSchema,
+} from "drizzle-typebox";
+
+export const AgentInsertSchema = createInsertSchema(agent);
+export const AgentSelectSchema = createSelectSchema(agent);
+export const AgentUpdateSchema = createUpdateSchema(agent);

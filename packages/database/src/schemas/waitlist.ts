@@ -1,4 +1,9 @@
 import { pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+   createInsertSchema,
+   createSelectSchema,
+   createUpdateSchema,
+} from "drizzle-typebox";
 
 export const leadTypeEnum = pgEnum("lead_type", [
    "individual blogger",
@@ -25,3 +30,7 @@ export const waitlist = pgTable("waitlist", {
    notes: text("notes"),
    referralSource: text("referral_source"),
 });
+
+export const WaitlistInsertSchema = createInsertSchema(waitlist);
+export const WaitlistSelectSchema = createSelectSchema(waitlist);
+export const WaitlistUpdateSchema = createUpdateSchema(waitlist);

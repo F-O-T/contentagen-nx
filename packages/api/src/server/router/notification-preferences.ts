@@ -12,18 +12,13 @@ import { TRPCError } from "@trpc/server";
 import { wrap } from "@typeschema/typebox";
 import { protectedProcedure, router } from "../trpc";
 
-const CreateNotificationPreferencesInput = Type.Object({
-  userId: Type.String(),
-  type: Type.String(),
-  enabled: Type.Optional(Type.Boolean()),
-});
+import {
+  NotificationPreferencesInsertSchema,
+  NotificationPreferencesUpdateSchema,
+} from "@packages/database/schema";
 
-const UpdateNotificationPreferencesInput = Type.Object({
-  id: Type.String({ format: "uuid" }),
-  userId: Type.Optional(Type.String()),
-  type: Type.Optional(Type.String()),
-  enabled: Type.Optional(Type.Boolean()),
-});
+const CreateNotificationPreferencesInput = NotificationPreferencesInsertSchema;
+const UpdateNotificationPreferencesInput = NotificationPreferencesUpdateSchema;
 
 const DeleteNotificationPreferencesInput = Type.Object({
   id: Type.String({ format: "uuid" }),
@@ -63,6 +58,13 @@ export const notificationPreferencesRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { id, ...updateFields } = input;
       try {
+        if (!id) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              "Notification Preferences ID is required for update.",
+          });
+        }
         await updateNotificationPreferences(ctx.db, id, updateFields);
         return { success: true };
       } catch (err) {

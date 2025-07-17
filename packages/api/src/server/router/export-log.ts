@@ -11,7 +11,10 @@ import { TRPCError } from "@trpc/server";
 import { wrap } from "@typeschema/typebox";
 import { protectedProcedure, router } from "../trpc";
 
-import { ExportLogOptionsSchema } from "@packages/database/schema";
+import {
+  ExportLogOptionsSchema,
+  ExportLogSelectSchema,
+} from "@packages/database/schema";
 
 const CreateExportLogInput = Type.Object({
   contentId: Type.String({ format: "uuid" }),
@@ -37,6 +40,7 @@ const GetExportLogInput = Type.Object({
 export const exportLogRouter = router({
   create: protectedProcedure
     .input(wrap(CreateExportLogInput))
+    .output(wrap(ExportLogSelectSchema))
     .mutation(async ({ ctx, input }) => {
       try {
         return await createExportLog(ctx.db, input);
@@ -92,6 +96,7 @@ export const exportLogRouter = router({
     }),
   get: protectedProcedure
     .input(wrap(GetExportLogInput))
+    .output(wrap(ExportLogSelectSchema))
     .query(async ({ ctx, input }) => {
       try {
         return await getExportLogById(ctx.db, input.id);
@@ -108,17 +113,19 @@ export const exportLogRouter = router({
         throw err;
       }
     }),
-  list: protectedProcedure.query(async ({ ctx }) => {
-    try {
-      return await listExportLogs(ctx.db);
-    } catch (err) {
-      if (err instanceof DatabaseError) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: err.message,
-        });
+  list: protectedProcedure
+    .output(wrap(Type.Array(ExportLogSelectSchema)))
+    .query(async ({ ctx }) => {
+      try {
+        return await listExportLogs(ctx.db);
+      } catch (err) {
+        if (err instanceof DatabaseError) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: err.message,
+          });
+        }
+        throw err;
       }
-      throw err;
-    }
-  }),
+    }),
 });

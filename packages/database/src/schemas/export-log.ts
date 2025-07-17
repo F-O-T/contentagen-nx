@@ -30,3 +30,13 @@ export const exportLog = pgTable("export_log", {
 
 export type ExportLog = typeof exportLog.$inferSelect;
 export type ExportLogInsert = typeof exportLog.$inferInsert;
+
+import {
+   createInsertSchema,
+   createSelectSchema,
+   createUpdateSchema,
+} from "drizzle-typebox";
+
+export const ExportLogInsertSchema = createInsertSchema(exportLog);
+export const ExportLogSelectSchema = createSelectSchema(exportLog);
+export const ExportLogUpdateSchema = createUpdateSchema(exportLog);

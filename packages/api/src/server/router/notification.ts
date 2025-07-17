@@ -11,30 +11,13 @@ import { TRPCError } from "@trpc/server";
 import { wrap } from "@typeschema/typebox";
 import { protectedProcedure, router } from "../trpc";
 
-import { NotificationDataSchema } from "@packages/database/schema";
+import {
+  NotificationInsertSchema,
+  NotificationUpdateSchema,
+} from "@packages/database/schema";
 
-const CreateNotificationInput = Type.Object({
-  userId: Type.String(),
-  type: Type.String(),
-  title: Type.String(),
-  message: Type.String(),
-  data: Type.Optional(NotificationDataSchema),
-  read: Type.Optional(Type.Boolean()),
-  sentAt: Type.Optional(Type.String({ format: "date-time" })),
-  error: Type.Optional(Type.String()),
-});
-
-const UpdateNotificationInput = Type.Object({
-  id: Type.String({ format: "uuid" }),
-  userId: Type.Optional(Type.String()),
-  type: Type.Optional(Type.String()),
-  title: Type.Optional(Type.String()),
-  message: Type.Optional(Type.String()),
-  data: Type.Optional(NotificationDataSchema),
-  read: Type.Optional(Type.Boolean()),
-  sentAt: Type.Optional(Type.String({ format: "date-time" })),
-  error: Type.Optional(Type.String()),
-});
+const CreateNotificationInput = NotificationInsertSchema;
+const UpdateNotificationInput = NotificationUpdateSchema;
 
 const DeleteNotificationInput = Type.Object({
   id: Type.String({ format: "uuid" }),
@@ -79,6 +62,12 @@ export const notificationRouter = router({
           ...rest,
           ...(sentAt ? { sentAt: new Date(sentAt) } : {}),
         };
+        if (!id) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Notification ID is required for update.",
+          });
+        }
         await updateNotification(ctx.db, id, repoInput);
         return { success: true };
       } catch (err) {
