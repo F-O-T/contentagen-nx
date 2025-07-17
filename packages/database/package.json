@@ -15,13 +15,9 @@
       "types": "./dist/src/schema.d.ts",
       "default": "./src/schema.ts"
     },
-    "./repositories/agent.repository": {
-      "types": "./dist/src/repositories/agent.repository.d.ts",
-      "default": "./src/repositories/agent.repository.ts"
-    },
-    "./repositories/waitlist.repository": {
-      "types": "./dist/src/repositories/waitlist.repository.d.ts",
-      "default": "./src/repositories/waitlist.repository.ts"
+    "./repositories/*": {
+      "types": "./dist/src/repositories/*.d.ts",
+      "default": "./src/repositories/*.ts"
     }
   },
   "scripts": {

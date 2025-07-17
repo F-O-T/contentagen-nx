@@ -223,6 +223,7 @@
       "dependencies": {
         "@packages/authentication": "workspace:*",
         "@packages/database": "workspace:*",
+        "@packages/files": "workspace:*",
         "@sinclair/typebox": "catalog:database",
         "@trpc/client": "^11.4.3",
         "@trpc/server": "^11.4.3",
