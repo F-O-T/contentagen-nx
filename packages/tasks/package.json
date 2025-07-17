@@ -1,5 +1,8 @@
 {
    "dependencies": {
+      "@packages/openrouter": "workspace:*",
+      "@packages/prompts": "workspace:*",
+      "@packages/chroma-db": "workspace:*",
       "@sinclair/typebox": "catalog:database",
       "@trigger.dev/sdk": "^3.3.17"
    },

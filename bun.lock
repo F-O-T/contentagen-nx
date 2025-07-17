@@ -393,10 +393,17 @@
         "typescript": "catalog:development",
       },
     },
+    "packages/prompts": {
+      "name": "@packages/prompts",
+      "version": "1.0.0",
+    },
     "packages/tasks": {
       "name": "@packages/tasks",
       "version": "0.0.0",
       "dependencies": {
+        "@packages/chroma-db": "workspace:*",
+        "@packages/openrouter": "workspace:*",
+        "@packages/prompts": "workspace:*",
         "@sinclair/typebox": "catalog:database",
         "@trigger.dev/sdk": "^3.3.17",
       },
@@ -1366,6 +1373,8 @@
     "@packages/polar-billing": ["@packages/polar-billing@workspace:packages/polar-billing"],
 
     "@packages/posthog": ["@packages/posthog@workspace:packages/posthog"],
+
+    "@packages/prompts": ["@packages/prompts@workspace:packages/prompts"],
 
     "@packages/tasks": ["@packages/tasks@workspace:packages/tasks"],
 
