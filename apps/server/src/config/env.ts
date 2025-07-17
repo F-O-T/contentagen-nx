@@ -1,9 +1,9 @@
-import { validateInput } from "@api/shared/errors";
-import { type Static, Type } from "@sinclair/typebox";
+import { Type } from "@sinclair/typebox";
+import { parseEnv } from "@packages/environment";
 
 export const EnvSchema = Type.Object({
    BETTER_AUTH_SECRET: Type.String(),
-   BETTER_AUTH_TRUSTED_ORIGINS: Type.String(),
+   BETTER_AUTH_TRUSTED_ORIGINS: Type.Array(Type.String()),
    DATABASE_URL: Type.String(),
    RESEND_API_KEY: Type.String(),
    POLAR_ACCESS_TOKEN: Type.String(),
@@ -24,13 +24,9 @@ export const EnvSchema = Type.Object({
    ARCJET_KEY: Type.String(),
    ARCJET_ENV: Type.Optional(Type.String()),
    TAVILY_API_KEY: Type.String(),
+   CHROMA_DB_URL: Type.String(),
 });
-
-function parseEnv(env: NodeJS.ProcessEnv): Static<typeof EnvSchema> {
-   validateInput(EnvSchema, env);
-   return env;
-}
 
 export const isProduction = process.env.NODE_ENV === "production";
 
-export const env = parseEnv(process.env);
+export const env = parseEnv(process.env, EnvSchema);

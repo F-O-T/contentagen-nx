@@ -23,7 +23,6 @@ const EnvSchema = Type.Object({
    MINIO_SECRET_KEY: Type.String(),
    MINIO_BUCKET: Type.String(),
 });
-type Env = Static<typeof EnvSchema>;
 export function getMinioClient(env: Static<typeof EnvSchema>) {
    const { endPoint, port } = parseEndpoint(env.MINIO_ENDPOINT);
 
@@ -41,11 +40,9 @@ export async function uploadFile(
    fileName: string,
    fileBuffer: Buffer,
    contentType: string,
-   env: Env,
+   bucketName: string,
    minioClient: MinioClient,
 ): Promise<string> {
-   const bucketName = env.MINIO_BUCKET;
-   // Ensure bucket exists
    const bucketExists = await minioClient.bucketExists(bucketName);
    if (!bucketExists) {
       await minioClient.makeBucket(bucketName);
@@ -69,11 +66,9 @@ export async function uploadFile(
 
 export async function getFile(
    fileName: string,
-   env: Env,
+   bucketName: string,
    minioClient: MinioClient,
 ): Promise<NodeJS.ReadableStream> {
-   const bucketName = env.MINIO_BUCKET;
-
    // Get file from MinIO
    const stream = await minioClient.getObject(bucketName, fileName);
    return stream;
@@ -81,10 +76,9 @@ export async function getFile(
 
 export async function getFileInfo(
    fileName: string,
-   env: Env,
+   bucketName: string,
    minioClient: MinioClient,
 ): Promise<{ size: number; contentType: string }> {
-   const bucketName = env.MINIO_BUCKET;
    const stat = await minioClient.statObject(bucketName, fileName);
    return { size: stat.size, contentType: stat.metaData["content-type"] };
 }

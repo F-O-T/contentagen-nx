@@ -1,10 +1,10 @@
-import { eq } from "drizzle-orm";
-import { TRPCError } from "@trpc/server";
-import { publicProcedure, router } from "../trpc";
-import { Type } from "@sinclair/typebox";
-import { wrap } from "@typeschema/typebox";
-import { agent } from "@packages/database";
 import type { AgentInsert } from "@packages/database";
+import { agent } from "@packages/database";
+import { Type } from "@sinclair/typebox";
+import { TRPCError } from "@trpc/server";
+import { wrap } from "@typeschema/typebox";
+import { eq } from "drizzle-orm";
+import { protectedProcedure, router } from "../trpc";
 
 // Input schemas
 const CreateAgentInput = Type.Object({
@@ -34,7 +34,7 @@ const GetAgentInput = Type.Object({
 });
 
 export const agentRouter = router({
-   create: publicProcedure
+   create: protectedProcedure
       .input(wrap(CreateAgentInput))
       .mutation(async ({ ctx, input }) => {
          const inserted = await ctx.db
@@ -44,7 +44,7 @@ export const agentRouter = router({
          return inserted[0];
       }),
 
-   update: publicProcedure
+   update: protectedProcedure
       .input(wrap(UpdateAgentInput))
       .mutation(async ({ ctx, input }) => {
          const { id, ...updateFields } = input;
@@ -62,7 +62,7 @@ export const agentRouter = router({
          return { success: true };
       }),
 
-   delete: publicProcedure
+   delete: protectedProcedure
       .input(wrap(DeleteAgentInput))
       .mutation(async ({ ctx, input }) => {
          const { id } = input;
@@ -80,7 +80,7 @@ export const agentRouter = router({
          return { success: true };
       }),
 
-   get: publicProcedure
+   get: protectedProcedure
       .input(wrap(GetAgentInput))
       .query(async ({ ctx, input }) => {
          const found = await ctx.db
@@ -96,7 +96,7 @@ export const agentRouter = router({
          return found[0];
       }),
 
-   list: publicProcedure.query(async ({ ctx }) => {
+   list: protectedProcedure.query(async ({ ctx }) => {
       return ctx.db.select().from(agent);
    }),
 });

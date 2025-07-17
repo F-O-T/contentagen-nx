@@ -2,24 +2,36 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import SuperJSON from "superjson";
 import type { AuthInstance } from "@packages/authentication/server";
 import type { DatabaseInstance } from "@packages/database/client";
-
+import type { MinioClient } from "@packages/files/client";
 export const createTRPCContext = async ({
   auth,
   db,
   headers,
+  minioClient,
+  minioBucket,
+  chromaClient,
 }: {
   auth: AuthInstance;
   db: DatabaseInstance;
+  minioClient: MinioClient;
+  minioBucket: string;
   headers: Headers;
+  chromaClient: any;
 }): Promise<{
+  minioBucket: string;
   db: DatabaseInstance;
+  minioClient: MinioClient;
+  chromaClient: any;
   session: AuthInstance["$Infer"]["Session"] | null;
 }> => {
   const session = await auth.api.getSession({
     headers,
   });
   return {
+    minioBucket,
+    minioClient,
     db,
+    chromaClient,
     session,
   };
 };

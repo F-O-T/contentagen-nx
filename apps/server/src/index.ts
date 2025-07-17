@@ -7,7 +7,12 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { createApi } from "@packages/api/server";
 import { auth } from "./integrations/auth";
 import { db } from "./integrations/database";
+import { minioClient } from "./integrations/minio";
+import { chromaClient } from "./integrations/chromadb";
 const trpcApi = createApi({
+   chromaClient,
+   minioClient,
+   minioBucket: env.MINIO_BUCKET,
    auth,
    db,
 });
@@ -17,7 +22,7 @@ const app = new Elysia()
          allowedHeaders: ["Content-Type", "Authorization"],
          credentials: true,
          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-         origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
+         origin: env.BETTER_AUTH_TRUSTED_ORIGINS,
       }),
    )
    .use(ArcjetShield)

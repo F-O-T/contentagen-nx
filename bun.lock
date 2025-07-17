@@ -118,8 +118,8 @@
         "@vitejs/plugin-react": "^4.3.4",
         "jsdom": "^26.0.0",
         "typescript": "catalog:development",
-        "vite": "^6.1.0",
-        "vitest": "^3.0.5",
+        "vite": "catalog:vite",
+        "vitest": "catalog:vite",
         "web-vitals": "^4.2.4",
       },
     },
@@ -233,7 +233,8 @@
       "devDependencies": {
         "@tooling/typescript": "workspace:*",
         "typescript": "catalog:development",
-        "vite": "^6.1.0",
+        "vite": "catalog:vite",
+        "vitest": "catalog:vite",
       },
     },
     "packages/arcjet": {
@@ -314,11 +315,14 @@
       "name": "@packages/environment",
       "version": "0.0.0",
       "dependencies": {
+        "@packages/errors": "workspace:*",
         "@sinclair/typebox": "catalog:database",
       },
       "devDependencies": {
         "@tooling/typescript": "workspace:*",
         "typescript": "catalog:development",
+        "vite": "catalog:vite",
+        "vitest": "catalog:vite",
       },
     },
     "packages/errors": {
@@ -536,6 +540,10 @@
     "ui": {
       "@tailwindcss/vite": "^4.1.8",
       "sonner": "^2.0.5",
+    },
+    "vite": {
+      "vite": "^6.1.0",
+      "vitest": "^3.0.5",
     },
   },
   "packages": {
