@@ -2,61 +2,69 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import SuperJSON from "superjson";
 import type { AuthInstance } from "@packages/authentication/server";
 import type { DatabaseInstance } from "@packages/database/client";
-
+import type { MinioClient } from "@packages/files/client";
 export const createTRPCContext = async ({
-  auth,
-  db,
-  headers,
+   auth,
+   db,
+   headers,
+   minioClient,
+   minioBucket,
 }: {
-  auth: AuthInstance;
-  db: DatabaseInstance;
-  headers: Headers;
+   auth: AuthInstance;
+   db: DatabaseInstance;
+   minioClient: MinioClient;
+   minioBucket: string;
+   headers: Headers;
 }): Promise<{
-  db: DatabaseInstance;
-  session: AuthInstance["$Infer"]["Session"] | null;
+   minioBucket: string;
+   db: DatabaseInstance;
+   minioClient: MinioClient;
+   session: AuthInstance["$Infer"]["Session"] | null;
 }> => {
-  const session = await auth.api.getSession({
-    headers,
-  });
-  return {
-    db,
-    session,
-  };
+   const session = await auth.api.getSession({
+      headers,
+   });
+   return {
+      minioBucket,
+      minioClient,
+      db,
+      session,
+   };
 };
 
 export const t = initTRPC.context<typeof createTRPCContext>().create({
-  transformer: SuperJSON,
+   transformer: SuperJSON,
 });
 
 export const router = t.router;
 
 const timingMiddleware = t.middleware(async ({ next, path }) => {
-  const start = Date.now();
-  let waitMsDisplay = "";
-  if (t._config.isDev) {
-    // artificial delay in dev 100-500ms
-    const waitMs = Math.floor(Math.random() * 400) + 100;
-    await new Promise((resolve) => setTimeout(resolve, waitMs));
-    waitMsDisplay = ` (artificial delay: ${waitMs}ms)`;
-  }
-  const result = await next();
-  const end = Date.now();
+   const start = Date.now();
+   let waitMsDisplay = "";
+   if (t._config.isDev) {
+      // artificial delay in dev 100-500ms
+      const waitMs = Math.floor(Math.random() * 400) + 100;
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      waitMsDisplay = ` (artificial delay: ${waitMs}ms)`;
+   }
+   const result = await next();
+   const end = Date.now();
 
-  console.log(
-    `\t[TRPC] /${path} executed after ${end - start}ms${waitMsDisplay}`,
-  );
-  return result;
+   console.log(
+      `\t[TRPC] /${path} executed after ${end - start}ms${waitMsDisplay}`,
+   );
+   return result;
 });
 
 export const publicProcedure = t.procedure.use(timingMiddleware);
 
 export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
-  if (!ctx.session?.user) {
-    throw new TRPCError({ code: "FORBIDDEN" });
-  }
-  return next({
-    ctx: {
-      session: { ...ctx.session },
-    },
-  });
+   if (!ctx.session?.user) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+   }
+   return next({
+      ctx: {
+         session: { ...ctx.session },
+      },
+   });
 });

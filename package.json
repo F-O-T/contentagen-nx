@@ -61,6 +61,10 @@
             "astro": "5.10.0",
             "@arcjet/astro": "^1.0.0-beta.8"
          },
+         "vite": {
+            "vite": "^6.1.0",
+            "vitest": "^3.0.5"
+         },
          "database": {
             "drizzle-orm": "^0.44.2",
             "drizzle-typebox": "^0.3.3",
