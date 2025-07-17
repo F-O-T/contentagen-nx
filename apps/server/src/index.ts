@@ -8,7 +8,9 @@ import { createApi } from "@packages/api/server";
 import { auth } from "./integrations/auth";
 import { db } from "./integrations/database";
 import { minioClient } from "./integrations/minio";
+import { chromaClient } from "./integrations/chromadb";
 const trpcApi = createApi({
+   chromaClient,
    minioClient,
    minioBucket: env.MINIO_BUCKET,
    auth,

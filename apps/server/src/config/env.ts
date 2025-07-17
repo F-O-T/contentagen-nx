@@ -1,4 +1,4 @@
-import { type Static, Type } from "@sinclair/typebox";
+import { Type } from "@sinclair/typebox";
 import { parseEnv } from "@packages/environment";
 
 export const EnvSchema = Type.Object({
@@ -24,6 +24,7 @@ export const EnvSchema = Type.Object({
    ARCJET_KEY: Type.String(),
    ARCJET_ENV: Type.Optional(Type.String()),
    TAVILY_API_KEY: Type.String(),
+   CHROMA_DB_URL: Type.String(),
 });
 
 export const isProduction = process.env.NODE_ENV === "production";

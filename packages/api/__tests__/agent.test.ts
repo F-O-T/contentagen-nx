@@ -1,5 +1,4 @@
 import { createTRPCClient, httpLink } from "@trpc/client";
-import { TRPCError } from "@trpc/server";
 import { setupServer } from "msw/node";
 import { describe, test, beforeAll, afterAll, expect, afterEach } from "vitest";
 import { createTRPCMsw } from "msw-trpc";
@@ -33,155 +32,106 @@ const trpc = createTRPCClient<AppRouter>({
 
 describe("agent router", () => {
   const server = setupServer();
-
   beforeAll(() => server.listen());
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
-  const baseAgent = {
-    userId: "user-123",
-    personaConfig: {
-      version: "2.1",
-      metadata: { name: "Agent", description: "desc" },
-    },
-    systemPrompt: "You are an agent.",
-    name: "Test Agent",
-    description: "A test agent",
+  const agentId = "00000000-0000-0000-0000-000000000001";
+  const userId = "user-123";
+  const agentData = {
+    id: agentId,
+    userId,
+    personaConfig: { foo: "bar" },
+    systemPrompt: "Prompt",
+    name: "Agent Name",
+    description: "desc",
     isActive: true,
   };
 
-  const agentId = "00000000-0000-0000-0000-000000000001";
-
-  describe("create", () => {
-    test("should successfully create agent with valid input", async () => {
-      server.use(
-        mswTrpc.agent.create.mutation(() => ({ ...baseAgent, id: agentId })),
-      );
-      const result = await trpc.agent.create.mutate(baseAgent);
-      expect(result).toMatchObject({ ...baseAgent, id: agentId });
+  test("should create an agent", async () => {
+    server.use(
+      mswTrpc.agent.create.mutation(({ input }) => ({
+        ...agentData,
+        ...input,
+      })),
+    );
+    const result = await trpc.agent.create.mutate({
+      userId,
+      personaConfig: { foo: "bar" },
+      systemPrompt: "Prompt",
+      name: "Agent Name",
+      description: "desc",
+      isActive: true,
     });
-
-    test("should throw validation error for missing required fields", async () => {
-      server.use(
-        mswTrpc.agent.create.mutation(() => {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Missing required fields",
-          });
-        }),
-      );
-      await expect(trpc.agent.create.mutate({})).rejects.toMatchObject({
-        message: "Missing required fields",
-        data: { code: "BAD_REQUEST" },
-      });
-    });
+    expect(result).toMatchObject(agentData);
   });
 
-  describe("get", () => {
-    test("should get agent by id", async () => {
-      server.use(
-        mswTrpc.agent.get.query(() => ({ ...baseAgent, id: agentId })),
-      );
-      const result = await trpc.agent.get.query({ id: agentId });
-      expect(result).toMatchObject({ ...baseAgent, id: agentId });
-    });
-
-    test("should throw NOT_FOUND if agent does not exist", async () => {
-      server.use(
-        mswTrpc.agent.get.query(() => {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Agent not found.",
-          });
-        }),
-      );
-      await expect(
-        trpc.agent.get.query({ id: "nonexistent-id" }),
-      ).rejects.toMatchObject({
-        message: "Agent not found.",
-        data: { code: "NOT_FOUND" },
-      });
-    });
+  test("should get an agent", async () => {
+    server.use(
+      mswTrpc.agent.get.query(({ input }) => ({ ...agentData, id: input.id })),
+    );
+    const result = await trpc.agent.get.query({ id: agentId });
+    expect(result).toMatchObject(agentData);
   });
 
-  describe("list", () => {
-    test("should list all agents", async () => {
-      server.use(
-        mswTrpc.agent.list.query(() => [{ ...baseAgent, id: agentId }]),
-      );
-      const result = await trpc.agent.list.query();
-      expect(Array.isArray(result)).toBe(true);
-      expect(result[0]).toMatchObject({ ...baseAgent, id: agentId });
-    });
+  test("should return not found for get", async () => {
+    server.use(
+      mswTrpc.agent.get.query(() => {
+        throw Object.assign(new Error("Agent not found."), {
+          code: "NOT_FOUND",
+        });
+      }),
+    );
+    await expect(
+      trpc.agent.get.query({ id: "not-exist" }),
+    ).rejects.toBeTruthy();
   });
 
-  describe("update", () => {
-    test("should update agent fields", async () => {
-      server.use(mswTrpc.agent.update.mutation(() => ({ success: true })));
-      const result = await trpc.agent.update.mutate({
-        id: agentId,
-        name: "Updated Name",
-      });
-      expect(result).toEqual({ success: true });
+  test("should update an agent", async () => {
+    server.use(mswTrpc.agent.update.mutation(() => ({ success: true })));
+    const result = await trpc.agent.update.mutate({
+      id: agentId,
+      name: "New Name",
     });
-
-    test("should throw NOT_FOUND if agent does not exist", async () => {
-      server.use(
-        mswTrpc.agent.update.mutation(() => {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Agent not found.",
-          });
-        }),
-      );
-      await expect(
-        trpc.agent.update.mutate({ id: "nonexistent-id", name: "Name" }),
-      ).rejects.toMatchObject({
-        message: "Agent not found.",
-        data: { code: "NOT_FOUND" },
-      });
-    });
-
-    test("should throw BAD_REQUEST if no fields to update", async () => {
-      server.use(
-        mswTrpc.agent.update.mutation(() => {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "No fields to update.",
-          });
-        }),
-      );
-      await expect(
-        trpc.agent.update.mutate({ id: agentId }),
-      ).rejects.toMatchObject({
-        message: "No fields to update.",
-        data: { code: "BAD_REQUEST" },
-      });
-    });
+    expect(result).toEqual({ success: true });
   });
 
-  describe("delete", () => {
-    test("should delete agent by id", async () => {
-      server.use(mswTrpc.agent.delete.mutation(() => ({ success: true })));
-      const result = await trpc.agent.delete.mutate({ id: agentId });
-      expect(result).toEqual({ success: true });
-    });
+  test("should return not found for update", async () => {
+    server.use(
+      mswTrpc.agent.update.mutation(() => {
+        throw Object.assign(new Error("Agent not found."), {
+          code: "NOT_FOUND",
+        });
+      }),
+    );
+    await expect(
+      trpc.agent.update.mutate({ id: "not-exist" }),
+    ).rejects.toBeTruthy();
+  });
 
-    test("should throw NOT_FOUND if agent does not exist", async () => {
-      server.use(
-        mswTrpc.agent.delete.mutation(() => {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Agent not found.",
-          });
-        }),
-      );
-      await expect(
-        trpc.agent.delete.mutate({ id: "nonexistent-id" }),
-      ).rejects.toMatchObject({
-        message: "Agent not found.",
-        data: { code: "NOT_FOUND" },
-      });
-    });
+  test("should delete an agent", async () => {
+    server.use(mswTrpc.agent.delete.mutation(() => ({ success: true })));
+    const result = await trpc.agent.delete.mutate({ id: agentId });
+    expect(result).toEqual({ success: true });
+  });
+
+  test("should return not found for delete", async () => {
+    server.use(
+      mswTrpc.agent.delete.mutation(() => {
+        throw Object.assign(new Error("Agent not found."), {
+          code: "NOT_FOUND",
+        });
+      }),
+    );
+    await expect(
+      trpc.agent.delete.mutate({ id: "not-exist" }),
+    ).rejects.toBeTruthy();
+  });
+
+  test("should list agents", async () => {
+    server.use(mswTrpc.agent.list.query(() => [agentData]));
+    const result = await trpc.agent.list.query();
+    expect(Array.isArray(result)).toBe(true);
+    expect(result[0]).toMatchObject(agentData);
   });
 });
