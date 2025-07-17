@@ -1,9 +1,16 @@
 import type { AgentInsert } from "@packages/database";
-import { agent } from "@packages/database";
+import {
+   createAgent,
+   getAgentById,
+   updateAgent,
+   deleteAgent,
+   listAgents,
+} from "@packages/database/repositories/agent-repository";
+import { NotFoundError, DatabaseError } from "@packages/errors";
 import { Type } from "@sinclair/typebox";
 import { TRPCError } from "@trpc/server";
 import { wrap } from "@typeschema/typebox";
-import { eq } from "drizzle-orm";
+
 import { protectedProcedure, router } from "../trpc";
 
 // Input schemas
@@ -37,66 +44,87 @@ export const agentRouter = router({
    create: protectedProcedure
       .input(wrap(CreateAgentInput))
       .mutation(async ({ ctx, input }) => {
-         const inserted = await ctx.db
-            .insert(agent)
-            .values(input as AgentInsert)
-            .returning();
-         return inserted[0];
+         try {
+            return await createAgent(ctx.db, input as AgentInsert);
+         } catch (err) {
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
       }),
-
    update: protectedProcedure
       .input(wrap(UpdateAgentInput))
       .mutation(async ({ ctx, input }) => {
          const { id, ...updateFields } = input;
-         const existing = await ctx.db
-            .select()
-            .from(agent)
-            .where(eq(agent.id, id));
-         if (existing.length === 0) {
-            throw new TRPCError({
-               code: "NOT_FOUND",
-               message: "Agent not found.",
-            });
+         try {
+            await updateAgent(ctx.db, id, updateFields);
+            return { success: true };
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
          }
-         await ctx.db.update(agent).set(updateFields).where(eq(agent.id, id));
-         return { success: true };
       }),
-
    delete: protectedProcedure
       .input(wrap(DeleteAgentInput))
       .mutation(async ({ ctx, input }) => {
          const { id } = input;
-         const existing = await ctx.db
-            .select()
-            .from(agent)
-            .where(eq(agent.id, id));
-         if (existing.length === 0) {
-            throw new TRPCError({
-               code: "NOT_FOUND",
-               message: "Agent not found.",
-            });
+         try {
+            await deleteAgent(ctx.db, id);
+            return { success: true };
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
          }
-         await ctx.db.delete(agent).where(eq(agent.id, id));
-         return { success: true };
       }),
-
    get: protectedProcedure
       .input(wrap(GetAgentInput))
       .query(async ({ ctx, input }) => {
-         const found = await ctx.db
-            .select()
-            .from(agent)
-            .where(eq(agent.id, input.id));
-         if (found.length === 0) {
+         try {
+            return await getAgentById(ctx.db, input.id);
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
+      }),
+   list: protectedProcedure.query(async ({ ctx }) => {
+      try {
+         return await listAgents(ctx.db);
+      } catch (err) {
+         if (err instanceof DatabaseError) {
             throw new TRPCError({
-               code: "NOT_FOUND",
-               message: "Agent not found.",
+               code: "INTERNAL_SERVER_ERROR",
+               message: err.message,
             });
          }
-         return found[0];
-      }),
-
-   list: protectedProcedure.query(async ({ ctx }) => {
-      return ctx.db.select().from(agent);
+         throw err;
+      }
    }),
 });

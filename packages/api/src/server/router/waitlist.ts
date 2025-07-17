@@ -1,9 +1,14 @@
-import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import {
+   createWaitlist,
+   updateWaitlist,
+   deleteWaitlist,
+   getWaitlistByEmail,
+} from "@packages/database/repositories/waitlist-repository";
+import { NotFoundError, DatabaseError } from "@packages/errors";
 import { publicProcedure, router } from "../trpc";
 import { Type } from "@sinclair/typebox";
 import { wrap } from "@typeschema/typebox";
-import { waitlist } from "@packages/database";
 
 const leadTypeValues = [
    "individual blogger",
@@ -41,39 +46,31 @@ export const waitlistRouter = router({
    join: publicProcedure
       .input(wrap(JoinInput))
       .mutation(async ({ ctx, input }) => {
-         const existing = await ctx.db
-            .select()
-            .from(waitlist)
-            .where(eq(waitlist.email, input.email));
-         if (existing.length > 0) {
-            throw new TRPCError({
-               code: "CONFLICT",
-               message:
-                  "Email already on waitlist. You can update or delete your entry.",
-            });
+         try {
+            await createWaitlist(ctx.db, input);
+            return { success: true };
+         } catch (err) {
+            if (
+               err instanceof DatabaseError &&
+               err.message.includes("already")
+            ) {
+               throw new TRPCError({
+                  code: "CONFLICT",
+                  message: err.message,
+               });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
          }
-         await ctx.db.insert(waitlist).values({
-            email: input.email,
-            name: input.name,
-            leadType: input.leadType,
-            notes: input.notes,
-            referralSource: input.referralSource,
-         });
-         return { success: true };
       }),
    update: publicProcedure
       .input(wrap(UpdateInput))
       .mutation(async ({ ctx, input }) => {
-         const existing = await ctx.db
-            .select()
-            .from(waitlist)
-            .where(eq(waitlist.email, input.email));
-         if (existing.length === 0) {
-            throw new TRPCError({
-               code: "NOT_FOUND",
-               message: "No waitlist entry found for this email.",
-            });
-         }
          const { email, ...updateFields } = input;
          if (Object.keys(updateFields).length === 0) {
             throw new TRPCError({
@@ -81,26 +78,54 @@ export const waitlistRouter = router({
                message: "No fields to update.",
             });
          }
-         await ctx.db
-            .update(waitlist)
-            .set(updateFields)
-            .where(eq(waitlist.email, email));
-         return { success: true };
+         try {
+            const entry = await getWaitlistByEmail(ctx.db, email);
+            if (!entry) {
+               throw new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "No waitlist entry found for this email.",
+               });
+            }
+            await updateWaitlist(ctx.db, entry.id, updateFields);
+            return { success: true };
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
       }),
    delete: publicProcedure
       .input(wrap(DeleteInput))
       .mutation(async ({ ctx, input }) => {
-         const existing = await ctx.db
-            .select()
-            .from(waitlist)
-            .where(eq(waitlist.email, input.email));
-         if (existing.length === 0) {
-            throw new TRPCError({
-               code: "NOT_FOUND",
-               message: "No waitlist entry found for this email.",
-            });
+         const { email } = input;
+         try {
+            const entry = await getWaitlistByEmail(ctx.db, email);
+            if (!entry) {
+               throw new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "No waitlist entry found for this email.",
+               });
+            }
+            await deleteWaitlist(ctx.db, entry.id);
+            return { success: true };
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
          }
-         await ctx.db.delete(waitlist).where(eq(waitlist.email, input.email));
-         return { success: true };
       }),
 });

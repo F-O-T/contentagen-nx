@@ -9,36 +9,36 @@ import { agentRouter } from "./router/agent";
 import { agentKnowledgeRouter } from "./router/agent-knowledge";
 
 export const appRouter = router({
-  waitlist: waitlistRouter,
-  agent: agentRouter,
-  agentFile: agentFileRouter,
-  agentKnowledge: agentKnowledgeRouter,
+   waitlist: waitlistRouter,
+   agent: agentRouter,
+   agentFile: agentFileRouter,
+   agentKnowledge: agentKnowledgeRouter,
 });
 export const createApi = ({
-  auth,
-  db,
-  minioClient,
-  minioBucket,
-  chromaClient,
+   auth,
+   db,
+   minioClient,
+   minioBucket,
+   chromaClient,
 }: {
-  minioBucket: string;
-  auth: AuthInstance;
-  db: DatabaseInstance;
-  minioClient: MinioClient;
-  chromaClient: any;
+   minioBucket: string;
+   auth: AuthInstance;
+   db: DatabaseInstance;
+   minioClient: MinioClient;
+   chromaClient: any;
 }) => {
-  return {
-    trpcRouter: appRouter,
-    createTRPCContext: ({ headers }: { headers: Headers }) =>
-      createTRPCContextInternal({
-        minioClient,
-        auth,
-        db,
-        headers,
-        minioBucket,
-        chromaClient,
-      }),
-  };
+   return {
+      trpcRouter: appRouter,
+      createTRPCContext: ({ headers }: { headers: Headers }) =>
+         createTRPCContextInternal({
+            minioClient,
+            auth,
+            db,
+            headers,
+            minioBucket,
+            chromaClient,
+         }),
+   };
 };
 
 export type AppRouter = typeof appRouter;
