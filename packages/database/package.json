@@ -27,7 +27,7 @@
       "check": "biome check --write ./src",
       "push": "bunx --bun env:run drizzle-kit push",
       "studio": "bunx --bun env:run drizzle-kit studio",
-      "typecheck": "tsc --build --noEmit --emitDeclarationOnly false",
+      "typecheck": "tsc --build --noEmit --emitDeclarationOnly false"
     
    },
    "dependencies": {
