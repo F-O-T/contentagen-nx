@@ -28,7 +28,7 @@
       "push": "bunx --bun env:run drizzle-kit push",
       "studio": "bunx --bun env:run drizzle-kit studio",
       "typecheck": "tsc --build --noEmit --emitDeclarationOnly false",
-      "test": "vitest run"
+    
    },
    "dependencies": {
       "drizzle-orm": "catalog:database",
@@ -42,8 +42,7 @@
       "dotenv-cli": "catalog:enviroment",
       "drizzle-kit": "catalog:database",
       "shx": "catalog:enviroment",
-      "typescript": "catalog:development",
-      "vite": "catalog:vite",
-      "vitest": "catalog:vite"
+      "typescript": "catalog:development"
+      
    }
 }
