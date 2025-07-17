@@ -4,7 +4,7 @@ import { createTRPCContext as createTRPCContextInternal, router } from "./trpc";
 import { waitlistRouter } from "./router/waitlist";
 import { agentFileRouter } from "./router/agent-file";
 import type { MinioClient } from "@packages/files/client";
-
+import type { ChromaClient } from "@packages/chroma-db/client";
 import { agentRouter } from "./router/agent";
 import { agentKnowledgeRouter } from "./router/agent-knowledge";
 import { contentRouter } from "./router/content";
@@ -33,7 +33,7 @@ export const createApi = ({
   auth: AuthInstance;
   db: DatabaseInstance;
   minioClient: MinioClient;
-  chromaClient: any;
+  chromaClient: ChromaClient;
 }) => {
   return {
     trpcRouter: appRouter,

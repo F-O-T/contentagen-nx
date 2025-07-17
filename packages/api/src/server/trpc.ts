@@ -3,6 +3,7 @@ import SuperJSON from "superjson";
 import type { AuthInstance } from "@packages/authentication/server";
 import type { DatabaseInstance } from "@packages/database/client";
 import type { MinioClient } from "@packages/files/client";
+import type { ChromaClient } from "@packages/chroma-db/client";
 export const createTRPCContext = async ({
    auth,
    db,
@@ -16,12 +17,12 @@ export const createTRPCContext = async ({
    minioClient: MinioClient;
    minioBucket: string;
    headers: Headers;
-   chromaClient: any;
+   chromaClient: ChromaClient;
 }): Promise<{
    minioBucket: string;
    db: DatabaseInstance;
    minioClient: MinioClient;
-   chromaClient: any;
+   chromaClient: ChromaClient;
    session: AuthInstance["$Infer"]["Session"] | null;
 }> => {
    const session = await auth.api.getSession({
