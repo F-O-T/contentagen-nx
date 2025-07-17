@@ -1,9 +1,9 @@
 {
-  "license": "PROPRIETARY",
-  "name": "@packages/brand",
-  "private": true,
-  "publishConfig": {
-    "access": "public"
-  },
-  "version": "0.0.0"
+   "license": "PROPRIETARY",
+   "name": "@packages/brand",
+   "private": true,
+   "publishConfig": {
+      "access": "public"
+   },
+   "version": "0.0.0"
 }

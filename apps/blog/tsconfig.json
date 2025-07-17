@@ -13,4 +13,3 @@
    "extends": "@tooling/typescript/astro.json",
    "include": [".astro/types.d.ts", "**/*"]
 }
-

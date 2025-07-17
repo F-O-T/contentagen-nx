@@ -1,26 +1,26 @@
 {
-  "dependencies": {
-    "@sinclair/typebox": "catalog:database",
-    "@packages/errors": "workspace:*"
-  },
-  "devDependencies": {
-    "@tooling/typescript": "workspace:*",
-    "typescript": "catalog:development",
-    "vite": "catalog:vite",
-    "vitest": "catalog:vite"
-  },
-  "license": "MIT",
-  "name": "@packages/environment",
-  "scripts": {
-    "check": "biome check --write ./src",
-    "typecheck": "bunx --bun tsc --noEmit ",
-    "test": "vitest run"
-  },
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": "./src/helpers.ts",
-    "./helpers": "./src/helpers.ts"
-  },
-  "version": "0.0.0"
+   "dependencies": {
+      "@sinclair/typebox": "catalog:database",
+      "@packages/errors": "workspace:*"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "typescript": "catalog:development",
+      "vite": "catalog:vite",
+      "vitest": "catalog:vite"
+   },
+   "license": "MIT",
+   "name": "@packages/environment",
+   "scripts": {
+      "check": "biome check --write ./src",
+      "typecheck": "bunx --bun tsc --noEmit ",
+      "test": "vitest run"
+   },
+   "private": true,
+   "type": "module",
+   "exports": {
+      ".": "./src/helpers.ts",
+      "./helpers": "./src/helpers.ts"
+   },
+   "version": "0.0.0"
 }
