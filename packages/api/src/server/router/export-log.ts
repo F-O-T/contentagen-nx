@@ -1,39 +1,49 @@
 import {
-  createAgent,
-  getAgentById,
-  updateAgent,
-  deleteAgent,
-  listAgents,
-} from "@packages/database/repositories/agent-repository";
+  createExportLog,
+  getExportLogById,
+  updateExportLog,
+  deleteExportLog,
+  listExportLogs,
+} from "@packages/database/repositories/export-log-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { Type } from "@sinclair/typebox";
 import { TRPCError } from "@trpc/server";
 import { wrap } from "@typeschema/typebox";
-
 import { protectedProcedure, router } from "../trpc";
+
 import {
-  AgentInsertSchema,
-  AgentUpdateSchema,
-  type AgentInsert,
+  ExportLogOptionsSchema,
+  ExportLogSelectSchema,
 } from "@packages/database/schema";
 
-const CreateAgentInput = AgentInsertSchema;
-const UpdateAgentInput = AgentUpdateSchema;
+const CreateExportLogInput = Type.Object({
+  contentId: Type.String({ format: "uuid" }),
+  userId: Type.String(),
+  options: ExportLogOptionsSchema,
+});
 
-const DeleteAgentInput = Type.Object({
+const UpdateExportLogInput = Type.Object({
+  id: Type.String({ format: "uuid" }),
+  contentId: Type.Optional(Type.String({ format: "uuid" })),
+  userId: Type.Optional(Type.String()),
+  options: Type.Optional(ExportLogOptionsSchema),
+});
+
+const DeleteExportLogInput = Type.Object({
   id: Type.String({ format: "uuid" }),
 });
 
-const GetAgentInput = Type.Object({
+const GetExportLogInput = Type.Object({
   id: Type.String({ format: "uuid" }),
 });
 
-export const agentRouter = router({
+export const exportLogRouter = router({
   create: protectedProcedure
-    .input(wrap(CreateAgentInput))
+    .input(wrap(CreateExportLogInput))
+    .output(wrap(ExportLogSelectSchema))
     .mutation(async ({ ctx, input }) => {
       try {
-        return await createAgent(ctx.db, input as AgentInsert);
+        return await createExportLog(ctx.db, input);
       } catch (err) {
         if (err instanceof DatabaseError) {
           throw new TRPCError({
@@ -45,18 +55,11 @@ export const agentRouter = router({
       }
     }),
   update: protectedProcedure
-    .input(wrap(UpdateAgentInput))
+    .input(wrap(UpdateExportLogInput))
     .mutation(async ({ ctx, input }) => {
       const { id, ...updateFields } = input;
-      if (!id) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Agent ID is required for update.",
-        });
-      }
-
       try {
-        await updateAgent(ctx.db, id, updateFields);
+        await updateExportLog(ctx.db, id, updateFields);
         return { success: true };
       } catch (err) {
         if (err instanceof NotFoundError) {
@@ -72,11 +75,11 @@ export const agentRouter = router({
       }
     }),
   delete: protectedProcedure
-    .input(wrap(DeleteAgentInput))
+    .input(wrap(DeleteExportLogInput))
     .mutation(async ({ ctx, input }) => {
       const { id } = input;
       try {
-        await deleteAgent(ctx.db, id);
+        await deleteExportLog(ctx.db, id);
         return { success: true };
       } catch (err) {
         if (err instanceof NotFoundError) {
@@ -92,10 +95,11 @@ export const agentRouter = router({
       }
     }),
   get: protectedProcedure
-    .input(wrap(GetAgentInput))
+    .input(wrap(GetExportLogInput))
+    .output(wrap(ExportLogSelectSchema))
     .query(async ({ ctx, input }) => {
       try {
-        return await getAgentById(ctx.db, input.id);
+        return await getExportLogById(ctx.db, input.id);
       } catch (err) {
         if (err instanceof NotFoundError) {
           throw new TRPCError({ code: "NOT_FOUND", message: err.message });
@@ -109,17 +113,19 @@ export const agentRouter = router({
         throw err;
       }
     }),
-  list: protectedProcedure.query(async ({ ctx }) => {
-    try {
-      return await listAgents(ctx.db);
-    } catch (err) {
-      if (err instanceof DatabaseError) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: err.message,
-        });
+  list: protectedProcedure
+    .output(wrap(Type.Array(ExportLogSelectSchema)))
+    .query(async ({ ctx }) => {
+      try {
+        return await listExportLogs(ctx.db);
+      } catch (err) {
+        if (err instanceof DatabaseError) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: err.message,
+          });
+        }
+        throw err;
       }
-      throw err;
-    }
-  }),
+    }),
 });

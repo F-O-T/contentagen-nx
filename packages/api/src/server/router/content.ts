@@ -1,10 +1,10 @@
 import {
-  createAgent,
-  getAgentById,
-  updateAgent,
-  deleteAgent,
-  listAgents,
-} from "@packages/database/repositories/agent-repository";
+  createContent,
+  getContentById,
+  updateContent,
+  deleteContent,
+  listContents,
+} from "@packages/database/repositories/content-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { Type } from "@sinclair/typebox";
 import { TRPCError } from "@trpc/server";
@@ -12,28 +12,27 @@ import { wrap } from "@typeschema/typebox";
 
 import { protectedProcedure, router } from "../trpc";
 import {
-  AgentInsertSchema,
-  AgentUpdateSchema,
-  type AgentInsert,
+  ContentInsertSchema,
+  ContentUpdateSchema,
 } from "@packages/database/schema";
 
-const CreateAgentInput = AgentInsertSchema;
-const UpdateAgentInput = AgentUpdateSchema;
+const CreateContentInput = ContentInsertSchema;
+const UpdateContentInput = ContentUpdateSchema;
 
-const DeleteAgentInput = Type.Object({
+const DeleteContentInput = Type.Object({
   id: Type.String({ format: "uuid" }),
 });
 
-const GetAgentInput = Type.Object({
+const GetContentInput = Type.Object({
   id: Type.String({ format: "uuid" }),
 });
 
-export const agentRouter = router({
+export const contentRouter = router({
   create: protectedProcedure
-    .input(wrap(CreateAgentInput))
+    .input(wrap(CreateContentInput))
     .mutation(async ({ ctx, input }) => {
       try {
-        return await createAgent(ctx.db, input as AgentInsert);
+        return await createContent(ctx.db, input);
       } catch (err) {
         if (err instanceof DatabaseError) {
           throw new TRPCError({
@@ -45,18 +44,17 @@ export const agentRouter = router({
       }
     }),
   update: protectedProcedure
-    .input(wrap(UpdateAgentInput))
+    .input(wrap(UpdateContentInput))
     .mutation(async ({ ctx, input }) => {
       const { id, ...updateFields } = input;
       if (!id) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Agent ID is required for update.",
+          message: "Content ID is required for update.",
         });
       }
-
       try {
-        await updateAgent(ctx.db, id, updateFields);
+        await updateContent(ctx.db, id, updateFields);
         return { success: true };
       } catch (err) {
         if (err instanceof NotFoundError) {
@@ -72,11 +70,11 @@ export const agentRouter = router({
       }
     }),
   delete: protectedProcedure
-    .input(wrap(DeleteAgentInput))
+    .input(wrap(DeleteContentInput))
     .mutation(async ({ ctx, input }) => {
       const { id } = input;
       try {
-        await deleteAgent(ctx.db, id);
+        await deleteContent(ctx.db, id);
         return { success: true };
       } catch (err) {
         if (err instanceof NotFoundError) {
@@ -92,10 +90,10 @@ export const agentRouter = router({
       }
     }),
   get: protectedProcedure
-    .input(wrap(GetAgentInput))
+    .input(wrap(GetContentInput))
     .query(async ({ ctx, input }) => {
       try {
-        return await getAgentById(ctx.db, input.id);
+        return await getContentById(ctx.db, input.id);
       } catch (err) {
         if (err instanceof NotFoundError) {
           throw new TRPCError({ code: "NOT_FOUND", message: err.message });
@@ -111,7 +109,7 @@ export const agentRouter = router({
     }),
   list: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await listAgents(ctx.db);
+      return await listContents(ctx.db);
     } catch (err) {
       if (err instanceof DatabaseError) {
         throw new TRPCError({

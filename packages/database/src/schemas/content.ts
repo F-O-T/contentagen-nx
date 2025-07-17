@@ -10,6 +10,11 @@ import {
 import { agent } from "./agent";
 import { user } from "./auth";
 import { Type as T, type Static } from "@sinclair/typebox";
+import {
+   createInsertSchema,
+   createSelectSchema,
+   createUpdateSchema,
+} from "drizzle-typebox";
 
 /* ------------------------------------------------------------------
    1. TypeBox Schemas for JSONB fields
@@ -76,3 +81,7 @@ export const content = pgTable(
 export type ContentStatus = (typeof contentStatusEnum.enumValues)[number];
 export type Content = typeof content.$inferSelect;
 export type ContentInsert = typeof content.$inferInsert;
+
+export const ContentInsertSchema = createInsertSchema(content);
+export const ContentSelectSchema = createSelectSchema(content);
+export const ContentUpdateSchema = createUpdateSchema(content);

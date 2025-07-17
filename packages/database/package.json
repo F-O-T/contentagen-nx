@@ -3,22 +3,10 @@
    "private": true,
    "type": "module",
    "exports": {
-      ".": {
-         "types": "./dist/src/index.d.ts",
-         "default": "./src/index.ts"
-      },
-      "./client": {
-         "types": "./dist/src/client.d.ts",
-         "default": "./src/client.ts"
-      },
-      "./schema": {
-         "types": "./dist/src/schema.d.ts",
-         "default": "./src/schema.ts"
-      },
-      "./repositories/*": {
-         "types": "./dist/src/repositories/*.d.ts",
-         "default": "./src/repositories/*.ts"
-      }
+      ".": "./src/index.ts",
+      "./client": "./src/client.ts",
+      "./schema": "./src/schema.ts",
+      "./repositories/*": "./src/repositories/*.ts"
    },
    "scripts": {
       "env:copy-example": "shx -- cp -n .env.example .env",
@@ -28,7 +16,6 @@
       "push": "bunx --bun env:run drizzle-kit push",
       "studio": "bunx --bun env:run drizzle-kit studio",
       "typecheck": "tsc --build --noEmit --emitDeclarationOnly false"
-    
    },
    "dependencies": {
       "drizzle-orm": "catalog:database",
@@ -43,6 +30,5 @@
       "drizzle-kit": "catalog:database",
       "shx": "catalog:enviroment",
       "typescript": "catalog:development"
-      
    }
 }

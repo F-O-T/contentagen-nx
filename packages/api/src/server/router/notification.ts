@@ -1,39 +1,47 @@
 import {
-  createAgent,
-  getAgentById,
-  updateAgent,
-  deleteAgent,
-  listAgents,
-} from "@packages/database/repositories/agent-repository";
+  createNotification,
+  getNotificationById,
+  updateNotification,
+  deleteNotification,
+  listNotifications,
+} from "@packages/database/repositories/notification-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { Type } from "@sinclair/typebox";
 import { TRPCError } from "@trpc/server";
 import { wrap } from "@typeschema/typebox";
-
 import { protectedProcedure, router } from "../trpc";
+
 import {
-  AgentInsertSchema,
-  AgentUpdateSchema,
-  type AgentInsert,
+  NotificationInsertSchema,
+  NotificationUpdateSchema,
 } from "@packages/database/schema";
 
-const CreateAgentInput = AgentInsertSchema;
-const UpdateAgentInput = AgentUpdateSchema;
+const CreateNotificationInput = NotificationInsertSchema;
+const UpdateNotificationInput = NotificationUpdateSchema;
 
-const DeleteAgentInput = Type.Object({
+const DeleteNotificationInput = Type.Object({
   id: Type.String({ format: "uuid" }),
 });
 
-const GetAgentInput = Type.Object({
+const GetNotificationInput = Type.Object({
   id: Type.String({ format: "uuid" }),
 });
 
-export const agentRouter = router({
+const ListNotificationsInput = Type.Object({
+  userId: Type.Optional(Type.String()),
+});
+
+export const notificationRouter = router({
   create: protectedProcedure
-    .input(wrap(CreateAgentInput))
+    .input(wrap(CreateNotificationInput))
     .mutation(async ({ ctx, input }) => {
       try {
-        return await createAgent(ctx.db, input as AgentInsert);
+        const { sentAt, ...rest } = input;
+        const repoInput = {
+          ...rest,
+          ...(sentAt ? { sentAt: new Date(sentAt) } : {}),
+        };
+        return await createNotification(ctx.db, repoInput);
       } catch (err) {
         if (err instanceof DatabaseError) {
           throw new TRPCError({
@@ -45,18 +53,22 @@ export const agentRouter = router({
       }
     }),
   update: protectedProcedure
-    .input(wrap(UpdateAgentInput))
+    .input(wrap(UpdateNotificationInput))
     .mutation(async ({ ctx, input }) => {
       const { id, ...updateFields } = input;
-      if (!id) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Agent ID is required for update.",
-        });
-      }
-
       try {
-        await updateAgent(ctx.db, id, updateFields);
+        const { sentAt, ...rest } = updateFields;
+        const repoInput = {
+          ...rest,
+          ...(sentAt ? { sentAt: new Date(sentAt) } : {}),
+        };
+        if (!id) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Notification ID is required for update.",
+          });
+        }
+        await updateNotification(ctx.db, id, repoInput);
         return { success: true };
       } catch (err) {
         if (err instanceof NotFoundError) {
@@ -72,11 +84,11 @@ export const agentRouter = router({
       }
     }),
   delete: protectedProcedure
-    .input(wrap(DeleteAgentInput))
+    .input(wrap(DeleteNotificationInput))
     .mutation(async ({ ctx, input }) => {
       const { id } = input;
       try {
-        await deleteAgent(ctx.db, id);
+        await deleteNotification(ctx.db, id);
         return { success: true };
       } catch (err) {
         if (err instanceof NotFoundError) {
@@ -92,10 +104,10 @@ export const agentRouter = router({
       }
     }),
   get: protectedProcedure
-    .input(wrap(GetAgentInput))
+    .input(wrap(GetNotificationInput))
     .query(async ({ ctx, input }) => {
       try {
-        return await getAgentById(ctx.db, input.id);
+        return await getNotificationById(ctx.db, input.id);
       } catch (err) {
         if (err instanceof NotFoundError) {
           throw new TRPCError({ code: "NOT_FOUND", message: err.message });
@@ -109,17 +121,19 @@ export const agentRouter = router({
         throw err;
       }
     }),
-  list: protectedProcedure.query(async ({ ctx }) => {
-    try {
-      return await listAgents(ctx.db);
-    } catch (err) {
-      if (err instanceof DatabaseError) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: err.message,
-        });
+  list: protectedProcedure
+    .input(wrap(ListNotificationsInput))
+    .query(async ({ ctx, input }) => {
+      try {
+        return await listNotifications(ctx.db, input.userId);
+      } catch (err) {
+        if (err instanceof DatabaseError) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: err.message,
+          });
+        }
+        throw err;
       }
-      throw err;
-    }
-  }),
+    }),
 });

@@ -222,6 +222,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@packages/authentication": "workspace:*",
+        "@packages/chroma-db": "workspace:*",
         "@packages/database": "workspace:*",
         "@packages/files": "workspace:*",
         "@sinclair/typebox": "catalog:database",
