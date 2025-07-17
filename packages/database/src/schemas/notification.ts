@@ -7,6 +7,10 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
+import { Type as T, type Static } from "@sinclair/typebox";
+
+export const NotificationDataSchema = T.Object({});
+export type NotificationData = Static<typeof NotificationDataSchema>;
 
 export const notification = pgTable("notification", {
   id: uuid("id").primaryKey().defaultRandom(),
