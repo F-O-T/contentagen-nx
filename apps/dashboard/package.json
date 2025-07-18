@@ -7,7 +7,6 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@packages/eden": "workspace:*",
     "@packages/ui": "workspace:*",
     "@polar-sh/better-auth": "catalog:auth",
     "@tabler/icons-react": "^3.34.0",

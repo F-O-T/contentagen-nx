@@ -92,7 +92,8 @@
          "ui": {
             "@tailwindcss/vite": "^4.1.8",
             "sonner": "^2.0.5"
-         }
+         },
+         "transactional": {}
       },
       "packages": [
          "tooling/*",
