@@ -1,7 +1,8 @@
 {
   "scripts": {
     "check": "biome check --write ./src",
-    "typecheck": "bunx --bun tsc --noEmit "
+    "typecheck": "bunx --bun tsc --noEmit ",
+    "test": "vitest run"
   },
   "exports": {
     "./helpers": "./src/helpers.ts",
