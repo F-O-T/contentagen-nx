@@ -1,14 +1,6 @@
 import { Type } from "@sinclair/typebox";
 import type { Static } from "@sinclair/typebox";
-
-export const KnowledgePointSchema = Type.Object({
-   content: Type.String(),
-   summary: Type.String(),
-   category: Type.Optional(Type.String()),
-   keywords: Type.Optional(Type.Array(Type.String())),
-   source: Type.Optional(Type.String()),
-   confidence: Type.Optional(Type.Number({ minimum: 0, maximum: 1 })),
-});
+import { KnowledgePointSchema } from "@packages/chroma-db/knowledge-point-schema";
 
 export const KnowledgePointsArraySchema = Type.Array(KnowledgePointSchema);
 export type KnowledgePoint = Static<typeof KnowledgePointSchema>;
