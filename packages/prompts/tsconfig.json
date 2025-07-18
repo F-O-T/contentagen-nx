@@ -5,6 +5,7 @@
     "*.ts",
     "*.json",
     "src/prompt-files/knowledge-distillation.json",
+    "src/prompt-files/content-generation.json",
     "__tests__/*.ts",
     "helpers.ts",
     "global.d.ts"
