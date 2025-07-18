@@ -1,6 +1,5 @@
 import { Polar } from "@polar-sh/sdk";
-export const isProduction = process.env.NODE_ENV === "production";
-
+import { isProduction } from "@packages/environment";
 export function getPaymentClient(POLAR_ACCESS_TOKEN: string) {
    if (!POLAR_ACCESS_TOKEN) {
       throw new Error(
