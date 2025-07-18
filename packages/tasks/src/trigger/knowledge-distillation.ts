@@ -9,7 +9,7 @@ import {
    createCollection,
    getCollection,
 } from "@packages/chroma-db/helpers";
-import { knowledgeDistillationPrompts } from "@packages/prompts";
+import { knowledgeDistillationPrompts, chunkText } from "@packages/prompts";
 import type { KnowledgeDistillationPrompts } from "@packages/prompts/helpers";
 import { parseKnowledgePoints } from "@packages/prompts/helpers";
 import type { OpenRouterClient } from "@packages/openrouter/client";
@@ -68,8 +68,7 @@ async function processFirstStageChunks({
    sourceType: string;
    openrouter: OpenRouterClient;
 }) {
-   // You may need to import chunkText from your prompts package
-   const chunks = (await import("@packages/prompts")).chunkText(rawText);
+   const chunks = chunkText(rawText);
    if (chunks.length === 1 && chunks[0]) {
       const content = await processChunkWithPrompt({
          chunk: chunks[0],
