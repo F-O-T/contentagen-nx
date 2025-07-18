@@ -21,7 +21,7 @@
     },
     "apps/blog": {
       "name": "blog",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@arcjet/astro": "catalog:astro",
         "@astrojs/check": "catalog:astro",
@@ -125,7 +125,7 @@
     },
     "apps/docs": {
       "name": "docs",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@arcjet/astro": "catalog:astro",
         "@astrojs/check": "catalog:astro",
@@ -146,7 +146,7 @@
     },
     "apps/landing-page": {
       "name": "landing-page",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@arcjet/astro": "catalog:astro",
         "@astrojs/check": "catalog:astro",
@@ -175,7 +175,7 @@
     },
     "apps/server": {
       "name": "server",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@elysiajs/cors": "^1.3.3",
         "@elysiajs/trpc": "^1.1.0",
@@ -303,7 +303,7 @@
     },
     "packages/eden": {
       "name": "@packages/eden",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@elysiajs/eden": "^1.3.2",
       },
@@ -376,7 +376,7 @@
     },
     "packages/polar-billing": {
       "name": "@packages/polar-billing",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "devDependencies": {
         "@tooling/typescript": "workspace:*",
         "typescript": "catalog:development",
@@ -393,10 +393,20 @@
         "typescript": "catalog:development",
       },
     },
+    "packages/prompts": {
+      "name": "@packages/prompts",
+      "version": "0.2.0",
+      "dependencies": {
+        "@packages/chroma-db": "workspace:*",
+      },
+    },
     "packages/tasks": {
       "name": "@packages/tasks",
       "version": "0.0.0",
       "dependencies": {
+        "@packages/chroma-db": "workspace:*",
+        "@packages/openrouter": "workspace:*",
+        "@packages/prompts": "workspace:*",
         "@sinclair/typebox": "catalog:database",
         "@trigger.dev/sdk": "^3.3.17",
       },
@@ -1366,6 +1376,8 @@
     "@packages/polar-billing": ["@packages/polar-billing@workspace:packages/polar-billing"],
 
     "@packages/posthog": ["@packages/posthog@workspace:packages/posthog"],
+
+    "@packages/prompts": ["@packages/prompts@workspace:packages/prompts"],
 
     "@packages/tasks": ["@packages/tasks@workspace:packages/tasks"],
 

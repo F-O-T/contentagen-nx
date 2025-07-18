@@ -1,0 +1,12 @@
+{
+  "extends": "@tooling/typescript/internal-package.json",
+  "include": [
+    "src/**/*.ts",
+    "*.ts",
+    "*.json",
+    "src/prompt-files/knowledge-distillation.json",
+    "__tests__/*.ts",
+    "helpers.ts",
+    "global.d.ts"
+  ]
+}

@@ -47,3 +47,26 @@ export const queryCollection = async (
 ) => {
    return await collection.query(args);
 };
+
+export function chunkText(
+   text: string,
+   maxChunkLength = 50000,
+   overlap = 500,
+): string[] {
+   const chunks: string[] = [];
+   let start = 0;
+   while (start < text.length) {
+      let end = start + maxChunkLength;
+      if (end < text.length) {
+         const lastSentence = text.lastIndexOf(".", end);
+         const lastNewline = text.lastIndexOf("\n", end);
+         const breakPoint = Math.max(lastSentence, lastNewline);
+         if (breakPoint > start + maxChunkLength * 0.7) {
+            end = breakPoint + 1;
+         }
+      }
+      chunks.push(text.slice(start, end));
+      start = end - overlap;
+   }
+   return chunks;
+}
