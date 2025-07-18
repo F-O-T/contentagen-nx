@@ -1,197 +1,168 @@
-import { createChromaClient } from "@packages/chroma-db/client";
+import { logger, task } from "@trigger.dev/sdk/v3";
+import { InvalidInputError } from "@packages/errors";
+import type { KnowledgePoint } from "@packages/chroma-db/knowledge-point-schema";
+import type { ChromaClient } from "@packages/chroma-db/client";
 import {
   addToCollection,
   createCollection,
   getCollection,
 } from "@packages/chroma-db/helpers";
+import { chunkText, knowledgeDistillationPrompts } from "@packages/prompts";
+import type { KnowledgeDistillationPrompts } from "@packages/prompts/helpers";
+import { parseKnowledgePoints } from "@packages/prompts/helpers";
+import type { OpenRouterClient } from "@packages/openrouter/client";
 import { generateOpenRouterText } from "@packages/openrouter/helpers";
-import {
-  buildExtractionPrompt,
-  buildFormattingPrompt,
-} from "@packages/prompts";
-import { logger, task } from "@trigger.dev/sdk/v3";
-import type { KnowledgePoint } from "@packages/chroma-db/knowledge-point-schema";
-import { InvalidInputError } from "@packages/errors";
 
-// Improved chunkText: splits by paragraphs, then sentences, with overlap
-function chunkText(text: string, maxLength = 2000, overlap = 200): string[] {
-  if (text.length <= maxLength) return [text];
-  const paragraphs = text.split(/\n{2,}/);
-  const chunks: string[] = [];
-  let current = "";
-  for (const para of paragraphs) {
-    if ((current + para).length > maxLength) {
-      if (current) chunks.push(current.trim());
-      current = para;
-    } else {
-      current += (current ? "\n\n" : "") + para;
-    }
-  }
-  if (current) chunks.push(current.trim());
-  // Add overlap
-  const overlapped: string[] = [];
-  for (let i = 0; i < chunks.length; i++) {
-    let chunk = chunks[i];
-    if (i > 0 && overlap > 0) {
-      const prev = chunks[i - 1];
-      chunk = prev.slice(-overlap) + "\n" + chunk;
-    }
-    overlapped.push(chunk);
-  }
-  return overlapped;
+// --- Types ---
+interface Clients {
+  openrouter: OpenRouterClient;
+  chroma: ChromaClient;
+  // Add other clients here as needed
 }
 
-// Robust JSON parsing for LLM output
-function parseJSONWithFallbacks(jsonString: string): any {
-  const strategies = [
-    (str: string) => JSON.parse(str),
-    (str: string) => JSON.parse(str.replace(/^[^{[]+/, "")),
-    (str: string) => JSON.parse(str.replace(/,[\s\n\r]*([\]}])/g, "$1")),
-    (str: string) => JSON.parse(str.replace(/'/g, '"')),
-    (str: string) => {
-      const match =
-        str.match(
-          /```(?:json)?\\s*(\\[[\\s\\S]*?\\]|\\{[\\s\\S]*?\\})\\s*```/,
-        ) || str.match(/(\\[[\\s\\S]*?\\]|\\{[\\s\\S]*?\\})/);
-      return match ? JSON.parse(match[1] ?? "") : null;
-    },
-  ];
-  for (const strategy of strategies) {
-    try {
-      const result = strategy(jsonString);
-      if (result) return result;
-    } catch {}
-  }
-  throw new InvalidInputError("All JSON parsing strategies failed");
-}
-
-// Validate and filter knowledge points
-function validateKnowledgePoints(result: any): KnowledgePoint[] {
-  let points: KnowledgePoint[] = [];
-  if (Array.isArray(result)) {
-    points = result as KnowledgePoint[];
-  } else if (
-    typeof result === "object" &&
-    result !== null &&
-    "content" in result &&
-    "summary" in result
-  ) {
-    points = [result as KnowledgePoint];
-  } else {
-    throw new InvalidInputError(
-      "Invalid result format - expected array or object with content and summary",
-    );
-  }
-  return points.filter(
-    (point) =>
-      point.content &&
-      point.summary &&
-      typeof point.content === "string" &&
-      point.content.length >= 50,
-  );
-}
-
-// Types for the distillation process
 interface DistillationInput {
   agentId: string;
   rawText: string;
   sourceType: string;
   sourceIdentifier?: string;
+  flow: "low" | "medium" | "high";
+  clients: Clients;
 }
 
-// Accepts OpenRouter client as a parameter
 export const knowledgeDistillationTask = task({
   id: "knowledge-distillation",
   maxDuration: 600, // 10 minutes
-  // Accepts OpenRouter client as a parameter
-  run: async (payload: DistillationInput & { openrouterClient: any }) => {
+  run: async (
+    payload: DistillationInput,
+  ): Promise<{
+    knowledgePoints: KnowledgePoint[];
+    stageOutputs: Record<string, string | string[]>;
+  }> => {
     logger.log("Starting knowledge distillation", { payload });
+    const { clients, flow, rawText, sourceType, agentId } = payload;
+    const openrouter = clients.openrouter;
+    const chromaClient = clients.chroma;
 
-    logger.log("Chunking raw text for processing");
-    const chunks = chunkText(payload.rawText);
+    // --- 1. Get Prompts for Flow ---
+    const flowPrompts = (
+      knowledgeDistillationPrompts as KnowledgeDistillationPrompts
+    )[flow];
+    if (!flowPrompts) throw new InvalidInputError(`Unknown flow: ${flow}`);
+    const stageKeys = Object.keys(flowPrompts)
+      .filter((k) => k.startsWith("stage-"))
+      .sort((a, b) => {
+        const na = parseInt(a.split("-")[1] ?? "0", 10);
+        const nb = parseInt(b.split("-")[1] ?? "0", 10);
+        return na - nb;
+      });
+    if (stageKeys.length === 0)
+      throw new InvalidInputError(`No stages found for flow: ${flow}`);
 
-    // === 2. Extraction ===
-    logger.log("Extracting knowledge points from text chunks");
-    const client = payload.openrouterClient;
-
-    async function extractKnowledgeChunks(chunks: string[]): Promise<string[]> {
-      const results: string[] = [];
-      for (const chunk of chunks) {
-        const extractionPrompt = buildExtractionPrompt(
-          chunk,
-          payload.sourceType,
+    // --- 2. Run Each Stage in Order ---
+    let prevOutput: string | string[] = rawText;
+    const stageOutputs: Record<string, string | string[]> = {};
+    for (let i = 0; i < stageKeys.length; i++) {
+      const stageKey = stageKeys[i];
+      const promptTemplate = flowPrompts[stageKey];
+      if (!promptTemplate)
+        throw new InvalidInputError(
+          `Missing prompt for ${stageKey} in flow ${flow}`,
         );
-        const response = await generateOpenRouterText(client, [
+      let prompt: string;
+      if (i === 0) {
+        // Stage 1: chunk rawText if needed
+        const chunks = chunkText(rawText);
+        if (chunks.length === 1) {
+          prompt = promptTemplate
+            .replace("{rawText}", chunks[0])
+            .replace("{sourceType}", sourceType);
+          const response = await generateOpenRouterText(openrouter, [
+            {
+              prompt,
+              maxTokens: 2000,
+              temperature: 0.3,
+              model: "moonshotai/kimi-k2" as any,
+            },
+          ]);
+          const content = response?.text?.trim?.() || "";
+          prevOutput = content;
+          stageOutputs[stageKey] = content;
+        } else {
+          // Multiple chunks: run prompt for each and join results
+          const results: string[] = [];
+          for (const chunk of chunks) {
+            const p = promptTemplate
+              .replace("{rawText}", chunk)
+              .replace("{sourceType}", sourceType);
+            const response = await generateOpenRouterText(openrouter, [
+              {
+                prompt: p,
+                maxTokens: 2000,
+                temperature: 0.3,
+                model: "moonshotai/kimi-k2" as any,
+              },
+            ]);
+            const content = response?.text?.trim?.() || "";
+            if (content.length >= 50) results.push(content);
+          }
+          prevOutput = results;
+          stageOutputs[stageKey] = results;
+        }
+      } else {
+        // Later stages: use previous output as input
+        let prev = Array.isArray(prevOutput)
+          ? prevOutput.join("\n\n")
+          : prevOutput;
+        prompt = promptTemplate
+          .replace("{sourceType}", sourceType)
+          .replace("{basicInsights}", prev)
+          .replace("{analyzedContent}", prev)
+          .replace("{strategicInsights}", prev)
+          .replace("{enrichedInsights}", prev)
+          .replace("{validatedInsights}", prev)
+          .replace("{preprocessedContent}", prev)
+          .replace("{deepAnalysis}", prev)
+          .replace("{executiveInsights}", prev);
+        const response = await generateOpenRouterText(openrouter, [
           {
-            prompt: extractionPrompt,
-            maxTokens: 2000,
-            temperature: 0.3,
-            model: "moonshotai/kimi-k2",
+            prompt,
+            maxTokens: 3000,
+            temperature: 0.1,
+            model: "moonshotai/kimi-k2" as any,
           },
         ]);
-        const content = response?.text?.trim?.() || "";
-        if (content.length >= 50) results.push(content);
+        const text =
+          response?.text?.trim?.() ||
+          (response as any)?.choices?.[0]?.text?.trim?.() ||
+          "";
+        prevOutput = text;
+        stageOutputs[stageKey] = text;
       }
-      return results;
     }
 
-    const extractedChunks = await extractKnowledgeChunks(chunks);
-    if (extractedChunks.length === 0) {
-      logger.error("No content extracted from input text", {
-        agentId: payload.agentId,
-      });
-      throw new InvalidInputError("No content extracted from input text");
-    }
-
-    logger.log("Knowledge points extracted from text chunks", {
-      count: extractedChunks.length,
-      agentId: payload.agentId,
-    });
-
-    // === 3. Formatting & Validation (Consolidated) ===
-    const formattingPrompt = buildFormattingPrompt(
-      payload.sourceType,
-      extractedChunks.join("\n\n"),
-    );
-
-    logger.log("Formatting and validating extracted knowledge points");
-    const formattingResponse = await generateOpenRouterText(client, [
-      {
-        prompt: formattingPrompt,
-        maxTokens: 3000,
-        temperature: 0.1,
-        model: "moonshotai/kimi-k2",
-      },
-    ]);
-    const jsonText =
-      formattingResponse?.text?.trim?.() ||
-      formattingResponse?.choices?.[0]?.text?.trim?.() ||
-      "";
-
+    // --- 3. Parse Final Output as KnowledgePoints (if possible) ---
     let knowledgePoints: KnowledgePoint[] = [];
     try {
-      const parsed = parseJSONWithFallbacks(jsonText);
-      knowledgePoints = validateKnowledgePoints(parsed);
-    } catch (e) {
-      throw new InvalidInputError(
-        "Failed to parse or validate LLM output as KnowledgePoints: " +
-          (e instanceof Error ? e.message : String(e)),
+      knowledgePoints = parseKnowledgePoints(
+        Array.isArray(prevOutput) ? prevOutput.join("\n\n") : prevOutput,
       );
+    } catch (e) {
+      // Not all flows/stages will output valid KnowledgePoints, so skip error
     }
 
-    // === 5. Chroma DB Storage ===
+    // --- 4. Store in Chroma DB ---
     async function storeKnowledgePoints(
       agentId: string,
       sourceType: string,
       knowledgePoints: KnowledgePoint[],
     ) {
+      if (!knowledgePoints.length) return;
       logger.log("Storing knowledge points in Chroma DB", {
         count: knowledgePoints.length,
       });
-      const chromaUrl = process.env.CHROMA_URL || "http://localhost:8000";
-      const chromaClient = createChromaClient(chromaUrl);
       const collectionName = `knowledge_distillation_${agentId}`;
-      let collection;
+      import type { Collection } from "chromadb";
+      let collection: Collection;
       try {
         collection = await getCollection(chromaClient, collectionName);
       } catch {
@@ -223,12 +194,11 @@ export const knowledgeDistillationTask = task({
       });
     }
 
-    await storeKnowledgePoints(
-      payload.agentId,
-      payload.sourceType,
-      knowledgePoints,
-    );
+    await storeKnowledgePoints(agentId, sourceType, knowledgePoints);
 
-    return { knowledgePoints };
+    return {
+      knowledgePoints,
+      stageOutputs,
+    };
   },
 });
