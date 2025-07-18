@@ -41,12 +41,8 @@
     "deploy": "wrangler deploy",
     "dev": "podman-compose down && podman-compose up -d && bun run --watch src/index.ts",
     "format": "biome format",
-    "generate": "bunx drizzle-kit generate",
-    "migrate": "bunx drizzle-kit migrate",
-    "push": "bunx drizzle-kit push",
     "start": "./server",
-    "typecheck": "bunx --bun tsc --noEmit ",
-    "studio": "bunx drizzle-kit studio"
+    "typecheck": "bunx --bun tsc --noEmit "
   },
   "version": "0.2.0"
 }
