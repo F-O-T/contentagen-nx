@@ -4,6 +4,9 @@
     "typecheck": "bunx --bun tsc --noEmit ",
     "test": "vitest run"
   },
+  "dependencies": {
+    "@packages/chroma-db": "workspace:*"
+  },
   "exports": {
     "./helpers": "./src/helpers.ts",
     "./text-utils": "./src/text-utils.ts",
