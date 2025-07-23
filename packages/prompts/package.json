@@ -5,7 +5,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@packages/chroma-db": "workspace:*"
+    "@packages/chroma-db": "workspace:*",
+    "@packages/openrouter": "workspace:*"
   },
   "exports": {
     "./helpers": "./src/helpers.ts",

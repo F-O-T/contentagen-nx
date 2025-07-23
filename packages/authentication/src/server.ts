@@ -4,8 +4,9 @@ import {
    type ResendClient,
    type SendEmailOTPOptions,
 } from "@packages/transactional/client";
+import { serverEnv } from "@packages/environment/server";
+
 import type { Polar } from "@polar-sh/sdk";
-import type { Static } from "@sinclair/typebox";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 import {
    getDatabaseAdapter,
@@ -13,15 +14,12 @@ import {
    getEmailVerificationOptions,
    getPlugins,
    getSocialProviders,
-   getTrustedOrigins,
-   type EnvSchema,
 } from "./helpers";
 import { emailOTP, openAPI, organization, apiKey } from "better-auth/plugins";
 export interface AuthOptions {
    db: DatabaseInstance;
    polarClient: Polar;
    resendClient: ResendClient;
-   env: Static<typeof EnvSchema>;
 }
 
 export const getBaseOptions = (db: DatabaseInstance) =>
@@ -43,21 +41,15 @@ export const getBaseOptions = (db: DatabaseInstance) =>
       ],
    }) satisfies BetterAuthOptions;
 export type AuthInstance = ReturnType<typeof createAuth>;
-export const createAuth = ({
-   db,
-   resendClient,
-   polarClient,
-   env,
-}: AuthOptions) => {
+export const createAuth = ({ db, resendClient, polarClient }: AuthOptions) => {
    return betterAuth({
-      socialProviders: getSocialProviders(env),
-      appName: "ContentaGen-Auth",
+      socialProviders: getSocialProviders(),
       database: getDatabaseAdapter(db),
       emailAndPassword: getEmailAndPasswordOptions(),
       emailVerification: getEmailVerificationOptions(),
       plugins: getPlugins(resendClient, polarClient),
-      secret: env.BETTER_AUTH_SECRET,
-      trustedOrigins: getTrustedOrigins(env),
+      secret: serverEnv.BETTER_AUTH_SECRET,
+      trustedOrigins: serverEnv.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
       session: {
          cookieCache: {
             enabled: true,

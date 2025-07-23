@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   db:
-    image: postgres:15
+    image: docker.io/postgres:15
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -31,7 +31,7 @@ services:
       retries: 3
 
   chroma:
-    image: chromadb/chroma:latest
+    image: docker.io/chromadb/chroma:latest
     ports:
       - "8000:8000"
     volumes:

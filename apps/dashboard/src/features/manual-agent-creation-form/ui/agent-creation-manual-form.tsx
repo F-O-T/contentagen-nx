@@ -32,7 +32,6 @@ import {
    communicationStyleEnum, // <-- Add this import
 } from "@api/schemas/agent-schema";
 import { z } from "zod";
-import type { EdenClientType } from "@packages/eden";
 export const agentFormSchema = z.object({
    contentType: z.enum(contentTypeEnum.enumValues, {
       required_error: "Content type is required",
@@ -67,10 +66,6 @@ const steps = [
    { id: "step-brand-integration", title: "Brand Integration" }, // New step
    { id: "step-review-submit", title: "Review & Submit" },
 ] as const;
-
-export type Agent = NonNullable<
-   Awaited<ReturnType<EdenClientType["api"]["v1"]["agents"]["get"]>>["data"]
->["agents"][number];
 
 const { Stepper } = defineStepper(...steps);
 export type AgentCreationManualForm = {

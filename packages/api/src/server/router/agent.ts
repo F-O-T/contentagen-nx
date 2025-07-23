@@ -3,7 +3,7 @@ import {
   getAgentById,
   updateAgent,
   deleteAgent,
-  listAgents,
+  listAgentsByUserId,
 } from "@packages/database/repositories/agent-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { Type } from "@sinclair/typebox";
@@ -109,9 +109,10 @@ export const agentRouter = router({
         throw err;
       }
     }),
-  list: protectedProcedure.query(async ({ ctx }) => {
+  listByUser: protectedProcedure.query(async ({ ctx }) => {
     try {
-      return await listAgents(ctx.db);
+      console.log("Listing agents for user:", ctx.session.user.id);
+      return await listAgentsByUserId(ctx.db, ctx.session.user.id);
     } catch (err) {
       if (err instanceof DatabaseError) {
         throw new TRPCError({

@@ -1,13 +1,13 @@
 import { createRouter as createTanstackRouter } from "@tanstack/react-router";
 import { routerWithQueryClient } from "@tanstack/react-router-with-query";
-import * as Eden from "./integrations/eden";
+import * as Trpc from "@/integrations/trpc";
 import * as TanstackQuery from "./integrations/tanstack-query";
 import { routeTree } from "./routeTree.gen";
 export const createRouter = () => {
    const router = routerWithQueryClient(
       createTanstackRouter({
          context: {
-            ...Eden.getContext(),
+            ...Trpc.getContext(),
             ...TanstackQuery.getContext(),
          },
          defaultPreloadStaleTime: 0,

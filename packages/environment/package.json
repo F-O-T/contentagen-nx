@@ -19,7 +19,8 @@
    "private": true,
    "type": "module",
    "exports": {
-      ".": "./src/helpers.ts",
+      "./server": "./src/server.ts",
+      "./client": "./src/client.ts",
       "./helpers": "./src/helpers.ts"
    },
    "version": "0.0.0"

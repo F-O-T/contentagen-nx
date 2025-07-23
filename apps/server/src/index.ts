@@ -1,6 +1,6 @@
 import cors from "@elysiajs/cors";
 import { Elysia } from "elysia";
-import { env } from "./config/env";
+import { serverEnv as env } from "@packages/environment/server";
 import { ArcjetShield } from "./integrations/arcjet";
 import { posthogPlugin } from "./integrations/posthog";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
@@ -22,7 +22,7 @@ const app = new Elysia()
          allowedHeaders: ["Content-Type", "Authorization"],
          credentials: true,
          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-         origin: env.BETTER_AUTH_TRUSTED_ORIGINS,
+         origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
       }),
    )
    .use(ArcjetShield)
@@ -32,7 +32,7 @@ const app = new Elysia()
       "/trpc/*",
       async (opts) => {
          const res = await fetchRequestHandler({
-            endpoint: "/api/trpc",
+            endpoint: "/trpc",
             router: trpcApi.trpcRouter,
             req: opts.request,
             createContext: (c) =>

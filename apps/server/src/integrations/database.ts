@@ -1,6 +1,6 @@
 import { createDb } from "@packages/database/client";
 
-import { env } from "@api/config/env";
+import { serverEnv as env } from "@packages/environment/server";
 export const db = createDb({
    databaseUrl: env.DATABASE_URL,
 });

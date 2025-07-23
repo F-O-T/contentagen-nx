@@ -1,7 +1,7 @@
-import { env } from "@/config/env";
+import { clientEnv } from "@packages/environment/client";
 import { createAuthClient } from "@packages/authentication/client";
 export const betterAuthClient = createAuthClient({
-   apiBaseUrl: env.VITE_SERVER_URL,
+   apiBaseUrl: clientEnv.VITE_SERVER_URL,
 });
 
 export type Session = typeof betterAuthClient.$Infer.Session;

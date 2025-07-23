@@ -37,7 +37,5 @@ export function getPromptStagesByType(type?: PromptType) {
   return result;
 }
 
-export * from "./helpers/knowledge-distillation";
-
 // Content Generation prompt types
 export type ContentGenerationPrompts = Record<PromptType, StageMap>;

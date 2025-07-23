@@ -2,7 +2,8 @@ import { arcjetProtect } from "@/integrations/arcjet";
 import { QueryProvider } from "@/integrations/tanstack-query";
 import { ThemeProvider } from "@/layout/theme-provider";
 import brandConfig from "@packages/brand/index.json";
-import type { EdenClientType } from "@packages/eden";
+
+import type { TrpcClient } from "@/integrations/trpc";
 import appCss from "@packages/ui/globals.css?url";
 import type { QueryClient } from "@tanstack/react-query";
 import {
@@ -16,7 +17,7 @@ import { Toaster } from "@packages/ui/components/sonner";
 import { getReactPosthogConfig } from "@packages/posthog/client";
 import { PostHogProvider } from "posthog-js/react";
 export interface MyRouterContext {
-   eden: EdenClientType;
+   trpc: TrpcClient;
    queryClient: QueryClient;
 }
 const posthogConfig = getReactPosthogConfig();

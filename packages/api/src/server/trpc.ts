@@ -25,9 +25,11 @@ export const createTRPCContext = async ({
    chromaClient: ChromaClient;
    session: AuthInstance["$Infer"]["Session"] | null;
 }> => {
+   console.log(headers);
    const session = await auth.api.getSession({
       headers,
    });
+
    return {
       minioBucket,
       minioClient,

@@ -35,15 +35,11 @@ import {
    CheckCircle2,
    Trash,
 } from "lucide-react";
-import type { EdenClientType } from "@packages/eden";
 import { formatValueToTitleCase } from "@packages/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getContext } from "@/integrations/eden";
 import { toast } from "sonner";
-
-type Agent = NonNullable<
-   Awaited<ReturnType<EdenClientType["api"]["v1"]["agents"]["get"]>>["data"]
->["agents"][number];
+import { Agent } from "@/features/manual-agent-creation-form/ui/agent-creation-manual-form";
+import { useTrpc } from "@/integrations/trpc";
 
 type AgentCardProps = {
    agent: Agent;
@@ -51,21 +47,20 @@ type AgentCardProps = {
 
 export function AgentCard({ agent }: AgentCardProps) {
    const queryClient = useQueryClient();
-   const { eden } = getContext();
-   const { mutate: deleteAgent, isPending } = useMutation({
-      mutationFn: async (id: string) =>
-         await eden.api.v1.agents({ id }).delete(),
-      onError: () => {
-         toast.error("Failed to delete agent");
-      },
-      onSuccess: () => {
-         queryClient.invalidateQueries({
-            queryKey: ["get-agents"],
-         });
-         toast.success("Agent deleted successfully");
-      },
-   });
-
+   const trpc = useTrpc();
+   const { mutate: deleteAgent, isPending } = useMutation(
+      trpc.agent.delete.mutationOptions({
+         onError: () => {
+            toast.error("Failed to delete agent");
+         },
+         onSuccess: () => {
+            queryClient.invalidateQueries({
+               queryKey: ["get-agents"],
+            });
+            toast.success("Agent deleted successfully");
+         },
+      }),
+   );
    const infoItems = React.useMemo(
       () => [
          {

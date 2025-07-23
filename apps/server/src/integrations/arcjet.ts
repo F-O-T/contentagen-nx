@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { createArcjetServer } from "@packages/arcjet/server";
-import { env } from "@api/config/env";
+import { serverEnv as env } from "@packages/environment/server";
 const aj = createArcjetServer(env.ARCJET_KEY);
 export const ArcjetShield = new Elysia({ name: "arcjet-shield" }).onRequest(
    // Get the `ip` from Elysia's context

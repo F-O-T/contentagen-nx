@@ -1,5 +1,5 @@
 import { Polar } from "@polar-sh/sdk";
-import { isProduction } from "@packages/environment";
+import { isProduction } from "@packages/environment/helpers";
 export function getPaymentClient(POLAR_ACCESS_TOKEN: string) {
    if (!POLAR_ACCESS_TOKEN) {
       throw new Error(

@@ -174,4 +174,18 @@ describe("agent router", () => {
     expect(Array.isArray(result)).toBe(true);
     expect(result[0]).toMatchObject(agentData);
   });
+
+  test("should list agents by user", async () => {
+    server.use(
+      mswTrpc.agent.listByUser.query(({ input }) => {
+        if (input.userId === userId) {
+          return [agentData];
+        }
+        return [];
+      }),
+    );
+    const result = await trpc.agent.listByUser.query({ userId });
+    expect(Array.isArray(result)).toBe(true);
+    expect(result[0]).toMatchObject(agentData);
+  });
 });

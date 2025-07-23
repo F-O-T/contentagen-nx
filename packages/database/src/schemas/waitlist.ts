@@ -5,6 +5,12 @@ import {
    createUpdateSchema,
 } from "drizzle-typebox";
 
+export const waitListStatus = pgEnum("waitlist_status", [
+   "pending",
+   "contacted",
+   "joined",
+   "rejected",
+]);
 export const leadTypeEnum = pgEnum("lead_type", [
    "individual blogger",
    "marketing team",
@@ -19,14 +25,7 @@ export const waitlist = pgTable("waitlist", {
    email: text("email").notNull(),
    name: text("name"),
    leadType: leadTypeEnum("lead_type").notNull(),
-   status: pgEnum("waitlist_status", [
-      "pending",
-      "contacted",
-      "joined",
-      "rejected",
-   ])("waitlist_status")
-      .notNull()
-      .default("pending"),
+   status: waitListStatus("status").notNull().default("pending"),
    notes: text("notes"),
    referralSource: text("referral_source"),
 });
