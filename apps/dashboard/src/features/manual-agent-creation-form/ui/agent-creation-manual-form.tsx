@@ -5,208 +5,214 @@ import { ChevronLeft } from "lucide-react";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { useAgentForm } from "../lib/use-agent-form";
 import { BasicInfoStep, BasicInfoStepSubscribe } from "./basic-info-step";
-import { Type, Static } from "@sinclair/typebox";
-import Ajv from "ajv";
-import addFormats from "ajv-formats";
-import { AudienceStep } from "./audience-step";
-export const agentFormSchema = z.object({
-  // Basic Information
-  name: z.string().min(1, "Agent name is required"),
-  description: z.string().min(1, "Description is required"),
-  systemPrompt: z.string().min(1, "System prompt is required"),
+import { Type, type Static } from "@sinclair/typebox";
+export const agentFormSchema = Type.Object({
+   // Basic Information
+   name: Type.String({ minLength: 1 }),
+   description: Type.String({ minLength: 1 }),
+   systemPrompt: Type.String({ minLength: 1 }),
 
-  // Voice & Tone
-  toneMix: z.array(
-    z.object({ value: z.string(), weight: z.number().min(0).max(1) }),
-  ),
-  formality: z.number().min(0).max(1),
-  humorLevel: z.number().min(0).max(1),
-  emojiDensity: z.number().min(0).max(1),
-  readingGrade: z.number().min(1).max(12),
-  communication: z.enum(["I", "we", "you"]),
-  forbiddenWords: z.array(z.string()).optional(),
-  requiredHooks: z.array(z.string()).optional(),
+   // Voice & Tone
+   toneMix: Type.Array(
+      Type.Object({
+         value: Type.String(),
+         weight: Type.Number({ minimum: 0, maximum: 1 }),
+      }),
+   ),
+   formality: Type.Number({ minimum: 0, maximum: 1 }),
+   humorLevel: Type.Number({ minimum: 0, maximum: 1 }),
+   emojiDensity: Type.Number({ minimum: 0, maximum: 1 }),
+   readingGrade: Type.Number({ minimum: 1, maximum: 12 }),
+   communication: Type.Union([
+      Type.Literal("I"),
+      Type.Literal("we"),
+      Type.Literal("you"),
+   ]),
+   forbiddenWords: Type.Optional(Type.Array(Type.String())),
+   requiredHooks: Type.Optional(Type.Array(Type.String())),
 
-  // Audience
-  audienceBase: z.enum([
-    "general_public",
-    "professionals",
-    "beginners",
-    "customers",
-  ]),
-  audiencePersonas: z.array(z.string()).optional(),
-  audienceRegions: z.string().optional(),
-  // Formatting & Structure
-  formattingStyle: z.enum(["structured", "narrative", "list_based"]),
-  headingDensity: z.enum(["low", "medium", "high"]).optional(),
-  listStyle: z.enum(["bullets", "numbered"]).optional(),
-  includeToc: z.boolean().optional(),
-  maxParagraphLen: z.number().min(20).optional(),
+   // Audience
+   audienceBase: Type.Union([
+      Type.Literal("general_public"),
+      Type.Literal("professionals"),
+      Type.Literal("beginners"),
+      Type.Literal("customers"),
+   ]),
+   audiencePersonas: Type.Optional(Type.Array(Type.String())),
+   audienceRegions: Type.Optional(Type.String()),
 
-  // Language
-  languagePrimary: z.enum(["en", "pt", "es"]),
-  languageVariant: z.string().optional(),
+   // Formatting & Structure
+   formattingStyle: Type.Union([
+      Type.Literal("structured"),
+      Type.Literal("narrative"),
+      Type.Literal("list_based"),
+   ]),
+   headingDensity: Type.Optional(
+      Type.Union([
+         Type.Literal("low"),
+         Type.Literal("medium"),
+         Type.Literal("high"),
+      ]),
+   ),
+   listStyle: Type.Optional(
+      Type.Union([Type.Literal("bullets"), Type.Literal("numbered")]),
+   ),
+   includeToc: Type.Optional(Type.Boolean()),
+   maxParagraphLen: Type.Optional(Type.Number({ minimum: 20 })),
 
-  // Brand Integration
-  brandIntegrationStyle: z.enum([
-    "strict_guideline",
-    "flexible_guideline",
-    "reference_only",
-    "creative_blend",
-  ]),
-  brandAssets: z
-    .array(z.object({ type: z.string(), payload: z.any() }))
-    .optional(),
-  brandBlacklistWords: z.array(z.string()).optional(),
-  brandProductNames: z.array(z.string()).optional(),
-  brandCompliance: z
-    .object({
-      gdpr: z.boolean().optional(),
-      hipaa: z.boolean().optional(),
-      fda: z.boolean().optional(),
-    })
-    .optional(),
+   // Language
+   languagePrimary: Type.Union([
+      Type.Literal("en"),
+      Type.Literal("pt"),
+      Type.Literal("es"),
+   ]),
+   languageVariant: Type.Optional(Type.String()),
 
-  // Repurposing
-  repurposePillarId: z.string().uuid().optional(),
-  repurposeChannels: z.array(
-    z.enum([
-      "blog_post",
-      "linkedin_post",
-      "twitter_thread",
-      "instagram_post",
-      "instagram_story",
-      "tiktok_script",
-      "email_newsletter",
-      "reddit_post",
-      "youtube_script",
-      "slide_deck",
-      "video_script",
-      "technical_documentation",
-    ]),
-  ),
-  repurposePromptTemplate: z.string().optional(),
+   // Brand Integration
+   brandIntegrationStyle: Type.Union([
+      Type.Literal("strict_guideline"),
+      Type.Literal("flexible_guideline"),
+      Type.Literal("reference_only"),
+      Type.Literal("creative_blend"),
+   ]),
+   brandAssets: Type.Optional(
+      Type.Array(Type.Object({ type: Type.String(), payload: Type.Any() })),
+   ),
+   brandBlacklistWords: Type.Optional(Type.Array(Type.String())),
+   brandProductNames: Type.Optional(Type.Array(Type.String())),
+   brandCompliance: Type.Optional(
+      Type.Object({
+         gdpr: Type.Optional(Type.Boolean()),
+         hipaa: Type.Optional(Type.Boolean()),
+         fda: Type.Optional(Type.Boolean()),
+      }),
+   ),
+
+   // Repurposing
+   repurposePillarId: Type.Optional(Type.String({ format: "uuid" })),
+   repurposeChannels: Type.Array(
+      Type.Union([
+         Type.Literal("blog_post"),
+         Type.Literal("linkedin_post"),
+         Type.Literal("twitter_thread"),
+         Type.Literal("instagram_post"),
+         Type.Literal("instagram_story"),
+         Type.Literal("tiktok_script"),
+         Type.Literal("email_newsletter"),
+         Type.Literal("reddit_post"),
+         Type.Literal("youtube_script"),
+         Type.Literal("slide_deck"),
+         Type.Literal("video_script"),
+         Type.Literal("technical_documentation"),
+      ]),
+   ),
+   repurposePromptTemplate: Type.Optional(Type.String()),
 });
-export type AgentFormData = z.infer<typeof agentFormSchema>;
+export type AgentFormData = Static<typeof agentFormSchema>;
+
 export type AgentForm = ReturnType<typeof useAgentForm>;
-const steps = [
-  { id: "step-basic-info", title: "Basic Information" },
-  { id: "step-audience", title: "Audience" },
-  { id: "step-voice-tone", title: "Voice & Tone" },
-  { id: "step-formatting", title: "Formatting & Structure" },
-  { id: "step-language", title: "Language" },
-  { id: "step-brand", title: "Brand Integration" },
-  { id: "step-repurposing", title: "Repurposing" },
-  { id: "step-review-submit", title: "Review & Submit" },
-] as const;
+const steps = [{ id: "step-basic-info", title: "Basic Information" }] as const;
 const { Stepper } = defineStepper(...steps);
 export type AgentCreationManualForm = {
-  defaultValues?: any;
-  onSubmit: (values: AgentFormData) => Promise<void>;
+   defaultValues?: any;
+   onSubmit: (values: AgentFormData) => Promise<void>;
 };
 
 export function AgentCreationManualForm({
-  onSubmit,
-  defaultValues,
+   onSubmit,
+   defaultValues,
 }: AgentCreationManualForm) {
-  const { handleSubmit, form } = useAgentForm({ defaultValues, onSubmit });
+   const { handleSubmit, form } = useAgentForm({ defaultValues, onSubmit });
 
-  const getMascotMessage = (step: string) => {
-    switch (step) {
-      case "step-basic-info":
-        return "Let's give your content agent a special name!";
-      case "step-content-type":
-        return "Now let's choose what type of content to create!";
-      case "step-voice-tone":
-        return "How should your agent communicate with your audience?";
-      case "step-target-audience":
-        return "Who will be reading your content?";
-      case "step-formatting-style":
-        return "How should your content be structured?";
-      case "step-brand-integration":
-        return "How closely should your agent follow your brand guidelines? Also, choose how your agent should communicate: as a singular person or in third person.";
-      case "step-review-submit":
-        return "Almost there! Let's review everything before creating your agent!";
-      default:
-        return "Let's create your content agent!";
-    }
-  };
+   const getMascotMessage = (step: string) => {
+      switch (step) {
+         case "step-basic-info":
+            return "Let's give your content agent a special name!";
+      }
+   };
 
-  return (
-    <Stepper.Provider
-      labelOrientation="vertical"
-      variant="horizontal"
-      className="h-full w-full"
-    >
-      {({ methods }) => (
-        <form className="h-full gap-8 flex flex-col" onSubmit={handleSubmit}>
-          <Stepper.Navigation>
-            {steps.map((step, idx) => {
-              const currentIdx = steps.findIndex(
-                (s) => s.id === methods.current.id,
-              );
-              const isPastOrCurrent = idx <= currentIdx;
-              return (
-                <Stepper.Step
-                  className={`bg-accent!important text-accent ${!isPastOrCurrent ? "cursor-not-allowed opacity-50 pointer-events-none" : ""}`}
-                  key={step.id}
-                  of={step.id}
-                  onClick={() => {
-                    if (isPastOrCurrent && idx !== currentIdx) {
-                      methods.goTo(step.id);
-                    }
-                  }}
-                />
-              );
-            })}
-          </Stepper.Navigation>
+   return (
+      <Stepper.Provider
+         labelOrientation="vertical"
+         variant="horizontal"
+         className="h-full w-full"
+      >
+         {({ methods }) => (
+            <form
+               className="h-full gap-8 flex flex-col"
+               onSubmit={handleSubmit}
+            >
+               <Stepper.Navigation>
+                  {steps.map((step, idx) => {
+                     const currentIdx = steps.findIndex(
+                        (s) => s.id === methods.current.id,
+                     );
+                     const isPastOrCurrent = idx <= currentIdx;
+                     return (
+                        <Stepper.Step
+                           className={`bg-accent!important text-accent ${!isPastOrCurrent ? "cursor-not-allowed opacity-50 pointer-events-none" : ""}`}
+                           key={step.id}
+                           of={step.id}
+                           onClick={() => {
+                              if (isPastOrCurrent && idx !== currentIdx) {
+                                 methods.goTo(step.id);
+                              }
+                           }}
+                        />
+                     );
+                  })}
+               </Stepper.Navigation>
 
-          <TalkingMascot message={getMascotMessage(methods.current.id)} />
+               <TalkingMascot message={getMascotMessage(methods.current.id)} />
 
-          <Stepper.Panel className="h-full ">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                className="h-full space-y-4"
-                key={methods.current.id}
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.3 }}
-              >
-                {methods.switch({
-                  "step-basic-info": () => <BasicInfoStep form={form} />,
-                  "step-audience": () => <AudienceStep form={form} />,
-                })}
-              </motion.div>
-            </AnimatePresence>
-          </Stepper.Panel>
-          <Stepper.Controls
-            className="flex justify-between gap-4 "
-            id="navigation-controls"
-          >
-            <div>
-              {!methods.isFirst && (
-                <Button
-                  className="gap-4 "
-                  onClick={methods.prev}
-                  type="button"
-                  variant="outline"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                  Back
-                </Button>
-              )}
-            </div>
-            <div className="flex gap-4">
-              {methods.switch({
-                "step-basic-info": () => (
-                  <BasicInfoStepSubscribe form={form} next={methods.next} />
-                ),
-              })}
-            </div>
-          </Stepper.Controls>
-        </form>
-      )}
-    </Stepper.Provider>
-  );
+               <Stepper.Panel className="h-full ">
+                  <AnimatePresence mode="wait" initial={false}>
+                     <motion.div
+                        className="h-full space-y-4"
+                        key={methods.current.id}
+                        initial={{ opacity: 0, scale: 0.96 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.96 }}
+                        transition={{ duration: 0.3 }}
+                     >
+                        {methods.switch({
+                           "step-basic-info": () => (
+                              <BasicInfoStep form={form} />
+                           ),
+                        })}
+                     </motion.div>
+                  </AnimatePresence>
+               </Stepper.Panel>
+               <Stepper.Controls
+                  className="flex justify-between gap-4 "
+                  id="navigation-controls"
+               >
+                  <div>
+                     {!methods.isFirst && (
+                        <Button
+                           className="gap-4 "
+                           onClick={methods.prev}
+                           type="button"
+                           variant="outline"
+                        >
+                           <ChevronLeft className="w-5 h-5" />
+                           Back
+                        </Button>
+                     )}
+                  </div>
+                  <div className="flex gap-4">
+                     {methods.switch({
+                        "step-basic-info": () => (
+                           <BasicInfoStepSubscribe
+                              form={form}
+                              next={methods.next}
+                           />
+                        ),
+                     })}
+                  </div>
+               </Stepper.Controls>
+            </form>
+         )}
+      </Stepper.Provider>
+   );
 }

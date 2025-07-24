@@ -1,4 +1,5 @@
 import { useAppForm } from "@packages/ui/components/form";
+import { Value } from "@sinclair/typebox/value";
 import { type FormEvent, useCallback } from "react";
 import {
   type AgentCreationManualForm,
@@ -29,7 +30,14 @@ export function useAgentForm({
       formApi.reset();
     },
     validators: {
-      onBlur: agentFormSchema,
+      onBlur: (value) => {
+        const valid = Value.Check(agentFormSchema, value);
+        if (!valid) {
+          const errors = Array.from(Value.Errors(agentFormSchema, value));
+          return errors.map((e) => e.message).join(", ") || "Validation error";
+        }
+        return undefined;
+      },
     },
   });
 
