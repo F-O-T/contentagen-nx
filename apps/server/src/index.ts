@@ -28,23 +28,18 @@ const app = new Elysia()
    .use(ArcjetShield)
    .use(posthogPlugin)
    .mount(auth.handler)
-   .all(
-      "/trpc/*",
-      async (opts) => {
-         const res = await fetchRequestHandler({
-            endpoint: "/trpc",
-            router: trpcApi.trpcRouter,
-            req: opts.request,
-            createContext: (c) =>
-               trpcApi.createTRPCContext({ headers: c.req.headers }),
-         });
+   .all("/trpc/*", async (opts) => {
+      const res = await fetchRequestHandler({
+         endpoint: "/trpc",
+         router: trpcApi.trpcRouter,
+         req: opts.request,
+         createContext: async (c) => {
+            return await trpcApi.createTRPCContext({ headers: c.req.headers });
+         },
+      });
 
-         return res;
-      },
-      {
-         parse: "none",
-      },
-   )
+      return res;
+   })
    .listen(process.env.PORT ?? 9876);
 
 console.log(

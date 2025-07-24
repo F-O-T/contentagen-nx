@@ -33,7 +33,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
                      defaults: "2025-05-24",
                   }}
                >
-                  <Toaster /> <Outlet />
+                  <Toaster />
+                  <Outlet />
                </PostHogProvider>
             </ThemeProvider>
          </QueryProvider>

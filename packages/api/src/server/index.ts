@@ -13,40 +13,40 @@ import { notificationRouter } from "./router/notification";
 import { notificationPreferencesRouter } from "./router/notification-preferences";
 
 export const appRouter = router({
-  waitlist: waitlistRouter,
-  agent: agentRouter,
-  agentFile: agentFileRouter,
-  agentKnowledge: agentKnowledgeRouter,
-  content: contentRouter,
-  exportLog: exportLogRouter,
-  notification: notificationRouter,
-  notificationPreferences: notificationPreferencesRouter,
+   waitlist: waitlistRouter,
+   agent: agentRouter,
+   agentFile: agentFileRouter,
+   agentKnowledge: agentKnowledgeRouter,
+   content: contentRouter,
+   exportLog: exportLogRouter,
+   notification: notificationRouter,
+   notificationPreferences: notificationPreferencesRouter,
 });
 export const createApi = ({
-  auth,
-  db,
-  minioClient,
-  minioBucket,
-  chromaClient,
+   auth,
+   db,
+   minioClient,
+   minioBucket,
+   chromaClient,
 }: {
-  minioBucket: string;
-  auth: AuthInstance;
-  db: DatabaseInstance;
-  minioClient: MinioClient;
-  chromaClient: ChromaClient;
+   minioBucket: string;
+   auth: AuthInstance;
+   db: DatabaseInstance;
+   minioClient: MinioClient;
+   chromaClient: ChromaClient;
 }) => {
-  return {
-    trpcRouter: appRouter,
-    createTRPCContext: ({ headers }: { headers: Headers }) =>
-      createTRPCContextInternal({
-        minioClient,
-        auth,
-        db,
-        headers,
-        minioBucket,
-        chromaClient,
-      }),
-  };
+   return {
+      trpcRouter: appRouter,
+      createTRPCContext: async ({ headers }: { headers: Headers }) =>
+         await createTRPCContextInternal({
+            minioClient,
+            auth,
+            db,
+            headers,
+            minioBucket,
+            chromaClient,
+         }),
+   };
 };
 
 export type AppRouter = typeof appRouter;
