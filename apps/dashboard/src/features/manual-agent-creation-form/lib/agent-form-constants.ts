@@ -1,96 +1,76 @@
+// Updated to import from new database schema
 import {
-   contentTypeEnum,
-   voiceToneEnum,
-   targetAudienceEnum,
-   formattingStyleEnum,
-} from "@api/schemas/agent-schema";
-import type {
-   brandIntegrationEnum,
-   communicationStyleEnum,
-} from "@api/schemas/agent-schema";
+   VoiceConfigSchema,
+   AudienceConfigSchema,
+   FormatConfigSchema,
+   LanguageConfigSchema,
+   BrandConfigSchema,
+   RepurposeChannelSchema,
+} from "@packages/database";
 
-/**
- * Converts a snake_case or underscore string to Title Case.
- */
-function toLabel(value: string): string {
-   return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+// Helper to extract literal values from TypeBox unions
+function extractLiterals(schema: any): string[] {
+   if (schema.anyOf) {
+      return schema.anyOf.map((v: any) => v.const);
+   }
+   if (schema.type === "string" && schema.enum) {
+      return schema.enum;
+   }
+   if (schema.oneOf) {
+      return schema.oneOf.map((v: any) => v.const);
+   }
+   return [];
 }
 
-export const CONTENT_TYPES: readonly {
-   value: (typeof contentTypeEnum.enumValues)[number];
-   label: string;
-}[] = contentTypeEnum.enumValues.map((value) => ({
+// Schema-driven value lists for form fields
+export const VOICE_TONES = extractLiterals(
+   VoiceConfigSchema.properties.toneMix.items.value.type,
+).map((value) => ({
    value,
-   label: toLabel(value),
+   label: value.charAt(0).toUpperCase() + value.slice(1),
 }));
 
-export const VOICE_TONES: readonly {
-   value: (typeof voiceToneEnum.enumValues)[number];
-   label: string;
-}[] = voiceToneEnum.enumValues.map((value) => ({
+export const AUDIENCE_BASES = extractLiterals(
+   AudienceConfigSchema.properties.base,
+).map((value) => ({
    value,
-   label: toLabel(value),
+   label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
 }));
 
-export const TARGET_AUDIENCES: readonly {
-   value: (typeof targetAudienceEnum.enumValues)[number];
-   label: string;
-}[] = targetAudienceEnum.enumValues.map((value) => ({
+export const AUDIENCE_EXPERTISE = extractLiterals(
+   AudienceConfigSchema.properties.expertise.type,
+).map((value) => ({
    value,
-   label: toLabel(value),
+   label: value.charAt(0).toUpperCase() + value.slice(1),
 }));
 
-export const FORMATTING_STYLES: readonly {
-   value: (typeof formattingStyleEnum.enumValues)[number];
-   label: string;
-}[] = formattingStyleEnum.enumValues.map((value) => ({
+export const FORMATTING_STYLES = extractLiterals(
+   FormatConfigSchema.properties.style,
+).map((value) => ({
    value,
-   label: toLabel(value),
+   label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
 }));
 
-export const BRAND_INTEGRATIONS: readonly {
-   value: (typeof brandIntegrationEnum.enumValues)[number];
-   label: string;
-   description: string;
-}[] = [
-   {
-      value: "strict_guideline",
-      label: "Strict Guideline",
-      description:
-         "Content must strictly follow brand guidelines. No deviations allowed.",
-   },
-   {
-      value: "flexible_guideline",
-      label: "Flexible Guideline",
-      description:
-         "Content should generally follow brand guidelines, but some flexibility is allowed.",
-   },
-   {
-      value: "reference_only",
-      label: "Reference Only",
-      description:
-         "Brand guidelines are for reference only; content can be more creative.",
-   },
-   {
-      value: "creative_blend",
-      label: "Creative Blend",
-      description: "Blend brand guidelines creatively for unique content.",
-   },
-];
+export const BRAND_INTEGRATIONS = extractLiterals(
+   BrandConfigSchema.properties.integrationStyle,
+).map((value) => ({
+   value,
+   label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+}));
 
-export const COMMUNICATION_STYLES: readonly {
-   value: (typeof communicationStyleEnum.enumValues)[number];
-   label: string;
-   description: string;
-}[] = [
-   {
-      value: "first_person",
-      label: "First Person",
-      description: "The AI communicates as a singular person (I/me/my).",
-   },
-   {
-      value: "third_person",
-      label: "Third Person",
-      description: "The AI communicates in third person (he/she/they/it).",
-   },
-];
+export const REPURPOSE_CHANNELS = extractLiterals(RepurposeChannelSchema).map(
+   (value) => ({
+      value,
+      label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+   }),
+);
+
+// Communication styles (from VoiceConfigSchema)
+export const COMMUNICATION_STYLES = extractLiterals(
+   VoiceConfigSchema.properties.communication,
+).map((value) => ({
+   value,
+   label: value.charAt(0).toUpperCase() + value.slice(1),
+}));
+
+// All legacy/duplicate constant definitions have been removed. Only schema-driven lists remain.

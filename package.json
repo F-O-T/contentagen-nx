@@ -104,5 +104,13 @@
          "packages/*",
          "apps/*"
       ]
+   },
+   "dependencies": {
+      "@sinclair/typebox": "^0.34.38",
+      "@tiptap/pm": "^3.0.7",
+      "@tiptap/react": "^3.0.7",
+      "@tiptap/starter-kit": "^3.0.7",
+      "ajv": "^8.17.1",
+      "ajv-formats": "^3.0.1"
    }
 }

@@ -1,23 +1,23 @@
 {
-  "name": "@packages/chroma-db",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "exports": {
-    "./client": "./src/client.ts",
-    "./helpers": "./src/helpers.ts",
-    "./knowledge-point-schema": "./src/knowledge-point-schema.ts"
-  },
-  "scripts": {
-    "check": "biome check --write ./src",
-    "typecheck": "tsc --build --noEmit --emitDeclarationOnly false"
-  },
-  "dependencies": {
-    "@chroma-core/default-embed": "^0.1.8",
-    "@tooling/typescript": "workspace:*",
-    "chromadb": "^3.0.9"
-  },
-  "devDependencies": {
-    "typescript": "catalog:development"
-  }
+   "name": "@packages/chroma-db",
+   "version": "0.1.0",
+   "private": true,
+   "type": "module",
+   "exports": {
+      "./client": "./src/client.ts",
+      "./helpers": "./src/helpers.ts",
+      "./knowledge-point-schema": "./src/knowledge-point-schema.ts"
+   },
+   "scripts": {
+      "check": "biome check --write ./src",
+      "typecheck": "tsc --build --noEmit --emitDeclarationOnly false"
+   },
+   "dependencies": {
+      "@chroma-core/default-embed": "^0.1.8",
+      "@tooling/typescript": "workspace:*",
+      "chromadb": "^3.0.9"
+   },
+   "devDependencies": {
+      "typescript": "catalog:development"
+   }
 }

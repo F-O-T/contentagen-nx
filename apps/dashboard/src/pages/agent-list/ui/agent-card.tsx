@@ -38,7 +38,7 @@ import {
 import { formatValueToTitleCase } from "@packages/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Agent } from "@/features/manual-agent-creation-form/ui/agent-creation-manual-form";
+import type { Agent } from "@/features/manual-agent-creation-form/ui/agent-creation-manual-form";
 import { useTrpc } from "@/integrations/trpc";
 
 type AgentCardProps = {

@@ -13,8 +13,8 @@ const parseEndpoint = (endpoint: string) => {
       port: portStr
          ? parseInt(portStr, 10)
          : endpoint.includes("https")
-            ? 443
-            : 9000,
+           ? 443
+           : 9000,
    };
 };
 const EnvSchema = Type.Object({

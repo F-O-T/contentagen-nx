@@ -1,22 +1,22 @@
 {
-  "scripts": {
-    "check": "biome check --write ./src",
-    "typecheck": "bunx --bun tsc --noEmit ",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@packages/chroma-db": "workspace:*",
-    "@packages/openrouter": "workspace:*"
-  },
-  "exports": {
-    "./helpers": "./src/helpers.ts",
-    "./text-utils": "./src/text-utils.ts",
-    ".": "./src/index.ts"
-  },
-  "name": "@packages/prompts",
-  "version": "0.2.0",
-  "main": "index.ts",
-  "types": "index.ts",
-  "description": "Prompt templates for LLM tasks (knowledge distillation, etc)",
-  "license": "MIT"
+   "scripts": {
+      "check": "biome check --write ./src",
+      "typecheck": "bunx --bun tsc --noEmit ",
+      "test": "vitest run"
+   },
+   "dependencies": {
+      "@packages/chroma-db": "workspace:*",
+      "@packages/openrouter": "workspace:*"
+   },
+   "exports": {
+      "./helpers": "./src/helpers.ts",
+      "./text-utils": "./src/text-utils.ts",
+      ".": "./src/index.ts"
+   },
+   "name": "@packages/prompts",
+   "version": "0.2.0",
+   "main": "index.ts",
+   "types": "index.ts",
+   "description": "Prompt templates for LLM tasks (knowledge distillation, etc)",
+   "license": "MIT"
 }
