@@ -33,7 +33,7 @@ export const agentRouter = router({
       .input(wrap(CreateAgentInput))
       .mutation(async ({ ctx, input }) => {
          try {
-            return await createAgent(ctx.db, input as AgentInsert);
+            return await createAgent((await ctx).db, input as AgentInsert);
          } catch (err) {
             if (err instanceof DatabaseError) {
                throw new TRPCError({

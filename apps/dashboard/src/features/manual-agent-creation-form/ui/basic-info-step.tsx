@@ -6,7 +6,7 @@ import { Button } from "@packages/ui/components/button";
 export function BasicInfoStep({ form }: { form: AgentForm }) {
   return (
     <>
-      <form.AppField name="name">
+      <form.AppField name="metadata.name">
         {(field) => (
           <field.FieldContainer>
             <field.FieldLabel>Agent Name *</field.FieldLabel>
@@ -23,13 +23,15 @@ export function BasicInfoStep({ form }: { form: AgentForm }) {
           </field.FieldContainer>
         )}
       </form.AppField>
-      <form.AppField name="description">
+      <form.AppField name="metadata.description">
         {(field) => (
           <field.FieldContainer>
             <field.FieldLabel>Description *</field.FieldLabel>
             <TiptapEditor
-              value={form.state.values.description || "<p></p>"}
-              onChange={(val) => form.setFieldValue("description", val)}
+              value={form.state.values.metadata?.description || "<p></p>"}
+              onChange={(val) =>
+                form.setFieldValue("metadata.description", val)
+              }
               onBlur={field.handleBlur}
               name={field.name}
               id={field.name}
@@ -51,23 +53,28 @@ export function BasicInfoStepSubscribe({
   form: AgentForm;
   next: () => void;
 }) {
-  // Updated to require systemPrompt as well
+  // System prompt is now generated automatically; no user input required.
 
   return (
     <form.Subscribe
       selector={(state) => ({
-        nameValue: state.values.name,
-        descriptionValue: state.values.description,
+        nameValue: state.values.metadata?.name,
+        descriptionValue: state.values.metadata?.description,
         fieldMeta: state.fieldMeta,
       })}
     >
       {({ nameValue, descriptionValue, fieldMeta }) => {
-        const nameErrors = fieldMeta?.name?.errors;
-        const descriptionErrors = fieldMeta?.description?.errors;
+        const nameErrors =
+          fieldMeta?.metadata && "name" in fieldMeta.metadata
+            ? fieldMeta.metadata.name.errors
+            : undefined;
+        const descriptionErrors =
+          fieldMeta?.metadata && "description" in fieldMeta.metadata
+            ? fieldMeta.metadata.description.errors
+            : undefined;
 
         const isNameValid =
-          nameValue?.trim() !== "" &&
-          (!nameErrors || nameErrors.length === 0);
+          nameValue?.trim() !== "" && (!nameErrors || nameErrors.length === 0);
         const isDescriptionValid =
           descriptionValue?.trim() !== "" &&
           (!descriptionErrors || descriptionErrors.length === 0);

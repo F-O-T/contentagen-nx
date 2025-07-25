@@ -3,10 +3,9 @@ import {
    VoiceConfigSchema,
    AudienceConfigSchema,
    FormatConfigSchema,
-   LanguageConfigSchema,
    BrandConfigSchema,
-   RepurposeChannelSchema,
-} from "@packages/database";
+   PurposeChannelSchema,
+} from "@packages/database/schemas/agent";
 
 // Helper to extract literal values from TypeBox unions
 function extractLiterals(schema: any): string[] {
@@ -58,7 +57,7 @@ export const BRAND_INTEGRATIONS = extractLiterals(
    label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
 }));
 
-export const REPURPOSE_CHANNELS = extractLiterals(RepurposeChannelSchema).map(
+export const REPURPOSE_CHANNELS = extractLiterals(PurposeChannelSchema).map(
    (value) => ({
       value,
       label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
