@@ -1,75 +1,65 @@
 // Updated to import from new database schema
 import {
-   VoiceConfigSchema,
-   AudienceConfigSchema,
-   FormatConfigSchema,
-   BrandConfigSchema,
-   PurposeChannelSchema,
-} from "@packages/database/schemas/agent";
+  VoiceConfigSchema,
+  AudienceConfigSchema,
+  FormatConfigSchema,
+  BrandConfigSchema,
+  PurposeChannelSchema,
+} from "@packages/database/schemas/agent-types";
 
 // Helper to extract literal values from TypeBox unions
 function extractLiterals(schema: any): string[] {
-   if (schema.anyOf) {
-      return schema.anyOf.map((v: any) => v.const);
-   }
-   if (schema.type === "string" && schema.enum) {
-      return schema.enum;
-   }
-   if (schema.oneOf) {
-      return schema.oneOf.map((v: any) => v.const);
-   }
-   return [];
+  if (schema.anyOf) {
+    return schema.anyOf.map((v: any) => v.const);
+  }
+  if (schema.type === "string" && schema.enum) {
+    return schema.enum;
+  }
+  if (schema.oneOf) {
+    return schema.oneOf.map((v: any) => v.const);
+  }
+  return [];
 }
 
 // Schema-driven value lists for form fields
-export const VOICE_TONES = extractLiterals(
-   VoiceConfigSchema.properties.toneMix.items.value.type,
-).map((value) => ({
-   value,
-   label: value.charAt(0).toUpperCase() + value.slice(1),
-}));
+// VOICE_TONES removed: toneMix no longer in schema
 
 export const AUDIENCE_BASES = extractLiterals(
-   AudienceConfigSchema.properties.base,
+  AudienceConfigSchema.properties.base,
 ).map((value) => ({
-   value,
-   label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+  value,
+  label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
 }));
 
-export const AUDIENCE_EXPERTISE = extractLiterals(
-   AudienceConfigSchema.properties.expertise.type,
-).map((value) => ({
-   value,
-   label: value.charAt(0).toUpperCase() + value.slice(1),
-}));
+// AUDIENCE_EXPERTISE removed: expertise no longer in schema
 
 export const FORMATTING_STYLES = extractLiterals(
-   FormatConfigSchema.properties.style,
+  FormatConfigSchema.properties.style,
 ).map((value) => ({
-   value,
-   label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+  value,
+  label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
 }));
 
 export const BRAND_INTEGRATIONS = extractLiterals(
-   BrandConfigSchema.properties.integrationStyle,
+  BrandConfigSchema.properties.integrationStyle,
 ).map((value) => ({
-   value,
-   label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+  value,
+  label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
 }));
 
 export const REPURPOSE_CHANNELS = extractLiterals(PurposeChannelSchema).map(
-   (value) => ({
-      value,
-      label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-   }),
+  (value) => ({
+    value,
+    label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+  }),
 );
 
 // Communication styles (from VoiceConfigSchema)
 export const COMMUNICATION_STYLES = extractLiterals(
-   VoiceConfigSchema.properties.communication,
+  VoiceConfigSchema.properties.communication,
 ).map((value) => ({
-   value,
-   label: value.charAt(0).toUpperCase() + value.slice(1),
+  value,
+  label: value.charAt(0).toUpperCase() + value.slice(1),
 }));
 
 // All legacy/duplicate constant definitions have been removed. Only schema-driven lists remain.

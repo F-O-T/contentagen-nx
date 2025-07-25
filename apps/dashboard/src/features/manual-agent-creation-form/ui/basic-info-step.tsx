@@ -65,14 +65,19 @@ export function BasicInfoStepSubscribe({
     >
       {({ nameValue, descriptionValue, fieldMeta }) => {
         const nameErrors =
-          fieldMeta?.metadata && "name" in fieldMeta.metadata
-            ? fieldMeta.metadata.name.errors
+          fieldMeta?.metadata &&
+          typeof fieldMeta.metadata.name === "object" &&
+          fieldMeta.metadata.name !== null &&
+          "errors" in fieldMeta.metadata.name
+            ? (fieldMeta.metadata.name as { errors?: string[] }).errors
             : undefined;
         const descriptionErrors =
-          fieldMeta?.metadata && "description" in fieldMeta.metadata
-            ? fieldMeta.metadata.description.errors
+          fieldMeta?.metadata &&
+          typeof fieldMeta.metadata.description === "object" &&
+          fieldMeta.metadata.description !== null &&
+          "errors" in fieldMeta.metadata.description
+            ? (fieldMeta.metadata.description as { errors?: string[] }).errors
             : undefined;
-
         const isNameValid =
           nameValue?.trim() !== "" && (!nameErrors || nameErrors.length === 0);
         const isDescriptionValid =

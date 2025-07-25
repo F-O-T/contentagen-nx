@@ -5,19 +5,17 @@ import { ChevronLeft } from "lucide-react";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { useAgentForm } from "../lib/use-agent-form";
 import { BasicInfoStep, BasicInfoStepSubscribe } from "./basic-info-step";
-import { BrandStep, BrandStepSubscribe } from "./brand-step";
 import { VoiceToneStep, VoiceToneStepSubscribe } from "./voice-tone-step";
 import {
    type PersonaConfig,
    PersonaConfigSchema,
-} from "@packages/database/schema";
+} from "@packages/database/schemas/agent-types";
 export const agentFormSchema = PersonaConfigSchema;
 
 export type AgentForm = ReturnType<typeof useAgentForm>;
 const steps = [
    { id: "step-basic-info", title: "Basic Information" },
    { id: "step-voice-tone", title: "Voice & Tone" },
-   { id: "step-brand", title: "Brand" },
 ] as const;
 const { Stepper } = defineStepper(...steps);
 
@@ -40,8 +38,8 @@ export function AgentCreationManualForm({
             return "Let's give your content agent a special name!";
          case "step-voice-tone":
             return "Now, let's define your agent's voice and tone.";
-         case "step-brand":
-            return "Now, let's configure your agent's brand compliance and style.";
+         default:
+            return "Let's get started with your agent's basic information.";
       }
    };
    return (
@@ -99,8 +97,7 @@ export function AgentCreationManualForm({
                            "step-voice-tone": () => (
                               <VoiceToneStep form={form} />
                            ),
-                           "step-brand": () => <BrandStep form={form} />,
-                        })}{" "}
+                        })}
                      </motion.div>
                   </AnimatePresence>
                </Stepper.Panel>
@@ -135,13 +132,7 @@ export function AgentCreationManualForm({
                               next={methods.next}
                            />
                         ),
-                        "step-brand": () => (
-                           <BrandStepSubscribe
-                              form={form}
-                              next={methods.next}
-                           />
-                        ),
-                     })}{" "}
+                     })}
                   </div>
                </Stepper.Controls>
             </form>
