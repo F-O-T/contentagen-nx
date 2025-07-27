@@ -9,14 +9,14 @@ import {
    timestamp,
    index,
 } from "drizzle-orm/pg-core";
-import {
-   createInsertSchema,
-   createSelectSchema,
-   createUpdateSchema,
-} from "drizzle-typebox";
+import { z } from "zod";
+import { createSchemaFactory } from "drizzle-zod";
 import type { PersonaConfig } from "./agent-types";
 import { user } from "./auth";
-
+const { createInsertSchema, createSelectSchema, createUpdateSchema } =
+   createSchemaFactory({
+      zodInstance: z,
+   });
 export const agent = pgTable(
    "agent",
    {

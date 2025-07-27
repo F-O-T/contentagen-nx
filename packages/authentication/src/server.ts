@@ -54,6 +54,8 @@ export const createAuth = ({ db, resendClient, polarClient }: AuthOptions) => {
          cookieCache: {
             enabled: true,
             maxAge: 5 * 60,
+            sameSite: "none",
+            secure: true,
          },
       },
    });

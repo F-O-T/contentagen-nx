@@ -1,10 +1,9 @@
-import { betterAuthClient } from "@/integrations/better-auth";
-import { createQueryKey } from "@packages/eden";
+import { betterAuthClient } from "@/integrations/clients";
 import { useQuery } from "@tanstack/react-query";
 
 export const useBillingInfo = () => {
    const { data: customerState, isLoading: isLoadingCustomerState } = useQuery({
-      queryKey: createQueryKey("betterAuthClient.customer.state"),
+      queryKey: ["customerState"],
       queryFn: () => betterAuthClient.customer.state(),
    });
 

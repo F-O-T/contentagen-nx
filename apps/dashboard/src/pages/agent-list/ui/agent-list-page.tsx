@@ -2,9 +2,9 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { AgentCard } from "./agent-card";
 import { CreateNewAgentButton } from "./create-new-agent-button";
-import { useTrpc } from "@/integrations/trpc";
+import { useTRPC } from "@/integrations/clients";
 export function AgentListPage() {
-   const trpc = useTrpc();
+   const trpc = useTRPC();
    const { data } = useSuspenseQuery(trpc.agent.listByUser.queryOptions());
 
    return (

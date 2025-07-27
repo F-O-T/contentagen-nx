@@ -12,6 +12,8 @@ import { exportLogRouter } from "./router/export-log";
 import { notificationRouter } from "./router/notification";
 import { notificationPreferencesRouter } from "./router/notification-preferences";
 
+import { sessionRouter } from "./router/session";
+
 export const appRouter = router({
    waitlist: waitlistRouter,
    agent: agentRouter,
@@ -21,6 +23,7 @@ export const appRouter = router({
    exportLog: exportLogRouter,
    notification: notificationRouter,
    notificationPreferences: notificationPreferencesRouter,
+   sessionHelper: sessionRouter,
 });
 export const createApi = ({
    auth,

@@ -1,5 +1,3 @@
-// TalkingMascot component for consistent mascot UI across dashboard
-
 import mascot from "@packages/brand/logo.svg";
 import { Typewriter } from "@packages/ui/components/typewriter";
 import type React from "react";

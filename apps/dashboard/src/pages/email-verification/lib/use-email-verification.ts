@@ -3,7 +3,7 @@ import { useRouter, useSearch } from "@tanstack/react-router";
 import { type FormEvent, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import z from "zod";
-import { betterAuthClient } from "@/integrations/better-auth";
+import { betterAuthClient } from "@/integrations/clients";
 
 type codes = "INVALID_OTP" | "default";
 
@@ -82,7 +82,7 @@ export const useEmailVerification = () => {
                      id: "email-verification-toast",
                   });
                   router.navigate({
-                     to: "/agents",
+                     to: "/home",
                   });
                },
             },

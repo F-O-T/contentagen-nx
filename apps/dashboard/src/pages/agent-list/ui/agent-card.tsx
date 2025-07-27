@@ -38,16 +38,16 @@ import {
 import { formatValueToTitleCase } from "@packages/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { Agent } from "@/features/manual-agent-creation-form/ui/agent-creation-manual-form";
-import { useTrpc } from "@/integrations/trpc";
+import { useTRPC } from "@/integrations/clients";
+import type { AgentInsert } from "@packages/database/schema";
 
 type AgentCardProps = {
-   agent: Agent;
+   agent: AgentInsert;
 };
 
 export function AgentCard({ agent }: AgentCardProps) {
    const queryClient = useQueryClient();
-   const trpc = useTrpc();
+   const trpc = useTRPC();
    const { mutate: deleteAgent, isPending } = useMutation(
       trpc.agent.delete.mutationOptions({
          onError: () => {

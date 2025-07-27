@@ -111,8 +111,7 @@ export const agentRouter = router({
       }),
    listByUser: protectedProcedure.query(async ({ ctx }) => {
       try {
-         console.log("Listing agents for user:", ctx.session.user.id);
-         return await listAgentsByUserId(ctx.db, ctx.session.user.id);
+         return await listAgentsByUserId((await ctx).db, ctx.session.user.id);
       } catch (err) {
          if (err instanceof DatabaseError) {
             throw new TRPCError({

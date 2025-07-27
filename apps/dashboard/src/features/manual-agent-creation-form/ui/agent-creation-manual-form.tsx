@@ -5,7 +5,6 @@ import { ChevronLeft } from "lucide-react";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { useAgentForm } from "../lib/use-agent-form";
 import { BasicInfoStep, BasicInfoStepSubscribe } from "./basic-info-step";
-import { VoiceToneStep, VoiceToneStepSubscribe } from "./voice-tone-step";
 import {
    type PersonaConfig,
    PersonaConfigSchema,
@@ -13,10 +12,7 @@ import {
 export const agentFormSchema = PersonaConfigSchema;
 
 export type AgentForm = ReturnType<typeof useAgentForm>;
-const steps = [
-   { id: "step-basic-info", title: "Basic Information" },
-   { id: "step-voice-tone", title: "Voice & Tone" },
-] as const;
+const steps = [{ id: "step-basic-info", title: "Basic Information" }] as const;
 const { Stepper } = defineStepper(...steps);
 
 export type AgentCreationManualForm = {
@@ -94,9 +90,6 @@ export function AgentCreationManualForm({
                            "step-basic-info": () => (
                               <BasicInfoStep form={form} />
                            ),
-                           "step-voice-tone": () => (
-                              <VoiceToneStep form={form} />
-                           ),
                         })}
                      </motion.div>
                   </AnimatePresence>
@@ -122,12 +115,6 @@ export function AgentCreationManualForm({
                      {methods.switch({
                         "step-basic-info": () => (
                            <BasicInfoStepSubscribe
-                              form={form}
-                              next={methods.next}
-                           />
-                        ),
-                        "step-voice-tone": () => (
-                           <VoiceToneStepSubscribe
                               form={form}
                               next={methods.next}
                            />

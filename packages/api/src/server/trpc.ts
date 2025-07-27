@@ -25,6 +25,7 @@ export const createTRPCContext = async ({
    chromaClient: ChromaClient;
    session: AuthInstance["$Infer"]["Session"] | null;
 }> => {
+   console.log("Creating TRPC context with headers:", headers);
    const session = await auth.api.getSession({
       headers,
    });

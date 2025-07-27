@@ -3,7 +3,7 @@ import { useRouter } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
-import { betterAuthClient } from "@/integrations/better-auth";
+import { betterAuthClient } from "@/integrations/clients";
 
 export function useForgotPassword() {
    const router = useRouter();
