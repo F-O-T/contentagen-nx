@@ -1,5 +1,5 @@
 import { createAuth } from "@packages/authentication/server";
-import { env } from "../config/env";
+import { serverEnv as env } from "@packages/environment/server";
 import { db } from "./database";
 import { getPaymentClient } from "@packages/payment/client";
 import { getResendClient } from "@packages/transactional/client";
@@ -10,6 +10,5 @@ const polarClient = getPaymentClient(env.POLAR_ACCESS_TOKEN);
 export const auth = createAuth({
    resendClient,
    db,
-   env,
    polarClient,
 });

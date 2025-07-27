@@ -27,7 +27,7 @@ export function SignInPage() {
          </CardHeader>
          <CardContent className="space-y-4">
             <Button
-               className="w-full"
+               className="w-full bg-muted/50"
                variant="outline"
                onClick={handleGoogleSignIn}
             >

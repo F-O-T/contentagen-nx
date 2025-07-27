@@ -1,88 +1,87 @@
-import { arcjetProtect } from "@/integrations/arcjet";
-import { QueryProvider } from "@/integrations/tanstack-query";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { Toaster } from "@packages/ui/components/sonner";
+import { QueryProvider } from "@/integrations/clients";
 import { ThemeProvider } from "@/layout/theme-provider";
-import brandConfig from "@packages/brand/index.json";
-import type { EdenClientType } from "@packages/eden";
 import appCss from "@packages/ui/globals.css?url";
-import type { QueryClient } from "@tanstack/react-query";
 import {
-   createRootRouteWithContext,
    HeadContent,
    Outlet,
-   redirect,
    Scripts,
+   createRootRouteWithContext,
 } from "@tanstack/react-router";
-import { Toaster } from "@packages/ui/components/sonner";
-import { getReactPosthogConfig } from "@packages/posthog/client";
-import { PostHogProvider } from "posthog-js/react";
-export interface MyRouterContext {
-   eden: EdenClientType;
+import type { TrpcClient } from "../integrations/clients";
+import type { QueryClient } from "@tanstack/react-query";
+export type RouterContext = {
+   trpc: TrpcClient;
    queryClient: QueryClient;
-}
-const posthogConfig = getReactPosthogConfig();
-export const Route = createRootRouteWithContext<MyRouterContext>()({
-   component: () => (
-      <RootDocument>
-         <QueryProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-               <PostHogProvider
-                  apiKey={posthogConfig.api_key}
-                  options={{
-                     api_host: posthogConfig.api_host,
-                     defaults: "2025-05-24",
-                  }}
-               >
-                  <Toaster /> <Outlet />
-               </PostHogProvider>
-            </ThemeProvider>
-         </QueryProvider>
-      </RootDocument>
-   ),
+};
+export const Route = createRootRouteWithContext<RouterContext>()({
    head: () => ({
       links: [
          {
             href: appCss,
             rel: "stylesheet",
          },
-         { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+         { rel: "icon", href: "/images/favicon.ico" },
       ],
       meta: [
          {
-            charSet: "utf-8",
+            title: "TanStack Router SSR Basic File Based Streaming",
          },
          {
-            content: "width=device-width, initial-scale=1",
+            charSet: "UTF-8",
+         },
+         {
             name: "viewport",
+            content: "width=device-width, initial-scale=1.0",
          },
+      ],
+      scripts: [
+         ...(!import.meta.env.PROD
+            ? [
+                 {
+                    type: "module",
+                    children: `import RefreshRuntime from "/@react-refresh"
+  RefreshRuntime.injectIntoGlobalHook(window)
+  window.$RefreshReg$ = () => {}
+  window.$RefreshSig$ = () => (type) => type
+  window.__vite_plugin_react_preamble_installed__ = true`,
+                 },
+                 {
+                    type: "module",
+                    src: "/@vite/client",
+                 },
+              ]
+            : []),
          {
-            title: brandConfig.name,
+            type: "module",
+            src: import.meta.env.PROD
+               ? "/static/entry-client.js"
+               : "/src/entry-client.tsx",
          },
       ],
    }),
-   beforeLoad: async ({ location }) => {
-      const decision = await arcjetProtect();
-
-      if (!decision) return;
-
-      if (decision.isDenied()) {
-         throw redirect({ to: "/auth/sign-in" });
-      }
-
-      // Redirect from root path to sign-in
-      if (location.pathname === "/") {
-         throw redirect({ to: "/auth/sign-in" });
-      }
-   },
+   component: RootComponent,
 });
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function RootComponent() {
    return (
       <html lang="en">
          <head>
             <HeadContent />
          </head>
          <body>
-            {children}
+            <QueryProvider>
+               <ThemeProvider
+                  attribute="class"
+                  defaultTheme="system"
+                  enableSystem
+               >
+                  <Toaster />
+                  <Outlet /> {/* Start rendering router matches */}
+                  <TanStackRouterDevtools position="bottom-left" />
+               </ThemeProvider>
+            </QueryProvider>
             <Scripts />
          </body>
       </html>

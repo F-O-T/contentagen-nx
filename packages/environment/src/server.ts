@@ -25,6 +25,7 @@ const EnvSchema = Type.Object({
    MINIO_SECRET_KEY: Type.String(),
    MINIO_BUCKET: Type.String({ default: "content-writer" }),
    TAVILY_API_KEY: Type.String(),
+   CHROMA_DB_URL: Type.String({ format: "uri" }),
 });
 export type ServerEnv = Static<typeof EnvSchema>;
 export const serverEnv: ServerEnv = parseEnv(process.env, EnvSchema);

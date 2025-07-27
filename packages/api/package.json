@@ -21,13 +21,14 @@
       "test": "vitest run"
    },
    "dependencies": {
+      "@tanstack/react-query": "^5.66.5",
       "@packages/authentication": "workspace:*",
       "@packages/database": "workspace:*",
       "@packages/files": "workspace:*",
       "@packages/chroma-db": "workspace:*",
       "@sinclair/typebox": "catalog:database",
-      "@trpc/client": "^11.4.3",
-      "@trpc/server": "^11.4.3",
+      "@trpc/client": "catalog:trpc",
+      "@trpc/server": "catalog:trpc",
       "@typeschema/typebox": "^0.14.0",
       "superjson": "^2.2.2",
       "url-join": "^5.0.0"

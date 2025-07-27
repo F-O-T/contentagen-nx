@@ -89,3 +89,18 @@ export async function listAgents(
       );
    }
 }
+
+export async function listAgentsByUserId(
+   dbClient: DatabaseInstance,
+   userId: string,
+): Promise<AgentSelect[]> {
+   try {
+      return await dbClient.query.agent.findMany({
+         where: eq(agent.userId, userId),
+      });
+   } catch (err) {
+      throw new DatabaseError(
+         `Failed to list agents for user: ${(err as Error).message}`,
+      );
+   }
+}

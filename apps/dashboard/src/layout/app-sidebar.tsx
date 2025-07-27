@@ -13,6 +13,7 @@ import { FilesIcon, LayoutDashboardIcon } from "lucide-react";
 import type * as React from "react";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
+import type { Session } from "@/integrations/clients";
 
 type NavigationItems = {
    url: keyof FileRoutesByTo;
@@ -20,7 +21,10 @@ type NavigationItems = {
    icon: typeof LayoutDashboardIcon;
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+   session,
+   ...props
+}: React.ComponentProps<typeof Sidebar> & { session: Session | null }) {
    const navMain: NavigationItems[] = [
       {
          icon: LayoutDashboardIcon,
@@ -30,7 +34,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
          icon: FilesIcon,
          title: "Your Content",
-         url: "/content",
+         url: "/home",
       },
    ];
 
@@ -59,7 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <NavMain items={navMain} />
          </SidebarContent>
          <SidebarFooter>
-            <NavUser />
+            <NavUser session={session} />{" "}
          </SidebarFooter>
       </Sidebar>
    );

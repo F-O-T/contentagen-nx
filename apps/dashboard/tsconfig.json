@@ -1,51 +1,30 @@
 {
-  "extends": "@tooling/typescript/base.json",
+  "extends": "@tooling/typescript/vite.json",
   "include": [
     "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "../../apps/server/**/*",
-    "../../apps/server/src/*"
+    "**/*.tsx",
   ],
   "compilerOptions": {
+    "types": [
+      "vite/client"
+    ],
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"
       ],
-      "@api": [
-        "../../apps/server/src/index"
-      ],
-      "@api/*": [
-        "../../apps/server/src/*"
-      ],
       "@packages/ui/*": [
         "../../packages/ui/src/*"
       ]
     },
-    "target": "ES2022",
-    "jsx": "react-jsx",
-    "module": "ESNext",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "types": [
-      "vite/client"
-    ],
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": false,
-    "noEmit": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
   }
 }

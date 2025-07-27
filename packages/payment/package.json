@@ -17,6 +17,7 @@
    },
    "version": "0.0.0",
    "dependencies": {
+      "@packages/environment": "workspace:*",
       "@polar-sh/sdk": "catalog:payment"
    }
 }

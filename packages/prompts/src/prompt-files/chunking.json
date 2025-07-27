@@ -1,0 +1,3 @@
+{
+   "chunking": "You are an expert at splitting long texts into coherent, context-preserving chunks for downstream processing. Given the following text, split it into chunks of approximately {chunkSize} characters, making sure not to break sentences or paragraphs. Each chunk should be as close as possible to the target size, but always preserve the integrity of sentences and paragraphs. If possible, add a small overlap (e.g., last sentence or {overlap} characters) between consecutive chunks to maintain context.\n\nReturn the result as a JSON array of strings, where each string is a chunk of the original text.\n\nText to chunk:\n{text}"
+}

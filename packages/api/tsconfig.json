@@ -3,6 +3,7 @@
    "include": ["src", "__tests__/*.test.ts"],
    "exclude": ["node_modules"],
    "compilerOptions": {
+      "types": ["vite/client"],
       "jsx": "react-jsx"
    }
 }

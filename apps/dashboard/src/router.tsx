@@ -1,14 +1,15 @@
 import { createRouter as createTanstackRouter } from "@tanstack/react-router";
 import { routerWithQueryClient } from "@tanstack/react-router-with-query";
-import * as Eden from "./integrations/eden";
-import * as TanstackQuery from "./integrations/tanstack-query";
+
+import * as Clients from "@/integrations/clients";
 import { routeTree } from "./routeTree.gen";
+
 export const createRouter = () => {
+   const context = Clients.getContext();
    const router = routerWithQueryClient(
       createTanstackRouter({
          context: {
-            ...Eden.getContext(),
-            ...TanstackQuery.getContext(),
+            ...context,
          },
          defaultPreloadStaleTime: 0,
          routeTree,
@@ -17,13 +18,12 @@ export const createRouter = () => {
          defaultPreloadDelay: 0,
          defaultPendingMs: 0,
       }),
-      TanstackQuery.getContext().queryClient,
+      context.queryClient,
    );
 
    return router;
 };
 
-// Register the router instance for type safety
 declare module "@tanstack/react-router" {
    interface Register {
       router: ReturnType<typeof createRouter>;

@@ -3,7 +3,7 @@ import { useRouter } from "@tanstack/react-router";
 import { type FormEvent, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import z from "zod";
-import { betterAuthClient } from "@/integrations/better-auth";
+import { betterAuthClient } from "@/integrations/clients";
 
 type codes = "USER_ALREADY_EXISTS" | "default";
 

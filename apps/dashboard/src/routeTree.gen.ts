@@ -17,17 +17,13 @@ import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-verification'
+import { Route as DashboardProfileRouteImport } from './routes/_dashboard/profile'
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard/home'
-import { Route as DashboardProfileIndexRouteImport } from './routes/_dashboard/profile/index'
-import { Route as DashboardContentIndexRouteImport } from './routes/_dashboard/content/index'
+import { Route as DashboardOrganizationIndexRouteImport } from './routes/_dashboard/organization/index'
 import { Route as DashboardAgentsIndexRouteImport } from './routes/_dashboard/agents/index'
+import { Route as DashboardOrganizationCreateRouteImport } from './routes/_dashboard/organization/create'
 import { Route as DashboardAgentsFlowRouteImport } from './routes/_dashboard/agents/_flow'
-import { Route as DashboardAgentsAgentIdIndexRouteImport } from './routes/_dashboard/agents/$agentId/index'
 import { Route as DashboardAgentsFlowManualRouteImport } from './routes/_dashboard/agents/_flow/manual'
-import { Route as DashboardAgentsAgentIdEditRouteImport } from './routes/_dashboard/agents/$agentId/edit'
-import { Route as DashboardContentRequestsRequestIdIndexRouteImport } from './routes/_dashboard/content/requests/$requestId/index'
-import { Route as DashboardContentRequestsRequestIdEditRouteImport } from './routes/_dashboard/content/requests/$requestId/edit'
-import { Route as DashboardAgentsAgentIdContentRequestRouteImport } from './routes/_dashboard/agents/$agentId/content/request'
 
 const DashboardAgentsRouteImport = createFileRoute('/_dashboard/agents')()
 
@@ -65,179 +61,132 @@ const AuthEmailVerificationRoute = AuthEmailVerificationRouteImport.update({
   path: '/email-verification',
   getParentRoute: () => AuthRoute,
 } as any)
+const DashboardProfileRoute = DashboardProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardHomeRoute = DashboardHomeRouteImport.update({
   id: '/home',
   path: '/home',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardProfileIndexRoute = DashboardProfileIndexRouteImport.update({
-  id: '/profile/',
-  path: '/profile/',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardContentIndexRoute = DashboardContentIndexRouteImport.update({
-  id: '/content/',
-  path: '/content/',
-  getParentRoute: () => DashboardRoute,
-} as any)
+const DashboardOrganizationIndexRoute =
+  DashboardOrganizationIndexRouteImport.update({
+    id: '/organization/',
+    path: '/organization/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardAgentsIndexRoute = DashboardAgentsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardAgentsRoute,
 } as any)
+const DashboardOrganizationCreateRoute =
+  DashboardOrganizationCreateRouteImport.update({
+    id: '/organization/create',
+    path: '/organization/create',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardAgentsFlowRoute = DashboardAgentsFlowRouteImport.update({
   id: '/_flow',
   getParentRoute: () => DashboardAgentsRoute,
 } as any)
-const DashboardAgentsAgentIdIndexRoute =
-  DashboardAgentsAgentIdIndexRouteImport.update({
-    id: '/$agentId/',
-    path: '/$agentId/',
-    getParentRoute: () => DashboardAgentsRoute,
-  } as any)
 const DashboardAgentsFlowManualRoute =
   DashboardAgentsFlowManualRouteImport.update({
     id: '/manual',
     path: '/manual',
     getParentRoute: () => DashboardAgentsFlowRoute,
   } as any)
-const DashboardAgentsAgentIdEditRoute =
-  DashboardAgentsAgentIdEditRouteImport.update({
-    id: '/$agentId/edit',
-    path: '/$agentId/edit',
-    getParentRoute: () => DashboardAgentsRoute,
-  } as any)
-const DashboardContentRequestsRequestIdIndexRoute =
-  DashboardContentRequestsRequestIdIndexRouteImport.update({
-    id: '/content/requests/$requestId/',
-    path: '/content/requests/$requestId/',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardContentRequestsRequestIdEditRoute =
-  DashboardContentRequestsRequestIdEditRouteImport.update({
-    id: '/content/requests/$requestId/edit',
-    path: '/content/requests/$requestId/edit',
-    getParentRoute: () => DashboardRoute,
-  } as any)
-const DashboardAgentsAgentIdContentRequestRoute =
-  DashboardAgentsAgentIdContentRequestRouteImport.update({
-    id: '/$agentId/content/request',
-    path: '/$agentId/content/request',
-    getParentRoute: () => DashboardAgentsRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteWithChildren
   '/home': typeof DashboardHomeRoute
+  '/profile': typeof DashboardProfileRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/agents': typeof DashboardAgentsFlowRouteWithChildren
+  '/organization/create': typeof DashboardOrganizationCreateRoute
   '/agents/': typeof DashboardAgentsIndexRoute
-  '/content': typeof DashboardContentIndexRoute
-  '/profile': typeof DashboardProfileIndexRoute
-  '/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
+  '/organization': typeof DashboardOrganizationIndexRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
-  '/agents/$agentId': typeof DashboardAgentsAgentIdIndexRoute
-  '/agents/$agentId/content/request': typeof DashboardAgentsAgentIdContentRequestRoute
-  '/content/requests/$requestId/edit': typeof DashboardContentRequestsRequestIdEditRoute
-  '/content/requests/$requestId': typeof DashboardContentRequestsRequestIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
   '/home': typeof DashboardHomeRoute
+  '/profile': typeof DashboardProfileRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/agents': typeof DashboardAgentsIndexRoute
-  '/content': typeof DashboardContentIndexRoute
-  '/profile': typeof DashboardProfileIndexRoute
-  '/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
+  '/organization/create': typeof DashboardOrganizationCreateRoute
+  '/organization': typeof DashboardOrganizationIndexRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
-  '/agents/$agentId': typeof DashboardAgentsAgentIdIndexRoute
-  '/agents/$agentId/content/request': typeof DashboardAgentsAgentIdContentRequestRoute
-  '/content/requests/$requestId/edit': typeof DashboardContentRequestsRequestIdEditRoute
-  '/content/requests/$requestId': typeof DashboardContentRequestsRequestIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_dashboard': typeof DashboardRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/_dashboard/home': typeof DashboardHomeRoute
+  '/_dashboard/profile': typeof DashboardProfileRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/_dashboard/agents': typeof DashboardAgentsRouteWithChildren
   '/_dashboard/agents/_flow': typeof DashboardAgentsFlowRouteWithChildren
+  '/_dashboard/organization/create': typeof DashboardOrganizationCreateRoute
   '/_dashboard/agents/': typeof DashboardAgentsIndexRoute
-  '/_dashboard/content/': typeof DashboardContentIndexRoute
-  '/_dashboard/profile/': typeof DashboardProfileIndexRoute
-  '/_dashboard/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
+  '/_dashboard/organization/': typeof DashboardOrganizationIndexRoute
   '/_dashboard/agents/_flow/manual': typeof DashboardAgentsFlowManualRoute
-  '/_dashboard/agents/$agentId/': typeof DashboardAgentsAgentIdIndexRoute
-  '/_dashboard/agents/$agentId/content/request': typeof DashboardAgentsAgentIdContentRequestRoute
-  '/_dashboard/content/requests/$requestId/edit': typeof DashboardContentRequestsRequestIdEditRoute
-  '/_dashboard/content/requests/$requestId/': typeof DashboardContentRequestsRequestIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/auth'
     | '/home'
+    | '/profile'
     | '/auth/email-verification'
     | '/auth/forgot-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/agents'
+    | '/organization/create'
     | '/agents/'
-    | '/content'
-    | '/profile'
-    | '/agents/$agentId/edit'
+    | '/organization'
     | '/agents/manual'
-    | '/agents/$agentId'
-    | '/agents/$agentId/content/request'
-    | '/content/requests/$requestId/edit'
-    | '/content/requests/$requestId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
     | '/home'
+    | '/profile'
     | '/auth/email-verification'
     | '/auth/forgot-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/agents'
-    | '/content'
-    | '/profile'
-    | '/agents/$agentId/edit'
+    | '/organization/create'
+    | '/organization'
     | '/agents/manual'
-    | '/agents/$agentId'
-    | '/agents/$agentId/content/request'
-    | '/content/requests/$requestId/edit'
-    | '/content/requests/$requestId'
   id:
     | '__root__'
     | '/_dashboard'
     | '/auth'
     | '/_dashboard/home'
+    | '/_dashboard/profile'
     | '/auth/email-verification'
     | '/auth/forgot-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/_dashboard/agents'
     | '/_dashboard/agents/_flow'
+    | '/_dashboard/organization/create'
     | '/_dashboard/agents/'
-    | '/_dashboard/content/'
-    | '/_dashboard/profile/'
-    | '/_dashboard/agents/$agentId/edit'
+    | '/_dashboard/organization/'
     | '/_dashboard/agents/_flow/manual'
-    | '/_dashboard/agents/$agentId/'
-    | '/_dashboard/agents/$agentId/content/request'
-    | '/_dashboard/content/requests/$requestId/edit'
-    | '/_dashboard/content/requests/$requestId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -296,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthEmailVerificationRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_dashboard/profile': {
+      id: '/_dashboard/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/home': {
       id: '/_dashboard/home'
       path: '/home'
@@ -303,18 +259,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardHomeRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/_dashboard/profile/': {
-      id: '/_dashboard/profile/'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof DashboardProfileIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/_dashboard/content/': {
-      id: '/_dashboard/content/'
-      path: '/content'
-      fullPath: '/content'
-      preLoaderRoute: typeof DashboardContentIndexRouteImport
+    '/_dashboard/organization/': {
+      id: '/_dashboard/organization/'
+      path: '/organization'
+      fullPath: '/organization'
+      preLoaderRoute: typeof DashboardOrganizationIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/_dashboard/agents/': {
@@ -324,18 +273,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAgentsIndexRouteImport
       parentRoute: typeof DashboardAgentsRoute
     }
+    '/_dashboard/organization/create': {
+      id: '/_dashboard/organization/create'
+      path: '/organization/create'
+      fullPath: '/organization/create'
+      preLoaderRoute: typeof DashboardOrganizationCreateRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/agents/_flow': {
       id: '/_dashboard/agents/_flow'
       path: '/agents'
       fullPath: '/agents'
       preLoaderRoute: typeof DashboardAgentsFlowRouteImport
-      parentRoute: typeof DashboardAgentsRoute
-    }
-    '/_dashboard/agents/$agentId/': {
-      id: '/_dashboard/agents/$agentId/'
-      path: '/$agentId'
-      fullPath: '/agents/$agentId'
-      preLoaderRoute: typeof DashboardAgentsAgentIdIndexRouteImport
       parentRoute: typeof DashboardAgentsRoute
     }
     '/_dashboard/agents/_flow/manual': {
@@ -344,34 +293,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/agents/manual'
       preLoaderRoute: typeof DashboardAgentsFlowManualRouteImport
       parentRoute: typeof DashboardAgentsFlowRoute
-    }
-    '/_dashboard/agents/$agentId/edit': {
-      id: '/_dashboard/agents/$agentId/edit'
-      path: '/$agentId/edit'
-      fullPath: '/agents/$agentId/edit'
-      preLoaderRoute: typeof DashboardAgentsAgentIdEditRouteImport
-      parentRoute: typeof DashboardAgentsRoute
-    }
-    '/_dashboard/content/requests/$requestId/': {
-      id: '/_dashboard/content/requests/$requestId/'
-      path: '/content/requests/$requestId'
-      fullPath: '/content/requests/$requestId'
-      preLoaderRoute: typeof DashboardContentRequestsRequestIdIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/_dashboard/content/requests/$requestId/edit': {
-      id: '/_dashboard/content/requests/$requestId/edit'
-      path: '/content/requests/$requestId/edit'
-      fullPath: '/content/requests/$requestId/edit'
-      preLoaderRoute: typeof DashboardContentRequestsRequestIdEditRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/_dashboard/agents/$agentId/content/request': {
-      id: '/_dashboard/agents/$agentId/content/request'
-      path: '/$agentId/content/request'
-      fullPath: '/agents/$agentId/content/request'
-      preLoaderRoute: typeof DashboardAgentsAgentIdContentRequestRouteImport
-      parentRoute: typeof DashboardAgentsRoute
     }
   }
 }
@@ -390,18 +311,11 @@ const DashboardAgentsFlowRouteWithChildren =
 interface DashboardAgentsRouteChildren {
   DashboardAgentsFlowRoute: typeof DashboardAgentsFlowRouteWithChildren
   DashboardAgentsIndexRoute: typeof DashboardAgentsIndexRoute
-  DashboardAgentsAgentIdEditRoute: typeof DashboardAgentsAgentIdEditRoute
-  DashboardAgentsAgentIdIndexRoute: typeof DashboardAgentsAgentIdIndexRoute
-  DashboardAgentsAgentIdContentRequestRoute: typeof DashboardAgentsAgentIdContentRequestRoute
 }
 
 const DashboardAgentsRouteChildren: DashboardAgentsRouteChildren = {
   DashboardAgentsFlowRoute: DashboardAgentsFlowRouteWithChildren,
   DashboardAgentsIndexRoute: DashboardAgentsIndexRoute,
-  DashboardAgentsAgentIdEditRoute: DashboardAgentsAgentIdEditRoute,
-  DashboardAgentsAgentIdIndexRoute: DashboardAgentsAgentIdIndexRoute,
-  DashboardAgentsAgentIdContentRequestRoute:
-    DashboardAgentsAgentIdContentRequestRoute,
 }
 
 const DashboardAgentsRouteWithChildren = DashboardAgentsRoute._addFileChildren(
@@ -410,22 +324,18 @@ const DashboardAgentsRouteWithChildren = DashboardAgentsRoute._addFileChildren(
 
 interface DashboardRouteChildren {
   DashboardHomeRoute: typeof DashboardHomeRoute
+  DashboardProfileRoute: typeof DashboardProfileRoute
   DashboardAgentsRoute: typeof DashboardAgentsRouteWithChildren
-  DashboardContentIndexRoute: typeof DashboardContentIndexRoute
-  DashboardProfileIndexRoute: typeof DashboardProfileIndexRoute
-  DashboardContentRequestsRequestIdEditRoute: typeof DashboardContentRequestsRequestIdEditRoute
-  DashboardContentRequestsRequestIdIndexRoute: typeof DashboardContentRequestsRequestIdIndexRoute
+  DashboardOrganizationCreateRoute: typeof DashboardOrganizationCreateRoute
+  DashboardOrganizationIndexRoute: typeof DashboardOrganizationIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardHomeRoute: DashboardHomeRoute,
+  DashboardProfileRoute: DashboardProfileRoute,
   DashboardAgentsRoute: DashboardAgentsRouteWithChildren,
-  DashboardContentIndexRoute: DashboardContentIndexRoute,
-  DashboardProfileIndexRoute: DashboardProfileIndexRoute,
-  DashboardContentRequestsRequestIdEditRoute:
-    DashboardContentRequestsRequestIdEditRoute,
-  DashboardContentRequestsRequestIdIndexRoute:
-    DashboardContentRequestsRequestIdIndexRoute,
+  DashboardOrganizationCreateRoute: DashboardOrganizationCreateRoute,
+  DashboardOrganizationIndexRoute: DashboardOrganizationIndexRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(

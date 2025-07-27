@@ -1,7 +1,7 @@
 export const POLAR_PLAN_SLUGS = {
    BASIC: "basic",
    TEAM: "team",
-};
+} as const;
 export const POLAR_PLANS = {
    [POLAR_PLAN_SLUGS.BASIC]: {
       slug: POLAR_PLAN_SLUGS.BASIC,
@@ -18,4 +18,4 @@ export const POLAR_BILLING_EVENTS = {
    INTERNAL_RAG: "internal_rag",
    CONTENT_GENERATION: "content_generation",
    STORED_CONTENT: "stored_content",
-};
+} as const;

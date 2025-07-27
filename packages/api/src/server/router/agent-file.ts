@@ -28,7 +28,7 @@ export const agentFileRouter = router({
             buffer,
             contentType,
             bucketName,
-            ctx.minioClient,
+            (await ctx).minioClient,
          );
          return { url };
       }),
