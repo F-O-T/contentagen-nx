@@ -56,8 +56,8 @@ export function BrandStep({ form }: { form: AgentForm }) {
               name={field.name}
               id={field.name}
               placeholder="Enter words to avoid..."
-           
               className="w-full"
+              error={field.state.meta.isTouched && field.state.meta.errors.length > 0}
             />
             <field.FieldMessage />
           </field.FieldContainer>

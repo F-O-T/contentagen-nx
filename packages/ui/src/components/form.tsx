@@ -13,7 +13,7 @@ export const FieldContainer = React.forwardRef<
    React.ElementRef<"div">,
    React.ComponentPropsWithoutRef<"div">
 >(({ className, ...props }, ref) => {
-   return <div className={cn("space-y-4", className)} ref={ref} {...props} />;
+   return <div className={cn("space-y-1 flex flex-col", className)} ref={ref} {...props} />;
 });
 FieldContainer.displayName = "FieldContainer";
 

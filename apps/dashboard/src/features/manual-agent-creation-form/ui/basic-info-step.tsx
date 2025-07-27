@@ -24,23 +24,25 @@ export function BasicInfoStep({ form }: { form: AgentForm }) {
                </field.FieldContainer>
             )}
          </form.AppField>
-         <form.AppField name="metadata.description">
+         <form.AppField
+            name="metadata.description"
+            
+         >
             {(field) => (
                <field.FieldContainer >
                   <field.FieldLabel>Description *</field.FieldLabel>
                   <TiptapEditor
-                     value={
-                        form.state.values.metadata?.description || "<p></p>"
-                     }
-                     onChange={(val) =>
-                        form.setFieldValue("metadata.description", val)
-                     }
+                     value={field.state.value || "<p></p>"}
+                     onChange={(val) => {
+                        field.handleChange(val);
+                     }}
                      onBlur={field.handleBlur}
                      name={field.name}
                      id={field.name}
                      placeholder="Describe what this agent does..."
-                     minHeight="200px"
+                 
                      className="w-full"
+                     
                   />
                   <field.FieldMessage />
                </field.FieldContainer>
@@ -84,8 +86,17 @@ export function BasicInfoStepSubscribe({
             const isNameValid =
                nameValue?.trim() !== "" &&
                (!nameErrors || nameErrors.length === 0);
+            
+            // Helper function to check if TipTap content is empty
+            const isContentEmpty = (htmlContent: string | undefined) => {
+               if (!htmlContent) return true;
+               // Remove HTML tags and check if there's actual text content
+               const textContent = htmlContent.replace(/<[^>]*>/g, '').trim();
+               return textContent === '';
+            };
+            
             const isDescriptionValid =
-               descriptionValue?.trim() !== "" &&
+               !isContentEmpty(descriptionValue) &&
                (!descriptionErrors || descriptionErrors.length === 0);
             const canGoNext = isNameValid && isDescriptionValid;
 

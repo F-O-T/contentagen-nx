@@ -1,12 +1,12 @@
 import { Button } from "@packages/ui/components/button";
 import { InfoItem } from "@packages/ui/components/info-item";
-import { formatValueToTitleCase } from "@packages/ui/lib/utils";
+
 import type { AgentForm } from "../lib/use-agent-form";
 import {
   UserIcon,
   FileTextIcon,
   LayoutGridIcon,
-  MicIcon,
+
   UsersIcon,
   PaintbrushIcon,
   Brain,
