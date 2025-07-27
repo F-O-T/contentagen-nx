@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 
 export async function createAgent(
    dbClient: DatabaseInstance,
-   data: AgentInsert,
+   data: Omit<AgentInsert, "id" | "createdAt" | "updatedAt">,
 ): Promise<AgentSelect> {
    try {
       const result = await dbClient.insert(agent).values(data).returning();

@@ -6,11 +6,13 @@
    },
    "dependencies": {
       "@packages/chroma-db": "workspace:*",
-      "@packages/openrouter": "workspace:*"
+      "@packages/openrouter": "workspace:*",
+      "@packages/database": "workspace:*"
    },
    "exports": {
-      "./helpers": "./src/helpers.ts",
+      "./helpers/*": "./src/helpers/*.ts",
       "./text-utils": "./src/text-utils.ts",
+   
       ".": "./src/index.ts"
    },
    "name": "@packages/prompts",

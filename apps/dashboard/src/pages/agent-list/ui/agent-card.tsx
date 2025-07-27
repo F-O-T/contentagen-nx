@@ -39,10 +39,11 @@ import { formatValueToTitleCase } from "@packages/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTRPC } from "@/integrations/clients";
-import type { AgentInsert } from "@packages/database/schema";
+import type { AgentSelect } from "@packages/database/schema";
+import type { PersonaConfig } from "@packages/database/schemas/agent-types";
 
 type AgentCardProps = {
-   agent: AgentInsert;
+   agent: AgentSelect;
 };
 
 export function AgentCard({ agent }: AgentCardProps) {
@@ -61,16 +62,37 @@ export function AgentCard({ agent }: AgentCardProps) {
          },
       }),
    );
-   const infoItems = React.useMemo(
-      () => [
+   const infoItems = React.useMemo(() => {
+      const personaConfig = agent.personaConfig as PersonaConfig;
+      
+      // Extract voice communication style
+      const voiceStyle = personaConfig.voice?.communication
+         ? formatValueToTitleCase(personaConfig.voice.communication.replace('_', ' '))
+         : 'Not specified';
+      
+      // Extract audience base
+      const audienceBase = personaConfig.audience?.base
+         ? formatValueToTitleCase(personaConfig.audience.base.replace('_', ' '))
+         : 'Not specified';
+      
+      // Extract purpose/channel if available
+      const purpose = personaConfig.purpose
+         ? formatValueToTitleCase(personaConfig.purpose.replace('_', ' '))
+         : null;
+      
+      return [
          {
             icon: <Users />,
             label: "Voice & Audience",
-            value: `${formatValueToTitleCase(agent.voiceTone)} • ${formatValueToTitleCase(agent.targetAudience)}`,
+            value: `${voiceStyle} • ${audienceBase}`,
          },
-      ],
-      [agent],
-   );
+         ...(purpose ? [{
+            icon: <FileText />,
+            label: "Purpose",
+            value: purpose,
+         }] : []),
+      ];
+   }, [agent]);
    const statsItems = React.useMemo(
       () => [
          {
@@ -92,9 +114,11 @@ export function AgentCard({ agent }: AgentCardProps) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle className="line-clamp-1">{agent.name}</CardTitle>
+            <CardTitle className="line-clamp-1">
+               {(agent.personaConfig as PersonaConfig).metadata.name}
+            </CardTitle>
             <CardDescription className="line-clamp-1">
-               {agent.description}
+               {(agent.personaConfig as PersonaConfig).metadata.description}
             </CardDescription>
             <CardAction>
                <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
@@ -109,15 +133,10 @@ export function AgentCard({ agent }: AgentCardProps) {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent align="end">
-                     <DropdownMenuItem asChild>
-                        <Link
-                           params={{
-                              agentId: agent.id,
-                           }}
-                           to="/agents/$agentId/edit"
-                        >
-                           <Edit className="w-4 h-4 mr-2" /> Edit
-                        </Link>
+                     <DropdownMenuItem
+                        disabled={true}
+                     >
+                        <Edit className="w-4 h-4 mr-2" /> Edit (Coming Soon)
                      </DropdownMenuItem>
                      <DropdownMenuItem
                         disabled={isPending}
@@ -142,7 +161,7 @@ export function AgentCard({ agent }: AgentCardProps) {
                      <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                           onClick={() => deleteAgent(agent.id)}
+                           onClick={() => deleteAgent({ id: agent.id })}
                            disabled={isPending}
                         >
                            Continue
