@@ -30,11 +30,7 @@ export function TiptapEditor({
    error = false,
 }: TiptapEditorProps) {
    const editor = useEditor({
-      extensions: [
-         // Using only StarterKit to avoid duplicate extension warnings
-         // StarterKit already includes: Bold, Italic, Strike, Code, History, Paragraph, Text, Heading, etc.
-         StarterKit,
-      ],
+      extensions: [StarterKit],
       content: value,
       editorProps: {
          attributes: {
@@ -43,17 +39,16 @@ export function TiptapEditor({
             }`,
             style: `min-height: ${minHeight};`,
          },
-         
       },
       onUpdate: ({ editor }) => {
-         onChange(editor.getHTML());
+         onChange(editor.getText());
       },
       ...editorOptions,
    });
 
    // Sync editor content if value changes externally
    useEffect(() => {
-      if (editor && value !== editor.getHTML()) {
+      if (editor && value !== editor.getText()) {
          editor.commands.setContent(value);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,31 +195,12 @@ export function TiptapEditor({
       [editor],
    );
 
-   // Attach onBlur handler if provided
-   React.useEffect(() => {
-      if (!editor || !onBlur) return;
-      const handler = () => {
-         // Simulate a React synthetic event for compatibility
-         const event = {
-            target: {
-               name,
-               id,
-               value: editor.getHTML(),
-            },
-            type: "blur",
-         } as unknown as React.FocusEvent<HTMLDivElement>;
-         onBlur(event);
-      };
-      editor.on("blur", handler);
-      return () => {
-         editor.off("blur", handler);
-      };
-   }, [editor, onBlur, name, id]);
-
    if (!editor) return <div>Loading editor...</div>;
 
    return (
-      <div className={`rounded-lg border-2 ${error ? "border-destructive" : "border-primary/30"} bg-muted`}>
+      <div
+         className={`rounded-lg border-2 ${error ? "border-destructive" : "border-primary/30"} bg-muted`}
+      >
          <div className="p-2 flex flex-wrap items-center gap-1 bg-primary/10">
             {toolbarButtons.map((btn) =>
                btn.separator ? (
@@ -269,6 +245,7 @@ export function TiptapEditor({
                id={id}
                data-name={name}
                data-placeholder={placeholder}
+               onBlur={onBlur}
             />
             {editor.isEmpty && placeholder && (
                <div
