@@ -1,16 +1,5 @@
 import { EditorContent, useEditor, type EditorOptions } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
-import TextAlign from "@tiptap/extension-text-align";
-import Highlight from "@tiptap/extension-highlight";
-import Link from "@tiptap/extension-link";
-import Image from "@tiptap/extension-image";
-import Table from "@tiptap/extension-table";
-import TableRow from "@tiptap/extension-table-row";
-import TableHeader from "@tiptap/extension-table-header";
-import TableCell from "@tiptap/extension-table-cell";
-import TextStyle from "@tiptap/extension-text-style";
-import Color from "@tiptap/extension-color";
 import React, { useEffect, useMemo } from "react";
 import { Button } from "@packages/ui/components/button";
 import { Separator } from "@packages/ui/components/separator";
@@ -25,6 +14,7 @@ export interface TiptapEditorProps {
    className?: string;
    minHeight?: string;
    editorOptions?: Partial<EditorOptions>;
+   error?: boolean;
 }
 
 export function TiptapEditor({
@@ -37,38 +27,28 @@ export function TiptapEditor({
    className = "",
    minHeight = "200px",
    editorOptions = {},
+   error = false,
 }: TiptapEditorProps) {
    const editor = useEditor({
-      extensions: [
-         StarterKit,
-         Underline,
-         TextAlign.configure({ types: ["heading", "paragraph"] }),
-         Highlight.configure({ multicolor: true }),
-         Link.configure({ openOnClick: false }),
-         Image,
-         Table.configure({ resizable: true }),
-         TableRow,
-         TableHeader,
-         TableCell,
-         TextStyle,
-         Color,
-      ],
+      extensions: [StarterKit],
       content: value,
       editorProps: {
          attributes: {
-            class: `prose prose-sm max-w-none focus:outline-none p-4 ${className}`,
+            class: `prose prose-sm max-w-none focus:outline-none p-4 ${className} ${
+               error ? "border-destructive" : ""
+            }`,
             style: `min-height: ${minHeight};`,
          },
       },
       onUpdate: ({ editor }) => {
-         onChange(editor.getHTML());
+         onChange(editor.getText());
       },
       ...editorOptions,
    });
 
    // Sync editor content if value changes externally
    useEffect(() => {
-      if (editor && value !== editor.getHTML()) {
+      if (editor && value !== editor.getText()) {
          editor.commands.setContent(value);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,16 +72,6 @@ export function TiptapEditor({
             isActive: () => editor?.isActive("italic") ?? false,
             onClick: () => editor?.chain().focus().toggleItalic().run(),
             variant: editor?.isActive("italic") ? "secondary" : "ghost",
-            size: "sm",
-            type: "button",
-            as: Button,
-         },
-         {
-            key: "underline",
-            label: <u>U</u>,
-            isActive: () => editor?.isActive("underline") ?? false,
-            onClick: () => editor?.chain().focus().toggleUnderline().run(),
-            variant: editor?.isActive("underline") ? "secondary" : "ghost",
             size: "sm",
             type: "button",
             as: Button,
@@ -224,35 +194,17 @@ export function TiptapEditor({
       ],
       [editor],
    );
-   // Attach onBlur handler if provided
-   React.useEffect(() => {
-      if (!editor || !onBlur) return;
-      const handler = () => {
-         // Simulate a React synthetic event for compatibility
-         const event = {
-            target: {
-               name,
-               id,
-               value: editor.getHTML(),
-            },
-            type: "blur",
-         } as unknown as React.FocusEvent<HTMLDivElement>;
-         onBlur(event);
-      };
-      editor.on("blur", handler);
-      return () => {
-         editor.off("blur", handler);
-      };
-   }, [editor, onBlur, name, id]);
 
    if (!editor) return <div>Loading editor...</div>;
 
    return (
-      <div className="bg-muted rounded-lg border-primary/30 border-2">
-         <div className="p-2 flex flex-wrap h-full gap-4 bg-primary/10">
+      <div
+         className={`rounded-lg border-2 ${error ? "border-destructive" : "border-primary/30"} bg-muted`}
+      >
+         <div className="p-2 flex flex-wrap items-center gap-1 bg-primary/10">
             {toolbarButtons.map((btn) =>
                btn.separator ? (
-                  <Separator key={btn.key} orientation="vertical" />
+                  <div key={btn.key} className="w-px h-6 bg-border mx-1" />
                ) : (
                   <Button
                      key={btn.key}
@@ -293,6 +245,7 @@ export function TiptapEditor({
                id={id}
                data-name={name}
                data-placeholder={placeholder}
+               onBlur={onBlur}
             />
             {editor.isEmpty && placeholder && (
                <div
@@ -302,7 +255,7 @@ export function TiptapEditor({
                   <span>{placeholder}</span>
                   <Separator className="my-2 w-full" />
                </div>
-            )}{" "}
+            )}
          </div>
       </div>
    );

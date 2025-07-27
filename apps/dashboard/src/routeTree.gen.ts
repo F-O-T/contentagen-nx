@@ -23,6 +23,7 @@ import { Route as DashboardOrganizationIndexRouteImport } from './routes/_dashbo
 import { Route as DashboardAgentsIndexRouteImport } from './routes/_dashboard/agents/index'
 import { Route as DashboardOrganizationCreateRouteImport } from './routes/_dashboard/organization/create'
 import { Route as DashboardAgentsFlowRouteImport } from './routes/_dashboard/agents/_flow'
+import { Route as DashboardAgentsAgentIdIndexRouteImport } from './routes/_dashboard/agents/$agentId/index'
 import { Route as DashboardAgentsFlowManualRouteImport } from './routes/_dashboard/agents/_flow/manual'
 
 const DashboardAgentsRouteImport = createFileRoute('/_dashboard/agents')()
@@ -92,6 +93,12 @@ const DashboardAgentsFlowRoute = DashboardAgentsFlowRouteImport.update({
   id: '/_flow',
   getParentRoute: () => DashboardAgentsRoute,
 } as any)
+const DashboardAgentsAgentIdIndexRoute =
+  DashboardAgentsAgentIdIndexRouteImport.update({
+    id: '/$agentId/',
+    path: '/$agentId/',
+    getParentRoute: () => DashboardAgentsRoute,
+  } as any)
 const DashboardAgentsFlowManualRoute =
   DashboardAgentsFlowManualRouteImport.update({
     id: '/manual',
@@ -112,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/agents/': typeof DashboardAgentsIndexRoute
   '/organization': typeof DashboardOrganizationIndexRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
+  '/agents/$agentId': typeof DashboardAgentsAgentIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
@@ -125,6 +133,7 @@ export interface FileRoutesByTo {
   '/organization/create': typeof DashboardOrganizationCreateRoute
   '/organization': typeof DashboardOrganizationIndexRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
+  '/agents/$agentId': typeof DashboardAgentsAgentIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,6 +151,7 @@ export interface FileRoutesById {
   '/_dashboard/agents/': typeof DashboardAgentsIndexRoute
   '/_dashboard/organization/': typeof DashboardOrganizationIndexRoute
   '/_dashboard/agents/_flow/manual': typeof DashboardAgentsFlowManualRoute
+  '/_dashboard/agents/$agentId/': typeof DashboardAgentsAgentIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/agents/'
     | '/organization'
     | '/agents/manual'
+    | '/agents/$agentId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/organization/create'
     | '/organization'
     | '/agents/manual'
+    | '/agents/$agentId'
   id:
     | '__root__'
     | '/_dashboard'
@@ -187,6 +199,7 @@ export interface FileRouteTypes {
     | '/_dashboard/agents/'
     | '/_dashboard/organization/'
     | '/_dashboard/agents/_flow/manual'
+    | '/_dashboard/agents/$agentId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -287,6 +300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAgentsFlowRouteImport
       parentRoute: typeof DashboardAgentsRoute
     }
+    '/_dashboard/agents/$agentId/': {
+      id: '/_dashboard/agents/$agentId/'
+      path: '/$agentId'
+      fullPath: '/agents/$agentId'
+      preLoaderRoute: typeof DashboardAgentsAgentIdIndexRouteImport
+      parentRoute: typeof DashboardAgentsRoute
+    }
     '/_dashboard/agents/_flow/manual': {
       id: '/_dashboard/agents/_flow/manual'
       path: '/manual'
@@ -311,11 +331,13 @@ const DashboardAgentsFlowRouteWithChildren =
 interface DashboardAgentsRouteChildren {
   DashboardAgentsFlowRoute: typeof DashboardAgentsFlowRouteWithChildren
   DashboardAgentsIndexRoute: typeof DashboardAgentsIndexRoute
+  DashboardAgentsAgentIdIndexRoute: typeof DashboardAgentsAgentIdIndexRoute
 }
 
 const DashboardAgentsRouteChildren: DashboardAgentsRouteChildren = {
   DashboardAgentsFlowRoute: DashboardAgentsFlowRouteWithChildren,
   DashboardAgentsIndexRoute: DashboardAgentsIndexRoute,
+  DashboardAgentsAgentIdIndexRoute: DashboardAgentsAgentIdIndexRoute,
 }
 
 const DashboardAgentsRouteWithChildren = DashboardAgentsRoute._addFileChildren(

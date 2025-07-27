@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // 1. Voice & Tone
 export const VoiceConfigSchema = z.object({
-  communication: z.enum(["I", "we", "you"]),
+  communication: z.enum(["first_person", "third_person"]),
 });
 
 // 2. Audience
@@ -19,7 +19,7 @@ export const FormatConfigSchema = z.object({
 // 4. Language
 export const LanguageConfigSchema = z.object({
   primary: z.enum(["en", "pt", "es"]),
-  variant: z.string().optional(), // en-US, pt-BR...
+  variant: z.enum(["en-US", "en-GB", "pt-BR", "pt-PT", "es-ES", "es-MX"]).optional(),
 });
 
 // 5. Brand Asset Bundle
@@ -30,7 +30,7 @@ export const BrandConfigSchema = z.object({
     "reference_only",
     "creative_blend",
   ]),
-  blacklistWords: z.array(z.string()).optional(),
+  blacklistWords: z.string().optional(),
 });
 
 // 6. Repurposing — strongly-typed channels
@@ -39,19 +39,14 @@ export const PurposeChannelSchema = z.enum([
   "linkedin_post",
   "twitter_thread",
   "instagram_post",
-  "instagram_story",
-  "tiktok_script",
   "email_newsletter",
   "reddit_post",
-  "youtube_script",
-  "slide_deck",
-  "video_script",
   "technical_documentation",
 ]);
 
 // 7. Top-level PersonaConfig
 export const PersonaConfigSchema = z.object({
-  metadata: z.object({ name: z.string(), description: z.string() }),
+  metadata: z.object({ name: z.string().min(1,'This field is required'), description: z.string().min(1,'This field is required') }),
   voice: VoiceConfigSchema.partial().optional(),
   audience: AudienceConfigSchema.partial().optional(),
   formatting: FormatConfigSchema.partial().optional(),

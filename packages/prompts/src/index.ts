@@ -7,5 +7,9 @@ export {
    contentGenerationPrompts,
    chunkingPrompt,
 };
-export * from "./helpers";
+
 export * from "./text-utils";
+export * from "./helpers/agent-system-prompt-assembler";
+
+// Legacy exports for backwards compatibility
+export { generateSystemPrompt as generateAgentPrompt } from "./helpers/agent-system-prompt-assembler";

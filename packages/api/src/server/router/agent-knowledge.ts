@@ -1,19 +1,18 @@
-import { Type } from "@sinclair/typebox";
-import { wrap } from "@typeschema/typebox";
+import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 
-const AgentKnowledgeIdInput = Type.Object({
-   id: Type.String(),
+const AgentKnowledgeIdInput = z.object({
+   id: z.string(),
 });
 
 export const agentKnowledgeRouter = router({
    getById: protectedProcedure
-      .input(wrap(AgentKnowledgeIdInput))
+      .input(AgentKnowledgeIdInput)
       .query(async ({ ctx, input }) => {
          // Query Chroma DB for the knowledge by ID
          const { id } = input;
          // Replace 'collection' with your actual collection name
-         const collection = await ctx.chromaClient.getCollection({
+         const collection = await (await ctx).chromaClient.getCollection({
             name: "agent-knowledge",
          });
          const result = await collection.get({ ids: [id] });
@@ -21,10 +20,10 @@ export const agentKnowledgeRouter = router({
       }),
 
    deleteById: protectedProcedure
-      .input(wrap(AgentKnowledgeIdInput))
+      .input(AgentKnowledgeIdInput)
       .mutation(async ({ ctx, input }) => {
          const { id } = input;
-         const collection = await ctx.chromaClient.getCollection({
+         const collection = await (await ctx).chromaClient.getCollection({
             name: "agent-knowledge",
          });
          await collection.delete({ ids: [id] });

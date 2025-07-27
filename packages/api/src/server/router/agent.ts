@@ -6,34 +6,48 @@ import {
    listAgentsByUserId,
 } from "@packages/database/repositories/agent-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
-import { Type } from "@sinclair/typebox";
 import { TRPCError } from "@trpc/server";
-import { wrap } from "@typeschema/typebox";
+import { z } from "zod";
 
 import { protectedProcedure, router } from "../trpc";
 import {
-   AgentInsertSchema,
    AgentUpdateSchema,
    type AgentInsert,
 } from "@packages/database/schema";
+import { PersonaConfigSchema } from "@packages/database/schemas/agent-types";
+import { generateSystemPrompt } from "@packages/prompts/helpers/agent-system-prompt-assembler";
 
-const CreateAgentInput = AgentInsertSchema;
+
+
 const UpdateAgentInput = AgentUpdateSchema;
 
-const DeleteAgentInput = Type.Object({
-   id: Type.String({ format: "uuid" }),
+const DeleteAgentInput = z.object({
+   id: z.string().uuid(),
 });
 
-const GetAgentInput = Type.Object({
-   id: Type.String({ format: "uuid" }),
+const GetAgentInput = z.object({
+   id: z.string().uuid(),
 });
 
 export const agentRouter = router({
    create: protectedProcedure
-      .input(wrap(CreateAgentInput))
+      .input(PersonaConfigSchema)
       .mutation(async ({ ctx, input }) => {
          try {
-            return await createAgent((await ctx).db, input as AgentInsert);
+            const userId = ctx.session.user.id;
+            if (!userId) {
+               throw new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message: "User ID is required to create an agent.",
+               });
+            }
+            const agentData: Omit<AgentInsert, "id" | "createdAt" | "updatedAt"> = {
+        
+               systemPrompt: generateSystemPrompt(input),
+               personaConfig: input,
+               userId: userId,
+            };
+            return await createAgent((await ctx).db, {...agentData});
          } catch (err) {
             if (err instanceof DatabaseError) {
                throw new TRPCError({
@@ -45,7 +59,7 @@ export const agentRouter = router({
          }
       }),
    update: protectedProcedure
-      .input(wrap(UpdateAgentInput))
+      .input(UpdateAgentInput)
       .mutation(async ({ ctx, input }) => {
          const { id, ...updateFields } = input;
          if (!id) {
@@ -56,7 +70,7 @@ export const agentRouter = router({
          }
 
          try {
-            await updateAgent(ctx.db, id, updateFields);
+            await updateAgent((await ctx).db, id, updateFields);
             return { success: true };
          } catch (err) {
             if (err instanceof NotFoundError) {
@@ -72,11 +86,11 @@ export const agentRouter = router({
          }
       }),
    delete: protectedProcedure
-      .input(wrap(DeleteAgentInput))
+      .input(DeleteAgentInput)
       .mutation(async ({ ctx, input }) => {
          const { id } = input;
          try {
-            await deleteAgent(ctx.db, id);
+            await deleteAgent((await ctx).db, id);
             return { success: true };
          } catch (err) {
             if (err instanceof NotFoundError) {
@@ -92,10 +106,10 @@ export const agentRouter = router({
          }
       }),
    get: protectedProcedure
-      .input(wrap(GetAgentInput))
+      .input(GetAgentInput)
       .query(async ({ ctx, input }) => {
          try {
-            return await getAgentById(ctx.db, input.id);
+            return await getAgentById((await ctx).db, input.id);
          } catch (err) {
             if (err instanceof NotFoundError) {
                throw new TRPCError({ code: "NOT_FOUND", message: err.message });
