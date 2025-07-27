@@ -13,7 +13,7 @@ export const FieldContainer = React.forwardRef<
    React.ElementRef<"div">,
    React.ComponentPropsWithoutRef<"div">
 >(({ className, ...props }, ref) => {
-   return <div className={cn("space-y-2", className)} ref={ref} {...props} />;
+   return <div className={cn("space-y-4", className)} ref={ref} {...props} />;
 });
 FieldContainer.displayName = "FieldContainer";
 
@@ -28,7 +28,7 @@ export const FieldLabel = React.forwardRef<
 
    return (
       <LabelPrimitive.Label
-         className={cn(isTouched && hasErrors && "text-destructive", className)}
+         className={cn(isTouched && hasErrors && "text-destructive", className, "font-medium")}
          htmlFor={field.name}
          ref={ref}
          {...props}
