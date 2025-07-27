@@ -10,6 +10,7 @@ export const createRouter = () => {
       createTanstackRouter({
          context: {
             ...context,
+            head: "",
          },
          defaultPreloadStaleTime: 0,
          routeTree,
