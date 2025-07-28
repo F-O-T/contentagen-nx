@@ -2,57 +2,62 @@ import { z } from "zod";
 
 // 1. Voice & Tone
 export const VoiceConfigSchema = z.object({
-  communication: z.enum(["first_person", "third_person"]),
+   communication: z.enum(["first_person", "third_person"]),
 });
 
 // 2. Audience
 export const AudienceConfigSchema = z.object({
-  base: z.enum(["general_public", "professionals", "beginners", "customers"]),
+   base: z.enum(["general_public", "professionals", "beginners", "customers"]),
 });
 
 // 3. Format & Structure
 export const FormatConfigSchema = z.object({
-  style: z.enum(["structured", "narrative", "list_based"]),
-  listStyle: z.enum(["bullets", "numbered"]).optional(),
+   style: z.enum(["structured", "narrative", "list_based"]),
+   listStyle: z.enum(["bullets", "numbered"]).optional(),
 });
 
 // 4. Language
 export const LanguageConfigSchema = z.object({
-  primary: z.enum(["en", "pt", "es"]),
-  variant: z.enum(["en-US", "en-GB", "pt-BR", "pt-PT", "es-ES", "es-MX"]).optional(),
+   primary: z.enum(["en", "pt", "es"]),
+   variant: z
+      .enum(["en-US", "en-GB", "pt-BR", "pt-PT", "es-ES", "es-MX"])
+      .optional(),
 });
 
 // 5. Brand Asset Bundle
 export const BrandConfigSchema = z.object({
-  integrationStyle: z.enum([
-    "strict_guideline",
-    "flexible_guideline",
-    "reference_only",
-    "creative_blend",
-  ]),
-  blacklistWords: z.string().optional(),
+   integrationStyle: z.enum([
+      "strict_guideline",
+      "flexible_guideline",
+      "reference_only",
+      "creative_blend",
+   ]),
+   blacklistWords: z.string().optional(),
 });
 
 // 6. Repurposing — strongly-typed channels
 export const PurposeChannelSchema = z.enum([
-  "blog_post",
-  "linkedin_post",
-  "twitter_thread",
-  "instagram_post",
-  "email_newsletter",
-  "reddit_post",
-  "technical_documentation",
+   "blog_post",
+   "linkedin_post",
+   "twitter_thread",
+   "instagram_post",
+   "email_newsletter",
+   "reddit_post",
+   "technical_documentation",
 ]);
 
 // 7. Top-level PersonaConfig
 export const PersonaConfigSchema = z.object({
-  metadata: z.object({ name: z.string().min(1,'This field is required'), description: z.string().min(1,'This field is required') }),
-  voice: VoiceConfigSchema.partial().optional(),
-  audience: AudienceConfigSchema.partial().optional(),
-  formatting: FormatConfigSchema.partial().optional(),
-  language: LanguageConfigSchema.partial().optional(),
-  brand: BrandConfigSchema.partial().optional(),
-  purpose: PurposeChannelSchema.optional(),
+   metadata: z.object({
+      name: z.string().min(1, "This field is required"),
+      description: z.string().min(1, "This field is required"),
+   }),
+   voice: VoiceConfigSchema.partial().optional(),
+   audience: AudienceConfigSchema.partial().optional(),
+   formatting: FormatConfigSchema.partial().optional(),
+   language: LanguageConfigSchema.partial().optional(),
+   brand: BrandConfigSchema.partial().optional(),
+   purpose: PurposeChannelSchema.optional(),
 });
 
 // 8. Static Type exports

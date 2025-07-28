@@ -1,19 +1,40 @@
 import { Button } from "@packages/ui/components/button";
 import { TiptapEditor } from "@packages/ui/components/tiptap-editor";
 import { BrandConfigSchema } from "@packages/database/schemas/agent-types";
+import { trpc } from "@/integrations/clients";
 import type { AgentForm } from "../lib/use-agent-form";
 
 // Helper function to convert schema values to display labels
 const getBrandLabel = (value: string): string => {
-  return value.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  return value.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 };
 
 export function BrandStep({ form }: { form: AgentForm }) {
   // Extract the enum values from the schema
-  const integrationStyleOptions = BrandConfigSchema.shape.integrationStyle.options;
+  const integrationStyleOptions =
+    BrandConfigSchema.shape.integrationStyle.options;
+
+  // Get agentId from form state (assume it's in metadata or similar)
+  const agentId = form.state.values.metadata?.id || "";
+  const { data, isLoading, error } = trpc.agentFile.listBrandFiles.useQuery(
+    agentId ? { agentId } : undefined,
+  );
 
   return (
     <div className="space-y-4">
+      <div>
+        <h3 className="font-semibold">Available Brand Files</h3>
+        {isLoading && <div>Loading brand files…</div>}
+        {error && <div className="text-red-500">Error loading files</div>}
+        {data && data.files.length === 0 && <div>No brand files found.</div>}
+        {data && data.files.length > 0 && (
+          <ul className="list-disc pl-5">
+            {data.files.map((file) => (
+              <li key={file}>{file}</li>
+            ))}
+          </ul>
+        )}
+      </div>{" "}
       <form.AppField name="brand.integrationStyle">
         {(field) => (
           <field.FieldContainer className="space-y-2">
@@ -46,9 +67,7 @@ export function BrandStep({ form }: { form: AgentForm }) {
           <field.FieldContainer className="space-y-2">
             <field.FieldLabel>Blacklist Words (optional)</field.FieldLabel>
             <TiptapEditor
-              value={
-                form.state.values.brand?.blacklistWords || "<p></p>"
-              }
+              value={form.state.values.brand?.blacklistWords || "<p></p>"}
               onChange={(val) =>
                 form.setFieldValue("brand.blacklistWords", val)
               }
@@ -57,7 +76,9 @@ export function BrandStep({ form }: { form: AgentForm }) {
               id={field.name}
               placeholder="Enter words to avoid..."
               className="w-full"
-              error={field.state.meta.isTouched && field.state.meta.errors.length > 0}
+              error={
+                field.state.meta.isTouched && field.state.meta.errors.length > 0
+              }
             />
             <field.FieldMessage />
           </field.FieldContainer>

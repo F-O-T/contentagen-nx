@@ -1,44 +1,37 @@
-// React hook for viewing files, using TRPC API and toast for errors.
-
 import { useState } from "react";
-import { toast } from "sonner";
+import { useTRPC } from "@/integrations/clients";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
 
 export default function useFileViewer() {
+   const trpc = useTRPC();
+   const { agentId } = useParams({ from: "/_dashboard/agents/$agentId/" });
    const [isOpen, setIsOpen] = useState(false);
    const [fileName, setFileName] = useState("");
-   const [fileContent, setFileContent] = useState("");
-   const [isLoading, setIsLoading] = useState(false);
 
-   const open = async (fileName: string, fileUrl: string) => {
-      setIsLoading(true);
+   const { data, isLoading } = useQuery({
+      ...trpc.agentFile.getFileContent.queryOptions({
+         agentId: agentId, // fallback to avoid undefined
+         fileName,
+      }),
+      enabled: isOpen && fileName !== "",
+   });
+
+   const open = (fileName: string) => {
       setFileName(fileName);
       setIsOpen(true);
-
-      try {
-         // TODO: Replace with actual TRPC endpoint for file viewing
-         // For now, we'll show a placeholder message
-         setFileContent("File viewing is temporarily unavailable. Feature being migrated to TRPC.");
-         console.log("Would view file:", fileName, "from URL:", fileUrl);
-      } catch (error) {
-         console.error("Error loading file content:", error);
-         toast.error("Failed to load file content");
-         setFileContent("Failed to load file content. Please try again.");
-      } finally {
-         setIsLoading(false);
-      }
+      // refetch will be triggered by useQuery's enabled
    };
 
    const close = () => {
       setIsOpen(false);
-      setFileContent("");
       setFileName("");
-      setIsLoading(false);
    };
 
    return {
       isOpen,
       fileName,
-      fileContent,
+      fileContent: data?.content,
       isLoading,
       open,
       close,

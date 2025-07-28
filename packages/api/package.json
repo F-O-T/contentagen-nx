@@ -21,7 +21,6 @@
       "test": "vitest run"
    },
    "dependencies": {
-      "@tanstack/react-query": "^5.66.5",
       "@packages/authentication": "workspace:*",
       "@packages/database": "workspace:*",
       "@packages/files": "workspace:*",

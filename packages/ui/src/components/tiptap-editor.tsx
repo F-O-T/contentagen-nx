@@ -1,6 +1,7 @@
 import { EditorContent, useEditor, type EditorOptions } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import React, { useEffect, useMemo } from "react";
+import type React from "react";
+import { useEffect, useMemo } from "react";
 import { Button } from "@packages/ui/components/button";
 import { Separator } from "@packages/ui/components/separator";
 

@@ -10,14 +10,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { protectedProcedure, router } from "../trpc";
-import {
-   AgentUpdateSchema,
-   type AgentInsert,
-} from "@packages/database/schema";
+import { AgentUpdateSchema, type AgentInsert } from "@packages/database/schema";
 import { PersonaConfigSchema } from "@packages/database/schemas/agent-types";
 import { generateSystemPrompt } from "@packages/prompts/helpers/agent-system-prompt-assembler";
-
-
 
 const UpdateAgentInput = AgentUpdateSchema;
 
@@ -41,13 +36,15 @@ export const agentRouter = router({
                   message: "User ID is required to create an agent.",
                });
             }
-            const agentData: Omit<AgentInsert, "id" | "createdAt" | "updatedAt"> = {
-        
+            const agentData: Omit<
+               AgentInsert,
+               "id" | "createdAt" | "updatedAt"
+            > = {
                systemPrompt: generateSystemPrompt(input),
                personaConfig: input,
                userId: userId,
             };
-            return await createAgent((await ctx).db, {...agentData});
+            return await createAgent((await ctx).db, { ...agentData });
          } catch (err) {
             if (err instanceof DatabaseError) {
                throw new TRPCError({

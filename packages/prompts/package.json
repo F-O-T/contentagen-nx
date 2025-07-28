@@ -10,10 +10,7 @@
       "@packages/database": "workspace:*"
    },
    "exports": {
-      "./helpers/*": "./src/helpers/*.ts",
-      "./text-utils": "./src/text-utils.ts",
-   
-      ".": "./src/index.ts"
+      "./helpers/*": "./src/helpers/*.ts"
    },
    "name": "@packages/prompts",
    "version": "0.2.0",
