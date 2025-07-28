@@ -23,7 +23,7 @@ export function ProfilePageBilling() {
 
    const goToCheckout = useCallback(async () => {
       return await betterAuthClient.checkout({
-         slug: "pro",
+         slug: "basic",
       });
    }, []);
 

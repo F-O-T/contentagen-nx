@@ -7,14 +7,6 @@ import {
    CardContent,
 } from "@packages/ui/components/card";
 import { Button } from "@packages/ui/components/button";
-import {
-   Table,
-   TableHeader,
-   TableBody,
-   TableRow,
-   TableHead,
-   TableCell,
-} from "@packages/ui/components/table";
 import { betterAuthClient } from "@/integrations/clients";
 import { Trash2, Monitor, Smartphone, CheckCircle2 } from "lucide-react";
 
