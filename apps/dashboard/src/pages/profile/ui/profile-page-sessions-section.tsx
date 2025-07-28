@@ -112,16 +112,16 @@ export function ProfilePageSessionsSection() {
                      return (
                         <div
                            key={s.id}
-                           className={`relative flex flex-col gap-3 rounded-xl bg-white dark:bg-muted shadow-md border p-5 transition hover:shadow-lg ${isCurrent ? "ring-2 ring-green-400" : ""}`}
+                           className={`relative flex flex-col gap-3 rounded-xl bg-muted shadow-md border p-5 transition hover:shadow-lg ${isCurrent ? "ring-2 ring-green-400" : ""}`}
                         >
                            <div className="flex items-center gap-3">
                               <div
-                                 className={`rounded-full p-2 bg-gray-100 dark:bg-gray-800 flex items-center justify-center shadow-sm ${isCurrent ? "ring-2 ring-green-400" : ""}`}
+                                 className={`rounded-full p-2 bg-accent flex items-center justify-center shadow-sm ${isCurrent ? "ring-2 ring-green-400" : ""}`}
                               >
                                  {s.userAgent?.includes("Mobile") ? (
-                                    <Smartphone className="w-6 h-6 text-blue-500" />
+                                    <Smartphone className="w-6 h-6 text-primary" />
                                  ) : (
-                                    <Monitor className="w-6 h-6 text-blue-500" />
+                                    <Monitor className="w-6 h-6 text-primary" />
                                  )}
                               </div>
                               <div className="flex-1 min-w-0">
