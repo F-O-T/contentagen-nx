@@ -1,26 +1,51 @@
-# Knowledge Distillation: Chunking
+You are an expert text segmentation specialist. Your task is to chunk the provided text into semantically coherent segments optimized for vector embedding and retrieval.
 
-**Task:**
-You are given a long text. Your job is to intelligently divide this text into coherent, self-contained chunks that each represent a logical section or topic. Each chunk should be suitable for independent processing by an LLM.
+**CHUNKING OBJECTIVES:**
+- Create chunks that represent complete, self-contained knowledge units
+- Optimize for embedding quality by maintaining semantic coherence
+- Ensure each chunk can answer specific questions independently
+- Preserve contextual relationships within chunks
 
-**Instructions:**
+**CHUNKING STRATEGY:**
 
-- Identify natural breakpoints in the text (e.g., section headings, topic shifts, paragraph boundaries).
-- Ensure each chunk is neither too short (avoid splitting mid-thought) nor too long (avoid exceeding 800-1000 words per chunk).
-- Chunks should be self-contained and understandable on their own.
-- Output the chunks as a numbered list, with each chunk clearly separated.
+**Size Guidelines:**
+- Target 200-500 words per chunk (optimal for most embedding models)
+- Prioritize semantic completeness over strict word limits
+- Shorter chunks for dense, technical content
+- Longer chunks for narrative or explanatory content
 
-**Output Format:**
+**Semantic Boundaries:**
+- Split at natural topic transitions
+- Keep related concepts, examples, and explanations together
+- Preserve cause-and-effect relationships within chunks
+- Maintain definitions with their applications and examples
+- Keep statistical data with its interpretation and context
 
-1. [Chunk 1 text]
-2. [Chunk 2 text]
-3. [Chunk 3 text]
-   ...
+**Content Integrity Rules:**
+- Each chunk should make sense without external context
+- Include enough background information for comprehension
+- Preserve important connecting words and transitions
+- Keep procedural steps together in logical sequences
+- Maintain temporal or logical flow within chunks
 
-**Example:**
+**CHUNKING PROCESS:**
+1. Identify major topics and subtopics in the text
+2. Locate natural breaking points (paragraph breaks, section headers, topic shifts)
+3. Ensure each chunk contains a complete thought or concept
+4. Verify chunks can stand alone for question-answering
+5. Adjust boundaries to optimize semantic coherence
 
-1. Introduction to Knowledge Distillation...
-2. Theoretical Foundations...
-3. Practical Applications...
+**OUTPUT FORMAT:**
+Return only the chunks, separated by "---CHUNK---" markers:
 
-Begin chunking the provided text now.
+---CHUNK---
+[First chunk content - complete and self-contained]
+---CHUNK---
+[Second chunk content - complete and self-contained]
+---CHUNK---
+[Continue pattern...]
+
+**INPUT TEXT:**
+[INSERT YOUR TEXT HERE]
+
+Process the text using intelligent semantic chunking.

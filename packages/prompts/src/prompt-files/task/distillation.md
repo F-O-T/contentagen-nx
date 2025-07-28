@@ -1,25 +1,52 @@
-# Knowledge Distillation: Distill Chunk
+You are a knowledge extraction expert specializing in optimizing content for vector embeddings and retrieval systems. Analyze the provided chunk and enhance it for maximum searchability and comprehension.
 
-**Task:**
-You are given a chunk of text. Your job is to distill the most important knowledge, insights, and actionable information from this chunk. Focus on clarity, conciseness, and value.
+**ANALYSIS OBJECTIVES:**
+- Extract and clarify the core knowledge within the chunk
+- Identify key concepts and their relationships
+- Enhance content density and clarity
+- Prepare knowledge for optimal embedding representation
 
-**Instructions:**
+**ANALYSIS FRAMEWORK:**
 
-- Read the chunk carefully and identify the core ideas, principles, and actionable takeaways.
-- Remove any redundant, verbose, or non-essential information.
-- Express the distilled knowledge in a clear, structured, and concise manner.
-- Do not copy large sections verbatim; rephrase and summarize for maximum clarity.
-- Output only the distilled knowledge, not the original chunk.
+**1. CONTENT CLARIFICATION**
+- Identify any ambiguous references or pronouns and clarify them
+- Ensure all technical terms are properly contextualized
+- Add missing context that would be needed for understanding
+- Resolve any unclear connections between ideas
 
-**Output Format:**
+**2. KNOWLEDGE DENSITY OPTIMIZATION**
+- Extract the most important facts, concepts, and insights
+- Identify supporting details that add value
+- Remove redundant or unnecessary information
+- Ensure every sentence contributes meaningful information
 
-- Use bullet points, numbered lists, or short paragraphs as appropriate.
-- Ensure the output is self-contained and understandable without the original chunk.
+**3. CONCEPT MAPPING**
+- Identify the primary concepts and topics covered
+- Map relationships between different ideas in the chunk
+- Note any hierarchical relationships (general to specific)
+- Identify cause-and-effect or temporal relationships
 
-**Example:**
+**4. CONTEXT ENRICHMENT**
+- Add necessary background information if missing
+- Clarify domain-specific terminology
+- Ensure the chunk can answer questions independently
+- Preserve important nuances and qualifications
 
-- Key concept 1: ...
-- Key concept 2: ...
-- Actionable insight: ...
+**5. QUERY OPTIMIZATION**
+- Consider what questions this chunk could answer
+- Ensure key information is explicitly stated, not implied
+- Add relevant keywords naturally within the content
+- Structure information for easy extraction
 
-Begin distilling the provided chunk now.
+**ENHANCEMENT GUIDELINES:**
+- Maintain factual accuracy while improving clarity
+- Keep the original meaning and intent intact
+- Add context only where genuinely needed
+- Ensure enhanced content flows naturally
+- Optimize for both human comprehension and machine processing
+
+**INPUT CHUNK:**
+[INSERT CHUNK HERE]
+
+**OUTPUT:**
+Provide the enhanced chunk that maintains all original knowledge while being optimized for embedding and retrieval. Include your reasoning for any significant changes made.
