@@ -1,7 +1,7 @@
 // Prompt: Target Audience - Beginners
 // Returns the full prompt as a string
 export function beginnersAudiencePrompt(): string {
-  return `# Target Audience: Beginners
+   return `# Target Audience: Beginners
 
 **Psychological Profile:**
 

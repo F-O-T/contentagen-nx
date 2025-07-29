@@ -61,9 +61,9 @@ export const content = pgTable(
       userId: text("user_id")
          .notNull()
          .references(() => user.id, { onDelete: "cascade" }),
-      title: text("title").notNull(),
-      body: text("body").notNull(),
-      status: contentStatusEnum("status").default("draft"),
+      title: text("title").notNull().default(""),
+      body: text("body").notNull().default(""),
+      status: contentStatusEnum("status").default("generating"),
       meta: jsonb("meta").$type<ContentMeta>().default({}),
       request: jsonb("request").$type<ContentRequest>().notNull(),
       stats: jsonb("stats").$type<ContentStats>().default({}),

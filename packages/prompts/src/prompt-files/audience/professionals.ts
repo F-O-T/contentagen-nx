@@ -1,7 +1,7 @@
 // Prompt: Target Audience - Professionals
 // Returns the full prompt as a string
 export function professionalsAudiencePrompt(): string {
-  return `# Target Audience: Professionals
+   return `# Target Audience: Professionals
 
 **Psychological Profile:**
 
