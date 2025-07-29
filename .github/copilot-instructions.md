@@ -13,7 +13,6 @@
 - Always follow AGENTS.md for workflow and code style.
 - Use only `bun` for install, scripts, and binaries (never npm/yarn).
 - Format code with Biome (`bun run format`) before commit; never manual formatting.
-- Use Nx commands for affected projects when relevant.
 - Respect TypeScript path aliases (`@/*`, `@api`, `@packages/ui/*`).
 - Never commit secrets; use `.env.example` for required variables.
 

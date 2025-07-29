@@ -47,13 +47,9 @@ export async function uploadFile(
    if (!bucketExists) {
       await minioClient.makeBucket(bucketName);
    }
-   // Generate unique filename with timestamp
-   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-   const uniqueFileName = `${timestamp}_${fileName}`;
-   // Upload file
    await minioClient.putObject(
       bucketName,
-      uniqueFileName,
+      fileName,
       fileBuffer,
       fileBuffer.length,
       {
@@ -61,7 +57,7 @@ export async function uploadFile(
       },
    );
    // Return the file URL (now using server proxy)
-   return `/api/v1/files/${uniqueFileName}`;
+   return fileName;
 }
 
 export async function getFile(
@@ -72,6 +68,19 @@ export async function getFile(
    // Get file from MinIO
    const stream = await minioClient.getObject(bucketName, fileName);
    return stream;
+}
+
+export async function listFiles(
+   bucketName: string,
+   prefix: string,
+   minioClient: MinioClient,
+): Promise<string[]> {
+   const files: string[] = [];
+   const stream = minioClient.listObjectsV2(bucketName, prefix, true);
+   for await (const obj of stream) {
+      if (obj.name) files.push(obj.name.replace(prefix, ""));
+   }
+   return files;
 }
 
 export async function getFileInfo(

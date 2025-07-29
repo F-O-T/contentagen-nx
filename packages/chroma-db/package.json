@@ -9,6 +9,7 @@
       "./knowledge-point-schema": "./src/knowledge-point-schema.ts"
    },
    "scripts": {
+      "build": "tsc",
       "check": "biome check --write ./src",
       "typecheck": "tsc --build --noEmit --emitDeclarationOnly false"
    },

@@ -1,12 +1,6 @@
 {
    "extends": "@tooling/typescript/internal-package.json",
-   "include": [
-      "src/**/*.ts",
-      "*.ts",
-      "*.json",
-      "src/prompt-files/*.json",
-      "__tests__/*.ts",
-      "helpers.ts",
-      "global.d.ts"
-   ]
+   "compilerOptions": {},
+   "include": ["globals.d.ts"],
+   "exclude": ["node_modules", "build", "dist"]
 }

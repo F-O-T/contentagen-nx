@@ -32,7 +32,6 @@ export function AgentDetailsPromptCard({
 }: AgentDetailsPromptCardProps) {
    const [draft, setDraft] = useState(basePrompt);
    const [isModalOpen, setIsModalOpen] = useState(false);
-   const [expanded, setExpanded] = useState(false);
 
    return (
       <Card>
@@ -53,19 +52,17 @@ export function AgentDetailsPromptCard({
                   <DropdownMenuItem onSelect={() => setIsModalOpen(true)}>
                      Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setExpanded((v) => !v)}>
-                     See More
-                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                     onSelect={() => alert("Regenerate System Prompt (TODO)")}
+                  >
+                     Regenerate System Prompt
+                  </DropdownMenuItem>{" "}
                </DropdownMenuContent>
             </DropdownMenu>
          </CardHeader>
-         <CardContent className="space-y-4">
-            <div
-               className={`${expanded ? "" : "h-full overflow-y-auto"} border rounded-lg p-4 bg-muted/30 transition-all`}
-            >
-               <div className="prose prose-sm max-w-none dark:prose-invert">
-                  <ReactMarkdown>{basePrompt}</ReactMarkdown>
-               </div>
+         <CardContent className="space-y-4 prose prose-sm max-w-none  dark:prose-invert">
+            <div className="border-primary/30 rounded-lg border bg-muted p-2 overflow-hidden">
+               <ReactMarkdown>{basePrompt}</ReactMarkdown>
             </div>
          </CardContent>
          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

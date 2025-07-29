@@ -60,12 +60,7 @@ export function ProfilePageApiKeySection() {
       setCreating(true);
       setError(null);
       try {
-         const { data } = await betterAuthClient.apiKey.create({
-            name: "My API Key",
-            expiresIn: 60 * 60 * 24 * 30, // 30 days
-            permissions: { files: ["read", "write"] },
-            metadata: { createdBy: "dashboard" },
-         });
+         const { data } = await betterAuthClient.apiKey.create();
          setNewKey(data);
          fetchApiKeys();
       } catch (e: any) {
@@ -90,10 +85,14 @@ export function ProfilePageApiKeySection() {
       }
    };
 
-   const handleCopy = (key: string) => {
+   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
+   const handleCopy = (key: string, id?: string) => {
       navigator.clipboard.writeText(key);
+      if (id) {
+         setCopiedKeyId(id);
+         setTimeout(() => setCopiedKeyId(null), 1500);
+      }
    };
-
    const handleEdit = (k: any) => {
       setEditingId(k.id);
       setEditName(k.name || "");
@@ -193,25 +192,9 @@ export function ProfilePageApiKeySection() {
                      return (
                         <div
                            key={k.id}
-                           className="relative flex flex-col gap-3 rounded-xl bg-white dark:bg-muted shadow-md border p-5 transition hover:shadow-lg"
+                           className="relative flex flex-col gap-4 rounded-2xl bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-muted dark:via-slate-900 dark:to-muted shadow-lg border border-slate-200 dark:border-slate-800 p-6 transition hover:shadow-2xl group hover:scale-[1.02] active:scale-[0.98] duration-150"
                         >
-                           <div className="flex items-center gap-3 mb-2">
-                              <div className="rounded-full p-2 bg-gray-100 dark:bg-gray-800 flex items-center justify-center shadow-sm">
-                                 <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="w-6 h-6 text-blue-500"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                 >
-                                    <path
-                                       strokeLinecap="round"
-                                       strokeLinejoin="round"
-                                       strokeWidth={2}
-                                       d="M12 15v2m0 4h.01M17.657 16.657A8 8 0 118 4.343m9.657 12.314A8 8 0 018 4.343"
-                                    />
-                                 </svg>
-                              </div>
+                           <div className="flex items-center gap-4 mb-2">
                               <div className="flex-1 min-w-0">
                                  {isEditing ? (
                                     <input
@@ -220,10 +203,9 @@ export function ProfilePageApiKeySection() {
                                        onChange={(e) =>
                                           setEditName(e.target.value)
                                        }
-                                       autoFocus
                                     />
                                  ) : (
-                                    <div className="font-medium truncate text-base">
+                                    <div className="font-semibold truncate text-base tracking-tight">
                                        {k.name || "API Key"}
                                     </div>
                                  )}
@@ -238,7 +220,7 @@ export function ProfilePageApiKeySection() {
                               <span>
                                  {isShowing
                                     ? k.key
-                                    : `${k.prefix}_...${k.start}`}
+                                    : `${k.key?.slice(0, 4) || ""}••••••••${k.key?.slice(-4) || ""}`}
                               </span>
                               <Button
                                  variant="ghost"
@@ -254,34 +236,51 @@ export function ProfilePageApiKeySection() {
                                     <Eye className="w-4 h-4" />
                                  )}
                               </Button>
-                              {isShowing && k.key && (
-                                 <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleCopy(k.key)}
-                                    title="Copy API Key"
-                                 >
+                              <Button
+                                 variant="ghost"
+                                 size="icon"
+                                 onClick={() =>
+                                    k.key && handleCopy(k.key, k.id)
+                                 }
+                                 title={
+                                    k.key
+                                       ? copiedKeyId === k.id
+                                          ? "Copied!"
+                                          : "Copy API Key"
+                                       : "You can only copy the key when it is first created. If you lost it, generate a new one."
+                                 }
+                                 disabled={!k.key}
+                              >
+                                 {copiedKeyId === k.id ? (
+                                    <Check className="w-4 h-4 text-green-500" />
+                                 ) : (
                                     <Copy className="w-4 h-4" />
-                                 </Button>
-                              )}
+                                 )}
+                              </Button>{" "}
                            </div>
-                           <div className="flex flex-wrap gap-2 text-xs mt-1">
+                           <div className="flex flex-wrap gap-2 text-xs mt-1 items-center">
                               <span
                                  className={
                                     k.enabled
-                                       ? "text-green-600"
-                                       : "text-red-600"
+                                       ? "bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold"
+                                       : "bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold"
                                  }
                               >
                                  {k.enabled ? "Enabled" : "Disabled"}
                               </span>
-                              <span>
+                              <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">
+                                 Created:{" "}
+                                 {k.createdAt
+                                    ? new Date(k.createdAt).toLocaleDateString()
+                                    : "-"}
+                              </span>
+                              <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">
                                  Expires:{" "}
                                  {k.expiresAt
                                     ? new Date(k.expiresAt).toLocaleDateString()
                                     : "Never"}
                               </span>
-                              <span>
+                              <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">
                                  Usage:{" "}
                                  {k.remaining != null
                                     ? `${k.remaining} left`

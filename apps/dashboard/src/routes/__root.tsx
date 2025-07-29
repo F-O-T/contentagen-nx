@@ -13,6 +13,7 @@ import type { TrpcClient } from "../integrations/clients";
 import type { QueryClient } from "@tanstack/react-query";
 export type RouterContext = {
    trpc: TrpcClient;
+   head: string;
    queryClient: QueryClient;
 };
 export const Route = createRootRouteWithContext<RouterContext>()({

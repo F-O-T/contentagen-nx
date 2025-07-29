@@ -64,33 +64,39 @@ export function AgentCard({ agent }: AgentCardProps) {
    );
    const infoItems = React.useMemo(() => {
       const personaConfig = agent.personaConfig as PersonaConfig;
-      
+
       // Extract voice communication style
       const voiceStyle = personaConfig.voice?.communication
-         ? formatValueToTitleCase(personaConfig.voice.communication.replace('_', ' '))
-         : 'Not specified';
-      
+         ? formatValueToTitleCase(
+              personaConfig.voice.communication.replace("_", " "),
+           )
+         : "Not specified";
+
       // Extract audience base
       const audienceBase = personaConfig.audience?.base
-         ? formatValueToTitleCase(personaConfig.audience.base.replace('_', ' '))
-         : 'Not specified';
-      
+         ? formatValueToTitleCase(personaConfig.audience.base.replace("_", " "))
+         : "Not specified";
+
       // Extract purpose/channel if available
       const purpose = personaConfig.purpose
-         ? formatValueToTitleCase(personaConfig.purpose.replace('_', ' '))
+         ? formatValueToTitleCase(personaConfig.purpose.replace("_", " "))
          : null;
-      
+
       return [
          {
             icon: <Users />,
             label: "Voice & Audience",
             value: `${voiceStyle} • ${audienceBase}`,
          },
-         ...(purpose ? [{
-            icon: <FileText />,
-            label: "Purpose",
-            value: purpose,
-         }] : []),
+         ...(purpose
+            ? [
+                 {
+                    icon: <FileText />,
+                    label: "Purpose",
+                    value: purpose,
+                 },
+              ]
+            : []),
       ];
    }, [agent]);
    const statsItems = React.useMemo(
@@ -133,9 +139,7 @@ export function AgentCard({ agent }: AgentCardProps) {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent align="end">
-                     <DropdownMenuItem
-                        disabled={true}
-                     >
+                     <DropdownMenuItem disabled={true}>
                         <Edit className="w-4 h-4 mr-2" /> Edit (Coming Soon)
                      </DropdownMenuItem>
                      <DropdownMenuItem
@@ -181,7 +185,7 @@ export function AgentCard({ agent }: AgentCardProps) {
                   value={item.value}
                />
             ))}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2">
                {statsItems.map((item) => (
                   <InfoItem
                      key={item.label}

@@ -5,7 +5,7 @@ import type { Static } from "@sinclair/typebox";
 const EnvSchema = Type.Object({
    POLAR_PREMIUM_PLAN: Type.String(),
    POLAR_PRO_PLAN: Type.String(),
-   DATABASE_URL: Type.String({ format: "uri" }),
+   DATABASE_URL: Type.String(),
    BETTER_AUTH_GOOGLE_CLIENT_ID: Type.String(),
    BETTER_AUTH_GOOGLE_CLIENT_SECRET: Type.String(),
    ARCJET_KEY: Type.String(),
@@ -25,7 +25,7 @@ const EnvSchema = Type.Object({
    MINIO_SECRET_KEY: Type.String(),
    MINIO_BUCKET: Type.String({ default: "content-writer" }),
    TAVILY_API_KEY: Type.String(),
-   CHROMA_DB_URL: Type.String({ format: "uri" }),
+   CHROMA_DB_URL: Type.String(),
 });
 export type ServerEnv = Static<typeof EnvSchema>;
 export const serverEnv: ServerEnv = parseEnv(process.env, EnvSchema);

@@ -1,6 +1,7 @@
 {
    "dependencies": {
       "@packages/environment": "workspace:*",
+      "@packages/tasks": "workspace:*",
       "@packages/files": "workspace:*",
       "@packages/api": "workspace:*",
       "@packages/authentication": "workspace:*",

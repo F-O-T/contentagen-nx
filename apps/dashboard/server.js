@@ -11,7 +11,6 @@ export async function createServer(
   hmrPort,
 ) {
   const app = express()
-
   /**
    * @type {import('vite').ViteDevServer}
    */
@@ -65,9 +64,9 @@ export async function createServer(
       // Best effort extraction of the head from vite's index transformation hook
       let viteHead = !isProd
         ? await vite.transformIndexHtml(
-            url,
-            `<html><head></head><body></body></html>`,
-          )
+          url,
+          `<html><head></head><body></body></html>`,
+        )
         : ''
 
       viteHead = viteHead.substring(

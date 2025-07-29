@@ -32,39 +32,52 @@ export default function useFileUpload(
       trpc.agentFile.delete.mutationOptions({
          onSuccess: () => {
             toast.success("File deleted successfully!");
-            queryClient.invalidateQueries({ queryKey: ["agent", agentId] });
+            queryClient.invalidateQueries({
+               queryKey: trpc.agent.get.queryKey({ id: agentId }),
+            });
          },
          onError: () => {
             toast.error("Failed to delete file");
          },
-      })
+      }),
    );
 
    // Upload file mutation
-   const uploadFileMutation = useMutation({
-      mutationFn: async (file: File) => {
-         // Convert file to base64 for TRPC
-         const buffer = await file.arrayBuffer();
-         const base64 = Buffer.from(buffer).toString('base64');
-         
-         const result = await trpc.agentFile.upload.mutate({
-            agentId,
-            fileName: file.name,
-            fileBuffer: base64,
-            contentType: file.type || 'text/markdown',
-         });
-         
-         return {
-            fileName: file.name,
-            fileUrl: result.url,
-            uploadedAt: new Date().toISOString(),
-         };
-      },
-      onError: (_err: unknown, file: File) => {
-         console.error("File upload error:", _err);
-         toast.error(`Failed to upload ${file.name}`);
-      },
-   });
+   const uploadFileMutation = useMutation(
+      trpc.agentFile.upload.mutationOptions({
+         onSuccess: () => {
+            toast.success("File uploaded successfully!");
+            queryClient.invalidateQueries({
+               queryKey: trpc.agent.get.queryKey({ id: agentId }),
+            });
+         },
+         onError: (_err: unknown, variables) => {
+            const file = variables as { fileName: string };
+            console.error("File upload error:", _err);
+            toast.error(`Failed to upload ${file.fileName}`);
+         },
+      }),
+   );
+
+   async function uploadFile(file: File) {
+      // Convert file to base64 for TRPC
+      const buffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(buffer);
+      const binary = String.fromCharCode(...uint8Array);
+      const base64 = btoa(binary);
+      const result = await uploadFileMutation.mutateAsync({
+         agentId,
+         fileName: file.name,
+         fileBuffer: base64,
+         contentType: file.type || "text/markdown",
+      });
+
+      return {
+         fileName: file.name,
+         fileUrl: result.url,
+         uploadedAt: new Date().toISOString(),
+      };
+   }
 
    const handleFileSelect = async (
       event: React.ChangeEvent<HTMLInputElement>,
@@ -92,7 +105,7 @@ export default function useFileUpload(
       const uploaded: UploadedFile[] = [];
       for (const file of files) {
          try {
-            const uploadedFile = await uploadFileMutation.mutateAsync(file);
+            const uploadedFile = await uploadFile(file);
             if (uploadedFile) {
                uploaded.push(uploadedFile);
             }

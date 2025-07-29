@@ -11,7 +11,9 @@ import "./fetch-polyfill";
 export async function render({
    req,
    res,
+   head,
 }: {
+   head: string;
    req: express.Request;
    res: express.Response;
 }) {
@@ -29,7 +31,6 @@ export async function render({
          return headers;
       })(),
    });
-
    // Create a request handler
    const handler = createRequestHandler({
       request,
@@ -40,6 +41,7 @@ export async function render({
          router.update({
             context: {
                ...router.options.context,
+               head: head,
             },
          });
          return router;
@@ -67,4 +69,3 @@ export async function render({
    // Stream the response body
    return pipeline(response.body as any, res);
 }
-
