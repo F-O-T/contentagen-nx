@@ -4,6 +4,7 @@ import type { AuthInstance } from "@packages/authentication/server";
 import type { DatabaseInstance } from "@packages/database/client";
 import type { MinioClient } from "@packages/files/client";
 import type { ChromaClient } from "@packages/chroma-db/client";
+import type { OpenRouterClient } from "@packages/openrouter/client";
 export const createTRPCContext = async ({
    auth,
    db,
@@ -11,7 +12,9 @@ export const createTRPCContext = async ({
    minioClient,
    minioBucket,
    chromaClient,
+   openRouterClient,
 }: {
+   openRouterClient: OpenRouterClient; // Replace with actual type if available
    auth: AuthInstance;
    db: DatabaseInstance;
    minioClient: MinioClient;
@@ -19,6 +22,7 @@ export const createTRPCContext = async ({
    headers: Headers;
    chromaClient: ChromaClient;
 }): Promise<{
+   openRouterClient: OpenRouterClient; // Pass the OpenRouter client to the context
    minioBucket: string;
    db: DatabaseInstance;
    minioClient: MinioClient;
@@ -30,6 +34,7 @@ export const createTRPCContext = async ({
    });
 
    return {
+      openRouterClient,
       minioBucket,
       minioClient,
       db,

@@ -20,6 +20,7 @@
    "private": true,
    "type": "module",
    "exports": {
+      ".": "./src/index.ts",
       "./triggers/*": "./src/trigger/*.ts"
    },
    "version": "0.0.0"

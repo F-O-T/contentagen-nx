@@ -1,4 +1,6 @@
 import type { Collection, Metadata, ChromaClient } from "chromadb";
+import { DefaultEmbeddingFunction } from "@chroma-core/default-embed";
+export const embedder = new DefaultEmbeddingFunction();
 
 // Collection names used in ChromaDB
 export const CollectionName = {
@@ -20,7 +22,10 @@ export const getOrCreateCollection = async (
 ): Promise<{ collection: Collection; justCreated: boolean }> => {
    const collectionName = CollectionName[name];
    try {
-      const collection = await client.getCollection({ name: collectionName });
+      const collection = await client.getCollection({
+         name: collectionName,
+         embeddingFunction: embedder,
+      });
       return { collection, justCreated: false };
    } catch (err) {
       console.error(
@@ -29,6 +34,8 @@ export const getOrCreateCollection = async (
       );
       const collection = await client.createCollection({
          name: collectionName,
+         embeddingFunction: embedder,
+
          metadata,
       });
       return { collection, justCreated: true };

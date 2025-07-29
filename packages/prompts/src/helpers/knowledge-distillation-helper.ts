@@ -1,37 +1,70 @@
 // Helper for knowledge distillation prompt flow
-import { join } from "node:path";
-import { readFileSync } from "node:fs";
+// Import markdown files directly as raw text (requires Vite/Bun/modern bundler with ?raw)
+import { chunkingPrompt } from "../prompt-files/task/chunking";
+import { distillationPrompt } from "../prompt-files/task/distillation";
+import { formattingPrompt } from "../prompt-files/task/formatting";
 
-// Loads a prompt template from the task category
-function loadTaskPrompt(name: string): string {
-   const filePath = join(__dirname, "..", "prompt-files", "task", `${name}.md`);
-   return readFileSync(filePath, "utf-8");
+// Simple template interpolation
+function interpolate(
+   template: string,
+   variables: Record<string, string>,
+): string {
+   let result = template;
+   for (const [key, value] of Object.entries(variables)) {
+      const regex = new RegExp(`{{${key}}}`, "g");
+      result = result.replace(regex, value);
+   }
+   return result;
+}
+
+// Section generators
+export function getChunkingSection(inputText: string): string {
+   return interpolate(chunkingPrompt.toString(), { inputText });
+}
+
+export function getDistillationSection(chunk: string): string {
+   return interpolate(distillationPrompt.toString(), { chunk });
+}
+
+export function getFormattingSection(distilled: string): string {
+   return interpolate(formattingPrompt.toString(), { distilled });
 }
 
 /**
- * Returns the prompt for chunking a large text into logical sections.
+ * Assembles a full knowledge distillation prompt with clear sections and separators.
  */
+export function assembleKnowledgeDistillationPrompt({
+   inputText,
+   chunk,
+   distilled,
+}: {
+   inputText?: string;
+   chunk?: string;
+   distilled?: string;
+}): string {
+   const sections: string[] = [];
+   if (inputText) {
+      sections.push(`# Chunking\n` + getChunkingSection(inputText));
+   }
+   if (chunk) {
+      sections.push(`# Distillation\n` + getDistillationSection(chunk));
+   }
+   if (distilled) {
+      sections.push(`# Formatting\n` + getFormattingSection(distilled));
+   }
+   return sections.filter(Boolean).join(`\n\n${"=".repeat(80)}\n\n`);
+}
+
+// Legacy exports for compatibility
 export function getChunkingPrompt(): string {
-   return loadTaskPrompt("chunking");
+   return chunkingPrompt();
 }
-
-/**
- * Returns the prompt for distilling knowledge from a text chunk.
- */
 export function getDistillationPrompt(): string {
-   return loadTaskPrompt("distillation");
+   return distillationPrompt();
 }
-
-/**
- * Returns the prompt for formatting distilled knowledge.
- */
 export function getFormattingPrompt(): string {
-   return loadTaskPrompt("formatting");
+   return formattingPrompt();
 }
-
-/**
- * Returns all knowledge distillation prompts in order: chunking, distillation, formatting.
- */
 export function getKnowledgeDistillationPrompts(): {
    chunking: string;
    distillation: string;

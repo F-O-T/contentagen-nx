@@ -13,6 +13,7 @@ import { notificationRouter } from "./router/notification";
 import { notificationPreferencesRouter } from "./router/notification-preferences";
 
 import { sessionRouter } from "./router/session";
+import type { OpenRouterClient } from "@packages/openrouter/client";
 
 export const appRouter = router({
    waitlist: waitlistRouter,
@@ -27,11 +28,13 @@ export const appRouter = router({
 });
 export const createApi = ({
    auth,
+   openRouterClient,
    db,
    minioClient,
    minioBucket,
    chromaClient,
 }: {
+   openRouterClient: OpenRouterClient; // Replace with actual type if available
    minioBucket: string;
    auth: AuthInstance;
    db: DatabaseInstance;
@@ -48,6 +51,7 @@ export const createApi = ({
             headers,
             minioBucket,
             chromaClient,
+            openRouterClient, // Pass the OpenRouter client to the context
          }),
    };
 };

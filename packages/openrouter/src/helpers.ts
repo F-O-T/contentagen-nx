@@ -8,9 +8,7 @@ export async function generateOpenRouterText(
 ) {
    const result = await generateText({
       ...params,
-      model: client.chat(
-         "moonshotai/kimi-k2",
-      ) as unknown as GenerateTextParams["model"],
+      model: client.chat("google/gemini-2.5-flash"),
    });
    return result;
 }

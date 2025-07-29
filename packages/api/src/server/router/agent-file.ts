@@ -1,3 +1,5 @@
+import type { distillationTask } from "@packages/tasks/triggers/distillation";
+import { tasks } from "@packages/tasks";
 import { listFiles, uploadFile } from "@packages/files/client";
 import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
@@ -66,9 +68,25 @@ export const agentFileRouter = router({
             : [];
          uploadedFiles.push({ fileName, fileUrl: key, uploadedAt: now });
          await updateAgent(db, agentId, { uploadedFiles });
+
+         // --- Knowledge Distillation Integration ---
+         try {
+            // Read file content as text
+            const fileContent = buffer.toString("utf-8");
+            const resolvedCtx = await ctx;
+            await tasks.trigger<typeof distillationTask>("distillation-job", {
+               inputText: fileContent,
+               openrouter: resolvedCtx.openRouterClient,
+               chroma: resolvedCtx.chromaClient,
+               agentId,
+            });
+         } catch (err) {
+            // Log error but do not block upload
+            console.error("Knowledge distillation failed:", err);
+         }
+
          return { url };
       }),
-
    delete: protectedProcedure
       .input(z.object({ agentId: z.string().uuid() }).and(AgentFileDeleteInput))
       .mutation(async ({ ctx, input }) => {
