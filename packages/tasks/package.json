@@ -15,7 +15,8 @@
    "name": "@packages/tasks",
    "scripts": {
       "check": "biome check --write ./src",
-      "typecheck": "bunx --bun tsc --noEmit "
+      "typecheck": "bunx --bun tsc --noEmit ",
+      "dev": "bunx trigger.dev@latest dev"
    },
    "private": true,
    "type": "module",

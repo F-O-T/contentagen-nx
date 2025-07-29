@@ -1,13 +1,12 @@
 import { useAppForm } from "@packages/ui/components/form";
 import { type FormEvent, useCallback } from "react";
-import { z } from "zod";
 
-export const contentRequestFormSchema = z.object({
-   topic: z.string().min(1, "Topic is required"),
-   briefDescription: z.string().min(1, "Brief description is required"),
-});
+import {
+   ContentRequestSchema,
+   type ContentRequest,
+} from "@packages/database/schemas/content";
 
-export type ContentRequestFormData = z.infer<typeof contentRequestFormSchema>;
+export type ContentRequestFormData = ContentRequest;
 
 export type ContentRequestFormProps = {
    defaultValues?: Partial<ContentRequestFormData>;
@@ -20,14 +19,13 @@ export function useContentRequestForm({
 }: ContentRequestFormProps) {
    const form = useAppForm({
       defaultValues: {
-         topic: defaultValues?.topic || "",
-         briefDescription: defaultValues?.briefDescription || "",
+         description: defaultValues?.description || "",
       } as ContentRequestFormData,
       onSubmit: async ({ value }) => {
          await onSubmit(value);
       },
       validators: {
-         onBlur: contentRequestFormSchema,
+         onBlur: ContentRequestSchema,
       },
    });
 
