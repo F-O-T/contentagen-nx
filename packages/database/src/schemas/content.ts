@@ -78,7 +78,7 @@ export const content = pgTable(
 );
 
 export type ContentStatus = (typeof contentStatusEnum.enumValues)[number];
-export type Content = typeof content.$inferSelect;
+export type ContentSelect = typeof content.$inferSelect;
 export type ContentInsert = typeof content.$inferInsert;
 
 export const ContentInsertSchema = createInsertSchema(content);

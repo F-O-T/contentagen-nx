@@ -82,9 +82,12 @@ export async function deleteContent(
 
 export async function listContents(
    dbClient: DatabaseInstance,
+   userId: string,
 ): Promise<Content[]> {
    try {
-      return await dbClient.query.content.findMany();
+      return await dbClient.query.content.findMany({
+         where: eq(content.userId, userId),
+      });
    } catch (err) {
       throw new DatabaseError(
          `Failed to list contents: ${(err as Error).message}`,
