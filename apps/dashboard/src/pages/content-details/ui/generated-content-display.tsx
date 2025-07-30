@@ -87,14 +87,12 @@ interface GeneratedContentDisplayProps {
    } | null;
    isExporting: boolean;
    isGenerating?: boolean;
-   onExport: (format: "html" | "markdown" | "mdx", content?: string) => void;
 }
 
 export function GeneratedContentDisplay({
    generatedContent,
    isExporting,
    isGenerating = false,
-   onExport,
 }: GeneratedContentDisplayProps) {
    const [isEditing, setIsEditing] = useState(false);
    const [showFullContent, setShowFullContent] = useState(false);
@@ -144,11 +142,6 @@ export function GeneratedContentDisplay({
    const handleCancelEdit = () => {
       setEditedMarkdown(generatedContent?.body || "");
       setIsEditing(false);
-   };
-
-   const handleExport = (format: "html" | "markdown" | "mdx") => {
-      const contentToExport = editedMarkdown || generatedContent?.body;
-      onExport(format, contentToExport);
    };
 
    const displayContent = editedMarkdown || generatedContent?.body || "";
@@ -215,30 +208,6 @@ export function GeneratedContentDisplay({
                                     <MoreVertical className="h-4 w-4" />
                                  </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                 <DropdownMenuItem onClick={handleCopyContent}>
-                                    <Copy className="h-4 w-4 mr-2" />
-                                    Copy Content
-                                 </DropdownMenuItem>
-                                 <DropdownMenuItem
-                                    onClick={() => handleExport("markdown")}
-                                 >
-                                    <Download className="h-4 w-4 mr-2" />
-                                    Export as Markdown
-                                 </DropdownMenuItem>
-                                 <DropdownMenuItem
-                                    onClick={() => handleExport("mdx")}
-                                 >
-                                    <Download className="h-4 w-4 mr-2" />
-                                    Export as MDX
-                                 </DropdownMenuItem>
-                                 <DropdownMenuItem
-                                    onClick={() => handleExport("html")}
-                                 >
-                                    <Download className="h-4 w-4 mr-2" />
-                                    Export as HTML
-                                 </DropdownMenuItem>
-                              </DropdownMenuContent>
                            </DropdownMenu>
                         </CardAction>
                      </div>
