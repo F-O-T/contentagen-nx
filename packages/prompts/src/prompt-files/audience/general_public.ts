@@ -1,7 +1,7 @@
 // Prompt: Target Audience - General Public
 // Returns the full prompt as a string
 export function generalPublicAudiencePrompt(): string {
-  return `# Target Audience: General Public
+   return `# Target Audience: General Public
 
 **Psychological Profile:**
 

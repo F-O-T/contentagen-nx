@@ -9,36 +9,35 @@ import {
 } from "drizzle-orm/pg-core";
 import { agent } from "./agent";
 import { user } from "./auth";
-import { Type as T, type Static } from "@sinclair/typebox";
+import { z } from "zod";
 import {
    createInsertSchema,
    createSelectSchema,
    createUpdateSchema,
-} from "drizzle-typebox";
+} from "drizzle-zod";
 
 /* ------------------------------------------------------------------
-   1. TypeBox Schemas for JSONB fields
+   1. Zod Schemas for JSONB fields
 ------------------------------------------------------------------ */
-export const ContentRequestSchema = T.Object({
-   topic: T.String(),
-   briefDescription: T.String(),
+export const ContentRequestSchema = z.object({
+   description: z.string().min(1, "Description is required"),
 });
-export type ContentRequest = Static<typeof ContentRequestSchema>;
+export type ContentRequest = z.infer<typeof ContentRequestSchema>;
 
-export const ContentStatsSchema = T.Object({
-   wordsCount: T.Optional(T.Number({ minimum: 0 })),
-   readTimeMinutes: T.Optional(T.Number({ minimum: 0 })),
-   qualityScore: T.Optional(T.Number({ minimum: 0, maximum: 100 })),
+export const ContentStatsSchema = z.object({
+   wordsCount: z.number().min(0).optional(),
+   readTimeMinutes: z.number().min(0).optional(),
+   qualityScore: z.number().min(0).max(100).optional(),
 });
-export type ContentStats = Static<typeof ContentStatsSchema>;
+export type ContentStats = z.infer<typeof ContentStatsSchema>;
 
-export const ContentMetaSchema = T.Object({
-   slug: T.Optional(T.String()),
-   tags: T.Optional(T.Array(T.String())),
-   topics: T.Optional(T.Array(T.String())),
-   sources: T.Optional(T.Array(T.String())),
+export const ContentMetaSchema = z.object({
+   slug: z.string().optional(),
+   tags: z.array(z.string()).optional(),
+   topics: z.array(z.string()).optional(),
+   sources: z.array(z.string()).optional(),
 });
-export type ContentMeta = Static<typeof ContentMetaSchema>;
+export type ContentMeta = z.infer<typeof ContentMetaSchema>;
 
 /* ------------------------------------------------------------------
    2. Content Status Enum
@@ -62,9 +61,9 @@ export const content = pgTable(
       userId: text("user_id")
          .notNull()
          .references(() => user.id, { onDelete: "cascade" }),
-      title: text("title").notNull(),
-      body: text("body").notNull(),
-      status: contentStatusEnum("status").default("draft"),
+      title: text("title").notNull().default(""),
+      body: text("body").notNull().default(""),
+      status: contentStatusEnum("status").default("generating"),
       meta: jsonb("meta").$type<ContentMeta>().default({}),
       request: jsonb("request").$type<ContentRequest>().notNull(),
       stats: jsonb("stats").$type<ContentStats>().default({}),

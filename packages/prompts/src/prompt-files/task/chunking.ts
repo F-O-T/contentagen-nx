@@ -1,7 +1,7 @@
 // Prompt: Task - Chunking
 // Returns the full chunking prompt as a string
 export function chunkingPrompt(): string {
-  return `You are an expert text segmentation specialist. Your task is to chunk the provided text into semantically coherent segments optimized for vector embedding and retrieval.
+   return `You are an expert text segmentation specialist. Your task is to chunk the provided text into semantically coherent segments optimized for vector embedding and retrieval.
 
 **CHUNKING OBJECTIVES:**
 - Create chunks that represent complete, self-contained knowledge units

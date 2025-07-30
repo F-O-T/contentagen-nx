@@ -1,7 +1,7 @@
 // Prompt: Task - Distillation
 // Returns the full distillation prompt as a string
 export function distillationPrompt(): string {
-  return `You are a knowledge extraction expert specializing in optimizing content for vector embeddings and retrieval systems. Analyze the provided chunk and enhance it for maximum searchability and comprehension.
+   return `You are a knowledge extraction expert specializing in optimizing content for vector embeddings and retrieval systems. Analyze the provided chunk and enhance it for maximum searchability and comprehension.
 
 **ANALYSIS OBJECTIVES:**
 - Extract and clarify the core knowledge within the chunk

@@ -1,5 +1,5 @@
 import type { ContentRequestForm } from "../lib/use-content-request-form";
-import { FileTextIcon, AlignLeftIcon } from "lucide-react";
+import { FileTextIcon } from "lucide-react";
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Button } from "@packages/ui/components/button";
 
@@ -11,15 +11,8 @@ export function ReviewSubmitStep({ form }: { form: ContentRequestForm }) {
       () => [
          {
             icon: <FileTextIcon className="w-4 h-4" />,
-            label: "Topic",
-            value: String(form.getFieldValue("topic") ?? ""),
-            className: "col-span-2",
-         },
-
-         {
-            icon: <AlignLeftIcon className="w-4 h-4" />,
-            label: "Brief Description",
-            value: String(form.getFieldValue("briefDescription") ?? ""),
+            label: "Descripton",
+            value: String(form.getFieldValue("description") ?? ""),
             className: "col-span-2",
          },
       ],

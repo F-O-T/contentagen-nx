@@ -1,46 +1,25 @@
-import { Input } from "@packages/ui/components/input";
-import { Textarea } from "@packages/ui/components/textarea";
 import type { ContentRequestForm } from "../lib/use-content-request-form";
 import { Button } from "@packages/ui/components/button";
+import { TiptapEditor } from "@packages/ui/components/tiptap-editor";
 
 export function BasicInfoStep({ form }: { form: ContentRequestForm }) {
    return (
-      <>
-         <form.AppField name="topic">
-            {(field) => (
-               <field.FieldContainer>
-                  <field.FieldLabel>Topic *</field.FieldLabel>
-                  <Input
-                     autoComplete="off"
-                     id={field.name}
-                     name={field.name}
-                     onBlur={field.handleBlur}
-                     onChange={(e) => field.handleChange(e.target.value)}
-                     placeholder="e.g., Artificial Intelligence in Healthcare"
-                     value={field.state.value}
-                  />
-                  <field.FieldMessage />
-               </field.FieldContainer>
-            )}
-         </form.AppField>
-         <form.AppField name="briefDescription">
-            {(field) => (
-               <field.FieldContainer>
-                  <field.FieldLabel>Brief Description *</field.FieldLabel>
-                  <Textarea
-                     id={field.name}
-                     name={field.name}
-                     onBlur={field.handleBlur}
-                     onChange={(e) => field.handleChange(e.target.value)}
-                     placeholder="Describe what you want the content to cover..."
-                     rows={3}
-                     value={field.state.value}
-                  />
-                  <field.FieldMessage />
-               </field.FieldContainer>
-            )}
-         </form.AppField>
-      </>
+      <form.AppField name="description">
+         {(field) => (
+            <field.FieldContainer>
+               <field.FieldLabel>Description *</field.FieldLabel>
+               <TiptapEditor
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  onBlur={field.handleBlur}
+                  placeholder="Describe what you want the content to cover..."
+               />
+               <field.FieldMessage />
+            </field.FieldContainer>
+         )}
+      </form.AppField>
    );
 }
 
@@ -54,22 +33,17 @@ export function BasicInfoStepSubscribe({
    return (
       <form.Subscribe
          selector={(state) => ({
-            topicValue: state.values.topic,
-            briefDescriptionValue: state.values.briefDescription,
+            descriptionValue: state.values.description,
             fieldMeta: state.fieldMeta,
          })}
       >
-         {({ topicValue, briefDescriptionValue, fieldMeta }) => {
-            const topicErrors = fieldMeta?.topic?.errors;
-            const briefDescriptionErrors = fieldMeta?.briefDescription?.errors;
+         {({ descriptionValue, fieldMeta }) => {
+            const descriptionErrors = fieldMeta?.description?.errors;
 
-            const isTopicValid =
-               topicValue?.trim() !== "" &&
-               (!topicErrors || topicErrors.length === 0);
             const isBriefDescriptionValid =
-               briefDescriptionValue?.trim() !== "" &&
-               (!briefDescriptionErrors || briefDescriptionErrors.length === 0);
-            const canGoNext = isTopicValid && isBriefDescriptionValid;
+               descriptionValue.trim() !== "" &&
+               (!descriptionErrors || descriptionErrors.length === 0);
+            const canGoNext = isBriefDescriptionValid;
 
             return (
                <Button onClick={next} type="button" disabled={!canGoNext}>
