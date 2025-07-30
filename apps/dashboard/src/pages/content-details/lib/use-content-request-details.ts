@@ -1,29 +1,19 @@
-import { createQueryKey } from "@packages/eden";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useParams, useRouteContext } from "@tanstack/react-router";
-
+import { useTRPC } from "@/integrations/clients";
 export function useContentRequestDetails() {
-   const { eden } = useRouteContext({
-      from: "/_dashboard/content/requests/$requestId/",
+   const { id } = useParams({
+      from: "/_dashboard/content/$id",
    });
-   const { requestId } = useParams({
-      from: "/_dashboard/content/requests/$requestId/",
-   });
-
-   const { data, isLoading, error } = useSuspenseQuery({
-      queryFn: async () =>
-         await eden.api.v1.content.request.details({ id: requestId }).get(),
-
-      queryKey: createQueryKey(
-         "eden.api.v1.content.request.details({ id: requestId }).get()",
-      ),
-      select: (data) => data.data,
-   });
+   const trpc = useTRPC();
+   const { data, isLoading, error } = useSuspenseQuery(
+      trpc.content.get.queryOptions({
+         id,
+      }),
+   );
 
    return {
-      request: data?.request,
-      generatedContent: data?.request?.generatedContent,
-      agent: data?.request,
+      data,
       isLoading,
       error,
    };

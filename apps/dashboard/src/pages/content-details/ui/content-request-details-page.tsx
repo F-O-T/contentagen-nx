@@ -31,7 +31,7 @@ import { ContentStatsCard, RequestDetailsCard } from "./request-details-cards";
 export function ContentRequestDetailsPage() {
    const navigate = useNavigate();
    const queryClient = useQueryClient();
-   const { request, generatedContent } = useContentRequestDetails();
+   const { data } = useContentRequestDetails();
    const { exportContent, isExporting } = useContentExport();
 
    const [alertOpen, setAlertOpen] = useState(false);
