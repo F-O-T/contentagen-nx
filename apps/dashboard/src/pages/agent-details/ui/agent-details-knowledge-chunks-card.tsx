@@ -22,7 +22,7 @@ export function AgentDetailsKnowledgeChunksCard() {
   );
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle>Knowledge Chunks</CardTitle>
         <CardDescription>All knowledge chunks for this agent</CardDescription>
