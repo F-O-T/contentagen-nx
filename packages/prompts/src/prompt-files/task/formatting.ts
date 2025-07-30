@@ -1,7 +1,8 @@
 // Prompt: Task - Formatting
 // Returns the full formatting prompt as a string
 export function formattingPrompt(): string {
-   return `You are a brand knowledge specialist for ContentaGen, an AI content generation platform. Extract essential brand metadata from the following analyzed knowledge chunk to enable AI agents to generate authentic, on-brand content.
+   return `
+You are a brand knowledge specialist. Extract essential brand metadata from the following analyzed knowledge chunk to enable AI agents to generate authentic, on-brand content.
 
 [INSERT CHUNK HERE]
 
