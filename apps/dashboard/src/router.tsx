@@ -1,11 +1,18 @@
 import { createRouter as createTanstackRouter } from "@tanstack/react-router";
 import { routerWithQueryClient } from "@tanstack/react-router-with-query";
 
-import * as Clients from "@/integrations/clients";
+import type { QueryClient } from "@tanstack/react-query";
+import type { TrpcClient, InternalTrpcClient } from "@/integrations/clients";
 import { routeTree } from "./routeTree.gen";
 
-export const createRouter = () => {
-   const context = Clients.getContext();
+export type RouterContext = {
+   trpc: TrpcClient;
+   trpcClient: InternalTrpcClient;
+   queryClient: QueryClient;
+   head: string;
+};
+
+export const createRouter = (context: Omit<RouterContext, "head">) => {
    const router = routerWithQueryClient(
       createTanstackRouter({
          context: {

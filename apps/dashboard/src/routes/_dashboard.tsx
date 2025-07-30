@@ -6,7 +6,6 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_dashboard")({
    component: RouteComponent,
-   ssr: true,
    wrapInSuspense: true,
    loader: async ({ context }) => {
       await context.queryClient.ensureQueryData(
@@ -15,7 +14,7 @@ export const Route = createFileRoute("/_dashboard")({
    },
 });
 
-async function RouteComponent() {
+function RouteComponent() {
    const location = useLocation();
    const trpc = useTRPC();
    const { data: session } = useSuspenseQuery(

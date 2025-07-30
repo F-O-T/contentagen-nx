@@ -1,6 +1,5 @@
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Toaster } from "@packages/ui/components/sonner";
-import { QueryProvider } from "@/integrations/clients";
 import { ThemeProvider } from "@/layout/theme-provider";
 import appCss from "@packages/ui/globals.css?url";
 import {
@@ -9,14 +8,11 @@ import {
    Scripts,
    createRootRouteWithContext,
 } from "@tanstack/react-router";
-import type { TrpcClient } from "../integrations/clients";
-import type { QueryClient } from "@tanstack/react-query";
-export type RouterContext = {
-   trpc: TrpcClient;
-   head: string;
-   queryClient: QueryClient;
-};
+import type { RouterContext } from "../router";
+
 export const Route = createRootRouteWithContext<RouterContext>()({
+   ssr: true,
+   wrapInSuspense: true,
    head: () => ({
       links: [
          {
@@ -72,17 +68,11 @@ function RootComponent() {
             <HeadContent />
          </head>
          <body>
-            <QueryProvider>
-               <ThemeProvider
-                  attribute="class"
-                  defaultTheme="system"
-                  enableSystem
-               >
-                  <Toaster />
-                  <Outlet /> {/* Start rendering router matches */}
-                  <TanStackRouterDevtools position="bottom-left" />
-               </ThemeProvider>
-            </QueryProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+               <Toaster />
+               <Outlet /> {/* Start rendering router matches */}
+               <TanStackRouterDevtools position="bottom-left" />
+            </ThemeProvider>
             <Scripts />
          </body>
       </html>

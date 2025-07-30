@@ -18,7 +18,7 @@ import {
 } from "@packages/ui/components/dropdown-menu";
 import { Upload, FileText, MoreHorizontal } from "lucide-react";
 import useFileUpload, { type UploadedFile } from "../lib/use-file-upload";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTRPC } from "@/integrations/clients";
 import {
    Dialog,
@@ -50,6 +50,11 @@ export function AgentDetailsKnowledgeBaseCard({
 
    agentId,
 }: AgentDetailsKnowledgeBaseCardProps) {
+   const [isClient, setIsClient] = useState(false);
+   useEffect(() => {
+      setIsClient(true);
+   }, []);
+
    const trpc = useTRPC();
    const {
       fileInputRef,
@@ -117,9 +122,11 @@ export function AgentDetailsKnowledgeBaseCard({
                                  </p>
                                  <p className="text-xs text-muted-foreground">
                                     Uploaded{" "}
-                                    {new Date(
-                                       file.uploadedAt,
-                                    ).toLocaleDateString()}
+                                    {isClient
+                                       ? new Date(
+                                            file.uploadedAt,
+                                         ).toLocaleDateString()
+                                       : "..."}
                                  </p>
                               </div>
                            </div>
