@@ -11,49 +11,50 @@ import { contentRouter } from "./router/content";
 import { exportLogRouter } from "./router/export-log";
 import { notificationRouter } from "./router/notification";
 import { notificationPreferencesRouter } from "./router/notification-preferences";
+import { brandRouter } from "./router/brand";
 
 import { sessionRouter } from "./router/session";
 import type { OpenRouterClient } from "@packages/openrouter/client";
 
 export const appRouter = router({
-   waitlist: waitlistRouter,
-   agent: agentRouter,
-   agentFile: agentFileRouter,
-   agentKnowledge: agentKnowledgeRouter,
-   content: contentRouter,
-   exportLog: exportLogRouter,
-   notification: notificationRouter,
-   notificationPreferences: notificationPreferencesRouter,
-   sessionHelper: sessionRouter,
+  waitlist: waitlistRouter,
+  agent: agentRouter,
+  agentFile: agentFileRouter,
+  agentKnowledge: agentKnowledgeRouter,
+  content: contentRouter,
+  exportLog: exportLogRouter,
+  notification: notificationRouter,
+  notificationPreferences: notificationPreferencesRouter,
+  sessionHelper: sessionRouter,
 });
 export const createApi = ({
-   auth,
-   openRouterClient,
-   db,
-   minioClient,
-   minioBucket,
-   chromaClient,
+  auth,
+  openRouterClient,
+  db,
+  minioClient,
+  minioBucket,
+  chromaClient,
 }: {
-   openRouterClient: OpenRouterClient; // Replace with actual type if available
-   minioBucket: string;
-   auth: AuthInstance;
-   db: DatabaseInstance;
-   minioClient: MinioClient;
-   chromaClient: ChromaClient;
+  openRouterClient: OpenRouterClient; // Replace with actual type if available
+  minioBucket: string;
+  auth: AuthInstance;
+  db: DatabaseInstance;
+  minioClient: MinioClient;
+  chromaClient: ChromaClient;
 }) => {
-   return {
-      trpcRouter: appRouter,
-      createTRPCContext: async ({ headers }: { headers: Headers }) =>
-         await createTRPCContextInternal({
-            minioClient,
-            auth,
-            db,
-            headers,
-            minioBucket,
-            chromaClient,
-            openRouterClient, // Pass the OpenRouter client to the context
-         }),
-   };
+  return {
+    trpcRouter: appRouter,
+    createTRPCContext: async ({ headers }: { headers: Headers }) =>
+      await createTRPCContextInternal({
+        minioClient,
+        auth,
+        db,
+        headers,
+        minioBucket,
+        chromaClient,
+        openRouterClient, // Pass the OpenRouter client to the context
+      }),
+  };
 };
 
 export type AppRouter = typeof appRouter;

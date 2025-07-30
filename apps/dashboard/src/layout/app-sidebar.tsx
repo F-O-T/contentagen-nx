@@ -34,7 +34,7 @@ export function AppSidebar({
       {
          icon: FilesIcon,
          title: "Your Content",
-         url: "/home",
+         url: "/content",
       },
    ];
 

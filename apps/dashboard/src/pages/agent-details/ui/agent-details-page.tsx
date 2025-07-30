@@ -38,9 +38,9 @@ export function AgentDetailsPage() {
    return (
       <Suspense>
          <main className="space-y-4">
-            <TalkingMascot message="Manage your agent’s configuration and knowledge base." />{" "}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               <div className="space-y-4">
+            <TalkingMascot message="Manage your agent’s configuration and knowledge base." />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+               <div className="col-span-1 space-y-4">
                   <AgentStatsCard
                      totalDrafts={agent?.totalDrafts ?? 0}
                      totalPublished={agent?.totalPublished ?? 0}
@@ -59,16 +59,24 @@ export function AgentDetailsPage() {
                         agent?.personaConfig.brand?.integrationStyle ?? ""
                      }
                   />
+               </div>
+               <div className="col-span-1 md:col-span-2 ">
+                  <AgentDetailsContentRequestsCard />
+               </div>
+               <div className="col-span-1 md:col-span-2">
+                  <AgentDetailsKnowledgeChunksCard />
+               </div>
+               <div className="col-span-1 ">
                   <AgentDetailsKnowledgeBaseCard
                      uploadedFiles={uploadedFiles}
                      onViewFile={open}
                      agentId={agentId}
                   />
-                  <AgentDetailsContentRequestsCard />
-                  <AgentDetailsKnowledgeChunksCard />
+               </div>
+               <div className="col-span-1 md:col-span-3">
                   <AgentDetailsPromptCard basePrompt={agent?.systemPrompt} />
                </div>
-            </div>{" "}
+            </div>
             <FileViewerModal
                open={isOpen}
                fileName={fileName}

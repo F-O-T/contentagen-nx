@@ -150,13 +150,18 @@ export const contentRouter = router({
       }),
    list: protectedProcedure.query(async ({ ctx }) => {
       try {
-         const contents = await listContents((await ctx).db);
-         // Only return the description for each content request
-         return contents.map((item) => ({
-            id: item.id,
-            description: item.request?.briefDescription,
-            // add other fields if needed
-         }));
+         const resolvedCtx = await ctx;
+         if (!resolvedCtx.session?.user.id) {
+            throw new TRPCError({
+               code: "UNAUTHORIZED",
+               message: "User must be authenticated to list content.",
+            });
+         }
+         const contents = await listContents(
+            resolvedCtx.db,
+            resolvedCtx.session?.user.id,
+         );
+         return contents;
       } catch (err) {
          if (err instanceof DatabaseError) {
             throw new TRPCError({
