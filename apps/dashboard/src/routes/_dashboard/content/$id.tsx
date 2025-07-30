@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ContentRequestDetailsPage } from "@/pages/content-details/ui/content-request-details-page";
 
 export const Route = createFileRoute(
-   "/_dashboard/content/requests/$requestId/",
+   "/_dashboard/content/$id",
 )({
    loader: async ({ context, params }) => {
       const { trpc, queryClient } = context;
