@@ -27,6 +27,7 @@ import { Route as DashboardContentIdRouteImport } from './routes/_dashboard/cont
 import { Route as DashboardAgentsFlowRouteImport } from './routes/_dashboard/agents/_flow'
 import { Route as DashboardAgentsAgentIdIndexRouteImport } from './routes/_dashboard/agents/$agentId/index'
 import { Route as DashboardAgentsFlowManualRouteImport } from './routes/_dashboard/agents/_flow/manual'
+import { Route as DashboardAgentsAgentIdEditRouteImport } from './routes/_dashboard/agents/$agentId/edit'
 import { Route as DashboardAgentsAgentIdContentRequestRouteImport } from './routes/_dashboard/agents/$agentId/content/request'
 
 const DashboardAgentsRouteImport = createFileRoute('/_dashboard/agents')()
@@ -118,6 +119,12 @@ const DashboardAgentsFlowManualRoute =
     path: '/manual',
     getParentRoute: () => DashboardAgentsFlowRoute,
   } as any)
+const DashboardAgentsAgentIdEditRoute =
+  DashboardAgentsAgentIdEditRouteImport.update({
+    id: '/$agentId/edit',
+    path: '/$agentId/edit',
+    getParentRoute: () => DashboardAgentsRoute,
+  } as any)
 const DashboardAgentsAgentIdContentRequestRoute =
   DashboardAgentsAgentIdContentRequestRouteImport.update({
     id: '/$agentId/content/request',
@@ -139,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/agents/': typeof DashboardAgentsIndexRoute
   '/content': typeof DashboardContentIndexRoute
   '/organization': typeof DashboardOrganizationIndexRoute
+  '/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
   '/agents/$agentId': typeof DashboardAgentsAgentIdIndexRoute
   '/agents/$agentId/content/request': typeof DashboardAgentsAgentIdContentRequestRoute
@@ -156,6 +164,7 @@ export interface FileRoutesByTo {
   '/organization/create': typeof DashboardOrganizationCreateRoute
   '/content': typeof DashboardContentIndexRoute
   '/organization': typeof DashboardOrganizationIndexRoute
+  '/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
   '/agents/$agentId': typeof DashboardAgentsAgentIdIndexRoute
   '/agents/$agentId/content/request': typeof DashboardAgentsAgentIdContentRequestRoute
@@ -177,6 +186,7 @@ export interface FileRoutesById {
   '/_dashboard/agents/': typeof DashboardAgentsIndexRoute
   '/_dashboard/content/': typeof DashboardContentIndexRoute
   '/_dashboard/organization/': typeof DashboardOrganizationIndexRoute
+  '/_dashboard/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
   '/_dashboard/agents/_flow/manual': typeof DashboardAgentsFlowManualRoute
   '/_dashboard/agents/$agentId/': typeof DashboardAgentsAgentIdIndexRoute
   '/_dashboard/agents/$agentId/content/request': typeof DashboardAgentsAgentIdContentRequestRoute
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/agents/'
     | '/content'
     | '/organization'
+    | '/agents/$agentId/edit'
     | '/agents/manual'
     | '/agents/$agentId'
     | '/agents/$agentId/content/request'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/organization/create'
     | '/content'
     | '/organization'
+    | '/agents/$agentId/edit'
     | '/agents/manual'
     | '/agents/$agentId'
     | '/agents/$agentId/content/request'
@@ -234,6 +246,7 @@ export interface FileRouteTypes {
     | '/_dashboard/agents/'
     | '/_dashboard/content/'
     | '/_dashboard/organization/'
+    | '/_dashboard/agents/$agentId/edit'
     | '/_dashboard/agents/_flow/manual'
     | '/_dashboard/agents/$agentId/'
     | '/_dashboard/agents/$agentId/content/request'
@@ -365,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAgentsFlowManualRouteImport
       parentRoute: typeof DashboardAgentsFlowRoute
     }
+    '/_dashboard/agents/$agentId/edit': {
+      id: '/_dashboard/agents/$agentId/edit'
+      path: '/$agentId/edit'
+      fullPath: '/agents/$agentId/edit'
+      preLoaderRoute: typeof DashboardAgentsAgentIdEditRouteImport
+      parentRoute: typeof DashboardAgentsRoute
+    }
     '/_dashboard/agents/$agentId/content/request': {
       id: '/_dashboard/agents/$agentId/content/request'
       path: '/$agentId/content/request'
@@ -389,6 +409,7 @@ const DashboardAgentsFlowRouteWithChildren =
 interface DashboardAgentsRouteChildren {
   DashboardAgentsFlowRoute: typeof DashboardAgentsFlowRouteWithChildren
   DashboardAgentsIndexRoute: typeof DashboardAgentsIndexRoute
+  DashboardAgentsAgentIdEditRoute: typeof DashboardAgentsAgentIdEditRoute
   DashboardAgentsAgentIdIndexRoute: typeof DashboardAgentsAgentIdIndexRoute
   DashboardAgentsAgentIdContentRequestRoute: typeof DashboardAgentsAgentIdContentRequestRoute
 }
@@ -396,6 +417,7 @@ interface DashboardAgentsRouteChildren {
 const DashboardAgentsRouteChildren: DashboardAgentsRouteChildren = {
   DashboardAgentsFlowRoute: DashboardAgentsFlowRouteWithChildren,
   DashboardAgentsIndexRoute: DashboardAgentsIndexRoute,
+  DashboardAgentsAgentIdEditRoute: DashboardAgentsAgentIdEditRoute,
   DashboardAgentsAgentIdIndexRoute: DashboardAgentsAgentIdIndexRoute,
   DashboardAgentsAgentIdContentRequestRoute:
     DashboardAgentsAgentIdContentRequestRoute,
