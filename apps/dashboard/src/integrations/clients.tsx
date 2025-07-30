@@ -15,7 +15,7 @@ export const { TRPCProvider, useTRPC, useTRPCClient } =
 
 function makeTrpcClient() {
    return createTrpcClient({
-      serverUrl: `${clientEnv.VITE_SERVER_URL}`,
+      serverUrl: clientEnv.VITE_SERVER_URL,
    });
 }
 

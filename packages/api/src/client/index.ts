@@ -5,9 +5,8 @@ import type { AppRouter } from "../server";
 
 export interface APIClientOptions {
    serverUrl: string;
-   headers?: Record<string, string> | Headers;
 }
-export const createTrpcClient = ({ serverUrl, headers }: APIClientOptions) => {
+export const createTrpcClient = ({ serverUrl }: APIClientOptions) => {
    return createTRPCClient<AppRouter>({
       links: [
          httpBatchLink({
@@ -17,7 +16,6 @@ export const createTrpcClient = ({ serverUrl, headers }: APIClientOptions) => {
                return fetch(url, {
                   ...options,
                   credentials: "include",
-                  headers: headers ? headers : options?.headers,
                });
             },
          }),

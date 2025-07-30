@@ -20,7 +20,6 @@ export async function render({
    // Convert the express request to a fetch request
    const url = new URL(req.originalUrl || req.url, "https://localhost:3000")
       .href;
-
    const request = new Request(url, {
       method: req.method,
       headers: (() => {

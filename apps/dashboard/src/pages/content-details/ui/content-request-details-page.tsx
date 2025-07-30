@@ -31,9 +31,6 @@ import { ContentStatsCard, RequestDetailsCard } from "./request-details-cards";
 export function ContentRequestDetailsPage() {
    const navigate = useNavigate();
    const queryClient = useQueryClient();
-   const { eden } = useRouteContext({
-      from: "/_dashboard/content/requests/$requestId/",
-   });
    const { request, generatedContent } = useContentRequestDetails();
    const { exportContent, isExporting } = useContentExport();
 
