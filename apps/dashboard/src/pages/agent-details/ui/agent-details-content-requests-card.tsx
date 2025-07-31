@@ -12,8 +12,14 @@ import { useParams, useNavigate } from "@tanstack/react-router";
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Activity } from "lucide-react";
 import { useTRPC } from "@/integrations/clients";
+import { useState, useEffect } from "react";
 
 export function AgentDetailsContentRequestsCard() {
+   const [isClient, setIsClient] = useState(false);
+   useEffect(() => {
+      setIsClient(true);
+   }, []);
+
    const { agentId } = useParams({ from: "/_dashboard/agents/$agentId/" });
    const navigate = useNavigate();
    const trpc = useTRPC();
@@ -72,9 +78,11 @@ export function AgentDetailsContentRequestsCard() {
                               <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
                                  <span>
                                     Created:{" "}
-                                    {new Date(
-                                       req.createdAt,
-                                    ).toLocaleDateString()}
+                                    {isClient
+                                       ? new Date(
+                                            req.createdAt,
+                                         ).toLocaleDateString()
+                                       : "..."}
                                  </span>
                               </div>
                               <InfoItem

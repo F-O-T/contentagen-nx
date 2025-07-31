@@ -28,6 +28,11 @@ import {
 } from "lucide-react";
 
 export function ProfilePageApiKeySection() {
+   const [isClient, setIsClient] = useState(false);
+   useEffect(() => {
+      setIsClient(true);
+   }, []);
+
    const [apiKeys, setApiKeys] = useState<any[]>([]);
    const [loading, setLoading] = useState(false);
    const [creating, setCreating] = useState(false);
@@ -141,9 +146,9 @@ export function ProfilePageApiKeySection() {
 
    // Only show newKey if it was just created and is not in the list
    const showNewKeyBox = newKey && !apiKeys.some((k) => k.id === newKey.id);
-   const hasExpired = apiKeys.some(
-      (k) => k.expiresAt && new Date(k.expiresAt) < new Date(),
-   );
+   const hasExpired =
+      isClient &&
+      apiKeys.some((k) => k.expiresAt && new Date(k.expiresAt) < new Date());
 
    return (
       <Card>
@@ -270,13 +275,13 @@ export function ProfilePageApiKeySection() {
                               </span>
                               <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">
                                  Created:{" "}
-                                 {k.createdAt
+                                 {isClient && k.createdAt
                                     ? new Date(k.createdAt).toLocaleDateString()
                                     : "-"}
                               </span>
                               <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-full">
                                  Expires:{" "}
-                                 {k.expiresAt
+                                 {isClient && k.expiresAt
                                     ? new Date(k.expiresAt).toLocaleDateString()
                                     : "Never"}
                               </span>

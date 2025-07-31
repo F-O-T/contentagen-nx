@@ -10,12 +10,15 @@ import {
 } from "@trpc/tanstack-react-query";
 import { useState } from "react";
 
+// This is now only for TRPC types and hooks
 export const { TRPCProvider, useTRPC, useTRPCClient } =
    createTRPCContext<AppRouter>();
 
-function makeTrpcClient() {
+// This function now correctly uses the environment variable
+export function makeTrpcClient(headers?: Headers) {
    return createTrpcClient({
-      serverUrl: `${clientEnv.VITE_SERVER_URL}`,
+      serverUrl: clientEnv.VITE_SERVER_URL,
+      headers,
    });
 }
 
@@ -23,43 +26,33 @@ export const betterAuthClient = createAuthClient({
    apiBaseUrl: clientEnv.VITE_SERVER_URL,
 });
 
-function makeQueryClient() {
+export function makeQueryClient() {
    return new QueryClient({
       defaultOptions: {
          queries: {
-            // With SSR, we usually want to set some default staleTime
-            // above 0 to avoid refetching immediately on the client
             staleTime: 60 * 1000,
          },
       },
    });
 }
+
+// Client-side singleton for QueryClient
 let browserQueryClient: QueryClient | undefined;
-function getQueryClient() {
+export function getQueryClient() {
    if (typeof window === "undefined") {
-      // Server: always make a new query client
       return makeQueryClient();
-   } else {
-      // Browser: make a new query client if we don't already have one
-      // This is very important, so we don't re-make a new client if React
-      // suspends during the initial render. This may not be needed if we
-      // have a suspense boundary BELOW the creation of the query client
-      if (!browserQueryClient) browserQueryClient = makeQueryClient();
-      return browserQueryClient;
    }
+   if (!browserQueryClient) browserQueryClient = makeQueryClient();
+   return browserQueryClient;
 }
 
+// Client-side singleton for tRPC Proxy. Do NOT use this on the server.
 export const trpc = createTRPCOptionsProxy<AppRouter>({
    client: makeTrpcClient(),
    queryClient: getQueryClient(),
 });
-export function getContext() {
-   return {
-      trpc,
-      queryClient: getQueryClient(),
-   };
-}
 
+// This provider is now for CLIENT-SIDE use only
 export function QueryProvider({ children }: { children: React.ReactNode }) {
    const queryClient = getQueryClient();
    const [trpcClient] = useState(() => makeTrpcClient());
@@ -73,4 +66,5 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
    );
 }
 export type Session = typeof betterAuthClient.$Infer.Session;
-export type TrpcClient = typeof trpc;
+export type TrpcClient = ReturnType<typeof createTRPCOptionsProxy<AppRouter>>;
+export type InternalTrpcClient = ReturnType<typeof makeTrpcClient>;

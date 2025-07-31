@@ -1,8 +1,6 @@
-import React from "react";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
-   CardAction,
    CardContent,
    CardDescription,
    CardFooter,
@@ -10,14 +8,8 @@ import {
    CardTitle,
 } from "@packages/ui/components/card";
 import { InfoItem } from "@packages/ui/components/info-item";
-import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuItem,
-   DropdownMenuTrigger,
-} from "@packages/ui/components/dropdown-menu";
-import { Link, useRouteContext } from "@tanstack/react-router";
-import { MoreVertical, Edit, Trash, Activity } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Activity } from "lucide-react";
 import type { ContentSelect } from "@packages/database/schema";
 export function ContentRequestCard({ request }: { request: ContentSelect }) {
    return (
@@ -37,10 +29,7 @@ export function ContentRequestCard({ request }: { request: ContentSelect }) {
          </CardContent>
          <CardFooter>
             <Button className="w-full" variant="outline" asChild>
-               <Link
-                  params={{ requestId: request.id }}
-                  to="/content/requests/$requestId"
-               >
+               <Link params={{ id: request.id }} to="/content/$id">
                   Manage your content
                </Link>
             </Button>

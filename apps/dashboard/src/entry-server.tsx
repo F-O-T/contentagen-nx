@@ -7,6 +7,14 @@ import {
 import { createRouter } from "./router";
 import type express from "express";
 import "./fetch-polyfill";
+import {
+   TRPCProvider,
+   makeQueryClient,
+   makeTrpcClient,
+} from "./integrations/clients";
+import type { AppRouter } from "@packages/api/server";
+import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 
 export async function render({
    req,
@@ -17,27 +25,26 @@ export async function render({
    req: express.Request;
    res: express.Response;
 }) {
-   // Convert the express request to a fetch request
    const url = new URL(req.originalUrl || req.url, "https://localhost:3000")
       .href;
-
    const request = new Request(url, {
       method: req.method,
-      headers: (() => {
-         const headers = new Headers();
-         for (const [key, value] of Object.entries(req.headers)) {
-            headers.set(key, value as any);
-         }
-         return headers;
-      })(),
+      headers: new Headers(req.headers as HeadersInit),
    });
-   // Create a request handler
+
    const handler = createRequestHandler({
       request,
       createRouter: () => {
-         const router = createRouter();
+         // Create request-scoped instances
+         const queryClient = makeQueryClient();
+         const trpcClient = makeTrpcClient(request.headers);
+         const trpc = createTRPCOptionsProxy<AppRouter>({
+            client: trpcClient,
+            queryClient,
+         });
 
-         // Update each router instance with the head info from vite
+         const router = createRouter({ trpc, queryClient, trpcClient });
+
          router.update({
             context: {
                ...router.options.context,
@@ -48,15 +55,24 @@ export async function render({
       },
    });
 
-   // Let's use the default stream handler to create the response
-   const response = await handler(({ request, responseHeaders, router }) =>
-      renderRouterToStream({
+   const response = await handler(({ request, responseHeaders, router }) => {
+      // Get the request-scoped clients from the router context
+      const { queryClient, trpcClient } = router.options.context;
+
+      return renderRouterToStream({
          request,
          responseHeaders,
          router,
-         children: <RouterServer router={router} />,
-      }),
-   );
+         // Wrap the app in the request-scoped providers
+         children: (
+            <QueryClientProvider client={queryClient}>
+               <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
+                  <RouterServer router={router} />
+               </TRPCProvider>
+            </QueryClientProvider>
+         ),
+      });
+   });
 
    // Convert the fetch response back to an express response
    res.statusMessage = response.statusText;
@@ -67,5 +83,6 @@ export async function render({
    });
 
    // Stream the response body
+   // biome-ignore lint/suspicious/noExplicitAny: This is a known pattern for bridging fetch Response streams and Node.js streams
    return pipeline(response.body as any, res);
 }

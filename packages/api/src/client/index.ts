@@ -14,10 +14,23 @@ export const createTrpcClient = ({ serverUrl, headers }: APIClientOptions) => {
             url: urlJoin(serverUrl, "/trpc"),
             transformer: SuperJSON,
             fetch(url, options) {
+               const requestHeaders = new Headers(options?.headers);
+
+               if (headers) {
+                  const incomingHeaders = new Headers(headers as Headers);
+                  const cookie = incomingHeaders.get("cookie");
+                  if (cookie) {
+                     requestHeaders.set("cookie", cookie);
+                  }
+                  const authorization = incomingHeaders.get("authorization");
+                  if (authorization) {
+                     requestHeaders.set("authorization", authorization);
+                  }
+               }
                return fetch(url, {
                   ...options,
                   credentials: "include",
-                  headers: headers ? headers : options?.headers,
+                  headers: requestHeaders,
                });
             },
          }),

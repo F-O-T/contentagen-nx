@@ -1,13 +1,16 @@
 import { AgentCreationManualForm } from "@/features/manual-agent-creation-form/ui/agent-creation-manual-form";
-import { useTrpc } from "@/integrations/trpc";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useTRPC } from "@/integrations/clients";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { toast } from "sonner";
-export function CreateAgentPage() {
+export function EditAgentPage() {
    const navigate = useNavigate();
-   const trpc = useTrpc();
+   const trpc = useTRPC();
+   const { agentId } = useParams({
+      from: "/_dashboard/agents/$agentId/edit",
+   });
    const agentMutation = useMutation(
-      trpc.agent.create.mutationOptions({
+      trpc.agent.update.mutationOptions({
          onSuccess: () => {
             toast.success("Agent created successfully!");
             navigate({
@@ -20,11 +23,20 @@ export function CreateAgentPage() {
          },
       }),
    );
+
+   const { data: agent } = useSuspenseQuery(
+      trpc.agent.get.queryOptions({ id: agentId }),
+   );
+
    return (
       <AgentCreationManualForm
          onSubmit={async (values) => {
-            await agentMutation.mutateAsync(values);
+            await agentMutation.mutateAsync({
+               id: agentId,
+               ...values,
+            });
          }}
+         defaultValues={{ ...agent.personaConfig }}
       />
    );
 }
