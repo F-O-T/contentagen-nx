@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "drizzle-orm": "catalog:database",
-    "drizzle-zod": "^0.7.0",
-    "zod": "^3.25.1",
+    "drizzle-zod": "catalog:database",
+    "zod": "catalog:validation",
     "pg": "catalog:database"
   },
   "devDependencies": {

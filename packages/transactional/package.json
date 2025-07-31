@@ -1,8 +1,7 @@
 {
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
-      "@types/web-push": "^3.6.4",
-      "react-email": "^4.0.17",
+      "react-email": "catalog:transactional",
       "typescript": "catalog:development"
    },
    "license": "MIT",
@@ -14,15 +13,14 @@
    "private": true,
    "type": "module",
    "exports": {
-      "./client": "./src/client.tsx",
-      "./push-notifications": "./src/push-notifications.ts"
+      "./client": "./src/client.tsx"
    },
    "version": "0.0.0",
    "dependencies": {
       "react": "catalog:react",
       "react-dom": "catalog:react",
-      "resend": "^4.6.0",
-      "@react-email/components": "^0.1.1",
+      "resend": "catalog:transactional",
+      "@react-email/components": "catalog:transactional",
       "@packages/brand": "workspace:*"
    }
 }
