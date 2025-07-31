@@ -1,4 +1,4 @@
-import type { PersonaConfig } from "@packages/database/schemas/agent-types";
+import type { PersonaConfig } from "@packages/database/schemas/agent";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 

@@ -11,7 +11,7 @@ import { z } from "zod";
 
 import { protectedProcedure, router } from "../trpc";
 import { AgentUpdateSchema, type AgentInsert } from "@packages/database/schema";
-import { PersonaConfigSchema } from "@packages/database/schemas/agent-types";
+import { PersonaConfigSchema } from "@packages/database/schemas/agent";
 import { generateSystemPrompt } from "@packages/prompts/helpers/agent-system-prompt-assembler";
 
 const UpdateAgentInput = AgentUpdateSchema;

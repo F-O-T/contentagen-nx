@@ -40,7 +40,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTRPC } from "@/integrations/clients";
 import type { AgentSelect } from "@packages/database/schema";
-import type { PersonaConfig } from "@packages/database/schemas/agent-types";
+import type { PersonaConfig } from "@packages/database/schemas/agent";
 
 type AgentCardProps = {
    agent: AgentSelect;
