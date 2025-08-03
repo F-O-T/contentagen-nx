@@ -1,4 +1,5 @@
-# Content Channel: Twitter Thread
+export function twitterThreadPrompt(): string {
+   return `# Content Channel: Twitter Thread
 
 **Platform Psychology & User Behavior:**
 
@@ -79,3 +80,5 @@
 - At least 2 quotable insights that work as standalone content
 - Generates meaningful discussion in replies beyond emoji responses
 - Creates bookmarking behavior and return engagement for reference
+`;
+}

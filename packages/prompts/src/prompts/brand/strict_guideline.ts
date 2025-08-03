@@ -1,4 +1,5 @@
-# Brand Integration: Strict Guidelines
+export function strictGuidelinePrompt(): string {
+   return `# Brand Integration: Strict Guidelines
 
 **Brand Adherence Psychology:**
 
@@ -76,3 +77,5 @@
 **Content Restrictions:**
 Avoid using these words or phrases: {{blacklistWords}}
 {{/blacklistWords}}
+`;
+}

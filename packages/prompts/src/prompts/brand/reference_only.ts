@@ -1,4 +1,5 @@
-# Brand Integration: Reference Only
+export function referenceOnlyPrompt(): string {
+   return `# Brand Integration: Reference Only
 
 **Brand Communication Strategy:**
 - Use brand knowledge as background context only
@@ -24,3 +25,5 @@
 **Content Restrictions:**
 Avoid using these words or phrases: {{blacklistWords}}
 {{/blacklistWords}}
+`;
+}

@@ -1,4 +1,5 @@
-# Content Channel: Blog Post
+export function blogPostPrompt(): string {
+   return `# Content Channel: Blog Post
 
 **Content Psychology & Reader Behavior:**
 
@@ -71,3 +72,5 @@
 - **Personalization elements:** Address different experience levels or use cases
 - **Update framework:** Build content designed for future refreshing and expansion
 - **Repurposing potential:** Structure allows easy conversion to videos, podcasts, or courses
+`;
+}

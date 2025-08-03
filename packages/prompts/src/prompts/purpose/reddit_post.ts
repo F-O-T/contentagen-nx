@@ -1,4 +1,5 @@
-# Content Channel: Reddit Post
+export function redditPostPrompt(): string {
+   return `# Content Channel: Reddit Post
 
 **Content Characteristics:**
 - Community-specific content
@@ -19,3 +20,5 @@
 - Authentic expertise demonstration
 - Discussion generation and participation
 - Reputation building within communities
+`;
+}

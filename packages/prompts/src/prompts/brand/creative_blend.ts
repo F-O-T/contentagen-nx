@@ -1,4 +1,5 @@
-# Brand Integration: Creative Blend
+export function creativeBlendPrompt(): string {
+   return `# Brand Integration: Creative Blend
 
 **Brand Psychology & Creative Fusion:**
 
@@ -76,3 +77,5 @@
 **Content Restrictions:**
 Avoid using these words or phrases: {{blacklistWords}}
 {{/blacklistWords}}
+`;
+}

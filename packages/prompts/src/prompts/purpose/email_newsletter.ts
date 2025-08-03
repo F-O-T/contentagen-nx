@@ -1,4 +1,5 @@
-# Content Channel: Email Newsletter
+export function emailNewsletterPrompt(): string {
+   return `# Content Channel: Email Newsletter
 
 **Subscriber Psychology & Inbox Behavior:**
 
@@ -87,3 +88,5 @@
 - **Proprietary research:** Original data or studies conducted specifically for subscribers
 - **Implementation templates:** Ready-to-use tools, frameworks, or processes
 - **Community access:** Invitation to exclusive groups, forums, or events
+`;
+}

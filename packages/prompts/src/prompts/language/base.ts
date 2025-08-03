@@ -1,4 +1,5 @@
-# Language Guidelines: {{languageDisplay}}
+export function languageBasePrompt(): string {
+   return `# Language Guidelines: {{languageDisplay}}
 
 **Writing Characteristics:**
 {{#languageRules}}
@@ -19,3 +20,5 @@
 - Explain foreign terms or technical jargon when necessary
 - Maintain consistent tone and style throughout all content
 - Adjust communication style to match cultural norms for formality and directness
+`;
+}

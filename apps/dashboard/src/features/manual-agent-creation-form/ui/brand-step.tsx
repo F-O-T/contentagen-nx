@@ -1,7 +1,6 @@
 import { Button } from "@packages/ui/components/button";
 import { TiptapEditor } from "@packages/ui/components/tiptap-editor";
 import { BrandConfigSchema } from "@packages/database/schemas/agent";
-import { trpc } from "@/integrations/clients";
 import type { AgentForm } from "../lib/use-agent-form";
 
 // Helper function to convert schema values to display labels
@@ -15,28 +14,9 @@ export function BrandStep({ form }: { form: AgentForm }) {
       BrandConfigSchema.shape.integrationStyle.options;
 
    // Get agentId from form state (assume it's in metadata or similar)
-   const agentId = form.state.values.metadata?.id || "";
-   const { data, isLoading, error } = trpc.agentFile.listBrandFiles.useQuery(
-      agentId ? { agentId } : undefined,
-   );
 
    return (
-      <div className="space-y-4">
-         <div>
-            <h3 className="font-semibold">Available Brand Files</h3>
-            {isLoading && <div>Loading brand files…</div>}
-            {error && <div className="text-red-500">Error loading files</div>}
-            {data && data.files.length === 0 && (
-               <div>No brand files found.</div>
-            )}
-            {data && data.files.length > 0 && (
-               <ul className="list-disc pl-5">
-                  {data.files.map((file) => (
-                     <li key={file}>{file}</li>
-                  ))}
-               </ul>
-            )}
-         </div>{" "}
+      <>
          <form.AppField name="brand.integrationStyle">
             {(field) => (
                <field.FieldContainer className="space-y-2">
@@ -91,7 +71,7 @@ export function BrandStep({ form }: { form: AgentForm }) {
                </field.FieldContainer>
             )}
          </form.AppField>
-      </div>
+      </>
    );
 }
 

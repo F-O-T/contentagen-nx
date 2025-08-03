@@ -1,4 +1,5 @@
-# Content Channel: LinkedIn Post
+export function linkedinPostPrompt(): string {
+   return `# Content Channel: LinkedIn Post
 
 **Professional Platform Psychology:**
 
@@ -79,3 +80,5 @@
 - **Cross-industry insights:** Applying lessons from one sector to another
 - **Leadership philosophy:** Management approaches backed by real experience
 - **Professional growth stories:** Career development lessons that inspire others
+`;
+}

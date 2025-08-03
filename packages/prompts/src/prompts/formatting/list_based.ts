@@ -1,4 +1,5 @@
-# Content Formatting: List-Based Format
+export function listBasedPrompt(): string {
+   return `# Content Formatting: List-Based Format
 
 **List Psychology & Cognitive Processing:**
 
@@ -62,7 +63,7 @@
 
 **Comprehensive Implementation Framework:**
 
-```
+\`\`\`
 # [Action-Oriented Title]
 
 ## Prerequisites
@@ -84,11 +85,11 @@
 - [ ] Outcome 1: [Measurable result]
 - [ ] Outcome 2: [Behavioral change]
 - [ ] Outcome 3: [Performance improvement]
-```
+\`\`\`
 
 **Comparative Analysis Framework:**
 
-```
+\`\`\`
 # [Decision-Making Title]
 
 ## Option A: [Approach Name]
@@ -108,7 +109,7 @@
   - Different limitation with workaround
   - Time investment with timeline
 • **Best For:** [Different use cases and scenarios]
-```
+\`\`\`
 
 **Quality List Standards:**
 
@@ -121,3 +122,5 @@
 {{#listStyle}}
 **Preferred List Style:** Use {{listStyle}} for all primary lists throughout the content.
 {{/listStyle}}
+`;
+}

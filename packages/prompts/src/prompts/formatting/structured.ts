@@ -1,4 +1,5 @@
-# Content Formatting: Structured Format
+export function structuredPrompt(): string {
+   return `# Content Formatting: Structured Format
 
 **Cognitive Load & Information Processing:**
 
@@ -52,7 +53,7 @@
 
 **Problem-Solution Framework:**
 
-```
+\`\`\`
 # [Main Title with Primary Benefit]
 
 ## The Challenge: [Specific Problem]
@@ -74,11 +75,11 @@
 - Expected outcomes
 - Immediate actions
 - Long-term strategy
-```
+\`\`\`
 
 **Educational Deep-Dive Framework:**
 
-```
+\`\`\`
 # [Topic Mastery Title]
 
 ## Foundation Knowledge
@@ -99,7 +100,7 @@
 - Beginner steps
 - Intermediate progression
 - Expert-level mastery
-```
+\`\`\`
 
 **Quality Structure Standards:**
 
@@ -112,3 +113,5 @@
 {{#listStyle}}
 **List Style Preference:** Use {{listStyle}} formatting for all lists and enumerated items.
 {{/listStyle}}
+`;
+}

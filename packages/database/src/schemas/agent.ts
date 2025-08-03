@@ -9,7 +9,12 @@ import {
    timestamp,
    index,
 } from "drizzle-orm/pg-core";
-import { createSchemaFactory } from "drizzle-zod";
+import {
+   createInsertSchema,
+   createSchemaFactory,
+   createSelectSchema,
+   createUpdateSchema,
+} from "drizzle-zod";
 import { user } from "./auth";
 import { z } from "zod";
 
@@ -75,10 +80,6 @@ export const PersonaConfigSchema = z.object({
 
 // 8. Static Type exports
 
-const { createInsertSchema, createSelectSchema, createUpdateSchema } =
-   createSchemaFactory({
-      zodInstance: z,
-   });
 export const agent = pgTable(
    "agent",
    {

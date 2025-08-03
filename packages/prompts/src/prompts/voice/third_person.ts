@@ -1,4 +1,5 @@
-# Voice & Communication: Third Person Perspective
+export function thirdPersonPrompt(): string {
+   return `# Voice & Communication: Third Person Perspective
 
 **Third Person Psychology & Professional Distance:**
 
@@ -87,3 +88,5 @@
 - Maintain professional, objective tone throughout content
 - Present information as external observation of established authority
 - Avoid any first person language or perspective shifts
+`;
+}

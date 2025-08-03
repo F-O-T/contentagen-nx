@@ -1,4 +1,5 @@
-# Content Channel: Instagram Post
+export function instagramPostPrompt(): string {
+   return `# Content Channel: Instagram Post
 
 **Content Characteristics:**
 - Visual-first content with supporting text
@@ -19,3 +20,5 @@
 - Visual storytelling and lifestyle integration
 - Community building through relatable content
 - User-generated content encouragement
+`;
+}

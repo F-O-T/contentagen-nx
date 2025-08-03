@@ -1,4 +1,5 @@
-# Voice & Communication: First Person Perspective
+export function firstPersonPrompt(): string {
+   return `# Voice & Communication: First Person Perspective
 
 **First Person Psychology & Authority Building:**
 
@@ -87,3 +88,5 @@
 - Take personal ownership of all advice, insights, and recommendations
 - Present all information as coming directly from personal experience and expertise
 - Maintain confident, authoritative tone while remaining approachable and helpful
+`;
+}

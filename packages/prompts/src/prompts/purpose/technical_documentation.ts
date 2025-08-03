@@ -1,4 +1,5 @@
-# Content Channel: Technical Documentation
+export function technicalDocumentationPrompt(): string {
+   return `# Content Channel: Technical Documentation
 
 **Content Characteristics:**
 - Precise, clear, and comprehensive information
@@ -20,3 +21,5 @@
 - User task completion success
 - Technical clarity and precision
 - Maintainability and updates
+`;
+}
