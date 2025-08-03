@@ -1,5 +1,3 @@
-import type { contentGenerationTask } from "@packages/tasks/triggers/content-generation";
-import { tasks } from "@packages/tasks";
 import {
    createContent,
    getContentById,
@@ -58,21 +56,6 @@ export const contentRouter = router({
                userId, // Use authenticated user ID
             });
             // Trigger new content generation pipeline task
-            try {
-               // Pass agentId from input or created record
-               await tasks.trigger<typeof contentGenerationTask>(
-                  "content-generation-pipeline",
-                  {
-                     contentId: created.id,
-                     agentId: input.agentId || created.agentId,
-                  },
-               );
-            } catch (err) {
-               console.error(
-                  "Failed to trigger content generation pipeline",
-                  err,
-               );
-            }
             return created;
          } catch (err) {
             if (err instanceof DatabaseError) {
