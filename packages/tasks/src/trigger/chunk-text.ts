@@ -1,6 +1,6 @@
 import { task, logger } from "@trigger.dev/sdk/v3";
 
-import { getChunkingPrompt } from "@packages/prompts/helpers/knowledge-distillation-helper";
+import { chunkingPrompt } from "@packages/prompts/prompt/task/chunking";
 import { generateOpenRouterText } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
@@ -10,7 +10,7 @@ export async function runChunkText(payload: { inputText: string }) {
    try {
       logger.info("Chunking input text", { inputLength: inputText.length });
       const chunkingResult = await generateOpenRouterText(openrouter, {
-         system: getChunkingPrompt(),
+         system: chunkingPrompt(),
          prompt: inputText,
       });
       const chunks = chunkingResult.text

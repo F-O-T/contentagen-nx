@@ -71,6 +71,7 @@ export async function runDistillationPipeline(payload: {
       logger.info("Knowledge distillation pipeline complete", {
          agentId,
          formattedChunkCount: formattedChunksOutput.length,
+         formattedChunksPreview: formattedChunksOutput,
       });
    } catch (error) {
       logger.error("Error in distillation pipeline", {
