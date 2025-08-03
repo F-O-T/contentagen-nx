@@ -1,4 +1,8 @@
-export function strictGuidelinePrompt(): string {
+export function strictGuidelinePrompt({
+   blacklistWords = [],
+}: {
+   blacklistWords?: string[];
+}): string {
    return `# Brand Integration: Strict Guidelines
 
 **Brand Adherence Psychology:**
@@ -73,9 +77,11 @@ export function strictGuidelinePrompt(): string {
 - **Competitive moat reinforcement:** Strengthen brand differentiation through consistent positioning
 - **Corporate communication mirroring:** Match tone and approach of official brand communications
 
-{{#blacklistWords}}
-**Content Restrictions:**
-Avoid using these words or phrases: {{blacklistWords}}
-{{/blacklistWords}}
+${
+   blacklistWords.length
+      ? `**Content Restrictions:**
+Avoid using these words or phrases: ${blacklistWords.join(", ")}`
+      : ""
+}
 `;
 }

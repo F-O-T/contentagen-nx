@@ -48,9 +48,5 @@ Return only the chunks, separated by "---CHUNK---" markers:
 ---CHUNK---
 [Continue pattern...]
 
-**INPUT TEXT:**
-[INSERT YOUR TEXT HERE]
-
-Process the text using intelligent semantic chunking.
 `;
 }

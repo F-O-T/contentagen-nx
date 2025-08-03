@@ -2,9 +2,6 @@
 // Returns the full formatting prompt as a string
 export function formattingPrompt(): string {
    return `
-You are a brand knowledge specialist. Extract essential brand metadata from the following analyzed knowledge chunk to enable AI agents to generate authentic, on-brand content.
-
-[INSERT CHUNK HERE]
 
 **Instructions:**
 - Output only the distilled brand metadata as a plain string in natural language.

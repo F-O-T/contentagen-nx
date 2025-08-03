@@ -1,28 +1,26 @@
 import type { PersonaConfig } from "@packages/database/schemas/agent";
-
-// Prompt template imports (kebab-case)
-import { basePrompt } from "../prompt-files/metadata/base-prompt";
-import { firstPersonPrompt } from "../prompt-files/voice/first-person-prompt";
-import { thirdPersonPrompt } from "../prompt-files/voice/third-person-prompt";
-import { generalPublicPrompt } from "../prompt-files/audience/general-public-prompt";
-import { professionalsPrompt } from "../prompt-files/audience/professionals-prompt";
-import { beginnersPrompt } from "../prompt-files/audience/beginners-prompt";
-import { customersPrompt } from "../prompt-files/audience/customers-prompt";
-import { structuredPrompt } from "../prompt-files/formatting/structured-prompt";
-import { narrativePrompt } from "../prompt-files/formatting/narrative-prompt";
-import { listBasedPrompt } from "../prompt-files/formatting/list-based-prompt";
-import { baseLanguagePrompt } from "../prompt-files/language/base-prompt";
-import { strictGuidelinePrompt } from "../prompt-files/brand/strict-guideline-prompt";
-import { flexibleGuidelinePrompt } from "../prompt-files/brand/flexible-guideline-prompt";
-import { referenceOnlyPrompt } from "../prompt-files/brand/reference-only-prompt";
-import { creativeBlendPrompt } from "../prompt-files/brand/creative-blend-prompt";
-import { blogPostPrompt } from "../prompt-files/purpose/blog-post-prompt";
-import { linkedinPostPrompt } from "../prompt-files/purpose/linkedin-post-prompt";
-import { twitterThreadPrompt } from "../prompt-files/purpose/twitter-thread-prompt";
-import { instagramPostPrompt } from "../prompt-files/purpose/instagram-post-prompt";
-import { emailNewsletterPrompt } from "../prompt-files/purpose/email-newsletter-prompt";
-import { redditPostPrompt } from "../prompt-files/purpose/reddit-post-prompt";
-import { technicalDocumentationPrompt } from "../prompt-files/purpose/technical-documentation-prompt";
+import { metadataBasePrompt } from "../prompts/metadata/base";
+import { firstPersonPrompt } from "../prompts/voice/first_person";
+import { thirdPersonPrompt } from "../prompts/voice/third_person";
+import { generalPublicAudiencePrompt } from "../prompts/audience/general_public";
+import { professionalsAudiencePrompt } from "../prompts/audience/professionals";
+import { beginnersAudiencePrompt } from "../prompts/audience/beginners";
+import { customersAudiencePrompt } from "../prompts/audience/customers";
+import { structuredPrompt } from "../prompts/formatting/structured";
+import { narrativePrompt } from "../prompts/formatting/narrative";
+import { listBasedPrompt } from "../prompts/formatting/list_based";
+import { languageBasePrompt } from "../prompts/language/base";
+import { strictGuidelinePrompt } from "../prompts/brand/strict_guideline";
+import { flexibleGuidelinePrompt } from "../prompts/brand/flexible_guideline";
+import { referenceOnlyPrompt } from "../prompts/brand/reference_only";
+import { creativeBlendPrompt } from "../prompts/brand/creative_blend";
+import { blogPostPrompt } from "../prompts/purpose/blog_post";
+import { linkedinPostPrompt } from "../prompts/purpose/linkedin_post";
+import { twitterThreadPrompt } from "../prompts/purpose/twitter_thread";
+import { instagramPostPrompt } from "../prompts/purpose/instagram_post";
+import { emailNewsletterPrompt } from "../prompts/purpose/email_newsletter";
+import { redditPostPrompt } from "../prompts/purpose/reddit_post";
+import { technicalDocumentationPrompt } from "../prompts/purpose/technical_documentation";
 
 // Type definitions for content request and options
 export interface ContentRequest {
@@ -36,13 +34,15 @@ export interface PromptOptions {
    specificRequirements?: string[];
 }
 
-
 // Individual helper functions for each section
 export function createMetadataSection(config: PersonaConfig): string {
    if (!config.metadata?.name || !config.metadata?.description) {
       return "";
    }
-   return basePrompt({ name: config.metadata.name, description: config.metadata.description });
+   return metadataBasePrompt({
+      name: config.metadata.name,
+      description: config.metadata.description,
+   });
 }
 
 export function createVoiceSection(config: PersonaConfig): string {
@@ -65,13 +65,13 @@ export function createAudienceSection(config: PersonaConfig): string {
    }
    switch (config.audience.base) {
       case "general_public":
-         return generalPublicPrompt();
+         return generalPublicAudiencePrompt();
       case "professionals":
-         return professionalsPrompt();
+         return professionalsAudiencePrompt();
       case "beginners":
-         return beginnersPrompt();
+         return beginnersAudiencePrompt();
       case "customers":
-         return customersPrompt();
+         return customersAudiencePrompt();
       default:
          return "";
    }
@@ -82,16 +82,25 @@ export function createFormattingSection(config: PersonaConfig): string {
       return "";
    }
    switch (config.formatting.style) {
-      case "structured":
-         return structuredPrompt();
+      case "structured": {
+         let listStyle = "";
+         if (config.formatting.listStyle) {
+            listStyle =
+               config.formatting.listStyle === "bullets"
+                  ? "bullet points (•)"
+                  : "numbered lists (1, 2, 3)";
+         }
+         return structuredPrompt({ listStyle });
+      }
       case "narrative":
          return narrativePrompt();
       case "list_based": {
-         let listStyle: string | undefined;
+         let listStyle = "";
          if (config.formatting.listStyle) {
-            listStyle = config.formatting.listStyle === "bullets"
-               ? "bullet points (•)"
-               : "numbered lists (1, 2, 3)";
+            listStyle =
+               config.formatting.listStyle === "bullets"
+                  ? "bullet points (•)"
+                  : "numbered lists (1, 2, 3)";
          }
          return listBasedPrompt({ listStyle });
       }
@@ -161,7 +170,12 @@ export function createLanguageSection(config: PersonaConfig): string {
             break;
       }
    }
-   return baseLanguagePrompt({ languageDisplay, languageRules, culturalNotes });
+   return languageBasePrompt({
+      languageDisplay,
+      languageRules,
+      culturalNotes,
+      language: languageDisplay,
+   });
 }
 
 export function createBrandSection(config: PersonaConfig): string {
@@ -169,29 +183,26 @@ export function createBrandSection(config: PersonaConfig): string {
       return "";
    }
    const raw = config.brand.blacklistWords;
-   const blacklistWords = Array.isArray(raw)
+   const blacklistWords: string[] = Array.isArray(raw)
       ? raw
       : typeof raw === "string" && raw.length > 0
-         ? [raw]
-         : undefined;
+        ? [raw]
+        : [];
    switch (config.brand.integrationStyle) {
       case "strict_guideline":
          return strictGuidelinePrompt({ blacklistWords });
       case "flexible_guideline":
          return flexibleGuidelinePrompt({ blacklistWords });
       case "reference_only":
-         return referenceOnlyPrompt();
+         return referenceOnlyPrompt({ blacklistWords });
       case "creative_blend":
-         return creativeBlendPrompt();
+         return creativeBlendPrompt({ blacklistWords });
       default:
          return "";
    }
 }
 
 export function createPurposeSection(config: PersonaConfig): string {
-   if (!config.purpose) {
-      return "";
-   }
    switch (config.purpose) {
       case "blog_post":
          return blogPostPrompt();
@@ -212,172 +223,18 @@ export function createPurposeSection(config: PersonaConfig): string {
    }
 }
 
-/**
- * Main system prompt generator using modular approach
- */
-export function generateSystemPrompt(personaConfig: PersonaConfig): string {
-   const sections: string[] = [];
+// Task section generator
 
-   // 1. Metadata (AI Identity) - always first if available
-   const metadataSection = createMetadataSection(personaConfig);
-   if (metadataSection) sections.push(metadataSection);
-
-   // 2. Voice & Communication
-   const voiceSection = createVoiceSection(personaConfig);
-   if (voiceSection) sections.push(voiceSection);
-
-   // 3. Target Audience
-   const audienceSection = createAudienceSection(personaConfig);
-   if (audienceSection) sections.push(audienceSection);
-
-   // 4. Content Formatting
-   const formattingSection = createFormattingSection(personaConfig);
-   if (formattingSection) sections.push(formattingSection);
-
-   // 5. Language Guidelines
-   const languageSection = createLanguageSection(personaConfig);
-   if (languageSection) sections.push(languageSection);
-
-   // 6. Brand Integration
-   const brandSection = createBrandSection(personaConfig);
-   if (brandSection) sections.push(brandSection);
-
-   // 7. Purpose Channel
-   const purposeSection = createPurposeSection(personaConfig);
-   if (purposeSection) sections.push(purposeSection);
-
-   return sections
-      .filter((section) => section.trim().length > 0)
-      .join(`\n\n${"=".repeat(80)}\n\n`);
-}
-
-/**
- * Validation functions
- */
-export function validatePersonaConfig(config: PersonaConfig): string[] {
-   const errors: string[] = [];
-
-   if (!config.metadata?.name || config.metadata.name.trim().length === 0) {
-      errors.push("Persona name is required");
-   }
-
-   if (
-      !config.metadata?.description ||
-      config.metadata.description.trim().length === 0
-   ) {
-      errors.push("Persona description is required");
-   }
-
-   return errors;
-}
-
-export function validateContentRequest(request: ContentRequest): string[] {
-   const errors: string[] = [];
-
-   if (!request.topic || request.topic.trim().length === 0) {
-      errors.push("Topic is required");
-   }
-
-   if (
-      !request.briefDescription ||
-      request.briefDescription.trim().length === 0
-   ) {
-      errors.push("Brief description is required");
-   }
-
-   if (request.topic && request.topic.length > 200) {
-      errors.push("Topic should be under 200 characters for clarity");
-   }
-
-   if (request.briefDescription && request.briefDescription.length > 1000) {
-      errors.push("Brief description should be under 1000 characters");
-   }
-
-   return errors;
-}
-
-/**
- * Utility functions
- */
-export function estimatePromptTokens(prompt: string): number {
-   return Math.ceil(prompt.length / 3.5);
-}
-
-export function previewPromptSections(personaConfig: PersonaConfig): string[] {
-   const sections: string[] = [];
-
-   if (personaConfig.metadata?.name) {
-      sections.push(`Persona Identity: ${personaConfig.metadata.name}`);
-   }
-
-   if (personaConfig.voice?.communication) {
-      sections.push(
-         `Voice: ${personaConfig.voice.communication.replace("_", " ")}`,
-      );
-   }
-
-   if (personaConfig.audience?.base) {
-      sections.push(
-         `Audience: ${personaConfig.audience.base.replace("_", " ")}`,
-      );
-   }
-
-   if (personaConfig.formatting?.style) {
-      let formatDesc = personaConfig.formatting.style.replace("_", " ");
-      if (personaConfig.formatting.listStyle) {
-         formatDesc += ` (${personaConfig.formatting.listStyle})`;
-      }
-      sections.push(`Formatting: ${formatDesc}`);
-   }
-
-   if (personaConfig.language?.primary) {
-      let langDesc = personaConfig.language.primary.toUpperCase();
-      if (personaConfig.language.variant) {
-         langDesc += ` (${personaConfig.language.variant})`;
-      }
-      sections.push(`Language: ${langDesc}`);
-   }
-
-   if (personaConfig.brand?.integrationStyle) {
-      sections.push(
-         `Brand Integration: ${personaConfig.brand.integrationStyle.replace("_", " ")}`,
-      );
-   }
-
-   if (personaConfig.purpose) {
-      sections.push(`Purpose: ${personaConfig.purpose.replace("_", " ")}`);
-   }
-
-   sections.push("Content Creation Task");
-
-   return sections;
-}
-
-/**
- * Generate all template structure for debugging/documentation
- */
-export function generateTemplateStructure(): Record<string, string[]> {
-   return {
-      metadata: ["base"],
-      voice: ["first_person", "third_person"],
-      audience: ["general_public", "professionals", "beginners", "customers"],
-      formatting: ["structured", "narrative", "list_based"],
-      language: ["base"],
-      brand: [
-         "strict_guideline",
-         "flexible_guideline",
-         "reference_only",
-         "creative_blend",
-      ],
-      purpose: [
-         "blog_post",
-         "linkedin_post",
-         "twitter_thread",
-         "instagram_post",
-         "email_newsletter",
-         "reddit_post",
-         "technical_documentation",
-      ],
-      task: ["base", "chunking", "distillation", "formatting"],
-   };
+// Main system prompt generator
+export function generateSystemPrompt(config: PersonaConfig): string {
+   const sections = [
+      createMetadataSection(config),
+      createVoiceSection(config),
+      createAudienceSection(config),
+      createFormattingSection(config),
+      createLanguageSection(config),
+      createBrandSection(config),
+      createPurposeSection(config),
+   ];
+   return sections.filter(Boolean).join(`\n\n${"=".repeat(80)}\n\n`);
 }

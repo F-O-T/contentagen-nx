@@ -1,4 +1,8 @@
-export function flexibleGuidelinePrompt(): string {
+export function flexibleGuidelinePrompt({
+   blacklistWords = [],
+}: {
+   blacklistWords?: string[];
+}): string {
    return `# Brand Integration: Flexible Guidelines
 
 **Brand Flexibility Psychology:**
@@ -49,9 +53,11 @@ export function flexibleGuidelinePrompt(): string {
 - **Market relevance:** Brand remains current and responsive
 - **Guideline compliance:** Adaptations stay within agreed brand boundaries
 
-{{#blacklistWords}}
-**Content Restrictions:**
-Avoid using these words or phrases: {{blacklistWords}}
-{{/blacklistWords}}
+${
+   blacklistWords.length
+      ? `**Content Restrictions:**
+Avoid using these words or phrases: ${blacklistWords.join(", ")}`
+      : ""
+}
 `;
 }

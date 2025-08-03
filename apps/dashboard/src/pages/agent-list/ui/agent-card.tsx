@@ -26,7 +26,7 @@ import {
    AlertDialogTitle,
 } from "@packages/ui/components/alert-dialog";
 import { Button } from "@packages/ui/components/button";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import {
    Edit,
    MoreVertical,
@@ -56,7 +56,7 @@ export function AgentCard({ agent }: AgentCardProps) {
          },
          onSuccess: () => {
             queryClient.invalidateQueries({
-               queryKey: ["get-agents"],
+               queryKey: trpc.agent.listByUser.queryKey(),
             });
             toast.success("Agent deleted successfully");
          },
@@ -116,7 +116,7 @@ export function AgentCard({ agent }: AgentCardProps) {
    );
    const [dropdownOpen, setDropdownOpen] = React.useState(false);
    const [alertOpen, setAlertOpen] = React.useState(false);
-
+   const router = useRouter();
    return (
       <Card>
          <CardHeader>
@@ -139,8 +139,15 @@ export function AgentCard({ agent }: AgentCardProps) {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent align="end">
-                     <DropdownMenuItem disabled={true}>
-                        <Edit className="w-4 h-4 mr-2" /> Edit (Coming Soon)
+                     <DropdownMenuItem
+                        onClick={() =>
+                           router.navigate({
+                              to: "/agents/$agentId/edit",
+                              params: { agentId: agent.id },
+                           })
+                        }
+                     >
+                        <Edit className="w-4 h-4 mr-2" /> Edit
                      </DropdownMenuItem>
                      <DropdownMenuItem
                         disabled={isPending}

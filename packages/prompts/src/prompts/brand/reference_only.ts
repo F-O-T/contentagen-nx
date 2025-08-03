@@ -1,4 +1,8 @@
-export function referenceOnlyPrompt(): string {
+export function referenceOnlyPrompt({
+   blacklistWords = [],
+}: {
+   blacklistWords?: string[];
+}): string {
    return `# Brand Integration: Reference Only
 
 **Brand Communication Strategy:**
@@ -21,9 +25,11 @@ export function referenceOnlyPrompt(): string {
 - Subtle brand influence through quality and expertise
 - Professional, neutral tone with brand-informed insights
 
-{{#blacklistWords}}
-**Content Restrictions:**
-Avoid using these words or phrases: {{blacklistWords}}
-{{/blacklistWords}}
+${
+   blacklistWords.length
+      ? `**Content Restrictions:**
+Avoid using these words or phrases: ${blacklistWords.join(", ")}`
+      : ""
+}
 `;
 }

@@ -32,12 +32,9 @@ export async function runDistillationPipeline(payload: {
    try {
       // 1. Chunking
       logger.info("Chunking input text", { inputLength: inputText.length });
-      const chunkingPrompt = getChunkingPrompt().replace(
-         "[INSERT YOUR TEXT HERE]",
-         inputText,
-      );
       const chunkingResult = await generateOpenRouterText(openrouter, {
-         prompt: chunkingPrompt,
+         system: getChunkingPrompt(),
+         prompt: inputText,
       });
       const chunks = chunkingResult.text
          .split(/---CHUNK---/)
@@ -50,18 +47,16 @@ export async function runDistillationPipeline(payload: {
 
       // 2. Distillation
       logger.info("Distilling chunks", { chunkCount: chunks.length });
-      const distillationPrompt = getDistillationPrompt();
       const distilledChunks: string[] = [];
       for (const [i, chunk] of chunks.entries()) {
          logger.info("Distilling chunk", {
             index: i,
             chunkLength: chunk.length,
          });
-         const prompt = distillationPrompt.replace(
-            "[INSERT CHUNK HERE]",
-            chunk,
-         );
-         const result = await generateOpenRouterText(openrouter, { prompt });
+         const result = await generateOpenRouterText(openrouter, {
+            prompt: chunk,
+            system: getDistillationPrompt(),
+         });
          distilledChunks.push(result.text.trim());
       }
       logger.info("Distillation complete", {
@@ -84,12 +79,9 @@ export async function runDistillationPipeline(payload: {
       );
       const formattedChunks: string[] = [];
       for (const chunk of distilledChunks) {
-         const formattingPrompt = getFormattingPrompt().replace(
-            "[INSERT CHUNK HERE]",
-            chunk,
-         );
          const formattingResult = await generateOpenRouterText(openrouter, {
-            prompt: formattingPrompt,
+            system: getFormattingPrompt(),
+            prompt: chunk,
          });
          const formatted = formattingResult.text.trim();
          formattedChunks.push(formatted);

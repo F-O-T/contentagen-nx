@@ -1,16 +1,17 @@
 // FileViewerModal.tsx
 
-import {
-   Dialog,
-   DialogContent,
-   DialogHeader,
-   DialogTitle,
-   DialogDescription,
-} from "@packages/ui/components/dialog";
 import { Button } from "@packages/ui/components/button";
 import { FileText, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-
+import {
+   Credenza,
+   CredenzaBody,
+   CredenzaContent,
+   CredenzaDescription,
+   CredenzaFooter,
+   CredenzaHeader,
+   CredenzaTitle,
+} from "@packages/ui/components/credenza";
 interface FileViewerModalProps {
    open: boolean;
    fileName: string;
@@ -27,19 +28,18 @@ export function FileViewerModal({
    onClose,
 }: FileViewerModalProps) {
    return (
-      <Dialog open={open} onOpenChange={onClose}>
-         <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
-            <DialogHeader>
-               <DialogTitle className="flex items-center gap-2">
+      <Credenza open={open} onOpenChange={onClose}>
+         <CredenzaContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+            <CredenzaHeader>
+               <CredenzaTitle className="flex items-center gap-2">
                   <FileText className="w-5 h-5" />
                   {fileName}
-               </DialogTitle>
-               <DialogDescription>
+               </CredenzaTitle>
+               <CredenzaDescription>
                   Markdown file content preview
-               </DialogDescription>
-            </DialogHeader>
-
-            <div className="flex-1 overflow-auto border rounded-lg p-4 bg-card">
+               </CredenzaDescription>
+            </CredenzaHeader>
+            <CredenzaBody className="flex-1 flex flex-col">
                {loading ? (
                   <div className="flex items-center justify-center h-32">
                      <Loader2 className="w-6 h-6 animate-spin" />
@@ -52,14 +52,14 @@ export function FileViewerModal({
                      <ReactMarkdown>{fileContent}</ReactMarkdown>
                   </div>
                )}
-            </div>
+            </CredenzaBody>
 
-            <div className="flex justify-end pt-4">
+            <CredenzaFooter>
                <Button variant="outline" onClick={onClose}>
                   Close
                </Button>
-            </div>
-         </DialogContent>
-      </Dialog>
+            </CredenzaFooter>
+         </CredenzaContent>
+      </Credenza>
    );
 }

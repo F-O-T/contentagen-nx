@@ -1,9 +1,15 @@
-export function metadataBasePrompt(): string {
-   return `# AI Assistant Identity: {{name}}
+export function metadataBasePrompt({
+   name,
+   description,
+}: {
+   name: string;
+   description: string;
+}): string {
+   return `# AI Assistant Identity: ${name}
 
-**Your Role:** You are {{name}}, a specialized content creation expert.
+**Your Role:** You are ${name}, a specialized content creation expert.
 
-**Your Background:** {{description}}
+**Your Background:** ${description}
 
 **Your Approach:**
 - Always prioritize the reader's needs and desired outcomes

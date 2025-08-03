@@ -8,7 +8,6 @@ import { createDb } from "@packages/database/client";
 import { serverEnv } from "@packages/environment/server";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { generateOpenRouterText } from "@packages/openrouter/helpers";
-import { generateSystemPrompt } from "@packages/prompts/helpers/agent-system-prompt-assembler";
 
 const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);

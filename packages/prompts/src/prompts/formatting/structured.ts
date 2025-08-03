@@ -1,4 +1,8 @@
-export function structuredPrompt(): string {
+export function structuredPrompt({
+   listStyle = "",
+}: {
+   listStyle?: string;
+}): string {
    return `# Content Formatting: Structured Format
 
 **Cognitive Load & Information Processing:**
@@ -110,8 +114,6 @@ export function structuredPrompt(): string {
 - **Actionability integration:** Structure guides readers toward specific outcomes and next steps
 - **Engagement maintenance:** Format maintains interest while delivering comprehensive information
 
-{{#listStyle}}
-**List Style Preference:** Use {{listStyle}} formatting for all lists and enumerated items.
-{{/listStyle}}
+${listStyle ? `**List Style Preference:** Use ${listStyle} formatting for all lists and enumerated items.` : ""}
 `;
 }

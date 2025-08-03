@@ -1,4 +1,8 @@
-export function creativeBlendPrompt(): string {
+export function creativeBlendPrompt({
+   blacklistWords = [],
+}: {
+   blacklistWords?: string[];
+}): string {
    return `# Brand Integration: Creative Blend
 
 **Brand Psychology & Creative Fusion:**
@@ -73,9 +77,11 @@ export function creativeBlendPrompt(): string {
 - **Differentiation effectiveness:** Creative approach distinguishes brand in competitive landscape
 - **Conversion through creativity:** Creative content drives desired brand actions and outcomes
 
-{{#blacklistWords}}
-**Content Restrictions:**
-Avoid using these words or phrases: {{blacklistWords}}
-{{/blacklistWords}}
+${
+   blacklistWords.length
+      ? `**Content Restrictions:**
+Avoid using these words or phrases: ${blacklistWords.join(", ")}`
+      : ""
+}
 `;
 }

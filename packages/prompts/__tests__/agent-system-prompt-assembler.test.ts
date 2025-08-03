@@ -9,14 +9,10 @@ import {
    createBrandSection,
    createPurposeSection,
    createTaskSection,
-   validatePersonaConfig,
-   validateContentRequest,
-   previewPromptSections,
-   generateTemplateStructure,
    type ContentRequest,
    type PromptOptions,
 } from "../src/helpers/agent-system-prompt-assembler";
-import type { PersonaConfig } from "@packages/database/schemas/agent";
+import type { PersonaConfig } from "@packages/database/src/schemas/agent";
 
 describe("Agent System Prompt Assembler", () => {
    const mockPersonaConfig: PersonaConfig = {
@@ -496,4 +492,3 @@ describe("Agent System Prompt Assembler", () => {
       });
    });
 });
-

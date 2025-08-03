@@ -1,4 +1,8 @@
-export function listBasedPrompt(): string {
+export function listBasedPrompt({
+   listStyle = "",
+}: {
+   listStyle?: string;
+}): string {
    return `# Content Formatting: List-Based Format
 
 **List Psychology & Cognitive Processing:**

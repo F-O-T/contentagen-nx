@@ -1,18 +1,24 @@
-export function languageBasePrompt(): string {
-   return `# Language Guidelines: {{languageDisplay}}
+export function languageBasePrompt({
+   languageDisplay,
+   languageRules,
+   culturalNotes,
+   language,
+}: {
+   languageDisplay: string;
+   languageRules: string[];
+   culturalNotes: string[];
+   language: string;
+}): string {
+   return `# Language Guidelines: ${languageDisplay}
 
 **Writing Characteristics:**
-{{#languageRules}}
-- {{.}}
-{{/languageRules}}
+${languageRules.map((rule) => `- ${rule}`).join("\n")}
 
 **Cultural Adaptation:**
-{{#culturalNotes}}
-- {{.}}
-{{/culturalNotes}}
+${culturalNotes.map((note) => `- ${note}`).join("\n")}
 
 **Quality Standards:**
-- Write original content, not translations - think directly in {{language}}
+- Write original content, not translations - think directly in ${language}
 - Use natural, native-level fluency with appropriate idioms and expressions
 - Employ cultural references and examples that resonate with native speakers
 - Apply region-specific spelling, grammar, and punctuation conventions

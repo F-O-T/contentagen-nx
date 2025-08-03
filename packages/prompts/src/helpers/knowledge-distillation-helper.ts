@@ -1,8 +1,9 @@
 // Helper for knowledge distillation prompt flow
 // Import markdown files directly as raw text (requires Vite/Bun/modern bundler with ?raw)
-import { chunkingPrompt } from "../prompt-files/task/chunking";
-import { distillationPrompt } from "../prompt-files/task/distillation";
-import { formattingPrompt } from "../prompt-files/task/formatting";
+
+import { chunkingPrompt } from "../prompts/task/chunking";
+import { distillationPrompt } from "../prompts/task/distillation";
+import { formattingPrompt } from "../prompts/task/formatting";
 
 // Simple template interpolation
 function interpolate(

@@ -48,10 +48,5 @@ export function distillationPrompt(): string {
 - Ensure enhanced content flows naturally
 - Optimize for both human comprehension and machine processing
 
-**INPUT CHUNK:**
-[INSERT CHUNK HERE]
-
-**OUTPUT:**
-Provide the enhanced chunk that maintains all original knowledge while being optimized for embedding and retrieval. Include your reasoning for any significant changes made.
 `;
 }
