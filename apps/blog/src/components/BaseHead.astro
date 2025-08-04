@@ -20,7 +20,10 @@ const {
 ---
 
 <!-- Global Metadata -->
-{import.meta.env.PROD && getAstroPosthogConfig()}
+{import.meta.env.PROD &&<script is:inline>
+
+getAstroPosthogConfig()
+</script> }
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

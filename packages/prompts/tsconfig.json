@@ -1,6 +1,9 @@
 {
    "extends": "@tooling/typescript/internal-package.json",
    "compilerOptions": {},
-   "include": ["globals.d.ts"],
-   "exclude": ["node_modules", "build", "dist"]
+   "exclude": [
+      "node_modules",
+      "build",
+      "dist"
+   ]
 }

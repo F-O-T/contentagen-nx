@@ -14,7 +14,7 @@ import {
    DropdownMenuItem,
 } from "@packages/ui/components/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import { Markdown } from "@packages/ui/components/markdown";
 import {
    Card,
    CardHeader,
@@ -23,6 +23,10 @@ import {
    CardContent,
 } from "@packages/ui/components/card";
 
+import { useTRPC } from "@/integrations/clients";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
+import { toast } from "sonner";
 interface AgentDetailsPromptCardProps {
    basePrompt: string;
 }
@@ -32,7 +36,25 @@ export function AgentDetailsPromptCard({
 }: AgentDetailsPromptCardProps) {
    const [draft, setDraft] = useState(basePrompt);
    const [isModalOpen, setIsModalOpen] = useState(false);
-
+   const trpc = useTRPC();
+   const agentId = useParams({
+      from: "/_dashboard/agents/$agentId/",
+      select: ({ agentId }) => agentId,
+   });
+   const queryClient = useQueryClient();
+   const regeneratePromptMutation = useMutation(
+      trpc.agent.regenerateSystemPrompt.mutationOptions({
+         onError: () => {
+            toast.error("Failed to regenerate system prompt");
+         },
+         onSuccess: () => {
+            queryClient.invalidateQueries({
+               queryKey: trpc.agent.get.queryKey({ id: agentId }),
+            });
+            toast.success("System prompt regenerated successfully");
+         },
+      }),
+   );
    return (
       <Card>
          <CardHeader className="flex justify-between items-start">
@@ -53,17 +75,19 @@ export function AgentDetailsPromptCard({
                      Edit
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                     onSelect={() => alert("Regenerate System Prompt (TODO)")}
+                     onSelect={async () =>
+                        await regeneratePromptMutation.mutateAsync({
+                           id: agentId,
+                        })
+                     }
                   >
-                     Regenerate System Prompt
+                     Regenerate System Prompt{" "}
                   </DropdownMenuItem>{" "}
                </DropdownMenuContent>
             </DropdownMenu>
          </CardHeader>
-         <CardContent className="space-y-4 prose prose-sm max-w-none  dark:prose-invert">
-            <div className="border-primary/30 rounded-lg border bg-muted p-2 overflow-hidden">
-               <ReactMarkdown>{basePrompt}</ReactMarkdown>
-            </div>
+         <CardContent>
+            <Markdown content={basePrompt} />
          </CardContent>
          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogContent>

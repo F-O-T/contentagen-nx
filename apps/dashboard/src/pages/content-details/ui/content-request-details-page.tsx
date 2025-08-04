@@ -1,37 +1,10 @@
-import { Suspense, useState } from "react";
-
-import {
-   Card,
-   CardContent,
-   CardDescription,
-   CardHeader,
-   CardTitle,
-} from "@packages/ui/components/card";
-
+import { Suspense } from "react";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
-import {
-   AlertDialog,
-   AlertDialogAction,
-   AlertDialogCancel,
-   AlertDialogContent,
-   AlertDialogDescription,
-   AlertDialogFooter,
-   AlertDialogHeader,
-   AlertDialogTitle,
-} from "@packages/ui/components/alert-dialog";
-import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useRouteContext } from "@tanstack/react-router";
-import { toast } from "sonner";
-import { useContentExport } from "../lib/use-content-export";
 import { useContentRequestDetails } from "../lib/use-content-request-details";
 import { GeneratedContentDisplay } from "./generated-content-display";
-import { ContentStatsCard, RequestDetailsCard } from "./request-details-cards";
 
 export function ContentRequestDetailsPage() {
    const { data } = useContentRequestDetails();
-
-   const [alertOpen, setAlertOpen] = useState(false);
 
    // Delete mutation
 

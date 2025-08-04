@@ -35,6 +35,11 @@ export default function useFileUpload(
             queryClient.invalidateQueries({
                queryKey: trpc.agent.get.queryKey({ id: agentId }),
             });
+            queryClient.invalidateQueries({
+               queryKey: trpc.agentKnowledge.listByAgentId.queryKey({
+                  agentId,
+               }),
+            });
          },
          onError: () => {
             toast.error("Failed to delete file");

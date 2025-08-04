@@ -1,14 +1,15 @@
 import { useAppForm } from "@packages/ui/components/form";
 import { type FormEvent, useCallback } from "react";
-import  { type PersonaConfig, PersonaConfigSchema } from "@packages/database/schemas/agent-types";
+import {
+   type PersonaConfig,
+   PersonaConfigSchema,
+} from "@packages/database/schemas/agent";
 import type { AgentCreationManualForm } from "../ui/agent-creation-manual-form";
-
 
 export function useAgentForm({
    defaultValues,
    onSubmit,
 }: AgentCreationManualForm) {
-  
    const form = useAppForm({
       defaultValues: {
          metadata: { name: "", description: "" },
@@ -26,7 +27,7 @@ export function useAgentForm({
          formApi.reset();
       },
       validators: {
-         onBlur: PersonaConfigSchema 
+         onBlur: PersonaConfigSchema,
       },
    });
 

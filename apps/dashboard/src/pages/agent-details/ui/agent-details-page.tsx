@@ -31,9 +31,7 @@ export function AgentDetailsPage() {
    const { agent, uploadedFiles, agentId } = useAgentDetails();
 
    // Dialog state
-   const [showPromptDialog, setShowPromptDialog] = useState(false);
    const [showBrandDialog, setShowBrandDialog] = useState(false);
-   const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
 
    return (
       <Suspense>
@@ -84,56 +82,6 @@ export function AgentDetailsPage() {
                loading={isFileLoading}
                onClose={close}
             />
-            {/* Edit System Prompt Dialog */}
-            <Dialog open={showPromptDialog} onOpenChange={setShowPromptDialog}>
-               <DialogContent>
-                  <DialogHeader>
-                     <DialogTitle>Edit System Prompt</DialogTitle>
-                  </DialogHeader>
-                  {/* TODO: Add prompt editing form here */}
-                  <DialogFooter>
-                     <Button
-                        variant="secondary"
-                        onClick={() => setShowPromptDialog(false)}
-                     >
-                        Cancel
-                     </Button>
-                     <Button onClick={() => setShowPromptDialog(false)}>
-                        Save
-                     </Button>
-                  </DialogFooter>
-               </DialogContent>
-            </Dialog>
-            {/* Regenerate Prompt Dialog */}
-            <Dialog
-               open={showRegenerateDialog}
-               onOpenChange={setShowRegenerateDialog}
-            >
-               <DialogContent>
-                  <DialogHeader>
-                     <DialogTitle>Regenerate System Prompt</DialogTitle>
-                  </DialogHeader>
-                  <div>
-                     Are you sure you want to reset the system prompt to the
-                     default based on the persona config?
-                  </div>
-                  <DialogFooter>
-                     <Button
-                        variant="secondary"
-                        onClick={() => setShowRegenerateDialog(false)}
-                     >
-                        Cancel
-                     </Button>
-                     <Button
-                        variant="destructive"
-                        onClick={() => setShowRegenerateDialog(false)}
-                     >
-                        Regenerate
-                     </Button>
-                  </DialogFooter>
-               </DialogContent>
-            </Dialog>
-            {/* Extract Brand Info Dialog */}
             <Dialog open={showBrandDialog} onOpenChange={setShowBrandDialog}>
                <DialogContent>
                   <DialogHeader>

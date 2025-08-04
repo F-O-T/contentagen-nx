@@ -11,7 +11,8 @@
       "@packages/database": "workspace:*"
    },
    "exports": {
-      "./helpers/*": "./src/helpers/*.ts"
+      "./helpers/*": "./src/helpers/*.ts",
+      "./prompt/*": "./src/prompts/*.ts"
    },
    "name": "@packages/prompts",
    "version": "0.2.0",

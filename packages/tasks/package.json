@@ -22,7 +22,8 @@
    "type": "module",
    "exports": {
       ".": "./src/index.ts",
-      "./triggers/*": "./src/trigger/*.ts"
+      "./triggers/*": "./src/trigger/*.ts",
+      "./workflows/*": "./src/workflow/*.ts"
    },
    "version": "0.0.0"
 }

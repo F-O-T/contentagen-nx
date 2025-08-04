@@ -8,10 +8,11 @@ export function CreateAgentPage() {
    const trpc = useTRPC();
    const agentMutation = useMutation(
       trpc.agent.create.mutationOptions({
-         onSuccess: () => {
+         onSuccess: (data) => {
             toast.success("Agent created successfully!");
             navigate({
-               to: "/agents",
+               params: { agentId: data.id },
+               to: "/agents/$agentId",
             });
          },
          onError: (error) => {

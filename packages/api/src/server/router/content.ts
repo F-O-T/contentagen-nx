@@ -1,5 +1,5 @@
-import type { contentGenerationTask } from "@packages/tasks/triggers/content-generation";
 import { tasks } from "@packages/tasks";
+import type { contentGenerationTask } from "@packages/tasks/workflows/content-generation";
 import {
    createContent,
    getContentById,
@@ -15,6 +15,7 @@ import { protectedProcedure, router } from "../trpc";
 import {
    ContentInsertSchema,
    ContentUpdateSchema,
+   ContentSelectSchema,
 } from "@packages/database/schema";
 
 const CreateContentInput = ContentInsertSchema;
@@ -57,22 +58,17 @@ export const contentRouter = router({
                ...input,
                userId, // Use authenticated user ID
             });
-            // Trigger new content generation pipeline task
-            try {
-               // Pass agentId from input or created record
-               await tasks.trigger<typeof contentGenerationTask>(
-                  "content-generation-pipeline",
-                  {
-                     contentId: created.id,
-                     agentId: input.agentId || created.agentId,
+            await tasks.trigger<typeof contentGenerationTask>(
+               "content-generation-workflow",
+               {
+                  agentId: input.agentId,
+                  contentId: created.id,
+                  contentRequest: {
+                     description: input.request.description,
                   },
-               );
-            } catch (err) {
-               console.error(
-                  "Failed to trigger content generation pipeline",
-                  err,
-               );
-            }
+               },
+            );
+            // Trigger new content generation pipeline task
             return created;
          } catch (err) {
             if (err instanceof DatabaseError) {
@@ -148,28 +144,31 @@ export const contentRouter = router({
             throw err;
          }
       }),
-   list: protectedProcedure.query(async ({ ctx }) => {
-      try {
-         const resolvedCtx = await ctx;
-         if (!resolvedCtx.session?.user.id) {
-            throw new TRPCError({
-               code: "UNAUTHORIZED",
-               message: "User must be authenticated to list content.",
-            });
+   list: protectedProcedure
+      .input(
+         ContentSelectSchema.pick({
+            agentId: true,
+         }),
+      )
+      .query(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            if (!resolvedCtx.session?.user.id) {
+               throw new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message: "User must be authenticated to list content.",
+               });
+            }
+            const contents = await listContents(resolvedCtx.db, input.agentId);
+            return contents;
+         } catch (err) {
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
          }
-         const contents = await listContents(
-            resolvedCtx.db,
-            resolvedCtx.session?.user.id,
-         );
-         return contents;
-      } catch (err) {
-         if (err instanceof DatabaseError) {
-            throw new TRPCError({
-               code: "INTERNAL_SERVER_ERROR",
-               message: err.message,
-            });
-         }
-         throw err;
-      }
-   }),
+      }),
 });

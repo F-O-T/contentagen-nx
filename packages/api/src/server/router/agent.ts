@@ -8,13 +8,22 @@ import {
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-
 import { protectedProcedure, router } from "../trpc";
 import { AgentUpdateSchema, type AgentInsert } from "@packages/database/schema";
-import { PersonaConfigSchema } from "@packages/database/schemas/agent-types";
+import { PersonaConfigSchema } from "@packages/database/schemas/agent";
 import { generateSystemPrompt } from "@packages/prompts/helpers/agent-system-prompt-assembler";
 
-const UpdateAgentInput = AgentUpdateSchema;
+const UpdateAgentInput = AgentUpdateSchema.omit({
+   createdAt: true,
+   updatedAt: true,
+   isActive: true,
+   lastGeneratedAt: true,
+   totalDrafts: true,
+   totalPublished: true,
+   uploadedFiles: true,
+   systemPrompt: true,
+   userId: true,
+});
 
 const DeleteAgentInput = z.object({
    id: z.string().uuid(),
@@ -25,6 +34,35 @@ const GetAgentInput = z.object({
 });
 
 export const agentRouter = router({
+   regenerateSystemPrompt: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+         // 1. Load agent
+         const agent = await getAgentById((await ctx).db, input.id);
+         if (!agent)
+            throw new TRPCError({
+               code: "NOT_FOUND",
+               message: "Agent not found",
+            });
+         // 2. Regenerate system prompt
+         const newSystemPrompt = generateSystemPrompt(agent.personaConfig);
+         // 3. Update agent
+         const updated = await updateAgent((await ctx).db, input.id, {
+            systemPrompt: newSystemPrompt,
+         });
+         return updated;
+      }),
+   updateSystemPrompt: protectedProcedure
+      .input(
+         z.object({ id: z.string().uuid(), systemPrompt: z.string().min(1) }),
+      )
+      .mutation(async ({ ctx, input }) => {
+         // 1. Update only the system prompt
+         const updated = await updateAgent((await ctx).db, input.id, {
+            systemPrompt: input.systemPrompt,
+         });
+         return updated;
+      }),
    create: protectedProcedure
       .input(PersonaConfigSchema)
       .mutation(async ({ ctx, input }) => {
@@ -65,9 +103,21 @@ export const agentRouter = router({
                message: "Agent ID is required for update.",
             });
          }
-
+         const getNewSystemPrompt = () => {
+            if (!updateFields.personaConfig) {
+               return;
+            }
+            return generateSystemPrompt({
+               ...updateFields.personaConfig,
+            });
+         };
+         const systemPrompt = getNewSystemPrompt();
          try {
-            await updateAgent((await ctx).db, id, updateFields);
+            await updateAgent((await ctx).db, id, {
+               personaConfig: updateFields.personaConfig,
+               systemPrompt,
+               updatedAt: new Date(),
+            });
             return { success: true };
          } catch (err) {
             if (err instanceof NotFoundError) {

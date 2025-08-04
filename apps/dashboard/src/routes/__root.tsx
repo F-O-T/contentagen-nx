@@ -7,6 +7,7 @@ import {
    Outlet,
    Scripts,
    createRootRouteWithContext,
+   redirect,
 } from "@tanstack/react-router";
 import type { RouterContext } from "../router";
 
@@ -58,6 +59,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
          },
       ],
    }),
+   loader: async ({ location }) => {
+      if (location.href === "/") {
+         throw redirect({ to: "/auth/sign-in" });
+      }
+   },
    component: RootComponent,
 });
 

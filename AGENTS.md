@@ -2,17 +2,6 @@
 
 ## Autonomous Coding Agent Guide
 
-**Build, Lint, and Test Commands:**
-
-- Install deps: `bun install`
-- Build all: `bun run build:all`
-- Dev all: `bun run dev:all`
-- Dev dashboard/server: `bun run dev:dashboard`
-- Lint: `bun run check` (Biome)
-- Format: `bun run format`
-- Typecheck: `bun run typecheck`
-- Test dashboard: `bun run --filter dashboard test`
-- Test single (dashboard): `bun run --filter dashboard test -- <pattern>`
 
 **Code Style Guidelines:**
 

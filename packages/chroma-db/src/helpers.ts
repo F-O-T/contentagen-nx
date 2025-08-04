@@ -41,20 +41,8 @@ export const getOrCreateCollection = async (
       return { collection, justCreated: true };
    }
 };
-
-export interface AddToCollectionArgs {
-   ids: string[];
-   embeddings?: number[][];
-   documents?: string[];
-   metadatas?: Metadata[];
-   uris?: string[];
-}
-
-export interface QueryCollectionArgs {
-   queryEmbeddings: number[][];
-   queryTexts?: string[];
-   nResults?: number;
-}
+type AddToCollectionArgs = Parameters<Collection["add"]>[0];
+type QueryCollectionArgs = Parameters<Collection["query"]>[0];
 
 export const createCollection = async (
    client: ChromaClient,
@@ -76,6 +64,12 @@ export const deleteCollection = async (client: ChromaClient, name: string) => {
    await client.deleteCollection({ name });
 };
 
+export const deleteFromCollection = async (
+   collection: Collection,
+   args: Parameters<Collection["delete"]>[0],
+) => {
+   await collection.delete(args);
+};
 export const addToCollection = async (
    collection: Collection,
    args: AddToCollectionArgs,
