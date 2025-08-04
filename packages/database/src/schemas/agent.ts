@@ -11,7 +11,6 @@ import {
 } from "drizzle-orm/pg-core";
 import {
    createInsertSchema,
-   createSchemaFactory,
    createSelectSchema,
    createUpdateSchema,
 } from "drizzle-zod";

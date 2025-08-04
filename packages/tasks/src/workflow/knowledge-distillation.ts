@@ -1,7 +1,7 @@
 import { task, logger, batch } from "@trigger.dev/sdk/v3";
 import { chunkTextTask } from "../trigger/chunk-text";
 import type { chunkDistillationTask } from "../trigger/chunk-distillation";
-import type { distilledChunkFormatterAndSaveOnChroma } from "../trigger/distilled-chunk-formatter";
+import type { distilledChunkFormatterAndSaveOnChroma } from "../trigger/save-chunk";
 export async function runDistillationPipeline(payload: {
    inputText: string;
    agentId: string;
@@ -57,14 +57,14 @@ export async function runDistillationPipeline(payload: {
       );
       const formattedChunksOutput = formattedChunks.runs.map((result) => {
          if (result.ok) {
-            return result.output.formattedChunk;
+            return result.output.chunk;
          } else {
-            logger.error("Chunk formatting failed", {
+            logger.error("Error on saving chunk in chroma db", {
                error: result.error,
                agentId,
             });
             throw new Error(
-               "Chunk formatting failed. Please check the logs for more details.",
+               "Error saving chunk to ChromaDB. Please check the logs for more details.",
             );
          }
       });

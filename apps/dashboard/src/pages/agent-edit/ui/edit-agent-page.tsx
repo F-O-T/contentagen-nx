@@ -33,7 +33,9 @@ export function EditAgentPage() {
          onSubmit={async (values) => {
             await agentMutation.mutateAsync({
                id: agentId,
-               ...values,
+               personaConfig: {
+                  ...values,
+               },
             });
          }}
          defaultValues={{ ...agent.personaConfig }}

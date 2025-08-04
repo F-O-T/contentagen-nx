@@ -114,8 +114,9 @@ export const agentRouter = router({
          const systemPrompt = getNewSystemPrompt();
          try {
             await updateAgent((await ctx).db, id, {
-               ...updateFields,
+               personaConfig: updateFields.personaConfig,
                systemPrompt,
+               updatedAt: new Date(),
             });
             return { success: true };
          } catch (err) {

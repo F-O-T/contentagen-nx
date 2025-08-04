@@ -49,12 +49,7 @@ export interface AddToCollectionArgs {
    metadatas?: Metadata[];
    uris?: string[];
 }
-
-export interface QueryCollectionArgs {
-   queryEmbeddings: number[][];
-   queryTexts?: string[];
-   nResults?: number;
-}
+type QueryCollectionArgs = Parameters<Collection["query"]>[0];
 
 export const createCollection = async (
    client: ChromaClient,

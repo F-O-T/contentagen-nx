@@ -1,14 +1,10 @@
 import { task, logger } from "@trigger.dev/sdk/v3";
-import { distillationPrompt } from "@packages/prompts/prompt/task/distillation";
-import { generateOpenRouterText } from "@packages/openrouter/helpers";
-import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
 import { createChromaClient } from "@packages/chroma-db/client";
 import {
    addToCollection,
    getOrCreateCollection,
 } from "@packages/chroma-db/helpers";
-const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 const chroma = createChromaClient(serverEnv.CHROMA_DB_URL);
 async function runDistilledChunkFormatterAndSaveOnChroma(payload: {
    chunk: string;
@@ -16,26 +12,12 @@ async function runDistilledChunkFormatterAndSaveOnChroma(payload: {
 }) {
    const { chunk, agentId } = payload;
    try {
-      logger.info("Formatting distilled chunk", {
-         chunkLength: chunk.length,
-         chunk,
-      });
-      const result = await generateOpenRouterText(openrouter, {
-         prompt: chunk,
-         system: distillationPrompt(),
-      });
-      logger.info("Distillation result", {
-         distilledTextLength: result.text.length,
-         resultText: result.text,
-      });
-
-      const formattedChunk = result.text.trim();
       logger.info("Saving distilled chunk to ChromaDB", {
-         distilledChunkLength: formattedChunk.length,
+         distilledChunkLength: chunk.length,
       });
       const collection = await getOrCreateCollection(chroma, "AgentKnowledge");
       await addToCollection(collection.collection, {
-         documents: [formattedChunk],
+         documents: [chunk],
          ids: [crypto.randomUUID()],
          metadatas: [
             {
@@ -49,7 +31,7 @@ async function runDistilledChunkFormatterAndSaveOnChroma(payload: {
          documentCount: collection.collection.count(),
       });
       return {
-         formattedChunk,
+         chunk,
       };
    } catch (error) {
       logger.error(

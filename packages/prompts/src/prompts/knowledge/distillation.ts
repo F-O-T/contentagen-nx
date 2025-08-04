@@ -1,5 +1,3 @@
-// Prompt: Task - Distillation
-// Returns the full distillation prompt as a string
 export function distillationPrompt(): string {
    return `You are a knowledge extraction expert specializing in optimizing content for vector embeddings and retrieval systems. Analyze the provided chunk and enhance it for maximum searchability and comprehension.
 
@@ -48,5 +46,15 @@ export function distillationPrompt(): string {
 - Ensure enhanced content flows naturally
 - Optimize for both human comprehension and machine processing
 
+**OUTPUT FORMAT:**
+Return only the distilled chunk content as plain text. Do not include:
+- Analysis sections
+- Bullet points about changes made
+- Explanatory text
+- Headers or formatting markers
+
+**EXAMPLE:**
+Input: "The company launched it in 2019. This revolutionized the industry."
+Output: "Apple launched the iPhone in 2019. The iPhone revolutionized the smartphone industry by introducing advanced features and user interface design."
 `;
 }

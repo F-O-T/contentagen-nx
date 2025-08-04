@@ -8,7 +8,7 @@ export async function generateOpenRouterText(
 ) {
    const result = await generateText({
       ...params,
-      model: client.chat("google/gemini-2.5-flash"),
+      model: client.chat("google/gemini-2.0-flash-001"),
    });
    return result;
 }

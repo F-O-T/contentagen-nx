@@ -1,6 +1,5 @@
 import { task, logger } from "@trigger.dev/sdk/v3";
-
-import { chunkingPrompt } from "@packages/prompts/prompt/task/chunking";
+import { chunkingPrompt } from "@packages/prompts/prompt/text/chunking";
 import { generateOpenRouterText } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";

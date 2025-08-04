@@ -1,5 +1,5 @@
 import { task, logger } from "@trigger.dev/sdk/v3";
-import { formattingPrompt } from "@packages/prompts/prompt/task/formatting";
+import { distillationPrompt } from "@packages/prompts/prompt/knowledge/distillation";
 import { generateOpenRouterText } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
@@ -12,9 +12,9 @@ async function runChunkDistillation(payload: { chunk: string }) {
       });
       const result = await generateOpenRouterText(openrouter, {
          prompt: chunk,
-         system: formattingPrompt(),
+         system: distillationPrompt(),
       });
-      logger.info("Formatted chunk", {
+      logger.info("Distilled chunk", {
          distilledTextLength: result.text.length,
          resultText: result.text,
       });

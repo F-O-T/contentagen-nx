@@ -14,7 +14,7 @@ import {
    DropdownMenuItem,
 } from "@packages/ui/components/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import { Markdown } from "@packages/ui/components/markdown";
 import {
    Card,
    CardHeader,
@@ -86,10 +86,8 @@ export function AgentDetailsPromptCard({
                </DropdownMenuContent>
             </DropdownMenu>
          </CardHeader>
-         <CardContent className="space-y-4 prose prose-sm max-w-none  dark:prose-invert">
-            <div className="border-primary/30 rounded-lg border bg-muted p-2 overflow-hidden">
-               <ReactMarkdown>{basePrompt}</ReactMarkdown>
-            </div>
+         <CardContent>
+            <Markdown content={basePrompt} />
          </CardContent>
          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogContent>
