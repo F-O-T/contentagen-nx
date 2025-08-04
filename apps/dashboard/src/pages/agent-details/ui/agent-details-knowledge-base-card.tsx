@@ -19,7 +19,7 @@ import {
 import { Upload, FileText, MoreHorizontal } from "lucide-react";
 import useFileUpload, { type UploadedFile } from "../lib/use-file-upload";
 import { useState, useEffect } from "react";
-import { useTRPC } from "@/integrations/clients";
+// import { useTRPC } from "@/integrations/clients";
 import {
    Dialog,
    DialogContent,
@@ -27,15 +27,22 @@ import {
    DialogTitle,
    DialogFooter,
 } from "@packages/ui/components/dialog";
-import {
-   useAppForm,
-   FieldContainer,
-   FieldLabel,
-   FieldMessage,
-   FormSubmit,
-} from "@packages/ui/components/form";
+import { useAppForm } from "@packages/ui/components/form";
 
 const FILE_UPLOAD_LIMIT = 5;
+
+function KnowledgeBaseEmptyState() {
+   return (
+      <div className="text-center py-8 text-muted-foreground">
+         <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+         <p>No brand files yet</p>
+         <p className="text-sm">
+            Upload Markdown files with your brand’s values, voice, or
+            guidelines.
+         </p>
+      </div>
+   );
+}
 
 export interface AgentDetailsKnowledgeBaseCardProps {
    uploadedFiles: UploadedFile[];
@@ -48,14 +55,14 @@ export function AgentDetailsKnowledgeBaseCard({
    uploadedFiles,
    onViewFile,
 
-   agentId,
+   // agentId,
 }: AgentDetailsKnowledgeBaseCardProps) {
    const [isClient, setIsClient] = useState(false);
    useEffect(() => {
       setIsClient(true);
    }, []);
 
-   const trpc = useTRPC();
+   // const trpc = useTRPC();
    const {
       fileInputRef,
       handleFileSelect,
@@ -161,14 +168,7 @@ export function AgentDetailsKnowledgeBaseCard({
                      ))}
                   </div>
                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                     <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                     <p>No brand files yet</p>
-                     <p className="text-sm">
-                        Upload Markdown files with your brand’s values, voice,
-                        or guidelines.
-                     </p>
-                  </div>
+                  <KnowledgeBaseEmptyState />
                )}
             </CardContent>
             {/* Hidden file input for uploads */}
