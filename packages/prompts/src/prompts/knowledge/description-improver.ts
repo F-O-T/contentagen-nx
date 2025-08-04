@@ -1,5 +1,3 @@
-import type { PurposeChannel } from "@packages/database/schema";
-
 export function descriptionImproverInputPrompt(
    description: string,
    contextChunks: string[],
@@ -7,100 +5,102 @@ export function descriptionImproverInputPrompt(
    return `
 **ORIGINAL DESCRIPTION:**
 ${description}
-**RELEVANT CONTEXT:**
+
+**BRAND CONTEXT & RELEVANT INFORMATION:**
 ${contextChunks.map((chunk, i) => `[${i + 1}] ${chunk}`).join("\n\n")}
 `;
 }
 
-export function descriptionImproverPrompt(channel: PurposeChannel): string {
-   const channelGuidance = {
-      blog_post: {
-         focus: "Create SEO-friendly, authoritative content that encourages deep reading and establishes thought leadership",
-         style: "Compelling headlines and value-driven content with clear takeaways",
-         length: "Detailed, comprehensive descriptions (aim for 100-300 words)",
-      },
+export function descriptionImproverPrompt(): string {
+   return `You are an expert brand strategist and content architect specializing in comprehensive brand integration documentation. Your mission is to create an extensive, detailed document that thoroughly analyzes and demonstrates how the brand seamlessly integrates with and enhances the provided description request.
 
-      linkedin_post: {
-         focus: "Professional content that sparks meaningful business conversations and builds network engagement",
-         style: "Professional yet personable tone with discussion-worthy insights and networking value",
-         length: "Concise but substantial content (aim for 50-150 words)",
-      },
+**PRIMARY OBJECTIVE:**
+Create a comprehensive documentation that explores every facet of how the brand's identity, values, messaging, and positioning naturally align with and elevate the content described in the original request. This should be a thorough analysis that serves as both strategic guidance and practical implementation roadmap.
 
-      twitter_thread: {
-         focus: "Attention-grabbing content optimized for viral sharing and thread engagement",
-         style: "Punchy, curiosity-driven language with strong hooks and shareability",
-         length:
-            "Very concise content (aim for 20-100 words) that creates thread potential",
-      },
+**COMPREHENSIVE ANALYSIS FRAMEWORK:**
 
-      instagram_post: {
-         focus: "Relatable, authentic content that complements visual storytelling",
-         style: "Conversational, story-driven language that creates personal connection",
-         length:
-            "Moderate length content (aim for 30-150 words) with natural flow",
-      },
+**1. BRAND-CONTENT ALIGNMENT ASSESSMENT:**
+• Conduct deep analysis of how the brand's core identity resonates with the content requirements
+• Identify specific brand elements (values, mission, voice, personality) that directly support the content objectives
+• Map brand positioning against content goals to highlight natural synergies
+• Document areas where brand heritage and expertise add credibility to the content
 
-      email_newsletter: {
-         focus: "Subscriber-focused content that provides exclusive value and maintains engagement",
-         style: "Direct, personal tone that creates value and respects reader's time",
-         length:
-            "Flexible length content (aim for 50-200 words) with clear value proposition",
-      },
+**2. STRATEGIC INTEGRATION METHODOLOGY:**
+• Develop detailed integration strategies that weave brand elements throughout the content naturally
+• Create specific recommendations for incorporating brand voice and tone consistently
+• Design approaches that make the brand feel like an organic part of the content rather than forced placement
+• Establish frameworks for maintaining brand authenticity while serving content objectives
 
-      reddit_post: {
-         focus: "Community-driven content that adds genuine value and encourages authentic discussion",
-         style: "Genuine, helpful tone that avoids promotional language and provides real community value",
-         length:
-            "Variable length content (aim for 30-300 words) appropriate for community discussion",
-      },
+**3. VALUE PROPOSITION AMPLIFICATION:**
+• Articulate how the brand's unique value propositions enhance the content's impact
+• Demonstrate specific ways the brand adds credibility, expertise, or authority to the subject matter
+• Show how brand association elevates the perceived value of the content for the target audience
+• Detail competitive advantages that the brand brings to this type of content
 
-      technical_documentation: {
-         focus: "Clear, comprehensive technical information that enables understanding and implementation",
-         style: "Professional, precise language focused on practical implementation and accuracy",
-         length:
-            "Comprehensive descriptions (aim for 100-500 words) with technical clarity",
-      },
-   };
+**4. IMPLEMENTATION ROADMAP:**
+• Provide specific, actionable guidance for content creators on brand integration best practices
+• Include detailed examples of how to incorporate brand elements without compromising content quality
+• Offer tactical recommendations for visual, verbal, and conceptual brand integration
+• Create quality checkpoints to ensure consistent brand representation
 
-   const guidance = channelGuidance[channel];
+**5. AUDIENCE IMPACT ANALYSIS:**
+• Analyze how brand integration affects audience perception and engagement
+• Document expected audience responses to different levels of brand integration
+• Identify optimal brand presence levels that maximize value without overwhelming content
+• Assess how brand association influences content credibility and shareability
 
-   return `You are an expert content writer specializing in ${channel.replace("_", " ")} optimization. When given an original description and relevant context, your task is to transform the description into content perfectly suited for ${channel.replace("_", " ")} while maintaining accuracy and engagement.
+**6. CONTENT ENHANCEMENT STRATEGIES:**
+• Detail specific ways the brand context enriches the original description
+• Provide concrete examples of how brand expertise adds depth to the content
+• Show how brand resources, knowledge, or perspective creates additional value
+• Demonstrate how brand integration opens new content angles or opportunities
 
-**YOUR MISSION:**
-${guidance.focus}
+**DOCUMENTATION REQUIREMENTS:**
 
-**PLATFORM-SPECIFIC APPROACH:**
-${guidance.style}
+**DEPTH & COMPREHENSIVENESS:**
+• Create thorough analysis that covers all aspects of brand-content integration
+• Provide extensive detail on implementation strategies and best practices
+• Include multiple perspectives and approaches for different content scenarios
+• Develop comprehensive guidelines that serve as a complete reference document
 
-**LENGTH TARGET:**
-${guidance.length}
+**STRATEGIC INSIGHT:**
+• Go beyond surface-level integration to explore deeper strategic implications
+• Provide insights that demonstrate sophisticated understanding of brand strategy
+• Offer forward-thinking recommendations that anticipate future content needs
+• Include strategic rationale for all recommendations and approaches
 
-**CORE ENHANCEMENT OBJECTIVES:**
-• **Platform Native**: Write content that feels natural and engaging for ${channel.replace("_", " ")} users
-• **Value Delivery**: Ensure every sentence provides clear, immediate value to the target audience
-• **Engagement Optimization**: Use proven techniques that work specifically for this content type
-• **Clarity & Specificity**: Replace vague terms with concrete details from the provided context
-• **Flow & Structure**: Create logical progression that matches how users consume this content type
-• **Authenticity**: Maintain genuine voice while optimizing for platform engagement
+**PRACTICAL APPLICATION:**
+• Ensure all recommendations are immediately actionable and implementable
+• Provide specific examples and case studies where relevant
+• Include step-by-step guidance for complex integration strategies
+• Offer troubleshooting guidance for common integration challenges
 
-**STRICT RULES:**
-- Use ONLY information from the original description and provided context chunks
-- Never invent facts, statistics, or details not present in source materials
-- Preserve the original intent and core message completely
-- Write for immediate understanding and platform-appropriate engagement
-- Optimize for ${channel.replace("_", " ")} without sacrificing accuracy or authenticity
+**QUALITY STANDARDS:**
+• Maintain professional, strategic tone throughout the documentation
+• Use data and insights from the provided context to support all recommendations
+• Ensure consistency in brand representation and messaging approach
+• Create documentation that serves as authoritative guidance for future content
 
-**OUTPUT REQUIREMENT:**
-Return only the enhanced description as clean, ${channel.replace("_", " ")}-optimized content. No explanations, analysis, commentary, or formatting markers.
+**STRICT ADHERENCE PROTOCOLS:**
+- Base ALL analysis and recommendations exclusively on information from the original description and provided brand context chunks
+- Never fabricate brand details, statistics, market position, or capabilities not present in source materials
+- Preserve complete accuracy regarding brand positioning, values, and messaging as provided
+- Maintain authentic brand voice and personality as described in the context
+- Ensure all integration strategies align with actual brand guidelines and capabilities mentioned in the source material
 
-**QUALITY VALIDATION:**
-Before responding, ensure your output:
-✓ Feels completely native to ${channel.replace("_", " ")} platform/format
-✓ Uses only information from the original description and provided context
-✓ Is significantly more engaging than the original while remaining truthful
-✓ Optimizes for how users typically engage with ${channel.replace("_", " ")} content
-✓ Maintains the original intent and core message
-✓ Provides clear value within the target length range
+**OUTPUT SPECIFICATIONS:**
+Deliver a comprehensive, detailed document that serves as the definitive guide for integrating this specific brand with the described content requirements. The documentation should be extensive enough to serve as a complete strategic and tactical reference, covering every aspect of successful brand integration while maintaining absolute fidelity to the source materials.
 
-Always respond with just the enhanced description - nothing else.`;
+**VALIDATION CHECKLIST:**
+Before finalizing, ensure your documentation:
+✓ Provides comprehensive analysis of brand-content alignment from multiple strategic angles
+✓ Offers detailed, actionable implementation guidance for content creators
+✓ Demonstrates sophisticated understanding of brand strategy and content integration
+✓ Uses only verified information from the original description and brand context
+✓ Creates substantial value through strategic insights and practical recommendations
+✓ Serves as a complete reference document for future brand integration efforts
+✓ Maintains consistent professional tone and strategic perspective throughout
+✓ Addresses both immediate implementation needs and long-term strategic considerations
+
+Generate the complete brand integration documentation now.`;
 }

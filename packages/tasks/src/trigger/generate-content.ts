@@ -8,17 +8,25 @@ const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 
 export async function runGenerateContent(payload: {
    agent: { systemPrompt: string };
+   brandDocument: string;
    contentRequest: ContentRequest;
 }) {
-   const { agent, contentRequest } = payload;
+   const { agent, contentRequest, brandDocument } = payload;
    try {
       logger.info("Generating content", {
          description: contentRequest.description,
       });
-      const result = await generateOpenRouterText(openrouter, {
-         system: agent.systemPrompt,
-         prompt: contentRequest.description,
-      });
+      const result = await generateOpenRouterText(
+         openrouter,
+         {
+            model: "medium",
+            reasoning: "medium",
+         },
+         {
+            system: agent.systemPrompt,
+            prompt: `brand document:${brandDocument}, request:${contentRequest.description}`,
+         },
+      );
       logger.info("Content generated", { length: result.text.length });
       if (!result.text || result.text.trim() === "") {
          throw new Error("Generated content is empty");

@@ -31,9 +31,9 @@ export async function runContentGeneration(payload: {
       const ragResult = await knowledgeChunkRag.triggerAndWait({
          agentId,
          purpose: agent.personaConfig.purpose,
-         query: contentRequest.description,
          description: contentRequest.description,
       });
+
       if (!ragResult.ok)
          throw new Error("Failed to improve description with RAG");
       const improvedDescription =
@@ -42,8 +42,9 @@ export async function runContentGeneration(payload: {
       logger.info("Pipeline: Generating content", { agentId });
       const contentResult = await generateContentTask.triggerAndWait({
          agent,
+         brandDocument: improvedDescription,
          contentRequest: {
-            description: improvedDescription,
+            description: payload.contentRequest.description,
          },
       });
       if (!contentResult.ok) throw new Error("Failed to generate content");

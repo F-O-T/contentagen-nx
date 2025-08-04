@@ -22,14 +22,12 @@ import {
    CredenzaClose,
 } from "@packages/ui/components/credenza";
 import { useParams } from "@tanstack/react-router";
-import { useState } from "react";
 import { useTRPC } from "@/integrations/clients";
 import { Markdown } from "@packages/ui/components/markdown";
 
 export function AgentDetailsKnowledgeChunksCard() {
    const { agentId } = useParams({ from: "/_dashboard/agents/$agentId/" });
    const trpc = useTRPC();
-   const [viewedChunk, setViewedChunk] = useState<string | null>(null);
 
    const { data, isLoading, error } = useSuspenseQuery(
       trpc.agentKnowledge.listByAgentId.queryOptions({ agentId }),
@@ -60,10 +58,7 @@ export function AgentDetailsKnowledgeChunksCard() {
                <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                   {data.metadatas.map((meta, idx) => {
                      return (
-                        <Card
-                           key={meta.agentId + idx}
-                           className="relative transition hover:shadow-lg"
-                        >
+                        <Card className="relative transition hover:shadow-lg">
                            <CardHeader>
                               <div className="flex items-center gap-2 mb-2">
                                  <span className="inline-block px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-700">
@@ -103,7 +98,7 @@ export function AgentDetailsKnowledgeChunksCard() {
                                           </CredenzaDescription>
                                        </CredenzaHeader>
                                        <CredenzaBody>
-                                          <ScrollArea className="h-[40vh]">
+                                          <ScrollArea className="max-h-[30vh] h-auto">
                                              {data.documents?.[idx] && (
                                                 <Markdown
                                                    content={data.documents[idx]}

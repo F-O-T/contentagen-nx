@@ -15,6 +15,7 @@ import { protectedProcedure, router } from "../trpc";
 import {
    ContentInsertSchema,
    ContentUpdateSchema,
+   ContentSelectSchema,
 } from "@packages/database/schema";
 
 const CreateContentInput = ContentInsertSchema;
@@ -143,28 +144,31 @@ export const contentRouter = router({
             throw err;
          }
       }),
-   list: protectedProcedure.query(async ({ ctx }) => {
-      try {
-         const resolvedCtx = await ctx;
-         if (!resolvedCtx.session?.user.id) {
-            throw new TRPCError({
-               code: "UNAUTHORIZED",
-               message: "User must be authenticated to list content.",
-            });
+   list: protectedProcedure
+      .input(
+         ContentSelectSchema.pick({
+            agentId: true,
+         }),
+      )
+      .query(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            if (!resolvedCtx.session?.user.id) {
+               throw new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message: "User must be authenticated to list content.",
+               });
+            }
+            const contents = await listContents(resolvedCtx.db, input.agentId);
+            return contents;
+         } catch (err) {
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
          }
-         const contents = await listContents(
-            resolvedCtx.db,
-            resolvedCtx.session?.user.id,
-         );
-         return contents;
-      } catch (err) {
-         if (err instanceof DatabaseError) {
-            throw new TRPCError({
-               code: "INTERNAL_SERVER_ERROR",
-               message: err.message,
-            });
-         }
-         throw err;
-      }
-   }),
+      }),
 });

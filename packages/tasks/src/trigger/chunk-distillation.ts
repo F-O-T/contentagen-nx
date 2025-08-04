@@ -10,10 +10,17 @@ async function runChunkDistillation(payload: { chunk: string }) {
       logger.info("Distilling chunk", {
          chunkLength: chunk.length,
       });
-      const result = await generateOpenRouterText(openrouter, {
-         prompt: chunk,
-         system: distillationPrompt(),
-      });
+      const result = await generateOpenRouterText(
+         openrouter,
+         {
+            model: "small",
+            reasoning: "medium",
+         },
+         {
+            prompt: chunk,
+            system: distillationPrompt(),
+         },
+      );
       logger.info("Distilled chunk", {
          distilledTextLength: result.text.length,
          resultText: result.text,

@@ -19,6 +19,10 @@ const AgentFileDeleteInput = z.object({
 });
 
 import { getFile } from "@packages/files/client";
+import {
+   deleteFromCollection,
+   getOrCreateCollection,
+} from "@packages/chroma-db/helpers";
 
 const GenerateBrandInput = z.object({
    url: z.string().url(),
@@ -97,6 +101,7 @@ export const agentFileRouter = router({
                {
                   inputText: fileContent,
                   agentId,
+                  sourceId: key,
                },
             );
          } catch (err) {
@@ -112,14 +117,22 @@ export const agentFileRouter = router({
          const { agentId, fileName } = input;
          const key = `${agentId}/${fileName}`;
          const bucketName = (await ctx).minioBucket;
-         await (await ctx).minioClient.removeObject(bucketName, key);
-         // Remove from agent's uploadedFiles in DB
-         const db = (await ctx).db;
-         const agent = await getAgentById(db, agentId);
+         const resolvedCtx = await ctx;
+         const chromaCollection = await getOrCreateCollection(
+            resolvedCtx.chromaClient,
+            "AgentKnowledge",
+         );
+         await deleteFromCollection(chromaCollection.collection, {
+            where: {
+               sourceId: key,
+            },
+         });
+         await resolvedCtx.minioClient.removeObject(bucketName, key);
+         const agent = await getAgentById(resolvedCtx.db, agentId);
          const uploadedFiles = (
             Array.isArray(agent.uploadedFiles) ? agent.uploadedFiles : []
          ).filter((f) => f.fileName !== fileName);
-         await updateAgent(db, agentId, { uploadedFiles });
+         await updateAgent(resolvedCtx.db, agentId, { uploadedFiles });
          return { success: true };
       }),
 });

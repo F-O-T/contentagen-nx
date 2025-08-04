@@ -9,8 +9,9 @@ const chroma = createChromaClient(serverEnv.CHROMA_DB_URL);
 async function runDistilledChunkFormatterAndSaveOnChroma(payload: {
    chunk: string;
    agentId: string;
+   sourceId: string;
 }) {
-   const { chunk, agentId } = payload;
+   const { chunk, agentId, sourceId } = payload;
    try {
       logger.info("Saving distilled chunk to ChromaDB", {
          distilledChunkLength: chunk.length,
@@ -23,6 +24,7 @@ async function runDistilledChunkFormatterAndSaveOnChroma(payload: {
             {
                agentId: agentId,
                sourceType: "file_upload",
+               sourceId: sourceId,
             },
          ],
       });

@@ -8,10 +8,16 @@ export async function runChunkText(payload: { inputText: string }) {
    const { inputText } = payload;
    try {
       logger.info("Chunking input text", { inputLength: inputText.length });
-      const chunkingResult = await generateOpenRouterText(openrouter, {
-         system: chunkingPrompt(),
-         prompt: inputText,
-      });
+      const chunkingResult = await generateOpenRouterText(
+         openrouter,
+         {
+            model: "small",
+         },
+         {
+            system: chunkingPrompt(),
+            prompt: inputText,
+         },
+      );
       const chunks = chunkingResult.text
          .split(/---CHUNK---/)
          .map((c) => c.trim())

@@ -12,20 +12,14 @@ import { useParams, useNavigate } from "@tanstack/react-router";
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Activity } from "lucide-react";
 import { useTRPC } from "@/integrations/clients";
-import { useState, useEffect } from "react";
 
 export function AgentDetailsContentRequestsCard() {
-   const [isClient, setIsClient] = useState(false);
-   useEffect(() => {
-      setIsClient(true);
-   }, []);
-
    const { agentId } = useParams({ from: "/_dashboard/agents/$agentId/" });
    const navigate = useNavigate();
    const trpc = useTRPC();
 
    const { data, isLoading, error } = useQuery(
-      trpc.content.list.queryOptions(),
+      trpc.content.list.queryOptions({ agentId }),
    );
 
    return (
@@ -47,72 +41,41 @@ export function AgentDetailsContentRequestsCard() {
                <div>No content requests found.</div>
             ) : (
                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {data.map(
-                     (req: {
-                        id: string;
-                        description: any;
-                        createdAt?: Date;
-                        updatedAt?: Date;
-                        agentId?: string;
-                        generatedContentId?: string | null;
-                        isCompleted?: boolean | null;
-                     }) => (
-                        <Card key={req.id} className="border shadow-sm">
-                           <CardHeader>
-                              <CardTitle className="line-clamp-1 text-base">
-                                 {/* Topic removed, only description shown */}
-                              </CardTitle>
-                              <CardDescription className="line-clamp-1 text-xs">
-                                 {/* Render only the description (briefDescription) */}
-                                 {typeof req.description === "string"
-                                    ? req.description
-                                    : req.description?.content
-                                         ?.map(
-                                            (block: any, idx: number) =>
-                                               block.text || "",
-                                         )
-                                         .join(" ")}
-                              </CardDescription>{" "}
-                           </CardHeader>
-                           <CardContent>
-                              <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                                 <span>
-                                    Created:{" "}
-                                    {isClient
-                                       ? new Date(
-                                            req.createdAt,
-                                         ).toLocaleDateString()
-                                       : "..."}
-                                 </span>
-                              </div>
-                              <InfoItem
-                                 icon={<Activity className="h-4 w-4" />}
-                                 label="Status"
-                                 value={
-                                    req.isCompleted === true
-                                       ? "Completed"
-                                       : "Generating"
-                                 }
-                              />
-                           </CardContent>
-                           <CardFooter>
-                              <Button
-                                 className="w-full"
-                                 variant="outline"
-                                 size="sm"
-                                 onClick={() =>
-                                    navigate({
-                                       to: "/content/requests/$requestId",
-                                       params: { requestId: req.id },
-                                    })
-                                 }
-                              >
-                                 Manage your content
-                              </Button>
-                           </CardFooter>
-                        </Card>
-                     ),
-                  )}
+                  {data.map((req) => (
+                     <Card key={req.id} className="border shadow-sm">
+                        <CardHeader>
+                           <CardTitle className="line-clamp-1 text-base">
+                              {/* Topic removed, only description shown */}
+                           </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                           <InfoItem
+                              icon={<Activity className="h-4 w-4" />}
+                              label="Status"
+                              value={
+                                 req.status === true
+                                    ? "Completed"
+                                    : "Generating"
+                              }
+                           />
+                        </CardContent>
+                        <CardFooter>
+                           <Button
+                              className="w-full"
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                 navigate({
+                                    to: "/content/requests/$requestId",
+                                    params: { requestId: req.id },
+                                 })
+                              }
+                           >
+                              Manage your content
+                           </Button>
+                        </CardFooter>
+                     </Card>
+                  ))}
                </div>
             )}
          </CardContent>

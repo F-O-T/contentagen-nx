@@ -5,8 +5,9 @@ import type { distilledChunkFormatterAndSaveOnChroma } from "../trigger/save-chu
 export async function runDistillationPipeline(payload: {
    inputText: string;
    agentId: string;
+   sourceId: string;
 }) {
-   const { inputText, agentId } = payload;
+   const { inputText, agentId, sourceId } = payload;
    logger.info("Starting distillation pipeline", { agentId });
    try {
       // 1. Chunking
@@ -52,7 +53,7 @@ export async function runDistillationPipeline(payload: {
       >(
          distilledChunks.map((chunk) => ({
             id: "distilled-chunk-formatter-and-save-on-chroma-job",
-            payload: { chunk, agentId },
+            payload: { chunk, agentId, sourceId },
          })),
       );
       const formattedChunksOutput = formattedChunks.runs.map((result) => {

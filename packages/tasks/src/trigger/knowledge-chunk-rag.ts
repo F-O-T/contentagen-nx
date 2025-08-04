@@ -19,14 +19,12 @@ const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 async function runKnowledgeChunkRag(payload: {
    agentId: string;
    purpose: PurposeChannel;
-   query: string;
    description: string;
 }) {
    const { agentId } = payload;
    logger.info("[knowledge-chunk-rag] Start", {
       event: "start",
       agentId: payload.agentId,
-      query: payload.query,
       payload,
    });
 
@@ -41,7 +39,6 @@ async function runKnowledgeChunkRag(payload: {
       logger.info("[knowledge-chunk-rag] Querying collection", {
          event: "query_collection",
          agentId,
-         query: payload.query,
          collectionName: collection.collection.name,
       });
       const chunks = await queryCollection(collection.collection, {
@@ -49,7 +46,7 @@ async function runKnowledgeChunkRag(payload: {
          where: {
             agentId: agentId,
          },
-         queryTexts: [payload.query],
+         queryTexts: [payload.description],
       });
 
       logger.info("[knowledge-chunk-rag] Chunks retrieved", {
@@ -67,17 +64,24 @@ async function runKnowledgeChunkRag(payload: {
          : [];
 
       // Build prompts
-      const systemPrompt = descriptionImproverPrompt(payload.purpose);
+      const systemPrompt = descriptionImproverPrompt();
       const userPrompt = descriptionImproverInputPrompt(
          payload.description,
          contextChunks,
       );
 
       // Call LLM to get improved description
-      const llmResult = await generateOpenRouterText(openrouter, {
-         system: systemPrompt,
-         prompt: userPrompt,
-      });
+      const llmResult = await generateOpenRouterText(
+         openrouter,
+         {
+            model: "small",
+            reasoning: "high",
+         },
+         {
+            system: systemPrompt,
+            prompt: userPrompt,
+         },
+      );
       const improvedDescription = llmResult.text || "";
 
       return {
