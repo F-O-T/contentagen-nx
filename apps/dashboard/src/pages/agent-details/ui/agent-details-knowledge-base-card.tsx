@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
 import {
@@ -21,13 +23,19 @@ import useFileUpload, { type UploadedFile } from "../lib/use-file-upload";
 import { useState, useEffect } from "react";
 // import { useTRPC } from "@/integrations/clients";
 import {
-   Dialog,
-   DialogContent,
-   DialogHeader,
-   DialogTitle,
-   DialogFooter,
-} from "@packages/ui/components/dialog";
+   Credenza,
+   CredenzaContent,
+   CredenzaHeader,
+   CredenzaTitle,
+   CredenzaFooter,
+   CredenzaClose,
+} from "@packages/ui/components/credenza";
 import { useAppForm } from "@packages/ui/components/form";
+import {
+   Dropzone,
+   DropzoneEmptyState,
+   DropzoneContent,
+} from "@packages/ui/components/dropzone";
 
 const FILE_UPLOAD_LIMIT = 5;
 
@@ -72,35 +80,25 @@ export function AgentDetailsKnowledgeBaseCard({
       remainingSlots,
    } = useFileUpload(uploadedFiles, { fileLimit: FILE_UPLOAD_LIMIT });
 
-   // Dialog state for website URL
-   const [showWebsiteDialog, setShowWebsiteDialog] = useState(false);
+   // Separate Credenza states
+   const [showUploadCredenza, setShowUploadCredenza] = useState(false);
+   const [showGenerateCredenza, setShowGenerateCredenza] = useState(false);
 
-   // TanStack Form for website URL
+   // TanStack Form for website URL (with zod validation)
+   const websiteSchema = z.object({
+      websiteUrl: z.string().url("Please enter a valid URL"),
+   });
    const websiteForm = useAppForm({
       defaultValues: { websiteUrl: "" },
+      validators: { onBlur: websiteSchema },
+      onSubmit: async ({ value, formApi }) => {
+         // TODO: implement your generate logic here
+         formApi.reset();
+      },
    });
 
    return (
       <>
-         <Dialog open={showWebsiteDialog} onOpenChange={setShowWebsiteDialog}>
-            <DialogContent>
-               <DialogHeader>
-                  <DialogTitle>Generate Brand Files from Website</DialogTitle>
-               </DialogHeader>
-               <form onSubmit={websiteForm.handleSubmit}>
-                  <Input placeholder="https://yourbrand.com" autoFocus />
-                  <DialogFooter className="mt-4">
-                     <Button
-                        variant="outline"
-                        type="button"
-                        onClick={() => setShowWebsiteDialog(false)}
-                     >
-                        Cancel
-                     </Button>
-                  </DialogFooter>
-               </form>
-            </DialogContent>
-         </Dialog>
          <Card>
             <CardHeader className="">
                <CardTitle>Brand Knowledge</CardTitle>
@@ -194,18 +192,120 @@ export function AgentDetailsKnowledgeBaseCard({
                         </Button>
                      </DropdownMenuTrigger>
                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={handleButtonClick}>
+                        <DropdownMenuItem
+                           onSelect={() => {
+                              setShowUploadCredenza(true);
+                           }}
+                        >
                            Upload Files
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                           onSelect={() => setShowWebsiteDialog(true)}
+                           onSelect={() => {
+                              setShowGenerateCredenza(true);
+                           }}
                         >
-                           Generate Files with Website URL
+                           Generate from Website
                         </DropdownMenuItem>
                      </DropdownMenuContent>
                   </DropdownMenu>
                )}
             </CardFooter>
+            {/* Credenza for file upload */}
+            <Credenza
+               open={showUploadCredenza}
+               onOpenChange={setShowUploadCredenza}
+            >
+               <CredenzaContent>
+                  <CredenzaHeader>
+                     <CredenzaTitle>Upload Brand Files</CredenzaTitle>
+                  </CredenzaHeader>
+                  <Dropzone
+                     accept={{ "text/markdown": [".md"] }}
+                     maxFiles={remainingSlots}
+                     onDrop={(acceptedFiles) =>
+                        handleFileSelect({
+                           target: { files: acceptedFiles },
+                        })
+                     }
+                  >
+                     <DropzoneEmptyState>
+                        <div className="flex flex-col items-center justify-center py-8">
+                           <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                           <span className="text-sm text-muted-foreground">
+                              Drag and drop or click to upload Markdown files
+                           </span>
+                        </div>
+                     </DropzoneEmptyState>
+                     <DropzoneContent />
+                  </Dropzone>
+                  <div className="text-xs text-muted-foreground mt-2">
+                     Upload Markdown files with your brand’s values, voice, or
+                     guidelines.
+                  </div>
+                  <CredenzaFooter className="mt-4">
+                     <CredenzaClose asChild>
+                        <Button variant="outline" type="button">
+                           Close
+                        </Button>
+                     </CredenzaClose>
+                  </CredenzaFooter>
+               </CredenzaContent>
+            </Credenza>
+            {/* Credenza for website generation */}
+            <Credenza
+               open={showGenerateCredenza}
+               onOpenChange={setShowGenerateCredenza}
+            >
+               <CredenzaContent>
+                  <CredenzaHeader>
+                     <CredenzaTitle>
+                        Generate Brand Files from Website
+                     </CredenzaTitle>
+                  </CredenzaHeader>
+                  <form onSubmit={websiteForm.handleSubmit}>
+                     <websiteForm.AppField name="websiteUrl">
+                        {(field) => (
+                           <field.FieldContainer>
+                              <field.FieldLabel>Website URL</field.FieldLabel>
+                              <Input
+                                 autoFocus
+                                 id={field.name}
+                                 name={field.name}
+                                 placeholder="https://yourbrand.com"
+                                 onBlur={field.handleBlur}
+                                 onChange={(e) =>
+                                    field.handleChange(e.target.value)
+                                 }
+                                 value={field.state.value}
+                                 type="url"
+                              />
+                              <field.FieldMessage />
+                           </field.FieldContainer>
+                        )}
+                     </websiteForm.AppField>
+                     <websiteForm.Subscribe>
+                        {(formState) => (
+                           <CredenzaFooter className="mt-4">
+                              <CredenzaClose asChild>
+                                 <Button variant="outline" type="button">
+                                    Cancel
+                                 </Button>
+                              </CredenzaClose>
+                              <Button
+                                 type="submit"
+                                 disabled={
+                                    !formState.canSubmit ||
+                                    formState.isSubmitting
+                                 }
+                              >
+                                 Generate
+                              </Button>
+                           </CredenzaFooter>
+                        )}
+                     </websiteForm.Subscribe>
+                  </form>
+               </CredenzaContent>
+            </Credenza>{" "}
          </Card>
       </>
    );
