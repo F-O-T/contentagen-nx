@@ -66,8 +66,8 @@ export function AgentDetailsContentRequestsCard() {
                               size="sm"
                               onClick={() =>
                                  navigate({
-                                    to: "/content/requests/$requestId",
-                                    params: { requestId: req.id },
+                                    to: "/content/$id",
+                                    params: { id: req.id },
                                  })
                               }
                            >
