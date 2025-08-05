@@ -8,7 +8,7 @@
       "@arcjet/inspect": "catalog:security",
       "@arcjet/node": "catalog:security",
       "@arcjet/bun": "catalog:security",
-      "@packages/enviroment": "workspace:*"
+      "@packages/environment": "workspace:*"
    },
    "license": "MIT",
    "name": "@packages/arcjet",

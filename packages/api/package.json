@@ -35,6 +35,6 @@
       "@tooling/typescript": "workspace:*",
       "typescript": "catalog:development",
       "vite": "catalog:vite",
-      "vitest": "catalog:vite"
+      "vitest": "catalog:testing"
    }
 }

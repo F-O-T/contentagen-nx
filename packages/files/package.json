@@ -18,6 +18,7 @@
    },
    "version": "0.0.0",
    "dependencies": {
+      "@packages/environment": "workspace:*",
       "fflate": "catalog:files",
       "minio": "catalog:files",
       "sharp": "catalog:files"

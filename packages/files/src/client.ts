@@ -1,6 +1,5 @@
 import { Client } from "minio";
-import type { Static } from "@sinclair/typebox";
-import { Type } from "@sinclair/typebox";
+import type { ServerEnv } from "@packages/environment/server";
 const parseEndpoint = (endpoint: string) => {
    // Remove protocol if present
    const cleanEndpoint = endpoint.replace(/^https?:\/\//, "");
@@ -13,17 +12,16 @@ const parseEndpoint = (endpoint: string) => {
       port: portStr
          ? parseInt(portStr, 10)
          : endpoint.includes("https")
-           ? 443
-           : 9000,
+            ? 443
+            : 9000,
    };
 };
-const EnvSchema = Type.Object({
-   MINIO_ENDPOINT: Type.String(),
-   MINIO_ACCESS_KEY: Type.String(),
-   MINIO_SECRET_KEY: Type.String(),
-   MINIO_BUCKET: Type.String(),
-});
-export function getMinioClient(env: Static<typeof EnvSchema>) {
+export function getMinioClient(
+   env: Pick<
+      ServerEnv,
+      "MINIO_ENDPOINT" | "MINIO_ACCESS_KEY" | "MINIO_SECRET_KEY"
+   >,
+): Client {
    const { endPoint, port } = parseEndpoint(env.MINIO_ENDPOINT);
 
    const internalClient = new Client({
