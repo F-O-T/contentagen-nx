@@ -4,7 +4,7 @@ import { generateOpenRouterText } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
-export async function runChunkText(payload: { inputText: string }) {
+async function runChunkText(payload: { inputText: string }) {
    const { inputText } = payload;
    try {
       logger.info("Chunking input text", { inputLength: inputText.length });

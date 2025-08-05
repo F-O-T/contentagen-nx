@@ -5,10 +5,7 @@ import { serverEnv } from "@packages/environment/server";
 
 const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
 
-export async function runSaveContent(payload: {
-   contentId: string;
-   content: string;
-}) {
+async function runSaveContent(payload: { contentId: string; content: string }) {
    const { contentId, content } = payload;
    try {
       logger.info("Saving generated content", { contentId });

@@ -166,35 +166,26 @@ export const contentRouter = router({
             throw err;
          }
       }),
-   listByUserId: protectedProcedure
-      .input(
-         ContentSelectSchema.pick({
-            userId: true,
-         }),
-      )
-      .query(async ({ ctx, input }) => {
-         try {
-            const resolvedCtx = await ctx;
-            if (!resolvedCtx.session?.user.id) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message:
-                     "User must be authenticated to list content by user.",
-               });
-            }
-            const contents = await getContentsByUserId(
-               resolvedCtx.db,
-               input.userId,
-            );
-            return contents;
-         } catch (err) {
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+   listByUserId: protectedProcedure.query(async ({ ctx }) => {
+      try {
+         const resolvedCtx = await ctx;
+         const userId = resolvedCtx.session?.user.id;
+         if (!userId) {
+            throw new TRPCError({
+               code: "UNAUTHORIZED",
+               message: "User must be authenticated to list content by user.",
+            });
          }
-      }),
+         const contents = await getContentsByUserId(resolvedCtx.db, userId);
+         return contents;
+      } catch (err) {
+         if (err instanceof DatabaseError) {
+            throw new TRPCError({
+               code: "INTERNAL_SERVER_ERROR",
+               message: err.message,
+            });
+         }
+         throw err;
+      }
+   }),
 });

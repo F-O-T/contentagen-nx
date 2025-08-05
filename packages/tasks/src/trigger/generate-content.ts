@@ -6,7 +6,7 @@ import type { ContentRequest } from "@packages/database/schema";
 
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 
-export async function runGenerateContent(payload: {
+async function runGenerateContent(payload: {
    agent: { systemPrompt: string };
    brandDocument: string;
    contentRequest: ContentRequest;
@@ -19,8 +19,8 @@ export async function runGenerateContent(payload: {
       const result = await generateOpenRouterText(
          openrouter,
          {
-            model: "medium",
-            reasoning: "medium",
+            model: "small",
+            reasoning: "high",
          },
          {
             system: agent.systemPrompt,
