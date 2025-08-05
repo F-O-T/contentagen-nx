@@ -27,9 +27,9 @@
       "@packages/chroma-db": "workspace:*",
       "@trpc/client": "catalog:trpc",
       "@trpc/server": "catalog:trpc",
-      "superjson": "^2.2.2",
-      "url-join": "^5.0.0",
-      "zod": "^3.25.1"
+      "superjson": "catalog:trpc",
+      "url-join": "catalog:trpc",
+      "zod": "catalog:validation"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",

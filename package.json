@@ -40,6 +40,21 @@
    ],
    "workspaces": {
       "catalogs": {
+         "files": {
+            "fflate": "^0.8.2",
+            "minio": "^8.0.5",
+            "sharp": "^0.34.3"
+         },
+         "tasks": {
+            "@trigger.dev/sdk": "^3.3.17",
+            "@trigger.dev/build": "^3.3.17"
+         },
+         "security": {
+            "@arcjet/astro": "^1.0.0-beta.8",
+            "@arcjet/inspect": "^1.0.0-beta.8",
+            "@arcjet/node": "^1.0.0-beta.8",
+            "@arcjet/bun": "^1.0.0-beta.8"
+         },
          "validation": {
             "zod": "4.0.14"
          },
@@ -51,6 +66,8 @@
             "shx": "0.4.0"
          },
          "trpc": {
+            "superjson": "^2.2.2",
+            "url-join": "^5.0.0",
             "@trpc/client": "^11.4.3",
             "@trpc/tanstack-react-query": "^11.4.3",
             "@trpc/server": "^11.4.3"

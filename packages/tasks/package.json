@@ -4,11 +4,11 @@
       "@packages/prompts": "workspace:*",
       "@packages/chroma-db": "workspace:*",
       "@sinclair/typebox": "catalog:database",
-      "@trigger.dev/sdk": "^3.3.17"
+      "@trigger.dev/sdk": "catalog:tasks"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
-      "@trigger.dev/build": "^3.3.17",
+      "@trigger.dev/build": "catalog:tasks",
       "typescript": "catalog:development"
    },
    "license": "MIT",

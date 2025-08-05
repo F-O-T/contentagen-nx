@@ -1,6 +1,3 @@
-// Astro-specific shared config
-
-// Only import types for bot categories for correct typing
 import type { ArcjetWellKnownBot, ArcjetBotCategory } from "@arcjet/node";
 
 export const ARCJET_CONFIG = {
