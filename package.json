@@ -123,8 +123,9 @@
             "react-email": "^4.0.17",
             "@react-email/components": "^0.1.1"
          },
-         "openrouter":{
-            "@openrouter/ai-sdk-provider": "^0.7.3"
+         "openrouter": {
+            "@openrouter/ai-sdk-provider": "^0.7.3",
+            "ai": "^5.0.2"
          }
       },
       "packages": [
