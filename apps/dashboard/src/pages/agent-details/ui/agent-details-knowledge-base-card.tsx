@@ -97,145 +97,163 @@ export function AgentDetailsKnowledgeBaseCard({
    });
 
    // Upload Brand Files Credenza (self-contained version)
-   function UploadBrandFilesCredenza({ open, onOpenChange }: {
-     open: boolean;
-     onOpenChange: (open: boolean) => void;
+   function UploadBrandFilesCredenza({
+      open,
+      onOpenChange,
+   }: {
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
    }) {
-     const FILE_UPLOAD_LIMIT = 5;
-     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-     const [error, setError] = useState<string | null>(null);
+      const FILE_UPLOAD_LIMIT = 5;
+      const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+      const [error, setError] = useState<string | null>(null);
 
-     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement> | { target: { files: File[] } }) => {
-       const files: File[] = "target" in e && e.target.files ? Array.from(e.target.files) : [];
-       if (!files.length) return;
-       if ((uploadedFiles.length + files.length) > FILE_UPLOAD_LIMIT) {
-         setError(`You can upload up to ${FILE_UPLOAD_LIMIT} files.`);
-         return;
-       }
-       const newFiles = files.map((file) => ({
-         fileName: file.name,
-         fileUrl: URL.createObjectURL(file),
-         uploadedAt: new Date().toISOString(),
-       }));
-       setUploadedFiles((prev) => [...prev, ...newFiles]);
-       setError(null);
-     };
+      const handleFileSelect = (
+         e: React.ChangeEvent<HTMLInputElement> | { target: { files: File[] } },
+      ) => {
+         const files: File[] =
+            "target" in e && e.target.files ? Array.from(e.target.files) : [];
+         if (!files.length) return;
+         if (uploadedFiles.length + files.length > FILE_UPLOAD_LIMIT) {
+            setError(`You can upload up to ${FILE_UPLOAD_LIMIT} files.`);
+            return;
+         }
+         const newFiles = files.map((file) => ({
+            fileName: file.name,
+            fileUrl: URL.createObjectURL(file),
+            uploadedAt: new Date().toISOString(),
+         }));
+         setUploadedFiles((prev) => [...prev, ...newFiles]);
+         setError(null);
+      };
 
-     return (
-       <Credenza open={open} onOpenChange={onOpenChange}>
-         <CredenzaContent>
-           <CredenzaHeader>
-             <CredenzaTitle>Upload Brand Files</CredenzaTitle>
-           </CredenzaHeader>
-           <Dropzone
-             accept={{ "text/markdown": [".md"] }}
-             maxFiles={FILE_UPLOAD_LIMIT}
-             onDrop={(acceptedFiles: File[]) =>
-               handleFileSelect({ target: { files: acceptedFiles } })
-             }
-           >
-             <DropzoneEmptyState>
-               <div className="flex flex-col items-center justify-center py-8">
-                 <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                 <span className="text-sm text-muted-foreground">
-                   Drag and drop or click to upload Markdown files
-                 </span>
-               </div>
-             </DropzoneEmptyState>
-             <DropzoneContent />
-           </Dropzone>
-           {error && <div className="text-xs text-red-500 mt-2">{error}</div>}
-           <div className="text-xs text-muted-foreground mt-2">
-             Upload Markdown files with your brand’s values, voice, or
-             guidelines.
-           </div>
-           <div className="mt-4 space-y-2">
-             {uploadedFiles.length > 0 && uploadedFiles.map((file) => (
-               <div key={file.fileName} className="flex items-center gap-2">
-                 <FileText className="w-4 h-4 text-muted-foreground" />
-                 <span className="text-xs">{file.fileName}</span>
-               </div>
-             ))}
-           </div>
-           <CredenzaFooter className="mt-4">
-             <CredenzaClose asChild>
-               <Button variant="outline" type="button">
-                 Close
-               </Button>
-             </CredenzaClose>
-           </CredenzaFooter>
-         </CredenzaContent>
-       </Credenza>
-     );
-   }
-   
-   // Generate Brand Files from Website Credenza (self-contained version)
-   function GenerateBrandFilesCredenza({ open, onOpenChange, onGenerate }: {
-     open: boolean;
-     onOpenChange: (open: boolean) => void;
-     onGenerate?: (websiteUrl: string) => void;
-   }) {
-     const [websiteUrl, setWebsiteUrl] = useState("");
-     const [error, setError] = useState<string | null>(null);
-     const [isSubmitting, setIsSubmitting] = useState(false);
-     const urlSchema = z.string().url("Please enter a valid URL");
-
-     const handleSubmit = async (e: React.FormEvent) => {
-       e.preventDefault();
-       setError(null);
-       try {
-         urlSchema.parse(websiteUrl);
-         setIsSubmitting(true);
-         if (onGenerate) onGenerate(websiteUrl);
-         setIsSubmitting(false);
-         setWebsiteUrl("");
-         onOpenChange(false);
-       } catch (err: any) {
-         setError(err.message || "Invalid URL");
-       }
-     };
-
-     return (
-       <Credenza open={open} onOpenChange={onOpenChange}>
-         <CredenzaContent>
-           <CredenzaHeader>
-             <CredenzaTitle>
-               Generate Brand Files from Website
-             </CredenzaTitle>
-           </CredenzaHeader>
-           <form onSubmit={handleSubmit}>
-             <div className="mb-2">
-               <Input
-                 autoFocus
-                 name="websiteUrl"
-                 placeholder="https://yourbrand.com"
-                 value={websiteUrl}
-                 type="url"
-                 onChange={e => setWebsiteUrl(e.target.value)}
-               />
-             </div>
-             {error && <div className="text-xs text-red-500 mb-2">{error}</div>}
-             <CredenzaFooter className="mt-4">
-               <CredenzaClose asChild>
-                 <Button variant="outline" type="button">
-                   Cancel
-                 </Button>
-               </CredenzaClose>
-               <Button
-                 type="submit"
-                 disabled={isSubmitting || !websiteUrl}
+      return (
+         <Credenza open={open} onOpenChange={onOpenChange}>
+            <CredenzaContent>
+               <CredenzaHeader>
+                  <CredenzaTitle>Upload Brand Files</CredenzaTitle>
+               </CredenzaHeader>
+               <Dropzone
+                  accept={{ "text/markdown": [".md"] }}
+                  maxFiles={FILE_UPLOAD_LIMIT}
+                  onDrop={(acceptedFiles: File[]) =>
+                     handleFileSelect({ target: { files: acceptedFiles } })
+                  }
                >
-                 Generate
-               </Button>
-             </CredenzaFooter>
-           </form>
-         </CredenzaContent>
-       </Credenza>
-     );
+                  <DropzoneEmptyState>
+                     <div className="flex flex-col items-center justify-center py-8">
+                        <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                           Drag and drop or click to upload Markdown files
+                        </span>
+                     </div>
+                  </DropzoneEmptyState>
+                  <DropzoneContent />
+               </Dropzone>
+               {error && (
+                  <div className="text-xs text-red-500 mt-2">{error}</div>
+               )}
+               <div className="text-xs text-muted-foreground mt-2">
+                  Upload Markdown files with your brand’s values, voice, or
+                  guidelines.
+               </div>
+               <div className="mt-4 space-y-2">
+                  {uploadedFiles.length > 0 &&
+                     uploadedFiles.map((file) => (
+                        <div
+                           key={file.fileName}
+                           className="flex items-center gap-2"
+                        >
+                           <FileText className="w-4 h-4 text-muted-foreground" />
+                           <span className="text-xs">{file.fileName}</span>
+                        </div>
+                     ))}
+               </div>
+               <CredenzaFooter className="mt-4">
+                  <CredenzaClose asChild>
+                     <Button variant="outline" type="button">
+                        Close
+                     </Button>
+                  </CredenzaClose>
+               </CredenzaFooter>
+            </CredenzaContent>
+         </Credenza>
+      );
    }
-   
+
+   // Generate Brand Files from Website Credenza (self-contained version)
+   function GenerateBrandFilesCredenza({
+      open,
+      onOpenChange,
+      onGenerate,
+   }: {
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+      onGenerate?: (websiteUrl: string) => void;
+   }) {
+      const [websiteUrl, setWebsiteUrl] = useState("");
+      const [error, setError] = useState<string | null>(null);
+      const [isSubmitting, setIsSubmitting] = useState(false);
+      const urlSchema = z.string().url("Please enter a valid URL");
+
+      const handleSubmit = async (e: React.FormEvent) => {
+         e.preventDefault();
+         setError(null);
+         try {
+            urlSchema.parse(websiteUrl);
+            setIsSubmitting(true);
+            if (onGenerate) onGenerate(websiteUrl);
+            setIsSubmitting(false);
+            setWebsiteUrl("");
+            onOpenChange(false);
+         } catch (err: any) {
+            setError(err.message || "Invalid URL");
+         }
+      };
+
+      return (
+         <Credenza open={open} onOpenChange={onOpenChange}>
+            <CredenzaContent>
+               <CredenzaHeader>
+                  <CredenzaTitle>
+                     Generate Brand Files from Website
+                  </CredenzaTitle>
+               </CredenzaHeader>
+               <form onSubmit={handleSubmit}>
+                  <div className="mb-2">
+                     <Input
+                        autoFocus
+                        name="websiteUrl"
+                        placeholder="https://yourbrand.com"
+                        value={websiteUrl}
+                        type="url"
+                        onChange={(e) => setWebsiteUrl(e.target.value)}
+                     />
+                  </div>
+                  {error && (
+                     <div className="text-xs text-red-500 mb-2">{error}</div>
+                  )}
+                  <CredenzaFooter className="mt-4">
+                     <CredenzaClose asChild>
+                        <Button variant="outline" type="button">
+                           Cancel
+                        </Button>
+                     </CredenzaClose>
+                     <Button
+                        type="submit"
+                        disabled={isSubmitting || !websiteUrl}
+                     >
+                        Generate
+                     </Button>
+                  </CredenzaFooter>
+               </form>
+            </CredenzaContent>
+         </Credenza>
+      );
+   }
+
    return (
-      <Card>
+      <Card className="h-full">
          <CardHeader className="">
             <CardTitle>Brand Knowledge</CardTitle>
             <CardDescription>
@@ -247,7 +265,7 @@ export function AgentDetailsKnowledgeBaseCard({
                </Badge>
             </CardAction>
          </CardHeader>
-         <CardContent>
+         <CardContent className="h-full">
             {uploadedFiles.length > 0 ? (
                <div className="space-y-2">
                   {uploadedFiles.map((file, index) => (
@@ -265,8 +283,8 @@ export function AgentDetailsKnowledgeBaseCard({
                                  Uploaded{" "}
                                  {isClient
                                     ? new Date(
-                                         file.uploadedAt,
-                                      ).toLocaleDateString()
+                                       file.uploadedAt,
+                                    ).toLocaleDateString()
                                     : "..."}
                               </p>
                            </div>

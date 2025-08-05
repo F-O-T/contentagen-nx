@@ -1,5 +1,5 @@
 import { content } from "../schemas/content";
-import type { Content, ContentInsert } from "../schemas/content";
+import type { ContentSelect as Content, ContentInsert } from "../schemas/content";
 import type { DatabaseInstance } from "../client";
 import { DatabaseError, NotFoundError } from "@packages/errors";
 import { eq } from "drizzle-orm";
@@ -91,6 +91,21 @@ export async function listContents(
    } catch (err) {
       throw new DatabaseError(
          `Failed to list contents: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function getContentsByUserId(
+   dbClient: DatabaseInstance,
+   userId: string,
+): Promise<Content[]> {
+   try {
+      return await dbClient.query.content.findMany({
+         where: eq(content.userId, userId),
+      });
+   } catch (err) {
+      throw new DatabaseError(
+         `Failed to get contents by userId: ${(err as Error).message}`,
       );
    }
 }

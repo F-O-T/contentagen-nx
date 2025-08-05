@@ -84,8 +84,7 @@
             "@astrojs/react": "^4.3.0",
             "@astrojs/sitemap": "^3.4.1",
             "@lucide/astro": "^0.511.0",
-            "astro": "5.10.0",
-            "@arcjet/astro": "^1.0.0-beta.8"
+            "astro": "5.10.0"
          },
          "tanstack": {
             "@tanstack/react-router-devtools": "1.130.8",

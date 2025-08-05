@@ -6,10 +6,10 @@ import {
    updateContent,
    deleteContent,
    listContents,
+   getContentsByUserId,
 } from "@packages/database/repositories/content-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 
 import { protectedProcedure, router } from "../trpc";
 import {
@@ -18,30 +18,12 @@ import {
    ContentSelectSchema,
 } from "@packages/database/schema";
 
-const CreateContentInput = ContentInsertSchema;
-const UpdateContentInput = ContentUpdateSchema;
-
-const DeleteContentInput = z.object({
-   id: z.string().uuid(),
-});
-
-const GetContentInput = z.object({
-   id: z.string().uuid(),
-});
-
 export const contentRouter = router({
    create: protectedProcedure
       .input(
-         CreateContentInput.omit({
-            userId: true, // userId is auto-generated
-            id: true, // id is auto-generated
-            createdAt: true, // createdAt is set automatically
-            updatedAt: true, // updatedAt is set automatically
-            title: true, // title is required for creation, can be added later
-            body: true, // body is optional for creation, can be added later
-            meta: true, // meta is optional for creation, can be added later
-            stats: true, // stats is optional for creation, can be added later
-            status: true, // status is optional for creation, can be set to 'draft'
+         ContentInsertSchema.pick({
+            agentId: true, // agentId is required for creation
+            request: true, // request is required for creation
          }),
       )
       .output(ContentInsertSchema)
@@ -81,7 +63,7 @@ export const contentRouter = router({
          }
       }),
    update: protectedProcedure
-      .input(UpdateContentInput)
+      .input(ContentUpdateSchema)
       .mutation(async ({ ctx, input }) => {
          const { id, ...updateFields } = input;
          if (!id) {
@@ -107,10 +89,17 @@ export const contentRouter = router({
          }
       }),
    delete: protectedProcedure
-      .input(DeleteContentInput)
+      .input(ContentInsertSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
          const { id } = input;
          try {
+            if (!id) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Content ID is required.",
+               });
+            }
+
             await deleteContent((await ctx).db, id);
             return { success: true };
          } catch (err) {
@@ -127,9 +116,15 @@ export const contentRouter = router({
          }
       }),
    get: protectedProcedure
-      .input(GetContentInput)
+      .input(ContentInsertSchema.pick({ id: true }))
       .query(async ({ ctx, input }) => {
          try {
+            if (!input.id) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Content ID is required.",
+               });
+            }
             return await getContentById((await ctx).db, input.id);
          } catch (err) {
             if (err instanceof NotFoundError) {
@@ -160,6 +155,37 @@ export const contentRouter = router({
                });
             }
             const contents = await listContents(resolvedCtx.db, input.agentId);
+            return contents;
+         } catch (err) {
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
+      }),
+   listByUserId: protectedProcedure
+      .input(
+         ContentSelectSchema.pick({
+            userId: true,
+         }),
+      )
+      .query(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            if (!resolvedCtx.session?.user.id) {
+               throw new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message:
+                     "User must be authenticated to list content by user.",
+               });
+            }
+            const contents = await getContentsByUserId(
+               resolvedCtx.db,
+               input.userId,
+            );
             return contents;
          } catch (err) {
             if (err instanceof DatabaseError) {

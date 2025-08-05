@@ -1,7 +1,7 @@
 {
    "dependencies": {
       "@packages/posthog": "workspace:*",
-      "@arcjet/astro": "catalog:astro",
+      "@arcjet/astro": "catalog:security",
       "@astrojs/check": "catalog:astro",
       "@astrojs/node": "catalog:astro",
       "@astrojs/react": "catalog:astro",
@@ -15,7 +15,7 @@
       "react": "catalog:react",
       "react-dom": "catalog:react",
       "sonner": "catalog:ui",
-      "zod": "^3.25.67"
+      "zod": "catalog:validation"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
