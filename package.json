@@ -7,7 +7,7 @@
       "@commitlint/config-conventional": "^19.8.1",
       "@tooling/typescript": "workspace:*",
       "husky": "^9.1.7",
-      "nx": "21.1.2",
+      "nx": "21.3.11",
       "typescript": "catalog:development"
    },
    "engines": {
