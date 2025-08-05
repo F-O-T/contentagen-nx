@@ -24,7 +24,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       ],
       meta: [
          {
-            title: `${brandConfig.name} ${brandConfig.catch}`,
+            title: `${brandConfig.name} - ${brandConfig.catch}`,
          },
          {
             charSet: "UTF-8",
