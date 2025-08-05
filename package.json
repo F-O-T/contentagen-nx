@@ -10,10 +10,13 @@
       "@swc/core": "~1.5.7",
       "@swc/helpers": "~0.5.11",
       "@tooling/typescript": "workspace:*",
+      "@types/jest": "^30.0.0",
       "husky": "^9.1.7",
+      "jest": "^30.0.5",
       "msw": "^2.10.4",
       "msw-trpc": "^2.0.1",
       "nx": "21.1.2",
+      "ts-jest": "^29.4.1",
       "typescript": "catalog:development"
    },
    "engines": {
