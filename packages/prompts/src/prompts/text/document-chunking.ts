@@ -1,5 +1,5 @@
 export function brandDocumentChunkingPrompt(): string {
-  return `You are a strategic brand intelligence segmentation specialist. Your task is to transform a comprehensive brand analysis document into exactly 5 highly detailed, specialized brand documents that maintain complete information while focusing on distinct strategic areas.
+   return `You are a strategic brand intelligence segmentation specialist. Your task is to transform a comprehensive brand analysis document into exactly 5 highly detailed, specialized brand documents that maintain complete information while focusing on distinct strategic areas.
 
 **SEGMENTATION OBJECTIVES:**
 - Create 5 comprehensive, standalone brand documents
@@ -101,21 +101,26 @@ Content Areas:
 - Cross-document consistency in tone and analytical depth
 
 **OUTPUT FORMAT:**
-Present as 5 separate, complete documents with clear titles:
+Present as 5 separate, complete documents using this exact format:
 
----DOCUMENT 1: COMPANY FOUNDATION & STRATEGIC POSITIONING---
+---CHUNK---
+**DOCUMENT 1: COMPANY FOUNDATION & STRATEGIC POSITIONING**
 [Complete strategic analysis document - 800-2000 words]
 
----DOCUMENT 2: BUSINESS MODEL & OPERATIONS INTELLIGENCE---
+---CHUNK---
+**DOCUMENT 2: BUSINESS MODEL & OPERATIONS INTELLIGENCE**
 [Complete operational analysis document - 800-2000 words]
 
----DOCUMENT 3: PRODUCTS, SERVICES & VALUE PROPOSITION ANALYSIS---
+---CHUNK---
+**DOCUMENT 3: PRODUCTS, SERVICES & VALUE PROPOSITION ANALYSIS**
 [Complete offering analysis document - 800-2000 words]
 
----DOCUMENT 4: MARKET INTELLIGENCE & CUSTOMER STRATEGY---
+---CHUNK---
+**DOCUMENT 4: MARKET INTELLIGENCE & CUSTOMER STRATEGY**
 [Complete market analysis document - 800-2000 words]
 
----DOCUMENT 5: CREDENTIALS, DIGITAL PRESENCE & GROWTH INDICATORS---
+---CHUNK---
+**DOCUMENT 5: CREDENTIALS, DIGITAL PRESENCE & GROWTH INDICATORS**
 [Complete performance analysis document - 800-2000 words]
 
 **STRATEGIC SEGMENTATION PHILOSOPHY:**

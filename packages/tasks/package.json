@@ -1,6 +1,7 @@
 {
    "dependencies": {
       "@packages/openrouter": "workspace:*",
+      "@packages/files": "workspace:*",
       "@packages/prompts": "workspace:*",
       "@packages/chroma-db": "workspace:*",
       "@trigger.dev/sdk": "catalog:tasks"

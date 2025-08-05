@@ -36,6 +36,7 @@ import {
    DropzoneEmptyState,
    DropzoneContent,
 } from "@packages/ui/components/dropzone";
+import { GenerateBrandFilesCredenza } from "../features/dynamic-brand-files";
 
 const FILE_UPLOAD_LIMIT = 5;
 
@@ -182,75 +183,6 @@ export function AgentDetailsKnowledgeBaseCard({
    }
 
    // Generate Brand Files from Website Credenza (self-contained version)
-   function GenerateBrandFilesCredenza({
-      open,
-      onOpenChange,
-      onGenerate,
-   }: {
-      open: boolean;
-      onOpenChange: (open: boolean) => void;
-      onGenerate?: (websiteUrl: string) => void;
-   }) {
-      const [websiteUrl, setWebsiteUrl] = useState("");
-      const [error, setError] = useState<string | null>(null);
-      const [isSubmitting, setIsSubmitting] = useState(false);
-      const urlSchema = z.string().url("Please enter a valid URL");
-
-      const handleSubmit = async (e: React.FormEvent) => {
-         e.preventDefault();
-         setError(null);
-         try {
-            urlSchema.parse(websiteUrl);
-            setIsSubmitting(true);
-            if (onGenerate) onGenerate(websiteUrl);
-            setIsSubmitting(false);
-            setWebsiteUrl("");
-            onOpenChange(false);
-         } catch (err: any) {
-            setError(err.message || "Invalid URL");
-         }
-      };
-
-      return (
-         <Credenza open={open} onOpenChange={onOpenChange}>
-            <CredenzaContent>
-               <CredenzaHeader>
-                  <CredenzaTitle>
-                     Generate Brand Files from Website
-                  </CredenzaTitle>
-               </CredenzaHeader>
-               <form onSubmit={handleSubmit}>
-                  <div className="mb-2">
-                     <Input
-                        autoFocus
-                        name="websiteUrl"
-                        placeholder="https://yourbrand.com"
-                        value={websiteUrl}
-                        type="url"
-                        onChange={(e) => setWebsiteUrl(e.target.value)}
-                     />
-                  </div>
-                  {error && (
-                     <div className="text-xs text-red-500 mb-2">{error}</div>
-                  )}
-                  <CredenzaFooter className="mt-4">
-                     <CredenzaClose asChild>
-                        <Button variant="outline" type="button">
-                           Cancel
-                        </Button>
-                     </CredenzaClose>
-                     <Button
-                        type="submit"
-                        disabled={isSubmitting || !websiteUrl}
-                     >
-                        Generate
-                     </Button>
-                  </CredenzaFooter>
-               </form>
-            </CredenzaContent>
-         </Credenza>
-      );
-   }
 
    return (
       <Card className="h-full">
@@ -283,8 +215,8 @@ export function AgentDetailsKnowledgeBaseCard({
                                  Uploaded{" "}
                                  {isClient
                                     ? new Date(
-                                       file.uploadedAt,
-                                    ).toLocaleDateString()
+                                         file.uploadedAt,
+                                      ).toLocaleDateString()
                                     : "..."}
                               </p>
                            </div>

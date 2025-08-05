@@ -1,16 +1,23 @@
 import type { knowledgeDistillationTask } from "@packages/tasks/workflows/knowledge-distillation";
 import { tasks } from "@packages/tasks";
+import type { autoBrandKnowledgeTask } from "@packages/tasks/workflows/auto-brand-knowledge";
 import { listFiles, uploadFile } from "@packages/files/client";
 import { z } from "zod";
-import { protectedProcedure, publicProcedure, router } from "../trpc";
+import { protectedProcedure, router } from "../trpc";
 import {
    updateAgent,
    getAgentById,
 } from "@packages/database/repositories/agent-repository";
+import { getFile } from "@packages/files/client";
+import {
+   deleteFromCollection,
+   getOrCreateCollection,
+} from "@packages/chroma-db/helpers";
+import { AgentInsertSchema } from "@packages/database/schema";
 
 const AgentFileUploadInput = z.object({
    fileName: z.string(),
-   fileBuffer: z.string(), // base64 encoded
+   fileBuffer: z.base64(), // base64 encoded
    contentType: z.string(),
 });
 
@@ -18,31 +25,33 @@ const AgentFileDeleteInput = z.object({
    fileName: z.string(),
 });
 
-import { getFile } from "@packages/files/client";
-import {
-   deleteFromCollection,
-   getOrCreateCollection,
-} from "@packages/chroma-db/helpers";
-
-const GenerateBrandInput = z.object({
-   url: z.string().url(),
-});
-
-function generateBrandCardFromUrl(url: string) {
-   // In a real implementation, this would fetch the website and extract brand info
-   return {
-      name: "Stub Brand Name",
-      description: `Brand card generated for ${url}`,
-      logoUrl: "https://via.placeholder.com/128x128.png?text=Logo",
-      website: url,
-   };
-}
-
 export const agentFileRouter = router({
-   generateBrandWithWebsite: publicProcedure
-      .input(GenerateBrandInput)
-      .mutation(async ({ input }: { input: { url: string } }) => {
-         return generateBrandCardFromUrl(input.url);
+   generateBrandKnowledge: protectedProcedure
+      .input(
+         AgentInsertSchema.pick({ id: true }).extend({
+            websiteUrl: z.url(),
+         }),
+      )
+      .mutation(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
+         const userId = resolvedCtx.session?.user.id;
+         if (!userId) {
+            throw new Error("User not authenticated");
+         }
+         if (!input.id) {
+            throw new Error(
+               "Missing required fields: id, userId, or websiteUrl",
+            );
+         }
+         await tasks.trigger<typeof autoBrandKnowledgeTask>(
+            "auto-brand-knowledge-workflow",
+            {
+               agentId: input.id,
+               userId: userId,
+               websiteUrl: input.websiteUrl,
+            },
+         );
+         return { success: true };
       }),
    getFileContent: protectedProcedure
       .input(z.object({ agentId: z.string().uuid(), fileName: z.string() }))
