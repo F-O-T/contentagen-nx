@@ -25,7 +25,7 @@ export async function generateOpenRouterText(
    const { model, reasoning } = lllmConfig;
    const result = await generateText({
       ...params,
-      model: client.languageModel(client.chat(MODELS[model]).modelId, {
+      model: client.chat(MODELS[model], {
          reasoning: {
             max_tokens: reasoning ? REASONING_EFFORT[reasoning] : 0,
             enabled: Boolean(reasoning),
@@ -47,13 +47,13 @@ export async function generateOpenRouterObject(
    const result = await generateObject({
       ...params,
       schema,
-      model: client.languageModel(client.chat(MODELS[model]).modelId, {
+
+      model: client.chat(MODELS[model], {
          reasoning: {
             max_tokens: reasoning ? REASONING_EFFORT[reasoning] : 0,
             enabled: Boolean(reasoning),
          },
       }),
    });
-   console.log("Generated object:", result);
    return result;
 }
