@@ -15,4 +15,4 @@ import { getBaseOptions } from "./server";
  */
 export const auth = betterAuth({
    ...getBaseOptions(createDb()),
-});
+}) as ReturnType<typeof betterAuth>;
