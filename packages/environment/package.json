@@ -1,6 +1,6 @@
 {
    "dependencies": {
-      "@sinclair/typebox": "catalog:database",
+      "zod": "catalog:validation",
       "@packages/errors": "workspace:*"
    },
    "devDependencies": {

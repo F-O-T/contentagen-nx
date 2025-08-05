@@ -1,6 +1,7 @@
 import { AppError, InvalidInputError } from ".";
-import type { Static, TSchema } from "@sinclair/typebox";
-import { Value } from "@sinclair/typebox/value";
+import { type z, ZodError } from "zod";
+import type { AnyZodObject } from "zod";
+
 export function propagateError(err: unknown): never {
    if (err instanceof AppError) {
       throw err;
@@ -11,16 +12,19 @@ export function propagateError(err: unknown): never {
    throw new AppError("Unknown error occurred");
 }
 
-export function validateInput<T extends TSchema>(
+export function validateInput<T extends AnyZodObject>(
    schema: T,
    value: unknown,
-): Static<T> {
-   if (!Value.Check(schema, value)) {
-      const errors = [...Value.Errors(schema, value)]
-         .map((e) => `${e.path}: ${e.message}`)
-         .join("; ");
-      throw new InvalidInputError(`Input validation failed: ${errors}`);
+): z.infer<T> {
+   try {
+      return schema.parse(value);
+   } catch (e) {
+      if (e instanceof ZodError) {
+         const errors = e.errors
+            .map((err) => `${err.path.join(".")}: ${err.message}`)
+            .join("; ");
+         throw new InvalidInputError(`Input validation failed: ${errors}`);
+      }
+      throw e;
    }
-   // Return a parsed, type-safe result (with defaults applied)
-   return Value.Cast(schema, value);
 }
