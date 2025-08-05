@@ -10,7 +10,7 @@ import {
    redirect,
 } from "@tanstack/react-router";
 import type { RouterContext } from "../router";
-
+import brandConfig from "@packages/brand/index.json";
 export const Route = createRootRouteWithContext<RouterContext>()({
    ssr: true,
    wrapInSuspense: true,
@@ -20,11 +20,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
             href: appCss,
             rel: "stylesheet",
          },
-         { rel: "icon", href: "/images/favicon.ico" },
+         { rel: "icon", href: "/favicon.svg" },
       ],
       meta: [
          {
-            title: "TanStack Router SSR Basic File Based Streaming",
+            title: `${brandConfig.name} ${brandConfig.catch}`,
          },
          {
             charSet: "UTF-8",

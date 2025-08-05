@@ -9,7 +9,8 @@
    },
    "dependencies": {
       "@openrouter/ai-sdk-provider": "catalog:openrouter",
-      "ai": "catalog:openrouter"
+      "ai": "catalog:openrouter",
+      "zod": "catalog:validation"
    },
    "scripts": {
       "build": "tsc",

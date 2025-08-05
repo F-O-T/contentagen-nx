@@ -25,13 +25,14 @@ export const ContentRequestSchema = z.object({
 export type ContentRequest = z.infer<typeof ContentRequestSchema>;
 
 export const ContentStatsSchema = z.object({
-   wordsCount: z.number().min(0).optional(),
-   readTimeMinutes: z.number().min(0).optional(),
-   qualityScore: z.number().min(0).max(100).optional(),
+   wordsCount: z.string().optional(),
+   readTimeMinutes: z.string().optional(),
+   qualityScore: z.string().optional(),
 });
 export type ContentStats = z.infer<typeof ContentStatsSchema>;
 
 export const ContentMetaSchema = z.object({
+   title: z.string().optional(),
    slug: z.string().optional(),
    tags: z.array(z.string()).optional(),
    topics: z.array(z.string()).optional(),
@@ -61,7 +62,6 @@ export const content = pgTable(
       userId: text("user_id")
          .notNull()
          .references(() => user.id, { onDelete: "cascade" }),
-      title: text("title").notNull().default(""),
       body: text("body").notNull().default(""),
       status: contentStatusEnum("status").default("generating"),
       meta: jsonb("meta").$type<ContentMeta>().default({}),

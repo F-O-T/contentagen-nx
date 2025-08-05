@@ -89,7 +89,6 @@ export const agent = pgTable(
 
       personaConfig: jsonb("persona_config").$type<PersonaConfig>().notNull(),
       systemPrompt: text("system_prompt").notNull(),
-      isActive: boolean("is_active").default(true),
       totalDrafts: integer("total_drafts").default(0),
       totalPublished: integer("total_published").default(0),
       uploadedFiles: jsonb("uploaded_files")

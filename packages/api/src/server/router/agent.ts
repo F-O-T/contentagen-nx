@@ -16,7 +16,6 @@ import { generateSystemPrompt } from "@packages/prompts/helpers/agent-system-pro
 const UpdateAgentInput = AgentUpdateSchema.omit({
    createdAt: true,
    updatedAt: true,
-   isActive: true,
    lastGeneratedAt: true,
    totalDrafts: true,
    totalPublished: true,
