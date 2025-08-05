@@ -28,13 +28,6 @@ export default defineConfig({
                label: "Integrations",
             },
          ],
-         social: [
-            {
-               href: "https://github.com/withastro/starlight",
-               icon: "github",
-               label: "GitHub",
-            },
-         ],
          title: "ContentaGen docs",
       }),
    ],
