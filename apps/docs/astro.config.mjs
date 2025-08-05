@@ -24,15 +24,8 @@ export default defineConfig({
          customCss: ["./src/styles/global.css"],
          sidebar: [
             {
-               items: [
-                  // Each item here is one entry in the navigation menu.
-                  { label: "Example Guide", slug: "guides/example" },
-               ],
-               label: "Guides",
-            },
-            {
-               autogenerate: { directory: "reference" },
-               label: "Reference",
+               autogenerate: { directory: "integrations" },
+               label: "Integrations",
             },
          ],
          social: [
@@ -42,7 +35,7 @@ export default defineConfig({
                label: "GitHub",
             },
          ],
-         title: "My Docs",
+         title: "ContentaGen docs",
       }),
    ],
 
