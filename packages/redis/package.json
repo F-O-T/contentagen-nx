@@ -1,0 +1,22 @@
+{
+   "dependencies": {
+      "ioredis": "^5.7.0"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "typescript": "catalog:development"
+   },
+   "license": "MIT",
+   "name": "@packages/redis",
+   "scripts": {
+      "check": "biome check --write ./src",
+      "typecheck": "bunx --bun tsc --noEmit "
+   },
+   "private": true,
+   "type": "module",
+   "exports": {
+      "./helpers": "./src/helpers.ts",
+      ".": "./src/index.ts"
+   },
+   "version": "0.0.0"
+}

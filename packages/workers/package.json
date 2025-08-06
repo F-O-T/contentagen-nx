@@ -1,0 +1,29 @@
+{
+   "dependencies": {
+      "@packages/chroma-db": "workspace:*",
+      "@packages/redis": "workspace:*",
+      "@packages/files": "workspace:*",
+      "@packages/openrouter": "workspace:*",
+      "@packages/prompts": "workspace:*",
+      "bullmq": "^5.56.9"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "typescript": "catalog:development"
+   },
+   "license": "MIT",
+   "name": "@packages/workers",
+   "scripts": {
+      "check": "biome check --write ./src",
+      "typecheck": "bunx --bun tsc --noEmit ",
+      "dev": "bunx trigger.dev@latest dev",
+      "deploy": "bunx trigger.dev@latest deploy"
+   },
+   "private": true,
+   "type": "module",
+   "exports": {
+      "./functions/*": "./src/functions/*.ts",
+      "./queues/*": "./src/queues/*.ts"
+   },
+   "version": "0.0.0"
+}

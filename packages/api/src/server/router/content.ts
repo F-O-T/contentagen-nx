@@ -1,5 +1,4 @@
-import { tasks } from "@packages/tasks";
-import type { contentGenerationTask } from "@packages/tasks/workflows/content-generation";
+import { contentGenerationQueue } from "@packages/workers/queues/content-generation";
 import {
    createContent,
    getContentById,
@@ -40,17 +39,13 @@ export const contentRouter = router({
                ...input,
                userId, // Use authenticated user ID
             });
-            await tasks.trigger<typeof contentGenerationTask>(
-               "content-generation-workflow",
-               {
-                  agentId: input.agentId,
-                  contentId: created.id,
-                  contentRequest: {
-                     description: input.request.description,
-                  },
+            await contentGenerationQueue.add("content-generation-workflow", {
+               agentId: input.agentId,
+               contentId: created.id,
+               contentRequest: {
+                  description: input.request.description,
                },
-            );
-            // Trigger new content generation pipeline task
+            });
             return created;
          } catch (err) {
             if (err instanceof DatabaseError) {

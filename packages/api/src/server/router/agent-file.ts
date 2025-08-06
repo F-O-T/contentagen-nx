@@ -1,7 +1,6 @@
-import type { knowledgeDistillationTask } from "@packages/tasks/workflows/knowledge-distillation";
-import { tasks } from "@packages/tasks";
-import type { autoBrandKnowledgeTask } from "@packages/tasks/workflows/auto-brand-knowledge";
 import { listFiles, uploadFile } from "@packages/files/client";
+import { autoBrandKnowledgeQueue } from "@packages/workers/queues/auto-brand-knowledge";
+import { knowledgeDistillationQueue } from "@packages/workers/queues/knowledge-distillation";
 import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 import {
@@ -43,14 +42,11 @@ export const agentFileRouter = router({
                "Missing required fields: id, userId, or websiteUrl",
             );
          }
-         await tasks.trigger<typeof autoBrandKnowledgeTask>(
-            "auto-brand-knowledge-workflow",
-            {
-               agentId: input.id,
-               userId: userId,
-               websiteUrl: input.websiteUrl,
-            },
-         );
+         await autoBrandKnowledgeQueue.add("auto-brand-knowledge-workflow", {
+            agentId: input.id,
+            userId: userId,
+            websiteUrl: input.websiteUrl,
+         });
          return { success: true };
       }),
    getFileContent: protectedProcedure
@@ -105,8 +101,8 @@ export const agentFileRouter = router({
          try {
             // Read file content as text
             const fileContent = buffer.toString("utf-8");
-            await tasks.trigger<typeof knowledgeDistillationTask>(
-               "knowledge-distillation-job",
+            await knowledgeDistillationQueue.add(
+               "auto-brand-knowledge-workflow",
                {
                   inputText: fileContent,
                   agentId,
