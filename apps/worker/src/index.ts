@@ -1,6 +1,5 @@
 import cors from "@elysiajs/cors";
 import { Elysia } from "elysia";
-import { serverEnv as env } from "@packages/environment/server";
 import { bullAuth } from "./integrations/bull-auth-guard";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { ElysiaAdapter } from "@bull-board/elysia";
