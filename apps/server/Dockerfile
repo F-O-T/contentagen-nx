@@ -160,12 +160,9 @@ RUN bun install
 # ---
 
 # Stage 3: Create the final, small production image
-FROM gcr.io/distroless/cc-debian12
+FROM oven/bun:latest AS deps
 WORKDIR /app
 
-COPY --from=deps /usr/local/lib/libonnxruntime.so.1.16.3 /usr/local/lib/
-COPY --from=deps /usr/local/lib/libonnxruntime.so.1 /usr/local/lib/
-COPY --from=deps /usr/local/lib/libonnxruntime.so /usr/local/lib/
 COPY --from=builder /app/server server
 
 ENV NODE_ENV=production
@@ -193,6 +190,25 @@ ENV MINIO_BUCKET=${MINIO_BUCKET}
 ENV TAVILY_API_KEY=${TAVILY_API_KEY}
 ENV CHROMA_DB_URL=${CHROMA_DB_URL}
 
+RUN bun install 
+
+# ---
+
+# Stage 3: Create the final, small production image
+FROM oven/bun:latest AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copy the pruned, production-only node_modules from the 'deps' stage.
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy the built application from the 'builder' stage
+COPY --from=builder /app/dist ./dist
+
+# Also copy the final package.json to the root of the app directory.
+COPY --from=deps /app/package.json ./package.json
+
 ARG PORT
 EXPOSE ${PORT}
-CMD ["./server"]
+CMD ["bun", "./dist/index.js"]
