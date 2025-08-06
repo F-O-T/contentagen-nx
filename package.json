@@ -17,7 +17,6 @@
    "private": true,
    "scripts": {
       "build:all": "nx run-many -t build --parallel=3",
-      "trigger:deploy": "nx run tasks:deploy",
       "db:studio": "nx run database:studio",
       "db:push": "nx run database:push",
       "db:migrate": "nx run database:migrate",
@@ -28,7 +27,7 @@
       "dev:landing-page": "nx run-many -t dev --parallel=1 -p  landing-page ",
       "dev:blog": "nx run-many -t dev --parallel=1 -p  blog ",
       "dev:docs": "nx run-many -t dev --parallel=1 -p  docs",
-      "dev:dashboard": "nx run-many -t dev --parallel=3 -p server dashboard tasks",
+      "dev:dashboard": "nx run server:container-start && nx run-many -t dev --parallel=3 -p server dashboard worker",
       "dev:server": "nx run-many -t dev --parallel=1 -p server ",
       "dev:dashboard-only": "nx run-many -t dev --parallel=1 -p dashboard",
       "format": "biome check --write .",

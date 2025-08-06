@@ -6,7 +6,7 @@ import { serverEnv } from "@packages/environment/server";
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 export async function runChunkBrandDocument(payload: { inputText: string }) {
    const { inputText } = payload;
-   // Removed logger.info: Starting brand document chunking
+   console.log(`[runChunkBrandDocument] Chunking input (length: ${inputText.length})`);
    const chunkingResult = await generateOpenRouterText(
       openrouter,
       {
@@ -21,7 +21,7 @@ export async function runChunkBrandDocument(payload: { inputText: string }) {
       .split(/---CHUNK---/)
       .map((c) => c.trim())
       .filter(Boolean);
-   // Removed logger.info: Chunking complete
+   console.log(`[runChunkBrandDocument] Chunking complete. Chunks: ${chunks.length}`);
    return {
       chunks,
    };

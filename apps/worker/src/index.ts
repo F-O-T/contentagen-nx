@@ -30,7 +30,7 @@ const app = new Elysia()
          allowedHeaders: ["Content-Type", "Authorization"],
          credentials: true,
          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-         origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
+         origin: "*",
       }),
    )
    .onBeforeHandle(({ request }) => {
@@ -42,7 +42,7 @@ const app = new Elysia()
    })
 
    .use(serverAdapter.registerPlugin())
-   .listen(process.env.PORT ?? 9876);
+   .listen(process.env.PORT ?? 9880);
 
 console.log(
    `🦊 Workers is running at ${app.server?.hostname}:${app.server?.port}`,

@@ -17,7 +17,9 @@ export async function runDistillationPipeline(payload: {
       const chunkingResult = await runChunkText({ inputText });
       if (!chunkingResult || !chunkingResult.chunks) {
          console.error("Chunking failed", { agentId });
-         throw new Error("Chunking failed. Please ensure the input text is valid and try again.");
+         throw new Error(
+            "Chunking failed. Please ensure the input text is valid and try again.",
+         );
       }
       const chunks = chunkingResult.chunks;
       // 2. Distillation
@@ -29,15 +31,23 @@ export async function runDistillationPipeline(payload: {
                return result.distilledChunk;
             } catch (error) {
                console.error("Chunk distillation failed", { error, agentId });
-               throw new Error("Chunk distillation failed. Please check the logs for more details.");
+               throw new Error(
+                  "Chunk distillation failed. Please check the logs for more details.",
+               );
             }
-         })
+         }),
       );
-      console.info("Distillation completed", { distilledChunkCount: distillationResults.length });
+      console.info("Distillation completed", {
+         distilledChunkCount: distillationResults.length,
+      });
       await Promise.all(
          distillationResults.map(async (chunk) =>
-            runDistilledChunkFormatterAndSaveOnChroma({ chunk, agentId, sourceId })
-         )
+            runDistilledChunkFormatterAndSaveOnChroma({
+               chunk,
+               agentId,
+               sourceId,
+            }),
+         ),
       );
       console.info("Knowledge distillation pipeline complete", {
          agentId,

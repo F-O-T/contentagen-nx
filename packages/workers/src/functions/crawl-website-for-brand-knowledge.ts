@@ -13,6 +13,7 @@ export async function runCrawlWebsiteForBrandKnowledge(
    const { websiteUrl } = payload;
    // 1. Crawl the website for brand knowledge
    try {
+      console.log(`[runCrawlWebsiteForBrandKnowledge] Crawling: ${websiteUrl}`);
       const crawlResult = await tavily.crawl(websiteUrl, {
          max_depth: 2,
          limit: 20,
@@ -23,15 +24,18 @@ export async function runCrawlWebsiteForBrandKnowledge(
          !crawlResult.results ||
          crawlResult.results.length === 0
       ) {
+         console.error(`[runCrawlWebsiteForBrandKnowledge] ERROR: No crawl results for ${websiteUrl}`);
          throw new Error("Couldnt crawl the website for brand knowledge");
       }
+      console.log(`[runCrawlWebsiteForBrandKnowledge] Crawled ${crawlResult.results.length} pages for ${websiteUrl}`);
       // 2. Aggregate and summarize the crawled content
       const allContent = crawlResult.results
          .map((r) => r.rawContent || "")
          .join("\n\n");
+      console.log(`[runCrawlWebsiteForBrandKnowledge] Aggregated content length: ${allContent.length}`);
       return { allContent };
    } catch (error) {
-      console.error(error);
+      console.error(`[runCrawlWebsiteForBrandKnowledge] Unhandled error:`, error);
       throw error;
    }
 }
