@@ -9,6 +9,30 @@ import { auth } from "./integrations/auth";
 import { db } from "./integrations/database";
 import { minioClient } from "./integrations/minio";
 import { chromaClient, openRouterClient } from "./integrations/chromadb";
+import { bullAuth } from "./integrations/bull-auth-guard";
+import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
+import { ElysiaAdapter } from "@bull-board/elysia";
+
+import { createBullBoard } from "@bull-board/api";
+import { autoBrandKnowledgeQueue } from "@packages/workers/queues/auto-brand-knowledge";
+import { contentGenerationQueue } from "@packages/workers/queues/content-generation";
+import { knowledgeDistillationQueue } from "@packages/workers/queues/knowledge-distillation";
+import { isProduction } from "@packages/environment/helpers";
+const serverAdapter = new ElysiaAdapter("/ui");
+
+createBullBoard({
+   queues: [
+      new BullMQAdapter(contentGenerationQueue),
+      new BullMQAdapter(knowledgeDistillationQueue), // Register the knowledge distillation queue
+      new BullMQAdapter(autoBrandKnowledgeQueue), // Register the auto brand knowledge queue
+   ],
+
+   serverAdapter,
+
+   options: {
+      uiBasePath: isProduction ? "node_modules/@bull-board/ui" : "",
+   },
+});
 const trpcApi = createApi({
    chromaClient,
 
@@ -30,6 +54,15 @@ const app = new Elysia()
    .use(ArcjetShield)
    .use(posthogPlugin)
    .mount(auth.handler)
+   .onBeforeHandle(({ request }) => {
+      const url = new URL(request.url);
+
+      if (url.pathname.startsWith("/ui")) {
+         return bullAuth(request);
+      }
+   })
+   .use(serverAdapter.registerPlugin())
+
    .all(
       "/trpc/*",
       async (opts) => {
