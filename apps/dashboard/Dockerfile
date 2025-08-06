@@ -9,12 +9,15 @@ WORKDIR /app
 COPY bun.lock ./
 COPY package.json ./
 COPY apps/dashboard/package.json ./apps/dashboard/
-COPY packages/eden/package.json ./packages/eden/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/brand/package.json ./packages/brand/
 COPY tooling/typescript/package.json ./tooling/typescript/
-
 COPY packages/posthog/package.json ./packages/posthog/
+COPY packages/api/package.json ./packages/api/
+COPY packages/posthog/package.json ./packages/posthog/
+COPY packages/api/package.json ./packages/api/
+COPY packages/authentication/package.json ./packages/authentication/
+COPY packages/environment/package.json ./packages/environment/
 # Install all dependencies (including devDependencies needed for the build step)
 RUN bun install 
 
@@ -41,10 +44,15 @@ WORKDIR /app
 COPY bun.lock ./
 COPY package.json ./
 COPY apps/dashboard/package.json ./apps/dashboard/
-COPY packages/eden/package.json ./packages/eden/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/brand/package.json ./packages/brand/
 COPY tooling/typescript/package.json ./tooling/typescript/
+COPY packages/posthog/package.json ./packages/posthog/
+COPY packages/api/package.json ./packages/api/
+COPY packages/posthog/package.json ./packages/posthog/
+COPY packages/api/package.json ./packages/api/
+COPY packages/authentication/package.json ./packages/authentication/
+COPY packages/environment/package.json ./packages/environment/
 
 COPY packages/posthog/package.json ./packages/posthog/
 # Install only production dependencies. This creates a lean, clean node_modules folder.

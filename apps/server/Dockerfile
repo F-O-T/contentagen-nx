@@ -18,6 +18,24 @@ COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/brand/package.json ./packages/brand/
 COPY packages/polar-billing/package.json ./packages/polar-billing/
 COPY packages/posthog/package.json ./packages/posthog/
+COPY packages/environment/package.json ./packages/environment/
+COPY packages/tasks/package.json ./packages/tasks/
+COPY packages/files/package.json ./packages/files/
+COPY packages/api/package.json ./packages/api/
+COPY packages/authentication/package.json ./packages/authentication/
+COPY packages/database/package.json ./packages/database/
+COPY packages/payment/package.json ./packages/payment/
+COPY packages/transactional/package.json ./packages/transactional/
+COPY packages/posthog/package.json ./packages/posthog/
+COPY packages/environment/package.json ./packages/environment/
+COPY packages/tasks/package.json ./packages/tasks/
+COPY packages/files/package.json ./packages/files/
+COPY packages/api/package.json ./packages/api/
+COPY packages/authentication/package.json ./packages/authentication/
+COPY packages/database/package.json ./packages/database/
+COPY packages/payment/package.json ./packages/payment/
+COPY packages/transactional/package.json ./packages/transactional/
+COPY packages/arcjet/package.json ./packages/arcjet/
 
 
 
@@ -49,6 +67,24 @@ COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/brand/package.json ./packages/brand/
 COPY packages/polar-billing/package.json ./packages/polar-billing/
 COPY packages/posthog/package.json ./packages/posthog/
+COPY packages/environment/package.json ./packages/environment/
+COPY packages/tasks/package.json ./packages/tasks/
+COPY packages/files/package.json ./packages/files/
+COPY packages/api/package.json ./packages/api/
+COPY packages/authentication/package.json ./packages/authentication/
+COPY packages/database/package.json ./packages/database/
+COPY packages/payment/package.json ./packages/payment/
+COPY packages/transactional/package.json ./packages/transactional/
+COPY packages/posthog/package.json ./packages/posthog/
+COPY packages/environment/package.json ./packages/environment/
+COPY packages/tasks/package.json ./packages/tasks/
+COPY packages/files/package.json ./packages/files/
+COPY packages/api/package.json ./packages/api/
+COPY packages/authentication/package.json ./packages/authentication/
+COPY packages/database/package.json ./packages/database/
+COPY packages/payment/package.json ./packages/payment/
+COPY packages/transactional/package.json ./packages/transactional/
+COPY packages/arcjet/package.json ./packages/arcjet/
 
 # Install only production dependencies.
 RUN bun install 

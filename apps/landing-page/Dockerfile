@@ -9,12 +9,9 @@ WORKDIR /app
 COPY bun.lock ./
 COPY package.json ./
 COPY apps/landing-page/package.json ./apps/landing-page/
-COPY packages/eden/package.json ./packages/eden/
 COPY packages/ui/package.json ./packages/ui/
-COPY packages/brand/package.json ./packages/brand/
-COPY tooling/typescript/package.json ./tooling/typescript/
-
 COPY packages/posthog/package.json ./packages/posthog/
+COPY tooling/typescript/package.json ./tooling/typescript/
 # Install all dependencies (including devDependencies needed for the build step)
 RUN bun install 
 

@@ -9,11 +9,6 @@ WORKDIR /app
 COPY bun.lock ./
 COPY package.json ./
 COPY apps/blog/package.json ./apps/blog/
-COPY packages/eden/package.json ./packages/eden/
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/brand/package.json ./packages/brand/
-COPY tooling/typescript/package.json ./tooling/typescript/
-
 COPY packages/posthog/package.json ./packages/posthog/
 # Install all dependencies (including devDependencies needed for the build step)
 RUN bun install 
@@ -36,14 +31,10 @@ FROM oven/bun:latest AS deps
 
 WORKDIR /app
 
-# Copy all package manifests and lockfile again
 COPY bun.lock ./
 COPY package.json ./
 COPY apps/blog/package.json ./apps/blog/
-COPY packages/eden/package.json ./packages/eden/
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/brand/package.json ./packages/brand/
-COPY tooling/typescript/package.json ./tooling/typescript/
+COPY packages/posthog/package.json ./packages/posthog/
 
 COPY packages/posthog/package.json ./packages/posthog/
 # Install only production dependencies. This creates a lean, clean node_modules folder.
