@@ -7,34 +7,17 @@ import {
 } from "@packages/database/repositories/agent-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 import { AgentUpdateSchema, type AgentInsert } from "@packages/database/schema";
-import { PersonaConfigSchema } from "@packages/database/schemas/agent";
+import {
+   AgentSelectSchema,
+   PersonaConfigSchema,
+} from "@packages/database/schemas/agent";
 import { generateSystemPrompt } from "@packages/prompts/helpers/agent-system-prompt-assembler";
-
-const UpdateAgentInput = AgentUpdateSchema.omit({
-   createdAt: true,
-   updatedAt: true,
-   lastGeneratedAt: true,
-   totalDrafts: true,
-   totalPublished: true,
-   uploadedFiles: true,
-   systemPrompt: true,
-   userId: true,
-});
-
-const DeleteAgentInput = z.object({
-   id: z.string().uuid(),
-});
-
-const GetAgentInput = z.object({
-   id: z.string().uuid(),
-});
 
 export const agentRouter = router({
    regenerateSystemPrompt: protectedProcedure
-      .input(z.object({ id: z.string().uuid() }))
+      .input(AgentSelectSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
          // 1. Load agent
          const agent = await getAgentById((await ctx).db, input.id);
@@ -53,9 +36,18 @@ export const agentRouter = router({
       }),
    updateSystemPrompt: protectedProcedure
       .input(
-         z.object({ id: z.string().uuid(), systemPrompt: z.string().min(1) }),
+         AgentUpdateSchema.pick({
+            id: true,
+            systemPrompt: true,
+         }),
       )
       .mutation(async ({ ctx, input }) => {
+         if (!input.id) {
+            throw new TRPCError({
+               code: "BAD_REQUEST",
+               message: "Agent ID is required for updating the system prompt.",
+            });
+         }
          // 1. Update only the system prompt
          const updated = await updateAgent((await ctx).db, input.id, {
             systemPrompt: input.systemPrompt,
@@ -93,7 +85,12 @@ export const agentRouter = router({
          }
       }),
    update: protectedProcedure
-      .input(UpdateAgentInput)
+      .input(
+         AgentUpdateSchema.pick({
+            id: true,
+            personaConfig: true,
+         }),
+      )
       .mutation(async ({ ctx, input }) => {
          const { id, ...updateFields } = input;
          if (!id) {
@@ -132,7 +129,7 @@ export const agentRouter = router({
          }
       }),
    delete: protectedProcedure
-      .input(DeleteAgentInput)
+      .input(AgentSelectSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
          const { id } = input;
          try {
@@ -152,7 +149,7 @@ export const agentRouter = router({
          }
       }),
    get: protectedProcedure
-      .input(GetAgentInput)
+      .input(AgentSelectSchema.pick({ id: true }))
       .query(async ({ ctx, input }) => {
          try {
             return await getAgentById((await ctx).db, input.id);

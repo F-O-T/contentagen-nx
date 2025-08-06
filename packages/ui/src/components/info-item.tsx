@@ -17,7 +17,7 @@ export function InfoItem({ icon, label, value, className }: InfoItemProps) {
          </div>
          <span
             className={cn(
-               "text-sm font-semibold text-foreground capitalize truncate w-full",
+               "text-sm font-semibold text-foreground normal-case truncate w-full",
                className,
             )}
             title={value}
