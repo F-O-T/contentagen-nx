@@ -92,11 +92,10 @@ ENV MINIO_BUCKET=${MINIO_BUCKET}
 ENV TAVILY_API_KEY=${TAVILY_API_KEY}
 ENV CHROMA_DB_URL=${CHROMA_DB_URL}
 RUN bun build \
-    --compile \
     --minify-whitespace \
     --minify-syntax \
     --target bun \
-    --outfile server \
+    --outfile ./dist/index.js \
     ./apps/server/src/index.ts
 
 # ---
@@ -105,21 +104,6 @@ RUN bun build \
 FROM oven/bun:latest AS deps
 WORKDIR /app
 
-# Install ONNX Runtime system dependencies
-USER root
-RUN apt-get update && apt-get install -y \
-    wget \
-    ca-certificates \
-    libgomp1 \
-    && wget -qO- https://github.com/microsoft/onnxruntime/releases/download/v1.16.3/onnxruntime-linux-x64-1.16.3.tgz | tar -xz -C /tmp \
-    && cp /tmp/onnxruntime-linux-x64-1.16.3/lib/libonnxruntime.so.1.16.3 /usr/local/lib/ \
-    && ln -s /usr/local/lib/libonnxruntime.so.1.16.3 /usr/local/lib/libonnxruntime.so.1 \
-    && ln -s /usr/local/lib/libonnxruntime.so.1.16.3 /usr/local/lib/libonnxruntime.so \
-    && ldconfig \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/onnxruntime-linux-x64-1.16.3
-
-# Copy all package manifests and lockfile again
 COPY bun.lock ./
 COPY package.json ./
 COPY apps/server/package.json ./apps/server/
@@ -160,9 +144,9 @@ RUN bun install
 # ---
 
 # Stage 3: Create the final, small production image
-FROM oven/bun:latest AS deps
-WORKDIR /app
 
+FROM oven/bun:latest AS runner
+WORKDIR /app
 COPY --from=builder /app/server server
 
 ENV NODE_ENV=production
@@ -195,8 +179,6 @@ RUN bun install
 # ---
 
 # Stage 3: Create the final, small production image
-FROM oven/bun:latest AS runner
-WORKDIR /app
 
 ENV NODE_ENV=production
 
