@@ -7,7 +7,6 @@ import type { ChromaClient } from "@packages/chroma-db/client";
 import { agentRouter } from "./router/agent";
 import { agentKnowledgeRouter } from "./router/agent-knowledge";
 import { contentRouter } from "./router/content";
-import { exportLogRouter } from "./router/export-log";
 
 import { sessionRouter } from "./router/session";
 import type { OpenRouterClient } from "@packages/openrouter/client";
@@ -17,7 +16,6 @@ export const appRouter = router({
    agentFile: agentFileRouter,
    agentKnowledge: agentKnowledgeRouter,
    content: contentRouter,
-   exportLog: exportLogRouter,
    sessionHelper: sessionRouter,
 });
 export const createApi = ({

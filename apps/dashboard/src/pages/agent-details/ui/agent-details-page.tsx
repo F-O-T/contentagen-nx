@@ -6,7 +6,6 @@ import { FileViewerModal } from "./file-viewer-modal";
 import { AgentStatsCard } from "./agent-stats-card";
 import useAgentDetails from "../lib/use-agent-details";
 import useFileViewer from "../lib/use-file-viewer";
-import { AgentDetailsKnowledgeChunksCard } from "./agent-details-knowledge-chunks-card";
 import { AgentDetailsContentRequestsCard } from "./agent-details-content-requests-card";
 import { Suspense, useState } from "react";
 
@@ -38,7 +37,11 @@ export function AgentDetailsPage() {
          <main className="space-y-4">
             <TalkingMascot message="Manage your agent’s configuration and knowledge base." />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-               <div className="col-span-1 space-y-4">
+               <div className="col-span-1 md:col-span-3 ">
+                  <AgentDetailsContentRequestsCard />
+               </div>
+
+               <div className="col-span-1 md:col-span-2 space-y-4">
                   <AgentStatsCard
                      totalDrafts={agent?.totalDrafts ?? 0}
                      totalPublished={agent?.totalPublished ?? 0}
@@ -57,12 +60,6 @@ export function AgentDetailsPage() {
                         agent?.personaConfig.brand?.integrationStyle ?? ""
                      }
                   />
-               </div>
-               <div className="col-span-1 md:col-span-2 ">
-                  <AgentDetailsContentRequestsCard />
-               </div>
-               <div className="col-span-1 md:col-span-2">
-                  <AgentDetailsKnowledgeChunksCard />
                </div>
                <div className="col-span-1 ">
                   <AgentDetailsKnowledgeBaseCard

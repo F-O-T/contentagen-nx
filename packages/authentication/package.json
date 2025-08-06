@@ -10,7 +10,8 @@
    "scripts": {
       "auth-schema-generate": "bunx --bun @better-auth/cli generate --config ./src/cli-config.ts --output ../database/src/schemas/auth.ts",
       "check": "biome check --write ./src",
-      "typecheck": "tsc --build --noEmit --emitDeclarationOnly false"
+      "typecheck": "tsc --build --noEmit --emitDeclarationOnly false",
+      "build": "tsc --build --noEmit"
    },
    "dependencies": {
       "@packages/transactional": "workspace:*",

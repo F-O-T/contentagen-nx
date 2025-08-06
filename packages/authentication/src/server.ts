@@ -22,7 +22,7 @@ export interface AuthOptions {
    resendClient: ResendClient;
 }
 
-export const getBaseOptions = (db: DatabaseInstance) =>
+export const getBaseOptions = (db: DatabaseInstance): BetterAuthOptions =>
    ({
       database: getDatabaseAdapter(db),
       plugins: [
@@ -41,7 +41,11 @@ export const getBaseOptions = (db: DatabaseInstance) =>
       ],
    }) satisfies BetterAuthOptions;
 export type AuthInstance = ReturnType<typeof createAuth>;
-export const createAuth = ({ db, resendClient, polarClient }: AuthOptions) => {
+export const createAuth = ({
+   db,
+   resendClient,
+   polarClient,
+}: AuthOptions): ReturnType<typeof betterAuth> => {
    return betterAuth({
       socialProviders: getSocialProviders(),
       database: getDatabaseAdapter(db),

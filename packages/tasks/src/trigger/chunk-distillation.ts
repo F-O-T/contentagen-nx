@@ -14,7 +14,7 @@ async function runChunkDistillation(payload: { chunk: string }) {
          openrouter,
          {
             model: "small",
-            reasoning: "medium",
+            reasoning: "high",
          },
          {
             prompt: chunk,

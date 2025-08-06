@@ -11,6 +11,7 @@ import { serverEnv } from "@packages/environment/server";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { apiKey, openAPI, organization } from "better-auth/plugins";
 import { emailOTP } from "better-auth/plugins/email-otp";
+import type { BetterAuthOptions } from "better-auth";
 
 export function getSocialProviders() {
    return {
@@ -45,7 +46,10 @@ export function getEmailVerificationOptions() {
    };
 }
 
-export function getPlugins(client: ResendClient, polarClient: Polar) {
+export function getPlugins(
+   client: ResendClient,
+   polarClient: Polar,
+): BetterAuthOptions["plugins"] {
    return [
       getEmailOTPPlugin(client),
       getPolarPlugin(polarClient),
@@ -55,7 +59,9 @@ export function getPlugins(client: ResendClient, polarClient: Polar) {
    ];
 }
 
-export function getEmailOTPPlugin(client: ResendClient) {
+export function getEmailOTPPlugin(
+   client: ResendClient,
+): ReturnType<typeof emailOTP> {
    return emailOTP({
       expiresIn: 60 * 10,
       otpLength: 6,
@@ -66,7 +72,7 @@ export function getEmailOTPPlugin(client: ResendClient) {
    });
 }
 
-export function getPolarPlugin(polarClient: Polar) {
+export function getPolarPlugin(polarClient: Polar): ReturnType<typeof polar> {
    return polar({
       client: polarClient,
       createCustomerOnSignUp: true,

@@ -1,7 +1,7 @@
 {
    "dependencies": {
       "@packages/posthog": "workspace:*",
-      "@arcjet/astro": "catalog:astro",
+      "@arcjet/astro": "catalog:security",
       "@lucide/astro": "catalog:astro",
       "@astrojs/ts-plugin": "catalog:astro",
       "@astrojs/node": "catalog:astro",

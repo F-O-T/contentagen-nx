@@ -1,11 +1,11 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
-import { ContentRequestCard } from "./content-request-card";
+import { ContentRequestCard } from "@/widgets/content-card/ui/content-card";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 export function ContentListPage() {
    const trpc = useTRPC();
-   const { data } = useSuspenseQuery(trpc.content.list.queryOptions());
+   const { data } = useSuspenseQuery(trpc.content.listByUserId.queryOptions());
 
    return (
       <main className="h-full w-full flex flex-col gap-4">

@@ -1,5 +1,8 @@
+import type { ContentSelect } from "@packages/database/schema";
+import { Badge } from "@packages/ui/components/badge";
 import {
    Card,
+   CardAction,
    CardContent,
    CardDescription,
    CardHeader,
@@ -11,30 +14,15 @@ import { Separator } from "@packages/ui/components/separator";
 import {
    Calendar,
    Clock,
-   BookOpen,
-   FileText,
    MessageSquare,
+   Type,
+   Link2,
+   Tags,
+   List,
+   Globe,
 } from "lucide-react";
 
-interface RequestDetailsCardProps {
-   request: {
-      id: string;
-      topic: string;
-      briefDescription: string;
-      createdAt: Date;
-      agentId?: string;
-   };
-}
-
-interface ContentStatsCardProps {
-   generatedContent?: {
-      wordsCount?: number;
-      readTimeMinutes?: number;
-      tags?: string[];
-   } | null;
-}
-
-export function RequestDetailsCard({ request }: RequestDetailsCardProps) {
+export function ContentDetailsCard({ content }: { content: ContentSelect }) {
    return (
       <Card>
          <CardHeader>
@@ -45,22 +33,59 @@ export function RequestDetailsCard({ request }: RequestDetailsCardProps) {
          </CardHeader>
          <CardContent className="space-y-4">
             <InfoItem
-               icon={<FileText className="h-4 w-4" />}
-               label="Topic"
-               value={request.topic}
+               icon={<Type className="h-4 w-4" />}
+               label="Title"
+               value={content.meta?.title || ""}
             />
             <InfoItem
-               icon={<MessageSquare className="h-4 w-4" />}
-               label="Description"
-               value={request.briefDescription}
+               icon={<Link2 className="h-4 w-4" />}
+               label="Slug"
+               value={content.meta?.slug || ""}
             />
-
             <Separator />
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-2 gap-4">
+               <InfoItem
+                  icon={<Calendar className="h-4 w-4" />}
+                  label="Last Updated"
+                  value={new Date(content.updatedAt).toLocaleDateString()}
+               />
+
                <InfoItem
                   icon={<Calendar className="h-4 w-4" />}
                   label="Created At"
-                  value={new Date(request.createdAt).toLocaleDateString()}
+                  value={new Date(content.createdAt).toLocaleDateString()}
+               />
+            </div>
+            <Separator />
+            <div className="grid grid-cols-2 gap-2">
+               <div className="col-span-2">
+                  <InfoItem
+                     icon={<Tags className="h-4 w-4" />}
+                     label="Tags"
+                     value={
+                        content.meta?.tags?.length
+                           ? content.meta.tags.join(", ")
+                           : ""
+                     }
+                  />
+               </div>
+               <InfoItem
+                  icon={<List className="h-4 w-4" />}
+                  label="Topics"
+                  value={
+                     content.meta?.topics?.length
+                        ? content.meta.topics.join(", ")
+                        : ""
+                  }
+               />
+               <InfoItem
+                  icon={<Globe className="h-4 w-4" />}
+                  label="Sources"
+                  value={
+                     content.meta?.sources?.length
+                        ? content.meta.sources.join(", ")
+                        : ""
+                  }
                />
             </div>
          </CardContent>
@@ -68,11 +93,7 @@ export function RequestDetailsCard({ request }: RequestDetailsCardProps) {
    );
 }
 
-export function ContentStatsCard({ generatedContent }: ContentStatsCardProps) {
-   if (!generatedContent) {
-      return null;
-   }
-
+export function ContentStatsCard({ content }: { content: ContentSelect }) {
    return (
       <Card>
          <CardHeader>
@@ -80,18 +101,21 @@ export function ContentStatsCard({ generatedContent }: ContentStatsCardProps) {
             <CardDescription>
                Statistics and metadata about your generated content
             </CardDescription>
+            <CardAction>
+               <Badge>{content.stats?.qualityScore}</Badge>
+            </CardAction>
          </CardHeader>
 
          <CardContent className="grid grid-cols-2 gap-4">
             <InfoItem
-               icon={<BookOpen className="h-4 w-4" />}
+               icon={<Type className="h-4 w-4" />}
                label="Word Count"
-               value={generatedContent.wordsCount?.toString() || "0"}
+               value={content.stats?.wordsCount || ""}
             />
             <InfoItem
                icon={<Clock className="h-4 w-4" />}
                label="Read Time"
-               value={`${generatedContent.readTimeMinutes || 0} min`}
+               value={`${content.stats?.readTimeMinutes || 0} min`}
             />
          </CardContent>
       </Card>

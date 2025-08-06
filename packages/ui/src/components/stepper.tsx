@@ -310,6 +310,7 @@ const StepperSeparator = ({
       return null;
    }
    return (
+      // biome-ignore lint/a11y/useSemanticElements: <no need>
       <div
          aria-orientation={orientation || "horizontal"}
          aria-valuemax={100}
@@ -409,6 +410,7 @@ const classForSeparator = cva(
    },
 );
 
+// biome-ignore lint/suspicious/noFunctionAssign: <no need>
 function scrollIntoStepperPanel(
    node: HTMLDivElement | null,
    tracking?: boolean,

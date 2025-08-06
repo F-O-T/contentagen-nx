@@ -22,11 +22,7 @@ import { getAstroPosthogConfig } from "@packages/posthog/client";
 		<meta property="og:image" content="/og-image.png" />
 		<meta property="og:url" content="https://contentagen.com" />
 		<meta property="og:type" content="website" />
-
-		{import.meta.env.PROD && <script is:inline>
-getAstroPosthogConfig()
-</script>
-		}
+		{import.meta.env.PROD && <script set:html={getAstroPosthogConfig()} is:inline/>}
 		<title>{brandConfig.name} - Modern Solutions for Your Needs</title>
 	</head>
 	<body>

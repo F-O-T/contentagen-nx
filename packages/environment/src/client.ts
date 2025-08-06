@@ -1,9 +1,8 @@
-import { Type } from "@sinclair/typebox";
+import { z } from "zod";
 import { parseEnv } from "./helpers";
-import type { Static } from "@sinclair/typebox";
 
-const EnvSchema = Type.Object({
-   VITE_SERVER_URL: Type.String(),
+const EnvSchema = z.object({
+  VITE_SERVER_URL: z.string(),
 });
-export type ClientEnv = Static<typeof EnvSchema>;
+export type ClientEnv = z.infer<typeof EnvSchema>;
 export const clientEnv: ClientEnv = parseEnv(import.meta.env, EnvSchema);

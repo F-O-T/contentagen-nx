@@ -1,4 +1,5 @@
-import { generateText } from "ai";
+import { generateObject, generateText } from "ai";
+import { ZodObject } from "zod";
 import type { OpenRouterClient } from "./client";
 export const MODELS = {
    small: "google/gemini-2.5-flash-lite",
@@ -12,6 +13,7 @@ export const REASONING_EFFORT = {
 type reasoningEffort = "low" | "medium" | "high";
 
 type GenerateTextParams = Parameters<typeof generateText>[0];
+type GenerateObjectParams = Parameters<typeof generateObject>[0];
 export async function generateOpenRouterText(
    client: OpenRouterClient,
    lllmConfig: {
@@ -23,7 +25,30 @@ export async function generateOpenRouterText(
    const { model, reasoning } = lllmConfig;
    const result = await generateText({
       ...params,
-      model: client.languageModel(client.chat(MODELS[model]).modelId, {
+      model: client.chat(MODELS[model], {
+         reasoning: {
+            max_tokens: reasoning ? REASONING_EFFORT[reasoning] : 0,
+            enabled: Boolean(reasoning),
+         },
+      }),
+   });
+   return result;
+}
+export async function generateOpenRouterObject(
+   client: OpenRouterClient,
+   lllmConfig: {
+      model: keyof typeof MODELS;
+      reasoning?: reasoningEffort;
+   },
+   schema: ZodObject,
+   params: Omit<GenerateObjectParams, "model" | "schema">,
+) {
+   const { model, reasoning } = lllmConfig;
+   const result = await generateObject({
+      ...params,
+      schema,
+
+      model: client.chat(MODELS[model], {
          reasoning: {
             max_tokens: reasoning ? REASONING_EFFORT[reasoning] : 0,
             enabled: Boolean(reasoning),

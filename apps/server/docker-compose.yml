@@ -35,8 +35,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./chromadata:/chroma/.chroma/index
+      - chroma-data:/data
 volumes:
   pgdata:
   miniodata:
-  chromadata:
+  chroma-data:

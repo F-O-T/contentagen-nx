@@ -1,10 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
+import { useParams, useRouter } from "@tanstack/react-router";
 import { ContentRequestForm } from "@/features/content-request-form/ui/content-request-form";
 import { useTRPC } from "@/integrations/clients";
 
 export function AgentContentRequestPage() {
    const trpc = useTRPC();
+   const state = useRouter();
    const { agentId } = useParams({
       from: "/_dashboard/agents/$agentId/content/request",
    });
@@ -26,6 +27,7 @@ export function AgentContentRequestPage() {
                   description: values.description,
                },
             });
+            state.history.back();
          }}
       />
    );

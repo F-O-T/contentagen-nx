@@ -42,7 +42,7 @@ async function runKnowledgeChunkRag(payload: {
          collectionName: collection.collection.name,
       });
       const chunks = await queryCollection(collection.collection, {
-         nResults: 10,
+         nResults: 50,
          where: {
             agentId: agentId,
          },

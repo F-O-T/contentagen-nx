@@ -4,6 +4,8 @@ import { generateContentTask } from "../trigger/generate-content";
 import { knowledgeChunkRag } from "../trigger/knowledge-chunk-rag";
 import { saveContentTask } from "../trigger/save-content";
 import type { ContentRequest } from "@packages/database/schema";
+import { webSerchTask } from "../trigger/web-search";
+import { analyzeContentTask } from "../trigger/generate-content-metadata";
 
 export async function runContentGeneration(payload: {
    agentId: string;
@@ -36,22 +38,34 @@ export async function runContentGeneration(payload: {
 
       if (!ragResult.ok)
          throw new Error("Failed to improve description with RAG");
-      const improvedDescription =
-         ragResult.output.improvedDescription || contentRequest.description;
-
+      const webSearch = await webSerchTask.triggerAndWait({
+         query: payload.contentRequest.description,
+      });
+      if (!webSearch.ok) {
+         throw new Error("Failed to perform web search");
+      }
       logger.info("Pipeline: Generating content", { agentId });
       const contentResult = await generateContentTask.triggerAndWait({
          agent,
-         brandDocument: improvedDescription,
+         brandDocument: ragResult.output.improvedDescription,
+         webSearchContent: webSearch.output.allContent,
          contentRequest: {
             description: payload.contentRequest.description,
          },
       });
       if (!contentResult.ok) throw new Error("Failed to generate content");
       const content = contentResult.output.content;
-
+      const contentMetadata = await analyzeContentTask.triggerAndWait({
+         content,
+      });
+      if (!contentMetadata.ok) {
+         throw new Error("Failed to analyze content metadata");
+      }
+      const metadata = contentMetadata.output;
       logger.info("Pipeline: Saving content", { contentId });
       const saveResult = await saveContentTask.triggerAndWait({
+         meta: metadata.meta,
+         stats: metadata.stats,
          contentId,
          content,
       });

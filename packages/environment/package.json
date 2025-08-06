@@ -1,20 +1,19 @@
 {
    "dependencies": {
-      "@sinclair/typebox": "catalog:database",
+      "zod": "catalog:validation",
       "@packages/errors": "workspace:*"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
       "typescript": "catalog:development",
       "vite": "catalog:vite",
-      "vitest": "catalog:vite"
+      "vitest": "catalog:testing"
    },
    "license": "MIT",
    "name": "@packages/environment",
    "scripts": {
       "check": "biome check --write ./src",
-      "typecheck": "bunx --bun tsc --noEmit ",
-      "test": "vitest run"
+      "typecheck": "bunx --bun tsc --noEmit "
    },
    "private": true,
    "type": "module",

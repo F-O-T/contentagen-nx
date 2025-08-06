@@ -31,7 +31,7 @@ export function TiptapEditor({
    error = false,
 }: TiptapEditorProps) {
    const editor = useEditor({
-      immediatelyRender: false,
+      immediatelyRender: true,
       extensions: [StarterKit],
       content: value,
       editorProps: {
@@ -201,12 +201,12 @@ export function TiptapEditor({
 
    return (
       <div
-         className={`rounded-lg border-2 ${error ? "border-destructive" : "border-primary/30"} bg-muted`}
+         className={`rounded-lg border-2 ${error ? "border-destructive" : "border-primary/30"} bg-muted/70`}
       >
          <div className="p-2 flex flex-wrap items-center gap-1 bg-primary/10">
             {toolbarButtons.map((btn) =>
                btn.separator ? (
-                  <div key={btn.key} className="w-px h-6 bg-border mx-1" />
+                  <div key={btn.key} className="w-px h-6 bg-primary mx-1" />
                ) : (
                   <Button
                      key={btn.key}
@@ -241,7 +241,7 @@ export function TiptapEditor({
                ),
             )}
          </div>
-         <div className="bg-muted relative rounded-b-lg" style={{ minHeight }}>
+         <div className=" relative rounded-b-lg" style={{ minHeight }}>
             <EditorContent
                editor={editor}
                id={id}

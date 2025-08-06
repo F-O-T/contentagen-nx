@@ -1,4 +1,5 @@
 import { task, logger } from "@trigger.dev/sdk/v3";
+import { writingInputPrompt } from "@packages/prompts/prompt/text/writing";
 import { generateOpenRouterText } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
@@ -6,12 +7,13 @@ import type { ContentRequest } from "@packages/database/schema";
 
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 
-export async function runGenerateContent(payload: {
+async function runGenerateContent(payload: {
    agent: { systemPrompt: string };
    brandDocument: string;
+   webSearchContent: string;
    contentRequest: ContentRequest;
 }) {
-   const { agent, contentRequest, brandDocument } = payload;
+   const { agent, contentRequest, brandDocument, webSearchContent } = payload;
    try {
       logger.info("Generating content", {
          description: contentRequest.description,
@@ -19,12 +21,16 @@ export async function runGenerateContent(payload: {
       const result = await generateOpenRouterText(
          openrouter,
          {
-            model: "medium",
-            reasoning: "medium",
+            model: "small",
+            reasoning: "high",
          },
          {
             system: agent.systemPrompt,
-            prompt: `brand document:${brandDocument}, request:${contentRequest.description}`,
+            prompt: writingInputPrompt(
+               brandDocument,
+               webSearchContent,
+               contentRequest.description,
+            ),
          },
       );
       logger.info("Content generated", { length: result.text.length });
