@@ -23,6 +23,7 @@
     "@tanstack/react-router": "catalog:tanstack",
     "@tanstack/react-router-with-query": "catalog:tanstack",
     "@tanstack/router-plugin": "catalog:tanstack",
+    "@trpc/tanstack-react-query": "catalog:trpc",
     "compression": "catalog:server",
     "express": "catalog:server",
     "get-port": "catalog:server",
@@ -30,6 +31,7 @@
     "node-fetch": "catalog:server",
     "react": "catalog:react",
     "react-dom": "catalog:react",
+    "react-error-boundary": "^6.0.0",
     "tailwindcss": "catalog:ui",
     "vite-tsconfig-paths": "catalog:vite"
   },

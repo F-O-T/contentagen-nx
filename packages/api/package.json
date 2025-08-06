@@ -17,8 +17,7 @@
       "build": "tsc",
       "dev": "tsc",
       "check": "biome check --write ./src",
-      "typecheck": "tsc --noEmit --emitDeclarationOnly false",
-      "test": "vitest run"
+      "typecheck": "tsc --noEmit --emitDeclarationOnly false"
    },
    "dependencies": {
       "@packages/authentication": "workspace:*",

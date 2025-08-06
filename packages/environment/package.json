@@ -13,8 +13,7 @@
    "name": "@packages/environment",
    "scripts": {
       "check": "biome check --write ./src",
-      "typecheck": "bunx --bun tsc --noEmit ",
-      "test": "vitest run"
+      "typecheck": "bunx --bun tsc --noEmit "
    },
    "private": true,
    "type": "module",
