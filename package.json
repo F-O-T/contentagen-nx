@@ -27,7 +27,7 @@
       "dev:landing-page": "nx run-many -t dev --parallel=1 -p  landing-page ",
       "dev:blog": "nx run-many -t dev --parallel=1 -p  blog ",
       "dev:docs": "nx run-many -t dev --parallel=1 -p  docs",
-      "dev:dashboard": "nx run server:container-start && nx run-many -t dev --parallel=3 -p server dashboard worker",
+      "dev:dashboard": "nx run server:container-start && nx run-many -t dev --parallel=2 -p server dashboard",
       "dev:server": "nx run-many -t dev --parallel=1 -p server ",
       "dev:dashboard-only": "nx run-many -t dev --parallel=1 -p dashboard",
       "format": "biome check --write .",

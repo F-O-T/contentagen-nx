@@ -58,6 +58,7 @@ COPY packages/prompts ./packages/prompts
 COPY packages/errors ./packages/errors
 COPY packages/chroma-db ./packages/chroma-db
 COPY packages/openrouter ./packages/openrouter
+COPY packages/workers ./packages/workers
 
 # Install all dependencies (monorepo-aware)
 RUN bun install
@@ -91,12 +92,12 @@ ENV MINIO_BUCKET=${MINIO_BUCKET}
 ENV TAVILY_API_KEY=${TAVILY_API_KEY}
 ENV CHROMA_DB_URL=${CHROMA_DB_URL}
 RUN bun build \
-  --compile \
-  --minify-whitespace \
-  --minify-syntax \
-  --target bun \
-  --outfile server \
-  ./apps/server/src/index.ts
+    --compile \
+    --minify-whitespace \
+    --minify-syntax \
+    --target bun \
+    --outfile server \
+    ./apps/server/src/index.ts
 
 # ---
 
@@ -134,6 +135,7 @@ COPY packages/database/package.json ./packages/database/
 COPY packages/payment/package.json ./packages/payment/
 COPY packages/transactional/package.json ./packages/transactional/
 COPY packages/prompts/package.json ./packages/prompts/
+COPY packages/workers/package.json ./packages/workers/
 COPY packages/errors/package.json ./packages/errors/
 COPY packages/chroma-db/package.json ./packages/chroma-db/
 COPY packages/openrouter/package.json ./packages/openrouter/
