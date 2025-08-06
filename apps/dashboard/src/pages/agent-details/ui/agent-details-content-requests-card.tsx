@@ -1,4 +1,4 @@
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { ContentRequestCard } from "@/widgets/content-card/ui/content-card";
 
 import {
@@ -28,7 +28,7 @@ export function AgentDetailsContentRequestsCard() {
             <CardTitle>Content</CardTitle>
             <CardDescription>Content linked to this agent</CardDescription>
          </CardHeader>
-         <CardContent>
+         <CardContent className="gap-4 grid grid-cols-1 md:grid-cols-3">
             {data.map((req) => (
                <ContentRequestCard key={req.id} request={req} />
             ))}

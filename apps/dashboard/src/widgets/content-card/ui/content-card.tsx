@@ -1,6 +1,7 @@
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
+   CardAction,
    CardContent,
    CardDescription,
    CardFooter,
@@ -11,6 +12,7 @@ import { InfoItem } from "@packages/ui/components/info-item";
 import { Link } from "@tanstack/react-router";
 import { Activity, Loader2 } from "lucide-react";
 import type { ContentSelect } from "@packages/database/schema";
+import { Badge } from "@packages/ui/components/badge";
 export function ContentRequestCard({ request }: { request: ContentSelect }) {
    return (
       <Card>
@@ -29,9 +31,9 @@ export function ContentRequestCard({ request }: { request: ContentSelect }) {
                   <CardTitle className="line-clamp-1">
                      {request.meta?.title}
                   </CardTitle>
-                  <CardDescription className="line-clamp-1">
-                     {request.stats?.qualityScore}
-                  </CardDescription>
+                  <CardAction>
+                     <Badge>{request.stats?.qualityScore}</Badge>
+                  </CardAction>
                </CardHeader>
                <CardContent className="grid grid-cols-1 gap-2 ">
                   <InfoItem
