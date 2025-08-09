@@ -19,6 +19,7 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-pas
 import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-verification'
 import { Route as DashboardProfileRouteImport } from './routes/_dashboard/profile'
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard/home'
+import { Route as DashboardApikeyRouteImport } from './routes/_dashboard/apikey'
 import { Route as DashboardContentIndexRouteImport } from './routes/_dashboard/content/index'
 import { Route as DashboardAgentsIndexRouteImport } from './routes/_dashboard/agents/index'
 import { Route as DashboardContentIdRouteImport } from './routes/_dashboard/content/$id'
@@ -74,6 +75,11 @@ const DashboardHomeRoute = DashboardHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardApikeyRoute = DashboardApikeyRouteImport.update({
+  id: '/apikey',
+  path: '/apikey',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardContentIndexRoute = DashboardContentIndexRouteImport.update({
   id: '/content/',
   path: '/content/',
@@ -120,6 +126,7 @@ const DashboardAgentsAgentIdContentRequestRoute =
 
 export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteWithChildren
+  '/apikey': typeof DashboardApikeyRoute
   '/home': typeof DashboardHomeRoute
   '/profile': typeof DashboardProfileRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
+  '/apikey': typeof DashboardApikeyRoute
   '/home': typeof DashboardHomeRoute
   '/profile': typeof DashboardProfileRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_dashboard': typeof DashboardRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/_dashboard/apikey': typeof DashboardApikeyRoute
   '/_dashboard/home': typeof DashboardHomeRoute
   '/_dashboard/profile': typeof DashboardProfileRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/auth'
+    | '/apikey'
     | '/home'
     | '/profile'
     | '/auth/email-verification'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/apikey'
     | '/home'
     | '/profile'
     | '/auth/email-verification'
@@ -209,6 +220,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_dashboard'
     | '/auth'
+    | '/_dashboard/apikey'
     | '/_dashboard/home'
     | '/_dashboard/profile'
     | '/auth/email-verification'
@@ -294,6 +306,13 @@ declare module '@tanstack/react-router' {
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof DashboardHomeRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/apikey': {
+      id: '/_dashboard/apikey'
+      path: '/apikey'
+      fullPath: '/apikey'
+      preLoaderRoute: typeof DashboardApikeyRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/_dashboard/content/': {
@@ -388,6 +407,7 @@ const DashboardAgentsRouteWithChildren = DashboardAgentsRoute._addFileChildren(
 )
 
 interface DashboardRouteChildren {
+  DashboardApikeyRoute: typeof DashboardApikeyRoute
   DashboardHomeRoute: typeof DashboardHomeRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
   DashboardAgentsRoute: typeof DashboardAgentsRouteWithChildren
@@ -396,6 +416,7 @@ interface DashboardRouteChildren {
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardApikeyRoute: DashboardApikeyRoute,
   DashboardHomeRoute: DashboardHomeRoute,
   DashboardProfileRoute: DashboardProfileRoute,
   DashboardAgentsRoute: DashboardAgentsRouteWithChildren,

@@ -157,7 +157,7 @@ function NavUserContent({ session }: { session: Session | null }) {
                            onClick={() => setOpenMobile(false)}
                            asChild
                         >
-                           <Link to="/organization">Api keys</Link>
+                           <Link to="/apikey">Api keys</Link>
                         </Button>
                      </DropdownMenuItem>
                   </DropdownMenuGroup>{" "}
