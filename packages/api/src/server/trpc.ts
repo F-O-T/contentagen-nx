@@ -28,13 +28,15 @@ export const createTRPCContext = async ({
    db: DatabaseInstance;
    minioClient: MinioClient;
    chromaClient: ChromaClient;
+   auth: AuthInstance;
+   headers: Headers;
    session: AuthInstance["$Infer"]["Session"] | null;
 }> => {
    const session = await auth.api.getSession({
       headers,
    });
-const collection = await ensureAgentKnowledgeCollection(chromaClient);
-if(!collection) {
+   const collection = await ensureAgentKnowledgeCollection(chromaClient);
+   if (!collection) {
       throw new TRPCError({
          code: "INTERNAL_SERVER_ERROR",
          message: "Failed to ensure agent knowledge collection",
@@ -47,6 +49,8 @@ if(!collection) {
       db,
       chromaClient,
       session,
+      auth,
+      headers,
    };
 };
 
@@ -68,6 +72,37 @@ const isAuthed = t.middleware(async ({ ctx, next }) => {
       },
    });
 });
+const sdkAuth = t.middleware(async ({ ctx, next }) => {
+   const resolvedCtx = await ctx;
+   // 1. Get the Authorization header from the incoming request.
+   const authHeader = resolvedCtx.headers.get("Authorization");
+
+   // 2. Check for the presence and format of the "Bearer <token>" header.
+   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      throw new TRPCError({
+         code: "UNAUTHORIZED",
+         message:
+            "API Key is missing or malformed. Expected 'Authorization: Bearer <key>'.",
+      });
+   }
+
+   // 3. Extract the API key from the header.
+   const key = authHeader.substring(7); // Removes "Bearer " prefix
+
+   // 4. Use the better-auth server-side API to validate the key.
+   // This checks the database for a matching, valid, and enabled key.
+   const apiKeyData = await resolvedCtx.auth.api.verifyApiKey({
+      body: { key },
+   });
+
+   if (!apiKeyData.valid) {
+      throw new TRPCError({
+         code: "UNAUTHORIZED",
+         message: "Invalid API Key.",
+      });
+   }
+   return next();
+});
 const timingMiddleware = t.middleware(async ({ next, path }) => {
    const start = Date.now();
    const result = await next();
@@ -80,3 +115,4 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 
 export const publicProcedure = t.procedure.use(timingMiddleware);
 export const protectedProcedure = publicProcedure.use(isAuthed);
+export const sdkProcedure = publicProcedure.use(sdkAuth);

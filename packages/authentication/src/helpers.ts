@@ -9,9 +9,7 @@ import { checkout, polar, portal, usage } from "@polar-sh/better-auth";
 import type { Polar } from "@polar-sh/sdk";
 import { serverEnv } from "@packages/environment/server";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { apiKey, openAPI, organization } from "better-auth/plugins";
 import { emailOTP } from "better-auth/plugins/email-otp";
-import type { BetterAuthOptions } from "better-auth";
 
 export function getSocialProviders() {
    return {
@@ -44,19 +42,6 @@ export function getEmailVerificationOptions() {
       autoSignInAfterVerification: true,
       sendOnSignUp: true,
    };
-}
-
-export function getPlugins(
-   client: ResendClient,
-   polarClient: Polar,
-): BetterAuthOptions["plugins"] {
-   return [
-      getEmailOTPPlugin(client),
-      getPolarPlugin(polarClient),
-      openAPI(),
-      apiKey(),
-      organization({ organizationLimit: 1 }),
-   ];
 }
 
 export function getEmailOTPPlugin(
