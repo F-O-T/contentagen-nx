@@ -78,18 +78,6 @@ export async function deleteAgent(
    }
 }
 
-export async function listAgents(
-   dbClient: DatabaseInstance,
-): Promise<AgentSelect[]> {
-   try {
-      return await dbClient.query.agent.findMany();
-   } catch (err) {
-      throw new DatabaseError(
-         `Failed to list agents: ${(err as Error).message}`,
-      );
-   }
-}
-
 export async function listAgentsByUserId(
    dbClient: DatabaseInstance,
    userId: string,

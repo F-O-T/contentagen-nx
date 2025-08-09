@@ -29,10 +29,7 @@ export function AgentDetailsPage() {
                </div>
 
                <div className="col-span-1 md:col-span-2 space-y-4">
-                  <AgentStatsCard
-                     totalDrafts={agent?.totalDrafts ?? 0}
-                     totalPublished={agent?.totalPublished ?? 0}
-                  />
+                  <AgentStatsCard />
                   <AgentPersonaCard
                      name={agent?.personaConfig.metadata.name}
                      description={agent?.personaConfig.metadata.description}

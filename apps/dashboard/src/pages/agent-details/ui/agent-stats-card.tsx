@@ -9,31 +9,46 @@ import {
 } from "@packages/ui/components/card";
 import { useMemo } from "react";
 import { InfoItem } from "@packages/ui/components/info-item";
-import { FileText, Eye } from "lucide-react";
+import { FileEdit, CheckCircle2, Type, Star } from "lucide-react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/integrations/clients";
+import { useParams } from "@tanstack/react-router";
 
-export interface AgentStatsCardProps {
-   totalDrafts: number;
-   totalPublished: number;
-}
-
-export function AgentStatsCard({
-   totalDrafts,
-   totalPublished,
-}: AgentStatsCardProps) {
+export function AgentStatsCard() {
+   const trpc = useTRPC();
+   const id = useParams({
+      from: "/_dashboard/agents/$agentId/",
+      select: ({ agentId }) => agentId,
+   });
+   const { data } = useSuspenseQuery(
+      trpc.agent.stats.queryOptions({
+         id,
+      }),
+   );
    const items = useMemo(
       () => [
          {
             label: "Drafts",
-            value: totalDrafts.toString(),
-            icon: <FileText className="w-4 h-4" />,
+            value: data.totalDraft.toString(),
+            icon: <FileEdit className="w-4 h-4" />,
          },
          {
             label: "Published",
-            value: totalPublished.toString(),
-            icon: <Eye className="w-4 h-4" />,
+            value: data.totalPublished.toString(),
+            icon: <CheckCircle2 className="w-4 h-4" />,
+         },
+         {
+            label: "Total Words Written",
+            value: data.wordsWritten?.toString() ?? "0",
+            icon: <Type className="w-4 h-4" />,
+         },
+         {
+            label: "Avg. Quality Score",
+            value: data.avgQualityScore?.toString() ?? "0",
+            icon: <Star className="w-4 h-4" />,
          },
       ],
-      [totalDrafts, totalPublished],
+      [data],
    );
 
    return (

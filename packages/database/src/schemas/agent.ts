@@ -4,7 +4,6 @@ import {
    jsonb,
    uuid,
    text,
-   boolean,
    integer,
    timestamp,
    index,
@@ -86,11 +85,9 @@ export const agent = pgTable(
       userId: text("user_id")
          .notNull()
          .references(() => user.id, { onDelete: "cascade" }),
-
       personaConfig: jsonb("persona_config").$type<PersonaConfig>().notNull(),
+      //TODO remover depois
       systemPrompt: text("system_prompt").notNull(),
-      totalDrafts: integer("total_drafts").default(0),
-      totalPublished: integer("total_published").default(0),
       uploadedFiles: jsonb("uploaded_files")
          .$type<{ fileName: string; fileUrl: string; uploadedAt: string }[]>()
          .default([]),

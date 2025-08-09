@@ -114,3 +114,22 @@ export async function getContentsByUserId(
       );
    }
 }
+
+/**
+ * Returns all contents for the provided agentId. This can be extended to return statistics in the future.
+ */
+export async function getAgentContentStats(
+   dbClient: DatabaseInstance,
+   agentId: string,
+): Promise<Content[]> {
+   try {
+      return await dbClient.query.content.findMany({
+         where: eq(content.agentId, agentId),
+         orderBy: (content, { desc }) => [desc(content.updatedAt)],
+      });
+   } catch (err) {
+      throw new DatabaseError(
+         `Failed to get agent content stats: ${(err as Error).message}`,
+      );
+   }
+}
