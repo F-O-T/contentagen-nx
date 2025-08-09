@@ -55,15 +55,6 @@ const app = new Elysia()
    .use(ArcjetShield)
    .use(posthogPlugin)
    .mount(auth.handler)
-   .onBeforeHandle(({ request }) => {
-      const url = new URL(request.url);
-
-      if (url.pathname.startsWith("/ui")) {
-         return bullAuth(request);
-      }
-   })
-   .use(serverAdapter.registerPlugin())
-
    .all(
       "/trpc/*",
       async (opts) => {
@@ -83,6 +74,14 @@ const app = new Elysia()
          parse: "none",
       },
    )
+   .onBeforeHandle(({ request }) => {
+      const url = new URL(request.url);
+
+      if (url.pathname.startsWith("/ui")) {
+         return bullAuth(request);
+      }
+   })
+   .use(serverAdapter.registerPlugin())
    .listen(process.env.PORT ?? 9876);
 
 console.log(
