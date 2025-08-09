@@ -21,6 +21,7 @@
    },
    "dependencies": {
       "@packages/database": "workspace:*",
+      "superjson": "catalog:trpc",
       "zod": "catalog:validation"
    },
    "devDependencies": {

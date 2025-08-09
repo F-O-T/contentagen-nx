@@ -2,18 +2,20 @@ import { writingInputPrompt } from "@packages/prompts/prompt/text/writing";
 import { generateOpenRouterText } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
-import type { ContentRequest } from "@packages/database/schema";
+import type { ContentRequest, PersonaConfig } from "@packages/database/schema";
+import { generateSystemPrompt } from "@packages/prompts/helpers/agent-system-prompt-assembler";
 
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 
 export async function runGenerateContent(payload: {
-   agent: { systemPrompt: string };
+   agent: { personaConfig: PersonaConfig };
    brandDocument: string;
    webSearchContent: string;
    contentRequest: ContentRequest;
 }) {
    const { agent, contentRequest, brandDocument, webSearchContent } = payload;
    try {
+      const agentSystemPrompt = generateSystemPrompt(agent.personaConfig);
       const result = await generateOpenRouterText(
          openrouter,
          {
@@ -21,7 +23,7 @@ export async function runGenerateContent(payload: {
             reasoning: "high",
          },
          {
-            system: agent.systemPrompt,
+            system: agentSystemPrompt,
             prompt: writingInputPrompt(
                brandDocument,
                webSearchContent,

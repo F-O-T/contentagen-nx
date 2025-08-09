@@ -13,7 +13,6 @@ import {
    AgentSelectSchema,
    PersonaConfigSchema,
 } from "@packages/database/schemas/agent";
-import { generateSystemPrompt } from "@packages/prompts/helpers/agent-system-prompt-assembler";
 
 import { getAgentContentStats } from "@packages/database/repositories/content-repository";
 
@@ -47,7 +46,7 @@ export const agentRouter = router({
          const avgQualityScore =
             qualityScores.length > 0
                ? qualityScores.reduce((sum, val) => sum + val, 0) /
-                 qualityScores.length
+               qualityScores.length
                : null;
 
          return {
@@ -56,24 +55,6 @@ export const agentRouter = router({
             totalPublished,
             avgQualityScore,
          };
-      }),
-   regenerateSystemPrompt: protectedProcedure
-      .input(AgentSelectSchema.pick({ id: true }))
-      .mutation(async ({ ctx, input }) => {
-         // 1. Load agent
-         const agent = await getAgentById((await ctx).db, input.id);
-         if (!agent)
-            throw new TRPCError({
-               code: "NOT_FOUND",
-               message: "Agent not found",
-            });
-         // 2. Regenerate system prompt
-         const newSystemPrompt = generateSystemPrompt(agent.personaConfig);
-         // 3. Update agent
-         const updated = await updateAgent((await ctx).db, input.id, {
-            systemPrompt: newSystemPrompt,
-         });
-         return updated;
       }),
    create: protectedProcedure
       .input(PersonaConfigSchema)
@@ -90,7 +71,6 @@ export const agentRouter = router({
                AgentInsert,
                "id" | "createdAt" | "updatedAt"
             > = {
-               systemPrompt: generateSystemPrompt(input),
                personaConfig: input,
                userId: userId,
             };
@@ -120,19 +100,9 @@ export const agentRouter = router({
                message: "Agent ID is required for update.",
             });
          }
-         const getNewSystemPrompt = () => {
-            if (!updateFields.personaConfig) {
-               return;
-            }
-            return generateSystemPrompt({
-               ...updateFields.personaConfig,
-            });
-         };
-         const systemPrompt = getNewSystemPrompt();
          try {
             await updateAgent((await ctx).db, id, {
                personaConfig: updateFields.personaConfig,
-               systemPrompt,
                updatedAt: new Date(),
             });
             return { success: true };

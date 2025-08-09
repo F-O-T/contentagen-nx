@@ -23,11 +23,12 @@
       "auth:generate": "nx run authentication:auth-schema-generate",
       "check": "nx run-many -t check --parallel=3",
       "dev:all": "nx run-many -t dev --parallel=5",
+      "dev:sdk-blog": "nx run-many -t dev --parallel=2 -p blog server",
       "dev:content-apps": "nx run-many -t dev --parallel=3 -p  landing-page blog docs",
       "dev:landing-page": "nx run-many -t dev --parallel=1 -p  landing-page ",
       "dev:blog": "nx run-many -t dev --parallel=1 -p  blog ",
       "dev:docs": "nx run-many -t dev --parallel=1 -p  docs",
-      "dev:dashboard": "nx run server:container-start && nx run-many -t dev --parallel=2 -p server dashboard",
+      "dev:dashboard": "nx run-many -t dev --parallel=2 -p server dashboard",
       "dev:server": "nx run-many -t dev --parallel=1 -p server ",
       "dev:dashboard-only": "nx run-many -t dev --parallel=1 -p dashboard",
       "format": "biome check --write .",
@@ -100,7 +101,7 @@
          },
          "database": {
             "drizzle-orm": "^0.44.2",
-            "drizzle-zod": "0.8.2",
+            "drizzle-zod": "0.8.3",
             "pg": "^8.16.3",
             "@types/pg": "^8.15.4",
             "drizzle-kit": "^0.31.4"

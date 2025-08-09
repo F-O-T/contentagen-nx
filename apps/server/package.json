@@ -26,7 +26,7 @@
       "check": "bunx --bun biome check --write .",
       "deploy": "wrangler deploy",
       "container-start": "podman-compose down && podman-compose up -d",
-      "dev": "bun run --watch src/index.ts",
+      "dev": "bun run container-start && bun run --watch src/index.ts",
       "format": "biome format",
       "start": "./server",
       "typecheck": "bunx --bun tsc --noEmit "

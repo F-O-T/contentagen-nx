@@ -12,7 +12,6 @@ import { chromaClient, openRouterClient } from "./integrations/chromadb";
 import { bullAuth } from "./integrations/bull-auth-guard";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { ElysiaAdapter } from "@bull-board/elysia";
-
 import { createBullBoard } from "@bull-board/api";
 import { autoBrandKnowledgeQueue } from "@packages/workers/queues/auto-brand-knowledge";
 import { contentGenerationQueue } from "@packages/workers/queues/content-generation";
@@ -47,7 +46,7 @@ const trpcApi = createApi({
 const app = new Elysia()
    .use(
       cors({
-         allowedHeaders: ["Content-Type", "Authorization"],
+         allowedHeaders: ["Content-Type", "Authorization", "sdk-api-key"],
          credentials: true,
          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
          origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),

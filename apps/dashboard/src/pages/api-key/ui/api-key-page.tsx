@@ -32,7 +32,7 @@ export function ApiKeyPage() {
       queryKey: ["apiKeys"],
       queryFn: async () => {
          const { data, error } = await betterAuthClient.apiKey.list();
-         if (error) throw new Error(error.message || "Failed to load API keys");
+         if (error) throw new Error("Failed to load API keys");
          return data;
       },
    });

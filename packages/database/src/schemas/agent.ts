@@ -86,8 +86,6 @@ export const agent = pgTable(
          .notNull()
          .references(() => user.id, { onDelete: "cascade" }),
       personaConfig: jsonb("persona_config").$type<PersonaConfig>().notNull(),
-      //TODO remover depois
-      systemPrompt: text("system_prompt").notNull(),
       uploadedFiles: jsonb("uploaded_files")
          .$type<{ fileName: string; fileUrl: string; uploadedAt: string }[]>()
          .default([]),

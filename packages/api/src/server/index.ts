@@ -8,6 +8,7 @@ import { agentRouter } from "./router/agent";
 import { contentRouter } from "./router/content";
 
 import { sessionRouter } from "./router/session";
+import { sdkRouter } from "./router/sdk";
 import type { OpenRouterClient } from "@packages/openrouter/client";
 
 export const appRouter = router({
@@ -15,6 +16,7 @@ export const appRouter = router({
    agentFile: agentFileRouter,
    content: contentRouter,
    sessionHelper: sessionRouter,
+   sdk: sdkRouter,
 });
 export const createApi = ({
    auth,

@@ -14,7 +14,8 @@
       "@tailwindcss/vite": "^4.1.8",
       "astro": "catalog:astro",
       "react": "catalog:react",
-      "react-dom": "catalog:react"
+      "react-dom": "catalog:react",
+      "@contentagen/sdk": "workspace:*"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",

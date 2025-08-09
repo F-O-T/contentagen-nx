@@ -84,11 +84,11 @@ export function CreateApiKeyCredenza({
    return (
       <>
          <Credenza open={open} onOpenChange={onOpenChange}>
-            <form onSubmit={(e) => handleSubmit(e)}>
-               <CredenzaContent>
-                  <CredenzaHeader>
-                     <CredenzaTitle>Create api key</CredenzaTitle>
-                  </CredenzaHeader>
+            <CredenzaContent>
+               <CredenzaHeader>
+                  <CredenzaTitle>Create api key</CredenzaTitle>
+               </CredenzaHeader>
+               <form onSubmit={(e) => handleSubmit(e)}>
                   <CredenzaBody>
                      <form.AppField name="name">
                         {(field) => (
@@ -125,8 +125,8 @@ export function CreateApiKeyCredenza({
                         )}
                      </form.Subscribe>
                   </CredenzaFooter>
-               </CredenzaContent>
-            </form>
+               </form>
+            </CredenzaContent>
          </Credenza>
          <Credenza
             open={alertOpen}
