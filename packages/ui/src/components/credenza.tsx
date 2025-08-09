@@ -136,8 +136,12 @@ const CredenzaTitle = ({ className, children, ...props }: CredenzaProps) => {
 };
 
 const CredenzaBody = ({ className, children, ...props }: CredenzaProps) => {
+   const { isDesktop } = useCredenzaContext();
    return (
-      <div className={cn("px-0 md:px-4 pb-4 ", className)} {...props}>
+      <div
+         className={cn(isDesktop ? "px-0 pb-4" : "pb-0 px-4", className)}
+         {...props}
+      >
          {children}
       </div>
    );

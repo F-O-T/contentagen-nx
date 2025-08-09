@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
 import {
@@ -21,7 +19,6 @@ import {
 import { Upload, FileText, MoreHorizontal } from "lucide-react";
 import useFileUpload, { type UploadedFile } from "../lib/use-file-upload";
 import { useState, useEffect } from "react";
-// import { useTRPC } from "@/integrations/clients";
 import {
    Credenza,
    CredenzaContent,
@@ -30,7 +27,6 @@ import {
    CredenzaFooter,
    CredenzaClose,
 } from "@packages/ui/components/credenza";
-import { useAppForm } from "@packages/ui/components/form";
 import {
    Dropzone,
    DropzoneEmptyState,
@@ -79,6 +75,14 @@ export function AgentDetailsKnowledgeBaseCard({
       canAddMore,
       remainingSlots,
    } = useFileUpload(uploadedFiles, { fileLimit: FILE_UPLOAD_LIMIT });
+
+   // Handler to delete all files
+   async function handleDeleteAllFiles() {
+      // Call handleDeleteFile for each file
+      await Promise.all(
+         uploadedFiles.map((file) => handleDeleteFile(file.fileName))
+      );
+   }
 
    // Separate Credenza states
    const [showUploadCredenza, setShowUploadCredenza] = useState(false);
@@ -178,9 +182,41 @@ export function AgentDetailsKnowledgeBaseCard({
                Upload files about your brand for your agent to use.
             </CardDescription>
             <CardAction>
-               <Badge variant="outline">
-                  {remainingSlots}/{FILE_UPLOAD_LIMIT}
-               </Badge>
+               <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                     <Button
+                        variant={"ghost"}
+                        size="icon"
+                        className="flex items-center justify-center"
+                     >
+                        <MoreHorizontal className="w-5 h-5" />
+                     </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                     {canAddMore ? (
+                        <>
+                           <DropdownMenuItem
+                              onSelect={() => {
+                                 setShowUploadCredenza(true);
+                              }}
+                           >
+                              Upload Files
+                           </DropdownMenuItem>
+                           <DropdownMenuItem
+                              onSelect={() => {
+                                 setShowGenerateCredenza(true);
+                              }}
+                           >
+                              Generate from Website
+                           </DropdownMenuItem>
+                        </>
+                     ) : (
+                        <DropdownMenuItem onSelect={handleDeleteAllFiles}>
+                           Delete All Files
+                        </DropdownMenuItem>
+                     )}
+                  </DropdownMenuContent>
+               </DropdownMenu>
             </CardAction>
          </CardHeader>
          <CardContent className="h-full">
@@ -250,37 +286,20 @@ export function AgentDetailsKnowledgeBaseCard({
             onChange={handleFileSelect}
             className="hidden"
          />
-         <CardFooter>
-            {canAddMore && (
-               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                     <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full flex items-center justify-center gap-2"
-                     >
-                        <Upload className="w-4 h-4" />
-                        Upload or Generate
-                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                     <DropdownMenuItem
-                        onSelect={() => {
-                           setShowUploadCredenza(true);
-                        }}
-                     >
-                        Upload Files
-                     </DropdownMenuItem>
-                     <DropdownMenuItem
-                        onSelect={() => {
-                           setShowGenerateCredenza(true);
-                        }}
-                     >
-                        Generate from Website
-                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-               </DropdownMenu>
-            )}
+         <CardFooter className="flex items-center gap-2 text-muted-foreground">
+            <span className="text-xs">
+               {uploadedFiles.length > 0
+                  ? `${uploadedFiles.length} of ${FILE_UPLOAD_LIMIT} file${FILE_UPLOAD_LIMIT > 1 ? 's' : ''} uploaded.`
+                  : `No files uploaded yet.`}
+            </span>
+            <Badge variant="outline">
+               {uploadedFiles.length}/{FILE_UPLOAD_LIMIT}
+            </Badge>
+            <span className="ml-auto text-xs">
+               {canAddMore
+                  ? `You can upload ${remainingSlots} more file${remainingSlots > 1 ? 's' : ''}.`
+                  : `Upload limit reached.`}
+            </span>
          </CardFooter>
          {/* Credenza for file upload */}
          <UploadBrandFilesCredenza

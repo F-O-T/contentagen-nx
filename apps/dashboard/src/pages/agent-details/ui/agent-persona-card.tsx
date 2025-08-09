@@ -31,7 +31,6 @@ import { useTRPC } from "@/integrations/clients";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useParams, useRouter } from "@tanstack/react-router";
-import { agent } from "@packages/database/schema";
 import {
    AlertDialog,
    AlertDialogContent,

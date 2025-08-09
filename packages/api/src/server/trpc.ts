@@ -75,24 +75,17 @@ const isAuthed = t.middleware(async ({ ctx, next }) => {
 const sdkAuth = t.middleware(async ({ ctx, next }) => {
    const resolvedCtx = await ctx;
    // 1. Get the Authorization header from the incoming request.
-   const authHeader = resolvedCtx.headers.get("Authorization");
-
-   // 2. Check for the presence and format of the "Bearer <token>" header.
-   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+   const authHeader = resolvedCtx.headers.get("sdk-api-key");
+   if (!authHeader) {
       throw new TRPCError({
          code: "UNAUTHORIZED",
-         message:
-            "API Key is missing or malformed. Expected 'Authorization: Bearer <key>'.",
+         message: "Missing API Key.",
       });
    }
 
-   // 3. Extract the API key from the header.
-   const key = authHeader.substring(7); // Removes "Bearer " prefix
-
-   // 4. Use the better-auth server-side API to validate the key.
-   // This checks the database for a matching, valid, and enabled key.
    const apiKeyData = await resolvedCtx.auth.api.verifyApiKey({
-      body: { key },
+      headers: resolvedCtx.headers,
+      body: { key: authHeader },
    });
 
    if (!apiKeyData.valid) {
@@ -101,7 +94,18 @@ const sdkAuth = t.middleware(async ({ ctx, next }) => {
          message: "Invalid API Key.",
       });
    }
-   return next();
+   const session = await resolvedCtx.auth.api.getSession({
+      headers: new Headers({
+         "sdk-api-key": authHeader,
+      }),
+   });
+   return next({
+      ctx: {
+         session: {
+            ...session,
+         },
+      },
+   });
 });
 const timingMiddleware = t.middleware(async ({ next, path }) => {
    const start = Date.now();

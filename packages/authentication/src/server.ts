@@ -69,7 +69,15 @@ export const getAuthOptions = (
          }),
          openAPI(),
          organization(),
-         apiKey(),
+         apiKey({
+            rateLimit: {
+               enabled: true,
+               timeWindow: 1000 * 60 * 60 * 24, // 1 day
+               maxRequests: 500, // 1000 requests per day
+            },
+            enableMetadata: true,
+            apiKeyHeaders: "sdk-api-key",
+         }),
       ],
       socialProviders: getSocialProviders(),
       emailAndPassword: getEmailAndPasswordOptions(),

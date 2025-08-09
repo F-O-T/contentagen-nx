@@ -39,7 +39,7 @@ export function FileViewerModal({
                   Markdown file content preview
                </CredenzaDescription>
             </CredenzaHeader>
-            <CredenzaBody className="flex-1 max-h-96 flex flex-col">
+            <CredenzaBody className="flex-1 flex flex-col">
                {loading ? (
                   <div className="flex items-center justify-center h-32">
                      <Loader2 className="w-6 h-6 animate-spin" />
@@ -48,9 +48,11 @@ export function FileViewerModal({
                      </span>
                   </div>
                ) : (
-                  <ScrollArea className=" h-full">
-                     <Markdown content={fileContent} />
-                  </ScrollArea>
+                  <div className="h-90">
+                     <ScrollArea className=" h-full">
+                        <Markdown content={fileContent} />
+                     </ScrollArea>
+                  </div>
                )}
             </CredenzaBody>
 
