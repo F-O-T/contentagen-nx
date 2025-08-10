@@ -2,7 +2,7 @@ import { sdkProcedure, router } from "../trpc";
 import {
    ListContentByAgentInputSchema,
    GetContentByIdInputSchema,
-} from "@contentagen/sdk";
+} from "@packages/database/schemas/agent";
 import {
    listContents,
    getContentById,

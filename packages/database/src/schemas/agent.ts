@@ -120,3 +120,12 @@ export type LanguageConfig = z.infer<typeof LanguageConfigSchema>;
 export type BrandConfig = z.infer<typeof BrandConfigSchema>;
 export type PurposeChannel = z.infer<typeof PurposeChannelSchema>;
 export type PersonaConfig = z.infer<typeof PersonaConfigSchema>;
+export const ListContentByAgentInputSchema = z.object({
+   agentId: z.uuid("Invalid Agent ID format."),
+   limit: z.number().min(1).max(100).optional().default(10),
+   page: z.number().min(1).optional().default(1),
+});
+
+export const GetContentByIdInputSchema = z.object({
+   id: z.uuid("Invalid Content ID format."),
+});

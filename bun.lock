@@ -161,7 +161,6 @@
       "name": "@packages/api",
       "version": "0.1.0",
       "dependencies": {
-        "@contentagen/sdk": "workspace:*",
         "@packages/authentication": "workspace:*",
         "@packages/chroma-db": "workspace:*",
         "@packages/database": "workspace:*",

@@ -3,15 +3,10 @@ import { ContentSelectSchema } from "@packages/database/schemas/content";
 import SuperJSON from "superjson";
 import { z } from "zod";
 import type { ContentSelect } from "@packages/database/schemas/content";
-export const ListContentByAgentInputSchema = z.object({
-   agentId: z.uuid("Invalid Agent ID format."),
-   limit: z.number().min(1).max(100).optional().default(10),
-   page: z.number().min(1).optional().default(1),
-});
-
-export const GetContentByIdInputSchema = z.object({
-   id: z.uuid("Invalid Content ID format."),
-});
+import {
+   ListContentByAgentInputSchema,
+   GetContentByIdInputSchema,
+} from "@packages/database/schemas/agent";
 
 const PRODUCTION_API_URL = "https://api.contentagen.com";
 
@@ -146,3 +141,7 @@ export class ContentaGenSDK {
 export const createSdk = (config: SdkConfig): ContentaGenSDK => {
    return new ContentaGenSDK(config);
 };
+export {
+   GetContentByIdInputSchema,
+   ListContentByAgentInputSchema,
+} from "@packages/database/schemas/agent";
