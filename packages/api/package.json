@@ -20,6 +20,7 @@
       "typecheck": "tsc --noEmit --emitDeclarationOnly false"
    },
    "dependencies": {
+      "@contentagen/sdk": "workspace:*",
       "@packages/workers": "workspace:*",
       "@packages/authentication": "workspace:*",
       "@packages/database": "workspace:*",
