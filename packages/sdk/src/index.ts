@@ -39,23 +39,23 @@ export class ContentaGenSDK {
 
    private transformDates(data: unknown): unknown {
       if (Array.isArray(data)) {
-         return data.map(item => this.transformDates(item));
+         return data.map((item) => this.transformDates(item));
       }
-      
-      if (data && typeof data === 'object' && data !== null) {
+
+      if (data && typeof data === "object" && data !== null) {
          const obj = { ...data } as Record<string, unknown>;
-         
+
          // Transform createdAt and updatedAt fields if they exist and are strings
-         if (typeof obj.createdAt === 'string') {
+         if (typeof obj.createdAt === "string") {
             obj.createdAt = new Date(obj.createdAt);
          }
-         if (typeof obj.updatedAt === 'string') {
+         if (typeof obj.updatedAt === "string") {
             obj.updatedAt = new Date(obj.updatedAt);
          }
-         
+
          return obj;
       }
-      
+
       return data;
    }
 
@@ -69,24 +69,16 @@ export class ContentaGenSDK {
          url.searchParams.set("input", SuperJSON.stringify(input));
       }
 
-      console.log("SDK making request to:", url.toString());
-      console.log("SDK request headers:", { "sdk-api-key": this.apiKey });
-
       const response = await fetch(url.toString(), {
          headers: { "sdk-api-key": this.apiKey },
       });
 
-      console.log("SDK response status:", response.status, response.statusText);
-
       if (!response.ok) {
-         const errorText = await response.text();
-         console.log("SDK error response:", errorText);
          throw new Error(`API request failed: ${response.statusText}`);
       }
 
       const json = await response.json();
-      console.log("SDK received response:", JSON.stringify(json, null, 2));
-      
+
       if (
          json &&
          typeof json === "object" &&
@@ -97,16 +89,15 @@ export class ContentaGenSDK {
       ) {
          // The data from TRPC is already deserialized and in the correct format
          const responseData = json.result.data;
-         console.log("Response data:", responseData);
-         
+
          // Extract the actual data from the TRPC response structure
          // TRPC wraps the data with SuperJSON metadata
-         const actualData = (responseData as { json?: unknown })?.json || responseData;
-         console.log("Actual data for validation:", actualData);
-         
+         const actualData =
+            (responseData as { json?: unknown })?.json || responseData;
+
          // Transform date strings back to Date objects for ContentSelect schemas
          const transformedData = this.transformDates(actualData);
-         
+
          return schema.parse(transformedData);
       }
       throw new Error("Invalid API response format.");
