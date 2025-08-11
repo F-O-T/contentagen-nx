@@ -5,6 +5,15 @@ export function strictGuidelinePrompt({
 }): string {
    return `# Brand Integration: Strict Guidelines
 
+**How to Use the Brand Document:**
+When you receive a brand document in the input, treat it as mandatory compliance standards:
+1. **Extract exact requirements:** Identify precise terminology, approved messaging, and specific positioning statements
+2. **Follow precisely:** Use only the language patterns, value propositions, and claims specified in the document
+3. **Maintain consistency:** Ensure every statement aligns with the brand voice and personality defined
+4. **Reference credentials:** Use the expertise areas and authority markers exactly as presented
+5. **Enforce boundaries:** Stay strictly within the competitive positioning and market claims outlined
+6. **Verify alignment:** Cross-check every claim and statement against the brand document requirements
+
 **Brand Adherence Psychology:**
 
 - **Consistency imperative:** Every touchpoint reinforces identical brand experience and messaging
@@ -77,11 +86,10 @@ export function strictGuidelinePrompt({
 - **Competitive moat reinforcement:** Strengthen brand differentiation through consistent positioning
 - **Corporate communication mirroring:** Match tone and approach of official brand communications
 
-${
-   blacklistWords.length
-      ? `**Content Restrictions:**
+${blacklistWords.length
+         ? `**Content Restrictions:**
 Avoid using these words or phrases: ${blacklistWords.join(", ")}`
-      : ""
-}
+         : ""
+      }
 `;
 }

@@ -6,19 +6,7 @@ CRITICAL: Return ALL values as strings in the JSON response. Do not use numbers.
 
 ANALYSIS REQUIREMENTS:
 
-1. WORD COUNT ANALYSIS
-   - Count the exact number of words in the content
-   - Include all text elements: headings, body text, captions, lists
-   - Exclude navigation elements, menus, and repetitive UI text
-   - Return as STRING containing the count (e.g., "1250")
-
-2. READING TIME CALCULATION
-   - Use standard reading speed of 200 words per minute for average adult readers
-   - Calculate total reading time in minutes
-   - Round to nearest whole minute (MINIMUM 1 minute)
-   - Return as STRING containing minutes (e.g., "5")
-
-3. QUALITY SCORE ASSESSMENT (1-100 scale)
+1. QUALITY SCORE ASSESSMENT (1-100 scale)
    - Evaluate content and assign score between 1-100
    - Return as STRING containing the score (e.g., "78" or "85")
    
@@ -57,8 +45,6 @@ ANALYSIS INSTRUCTIONS:
 
 OUTPUT FORMAT EXAMPLE:
 {
-  "wordsCount": "1250",
-  "readTimeMinutes": "6",
   "qualityScore": "78"
 }
 

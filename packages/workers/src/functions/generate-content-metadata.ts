@@ -5,11 +5,13 @@ import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
 import {
    ContentMetaSchema,
+   ContentStatsSchema,
    type ContentMeta,
    type ContentStats,
 } from "@packages/database/schemas/content"; // or wherever your schemas are
 import { createAiUsageMetadata } from "@packages/payment/ingestion";
 import { runIngestBilling } from "./ingest-usage";
+import { contentStatsPrompt } from "@packages/prompts/prompt/content/content_stats";
 
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 
@@ -35,20 +37,46 @@ export async function runAnalyzeContent(payload: {
             countContentWords(content),
          ).toString(),
       };
-      const metaResult = await generateOpenRouterObject(
-         openrouter,
-         {
-            model: "medium",
-            reasoning: "low",
-         },
-         ContentMetaSchema,
-         {
-            system: contentMetaPrompt(),
-            prompt: content,
-         },
+      const [qualityScoreResult, metaResult] = await Promise.all([
+         generateOpenRouterObject(
+            openrouter,
+            {
+               model: "medium",
+               reasoning: "low",
+            },
+            ContentStatsSchema.pick({
+               qualityScore: true,
+            }),
+            {
+               system: contentStatsPrompt(),
+               prompt: content,
+            },
+         ),
+         generateOpenRouterObject(
+            openrouter,
+            {
+               model: "medium",
+               reasoning: "low",
+            },
+            ContentMetaSchema,
+            {
+               system: contentMetaPrompt(),
+               prompt: content,
+            },
+         ),
+      ]);
+      const qualityScoreObject = qualityScoreResult.object as Pick<
+         ContentStats,
+         "qualityScore"
+      >;
+      console.log(
+         "[runAnalyzeContent] qualityScoreObject:",
+         qualityScoreObject,
       );
-
-      const stats = statsResult as ContentStats;
+      const stats = {
+         ...statsResult,
+         qualityScore: qualityScoreObject.qualityScore,
+      } as ContentStats;
       const meta = metaResult.object as ContentMeta;
 
       // Validate that we got meaningful results

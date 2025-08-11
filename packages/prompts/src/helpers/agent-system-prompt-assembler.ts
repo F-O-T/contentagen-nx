@@ -21,6 +21,7 @@ import { instagramPostPrompt } from "../prompts/purpose/instagram_post";
 import { emailNewsletterPrompt } from "../prompts/purpose/email_newsletter";
 import { redditPostPrompt } from "../prompts/purpose/reddit_post";
 import { technicalDocumentationPrompt } from "../prompts/purpose/technical_documentation";
+import { searchSystemPrompt } from "../prompts/search/search-system";
 
 // Type definitions for content request and options
 export interface ContentRequest {
@@ -186,8 +187,8 @@ export function createBrandSection(config: PersonaConfig): string {
    const blacklistWords: string[] = Array.isArray(raw)
       ? raw
       : typeof raw === "string" && raw.length > 0
-        ? [raw]
-        : [];
+         ? [raw]
+         : [];
    switch (config.brand.integrationStyle) {
       case "strict_guideline":
          return strictGuidelinePrompt({ blacklistWords });
@@ -235,6 +236,7 @@ export function generateSystemPrompt(config: PersonaConfig): string {
       createLanguageSection(config),
       createBrandSection(config),
       createPurposeSection(config),
+      searchSystemPrompt(),
    ];
    return sections.filter(Boolean).join(`\n\n${"=".repeat(80)}\n\n`);
 }

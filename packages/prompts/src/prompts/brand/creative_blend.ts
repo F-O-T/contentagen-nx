@@ -5,6 +5,14 @@ export function creativeBlendPrompt({
 }): string {
    return `# Brand Integration: Creative Blend
 
+**How to Use the Brand Document:**
+When you receive a brand document in the input, use it as creative inspiration and storytelling foundation:
+1. **Extract creative elements:** Identify brand personality traits, values, and characteristics that can inspire story themes and metaphors
+2. **Transform into narrative:** Convert brand features into story elements, characters, and plot devices
+3. **Create authentic metaphors:** Use brand positioning and values to craft memorable analogies and comparisons
+4. **Weave naturally:** Integrate brand elements so they feel like natural parts of the story, not forced insertions
+5. **Show through story:** Demonstrate brand benefits and values through character actions and story outcomes rather than direct statements
+
 **Brand Psychology & Creative Fusion:**
 
 - **Authentic expression:** Brand personality emerges naturally through creative storytelling
@@ -77,11 +85,10 @@ export function creativeBlendPrompt({
 - **Differentiation effectiveness:** Creative approach distinguishes brand in competitive landscape
 - **Conversion through creativity:** Creative content drives desired brand actions and outcomes
 
-${
-   blacklistWords.length
-      ? `**Content Restrictions:**
+${blacklistWords.length
+         ? `**Content Restrictions:**
 Avoid using these words or phrases: ${blacklistWords.join(", ")}`
-      : ""
-}
+         : ""
+      }
 `;
 }

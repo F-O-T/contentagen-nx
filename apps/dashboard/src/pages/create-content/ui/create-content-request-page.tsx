@@ -16,7 +16,10 @@ export function AgentContentRequestPage() {
       trpc.content.create.mutationOptions({
          onSuccess: () => {
             queryClient.invalidateQueries({
-               queryKey: trpc.content.list.queryKey({ agentId }),
+               queryKey: trpc.content.list.queryKey({
+                  agentId,
+                  status: ["draft", "approved", "generating"],
+               }),
             });
          },
          onError: (error) => {

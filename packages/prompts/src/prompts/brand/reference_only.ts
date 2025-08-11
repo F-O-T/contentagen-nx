@@ -5,6 +5,15 @@ export function referenceOnlyPrompt({
 }): string {
    return `# Brand Integration: Reference Only
 
+**How to Use the Brand Document:**
+When you receive a brand document in the input, treat it as background knowledge and expertise source:
+1. **Absorb expertise:** Use the document to understand areas of specialization, industry knowledge, and professional standards
+2. **Extract values subtly:** Let brand values inform your perspective and approach without explicit promotion
+3. **Understand audience:** Use target audience insights to shape helpful, relevant content
+4. **Reference when relevant:** Only mention brand solutions, products, or services when directly applicable to the user's needs
+5. **Maintain neutrality:** Provide unbiased advice even if it doesn't favor the brand
+6. **Demonstrate quality:** Let the brand's expertise level naturally elevate content quality and professionalism
+
 **Brand Communication Strategy:**
 - Use brand knowledge as background context only
 - Avoid direct brand mentions unless specifically relevant
@@ -25,11 +34,10 @@ export function referenceOnlyPrompt({
 - Subtle brand influence through quality and expertise
 - Professional, neutral tone with brand-informed insights
 
-${
-   blacklistWords.length
-      ? `**Content Restrictions:**
+${blacklistWords.length
+         ? `**Content Restrictions:**
 Avoid using these words or phrases: ${blacklistWords.join(", ")}`
-      : ""
-}
+         : ""
+      }
 `;
 }
