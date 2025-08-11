@@ -44,12 +44,16 @@ Creates and returns a new `ContentaGenSDK` instance.
 
 ### `sdk.listContentByAgent(params)`
 Fetches a list of content items for a given agent, with pagination support.
-- `params`: 
-  - `agentId`: `string` (required)
-  - `status`: `('draft' | 'approved' | 'generating')[]` (optional)
-  - `limit`: `number` (optional, default: 10, min: 1, max: 100)
-  - `page`: `number` (optional, default: 1, min: 1)
-  (see [ListContentByAgentInputSchema](../database/src/schemas/content.ts))
+- `params` (Zod schema):
+
+  ```ts
+  const ListContentByAgentInputSchema = z.object({
+    status: z.enum(['draft', 'approved', 'generating']).array(),
+    agentId: z.string().uuid('Invalid Agent ID format.'),
+    limit: z.number().min(1).max(100).optional().default(10),
+    page: z.number().min(1).optional().default(1),
+  });
+  ```
 - Returns: `Promise<ContentSelect[]>`
 
 **Pagination:**
@@ -57,7 +61,13 @@ Use `limit` to control the number of items per page, and `page` to select which 
 
 ### `sdk.getContentById(params)`
 Fetches a content item by its unique ID.
-- `params`: `{ id: string }` (see [GetContentByIdInputSchema](./src/index.ts))
+- `params` (Zod schema):
+
+  ```ts
+  const GetContentByIdInputSchema = z.object({
+    id: z.string().uuid('Invalid Content ID format.'),
+  });
+  ```
 - Returns: `Promise<ContentSelect>`
 
 ## Error Codes
@@ -68,5 +78,5 @@ Fetches a content item by its unique ID.
 
 ## License
 
-MIT
+GPLv3
 

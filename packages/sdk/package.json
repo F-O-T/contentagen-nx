@@ -1,6 +1,6 @@
 {
    "name": "@contentagen/sdk",
-   "version": "0.3.2",
+   "version": "0.3.3",
    "private": false,
    "type": "module",
    "exports": {
@@ -12,12 +12,14 @@
    },
    "files": [
       "dist",
-      "README.md"
+      "README.md",
+      "LICENSE.md"
    ],
    "scripts": {
       "build": "tsc",
       "check": "biome check --write ./src",
-      "typecheck": "tsc --build --noEmit --emitDeclarationOnly false"
+      "typecheck": "tsc --build --noEmit --emitDeclarationOnly false",
+      "publish": "npm publish --access public"
    },
    "dependencies": {
       "@packages/database": "workspace:*",
