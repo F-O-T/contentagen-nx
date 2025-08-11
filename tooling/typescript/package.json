@@ -2,8 +2,5 @@
    "license": "PROPRIETARY",
    "name": "@tooling/typescript",
    "private": true,
-   "publishConfig": {
-      "access": "public"
-   },
    "version": "0.0.0"
 }
