@@ -1,11 +1,9 @@
 import { contentMetaPrompt } from "@packages/prompts/prompt/content/content_meta";
-import { contentStatsPrompt } from "@packages/prompts/prompt/content/content_stats";
 
 import { generateOpenRouterObject } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
 import {
-   ContentStatsSchema,
    ContentMetaSchema,
    type ContentMeta,
    type ContentStats,
@@ -20,35 +18,37 @@ export async function runAnalyzeContent(payload: {
    userId: string;
 }) {
    const { content, userId } = payload;
-
+   const countContentWords = (text: string): number => {
+      return text
+         .trim()
+         .split(/\s+/)
+         .filter((word) => word.length > 0).length;
+   };
+   const readTimeMinutes = (wordCount: number): number => {
+      const wordsPerMinute = 200; // Average reading speed
+      return Math.ceil(wordCount / wordsPerMinute);
+   };
    try {
-      const [statsResult, metaResult] = await Promise.all([
-         generateOpenRouterObject(
-            openrouter,
-            {
-               model: "medium",
-               reasoning: "low",
-            },
-            ContentStatsSchema,
-            {
-               system: contentStatsPrompt(),
-               prompt: content,
-            },
-         ),
-         generateOpenRouterObject(
-            openrouter,
-            {
-               model: "medium",
-               reasoning: "low",
-            },
-            ContentMetaSchema,
-            {
-               system: contentMetaPrompt(),
-               prompt: content,
-            },
-         ),
-      ]);
-      const stats = statsResult.object as ContentStats;
+      const statsResult = {
+         wordsCount: countContentWords(content).toString(),
+         readTimeMinutes: readTimeMinutes(
+            countContentWords(content),
+         ).toString(),
+      };
+      const metaResult = await generateOpenRouterObject(
+         openrouter,
+         {
+            model: "medium",
+            reasoning: "low",
+         },
+         ContentMetaSchema,
+         {
+            system: contentMetaPrompt(),
+            prompt: content,
+         },
+      );
+
+      const stats = statsResult as ContentStats;
       const meta = metaResult.object as ContentMeta;
 
       // Validate that we got meaningful results
@@ -63,26 +63,16 @@ export async function runAnalyzeContent(payload: {
       ) {
          throw new Error("Meta analysis returned empty results");
       }
-      if (!statsResult.usage.inputTokens || !metaResult.usage.inputTokens) {
+      if (!metaResult.usage.outputTokens || !metaResult.usage.inputTokens) {
          console.error("[runAnalyzeContent] ERROR: No usage data returned");
          throw new Error("No usage data returned from analysis");
       }
-      if (!statsResult.usage.outputTokens || !metaResult.usage.outputTokens) {
-         console.error(
-            "[runAnalyzeContent] ERROR: No output tokens used in analysis",
-         );
-         throw new Error("No output tokens used in analysis");
-      }
-      const outputTokens =
-         statsResult.usage?.outputTokens + metaResult.usage?.outputTokens;
-      const inputTokens =
-         statsResult.usage?.inputTokens + metaResult.usage?.inputTokens;
       await runIngestBilling({
          params: {
             metadata: createAiUsageMetadata({
                effort: "small",
-               inputTokens: inputTokens,
-               outputTokens: outputTokens,
+               inputTokens: metaResult.usage.inputTokens,
+               outputTokens: metaResult.usage.outputTokens,
             }),
             event: "LLM",
             externalCustomerId: userId, // This is a system-level operation, not user-specific

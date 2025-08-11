@@ -138,6 +138,7 @@ export const contentRouter = router({
       .input(
          ContentSelectSchema.pick({
             agentId: true,
+            status: true,
          }),
       )
       .query(async ({ ctx, input }) => {
@@ -149,7 +150,11 @@ export const contentRouter = router({
                   message: "User must be authenticated to list content.",
                });
             }
-            const contents = await listContents(resolvedCtx.db, input.agentId);
+            const contents = await listContents(
+               resolvedCtx.db,
+               input.agentId,
+               input.status,
+            );
             return contents;
          } catch (err) {
             if (err instanceof DatabaseError) {

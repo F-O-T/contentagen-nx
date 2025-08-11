@@ -6,13 +6,12 @@ import type { ContentSelect } from "@packages/database/schemas/content";
 import {
    ListContentByAgentInputSchema,
    GetContentByIdInputSchema,
-} from "@packages/database/schemas/agent";
+} from "@packages/database/schemas/content";
 
 const PRODUCTION_API_URL = "https://api.contentagen.com";
 
 export interface SdkConfig {
    apiKey: string;
-   apiUrl?: string;
 }
 
 export class ContentaGenSDK {
@@ -25,7 +24,7 @@ export class ContentaGenSDK {
          throw new Error("apiKey is required to initialize the ContentaGenSDK");
       }
 
-      const baseUrl = config.apiUrl ?? PRODUCTION_API_URL;
+      const baseUrl = PRODUCTION_API_URL;
 
       this.auth = createAuthClient({ apiBaseUrl: baseUrl });
       this.trpcUrl = `${baseUrl}/trpc`;
@@ -144,4 +143,4 @@ export const createSdk = (config: SdkConfig): ContentaGenSDK => {
 export {
    GetContentByIdInputSchema,
    ListContentByAgentInputSchema,
-} from "@packages/database/schemas/agent";
+} from "@packages/database/schemas/content";

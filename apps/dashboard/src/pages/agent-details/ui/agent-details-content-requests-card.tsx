@@ -19,7 +19,7 @@ export function AgentDetailsContentRequestsCard() {
    const trpc = useTRPC();
 
    const { data } = useSuspenseQuery(
-      trpc.content.list.queryOptions({ agentId }),
+      trpc.content.list.queryOptions({ agentId, status: "draft" }),
    );
 
    return (

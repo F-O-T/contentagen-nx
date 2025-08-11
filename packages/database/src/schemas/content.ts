@@ -93,3 +93,16 @@ export type ContentInsert = typeof content.$inferInsert;
 export const ContentInsertSchema = createInsertSchema(content);
 export const ContentSelectSchema = createSelectSchema(content);
 export const ContentUpdateSchema = createUpdateSchema(content);
+export const ListContentByAgentInputSchema = z.object({
+   status: z.enum(
+      contentStatusEnum.enumValues,
+      "Invalid content status. Must be one of: draft, approved, generating.",
+   ),
+   agentId: z.uuid("Invalid Agent ID format."),
+   limit: z.number().min(1).max(100).optional().default(10),
+   page: z.number().min(1).optional().default(1),
+});
+
+export const GetContentByIdInputSchema = z.object({
+   id: z.uuid("Invalid Content ID format."),
+});

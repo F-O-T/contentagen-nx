@@ -2,7 +2,7 @@ import { sdkProcedure, router } from "../trpc";
 import {
    ListContentByAgentInputSchema,
    GetContentByIdInputSchema,
-} from "@packages/database/schemas/agent";
+} from "@packages/database/schemas/content";
 import {
    listContents,
    getContentById,
@@ -15,10 +15,8 @@ export const sdkRouter = router({
       .input(ListContentByAgentInputSchema)
       .output(ContentSelectSchema.array())
       .query(async ({ ctx, input }) => {
-         console.log("listContentByAgent called with input:", input);
-         const { agentId, limit = 10, page = 1 } = input;
-         const all = await listContents((await ctx).db, agentId);
-         // Simple pagination
+         const { agentId, limit = 10, page = 1, status } = input;
+         const all = await listContents((await ctx).db, agentId, status);
          const start = (page - 1) * limit;
          const end = start + limit;
          return all.slice(start, end);

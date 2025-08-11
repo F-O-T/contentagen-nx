@@ -86,10 +86,15 @@ export async function deleteContent(
 export async function listContents(
    dbClient: DatabaseInstance,
    agentId: string,
+   status: Exclude<Content["status"], null>,
 ): Promise<Content[]> {
    try {
       return await dbClient.query.content.findMany({
-         where: eq(content.agentId, agentId),
+         where: (_fields, operators) =>
+            operators.and(
+               eq(content.agentId, agentId),
+               eq(content.status, status),
+            ),
          orderBy: (content, { desc }) => [desc(content.updatedAt)],
       });
    } catch (err) {
