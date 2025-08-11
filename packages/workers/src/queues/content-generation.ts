@@ -22,6 +22,7 @@ export async function runContentGeneration(payload: {
          contentId,
       });
       const agentResult = await runFetchAgent({ agentId });
+      const userId = agentResult?.agent?.userId;
       console.info("[ContentGeneration] END: Fetching agent", {
          agentId,
          contentId,
@@ -76,6 +77,7 @@ export async function runContentGeneration(payload: {
       });
       const webSearch = await runWebSearch({
          query: payload.contentRequest.description,
+         userId,
       });
       console.info("[ContentGeneration] END: Performing web search", {
          agentId,
@@ -98,6 +100,7 @@ export async function runContentGeneration(payload: {
          agent,
          brandDocument: ragResult.improvedDescription,
          webSearchContent: webSearch.allContent,
+         userId,
          contentRequest: {
             description: payload.contentRequest.description,
          },
@@ -120,7 +123,7 @@ export async function runContentGeneration(payload: {
          agentId,
          contentId,
       });
-      const contentMetadata = await runAnalyzeContent({ content });
+      const contentMetadata = await runAnalyzeContent({ content, userId });
       console.info("[ContentGeneration] END: Analyzing content metadata", {
          agentId,
          contentId,
@@ -190,6 +193,9 @@ export const contentGenerationWorker = new Worker(
    },
    {
       connection: redis,
+      removeOnComplete: {
+         count: 10,
+      },
    },
 );
 registerGracefulShutdown(contentGenerationWorker);

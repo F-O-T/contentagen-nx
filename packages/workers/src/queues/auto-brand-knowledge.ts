@@ -28,7 +28,7 @@ registerGracefulShutdown(autoBrandKnowledgeQueue);
 export const autoBrandKnowledgeWorker = new Worker<AutoBrandKnowledgePayload>(
    QUEUE_NAME,
    async (job: Job<AutoBrandKnowledgePayload>) => {
-      const { agentId, websiteUrl } = job.data;
+      const { agentId, websiteUrl, userId } = job.data;
       console.log(
          `[auto-brand-knowledge] Job started for agentId=${agentId}, url=${websiteUrl}`,
       );
@@ -37,6 +37,7 @@ export const autoBrandKnowledgeWorker = new Worker<AutoBrandKnowledgePayload>(
          console.log("[auto-brand-knowledge] Crawling website...");
          const crawlResult = await runCrawlWebsiteForBrandKnowledge({
             websiteUrl,
+            userId,
          });
          if (!crawlResult || !crawlResult.allContent) {
             console.error(
@@ -52,6 +53,7 @@ export const autoBrandKnowledgeWorker = new Worker<AutoBrandKnowledgePayload>(
          console.log("[auto-brand-knowledge] Creating brand document...");
          const brandDocument = await runCreateBrandDocument({
             rawText: crawlResult.allContent,
+            userId,
          });
          if (!brandDocument || !brandDocument.content) {
             console.error(
@@ -67,6 +69,7 @@ export const autoBrandKnowledgeWorker = new Worker<AutoBrandKnowledgePayload>(
          console.log("[auto-brand-knowledge] Chunking brand document...");
          const chunkBrandDocument = await runChunkBrandDocument({
             inputText: brandDocument.content,
+            userId,
          });
          if (!chunkBrandDocument || !chunkBrandDocument.chunks) {
             console.error(
@@ -103,6 +106,7 @@ export const autoBrandKnowledgeWorker = new Worker<AutoBrandKnowledgePayload>(
             uploadedFiles.map((file) => ({
                name: `knowledge-distillation-${file.fileUrl}`,
                data: {
+                  userId,
                   inputText: file.rawContent,
                   agentId,
                   sourceId: file.fileUrl,
@@ -120,6 +124,9 @@ export const autoBrandKnowledgeWorker = new Worker<AutoBrandKnowledgePayload>(
    },
    {
       connection: redis,
+      removeOnComplete: {
+         count: 10,
+      },
    },
 );
 registerGracefulShutdown(autoBrandKnowledgeWorker);

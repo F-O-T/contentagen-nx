@@ -1,16 +1,19 @@
 import { brandCrawlerPrompt } from "@packages/prompts/prompt/search/brand-crawler";
 import { createTavilyClient } from "@packages/tavily/client";
 import { serverEnv } from "@packages/environment/server";
+import { runIngestBilling } from "./ingest-usage";
+import { createWebSearchUsageMetadata } from "@packages/payment/ingestion";
 
 interface AutoBrandKnowledgePayload {
    websiteUrl: string;
+   userId: string;
 }
 
 const tavily = createTavilyClient(serverEnv.TAVILY_API_KEY);
 export async function runCrawlWebsiteForBrandKnowledge(
    payload: AutoBrandKnowledgePayload,
 ) {
-   const { websiteUrl } = payload;
+   const { websiteUrl, userId } = payload;
    // 1. Crawl the website for brand knowledge
    try {
       console.log(`[runCrawlWebsiteForBrandKnowledge] Crawling: ${websiteUrl}`);
@@ -32,6 +35,15 @@ export async function runCrawlWebsiteForBrandKnowledge(
       console.log(
          `[runCrawlWebsiteForBrandKnowledge] Crawled ${crawlResult.results.length} pages for ${websiteUrl}`,
       );
+      await runIngestBilling({
+         params: {
+            metadata: createWebSearchUsageMetadata({
+               method: "crawl",
+            }),
+            event: "WEB_SEARCH",
+            externalCustomerId: userId, // This is a system-level operation, not user-specific
+         },
+      });
       // 2. Aggregate and summarize the crawled content
       const allContent = crawlResult.results
          .map((r) => r.rawContent || "")

@@ -1,16 +1,15 @@
-import { betterAuthClient } from "@/integrations/clients";
-import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/integrations/clients";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const useBillingInfo = () => {
-   const { data: customerState, isLoading: isLoadingCustomerState } = useQuery({
-      queryKey: ["customerState"],
-      queryFn: () => betterAuthClient.customer.state(),
-   });
-
+   const trpc = useTRPC();
+   const { data: customerState, isLoading } = useSuspenseQuery(
+      trpc.sessionHelper.getCustomerState.queryOptions(),
+   );
    return {
       customerState,
-      activeSubscription: customerState?.data?.activeSubscriptions[0],
-      activeMeter: customerState?.data?.activeMeters[0],
-      isLoading: isLoadingCustomerState,
+      activeSubscription: customerState?.activeSubscriptions[0],
+      activeMeter: customerState?.activeMeters[0],
+      isLoading,
    };
 };

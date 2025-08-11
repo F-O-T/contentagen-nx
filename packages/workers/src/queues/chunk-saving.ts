@@ -26,9 +26,11 @@ export const chunkSavingWorker = new Worker(
          agentId: job.data.agentId,
          sourceId: job.data.sourceId,
       });
-      
+
       try {
-         const result = await runDistilledChunkFormatterAndSaveOnChroma(job.data);
+         const result = await runDistilledChunkFormatterAndSaveOnChroma(
+            job.data,
+         );
          console.info("[ChunkSaving] Chunk saved successfully", {
             jobId: job.id,
             agentId: job.data.agentId,
@@ -52,8 +54,13 @@ export const chunkSavingWorker = new Worker(
          max: 5, // Max 5 jobs per...
          duration: 1000, // ...1 second (5 jobs/second rate limit)
       },
+      removeOnComplete: {
+         count: 10, // Keep the last 100 completed job
+      },
    },
 );
 registerGracefulShutdown(chunkSavingWorker);
 
-console.info("[ChunkSaving] Worker initialized with concurrency=2 and rate limit 5/sec");
+console.info(
+   "[ChunkSaving] Worker initialized with concurrency=2 and rate limit 5/sec",
+);

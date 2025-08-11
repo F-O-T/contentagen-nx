@@ -89,15 +89,16 @@ function NavUserContent({ session }: { session: Session | null }) {
    const { isMobile, setOpenMobile } = useSidebar();
    const router = useRouter();
    const handleLogout = useCallback(async () => {
-      await betterAuthClient.signOut({
-         fetchOptions: {
+      await betterAuthClient.signOut(
+         {},
+         {
             onSuccess: () => {
                router.navigate({
                   to: "/auth/sign-in",
                });
             },
          },
-      });
+      );
       setOpenMobile(false);
    }, [router, setOpenMobile]);
    if (!session) return <NavUserSkeleton />;

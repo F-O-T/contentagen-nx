@@ -28,10 +28,3 @@ export const POLAR_PLANS = {
          : POLAR_PLAN_IDS[POLAR_PLAN_SLUGS.TEAM].sandbox,
    },
 };
-
-export const POLAR_BILLING_EVENTS = {
-   KNOWLEDGE_CHUNK_PROCESSING: "knowledge_chunk_processing",
-   INTERNAL_RAG: "internal_rag",
-   CONTENT_GENERATION: "content_generation",
-   STORED_CONTENT: "stored_content",
-} as const;

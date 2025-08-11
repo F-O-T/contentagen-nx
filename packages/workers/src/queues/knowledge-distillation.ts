@@ -10,12 +10,13 @@ export async function runDistillationPipeline(payload: {
    inputText: string;
    agentId: string;
    sourceId: string;
+   userId: string;
 }) {
-   const { inputText, agentId, sourceId } = payload;
+   const { inputText, agentId, sourceId, userId } = payload;
    console.info("Starting distillation pipeline", { agentId });
    try {
       // 1. Chunking
-      const chunkingResult = await runChunkText({ inputText });
+      const chunkingResult = await runChunkText({ inputText, userId });
       if (!chunkingResult || !chunkingResult.chunks) {
          console.error("Chunking failed", { agentId });
          throw new Error(
@@ -28,7 +29,7 @@ export async function runDistillationPipeline(payload: {
       const distillationResults = await Promise.all(
          chunks.map(async (chunk) => {
             try {
-               const result = await runChunkDistillation({ chunk });
+               const result = await runChunkDistillation({ chunk, userId });
                return result.distilledChunk;
             } catch (error) {
                console.error("Chunk distillation failed", { error, agentId });
@@ -41,7 +42,7 @@ export async function runDistillationPipeline(payload: {
       console.info("Distillation completed", {
          distilledChunkCount: distillationResults.length,
       });
-      
+
       // Queue chunk saving jobs in bulk instead of processing all at once
       console.info("Queuing chunk saving jobs", {
          chunkCount: distillationResults.length,
@@ -57,7 +58,7 @@ export async function runDistillationPipeline(payload: {
             },
          })),
       );
-      
+
       console.info("Knowledge distillation pipeline complete", {
          agentId,
          queuedChunkCount: distillationResults.length,
@@ -86,11 +87,16 @@ export const knowledgeDistillationWorker = new Worker(
          inputText: string;
          agentId: string;
          sourceId: string;
+         userId: string;
       }>,
    ) => {
       await runDistillationPipeline(job.data);
    },
    {
+      removeOnComplete: {
+         count: 10,
+      },
+
       connection: redis,
    },
 );

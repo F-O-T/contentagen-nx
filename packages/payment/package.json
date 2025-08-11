@@ -13,10 +13,12 @@
    "type": "module",
    "exports": {
       "./client": "./src/client.ts",
-      "./plans": "./src/plans.ts"
+      "./plans": "./src/plans.ts",
+      "./ingestion": "./src/ingestion.ts"
    },
    "version": "0.0.0",
    "dependencies": {
+      "@packages/openrouter": "workspace:*",
       "@packages/environment": "workspace:*",
       "@polar-sh/sdk": "catalog:payment"
    }

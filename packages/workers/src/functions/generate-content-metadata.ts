@@ -10,11 +10,16 @@ import {
    type ContentMeta,
    type ContentStats,
 } from "@packages/database/schemas/content"; // or wherever your schemas are
+import { createAiUsageMetadata } from "@packages/payment/ingestion";
+import { runIngestBilling } from "./ingest-usage";
 
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 
-export async function runAnalyzeContent(payload: { content: string }) {
-   const { content } = payload;
+export async function runAnalyzeContent(payload: {
+   content: string;
+   userId: string;
+}) {
+   const { content, userId } = payload;
 
    try {
       const [statsResult, metaResult] = await Promise.all([
@@ -58,6 +63,31 @@ export async function runAnalyzeContent(payload: { content: string }) {
       ) {
          throw new Error("Meta analysis returned empty results");
       }
+      if (!statsResult.usage.inputTokens || !metaResult.usage.inputTokens) {
+         console.error("[runAnalyzeContent] ERROR: No usage data returned");
+         throw new Error("No usage data returned from analysis");
+      }
+      if (!statsResult.usage.outputTokens || !metaResult.usage.outputTokens) {
+         console.error(
+            "[runAnalyzeContent] ERROR: No output tokens used in analysis",
+         );
+         throw new Error("No output tokens used in analysis");
+      }
+      const outputTokens =
+         statsResult.usage?.outputTokens + metaResult.usage?.outputTokens;
+      const inputTokens =
+         statsResult.usage?.inputTokens + metaResult.usage?.inputTokens;
+      await runIngestBilling({
+         params: {
+            metadata: createAiUsageMetadata({
+               effort: "small",
+               inputTokens: inputTokens,
+               outputTokens: outputTokens,
+            }),
+            event: "LLM",
+            externalCustomerId: userId, // This is a system-level operation, not user-specific
+         },
+      });
 
       return {
          stats,
