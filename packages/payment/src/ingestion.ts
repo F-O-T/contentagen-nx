@@ -41,7 +41,11 @@ export const createAiUsageMetadata = (params: {
 export const createWebSearchUsageMetadata = (params: {
    method: "crawl" | "search";
 }) => {
+   const amount = {
+      crawl: 2,
+      search: 1,
+   };
    return {
-      method: params.method,
+      amount: amount[params.method],
    };
 };
