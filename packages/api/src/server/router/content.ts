@@ -19,6 +19,34 @@ import {
 } from "@packages/database/schema";
 
 export const contentRouter = router({
+   addImageUrl: protectedProcedure
+      .input(ContentUpdateSchema.pick({ id: true, imageUrl: true }))
+      .mutation(async ({ ctx, input }) => {
+         try {
+            if (!input.id || !input.imageUrl) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Content ID and image URL are required.",
+               });
+            }
+            const db = (await ctx).db;
+            const updated = await updateContent(db, input.id, {
+               imageUrl: input.imageUrl,
+            });
+            return { success: true, content: updated };
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
+      }),
    create: protectedProcedure
       .input(
          ContentInsertSchema.pick({

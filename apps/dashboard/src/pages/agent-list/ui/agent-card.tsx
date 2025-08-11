@@ -99,21 +99,6 @@ export function AgentCard({ agent }: AgentCardProps) {
             : []),
       ];
    }, [agent]);
-   const statsItems = React.useMemo(
-      () => [
-         {
-            icon: <FileText />,
-            label: "Drafts",
-            value: String(agent.totalDrafts ?? 0),
-         },
-         {
-            icon: <CheckCircle2 />,
-            label: "Published",
-            value: String(agent?.totalPublished ?? 0),
-         },
-      ],
-      [agent],
-   );
    const [dropdownOpen, setDropdownOpen] = React.useState(false);
    const [alertOpen, setAlertOpen] = React.useState(false);
    const router = useRouter();
@@ -192,16 +177,6 @@ export function AgentCard({ agent }: AgentCardProps) {
                   value={item.value}
                />
             ))}
-            <div className="grid grid-cols-2 gap-2">
-               {statsItems.map((item) => (
-                  <InfoItem
-                     key={item.label}
-                     icon={item.icon}
-                     label={item.label}
-                     value={item.value}
-                  />
-               ))}
-            </div>
          </CardContent>
 
          <CardFooter className="grid grid-cols-1 gap-2">

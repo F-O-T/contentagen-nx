@@ -70,6 +70,7 @@ export const content = pgTable(
       agentId: uuid("agent_id")
          .notNull()
          .references(() => agent.id, { onDelete: "cascade" }),
+      imageUrl: text("image_url"),
       userId: text("user_id")
          .notNull()
          .references(() => user.id, { onDelete: "cascade" }),
