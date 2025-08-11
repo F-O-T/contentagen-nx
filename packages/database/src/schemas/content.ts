@@ -94,10 +94,12 @@ export const ContentInsertSchema = createInsertSchema(content);
 export const ContentSelectSchema = createSelectSchema(content);
 export const ContentUpdateSchema = createUpdateSchema(content);
 export const ListContentByAgentInputSchema = z.object({
-   status: z.enum(
-      contentStatusEnum.enumValues,
-      "Invalid content status. Must be one of: draft, approved, generating.",
-   ),
+   status: z
+      .enum(
+         contentStatusEnum.enumValues,
+         "Invalid content status. Must be one of: draft, approved, generating.",
+      )
+      .array(),
    agentId: z.uuid("Invalid Agent ID format."),
    limit: z.number().min(1).max(100).optional().default(10),
    page: z.number().min(1).optional().default(1),

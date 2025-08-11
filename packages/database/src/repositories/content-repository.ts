@@ -1,4 +1,6 @@
 import { content } from "../schemas/content";
+import { inArray } from "drizzle-orm";
+
 import type {
    ContentSelect as Content,
    ContentInsert,
@@ -86,14 +88,14 @@ export async function deleteContent(
 export async function listContents(
    dbClient: DatabaseInstance,
    agentId: string,
-   status: Exclude<Content["status"], null>,
+   status: Array<Exclude<Content["status"], null>>,
 ): Promise<Content[]> {
    try {
       return await dbClient.query.content.findMany({
          where: (_fields, operators) =>
             operators.and(
                eq(content.agentId, agentId),
-               eq(content.status, status),
+               inArray(content.status, status),
             ),
          orderBy: (content, { desc }) => [desc(content.updatedAt)],
       });

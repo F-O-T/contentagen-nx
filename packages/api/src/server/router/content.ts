@@ -9,6 +9,7 @@ import {
 } from "@packages/database/repositories/content-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 import { protectedProcedure, router } from "../trpc";
 import {
@@ -136,9 +137,9 @@ export const contentRouter = router({
       }),
    list: protectedProcedure
       .input(
-         ContentSelectSchema.pick({
-            agentId: true,
-            status: true,
+         z.object({
+            agentId: ContentSelectSchema.shape.agentId,
+            status: ContentSelectSchema.shape.status.array().min(1),
          }),
       )
       .query(async ({ ctx, input }) => {
@@ -150,10 +151,19 @@ export const contentRouter = router({
                   message: "User must be authenticated to list content.",
                });
             }
+            if (!input.status || input.status.length === 0) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "At least one status is required to list content.",
+               });
+            }
+            const filteredStatus = input.status.filter(
+               (s): s is NonNullable<typeof s> => s !== null,
+            );
             const contents = await listContents(
                resolvedCtx.db,
                input.agentId,
-               input.status,
+               filteredStatus,
             );
             return contents;
          } catch (err) {
@@ -188,4 +198,43 @@ export const contentRouter = router({
          throw err;
       }
    }),
+   approve: protectedProcedure
+      .input(ContentInsertSchema.pick({ id: true }))
+      .mutation(async ({ ctx, input }) => {
+         try {
+            if (!input.id) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Content ID is required.",
+               });
+            }
+            const db = (await ctx).db;
+            const content = await getContentById(db, input.id);
+            if (!content) {
+               throw new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Content not found.",
+               });
+            }
+            if (content.status !== "draft") {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Only draft content can be approved.",
+               });
+            }
+            await updateContent(db, input.id, { status: "approved" });
+            return { success: true };
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
+      }),
 });
