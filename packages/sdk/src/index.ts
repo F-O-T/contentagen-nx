@@ -8,6 +8,30 @@ import {
    GetContentByIdInputSchema,
 } from "@packages/database/schemas/content";
 
+export const ERROR_CODES = {
+   MISSING_API_KEY: {
+      code: "SDK_E001",
+      message: "apiKey is required to initialize the ContentaGenSDK",
+   },
+   API_REQUEST_FAILED: {
+      code: "SDK_E002",
+      message: "API request failed",
+   },
+   INVALID_API_RESPONSE: {
+      code: "SDK_E003",
+      message: "Invalid API response format.",
+   },
+   INVALID_INPUT: {
+      code: "SDK_E004",
+      message: "Invalid input.",
+   },
+};
+
+export const TRPC_ENDPOINTS = {
+   listContentByAgent: "listContentByAgent",
+   getContentById: "getContentById",
+};
+
 const PRODUCTION_API_URL = "https://api.contentagen.com";
 
 export interface SdkConfig {
@@ -53,12 +77,37 @@ export class ContentaGenSDK {
       return data;
    }
 
+   private _parseTrpcResponse<T>(json: unknown, schema: z.ZodType<T>): T {
+      if (
+         json &&
+         typeof json === "object" &&
+         "result" in json &&
+         (json as { result: unknown }).result &&
+         typeof (json as { result: unknown }).result === "object" &&
+         "data" in (json as { result: { data: unknown } }).result
+      ) {
+         const resultObj = (json as { result: { data: unknown } }).result;
+         const responseData = resultObj.data;
+         // Safely extract json property if exists, or use responseData
+         const actualData =
+            typeof responseData === "object" &&
+            responseData !== null &&
+            "json" in responseData
+               ? (responseData as { json: unknown }).json
+               : responseData;
+         const transformedData = this.transformDates(actualData);
+         return schema.parse(transformedData);
+      }
+      const { code, message } = ERROR_CODES.INVALID_API_RESPONSE;
+      throw new Error(`${code}: ${message}`);
+   }
+
    private async _query<T>(
       path: string,
       input: unknown,
       schema: z.ZodType<T>,
    ): Promise<T> {
-      const url = new URL(`${this.trpcUrl}/${path}`);
+      const url = new URL(`${this.trpcUrl}/sdk.${path}`);
       if (input) {
          url.searchParams.set("input", SuperJSON.stringify(input));
       }
@@ -68,33 +117,12 @@ export class ContentaGenSDK {
       });
 
       if (!response.ok) {
-         throw new Error(`API request failed: ${response.statusText}`);
+         const { code, message } = ERROR_CODES.API_REQUEST_FAILED;
+         throw new Error(`${code}: ${message} (${response.statusText})`);
       }
 
       const json = await response.json();
-
-      if (
-         json &&
-         typeof json === "object" &&
-         "result" in json &&
-         json.result &&
-         typeof json.result === "object" &&
-         "data" in json.result
-      ) {
-         // The data from TRPC is already deserialized and in the correct format
-         const responseData = json.result.data;
-
-         // Extract the actual data from the TRPC response structure
-         // TRPC wraps the data with SuperJSON metadata
-         const actualData =
-            (responseData as { json?: unknown })?.json || responseData;
-
-         // Transform date strings back to Date objects for ContentSelect schemas
-         const transformedData = this.transformDates(actualData);
-
-         return schema.parse(transformedData);
-      }
-      throw new Error("Invalid API response format.");
+      return this._parseTrpcResponse(json, schema);
    }
    async listContentByAgent(
       params: z.input<typeof ListContentByAgentInputSchema>,
@@ -102,14 +130,15 @@ export class ContentaGenSDK {
       try {
          const validatedParams = ListContentByAgentInputSchema.parse(params);
          return this._query(
-            "sdk.listContentByAgent",
+            TRPC_ENDPOINTS.listContentByAgent,
             validatedParams,
             ContentSelectSchema.array(),
          );
       } catch (error) {
          if (error instanceof z.ZodError) {
+            const { code, message } = ERROR_CODES.INVALID_INPUT;
             throw new Error(
-               `Invalid input for listContentByAgent: ${error.issues.map((e) => e.message).join(", ")}`,
+               `${code}: ${message} for listContentByAgent: ${error.issues.map((e) => e.message).join(", ")}`,
             );
          }
          throw error;
@@ -122,14 +151,15 @@ export class ContentaGenSDK {
       try {
          const validatedParams = GetContentByIdInputSchema.parse(params);
          return this._query(
-            "sdk.getContentById",
+            TRPC_ENDPOINTS.getContentById,
             validatedParams,
             ContentSelectSchema,
          );
       } catch (error) {
          if (error instanceof z.ZodError) {
+            const { code, message } = ERROR_CODES.INVALID_INPUT;
             throw new Error(
-               `Invalid input for getContentById: ${error.issues.map((e) => e.message).join(", ")}`,
+               `${code}: ${message} for getContentById: ${error.issues.map((e) => e.message).join(", ")}`,
             );
          }
          throw error;

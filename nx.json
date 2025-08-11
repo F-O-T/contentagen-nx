@@ -1,6 +1,11 @@
 {
    "$schema": "./node_modules/nx/schemas/nx-schema.json",
    "defaultBase": "master",
+   "release": {
+      "version": {
+         "conventionalCommits": true
+      }
+   },
    "targetDefaults": {
       "typecheck": {
          "cache": true,
