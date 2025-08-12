@@ -44,7 +44,7 @@ export function AgentStatsCard() {
          },
          {
             label: "Avg. Quality Score",
-            value: data.avgQualityScore?.toString() ?? "0",
+            value: data.avgQualityScore?.toFixed(2).toString() ?? "0",
             icon: <Star className="w-4 h-4" />,
          },
       ],

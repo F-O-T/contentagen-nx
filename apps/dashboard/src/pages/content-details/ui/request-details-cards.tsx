@@ -1,8 +1,6 @@
 import type { ContentSelect } from "@packages/database/schema";
-import { Badge } from "@packages/ui/components/badge";
 import {
    Card,
-   CardAction,
    CardContent,
    CardDescription,
    CardHeader,
@@ -11,16 +9,7 @@ import {
 
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Separator } from "@packages/ui/components/separator";
-import {
-   Calendar,
-   Clock,
-   MessageSquare,
-   Type,
-   Link2,
-   Tags,
-   List,
-   Globe,
-} from "lucide-react";
+import { Calendar, Clock, Type, Link2, Tags, List, Globe } from "lucide-react";
 
 export function ContentDetailsCard({ content }: { content: ContentSelect }) {
    return (
@@ -101,9 +90,6 @@ export function ContentStatsCard({ content }: { content: ContentSelect }) {
             <CardDescription>
                Statistics and metadata about your generated content
             </CardDescription>
-            <CardAction>
-               <Badge>{content.stats?.qualityScore}</Badge>
-            </CardAction>
          </CardHeader>
 
          <CardContent className="grid grid-cols-2 gap-4">

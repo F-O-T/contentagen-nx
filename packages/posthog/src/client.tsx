@@ -1,4 +1,5 @@
 import { posthogHost, posthogPublicKey } from "./shared-posthog-config";
+import { isProduction } from "@packages/environment/helpers";
 import { PostHogProvider } from "posthog-js/react";
 
 export function getReactPosthogConfig() {
@@ -21,7 +22,10 @@ export function PostHogWrapper({ children }: { children: React.ReactNode }) {
    return (
       <PostHogProvider
          apiKey={posthogPublicKey}
-         options={getReactPosthogConfig()}
+         options={{
+            ...getReactPosthogConfig(),
+            disable_session_recording: !isProduction,
+         }}
       >
          {children}
       </PostHogProvider>

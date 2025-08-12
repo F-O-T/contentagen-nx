@@ -23,7 +23,6 @@ import {
    CredenzaTitle,
    CredenzaBody,
    CredenzaFooter,
-   CredenzaClose,
 } from "@packages/ui/components/credenza";
 import { Input } from "@packages/ui/components/input";
 import type { ContentSelect } from "@packages/database/schemas/content";
