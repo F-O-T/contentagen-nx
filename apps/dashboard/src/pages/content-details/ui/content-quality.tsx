@@ -7,7 +7,6 @@ import {
    CardAction,
    CardContent,
 } from "@packages/ui/components/card";
-import { Progress } from "@packages/ui/components/progress";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -106,17 +105,13 @@ export function ContentQualityCard({ content }: { content: ContentSelect }) {
                <div className="flex items-center gap-2 text-lg font-semibold">
                   <span>Score:</span>
                   <span className="text-2xl font-bold">
-                     {score != null ? Math.round(score) : "-"}
+                     {score != null ? Math.round(score) : "-"}/100
                   </span>
                   <Badge variant="secondary" className="text-xs py-1 px-2">
                      {getQualityLabel(score)}
                   </Badge>
                </div>
-               <span className="text-xs text-muted-foreground">
-                  Score out of 100
-               </span>
             </div>
-            <Progress value={typeof score === "number" ? score : 0} max={100} />
          </CardContent>
       </Card>
    );
