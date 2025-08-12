@@ -109,3 +109,7 @@ export const ListContentByAgentInputSchema = z.object({
 export const GetContentByIdInputSchema = z.object({
    id: z.uuid("Invalid Content ID format."),
 });
+
+export const GetContentBySlugInputSchema = z.object({
+   slug: z.string().min(1, "Slug is required."),
+});

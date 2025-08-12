@@ -45,7 +45,9 @@ export const getAuthOptions = (
             use: [
                portal(),
                checkout({
-                  successUrl: "http://localhost:3000/profile",
+                  successUrl: isProduction
+                     ? "https://app.contentagen.com/profile"
+                     : "http://localhost:3000/profile",
                   authenticatedUsersOnly: true,
                   products: [
                      POLAR_PLANS[POLAR_PLAN_SLUGS.BASIC],

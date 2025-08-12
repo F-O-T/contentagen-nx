@@ -1,11 +1,12 @@
 import { createAuthClient } from "@packages/authentication/client";
-import { ContentSelectSchema } from "@packages/database/schemas/content";
 import SuperJSON from "superjson";
 import { z } from "zod";
 import type { ContentSelect } from "@packages/database/schemas/content";
 import {
    ListContentByAgentInputSchema,
    GetContentByIdInputSchema,
+   GetContentBySlugInputSchema,
+   ContentSelectSchema,
 } from "@packages/database/schemas/content";
 
 export const ERROR_CODES = {
@@ -30,6 +31,7 @@ export const ERROR_CODES = {
 export const TRPC_ENDPOINTS = {
    listContentByAgent: "listContentByAgent",
    getContentById: "getContentById",
+   getContentBySlug: "getContentBySlug",
 };
 
 const PRODUCTION_API_URL = "https://api.contentagen.com";
@@ -91,8 +93,8 @@ export class ContentaGenSDK {
          // Safely extract json property if exists, or use responseData
          const actualData =
             typeof responseData === "object" &&
-               responseData !== null &&
-               "json" in responseData
+            responseData !== null &&
+            "json" in responseData
                ? (responseData as { json: unknown }).json
                : responseData;
          const transformedData = this.transformDates(actualData);
@@ -165,6 +167,27 @@ export class ContentaGenSDK {
          throw error;
       }
    }
+
+   async getContentBySlug(
+      params: z.input<typeof GetContentBySlugInputSchema>,
+   ): Promise<ContentSelect> {
+      try {
+         const validatedParams = GetContentBySlugInputSchema.parse(params);
+         return this._query(
+            TRPC_ENDPOINTS.getContentBySlug,
+            validatedParams,
+            ContentSelectSchema,
+         );
+      } catch (error) {
+         if (error instanceof z.ZodError) {
+            const { code, message } = ERROR_CODES.INVALID_INPUT;
+            throw new Error(
+               `${code}: ${message} for getContentBySlug: ${error.issues.map((e) => e.message).join(", ")}`,
+            );
+         }
+         throw error;
+      }
+   }
 }
 
 export const createSdk = (config: SdkConfig): ContentaGenSDK => {
@@ -173,4 +196,5 @@ export const createSdk = (config: SdkConfig): ContentaGenSDK => {
 export {
    GetContentByIdInputSchema,
    ListContentByAgentInputSchema,
+   GetContentBySlugInputSchema,
 } from "@packages/database/schemas/content";

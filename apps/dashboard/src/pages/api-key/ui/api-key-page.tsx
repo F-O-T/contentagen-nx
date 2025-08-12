@@ -26,6 +26,7 @@ import { Key, MoreVertical } from "lucide-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { CreateApiKeyCredenza } from "../features/create-api-key-credenza";
+import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 export function ApiKeyPage() {
    const [open, setOpen] = useState(false);
    const { data } = useSuspenseQuery({
@@ -38,7 +39,8 @@ export function ApiKeyPage() {
    });
 
    return (
-      <>
+      <div className="flex flex-col gap-4">
+         <TalkingMascot message="This API key is for our SDK. Manage your keys here and keep your integrations running smoothly!" />
          <Card>
             <CardHeader>
                <CardTitle>API Keys</CardTitle>
@@ -132,6 +134,6 @@ export function ApiKeyPage() {
             </CardContent>
          </Card>
          <CreateApiKeyCredenza open={open} onOpenChange={setOpen} />
-      </>
+      </div>
    );
 }

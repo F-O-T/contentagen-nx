@@ -27,16 +27,13 @@ createBullBoard({
       new BullMQAdapter(autoBrandKnowledgeQueue), // Register the auto brand knowledge queue
       new BullMQAdapter(chunkSavingQueue), // Register the chunk saving queue
    ],
-
    serverAdapter,
-
    options: {
       uiBasePath: isProduction ? "node_modules/@bull-board/ui" : "",
    },
 });
 const trpcApi = createApi({
    chromaClient,
-
    openRouterClient,
    minioClient,
    minioBucket: env.MINIO_BUCKET,
@@ -49,7 +46,19 @@ const app = new Elysia()
          allowedHeaders: ["Content-Type", "Authorization", "sdk-api-key"],
          credentials: true,
          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-         origin: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
+         origin: (request: Request) => {
+            const url = new URL(request.url);
+            
+            // Allow all origins for SDK endpoints
+            if (url.pathname.startsWith("/trpc/sdk")) {
+               return true;
+            }
+            
+            // Use trusted origins for other endpoints
+            const origin = request.headers.get("origin");
+            const trustedOrigins = env.BETTER_AUTH_TRUSTED_ORIGINS.split(",");
+            return trustedOrigins.includes(origin || "");
+         },
       }),
    )
    .use(ArcjetShield)

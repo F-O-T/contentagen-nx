@@ -9,6 +9,26 @@ import type { DatabaseInstance } from "../client";
 import { DatabaseError, NotFoundError } from "@packages/errors";
 import { eq } from "drizzle-orm";
 
+// Get content by slug
+export async function getContentBySlug(
+   dbClient: DatabaseInstance,
+   slug: string,
+): Promise<Content> {
+   try {
+      // Find by meta.slug with SQL JSON extraction
+      const result = await dbClient.query.content.findFirst({
+         where: (fields, { sql }) => sql`${fields.meta}->>'slug' = ${slug}`,
+      });
+      if (!result) throw new NotFoundError("Content not found");
+      return result;
+   } catch (err) {
+      if (err instanceof NotFoundError) throw err;
+      throw new DatabaseError(
+         `Failed to get content by slug: ${(err as Error).message}`,
+      );
+   }
+}
+
 export async function createContent(
    dbClient: DatabaseInstance,
    data: ContentInsert,
