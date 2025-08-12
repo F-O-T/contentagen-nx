@@ -94,6 +94,10 @@ Fetches a content item by its slug.
 - `SDK_E003`: Invalid API response
 - `SDK_E004`: Invalid input
 
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for version history and updates.
+
 ## License
 
 GPLv3
