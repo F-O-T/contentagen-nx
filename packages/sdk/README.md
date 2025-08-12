@@ -37,6 +37,13 @@ const item = await sdk.getContentById({ id: 'content-uuid' });
 console.log(item);
 ```
 
+### Get Content by Slug
+
+```ts
+const item = await sdk.getContentBySlug({ slug: 'your-content-slug' });
+console.log(item);
+```
+
 ## API Reference
 
 ### `createSdk(config: { apiKey: string })`
@@ -66,6 +73,17 @@ Fetches a content item by its unique ID.
   ```ts
   const GetContentByIdInputSchema = z.object({
     id: z.string().uuid('Invalid Content ID format.'),
+  });
+  ```
+- Returns: `Promise<ContentSelect>`
+
+### `sdk.getContentBySlug(params)`
+Fetches a content item by its slug.
+- `params` (Zod schema):
+
+  ```ts
+  const GetContentBySlugInputSchema = z.object({
+    slug: z.string(),
   });
   ```
 - Returns: `Promise<ContentSelect>`

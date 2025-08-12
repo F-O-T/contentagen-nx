@@ -1,6 +1,6 @@
 {
    "name": "@contentagen/sdk",
-   "version": "0.3.3",
+   "version": "0.4.1",
    "private": false,
    "type": "module",
    "exports": {
@@ -13,7 +13,8 @@
    "files": [
       "dist",
       "README.md",
-      "LICENSE.md"
+      "LICENSE.md",
+      "CHANGELOG.md"
    ],
    "scripts": {
       "build": "tsc",
