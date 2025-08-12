@@ -1,5 +1,3 @@
-// FileViewerModal.tsx
-
 import { Button } from "@packages/ui/components/button";
 import { FileText, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";

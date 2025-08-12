@@ -13,6 +13,7 @@ import { Input } from "@packages/ui/components/input";
 import { useMutation } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useCallback, type FormEvent } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
 export function GenerateBrandFilesCredenza({
    open,
@@ -30,7 +31,17 @@ export function GenerateBrandFilesCredenza({
    });
    const trpc = useTRPC();
    const generateBrandFilesMutation = useMutation(
-      trpc.agentFile.generateBrandKnowledge.mutationOptions(),
+      trpc.agentFile.generateBrandKnowledge.mutationOptions({
+         onError: (error) => {
+            console.error("Error generating brand files:", error);
+            toast.error("An error occurred while generating brand files.");
+            // Optionally, display an error message to the user here
+         },
+         onSuccess: () => {
+            toast.success("Brand files generation initiated.");
+            // Optionally, display a success message to the user here
+         },
+      }),
    );
    const form = useAppForm({
       defaultValues: { websiteUrl: "" },

@@ -1,4 +1,5 @@
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { PostHogWrapper } from "@packages/posthog/client";
 import { Toaster } from "@packages/ui/components/sonner";
 import { ThemeProvider } from "@/layout/theme-provider";
 import appCss from "@packages/ui/globals.css?url";
@@ -74,11 +75,17 @@ function RootComponent() {
             <HeadContent />
          </head>
          <body>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-               <Toaster />
-               <Outlet /> {/* Start rendering router matches */}
-               <TanStackRouterDevtools position="bottom-left" />
-            </ThemeProvider>
+            <PostHogWrapper>
+               <ThemeProvider
+                  attribute="class"
+                  defaultTheme="system"
+                  enableSystem
+               >
+                  <Toaster />
+                  <Outlet /> {/* Start rendering router matches */}
+                  <TanStackRouterDevtools position="bottom-left" />
+               </ThemeProvider>
+            </PostHogWrapper>
             <Scripts />
          </body>
       </html>
