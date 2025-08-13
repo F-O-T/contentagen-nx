@@ -42,12 +42,24 @@ export function CreateOrganizationCredenza({
                slug,
             },
             {
-               onSuccess: ({ data }) => {
+               onSuccess: async ({ data }) => {
                   toast.success(`Organization created successfully`);
                   if (data?.name) setNewOrg(data.name);
                   setAlertOpen(true);
+                  // Set the new org as active
+                  await betterAuthClient.organization.setActive({
+                     organizationId: data.id,
+                     organizationSlug: data.slug,
+                  });
+                  // Invalidate queries for org and members
                   queryClient.invalidateQueries({
                      queryKey: ["organizations"],
+                  });
+                  queryClient.invalidateQueries({
+                     queryKey: ["activeOrganization"],
+                  });
+                  queryClient.invalidateQueries({
+                     queryKey: ["organizationMembers"],
                   });
                },
                onError: (e) => {
