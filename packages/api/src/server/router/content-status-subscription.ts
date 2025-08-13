@@ -4,7 +4,7 @@ import {
    CONTENT_EVENTS,
    type ContentStatusChangedPayload,
 } from "@packages/server-events";
-import { on } from "events";
+import { on } from "node:events";
 import { z } from "zod";
 
 export const contentStatusSubscription = publicProcedure

@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { ContentRequestCard } from "@/widgets/content-card/ui/content-card";
 
 import {
@@ -12,6 +12,9 @@ import {
 import { Button } from "@packages/ui/components/button";
 import { useParams, useNavigate } from "@tanstack/react-router";
 import { useTRPC } from "@/integrations/clients";
+import { useSubscription } from "@trpc/tanstack-react-query";
+import { useMemo } from "react";
+import { toast } from "sonner";
 
 export function AgentDetailsContentRequestsCard() {
    const { agentId } = useParams({ from: "/_dashboard/agents/$agentId/" });
@@ -24,7 +27,31 @@ export function AgentDetailsContentRequestsCard() {
          status: ["draft", "approved", "generating"],
       }),
    );
+   const queryClient = useQueryClient();
+   const hasGenerating = useMemo(
+      () => data.some((item) => item.status === "generating"),
+      [data],
+   );
 
+   useSubscription(
+      trpc.content.onStatusChanged.subscriptionOptions(
+         {},
+         {
+            onData(data) {
+               toast.success(
+                  `Content finished generation, status updated to ${data.status}`,
+               );
+               queryClient.invalidateQueries({
+                  queryKey: trpc.content.list.queryKey({
+                     agentId,
+                     status: ["draft", "approved", "generating"],
+                  }),
+               });
+            },
+            enabled: hasGenerating,
+         },
+      ),
+   );
    return (
       <Card className="h-full">
          <CardHeader>

@@ -39,6 +39,8 @@ COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/api/package.json ./packages/api/
 COPY packages/arcjet/package.json ./packages/arcjet/
 COPY packages/authentication/package.json ./packages/authentication/
+COPY packages/server-events/package.json ./packages/server-events/
+
 COPY packages/brand/package.json ./packages/brand/
 COPY packages/chroma-db/package.json ./packages/chroma-db/
 COPY packages/database/package.json ./packages/database/
@@ -111,6 +113,8 @@ COPY packages/chroma-db/package.json ./packages/chroma-db/
 COPY packages/database/package.json ./packages/database/
 COPY packages/environment/package.json ./packages/environment/
 COPY packages/errors/package.json ./packages/errors/
+COPY packages/server-events/package.json ./packages/server-events/
+
 COPY packages/files/package.json ./packages/files/
 COPY packages/openrouter/package.json ./packages/openrouter/
 COPY packages/payment/package.json ./packages/payment/

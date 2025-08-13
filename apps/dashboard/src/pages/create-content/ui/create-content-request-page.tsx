@@ -15,6 +15,7 @@ export function AgentContentRequestPage() {
    const contentRequestMutation = useMutation(
       trpc.content.create.mutationOptions({
          onSuccess: (data) => {
+            toast.success("Content begun generation successfully!");
             queryClient.invalidateQueries({
                queryKey: trpc.content.list.queryKey({
                   agentId,

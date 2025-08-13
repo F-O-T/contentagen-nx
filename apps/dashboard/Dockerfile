@@ -11,6 +11,7 @@ COPY package.json ./
 COPY apps/dashboard/package.json ./apps/dashboard/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/brand/package.json ./packages/brand/
+COPY packages/server-events/package.json ./packages/server-events/
 COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/posthog/package.json ./packages/posthog/
 COPY packages/api/package.json ./packages/api/
@@ -54,6 +55,7 @@ COPY package.json ./
 COPY apps/dashboard/package.json ./apps/dashboard/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/brand/package.json ./packages/brand/
+COPY packages/server-events/package.json ./packages/server-events/
 COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/posthog/package.json ./packages/posthog/
 COPY packages/api/package.json ./packages/api/
