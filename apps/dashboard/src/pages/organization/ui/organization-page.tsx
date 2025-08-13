@@ -7,24 +7,10 @@ import {
    CardContent,
    CardAction,
 } from "@packages/ui/components/card";
-import {
-   DropdownMenu,
-   DropdownMenuTrigger,
-   DropdownMenuContent,
-   DropdownMenuItem,
-} from "@packages/ui/components/dropdown-menu";
-import {
-   Table,
-   TableHeader,
-   TableBody,
-   TableHead,
-   TableRow,
-   TableCell,
-} from "@packages/ui/components/table";
 import { Button } from "@packages/ui/components/button";
-import { Building2, MoreVertical } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { CreateOrganizationCredenza } from "../features/create-organization-credenza";
 
@@ -39,89 +25,63 @@ export function OrganizationPage() {
       },
    });
 
+   // Only allow one organization per user
+   const org = data?.[0];
+
+   // Auto-open credenza if no org exists
+   useEffect(() => {
+      if (!org) setOpen(true);
+   }, [org]);
+
    return (
       <div className="flex flex-col gap-4">
-         <TalkingMascot message="Create and manage your organizations here. Invite team members and their control access" />
+         <TalkingMascot message="Create and manage your organization here. Invite team members and control access." />
          <Card>
             <CardHeader>
-               <CardTitle>Organizations</CardTitle>
+               <CardTitle>Organization</CardTitle>
                <CardDescription>
-                  Manage your organizations, invite members, and control access.
+                  Manage your organization, invite members, and control access.
                   Powered by Better Auth integration.
                </CardDescription>
                <CardAction>
-                  <DropdownMenu>
-                     <DropdownMenuTrigger asChild>
-                        <Button
-                           variant="ghost"
-                           size="icon"
-                           aria-label="More actions"
-                        >
-                           <MoreVertical className="w-5 h-5" />
-                        </Button>
-                     </DropdownMenuTrigger>
-                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => setOpen(true)}>
-                           <Building2 />
-                           Create Organization
-                        </DropdownMenuItem>
-                     </DropdownMenuContent>
-                  </DropdownMenu>
+                  {/* Only show create button if no org exists */}
+                  {!org && (
+                     <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Create Organization"
+                        onClick={() => setOpen(true)}
+                     >
+                        <Building2 className="w-5 h-5" />
+                     </Button>
+                  )}
                </CardAction>
             </CardHeader>
             <CardContent>
-               <Table>
-                  <TableHeader>
-                     <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Members</TableHead>
-                        <TableHead>Created At</TableHead>
-                        <TableHead className="w-8" />
-                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                     {data.map((org: any) => (
-                        <TableRow key={org.id}>
-                           <TableCell>
-                              {org.name || (
-                                 <span className="text-muted-foreground">
-                                    —
-                                 </span>
-                              )}
-                           </TableCell>
-                           <TableCell>{org.members?.length ?? "—"}</TableCell>
-                           <TableCell>
-                              {org.createdAt
-                                 ? new Date(org.createdAt).toLocaleString()
-                                 : "—"}
-                           </TableCell>
-                           <TableCell className="text-right">
-                              <DropdownMenu>
-                                 <DropdownMenuTrigger asChild>
-                                    <Button
-                                       variant="ghost"
-                                       size="icon"
-                                       aria-label="Organization actions"
-                                    >
-                                       <MoreVertical className="w-5 h-5" />
-                                    </Button>
-                                 </DropdownMenuTrigger>
-                                 <DropdownMenuContent align="end">
-                                    <DropdownMenuItem
-                                       className="text-red-600"
-                                       onSelect={() => {
-                                          /* TODO: implement delete logic */
-                                       }}
-                                    >
-                                       Delete
-                                    </DropdownMenuItem>
-                                 </DropdownMenuContent>
-                              </DropdownMenu>
-                           </TableCell>
-                        </TableRow>
-                     ))}
-                  </TableBody>
-               </Table>
+               {/* If org exists, show its info. Otherwise, prompt to create. */}
+               {org ? (
+                  <div className="flex flex-col gap-2">
+                     <div>
+                        <strong>Name:</strong> {org.name}
+                     </div>
+                     <div>
+                        <strong>Members:</strong>{" "}
+                        {"members" in org && Array.isArray((org as any).members)
+                           ? (org as any).members.length
+                           : "—"}
+                     </div>
+                     <div>
+                        <strong>Created At:</strong>{" "}
+                        {org.createdAt
+                           ? new Date(org.createdAt).toLocaleString()
+                           : "—"}
+                     </div>
+                  </div>
+               ) : (
+                  <div className="text-muted-foreground">
+                     No organization found. Please create one to continue.
+                  </div>
+               )}
             </CardContent>
          </Card>
          <CreateOrganizationCredenza open={open} onOpenChange={setOpen} />

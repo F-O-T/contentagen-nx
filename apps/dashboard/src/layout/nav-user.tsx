@@ -170,19 +170,19 @@ function NavUserContent({ session }: { session: Session | null }) {
                            </Link>
                         </Button>
                      </DropdownMenuItem>
-                     <DropdownMenuItem asChild>
-                        <Button
-                           className="w-full items-center cursor-pointer justify-start flex gap-2 h-12"
-                           variant="ghost"
-                           onClick={() => setOpenMobile(false)}
-                           asChild
-                        >
-                           <Link to="/organization">
-                              <Building2 />
-                              Organizations
-                           </Link>
-                        </Button>
-                     </DropdownMenuItem>
+                     {/* <DropdownMenuItem asChild> */}
+                     {/*    <Button */}
+                     {/*       className="w-full items-center cursor-pointer justify-start flex gap-2 h-12" */}
+                     {/*       variant="ghost" */}
+                     {/*       onClick={() => setOpenMobile(false)} */}
+                     {/*       asChild */}
+                     {/*    > */}
+                     {/*       <Link to="/organization"> */}
+                     {/*          <Building2 /> */}
+                     {/*          Organizations */}
+                     {/*       </Link> */}
+                     {/*    </Button> */}
+                     {/* </DropdownMenuItem> */}
                   </DropdownMenuGroup>{" "}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
