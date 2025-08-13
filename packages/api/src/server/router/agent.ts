@@ -17,10 +17,82 @@ import {
 import { getAgentContentStats } from "@packages/database/repositories/content-repository";
 
 export const agentRouter = router({
+   transferToOrganization: protectedProcedure
+      .input(AgentSelectSchema.pick({ id: true }))
+      .mutation(async ({ ctx, input }) => {
+         const { id } = input;
+         const session = ctx.session;
+         if (!session?.user?.id) {
+            throw new TRPCError({
+               code: "UNAUTHORIZED",
+               message: "User not authenticated.",
+            });
+         }
+         const resolvedCtx = await ctx;
+         const agent = await getAgentById(resolvedCtx.db, id);
+         if (!agent) {
+            throw new TRPCError({
+               code: "NOT_FOUND",
+               message: "Agent not found.",
+            });
+         }
+         if (agent.userId !== session.user.id) {
+            throw new TRPCError({
+               code: "FORBIDDEN",
+               message: "You do not own this agent.",
+            });
+         }
+         if (agent.organizationId) {
+            throw new TRPCError({
+               code: "BAD_REQUEST",
+               message: "Agent is already owned by an organization.",
+            });
+         }
+         // Get user's organizations using Better Auth
+         const orgsRes = await resolvedCtx.auth.api.listOrganizations({
+            headers: resolvedCtx.headers,
+         });
+         if (!orgsRes.length) {
+            throw new TRPCError({
+               code: "BAD_REQUEST",
+               message: "You are not a member of any organization.",
+            });
+         }
+         const organization = orgsRes[0];
+         if (!organization?.id) {
+            throw new TRPCError({
+               code: "BAD_REQUEST",
+               message: "Organization ID is missing.",
+            });
+         }
+         await resolvedCtx.auth.api.setActiveOrganization({
+            headers: resolvedCtx.headers,
+            body: {
+               organizationId: organization.id,
+            },
+         });
+         const member = await resolvedCtx.auth.api.getActiveMember({
+            // This endpoint requires session cookies.
+            headers: resolvedCtx.headers,
+         });
+         if (member?.role !== "owner") {
+            throw new TRPCError({
+               code: "FORBIDDEN",
+               message:
+                  "You must be the owner of the organization to transfer.",
+            });
+         }
+         const updatedAgent = await updateAgent(resolvedCtx.db, id, {
+            organizationId: organization.id,
+            updatedAt: new Date(),
+         });
+         return updatedAgent;
+      }),
    stats: protectedProcedure
       .input(AgentSelectSchema.pick({ id: true }))
       .query(async ({ ctx, input }) => {
-         const contents = await getAgentContentStats((await ctx).db, input.id);
+         const resolvedCtx = await ctx;
+         const contents = await getAgentContentStats(resolvedCtx.db, input.id);
 
          const toNumber = (val: unknown) => {
             const n = Number(val);
@@ -46,7 +118,7 @@ export const agentRouter = router({
          const avgQualityScore =
             qualityScores.length > 0
                ? qualityScores.reduce((sum, val) => sum + val, 0) /
-               qualityScores.length
+                 qualityScores.length
                : null;
 
          return {
@@ -59,8 +131,9 @@ export const agentRouter = router({
    create: protectedProcedure
       .input(PersonaConfigSchema)
       .mutation(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
          try {
-            const userId = ctx.session.user.id;
+            const userId = resolvedCtx.session?.user.id;
             if (!userId) {
                throw new TRPCError({
                   code: "UNAUTHORIZED",
@@ -74,7 +147,7 @@ export const agentRouter = router({
                personaConfig: input,
                userId: userId,
             };
-            return await createAgent((await ctx).db, { ...agentData });
+            return await createAgent(resolvedCtx.db, { ...agentData });
          } catch (err) {
             if (err instanceof DatabaseError) {
                throw new TRPCError({
@@ -93,6 +166,7 @@ export const agentRouter = router({
          }),
       )
       .mutation(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
          const { id, ...updateFields } = input;
          if (!id) {
             throw new TRPCError({
@@ -101,7 +175,7 @@ export const agentRouter = router({
             });
          }
          try {
-            await updateAgent((await ctx).db, id, {
+            await updateAgent(resolvedCtx.db, id, {
                personaConfig: updateFields.personaConfig,
                updatedAt: new Date(),
             });
@@ -122,9 +196,10 @@ export const agentRouter = router({
    delete: protectedProcedure
       .input(AgentSelectSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
          const { id } = input;
          try {
-            await deleteAgent((await ctx).db, id);
+            await deleteAgent(resolvedCtx.db, id);
             return { success: true };
          } catch (err) {
             if (err instanceof NotFoundError) {
@@ -142,8 +217,9 @@ export const agentRouter = router({
    get: protectedProcedure
       .input(AgentSelectSchema.pick({ id: true }))
       .query(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
          try {
-            return await getAgentById((await ctx).db, input.id);
+            return await getAgentById(resolvedCtx.db, input.id);
          } catch (err) {
             if (err instanceof NotFoundError) {
                throw new TRPCError({ code: "NOT_FOUND", message: err.message });
@@ -158,8 +234,16 @@ export const agentRouter = router({
          }
       }),
    listByUser: protectedProcedure.query(async ({ ctx }) => {
+      const resolvedCtx = await ctx;
       try {
-         return await listAgentsByUserId((await ctx).db, ctx.session.user.id);
+         const userId = resolvedCtx.session?.user.id;
+         if (!userId) {
+            throw new TRPCError({
+               code: "UNAUTHORIZED",
+               message: "User ID is required to list agents.",
+            });
+         }
+         return await listAgentsByUserId(resolvedCtx.db, userId);
       } catch (err) {
          if (err instanceof DatabaseError) {
             throw new TRPCError({

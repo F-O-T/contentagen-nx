@@ -2,6 +2,12 @@ import { validateInput } from "@packages/errors/helpers";
 import type { ZodObject, z } from "zod";
 
 export const isProduction = process.env.NODE_ENV === "production";
+export const getDomain = () => {
+   if (isProduction) {
+      return "https://app.contentagen.com";
+   }
+   return "http://localhost:3000";
+};
 
 export function parseEnv<T extends ZodObject>(
    env: NodeJS.ProcessEnv,

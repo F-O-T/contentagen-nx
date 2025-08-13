@@ -12,7 +12,7 @@ import {
    createSelectSchema,
    createUpdateSchema,
 } from "drizzle-zod";
-import { user } from "./auth";
+import { user, organization } from "./auth";
 import { z } from "zod";
 
 // 1. Voice & Tone
@@ -84,6 +84,10 @@ export const agent = pgTable(
       userId: text("user_id")
          .notNull()
          .references(() => user.id, { onDelete: "cascade" }),
+      organizationId: text("organization_id").references(
+         () => organization.id,
+         { onDelete: "cascade" },
+      ),
       personaConfig: jsonb("persona_config").$type<PersonaConfig>().notNull(),
       uploadedFiles: jsonb("uploaded_files")
          .$type<{ fileName: string; fileUrl: string; uploadedAt: string }[]>()

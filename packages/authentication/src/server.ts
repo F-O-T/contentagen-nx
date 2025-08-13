@@ -1,6 +1,7 @@
 import type { DatabaseInstance } from "@packages/database/client";
 import {
    sendEmailOTP,
+   sendOrganizationInvitation,
    type ResendClient,
    type SendEmailOTPOptions,
 } from "@packages/transactional/client";
@@ -15,7 +16,7 @@ import {
    getSocialProviders,
 } from "./helpers";
 import { emailOTP, openAPI, organization, apiKey } from "better-auth/plugins";
-import { isProduction } from "@packages/environment/helpers";
+import { getDomain, isProduction } from "@packages/environment/helpers";
 import { POLAR_PLANS, POLAR_PLAN_SLUGS } from "@packages/payment/plans";
 import { polar, portal, checkout, usage } from "@polar-sh/better-auth";
 export interface AuthOptions {
@@ -45,9 +46,7 @@ export const getAuthOptions = (
             use: [
                portal(),
                checkout({
-                  successUrl: isProduction
-                     ? "https://app.contentagen.com/profile"
-                     : "http://localhost:3000/profile",
+                  successUrl: `${getDomain()}/profile`,
                   authenticatedUsersOnly: true,
                   products: [
                      POLAR_PLANS[POLAR_PLAN_SLUGS.BASIC],
@@ -72,6 +71,16 @@ export const getAuthOptions = (
          openAPI(),
          organization({
             organizationLimit: 1,
+            async sendInvitationEmail(data) {
+               const inviteLink = `${getDomain()}/callback/organization/invite/${data.id}`;
+               await sendOrganizationInvitation(resendClient, {
+                  email: data.email,
+                  invitedByUsername: data.inviter.user.name,
+                  invitedByEmail: data.inviter.user.email,
+                  teamName: data.organization.name,
+                  inviteLink,
+               });
+            },
          }),
          apiKey({
             rateLimit: {
