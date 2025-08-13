@@ -90,8 +90,8 @@ export class ContentaGenSDK {
          // Safely extract json property if exists, or use responseData
          const actualData =
             typeof responseData === "object" &&
-               responseData !== null &&
-               "json" in responseData
+            responseData !== null &&
+            "json" in responseData
                ? (responseData as { json: unknown }).json
                : responseData;
          const transformedData = this.transformDates(actualData);
@@ -125,13 +125,17 @@ export class ContentaGenSDK {
    }
    async listContentByAgent(
       params: z.input<typeof ListContentByAgentInputSchema>,
-   ): Promise<ContentSelect[]> {
+   ): Promise<Pick<ContentSelect, "meta" | "id" | "imageUrl">[]> {
       try {
          const validatedParams = ListContentByAgentInputSchema.parse(params);
          return this._query(
             TRPC_ENDPOINTS.listContentByAgent,
             validatedParams,
-            ContentSelectSchema.array(),
+            ContentSelectSchema.pick({
+               id: true,
+               meta: true,
+               imageUrl: true,
+            }).array(),
          );
       } catch (error) {
          if (error instanceof z.ZodError) {

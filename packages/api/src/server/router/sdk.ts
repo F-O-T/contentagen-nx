@@ -15,7 +15,13 @@ import { TRPCError } from "@trpc/server";
 export const sdkRouter = router({
    listContentByAgent: sdkProcedure
       .input(ListContentByAgentInputSchema)
-      .output(ContentSelectSchema.array())
+      .output(
+         ContentSelectSchema.pick({
+            id: true,
+            meta: true,
+            imageUrl: true,
+         }).array(),
+      )
       .query(async ({ ctx, input }) => {
          const { agentId, limit = 10, page = 1, status } = input;
          const all = await listContents((await ctx).db, agentId, status);

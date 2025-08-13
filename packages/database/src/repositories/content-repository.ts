@@ -109,7 +109,7 @@ export async function listContents(
    dbClient: DatabaseInstance,
    agentId: string,
    status: Array<Exclude<Content["status"], null>>,
-): Promise<Content[]> {
+): Promise<Pick<Content, "id" | "meta" | "imageUrl">[]> {
    try {
       return await dbClient.query.content.findMany({
          where: (_fields, operators) =>
@@ -117,6 +117,11 @@ export async function listContents(
                eq(content.agentId, agentId),
                inArray(content.status, status),
             ),
+         columns: {
+            id: true,
+            meta: true,
+            imageUrl: true,
+         },
          orderBy: (content, { desc }) => [desc(content.updatedAt)],
       });
    } catch (err) {

@@ -17,7 +17,7 @@ import {
    CONTENT_EVENTS,
    type ContentStatusChangedPayload,
 } from "@packages/server-events";
-import { on } from "events";
+import { on } from "node:events";
 import {
    ContentInsertSchema,
    ContentUpdateSchema,
