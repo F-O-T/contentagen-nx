@@ -115,6 +115,7 @@ COPY packages/environment/package.json ./packages/environment/
 COPY packages/errors/package.json ./packages/errors/
 COPY packages/server-events/package.json ./packages/server-events/
 
+
 COPY packages/files/package.json ./packages/files/
 COPY packages/openrouter/package.json ./packages/openrouter/
 COPY packages/payment/package.json ./packages/payment/
