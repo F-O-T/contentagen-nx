@@ -3,7 +3,7 @@ import {
    getAgentById,
    updateAgent,
    deleteAgent,
-   listAgentsByUserId,
+   listAgents,
 } from "@packages/database/repositories/agent-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
@@ -233,25 +233,36 @@ export const agentRouter = router({
             throw err;
          }
       }),
-   listByUser: protectedProcedure.query(async ({ ctx }) => {
-      const resolvedCtx = await ctx;
-      try {
-         const userId = resolvedCtx.session?.user.id;
-         if (!userId) {
-            throw new TRPCError({
-               code: "UNAUTHORIZED",
-               message: "User ID is required to list agents.",
-            });
+   list: protectedProcedure
+      .input(
+         AgentSelectSchema.pick({
+            organizationId: true,
+         }).optional(),
+      )
+      .query(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
+         try {
+            const userId = resolvedCtx.session?.user.id;
+            const organizationId = input?.organizationId;
+            if (!userId && !organizationId) {
+               throw new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message:
+                     "User or organization ID is required to list agents.",
+               });
+            }
+            if (!organizationId) {
+               return await listAgents(resolvedCtx.db, { userId });
+            }
+            return await listAgents(resolvedCtx.db, { userId, organizationId });
+         } catch (err) {
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
          }
-         return await listAgentsByUserId(resolvedCtx.db, userId);
-      } catch (err) {
-         if (err instanceof DatabaseError) {
-            throw new TRPCError({
-               code: "INTERNAL_SERVER_ERROR",
-               message: err.message,
-            });
-         }
-         throw err;
-      }
-   }),
+      }),
 });

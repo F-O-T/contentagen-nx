@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-router";
 import { Outlet } from "@tanstack/react-router";
 import { DashboardLayout } from "@/layout/dashboard-layout";
-import { useTRPC } from "@/integrations/clients";
+import { betterAuthClient, useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useIsomorphicLayoutEffect } from "@packages/ui/hooks/use-isomorphic-layout-effect";
 import { toast } from "sonner";
@@ -27,6 +27,28 @@ function RouteComponent() {
    const { data: session, error } = useSuspenseQuery(
       trpc.sessionHelper.getSession.queryOptions(),
    );
+   //TODO: mover o setOrganization para o databaseHooks com o betterAuth
+
+   useSuspenseQuery({
+      queryKey: ["activeOrganization"],
+      queryFn: async () => {
+         const orgs = await betterAuthClient.organization.list();
+         if (!orgs.data) {
+            throw new Error("Failed to fetch organizations");
+         }
+         if (!orgs?.data[0]?.id) {
+            throw new Error("No organizations found");
+         }
+         await betterAuthClient.organization.setActive({
+            organizationId: orgs?.data[0]?.id,
+         });
+         const { data, error } =
+            await betterAuthClient.organization.getFullOrganization();
+         if (error) throw new Error("Failed to load organization");
+         return data;
+      },
+   });
+
    useIsomorphicLayoutEffect(() => {
       if (error) {
          toast.error("Failed to fetch session data.");

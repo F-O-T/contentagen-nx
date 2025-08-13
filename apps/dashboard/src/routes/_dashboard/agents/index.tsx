@@ -5,6 +5,6 @@ export const Route = createFileRoute("/_dashboard/agents/")({
    component: AgentListPage,
    loader: async ({ context }) => {
       const { trpc, queryClient } = context;
-      await queryClient.ensureQueryData(trpc.agent.listByUser.queryOptions());
+      await queryClient.ensureQueryData(trpc.agent.list.queryOptions());
    },
 });

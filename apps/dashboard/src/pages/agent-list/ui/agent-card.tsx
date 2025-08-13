@@ -56,9 +56,23 @@ export function AgentCard({ agent }: AgentCardProps) {
          },
          onSuccess: () => {
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.listByUser.queryKey(),
+               queryKey: trpc.agent.list.queryKey(),
             });
             toast.success("Agent deleted successfully");
+         },
+      }),
+   );
+
+   const { mutate: transferAgent, isPending: isTransferPending } = useMutation(
+      trpc.agent.transferToOrganization.mutationOptions({
+         onError: () => {
+            toast.error("Failed to transfer agent");
+         },
+         onSuccess: () => {
+            queryClient.invalidateQueries({
+               queryKey: trpc.agent.list.queryKey(),
+            });
+            toast.success("Agent transferred to organization");
          },
       }),
    );
@@ -133,6 +147,13 @@ export function AgentCard({ agent }: AgentCardProps) {
                         }
                      >
                         <Edit className="w-4 h-4 mr-2" /> Edit
+                     </DropdownMenuItem>
+                     <DropdownMenuItem
+                        onClick={() => transferAgent({ id: agent.id })}
+                        disabled={isTransferPending}
+                     >
+                        <CheckCircle2 className="w-4 h-4 mr-2" /> Transfer to
+                        Organization
                      </DropdownMenuItem>
                      <DropdownMenuItem
                         disabled={isPending}

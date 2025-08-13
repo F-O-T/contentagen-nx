@@ -1,4 +1,8 @@
-import { betterAuthClient, type Session } from "@/integrations/clients";
+import {
+   betterAuthClient,
+   useTRPC,
+   type Session,
+} from "@/integrations/clients";
 import {
    Avatar,
    AvatarFallback,
@@ -21,6 +25,7 @@ import {
    useSidebar,
 } from "@packages/ui/components/sidebar";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useRouter } from "@tanstack/react-router";
 import {
    LogOutIcon,
@@ -94,11 +99,16 @@ function NavUserSkeleton() {
 function NavUserContent({ session }: { session: Session | null }) {
    const { isMobile, setOpenMobile } = useSidebar();
    const router = useRouter();
+   const trpc = useTRPC();
+   const queryClient = useQueryClient();
    const handleLogout = useCallback(async () => {
       await betterAuthClient.signOut(
          {},
          {
-            onSuccess: () => {
+            onSuccess: async () => {
+               await queryClient.invalidateQueries({
+                  queryKey: trpc.sessionHelper.getSession.queryKey(),
+               });
                router.navigate({
                   to: "/auth/sign-in",
                });
@@ -106,7 +116,12 @@ function NavUserContent({ session }: { session: Session | null }) {
          },
       );
       setOpenMobile(false);
-   }, [router, setOpenMobile]);
+   }, [
+      router,
+      setOpenMobile,
+      queryClient,
+      trpc.sessionHelper.getSession.queryKey,
+   ]);
    if (!session) return <NavUserSkeleton />;
 
    return (
@@ -170,19 +185,19 @@ function NavUserContent({ session }: { session: Session | null }) {
                            </Link>
                         </Button>
                      </DropdownMenuItem>
-                     {/* <DropdownMenuItem asChild> */}
-                     {/*    <Button */}
-                     {/*       className="w-full items-center cursor-pointer justify-start flex gap-2 h-12" */}
-                     {/*       variant="ghost" */}
-                     {/*       onClick={() => setOpenMobile(false)} */}
-                     {/*       asChild */}
-                     {/*    > */}
-                     {/*       <Link to="/organization"> */}
-                     {/*          <Building2 /> */}
-                     {/*          Organizations */}
-                     {/*       </Link> */}
-                     {/*    </Button> */}
-                     {/* </DropdownMenuItem> */}
+                     <DropdownMenuItem asChild>
+                        <Button
+                           className="w-full items-center cursor-pointer justify-start flex gap-2 h-12"
+                           variant="ghost"
+                           onClick={() => setOpenMobile(false)}
+                           asChild
+                        >
+                           <Link to="/organization">
+                              <Building2 />
+                              Organizations
+                           </Link>
+                        </Button>
+                     </DropdownMenuItem>
                   </DropdownMenuGroup>{" "}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>

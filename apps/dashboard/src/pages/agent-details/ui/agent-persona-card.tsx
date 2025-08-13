@@ -82,7 +82,7 @@ export const AgentPersonaCard: React.FC<AgentPersonaCardProps> = ({
          },
          onSuccess: () => {
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.listByUser.queryKey(),
+               queryKey: trpc.agent.list.queryKey(),
             });
             toast.success("Agent deleted successfully");
          },

@@ -36,12 +36,26 @@ import { useState, useEffect, useMemo } from "react";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { CreateOrganizationCredenza } from "../features/create-organization-credenza";
 import { InfoItem } from "@packages/ui/components/info-item";
+import { SendInvitationCredenza } from "../features/send-invitation-credenza";
 
 export function OrganizationPage() {
    const [open, setOpen] = useState(false);
+   const [inviteOpen, setInviteOpen] = useState(false);
+   //TODO: mover o setOrganization para o databaseHooks com o betterAuth
+
    const { data: org, isLoading: orgLoading } = useSuspenseQuery({
       queryKey: ["activeOrganization"],
       queryFn: async () => {
+         const orgs = await betterAuthClient.organization.list();
+         if (!orgs.data) {
+            throw new Error("Failed to fetch organizations");
+         }
+         if (!orgs?.data[0]?.id) {
+            throw new Error("No organizations found");
+         }
+         await betterAuthClient.organization.setActive({
+            organizationId: orgs?.data[0]?.id,
+         });
          const { data, error } =
             await betterAuthClient.organization.getFullOrganization();
          if (error) throw new Error("Failed to load organization");
@@ -108,7 +122,7 @@ export function OrganizationPage() {
                            <DropdownMenuContent align="end">
                               <DropdownMenuItem
                                  onSelect={() => {
-                                    /* TODO: invite members logic */
+                                    setInviteOpen(true);
                                  }}
                               >
                                  <UserPlus className="w-4 h-4 mr-2" /> Invite
@@ -218,6 +232,11 @@ export function OrganizationPage() {
             </div>
          )}
          <CreateOrganizationCredenza open={open} onOpenChange={setOpen} />
+         <SendInvitationCredenza
+            open={inviteOpen}
+            onOpenChange={setInviteOpen}
+            organizationId={org?.id}
+         />
       </div>
    );
 }

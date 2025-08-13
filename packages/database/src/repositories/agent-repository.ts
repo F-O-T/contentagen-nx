@@ -78,17 +78,36 @@ export async function deleteAgent(
    }
 }
 
-export async function listAgentsByUserId(
+export async function listAgents(
    dbClient: DatabaseInstance,
-   userId: string,
+   { userId, organizationId }: { userId?: string; organizationId?: string },
 ): Promise<AgentSelect[]> {
    try {
-      return await dbClient.query.agent.findMany({
-         where: eq(agent.userId, userId),
-      });
+      if (userId && organizationId) {
+         // Return agents owned by user or linked to org
+         const { or, eq } = await import("drizzle-orm");
+         return await dbClient.query.agent.findMany({
+            where: or(
+               eq(agent.userId, userId),
+               eq(agent.organizationId, organizationId),
+            ),
+         });
+      } else if (userId) {
+         const { eq } = await import("drizzle-orm");
+         return await dbClient.query.agent.findMany({
+            where: eq(agent.userId, userId),
+         });
+      } else if (organizationId) {
+         const { eq } = await import("drizzle-orm");
+         return await dbClient.query.agent.findMany({
+            where: eq(agent.organizationId, organizationId),
+         });
+      } else {
+         return [];
+      }
    } catch (err) {
       throw new DatabaseError(
-         `Failed to list agents for user: ${(err as Error).message}`,
+         `Failed to list agents: ${(err as Error).message}`,
       );
    }
 }
