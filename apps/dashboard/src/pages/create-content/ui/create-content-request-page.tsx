@@ -14,12 +14,17 @@ export function AgentContentRequestPage() {
    // Create mutation for content request
    const contentRequestMutation = useMutation(
       trpc.content.create.mutationOptions({
-         onSuccess: () => {
+         onSuccess: (data) => {
             queryClient.invalidateQueries({
                queryKey: trpc.content.list.queryKey({
                   agentId,
                   status: ["draft", "approved", "generating"],
                }),
+            });
+            if (!data?.id) return state.history.back();
+            state.navigate({
+               to: "/content/$id",
+               params: { id: data.id },
             });
          },
          onError: (error) => {
@@ -41,7 +46,6 @@ export function AgentContentRequestPage() {
                   description: values.description,
                },
             });
-            state.history.back();
          }}
       />
    );

@@ -1,4 +1,10 @@
-import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import {
+   createTRPCClient,
+   httpBatchLink,
+   httpSubscriptionLink,
+   loggerLink,
+   splitLink,
+} from "@trpc/client";
 import SuperJSON from "superjson";
 import urlJoin from "url-join";
 import type { AppRouter } from "../server";
@@ -10,29 +16,43 @@ export interface APIClientOptions {
 export const createTrpcClient = ({ serverUrl, headers }: APIClientOptions) => {
    return createTRPCClient<AppRouter>({
       links: [
-         httpBatchLink({
-            url: urlJoin(serverUrl, "/trpc"),
-            transformer: SuperJSON,
-            fetch(url, options) {
-               const requestHeaders = new Headers(options?.headers);
+         loggerLink(),
+         splitLink({
+            // uses the httpSubscriptionLink for subscriptions
+            condition: (op) => op.type === "subscription",
+            true: httpSubscriptionLink({
+               url: urlJoin(serverUrl, "/trpc"),
+               transformer: SuperJSON,
+               eventSourceOptions() {
+                  return {
+                     withCredentials: true,
+                  };
+               },
+            }),
+            false: httpBatchLink({
+               url: urlJoin(serverUrl, "/trpc"),
+               transformer: SuperJSON,
+               fetch(url, options) {
+                  const requestHeaders = new Headers(options?.headers);
 
-               if (headers) {
-                  const incomingHeaders = new Headers(headers as Headers);
-                  const cookie = incomingHeaders.get("cookie");
-                  if (cookie) {
-                     requestHeaders.set("cookie", cookie);
+                  if (headers) {
+                     const incomingHeaders = new Headers(headers as Headers);
+                     const cookie = incomingHeaders.get("cookie");
+                     if (cookie) {
+                        requestHeaders.set("cookie", cookie);
+                     }
+                     const authorization = incomingHeaders.get("authorization");
+                     if (authorization) {
+                        requestHeaders.set("authorization", authorization);
+                     }
                   }
-                  const authorization = incomingHeaders.get("authorization");
-                  if (authorization) {
-                     requestHeaders.set("authorization", authorization);
-                  }
-               }
-               return fetch(url, {
-                  ...options,
-                  credentials: "include",
-                  headers: requestHeaders,
-               });
-            },
+                  return fetch(url, {
+                     ...options,
+                     credentials: "include",
+                     headers: requestHeaders,
+                  });
+               },
+            }),
          }),
       ],
    });

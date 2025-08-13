@@ -1,14 +1,10 @@
 {
-   "dependencies": {
-      "ws": "^8.18.3"
-   },
    "devDependencies": {
-      "@types/ws": "^8.18.1",
       "@tooling/typescript": "workspace:*",
       "typescript": "catalog:development"
    },
    "license": "MIT",
-   "name": "@packages/websocket",
+   "name": "@packages/server-events",
    "scripts": {
       "check": "biome check --write ./src",
       "typecheck": "bunx --bun tsc --noEmit "

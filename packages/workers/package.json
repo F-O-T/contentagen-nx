@@ -6,7 +6,8 @@
       "@packages/files": "workspace:*",
       "@packages/openrouter": "workspace:*",
       "@packages/prompts": "workspace:*",
-      "bullmq": "^5.56.9"
+      "bullmq": "^5.56.9",
+      "@packages/server-events": "workspace:*"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",

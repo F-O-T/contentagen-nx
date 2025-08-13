@@ -1,4 +1,5 @@
 import { Worker, Queue, type Job } from "bullmq";
+import { emitContentStatusChanged } from "@packages/server-events";
 import { runFetchAgent } from "../functions/fetch-agent";
 import { runGenerateContent } from "../functions/generate-content";
 import { runKnowledgeChunkRag } from "../functions/knowledge-chunk-rag";
@@ -159,6 +160,11 @@ export async function runContentGeneration(payload: {
          });
          throw new Error("Failed to save content");
       }
+      // Emit event to signal content status changed to draft
+      emitContentStatusChanged({
+         contentId,
+         status: "draft",
+      });
       return saveResult;
    } catch (error) {
       console.error("[ContentGeneration] PIPELINE ERROR", {

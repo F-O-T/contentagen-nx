@@ -20,7 +20,7 @@
       "typecheck": "tsc --noEmit --emitDeclarationOnly false"
    },
    "dependencies": {
-      "@packages/websocket": "workspace:*",
+      "@packages/server-events": "workspace:*",
       "@packages/workers": "workspace:*",
       "@packages/authentication": "workspace:*",
       "@packages/database": "workspace:*",

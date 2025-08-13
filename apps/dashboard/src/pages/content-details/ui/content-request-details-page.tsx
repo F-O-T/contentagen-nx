@@ -1,20 +1,53 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { GeneratedContentDisplay } from "./generated-content-display";
 import { useTRPC } from "@/integrations/clients";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { ContentStatsCard, ContentDetailsCard } from "./request-details-cards";
 import { ContentQualityCard } from "./content-quality";
+import { useSubscription } from "@trpc/tanstack-react-query";
+import { toast } from "sonner";
+import { useEffect, useState } from "react";
 
 export function ContentRequestDetailsPage() {
    const { id } = useParams({
       from: "/_dashboard/content/$id",
    });
    const trpc = useTRPC();
+   const queryClient = useQueryClient();
    const { data } = useSuspenseQuery(
       trpc.content.get.queryOptions({
          id,
       }),
+   );
+   // State to control subscription
+   const [subscriptionEnabled, setSubscriptionEnabled] = useState(true);
+
+   useEffect(() => {
+      if (data?.status === "draft") {
+         setSubscriptionEnabled(false);
+      } else {
+         setSubscriptionEnabled(true);
+      }
+   }, [data?.status]);
+
+   useSubscription(
+      trpc.content.onStatusChanged.subscriptionOptions(
+         {
+            contentId: id,
+         },
+         {
+            onData(data) {
+               toast.success(`Content status updated to ${data.status}`);
+               queryClient.invalidateQueries({
+                  queryKey: trpc.content.get.queryKey({
+                     id,
+                  }),
+               });
+            },
+            enabled: subscriptionEnabled,
+         },
+      ),
    );
 
    return (
