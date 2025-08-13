@@ -59,21 +59,23 @@ export class ContentaGenSDK {
       if (Array.isArray(data)) {
          return data.map((item) => this.transformDates(item));
       }
-
       if (data && typeof data === "object" && data !== null) {
-         const obj = { ...data } as Record<string, unknown>;
-
-         // Transform createdAt and updatedAt fields if they exist and are strings
-         if (typeof obj.createdAt === "string") {
-            obj.createdAt = new Date(obj.createdAt);
+         const obj: Record<string, unknown> = { ...data };
+         for (const key of Object.keys(obj)) {
+            if (
+               (key === "createdAt" || key === "updatedAt") &&
+               typeof obj[key] === "string"
+            ) {
+               obj[key] = new Date(obj[key] as string);
+            } else if (
+               Array.isArray(obj[key]) ||
+               (obj[key] && typeof obj[key] === "object")
+            ) {
+               obj[key] = this.transformDates(obj[key]);
+            }
          }
-         if (typeof obj.updatedAt === "string") {
-            obj.updatedAt = new Date(obj.updatedAt);
-         }
-
          return obj;
       }
-
       return data;
    }
 

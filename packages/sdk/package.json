@@ -1,6 +1,6 @@
 {
    "name": "@contentagen/sdk",
-   "version": "0.4.7",
+   "version": "0.4.8",
    "private": false,
    "type": "module",
    "exports": {
@@ -20,15 +20,19 @@
       "build": "tsup",
       "check": "biome check --write ./src",
       "typecheck": "tsc --build --noEmit --emitDeclarationOnly false",
-      "publish": "npm publish --access public"
+      "publish": "npm publish --access public",
+      "test": "vitest run "
    },
    "dependencies": {
       "superjson": "2.2.2",
       "zod": "4.0.14"
    },
    "devDependencies": {
+      "@types/node": "^24.2.1",
+      "msw": "^2.10.4",
       "tsup": "^8.5.0",
-      "typescript": "5.8.3"
+      "typescript": "5.8.3",
+      "vitest": "^3.2.4"
    },
    "publishConfig": {
       "access": "public"
