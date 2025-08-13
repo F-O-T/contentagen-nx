@@ -1,11 +1,12 @@
 import SuperJSON from "superjson";
 import { z } from "zod";
-import type { ContentSelect } from "./types";
+import type { ContentList, ContentSelect } from "./types";
 import {
    ListContentByAgentInputSchema,
    GetContentByIdInputSchema,
    GetContentBySlugInputSchema,
    ContentSelectSchema,
+   ContentListResponseSchema,
 } from "./types";
 
 export const ERROR_CODES = {
@@ -125,17 +126,13 @@ export class ContentaGenSDK {
    }
    async listContentByAgent(
       params: z.input<typeof ListContentByAgentInputSchema>,
-   ): Promise<Pick<ContentSelect, "meta" | "id" | "imageUrl">[]> {
+   ): Promise<ContentList> {
       try {
          const validatedParams = ListContentByAgentInputSchema.parse(params);
          return this._query(
             TRPC_ENDPOINTS.listContentByAgent,
             validatedParams,
-            ContentSelectSchema.pick({
-               id: true,
-               meta: true,
-               imageUrl: true,
-            }).array(),
+            ContentListResponseSchema,
          );
       } catch (error) {
          if (error instanceof z.ZodError) {

@@ -20,14 +20,45 @@ import { createSdk } from '@contentagen/sdk';
 const sdk = createSdk({ apiKey: 'YOUR_API_KEY' });
 ```
 
-### List Content by Agent (with Pagination)
+### List Content by Agent (Advanced Pagination & Filtering)
 
-You can paginate results using the optional `limit` (default: 10, min: 1, max: 100) and `page` (default: 1, min: 1) parameters:
+The `listContentByAgent` method now supports:
+- **Pagination** via `limit` (number of items per page, default: 10, min: 1, max: 100) and `page` (page number, default: 1, min: 1)
+- **Status Filtering**: Filter results by content status (`draft`, `approved`, `generating`)
+- **Input Validation**: All inputs are strictly validated using Zod schemas; invalid parameters throw clear errors
+- **Rich Response**: Returns an object including post metadata, image URL, status, and total count
+
+#### Example Usage
 
 ```ts
-// Fetch the second page of results, 20 items per page
-const content = await sdk.listContentByAgent({ agentId: 'agent-uuid', limit: 20, page: 2 });
-console.log(content);
+const contentList = await sdk.listContentByAgent({
+  agentId: "agent-uuid",
+  status: ["draft", "approved"],
+  limit: 20, // optional
+  page: 2 // optional
+});
+console.log(contentList.posts); // array of content post summaries
+console.log(contentList.total); // total number of items matching filter
+```
+
+#### Input Schema
+```ts
+const ListContentByAgentInputSchema = z.object({
+  status: z.enum(["draft", "approved", "generating"]).array(),
+  agentId: z.string().uuid("Invalid Agent ID format."),
+  limit: z.number().min(1).max(100).optional().default(10),
+  page: z.number().min(1).optional().default(1),
+});
+```
+
+#### Response Example
+```ts
+{
+  posts: [
+    { id, meta, imageUrl, status } // summary for each post
+  ],
+  total: 40 // total matching posts
+}
 ```
 
 ### Get Content by ID

@@ -79,6 +79,16 @@ export const ContentSelectSchema = z.object({
    updatedAt: z.date(),
 });
 
+export const ContentListResponseSchema = z.object({
+   posts: ContentSelectSchema.pick({
+      id: true,
+      meta: true,
+      imageUrl: true,
+      status: true,
+   }).array(),
+   total: z.number(),
+});
+export type ContentList = z.infer<typeof ContentListResponseSchema>;
 // Exported types
 export type ContentStats = z.infer<typeof ContentStatsSchema>;
 export type ContentMeta = z.infer<typeof ContentMetaSchema>;

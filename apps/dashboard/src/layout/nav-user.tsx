@@ -22,7 +22,13 @@ import {
 } from "@packages/ui/components/sidebar";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { Link, useRouter } from "@tanstack/react-router";
-import { LogOutIcon, MoreVerticalIcon, UserCircleIcon, KeyIcon } from "lucide-react";
+import {
+   LogOutIcon,
+   MoreVerticalIcon,
+   UserCircleIcon,
+   KeyIcon,
+   Building2,
+} from "lucide-react";
 import { useCallback } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 function UserAvatarInfo({
@@ -161,6 +167,19 @@ function NavUserContent({ session }: { session: Session | null }) {
                            <Link to="/apikey">
                               <KeyIcon />
                               Api keys
+                           </Link>
+                        </Button>
+                     </DropdownMenuItem>
+                     <DropdownMenuItem asChild>
+                        <Button
+                           className="w-full items-center cursor-pointer justify-start flex gap-2 h-12"
+                           variant="ghost"
+                           onClick={() => setOpenMobile(false)}
+                           asChild
+                        >
+                           <Link to="/organization">
+                              <Building2 />
+                              Organizations
                            </Link>
                         </Button>
                      </DropdownMenuItem>

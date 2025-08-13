@@ -11,23 +11,27 @@ import {
 } from "@packages/database/repositories/content-repository";
 import { ContentSelectSchema } from "@packages/database/schemas/content";
 import { TRPCError } from "@trpc/server";
-
+import { z } from "zod";
 export const sdkRouter = router({
    listContentByAgent: sdkProcedure
       .input(ListContentByAgentInputSchema)
       .output(
-         ContentSelectSchema.pick({
-            id: true,
-            meta: true,
-            imageUrl: true,
-         }).array(),
+         z.object({
+            posts: ContentSelectSchema.pick({
+               id: true,
+               meta: true,
+               imageUrl: true,
+            }).array(),
+            total: z.number(),
+         }),
       )
       .query(async ({ ctx, input }) => {
          const { agentId, limit = 10, page = 1, status } = input;
          const all = await listContents((await ctx).db, agentId, status);
          const start = (page - 1) * limit;
          const end = start + limit;
-         return all.slice(start, end);
+         const posts = all.slice(start, end);
+         return { posts, total: all.length };
       }),
    getContentById: sdkProcedure
       .input(GetContentByIdInputSchema)

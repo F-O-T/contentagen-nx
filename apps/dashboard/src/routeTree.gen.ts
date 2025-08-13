@@ -18,6 +18,7 @@ import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-verification'
 import { Route as DashboardProfileRouteImport } from './routes/_dashboard/profile'
+import { Route as DashboardOrganizationRouteImport } from './routes/_dashboard/organization'
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard/home'
 import { Route as DashboardApikeyRouteImport } from './routes/_dashboard/apikey'
 import { Route as DashboardContentIndexRouteImport } from './routes/_dashboard/content/index'
@@ -68,6 +69,11 @@ const AuthEmailVerificationRoute = AuthEmailVerificationRouteImport.update({
 const DashboardProfileRoute = DashboardProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardOrganizationRoute = DashboardOrganizationRouteImport.update({
+  id: '/organization',
+  path: '/organization',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardHomeRoute = DashboardHomeRouteImport.update({
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteWithChildren
   '/apikey': typeof DashboardApikeyRoute
   '/home': typeof DashboardHomeRoute
+  '/organization': typeof DashboardOrganizationRoute
   '/profile': typeof DashboardProfileRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
   '/apikey': typeof DashboardApikeyRoute
   '/home': typeof DashboardHomeRoute
+  '/organization': typeof DashboardOrganizationRoute
   '/profile': typeof DashboardProfileRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRouteWithChildren
   '/_dashboard/apikey': typeof DashboardApikeyRoute
   '/_dashboard/home': typeof DashboardHomeRoute
+  '/_dashboard/organization': typeof DashboardOrganizationRoute
   '/_dashboard/profile': typeof DashboardProfileRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/apikey'
     | '/home'
+    | '/organization'
     | '/profile'
     | '/auth/email-verification'
     | '/auth/forgot-password'
@@ -204,6 +214,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/apikey'
     | '/home'
+    | '/organization'
     | '/profile'
     | '/auth/email-verification'
     | '/auth/forgot-password'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_dashboard/apikey'
     | '/_dashboard/home'
+    | '/_dashboard/organization'
     | '/_dashboard/profile'
     | '/auth/email-verification'
     | '/auth/forgot-password'
@@ -299,6 +311,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/organization': {
+      id: '/_dashboard/organization'
+      path: '/organization'
+      fullPath: '/organization'
+      preLoaderRoute: typeof DashboardOrganizationRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/_dashboard/home': {
@@ -409,6 +428,7 @@ const DashboardAgentsRouteWithChildren = DashboardAgentsRoute._addFileChildren(
 interface DashboardRouteChildren {
   DashboardApikeyRoute: typeof DashboardApikeyRoute
   DashboardHomeRoute: typeof DashboardHomeRoute
+  DashboardOrganizationRoute: typeof DashboardOrganizationRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
   DashboardAgentsRoute: typeof DashboardAgentsRouteWithChildren
   DashboardContentIdRoute: typeof DashboardContentIdRoute
@@ -418,6 +438,7 @@ interface DashboardRouteChildren {
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardApikeyRoute: DashboardApikeyRoute,
   DashboardHomeRoute: DashboardHomeRoute,
+  DashboardOrganizationRoute: DashboardOrganizationRoute,
   DashboardProfileRoute: DashboardProfileRoute,
   DashboardAgentsRoute: DashboardAgentsRouteWithChildren,
   DashboardContentIdRoute: DashboardContentIdRoute,
