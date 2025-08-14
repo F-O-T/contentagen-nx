@@ -72,6 +72,34 @@ export const contentRouter = router({
             throw err;
          }
       }),
+   editBody: protectedProcedure
+      .input(ContentUpdateSchema.pick({ id: true, body: true }))
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const db = (await ctx).db;
+            if (!input.id || !input.body) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Content ID and body are required.",
+               });
+            }
+            const updated = await updateContent(db, input.id, {
+               body: input.body,
+            });
+            return { success: true, content: updated };
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
+      }),
    create: protectedProcedure
       .input(
          ContentInsertSchema.pick({

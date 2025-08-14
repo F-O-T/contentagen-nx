@@ -31,13 +31,57 @@ import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
 import { useAppForm } from "@packages/ui/components/form";
 import { z } from "zod";
+import { TiptapEditor } from "@packages/ui/components/tiptap-editor";
+
 export function GeneratedContentDisplay({
    content,
 }: {
    content: ContentSelect;
 }) {
+   // New state for edit credenza
+   const [editBodyOpen, setEditBodyOpen] = useState(false);
+
    const trpc = useTRPC();
    const queryClient = useQueryClient();
+   const editBodyMutation = useMutation(
+      trpc.content.editBody.mutationOptions({
+         onError: (error) => {
+            console.error("Error editing content body:", error);
+            toast.error("Failed to edit content body. Please try again.");
+         },
+         onSuccess: () => {
+            toast.success("Content body edited successfully!");
+            queryClient.invalidateQueries({
+               queryKey: [
+                  trpc.content.list.queryKey(),
+                  trpc.content.get.queryKey({ id: content.id }),
+               ],
+            });
+         },
+      }),
+   );
+   // TanStack form for editing body
+   const editForm = useAppForm({
+      defaultValues: { body: content?.body ?? "" },
+      validators: {
+         onBlur: z.object({ body: z.string().min(1, "Body is required") }),
+      },
+      onSubmit: async ({ value, formApi }) => {
+         await editBodyMutation.mutateAsync({
+            id: content.id,
+            body: value.body,
+         });
+         toast.success("Content body updated!");
+         setEditBodyOpen(false);
+         queryClient.invalidateQueries({
+            queryKey: [
+               trpc.content.list.queryKey(),
+               trpc.content.get.queryKey({ id: content.id }),
+            ],
+         });
+         formApi.reset();
+      },
+   });
    const addImageMutation = useMutation(
       trpc.content.addImageUrl.mutationOptions({
          onError: (error) => {
@@ -127,6 +171,9 @@ export function GeneratedContentDisplay({
                         >
                            Add Image URL
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditBodyOpen(true)}>
+                           Edit Content Body
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                            onClick={async () =>
                               await approveContentMutation.mutateAsync({
@@ -186,6 +233,55 @@ export function GeneratedContentDisplay({
                            </Button>
                         )}
                      </form.Subscribe>
+                  </CredenzaFooter>
+               </form>
+            </CredenzaContent>
+         </Credenza>
+         <Credenza open={editBodyOpen} onOpenChange={setEditBodyOpen}>
+            <CredenzaContent>
+               <CredenzaHeader>
+                  <CredenzaTitle>Edit your content</CredenzaTitle>
+               </CredenzaHeader>
+               <form
+                  onSubmit={(e) => {
+                     e.preventDefault();
+                     e.stopPropagation();
+                     editForm.handleSubmit();
+                  }}
+               >
+                  <CredenzaBody>
+                     <editForm.AppField name="body">
+                        {(field) => (
+                           <field.FieldContainer>
+                              <field.FieldLabel>Content</field.FieldLabel>
+                              <TiptapEditor
+                                 className="max-h-96 overflow-y-scroll"
+                                 value={field.state.value}
+                                 onChange={field.handleChange}
+                                 onBlur={field.handleBlur}
+                                 placeholder="Edit your content..."
+                                 minHeight="300px"
+                                 error={field.state.meta.errors.length > 0}
+                              />
+                              <field.FieldMessage />
+                           </field.FieldContainer>
+                        )}
+                     </editForm.AppField>
+                  </CredenzaBody>
+                  <CredenzaFooter>
+                     <editForm.Subscribe>
+                        {(formState) => (
+                           <Button
+                              type="submit"
+                              variant="default"
+                              disabled={
+                                 !formState.canSubmit || formState.isSubmitting
+                              }
+                           >
+                              Save
+                           </Button>
+                        )}
+                     </editForm.Subscribe>
                   </CredenzaFooter>
                </form>
             </CredenzaContent>

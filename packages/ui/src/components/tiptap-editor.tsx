@@ -1,5 +1,6 @@
 import { EditorContent, useEditor, type EditorOptions } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { Markdown } from "tiptap-markdown";
 import type React from "react";
 import { useEffect, useMemo } from "react";
 import { Button } from "@packages/ui/components/button";
@@ -32,7 +33,7 @@ export function TiptapEditor({
 }: TiptapEditorProps) {
    const editor = useEditor({
       immediatelyRender: true,
-      extensions: [StarterKit],
+      extensions: [StarterKit, Markdown],
       content: value,
       editorProps: {
          attributes: {

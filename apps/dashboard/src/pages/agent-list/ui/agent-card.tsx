@@ -148,13 +148,15 @@ export function AgentCard({ agent }: AgentCardProps) {
                      >
                         <Edit className="w-4 h-4 mr-2" /> Edit
                      </DropdownMenuItem>
-                     <DropdownMenuItem
-                        onClick={() => transferAgent({ id: agent.id })}
-                        disabled={isTransferPending}
-                     >
-                        <CheckCircle2 className="w-4 h-4 mr-2" /> Transfer to
-                        Organization
-                     </DropdownMenuItem>
+                     {!agent.organizationId && (
+                        <DropdownMenuItem
+                           onClick={() => transferAgent({ id: agent.id })}
+                           disabled={isTransferPending}
+                        >
+                           <CheckCircle2 className="w-4 h-4 mr-2" /> Transfer to
+                           Organization
+                        </DropdownMenuItem>
+                     )}
                      <DropdownMenuItem
                         disabled={isPending}
                         onClick={() => setAlertOpen(true)}
