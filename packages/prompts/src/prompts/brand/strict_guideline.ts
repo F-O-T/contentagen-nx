@@ -86,10 +86,11 @@ When you receive a brand document in the input, treat it as mandatory compliance
 - **Competitive moat reinforcement:** Strengthen brand differentiation through consistent positioning
 - **Corporate communication mirroring:** Match tone and approach of official brand communications
 
-${blacklistWords.length
-         ? `**Content Restrictions:**
+${
+   blacklistWords.length
+      ? `**Content Restrictions:**
 Avoid using these words or phrases: ${blacklistWords.join(", ")}`
-         : ""
-      }
+      : ""
+}
 `;
 }

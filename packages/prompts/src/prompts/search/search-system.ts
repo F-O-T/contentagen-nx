@@ -1,5 +1,5 @@
 export function searchSystemPrompt(): string {
-  return `# Web Search Results Integration Guide
+   return `# Web Search Results Integration Guide
 
 **How to Use Tavily Search Results:**
 

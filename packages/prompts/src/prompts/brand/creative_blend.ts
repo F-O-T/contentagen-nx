@@ -85,10 +85,11 @@ When you receive a brand document in the input, use it as creative inspiration a
 - **Differentiation effectiveness:** Creative approach distinguishes brand in competitive landscape
 - **Conversion through creativity:** Creative content drives desired brand actions and outcomes
 
-${blacklistWords.length
-         ? `**Content Restrictions:**
+${
+   blacklistWords.length
+      ? `**Content Restrictions:**
 Avoid using these words or phrases: ${blacklistWords.join(", ")}`
-         : ""
-      }
+      : ""
+}
 `;
 }

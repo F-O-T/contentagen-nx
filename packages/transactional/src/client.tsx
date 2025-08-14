@@ -18,37 +18,37 @@ export const getResendClient = (RESEND_API_KEY: string) => {
 };
 
 export interface SendOrganizationInvitationOptions {
-  email: string;
-  invitedByUsername: string;
-  invitedByEmail: string;
-  teamName: string;
-  inviteLink: string;
+   email: string;
+   invitedByUsername: string;
+   invitedByEmail: string;
+   teamName: string;
+   inviteLink: string;
 }
 
 export const sendOrganizationInvitation = async (
-  client: Resend,
-  {
-    email,
-    invitedByUsername,
-    invitedByEmail,
-    teamName,
-    inviteLink,
-  }: SendOrganizationInvitationOptions,
+   client: Resend,
+   {
+      email,
+      invitedByUsername,
+      invitedByEmail,
+      teamName,
+      inviteLink,
+   }: SendOrganizationInvitationOptions,
 ) => {
-  const subject = `Convite para se juntar à equipe ${teamName} no ContentAgen`;
-  await client.emails.send({
-    from: `${brandConfig.name} <support@app.contentagen.com>`,
-    react: (
-      <OrganizationInvitationEmail
-        invitedByUsername={invitedByUsername}
-        invitedByEmail={invitedByEmail}
-        teamName={teamName}
-        inviteLink={inviteLink}
-      />
-    ),
-    subject,
-    to: email,
-  });
+   const subject = `Convite para se juntar à equipe ${teamName} no ContentAgen`;
+   await client.emails.send({
+      from: `${brandConfig.name} <support@app.contentagen.com>`,
+      react: (
+         <OrganizationInvitationEmail
+            invitedByUsername={invitedByUsername}
+            invitedByEmail={invitedByEmail}
+            teamName={teamName}
+            inviteLink={inviteLink}
+         />
+      ),
+      subject,
+      to: email,
+   });
 };
 
 export const sendEmailOTP = async (

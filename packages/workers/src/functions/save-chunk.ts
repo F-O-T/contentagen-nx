@@ -16,7 +16,7 @@ export async function runDistilledChunkFormatterAndSaveOnChroma(payload: {
    try {
       // Ensure the collection exists before using it
       const collection = await ensureAgentKnowledgeCollection(chroma);
-      
+
       await addToCollection(collection, {
          documents: [chunk],
          ids: [crypto.randomUUID()],

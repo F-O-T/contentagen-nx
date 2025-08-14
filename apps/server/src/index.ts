@@ -48,12 +48,12 @@ const app = new Elysia()
          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
          origin: (request: Request) => {
             const url = new URL(request.url);
-            
+
             // Allow all origins for SDK endpoints
             if (url.pathname.startsWith("/trpc/sdk")) {
                return true;
             }
-            
+
             // Use trusted origins for other endpoints
             const origin = request.headers.get("origin");
             const trustedOrigins = env.BETTER_AUTH_TRUSTED_ORIGINS.split(",");

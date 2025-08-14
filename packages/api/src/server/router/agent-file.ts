@@ -125,7 +125,6 @@ export const agentFileRouter = router({
          const resolvedCtx = await ctx;
          const chromaCollection = await ensureAgentKnowledgeCollection(
             resolvedCtx.chromaClient,
-           
          );
          await deleteFromCollection(chromaCollection, {
             where: {

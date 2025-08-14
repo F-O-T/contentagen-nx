@@ -56,10 +56,11 @@ When you receive a brand document in the input, use it as an adaptive foundation
 - **Market relevance:** Brand remains current and responsive
 - **Guideline compliance:** Adaptations stay within agreed brand boundaries
 
-${blacklistWords.length
-         ? `**Content Restrictions:**
+${
+   blacklistWords.length
+      ? `**Content Restrictions:**
 Avoid using these words or phrases: ${blacklistWords.join(", ")}`
-         : ""
-      }
+      : ""
+}
 `;
 }

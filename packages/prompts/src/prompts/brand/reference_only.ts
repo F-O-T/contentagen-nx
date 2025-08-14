@@ -34,10 +34,11 @@ When you receive a brand document in the input, treat it as background knowledge
 - Subtle brand influence through quality and expertise
 - Professional, neutral tone with brand-informed insights
 
-${blacklistWords.length
-         ? `**Content Restrictions:**
+${
+   blacklistWords.length
+      ? `**Content Restrictions:**
 Avoid using these words or phrases: ${blacklistWords.join(", ")}`
-         : ""
-      }
+      : ""
+}
 `;
 }

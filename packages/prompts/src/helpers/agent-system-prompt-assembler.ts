@@ -187,8 +187,8 @@ export function createBrandSection(config: PersonaConfig): string {
    const blacklistWords: string[] = Array.isArray(raw)
       ? raw
       : typeof raw === "string" && raw.length > 0
-         ? [raw]
-         : [];
+        ? [raw]
+        : [];
    switch (config.brand.integrationStyle) {
       case "strict_guideline":
          return strictGuidelinePrompt({ blacklistWords });
