@@ -12,7 +12,6 @@ COPY apps/blog/package.json ./apps/blog/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/brand/package.json ./packages/brand/
 COPY packages/posthog/package.json ./packages/posthog/
-COPY packages/sdk/package.json ./packages/sdk/
 COPY packages/database/package.json ./packages/database/
 COPY tooling/typescript/package.json ./tooling/typescript/
 # Install all dependencies (including devDependencies needed for the build step)

@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { sdk, agentId } from "../contentagen";
 import BaseHead from "../components/BaseHead.astro";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
@@ -7,8 +7,15 @@ import FormattedDate from "../components/FormattedDate.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 import { Image } from "astro:assets";
 
-const posts = (await getCollection("blog")).sort(
-   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+import type { ContentList } from "@contentagen/sdk";
+const response: ContentList = await sdk.listContentByAgent({
+   agentId,
+   status: ["approved"],
+   limit: 20,
+   page: 1,
+});
+const posts = response.posts.sort(
+   (a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf(),
 );
 ---
 
@@ -27,25 +34,25 @@ const posts = (await getCollection("blog")).sort(
 							<li
 								class={index === 0 ? "md:col-span-2 text-center" : ""}
 							>
-								<a href={`/${post.id}/`} class="block">
-									<Image
-										width={720}
-										height={360}
-										src={post.data.heroImage ?? ""}
-										alt={post.data.title}
-										class="w-full rounded-xl mb-3 transition-shadow hover:shadow-lg aspect-video object-cover"
-										format="webp"
-										loading="lazy"
-									/>
-									<h4
-										class={`text-xl font-semibold leading-snug text-gray-900 dark:text-gray-100 transition-colors ${index === 0 ? "md:text-4xl" : ""}`}
-									>
-										{post.data.title}
-									</h4>
-									<p class="text-sm text-gray-500">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
+<a href={`/${post.meta.slug}/`} class="block">
+  <Image
+    width={720}
+    height={360}
+    src={post.imageUrl ?? ""}
+    alt={post.meta?.title ?? ""}
+    class="w-full rounded-xl mb-3 transition-shadow hover:shadow-lg aspect-video object-cover"
+    format="webp"
+    loading="lazy"
+  />
+  <h4
+    class={`text-xl font-semibold leading-snug text-gray-900 dark:text-gray-100 transition-colors ${index === 0 ? "md:text-4xl" : ""}`}
+  >
+    {post.meta?.title ?? ""}
+  </h4>
+  <p class="text-sm text-gray-500">
+    <FormattedDate date={post.meta?.pubDate ? new Date(post.meta.pubDate) : new Date(post.createdAt)} />
+  </p>
+</a>
 							</li>
 						))
 					}

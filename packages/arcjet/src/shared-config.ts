@@ -8,9 +8,9 @@ export const ARCJET_CONFIG = {
    },
    tokenBucket: {
       mode: isProduction ? ("LIVE" as const) : ("DRY_RUN" as const),
-      refillRate: 5,
-      interval: 10,
-      capacity: 10,
+      refillRate: 20, // Increased rate for higher throughput
+      interval: 10, // Keep interval unchanged
+      capacity: 50, // Allow higher burst capacity
       characteristics: ["ip.src"],
    },
    shield: {
