@@ -72,6 +72,13 @@ export function GeneratedContentDisplay({
             body: value.body,
          });
          formApi.reset();
+         await queryClient.invalidateQueries({
+            queryKey: trpc.content.get.queryKey({ id: content.id }),
+         });
+         await queryClient.invalidateQueries({
+            queryKey: trpc.content.list.queryKey(),
+         });
+
          setEditBodyOpen(false);
       },
    });
