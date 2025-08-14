@@ -1,6 +1,11 @@
-import { EditorContent, useEditor, type EditorOptions } from "@tiptap/react";
+import {
+   EditorContent,
+   useEditor,
+   type EditorOptions,
+   type Storage,
+} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { Markdown } from "tiptap-markdown";
+import { Markdown, type MarkdownStorage } from "tiptap-markdown";
 import type React from "react";
 import { useEffect, useMemo } from "react";
 import { Button } from "@packages/ui/components/button";
@@ -18,7 +23,9 @@ export interface TiptapEditorProps {
    editorOptions?: Partial<EditorOptions>;
    error?: boolean;
 }
-
+type MDStorage = Storage & {
+   markdown?: MarkdownStorage;
+};
 export function TiptapEditor({
    value,
    onChange,
@@ -44,7 +51,12 @@ export function TiptapEditor({
          },
       },
       onUpdate: ({ editor }) => {
-         onChange(editor.getText());
+         const markdownStorage = (editor.storage as MDStorage).markdown;
+         if (markdownStorage?.getMarkdown) {
+            onChange(markdownStorage.getMarkdown());
+         } else {
+            onChange(editor.getText()); // fallback to plain text
+         }
       },
       ...editorOptions,
    });

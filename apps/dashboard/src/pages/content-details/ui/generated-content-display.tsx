@@ -71,15 +71,8 @@ export function GeneratedContentDisplay({
             id: content.id,
             body: value.body,
          });
-         toast.success("Content body updated!");
-         setEditBodyOpen(false);
-         queryClient.invalidateQueries({
-            queryKey: [
-               trpc.content.list.queryKey(),
-               trpc.content.get.queryKey({ id: content.id }),
-            ],
-         });
          formApi.reset();
+         setEditBodyOpen(false);
       },
    });
    const addImageMutation = useMutation(
