@@ -3,10 +3,6 @@
   "workspaces": {
     "": {
       "name": "contentagen-nx",
-      "dependencies": {
-        "marked": "^16.1.2",
-        "slugify": "^1.6.6",
-      },
       "devDependencies": {
         "@biomejs/biome": "2.1.3",
         "@commitlint/cli": "^19.8.1",
@@ -29,14 +25,16 @@
         "@astrojs/rss": "^4.0.11",
         "@astrojs/sitemap": "catalog:astro",
         "@astrojs/ts-plugin": "catalog:astro",
-        "@contentagen/sdk": "^0.4.8",
+        "@contentagen/sdk": "^0.4.9",
         "@lucide/astro": "catalog:astro",
         "@packages/posthog": "workspace:*",
         "@packages/ui": "workspace:*",
         "@tailwindcss/vite": "^4.1.8",
         "astro": "catalog:astro",
+        "marked": "^16.1.2",
         "react": "catalog:react",
         "react-dom": "catalog:react",
+        "slugify": "^1.6.6",
       },
       "devDependencies": {
         "@tooling/typescript": "workspace:*",
@@ -348,7 +346,7 @@
     },
     "packages/sdk": {
       "name": "@contentagen/sdk",
-      "version": "0.4.8",
+      "version": "0.4.9",
       "dependencies": {
         "superjson": "2.2.2",
         "zod": "4.0.14",

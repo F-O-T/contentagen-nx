@@ -197,4 +197,6 @@ export {
    GetContentByIdInputSchema,
    ListContentByAgentInputSchema,
    GetContentBySlugInputSchema,
+   ContentSelectSchema,
+   ContentListResponseSchema,
 } from "./types";

@@ -155,9 +155,5 @@
          "packages/*",
          "apps/*"
       ]
-   },
-   "dependencies": {
-      "marked": "^16.1.2",
-      "slugify": "^1.6.6"
    }
 }

@@ -1,9 +1,8 @@
 ---
 import { sdk } from "../contentagen";
 import BlogPost from "../layouts/BlogPost.astro";
-import type { ContentSelect } from "@contentagen/sdk";
 
 const { slug } = Astro.params;
-const post: ContentSelect = await sdk.getContentBySlug({ slug });
+const post = await sdk.getContentBySlug({ slug: slug ?? "" });
 ---
 <BlogPost post={post} />

@@ -6,9 +6,7 @@ import Footer from "../components/Footer.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 import { Image } from "astro:assets";
-
-import type { ContentList } from "@contentagen/sdk";
-const response: ContentList = await sdk.listContentByAgent({
+const response = await sdk.listContentByAgent({
    agentId,
    status: ["approved"],
    limit: 20,
@@ -50,7 +48,7 @@ const posts = response.posts.sort(
     {post.meta?.title ?? ""}
   </h4>
   <p class="text-sm text-gray-500">
-    <FormattedDate date={post.meta?.pubDate ? new Date(post.meta.pubDate) : new Date(post.createdAt)} />
+    <FormattedDate date={ new Date(post.createdAt)} />
   </p>
 </a>
 							</li>

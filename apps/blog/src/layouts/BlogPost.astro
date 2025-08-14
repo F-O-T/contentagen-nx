@@ -5,7 +5,6 @@ import Footer from "../components/Footer.astro";
 import BaseHead from "../components/BaseHead.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import { marked } from "marked";
-import type { ContentSelect } from "@contentagen/sdk";
 
 const { post } = Astro.props;
 // Remove the first markdown heading (title) from the body
@@ -42,7 +41,7 @@ const htmlBody = cleanedBody ? marked.parse(cleanedBody) : "";
     <div class="flex flex-col items-center gap-4">
       <header class="text-center flex flex-col items-center gap-4">
         <div class="text-sm text-muted-foreground flex flex-col items-center gap-4">
-          <FormattedDate date={post.createdAt ? new Date(post.createdAt) : undefined} />
+          <FormattedDate date={new Date(post.createdAt) } />
         </div>
         <h1 class="text-4xl font-bold text-foreground">
           {post.meta?.title ?? ""}
