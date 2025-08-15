@@ -41,6 +41,7 @@ import {
    AlertDialogCancel,
    AlertDialogAction,
 } from "@packages/ui/components/alert-dialog";
+import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
 interface AgentPersonaCardProps {
    name: string;
    description: string;
@@ -168,17 +169,9 @@ export const AgentPersonaCard: React.FC<AgentPersonaCardProps> = ({
                      </DropdownMenuItem>
                   </DropdownMenuContent>
                </DropdownMenu>
-            </CardHeader>{" "}
+            </CardHeader>
             <CardContent className="flex flex-col gap-4">
-               <div className="flex items-center gap-4 rounded-lg bg-muted p-4 ">
-                  <Bot className="w-8 h-8 rounded-full bg-muted" />
-                  <div>
-                     <p className="font-medium text-sm line-clamp-1">{name}</p>
-                     <p className="text-xs text-muted-foreground line-clamp-1">
-                        {description}
-                     </p>
-                  </div>
-               </div>
+               <AgentWriterCard name={name} description={description} />
                <Separator />
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {items.map(({ label, value, icon: Icon }) => (

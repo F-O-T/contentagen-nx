@@ -5,6 +5,7 @@ import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useSubscription } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
 import { useMemo } from "react";
+import { CreateContentCredenza } from "../features/create-content-credenza";
 
 export function ContentListPage() {
    const trpc = useTRPC();
@@ -43,6 +44,7 @@ export function ContentListPage() {
       <main className="h-full w-full flex flex-col gap-4">
          <TalkingMascot message="Here you can manage all your content requests. Create, edit, or explore your requests below!" />
          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <CreateContentCredenza />
             {data.map((item) => (
                <ContentRequestCard key={item.id} request={item} />
             ))}
