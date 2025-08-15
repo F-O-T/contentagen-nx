@@ -1,11 +1,11 @@
 import { contentGenerationQueue } from "@packages/workers/queues/content-generation";
+import { listAgents } from "@packages/database/repositories/agent-repository";
 import {
    createContent,
    getContentById,
    updateContent,
    deleteContent,
    listContents,
-   getContentsByUserId,
 } from "@packages/database/repositories/content-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
@@ -25,6 +25,38 @@ import {
 } from "@packages/database/schema";
 
 export const contentRouter = router({
+   listAllContent: protectedProcedure
+      .input(
+         z.object({ status: ContentSelectSchema.shape.status.array().min(1) }),
+      )
+      .query(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
+         const userId = resolvedCtx.session?.user.id;
+         const organizationId =
+            resolvedCtx.session?.session?.activeOrganizationId;
+         if (!userId) {
+            throw new TRPCError({
+               code: "UNAUTHORIZED",
+               message: "User must be authenticated to list content.",
+            });
+         }
+         const agents = await listAgents(resolvedCtx.db, {
+            userId,
+            organizationId: organizationId ?? "",
+         });
+         const agentIds = agents.map((agent) => agent.id);
+         if (agentIds.length === 0) return [];
+         const filteredStatus = input.status.filter(
+            (s): s is NonNullable<typeof s> => s !== null,
+         );
+         // Get all content for these agents
+         const contents = await listContents(
+            resolvedCtx.db,
+            agentIds,
+            filteredStatus,
+         );
+         return contents;
+      }),
    onStatusChanged: publicProcedure
       .input(z.object({ contentId: z.string().optional() }).optional())
       .subscription(async function* (opts) {
@@ -119,7 +151,6 @@ export const contentRouter = router({
             }
             const created = await createContent((await ctx).db, {
                ...input,
-               userId, // Use authenticated user ID
             });
             await contentGenerationQueue.add("content-generation-workflow", {
                agentId: input.agentId,
@@ -216,7 +247,7 @@ export const contentRouter = router({
             throw err;
          }
       }),
-   list: protectedProcedure
+   listByAgentId: protectedProcedure
       .input(
          z.object({
             agentId: ContentSelectSchema.shape.agentId,
@@ -226,12 +257,6 @@ export const contentRouter = router({
       .query(async ({ ctx, input }) => {
          try {
             const resolvedCtx = await ctx;
-            if (!resolvedCtx.session?.user.id) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message: "User must be authenticated to list content.",
-               });
-            }
             if (!input.status || input.status.length === 0) {
                throw new TRPCError({
                   code: "BAD_REQUEST",
@@ -243,7 +268,7 @@ export const contentRouter = router({
             );
             const contents = await listContents(
                resolvedCtx.db,
-               input.agentId,
+               [input.agentId],
                filteredStatus,
             );
             return contents;
@@ -257,28 +282,7 @@ export const contentRouter = router({
             throw err;
          }
       }),
-   listByUserId: protectedProcedure.query(async ({ ctx }) => {
-      try {
-         const resolvedCtx = await ctx;
-         const userId = resolvedCtx.session?.user.id;
-         if (!userId) {
-            throw new TRPCError({
-               code: "UNAUTHORIZED",
-               message: "User must be authenticated to list content by user.",
-            });
-         }
-         const contents = await getContentsByUserId(resolvedCtx.db, userId);
-         return contents;
-      } catch (err) {
-         if (err instanceof DatabaseError) {
-            throw new TRPCError({
-               code: "INTERNAL_SERVER_ERROR",
-               message: err.message,
-            });
-         }
-         throw err;
-      }
-   }),
+
    approve: protectedProcedure
       .input(ContentInsertSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {

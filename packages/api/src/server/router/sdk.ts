@@ -30,7 +30,8 @@ export const sdkRouter = router({
       )
       .query(async ({ ctx, input }) => {
          const { agentId, limit = 10, page = 1, status } = input;
-         const all = await listContents((await ctx).db, agentId, status);
+         //TODO: atualizar o sdk para entrar array de agentId
+         const all = await listContents((await ctx).db, [agentId], status);
          const start = (page - 1) * limit;
          const end = start + limit;
          const posts = all.slice(start, end);

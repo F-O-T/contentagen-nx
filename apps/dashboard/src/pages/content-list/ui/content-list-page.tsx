@@ -1,5 +1,5 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
-import { ContentRequestCard } from "@/widgets/content-card/ui/content-card";
+import { ContentRequestCard } from "./content-card";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useSubscription } from "@trpc/tanstack-react-query";
@@ -9,7 +9,11 @@ import { useMemo } from "react";
 export function ContentListPage() {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
-   const { data } = useSuspenseQuery(trpc.content.listByUserId.queryOptions());
+   const { data } = useSuspenseQuery(
+      trpc.content.listAllContent.queryOptions({
+         status: ["draft", "generating", "approved"],
+      }),
+   );
 
    const hasGenerating = useMemo(
       () => data.some((item) => item.status === "generating"),
@@ -25,7 +29,9 @@ export function ContentListPage() {
                   `Content finished generation, status updated to ${data.status}`,
                );
                queryClient.invalidateQueries({
-                  queryKey: trpc.content.listByUserId.queryKey(),
+                  queryKey: trpc.content.listAllContent.queryKey({
+                     status: ["draft", "generating", "approved"],
+                  }),
                });
             },
             enabled: hasGenerating,

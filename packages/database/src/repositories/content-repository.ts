@@ -107,7 +107,7 @@ export async function deleteContent(
 
 export async function listContents(
    dbClient: DatabaseInstance,
-   agentId: string,
+   agentIds: string[],
    status: Array<Exclude<Content["status"], null>>,
 ): Promise<
    Pick<
@@ -119,7 +119,7 @@ export async function listContents(
       return await dbClient.query.content.findMany({
          where: (_fields, operators) =>
             operators.and(
-               eq(content.agentId, agentId),
+               inArray(content.agentId, agentIds),
                inArray(content.status, status),
             ),
          columns: {
