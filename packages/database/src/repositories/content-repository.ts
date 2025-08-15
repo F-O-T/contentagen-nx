@@ -139,6 +139,37 @@ export async function listContents(
    }
 }
 
+export async function getContentStatsLast30Days(
+   dbClient: DatabaseInstance,
+   agentIds: string[],
+   status: Array<Exclude<Content["status"], null>> = ["approved", "draft", "generating"],
+): Promise<{ count: number; wordsCount: number }> {
+   try {
+      const now = new Date();
+      const date30dAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const items = await dbClient.query.content.findMany({
+         where: (_fields, operators) =>
+            operators.and(
+               inArray(content.agentId, agentIds),
+               inArray(content.status, status),
+               operators.gte(content.createdAt, date30dAgo),
+            ),
+         columns: {
+            stats: true,
+         },
+      });
+      const wordsCount = items.reduce((acc, item) => {
+         const wc = item.stats?.wordsCount ? parseInt(item.stats.wordsCount, 10) : 0;
+         return acc + wc;
+      }, 0);
+      return { count: items.length, wordsCount };
+   } catch (err) {
+      throw new DatabaseError(
+         `Failed to get content stats: ${(err as Error).message}`,
+      );
+   }
+}
+
 export async function getAgentContentStats(
    dbClient: DatabaseInstance,
    agentId: string,

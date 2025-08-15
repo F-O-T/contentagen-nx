@@ -1,8 +1,9 @@
 import { agent } from "../schemas/agent";
+
 import type { AgentSelect, AgentInsert } from "../schemas/agent";
 import type { DatabaseInstance } from "../client";
 import { DatabaseError, NotFoundError } from "@packages/errors";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 export async function createAgent(
    dbClient: DatabaseInstance,
@@ -84,30 +85,41 @@ export async function listAgents(
 ): Promise<AgentSelect[]> {
    try {
       if (userId && organizationId) {
-         // Return agents owned by user or linked to org
-         const { or, eq } = await import("drizzle-orm");
          return await dbClient.query.agent.findMany({
             where: or(
                eq(agent.userId, userId),
                eq(agent.organizationId, organizationId),
             ),
          });
-      } else if (userId) {
-         const { eq } = await import("drizzle-orm");
+      }
+      if (userId) {
          return await dbClient.query.agent.findMany({
             where: eq(agent.userId, userId),
          });
-      } else if (organizationId) {
-         const { eq } = await import("drizzle-orm");
+      }
+      if (organizationId) {
          return await dbClient.query.agent.findMany({
             where: eq(agent.organizationId, organizationId),
          });
-      } else {
-         return [];
       }
+      return [];
    } catch (err) {
       throw new DatabaseError(
          `Failed to list agents: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function getTotalAgents(
+   dbClient: DatabaseInstance,
+   { userId, organizationId }: { userId?: string; organizationId?: string },
+): Promise<number> {
+   try {
+      const agents = await listAgents(dbClient, { userId, organizationId });
+      return agents.length;
+   } catch (err) {
+      throw new DatabaseError(
+         `Failed to get total agents: ${(err as Error).message}`,
       );
    }
 }

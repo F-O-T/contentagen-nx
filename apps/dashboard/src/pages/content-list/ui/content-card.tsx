@@ -18,7 +18,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import { Activity, MoreHorizontal } from "lucide-react";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { type RouterOutput } from "@packages/api/client";
+import type { RouterOutput } from "@packages/api/client";
 import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
 import { Separator } from "@packages/ui/components/separator";
 export function ContentRequestCard({

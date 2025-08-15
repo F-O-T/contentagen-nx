@@ -9,7 +9,7 @@ import {
    SidebarMenu,
    SidebarMenuItem,
 } from "@packages/ui/components/sidebar";
-import { FilesIcon, LayoutDashboardIcon } from "lucide-react";
+import { Bot, FilesIcon, LayoutDashboardIcon } from "lucide-react";
 import type * as React from "react";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
@@ -28,6 +28,11 @@ export function AppSidebar({
    const navMain: NavigationItems[] = [
       {
          icon: LayoutDashboardIcon,
+         title: "Dashboard",
+         url: "/home",
+      },
+      {
+         icon: Bot,
          title: "Your Agents",
          url: "/agents",
       },

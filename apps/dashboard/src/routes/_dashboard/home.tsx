@@ -1,3 +1,4 @@
+import { DashboardHomePage } from "@/pages/home/ui/home-page";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_dashboard/home")({
@@ -5,5 +6,5 @@ export const Route = createFileRoute("/_dashboard/home")({
 });
 
 function RouteComponent() {
-   return <div>Hello "/_dashboard/"!</div>;
+   return <DashboardHomePage />;
 }

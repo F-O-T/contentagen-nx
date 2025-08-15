@@ -30,7 +30,7 @@ function AuthLayout() {
    useIsomorphicLayoutEffect(() => {
       if (session) {
          router.navigate({
-            to: "/agents",
+            to: "/home",
             search: location.search,
             replace: true,
          });
