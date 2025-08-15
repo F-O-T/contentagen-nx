@@ -1,4 +1,4 @@
-import { betterAuthClient, useTRPC } from "@/integrations/clients";
+import { useTRPC } from "@/integrations/clients";
 import {
    Card,
    CardHeader,
@@ -13,14 +13,6 @@ import {
    DropdownMenuContent,
    DropdownMenuItem,
 } from "@packages/ui/components/dropdown-menu";
-import {
-   Table,
-   TableHeader,
-   TableBody,
-   TableHead,
-   TableRow,
-   TableCell,
-} from "@packages/ui/components/table";
 import { Button } from "@packages/ui/components/button";
 import {
    Building2,
@@ -28,19 +20,18 @@ import {
    CalendarDays,
    Pencil,
    Trash,
-   UserPlus,
    MoreHorizontal,
 } from "lucide-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { CreateOrganizationCredenza } from "../features/create-organization-credenza";
 import { InfoItem } from "@packages/ui/components/info-item";
-import { SendInvitationCredenza } from "../features/send-invitation-credenza";
+import { useIsomorphicLayoutEffect } from "@packages/ui/hooks/use-isomorphic-layout-effect";
+import { OrganizationPageMembersTable } from "./organization-page-members-table";
 
 export function OrganizationPage() {
    const [open, setOpen] = useState(false);
-   const [inviteOpen, setInviteOpen] = useState(false);
    const trpc = useTRPC();
    const { data: org, isLoading: orgLoading } = useSuspenseQuery(
       trpc.sessionHelper.getDefaultOrganization.queryOptions(),
@@ -71,9 +62,7 @@ export function OrganizationPage() {
       [org],
    );
 
-   // Members are included in the organization object returned by getFullOrganization
-
-   useEffect(() => {
+   useIsomorphicLayoutEffect(() => {
       if (!org && !orgLoading) setOpen(true);
    }, [org, orgLoading]);
 
@@ -82,76 +71,7 @@ export function OrganizationPage() {
          <TalkingMascot message="Create and manage your organization here. Invite team members and control access." />
          {org ? (
             <div className="grid  grid-cols-3 gap-4">
-               <Card className="col-span-2">
-                  <CardHeader>
-                     <CardTitle>Organization Members</CardTitle>
-                     <CardDescription>
-                        List of all members in your organization.
-                     </CardDescription>
-                     <CardAction>
-                        <DropdownMenu>
-                           <DropdownMenuTrigger asChild>
-                              <Button
-                                 variant="ghost"
-                                 size="icon"
-                                 aria-label="More actions"
-                              >
-                                 <MoreHorizontal className="w-5 h-5" />
-                              </Button>
-                           </DropdownMenuTrigger>
-                           <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                 onSelect={() => {
-                                    setInviteOpen(true);
-                                 }}
-                              >
-                                 <UserPlus className="w-4 h-4 mr-2" /> Invite
-                                 Members
-                              </DropdownMenuItem>
-                           </DropdownMenuContent>
-                        </DropdownMenu>
-                     </CardAction>
-                  </CardHeader>
-                  <CardContent>
-                     {Array.isArray(org.members) && org.members.length > 0 ? (
-                        <Table>
-                           <TableHeader>
-                              <TableRow>
-                                 <TableHead>Name</TableHead>
-                                 <TableHead>Email</TableHead>
-                                 <TableHead>Role</TableHead>
-                              </TableRow>
-                           </TableHeader>
-                           <TableBody>
-                              {org.members.map((member) => (
-                                 <TableRow
-                                    key={member.id || member.user?.email}
-                                 >
-                                    <TableCell className="flex items-center gap-2">
-                                       {member.user?.image && (
-                                          <img
-                                             src={member.user.image}
-                                             alt={member.user.name || "Avatar"}
-                                             className="w-6 h-6 rounded-full"
-                                          />
-                                       )}
-                                       {member.user?.name || "—"}
-                                    </TableCell>
-                                    <TableCell>
-                                       {member.user?.email || "—"}
-                                    </TableCell>
-                                    <TableCell>{member.role || "—"}</TableCell>
-                                 </TableRow>
-                              ))}
-                           </TableBody>
-                        </Table>
-                     ) : (
-                        <div className="text-muted-foreground">
-                           No members found.
-                        </div>
-                     )}
-                  </CardContent>
-               </Card>
+               <OrganizationPageMembersTable organization={org} />
 
                <div className="col-span-1 flex flex-col gap-4">
                   <Card>
@@ -212,11 +132,6 @@ export function OrganizationPage() {
             </div>
          )}
          <CreateOrganizationCredenza open={open} onOpenChange={setOpen} />
-         <SendInvitationCredenza
-            open={inviteOpen}
-            onOpenChange={setInviteOpen}
-            organizationId={org?.id ?? ""}
-         />
       </div>
    );
 }

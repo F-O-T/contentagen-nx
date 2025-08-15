@@ -14,16 +14,9 @@ import {
    DropdownMenuItem,
 } from "@packages/ui/components/dropdown-menu";
 import { Button } from "@packages/ui/components/button";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Check, X } from "lucide-react";
 import { useCallback, useState, type FormEvent } from "react";
-import {
-   Credenza,
-   CredenzaContent,
-   CredenzaHeader,
-   CredenzaTitle,
-   CredenzaBody,
-   CredenzaFooter,
-} from "@packages/ui/components/credenza";
+// Removed Credenza imports since edit will be inline
 import { Input } from "@packages/ui/components/input";
 import type { ContentSelect } from "@packages/database/schemas/content";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -32,6 +25,14 @@ import { toast } from "sonner";
 import { useAppForm } from "@packages/ui/components/form";
 import { z } from "zod";
 import { TiptapEditor } from "@packages/ui/components/tiptap-editor";
+import {
+   Credenza,
+   CredenzaContent,
+   CredenzaHeader,
+   CredenzaTitle,
+   CredenzaBody,
+   CredenzaFooter,
+} from "@packages/ui/components/credenza";
 
 export function GeneratedContentDisplay({
    content,
@@ -39,7 +40,8 @@ export function GeneratedContentDisplay({
    content: ContentSelect;
 }) {
    // New state for edit credenza
-   const [editBodyOpen, setEditBodyOpen] = useState(false);
+   // State for inline body editor
+   const [editingBody, setEditingBody] = useState(false);
 
    const trpc = useTRPC();
    const queryClient = useQueryClient();
@@ -60,7 +62,7 @@ export function GeneratedContentDisplay({
          },
       }),
    );
-   // TanStack form for editing body
+   // Form for inline body editing
    const editForm = useAppForm({
       defaultValues: { body: content?.body ?? "" },
       validators: {
@@ -78,8 +80,7 @@ export function GeneratedContentDisplay({
          await queryClient.invalidateQueries({
             queryKey: trpc.content.list.queryKey(),
          });
-
-         setEditBodyOpen(false);
+         setEditingBody(false);
       },
    });
    const addImageMutation = useMutation(
@@ -171,7 +172,7 @@ export function GeneratedContentDisplay({
                         >
                            Add Image URL
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setEditBodyOpen(true)}>
+                        <DropdownMenuItem onClick={() => setEditingBody(true)}>
                            Edit Content Body
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -188,7 +189,63 @@ export function GeneratedContentDisplay({
                </CardAction>
             </CardHeader>
             <CardContent>
-               <Markdown content={content?.body} />
+               {editingBody ? (
+                  <form
+                     onSubmit={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        editForm.handleSubmit();
+                     }}
+                     className="flex flex-col items-end gap-4"
+                  >
+                     <editForm.Subscribe>
+                        {(formState) => (
+                           <div className="flex items-center gap-2">
+                              <Button
+                                 type="submit"
+                                 variant="ghost"
+                                 size="icon"
+                                 disabled={
+                                    !formState.canSubmit ||
+                                    formState.isSubmitting
+                                 }
+                                 aria-label="Save"
+                              >
+                                 <span className="sr-only">Save</span>
+                                 <Check size={20} />
+                              </Button>
+                              <Button
+                                 type="button"
+                                 variant="ghost"
+                                 size="icon"
+                                 aria-label="Cancel"
+                                 onClick={() => setEditingBody(false)}
+                              >
+                                 <span className="sr-only">Cancel</span>
+                                 <X size={20} />
+                              </Button>
+                           </div>
+                        )}
+                     </editForm.Subscribe>
+
+                     <editForm.AppField name="body">
+                        {(field) => (
+                           <field.FieldContainer>
+                              <TiptapEditor
+                                 value={field.state.value}
+                                 onChange={field.handleChange}
+                                 onBlur={field.handleBlur}
+                                 placeholder="Edit your content..."
+                                 error={field.state.meta.errors.length > 0}
+                              />
+                              <field.FieldMessage />
+                           </field.FieldContainer>
+                        )}
+                     </editForm.AppField>
+                  </form>
+               ) : (
+                  <Markdown content={content?.body} />
+               )}
             </CardContent>
          </Card>
          <Credenza open={addImageUrlOpen} onOpenChange={setAddImageUrlOpen}>
@@ -233,55 +290,6 @@ export function GeneratedContentDisplay({
                            </Button>
                         )}
                      </form.Subscribe>
-                  </CredenzaFooter>
-               </form>
-            </CredenzaContent>
-         </Credenza>
-         <Credenza open={editBodyOpen} onOpenChange={setEditBodyOpen}>
-            <CredenzaContent>
-               <CredenzaHeader>
-                  <CredenzaTitle>Edit your content</CredenzaTitle>
-               </CredenzaHeader>
-               <form
-                  onSubmit={(e) => {
-                     e.preventDefault();
-                     e.stopPropagation();
-                     editForm.handleSubmit();
-                  }}
-               >
-                  <CredenzaBody>
-                     <editForm.AppField name="body">
-                        {(field) => (
-                           <field.FieldContainer>
-                              <field.FieldLabel>Content</field.FieldLabel>
-                              <TiptapEditor
-                                 className="max-h-96 overflow-y-scroll"
-                                 value={field.state.value}
-                                 onChange={field.handleChange}
-                                 onBlur={field.handleBlur}
-                                 placeholder="Edit your content..."
-                                 minHeight="300px"
-                                 error={field.state.meta.errors.length > 0}
-                              />
-                              <field.FieldMessage />
-                           </field.FieldContainer>
-                        )}
-                     </editForm.AppField>
-                  </CredenzaBody>
-                  <CredenzaFooter>
-                     <editForm.Subscribe>
-                        {(formState) => (
-                           <Button
-                              type="submit"
-                              variant="default"
-                              disabled={
-                                 !formState.canSubmit || formState.isSubmitting
-                              }
-                           >
-                              Save
-                           </Button>
-                        )}
-                     </editForm.Subscribe>
                   </CredenzaFooter>
                </form>
             </CredenzaContent>
