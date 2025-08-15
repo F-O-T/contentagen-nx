@@ -22,7 +22,10 @@ export function ContentRequestDetailsPage() {
       }),
    );
    // Calculate subscription enabled state using useMemo
-   const isEnabled = useMemo(() => data?.status !== "draft", [data?.status]);
+   const isEnabled = useMemo(
+      () => data?.status === "generating",
+      [data?.status],
+   );
 
    useSubscription(
       trpc.content.onStatusChanged.subscriptionOptions(
