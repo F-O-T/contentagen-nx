@@ -11,7 +11,7 @@ export function ReviewSubmitStep({ form }: { form: ContentRequestForm }) {
       () => [
          {
             icon: <FileTextIcon className="w-4 h-4" />,
-            label: "Descripton",
+            label: "Headline of your content",
             value: String(form.getFieldValue("description") ?? ""),
             className: "col-span-2",
          },

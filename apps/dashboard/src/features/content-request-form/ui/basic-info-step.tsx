@@ -7,7 +7,7 @@ export function BasicInfoStep({ form }: { form: ContentRequestForm }) {
       <form.AppField name="description">
          {(field) => (
             <field.FieldContainer>
-               <field.FieldLabel>Description *</field.FieldLabel>
+               <field.FieldLabel>Headline *</field.FieldLabel>
                <TiptapEditor
                   id={field.name}
                   name={field.name}
