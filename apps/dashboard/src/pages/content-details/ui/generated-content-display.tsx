@@ -14,7 +14,7 @@ import {
    DropdownMenuItem,
 } from "@packages/ui/components/dropdown-menu";
 import { Button } from "@packages/ui/components/button";
-import { MoreVertical, Check, X } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import { useCallback, useState, type FormEvent } from "react";
 // Removed Credenza imports since edit will be inline
 import { Input } from "@packages/ui/components/input";
@@ -24,7 +24,6 @@ import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
 import { useAppForm } from "@packages/ui/components/form";
 import { z } from "zod";
-import { TiptapEditor } from "@packages/ui/components/tiptap-editor";
 import {
    Credenza,
    CredenzaContent,
@@ -33,6 +32,7 @@ import {
    CredenzaBody,
    CredenzaFooter,
 } from "@packages/ui/components/credenza";
+import { EditContentBody } from "../features/edit-content-body";
 
 export function GeneratedContentDisplay({
    content,
@@ -45,44 +45,6 @@ export function GeneratedContentDisplay({
 
    const trpc = useTRPC();
    const queryClient = useQueryClient();
-   const editBodyMutation = useMutation(
-      trpc.content.editBody.mutationOptions({
-         onError: (error) => {
-            console.error("Error editing content body:", error);
-            toast.error("Failed to edit content body. Please try again.");
-         },
-         onSuccess: () => {
-            toast.success("Content body edited successfully!");
-            queryClient.invalidateQueries({
-               queryKey: [
-                  trpc.content.list.queryKey(),
-                  trpc.content.get.queryKey({ id: content.id }),
-               ],
-            });
-         },
-      }),
-   );
-   // Form for inline body editing
-   const editForm = useAppForm({
-      defaultValues: { body: content?.body ?? "" },
-      validators: {
-         onBlur: z.object({ body: z.string().min(1, "Body is required") }),
-      },
-      onSubmit: async ({ value, formApi }) => {
-         await editBodyMutation.mutateAsync({
-            id: content.id,
-            body: value.body,
-         });
-         formApi.reset();
-         await queryClient.invalidateQueries({
-            queryKey: trpc.content.get.queryKey({ id: content.id }),
-         });
-         await queryClient.invalidateQueries({
-            queryKey: trpc.content.list.queryKey(),
-         });
-         setEditingBody(false);
-      },
-   });
    const addImageMutation = useMutation(
       trpc.content.addImageUrl.mutationOptions({
          onError: (error) => {
@@ -190,59 +152,10 @@ export function GeneratedContentDisplay({
             </CardHeader>
             <CardContent>
                {editingBody ? (
-                  <form
-                     onSubmit={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        editForm.handleSubmit();
-                     }}
-                     className="flex flex-col items-end gap-4"
-                  >
-                     <editForm.Subscribe>
-                        {(formState) => (
-                           <div className="flex items-center gap-2">
-                              <Button
-                                 type="submit"
-                                 variant="ghost"
-                                 size="icon"
-                                 disabled={
-                                    !formState.canSubmit ||
-                                    formState.isSubmitting
-                                 }
-                                 aria-label="Save"
-                              >
-                                 <span className="sr-only">Save</span>
-                                 <Check size={20} />
-                              </Button>
-                              <Button
-                                 type="button"
-                                 variant="ghost"
-                                 size="icon"
-                                 aria-label="Cancel"
-                                 onClick={() => setEditingBody(false)}
-                              >
-                                 <span className="sr-only">Cancel</span>
-                                 <X size={20} />
-                              </Button>
-                           </div>
-                        )}
-                     </editForm.Subscribe>
-
-                     <editForm.AppField name="body">
-                        {(field) => (
-                           <field.FieldContainer>
-                              <TiptapEditor
-                                 value={field.state.value}
-                                 onChange={field.handleChange}
-                                 onBlur={field.handleBlur}
-                                 placeholder="Edit your content..."
-                                 error={field.state.meta.errors.length > 0}
-                              />
-                              <field.FieldMessage />
-                           </field.FieldContainer>
-                        )}
-                     </editForm.AppField>
-                  </form>
+                  <EditContentBody
+                     content={content}
+                     setEditing={setEditingBody}
+                  />
                ) : (
                   <Markdown content={content?.body} />
                )}
