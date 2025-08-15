@@ -75,9 +75,6 @@ export const content = pgTable(
          .notNull()
          .references(() => agent.id, { onDelete: "cascade" }),
       imageUrl: text("image_url"),
-      userId: text("user_id")
-         .notNull()
-         .references(() => user.id, { onDelete: "cascade" }),
       body: text("body").notNull().default(""),
       status: contentStatusEnum("status").default("generating"),
       meta: jsonb("meta").$type<ContentMeta>().default({}),

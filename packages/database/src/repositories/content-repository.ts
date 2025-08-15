@@ -139,25 +139,6 @@ export async function listContents(
    }
 }
 
-export async function getContentsByUserId(
-   dbClient: DatabaseInstance,
-   userId: string,
-): Promise<Content[]> {
-   try {
-      return await dbClient.query.content.findMany({
-         where: eq(content.userId, userId),
-         orderBy: (content, { desc }) => [desc(content.updatedAt)],
-      });
-   } catch (err) {
-      throw new DatabaseError(
-         `Failed to get contents by userId: ${(err as Error).message}`,
-      );
-   }
-}
-
-/**
- * Returns all contents for the provided agentId. This can be extended to return statistics in the future.
- */
 export async function getAgentContentStats(
    dbClient: DatabaseInstance,
    agentId: string,
