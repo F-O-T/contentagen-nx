@@ -24,7 +24,7 @@ import { Separator } from "@packages/ui/components/separator";
 export function ContentRequestCard({
    request,
 }: {
-   request: RouterOutput["content"]["listAllContent"][0];
+   request: RouterOutput["content"]["listAllContent"]["items"][0];
 }) {
    return (
       <Card>

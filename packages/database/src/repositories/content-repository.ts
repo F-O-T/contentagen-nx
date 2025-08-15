@@ -109,6 +109,8 @@ export async function listContents(
    dbClient: DatabaseInstance,
    agentIds: string[],
    status: Array<Exclude<Content["status"], null>>,
+   limit: number = 10,
+   page: number = 1,
 ) {
    try {
       return await dbClient.query.content.findMany({

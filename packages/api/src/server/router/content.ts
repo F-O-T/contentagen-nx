@@ -27,7 +27,11 @@ import {
 export const contentRouter = router({
    listAllContent: protectedProcedure
       .input(
-         z.object({ status: ContentSelectSchema.shape.status.array().min(1) }),
+         z.object({
+            status: ContentSelectSchema.shape.status.array().min(1),
+            limit: z.number().min(1).max(100).optional().default(10),
+            page: z.number().min(1).optional().default(1),
+         }),
       )
       .query(async ({ ctx, input }) => {
          const resolvedCtx = await ctx;
@@ -45,17 +49,20 @@ export const contentRouter = router({
             organizationId: organizationId ?? "",
          });
          const agentIds = agents.map((agent) => agent.id);
-         if (agentIds.length === 0) return [];
+         if (agentIds.length === 0) return { items: [], total: 0 };
          const filteredStatus = input.status.filter(
             (s): s is NonNullable<typeof s> => s !== null,
          );
          // Get all content for these agents
-         const contents = await listContents(
+         const all = await listContents(
             resolvedCtx.db,
             agentIds,
             filteredStatus,
          );
-         return contents;
+         const start = (input.page - 1) * input.limit;
+         const end = start + input.limit;
+         const items = all.slice(start, end);
+         return { items, total: all.length };
       }),
    onStatusChanged: publicProcedure
       .input(z.object({ contentId: z.string().optional() }).optional())
