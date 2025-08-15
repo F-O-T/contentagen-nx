@@ -1,0 +1,18 @@
+{
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "typescript": "catalog:development"
+   },
+   "license": "MIT",
+   "name": "@packages/helpers",
+   "scripts": {
+      "check": "biome check --write ./src",
+      "typecheck": "bunx --bun tsc --noEmit "
+   },
+   "private": true,
+   "type": "module",
+   "exports": {
+      "./text": "./src/text.ts"
+   },
+   "version": "0.0.0"
+}

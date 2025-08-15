@@ -21,14 +21,22 @@ export const agentRouter = router({
       .input(AgentSelectSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
          const { id } = input;
-         const session = ctx.session;
-         if (!session?.user?.id) {
+         const resolvedCtx = await ctx;
+         const userId = resolvedCtx.session?.user?.id;
+         const organizationId =
+            resolvedCtx.session?.session?.activeOrganizationId;
+         if (!userId) {
             throw new TRPCError({
                code: "UNAUTHORIZED",
                message: "User not authenticated.",
             });
          }
-         const resolvedCtx = await ctx;
+         if (!organizationId) {
+            throw new TRPCError({
+               code: "BAD_REQUEST",
+               message: "No active organization found in session.",
+            });
+         }
          const agent = await getAgentById(resolvedCtx.db, id);
          if (!agent) {
             throw new TRPCError({
@@ -36,7 +44,7 @@ export const agentRouter = router({
                message: "Agent not found.",
             });
          }
-         if (agent.userId !== session.user.id) {
+         if (agent.userId !== userId) {
             throw new TRPCError({
                code: "FORBIDDEN",
                message: "You do not own this agent.",
@@ -48,46 +56,14 @@ export const agentRouter = router({
                message: "Agent is already owned by an organization.",
             });
          }
-         // Get user's organizations using Better Auth
-         const orgsRes = await resolvedCtx.auth.api.listOrganizations({
-            headers: resolvedCtx.headers,
-         });
-         if (!orgsRes.length) {
-            throw new TRPCError({
-               code: "BAD_REQUEST",
-               message: "You are not a member of any organization.",
-            });
-         }
-         const organization = orgsRes[0];
-         if (!organization?.id) {
-            throw new TRPCError({
-               code: "BAD_REQUEST",
-               message: "Organization ID is missing.",
-            });
-         }
-         await resolvedCtx.auth.api.setActiveOrganization({
-            headers: resolvedCtx.headers,
-            body: {
-               organizationId: organization.id,
-            },
-         });
-         const member = await resolvedCtx.auth.api.getActiveMember({
-            // This endpoint requires session cookies.
-            headers: resolvedCtx.headers,
-         });
-         if (member?.role !== "owner") {
-            throw new TRPCError({
-               code: "FORBIDDEN",
-               message:
-                  "You must be the owner of the organization to transfer.",
-            });
-         }
+         // Optionally, you may want to check the user's role here, depending on business logic
          const updatedAgent = await updateAgent(resolvedCtx.db, id, {
-            organizationId: organization.id,
+            organizationId,
             updatedAt: new Date(),
          });
          return updatedAgent;
       }),
+   //TODO: refatorar para usar o pacote de helpers
    stats: protectedProcedure
       .input(AgentSelectSchema.pick({ id: true }))
       .query(async ({ ctx, input }) => {
@@ -233,36 +209,30 @@ export const agentRouter = router({
             throw err;
          }
       }),
-   list: protectedProcedure
-      .input(
-         AgentSelectSchema.pick({
-            organizationId: true,
-         }).optional(),
-      )
-      .query(async ({ ctx, input }) => {
-         const resolvedCtx = await ctx;
-         try {
-            const userId = resolvedCtx.session?.user.id;
-            const organizationId = input?.organizationId;
-            if (!userId && !organizationId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message:
-                     "User or organization ID is required to list agents.",
-               });
-            }
-            if (!organizationId) {
-               return await listAgents(resolvedCtx.db, { userId });
-            }
-            return await listAgents(resolvedCtx.db, { userId, organizationId });
-         } catch (err) {
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+   list: protectedProcedure.query(async ({ ctx }) => {
+      const resolvedCtx = await ctx;
+      try {
+         const userId = resolvedCtx.session?.user.id;
+         const organizationId =
+            resolvedCtx.session?.session?.activeOrganizationId;
+         if (!userId && !organizationId) {
+            throw new TRPCError({
+               code: "UNAUTHORIZED",
+               message: "User or organization ID is required to list agents.",
+            });
          }
-      }),
+         if (!organizationId) {
+            return await listAgents(resolvedCtx.db, { userId });
+         }
+         return await listAgents(resolvedCtx.db, { userId, organizationId });
+      } catch (err) {
+         if (err instanceof DatabaseError) {
+            throw new TRPCError({
+               code: "INTERNAL_SERVER_ERROR",
+               message: err.message,
+            });
+         }
+         throw err;
+      }
+   }),
 });

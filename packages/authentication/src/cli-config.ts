@@ -1,9 +1,9 @@
-import { createDb } from "@packages/database/client";
+import { createDb } from "../../database/src/client";
 import { betterAuth } from "better-auth";
 import { getAuthOptions } from "./server";
-import { getResendClient } from "@packages/transactional/client";
-import { getPaymentClient } from "@packages/payment/client";
-import { serverEnv } from "@packages/environment/server";
+import { getResendClient } from "../../transactional/src/client";
+import { getPaymentClient } from "../../payment/src/client";
+import { serverEnv } from "../../environment/src/server";
 /**
  * @internal
  *

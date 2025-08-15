@@ -1,4 +1,4 @@
-import { betterAuthClient } from "@/integrations/clients";
+import { betterAuthClient, useTRPC } from "@/integrations/clients";
 import {
    Card,
    CardHeader,
@@ -31,7 +31,7 @@ import {
    UserPlus,
    MoreHorizontal,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { CreateOrganizationCredenza } from "../features/create-organization-credenza";
@@ -41,27 +41,10 @@ import { SendInvitationCredenza } from "../features/send-invitation-credenza";
 export function OrganizationPage() {
    const [open, setOpen] = useState(false);
    const [inviteOpen, setInviteOpen] = useState(false);
-   //TODO: mover o setOrganization para o databaseHooks com o betterAuth
-
-   const { data: org, isLoading: orgLoading } = useQuery({
-      queryKey: ["activeOrganization"],
-      queryFn: async () => {
-         const orgs = await betterAuthClient.organization.list();
-         if (!orgs.data) {
-            throw new Error("Failed to fetch organizations");
-         }
-         if (!orgs?.data[0]?.id) {
-            throw new Error("No organizations found");
-         }
-         await betterAuthClient.organization.setActive({
-            organizationId: orgs?.data[0]?.id,
-         });
-         const { data, error } =
-            await betterAuthClient.organization.getFullOrganization();
-         if (error) throw new Error("Failed to load organization");
-         return data;
-      },
-   });
+   const trpc = useTRPC();
+   const { data: org, isLoading: orgLoading } = useSuspenseQuery(
+      trpc.sessionHelper.getDefaultOrganization.queryOptions(),
+   );
 
    const detailsInfoItems = useMemo(
       () => [
@@ -98,10 +81,7 @@ export function OrganizationPage() {
       <div className="flex flex-col gap-4">
          <TalkingMascot message="Create and manage your organization here. Invite team members and control access." />
          {org ? (
-            <div
-               className="grid grid-cols-3 gap-4"
-               style={{ alignItems: "start" }}
-            >
+            <div className="grid  grid-cols-3 gap-4">
                <Card className="col-span-2">
                   <CardHeader>
                      <CardTitle>Organization Members</CardTitle>

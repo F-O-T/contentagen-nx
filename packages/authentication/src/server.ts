@@ -19,6 +19,7 @@ import { emailOTP, openAPI, organization, apiKey } from "better-auth/plugins";
 import { getDomain, isProduction } from "@packages/environment/helpers";
 import { POLAR_PLANS, POLAR_PLAN_SLUGS } from "@packages/payment/plans";
 import { polar, portal, checkout, usage } from "@polar-sh/better-auth";
+import { findMemberByUserId } from "@packages/database/repositories/auth-repository";
 export interface AuthOptions {
    db: DatabaseInstance;
    polarClient: Polar;
@@ -39,6 +40,38 @@ export const getAuthOptions = (
 ) =>
    ({
       database: getDatabaseAdapter(db),
+      databaseHooks: {
+         session: {
+            create: {
+               before: async (session) => {
+                  try {
+                     const member = await findMemberByUserId(
+                        db,
+                        session.userId,
+                     );
+                     if (member.organizationId) {
+                        return {
+                           data: {
+                              ...session,
+                              activeOrganizationId: member.organizationId,
+                           },
+                        };
+                     }
+                  } catch (error) {
+                     console.error(
+                        "Error in session create before hook:",
+                        error,
+                     );
+                     return {
+                        data: {
+                           ...session,
+                        },
+                     };
+                  }
+               },
+            },
+         },
+      },
       plugins: [
          polar({
             client: polarClient,

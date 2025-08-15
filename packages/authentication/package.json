@@ -8,7 +8,7 @@
       "./server": "./src/server.ts"
    },
    "scripts": {
-      "auth-schema-generate": "bunx --bun @better-auth/cli generate --config ./src/cli-config.ts --output ../database/src/schemas/auth.ts",
+      "auth-schema-generate": "bunx --bun @better-auth/cli@latest generate --config ./src/cli-config.ts --output ../database/src/schemas/auth.ts",
       "check": "biome check --write ./src",
       "typecheck": "tsc --build --noEmit --emitDeclarationOnly false",
       "build": "tsc --build --noEmit"

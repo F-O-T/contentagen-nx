@@ -38,6 +38,10 @@ export type ContentStats = z.infer<typeof ContentStatsSchema>;
 
 export const ContentMetaSchema = z.object({
    title: z.string().optional().describe("The title of the content."),
+   description: z
+      .string()
+      .optional()
+      .describe("A brief seo optmized description of the content."),
    slug: z
       .string()
       .optional()
@@ -45,7 +49,7 @@ export const ContentMetaSchema = z.object({
    tags: z
       .array(z.string())
       .optional()
-      .describe("Tags associated with the content."),
+      .describe("SEO optmized tags associated with the content."),
    topics: z
       .array(z.string())
       .optional()
