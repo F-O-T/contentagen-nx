@@ -8,13 +8,13 @@ import {
    pgEnum,
 } from "drizzle-orm/pg-core";
 import { agent } from "./agent";
-import { user } from "./auth";
 import { z } from "zod";
 import {
    createInsertSchema,
    createSelectSchema,
    createUpdateSchema,
 } from "drizzle-zod";
+import { relations } from "drizzle-orm";
 
 export const ContentRequestSchema = z.object({
    description: z.string().min(1, "Description is required"),
@@ -89,6 +89,13 @@ export const content = pgTable(
    },
    (table) => [index("content_agent_id_idx").on(table.agentId)],
 );
+export const contentRelations = relations(content, ({ one }) => ({
+   agent: one(agent, {
+      fields: [content.agentId],
+      references: [agent.id],
+   }),
+}));
+
 export type ContentStatus = (typeof contentStatusEnum.enumValues)[number];
 export type ContentSelect = typeof content.$inferSelect;
 export type ContentInsert = typeof content.$inferInsert;

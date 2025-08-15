@@ -105,7 +105,7 @@ export const getAuthOptions = (
          organization({
             organizationLimit: 1,
             async sendInvitationEmail(data) {
-               const inviteLink = `${getDomain()}/callback/organization/invite/${data.id}`;
+               const inviteLink = `${getDomain()}/callback/organization/invitation/${data.id}`;
                await sendOrganizationInvitation(resendClient, {
                   email: data.email,
                   invitedByUsername: data.inviter.user.name,

@@ -24,9 +24,8 @@ export default function OrganizationInvitationEmail({
                You have been invited to join {teamName}
             </Text>
             <Text className="text-muted-foreground text-base text-center">
-               <b>{invitedByUsername}</b> (
-               <a href={`mailto:${invitedByEmail}`}>{invitedByEmail}</a>) has
-               invited you to join the team <b>{teamName}</b>.
+               <b>{invitedByUsername}</b> (<span>{invitedByEmail}</span>) has
+               invited you to join the organization <b>{teamName}</b>.
             </Text>
             <Container className="text-center my-4">
                <Button

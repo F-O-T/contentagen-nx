@@ -1,19 +1,19 @@
 import { relations } from "drizzle-orm";
 import {
-   pgTable,
+   index,
    jsonb,
-   uuid,
+   pgTable,
    text,
    timestamp,
-   index,
+   uuid,
 } from "drizzle-orm/pg-core";
 import {
    createInsertSchema,
    createSelectSchema,
    createUpdateSchema,
 } from "drizzle-zod";
-import { user, organization } from "./auth";
 import { z } from "zod";
+import { organization, user } from "./auth";
 
 // 1. Voice & Tone
 export const VoiceConfigSchema = z.object({

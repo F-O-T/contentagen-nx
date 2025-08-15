@@ -8,6 +8,7 @@ import {
 import SuperJSON from "superjson";
 import urlJoin from "url-join";
 import type { AppRouter } from "../server";
+import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 
 export interface APIClientOptions {
    serverUrl: string;
@@ -57,3 +58,5 @@ export const createTrpcClient = ({ serverUrl, headers }: APIClientOptions) => {
       ],
    });
 };
+export type RouterInput = inferRouterInputs<AppRouter>;
+export type RouterOutput = inferRouterOutputs<AppRouter>;
