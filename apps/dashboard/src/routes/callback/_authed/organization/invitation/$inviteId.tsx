@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { betterAuthClient, useTRPC } from "@/integrations/clients";
 import {
