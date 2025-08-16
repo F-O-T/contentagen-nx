@@ -92,6 +92,23 @@ export function GeneratedContentDisplay({
       },
       [form],
    );
+   const regenerateContentMutation = useMutation(
+      trpc.content.regenerate.mutationOptions({
+         onError: (error) => {
+            console.error("Error triggering regeneration:", error);
+            toast.error("Failed to trigger regeneration. Please try again.");
+         },
+         onSuccess: async () => {
+            toast.success("Content regeneration triggered!");
+            await queryClient.invalidateQueries({
+               queryKey: [
+                  trpc.content.listAllContent.queryKey(),
+                  trpc.content.get.queryKey({ id: content.id }),
+               ],
+            });
+         },
+      }),
+   );
    const approveContentMutation = useMutation(
       trpc.content.approve.mutationOptions({
          onError: (error) => {
@@ -129,6 +146,30 @@ export function GeneratedContentDisplay({
                         </Button>
                      </DropdownMenuTrigger>
                      <DropdownMenuContent>
+                        <DropdownMenuItem
+                           onClick={async () => {
+                              try {
+                                 await regenerateContentMutation.mutateAsync({
+                                    id: content.id,
+                                 });
+                                 toast.success(
+                                    "Content regeneration triggered!",
+                                 );
+                                 queryClient.invalidateQueries({
+                                    queryKey: [
+                                       trpc.content.listAllContent.queryKey(),
+                                       trpc.content.get.queryKey({
+                                          id: content.id,
+                                       }),
+                                    ],
+                                 });
+                              } catch (error) {
+                                 toast.error("Failed to trigger regeneration.");
+                              }
+                           }}
+                        >
+                           Regenerate Content
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                            onClick={() => setAddImageUrlOpen(true)}
                         >

@@ -25,6 +25,45 @@ import {
 } from "@packages/database/schema";
 
 export const contentRouter = router({
+   regenerate: protectedProcedure
+      .input(ContentInsertSchema.pick({ id: true }))
+      .mutation(async ({ ctx, input }) => {
+         try {
+            if (!input.id) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Content ID is required.",
+               });
+            }
+            const db = (await ctx).db;
+            const content = await getContentById(db, input.id);
+            if (!content) {
+               throw new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Content not found.",
+               });
+            }
+            // Optionally update status to 'generating'
+            await updateContent(db, input.id, { status: "generating" });
+            await contentGenerationQueue.add("content-generation-workflow", {
+               agentId: content.agentId,
+               contentId: content.id,
+               contentRequest: content.request,
+            });
+            return { success: true };
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
+      }),
    listAllContent: protectedProcedure
       .input(
          z.object({
