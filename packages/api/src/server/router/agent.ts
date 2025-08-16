@@ -14,6 +14,7 @@ import {
    PersonaConfigSchema,
 } from "@packages/database/schemas/agent";
 import { getAgentContentStats } from "@packages/database/repositories/content-repository";
+import { countWords } from "@packages/helpers/text";
 
 export const agentRouter = router({
    transferToOrganization: protectedProcedure
@@ -69,24 +70,22 @@ export const agentRouter = router({
          const resolvedCtx = await ctx;
          const contents = await getAgentContentStats(resolvedCtx.db, input.id);
 
-         const toNumber = (val: unknown) => {
-            const n = Number(val);
-            return Number.isFinite(n) ? n : 0;
-         };
-         const isNumber = (val: unknown): val is number =>
-            typeof val === "number" && Number.isFinite(val);
-
-         const wordsWritten = contents.reduce(
-            (sum, item) => sum + toNumber(item.stats?.wordsCount),
-            0,
+         const wordsWritten = countWords(
+            contents.map((item) => item.body).join(" "),
          );
+
          const totalDraft = contents.filter(
             (item) => item.status === "draft",
          ).length;
          const totalPublished = contents.filter(
             (item) => item.status === "approved",
          ).length;
-
+         const isNumber = (value: unknown): value is number =>
+            typeof value === "number" && !Number.isNaN(value);
+         const toNumber = (value: unknown): number | null => {
+            const num = Number(value);
+            return Number.isNaN(num) ? null : num;
+         };
          const qualityScores = contents
             .map((item) => toNumber(item.stats?.qualityScore))
             .filter(isNumber);

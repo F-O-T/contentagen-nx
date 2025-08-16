@@ -1,18 +1,15 @@
 import { Worker, Queue, type Job } from "bullmq";
-import { emitContentStatusChanged } from "@packages/server-events";
 import { runFetchAgent } from "../functions/fetch-agent";
 import { runGenerateContent } from "../functions/generate-content";
-import { runSaveContent } from "../functions/save-content";
 import type { ContentRequest } from "@packages/database/schema";
 import { runWebSearch } from "../functions/web-search";
-import { runAnalyzeContent } from "../functions/generate-content-metadata";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../helpers";
 import { runHeadlineKeywordExtractor } from "../functions/headline-keyword-extractor";
 import { runRagByKeywords } from "../functions/rag-by-keywords";
 import { runGenerateBrandDocument } from "../functions/generate-brand-document";
-import { removeTitleFromMarkdown } from "@packages/helpers/text";
+import { contentPostProcessingQueue } from "./content-post-processing";
 
 export async function runContentGeneration(payload: {
    agentId: string;
@@ -81,57 +78,17 @@ export async function runContentGeneration(payload: {
          throw new Error("Failed to generate content");
       }
 
-      console.info("[ContentGeneration] START: Analyzing content metadata", {
+      // Enqueue post-processing job (metadata, stats) in the new queue
+      await contentPostProcessingQueue.add("content-post-processing", {
          agentId,
          contentId,
-      });
-      const contentMetadata = await runAnalyzeContent({
-         content,
          userId,
+         content,
          keywords,
          sources: searchResult.results.map((result) => result.url),
+         contentRequest,
       });
-      console.info("[ContentGeneration] END: Analyzing content metadata", {
-         agentId,
-         contentId,
-         hasMetadata: !!(contentMetadata?.meta && contentMetadata?.stats),
-      });
-      if (!contentMetadata?.meta || !contentMetadata?.stats) {
-         console.error(
-            "[ContentGeneration] ERROR: Failed to analyze content metadata",
-            { agentId, contentId, contentMetadata },
-         );
-         throw new Error("Failed to analyze content metadata");
-      }
-      const metadata = contentMetadata;
-      console.info("[ContentGeneration] START: Saving content", {
-         agentId,
-         contentId,
-      });
-      const saveResult = await runSaveContent({
-         meta: metadata.meta,
-         stats: metadata.stats,
-         contentId,
-         content: removeTitleFromMarkdown(content),
-      });
-      console.info("[ContentGeneration] END: Saving content", {
-         agentId,
-         contentId,
-         saveSuccess: !!saveResult,
-      });
-      if (!saveResult) {
-         console.error("[ContentGeneration] ERROR: Failed to save content", {
-            agentId,
-            contentId,
-         });
-         throw new Error("Failed to save content");
-      }
-      // Emit event to signal content status changed to draft
-      emitContentStatusChanged({
-         contentId,
-         status: "draft",
-      });
-      return saveResult;
+      return { contentId, content };
    } catch (error) {
       console.error("[ContentGeneration] PIPELINE ERROR", {
          agentId,

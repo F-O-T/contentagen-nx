@@ -27,6 +27,8 @@ COPY packages/payment/package.json ./packages/payment/
 COPY packages/transactional/package.json ./packages/transactional/
 COPY packages/errors/package.json ./packages/errors/
 COPY packages/workers/package.json ./packages/workers/
+COPY packages/helpers/package.json ./packages/helpers/
+
 # Install all dependencies (including devDependencies needed for the build step)
 RUN bun install 
 
@@ -50,6 +52,8 @@ FROM oven/bun:latest AS deps
 WORKDIR /app
 
 # Copy all package manifests and lockfile again
+COPY packages/helpers/package.json ./packages/helpers/
+
 COPY bun.lock ./
 COPY package.json ./
 COPY apps/dashboard/package.json ./apps/dashboard/
