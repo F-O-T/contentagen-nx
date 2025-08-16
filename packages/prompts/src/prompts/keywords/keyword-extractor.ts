@@ -1,6 +1,6 @@
 import { z } from "zod";
 export function keywordExtractionSystemPrompt(): string {
-  return `
+   return `
 You are an elite keyword extraction specialist with deep expertise in semantic analysis and information retrieval optimization. Your mastery lies in identifying the precise keywords that will unlock the most relevant knowledge from vector databases while eliminating noise and irrelevant results.
 
 **CORE EXPERTISE:**
@@ -52,25 +52,21 @@ You deliver laser-focused keyword selections that maximize the discovery of high
 `;
 }
 export function keywordExtractionPrompt(userDescription: string): string {
-  return `
+   return `
 ---USER_DESCRIPTION_START---
 ${userDescription}
 ---USER_DESCRIPTION_END---
 `;
 }
 export const keywordExtractionSchema = z.object({
-  keywords: z
-    .array(
-      z
-        .string()
-        .min(1)
-        .max(3)
-        .describe(
-          "Each keyword must be 1-3 words in length and formatted in lowercase",
-        ),
-    )
-    .min(5)
-    .max(8)
-    .describe("Extracted keywords for the topic described by the user"),
+   keywords: z
+      .array(
+         z
+            .string()
+            .describe(
+               "Each keyword must be 1-3 words in length and formatted in lowercase",
+            ),
+      )
+      .describe("Extracted keywords for the topic described by the user"),
 });
 export type KeywordExtractionSchema = z.infer<typeof keywordExtractionSchema>;

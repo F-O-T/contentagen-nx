@@ -2,8 +2,7 @@ import { chunkingPrompt } from "@packages/prompts/prompt/text/chunking";
 import { generateOpenRouterText } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
-import { runIngestBilling } from "./ingest-usage";
-import { createAiUsageMetadata } from "@packages/payment/ingestion";
+import { billingLlmIngestionQueue } from "../queues/billing-llm-ingestion-queue";
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 export async function runChunkText(payload: {
    inputText: string;
@@ -21,25 +20,11 @@ export async function runChunkText(payload: {
             prompt: inputText,
          },
       );
-      if (
-         !chunkingResult.usage.inputTokens ||
-         !chunkingResult.usage.outputTokens
-      ) {
-         console.error(
-            "[runChunkBrandDocument] ERROR: No tokens used in chunking",
-         );
-         throw new Error("No tokens used in chunking");
-      }
-      await runIngestBilling({
-         params: {
-            metadata: createAiUsageMetadata({
-               effort: "small",
-               inputTokens: chunkingResult.usage.inputTokens,
-               outputTokens: chunkingResult.usage.outputTokens,
-            }),
-            event: "LLM",
-            externalCustomerId: userId, // This is a system-level operation, not user-specific
-         },
+      await billingLlmIngestionQueue.add("chunk-distillation", {
+         inputTokens: chunkingResult.usage.inputTokens,
+         outputTokens: chunkingResult.usage.outputTokens,
+         effort: "small",
+         userId, // This is a system-level operation, not user-specific
       });
 
       const chunks = chunkingResult.text

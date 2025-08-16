@@ -1,7 +1,6 @@
 import { createTavilyClient } from "@packages/tavily/client";
 import { serverEnv } from "@packages/environment/server";
-import { createWebSearchUsageMetadata } from "@packages/payment/ingestion";
-import { runIngestBilling } from "./ingest-usage";
+import { billingWebSearchIngestionQueue } from "../queues/billing-websearch-ingestion-queue";
 
 interface AutoBrandKnowledgePayload {
    query: string;
@@ -12,7 +11,6 @@ const tavily = createTavilyClient(serverEnv.TAVILY_API_KEY);
 export async function runWebSearch(payload: AutoBrandKnowledgePayload) {
    const { query, userId } = payload;
 
-   // 1. Crawl the website for brand knowledge
    try {
       const searchResult = await tavily.search(query);
       if (
@@ -24,21 +22,12 @@ export async function runWebSearch(payload: AutoBrandKnowledgePayload) {
             "Could not perform the web search for brand knowledge; no results found",
          );
       }
-      await runIngestBilling({
-         params: {
-            metadata: createWebSearchUsageMetadata({
-               method: "search",
-            }),
-            event: "WEB_SEARCH",
-            externalCustomerId: userId, // This is a system-level operation, not user-specific
-         },
+      await billingWebSearchIngestionQueue.add("web-search-sources", {
+         method: "search",
+         userId,
       });
 
-      // 2. Aggregate and summarize the search content
-      const allContent = searchResult.results
-         .map((r) => r.content || "")
-         .join("\n\n");
-      return { allContent };
+      return { searchResult };
    } catch (error) {
       console.error("Error during web search:", error);
       throw error;

@@ -26,7 +26,7 @@ export function EditContentBody({
             toast.success("Content body edited successfully!");
             queryClient.invalidateQueries({
                queryKey: [
-                  trpc.content.list.queryKey(),
+                  trpc.content.listAllContent.queryKey(),
                   trpc.content.get.queryKey({ id: content.id }),
                ],
             });
@@ -49,7 +49,7 @@ export function EditContentBody({
             queryKey: trpc.content.get.queryKey({ id: content.id }),
          });
          await queryClient.invalidateQueries({
-            queryKey: trpc.content.list.queryKey(),
+            queryKey: trpc.content.listAllContent.queryKey(),
          });
          setEditing(false);
       },

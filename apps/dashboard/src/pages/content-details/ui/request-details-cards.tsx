@@ -9,7 +9,7 @@ import {
 
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Separator } from "@packages/ui/components/separator";
-import { Calendar, Clock, Type, Link2, Tags, List, Globe } from "lucide-react";
+import { Calendar, Clock, Type, Link2, Tags, Globe } from "lucide-react";
 
 export function ContentDetailsCard({ content }: { content: ContentSelect }) {
    return (
@@ -28,8 +28,8 @@ export function ContentDetailsCard({ content }: { content: ContentSelect }) {
             />
             <InfoItem
                icon={<Link2 className="h-4 w-4" />}
-               label="Slug"
-               value={content.meta?.slug || ""}
+               label="Description"
+               value={content.meta?.description || ""}
             />
             <Separator />
             <div className="grid grid-cols-2 gap-4">
@@ -50,31 +50,27 @@ export function ContentDetailsCard({ content }: { content: ContentSelect }) {
                <div className="col-span-2">
                   <InfoItem
                      icon={<Tags className="h-4 w-4" />}
-                     label="Tags"
+                     label="Keywords"
                      value={
-                        content.meta?.tags?.length
-                           ? content.meta.tags.join(", ")
+                        content.meta?.keywords?.length
+                           ? content.meta.keywords.join(", ")
                            : ""
                      }
                   />
                </div>
                <InfoItem
-                  icon={<List className="h-4 w-4" />}
-                  label="Topics"
-                  value={
-                     content.meta?.topics?.length
-                        ? content.meta.topics.join(", ")
-                        : ""
-                  }
-               />
-               <InfoItem
                   icon={<Globe className="h-4 w-4" />}
                   label="Sources"
                   value={
                      content.meta?.sources?.length
-                        ? content.meta.sources.join(", ")
+                        ? content.meta.sources.join("\n")
                         : ""
                   }
+               />
+               <InfoItem
+                  icon={<Link2 className="h-4 w-4" />}
+                  label="Slug"
+                  value={content.meta?.slug || ""}
                />
             </div>
          </CardContent>

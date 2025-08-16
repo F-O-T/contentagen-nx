@@ -3,6 +3,7 @@ import { getPaymentClient } from "@packages/payment/client";
 import {
    ingestBilling,
    createAiUsageMetadata,
+   createWebSearchUsageMetadata,
 } from "@packages/payment/ingestion";
 const polar = getPaymentClient(serverEnv.POLAR_ACCESS_TOKEN);
 
@@ -38,6 +39,22 @@ export async function ingestLlmBilling({
       params: {
          metadata: createAiUsageMetadata({ effort, inputTokens, outputTokens }),
          event: "LLM",
+         externalCustomerId: userId,
+      },
+   });
+}
+
+export async function ingestWebSearchBilling({
+   method,
+   userId,
+}: {
+   method: Parameters<typeof createWebSearchUsageMetadata>[0]["method"];
+   userId: string;
+}) {
+   return runIngestBilling({
+      params: {
+         metadata: createWebSearchUsageMetadata({ method }),
+         event: "WEB_SEARCH",
          externalCustomerId: userId,
       },
    });

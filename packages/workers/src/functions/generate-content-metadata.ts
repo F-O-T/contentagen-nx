@@ -9,39 +9,40 @@ import {
    type ContentMeta,
    type ContentStats,
 } from "@packages/database/schemas/content"; // or wherever your schemas are
-import { createAiUsageMetadata } from "@packages/payment/ingestion";
-import { runIngestBilling } from "./ingest-usage";
+import {
+   countWords,
+   createSlug,
+   extractTitleFromMarkdown,
+   readTimeMinutes,
+} from "@packages/helpers/text";
 import { contentStatsPrompt } from "@packages/prompts/prompt/content/content_stats";
+import { billingLlmIngestionQueue } from "../queues/billing-llm-ingestion-queue";
 
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 
 export async function runAnalyzeContent(payload: {
    content: string;
    userId: string;
+   keywords: string[];
+   sources: string[];
 }) {
-   const { content, userId } = payload;
-   const countContentWords = (text: string): number => {
-      return text
-         .trim()
-         .split(/\s+/)
-         .filter((word) => word.length > 0).length;
-   };
-   const readTimeMinutes = (wordCount: number): number => {
-      const wordsPerMinute = 200; // Average reading speed
-      return Math.ceil(wordCount / wordsPerMinute);
-   };
+   const { content, userId, keywords, sources } = payload;
    try {
       const statsResult = {
-         wordsCount: countContentWords(content).toString(),
-         readTimeMinutes: readTimeMinutes(
-            countContentWords(content),
-         ).toString(),
+         wordsCount: countWords(content).toString(),
+         readTimeMinutes: readTimeMinutes(countWords(content)).toString(),
+      };
+      const baseMeta = {
+         title: extractTitleFromMarkdown(content),
+         slug: createSlug(extractTitleFromMarkdown(content)),
+         keywords,
+         sources,
       };
       const [qualityScoreResult, metaResult] = await Promise.all([
          generateOpenRouterObject(
             openrouter,
             {
-               model: "medium",
+               model: "small",
                reasoning: "low",
             },
             ContentStatsSchema.pick({
@@ -55,10 +56,12 @@ export async function runAnalyzeContent(payload: {
          generateOpenRouterObject(
             openrouter,
             {
-               model: "medium",
+               model: "small",
                reasoning: "low",
             },
-            ContentMetaSchema,
+            ContentMetaSchema.pick({
+               description: true,
+            }),
             {
                system: contentMetaPrompt(),
                prompt: content,
@@ -69,6 +72,7 @@ export async function runAnalyzeContent(payload: {
          ContentStats,
          "qualityScore"
       >;
+      const metaObject = metaResult.object as Pick<ContentMeta, "description">;
       console.log(
          "[runAnalyzeContent] qualityScoreObject:",
          qualityScoreObject,
@@ -77,34 +81,34 @@ export async function runAnalyzeContent(payload: {
          ...statsResult,
          qualityScore: qualityScoreObject.qualityScore,
       } as ContentStats;
-      const meta = metaResult.object as ContentMeta;
-
-      // Validate that we got meaningful results
-      if (!stats.wordsCount && !stats.readTimeMinutes && !stats.qualityScore) {
-         throw new Error("Stats analysis returned empty results");
-      }
-
-      if (
-         !meta.slug &&
-         (!meta.tags || meta.tags.length === 0) &&
-         (!meta.topics || meta.topics.length === 0)
-      ) {
-         throw new Error("Meta analysis returned empty results");
-      }
-      if (!metaResult.usage.outputTokens || !metaResult.usage.inputTokens) {
-         console.error("[runAnalyzeContent] ERROR: No usage data returned");
-         throw new Error("No usage data returned from analysis");
-      }
-      await runIngestBilling({
-         params: {
-            metadata: createAiUsageMetadata({
-               effort: "small",
-               inputTokens: metaResult.usage.inputTokens,
-               outputTokens: metaResult.usage.outputTokens,
-            }),
-            event: "LLM",
-            externalCustomerId: userId, // This is a system-level operation, not user-specific
-         },
+      const meta = {
+         ...baseMeta,
+         description: metaObject.description,
+      } as ContentMeta;
+      const getTotalTokens = () => {
+         if (
+            !qualityScoreResult?.usage?.inputTokens ||
+            !metaResult?.usage?.inputTokens ||
+            !metaResult?.usage?.outputTokens ||
+            !qualityScoreResult?.usage?.outputTokens
+         ) {
+            throw new Error("Token usage data is missing");
+         }
+         return {
+            input:
+               qualityScoreResult.usage.inputTokens +
+               metaResult.usage.inputTokens,
+            output:
+               qualityScoreResult.usage.outputTokens +
+               metaResult.usage.outputTokens,
+         };
+      };
+      const total = getTotalTokens();
+      await billingLlmIngestionQueue.add("metadata-generation", {
+         inputTokens: total.input,
+         outputTokens: total.output,
+         effort: "small",
+         userId, // This is a system-level operation, not user-specific
       });
 
       return {

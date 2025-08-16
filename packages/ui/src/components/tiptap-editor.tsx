@@ -63,7 +63,7 @@ export function TiptapEditor({
 
    // Sync editor content if value changes externally
    useEffect(() => {
-      if (editor && value !== editor.getText()) {
+      if (editor && value !== editor.getText() && editor.isEmpty) {
          editor.commands.setContent(value);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps

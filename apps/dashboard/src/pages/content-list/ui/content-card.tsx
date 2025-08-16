@@ -68,7 +68,7 @@ export function ContentRequestCard({
                         </DropdownMenuContent>
                      </DropdownMenu>
                   </CardAction>
-                  <CardDescription>
+                  <CardDescription className="line-clamp-1">
                      {request.meta?.description ?? "No description found"}
                   </CardDescription>
                </CardHeader>

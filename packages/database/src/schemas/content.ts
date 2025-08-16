@@ -42,22 +42,18 @@ export const ContentMetaSchema = z.object({
       .string()
       .optional()
       .describe("A brief seo optmized description of the content."),
+   keywords: z
+      .array(z.string())
+      .optional()
+      .describe("SEO optimized keywords associated with the content."),
    slug: z
       .string()
       .optional()
       .describe("A URL-friendly identifier for the content."),
-   tags: z
-      .array(z.string())
-      .optional()
-      .describe("SEO optmized tags associated with the content."),
-   topics: z
-      .array(z.string())
-      .optional()
-      .describe("Topics covered in the content."),
    sources: z
       .array(z.string())
       .optional()
-      .describe("Sources referenced for the content."),
+      .describe("Sources or references used in the content."),
 });
 export type ContentMeta = z.infer<typeof ContentMetaSchema>;
 

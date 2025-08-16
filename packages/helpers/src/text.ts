@@ -17,3 +17,7 @@ export function readTimeMinutes(wordCount: number): number {
    const wordsPerMinute = 200; // Average reading speed
    return Math.ceil(wordCount / wordsPerMinute);
 }
+
+export function removeTitleFromMarkdown(markdown: string): string {
+   return markdown.replace(/^#\s+.*\n?/, "");
+}

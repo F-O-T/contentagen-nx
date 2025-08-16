@@ -2,7 +2,6 @@ import { Worker, Queue, type Job } from "bullmq";
 import { emitContentStatusChanged } from "@packages/server-events";
 import { runFetchAgent } from "../functions/fetch-agent";
 import { runGenerateContent } from "../functions/generate-content";
-import { runKnowledgeChunkRag } from "../functions/knowledge-chunk-rag";
 import { runSaveContent } from "../functions/save-content";
 import type { ContentRequest } from "@packages/database/schema";
 import { runWebSearch } from "../functions/web-search";
@@ -10,6 +9,10 @@ import { runAnalyzeContent } from "../functions/generate-content-metadata";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../helpers";
+import { runHeadlineKeywordExtractor } from "../functions/headline-keyword-extractor";
+import { runRagByKeywords } from "../functions/rag-by-keywords";
+import { runGenerateBrandDocument } from "../functions/generate-brand-document";
+import { removeTitleFromMarkdown } from "@packages/helpers/text";
 
 export async function runContentGeneration(payload: {
    agentId: string;
@@ -17,36 +20,25 @@ export async function runContentGeneration(payload: {
    contentRequest: ContentRequest;
 }) {
    const { agentId, contentId, contentRequest } = payload;
-   try {
-      console.info("[ContentGeneration] START: Fetching agent", {
-         agentId,
-         contentId,
-      });
-      const agentResult = await runFetchAgent({ agentId });
-      const userId = agentResult?.agent?.userId;
-      console.info("[ContentGeneration] END: Fetching agent", {
-         agentId,
-         contentId,
-         agentFound: !!agentResult?.agent,
-      });
-      if (!agentResult?.agent) throw new Error("Failed to fetch agent");
-      const agent = agentResult.agent;
-
-      // Step: Improve description using RAG
-      console.info(
-         "[ContentGeneration] START: Improving description with RAG",
-         { agentId, contentId },
+   if (!contentRequest.description) {
+      console.error(
+         "[ContentGeneration] ERROR: Content request description is empty",
+         {
+            agentId,
+            contentId,
+            contentRequest,
+         },
       );
-      if (
-         !contentRequest.description ||
-         contentRequest.description.trim() === ""
-      ) {
-         console.error(
-            "[ContentGeneration] ERROR: Content request description is empty",
-            { agentId, contentId, contentRequest },
-         );
-         throw new Error("Content request description is empty");
-      }
+      throw new Error("Content request description is empty");
+   }
+   try {
+      const { agent } = await runFetchAgent({ agentId });
+      const userId = agent?.userId;
+      if (!agent) throw new Error("Failed to fetch agent");
+      const { keywords } = await runHeadlineKeywordExtractor({
+         inputText: contentRequest.description,
+         userId,
+      });
       if (!agent.personaConfig.purpose) {
          console.error(
             "[ContentGeneration] ERROR: Agent persona config purpose is not set",
@@ -54,77 +46,51 @@ export async function runContentGeneration(payload: {
          );
          throw new Error("Agent persona config purpose is not set");
       }
-      const ragResult = await runKnowledgeChunkRag({
-         agentId,
-         purpose: agent.personaConfig.purpose,
-         description: contentRequest.description,
+      const rag = await runRagByKeywords({
+         agentId: agent.id,
+         keywords,
       });
-      console.info("[ContentGeneration] END: Improving description with RAG", {
-         agentId,
-         contentId,
-         improved: !!ragResult?.improvedDescription,
-      });
-      if (!ragResult?.improvedDescription) {
-         console.error(
-            "[ContentGeneration] ERROR: Failed to improve description with RAG",
-            { agentId, contentId, ragResult },
-         );
-         throw new Error("Failed to improve description with RAG");
-      }
+      const [brandDocumentResult, searchResultResult] = await Promise.all([
+         runGenerateBrandDocument({
+            chunks: rag.chunks,
+            userId,
+            description: contentRequest.description,
+         }),
+         runWebSearch({
+            query: Array.isArray(keywords) ? keywords.join(" ") : keywords,
+            userId,
+         }),
+      ]);
+      const { brandDocument } = brandDocumentResult;
+      const { searchResult } = searchResultResult;
 
-      console.info("[ContentGeneration] START: Performing web search", {
-         agentId,
-         contentId,
-      });
-      const webSearch = await runWebSearch({
-         query: payload.contentRequest.description,
-         userId,
-      });
-      console.info("[ContentGeneration] END: Performing web search", {
-         agentId,
-         contentId,
-         foundResults: !!webSearch?.allContent,
-      });
-      if (!webSearch?.allContent) {
-         console.error(
-            "[ContentGeneration] ERROR: Failed to perform web search",
-            { agentId, contentId, webSearch },
-         );
-         throw new Error("Failed to perform web search");
-      }
-
-      console.info("[ContentGeneration] START: Generating content", {
-         agentId,
-         contentId,
-      });
-      const contentResult = await runGenerateContent({
+      const { content } = await runGenerateContent({
          agent,
-         brandDocument: ragResult.improvedDescription,
-         webSearchContent: webSearch.allContent,
+         brandDocument,
+         webSearchContent: searchResult.results
+            .map((r) => r.content || "")
+            .join("\n\n"),
          userId,
-         contentRequest: {
-            description: payload.contentRequest.description,
-         },
+         contentRequest,
       });
-      console.info("[ContentGeneration] END: Generating content", {
-         agentId,
-         contentId,
-         contentGenerated: !!contentResult?.content,
-      });
-      if (!contentResult?.content) {
+      if (!content) {
          console.error(
             "[ContentGeneration] ERROR: Failed to generate content",
-            { agentId, contentId, contentResult },
+            { agentId, contentId, content },
          );
          throw new Error("Failed to generate content");
       }
-      const content = contentResult.content;
 
       console.info("[ContentGeneration] START: Analyzing content metadata", {
          agentId,
          contentId,
       });
-      const contentMetadata = await runAnalyzeContent({ content, userId });
+      const contentMetadata = await runAnalyzeContent({
+         content,
+         userId,
+         keywords,
+         sources: searchResult.results.map((result) => result.url),
+      });
       console.info("[ContentGeneration] END: Analyzing content metadata", {
          agentId,
          contentId,
@@ -146,7 +112,7 @@ export async function runContentGeneration(payload: {
          meta: metadata.meta,
          stats: metadata.stats,
          contentId,
-         content,
+         content: removeTitleFromMarkdown(content),
       });
       console.info("[ContentGeneration] END: Saving content", {
          agentId,

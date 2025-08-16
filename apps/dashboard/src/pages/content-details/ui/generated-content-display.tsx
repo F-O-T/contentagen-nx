@@ -55,7 +55,7 @@ export function GeneratedContentDisplay({
             toast.success("Image URL added successfully!");
             queryClient.invalidateQueries({
                queryKey: [
-                  trpc.content.list.queryKey(),
+                  trpc.content.listAllContent.queryKey(),
                   trpc.content.get.queryKey({ id: content.id }),
                ],
             });
@@ -102,7 +102,7 @@ export function GeneratedContentDisplay({
             toast.success("Content approved successfully!");
             queryClient.invalidateQueries({
                queryKey: [
-                  trpc.content.list.queryKey(),
+                  trpc.content.listAllContent.queryKey(),
                   trpc.content.get.queryKey({ id: content.id }),
                ],
             });
