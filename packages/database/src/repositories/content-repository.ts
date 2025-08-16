@@ -13,18 +13,22 @@ import { eq } from "drizzle-orm";
 export async function getContentBySlug(
    dbClient: DatabaseInstance,
    slug: string,
+   agentId: string,
 ): Promise<Content> {
    try {
-      // Find by meta.slug with SQL JSON extraction
+      // Find by meta.slug and agentId
       const result = await dbClient.query.content.findFirst({
-         where: (fields, { sql }) => sql`${fields.meta}->>'slug' = ${slug}`,
+         where: (fields, { sql, and }) => and(
+            sql`${fields.meta}->>'slug' = ${slug}`,
+            sql`${fields.agentId} = ${agentId}`,
+         ),
       });
       if (!result) throw new NotFoundError("Content not found");
       return result;
    } catch (err) {
       if (err instanceof NotFoundError) throw err;
       throw new DatabaseError(
-         `Failed to get content by slug: ${(err as Error).message}`,
+         `Failed to get content by slug and agentId: ${(err as Error).message}`,
       );
    }
 }

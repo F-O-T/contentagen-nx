@@ -105,7 +105,7 @@ export const ListContentByAgentInputSchema = z.object({
          "Invalid content status. Must be one of: draft, approved, generating.",
       )
       .array(),
-   agentId: z.uuid("Invalid Agent ID format."),
+   agentId: z.array(z.uuid("Invalid Agent ID format.")),
    limit: z.number().min(1).max(100).optional().default(10),
    page: z.number().min(1).optional().default(1),
 });
@@ -116,4 +116,5 @@ export const GetContentByIdInputSchema = z.object({
 
 export const GetContentBySlugInputSchema = z.object({
    slug: z.string().min(1, "Slug is required."),
+   agentId: z.uuid("Invalid Agent ID format."),
 });
