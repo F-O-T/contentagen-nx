@@ -25,13 +25,14 @@ import { MoreHorizontal, UserPlus } from "lucide-react";
 import { useState } from "react";
 import type { betterAuthClient } from "@/integrations/clients";
 import { SendInvitationCredenza } from "../features/send-invitation-credenza";
+import { DeleteOrganizationCredenza } from "../features/delete-organization-credenza";
 export function OrganizationPageMembersTable({
    organization,
 }: {
    organization: typeof betterAuthClient.$Infer.ActiveOrganization;
 }) {
    const [inviteOpen, setInviteOpen] = useState(false);
-
+   const [deleteOpen, setDeleteOpen] = useState(false);
    return (
       <>
          <Card className="col-span-2">
@@ -54,6 +55,13 @@ export function OrganizationPageMembersTable({
                      <DropdownMenuContent align="end">
                         <DropdownMenuItem
                            onSelect={() => {
+                              setDeleteOpen(true);
+                           }}
+                        >
+                           Delete Organization
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                           onSelect={() => {
                               setInviteOpen(true);
                            }}
                         >
@@ -65,7 +73,7 @@ export function OrganizationPageMembersTable({
             </CardHeader>
             <CardContent>
                {Array.isArray(organization.members) &&
-               organization.members.length > 0 ? (
+                  organization.members.length > 0 ? (
                   <Table>
                      <TableHeader>
                         <TableRow>
@@ -102,6 +110,11 @@ export function OrganizationPageMembersTable({
             open={inviteOpen}
             onOpenChange={setInviteOpen}
             organizationId={organization?.id ?? ""}
+         />
+         <DeleteOrganizationCredenza
+            open={deleteOpen}
+            onOpenChange={setDeleteOpen}
+            organizationId={organization?.id || ""}
          />
       </>
    );

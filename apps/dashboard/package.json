@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check": "bunx --bun biome check --write .",
     "typecheck": "tsc --noEmit",
     "dev": "node server",
     "build": "npm run build:client && npm run build:server",
@@ -20,7 +21,7 @@
     "@packages/ui": "workspace:*",
     "@packages/errors": "workspace:*",
     "@packages/transactional": "workspace:*",
-    "slugify": "^1.6.6",
+    "@packages/helpers": "workspace:*",
     "sonner": "catalog:ui",
     "@tailwindcss/vite": "catalog:vite",
     "@tanstack/react-query": "catalog:tanstack",
