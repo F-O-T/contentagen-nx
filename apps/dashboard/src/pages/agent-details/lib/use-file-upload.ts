@@ -30,15 +30,10 @@ export default function useFileUpload(
    // Delete file mutation
    const deleteFileMutation = useMutation(
       trpc.agentFile.delete.mutationOptions({
-         onSuccess: () => {
+         onSuccess: async () => {
             toast.success("File deleted successfully!");
-            queryClient.invalidateQueries({
+            await queryClient.invalidateQueries({
                queryKey: trpc.agent.get.queryKey({ id: agentId }),
-            });
-            queryClient.invalidateQueries({
-               queryKey: trpc.agentKnowledge.listByAgentId.queryKey({
-                  agentId,
-               }),
             });
          },
          onError: () => {
