@@ -43,7 +43,7 @@ export function InfoItem({ icon, label, value, className }: InfoItemProps) {
                   More details about <strong>{label}</strong>
                </CredenzaDescription>
             </CredenzaHeader>
-            <CredenzaBody>
+            <CredenzaBody className="grid grid-cols-1 ">
                <Markdown content={value} />
             </CredenzaBody>
          </CredenzaContent>

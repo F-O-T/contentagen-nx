@@ -107,7 +107,7 @@ function NavUserContent({ session }: { session: Session | null }) {
          {
             onSuccess: async () => {
                await queryClient.invalidateQueries({
-                  queryKey: trpc.sessionHelper.getSession.queryKey(),
+                  queryKey: trpc.authHelpers.getSession.queryKey(),
                });
                router.navigate({
                   to: "/auth/sign-in",
@@ -120,7 +120,7 @@ function NavUserContent({ session }: { session: Session | null }) {
       router,
       setOpenMobile,
       queryClient,
-      trpc.sessionHelper.getSession.queryKey,
+      trpc.authHelpers.getSession.queryKey,
    ]);
    if (!session) return <NavUserSkeleton />;
 

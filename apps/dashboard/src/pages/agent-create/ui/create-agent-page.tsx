@@ -8,7 +8,7 @@ export function CreateAgentPage() {
    const navigate = useNavigate();
    const trpc = useTRPC();
    const { data: customer } = useSuspenseQuery(
-      trpc.sessionHelper.getCustomerState.queryOptions(),
+      trpc.authHelpers.getCustomerState.queryOptions(),
    );
 
    const agentMutation = useMutation(

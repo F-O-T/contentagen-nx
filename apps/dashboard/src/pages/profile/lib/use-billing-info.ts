@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 export const useBillingInfo = () => {
    const trpc = useTRPC();
    const { data: customerState, isLoading } = useSuspenseQuery(
-      trpc.sessionHelper.getCustomerState.queryOptions(),
+      trpc.authHelpers.getCustomerState.queryOptions(),
    );
    return {
       customerState,

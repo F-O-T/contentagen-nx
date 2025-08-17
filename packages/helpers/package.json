@@ -15,7 +15,8 @@
    "private": true,
    "type": "module",
    "exports": {
-      "./text": "./src/text.ts"
+      "./text": "./src/text.ts",
+      "./number": "./src/numbers.ts"
    },
    "version": "0.0.0"
 }

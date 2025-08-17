@@ -15,7 +15,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 export function DashboardHomePage() {
    const trpc = useTRPC();
    const { data } = useSuspenseQuery(
-      trpc.sessionHelper.getHomeStats.queryOptions(),
+      trpc.authHelpers.getHomeStats.queryOptions(),
    );
 
    const statsCards = useMemo(

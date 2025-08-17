@@ -5,23 +5,8 @@ import {
    CardTitle,
    CardDescription,
    CardContent,
-   CardAction,
 } from "@packages/ui/components/card";
-import {
-   DropdownMenu,
-   DropdownMenuTrigger,
-   DropdownMenuContent,
-   DropdownMenuItem,
-} from "@packages/ui/components/dropdown-menu";
-import { Button } from "@packages/ui/components/button";
-import {
-   Building2,
-   Users,
-   CalendarDays,
-   Pencil,
-   Trash,
-   MoreHorizontal,
-} from "lucide-react";
+import { Building2, Users, CalendarDays } from "lucide-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
@@ -34,7 +19,7 @@ export function OrganizationPage() {
    const [open, setOpen] = useState(false);
    const trpc = useTRPC();
    const { data: org, isLoading: orgLoading } = useSuspenseQuery(
-      trpc.sessionHelper.getDefaultOrganization.queryOptions(),
+      trpc.authHelpers.getDefaultOrganization.queryOptions(),
    );
 
    const detailsInfoItems = useMemo(

@@ -6,8 +6,8 @@ import type { MinioClient } from "@packages/files/client";
 import type { ChromaClient } from "@packages/chroma-db/client";
 import { agentRouter } from "./router/agent";
 import { contentRouter } from "./router/content";
-
-import { sessionRouter } from "./router/session";
+import { statisticsRouter } from "./router/statistics";
+import { authHelpersRouter } from "./router/auth-helpers";
 import { sdkRouter } from "./router/sdk";
 import type { OpenRouterClient } from "@packages/openrouter/client";
 
@@ -15,7 +15,8 @@ export const appRouter = router({
    agent: agentRouter,
    agentFile: agentFileRouter,
    content: contentRouter,
-   sessionHelper: sessionRouter,
+   authHelpers: authHelpersRouter,
+   statistics: statisticsRouter,
    sdk: sdkRouter,
 });
 export const createApi = ({

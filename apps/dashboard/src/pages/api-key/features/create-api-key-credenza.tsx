@@ -1,4 +1,4 @@
-import { betterAuthClient } from "@/integrations/clients";
+import { betterAuthClient, useTRPC } from "@/integrations/clients";
 import { Key } from "lucide-react";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -17,6 +17,49 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+function ApiKeyAlertCredenza({
+   apiKey,
+   open,
+   onOpenChange,
+}: {
+   apiKey: string;
+   open: boolean;
+   onOpenChange: (open: boolean) => void;
+}) {
+   const handleCopyApiKey = useCallback(() => {
+      if (apiKey) {
+         navigator.clipboard.writeText(apiKey);
+         toast.success("API key copied to clipboard");
+      }
+      onOpenChange(false);
+   }, [apiKey, onOpenChange]);
+   return (
+      <Credenza open={open} onOpenChange={onOpenChange}>
+         <CredenzaContent>
+            <CredenzaHeader>
+               <CredenzaTitle>This is your API key</CredenzaTitle>
+               <CredenzaDescription>
+                  Please copy and store this API key securely.
+                  <br />
+                  <strong>You will not be able to see it again.</strong>
+               </CredenzaDescription>
+            </CredenzaHeader>
+            <CredenzaBody className="grid grid-cols-1 pb-0">
+               <InfoItem
+                  icon={<Key />}
+                  label="API Key"
+                  value={apiKey}
+                  key={"api-key"}
+               />
+            </CredenzaBody>
+            <CredenzaFooter>
+               <Button onClick={handleCopyApiKey}>Copy to clipboard</Button>
+            </CredenzaFooter>
+         </CredenzaContent>
+      </Credenza>
+   );
+}
+
 export function CreateApiKeyCredenza({
    open,
    onOpenChange,
@@ -26,8 +69,9 @@ export function CreateApiKeyCredenza({
 }) {
    const [newApiKey, setNewApiKey] = useState<string>("");
    const [alertOpen, setAlertOpen] = useState(false);
+   const trpc = useTRPC();
    const schema = z.object({
-      name: z.string("Please enter a name"),
+      name: z.string("Please enter a name").min(1, "Name is required"),
    });
    const queryClient = useQueryClient();
    const createApiKey = useCallback(
@@ -41,7 +85,9 @@ export function CreateApiKeyCredenza({
                   toast.success(`API key created successfully`);
                   if (data?.key) setNewApiKey(data.key);
                   setAlertOpen(true);
-                  queryClient.invalidateQueries({ queryKey: ["apiKeys"] });
+                  queryClient.invalidateQueries({
+                     queryKey: trpc.authHelpers.getApiKeys.queryKey(),
+                  });
                },
                onError: (e) => {
                   console.error("Error creating API key:", e);
@@ -50,7 +96,7 @@ export function CreateApiKeyCredenza({
             },
          );
       },
-      [queryClient],
+      [queryClient, trpc.authHelpers.getApiKeys.queryKey],
    );
 
    const form = useAppForm({
@@ -72,14 +118,6 @@ export function CreateApiKeyCredenza({
       },
       [form],
    );
-
-   const handleCopyApiKey = useCallback(() => {
-      if (newApiKey) {
-         navigator.clipboard.writeText(newApiKey);
-      }
-      setAlertOpen(false);
-      setNewApiKey("");
-   }, [newApiKey]);
 
    return (
       <>
@@ -128,35 +166,14 @@ export function CreateApiKeyCredenza({
                </form>
             </CredenzaContent>
          </Credenza>
-         <Credenza
+         <ApiKeyAlertCredenza
+            apiKey={newApiKey}
             open={alertOpen}
             onOpenChange={(isOpen) => {
                setAlertOpen(isOpen);
                if (!isOpen) setNewApiKey("");
             }}
-         >
-            <CredenzaContent>
-               <CredenzaHeader>
-                  <CredenzaTitle>This is your API key</CredenzaTitle>
-                  <CredenzaDescription>
-                     Please copy and store this API key securely.
-                     <br />
-                     <strong>You will not be able to see it again.</strong>
-                  </CredenzaDescription>
-               </CredenzaHeader>
-               <CredenzaBody className="grid grid-cols-1 pb-0">
-                  <InfoItem
-                     icon={<Key />}
-                     label="API Key"
-                     value={newApiKey}
-                     key={"api-key"}
-                  />
-               </CredenzaBody>
-               <CredenzaFooter>
-                  <Button onClick={handleCopyApiKey}>Copy to clipboard</Button>
-               </CredenzaFooter>
-            </CredenzaContent>
-         </Credenza>
+         />
       </>
    );
 }

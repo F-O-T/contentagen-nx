@@ -14,7 +14,7 @@ export const Route = createFileRoute("/callback/_authed")({
    errorComponent: () => <>error</>,
    loader: async ({ context }) => {
       await context.queryClient.prefetchQuery(
-         context.trpc.sessionHelper.getSession.queryOptions(),
+         context.trpc.authHelpers.getSession.queryOptions(),
       );
    },
 });
@@ -24,7 +24,7 @@ function RouteComponent() {
    const router = useRouter();
    const trpc = useTRPC();
    const { data: session, error } = useSuspenseQuery(
-      trpc.sessionHelper.getSession.queryOptions(),
+      trpc.authHelpers.getSession.queryOptions(),
    );
 
    useIsomorphicLayoutEffect(() => {

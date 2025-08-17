@@ -31,7 +31,7 @@ function RouteComponent() {
          {
             onSuccess: async () => {
                await queryClient.invalidateQueries({
-                  queryKey: trpc.sessionHelper.getSession.queryKey(),
+                  queryKey: trpc.authHelpers.getSession.queryKey(),
                });
                router.navigate({
                   to: "/auth/sign-in",
@@ -39,7 +39,7 @@ function RouteComponent() {
             },
          },
       );
-   }, [router, queryClient, trpc.sessionHelper.getSession.queryKey]);
+   }, [router, queryClient, trpc.authHelpers.getSession.queryKey]);
    const acceptInvitation = useCallback(async () => {
       await betterAuthClient.organization.acceptInvitation(
          {

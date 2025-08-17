@@ -12,7 +12,7 @@ import { useIsomorphicLayoutEffect } from "@packages/ui/hooks/use-isomorphic-lay
 export const Route = createFileRoute("/auth")({
    loader: async ({ context }) => {
       await context.queryClient.prefetchQuery(
-         context.trpc.sessionHelper.getSession.queryOptions(),
+         context.trpc.authHelpers.getSession.queryOptions(),
       );
       return;
    },
@@ -25,7 +25,7 @@ function AuthLayout() {
    const router = useRouter();
    const trpc = useTRPC();
    const { data: session } = useQuery(
-      trpc.sessionHelper.getSession.queryOptions(),
+      trpc.authHelpers.getSession.queryOptions(),
    );
    useIsomorphicLayoutEffect(() => {
       if (session) {

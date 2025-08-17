@@ -17,8 +17,7 @@ export function AgentContentRequestPage() {
          onSuccess: (data) => {
             toast.success("Content begun generation successfully!");
             queryClient.invalidateQueries({
-               queryKey: trpc.content.list.queryKey({
-                  agentId,
+               queryKey: trpc.content.listAllContent.queryKey({
                   status: ["draft", "approved", "generating"],
                }),
             });
