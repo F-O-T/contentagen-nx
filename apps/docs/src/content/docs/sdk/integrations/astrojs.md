@@ -102,6 +102,57 @@ const post = await sdk.getContentBySlug({ slug: slug ?? "", agentId });
 <BlogPost post={post} />
 ```
 
+## RSS Feed Example
+
+### RSS Feed Auto-Discovery
+
+To enable RSS auto-discovery, add the following tag to your main layout (e.g., `BaseHead.astro`):
+
+```html
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title="Your Site's Title"
+  href={new URL("rss.xml", Astro.site)}
+/>
+```
+
+This allows browsers and RSS readers to automatically find your feed at `/rss.xml`.
+
+
+Generate an RSS feed for your blog using Astro and ContentaGen SDK. This example uses Astro's static generation and the SDK to fetch posts.
+
+Example from `src/pages/rss.xml.js`:
+```js
+import rss from "@astrojs/rss";
+import { sdk, agentId } from "../contentagen";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+
+export const GET = async (context) => {
+  const response = await sdk.listContentByAgent({
+    agentId,
+    status: ["approved"],
+    limit: 100,
+    page: 1,
+  });
+  const posts = response.posts ?? [];
+
+  return rss({
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    site: context.site,
+    // trailingSlash: false, // Uncomment if your site uses trailingSlash: "never"
+    items: posts.map((post) => ({
+      title: post.meta?.title ?? "",
+      description: post.meta?.description ?? "",
+      link: new URL(post.meta?.slug ?? "", context.site).toString(),
+      pubDate: post.createdAt,
+      // Optionally include more fields like keywords, content, etc.
+    })),
+  });
+};
+```
+
 ## BlogPost Layout Example
 Example from `src/layouts/BlogPost.astro`:
 ```astro

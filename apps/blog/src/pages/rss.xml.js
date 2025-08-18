@@ -2,10 +2,8 @@ import rss from "@astrojs/rss";
 import { sdk, agentId } from "../contentagen";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 
-/**
- * @param {any} context
- */
-export async function GET(context) {
+//@ts-expect-error
+export const GET = async (context) => {
    const response = await sdk.listContentByAgent({
       agentId,
       status: ["approved"],
@@ -18,14 +16,12 @@ export async function GET(context) {
       title: SITE_TITLE,
       description: SITE_DESCRIPTION,
       site: context.site,
-      items: posts.map((post) => {
-         return {
-            title: post.meta.title,
-            description: post.meta.description,
-            keywords: post.meta.keywords,
-            link: post.meta.slug,
-            pubDate: post.createdAt,
-         };
-      }),
+      items: posts.map((post) => ({
+         title: post.meta?.title ?? "",
+         description: post.meta?.description ?? "",
+         link: new URL(post.meta?.slug ?? "", context.site).toString(),
+         pubDate: post.createdAt,
+         categories: post.meta.keywords ?? [],
+      })),
    });
-}
+};
