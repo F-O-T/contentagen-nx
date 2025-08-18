@@ -315,7 +315,3 @@ ContentaGen SDK has strict rate limits. If you use SSR for blog/content routes, 
 ## Pagination & Filtering
 Use `limit` and `page` to paginate. Filter by status for draft, approved, or generating content.
 
-## Best Practices
-- Use Zod schemas for input validation.
-- Access rich metadata and stats for each post.
-- Handle edge cases (empty results, invalid input).
