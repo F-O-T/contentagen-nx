@@ -3,8 +3,21 @@ title: AstroJS Integration
 description: How to use @contentagen/sdk in AstroJS projects.
 ---
 
-## Overview
-Integrate ContentaGen SDK with AstroJS to fetch and display dynamic content in your site or blog.
+Integrate the ContentaGen SDK with your AstroJS blog for fast, reliable static content publishing.
+
+**Who is this guide for?**
+- Anyone building a blog or content site with AstroJS 
+
+**What you'll learn:**
+- How to set up your environment for ContentaGen + AstroJS
+- Fetching and rendering blog posts using the SDK
+- Generating RSS feeds for your site
+- Optimizing for static generation, rate limiting, and SEO
+
+> **Prerequisites:**  
+> Basic familiarity with AstroJS and environment variables is recommended.
+
+---
 
 ## Environment Setup
 
@@ -154,6 +167,7 @@ export const GET = async (context) => {
 ```
 
 ## BlogPost Layout Example
+
 Example from `src/layouts/BlogPost.astro`:
 ```astro
 ---
@@ -210,6 +224,84 @@ const htmlBody = marked.parse(post.body);
   </article>
 </main>
 <Footer />
+```
+
+### Supporting Components
+
+Example `Navbar.astro`:
+```astro
+<nav class="navbar"> ... </nav>
+```
+
+Example `Footer.astro`:
+```astro
+<footer class="footer"> ... </footer>
+```
+
+Example `BaseHead.astro`:
+```astro
+---
+import { SITE_TITLE } from "../consts";
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  keywords?: string[];
+}
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const {
+  title,
+  description,
+  image = "/blog-placeholder-1.jpg",
+  keywords,
+} = Astro.props;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title={SITE_TITLE}
+  href={new URL('rss.xml', Astro.site)}
+/>
+<meta name="generator" content={Astro.generator} />
+
+<!-- Font preloads -->
+<link rel="preload" href="/fonts/atkinson-regular.woff" as="font" type="font/woff" crossorigin />
+<link rel="preload" href="/fonts/atkinson-bold.woff" as="font" type="font/woff" crossorigin />
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+{keywords && <meta name="keywords" content={keywords.join(', ')} />}
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content={Astro.url} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={new URL(image, Astro.url)} />
+{keywords && <meta property="article:tag" content={keywords.join(', ')} />}
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={new URL(image, Astro.url)} />
+```
+
+Example `FormattedDate.astro`:
+```astro
+<span>{date.toLocaleDateString()}</span>
 ```
 
 ## Rate Limiting & Static Generation
