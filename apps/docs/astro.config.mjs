@@ -24,11 +24,21 @@ export default defineConfig({
          customCss: ["./src/styles/global.css"],
          sidebar: [
             {
-               autogenerate: { directory: "integrations" },
-               label: "Integrations",
+               label: "SDK",
+               items: [
+                  { label: "Setup", link: "/sdk/setup" },
+                  { label: "API Reference", link: "/sdk/api" },
+                  {
+                     label: "Integrations",
+                     items: [
+                        { label: "AstroJS", link: "/sdk/integrations/astrojs" },
+                     ],
+                  },
+               ],
             },
          ],
-         title: "ContentaGen docs",
+         title: "ContentaGen",
+         description: "Documentation for ContentaGen app",
       }),
    ],
 
