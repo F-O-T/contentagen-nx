@@ -38,6 +38,9 @@ export default defineConfig({
             },
          ],
          title: "ContentaGen",
+         logo: {
+            src: "./src/assets/contentagen-logo.svg",
+         },
          description: "Documentation for ContentaGen app",
       }),
    ],
