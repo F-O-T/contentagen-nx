@@ -12,9 +12,9 @@ export type ContentStatusChangedPayload = {
 };
 
 // 3. The event emitter instance
-export const contentEvent = new EventEmitter();
+export const eventEmitter = new EventEmitter();
 
 // 4. Helper to emit a status change event (strongly typed)
 export function emitContentStatusChanged(payload: ContentStatusChangedPayload) {
-   contentEvent.emit(CONTENT_EVENTS.statusChanged, payload);
+   eventEmitter.emit(CONTENT_EVENTS.statusChanged, payload);
 }

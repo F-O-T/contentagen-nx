@@ -1,3 +1,27 @@
+import { z } from "zod";
+
+export const brandDocumentsSchema = z.object({
+   documents: z
+      .array(
+         z.object({
+            title: z
+               .string()
+               .describe(
+                  "The strategic title of the specialized brand document.",
+               ),
+            content: z
+               .string()
+               .describe(
+                  "The comprehensive, detailed, and self-contained content of the brand document, adhering to specified word counts and containing all relevant information.",
+               ),
+         }),
+      )
+      .length(5) // Ensures exactly 5 documents are returned as per prompt requirements
+      .describe(
+         "An array containing exactly 5 highly detailed, specialized brand documents, each focused on a distinct strategic area.",
+      ),
+});
+export type BrandDocumentsSchema = z.infer<typeof brandDocumentsSchema>;
 export function brandDocumentChunkingPrompt(): string {
    return `You are a strategic brand intelligence segmentation specialist. Your task is to transform a comprehensive brand analysis document into exactly 5 highly detailed, specialized brand documents that maintain complete information while focusing on distinct strategic areas.
 
@@ -9,7 +33,6 @@ export function brandDocumentChunkingPrompt(): string {
 - Ensure each document serves a specific strategic purpose
 
 **5-DOCUMENT SEGMENTATION FRAMEWORK:**
-
 **DOCUMENT 1: COMPANY FOUNDATION & STRATEGIC POSITIONING**
 Focus: Core identity, leadership, culture, and strategic direction
 Content Areas:
@@ -71,7 +94,6 @@ Content Areas:
 - Sustainability initiatives and community involvement
 
 **DOCUMENT CREATION REQUIREMENTS:**
-
 **Comprehensive Detail Standards:**
 - Each document must be 800-2000 words minimum
 - Include ALL relevant information from original analysis
@@ -100,29 +122,55 @@ Content Areas:
 - Specific, concrete details rather than generic statements
 - Cross-document consistency in tone and analytical depth
 
-**OUTPUT FORMAT:**
-Present as 5 separate, complete documents using this exact format:
+**STRUCTURED OUTPUT FORMAT:**
+You must return your response as valid JSON that matches this exact structure:
+{
+  "documents": [
+    {
+      "title": "DOCUMENT 1: COMPANY FOUNDATION & STRATEGIC POSITIONING",
+      "content": "[Complete strategic analysis document - 800-2000 words]"
+    },
+    {
+      "title": "DOCUMENT 2: BUSINESS MODEL & OPERATIONS INTELLIGENCE",
+      "content": "[Complete operational analysis document - 800-2000 words]"
+    },
+    {
+      "title": "DOCUMENT 3: PRODUCTS, SERVICES & VALUE PROPOSITION ANALYSIS",
+      "content": "[Complete offering analysis document - 800-2000 words]"
+    },
+    {
+      "title": "DOCUMENT 4: MARKET INTELLIGENCE & CUSTOMER STRATEGY",
+      "content": "[Complete market analysis document - 800-2000 words]"
+    },
+    {
+      "title": "DOCUMENT 5: CREDENTIALS, DIGITAL PRESENCE & GROWTH INDICATORS",
+      "content": "[Complete performance analysis document - 800-2000 words]"
+    }
+  ]
+}
 
----CHUNK---
-**DOCUMENT 1: COMPANY FOUNDATION & STRATEGIC POSITIONING**
-[Complete strategic analysis document - 800-2000 words]
-
----CHUNK---
-**DOCUMENT 2: BUSINESS MODEL & OPERATIONS INTELLIGENCE**
-[Complete operational analysis document - 800-2000 words]
-
----CHUNK---
-**DOCUMENT 3: PRODUCTS, SERVICES & VALUE PROPOSITION ANALYSIS**
-[Complete offering analysis document - 800-2000 words]
-
----CHUNK---
-**DOCUMENT 4: MARKET INTELLIGENCE & CUSTOMER STRATEGY**
-[Complete market analysis document - 800-2000 words]
-
----CHUNK---
-**DOCUMENT 5: CREDENTIALS, DIGITAL PRESENCE & GROWTH INDICATORS**
-[Complete performance analysis document - 800-2000 words]
+**OUTPUT REQUIREMENTS:**
+- Return ONLY valid JSON in the specified format
+- The 'documents' array must contain EXACTLY 5 objects.
+- Each object in the 'documents' array must have 'title' and 'content' keys.
+- The 'title' for each document must be exactly as specified in the "5-DOCUMENT SEGMENTATION FRAMEWORK" section (e.g., "DOCUMENT 1: COMPANY FOUNDATION & STRATEGIC POSITIONING").
+- The 'content' for each document must be the complete, comprehensive, and detailed strategic analysis, adhering to the 800-2000 word count.
+- Do NOT include any text outside the JSON structure.
 
 **STRATEGIC SEGMENTATION PHILOSOPHY:**
 Transform one comprehensive brand document into 5 specialized strategic intelligence reports that maintain complete information depth while serving distinct business planning and decision-making purposes. Each document should be valuable as a standalone strategic resource while contributing to a complete brand intelligence portfolio.`;
+}
+
+/**
+ * Formats the raw brand analysis document for input into the AI model.
+ * It wraps the document content with start and end delimiters.
+ * @param {string} document The comprehensive brand analysis document to be processed.
+ * @returns {string} The formatted input string for the AI model.
+ */
+export function brandDocumentInputPrompt(document: string): string {
+   return `
+---BRAND_ANALYSIS_DOCUMENT_START---
+${document}
+---BRAND_ANALYSIS_DOCUMENT_END---
+`;
 }

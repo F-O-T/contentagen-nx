@@ -4,7 +4,7 @@ import { serverEnv } from "@packages/environment/server";
 
 const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
 
-export async function runFetchAgent(payload: { agentId: string }) {
+export async function runGetAgent(payload: { agentId: string }) {
    const { agentId } = payload;
    try {
       const agent = await getAgentById(db, agentId);

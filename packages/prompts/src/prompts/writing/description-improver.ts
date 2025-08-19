@@ -12,6 +12,9 @@ export const descriptionImprovementSchema = z.object({
       ),
 });
 
+export type DescriptionImprovementSchema = z.infer<
+   typeof descriptionImprovementSchema
+>;
 /**
  * Generates the system prompt for the AI model to act as an expert brand strategist
  * and create a comprehensive document on brand integration.

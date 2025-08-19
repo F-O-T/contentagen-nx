@@ -1,6 +1,18 @@
 import { generateObject, generateText } from "ai";
 import type { ZodObject } from "zod";
 import type { OpenRouterClient } from "./client";
+
+export const NANO_MODELS = {
+   qwen: "qwen/qwen3-30b-a3b-instruct-2507",
+   gemini: "google/gemini-2.5-flash-lite",
+   glm: "z-ai/glm-4.5-air",
+};
+
+export const SMALL_MODELS = {
+   qwen: "qwen/qwen3-235b-a22b-2507",
+   gemini: "google/gemini-2.5-flash",
+   glm: "z-ai/glm-4.5",
+};
 export const MODELS = {
    small: "google/gemini-2.5-flash-lite",
    medium: "google/gemini-2.5-flash",

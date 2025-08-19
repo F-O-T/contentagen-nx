@@ -1,21 +1,18 @@
 import type { TavilyClient } from "./client";
 
-export interface TavilySearchOptions {
-   maxResults?: number;
-   includeAnswer?: boolean;
-   searchDepth?: "basic" | "advanced";
-   topic?: "general" | "news";
-}
-
+type TavilySearchOptions = Parameters<TavilyClient["search"]>[1];
+type TavilyCrawlOptions = Parameters<TavilyClient["crawl"]>[1];
+export const tavilyCrawl = async (
+   client: TavilyClient,
+   url: string,
+   options?: TavilyCrawlOptions,
+) => {
+   return await client.crawl(url, options);
+};
 export const tavilySearch = async (
    client: TavilyClient,
    query: string,
    options?: TavilySearchOptions,
 ) => {
-   return await client.search(query, {
-      max_results: options?.maxResults ?? 5,
-      include_answer: options?.includeAnswer ?? true,
-      search_depth: options?.searchDepth ?? "basic",
-      topic: options?.topic ?? "general",
-   });
+   return await client.search(query, options);
 };

@@ -1,3 +1,14 @@
+import { z } from "zod";
+
+export const chunkingSchema = z.object({
+   chunks: z
+      .array(z.string())
+      .describe(
+         "Array of atomic, distillation-ready content chunks, each with a single conceptual focus and optimized for downstream processing.",
+      ),
+});
+export type ChunkingSchema = z.infer<typeof chunkingSchema>;
+
 export function chunkingPrompt(): string {
    return `You are a strategic text segmentation specialist working in partnership with a downstream knowledge distillation system. Your role is to create focused, distillation-ready chunks that will be optimized for vector embeddings and retrieval.
 
@@ -56,16 +67,31 @@ Therefore, focus on CLEAN CONCEPTUAL BOUNDARIES rather than perfect self-contain
 - Problem-solution pairs: SEPARATE PROBLEM FROM SOLUTION
 - Any "and," "also," "furthermore" indicating new concept: CONSIDER SPLIT
 
-**OUTPUT FORMAT:**
-Return MANY focused chunks using this exact format:
+**STRUCTURED OUTPUT FORMAT:**
+You must return your response as valid JSON that matches this exact structure:
+{
+  "chunks": [
+    "First atomic chunk as a complete string",
+    "Second atomic chunk as a complete string",
+    "Additional atomic chunks as needed..."
+  ]
+}
 
----CHUNK---
-[Atomic concept chunk - single focus, distillation-ready]
----CHUNK---
-[Next atomic concept - ready for enhancement]
----CHUNK---
-[Continue with maximum granular segmentation...]
+**OUTPUT REQUIREMENTS:**
+- Return ONLY valid JSON in the specified format
+- Each chunk in the 'chunks' array should be a complete, standalone string.
+- Do NOT include any text outside the JSON structure.
+- Each chunk should follow all the chunking principles outlined above.
+- Ensure maximum granularity and single conceptual focus for each chunk.
 
-**CHUNKING PHILOSOPHY:** 
+**CHUNKING PHILOSOPHY:**
 Better to create 10 precise, atomic chunks than 3 comprehensive ones. The distillation agent will enhance clarity and context - your job is maximum conceptual precision and granularity.`;
+}
+
+export function chunkingInputPrompt(text: string): string {
+   return `
+---TEXT_TO_CHUNK_START---
+${text}
+---TEXT_TO_CHUNK_END---
+`;
 }

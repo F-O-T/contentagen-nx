@@ -21,7 +21,7 @@ import { instagramPostPrompt } from "../prompts/purpose/instagram_post";
 import { emailNewsletterPrompt } from "../prompts/purpose/email_newsletter";
 import { redditPostPrompt } from "../prompts/purpose/reddit_post";
 import { technicalDocumentationPrompt } from "../prompts/purpose/technical_documentation";
-import { searchSystemPrompt } from "../prompts/search/search-system";
+import { searchSystemPrompt } from "../prompts/search/search-query-creation";
 
 // Type definitions for content request and options
 export interface ContentRequest {
