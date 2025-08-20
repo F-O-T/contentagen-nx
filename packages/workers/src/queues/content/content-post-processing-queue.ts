@@ -16,6 +16,7 @@ import {
    removeTitleFromMarkdown,
 } from "@packages/helpers/text";
 import { runSaveContent } from "../../functions/database/save-content";
+import { updateContentStatus } from "../../functions/database/update-content-status";
 
 export interface ContentPostProcessingJobData {
    agentId: string;
@@ -33,6 +34,12 @@ export async function runContentPostProcessing(
    const { agentId, contentId, userId, editedDraft, searchSources, keywords } =
       payload;
    try {
+      // Update status to analyzing
+      await updateContentStatus({
+         contentId,
+         status: "analyzing",
+      });
+
       const { description, qualityScore } = await runAnalyzeContent({
          content: editedDraft,
          userId,

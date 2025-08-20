@@ -7,6 +7,7 @@ import { runGetAgent } from "../../functions/database/get-agent";
 import { runGetContentKeywords } from "../../functions/chunking/get-content-keywords";
 import { runRagByKeywords } from "../../functions/rag/brand-knowledge-rag-by-keywords";
 import { runGetImprovedSearchQuery } from "../../functions/chunking/get-improved-search-query";
+import { updateContentStatus } from "../../functions/database/update-content-status";
 
 export interface ContentPlanningJob {
    agentId: string;
@@ -20,6 +21,12 @@ export async function runContentPlanning(payload: ContentPlanningJob) {
    const { agentId, contentId, contentRequest } = payload;
    const { description } = contentRequest;
    try {
+      // Update status to planning
+      await updateContentStatus({
+         contentId,
+         status: "planning",
+      });
+
       const { agent } = await runGetAgent({ agentId });
       const { userId } = agent;
       const [improvedSearchQueryResult, contentKeywordsResult] =

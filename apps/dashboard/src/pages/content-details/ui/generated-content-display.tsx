@@ -101,10 +101,10 @@ export function GeneratedContentDisplay({
          onSuccess: async () => {
             toast.success("Content regeneration triggered!");
             await queryClient.invalidateQueries({
-               queryKey: [
-                  trpc.content.listAllContent.queryKey(),
-                  trpc.content.get.queryKey({ id: content.id }),
-               ],
+               queryKey: trpc.content.listAllContent.queryKey(),
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.get.queryKey({ id: content.id }),
             });
          },
       }),

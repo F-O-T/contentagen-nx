@@ -2,6 +2,7 @@ import { Worker, Queue, type Job } from "bullmq";
 import type { ContentRequest } from "@packages/database/schema";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
+import { updateContentStatus } from "../../functions/database/update-content-status";
 
 export interface ContentEditingJobData {
    searchSources: string[];
@@ -38,6 +39,12 @@ export async function runContentEditing(
       searchSources,
    } = payload;
    try {
+      // Update status to editing
+      await updateContentStatus({
+         contentId,
+         status: "editing",
+      });
+
       const { content: editedDraft } = await runEditContentDraft({
          data: {
             draft,

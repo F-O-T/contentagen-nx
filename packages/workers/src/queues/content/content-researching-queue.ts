@@ -6,6 +6,7 @@ import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../../helpers";
 import { runExternalLinkCuration } from "../../functions/web-search/external-link-curation";
 import { runWriteImprovedDescription } from "../../functions/writing/write-improved-description";
+import { updateContentStatus } from "../../functions/database/update-content-status";
 
 export interface ContentResearchJobData {
    userId: string;
@@ -29,6 +30,12 @@ export async function runContentResearch(payload: ContentResearchJobData) {
    } = payload;
    const { description } = contentRequest;
    try {
+      // Update status to researching
+      await updateContentStatus({
+         contentId,
+         status: "researching",
+      });
+
       const [
          optimizedQueryReult,
          keywordsSearchResult,

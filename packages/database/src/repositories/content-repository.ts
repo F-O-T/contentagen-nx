@@ -18,10 +18,11 @@ export async function getContentBySlug(
    try {
       // Find by meta.slug and agentId
       const result = await dbClient.query.content.findFirst({
-         where: (fields, { sql, and }) => and(
-            sql`${fields.meta}->>'slug' = ${slug}`,
-            sql`${fields.agentId} = ${agentId}`,
-         ),
+         where: (fields, { sql, and }) =>
+            and(
+               sql`${fields.meta}->>'slug' = ${slug}`,
+               sql`${fields.agentId} = ${agentId}`,
+            ),
       });
       if (!result) throw new NotFoundError("Content not found");
       return result;
@@ -147,7 +148,11 @@ export async function getContentStatsLast30Days(
    status: Array<Exclude<Content["status"], null>> = [
       "approved",
       "draft",
-      "generating",
+      "planning",
+      "researching",
+      "writing",
+      "editing",
+      "analyzing",
    ],
 ): Promise<{ count: number; wordsCount: number }> {
    try {

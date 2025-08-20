@@ -2,6 +2,7 @@ import { Worker, Queue, type Job } from "bullmq";
 import type { ContentRequest } from "@packages/database/schema";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
+import { updateContentStatus } from "../../functions/database/update-content-status";
 
 export interface ContentWritingJobData {
    userId: string;
@@ -40,6 +41,12 @@ export async function runContentWriting(
       contentId,
    } = payload;
    try {
+      // Update status to writing
+      await updateContentStatus({
+         contentId,
+         status: "writing",
+      });
+
       const { draft } = await runWriteContentDraft({
          data: {
             brandDocument,

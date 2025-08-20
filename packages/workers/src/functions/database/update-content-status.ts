@@ -1,35 +1,31 @@
 import { updateContent } from "@packages/database/repositories/content-repository";
 import { createDb } from "@packages/database/client";
 import { serverEnv } from "@packages/environment/server";
-import type { ContentMeta, ContentStats } from "@packages/database/schema";
+import type { ContentStatus } from "@packages/database/schema";
 import { emitContentStatusChanged } from "@packages/server-events";
 
 const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
 
-export async function runSaveContent(payload: {
+export async function updateContentStatus(payload: {
    contentId: string;
-   content: string;
-   stats: ContentStats;
-   meta: ContentMeta;
+   status: ContentStatus;
 }) {
-   const { contentId, content, meta, stats } = payload;
+   const { contentId, status } = payload;
    try {
+      // Update database first
       await updateContent(db, contentId, {
-         body: content,
-         stats,
-         meta,
-         status: "draft",
+         status,
       });
 
-      // Emit final draft status
+      // Then emit event
       emitContentStatusChanged({
          contentId,
-         status: "draft",
+         status,
       });
 
-      return { contentId, content };
+      return { contentId, status };
    } catch (error) {
-      console.error("Error saving content to database:", error);
+      console.error(`Error updating content status to ${status}:`, error);
       throw error;
    }
 }

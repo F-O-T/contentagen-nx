@@ -6,7 +6,6 @@ import { useSubscription } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
 import { useMemo } from "react";
 import { CreateContentCredenza } from "../features/create-content-credenza";
-
 import { useState, useCallback } from "react";
 import { Button } from "@packages/ui/components/button";
 
@@ -17,34 +16,62 @@ export function ContentListPage() {
    const [limit] = useState(7);
    const { data } = useSuspenseQuery(
       trpc.content.listAllContent.queryOptions({
-         status: ["draft", "generating", "approved"],
+         status: [
+            "draft",
+            "approved",
+            "pending",
+            "planning",
+            "researching",
+            "writing",
+            "editing",
+            "analyzing",
+         ],
          page,
          limit,
       }),
    );
 
-   const hasGenerating = useMemo(
-      () => data.items.some((item) => item.status === "generating"),
-      [data],
+   const hasGeneratingContent = useMemo(
+      () =>
+         data?.items?.some(
+            (item) =>
+               item.status &&
+               [
+                  "pending",
+                  "planning",
+                  "researching",
+                  "writing",
+                  "editing",
+                  "analyzing",
+               ].includes(item.status),
+         ) || false,
+      [data?.items],
    );
 
    useSubscription(
       trpc.content.onStatusChanged.subscriptionOptions(
          {},
          {
-            onData(data) {
-               toast.success(
-                  `Content finished generation, status updated to ${data.status}`,
-               );
+            onData(statusData) {
+               toast.success(`Content status updated to ${statusData.status}`);
                queryClient.invalidateQueries({
                   queryKey: trpc.content.listAllContent.queryKey({
-                     status: ["draft", "generating", "approved"],
+                     status: [
+                        "draft",
+                        "approved",
+                        "pending",
+                        "planning",
+                        "researching",
+                        "writing",
+                        "editing",
+                        "analyzing",
+                     ],
                      page,
                      limit,
                   }),
                });
             },
-            enabled: hasGenerating,
+            enabled: hasGeneratingContent,
          },
       ),
    );

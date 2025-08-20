@@ -14,7 +14,7 @@ import { z } from "zod";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 import {
    eventEmitter,
-   CONTENT_EVENTS,
+   EVENTS,
    type ContentStatusChangedPayload,
 } from "@packages/server-events";
 import { on } from "node:events";
@@ -106,13 +106,9 @@ export const contentRouter = router({
    onStatusChanged: publicProcedure
       .input(z.object({ contentId: z.string().optional() }).optional())
       .subscription(async function* (opts) {
-         for await (const [payload] of on(
-            eventEmitter,
-            CONTENT_EVENTS.statusChanged,
-            {
-               signal: opts.signal,
-            },
-         )) {
+         for await (const [payload] of on(eventEmitter, EVENTS.contentStatus, {
+            signal: opts.signal,
+         })) {
             const event = payload as ContentStatusChangedPayload;
             if (
                !opts.input?.contentId ||
