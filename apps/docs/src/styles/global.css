@@ -6,156 +6,153 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 
 @theme {
-  /* Map your primary colors to Starlight's accent system (this controls buttons!) */
-  --color-accent-50: oklch(0.98 0.01 93.48);
-  --color-accent-100: oklch(0.92 0.01 87.42);
-  --color-accent-200: oklch(0.88 0.04 298.21);
-  --color-accent-300: oklch(0.69 0.16 290.29);
-  --color-accent-400: oklch(0.62 0.14 39.15);
-  --color-accent-500: oklch(
-    0.62 0.14 39.15
-  ); /* This is your primary color - used for buttons! */
-  --color-accent-600: oklch(0.59 0.17 252.92);
-  --color-accent-700: oklch(0.43 0.02 99.33);
-  --color-accent-800: oklch(0.34 0.03 94.42);
-  --color-accent-900: oklch(0.27 0.02 99.7);
-  --color-accent-950: oklch(0.19 0 0);
+   /* Map your primary colors to Starlight's accent system (this controls buttons!) */
+   --color-accent-50: oklch(0.98 0.01 93.48);
+   --color-accent-100: oklch(0.92 0.01 87.42);
+   --color-accent-200: oklch(0.88 0.04 298.21);
+   --color-accent-300: oklch(0.69 0.16 290.29);
+   --color-accent-400: oklch(0.62 0.14 39.15);
+   --color-accent-500: oklch(0.62 0.14 39.15); /* This is your primary color - used for buttons! */
+   --color-accent-600: oklch(0.59 0.17 252.92);
+   --color-accent-700: oklch(0.43 0.02 99.33);
+   --color-accent-800: oklch(0.34 0.03 94.42);
+   --color-accent-900: oklch(0.27 0.02 99.7);
+   --color-accent-950: oklch(0.19 0 0);
 
-  /* Map your gray scale to Starlight's expected format */
-  --color-gray-50: oklch(0.98 0.01 93.48);
-  --color-gray-100: oklch(0.93 0.02 91.55);
-  --color-gray-200: oklch(0.92 0.01 87.42);
-  --color-gray-300: oklch(0.88 0.04 298.21);
-  --color-gray-400: oklch(0.76 0.02 96.91);
-  --color-gray-500: oklch(0.61 0.01 91.49);
-  --color-gray-600: oklch(0.43 0.02 99.33);
-  --color-gray-700: oklch(0.34 0.03 94.42);
-  --color-gray-800: oklch(0.27 0.02 99.7);
-  --color-gray-900: oklch(0.19 0 0);
-  --color-gray-950: oklch(0.19 0 0);
+   /* Map your gray scale to Starlight's expected format */
+   --color-gray-50: oklch(0.98 0.01 93.48);
+   --color-gray-100: oklch(0.93 0.02 91.55);
+   --color-gray-200: oklch(0.92 0.01 87.42);
+   --color-gray-300: oklch(0.88 0.04 298.21);
+   --color-gray-400: oklch(0.76 0.02 96.91);
+   --color-gray-500: oklch(0.61 0.01 91.49);
+   --color-gray-600: oklch(0.43 0.02 99.33);
+   --color-gray-700: oklch(0.34 0.03 94.42);
+   --color-gray-800: oklch(0.27 0.02 99.7);
+   --color-gray-900: oklch(0.19 0 0);
+   --color-gray-950: oklch(0.19 0 0);
 
-  /* Your custom fonts */
-  --font-sans:
-    "Montserrat", "Geist", "Geist Fallback", ui-sans-serif, system-ui,
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol", "Noto Color Emoji";
-  --font-mono:
-    "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Menlo,
-    Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --font-serif:
-    "Geist", "Geist Fallback", ui-serif, Georgia, Cambria, "Times New Roman",
-    Times, serif;
+   /* Your custom fonts */
+   --font-sans:
+      "Montserrat", "Geist", "Geist Fallback", ui-sans-serif, system-ui,
+      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+      Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol", "Noto Color Emoji";
+   --font-mono:
+      "Geist Mono", "Geist Mono Fallback", ui-monospace, SFMono-Regular, Menlo,
+      Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+   --font-serif:
+      "Geist", "Geist Fallback", ui-serif, Georgia, Cambria, "Times New Roman",
+      Times, serif;
 
-  /* Your custom design system variables */
-  --color-background: var(--gray-50);
-  --color-foreground: var(--gray-800);
-  --color-card: var(--gray-50);
-  --color-card-foreground: var(--gray-950);
-  --color-popover: var(--gray-50);
-  --color-popover-foreground: var(--gray-700);
-  --color-primary: var(--accent-500); /* This now maps to your accent color */
-  --color-primary-foreground: var(--gray-50);
-  --color-secondary: var(--gray-100);
-  --color-secondary-foreground: var(--gray-700);
-  --color-muted: var(--gray-100);
-  --color-muted-foreground: var(--gray-500);
-  --color-accent: var(--gray-100);
-  --color-accent-foreground: var(--gray-700);
-  --color-destructive: var(--gray-950);
-  --color-border: var(--gray-200);
-  --color-input: var(--gray-300);
-  --color-ring: var(--accent-600);
-  --color-chart-1: var(--accent-400);
-  --color-chart-2: var(--accent-500);
-  --color-chart-3: var(--gray-100);
-  --color-chart-4: var(--gray-200);
-  --color-chart-5: var(--accent-400);
-  --color-sidebar: var(--gray-50);
-  --color-sidebar-foreground: var(--gray-700);
-  --color-sidebar-primary: var(--accent-500);
-  --color-sidebar-primary-foreground: var(--gray-50);
-  --color-sidebar-accent: var(--gray-100);
-  --color-sidebar-accent-foreground: var(--gray-950);
-  --color-sidebar-border: var(--gray-100);
-  --color-sidebar-ring: var(--gray-200);
+   /* Your custom design system variables */
+   --color-background: var(--gray-50);
+   --color-foreground: var(--gray-800);
+   --color-card: var(--gray-50);
+   --color-card-foreground: var(--gray-950);
+   --color-popover: var(--gray-50);
+   --color-popover-foreground: var(--gray-700);
+   --color-primary: var(--accent-500); /* This now maps to your accent color */
+   --color-primary-foreground: var(--gray-50);
+   --color-secondary: var(--gray-100);
+   --color-secondary-foreground: var(--gray-700);
+   --color-muted: var(--gray-100);
+   --color-muted-foreground: var(--gray-500);
+   --color-accent: var(--gray-100);
+   --color-accent-foreground: var(--gray-700);
+   --color-destructive: var(--gray-950);
+   --color-border: var(--gray-200);
+   --color-input: var(--gray-300);
+   --color-ring: var(--accent-600);
+   --color-chart-1: var(--accent-400);
+   --color-chart-2: var(--accent-500);
+   --color-chart-3: var(--gray-100);
+   --color-chart-4: var(--gray-200);
+   --color-chart-5: var(--accent-400);
+   --color-sidebar: var(--gray-50);
+   --color-sidebar-foreground: var(--gray-700);
+   --color-sidebar-primary: var(--accent-500);
+   --color-sidebar-primary-foreground: var(--gray-50);
+   --color-sidebar-accent: var(--gray-100);
+   --color-sidebar-accent-foreground: var(--gray-950);
+   --color-sidebar-border: var(--gray-100);
+   --color-sidebar-ring: var(--gray-200);
 
-  --radius-sm: calc(0.5rem - 4px);
-  --radius-md: calc(0.5rem - 2px);
-  --radius-lg: 0.5rem;
-  --radius-xl: calc(0.5rem + 4px);
-  --shadow-2xs: 0 1px 3px 0px oklch(0 0 0 / 0.05);
-  --shadow-xs: 0 1px 3px 0px oklch(0 0 0 / 0.05);
-  --shadow-sm:
-    0 1px 3px 0px oklch(0 0 0 / 0.1), 0 1px 2px -1px oklch(0 0 0 / 0.1);
-  --shadow: 0 1px 3px 0px oklch(0 0 0 / 0.1), 0 1px 2px -1px oklch(0 0 0 / 0.1);
-  --shadow-md:
-    0 1px 3px 0px oklch(0 0 0 / 0.1), 0 2px 4px -1px oklch(0 0 0 / 0.1);
-  --shadow-lg:
-    0 1px 3px 0px oklch(0 0 0 / 0.1), 0 4px 6px -1px oklch(0 0 0 / 0.1);
-  --shadow-xl:
-    0 1px 3px 0px oklch(0 0 0 / 0.1), 0 8px 10px -1px oklch(0 0 0 / 0.1);
-  --shadow-2xl: 0 1px 3px 0px oklch(0 0 0 / 0.25);
+   --radius-sm: calc(0.5rem - 4px);
+   --radius-md: calc(0.5rem - 2px);
+   --radius-lg: 0.5rem;
+   --radius-xl: calc(0.5rem + 4px);
+   --shadow-2xs: 0 1px 3px 0px oklch(0 0 0 / 0.05);
+   --shadow-xs: 0 1px 3px 0px oklch(0 0 0 / 0.05);
+   --shadow-sm:
+      0 1px 3px 0px oklch(0 0 0 / 0.1), 0 1px 2px -1px oklch(0 0 0 / 0.1);
+   --shadow:
+      0 1px 3px 0px oklch(0 0 0 / 0.1), 0 1px 2px -1px oklch(0 0 0 / 0.1);
+   --shadow-md:
+      0 1px 3px 0px oklch(0 0 0 / 0.1), 0 2px 4px -1px oklch(0 0 0 / 0.1);
+   --shadow-lg:
+      0 1px 3px 0px oklch(0 0 0 / 0.1), 0 4px 6px -1px oklch(0 0 0 / 0.1);
+   --shadow-xl:
+      0 1px 3px 0px oklch(0 0 0 / 0.1), 0 8px 10px -1px oklch(0 0 0 / 0.1);
+   --shadow-2xl: 0 1px 3px 0px oklch(0 0 0 / 0.25);
 }
 
 /* Dark mode overrides */
 .dark {
-  /* Update dark mode accent colors to match your primary theme */
-  --color-accent-50: oklch(0.27 0 0);
-  --color-accent-100: oklch(0.22 0 0);
-  --color-accent-200: oklch(0.21 0.01 88.79);
-  --color-accent-300: oklch(0.31 0.05 289.74);
-  --color-accent-400: oklch(0.67 0.13 38.92);
-  --color-accent-500: oklch(
-    0.67 0.13 38.92
-  ); /* Your primary color in dark mode */
-  --color-accent-600: oklch(0.59 0.17 252.92);
-  --color-accent-700: oklch(0.98 0.01 93.48);
-  --color-accent-800: oklch(0.81 0.01 93.53);
-  --color-accent-900: oklch(0.92 0 0);
-  --color-accent-950: oklch(0.64 0.21 25.39);
+   /* Update dark mode accent colors to match your primary theme */
+   --color-accent-50: oklch(0.27 0 0);
+   --color-accent-100: oklch(0.22 0 0);
+   --color-accent-200: oklch(0.21 0.01 88.79);
+   --color-accent-300: oklch(0.31 0.05 289.74);
+   --color-accent-400: oklch(0.67 0.13 38.92);
+   --color-accent-500: oklch(0.67 0.13 38.92); /* Your primary color in dark mode */
+   --color-accent-600: oklch(0.59 0.17 252.92);
+   --color-accent-700: oklch(0.98 0.01 93.48);
+   --color-accent-800: oklch(0.81 0.01 93.53);
+   --color-accent-900: oklch(0.92 0 0);
+   --color-accent-950: oklch(0.64 0.21 25.39);
 
-  --color-gray-50: oklch(0.27 0 0);
-  --color-gray-100: oklch(0.24 0 0);
-  --color-gray-200: oklch(0.22 0 0);
-  --color-gray-300: oklch(0.21 0.01 88.79);
-  --color-gray-400: oklch(0.31 0 0);
-  --color-gray-500: oklch(0.36 0.01 106.85);
-  --color-gray-600: oklch(0.43 0.01 99.03);
-  --color-gray-700: oklch(0.81 0.01 93.53);
-  --color-gray-800: oklch(0.92 0 0);
-  --color-gray-900: oklch(0.98 0.01 93.48);
-  --color-gray-950: oklch(0.64 0.21 25.39);
+   --color-gray-50: oklch(0.27 0 0);
+   --color-gray-100: oklch(0.24 0 0);
+   --color-gray-200: oklch(0.22 0 0);
+   --color-gray-300: oklch(0.21 0.01 88.79);
+   --color-gray-400: oklch(0.31 0 0);
+   --color-gray-500: oklch(0.36 0.01 106.85);
+   --color-gray-600: oklch(0.43 0.01 99.03);
+   --color-gray-700: oklch(0.81 0.01 93.53);
+   --color-gray-800: oklch(0.92 0 0);
+   --color-gray-900: oklch(0.98 0.01 93.48);
+   --color-gray-950: oklch(0.64 0.21 25.39);
 
-  --color-background: var(--gray-900);
-  --color-foreground: var(--gray-100);
-  --color-card: var(--gray-900);
-  --color-card-foreground: var(--gray-50);
-  --color-popover: var(--gray-800);
-  --color-popover-foreground: var(--gray-100);
-  --color-primary: var(--accent-400); /* Dark mode primary */
-  --color-primary-foreground: var(--gray-50);
-  --color-secondary: var(--gray-800);
-  --color-secondary-foreground: var(--gray-100);
-  --color-muted: var(--gray-800);
-  --color-muted-foreground: var(--gray-400);
-  --color-accent: var(--gray-800);
-  --color-accent-foreground: var(--gray-50);
-  --color-destructive: var(--accent-700);
-  --color-border: var(--gray-700);
-  --color-input: var(--gray-700);
-  --color-ring: var(--accent-600);
-  --color-chart-1: var(--accent-400);
-  --color-chart-2: var(--accent-500);
-  --color-chart-3: var(--gray-800);
-  --color-chart-4: var(--gray-700);
-  --color-chart-5: var(--accent-400);
-  --color-sidebar: var(--gray-950);
-  --color-sidebar-foreground: var(--gray-100);
-  --color-sidebar-primary: var(--gray-800);
-  --color-sidebar-primary-foreground: var(--gray-50);
-  --color-sidebar-accent: var(--gray-800);
-  --color-sidebar-accent-foreground: var(--gray-100);
-  --color-sidebar-border: var(--gray-800);
-  --color-sidebar-ring: var(--gray-700);
+   --color-background: var(--gray-900);
+   --color-foreground: var(--gray-100);
+   --color-card: var(--gray-900);
+   --color-card-foreground: var(--gray-50);
+   --color-popover: var(--gray-800);
+   --color-popover-foreground: var(--gray-100);
+   --color-primary: var(--accent-400); /* Dark mode primary */
+   --color-primary-foreground: var(--gray-50);
+   --color-secondary: var(--gray-800);
+   --color-secondary-foreground: var(--gray-100);
+   --color-muted: var(--gray-800);
+   --color-muted-foreground: var(--gray-400);
+   --color-accent: var(--gray-800);
+   --color-accent-foreground: var(--gray-50);
+   --color-destructive: var(--accent-700);
+   --color-border: var(--gray-700);
+   --color-input: var(--gray-700);
+   --color-ring: var(--accent-600);
+   --color-chart-1: var(--accent-400);
+   --color-chart-2: var(--accent-500);
+   --color-chart-3: var(--gray-800);
+   --color-chart-4: var(--gray-700);
+   --color-chart-5: var(--accent-400);
+   --color-sidebar: var(--gray-950);
+   --color-sidebar-foreground: var(--gray-100);
+   --color-sidebar-primary: var(--gray-800);
+   --color-sidebar-primary-foreground: var(--gray-50);
+   --color-sidebar-accent: var(--gray-800);
+   --color-sidebar-accent-foreground: var(--gray-100);
+   --color-sidebar-border: var(--gray-800);
+   --color-sidebar-ring: var(--gray-700);
 }

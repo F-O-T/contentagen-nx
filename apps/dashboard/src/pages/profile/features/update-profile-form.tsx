@@ -44,7 +44,7 @@ export function UpdateProfileForm({
    const [imageFile, setImageFile] = useState<File | null>(null);
    const handleUpdateProfile = useCallback(
       async (value: { name: string; image: any }, formApi: any) => {
-         let imageUrl = currentImage;
+         const imageUrl = currentImage;
          if (imageFile) {
             // TODO: implement image upload and return URL
             // Example: const uploaded = await uploadProfileImage(imageFile);

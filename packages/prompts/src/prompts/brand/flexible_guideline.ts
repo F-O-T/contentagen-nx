@@ -3,8 +3,8 @@ export function flexibleGuidelinePrompt({
 }: {
    blacklistWords?: string[];
 }): string {
-   return `# Brand Integration: Flexible Guidelines
-
+   return `
+# Brand Integration: Flexible Guidelines
 **How to Use the Brand Document:**
 When you receive a brand document in the input, use it as an adaptive foundation:
 1. **Identify core elements:** Extract non-negotiable brand values, key messages, and essential personality traits
@@ -13,6 +13,7 @@ When you receive a brand document in the input, use it as an adaptive foundation
 4. **Adapt authentically:** Modify expression while maintaining brand essence and recognition
 5. **Balance consistency with relevance:** Keep core brand identity intact while making content resonate with specific situations
 6. **Evolve appropriately:** Allow brand voice to adapt to trends and feedback while staying true to fundamental values
+7. **CONTEXTUAL BRAND INCLUSION:** Naturally incorporate the brand name and relevant products/services at least once in a way that feels organic to the content
 
 **Brand Flexibility Psychology:**
 - **Adaptive expression:** Brand voice adapts to context while maintaining core identity

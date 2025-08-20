@@ -73,7 +73,7 @@ export function OrganizationPageMembersTable({
             </CardHeader>
             <CardContent>
                {Array.isArray(organization.members) &&
-                  organization.members.length > 0 ? (
+               organization.members.length > 0 ? (
                   <Table>
                      <TableHeader>
                         <TableRow>

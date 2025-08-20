@@ -14,13 +14,6 @@ import { strictGuidelinePrompt } from "../prompts/brand/strict_guideline";
 import { flexibleGuidelinePrompt } from "../prompts/brand/flexible_guideline";
 import { referenceOnlyPrompt } from "../prompts/brand/reference_only";
 import { creativeBlendPrompt } from "../prompts/brand/creative_blend";
-import { blogPostPrompt } from "../prompts/purpose/blog_post";
-import { linkedinPostPrompt } from "../prompts/purpose/linkedin_post";
-import { twitterThreadPrompt } from "../prompts/purpose/twitter_thread";
-import { instagramPostPrompt } from "../prompts/purpose/instagram_post";
-import { emailNewsletterPrompt } from "../prompts/purpose/email_newsletter";
-import { redditPostPrompt } from "../prompts/purpose/reddit_post";
-import { technicalDocumentationPrompt } from "../prompts/purpose/technical_documentation";
 import { searchIntegrationSystemPrompt } from "../prompts/search/search-integrations";
 import { writingDraftSystemPrompt } from "../prompts/writing/writing-draft";
 
@@ -74,38 +67,6 @@ export function createAudienceSection(config: PersonaConfig): string {
          return beginnersAudiencePrompt();
       case "customers":
          return customersAudiencePrompt();
-      default:
-         return "";
-   }
-}
-
-export function createFormattingSection(config: PersonaConfig): string {
-   if (!config.formatting?.style) {
-      return "";
-   }
-   switch (config.formatting.style) {
-      case "structured": {
-         let listStyle = "";
-         if (config.formatting.listStyle) {
-            listStyle =
-               config.formatting.listStyle === "bullets"
-                  ? "bullet points (•)"
-                  : "numbered lists (1, 2, 3)";
-         }
-         return structuredPrompt({ listStyle });
-      }
-      case "narrative":
-         return narrativePrompt();
-      case "list_based": {
-         let listStyle = "";
-         if (config.formatting.listStyle) {
-            listStyle =
-               config.formatting.listStyle === "bullets"
-                  ? "bullet points (•)"
-                  : "numbered lists (1, 2, 3)";
-         }
-         return listBasedPrompt({ listStyle });
-      }
       default:
          return "";
    }
@@ -210,13 +171,12 @@ export function createBrandSection(config: PersonaConfig): string {
 export function generateWritingPrompt(config: PersonaConfig): string {
    const sections = [
       createMetadataSection(config),
-      writingDraftSystemPrompt(),
-      createVoiceSection(config),
-      createAudienceSection(config),
-      createFormattingSection(config),
-      createLanguageSection(config),
       createBrandSection(config),
+      createAudienceSection(config),
+      createLanguageSection(config),
+      createVoiceSection(config),
       searchIntegrationSystemPrompt(),
+      writingDraftSystemPrompt(),
    ];
    return sections.filter(Boolean).join(`\n\n${"=".repeat(80)}\n\n`);
 }

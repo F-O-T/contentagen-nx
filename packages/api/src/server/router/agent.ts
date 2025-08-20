@@ -63,7 +63,6 @@ export const agentRouter = router({
          });
          return updatedAgent;
       }),
-   //TODO: refatorar para usar o pacote de helpers
    stats: protectedProcedure
       .input(AgentSelectSchema.pick({ id: true }))
       .query(async ({ ctx, input }) => {

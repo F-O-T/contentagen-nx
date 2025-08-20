@@ -80,7 +80,7 @@ export function AgentDetailsKnowledgeBaseCard({
    async function handleDeleteAllFiles() {
       // Call handleDeleteFile for each file
       await Promise.all(
-         uploadedFiles.map((file) => handleDeleteFile(file.fileName))
+         uploadedFiles.map((file) => handleDeleteFile(file.fileName)),
       );
    }
 
@@ -289,7 +289,7 @@ export function AgentDetailsKnowledgeBaseCard({
          <CardFooter className="flex items-center gap-2 text-muted-foreground">
             <span className="text-xs">
                {uploadedFiles.length > 0
-                  ? `${uploadedFiles.length} of ${FILE_UPLOAD_LIMIT} file${FILE_UPLOAD_LIMIT > 1 ? 's' : ''} uploaded.`
+                  ? `${uploadedFiles.length} of ${FILE_UPLOAD_LIMIT} file${FILE_UPLOAD_LIMIT > 1 ? "s" : ""} uploaded.`
                   : `No files uploaded yet.`}
             </span>
             <Badge variant="outline">
@@ -297,7 +297,7 @@ export function AgentDetailsKnowledgeBaseCard({
             </Badge>
             <span className="ml-auto text-xs">
                {canAddMore
-                  ? `You can upload ${remainingSlots} more file${remainingSlots > 1 ? 's' : ''}.`
+                  ? `You can upload ${remainingSlots} more file${remainingSlots > 1 ? "s" : ""}.`
                   : `Upload limit reached.`}
             </span>
          </CardFooter>

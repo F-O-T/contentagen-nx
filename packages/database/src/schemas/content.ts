@@ -107,7 +107,7 @@ export const ListContentByAgentInputSchema = z.object({
    status: z
       .enum(
          contentStatusEnum.enumValues,
-         "Invalid content status. Must be one of: draft, approved, generating.",
+         "Invalid content status. Must be one of: draft, approved.",
       )
       .array(),
    agentId: z.array(z.uuid("Invalid Agent ID format.")),

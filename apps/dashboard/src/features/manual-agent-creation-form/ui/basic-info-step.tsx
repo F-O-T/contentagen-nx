@@ -8,7 +8,7 @@ export function BasicInfoStep({ form }: { form: AgentForm }) {
       <div className="space-y-4">
          <form.AppField name="metadata.name">
             {(field) => (
-               <field.FieldContainer >
+               <field.FieldContainer>
                   <field.FieldLabel>Agent Name *</field.FieldLabel>
                   <Input
                      autoComplete="off"
@@ -24,12 +24,9 @@ export function BasicInfoStep({ form }: { form: AgentForm }) {
                </field.FieldContainer>
             )}
          </form.AppField>
-         <form.AppField
-            name="metadata.description"
-            
-         >
+         <form.AppField name="metadata.description">
             {(field) => (
-               <field.FieldContainer >
+               <field.FieldContainer>
                   <field.FieldLabel>Description *</field.FieldLabel>
                   <TiptapEditor
                      value={field.state.value || "<p></p>"}
@@ -40,9 +37,7 @@ export function BasicInfoStep({ form }: { form: AgentForm }) {
                      name={field.name}
                      id={field.name}
                      placeholder="Describe what this agent does..."
-                 
                      className="w-full"
-                     
                   />
                   <field.FieldMessage />
                </field.FieldContainer>
@@ -86,15 +81,15 @@ export function BasicInfoStepSubscribe({
             const isNameValid =
                nameValue?.trim() !== "" &&
                (!nameErrors || nameErrors.length === 0);
-            
+
             // Helper function to check if TipTap content is empty
             const isContentEmpty = (htmlContent: string | undefined) => {
                if (!htmlContent) return true;
                // Remove HTML tags and check if there's actual text content
-               const textContent = htmlContent.replace(/<[^>]*>/g, '').trim();
-               return textContent === '';
+               const textContent = htmlContent.replace(/<[^>]*>/g, "").trim();
+               return textContent === "";
             };
-            
+
             const isDescriptionValid =
                !isContentEmpty(descriptionValue) &&
                (!descriptionErrors || descriptionErrors.length === 0);

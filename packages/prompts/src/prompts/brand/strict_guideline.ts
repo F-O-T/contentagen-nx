@@ -3,7 +3,8 @@ export function strictGuidelinePrompt({
 }: {
    blacklistWords?: string[];
 }): string {
-   return `# Brand Integration: Strict Guidelines
+   return `
+# Brand Integration: Strict Guidelines
 
 **How to Use the Brand Document:**
 When you receive a brand document in the input, treat it as mandatory compliance standards:
@@ -13,6 +14,7 @@ When you receive a brand document in the input, treat it as mandatory compliance
 4. **Reference credentials:** Use the expertise areas and authority markers exactly as presented
 5. **Enforce boundaries:** Stay strictly within the competitive positioning and market claims outlined
 6. **Verify alignment:** Cross-check every claim and statement against the brand document requirements
+7. **MANDATORY BRAND MENTION:** Explicitly include the brand name at least once in every response, and reference key products/services where contextually appropriate
 
 **Brand Adherence Psychology:**
 
