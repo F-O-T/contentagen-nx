@@ -180,7 +180,48 @@ Think of yourself as a skilled communicator who happens to have broad knowledge,
 
 **Essential Philosophy:** Natural writing isn't perfect writing. It includes the organic qualities that make communication alive and engaging—the features that help meaning transcend mere information transfer to become genuine understanding between minds.
 
-**Implementation Note:** Apply these principles fluidly rather than mechanically. Let them guide your instincts rather than constrain your expression. The best writing happens when sophisticated technique becomes so internalized that it feels natural and effortless.`;
+**Implementation Note:** Apply these principles fluidly rather than mechanically. Let them guide your instincts rather than constrain your expression. The best writing happens when sophisticated technique becomes so internalized that it feels natural and effortless.
+
+**REQUIRED OUTPUT FORMAT:**
+You must return your response as a valid JSON object that exactly matches this schema:
+
+\`\`\`json
+{
+  "draft": "string"
+}
+\`\`\`
+
+**SPECIFIC FORMAT REQUIREMENTS:**
+- Return ONLY valid JSON - no additional text, explanations, or formatting outside the JSON structure
+- The JSON must contain exactly one key: "draft"
+- The value must be a single string containing the complete written draft
+- The draft should be substantial and detailed, following all the writing principles outlined above
+- Ensure proper JSON string escaping (escape quotes, newlines, etc.)
+- Do not include any text before or after the JSON object
+- The draft string can include natural formatting like line breaks (\\n) for paragraphs
+
+**EXAMPLE OUTPUT STRUCTURE:**
+\`\`\`json
+{
+  "draft": "Your complete written draft goes here, following all the sophisticated writing principles while maintaining natural flow and authentic voice..."
+}
+\`\`\`
+
+**VALIDATION CHECKLIST:**
+Before finalizing, ensure your response:
+✓ Is returned as valid JSON matching the exact schema format
+✓ Contains no text outside the JSON structure
+✓ Demonstrates exceptional clarity and sophistication while feeling natural
+✓ Follows all the fundamental writing principles outlined above
+✓ Shows authentic voice development and conversational authority
+✓ Exhibits structural excellence and dynamic organization
+✓ Uses humanizing language choices and natural speech patterns
+✓ Provides depth, nuance, and intellectual rigor
+✓ Avoids robotic patterns while embracing organic flow
+✓ Shows genuine engagement with the subject matter
+✓ Reads like thoughtful expert communication, not algorithmic generation
+
+Generate the complete writing draft now in the required JSON format.`;
 }
 
 export function writingDraftInputPrompt(

@@ -15,7 +15,12 @@ import { ElysiaAdapter } from "@bull-board/elysia";
 import { createBullBoard } from "@bull-board/api";
 import { billingLlmIngestionQueue } from "@packages/workers/queues/billing-llm-ingestion-queue";
 import { billingWebSearchIngestionQueue } from "@packages/workers/queues/billing-websearch-ingestion-queue";
-import { contentGenerationQueue } from "@packages/workers/producers/content-generation";
+import { contentEditingQueue } from "@packages/workers/queues/content/content-editing-queue";
+import { contentPostProcessingQueue } from "@packages/workers/queues/content/content-post-processing-queue";
+import { contentResearchingQueue } from "@packages/workers/queues/content/content-researching-queue";
+import { contentPlanningQueue } from "@packages/workers/queues/content/content-planning-queue";
+import { contentWritingQueue } from "@packages/workers/queues/content/content-writing-queue";
+
 import { isProduction } from "@packages/environment/helpers";
 const serverAdapter = new ElysiaAdapter("/ui");
 
@@ -23,7 +28,11 @@ createBullBoard({
    queues: [
       new BullMQAdapter(billingLlmIngestionQueue),
       new BullMQAdapter(billingWebSearchIngestionQueue),
-      new BullMQAdapter(contentGenerationQueue),
+      new BullMQAdapter(contentEditingQueue),
+      new BullMQAdapter(contentPostProcessingQueue),
+      new BullMQAdapter(contentResearchingQueue),
+      new BullMQAdapter(contentPlanningQueue),
+      new BullMQAdapter(contentWritingQueue),
    ],
    serverAdapter,
    options: {

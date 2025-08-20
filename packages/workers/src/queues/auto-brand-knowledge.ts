@@ -1,8 +1,5 @@
 import { Worker, Queue, type Job } from "bullmq";
-import { runCrawlWebsiteForBrandKnowledge } from "../functions/crawl-website-for-brand-knowledge";
-import { runChunkBrandDocument } from "../functions/chunk-brand-document";
-import { runUploadBrandChunks } from "../functions/upload-brand-chunks";
-import { runCreateBrandDocument } from "../functions/create-brand-document";
+import { runCrawlWebsiteForBrandKnowledge } from "../functions/web-search/crawl-website-for-brand-knowledge.ts";
 import { knowledgeDistillationQueue } from "./knowledge-distillation";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
@@ -28,6 +25,7 @@ registerGracefulShutdown(autoBrandKnowledgeQueue);
 export const autoBrandKnowledgeWorker = new Worker<AutoBrandKnowledgePayload>(
    QUEUE_NAME,
    async (job: Job<AutoBrandKnowledgePayload>) => {
+      return;
       const { agentId, websiteUrl, userId } = job.data;
       console.log(
          `[auto-brand-knowledge] Job started for agentId=${agentId}, url=${websiteUrl}`,

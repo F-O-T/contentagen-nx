@@ -1,6 +1,5 @@
 import { Worker, Queue, type Job } from "bullmq";
-import { runChunkText } from "../functions/chunk-text";
-import { runChunkDistillation } from "../functions/chunk-distillation";
+
 import { chunkSavingQueue } from "./chunk-saving";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
@@ -15,6 +14,7 @@ export async function runDistillationPipeline(payload: {
    const { inputText, agentId, sourceId, userId } = payload;
    console.info("Starting distillation pipeline", { agentId });
    try {
+      return;
       // 1. Chunking
       const chunkingResult = await runChunkText({ inputText, userId });
       if (!chunkingResult || !chunkingResult.chunks) {

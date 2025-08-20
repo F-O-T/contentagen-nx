@@ -1,5 +1,5 @@
 import { Worker, Queue, type Job } from "bullmq";
-import { runDistilledChunkFormatterAndSaveOnChroma } from "../functions/save-chunk";
+import { runDistilledChunkFormatterAndSaveOnChroma } from "../functions/rag/save-chunk";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../helpers";

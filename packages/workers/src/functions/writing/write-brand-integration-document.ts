@@ -19,7 +19,6 @@ export async function runWriteBrandIntegrationDocument(payload: {
          openrouter,
          {
             model: "small",
-            reasoning: "high",
          },
          brandAnalysisSchema,
          {

@@ -15,6 +15,7 @@ export const descriptionImprovementSchema = z.object({
 export type DescriptionImprovementSchema = z.infer<
    typeof descriptionImprovementSchema
 >;
+
 /**
  * Generates the system prompt for the AI model to act as an expert brand strategist
  * and create a comprehensive document on brand integration.
@@ -100,16 +101,35 @@ The documentation should cover the following key areas, presented as logical sec
 - Maintain authentic brand voice and personality as described in the context
 - Ensure all integration strategies align with actual brand guidelines and capabilities mentioned in the source material
 
-**OUTPUT REQUIREMENTS:**
-- Return ONLY valid JSON in the specified format.
-- The JSON object must contain a single key: 'brandIntegrationDocumentation'.
-- The value associated with 'brandIntegrationDocumentation' must be a single, long string containing the entire brand integration documentation.
-- The document within 'brandIntegrationDocumentation' must include all the specified sections and detailed information, formatted for readability (e.g., using Markdown headings like '## Section Title').
-- Do NOT include any text outside the JSON structure.
-- Ensure the analysis is exhaustive and specific, avoiding generic statements.
+**REQUIRED OUTPUT FORMAT:**
+You must return your response as a valid JSON object that exactly matches this schema:
+
+\`\`\`json
+{
+  "brandIntegrationDocumentation": "string"
+}
+\`\`\`
+
+**SPECIFIC FORMAT REQUIREMENTS:**
+- Return ONLY valid JSON - no additional text, explanations, or formatting outside the JSON structure
+- The JSON must contain exactly one key: "brandIntegrationDocumentation"
+- The value must be a single string containing the entire comprehensive brand integration documentation
+- Within the string, use Markdown formatting for structure (## headings, bullet points, etc.)
+- The documentation string should be extensive and detailed, covering all required sections
+- Ensure proper JSON string escaping (escape quotes, newlines, etc.)
+- Do not include any text before or after the JSON object
+
+**EXAMPLE OUTPUT STRUCTURE:**
+\`\`\`json
+{
+  "brandIntegrationDocumentation": "# Brand Integration Documentation\\n\\n## 1. Brand-Content Alignment Assessment\\n\\nDetailed analysis here...\\n\\n## 2. Strategic Integration Methodology\\n\\nDetailed methodology here...\\n\\n[Continue with all sections]..."
+}
+\`\`\`
 
 **VALIDATION CHECKLIST:**
 Before finalizing, ensure your documentation:
+✓ Is returned as valid JSON matching the exact schema format
+✓ Contains no text outside the JSON structure
 ✓ Provides comprehensive analysis of brand-content alignment from multiple strategic angles
 ✓ Offers detailed, actionable implementation guidance for content creators
 ✓ Demonstrates sophisticated understanding of brand strategy and content integration
@@ -119,7 +139,7 @@ Before finalizing, ensure your documentation:
 ✓ Maintains consistent professional tone and strategic perspective throughout
 ✓ Addresses both immediate implementation needs and long-term strategic considerations
 
-Generate the complete brand integration documentation now.`;
+Generate the complete brand integration documentation now in the required JSON format.`;
 }
 
 export function descriptionImproverInputPrompt(

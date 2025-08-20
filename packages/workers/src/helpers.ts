@@ -1,8 +1,3 @@
-/**
- * Registers graceful shutdown for BullMQ queues/workers.
- * Usage: call registerGracefulShutdown(queueOrWorker) for each instance.
- * On SIGINT/SIGTERM, all registered instances will be closed before exit.
- */
 import type { Queue, Worker } from "bullmq";
 
 const shutdownTargets: Array<Queue | Worker> = [];
@@ -35,11 +30,3 @@ async function gracefulShutdown(signal: string) {
 
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-
-// Example usage comment:
-// import { Queue, Worker } from "bullmq";
-// import { registerGracefulShutdown } from "./helpers";
-// const queue = new Queue("myQueue", ...);
-// registerGracefulShutdown(queue);
-// const worker = new Worker("myQueue", async job => { ... });
-// registerGracefulShutdown(worker);

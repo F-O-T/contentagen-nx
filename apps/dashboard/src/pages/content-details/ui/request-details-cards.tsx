@@ -24,12 +24,12 @@ export function ContentDetailsCard({ content }: { content: ContentSelect }) {
             <InfoItem
                icon={<Type className="h-4 w-4" />}
                label="Title"
-               value={content.meta?.title || ""}
+               value={content.meta?.title ? `# ${content.meta.title}` : ""}
             />
             <InfoItem
                icon={<Link2 className="h-4 w-4" />}
                label="Description"
-               value={content.meta?.description || ""}
+               value={content.meta?.description ? `\n- ${content.meta.description}` : ""}
             />
             <Separator />
             <div className="grid grid-cols-2 gap-4">
@@ -53,7 +53,7 @@ export function ContentDetailsCard({ content }: { content: ContentSelect }) {
                      label="Keywords"
                      value={
                         content.meta?.keywords?.length
-                           ? content.meta.keywords.join(", ")
+                           ? content.meta.keywords.map(kw => `- ${kw}`).join("\n")
                            : ""
                      }
                   />
@@ -63,14 +63,14 @@ export function ContentDetailsCard({ content }: { content: ContentSelect }) {
                   label="Sources"
                   value={
                      content.meta?.sources?.length
-                        ? content.meta.sources.join("\n")
+                        ? content.meta.sources.map(src => `- [${src}](${src})`).join("\n")
                         : ""
                   }
                />
                <InfoItem
                   icon={<Link2 className="h-4 w-4" />}
                   label="Slug"
-                  value={content.meta?.slug || ""}
+                                    value={content.meta?.slug ? `# ${content.meta.slug}` : ""}
                />
             </div>
          </CardContent>

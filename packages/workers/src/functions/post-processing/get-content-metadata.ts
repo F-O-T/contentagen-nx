@@ -7,7 +7,7 @@ import {
    unifiedContentAnalysisSchema,
    type UnifiedContentAnalysis,
 } from "@packages/prompts/prompt/post-processing/content-metadata";
-import { addBillingLlmIngestionJob } from "../../helper-queues/billing-llm-ingestion-queue";
+import { addBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
 
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 

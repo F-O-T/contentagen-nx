@@ -20,7 +20,6 @@ export async function runWriteImprovedDescription(payload: {
          openrouter,
          {
             model: "small",
-            reasoning: "high",
          },
          descriptionImprovementSchema,
          {
