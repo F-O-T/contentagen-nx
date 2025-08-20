@@ -2,7 +2,7 @@ import { Worker, Queue, type Job } from "bullmq";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../helpers";
-import { ingestWebSearchBilling } from "../functions/ingest-usage";
+import { ingestWebSearchBilling } from "../functions/billing/ingest-usage";
 
 export type BillingWebSearchIngestionJobData = Parameters<
    typeof ingestWebSearchBilling

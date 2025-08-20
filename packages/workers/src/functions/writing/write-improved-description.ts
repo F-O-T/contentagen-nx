@@ -7,9 +7,9 @@ import {
 import { generateOpenRouterObject } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
-import { addBillingLlmIngestionJob } from "../../helper-queues/billing-llm-ingestion-queue";
+import { addBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
-export async function runWriteBrandIntegrationDocument(payload: {
+export async function runWriteImprovedDescription(payload: {
    description: string;
    chunks: string[];
    userId: string;

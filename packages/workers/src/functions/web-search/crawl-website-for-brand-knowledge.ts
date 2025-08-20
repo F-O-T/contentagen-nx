@@ -1,7 +1,7 @@
 import { createTavilyClient } from "@packages/tavily/client";
 import { tavilyCrawl } from "@packages/tavily/helpers";
 import { serverEnv } from "@packages/environment/server";
-import { addBillingWebSearchIngestionJob } from "../../helper-queues/billing-websearch-ingestion-queue";
+import { addBillingWebSearchIngestionJob } from "../../queues/billing-websearch-ingestion-queue";
 
 type CrawlWebsiteForKnowledge = {
    websiteUrl: string;
@@ -9,7 +9,7 @@ type CrawlWebsiteForKnowledge = {
 };
 
 const tavily = createTavilyClient(serverEnv.TAVILY_API_KEY);
-export async function runExternalLinkCuration(
+export async function runCrawlWebsiteForBrandKnowledge(
    payload: CrawlWebsiteForKnowledge,
 ) {
    const { websiteUrl, userId } = payload;

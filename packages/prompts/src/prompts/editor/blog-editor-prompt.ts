@@ -1,3 +1,10 @@
+import { z } from "zod";
+export const editorObjectSchema = z.object({
+   content: z
+      .string()
+      .describe("The content after the editor has made changes."),
+});
+export type EditorObjectSchema = z.infer<typeof editorObjectSchema>;
 export function blogEditorPrompt() {
    return `
 # Blog Post Editor System Prompt
