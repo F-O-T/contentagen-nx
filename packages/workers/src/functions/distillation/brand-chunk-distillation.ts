@@ -7,7 +7,7 @@ import {
 import { generateOpenRouterObject } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
-import { addBillingLlmIngestionJob } from "../../helper-queues/billing-llm-ingestion-queue";
+import { enqueueBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 export async function runChunksDistillation(payload: {
    chunks: string[];
@@ -28,7 +28,7 @@ export async function runChunksDistillation(payload: {
          },
       );
 
-      await addBillingLlmIngestionJob({
+      await enqueueBillingLlmIngestionJob({
          inputTokens: result.usage.inputTokens,
          outputTokens: result.usage.outputTokens,
          effort: "small",

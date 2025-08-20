@@ -1,25 +1,27 @@
 import {
    writingDraftInputPrompt,
    type WritingDraftSchema,
-   writingDraftSystemPrompt,
    writingDraftSchema,
 } from "@packages/prompts/prompt/writing/writing-draft";
 import { generateOpenRouterObject } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
-import { addBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
-import type { ContentRequest } from "@packages/database/schema";
+import { enqueueBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
+import type { ContentRequest, PersonaConfig } from "@packages/database/schema";
+import { generateWritingPrompt } from "@packages/prompts/helpers/assemble-writing-prompt";
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 export async function runWriteContentDraft(payload: {
    data: {
       brandDocument: string;
       webSearchContent: string;
       contentRequest: ContentRequest;
+      personaConfig: PersonaConfig;
    };
    userId: string;
 }) {
    const { data, userId } = payload;
-   const { brandDocument, webSearchContent, contentRequest } = data;
+   const { brandDocument, webSearchContent, contentRequest, personaConfig } =
+      data;
    try {
       const result = await generateOpenRouterObject(
          openrouter,
@@ -33,11 +35,11 @@ export async function runWriteContentDraft(payload: {
                brandDocument,
                webSearchContent,
             ),
-            system: writingDraftSystemPrompt(),
+            system: generateWritingPrompt(personaConfig),
          },
       );
 
-      await addBillingLlmIngestionJob({
+      await enqueueBillingLlmIngestionJob({
          inputTokens: result.usage.inputTokens,
          outputTokens: result.usage.outputTokens,
          effort: "small",

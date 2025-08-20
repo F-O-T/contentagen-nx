@@ -4,23 +4,27 @@ import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../helpers";
 
+export interface ChunkSavingJob {
+   chunk: string;
+   agentId: string;
+   sourceId: string;
+}
+
 const QUEUE_NAME = "chunk-saving-job";
 const redis = createRedisClient(serverEnv.REDIS_URL);
 
-export const chunkSavingQueue = new Queue(QUEUE_NAME, {
+export const chunkSavingQueue = new Queue<ChunkSavingJob>(QUEUE_NAME, {
    connection: redis,
 });
 registerGracefulShutdown(chunkSavingQueue);
 
-export const chunkSavingWorker = new Worker(
+export async function enqueueChunkSavingJob(job: ChunkSavingJob) {
+   return chunkSavingQueue.add("chunk-saving", job);
+}
+
+export const chunkSavingWorker = new Worker<ChunkSavingJob>(
    QUEUE_NAME,
-   async (
-      job: Job<{
-         chunk: string;
-         agentId: string;
-         sourceId: string;
-      }>,
-   ) => {
+   async (job: Job<ChunkSavingJob>) => {
       console.info("[ChunkSaving] Processing chunk save job", {
          jobId: job.id,
          agentId: job.data.agentId,

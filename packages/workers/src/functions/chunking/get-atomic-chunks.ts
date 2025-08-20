@@ -7,7 +7,7 @@ import {
 } from "@packages/prompts/prompt/text/chunking";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
-import { addBillingLlmIngestionJob } from "../../helper-queues/billing-llm-ingestion-queue";
+import { enqueueBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 export async function runCreateBrandDocuments(payload: {
    inputText: string;
@@ -26,7 +26,7 @@ export async function runCreateBrandDocuments(payload: {
             prompt: chunkingInputPrompt(inputText),
          },
       );
-      await addBillingLlmIngestionJob({
+      await enqueueBillingLlmIngestionJob({
          inputTokens: brandDocumentsResult.usage.inputTokens,
          outputTokens: brandDocumentsResult.usage.outputTokens,
          effort: "small",

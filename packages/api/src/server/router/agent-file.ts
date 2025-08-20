@@ -1,6 +1,6 @@
 import { listFiles, uploadFile } from "@packages/files/client";
 import { autoBrandKnowledgeQueue } from "@packages/workers/queues/auto-brand-knowledge";
-import { knowledgeDistillationQueue } from "@packages/workers/queues/knowledge-distillation";
+import { enqueueKnowledgeDistillationJob } from "@packages/workers/queues/knowledge-distillation";
 import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 import {
@@ -101,14 +101,12 @@ export const agentFileRouter = router({
          try {
             // Read file content as text
             const fileContent = buffer.toString("utf-8");
-            await knowledgeDistillationQueue.add(
-               "auto-brand-knowledge-workflow",
-               {
-                  inputText: fileContent,
-                  agentId,
-                  sourceId: key,
-               },
-            );
+            await enqueueKnowledgeDistillationJob({
+               inputText: fileContent,
+               agentId,
+               sourceId: key,
+               userId: ctx.session.user.id,
+            });
          } catch (err) {
             // Log error but do not block upload
             console.error("Knowledge distillation failed:", err);

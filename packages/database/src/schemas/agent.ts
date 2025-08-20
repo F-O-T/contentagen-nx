@@ -51,15 +51,7 @@ export const BrandConfigSchema = z.object({
 });
 
 // 6. Repurposing — strongly-typed channels
-export const PurposeChannelSchema = z.enum([
-   "blog_post",
-   "linkedin_post",
-   "twitter_thread",
-   "instagram_post",
-   "email_newsletter",
-   "reddit_post",
-   "technical_documentation",
-]);
+export const PurposeChannelSchema = z.enum(["blog_post"]);
 
 // 7. Top-level PersonaConfig
 export const PersonaConfigSchema = z.object({

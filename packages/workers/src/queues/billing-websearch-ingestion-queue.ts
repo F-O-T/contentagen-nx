@@ -4,23 +4,40 @@ import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../helpers";
 import { ingestWebSearchBilling } from "../functions/billing/ingest-usage";
 
-export type BillingWebSearchIngestionJobData = Parameters<
-   typeof ingestWebSearchBilling
->[0];
+export interface BillingWebSearchIngestionJob {
+   method: "crawl" | "search";
+   userId: string;
+}
+
+export async function runBillingWebSearchIngestion(
+   payload: BillingWebSearchIngestionJob,
+) {
+   await ingestWebSearchBilling(payload);
+}
+
 const QUEUE_NAME = "billing-websearch-ingestion-job";
 const redis = createRedisClient(serverEnv.REDIS_URL);
 
 export const billingWebSearchIngestionQueue =
-   new Queue<BillingWebSearchIngestionJobData>(QUEUE_NAME, {
+   new Queue<BillingWebSearchIngestionJob>(QUEUE_NAME, {
       connection: redis,
    });
 registerGracefulShutdown(billingWebSearchIngestionQueue);
 
+export async function enqueueBillingWebSearchIngestionJob(
+   job: BillingWebSearchIngestionJob,
+) {
+   return billingWebSearchIngestionQueue.add(
+      "billing-websearch-ingestion",
+      job,
+   );
+}
+
 export const billingWebSearchIngestionWorker =
-   new Worker<BillingWebSearchIngestionJobData>(
+   new Worker<BillingWebSearchIngestionJob>(
       QUEUE_NAME,
-      async (job: Job<BillingWebSearchIngestionJobData>) => {
-         await ingestWebSearchBilling(job.data);
+      async (job: Job<BillingWebSearchIngestionJob>) => {
+         await runBillingWebSearchIngestion(job.data);
       },
       {
          connection: redis,
@@ -30,9 +47,3 @@ export const billingWebSearchIngestionWorker =
       },
    );
 registerGracefulShutdown(billingWebSearchIngestionWorker);
-
-export function addBillingWebSearchIngestionJob(
-   data: BillingWebSearchIngestionJobData,
-) {
-   return billingWebSearchIngestionQueue.add(QUEUE_NAME, data);
-}

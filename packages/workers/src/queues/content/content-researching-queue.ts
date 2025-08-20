@@ -1,6 +1,6 @@
 import { Worker, Queue, type Job } from "bullmq";
 import { enqueueContentWritingJob } from "./content-writing-queue";
-import type { ContentRequest } from "@packages/database/schema";
+import type { ContentRequest, PersonaConfig } from "@packages/database/schema";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../../helpers";
@@ -10,6 +10,8 @@ import { updateContentStatus } from "../../functions/database/update-content-sta
 
 export interface ContentResearchJobData {
    userId: string;
+   personaConfig: PersonaConfig;
+
    keywords: string[];
    chunks: string[];
    agentId: string;
@@ -27,6 +29,7 @@ export async function runContentResearch(payload: ContentResearchJobData) {
       keywords,
       optimizedQuery,
       userId,
+      personaConfig,
    } = payload;
    const { description } = contentRequest;
    try {
@@ -82,6 +85,7 @@ export async function runContentResearch(payload: ContentResearchJobData) {
          searchSources: searchSources(),
          webSearchContent: getSearchResults(),
          brandDocument: brandIntegrationDocumentation,
+         personaConfig,
       });
 
       return {

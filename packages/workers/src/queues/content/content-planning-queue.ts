@@ -28,7 +28,7 @@ export async function runContentPlanning(payload: ContentPlanningJob) {
       });
 
       const { agent } = await runGetAgent({ agentId });
-      const { userId } = agent;
+      const { userId, personaConfig } = agent;
       const [improvedSearchQueryResult, contentKeywordsResult] =
          await Promise.all([
             runGetImprovedSearchQuery({ inputText: description, userId }),
@@ -50,6 +50,7 @@ export async function runContentPlanning(payload: ContentPlanningJob) {
          keywords,
          chunks,
          optimizedQuery,
+         personaConfig,
       });
 
       return {

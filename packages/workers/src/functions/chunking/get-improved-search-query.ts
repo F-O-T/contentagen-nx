@@ -7,7 +7,7 @@ import {
 } from "@packages/prompts/prompt/search/search-query-creation";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
-import { addBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
+import { enqueueBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 export async function runGetImprovedSearchQuery(payload: {
    inputText: string;
@@ -26,7 +26,7 @@ export async function runGetImprovedSearchQuery(payload: {
             prompt: tavilyQueryOptimizationPrompt(inputText),
          },
       );
-      await addBillingLlmIngestionJob({
+      await enqueueBillingLlmIngestionJob({
          inputTokens: searchQueryCreationResult.usage.inputTokens,
          outputTokens: searchQueryCreationResult.usage.outputTokens,
          effort: "small",

@@ -1,5 +1,5 @@
 import { Worker, Queue, type Job } from "bullmq";
-import type { ContentRequest } from "@packages/database/schema";
+import type { ContentRequest, PersonaConfig } from "@packages/database/schema";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { updateContentStatus } from "../../functions/database/update-content-status";
@@ -11,6 +11,7 @@ export interface ContentWritingJobData {
    brandDocument: string;
    contentRequest: ContentRequest;
    agentId: string;
+   personaConfig: PersonaConfig;
    contentId: string;
    keywords: string[];
 }
@@ -31,6 +32,7 @@ export async function runContentWriting(
    payload: ContentWritingJobData,
 ): Promise<ContentWritingJobResult> {
    const {
+      personaConfig,
       contentRequest,
       keywords,
       brandDocument,
@@ -52,6 +54,7 @@ export async function runContentWriting(
             brandDocument,
             webSearchContent,
             contentRequest,
+            personaConfig,
          },
          userId,
       });

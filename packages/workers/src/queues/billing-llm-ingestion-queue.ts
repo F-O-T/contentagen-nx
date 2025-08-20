@@ -4,11 +4,21 @@ import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../helpers";
 import { ingestLlmBilling } from "../functions/billing/ingest-usage";
 
-export type BillingLlmIngestionJobData = Parameters<typeof ingestLlmBilling>[0];
+export interface BillingLlmIngestionJob {
+   inputTokens?: number;
+   outputTokens?: number;
+   effort: "small" | "medium";
+   userId: string;
+}
+
+export async function runBillingLlmIngestion(payload: BillingLlmIngestionJob) {
+   await ingestLlmBilling(payload);
+}
+
 const QUEUE_NAME = "billing-llm-ingestion-job";
 const redis = createRedisClient(serverEnv.REDIS_URL);
 
-export const billingLlmIngestionQueue = new Queue<BillingLlmIngestionJobData>(
+export const billingLlmIngestionQueue = new Queue<BillingLlmIngestionJob>(
    QUEUE_NAME,
    {
       connection: redis,
@@ -16,10 +26,16 @@ export const billingLlmIngestionQueue = new Queue<BillingLlmIngestionJobData>(
 );
 registerGracefulShutdown(billingLlmIngestionQueue);
 
-export const billingLlmIngestionWorker = new Worker<BillingLlmIngestionJobData>(
+export async function enqueueBillingLlmIngestionJob(
+   job: BillingLlmIngestionJob,
+) {
+   return billingLlmIngestionQueue.add("billing-llm-ingestion", job);
+}
+
+export const billingLlmIngestionWorker = new Worker<BillingLlmIngestionJob>(
    QUEUE_NAME,
-   async (job: Job<BillingLlmIngestionJobData>) => {
-      await ingestLlmBilling(job.data);
+   async (job: Job<BillingLlmIngestionJob>) => {
+      await runBillingLlmIngestion(job.data);
    },
    {
       connection: redis,
@@ -29,8 +45,3 @@ export const billingLlmIngestionWorker = new Worker<BillingLlmIngestionJobData>(
    },
 );
 registerGracefulShutdown(billingLlmIngestionWorker);
-
-// Type-safe helper for adding jobs to the queue
-export function addBillingLlmIngestionJob(data: BillingLlmIngestionJobData) {
-   return billingLlmIngestionQueue.add(QUEUE_NAME, data);
-}

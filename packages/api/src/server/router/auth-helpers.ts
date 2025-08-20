@@ -50,7 +50,6 @@ export const authHelpersRouter = router({
       const contentStats = await getContentStatsLast30Days(db, agentIds, [
          "approved",
          "draft",
-         "generating",
       ]);
       return {
          totalAgents,

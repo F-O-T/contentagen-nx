@@ -7,7 +7,7 @@ import {
 } from "@packages/prompts/prompt/keywords/keyword-extractor";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
-import { addBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
+import { enqueueBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 export async function runGetContentKeywords(payload: {
    inputText: string;
@@ -26,7 +26,7 @@ export async function runGetContentKeywords(payload: {
             prompt: keywordExtractionPrompt(inputText),
          },
       );
-      await addBillingLlmIngestionJob({
+      await enqueueBillingLlmIngestionJob({
          inputTokens: headlineKeywordResult.usage.inputTokens,
          outputTokens: headlineKeywordResult.usage.outputTokens,
          effort: "small",

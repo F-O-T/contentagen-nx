@@ -7,7 +7,7 @@ import {
    unifiedContentAnalysisSchema,
    type UnifiedContentAnalysis,
 } from "@packages/prompts/prompt/post-processing/content-metadata";
-import { addBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
+import { enqueueBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
 
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 
@@ -28,7 +28,7 @@ export async function runAnalyzeContent(payload: {
             prompt: unifiedContentAnalysisInputPrompt(content),
          },
       );
-      await addBillingLlmIngestionJob({
+      await enqueueBillingLlmIngestionJob({
          inputTokens: result.usage.inputTokens,
          outputTokens: result.usage.outputTokens,
          effort: "small",

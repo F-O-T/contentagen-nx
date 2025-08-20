@@ -1,7 +1,7 @@
 import { createTavilyClient } from "@packages/tavily/client";
 import { tavilySearch } from "@packages/tavily/helpers";
 import { serverEnv } from "@packages/environment/server";
-import { addBillingWebSearchIngestionJob } from "../../queues/billing-websearch-ingestion-queue";
+import { enqueueBillingWebSearchIngestionJob } from "../../queues/billing-websearch-ingestion-queue";
 
 type ExternalLinkCurationPayload = {
    query: string;
@@ -19,7 +19,7 @@ export async function runExternalLinkCuration(
          autoParameters: true,
          searchDepth: "advanced",
       });
-      await addBillingWebSearchIngestionJob({
+      await enqueueBillingWebSearchIngestionJob({
          method: "crawl",
          userId,
       });
