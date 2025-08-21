@@ -2,9 +2,22 @@ import { Button } from "@packages/ui/components/button";
 import { VoiceConfigSchema } from "@packages/database/schemas/agent";
 import type { AgentForm } from "../lib/use-agent-form";
 
+import { Markdown } from "@packages/ui/components/markdown";
 // Helper function to convert schema values to display labels
 const getVoiceLabel = (value: string): string => {
    return value.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+};
+
+// Example string generator for communication style
+const getCommunicationExample = (style: string): string => {
+   switch (style) {
+      case "first_person":
+         return "**First Person Example:**\n\n> In my work with 500+ clients, I've discovered...\n> Let me walk you through my process...\n> I recommend this approach because I've personally tested it.";
+      case "third_person":
+         return "**Third Person Example:**\n\n> [Brand] has developed a methodology that...\n> Their clients consistently achieve X% improvement because...\n> According to [Brand's] research, this approach is recommended.";
+      default:
+         return "How can I assist you?";
+   }
 };
 
 export function VoiceToneStep({ form }: { form: AgentForm }) {
@@ -39,6 +52,20 @@ export function VoiceToneStep({ form }: { form: AgentForm }) {
                   ))}
                </div>
                <field.FieldMessage />
+
+               {/* Markdown preview for communication style */}
+               {field.state.value?.communication && (
+                  <div className="mt-4">
+                     <div className="text-xs font-semibold mb-1 text-muted-foreground">
+                        Example Communication
+                     </div>
+                     <Markdown
+                        content={getCommunicationExample(
+                           field.state.value.communication,
+                        )}
+                     />
+                  </div>
+               )}
             </field.FieldContainer>
          )}
       </form.AppField>

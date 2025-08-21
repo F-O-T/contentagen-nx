@@ -1,7 +1,25 @@
 import { Button } from "@packages/ui/components/button";
 import { TiptapEditor } from "@packages/ui/components/tiptap-editor";
 import { BrandConfigSchema } from "@packages/database/schemas/agent";
+import { Markdown } from "@packages/ui/components/markdown";
+
 import type { AgentForm } from "../lib/use-agent-form";
+
+// Example string generator for integration style
+const getIntegrationExample = (style: string): string => {
+   switch (style) {
+      case "strict_guideline":
+         return "**Strict Guideline Example:**\n\nAll content must strictly follow brand guidelines and use only approved messaging.\nExplicitly include the brand name at least once in every response.";
+      case "flexible_guideline":
+         return "**Flexible Guideline Example:**\n\nUse brand guidelines as a foundation, but adapt tone and style for context and audience.\nNaturally incorporate the brand name and products in a way that feels organic.";
+      case "reference_only":
+         return "**Reference Only Example:**\n\nTreat the brand document as background knowledge.\nMention brand solutions only when directly relevant to the user's needs.";
+      case "creative_blend":
+         return "**Creative Blend Example:**\n\nUse brand personality traits as inspiration for creative storytelling.\nIntegrate brand elements naturally into the narrative.";
+      default:
+         return "Sample integration message for the selected style.";
+   }
+};
 
 // Helper function to convert schema values to display labels
 const getBrandLabel = (value: string): string => {
@@ -41,6 +59,18 @@ export function BrandStep({ form }: { form: AgentForm }) {
                      ))}
                   </div>
                   <field.FieldMessage />
+
+                  {/* Markdown preview for integration style */}
+                  {field.state.value && (
+                     <div className="mt-4">
+                        <div className="text-xs font-semibold mb-1 text-muted-foreground">
+                           Example Integration
+                        </div>
+                        <Markdown
+                           content={getIntegrationExample(field.state.value)}
+                        />
+                     </div>
+                  )}
                </field.FieldContainer>
             )}
          </form.AppField>
