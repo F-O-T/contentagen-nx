@@ -20,7 +20,7 @@ export async function runExternalLinkCuration(
          searchDepth: "advanced",
       });
       await enqueueBillingWebSearchIngestionJob({
-         method: "crawl",
+         method: "advanced",
          userId,
       });
 

@@ -11,9 +11,9 @@
    },
    "scripts": {
       "db:studio:local": "dotenv -e .env.local drizzle-kit studio",
-      "db:studio:prod": "dotenv -e .env.prod drizzle-kit studio",
+      "db:studio:prod": "dotenv -e .env.production.local drizzle-kit studio",
       "db:push:local": "dotenv -e .env.local drizzle-kit push",
-      "db:push:prod": "dotenv -e .env.prod drizzle-kit push",
+      "db:push:prod": "dotenv -e .env.production.local drizzle-kit push",
       "env:copy-example": "shx -- cp -n .env.example .env",
       "env:remove": "shx -- rm -f .env",
       "env:run": "dotenv --",

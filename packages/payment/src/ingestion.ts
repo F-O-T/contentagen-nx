@@ -2,13 +2,23 @@ import type { Polar } from "@polar-sh/sdk";
 import type { EventCreateCustomer } from "@polar-sh/sdk/models/components/eventcreatecustomer.js";
 import type { MODELS } from "@packages/openrouter/helpers";
 export const POLAR_BILLING_EVENTS = {
-   RAG: "rag",
-   WEB_SEARCH: "web_search",
-   LLM: "llm_usage",
+   CREDIT: "credit",
 } as const;
 
+export const USAGE_TYPE = {
+   LLM: "llm_usage",
+   WEB_SEARCH: "web_search",
+} as const;
+
+export const BILLING_CONFIG = {
+   llmUsdPerMillion: 2.5,
+   llmTokensPerMillion: 1_000_000,
+   llmCreditValueUsd: 5,
+   webBaseCreditUsd: 0.008,
+   margin: 0.1,
+};
+
 interface IngestBillingParams {
-   event: keyof typeof POLAR_BILLING_EVENTS;
    externalCustomerId: string;
    metadata: EventCreateCustomer["metadata"];
 }
@@ -19,7 +29,7 @@ export async function ingestBilling(
    await client.events.ingest({
       events: [
          {
-            name: POLAR_BILLING_EVENTS[params.event],
+            name: POLAR_BILLING_EVENTS.CREDIT,
             externalCustomerId: params.externalCustomerId,
             metadata: params.metadata,
          },
@@ -31,21 +41,31 @@ export const createAiUsageMetadata = (params: {
    outputTokens: number;
    effort: keyof typeof MODELS;
 }) => {
+   const creditsDebited = calculateCreditsDebited(
+      params.inputTokens + params.outputTokens
+   );
    return {
+      usage_type: USAGE_TYPE.LLM,
       input_tokens: params.inputTokens,
       output_tokens: params.outputTokens,
       effort: params.effort,
-      total_tokens: params.inputTokens + params.outputTokens,
+      credits_debited: creditsDebited,
    };
 };
 export const createWebSearchUsageMetadata = (params: {
-   method: "crawl" | "search";
+   method: "crawl" | "search" | "advanced";
 }) => {
-   const amount = {
-      crawl: 2,
-      search: 1,
-   };
+   let baseAmount = 1;
+   if (params.method === "crawl" || params.method === "advanced") {
+      baseAmount = 2;
+   }
+   const creditsDebited = calculateCreditsDebited(baseAmount);
    return {
-      amount: amount[params.method],
+      usage_type: USAGE_TYPE.WEB_SEARCH,
+      method: params.method,
+      credits_debited: creditsDebited,
    };
 };
+function calculateCreditsDebited(amount: number) {
+   return Math.ceil(amount * BILLING_CONFIG.margin);
+}

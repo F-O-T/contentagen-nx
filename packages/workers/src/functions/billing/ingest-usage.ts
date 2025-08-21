@@ -38,7 +38,6 @@ export async function ingestLlmBilling({
    return runIngestBilling({
       params: {
          metadata: createAiUsageMetadata({ effort, inputTokens, outputTokens }),
-         event: "LLM",
          externalCustomerId: userId,
       },
    });
@@ -54,7 +53,6 @@ export async function ingestWebSearchBilling({
    return runIngestBilling({
       params: {
          metadata: createWebSearchUsageMetadata({ method }),
-         event: "WEB_SEARCH",
          externalCustomerId: userId,
       },
    });

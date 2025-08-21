@@ -4,11 +4,9 @@ import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../helpers";
 import { ingestWebSearchBilling } from "../functions/billing/ingest-usage";
 
-export interface BillingWebSearchIngestionJob {
-   method: "crawl" | "search";
-   userId: string;
-}
-
+export type BillingWebSearchIngestionJob = Parameters<
+   typeof ingestWebSearchBilling
+>[0];
 export async function runBillingWebSearchIngestion(
    payload: BillingWebSearchIngestionJob,
 ) {

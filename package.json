@@ -113,7 +113,7 @@
             "@polar-sh/better-auth": "^1.1.0"
          },
          "development": {
-            "typescript": "5.8.3"
+            "typescript": "5.9.2"
          },
          "react": {
             "react-error-boundary": "^6.0.0",

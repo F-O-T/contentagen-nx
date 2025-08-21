@@ -1,9 +1,11 @@
-import { betterAuthClient } from "@/integrations/clients";
-import { useBillingInfo } from "@/pages/profile/lib/use-billing-info";
+import { betterAuthClient, useTRPC } from "@/integrations/clients";
+import { useSuspenseQuery } from "@tanstack/react-query";
+
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
+   CardAction,
    CardContent,
    CardDescription,
    CardHeader,
@@ -15,8 +17,14 @@ import { AlertCircle, Crown, Loader2 } from "lucide-react";
 import { useCallback } from "react";
 
 export function ProfilePageBilling() {
-   const { activeSubscription, activeMeter, isLoading } = useBillingInfo();
-
+   const trpc = useTRPC();
+   const { data: customerState, isLoading } = useSuspenseQuery(
+      trpc.authHelpers.getCustomerState.queryOptions(),
+   );
+   const activeSubscription = customerState?.activeSubscriptions[0];
+   const activeMeter = customerState?.activeMeters[0];
+   console.log(activeMeter);
+   console.log(activeSubscription);
    const handleManageSubscription = useCallback(async () => {
       return await betterAuthClient.customer.portal();
    }, []);
@@ -154,11 +162,16 @@ export function ProfilePageBilling() {
    return (
       <Card>
          <CardHeader>
-            <CardTitle className="">Current plan</CardTitle>
-            <CardDescription className="">
+            <CardTitle>Current plan</CardTitle>
+            <CardDescription>
                This is your current subscription plan details. You can manage
                your subscription or view usage metrics below.
             </CardDescription>
+            <CardAction>
+               <Button onClick={handleManageSubscription} variant="outline">
+                  Manage subscription
+               </Button>
+            </CardAction>
          </CardHeader>
          <CardContent>
             <div className="flex items-center justify-between mb-6">
@@ -217,12 +230,6 @@ export function ProfilePageBilling() {
                      )}
                   </div>
                </div>
-            </div>
-
-            <div className="flex space-x-3 mt-6">
-               <Button onClick={handleManageSubscription} variant="outline">
-                  Manage subscription
-               </Button>
             </div>
          </CardContent>
       </Card>
