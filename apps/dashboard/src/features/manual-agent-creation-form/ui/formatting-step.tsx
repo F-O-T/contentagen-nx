@@ -12,6 +12,13 @@ const getFormatLabel = (value: string): string => {
 // Example string generator for formatting style
 const getFormattingExample = (style: string, listStyle?: string): string => {
    // Realistic, context-rich markdown examples from the prompts package
+   let listStyleExample = "";
+   if (listStyle === "bullets") {
+      listStyleExample = `**Bulleted List Example:**\n- Key point one\n- Key point two\n- Key point three`;
+   } else if (listStyle === "numbered") {
+      listStyleExample = `**Numbered List Example:**\n1. Step one\n2. Step two\n3. Step three`;
+   }
+
    if (style === "structured") {
       return `# [Main Title with Primary Benefit]
 
@@ -34,7 +41,7 @@ const getFormattingExample = (style: string, listStyle?: string): string => {
 - Expected outcomes
 - Immediate actions
 - Long-term strategy
-${listStyle ? `\n**List Style Preference:** Use ${listStyle} formatting for all lists and enumerated items.` : ""}`;
+${listStyle ? `\n**List Style Preference:** Use ${listStyle} formatting for all lists and enumerated items.\n\n${listStyleExample}` : ""}`;
    }
    if (style === "narrative") {
       return `# Narrative Example: Overcoming the Challenge
@@ -43,7 +50,7 @@ When I first encountered this problem, I felt overwhelmed. The obstacles seemed 
 
 > "Stories activate empathy and memory centers in the brain."
 
-${listStyle ? `\n**List Style Preference:** Use ${listStyle} formatting for any lists in the story.` : ""}`;
+${listStyle ? `\n**List Style Preference:** Use ${listStyle} formatting for any lists in the story.\n\n${listStyleExample}` : ""}`;
    }
    if (style === "list_based") {
       if (listStyle === "numbered") {
@@ -55,7 +62,7 @@ ${listStyle ? `\n**List Style Preference:** Use ${listStyle} formatting for any 
 4. Review progress
 5. Adjust and repeat
 
-**Preferred List Style:** Use numbered formatting for all primary lists.`;
+**Preferred List Style:** Use numbered formatting for all primary lists.\n\n${listStyleExample}`;
       }
       // Default to bullets
       return `# Key Points for Implementation
@@ -66,7 +73,11 @@ ${listStyle ? `\n**List Style Preference:** Use ${listStyle} formatting for any 
 - Track progress
 - Celebrate achievements
 
-**Preferred List Style:** Use bullet formatting for all primary lists.`;
+**Preferred List Style:** Use bullet formatting for all primary lists.\n\n${listStyleExample}`;
+   }
+   // If only listStyle is selected, show its example
+   if (listStyle) {
+      return listStyleExample;
    }
    return "Sample output in the selected format.";
 };
