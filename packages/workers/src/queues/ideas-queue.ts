@@ -5,7 +5,6 @@ import { registerGracefulShutdown } from "../helpers";
 
 export interface IdeaGenerationJobData {
    agentId: string;
-   createdAt: number;
 }
 
 const QUEUE_NAME = "idea-generation-workflow";
@@ -27,7 +26,7 @@ export async function enqueueIdeaGenerationJob(
 }
 
 import { runRagByKeywords } from "../functions/rag/brand-knowledge-rag-by-keywords";
-import { generateIdeaWithLLM } from "../functions/writing/generate-idea";
+import { runGenerateIdea } from "../functions/writing/generate-idea";
 import { runExternalLinkCuration } from "../functions/web-search/external-link-curation";
 
 import { runGetAgent } from "../functions/database/get-agent";
@@ -36,22 +35,35 @@ import { runGetContentKeywords } from "../functions/chunking/get-content-keyword
 export const ideaGenerationWorker = new Worker<IdeaGenerationJobData>(
    QUEUE_NAME,
    async (job: Job<IdeaGenerationJobData>) => {
-      const { agentId, createdAt } = job.data;
+      const { agentId } = job.data;
       try {
          // 1. Fetch agent info
          const { agent } = await runGetAgent({ agentId });
          const userId = agent.userId;
 
-         // 2. Get brand context (RAG)
-         const ragResult = await runRagByKeywords({ agentId, keywords: [] });
-         const brandContext = ragResult.chunks.join("\n");
-
-         // 3. Generate keywords/topics
-         const keywordsResult = await runGetContentKeywords({
-            inputText: brandContext,
+         // 2. Find relevant keywords for the agent via web search
+         const brandQuery = agent.brandDescription || agent.name || "blog";
+         const webSearchRes = await runExternalLinkCuration({
+            query: brandQuery,
             userId,
          });
-         const keywords = keywordsResult.keywords;
+         const webContents = webSearchRes.results
+            .map((r) => r.content)
+            .join("\n");
+
+         // Extract keywords from web search results
+         let keywordsResult = await runGetContentKeywords({
+            inputText: webContents,
+            userId,
+         });
+         let keywords = keywordsResult.keywords;
+         if (!keywords || keywords.length === 0) {
+            keywords = [brandQuery]; // fallback to brand description/name
+         }
+
+         // 3. RAG search with extracted keywords
+         const ragResult = await runRagByKeywords({ agentId, keywords });
+         const brandContext = ragResult.chunks.join("\n");
 
          // 4. Tavily web search for each keyword
          const webResults = await Promise.all(
@@ -67,10 +79,11 @@ export const ideaGenerationWorker = new Worker<IdeaGenerationJobData>(
             .join("\n");
 
          // 5. Generate idea (LLM)
-         const idea = await generateIdeaWithLLM({
+         const idea = await runGenerateIdea({
             brandContext,
             webSnippets,
-            searchQueries: keywords,
+            keywords,
+            userId,
          });
 
          // Log or persist result
@@ -80,7 +93,7 @@ export const ideaGenerationWorker = new Worker<IdeaGenerationJobData>(
             brandContext,
             sources,
             keywords,
-            createdAt,
+            createdAt: new Date().toISOString(),
             status: "done",
             updatedAt: Date.now(),
          });
