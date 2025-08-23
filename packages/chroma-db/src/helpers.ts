@@ -18,17 +18,23 @@ export type CollectionName =
 /**
  * Test ChromaDB connection
  */
-export const testConnection = async (client: ChromaClient): Promise<boolean> => {
+export const testConnection = async (
+   client: ChromaClient,
+): Promise<boolean> => {
    try {
       const heartbeat = await client.heartbeat();
-      console.log(`ChromaDB connection test successful. Heartbeat: ${heartbeat}`);
-      
+      console.log(
+         `ChromaDB connection test successful. Heartbeat: ${heartbeat}`,
+      );
+
       const version = await client.version();
       console.log(`ChromaDB version: ${version}`);
-      
+
       const collections = await client.listCollections();
-      console.log(`Existing collections: ${collections.map(c => c.name).join(', ') || 'none'}`);
-      
+      console.log(
+         `Existing collections: ${collections.map((c) => c.name).join(", ") || "none"}`,
+      );
+
       return true;
    } catch (error) {
       console.error(`ChromaDB connection test failed:`, error);
@@ -39,9 +45,11 @@ export const testConnection = async (client: ChromaClient): Promise<boolean> => 
 /**
  * Ensure the agent_knowledge collection exists, creating it if necessary
  */
-export const ensureAgentKnowledgeCollection = async (client: ChromaClient): Promise<Collection> => {
+export const ensureAgentKnowledgeCollection = async (
+   client: ChromaClient,
+): Promise<Collection> => {
    const collectionName = "agent_knowledge";
-   
+
    try {
       // Try to get the collection first
       const collection = await client.getCollection({
@@ -52,7 +60,9 @@ export const ensureAgentKnowledgeCollection = async (client: ChromaClient): Prom
       return collection;
    } catch {
       // Collection doesn't exist, create it
-      console.log(`Creating collection '${collectionName}' with OpenAI embedding function...`);
+      console.log(
+         `Creating collection '${collectionName}' with OpenAI embedding function...`,
+      );
       try {
          const collection = await client.createCollection({
             name: collectionName,
@@ -61,7 +71,10 @@ export const ensureAgentKnowledgeCollection = async (client: ChromaClient): Prom
          console.log(`✓ Successfully created collection '${collectionName}'`);
          return collection;
       } catch (createError) {
-         console.error(`✗ Failed to create collection '${collectionName}':`, createError);
+         console.error(
+            `✗ Failed to create collection '${collectionName}':`,
+            createError,
+         );
          throw createError;
       }
    }

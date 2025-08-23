@@ -42,7 +42,10 @@ export const ideaGenerationWorker = new Worker<IdeaGenerationJobData>(
          const userId = agent.userId;
 
          // 2. Find relevant keywords for the agent via web search
-         const brandQuery = agent.brandDescription || agent.name || "blog";
+         const brandQuery =
+            agent.personaConfig.metadata.description ||
+            agent.personaConfig.metadata.name ||
+            "blog";
          const webSearchRes = await runExternalLinkCuration({
             query: brandQuery,
             userId,
@@ -83,7 +86,6 @@ export const ideaGenerationWorker = new Worker<IdeaGenerationJobData>(
             brandContext,
             webSnippets,
             keywords,
-            userId,
          });
 
          // Log or persist result

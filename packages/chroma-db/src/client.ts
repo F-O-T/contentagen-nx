@@ -6,7 +6,8 @@ export const createChromaClient = (baseUrl: string): InternalChromaCLient => {
    try {
       const url = new URL(baseUrl);
       const host = url.hostname;
-      const port = parseInt(url.port) || (url.protocol === "https:" ? 443 : 80);
+      const port =
+         parseInt(url.port, 10) || (url.protocol === "https:" ? 443 : 80);
       const ssl = url.protocol === "https:";
 
       console.log(`Creating ChromaDB client for ${host}:${port} (SSL: ${ssl})`);
