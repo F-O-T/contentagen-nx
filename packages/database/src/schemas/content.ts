@@ -66,6 +66,7 @@ export const contentStatusEnum = pgEnum("content_status", [
    "writing",
    "editing",
    "analyzing",
+   "grammar_checking",
 ]);
 
 export const content = pgTable(

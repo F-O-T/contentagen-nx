@@ -6,10 +6,7 @@ import { generalPublicAudiencePrompt } from "../prompts/audience/general_public"
 import { professionalsAudiencePrompt } from "../prompts/audience/professionals";
 import { beginnersAudiencePrompt } from "../prompts/audience/beginners";
 import { customersAudiencePrompt } from "../prompts/audience/customers";
-import { structuredPrompt } from "../prompts/formatting/structured";
-import { narrativePrompt } from "../prompts/formatting/narrative";
-import { listBasedPrompt } from "../prompts/formatting/list_based";
-import { languageBasePrompt } from "../prompts/language/base";
+import { languageCorrectionBasePrompt } from "../prompts/language/base";
 import { strictGuidelinePrompt } from "../prompts/brand/strict_guideline";
 import { flexibleGuidelinePrompt } from "../prompts/brand/flexible_guideline";
 import { referenceOnlyPrompt } from "../prompts/brand/reference_only";
@@ -133,7 +130,7 @@ export function createLanguageSection(config: PersonaConfig): string {
             break;
       }
    }
-   return languageBasePrompt({
+   return languageCorrectionBasePrompt({
       languageDisplay,
       languageRules,
       culturalNotes,
@@ -173,7 +170,6 @@ export function generateWritingPrompt(config: PersonaConfig): string {
       createMetadataSection(config),
       createBrandSection(config),
       createAudienceSection(config),
-      createLanguageSection(config),
       createVoiceSection(config),
       searchIntegrationSystemPrompt(),
       writingDraftSystemPrompt(),

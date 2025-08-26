@@ -1,5 +1,5 @@
 import { Worker, Queue, type Job } from "bullmq";
-import type { ContentRequest } from "@packages/database/schema";
+import type { ContentRequest, PersonaConfig } from "@packages/database/schema";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { updateContentStatus } from "../../functions/database/update-content-status";
@@ -10,6 +10,7 @@ export interface ContentEditingJobData {
    keywords: string[];
    contentId: string;
    contentRequest: ContentRequest;
+   personaConfig: PersonaConfig;
    draft: string;
    userId: string;
 }
@@ -22,7 +23,7 @@ export interface ContentEditingJobResult {
    editedDraft: string;
 }
 
-import { enqueueContentPostProcessingJob } from "./content-post-processing-queue";
+import { enqueueContentGrammarCheckJob } from "./content-grammar-checker-queue";
 import { runEditContentDraft } from "../../functions/writing/edit-content-draft";
 import { registerGracefulShutdown } from "../../helpers";
 
@@ -30,6 +31,7 @@ export async function runContentEditing(
    payload: ContentEditingJobData,
 ): Promise<ContentEditingJobResult> {
    const {
+      personaConfig,
       agentId,
       contentId,
       keywords,
@@ -52,14 +54,16 @@ export async function runContentEditing(
          userId,
       });
       console.info("[ContentEditing] Content edited", editedDraft);
-      await enqueueContentPostProcessingJob({
+
+      await enqueueContentGrammarCheckJob({
+         userId,
+         contentId,
+         agentId,
+         contentRequest,
+         personaConfig,
+         draft: editedDraft,
          searchSources,
          keywords,
-         agentId,
-         contentId,
-         userId,
-         contentRequest,
-         editedDraft,
       });
       return { contentId, agentId, userId, contentRequest, editedDraft };
    } catch (error) {

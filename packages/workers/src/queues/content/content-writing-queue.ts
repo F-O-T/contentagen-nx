@@ -60,6 +60,7 @@ export async function runContentWriting(
       });
       const jobResult = { draft, contentRequest, agentId, contentId, userId };
       await enqueueContentEditingJob({
+         personaConfig,
          keywords,
          searchSources,
          agentId,

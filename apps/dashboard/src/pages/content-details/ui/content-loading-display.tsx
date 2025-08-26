@@ -35,6 +35,11 @@ const contentSteps = [
       description: "Refining and polishing the content",
    },
    {
+      id: "grammar_checking",
+      label: "Grammar Checking",
+      description: "Checking and correcting grammar",
+   },
+   {
       id: "analyzing",
       label: "Analyzing",
       description: "Quality check and metadata generation",
