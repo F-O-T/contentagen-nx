@@ -1,6 +1,6 @@
-import { useParams } from "@tanstack/react-router";
-import { useTRPC } from "@/integrations/clients";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useParams, useRouter } from "@tanstack/react-router";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+
 import {
    Card,
    CardHeader,
@@ -9,14 +9,59 @@ import {
    CardDescription,
 } from "@packages/ui/components/card";
 import { InfoItem } from "@packages/ui/components/info-item";
-import { Circle, Calendar, Clock, Tag, Link2 } from "lucide-react";
+import {
+   Circle,
+   Calendar,
+   Clock,
+   Tag,
+   Link2,
+   MoreVertical,
+} from "lucide-react";
+import { CardAction } from "@packages/ui/components/card";
+import {
+   DropdownMenu,
+   DropdownMenuTrigger,
+   DropdownMenuContent,
+   DropdownMenuItem,
+} from "@packages/ui/components/dropdown-menu";
+import { useMutation } from "@tanstack/react-query";
 import { Markdown } from "@packages/ui/components/markdown";
+import { useTRPC } from "@/integrations/clients";
+import { toast } from "sonner";
 
 export function IdeaDetailsPage() {
    const { id } = useParams({ from: "/_dashboard/ideas/$id" });
    const trpc = useTRPC();
+   const queryClient = useQueryClient();
    const { data: idea } = useSuspenseQuery(
       trpc.ideas.getIdeaById.queryOptions({ id }),
+   );
+   const router = useRouter();
+   const approveMutation = useMutation(
+      trpc.ideas.approve.mutationOptions({
+         onSuccess: async (data) => {
+            toast.success(
+               "Idea approved successfully and sent to content generation",
+            );
+            router.navigate({
+               to: "/content/$id",
+               params: {
+                  id: data.content.id,
+               },
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.ideas.getIdeaById.queryKey({ id }),
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.ideas.listAllIdeas.queryKey(),
+            });
+         },
+         onError: (error) => {
+            toast.error(
+               `Error approving idea: ${error.message ?? "Unknown error"}`,
+            );
+         },
+      }),
    );
 
    return (
@@ -88,6 +133,28 @@ export function IdeaDetailsPage() {
                      <CardDescription>
                         The main content of this idea.
                      </CardDescription>
+                     <CardAction>
+                        <DropdownMenu>
+                           <DropdownMenuTrigger className="flex items-center justify-center p-2 rounded hover:bg-muted">
+                              <MoreVertical className="w-5 h-5" />
+                           </DropdownMenuTrigger>
+                           <DropdownMenuContent>
+                              <DropdownMenuItem
+                                 disabled={
+                                    idea.status === "approved" ||
+                                    idea.status === "rejected"
+                                 }
+                                 onClick={async () => {
+                                    await approveMutation.mutateAsync({
+                                       id: idea.id,
+                                    });
+                                 }}
+                              >
+                                 Approve Idea
+                              </DropdownMenuItem>
+                           </DropdownMenuContent>
+                        </DropdownMenu>
+                     </CardAction>
                   </CardHeader>
                   <CardContent>
                      <Markdown content={idea.content ?? "No content"} />

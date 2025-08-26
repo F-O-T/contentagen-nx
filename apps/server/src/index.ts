@@ -20,7 +20,7 @@ import { contentPostProcessingQueue } from "@packages/workers/queues/content/con
 import { contentResearchingQueue } from "@packages/workers/queues/content/content-researching-queue";
 import { contentPlanningQueue } from "@packages/workers/queues/content/content-planning-queue";
 import { contentWritingQueue } from "@packages/workers/queues/content/content-writing-queue";
-import { ideaGenerationQueue } from "@packages/workers/queues/ideas-queue";
+import { ideaGenerationQueue } from "@packages/workers/queues/content/ideas-queue";
 import { autoBrandKnowledgeQueue } from "@packages/workers/queues/knowledge/brand-knowledge-queue";
 import { chunkSavingQueue } from "@packages/workers/queues/knowledge/chunk-saving";
 import { documentChunkQueue } from "@packages/workers/queues/knowledge/document-chunk-queue";

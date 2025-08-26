@@ -15,6 +15,9 @@ import { z } from "zod";
 
 import { listAllIdeasPaginated } from "@packages/database/repositories/ideas-repository";
 
+import { createContent } from "@packages/database/repositories/content-repository";
+import { enqueueContentPlanningJob } from "@packages/workers/queues/content/content-planning-queue";
+
 export const ideasRouter = router({
    listAllIdeas: protectedProcedure
       .input(
@@ -131,5 +134,40 @@ export const ideasRouter = router({
          const resolvedCtx = await ctx;
          // listIdeasByAgent now returns an array directly
          return await listIdeasByAgent(resolvedCtx.db, input.agentId);
+      }),
+
+   approve: protectedProcedure
+      .input(z.object({ id: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
+         const db = resolvedCtx.db;
+         // 1. Fetch idea
+         const idea = await getIdeaById(db, input.id);
+         if (!idea) {
+            throw new TRPCError({
+               code: "NOT_FOUND",
+               message: "Idea not found.",
+            });
+         }
+         if (idea.status === "approved" || idea.status === "rejected") {
+            throw new TRPCError({
+               code: "BAD_REQUEST",
+               message: "Idea already processed.",
+            });
+         }
+         // 2. Update status
+         await updateIdea(db, idea.id, { status: "approved" });
+         // 3. Create content
+         const content = await createContent(db, {
+            agentId: idea.agentId,
+            request: { description: idea.content },
+         });
+         // 4. Enqueue job
+         await enqueueContentPlanningJob({
+            agentId: idea.agentId,
+            contentId: content.id,
+            contentRequest: { description: idea.content },
+         });
+         return { success: true, content };
       }),
 });

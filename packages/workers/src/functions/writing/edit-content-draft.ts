@@ -1,5 +1,5 @@
 import {
-   blogEditorInputPromp,
+   blogEditorInputPrompt,
    blogEditorPrompt,
    editorObjectSchema,
    type EditorObjectSchema,
@@ -24,7 +24,7 @@ export async function runEditContentDraft(payload: {
          },
          editorObjectSchema,
          {
-            prompt: blogEditorInputPromp(data.draft),
+            prompt: blogEditorInputPrompt(data.draft),
             system: blogEditorPrompt(),
          },
       );
