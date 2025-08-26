@@ -1,13 +1,18 @@
 import { Worker, Queue, type Job } from "bullmq";
+import { runRagByKeywords } from "../../functions/rag/brand-knowledge-rag-by-keywords";
+import { runGenerateIdea } from "../../functions/writing/generate-idea";
+import { runExternalLinkCuration } from "../../functions/web-search/external-link-curation";
+import { runGetAgent } from "../../functions/database/get-agent";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
-import { registerGracefulShutdown } from "../helpers";
+import { registerGracefulShutdown } from "../../helpers";
 import { createDb } from "@packages/database/client";
 import { createIdea } from "@packages/database/repositories/ideas-repository";
 import { emitAgentKnowledgeStatusChanged } from "@packages/server-events";
 
 export interface IdeaGenerationJobData {
    agentId: string;
+   keywords: string[];
 }
 
 const QUEUE_NAME = "idea-generation-workflow";
@@ -28,18 +33,12 @@ export async function enqueueIdeaGenerationJob(
    return ideaGenerationQueue.add(QUEUE_NAME, data, jobOptions);
 }
 
-import { runRagByKeywords } from "../functions/rag/brand-knowledge-rag-by-keywords";
-import { runGenerateIdea } from "../functions/writing/generate-idea";
-import { runExternalLinkCuration } from "../functions/web-search/external-link-curation";
-
-import { runGetAgent } from "../functions/database/get-agent";
-import { runGetContentKeywords } from "../functions/chunking/get-content-keywords";
-import { getMostUsedKeywordsByAgent } from "@packages/database/repositories/content-repository";
+// Removed unused imports after keyword logic change
 
 export const ideaGenerationWorker = new Worker<IdeaGenerationJobData>(
    QUEUE_NAME,
    async (job: Job<IdeaGenerationJobData>) => {
-      const { agentId } = job.data;
+      const { agentId, keywords } = job.data;
       const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
       try {
          emitAgentKnowledgeStatusChanged({
@@ -51,47 +50,16 @@ export const ideaGenerationWorker = new Worker<IdeaGenerationJobData>(
          const { agent } = await runGetAgent({ agentId });
          const userId = agent.userId;
 
-         // 2. Get most used keywords from agent's content
-         let keywords = await getMostUsedKeywordsByAgent(db, agentId, 10);
-
-         // If no keywords found, fallback to web search
-         if (!keywords || keywords.length === 0) {
-            const brandQuery =
-               agent.personaConfig.metadata.description ||
-               agent.personaConfig.metadata.name ||
-               "blog";
-            const webSearchRes = await runExternalLinkCuration({
-               query: brandQuery,
-               userId,
-            });
-            const webContents = webSearchRes.results
-               .map((r) => r.content)
-               .join("\n");
-
-            // Extract keywords from web search results
-            let keywordsResult = await runGetContentKeywords({
-               inputText: webContents,
-               userId,
-            });
-            keywords = keywordsResult.keywords;
-            if (!keywords || keywords.length === 0) {
-               keywords = [brandQuery]; // fallback to brand description/name
-            }
-         }
-
-         // 3. RAG search with extracted keywords
+         // 3. RAG search with provided keywords
          const ragResult = await runRagByKeywords({ agentId, keywords });
          const brandContext = ragResult.chunks.join("\n");
 
-         // 4. Tavily web search for each keyword
-         const webResults = await Promise.all(
-            keywords.map(async (query) => {
-               const res = await runExternalLinkCuration({ query, userId });
-               return res?.results || [];
-            }),
-         );
-         const sources = webResults.flat().map((r) => r.url);
-         const webSnippets = webResults
+         const { results } = await runExternalLinkCuration({
+            query: keywords.join(", "),
+            userId,
+         });
+         const sources = results.flat().map((r) => r.url);
+         const webSnippets = results
             .flat()
             .map((r) => r.content)
             .join("\n");

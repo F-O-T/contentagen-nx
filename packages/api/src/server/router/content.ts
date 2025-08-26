@@ -23,6 +23,7 @@ import {
    ContentUpdateSchema,
    ContentSelectSchema,
 } from "@packages/database/schema";
+import { enqueueIdeaGenerationJob } from "@packages/workers/queues/content/ideas-queue";
 
 export const contentRouter = router({
    regenerate: protectedProcedure
@@ -350,6 +351,17 @@ export const contentRouter = router({
                });
             }
             await updateContent(db, input.id, { status: "approved" });
+            if (!content.meta?.keywords || content.meta.keywords.length === 0) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message:
+                     "Content must have keywords in meta to generate ideas.",
+               });
+            }
+            await enqueueIdeaGenerationJob({
+               agentId: content.agentId,
+               keywords: content.meta?.keywords,
+            });
             return { success: true };
          } catch (err) {
             if (err instanceof NotFoundError) {
