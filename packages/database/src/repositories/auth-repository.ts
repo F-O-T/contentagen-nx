@@ -7,7 +7,7 @@ export async function findMemberByUserId(
 ) {
    try {
       const result = await dbClient.query.member.findFirst({
-         where: (user, { eq }) => eq(user.id, userId),
+         where: (member, { eq }) => eq(member.userId, userId),
       });
       if (!result) throw new NotFoundError("User not found");
       return result;

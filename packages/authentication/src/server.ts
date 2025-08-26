@@ -49,7 +49,11 @@ export const getAuthOptions = (
                         db,
                         session.userId,
                      );
+
                      if (member.organizationId) {
+                        console.log(
+                           `Setting activeOrganizationId for user ${session.userId} to ${member.organizationId}`,
+                        );
                         return {
                            data: {
                               ...session,

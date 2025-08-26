@@ -17,9 +17,10 @@
    "private": true,
    "scripts": {
       "build:all": "nx run-many -t build --parallel=3",
-      "db:studio": "nx run database:studio",
-      "db:push": "nx run database:push",
-      "db:migrate": "nx run database:migrate",
+      "db:studio:local": "nx run database:db-studio-local",
+      "db:studio:prod": "nx run database:db-studio-prod",
+      "db:push:local": "nx run database:db-push-local",
+      "db:push:prod": "nx run database:db-push-prod",
       "auth:generate": "nx run authentication:auth-schema-generate",
       "check": "nx run-many -t check --parallel=3",
       "dev:all": "nx run-many -t dev --parallel=5",
