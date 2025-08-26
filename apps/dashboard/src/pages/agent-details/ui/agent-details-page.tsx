@@ -5,7 +5,11 @@ import { FileViewerModal } from "./file-viewer-modal";
 import { AgentStatsCard } from "./agent-stats-card";
 import useAgentDetails from "../lib/use-agent-details";
 import useFileViewer from "../lib/use-file-viewer";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
+import { useSubscription } from "@trpc/tanstack-react-query";
+import { toast } from "sonner";
+import { useTRPC } from "@/integrations/clients";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function AgentDetailsPage() {
    const {
@@ -17,6 +21,44 @@ export function AgentDetailsPage() {
       close,
    } = useFileViewer();
    const { agent, uploadedFiles, agentId } = useAgentDetails();
+
+   // --- Brand Knowledge Status Subscription ---
+   const trpc = useTRPC();
+   const queryClient = useQueryClient();
+   const isRunning = useMemo(
+      () =>
+         agent &&
+         ["pending", "crawling", "analyzing", "chunking"].includes(
+            agent.brandKnowledgeStatus,
+         ),
+      [agent],
+   );
+
+   useSubscription(
+      trpc.agent.onBrandKnowledgeStatusChanged.subscriptionOptions(
+         { agentId },
+         {
+            async onData(data) {
+               if (data.status === "failed") {
+                  toast.error(data.message || "Brand knowledge job failed");
+                  return;
+               }
+               if (data.status === "completed") {
+                  toast.success(
+                     data.message || "Brand knowledge job completed",
+                  );
+                  return;
+               }
+
+               toast.info(data.message || `Status: ${data.status}`);
+               await queryClient.invalidateQueries({
+                  queryKey: trpc.agent.get.queryKey({ id: agentId }),
+               });
+            },
+            enabled: isRunning,
+         },
+      ),
+   );
 
    return (
       <Suspense>

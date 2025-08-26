@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
    index,
    jsonb,
+   pgEnum,
    pgTable,
    text,
    timestamp,
@@ -69,6 +70,17 @@ export const PersonaConfigSchema = z.object({
 
 // 8. Static Type exports
 
+export const brandKnowledgeStatusEnum = pgEnum("brand_knowledge_status", [
+   "pending",
+   "crawling",
+   "analyzing",
+   "chunking",
+   "completed",
+   "failed",
+]);
+
+export type BrandKnowledgeStatus =
+   (typeof brandKnowledgeStatusEnum.enumValues)[number];
 export const agent = pgTable(
    "agent",
    {
@@ -91,6 +103,9 @@ export const agent = pgTable(
          .$defaultFn(() => new Date())
          .notNull(),
       lastGeneratedAt: timestamp("last_generated_at"),
+      brandKnowledgeStatus: brandKnowledgeStatusEnum("brand_knowledge_status")
+         .default("pending")
+         .notNull(),
    },
    (table) => [index("agent_user_id_idx").on(table.userId)],
 );

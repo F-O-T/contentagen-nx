@@ -21,11 +21,17 @@ import { contentResearchingQueue } from "@packages/workers/queues/content/conten
 import { contentPlanningQueue } from "@packages/workers/queues/content/content-planning-queue";
 import { contentWritingQueue } from "@packages/workers/queues/content/content-writing-queue";
 import { ideaGenerationQueue } from "@packages/workers/queues/ideas-queue";
+import { autoBrandKnowledgeQueue } from "@packages/workers/queues/knowledge/brand-knowledge-queue";
+import { chunkSavingQueue } from "@packages/workers/queues/knowledge/chunk-saving";
+import { documentChunkQueue } from "@packages/workers/queues/knowledge/document-chunk-queue";
 import { isProduction } from "@packages/environment/helpers";
 const serverAdapter = new ElysiaAdapter("/ui");
 
 createBullBoard({
    queues: [
+      new BullMQAdapter(autoBrandKnowledgeQueue),
+      new BullMQAdapter(chunkSavingQueue),
+      new BullMQAdapter(documentChunkQueue),
       new BullMQAdapter(ideaGenerationQueue),
       new BullMQAdapter(billingLlmIngestionQueue),
       new BullMQAdapter(billingWebSearchIngestionQueue),

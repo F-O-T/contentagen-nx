@@ -1,6 +1,6 @@
 import { listFiles, uploadFile } from "@packages/files/client";
-import { autoBrandKnowledgeQueue } from "@packages/workers/queues/auto-brand-knowledge";
-import { enqueueKnowledgeDistillationJob } from "@packages/workers/queues/knowledge-distillation";
+import { enqueueDocumentChunkJob } from "@packages/workers/queues/knowledge/document-chunk-queue";
+import { enqueueAutoBrandKnowledgeJob } from "@packages/workers/queues/knowledge/brand-knowledge-queue";
 import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 import {
@@ -42,7 +42,7 @@ export const agentFileRouter = router({
                "Missing required fields: id, userId, or websiteUrl",
             );
          }
-         await autoBrandKnowledgeQueue.add("auto-brand-knowledge-workflow", {
+         await enqueueAutoBrandKnowledgeJob({
             agentId: input.id,
             userId: userId,
             websiteUrl: input.websiteUrl,
@@ -50,7 +50,7 @@ export const agentFileRouter = router({
          return { success: true };
       }),
    getFileContent: protectedProcedure
-      .input(z.object({ agentId: z.string().uuid(), fileName: z.string() }))
+      .input(z.object({ agentId: z.uuid(), fileName: z.string() }))
       .query(async ({ ctx, input }) => {
          const minioClient = (await ctx).minioClient;
          const bucketName = (await ctx).minioBucket;
@@ -64,7 +64,7 @@ export const agentFileRouter = router({
          return { content };
       }),
    listAgentFiles: protectedProcedure
-      .input(z.object({ agentId: z.string().uuid() }))
+      .input(z.object({ agentId: z.uuid() }))
       .query(async ({ ctx, input }) => {
          const minioClient = (await ctx).minioClient;
          const bucketName = (await ctx).minioBucket;
@@ -74,7 +74,7 @@ export const agentFileRouter = router({
       }),
 
    upload: protectedProcedure
-      .input(z.object({ agentId: z.string().uuid() }).and(AgentFileUploadInput))
+      .input(z.object({ agentId: z.uuid() }).and(AgentFileUploadInput))
       .mutation(async ({ ctx, input }) => {
          const { agentId, fileName, fileBuffer, contentType } = input;
          const key = `${agentId}/${fileName}`;
@@ -101,7 +101,7 @@ export const agentFileRouter = router({
          try {
             // Read file content as text
             const fileContent = buffer.toString("utf-8");
-            await enqueueKnowledgeDistillationJob({
+            await enqueueDocumentChunkJob({
                inputText: fileContent,
                agentId,
                sourceId: key,
@@ -115,7 +115,7 @@ export const agentFileRouter = router({
          return { url };
       }),
    delete: protectedProcedure
-      .input(z.object({ agentId: z.string().uuid() }).and(AgentFileDeleteInput))
+      .input(z.object({ agentId: z.uuid() }).and(AgentFileDeleteInput))
       .mutation(async ({ ctx, input }) => {
          const { agentId, fileName } = input;
          const key = `${agentId}/${fileName}`;

@@ -9,7 +9,7 @@ import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
 import { enqueueBillingLlmIngestionJob } from "../../queues/billing-llm-ingestion-queue";
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
-export async function runCreateBrandDocuments(payload: {
+export async function runCreateAtomicChunks(payload: {
    inputText: string;
    userId: string;
 }) {

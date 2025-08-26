@@ -1,8 +1,8 @@
 import { Worker, Queue, type Job } from "bullmq";
-import { runDistilledChunkFormatterAndSaveOnChroma } from "../functions/rag/save-chunk";
+import { runDistilledChunkFormatterAndSaveOnChroma } from "../../functions/rag/save-chunk";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
-import { registerGracefulShutdown } from "../helpers";
+import { registerGracefulShutdown } from "../../helpers";
 
 export interface ChunkSavingJob {
    chunk: string;
@@ -20,6 +20,15 @@ registerGracefulShutdown(chunkSavingQueue);
 
 export async function enqueueChunkSavingJob(job: ChunkSavingJob) {
    return chunkSavingQueue.add("chunk-saving", job);
+}
+
+export async function enqueueChunkSavingJobsBulk(jobs: ChunkSavingJob[]) {
+   return chunkSavingQueue.addBulk(
+      jobs.map((job) => ({
+         name: "chunk-saving",
+         data: job,
+      }))
+   );
 }
 
 export const chunkSavingWorker = new Worker<ChunkSavingJob>(
