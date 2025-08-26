@@ -198,3 +198,36 @@ export async function getAgentContentStats(
       );
    }
 }
+
+export async function getMostUsedKeywordsByAgent(
+   dbClient: DatabaseInstance,
+   agentId: string,
+   limit: number = 10,
+): Promise<string[]> {
+   try {
+      // Get all content for the agent
+      const items = await dbClient.query.content.findMany({
+         where: eq(content.agentId, agentId),
+         columns: { meta: true },
+      });
+
+      // Aggregate keywords
+      const keywordCounts: Record<string, number> = {};
+      for (const item of items) {
+         const keywords = item.meta?.keywords ?? [];
+         for (const kw of keywords) {
+            keywordCounts[kw] = (keywordCounts[kw] || 0) + 1;
+         }
+      }
+
+      // Sort and return top N
+      return Object.entries(keywordCounts)
+         .sort((a, b) => b[1] - a[1])
+         .slice(0, limit)
+         .map(([kw]) => kw);
+   } catch (err) {
+      throw new DatabaseError(
+         `Failed to get most used keywords: ${(err as Error).message}`,
+      );
+   }
+}

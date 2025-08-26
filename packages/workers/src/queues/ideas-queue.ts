@@ -2,6 +2,9 @@ import { Worker, Queue, type Job } from "bullmq";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../helpers";
+import { createDb } from "@packages/database/client";
+import { createIdea } from "@packages/database/repositories/ideas-repository";
+import { emitAgentKnowledgeStatusChanged } from "@packages/server-events";
 
 export interface IdeaGenerationJobData {
    agentId: string;
@@ -31,37 +34,49 @@ import { runExternalLinkCuration } from "../functions/web-search/external-link-c
 
 import { runGetAgent } from "../functions/database/get-agent";
 import { runGetContentKeywords } from "../functions/chunking/get-content-keywords";
+import { getMostUsedKeywordsByAgent } from "@packages/database/repositories/content-repository";
 
 export const ideaGenerationWorker = new Worker<IdeaGenerationJobData>(
    QUEUE_NAME,
    async (job: Job<IdeaGenerationJobData>) => {
       const { agentId } = job.data;
+      const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
       try {
+         emitAgentKnowledgeStatusChanged({
+            agentId,
+            status: "pending",
+            message: "Generating ideas...",
+         });
          // 1. Fetch agent info
          const { agent } = await runGetAgent({ agentId });
          const userId = agent.userId;
 
-         // 2. Find relevant keywords for the agent via web search
-         const brandQuery =
-            agent.personaConfig.metadata.description ||
-            agent.personaConfig.metadata.name ||
-            "blog";
-         const webSearchRes = await runExternalLinkCuration({
-            query: brandQuery,
-            userId,
-         });
-         const webContents = webSearchRes.results
-            .map((r) => r.content)
-            .join("\n");
+         // 2. Get most used keywords from agent's content
+         let keywords = await getMostUsedKeywordsByAgent(db, agentId, 10);
 
-         // Extract keywords from web search results
-         let keywordsResult = await runGetContentKeywords({
-            inputText: webContents,
-            userId,
-         });
-         let keywords = keywordsResult.keywords;
+         // If no keywords found, fallback to web search
          if (!keywords || keywords.length === 0) {
-            keywords = [brandQuery]; // fallback to brand description/name
+            const brandQuery =
+               agent.personaConfig.metadata.description ||
+               agent.personaConfig.metadata.name ||
+               "blog";
+            const webSearchRes = await runExternalLinkCuration({
+               query: brandQuery,
+               userId,
+            });
+            const webContents = webSearchRes.results
+               .map((r) => r.content)
+               .join("\n");
+
+            // Extract keywords from web search results
+            let keywordsResult = await runGetContentKeywords({
+               inputText: webContents,
+               userId,
+            });
+            keywords = keywordsResult.keywords;
+            if (!keywords || keywords.length === 0) {
+               keywords = [brandQuery]; // fallback to brand description/name
+            }
          }
 
          // 3. RAG search with extracted keywords
@@ -81,25 +96,34 @@ export const ideaGenerationWorker = new Worker<IdeaGenerationJobData>(
             .map((r) => r.content)
             .join("\n");
 
-         // 5. Generate idea (LLM)
-         const idea = await runGenerateIdea({
+         // 5. Generate ideas (LLM)
+         const { ideas } = await runGenerateIdea({
             brandContext,
             webSnippets,
             keywords,
          });
 
-         // Log or persist result
-         console.log({
-            agentId,
-            idea,
-            brandContext,
-            sources,
-            keywords,
-            createdAt: new Date().toISOString(),
-            status: "done",
-            updatedAt: Date.now(),
-         });
+         // 6. Persist each idea to DB and emit event
+         for (const ideaContent of ideas) {
+            const meta = { tags: keywords, source: sources.join(",") };
+            const createdIdea = await createIdea(db, {
+               agentId,
+               content: ideaContent,
+               status: "pending",
+               meta,
+            });
+            emitAgentKnowledgeStatusChanged({
+               agentId,
+               status: "completed",
+               message: `Idea created: ${createdIdea.content}`,
+            });
+         }
       } catch (error) {
+         emitAgentKnowledgeStatusChanged({
+            agentId,
+            status: "failed",
+            message: `Error generating ideas: ${error instanceof Error ? error.message : String(error)}`,
+         });
          console.error("[IdeaGenerationWorker] Error:", error);
       }
    },

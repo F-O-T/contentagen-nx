@@ -22,8 +22,10 @@ import { Route as DashboardProfileRouteImport } from './routes/_dashboard/profil
 import { Route as DashboardOrganizationRouteImport } from './routes/_dashboard/organization'
 import { Route as DashboardHomeRouteImport } from './routes/_dashboard/home'
 import { Route as DashboardApikeyRouteImport } from './routes/_dashboard/apikey'
+import { Route as DashboardIdeasIndexRouteImport } from './routes/_dashboard/ideas/index'
 import { Route as DashboardContentIndexRouteImport } from './routes/_dashboard/content/index'
 import { Route as DashboardAgentsIndexRouteImport } from './routes/_dashboard/agents/index'
+import { Route as DashboardIdeasIdRouteImport } from './routes/_dashboard/ideas/$id'
 import { Route as DashboardContentIdRouteImport } from './routes/_dashboard/content/$id'
 import { Route as DashboardAgentsFlowRouteImport } from './routes/_dashboard/agents/_flow'
 import { Route as DashboardAgentsAgentIdIndexRouteImport } from './routes/_dashboard/agents/$agentId/index'
@@ -98,6 +100,11 @@ const DashboardApikeyRoute = DashboardApikeyRouteImport.update({
   path: '/apikey',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardIdeasIndexRoute = DashboardIdeasIndexRouteImport.update({
+  id: '/ideas/',
+  path: '/ideas/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardContentIndexRoute = DashboardContentIndexRouteImport.update({
   id: '/content/',
   path: '/content/',
@@ -107,6 +114,11 @@ const DashboardAgentsIndexRoute = DashboardAgentsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardAgentsRoute,
+} as any)
+const DashboardIdeasIdRoute = DashboardIdeasIdRouteImport.update({
+  id: '/ideas/$id',
+  path: '/ideas/$id',
+  getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardContentIdRoute = DashboardContentIdRouteImport.update({
   id: '/content/$id',
@@ -161,8 +173,10 @@ export interface FileRoutesByFullPath {
   '/callback': typeof CallbackAuthedRouteWithChildren
   '/agents': typeof DashboardAgentsFlowRouteWithChildren
   '/content/$id': typeof DashboardContentIdRoute
+  '/ideas/$id': typeof DashboardIdeasIdRoute
   '/agents/': typeof DashboardAgentsIndexRoute
   '/content': typeof DashboardContentIndexRoute
+  '/ideas': typeof DashboardIdeasIndexRoute
   '/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
   '/agents/$agentId': typeof DashboardAgentsAgentIdIndexRoute
@@ -182,7 +196,9 @@ export interface FileRoutesByTo {
   '/callback': typeof CallbackAuthedRouteWithChildren
   '/agents': typeof DashboardAgentsIndexRoute
   '/content/$id': typeof DashboardContentIdRoute
+  '/ideas/$id': typeof DashboardIdeasIdRoute
   '/content': typeof DashboardContentIndexRoute
+  '/ideas': typeof DashboardIdeasIndexRoute
   '/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
   '/agents/manual': typeof DashboardAgentsFlowManualRoute
   '/agents/$agentId': typeof DashboardAgentsAgentIdIndexRoute
@@ -206,8 +222,10 @@ export interface FileRoutesById {
   '/_dashboard/agents': typeof DashboardAgentsRouteWithChildren
   '/_dashboard/agents/_flow': typeof DashboardAgentsFlowRouteWithChildren
   '/_dashboard/content/$id': typeof DashboardContentIdRoute
+  '/_dashboard/ideas/$id': typeof DashboardIdeasIdRoute
   '/_dashboard/agents/': typeof DashboardAgentsIndexRoute
   '/_dashboard/content/': typeof DashboardContentIndexRoute
+  '/_dashboard/ideas/': typeof DashboardIdeasIndexRoute
   '/_dashboard/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
   '/_dashboard/agents/_flow/manual': typeof DashboardAgentsFlowManualRoute
   '/_dashboard/agents/$agentId/': typeof DashboardAgentsAgentIdIndexRoute
@@ -229,8 +247,10 @@ export interface FileRouteTypes {
     | '/callback'
     | '/agents'
     | '/content/$id'
+    | '/ideas/$id'
     | '/agents/'
     | '/content'
+    | '/ideas'
     | '/agents/$agentId/edit'
     | '/agents/manual'
     | '/agents/$agentId'
@@ -250,7 +270,9 @@ export interface FileRouteTypes {
     | '/callback'
     | '/agents'
     | '/content/$id'
+    | '/ideas/$id'
     | '/content'
+    | '/ideas'
     | '/agents/$agentId/edit'
     | '/agents/manual'
     | '/agents/$agentId'
@@ -273,8 +295,10 @@ export interface FileRouteTypes {
     | '/_dashboard/agents'
     | '/_dashboard/agents/_flow'
     | '/_dashboard/content/$id'
+    | '/_dashboard/ideas/$id'
     | '/_dashboard/agents/'
     | '/_dashboard/content/'
+    | '/_dashboard/ideas/'
     | '/_dashboard/agents/$agentId/edit'
     | '/_dashboard/agents/_flow/manual'
     | '/_dashboard/agents/$agentId/'
@@ -381,6 +405,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardApikeyRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/ideas/': {
+      id: '/_dashboard/ideas/'
+      path: '/ideas'
+      fullPath: '/ideas'
+      preLoaderRoute: typeof DashboardIdeasIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/content/': {
       id: '/_dashboard/content/'
       path: '/content'
@@ -394,6 +425,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/agents/'
       preLoaderRoute: typeof DashboardAgentsIndexRouteImport
       parentRoute: typeof DashboardAgentsRoute
+    }
+    '/_dashboard/ideas/$id': {
+      id: '/_dashboard/ideas/$id'
+      path: '/ideas/$id'
+      fullPath: '/ideas/$id'
+      preLoaderRoute: typeof DashboardIdeasIdRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/_dashboard/content/$id': {
       id: '/_dashboard/content/$id'
@@ -486,7 +524,9 @@ interface DashboardRouteChildren {
   DashboardProfileRoute: typeof DashboardProfileRoute
   DashboardAgentsRoute: typeof DashboardAgentsRouteWithChildren
   DashboardContentIdRoute: typeof DashboardContentIdRoute
+  DashboardIdeasIdRoute: typeof DashboardIdeasIdRoute
   DashboardContentIndexRoute: typeof DashboardContentIndexRoute
+  DashboardIdeasIndexRoute: typeof DashboardIdeasIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
@@ -496,7 +536,9 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardProfileRoute: DashboardProfileRoute,
   DashboardAgentsRoute: DashboardAgentsRouteWithChildren,
   DashboardContentIdRoute: DashboardContentIdRoute,
+  DashboardIdeasIdRoute: DashboardIdeasIdRoute,
   DashboardContentIndexRoute: DashboardContentIndexRoute,
+  DashboardIdeasIndexRoute: DashboardIdeasIndexRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
