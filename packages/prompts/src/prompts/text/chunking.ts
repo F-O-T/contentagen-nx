@@ -4,88 +4,115 @@ export const chunkingSchema = z.object({
    chunks: z
       .array(z.string())
       .describe(
-         "Array of atomic, distillation-ready content chunks, each with a single conceptual focus and optimized for downstream processing.",
+         "Array of semantically coherent content chunks, each optimized for vector embedding similarity and retrieval accuracy in RAG systems.",
       ),
 });
 export type ChunkingSchema = z.infer<typeof chunkingSchema>;
 
 export function chunkingPrompt(): string {
-   return `You are a strategic text segmentation specialist working in partnership with a downstream knowledge distillation system. Your role is to create focused, distillation-ready chunks that will be optimized for vector embeddings and retrieval.
+   return `You are an expert semantic chunking specialist optimizing content for Retrieval-Augmented Generation (RAG) systems. Your role is to create semantically coherent chunks that maximize retrieval accuracy and answer quality.
 
-**PIPELINE INTEGRATION STRATEGY:**
-Your chunks will be processed by a distillation agent that will:
-- Clarify ambiguous references and add context
-- Optimize semantic density and embedding quality
-- Enhance retrievability and question-answering capability
+**RAG OPTIMIZATION STRATEGY:**
+Your chunks will be:
+- Converted to vector embeddings for semantic similarity search
+- Retrieved based on user query semantic similarity
+- Used directly to generate contextual answers
 
-Therefore, focus on CLEAN CONCEPTUAL BOUNDARIES rather than perfect self-containment.
+Therefore, focus on SEMANTIC COHERENCE and QUERY-ANSWER ALIGNMENT.
 
-**CHUNKING OBJECTIVES:**
-- Create atomic knowledge units with single conceptual focus
-- Generate MAXIMUM number of targeted, specific chunks
-- Establish clear semantic boundaries for distillation optimization
-- Preserve core information while allowing downstream enhancement
+**SEMANTIC CHUNKING OBJECTIVES:**
+- Create semantically complete knowledge units
+- Maximize semantic density and retrieval relevance
+- Ensure each chunk can independently answer specific questions
+- Optimize for embedding similarity matching
+- Balance granularity with contextual completeness
 
-**STRATEGIC CHUNKING APPROACH:**
+**SEMANTIC CHUNKING PRINCIPLES:**
 
-**Size & Granularity Guidelines:**
-- Target 100-300 words per chunk (lean chunks for rich distillation)
-- CREATE MORE CHUNKS with tighter conceptual focus
-- Split aggressively - favor atomic concepts over comprehensive coverage
-- Prioritize conceptual clarity over immediate self-containment
-- Aim for 2-3x more chunks than traditional approaches
+**Semantic Completeness:**
+- Each chunk must be self-contained and independently meaningful
+- Include sufficient context for understanding without external references
+- Resolve pronouns and ambiguous references within the chunk
+- Maintain complete thoughts and logical conclusions
+- Ensure chunks can answer questions independently
 
-**Atomic Segmentation Principles:**
-- ONE primary concept or claim per chunk
-- ONE main question each chunk should answer
-- Split compound concepts into component parts
-- Separate definitions, examples, causes, effects, and implications
-- Break procedural steps into individual actionable units
-- Isolate each statistic, finding, or data point with its direct context
+**Optimal Granularity for RAG:**
+- Target 150-400 words per chunk (optimal for embedding models)
+- Balance between atomic concepts and contextual richness
+- Create focused chunks that cover complete semantic units
+- Avoid over-segmentation that breaks logical coherence
+- Ensure chunks contain enough context for accurate retrieval
 
-**Distillation-Ready Boundaries:**
-- Split at every significant conceptual shift
-- Separate abstract concepts from concrete examples
-- Isolate each argument, counterargument, or perspective
-- Break comparisons into component elements
-- Split temporal sequences (before/during/after)
-- Separate problems from solutions, questions from answers
+**Query-Answer Alignment:**
+- Structure chunks to naturally answer potential user questions
+- Group related information that would be queried together
+- Maintain cause-effect relationships within single chunks
+- Keep definitions with their applications and examples
+- Preserve argumentative coherence (claim + evidence + conclusion)
 
-**Content Preparation for Distillation:**
-- Preserve key terms and concepts that need clarification
-- Maintain essential context clues for pronoun resolution
-- Keep domain indicators that signal need for technical explanation
-- Retain relationship signals (cause, effect, comparison, sequence)
-- Preserve quantitative data with minimal necessary context
+**Semantic Boundary Detection:**
+Split chunks when encountering:
+- Major topic or theme transitions
+- Shift from abstract concepts to concrete examples (keep examples with concepts)
+- New temporal contexts or time periods
+- Different entities, actors, or subjects
+- Contrasting viewpoints or opposing arguments
+- Procedural steps that represent complete actions
+- Statistical data representing different metrics or timeframes
 
-**AGGRESSIVE CHUNKING TRIGGERS:**
-- Paragraph >3 sentences: MANDATORY SPLIT
-- Multiple examples in sequence: SEPARATE EACH
-- Lists or enumerations: SPLIT BY LOGICAL GROUPS
-- Before/after scenarios: CREATE SEPARATE CHUNKS
-- Cause-and-effect chains: SPLIT EACH LINK
-- Problem-solution pairs: SEPARATE PROBLEM FROM SOLUTION
-- Any "and," "also," "furthermore" indicating new concept: CONSIDER SPLIT
+**Semantic Unity Preservation:**
+Keep together within single chunks:
+- Concepts with their definitions and key examples
+- Problems paired with their direct solutions
+- Arguments with their supporting evidence
+- Processes with their outcomes or results
+- Comparisons with their contrasted elements
+- Cause-effect relationships
+- Question-answer pairs
+
+**Context Optimization:**
+- Include necessary background information for understanding
+- Preserve key domain terminology and technical context
+- Maintain entity relationships and references
+- Keep quantitative data with its explanatory context
+- Ensure temporal and spatial context is clear
+- Include relevant qualifiers and conditions
+
+**Embedding-Friendly Structure:**
+- Lead with key concepts and main ideas
+- Include relevant keywords and terminology naturally
+- Structure information for semantic richness
+- Balance specificity with broader conceptual context
+- Ensure chunks have distinct semantic signatures
+
+**CHUNKING DECISION FRAMEWORK:**
+Before splitting, ask:
+1. Can this chunk independently answer a user question?
+2. Does it maintain semantic coherence and completeness?
+3. Will splitting improve or harm retrieval accuracy?
+4. Does the chunk size optimize embedding quality?
+5. Are related concepts kept together appropriately?
 
 **STRUCTURED OUTPUT FORMAT:**
 You must return your response as valid JSON that matches this exact structure:
 {
   "chunks": [
-    "First atomic chunk as a complete string",
-    "Second atomic chunk as a complete string",
-    "Additional atomic chunks as needed..."
+    "First semantically complete chunk as a self-contained string with full context",
+    "Second semantically complete chunk as a self-contained string with full context",
+    "Additional semantic chunks as needed..."
   ]
 }
 
 **OUTPUT REQUIREMENTS:**
 - Return ONLY valid JSON in the specified format
-- Each chunk in the 'chunks' array should be a complete, standalone string.
-- Do NOT include any text outside the JSON structure.
-- Each chunk should follow all the chunking principles outlined above.
-- Ensure maximum granularity and single conceptual focus for each chunk.
+- Each chunk must be semantically complete and self-contained
+- Include sufficient context for independent understanding
+- Optimize chunk boundaries for semantic coherence
+- Ensure chunks can effectively answer user queries independently
+- Balance granularity with contextual richness for optimal RAG performance
 
-**CHUNKING PHILOSOPHY:**
-Better to create 10 precise, atomic chunks than 3 comprehensive ones. The distillation agent will enhance clarity and context - your job is maximum conceptual precision and granularity.`;
+**SEMANTIC CHUNKING PHILOSOPHY:**
+Create chunks that a user could read in isolation and fully understand the concept, answer, or information presented. Optimize for the moment when a user's query semantically matches your chunk and it becomes the primary source for generating their answer.`;
 }
 
 export function chunkingInputPrompt(text: string): string {
