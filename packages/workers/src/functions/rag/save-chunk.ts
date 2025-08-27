@@ -1,9 +1,6 @@
 import { serverEnv } from "@packages/environment/server";
 import { createChromaClient } from "@packages/chroma-db/client";
-import {
-   addToCollection,
-   ensureAgentKnowledgeCollection,
-} from "@packages/chroma-db/helpers";
+import { addToCollection, ensureCollections } from "@packages/chroma-db/helpers";
 
 const chroma = createChromaClient(serverEnv.CHROMA_DB_URL);
 
@@ -14,8 +11,9 @@ export async function runDistilledChunkFormatterAndSaveOnChroma(payload: {
 }) {
    const { chunk, agentId, sourceId } = payload;
    try {
-      // Ensure the collection exists before using it
-      const collection = await ensureAgentKnowledgeCollection(chroma);
+      // Ensure all defined collections exist before using agent_knowledge
+      const collections = await ensureCollections(chroma);
+      const collection = collections["agent_knowledge"];
 
       await addToCollection(collection, {
          documents: [chunk],

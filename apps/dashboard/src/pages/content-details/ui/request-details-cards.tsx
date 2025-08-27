@@ -11,7 +11,13 @@ import { InfoItem } from "@packages/ui/components/info-item";
 import { Separator } from "@packages/ui/components/separator";
 import { Calendar, Clock, Type, Link2, Tags, Globe } from "lucide-react";
 
-export function ContentDetailsCard({ content }: { content: ContentSelect }) {
+export function ContentDetailsCard({
+   content,
+   relatedSlugs,
+}: {
+   content: ContentSelect;
+   relatedSlugs: string[];
+}) {
    return (
       <Card>
          <CardHeader>
@@ -80,6 +86,18 @@ export function ContentDetailsCard({ content }: { content: ContentSelect }) {
                   label="Slug"
                   value={content.meta?.slug ? `# ${content.meta.slug}` : ""}
                />
+               <Separator className="col-span-2" />
+               <div className="col-span-2">
+                  <InfoItem
+                     icon={<Link2 className="h-4 w-4" />}
+                     label="Related Slugs"
+                     value={
+                        relatedSlugs?.length
+                           ? relatedSlugs.map((slug) => `- ${slug}`).join("\n")
+                           : "None"
+                     }
+                  />
+               </div>
             </div>
          </CardContent>
       </Card>

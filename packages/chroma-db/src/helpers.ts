@@ -6,90 +6,60 @@ export const embedder = new OpenAIEmbeddingFunction({
    apiKey: serverEnv.OPENAI_API_KEY,
 });
 
-// Collection names used in ChromaDB
 export const CollectionName = {
    AgentKnowledge: "agent_knowledge",
-   // Add more as needed
+   RelatedSlugs: "related_slugs",
 } as const;
 
 export type CollectionName =
    (typeof CollectionName)[keyof typeof CollectionName];
 
-/**
- * Test ChromaDB connection
- */
-export const testConnection = async (
+export const ensureCollections = async (
    client: ChromaClient,
-): Promise<boolean> => {
-   try {
-      const heartbeat = await client.heartbeat();
-      console.log(
-         `ChromaDB connection test successful. Heartbeat: ${heartbeat}`,
-      );
-
-      const version = await client.version();
-      console.log(`ChromaDB version: ${version}`);
-
-      const collections = await client.listCollections();
-      console.log(
-         `Existing collections: ${collections.map((c) => c.name).join(", ") || "none"}`,
-      );
-
-      return true;
-   } catch (error) {
-      console.error(`ChromaDB connection test failed:`, error);
-      return false;
-   }
-};
-
-/**
- * Ensure the agent_knowledge collection exists, creating it if necessary
- */
-export const ensureAgentKnowledgeCollection = async (
-   client: ChromaClient,
-): Promise<Collection> => {
-   const collectionName = "agent_knowledge";
-
-   try {
-      // Try to get the collection first
-      const collection = await client.getCollection({
-         name: collectionName,
-         embeddingFunction: embedder,
-      });
-      console.log(`✓ Collection '${collectionName}' already exists`);
-      return collection;
-   } catch {
-      // Collection doesn't exist, create it
-      console.log(
-         `Creating collection '${collectionName}' with OpenAI embedding function...`,
-      );
+): Promise<Record<CollectionName, Collection>> => {
+   const results = {} as Record<CollectionName, Collection>;
+   for (const key in CollectionName) {
+      const collectionName = CollectionName[key as keyof typeof CollectionName];
       try {
-         const collection = await client.createCollection({
+         // Try to get the collection first
+         const collection = await client.getCollection({
             name: collectionName,
             embeddingFunction: embedder,
          });
-         console.log(`✓ Successfully created collection '${collectionName}'`);
-         return collection;
-      } catch (createError) {
-         console.error(
-            `✗ Failed to create collection '${collectionName}':`,
-            createError,
+         console.log(`✓ Collection '${collectionName}' already exists`);
+         results[collectionName as CollectionName] = collection;
+      } catch {
+         // Collection doesn't exist, create it
+         console.log(
+            `Creating collection '${collectionName}' with OpenAI embedding function...`,
          );
-         throw createError;
+         try {
+            const collection = await client.createCollection({
+               name: collectionName,
+               embeddingFunction: embedder,
+            });
+            console.log(
+               `✓ Successfully created collection '${collectionName}'`,
+            );
+            results[collectionName as CollectionName] = collection;
+         } catch (createError) {
+            console.error(
+               `✗ Failed to create collection '${collectionName}':`,
+               createError,
+            );
+            throw createError;
+         }
       }
    }
+   return results;
 };
 
-/**
- * Get a collection by name. The collection should already exist since we create them during client initialization.
- */
 export const getCollection = async (
    client: ChromaClient,
    name: keyof typeof CollectionName,
 ): Promise<Collection> => {
    const collectionName = CollectionName[name];
    try {
-      console.log(`Getting collection: ${collectionName}`);
       const collection = await client.getCollection({
          name: collectionName,
          embeddingFunction: embedder,

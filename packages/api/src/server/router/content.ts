@@ -24,6 +24,11 @@ import {
    ContentSelectSchema,
 } from "@packages/database/schema";
 import { enqueueIdeaGenerationJob } from "@packages/workers/queues/content/ideas-queue";
+import {
+   addToCollection,
+   getCollection,
+   queryCollection,
+} from "@packages/chroma-db/helpers";
 
 export const contentRouter = router({
    regenerate: protectedProcedure
@@ -351,6 +356,19 @@ export const contentRouter = router({
                });
             }
             await updateContent(db, input.id, { status: "approved" });
+            // Save slug to related_slugs collection with agentId metadata
+            if (content.meta?.slug) {
+               const chromaClient = (await ctx).chromaClient;
+               const collection = await getCollection(
+                  chromaClient,
+                  "RelatedSlugs",
+               );
+               await addToCollection(collection, {
+                  documents: [content.meta.slug],
+                  ids: [crypto.randomUUID()],
+                  metadatas: [{ agentId: content.agentId }],
+               });
+            }
             if (!content.meta?.keywords || content.meta.keywords.length === 0) {
                throw new TRPCError({
                   code: "BAD_REQUEST",
@@ -363,6 +381,52 @@ export const contentRouter = router({
                keywords: content.meta?.keywords,
             });
             return { success: true };
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
+      }),
+   getRelatedSlugs: protectedProcedure
+      .input(z.object({ slug: z.string(), agentId: z.string() }))
+      .query(async ({ ctx, input }) => {
+         try {
+            if (!input.slug || !input.agentId) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Slug and Agent ID are required.",
+               });
+            }
+            const resolvedCtx = await ctx;
+            const collection = await getCollection(
+               resolvedCtx.chromaClient,
+               "RelatedSlugs",
+            );
+            // Query for document matching the slug and metadata.agentId
+            const results = await queryCollection(collection, {
+               queryTexts: [input.slug],
+               nResults: 5,
+               whereDocument: {
+                  $not_contains: input.slug,
+               },
+               include: ["documents", "metadatas", "distances"],
+               where: { agentId: input.agentId },
+            });
+            const slugs = results.documents
+               .flat()
+               .filter(
+                  (doc): doc is string =>
+                     typeof doc === "string" && doc !== null,
+               );
+
+            return slugs;
          } catch (err) {
             if (err instanceof NotFoundError) {
                throw new TRPCError({ code: "NOT_FOUND", message: err.message });

@@ -51,13 +51,19 @@ export function GeneratedContentDisplay({
             console.error("Error adding image URL:", error);
             toast.error("Failed to add image URL. Please try again.");
          },
-         onSuccess: () => {
+         onSuccess: async () => {
             toast.success("Image URL added successfully!");
-            queryClient.invalidateQueries({
-               queryKey: [
-                  trpc.content.listAllContent.queryKey(),
-                  trpc.content.get.queryKey({ id: content.id }),
-               ],
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.listAllContent.queryKey(),
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.get.queryKey({ id: content.id }),
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.getRelatedSlugs.queryKey({
+                  slug: content.meta?.slug,
+                  agentId: content.agentId,
+               }),
             });
          },
       }),
@@ -164,6 +170,10 @@ export function GeneratedContentDisplay({
                                     ],
                                  });
                               } catch (error) {
+                                 console.error(
+                                    "Error triggering regeneration:",
+                                    error,
+                                 );
                                  toast.error("Failed to trigger regeneration.");
                               }
                            }}

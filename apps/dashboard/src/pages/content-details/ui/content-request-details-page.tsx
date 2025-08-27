@@ -22,6 +22,14 @@ export function ContentRequestDetailsPage() {
       }),
    );
 
+   // Fetch related slugs if slug and agentId are available
+   const { data: relatedSlugs } = useSuspenseQuery(
+      trpc.content.getRelatedSlugs.queryOptions({
+         slug: data?.meta?.slug ?? "",
+         agentId: data.agentId,
+      }),
+   );
+
    // Calculate subscription enabled state using useMemo
    const isGenerating = useMemo(
       () =>
@@ -69,7 +77,10 @@ export function ContentRequestDetailsPage() {
                <div className="col-span-1 gap-4 flex flex-col">
                   <ContentQualityCard content={data} />
                   <ContentStatsCard content={data} />
-                  <ContentDetailsCard content={data} />
+                  <ContentDetailsCard
+                     content={data}
+                     relatedSlugs={relatedSlugs}
+                  />
                </div>
                <div className="col-span-1 md:col-span-2">
                   <GeneratedContentDisplay content={data} />

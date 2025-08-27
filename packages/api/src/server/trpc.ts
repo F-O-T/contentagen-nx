@@ -5,6 +5,7 @@ import type { DatabaseInstance } from "@packages/database/client";
 import type { MinioClient } from "@packages/files/client";
 import type { ChromaClient } from "@packages/chroma-db/client";
 import type { OpenRouterClient } from "@packages/openrouter/client";
+import { ensureCollections } from "@packages/chroma-db/helpers";
 export const createTRPCContext = async ({
    auth,
    db,
@@ -34,6 +35,7 @@ export const createTRPCContext = async ({
    const session = await auth.api.getSession({
       headers,
    });
+   await ensureCollections(chromaClient);
    return {
       openRouterClient,
       minioBucket,

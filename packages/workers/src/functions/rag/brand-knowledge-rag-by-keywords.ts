@@ -1,9 +1,6 @@
 import { serverEnv } from "@packages/environment/server";
 import { createChromaClient } from "@packages/chroma-db/client";
-import {
-   queryCollection,
-   ensureAgentKnowledgeCollection,
-} from "@packages/chroma-db/helpers";
+import { queryCollection, getCollection } from "@packages/chroma-db/helpers";
 
 const chroma = createChromaClient(serverEnv.CHROMA_DB_URL);
 
@@ -14,7 +11,7 @@ export async function runRagByKeywords(payload: {
    const { agentId, keywords } = payload;
 
    try {
-      const collection = await ensureAgentKnowledgeCollection(chroma);
+      const collection = await getCollection(chroma, "AgentKnowledge");
 
       const chunks = await queryCollection(collection, {
          nResults: 30,
