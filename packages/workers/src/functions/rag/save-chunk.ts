@@ -1,6 +1,9 @@
 import { serverEnv } from "@packages/environment/server";
 import { createChromaClient } from "@packages/chroma-db/client";
-import { addToCollection, ensureCollections } from "@packages/chroma-db/helpers";
+import {
+   addToCollection,
+   ensureCollections,
+} from "@packages/chroma-db/helpers";
 
 const chroma = createChromaClient(serverEnv.CHROMA_DB_URL);
 
