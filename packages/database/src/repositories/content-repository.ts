@@ -14,7 +14,7 @@ export async function getContentBySlug(
    dbClient: DatabaseInstance,
    slug: string,
    agentId: string,
-): Promise<Content> {
+) {
    try {
       // Find by meta.slug and agentId
       const result = await dbClient.query.content.findFirst({
@@ -23,6 +23,13 @@ export async function getContentBySlug(
                sql`${fields.meta}->>'slug' = ${slug}`,
                sql`${fields.agentId} = ${agentId}`,
             ),
+         with: {
+            agent: {
+               columns: {
+                  personaConfig: true,
+               },
+            },
+         },
       });
       if (!result) throw new NotFoundError("Content not found");
       return result;

@@ -1,11 +1,5 @@
 FROM oven/bun:latest AS builder
 
-
-
-
-
-
-
 ARG POLAR_PREMIUM_PLAN
 ARG POLAR_PRO_PLAN
 

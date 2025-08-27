@@ -11,6 +11,7 @@ import { ContentSelectSchema } from "@packages/database/schemas/content";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getCollection, queryCollection } from "@packages/chroma-db/helpers";
+import { PersonaConfigSchema } from "@packages/database/schema";
 
 export const sdkRouter = router({
    getRelatedSlugs: sdkProcedure
@@ -69,7 +70,13 @@ export const sdkRouter = router({
       }),
    getContentBySlug: sdkProcedure
       .input(GetContentBySlugInputSchema)
-      .output(ContentSelectSchema)
+      .output(
+         ContentSelectSchema.extend({
+            agent: {
+               personaConfig: PersonaConfigSchema,
+            },
+         }),
+      )
       .query(async ({ ctx, input }) => {
          try {
             return await getContentBySlug(
