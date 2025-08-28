@@ -6,6 +6,7 @@ import {
    CardTitle,
    CardContent,
    CardFooter,
+   CardAction,
    CardDescription,
 } from "@packages/ui/components/card";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -13,10 +14,17 @@ import { useTRPC } from "@/integrations/clients";
 import { useParams } from "@tanstack/react-router";
 import { useState, Suspense } from "react";
 import { Button } from "@packages/ui/components/button";
-import { ChevronLeft, ChevronRight, Tags } from "lucide-react";
+import { ChevronLeft, ChevronRight, Tags, MoreVertical } from "lucide-react";
 import { Badge } from "@packages/ui/components/badge";
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import {
+   DropdownMenu,
+   DropdownMenuTrigger,
+   DropdownMenuContent,
+   DropdownMenuItem,
+} from "@packages/ui/components/dropdown-menu";
+import { Link } from "@tanstack/react-router";
 
 export function AgentIdeasCard() {
    const { agentId } = useParams({
@@ -90,6 +98,23 @@ function IdeasList({
                         <CardTitle className="line-clamp-1">
                            {idea.content}
                         </CardTitle>
+                        <CardAction>
+                           <DropdownMenu>
+                              <DropdownMenuTrigger className="flex items-center justify-center p-2 rounded hover:bg-muted">
+                                 <MoreVertical className="w-5 h-5" />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                 <DropdownMenuItem asChild>
+                                    <Link
+                                       to="/ideas/$id"
+                                       params={{ id: idea.id }}
+                                    >
+                                       View Details
+                                    </Link>
+                                 </DropdownMenuItem>
+                              </DropdownMenuContent>
+                           </DropdownMenu>
+                        </CardAction>
                      </CardHeader>
 
                      <CardContent className="wrap">
