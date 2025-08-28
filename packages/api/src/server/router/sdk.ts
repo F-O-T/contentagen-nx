@@ -11,9 +11,53 @@ import { ContentSelectSchema } from "@packages/database/schemas/content";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getCollection, queryCollection } from "@packages/chroma-db/helpers";
-import { PersonaConfigSchema } from "@packages/database/schema";
+
+import { getAgentById } from "@packages/database/repositories/agent-repository";
+import { streamFileForProxy } from "@packages/files/client";
 
 export const sdkRouter = router({
+   getAuthorByAgentId: sdkProcedure
+      .input(GetContentBySlugInputSchema.pick({ agentId: true }))
+      .output(
+         z.object({
+            name: z.string(),
+            profilePhoto: z
+               .object({ image: z.base64(), contentType: z.string() })
+               .nullable(),
+         }),
+      )
+      .query(async ({ ctx, input }) => {
+         const db = (await ctx).db;
+         const minioClient = (await ctx).minioClient;
+         const bucketName = (await ctx).minioBucket;
+         const agent = await getAgentById(db, input.agentId);
+         if (!agent)
+            throw new TRPCError({
+               code: "NOT_FOUND",
+               message: "Agent not found",
+            });
+         let profilePhoto = null;
+         if (agent.profilePhotoUrl) {
+            try {
+               const { buffer, contentType } = await streamFileForProxy(
+                  agent.profilePhotoUrl,
+                  bucketName,
+                  minioClient,
+               );
+               profilePhoto = {
+                  image: buffer.toString("base64"),
+                  contentType,
+               };
+            } catch (err) {
+               console.error("Error fetching profile photo:", err);
+               profilePhoto = null;
+            }
+         }
+         return {
+            name: agent.personaConfig?.metadata?.name ?? "",
+            profilePhoto,
+         };
+      }),
    getRelatedSlugs: sdkProcedure
       .input(GetContentBySlugInputSchema)
       .query(async ({ ctx, input }) => {
@@ -70,13 +114,7 @@ export const sdkRouter = router({
       }),
    getContentBySlug: sdkProcedure
       .input(GetContentBySlugInputSchema)
-      .output(
-         ContentSelectSchema.extend({
-            agent: {
-               personaConfig: PersonaConfigSchema,
-            },
-         }),
-      )
+      .output(ContentSelectSchema)
       .query(async ({ ctx, input }) => {
          try {
             return await getContentBySlug(

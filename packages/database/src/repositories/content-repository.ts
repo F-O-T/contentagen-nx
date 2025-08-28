@@ -23,13 +23,6 @@ export async function getContentBySlug(
                sql`${fields.meta}->>'slug' = ${slug}`,
                sql`${fields.agentId} = ${agentId}`,
             ),
-         with: {
-            agent: {
-               columns: {
-                  personaConfig: true,
-               },
-            },
-         },
       });
       if (!result) throw new NotFoundError("Content not found");
       return result;

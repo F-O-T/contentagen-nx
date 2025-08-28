@@ -95,6 +95,29 @@ export async function listFiles(
    return files;
 }
 
+export async function streamFileForProxy(
+   fileName: string,
+   bucketName: string,
+   minioClient: MinioClient,
+): Promise<{ buffer: Buffer; contentType: string }> {
+   const stream = await minioClient.getObject(bucketName, fileName);
+   const chunks: Buffer[] = [];
+   for await (const chunk of stream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+   }
+   const buffer = Buffer.concat(chunks);
+   let contentType = "image/jpeg";
+   try {
+      const stat = await minioClient.statObject(bucketName, fileName);
+      if (stat.metaData && stat.metaData["content-type"]) {
+         contentType = stat.metaData["content-type"];
+      }
+   } catch (err) {
+      // fallback to default
+   }
+   return { buffer, contentType };
+}
+
 export async function getFileInfo(
    fileName: string,
    bucketName: string,

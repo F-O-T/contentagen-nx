@@ -24,7 +24,35 @@ const AgentFileDeleteInput = z.object({
    fileName: z.string(),
 });
 
+const AgentProfilePhotoUploadInput = z.object({
+   agentId: z.uuid(),
+   fileName: z.string(),
+   fileBuffer: z.base64(), // base64 encoded
+   contentType: z.string(),
+});
+
 export const agentFileRouter = router({
+   uploadProfilePhoto: protectedProcedure
+      .input(AgentProfilePhotoUploadInput)
+      .mutation(async ({ ctx, input }) => {
+         const { agentId, fileName, fileBuffer, contentType } = input;
+         const key = `${agentId}/profile-photo/${fileName}`;
+         const buffer = Buffer.from(fileBuffer, "base64");
+         const bucketName = (await ctx).minioBucket;
+         const minioClient = (await ctx).minioClient;
+         // Upload to S3/Minio
+         const url = await uploadFile(
+            key,
+            buffer,
+            contentType,
+            bucketName,
+            minioClient,
+         );
+         // Update agent profilePhotoUrl
+         const db = (await ctx).db;
+         await updateAgent(db, agentId, { profilePhotoUrl: key });
+         return { url };
+      }),
    generateBrandKnowledge: protectedProcedure
       .input(
          AgentInsertSchema.pick({ id: true }).extend({

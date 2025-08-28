@@ -96,6 +96,7 @@ export const agent = pgTable(
       uploadedFiles: jsonb("uploaded_files")
          .$type<{ fileName: string; fileUrl: string; uploadedAt: string }[]>()
          .default([]),
+      profilePhotoUrl: text("profile_photo_url"),
       createdAt: timestamp("created_at")
          .$defaultFn(() => new Date())
          .notNull(),
@@ -123,6 +124,7 @@ export type AgentInsert = typeof agent.$inferInsert;
 export const AgentInsertSchema = createInsertSchema(agent);
 export const AgentSelectSchema = createSelectSchema(agent);
 export const AgentUpdateSchema = createUpdateSchema(agent);
+
 export type VoiceConfig = z.infer<typeof VoiceConfigSchema>;
 export type AudienceConfig = z.infer<typeof AudienceConfigSchema>;
 export type FormatConfig = z.infer<typeof FormatConfigSchema>;
