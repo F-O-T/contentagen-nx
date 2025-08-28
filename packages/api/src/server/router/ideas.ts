@@ -4,6 +4,7 @@ import {
    updateIdea,
    deleteIdea,
    listIdeasByAgent,
+   getAgentIdeasCount,
 } from "@packages/database/repositories/ideas-repository";
 import {
    IdeaInsertSchema,
@@ -12,6 +13,8 @@ import {
 import { protectedProcedure, router } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { eq } from "drizzle-orm";
+import { ideas } from "@packages/database/schemas/ideas";
 
 import { listAllIdeasPaginated } from "@packages/database/repositories/ideas-repository";
 import { listAgents } from "@packages/database/repositories/agent-repository";
@@ -151,6 +154,49 @@ export const ideasRouter = router({
          const resolvedCtx = await ctx;
          // listIdeasByAgent now returns an array directly
          return await listIdeasByAgent(resolvedCtx.db, input.agentId);
+      }),
+
+   getAgentIdeasCount: protectedProcedure
+      .input(z.object({ agentId: z.string().min(1) }))
+      .query(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
+         return await getAgentIdeasCount(resolvedCtx.db, input.agentId);
+      }),
+
+   listByAgentPaginated: protectedProcedure
+      .input(
+         z.object({
+            agentId: z.string().min(1),
+            page: z.number().min(1).default(1),
+            limit: z.number().min(1).max(50).default(10),
+         }),
+      )
+      .query(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
+         try {
+            const offset = (input.page - 1) * input.limit;
+            const ideasList = await resolvedCtx.db.query.ideas.findMany({
+               where: eq(ideas.agentId, input.agentId),
+               limit: input.limit,
+               offset,
+               orderBy: (ideas, { desc }) => [desc(ideas.createdAt)],
+            });
+            const total = await getAgentIdeasCount(
+               resolvedCtx.db,
+               input.agentId,
+            );
+            return {
+               items: ideasList,
+               total,
+               page: input.page,
+               limit: input.limit,
+            };
+         } catch (err) {
+            throw new TRPCError({
+               code: "INTERNAL_SERVER_ERROR",
+               message: (err as Error).message,
+            });
+         }
       }),
 
    approve: protectedProcedure

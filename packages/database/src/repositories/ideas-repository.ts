@@ -93,6 +93,23 @@ export async function listIdeasByAgent(
    }
 }
 
+export async function getAgentIdeasCount(
+   dbClient: DatabaseInstance,
+   agentId: string,
+): Promise<number> {
+   try {
+      const result = await dbClient
+         .select({ count: ideas.id })
+         .from(ideas)
+         .where(eq(ideas.agentId, agentId));
+      return result.length;
+   } catch (err) {
+      throw new DatabaseError(
+         `Failed to get agent ideas count: ${(err as Error).message}`,
+      );
+   }
+}
+
 export async function listAllIdeasPaginated(
    dbClient: DatabaseInstance,
    page: number = 1,
@@ -110,7 +127,9 @@ export async function listAllIdeasPaginated(
          },
          where: inArray(ideas.agentId, agentIds),
       });
-      const totalRes = await dbClient.query.ideas.findMany({});
+      const totalRes = await dbClient.query.ideas.findMany({
+         where: inArray(ideas.agentId, agentIds),
+      });
       return { items, total: totalRes.length };
    } catch (err) {
       throw new DatabaseError(

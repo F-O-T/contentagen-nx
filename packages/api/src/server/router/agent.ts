@@ -14,6 +14,7 @@ import {
    PersonaConfigSchema,
 } from "@packages/database/schemas/agent";
 import { getAgentContentStats } from "@packages/database/repositories/content-repository";
+import { getAgentIdeasCount } from "@packages/database/repositories/ideas-repository";
 import { countWords } from "@packages/helpers/text";
 import { publicProcedure } from "../trpc";
 import { z } from "zod";
@@ -94,6 +95,7 @@ export const agentRouter = router({
       .query(async ({ ctx, input }) => {
          const resolvedCtx = await ctx;
          const contents = await getAgentContentStats(resolvedCtx.db, input.id);
+         const totalIdeas = await getAgentIdeasCount(resolvedCtx.db, input.id);
 
          const wordsWritten = countWords(
             contents.map((item) => item.body).join(" "),
@@ -124,6 +126,7 @@ export const agentRouter = router({
             wordsWritten,
             totalDraft,
             totalPublished,
+            totalIdeas,
             avgQualityScore,
          };
       }),
