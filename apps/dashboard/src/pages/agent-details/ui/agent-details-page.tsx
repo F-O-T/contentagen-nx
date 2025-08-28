@@ -40,6 +40,10 @@ export function AgentDetailsPage() {
          { agentId },
          {
             async onData(data) {
+               await queryClient.invalidateQueries({
+                  queryKey: trpc.agent.get.queryKey({ id: agentId }),
+               });
+
                if (data.status === "failed") {
                   toast.error(data.message || "Brand knowledge job failed");
                   return;
@@ -48,13 +52,11 @@ export function AgentDetailsPage() {
                   toast.success(
                      data.message || "Brand knowledge job completed",
                   );
+
                   return;
                }
 
                toast.info(data.message || `Status: ${data.status}`);
-               await queryClient.invalidateQueries({
-                  queryKey: trpc.agent.get.queryKey({ id: agentId }),
-               });
             },
             enabled: isRunning,
          },

@@ -1,6 +1,5 @@
 import { listFiles, uploadFile } from "@packages/files/client";
 import { enqueueDocumentChunkJob } from "@packages/workers/queues/knowledge/document-chunk-queue";
-import { enqueueAutoBrandKnowledgeJob } from "@packages/workers/queues/knowledge/brand-knowledge-queue";
 import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 import {
@@ -13,6 +12,7 @@ import {
    getCollection,
 } from "@packages/chroma-db/helpers";
 import { AgentInsertSchema } from "@packages/database/schema";
+import { enqueueAutoBrandKnowledgeJob } from "@packages/workers/queues/knowledge/brand-knowledge-crawl";
 
 const AgentFileUploadInput = z.object({
    fileName: z.string(),

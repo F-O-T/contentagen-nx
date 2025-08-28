@@ -1,14 +1,15 @@
 import { Worker, Queue, type Job } from "bullmq";
-import { runDistilledChunkFormatterAndSaveOnChroma } from "../../functions/rag/save-chunk";
+import { runCunkSaving } from "../../functions/rag/save-chunk";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../../helpers";
+import { updateAgentKnowledgeStatus } from "../../functions/database/update-agent-status";
 
-export interface ChunkSavingJob {
+export type ChunkSavingJob = {
    chunk: string;
    agentId: string;
    sourceId: string;
-}
+}[];
 
 const QUEUE_NAME = "chunk-saving-job";
 const redis = createRedisClient(serverEnv.REDIS_URL);
@@ -22,54 +23,29 @@ export async function enqueueChunkSavingJob(job: ChunkSavingJob) {
    return chunkSavingQueue.add("chunk-saving", job);
 }
 
-export async function enqueueChunkSavingJobsBulk(jobs: ChunkSavingJob[]) {
-   return chunkSavingQueue.addBulk(
-      jobs.map((job) => ({
-         name: "chunk-saving",
-         data: job,
-      })),
-   );
-}
-
 export const chunkSavingWorker = new Worker<ChunkSavingJob>(
    QUEUE_NAME,
    async (job: Job<ChunkSavingJob>) => {
-      console.info("[ChunkSaving] Processing chunk save job", {
-         jobId: job.id,
-         agentId: job.data.agentId,
-         sourceId: job.data.sourceId,
-      });
-
       try {
-         const result = await runDistilledChunkFormatterAndSaveOnChroma(
-            job.data,
-         );
-         console.info("[ChunkSaving] Chunk saved successfully", {
-            jobId: job.id,
-            agentId: job.data.agentId,
-            sourceId: job.data.sourceId,
-         });
+         const agentId = job.data[0]?.agentId;
+         if (!agentId) {
+            throw new Error("Agent ID is missing in chunk saving job data");
+         }
+         const msg = `Indexed ${job.data.length} chunks to knowledge base`;
+         const result = await runCunkSaving({ items: job.data });
+         await updateAgentKnowledgeStatus(agentId, "completed", msg);
+
          return result;
       } catch (error) {
-         console.error("[ChunkSaving] Failed to save chunk", {
-            jobId: job.id,
-            agentId: job.data.agentId,
-            sourceId: job.data.sourceId,
-            error: error instanceof Error ? error.message : error,
-         });
+         console.error("Error processing chunk saving job:", error);
          throw error;
       }
    },
    {
       connection: redis,
-      concurrency: 2, // Process 2 chunks at a time to avoid rate limits
-      limiter: {
-         max: 5, // Max 5 jobs per...
-         duration: 1000, // ...1 second (5 jobs/second rate limit)
-      },
-      removeOnComplete: {
-         count: 10, // Keep the last 100 completed job
-      },
+      concurrency: 2,
+      limiter: { max: 5, duration: 1000 },
+      removeOnComplete: { count: 10 },
    },
 );
 registerGracefulShutdown(chunkSavingWorker);

@@ -3,8 +3,7 @@ import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../../helpers";
 import { runCreateAtomicChunks } from "../../functions/chunking/get-atomic-chunks";
-
-import { enqueueChunkSavingJobsBulk } from "./chunk-saving";
+import { enqueueChunkSavingJob } from "./chunk-saving";
 export interface DocumentChunkJob {
    inputText: string;
    agentId: string;
@@ -18,14 +17,13 @@ export async function runDocumentChunking(payload: DocumentChunkJob) {
       userId,
       inputText,
    });
+   const result = chunks.map((chunk) => ({
+      chunk,
+      agentId,
+      sourceId,
+   }));
    if (chunks && chunks.length > 0) {
-      await enqueueChunkSavingJobsBulk(
-         chunks.map((chunk) => ({
-            chunk,
-            agentId,
-            sourceId,
-         })),
-      );
+      await enqueueChunkSavingJob(result);
    }
    return;
 }

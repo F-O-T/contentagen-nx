@@ -1,5 +1,3 @@
-// apps/dashboard/src/pages/agent-details/ui/agent-ideas-card.tsx
-
 import {
    Card,
    CardHeader,

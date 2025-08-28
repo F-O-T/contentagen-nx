@@ -10,7 +10,7 @@ import {
 } from "@packages/ui/components/credenza";
 import { useAppForm } from "@packages/ui/components/form";
 import { Input } from "@packages/ui/components/input";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useCallback, type FormEvent } from "react";
 import { toast } from "sonner";
@@ -29,6 +29,7 @@ export function GenerateBrandFilesCredenza({
       from: "/_dashboard/agents/$agentId/",
       select: ({ agentId }) => agentId,
    });
+   const queryClient = useQueryClient();
    const trpc = useTRPC();
    const generateBrandFilesMutation = useMutation(
       trpc.agentFile.generateBrandKnowledge.mutationOptions({
@@ -37,8 +38,11 @@ export function GenerateBrandFilesCredenza({
             toast.error("An error occurred while generating brand files.");
             // Optionally, display an error message to the user here
          },
-         onSuccess: () => {
+         onSuccess: async () => {
             toast.success("Brand files generation initiated.");
+            await queryClient.invalidateQueries({
+               queryKey: trpc.agent.get.queryKey({ id: agentId }),
+            });
             // Optionally, display a success message to the user here
          },
       }),
