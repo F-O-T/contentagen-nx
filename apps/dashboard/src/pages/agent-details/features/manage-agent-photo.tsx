@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
@@ -8,6 +8,7 @@ import {
    CredenzaContent,
    CredenzaHeader,
    CredenzaTitle,
+   CredenzaDescription,
    CredenzaBody,
    CredenzaFooter,
    CredenzaClose,
@@ -18,12 +19,7 @@ import {
    DropzoneEmptyState,
 } from "@packages/ui/components/dropzone";
 import { Button } from "@packages/ui/components/button";
-import {
-   Avatar,
-   AvatarImage,
-   AvatarFallback,
-} from "@packages/ui/components/avatar";
-import { Upload, X } from "lucide-react";
+
 import type { AgentSelect } from "@packages/database/schema";
 
 interface ManageAgentPhotoProps {
@@ -33,7 +29,7 @@ interface ManageAgentPhotoProps {
 }
 
 export function ManageAgentPhoto({
-   agent,
+   agent: _agent,
    open,
    onOpenChange,
 }: ManageAgentPhotoProps) {
@@ -43,19 +39,20 @@ export function ManageAgentPhoto({
    const isOpen = isControlled ? open : internalOpen;
    const setIsOpen = isControlled ? onOpenChange : setInternalOpen;
    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+   const [filePreview, setFilePreview] = useState<string | undefined>();
    const { agentId } = useParams({ from: "/_dashboard/agents/$agentId/" });
    const queryClient = useQueryClient();
    const trpc = useTRPC();
 
-   // Query to fetch profile photo data
+   // Fetch the profile photo using the streaming route
    const { data: profilePhotoData } = useQuery(
-      trpc.agentFile.getProfilePhoto.queryOptions(
-         { agentId },
-         {
-            enabled: !!agent.profilePhotoUrl,
-         },
-      ),
+      trpc.agentFile.getProfilePhoto.queryOptions({
+         agentId,
+      }),
    );
+
+   // Determine what image to display: new preview, existing photo, or nothing
+   const displayImage = filePreview || profilePhotoData?.data;
 
    // Create preview URL using useMemo for proper lifecycle management
    const previewUrl = useMemo(() => {
@@ -74,13 +71,17 @@ export function ManageAgentPhoto({
 
    const uploadPhotoMutation = useMutation(
       trpc.agentFile.uploadProfilePhoto.mutationOptions({
-         onSuccess: () => {
+         onSuccess: async () => {
             toast.success("Profile photo updated successfully!");
-            queryClient.invalidateQueries({
+            await queryClient.invalidateQueries({
                queryKey: trpc.agent.get.queryKey({ id: agentId }),
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.agentFile.getProfilePhoto.queryKey({ agentId }),
             });
             setIsOpen(false);
             setSelectedFile(null);
+            setFilePreview(undefined);
          },
          onError: (error) => {
             console.error("Upload error:", error);
@@ -106,6 +107,15 @@ export function ManageAgentPhoto({
       }
 
       setSelectedFile(file);
+
+      // Create file preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+         if (typeof e.target?.result === "string") {
+            setFilePreview(e.target.result);
+         }
+      };
+      reader.readAsDataURL(file);
    };
 
    const handleUpload = async () => {
@@ -130,47 +140,17 @@ export function ManageAgentPhoto({
       }
    };
 
-   const handleRemove = () => {
-      if (previewUrl) {
-         URL.revokeObjectURL(previewUrl);
-      }
-      setSelectedFile(null);
-   };
-
    return (
       <Credenza open={isOpen} onOpenChange={setIsOpen}>
          <CredenzaContent className="sm:max-w-md">
             <CredenzaHeader>
                <CredenzaTitle>Manage Agent Photo</CredenzaTitle>
+               <CredenzaDescription>
+                  Upload a new profile photo for your agent. The image will be
+                  displayed in your agent's profile.
+               </CredenzaDescription>
             </CredenzaHeader>
             <CredenzaBody className="space-y-4">
-               {/* Current/Preview Photo Display */}
-               <div className="flex justify-center">
-                  <div className="relative">
-                     <Avatar className="w-24 h-24">
-                        <AvatarImage
-                           src={profilePhotoData?.data}
-                           alt={agent.personaConfig.metadata.name}
-                        />
-                        <AvatarFallback className="text-lg">
-                           {agent.personaConfig.metadata.name
-                              .charAt(0)
-                              .toUpperCase()}
-                        </AvatarFallback>
-                     </Avatar>
-                     {selectedFile && (
-                        <Button
-                           variant="destructive"
-                           size="sm"
-                           className="absolute -top-2 -right-2 rounded-full w-6 h-6 p-0"
-                           onClick={handleRemove}
-                        >
-                           <X className="w-3 h-3" />
-                        </Button>
-                     )}
-                  </div>
-               </div>
-
                {/* Dropzone */}
                <Dropzone
                   accept={{
@@ -180,38 +160,29 @@ export function ManageAgentPhoto({
                   maxFiles={1}
                   onDrop={handleFileSelect}
                   disabled={uploadPhotoMutation.isPending}
+                  src={selectedFile ? [selectedFile] : undefined}
                >
+                  <DropzoneEmptyState>
+                     {profilePhotoData?.data && (
+                        <img
+                           alt="profile"
+                           className="  object-contain"
+                           src={profilePhotoData.data}
+                        />
+                     )}
+                  </DropzoneEmptyState>
                   <DropzoneContent>
-                     {selectedFile ? (
-                        <div className="flex flex-col items-center justify-center space-y-2">
-                           <Upload className="w-8 h-8 text-muted-foreground" />
-                           <p className="text-sm font-medium">
-                              {selectedFile.name}
-                           </p>
-                           <p className="text-xs text-muted-foreground">
-                              {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                           </p>
-                        </div>
-                     ) : (
-                        <DropzoneEmptyState>
-                           <div className="flex flex-col items-center justify-center space-y-2">
-                              <Upload className="w-8 h-8 text-muted-foreground" />
-                              <p className="text-sm font-medium">
-                                 Upload Photo
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                 Drag and drop or click to select
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                 PNG, JPG, JPEG, GIF, WebP up to 5MB
-                              </p>
-                           </div>
-                        </DropzoneEmptyState>
+                     {displayImage && (
+                        <img
+                           alt="Preview"
+                           className="h-full w-full object-contain rounded-md"
+                           src={displayImage}
+                        />
                      )}
                   </DropzoneContent>
                </Dropzone>
             </CredenzaBody>
-            <CredenzaFooter>
+            <CredenzaFooter className="grid grid-cols-2 gap-2">
                <CredenzaClose asChild>
                   <Button variant="outline">Cancel</Button>
                </CredenzaClose>
