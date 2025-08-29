@@ -1,12 +1,6 @@
 import { useMemo } from "react";
 import { Bot, FileText } from "lucide-react";
-import {
-   Card,
-   CardHeader,
-   CardTitle,
-   CardDescription,
-   CardContent,
-} from "@packages/ui/components/card";
+import { StatsCard } from "@packages/ui/components/stats-card";
 import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
 import { Link } from "@tanstack/react-router";
 import { useTRPC } from "@/integrations/clients";
@@ -43,15 +37,12 @@ export function DashboardHomePage() {
       <div className="flex flex-col gap-4">
          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {statsCards.map((card) => (
-               <Card className="col-span-1" key={card.title}>
-                  <CardHeader>
-                     <CardTitle>{card.title}</CardTitle>
-                     <CardDescription>{card.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="font-bold text-4xl">
-                     {card.value}
-                  </CardContent>
-               </Card>
+               <StatsCard
+                  key={card.title}
+                  title={card.title}
+                  description={card.description}
+                  value={card.value}
+               />
             ))}
          </div>
          <div className="grid grid-cols-2 gap-4">

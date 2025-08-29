@@ -109,10 +109,11 @@ export async function streamFileForProxy(
    let contentType = "image/jpeg";
    try {
       const stat = await minioClient.statObject(bucketName, fileName);
-      if (stat.metaData && stat.metaData["content-type"]) {
+      if (stat.metaData?.["content-type"]) {
          contentType = stat.metaData["content-type"];
       }
    } catch (err) {
+      console.error("Error fetching file metadata:", err);
       // fallback to default
    }
    return { buffer, contentType };

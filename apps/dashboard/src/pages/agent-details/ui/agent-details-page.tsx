@@ -1,30 +1,24 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
-import { AgentDetailsKnowledgeBaseCard } from "./agent-details-knowledge-base-card";
-import { AgentPersonaCard } from "./agent-persona-card";
-import { FileViewerModal } from "./file-viewer-modal";
+import { AgentPersonaCard } from "./agent-details-persona-card";
 import { AgentStatsCard } from "./agent-stats-card";
-import { AgentIdeasCard } from "./agent-ideas-card";
-import useAgentDetails from "../lib/use-agent-details";
-import useFileViewer from "../lib/use-file-viewer";
 import { Suspense, useMemo } from "react";
 import { useSubscription } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
 import { useTRPC } from "@/integrations/clients";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
+import { AgentDetailsQuickActions } from "./agent-details-quick-actions";
+import { AgentDetailsKnowledgeBaseCard } from "./agent-details-knowledge-base-card";
+import { AgentIdeasCard } from "./agent-ideas-card";
 
 export function AgentDetailsPage() {
-   const {
-      isOpen,
-      fileName,
-      fileContent,
-      isLoading: isFileLoading,
-      open,
-      close,
-   } = useFileViewer();
-   const { agent, uploadedFiles, agentId } = useAgentDetails();
-
-   // --- Brand Knowledge Status Subscription ---
    const trpc = useTRPC();
+   const { agentId } = useParams({ from: "/_dashboard/agents/$agentId/" });
+
+   const { data: agent } = useSuspenseQuery(
+      trpc.agent.get.queryOptions({ id: agentId }),
+   );
+
    const queryClient = useQueryClient();
    const isRunning = useMemo(
       () =>
@@ -65,44 +59,21 @@ export function AgentDetailsPage() {
 
    return (
       <Suspense>
-         <main className="space-y-4">
+         <main className="flex flex-col gap-4">
             <TalkingMascot message="Manage your agent’s configuration and knowledge base." />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-               <div className="col-span-1 md:col-span-2 space-y-4">
+               <div className="col-span-1 md:col-span-2 flex flex-col  gap-4">
                   <AgentStatsCard />
-                  <AgentPersonaCard
-                     name={agent?.personaConfig.metadata.name}
-                     description={agent?.personaConfig.metadata.description}
-                     contentType={agent?.personaConfig.purpose ?? ""}
-                     voiceTone={agent?.personaConfig.voice?.communication ?? ""}
-                     targetAudience={agent?.personaConfig.audience?.base ?? ""}
-                     formattingStyle={
-                        agent?.personaConfig.formatting?.style ?? ""
-                     }
-                     language={agent?.personaConfig.language?.primary ?? ""}
-                     brandIntegration={
-                        agent?.personaConfig.brand?.integrationStyle ?? ""
-                     }
-                  />
+                  <AgentPersonaCard agent={agent} />
                </div>
-               <div className="col-span-1 space-y-4">
-                  <AgentDetailsKnowledgeBaseCard
-                     uploadedFiles={uploadedFiles}
-                     onViewFile={open}
-                     agentId={agentId}
-                  />
+               <div className=" col-span-1  gap-4 flex flex-col">
+                  <AgentDetailsQuickActions agent={agent} />
+                  <AgentDetailsKnowledgeBaseCard agent={agent} />
                </div>
-               <div className="md:col-span-3">
+               <div className="md:col-span-3 ">
                   <AgentIdeasCard />
                </div>
             </div>
-            <FileViewerModal
-               open={isOpen}
-               fileName={fileName}
-               fileContent={fileContent ?? ""}
-               loading={isFileLoading}
-               onClose={close}
-            />
          </main>
       </Suspense>
    );

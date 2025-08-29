@@ -156,6 +156,7 @@ export function ContentRequestCard({
                      Written By:
                   </span>
                   <AgentWriterCard
+                     agent={request.agent}
                      name={request.agent.personaConfig.metadata.name}
                      description={
                         request.agent.personaConfig.metadata.description

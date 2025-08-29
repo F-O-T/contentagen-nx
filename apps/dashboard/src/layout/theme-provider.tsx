@@ -118,7 +118,7 @@ const Theme = ({
          const colorScheme = colorSchemes.includes(resolved)
             ? resolved
             : fallback;
-         // @ts-ignore
+         // @ts-expect-error
          d.style.colorScheme = colorScheme;
       }
 

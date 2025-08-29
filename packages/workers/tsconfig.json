@@ -1,6 +1,4 @@
 {
-  "extends": "@tooling/typescript/internal-package.json",
-  "include": [
-    "src/**/*.ts"
-  ]
+   "extends": "@tooling/typescript/internal-package.json",
+   "include": ["src/**/*.ts"]
 }

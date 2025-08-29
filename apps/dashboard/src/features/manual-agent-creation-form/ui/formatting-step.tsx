@@ -96,10 +96,11 @@ export function FormattingStep({ form }: { form: AgentForm }) {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                      {styleOptions.map((option) => (
                         <button
-                           className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${field.state.value === option
+                           className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${
+                              field.state.value === option
                                  ? "border-primary bg-primary/5 text-primary shadow-sm"
                                  : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                              }`}
+                           }`}
                            key={option}
                            onClick={() => {
                               field.handleChange(option);
@@ -122,10 +123,11 @@ export function FormattingStep({ form }: { form: AgentForm }) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                      {listStyleOptions.map((option) => (
                         <button
-                           className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${field.state.value === option
+                           className={`group relative rounded-lg border-2 p-4 text-sm font-medium transition-all hover:shadow-sm ${
+                              field.state.value === option
                                  ? "border-primary bg-primary/5 text-primary shadow-sm"
                                  : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                              }`}
+                           }`}
                            key={option}
                            onClick={() => {
                               field.handleChange(option);

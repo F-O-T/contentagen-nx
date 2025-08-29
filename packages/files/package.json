@@ -14,7 +14,7 @@
    "exports": {
       "./client": "./src/client.ts",
       "./image-helper": "./src/image-helper.ts",
-      "./text-file-helper": "./src/text-file-helper.ts"
+      "./text-file-helper": "./src/text-file-helpers.ts"
    },
    "version": "0.0.0",
    "dependencies": {

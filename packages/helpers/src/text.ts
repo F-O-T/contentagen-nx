@@ -21,3 +21,8 @@ export function readTimeMinutes(wordCount: number): number {
 export function removeTitleFromMarkdown(markdown: string): string {
    return markdown.replace(/^#\s+.*\n?/, "");
 }
+
+export function formatValueForDisplay(value: string) {
+   if (!value) return "Not specified";
+   return value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}

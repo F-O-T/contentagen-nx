@@ -15,18 +15,8 @@ import {
    DropdownMenuItem,
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
-import {
-   AlertDialog,
-   AlertDialogAction,
-   AlertDialogCancel,
-   AlertDialogContent,
-   AlertDialogDescription,
-   AlertDialogFooter,
-   AlertDialogHeader,
-   AlertDialogTitle,
-} from "@packages/ui/components/alert-dialog";
 import { Button } from "@packages/ui/components/button";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
    Edit,
    MoreVertical,
@@ -39,6 +29,8 @@ import { formatValueToTitleCase } from "@packages/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTRPC } from "@/integrations/clients";
+import { DeleteAgentDialog } from "@/features/agent-actions/ui/delete-agent-dialog";
+import { EditAgentAction } from "@/features/agent-actions/ui/edit-agent-action";
 import type { AgentSelect } from "@packages/database/schema";
 import type { PersonaConfig } from "@packages/database/schemas/agent";
 
@@ -49,20 +41,6 @@ type AgentCardProps = {
 export function AgentCard({ agent }: AgentCardProps) {
    const queryClient = useQueryClient();
    const trpc = useTRPC();
-   const { mutate: deleteAgent, isPending } = useMutation(
-      trpc.agent.delete.mutationOptions({
-         onError: () => {
-            toast.error("Failed to delete agent");
-         },
-         onSuccess: () => {
-            queryClient.invalidateQueries({
-               queryKey: trpc.agent.list.queryKey(),
-            });
-            toast.success("Agent deleted successfully");
-         },
-      }),
-   );
-
    const { mutate: transferAgent, isPending: isTransferPending } = useMutation(
       trpc.agent.transferToOrganization.mutationOptions({
          onError: () => {
@@ -76,6 +54,8 @@ export function AgentCard({ agent }: AgentCardProps) {
          },
       }),
    );
+
+   const { handleEdit } = EditAgentAction({ agentId: agent.id });
    const infoItems = React.useMemo(() => {
       const personaConfig = agent.personaConfig as PersonaConfig;
 
@@ -114,8 +94,7 @@ export function AgentCard({ agent }: AgentCardProps) {
       ];
    }, [agent]);
    const [dropdownOpen, setDropdownOpen] = React.useState(false);
-   const [alertOpen, setAlertOpen] = React.useState(false);
-   const router = useRouter();
+   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
    return (
       <Card>
          <CardHeader>
@@ -138,14 +117,7 @@ export function AgentCard({ agent }: AgentCardProps) {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent align="end">
-                     <DropdownMenuItem
-                        onClick={() =>
-                           router.navigate({
-                              to: "/agents/$agentId/edit",
-                              params: { agentId: agent.id },
-                           })
-                        }
-                     >
+                     <DropdownMenuItem onClick={handleEdit}>
                         <Edit className="w-4 h-4 mr-2" /> Edit
                      </DropdownMenuItem>
                      {!agent.organizationId && (
@@ -158,36 +130,20 @@ export function AgentCard({ agent }: AgentCardProps) {
                         </DropdownMenuItem>
                      )}
                      <DropdownMenuItem
-                        disabled={isPending}
-                        onClick={() => setAlertOpen(true)}
+                        onClick={() => setDeleteDialogOpen(true)}
                      >
                         <Trash className="w-4 h-4 mr-2" /> Delete
                      </DropdownMenuItem>
                   </DropdownMenuContent>
                </DropdownMenu>
-               <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
-                  <AlertDialogContent>
-                     <AlertDialogHeader>
-                        <AlertDialogTitle>
-                           Are you absolutely sure?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                           This action cannot be undone. This will permanently
-                           delete your agent and remove your data from our
-                           servers.
-                        </AlertDialogDescription>
-                     </AlertDialogHeader>
-                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                           onClick={() => deleteAgent({ id: agent.id })}
-                           disabled={isPending}
-                        >
-                           Continue
-                        </AlertDialogAction>
-                     </AlertDialogFooter>
-                  </AlertDialogContent>
-               </AlertDialog>
+               <DeleteAgentDialog
+                  agentId={agent.id}
+                  agentName={
+                     (agent.personaConfig as PersonaConfig).metadata.name
+                  }
+                  open={deleteDialogOpen}
+                  onOpenChange={setDeleteDialogOpen}
+               />
             </CardAction>
          </CardHeader>
 

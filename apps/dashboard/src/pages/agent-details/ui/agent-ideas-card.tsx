@@ -23,7 +23,7 @@ import {
    DropdownMenuItem,
 } from "@packages/ui/components/dropdown-menu";
 import { Link } from "@tanstack/react-router";
-
+//TODO mudar para uma data table?
 export function AgentIdeasCard() {
    const { agentId } = useParams({
       from: "/_dashboard/agents/$agentId/",

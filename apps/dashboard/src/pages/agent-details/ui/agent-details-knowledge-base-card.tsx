@@ -1,14 +1,13 @@
-import { Button } from "@packages/ui/components/button";
-import { Input } from "@packages/ui/components/input";
 import {
    Card,
    CardContent,
    CardDescription,
+   CardFooter,
    CardHeader,
    CardTitle,
-   CardFooter,
    CardAction,
 } from "@packages/ui/components/card";
+import { Button } from "@packages/ui/components/button";
 import { Badge } from "@packages/ui/components/badge";
 import {
    DropdownMenu,
@@ -16,25 +15,22 @@ import {
    DropdownMenuContent,
    DropdownMenuItem,
 } from "@packages/ui/components/dropdown-menu";
-import { Upload, FileText, MoreHorizontal } from "lucide-react";
-import useFileUpload, { type UploadedFile } from "../lib/use-file-upload";
-import { useState, useEffect } from "react";
-import {
-   Credenza,
-   CredenzaContent,
-   CredenzaHeader,
-   CredenzaTitle,
-   CredenzaFooter,
-   CredenzaClose,
-} from "@packages/ui/components/credenza";
-import {
-   Dropzone,
-   DropzoneEmptyState,
-   DropzoneContent,
-} from "@packages/ui/components/dropzone";
+import { FileText, MoreVertical } from "lucide-react";
+import { FileViewerModal } from "../features/file-viewer-modal";
+import { useState, useCallback, useMemo } from "react";
 import { GenerateBrandFilesCredenza } from "../features/dynamic-brand-files";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams } from "@tanstack/react-router";
+import { useTRPC } from "@/integrations/clients";
+import { toast } from "sonner";
+import { AGENT_FILE_UPLOAD_LIMIT } from "@packages/files/text-file-helper";
+import type { AgentSelect } from "@packages/database/schema";
 
-const FILE_UPLOAD_LIMIT = 5;
+export type UploadedFile = {
+   fileName: string;
+   fileUrl: string;
+   uploadedAt: string;
+};
 
 function KnowledgeBaseEmptyState() {
    return (
@@ -42,275 +38,145 @@ function KnowledgeBaseEmptyState() {
          <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
          <p>No brand files yet</p>
          <p className="text-sm">
-            Upload Markdown files with your brand’s values, voice, or
+            Upload Markdown files with your brand's values, voice, or
             guidelines.
          </p>
       </div>
    );
 }
 
-export interface AgentDetailsKnowledgeBaseCardProps {
-   uploadedFiles: UploadedFile[];
-   onViewFile: (fileName: string, fileUrl: string) => void;
-
-   agentId: string;
-}
-
 export function AgentDetailsKnowledgeBaseCard({
-   uploadedFiles,
-   onViewFile,
-
-   // agentId,
-}: AgentDetailsKnowledgeBaseCardProps) {
-   const [isClient, setIsClient] = useState(false);
-   useEffect(() => {
-      setIsClient(true);
-   }, []);
-
-   // const trpc = useTRPC();
-   const {
-      fileInputRef,
-      handleFileSelect,
-      handleDeleteFile,
-      canAddMore,
-      remainingSlots,
-   } = useFileUpload(uploadedFiles, { fileLimit: FILE_UPLOAD_LIMIT });
-
-   // Handler to delete all files
-   async function handleDeleteAllFiles() {
-      // Call handleDeleteFile for each file
-      await Promise.all(
-         uploadedFiles.map((file) => handleDeleteFile(file.fileName)),
-      );
-   }
-
-   // Separate Credenza states
-   const [showUploadCredenza, setShowUploadCredenza] = useState(false);
+   agent,
+}: {
+   agent: AgentSelect;
+}) {
    const [showGenerateCredenza, setShowGenerateCredenza] = useState(false);
+   const { agentId } = useParams({ from: "/_dashboard/agents/$agentId/" });
+   const queryClient = useQueryClient();
+   const trpc = useTRPC();
+   const { open, Modal } = FileViewerModal();
 
-   function UploadBrandFilesCredenza({
-      open,
-      onOpenChange,
-   }: {
-      open: boolean;
-      onOpenChange: (open: boolean) => void;
-   }) {
-      const FILE_UPLOAD_LIMIT = 5;
-      const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-      const [error, setError] = useState<string | null>(null);
+   const deleteFileMutation = useMutation(
+      trpc.agentFile.delete.mutationOptions({
+         onSuccess: async () => {
+            toast.success("File deleted successfully!");
+            await queryClient.invalidateQueries({
+               queryKey: trpc.agent.get.queryKey({ id: agentId }),
+            });
+         },
+         onError: () => {
+            toast.error("Failed to delete file");
+         },
+      }),
+   );
 
-      const handleFileSelect = (
-         e: React.ChangeEvent<HTMLInputElement> | { target: { files: File[] } },
-      ) => {
-         const files: File[] =
-            "target" in e && e.target.files ? Array.from(e.target.files) : [];
-         if (!files.length) return;
-         if (uploadedFiles.length + files.length > FILE_UPLOAD_LIMIT) {
-            setError(`You can upload up to ${FILE_UPLOAD_LIMIT} files.`);
-            return;
+   const handleDeleteFile = useCallback(
+      async (fileName: string) => {
+         const fileToDelete = agent?.uploadedFiles?.find(
+            (f: UploadedFile) => f.fileName === fileName,
+         );
+         if (fileToDelete) {
+            await deleteFileMutation.mutateAsync({
+               agentId,
+               fileName: fileName,
+            });
          }
-         const newFiles = files.map((file) => ({
-            fileName: file.name,
-            fileUrl: URL.createObjectURL(file),
-            uploadedAt: new Date().toISOString(),
-         }));
-         setUploadedFiles((prev) => [...prev, ...newFiles]);
-         setError(null);
-      };
+      },
+      [agent, agentId, deleteFileMutation],
+   );
 
-      return (
-         <Credenza open={open} onOpenChange={onOpenChange}>
-            <CredenzaContent>
-               <CredenzaHeader>
-                  <CredenzaTitle>Upload Brand Files</CredenzaTitle>
-               </CredenzaHeader>
-               <Dropzone
-                  accept={{ "text/markdown": [".md"] }}
-                  maxFiles={FILE_UPLOAD_LIMIT}
-                  onDrop={(acceptedFiles: File[]) =>
-                     handleFileSelect({ target: { files: acceptedFiles } })
-                  }
-               >
-                  <DropzoneEmptyState>
-                     <div className="flex flex-col items-center justify-center py-8">
-                        <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                           Drag and drop or click to upload Markdown files
-                        </span>
-                     </div>
-                  </DropzoneEmptyState>
-                  <DropzoneContent />
-               </Dropzone>
-               {error && (
-                  <div className="text-xs text-red-500 mt-2">{error}</div>
-               )}
-               <div className="text-xs text-muted-foreground mt-2">
-                  Upload Markdown files with your brand’s values, voice, or
-                  guidelines.
-               </div>
-               <div className="mt-4 space-y-2">
-                  {uploadedFiles.length > 0 &&
-                     uploadedFiles.map((file) => (
-                        <div
-                           key={file.fileName}
-                           className="flex items-center gap-2"
-                        >
-                           <FileText className="w-4 h-4 text-muted-foreground" />
-                           <span className="text-xs">{file.fileName}</span>
-                        </div>
-                     ))}
-               </div>
-               <CredenzaFooter className="mt-4">
-                  <CredenzaClose asChild>
-                     <Button variant="outline" type="button">
-                        Close
-                     </Button>
-                  </CredenzaClose>
-               </CredenzaFooter>
-            </CredenzaContent>
-         </Credenza>
-      );
-   }
+   const handleViewFile = useCallback(
+      (fileName: string) => {
+         open(fileName);
+      },
+      [open],
+   );
 
-   // Generate Brand Files from Website Credenza (self-contained version)
+   const uploadedFiles = useMemo(
+      () => agent.uploadedFiles || [],
+      [agent.uploadedFiles],
+   );
+   const canAddMore = useMemo(
+      () => uploadedFiles.length < AGENT_FILE_UPLOAD_LIMIT,
+      [uploadedFiles],
+   );
+   const remainingSlots = useMemo(
+      () => AGENT_FILE_UPLOAD_LIMIT - uploadedFiles.length,
+      [uploadedFiles],
+   );
 
    return (
-      <Card className="h-full">
-         <CardHeader className="">
+      <Card>
+         <CardHeader>
             <CardTitle>Brand Knowledge</CardTitle>
             <CardDescription>
-               Upload files about your brand for your agent to use.
+               Files generated using your website url
             </CardDescription>
             <CardAction>
-               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                     <Button
-                        variant={"ghost"}
-                        size="icon"
-                        className="flex items-center justify-center"
-                     >
-                        <MoreHorizontal className="w-5 h-5" />
-                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                     {canAddMore ? (
-                        <>
-                           <DropdownMenuItem
-                              onSelect={() => {
-                                 setShowUploadCredenza(true);
-                              }}
-                           >
-                              Upload Files
-                           </DropdownMenuItem>
-                           <DropdownMenuItem
-                              onSelect={() => {
-                                 setShowGenerateCredenza(true);
-                              }}
-                           >
-                              Generate from Website
-                           </DropdownMenuItem>
-                        </>
-                     ) : (
-                        <DropdownMenuItem onSelect={handleDeleteAllFiles}>
-                           Delete All Files
-                        </DropdownMenuItem>
-                     )}
-                  </DropdownMenuContent>
-               </DropdownMenu>
+               {agent.brandKnowledgeStatus === "completed" && (
+                  <Badge className="font-semibold">100% indexed</Badge>
+               )}
             </CardAction>
          </CardHeader>
-         <CardContent className="h-full">
-            {uploadedFiles.length > 0 ? (
-               <div className="space-y-2">
-                  {uploadedFiles.map((file, index) => (
-                     <div
-                        key={`file-${index + 1}`}
-                        className="flex items-center justify-between p-4 border rounded-lg "
-                     >
-                        <div className="flex items-center gap-3">
-                           <FileText className="w-4 h-4 text-muted-foreground" />
-                           <div>
-                              <p className="font-medium text-sm">
-                                 {file.fileName}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                 Uploaded{" "}
-                                 {isClient
-                                    ? new Date(
-                                         file.uploadedAt,
-                                      ).toLocaleDateString()
-                                    : "..."}
-                              </p>
-                           </div>
-                        </div>
-                        <DropdownMenu>
-                           <DropdownMenuTrigger asChild>
-                              <Button
-                                 variant="outline"
-                                 size="sm"
-                                 className="flex items-center"
-                              >
-                                 <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                           </DropdownMenuTrigger>
-                           <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                 onSelect={() =>
-                                    onViewFile(file.fileName, file.fileUrl)
-                                 }
-                              >
-                                 View
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                 onSelect={() =>
-                                    handleDeleteFile(file.fileName)
-                                 }
-                              >
-                                 Delete
-                              </DropdownMenuItem>
-                           </DropdownMenuContent>
-                        </DropdownMenu>
+         <CardContent className="grid gap-2">
+            {uploadedFiles.map((file, index) => (
+               <div
+                  key={`file-${index + 1}`}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+               >
+                  <div className="flex items-center gap-3">
+                     <FileText className="w-4 h-4 text-muted-foreground" />
+                     <div>
+                        <p className="font-medium text-sm">{file.fileName}</p>
+                        <p className="text-xs text-muted-foreground">
+                           Uploaded{" "}
+                           {new Date(file.uploadedAt).toLocaleDateString()}
+                        </p>
                      </div>
-                  ))}
+                  </div>
+                  <DropdownMenu>
+                     <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                           <MoreVertical className="w-4 h-4" />
+                        </Button>
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                           onSelect={() => handleViewFile(file.fileName)}
+                        >
+                           View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                           onSelect={() => handleDeleteFile(file.fileName)}
+                        >
+                           Delete
+                        </DropdownMenuItem>
+                     </DropdownMenuContent>
+                  </DropdownMenu>
                </div>
-            ) : (
-               <KnowledgeBaseEmptyState />
-            )}
+            ))}
+            {uploadedFiles.length === 0 && <KnowledgeBaseEmptyState />}
          </CardContent>
-         {/* Hidden file input for uploads */}
-         <Input
-            ref={fileInputRef}
-            type="file"
-            accept=".md"
-            multiple
-            onChange={handleFileSelect}
-            className="hidden"
-         />
-         <CardFooter className="flex items-center gap-2 text-muted-foreground">
-            <span className="text-xs">
-               {uploadedFiles.length > 0
-                  ? `${uploadedFiles.length} of ${FILE_UPLOAD_LIMIT} file${FILE_UPLOAD_LIMIT > 1 ? "s" : ""} uploaded.`
-                  : `No files uploaded yet.`}
+         <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>
+               {uploadedFiles.length} of {AGENT_FILE_UPLOAD_LIMIT} files
+               uploaded
             </span>
-            <Badge variant="outline">
-               {uploadedFiles.length}/{FILE_UPLOAD_LIMIT}
-            </Badge>
-            <span className="ml-auto text-xs">
+            <span>
                {canAddMore
-                  ? `You can upload ${remainingSlots} more file${remainingSlots > 1 ? "s" : ""}.`
-                  : `Upload limit reached.`}
+                  ? `${remainingSlots} more file${remainingSlots > 1 ? "s" : ""} allowed`
+                  : "Upload limit reached"}
             </span>
          </CardFooter>
-         {/* Credenza for file upload */}
-         <UploadBrandFilesCredenza
-            open={showUploadCredenza}
-            onOpenChange={setShowUploadCredenza}
-         />
+
          {/* Credenza for website generation */}
          <GenerateBrandFilesCredenza
             open={showGenerateCredenza}
             onOpenChange={setShowGenerateCredenza}
          />
+
+         {/* File Viewer Modal */}
+         <Modal />
       </Card>
    );
 }

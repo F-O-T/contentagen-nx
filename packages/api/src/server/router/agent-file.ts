@@ -1,24 +1,17 @@
 import { listFiles, uploadFile } from "@packages/files/client";
-import { enqueueDocumentChunkJob } from "@packages/workers/queues/knowledge/document-chunk-queue";
 import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 import {
    updateAgent,
    getAgentById,
 } from "@packages/database/repositories/agent-repository";
-import { getFile } from "@packages/files/client";
+import { getFile, streamFileForProxy } from "@packages/files/client";
 import {
    deleteFromCollection,
    getCollection,
 } from "@packages/chroma-db/helpers";
 import { AgentInsertSchema } from "@packages/database/schema";
 import { enqueueAutoBrandKnowledgeJob } from "@packages/workers/queues/knowledge/brand-knowledge-crawl";
-
-const AgentFileUploadInput = z.object({
-   fileName: z.string(),
-   fileBuffer: z.base64(), // base64 encoded
-   contentType: z.string(),
-});
 
 const AgentFileDeleteInput = z.object({
    fileName: z.string(),
@@ -101,47 +94,6 @@ export const agentFileRouter = router({
          return { files };
       }),
 
-   upload: protectedProcedure
-      .input(z.object({ agentId: z.uuid() }).and(AgentFileUploadInput))
-      .mutation(async ({ ctx, input }) => {
-         const { agentId, fileName, fileBuffer, contentType } = input;
-         const key = `${agentId}/${fileName}`;
-         const buffer = Buffer.from(fileBuffer, "base64");
-         const bucketName = (await ctx).minioBucket;
-         const url = await uploadFile(
-            key,
-            buffer,
-            contentType,
-            bucketName,
-            (await ctx).minioClient,
-         );
-         // Update agent's uploadedFiles in DB
-         const db = (await ctx).db;
-         const agent = await getAgentById(db, agentId);
-         const now = new Date().toISOString();
-         const uploadedFiles = Array.isArray(agent.uploadedFiles)
-            ? agent.uploadedFiles
-            : [];
-         uploadedFiles.push({ fileName, fileUrl: key, uploadedAt: now });
-         await updateAgent(db, agentId, { uploadedFiles });
-
-         // --- Knowledge Distillation Integration ---
-         try {
-            // Read file content as text
-            const fileContent = buffer.toString("utf-8");
-            await enqueueDocumentChunkJob({
-               inputText: fileContent,
-               agentId,
-               sourceId: key,
-               userId: ctx.session.user.id,
-            });
-         } catch (err) {
-            // Log error but do not block upload
-            console.error("Knowledge distillation failed:", err);
-         }
-
-         return { url };
-      }),
    delete: protectedProcedure
       .input(z.object({ agentId: z.uuid() }).and(AgentFileDeleteInput))
       .mutation(async ({ ctx, input }) => {
@@ -165,5 +117,92 @@ export const agentFileRouter = router({
          ).filter((f) => f.fileName !== fileName);
          await updateAgent(resolvedCtx.db, agentId, { uploadedFiles });
          return { success: true };
+      }),
+   deleteAllFiles: protectedProcedure
+      .input(z.object({ agentId: z.uuid() }))
+      .mutation(async ({ ctx, input }) => {
+         const { agentId } = input;
+         const resolvedCtx = await ctx;
+
+         // Get the agent to check current uploaded files
+         const agent = await getAgentById(resolvedCtx.db, agentId);
+         const uploadedFiles = Array.isArray(agent.uploadedFiles)
+            ? agent.uploadedFiles
+            : [];
+
+         if (uploadedFiles.length === 0) {
+            return { success: true, message: "No files to delete" };
+         }
+
+         // Delete files from MinIO bucket
+         const bucketName = resolvedCtx.minioBucket;
+         const deletePromises = uploadedFiles.map(async (file) => {
+            const key = `${agentId}/${file.fileName}`;
+            try {
+               await resolvedCtx.minioClient.removeObject(bucketName, key);
+            } catch (error) {
+               console.error(`Failed to delete file ${key}:`, error);
+            }
+         });
+
+         await Promise.all(deletePromises);
+
+         // Delete from ChromaDB collection
+         try {
+            const collection = await getCollection(
+               resolvedCtx.chromaClient,
+               "AgentKnowledge",
+            );
+
+            const sourceIds = uploadedFiles.map(
+               (file) => `${agentId}/${file.fileName}`,
+            );
+            await deleteFromCollection(collection, {
+               where: {
+                  sourceId: { $in: sourceIds },
+               },
+            });
+         } catch (error) {
+            console.error("Failed to delete from ChromaDB:", error);
+         }
+
+         // Update agent's uploadedFiles to empty array
+         await updateAgent(resolvedCtx.db, agentId, {
+            uploadedFiles: [],
+            brandKnowledgeStatus: "pending",
+         });
+
+         return {
+            success: true,
+            message: `Successfully deleted ${uploadedFiles.length} files`,
+         };
+      }),
+   getProfilePhoto: protectedProcedure
+      .input(z.object({ agentId: z.uuid() }))
+      .query(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
+         const agent = await getAgentById(resolvedCtx.db, input.agentId);
+         if (!agent?.profilePhotoUrl) {
+            return null;
+         }
+
+         const bucketName = resolvedCtx.minioBucket;
+         const key = agent.profilePhotoUrl;
+
+         try {
+            const { buffer, contentType } = await streamFileForProxy(
+               key,
+               bucketName,
+               resolvedCtx.minioClient,
+            );
+            const base64 = buffer.toString("base64");
+            return {
+               data: `data:${contentType};base64,${base64}`,
+               contentType,
+            };
+         } catch (error) {
+            console.error("Error fetching profile photo:", error);
+            return null;
+         }
       }),
 });
