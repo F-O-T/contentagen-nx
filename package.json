@@ -1,9 +1,10 @@
 {
    "name": "contentagen-nx",
    "version": "0.0.1",
+   "license": "Apache-2.0",
    "type": "module",
    "devDependencies": {
-      "@biomejs/biome": "2.1.3",
+      "@biomejs/biome": "2.2.2",
       "@commitlint/cli": "^19.8.1",
       "@commitlint/config-conventional": "^19.8.1",
       "@tooling/typescript": "workspace:*",
@@ -149,7 +150,7 @@
             "@react-email/components": "^0.1.1"
          },
          "openrouter": {
-            "@openrouter/ai-sdk-provider": "1.0.0-beta.7",
+            "@openrouter/ai-sdk-provider": "1.1.2",
             "ai": "5.0.5"
          }
       },

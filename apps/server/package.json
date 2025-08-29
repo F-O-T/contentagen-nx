@@ -22,6 +22,7 @@
       "typescript": "catalog:development"
    },
    "name": "server",
+   "license": "Apache-2.0",
    "scripts": {
       "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile server ./src/index.ts",
       "check": "bunx --bun biome check --write .",

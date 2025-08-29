@@ -10,7 +10,7 @@
       "@arcjet/bun": "catalog:security",
       "@packages/environment": "workspace:*"
    },
-   "license": "MIT",
+   "license": "Apache-2.0",
    "name": "@packages/arcjet",
    "scripts": {
       "check": "biome check --write ./src",

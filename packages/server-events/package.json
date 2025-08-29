@@ -3,7 +3,7 @@
       "@tooling/typescript": "workspace:*",
       "typescript": "catalog:development"
    },
-   "license": "MIT",
+   "license": "Apache-2.0",
    "name": "@packages/server-events",
    "scripts": {
       "check": "biome check --write ./src",

@@ -26,6 +26,7 @@
       "typescript": "catalog:development"
    },
    "name": "blog",
+   "license": "Apache-2.0",
    "scripts": {
       "astro": "bunx --bun astro",
       "build": "bunx --bun astro build",

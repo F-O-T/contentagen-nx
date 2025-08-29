@@ -6,7 +6,7 @@
       "@tooling/typescript": "workspace:*",
       "typescript": "catalog:development"
    },
-   "license": "MIT",
+   "license": "Apache-2.0",
    "name": "@packages/errors",
    "scripts": {
       "check": "biome check --write ./src",

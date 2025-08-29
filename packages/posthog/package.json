@@ -3,7 +3,7 @@
       "@tooling/typescript": "workspace:*",
       "typescript": "catalog:development"
    },
-   "license": "MIT",
+   "license": "Apache-2.0",
    "name": "@packages/posthog",
    "scripts": {
       "check": "biome check --write ./src",

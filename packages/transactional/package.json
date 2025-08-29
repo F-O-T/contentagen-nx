@@ -4,7 +4,7 @@
       "react-email": "catalog:transactional",
       "typescript": "catalog:development"
    },
-   "license": "MIT",
+   "license": "Apache-2.0",
    "name": "@packages/transactional",
    "scripts": {
       "check": "biome check --write ./src",

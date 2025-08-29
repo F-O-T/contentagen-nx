@@ -18,8 +18,6 @@ import { z } from "zod";
 import { user } from "./auth";
 import { agent } from "./agent";
 
-// Memory types for different kinds of agent memories
-// These complement the existing agent personaConfig and other agent data
 export const memoryTypeEnum = pgEnum("memory_type", [
    "conversation_history", // Past conversations and user interactions
    "user_feedback", // Explicit user feedback on generated content
@@ -32,15 +30,6 @@ export const memoryTypeEnum = pgEnum("memory_type", [
 
 export type MemoryType = (typeof memoryTypeEnum.enumValues)[number];
 
-// Memory content schema for structured memory data
-// Examples of memory content:
-// - conversation_history: { content: "User asked for blog post about AI", tags: ["blog", "ai"], user_satisfaction: 8 }
-// - user_feedback: { content: "Too technical, make it simpler", tags: ["feedback", "complexity"], applied: true }
-// - performance_insight: { content: "Shorter paragraphs work better", tags: ["formatting"], success_rate: 0.85 }
-// - context_pattern: { content: "User prefers markdown over HTML", tags: ["format", "preference"] }
-// - error_recovery: { content: "Recovered from API timeout by retrying", tags: ["error", "recovery"] }
-// - success_pattern: { content: "Using examples improved engagement", tags: ["examples", "engagement"] }
-// - adaptation: { content: "Adapted tone from formal to conversational", tags: ["tone", "adaptation"] }
 export const MemoryContentSchema = z.object({
    title: z.string().optional(),
    description: z.string().optional(),

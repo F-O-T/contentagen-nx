@@ -18,5 +18,5 @@
    "main": "index.ts",
    "types": "index.ts",
    "description": "Prompt templates for LLM tasks (knowledge distillation, etc)",
-   "license": "MIT"
+   "license": "Apache-2.0"
 }

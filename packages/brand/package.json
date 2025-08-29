@@ -1,5 +1,5 @@
 {
-   "license": "PROPRIETARY",
+   "license": "Apache-2.0",
    "name": "@packages/brand",
    "private": true,
    "version": "0.0.0"

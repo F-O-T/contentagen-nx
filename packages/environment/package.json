@@ -9,7 +9,7 @@
       "vite": "catalog:vite",
       "vitest": "catalog:testing"
    },
-   "license": "MIT",
+   "license": "Apache-2.0",
    "name": "@packages/environment",
    "scripts": {
       "check": "biome check --write ./src",
