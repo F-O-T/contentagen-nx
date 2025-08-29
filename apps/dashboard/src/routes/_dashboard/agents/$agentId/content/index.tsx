@@ -1,9 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
+import { AgentContentPage } from "@/pages/agent-details/ui/agent-content-page";
 
-export const Route = createFileRoute('/_dashboard/agents/$agentId/content/')({
-  component: RouteComponent,
-})
+export const Route = createFileRoute("/_dashboard/agents/$agentId/content/")({
+   component: RouteComponent,
+});
 
 function RouteComponent() {
-  return <div>Hello "/_dashboard/agents/$agentId/content/"!</div>
+   const { agentId } = Route.useParams();
+   return <AgentContentPage agentId={agentId} />;
 }

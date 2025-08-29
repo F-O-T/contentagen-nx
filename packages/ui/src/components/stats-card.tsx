@@ -16,7 +16,6 @@ import {
    CredenzaDescription,
    CredenzaTitle,
 } from "./credenza";
-import { SquaredIconButton } from "./squared-icon-button";
 import { Info as InfoIcon } from "lucide-react";
 import { Button } from "./button";
 

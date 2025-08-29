@@ -1,0 +1,28 @@
+import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
+import { FileText, Lightbulb } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+
+interface AgentNavigationButtonsProps {
+   agentId: string;
+}
+
+export function AgentNavigationButtons({
+   agentId,
+}: AgentNavigationButtonsProps) {
+   return (
+      <div className="grid grid-cols-2 gap-4">
+         <Link to="/agents/$agentId/content" params={{ agentId }}>
+            <SquaredIconButton>
+               <FileText className="w-6 h-6" />
+               <span>Your agent content</span>
+            </SquaredIconButton>
+         </Link>
+         <Link to="/agents/$agentId/ideas" params={{ agentId }}>
+            <SquaredIconButton>
+               <Lightbulb className="w-6 h-6" />
+               <span>Your agent ideas</span>
+            </SquaredIconButton>
+         </Link>
+      </div>
+   );
+}

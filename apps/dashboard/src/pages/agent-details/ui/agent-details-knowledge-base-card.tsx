@@ -106,77 +106,78 @@ export function AgentDetailsKnowledgeBaseCard({
    );
 
    return (
-      <Card>
-         <CardHeader>
-            <CardTitle>Brand Knowledge</CardTitle>
-            <CardDescription>
-               Files generated using your website url
-            </CardDescription>
-            <CardAction>
-               {agent.brandKnowledgeStatus === "completed" && (
-                  <Badge className="font-semibold">100% indexed</Badge>
-               )}
-            </CardAction>
-         </CardHeader>
-         <CardContent className="grid gap-2">
-            {uploadedFiles.map((file, index) => (
-               <div
-                  key={`file-${index + 1}`}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-               >
-                  <div className="flex items-center gap-3">
-                     <FileText className="w-4 h-4 text-muted-foreground" />
-                     <div>
-                        <p className="font-medium text-sm">{file.fileName}</p>
-                        <p className="text-xs text-muted-foreground">
-                           Uploaded{" "}
-                           {new Date(file.uploadedAt).toLocaleDateString()}
-                        </p>
+      <>
+         <Card className="h-full">
+            <CardHeader>
+               <CardTitle>Brand Knowledge</CardTitle>
+               <CardDescription>
+                  Files generated using your website url
+               </CardDescription>
+               <CardAction>
+                  {agent.brandKnowledgeStatus === "completed" && (
+                     <Badge className="font-semibold">100% indexed</Badge>
+                  )}
+               </CardAction>
+            </CardHeader>
+            <CardContent className="grid gap-2">
+               {uploadedFiles.map((file, index) => (
+                  <div
+                     key={`file-${index + 1}`}
+                     className="flex items-center justify-between p-4 border rounded-lg"
+                  >
+                     <div className="flex items-center gap-3">
+                        <FileText className="w-4 h-4 text-muted-foreground" />
+                        <div>
+                           <p className="font-medium text-sm">
+                              {file.fileName}
+                           </p>
+                           <p className="text-xs text-muted-foreground">
+                              Uploaded{" "}
+                              {new Date(file.uploadedAt).toLocaleDateString()}
+                           </p>
+                        </div>
                      </div>
+                     <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                           <Button variant="ghost" size="icon">
+                              <MoreVertical className="w-4 h-4" />
+                           </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                           <DropdownMenuItem
+                              onSelect={() => handleViewFile(file.fileName)}
+                           >
+                              View
+                           </DropdownMenuItem>
+                           <DropdownMenuItem
+                              onSelect={() => handleDeleteFile(file.fileName)}
+                           >
+                              Delete
+                           </DropdownMenuItem>
+                        </DropdownMenuContent>
+                     </DropdownMenu>
                   </div>
-                  <DropdownMenu>
-                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                           <MoreVertical className="w-4 h-4" />
-                        </Button>
-                     </DropdownMenuTrigger>
-                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                           onSelect={() => handleViewFile(file.fileName)}
-                        >
-                           View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                           onSelect={() => handleDeleteFile(file.fileName)}
-                        >
-                           Delete
-                        </DropdownMenuItem>
-                     </DropdownMenuContent>
-                  </DropdownMenu>
-               </div>
-            ))}
-            {uploadedFiles.length === 0 && <KnowledgeBaseEmptyState />}
-         </CardContent>
-         <CardFooter className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>
-               {uploadedFiles.length} of {AGENT_FILE_UPLOAD_LIMIT} files
-               uploaded
-            </span>
-            <span>
-               {canAddMore
-                  ? `${remainingSlots} more file${remainingSlots > 1 ? "s" : ""} allowed`
-                  : "Upload limit reached"}
-            </span>
-         </CardFooter>
-
-         {/* Credenza for website generation */}
+               ))}
+               {uploadedFiles.length === 0 && <KnowledgeBaseEmptyState />}
+            </CardContent>
+            <CardFooter className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
+               <span>
+                  {uploadedFiles.length} of {AGENT_FILE_UPLOAD_LIMIT} files
+                  uploaded
+               </span>
+               <span>
+                  {canAddMore
+                     ? `${remainingSlots} more file${remainingSlots > 1 ? "s" : ""} allowed`
+                     : "Upload limit reached"}
+               </span>
+            </CardFooter>
+         </Card>
          <GenerateBrandFilesCredenza
             open={showGenerateCredenza}
             onOpenChange={setShowGenerateCredenza}
          />
 
-         {/* File Viewer Modal */}
          <Modal />
-      </Card>
+      </>
    );
 }

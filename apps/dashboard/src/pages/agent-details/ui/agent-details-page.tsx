@@ -9,6 +9,7 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { AgentDetailsQuickActions } from "./agent-details-quick-actions";
 import { AgentDetailsKnowledgeBaseCard } from "./agent-details-knowledge-base-card";
+import { AgentNavigationButtons } from "./agent-navigation-buttons";
 
 export function AgentDetailsPage() {
    const trpc = useTRPC();
@@ -59,15 +60,18 @@ export function AgentDetailsPage() {
    return (
       <Suspense>
          <main className="flex flex-col gap-4">
-            <TalkingMascot message="Manage your agent’s configuration and knowledge base." />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-               <div className="col-span-1 md:col-span-2 flex flex-col  gap-4">
+            <TalkingMascot message="Manage your agent's configuration and knowledge base." />
+            <div className="grid md:grid-cols-3 grid-cols-1  gap-4">
+               <div className="col-span-1  md:col-span-2 flex flex-col  gap-4">
                   <AgentStatsCard />
                   <AgentPersonaCard agent={agent} />
                </div>
-               <div className=" col-span-1  gap-4 flex flex-col">
+               <div className="col-span-1 gap-4 flex flex-col">
                   <AgentDetailsQuickActions agent={agent} />
                   <AgentDetailsKnowledgeBaseCard agent={agent} />
+               </div>
+               <div className="md:col-span-3">
+                  <AgentNavigationButtons agentId={agentId} />
                </div>
             </div>
          </main>

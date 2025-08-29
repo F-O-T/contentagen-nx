@@ -153,7 +153,13 @@ export const ideasRouter = router({
       .query(async ({ ctx, input }) => {
          const resolvedCtx = await ctx;
          // listIdeasByAgent now returns an array directly
-         return await listIdeasByAgent(resolvedCtx.db, input.agentId);
+         const ideasList = await resolvedCtx.db.query.ideas.findMany({
+            where: eq(ideas.agentId, input.agentId),
+            with: {
+               agent: true,
+            },
+         });
+         return ideasList;
       }),
 
    getAgentIdeasCount: protectedProcedure
@@ -180,6 +186,9 @@ export const ideasRouter = router({
                limit: input.limit,
                offset,
                orderBy: (ideas, { desc }) => [desc(ideas.createdAt)],
+               with: {
+                  agent: true,
+               },
             });
             const total = await getAgentIdeasCount(
                resolvedCtx.db,
