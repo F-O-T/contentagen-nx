@@ -22,6 +22,9 @@ import { Progress } from "@packages/ui/components/progress";
 import type { RouterOutput } from "@packages/api/client";
 import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
 import { Separator } from "@packages/ui/components/separator";
+import { useTRPC } from "@/integrations/clients";
+import { agent } from "@packages/database/schema";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 const getStatusDisplay = (status: string | null) => {
    if (!status)
@@ -85,6 +88,12 @@ export function ContentRequestCard({
    const statusInfo = getStatusDisplay(request.status);
    const isGenerating = isGeneratingStatus(request.status);
 
+   const trpc = useTRPC();
+   const { data } = useSuspenseQuery(
+      trpc.agentFile.getProfilePhoto.queryOptions({
+         agentId: request.agent.id,
+      }),
+   );
    return (
       <Card>
          {isGenerating ? (
@@ -156,7 +165,7 @@ export function ContentRequestCard({
                      Written By:
                   </span>
                   <AgentWriterCard
-                     agent={request.agent}
+                     photo={data?.data}
                      name={request.agent.personaConfig.metadata.name}
                      description={
                         request.agent.personaConfig.metadata.description

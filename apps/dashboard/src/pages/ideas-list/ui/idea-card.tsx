@@ -19,11 +19,20 @@ import {
    DropdownMenuItem,
 } from "@packages/ui/components/dropdown-menu";
 import { Link } from "@tanstack/react-router";
+import { useTRPC } from "@/integrations/clients";
+import { useSuspenseQuery } from "@tanstack/react-query";
 export function IdeaCard({
    idea,
 }: {
    idea: RouterOutput["ideas"]["listAllIdeas"]["items"][number];
 }) {
+   const trpc = useTRPC();
+   const { data } = useSuspenseQuery(
+      trpc.agentFile.getProfilePhoto.queryOptions({
+         agentId: idea.agent.id,
+      }),
+   );
+
    return (
       <Card>
          <CardHeader>
@@ -69,6 +78,7 @@ export function IdeaCard({
          <CardFooter className="flex flex-col gap-2">
             <Separator />
             <AgentWriterCard
+               photo={data?.data}
                name={idea.agent?.personaConfig.metadata.name || "Unknown"}
                description={
                   idea.agent?.personaConfig.metadata.description ||
