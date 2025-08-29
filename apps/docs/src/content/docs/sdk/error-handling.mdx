@@ -1,0 +1,144 @@
+---
+title: Error Handling
+description: Error codes and handling patterns in the ContentaGen SDK.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Error Codes
+
+The ContentaGen SDK uses consistent error codes for different types of failures:
+
+- **`SDK_E001`**: apiKey is required to initialize the ContentaGenSDK
+- **`SDK_E002`**: API request failed
+- **`SDK_E003`**: Invalid API response format
+- **`SDK_E004`**: Invalid input
+
+## Error Handling Patterns
+
+<Tabs syncKey="error-pattern">
+  <TabItem label="Basic" icon="star">
+    ```ts
+    async function run() {
+      try {
+        const sdk = createSdk({ apiKey: process.env.CONTENTAGEN_API_KEY! });
+
+        const list = await sdk.listContentByAgent({
+          agentId: ["00000000-0000-0000-0000-000000000000"],
+          status: ["approved"],
+          limit: 5,
+          page: 1,
+        });
+
+        if (list.total === 0) {
+          console.log("No posts found");
+          return;
+        }
+
+        const first = list.posts[0];
+        console.log("First post id:", first.id);
+
+        const post = await sdk.getContentBySlug({
+          slug: first.meta.slug ?? "unknown-slug",
+          agentId: first.agentId || "00000000-0000-0000-0000-000000000000",
+        });
+
+        console.log("Post body:", post.body);
+      } catch (err) {
+        console.error("SDK error:", err);
+      }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Advanced" icon="settings">
+    ```ts
+    import { createSdk } from "@contentagen/sdk";
+
+    async function safeApiCall() {
+      try {
+        const sdk = createSdk({ apiKey: process.env.CONTENTAGEN_API_KEY! });
+        const result = await sdk.listContentByAgent({
+          agentId: ["invalid-uuid"],
+          status: ["approved"],
+        });
+        return result;
+      } catch (error: any) {
+        // Handle different error types
+        if (error.code === "SDK_E004") {
+          console.error("Invalid input:", error.message);
+          // Handle validation errors
+        } else if (error.code === "SDK_E002") {
+          console.error("API request failed:", error.message);
+          // Handle network/API errors
+        } else if (error.code === "SDK_E003") {
+          console.error("Invalid response format:", error.message);
+          // Handle response parsing errors
+        } else {
+          console.error("Unknown error:", error);
+        }
+        throw error;
+      }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Initialization" icon="gear">
+    ```ts
+    function initializeSdk() {
+      try {
+        if (!process.env.CONTENTAGEN_API_KEY) {
+          throw new Error("CONTENTAGEN_API_KEY environment variable is required");
+        }
+
+        const sdk = createSdk({
+          apiKey: process.env.CONTENTAGEN_API_KEY
+        });
+
+        return sdk;
+      } catch (error) {
+        console.error("Failed to initialize SDK:", error);
+        throw error;
+      }
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+## Best Practices
+
+1. **Always handle errors**: Wrap SDK calls in try-catch blocks
+2. **Check error codes**: Use specific error codes for targeted error handling
+3. **Validate inputs**: Ensure required parameters are provided before making API calls
+4. **Log errors**: Log errors for debugging while handling them gracefully for users
+5. **Retry logic**: Implement retry logic for transient network errors (SDK_E002)
+
+## Common Error Scenarios
+
+<Tabs syncKey="error-scenario">
+  <TabItem label="Invalid API Key" icon="key">
+    ```ts
+    // SDK_E001: apiKey is required
+    const sdk = createSdk({}); // Throws SDK_E001
+    ```
+  </TabItem>
+  <TabItem label="Network Issues" icon="wifi">
+    ```ts
+    // SDK_E002: API request failed
+    const result = await sdk.listContentByAgent(params); // May throw if network fails
+    ```
+  </TabItem>
+  <TabItem label="Invalid Response" icon="warning">
+    ```ts
+    // SDK_E003: Invalid API response format
+    const result = await sdk.getContentBySlug(params); // May throw if API returns unexpected format
+    ```
+  </TabItem>
+  <TabItem label="Validation Errors" icon="check-circle">
+    ```ts
+    // SDK_E004: Invalid input
+    const result = await sdk.listContentByAgent({
+      agentId: [], // Empty array
+      status: ["approved"],
+    }); // May throw SDK_E004
+    ```
+  </TabItem>
+</Tabs>

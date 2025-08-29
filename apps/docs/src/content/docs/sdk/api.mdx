@@ -1,0 +1,250 @@
+---
+title: API Reference
+description: Complete reference for ContentaGen SDK methods, types, and schemas.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Exports
+
+- `createSdk(config: { apiKey: string }): ContentaGenSDK` — factory for SDK instance
+- `ContentaGenSDK` class — all methods available on instances
+- Zod schemas for advanced validation:
+  - `ContentListResponseSchema`
+  - `ContentSelectSchema`
+  - `GetContentBySlugInputSchema`
+  - `ListContentByAgentInputSchema`
+  - `AuthorByAgentIdSchema`
+  - `RelatedSlugsResponseSchema`
+
+## Methods
+
+### `sdk.listContentByAgent(params)`
+
+Fetch a list of content for agent(s), with pagination and filtering.
+
+**Parameters** (validated by `ListContentByAgentInputSchema`):
+- `agentId`: `string[]` (UUIDs) — **required**
+- `status`: `("draft" | "approved")[]` — **required**
+- `limit?: number` — optional, default 10, between 1 and 100
+- `page?: number` — optional, default 1, min 1
+
+**Returns**: `Promise<ContentList>`
+
+**Examples**:
+
+<Tabs>
+  <TabItem label="Basic" icon="star">
+    ```ts
+    const result = await sdk.listContentByAgent({
+      agentId: ["00000000-0000-0000-0000-000000000000"],
+      status: ["approved"],
+      limit: 10,
+      page: 1,
+    });
+    ```
+  </TabItem>
+  <TabItem label="Multiple Agents" icon="users">
+    ```ts
+    const result = await sdk.listContentByAgent({
+      agentId: [
+        "00000000-0000-0000-0000-000000000000",
+        "11111111-1111-1111-1111-111111111111"
+      ],
+      status: ["approved", "draft"],
+      limit: 20,
+      page: 1,
+    });
+    ```
+  </TabItem>
+  <TabItem label="Pagination" icon="list">
+    ```ts
+    const result = await sdk.listContentByAgent({
+      agentId: ["00000000-0000-0000-0000-000000000000"],
+      status: ["approved"],
+      limit: 50,
+      page: 2,
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+### `sdk.getContentBySlug(params)`
+
+Fetch a content item by its slug.
+
+**Parameters** (validated by `GetContentBySlugInputSchema`):
+- `slug`: `string` — **required**
+- `agentId`: `string` (UUID) — **required**
+
+**Returns**: `Promise<ContentSelect>`
+
+**Examples**:
+
+<Tabs>
+  <TabItem label="Basic" icon="document">
+    ```ts
+    const post = await sdk.getContentBySlug({
+      slug: "my-post-slug",
+      agentId: "00000000-0000-0000-0000-000000000000",
+    });
+    ```
+  </TabItem>
+  <TabItem label="With Error Handling" icon="warning">
+    ```ts
+    try {
+      const post = await sdk.getContentBySlug({
+        slug: "my-post-slug",
+        agentId: "00000000-0000-0000-0000-000000000000",
+      });
+      console.log("Post title:", post.meta.title);
+    } catch (error) {
+      console.error("Post not found:", error);
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+### `sdk.getRelatedSlugs(params)`
+
+Get related slugs for a post.
+
+**Parameters**:
+- `slug`: `string`
+- `agentId`: `string`
+
+**Returns**: `Promise<string[]>` (array of related slugs)
+
+**Examples**:
+
+<Tabs>
+  <TabItem label="Basic" icon="link">
+    ```ts
+    const relatedSlugs = await sdk.getRelatedSlugs({
+      slug: "my-post-slug",
+      agentId: "00000000-0000-0000-0000-000000000000",
+    });
+    console.log("Related content:", relatedSlugs);
+    ```
+  </TabItem>
+  <TabItem label="Integration" icon="puzzle">
+    ```ts
+    // Get related content for recommendations
+    const relatedSlugs = await sdk.getRelatedSlugs({
+      slug: currentPostSlug,
+      agentId: currentAgentId,
+    });
+
+    // Fetch related posts
+    const relatedPosts = await Promise.all(
+      relatedSlugs.slice(0, 3).map(slug =>
+        sdk.getContentBySlug({ slug, agentId: currentAgentId })
+      )
+    );
+    ```
+  </TabItem>
+</Tabs>
+
+### `sdk.getAuthorByAgentId(params)`
+
+Get author info by agent ID.
+
+**Parameters**:
+- `agentId`: `string`
+
+**Returns**: `{ name: string; profilePhoto: { image: string; contentType: string } | null }`
+
+**Note**: The agent serves as the author. The returned name and profile photo are derived directly from the agent config.
+
+**Examples**:
+
+<Tabs>
+  <TabItem label="Basic" icon="user">
+    ```ts
+    const author = await sdk.getAuthorByAgentId({
+      agentId: "00000000-0000-0000-0000-000000000000",
+    });
+    console.log("Author:", author.name);
+    ```
+  </TabItem>
+  <TabItem label="With Profile Photo" icon="image">
+    ```ts
+    const author = await sdk.getAuthorByAgentId({
+      agentId: "00000000-0000-0000-0000-000000000000",
+    });
+
+    if (author.profilePhoto) {
+      console.log("Profile photo available");
+      // Use author.profilePhoto.image and author.profilePhoto.contentType
+    } else {
+      console.log("No profile photo available");
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+## Types
+
+### ContentList
+```ts
+type ContentList = {
+  posts: Array<{
+    id: string;
+    meta: {
+      title?: string;
+      description?: string;
+      keywords?: string[];
+      slug?: string;
+      sources?: string[];
+    };
+    imageUrl: string | null;
+    status: "draft" | "approved";
+    stats: {
+      wordsCount?: string;
+      readTimeMinutes?: string;
+      qualityScore?: string;
+    };
+    createdAt: Date;
+  }>;
+  total: number;
+};
+```
+
+### ContentSelect
+```ts
+type ContentSelect = {
+  id: string;
+  agentId: string;
+  imageUrl: string | null;
+  body: string;
+  status: "draft" | "approved";
+  meta: {
+    title?: string;
+    description?: string;
+    keywords?: string[];
+    slug?: string;
+    sources?: string[];
+  };
+  request: { description: string };
+  stats: {
+    wordsCount?: string;
+    readTimeMinutes?: string;
+    qualityScore?: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+};
+```
+
+### AuthorByAgentId
+```ts
+type AuthorByAgentId = {
+  name: string;
+  profilePhoto: { image: string; contentType: string } | null;
+};
+```
+
+### RelatedSlugsResponse
+```ts
+type RelatedSlugsResponse = string[];
+```

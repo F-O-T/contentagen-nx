@@ -4,6 +4,7 @@
       "@arcjet/astro": "catalog:security",
       "@astrojs/node": "catalog:astro",
       "@astrojs/check": "catalog:astro",
+      "@astrojs/mdx": "catalog:astro",
       "@astrojs/starlight": "catalog:astro",
       "@astrojs/starlight-tailwind": "catalog:astro",
       "@packages/ui": "workspace:*",

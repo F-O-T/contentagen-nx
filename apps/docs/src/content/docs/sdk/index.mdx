@@ -1,0 +1,158 @@
+---
+title: SDK Guide
+description: Official TypeScript SDK for interacting with the ContentaGen API.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+# ContentaGen SDK
+
+Official TypeScript SDK for interacting with the ContentaGen API.
+
+## Features
+
+- Lightweight client for ContentaGen API
+- Input validation with Zod schemas
+- Automatic date parsing for `createdAt` / `updatedAt`
+- Consistent error codes and robust error handling
+- Agents can be used as authors (author info is derived from the agent config)
+- New procedures: `getAuthorByAgentId`, `getRelatedSlugs`
+- All types and schemas exported for advanced usage
+
+## Installation
+
+<Tabs>
+  <TabItem label="npm">
+    ```bash
+    npm install @contentagen/sdk
+    ```
+  </TabItem>
+
+  <TabItem label="yarn">
+    ```bash
+    yarn add @contentagen/sdk
+    ```
+  </TabItem>
+
+  <TabItem label="pnpm">
+    ```bash
+    pnpm add @contentagen/sdk
+    ```
+  </TabItem>
+
+  <TabItem label="bun">
+    ```bash
+    bun add @contentagen/sdk
+    ```
+  </TabItem>
+</Tabs>
+
+## Quick Start (TypeScript)
+
+<Tabs>
+  <TabItem label="Basic Example">
+    ```ts
+    import { createSdk } from "@contentagen/sdk";
+    import type { ContentList, ContentSelect } from "@contentagen/sdk";
+
+    const sdk = createSdk({ apiKey: "YOUR_API_KEY" });
+
+    async function example() {
+      // List content by agent(s)
+      const listParams = {
+        agentId: ["00000000-0000-0000-0000-000000000000"], // array of UUIDs
+        status: ["approved", "draft"], // required array of statuses
+        limit: 10, // optional, default 10
+        page: 1, // optional, default 1
+      };
+      const list: ContentList = await sdk.listContentByAgent(listParams);
+      console.log("total:", list.total);
+      console.log("posts:", list.posts);
+
+      // Get content by slug
+      const selectParams = {
+        slug: "my-post-slug",
+        agentId: "00000000-0000-0000-0000-000000000000",
+      };
+      const post: ContentSelect = await sdk.getContentBySlug(selectParams);
+      console.log(post.id, post.meta.title, post.createdAt);
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="With Related Content">
+    ```ts
+    import { createSdk } from "@contentagen/sdk";
+    import type { ContentList, ContentSelect } from "@contentagen/sdk";
+
+    const sdk = createSdk({ apiKey: "YOUR_API_KEY" });
+
+    async function example() {
+      // Get content by slug
+      const selectParams = {
+        slug: "my-post-slug",
+        agentId: "00000000-0000-0000-0000-000000000000",
+      };
+      const post: ContentSelect = await sdk.getContentBySlug(selectParams);
+      console.log(post.id, post.meta.title, post.createdAt);
+
+      // Get related slugs for a post
+      const relatedSlugs = await sdk.getRelatedSlugs({
+        slug: "my-post-slug",
+        agentId: "00000000-0000-0000-0000-000000000000",
+      });
+      console.log("Related slugs:", relatedSlugs);
+
+      // Get author info by agent ID
+      const author = await sdk.getAuthorByAgentId({
+        agentId: "00000000-0000-0000-0000-000000000000",
+      });
+      console.log("Author name:", author.name);
+      console.log("Profile photo:", author.profilePhoto?.image);
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Error Handling">
+    ```ts
+    import { createSdk } from "@contentagen/sdk";
+
+    const sdk = createSdk({ apiKey: "YOUR_API_KEY" });
+
+    async function safeExample() {
+      try {
+        const list = await sdk.listContentByAgent({
+          agentId: ["00000000-0000-0000-0000-000000000000"],
+          status: ["approved"],
+          limit: 5,
+          page: 1,
+        });
+
+        if (list.total === 0) {
+          console.log("No posts found");
+          return;
+        }
+
+        const first = list.posts[0];
+        console.log("First post id:", first.id);
+
+        const post = await sdk.getContentBySlug({
+          slug: first.meta.slug ?? "unknown-slug",
+          agentId: first.agentId || "00000000-0000-0000-0000-000000000000",
+        });
+
+        console.log("Post body:", post.body);
+      } catch (err) {
+        console.error("SDK error:", err);
+      }
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+## Sections
+
+- [Setup](./setup) - Installation and configuration
+- [API Reference](./api) - Complete method documentation
+- [Error Handling](./error-handling) - Error codes and handling patterns
+- [Integrations](./integrations/astrojs) - Framework integrations

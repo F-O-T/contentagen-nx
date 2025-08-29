@@ -1,4 +1,5 @@
 import node from "@astrojs/node";
+import mdx from "@astrojs/mdx";
 import starlight from "@astrojs/starlight";
 import tailwindcss from "@tailwindcss/vite";
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/astro";
@@ -27,8 +28,10 @@ export default defineConfig({
             {
                label: "SDK",
                items: [
+                  { label: "Overview", link: "/sdk/" },
                   { label: "Setup", link: "/sdk/setup" },
                   { label: "API Reference", link: "/sdk/api" },
+                  { label: "Error Handling", link: "/sdk/error-handling" },
                   {
                      label: "Integrations",
                      items: [
@@ -44,6 +47,7 @@ export default defineConfig({
          },
          description: "Documentation for ContentaGen app",
       }),
+      mdx(),
    ],
 
    site: "https://docs.contentagen.com",

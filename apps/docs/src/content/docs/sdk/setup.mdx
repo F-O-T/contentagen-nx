@@ -1,0 +1,94 @@
+---
+title: SDK Setup
+description: How to install and initialize the ContentaGen SDK.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Installation
+
+<Tabs syncKey="package-manager">
+  <TabItem label="npm" icon="seti:npm">
+    ```bash
+    npm install @contentagen/sdk
+    ```
+  </TabItem>
+  <TabItem label="yarn" icon="seti:yarn">
+    ```bash
+    yarn add @contentagen/sdk
+    ```
+  </TabItem>
+  <TabItem label="pnpm" icon="pnpm">
+    ```bash
+    pnpm add @contentagen/sdk
+    ```
+  </TabItem>
+</Tabs>
+
+## Environment Setup
+
+Add your API key to your `.env` file:
+```
+CONTENTAGEN_API_KEY=your-api-key-here
+```
+
+**Important**: Keep your API key secure and never commit it to version control.
+
+## Initialization
+
+<Tabs syncKey="framework">
+  <TabItem label="Basic" icon="star">
+    ```ts
+    import { createSdk } from "@contentagen/sdk";
+
+    const sdk = createSdk({
+      apiKey: "YOUR_API_KEY" // or process.env.CONTENTAGEN_API_KEY
+    });
+    ```
+  </TabItem>
+  <TabItem label="Astro" icon="seti:astro">
+    ```ts
+    import { createSdk } from "@contentagen/sdk";
+
+    // Use Astro's typed server environment
+    const { CONTENTAGEN_API_KEY } = Astro.env;
+
+    export const sdk = createSdk({
+      apiKey: CONTENTAGEN_API_KEY
+    });
+    ```
+  </TabItem>
+  <TabItem label="Node.js" icon="nodejs">
+    ```ts
+    import { createSdk } from "@contentagen/sdk";
+    import { config } from "dotenv";
+
+    config(); // Load environment variables
+
+    const sdk = createSdk({
+      apiKey: process.env.CONTENTAGEN_API_KEY!
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+## Configuration Options
+
+The `createSdk` function accepts the following configuration:
+
+- `apiKey`: `string` — **Required**. Your ContentaGen API key
+
+## Error Handling Setup
+
+The SDK includes built-in error handling with specific error codes. Make sure to handle errors appropriately:
+
+```ts
+try {
+  const sdk = createSdk({ apiKey: process.env.CONTENTAGEN_API_KEY! });
+  // Use SDK methods...
+} catch (error) {
+  console.error("SDK initialization failed:", error);
+}
+```
+
+See the [Error Handling](./error-handling) section for more details on error codes and handling patterns.
