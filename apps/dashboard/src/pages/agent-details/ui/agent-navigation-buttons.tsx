@@ -17,7 +17,7 @@ export function AgentNavigationButtons({
                <span>Your agent content</span>
             </SquaredIconButton>
          </Link>
-         <Link to="/agents/$agentId/ideas" params={{ agentId }}>
+         <Link to="/ideas" search={{ agentId }}>
             <SquaredIconButton>
                <Lightbulb className="w-6 h-6" />
                <span>Your agent ideas</span>

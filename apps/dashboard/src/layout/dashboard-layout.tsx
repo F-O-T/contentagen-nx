@@ -17,11 +17,7 @@ export function DashboardLayout({
          <AppSidebar variant="inset" session={session} />
          <SidebarInset>
             <SiteHeader />
-            {/* You can now use the session prop here, e.g. show user info */}
-            <div className="p-4 h-full flex-1 overflow-y-auto">
-               {/* Example: <pre>{JSON.stringify(session, null, 2)}</pre> */}
-               {children}
-            </div>
+            <div className="p-4 h-full flex-1 overflow-y-auto">{children}</div>
          </SidebarInset>
       </SidebarProvider>
    );

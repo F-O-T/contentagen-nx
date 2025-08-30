@@ -31,7 +31,6 @@ import { Route as DashboardAgentsFlowRouteImport } from './routes/_dashboard/age
 import { Route as DashboardAgentsAgentIdIndexRouteImport } from './routes/_dashboard/agents/$agentId/index'
 import { Route as DashboardAgentsFlowManualRouteImport } from './routes/_dashboard/agents/_flow/manual'
 import { Route as DashboardAgentsAgentIdEditRouteImport } from './routes/_dashboard/agents/$agentId/edit'
-import { Route as DashboardAgentsAgentIdIdeasIndexRouteImport } from './routes/_dashboard/agents/$agentId/ideas/index'
 import { Route as CallbackAuthedOrganizationInvitationInviteIdRouteImport } from './routes/callback/_authed/organization/invitation/$inviteId'
 import { Route as DashboardAgentsAgentIdContentRequestRouteImport } from './routes/_dashboard/agents/$agentId/content/request'
 
@@ -148,12 +147,6 @@ const DashboardAgentsAgentIdEditRoute =
     path: '/$agentId/edit',
     getParentRoute: () => DashboardAgentsRoute,
   } as any)
-const DashboardAgentsAgentIdIdeasIndexRoute =
-  DashboardAgentsAgentIdIdeasIndexRouteImport.update({
-    id: '/$agentId/ideas/',
-    path: '/$agentId/ideas/',
-    getParentRoute: () => DashboardAgentsRoute,
-  } as any)
 const CallbackAuthedOrganizationInvitationInviteIdRoute =
   CallbackAuthedOrganizationInvitationInviteIdRouteImport.update({
     id: '/organization/invitation/$inviteId',
@@ -189,7 +182,6 @@ export interface FileRoutesByFullPath {
   '/agents/$agentId': typeof DashboardAgentsAgentIdIndexRoute
   '/agents/$agentId/content/request': typeof DashboardAgentsAgentIdContentRequestRoute
   '/callback/organization/invitation/$inviteId': typeof CallbackAuthedOrganizationInvitationInviteIdRoute
-  '/agents/$agentId/ideas': typeof DashboardAgentsAgentIdIdeasIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
@@ -212,7 +204,6 @@ export interface FileRoutesByTo {
   '/agents/$agentId': typeof DashboardAgentsAgentIdIndexRoute
   '/agents/$agentId/content/request': typeof DashboardAgentsAgentIdContentRequestRoute
   '/callback/organization/invitation/$inviteId': typeof CallbackAuthedOrganizationInvitationInviteIdRoute
-  '/agents/$agentId/ideas': typeof DashboardAgentsAgentIdIdeasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -240,7 +231,6 @@ export interface FileRoutesById {
   '/_dashboard/agents/$agentId/': typeof DashboardAgentsAgentIdIndexRoute
   '/_dashboard/agents/$agentId/content/request': typeof DashboardAgentsAgentIdContentRequestRoute
   '/callback/_authed/organization/invitation/$inviteId': typeof CallbackAuthedOrganizationInvitationInviteIdRoute
-  '/_dashboard/agents/$agentId/ideas/': typeof DashboardAgentsAgentIdIdeasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -266,7 +256,6 @@ export interface FileRouteTypes {
     | '/agents/$agentId'
     | '/agents/$agentId/content/request'
     | '/callback/organization/invitation/$inviteId'
-    | '/agents/$agentId/ideas'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -289,7 +278,6 @@ export interface FileRouteTypes {
     | '/agents/$agentId'
     | '/agents/$agentId/content/request'
     | '/callback/organization/invitation/$inviteId'
-    | '/agents/$agentId/ideas'
   id:
     | '__root__'
     | '/_dashboard'
@@ -316,7 +304,6 @@ export interface FileRouteTypes {
     | '/_dashboard/agents/$agentId/'
     | '/_dashboard/agents/$agentId/content/request'
     | '/callback/_authed/organization/invitation/$inviteId'
-    | '/_dashboard/agents/$agentId/ideas/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -481,13 +468,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAgentsAgentIdEditRouteImport
       parentRoute: typeof DashboardAgentsRoute
     }
-    '/_dashboard/agents/$agentId/ideas/': {
-      id: '/_dashboard/agents/$agentId/ideas/'
-      path: '/$agentId/ideas'
-      fullPath: '/agents/$agentId/ideas'
-      preLoaderRoute: typeof DashboardAgentsAgentIdIdeasIndexRouteImport
-      parentRoute: typeof DashboardAgentsRoute
-    }
     '/callback/_authed/organization/invitation/$inviteId': {
       id: '/callback/_authed/organization/invitation/$inviteId'
       path: '/organization/invitation/$inviteId'
@@ -522,7 +502,6 @@ interface DashboardAgentsRouteChildren {
   DashboardAgentsAgentIdEditRoute: typeof DashboardAgentsAgentIdEditRoute
   DashboardAgentsAgentIdIndexRoute: typeof DashboardAgentsAgentIdIndexRoute
   DashboardAgentsAgentIdContentRequestRoute: typeof DashboardAgentsAgentIdContentRequestRoute
-  DashboardAgentsAgentIdIdeasIndexRoute: typeof DashboardAgentsAgentIdIdeasIndexRoute
 }
 
 const DashboardAgentsRouteChildren: DashboardAgentsRouteChildren = {
@@ -532,7 +511,6 @@ const DashboardAgentsRouteChildren: DashboardAgentsRouteChildren = {
   DashboardAgentsAgentIdIndexRoute: DashboardAgentsAgentIdIndexRoute,
   DashboardAgentsAgentIdContentRequestRoute:
     DashboardAgentsAgentIdContentRequestRoute,
-  DashboardAgentsAgentIdIdeasIndexRoute: DashboardAgentsAgentIdIdeasIndexRoute,
 }
 
 const DashboardAgentsRouteWithChildren = DashboardAgentsRoute._addFileChildren(

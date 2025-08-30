@@ -50,7 +50,7 @@ const getStatusDisplay = (status: string | null) => {
       }
    );
 };
-
+//TODO: criar um component padrao para paginacao + toolbar, bulk actions de aprovar, deletar ou rejeitar
 export function ContentListPage() {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
