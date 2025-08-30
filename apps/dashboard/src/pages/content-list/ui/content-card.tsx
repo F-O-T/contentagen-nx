@@ -32,14 +32,12 @@ export function ContentRequestCard({
    onSelectionChange,
    onView,
    onDelete,
-   onApprove,
 }: {
    request: RouterOutput["content"]["listAllContent"]["items"][0];
    isSelected?: boolean;
    onSelectionChange?: (id: string, selected: boolean) => void;
    onView?: (id: string) => void;
    onDelete?: (id: string) => void;
-   onApprove?: (id: string) => void;
 }) {
    const trpc = useTRPC();
    const navigate = useNavigate();
@@ -62,11 +60,6 @@ export function ContentRequestCard({
 
    const handleDelete = () => {
       onDelete?.(request.id);
-      setIsCredenzaOpen(false);
-   };
-
-   const handleApprove = () => {
-      onApprove?.(request.id);
       setIsCredenzaOpen(false);
    };
 

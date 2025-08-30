@@ -8,6 +8,7 @@ import { useSubscription } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
 import { useMemo } from "react";
 import { useState, useCallback } from "react";
+import type { RouterInput } from "@packages/api/client";
 
 const getStatusDisplay = (status: string | null) => {
    if (!status)
@@ -54,26 +55,35 @@ export function ContentListPage() {
    const queryClient = useQueryClient();
    const [page, setPage] = useState(1);
    const [limit] = useState(8);
+   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+
+   type Statuses = RouterInput["content"]["listAllContent"]["status"];
+   const { data: agents } = useSuspenseQuery(trpc.agent.list.queryOptions());
+   const [selectedStatuses, setSelectedStatuses] = useState<Statuses>([]);
+   const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
+   const allStatuses: Statuses = [
+      "draft",
+      "approved",
+      "pending",
+      "planning",
+      "researching",
+      "writing",
+      "editing",
+      "analyzing",
+      "grammar_checking",
+   ];
+
+   const filteredStatuses: Statuses =
+      selectedStatuses.length > 0 ? selectedStatuses : allStatuses;
 
    const { data } = useSuspenseQuery(
       trpc.content.listAllContent.queryOptions({
-         status: [
-            "draft",
-            "approved",
-            "pending",
-            "planning",
-            "researching",
-            "writing",
-            "editing",
-            "analyzing",
-            "grammar_checking",
-         ],
+         status: filteredStatuses,
          page,
          limit,
+         ...(selectedAgents.length > 0 && { agentIds: selectedAgents }),
       }),
    );
-
-   // Filter content by selected agent on client side since API doesn't support it
 
    const hasGeneratingContent = useMemo(
       () =>
@@ -129,6 +139,57 @@ export function ContentListPage() {
       setPage(newPage);
    }, []);
 
+   const handleSelectionChange = useCallback(
+      (id: string, selected: boolean) => {
+         setSelectedItems((prev) => {
+            const newSet = new Set(prev);
+            if (selected) {
+               newSet.add(id);
+            } else {
+               newSet.delete(id);
+            }
+            return newSet;
+         });
+      },
+      [],
+   );
+
+   const selectableItems = useMemo(() => {
+      return data.items.filter(
+         (item) =>
+            ![
+               "pending",
+               "planning",
+               "researching",
+               "writing",
+               "editing",
+               "analyzing",
+            ].includes(item.status || ""),
+      );
+   }, [data.items]);
+
+   const allSelectableSelected = useMemo(() => {
+      const selectableIds = selectableItems.map((item) => item.id);
+      return (
+         selectableIds.length > 0 &&
+         selectableIds.every((id) => selectedItems.has(id))
+      );
+   }, [selectableItems, selectedItems]);
+
+   const handleSelectAll = useCallback(() => {
+      const selectableIds = selectableItems.map((item) => item.id);
+
+      setSelectedItems((prev) => {
+         if (allSelectableSelected) {
+            // If all selectable items are selected, deselect all
+            return new Set();
+         } else {
+            // Select all selectable items
+            return new Set([...prev, ...selectableIds]);
+         }
+      });
+   }, [selectableItems, allSelectableSelected]);
+
    return (
       <main className="h-full w-full flex flex-col gap-6 p-4">
          <TalkingMascot message="Here you can manage all your content requests. Create, edit, or explore your requests below!" />
@@ -136,6 +197,14 @@ export function ContentListPage() {
             page={page}
             totalPages={totalPages}
             onPageChange={handlePageChange}
+            onSelectAll={handleSelectAll}
+            selectedItemsCount={selectedItems.size}
+            allSelected={allSelectableSelected}
+            selectedStatuses={selectedStatuses}
+            selectedAgents={selectedAgents}
+            onStatusesChange={setSelectedStatuses}
+            onAgentsChange={setSelectedAgents}
+            agents={agents}
          />
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {data.items.map((item) => {
@@ -161,7 +230,14 @@ export function ContentListPage() {
                   );
                }
 
-               return <ContentRequestCard key={item.id} request={item} />;
+               return (
+                  <ContentRequestCard
+                     key={item.id}
+                     request={item}
+                     isSelected={selectedItems.has(item.id)}
+                     onSelectionChange={handleSelectionChange}
+                  />
+               );
             })}
          </div>
          {data.items.length === 0 && (

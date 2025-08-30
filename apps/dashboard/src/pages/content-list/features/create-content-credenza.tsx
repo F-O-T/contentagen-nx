@@ -1,6 +1,5 @@
 import {
    Credenza,
-   CredenzaTrigger,
    CredenzaContent,
    CredenzaHeader,
    CredenzaTitle,
@@ -14,22 +13,20 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
 import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
 import { useMemo } from "react";
-import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
-import { Plus } from "lucide-react";
 
-export function CreateContentCredenza() {
+export function CreateContentCredenza({
+   open,
+   onOpenChange,
+}: {
+   open: boolean;
+   onOpenChange: (open: boolean) => void;
+}) {
    const trpc = useTRPC();
    const { data, isLoading } = useSuspenseQuery(trpc.agent.list.queryOptions());
    const userHasAgents = useMemo(() => !!(data && data.length > 0), [data]);
 
    return (
-      <Credenza>
-         <CredenzaTrigger>
-            <SquaredIconButton>
-               <Plus />
-               Create Content
-            </SquaredIconButton>
-         </CredenzaTrigger>
+      <Credenza open={open} onOpenChange={onOpenChange}>
          <CredenzaContent>
             <CredenzaHeader>
                <CredenzaTitle>Select Agent</CredenzaTitle>

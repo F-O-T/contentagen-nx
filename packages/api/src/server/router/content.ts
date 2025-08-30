@@ -76,6 +76,7 @@ export const contentRouter = router({
             status: ContentSelectSchema.shape.status.array().min(1),
             limit: z.number().min(1).max(100).optional().default(10),
             page: z.number().min(1).optional().default(1),
+            agentIds: z.array(z.string()).optional(),
          }),
       )
       .query(async ({ ctx, input }) => {
@@ -93,8 +94,16 @@ export const contentRouter = router({
             userId,
             organizationId: organizationId ?? "",
          });
-         const agentIds = agents.map((agent) => agent.id);
+         const allUserAgentIds = agents.map((agent) => agent.id);
+         if (allUserAgentIds.length === 0) return { items: [], total: 0 };
+
+         // If agentIds provided, filter to only those belonging to the user
+         const agentIds = input.agentIds
+            ? input.agentIds.filter(id => allUserAgentIds.includes(id))
+            : allUserAgentIds;
+
          if (agentIds.length === 0) return { items: [], total: 0 };
+
          const filteredStatus = input.status.filter(
             (s): s is NonNullable<typeof s> => s !== null,
          );
