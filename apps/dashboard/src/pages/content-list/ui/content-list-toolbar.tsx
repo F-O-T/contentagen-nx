@@ -1,10 +1,18 @@
 import { Button } from "@packages/ui/components/button";
 import { Label } from "@packages/ui/components/label";
-import { ChevronLeft, ChevronRight, Filter, Settings } from "lucide-react";
+import {
+   ChevronLeft,
+   ChevronRight,
+   Filter,
+   Settings,
+   CheckSquare,
+   Square,
+   Trash2,
+   Check,
+} from "lucide-react";
 import { Checkbox } from "@packages/ui/components/checkbox";
 import {
    Credenza,
-   CredenzaTrigger,
    CredenzaContent,
    CredenzaHeader,
    CredenzaTitle,
@@ -14,6 +22,8 @@ import {
    DropdownMenuTrigger,
    DropdownMenuContent,
    DropdownMenuItem,
+   DropdownMenuSeparator,
+   DropdownMenuLabel,
 } from "@packages/ui/components/dropdown-menu";
 import { Separator } from "@packages/ui/components/separator";
 import { useState } from "react";
@@ -29,6 +39,11 @@ interface ContentListToolbarProps {
    onStatusFilterChange: (statuses: string[]) => void;
    onAgentFilterChange: (agents: string[]) => void;
    availableAgents: { id: string; name: string }[];
+   selectedItems: string[];
+   totalItems: number;
+   onSelectAll: () => void;
+   onBulkApprove: () => void;
+   onBulkDelete: () => void;
 }
 
 const statusOptions = [
@@ -43,7 +58,7 @@ const statusOptions = [
    { value: "grammar_checking", label: "Grammar Checking" },
 ];
 
-const limitOptions = [4, 7, 11, 15, 19];
+const limitOptions = [4, 8, 12, 16, 20];
 
 export function ContentListToolbar({
    page,
@@ -56,6 +71,11 @@ export function ContentListToolbar({
    onStatusFilterChange,
    onAgentFilterChange,
    availableAgents,
+   selectedItems,
+   totalItems,
+   onSelectAll,
+   onBulkApprove,
+   onBulkDelete,
 }: ContentListToolbarProps) {
    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -83,22 +103,80 @@ export function ContentListToolbar({
    const hasActiveFilters =
       selectedStatuses.length > 0 || selectedAgents.length > 0;
 
+   const isAllSelected = selectedItems.length === totalItems && totalItems > 0;
+   const hasSelections = selectedItems.length > 0;
+
    return (
       <div className="flex items-center justify-between gap-4 p-4 bg-background border rounded-lg shadow-sm">
-         {/* Left side - Filter button */}
+         {/* Left side - Actions dropdown */}
          <div className="flex items-center gap-2">
-            <Credenza open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-               <CredenzaTrigger asChild>
+            <DropdownMenu>
+               <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
+                     <Settings className="h-4 w-4" />
+                     Actions
+                  </Button>
+               </DropdownMenuTrigger>
+               <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuLabel>Filtering</DropdownMenuLabel>
+                  <DropdownMenuItem
+                     onClick={() => setIsFilterOpen(true)}
+                     className="gap-2"
+                  >
                      <Filter className="h-4 w-4" />
-                     Filter
+                     Filter Content
                      {hasActiveFilters && (
-                        <span className="ml-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
+                        <span className="ml-auto bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
                            {selectedStatuses.length + selectedAgents.length}
                         </span>
                      )}
-                  </Button>
-               </CredenzaTrigger>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onSelectAll} className="gap-2">
+                     {isAllSelected ? (
+                        <CheckSquare className="h-4 w-4" />
+                     ) : (
+                        <Square className="h-4 w-4" />
+                     )}
+                     Select All ({totalItems})
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuLabel>Bulk Actions</DropdownMenuLabel>
+                  <DropdownMenuItem
+                     onClick={onBulkApprove}
+                     disabled={!hasSelections}
+                     className="gap-2"
+                  >
+                     <Check className="h-4 w-4" />
+                     Approve Selected ({selectedItems.length})
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                     onClick={onBulkDelete}
+                     disabled={!hasSelections}
+                     className="gap-2 text-destructive focus:text-destructive"
+                  >
+                     <Trash2 className="h-4 w-4" />
+                     Delete Selected ({selectedItems.length})
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuLabel>Page Size</DropdownMenuLabel>
+                  {limitOptions.map((option) => (
+                     <DropdownMenuItem
+                        key={option}
+                        onClick={() => onLimitChange(option)}
+                        className={limit === option ? "bg-accent" : ""}
+                     >
+                        Show {option} items
+                     </DropdownMenuItem>
+                  ))}
+               </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Filter Credenza */}
+            <Credenza open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                <CredenzaContent className="sm:max-w-md">
                   <CredenzaHeader>
                      <CredenzaTitle>Filter Content</CredenzaTitle>
@@ -209,30 +287,6 @@ export function ContentListToolbar({
             >
                <ChevronRight className="h-4 w-4" />
             </Button>
-         </div>
-
-         {/* Right side - Limit selector */}
-         <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Show:</span>
-            <DropdownMenu>
-               <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                     <Settings className="h-4 w-4" />
-                     {limit}
-                  </Button>
-               </DropdownMenuTrigger>
-               <DropdownMenuContent align="end">
-                  {limitOptions.map((option) => (
-                     <DropdownMenuItem
-                        key={option}
-                        onClick={() => onLimitChange(option)}
-                        className={limit === option ? "bg-accent" : ""}
-                     >
-                        {option} items
-                     </DropdownMenuItem>
-                  ))}
-               </DropdownMenuContent>
-            </DropdownMenu>
          </div>
       </div>
    );

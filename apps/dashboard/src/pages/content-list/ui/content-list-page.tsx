@@ -56,7 +56,7 @@ export function ContentListPage() {
    const queryClient = useQueryClient();
    const { agentId } = useSearch({ from: "/_dashboard/content/" });
    const [page, setPage] = useState(1);
-   const [limit, setLimit] = useState(7);
+   const [limit, setLimit] = useState(8);
    const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
       "draft",
       "approved",
@@ -71,6 +71,7 @@ export function ContentListPage() {
    const [selectedAgents, setSelectedAgents] = useState<string[]>(
       agentId ? [agentId] : [],
    );
+   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
    // Update selectedAgents when agentId from URL changes
    useEffect(() => {
@@ -200,6 +201,50 @@ export function ContentListPage() {
       setPage(1); // Reset to first page when filters change
    }, []);
 
+   const handleSelectAll = useCallback(() => {
+      if (selectedItems.length === filteredContent.items.length) {
+         setSelectedItems([]);
+      } else {
+         setSelectedItems(filteredContent.items.map((item) => item.id));
+      }
+   }, [selectedItems.length, filteredContent.items]);
+
+   const handleBulkApprove = useCallback(() => {
+      // TODO: Implement bulk approve logic
+      console.log("Bulk approve items:", selectedItems);
+      setSelectedItems([]);
+   }, [selectedItems]);
+
+   const handleBulkDelete = useCallback(() => {
+      // TODO: Implement bulk delete logic
+      console.log("Bulk delete items:", selectedItems);
+      setSelectedItems([]);
+   }, [selectedItems]);
+
+   const handleItemSelection = useCallback((id: string, selected: boolean) => {
+      if (selected) {
+         setSelectedItems((prev) => [...prev, id]);
+      } else {
+         setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
+      }
+   }, []);
+
+   const handleViewContent = useCallback((id: string) => {
+      // Navigate to content view
+      console.log("View content:", id);
+   }, []);
+
+   const handleDeleteContent = useCallback((id: string) => {
+      // TODO: Implement delete logic
+      console.log("Delete content:", id);
+      setSelectedItems((prev) => prev.filter((itemId) => itemId !== id));
+   }, []);
+
+   const handleApproveContent = useCallback((id: string) => {
+      // TODO: Implement approve logic
+      console.log("Approve content:", id);
+   }, []);
+
    return (
       <main className="h-full w-full flex flex-col gap-6 p-4">
          <TalkingMascot message="Here you can manage all your content requests. Create, edit, or explore your requests below!" />
@@ -214,9 +259,13 @@ export function ContentListPage() {
             onStatusFilterChange={handleStatusFilterChange}
             onAgentFilterChange={handleAgentFilterChange}
             availableAgents={availableAgents}
+            selectedItems={selectedItems}
+            totalItems={filteredContent.items.length}
+            onSelectAll={handleSelectAll}
+            onBulkApprove={handleBulkApprove}
+            onBulkDelete={handleBulkDelete}
          />
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <CreateContentCredenza />
             {filteredContent.items.map((item) => {
                const isGenerating =
                   item.status &&
@@ -240,7 +289,17 @@ export function ContentListPage() {
                   );
                }
 
-               return <ContentRequestCard key={item.id} request={item} />;
+               return (
+                  <ContentRequestCard
+                     key={item.id}
+                     request={item}
+                     isSelected={selectedItems.includes(item.id)}
+                     onSelectionChange={handleItemSelection}
+                     onView={handleViewContent}
+                     onDelete={handleDeleteContent}
+                     onApprove={handleApproveContent}
+                  />
+               );
             })}
          </div>
          {filteredContent.items.length === 0 && (

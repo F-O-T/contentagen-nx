@@ -1,5 +1,5 @@
 ---
-export const prerender = true;
+export const prerender = false;
 import { sdk, agentId } from "../contentagen";
 import BaseHead from "../components/BaseHead.astro";
 import Navbar from "../components/Navbar.astro";
@@ -7,15 +7,23 @@ import Footer from "../components/Footer.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 import { Image } from "astro:assets";
+import { Button } from "@packages/ui/components/button";
+
+const url = new URL(Astro.request.url);
+const currentPage = parseInt(url.searchParams.get("page") || "1");
+const postsPerPage = 5;
+
 const response = await sdk.listContentByAgent({
    agentId: [agentId],
    status: ["approved"],
-   limit: 20,
-   page: 1,
+   limit: postsPerPage,
+   page: currentPage,
 });
 const posts = response.posts.sort(
    (a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf(),
 );
+const totalPosts = response.total;
+const totalPages = Math.ceil(totalPosts / postsPerPage);
 ---
 
 <!doctype html>
@@ -57,6 +65,44 @@ const posts = response.posts.sort(
 					}
 				</ul>
 			</section>
+
+			<!-- Pagination -->
+			{totalPages > 1 && (
+				<section class="mt-12 flex justify-center">
+					<nav class="flex items-center space-x-2">
+						{currentPage > 1 && (
+							<a href={`/?page=${currentPage - 1}`}>
+								<Button variant="outline" size="sm">
+									Previous
+								</Button>
+							</a>
+						)}
+
+						{Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+							const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+							if (pageNum > totalPages) return null;
+							return (
+								<a key={pageNum} href={`/?page=${pageNum}`}>
+									<Button
+										variant={pageNum === currentPage ? "default" : "outline"}
+										size="sm"
+									>
+										{pageNum}
+									</Button>
+								</a>
+							);
+						})}
+
+						{currentPage < totalPages && (
+							<a href={`/?page=${currentPage + 1}`}>
+								<Button variant="outline" size="sm">
+									Next
+								</Button>
+							</a>
+						)}
+					</nav>
+				</section>
+			)}
 		</main>
 		<Footer />
 	</body>

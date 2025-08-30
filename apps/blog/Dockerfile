@@ -2,6 +2,9 @@
 # Stage 1: Install all dependencies and build the application
 FROM oven/bun:latest AS builder
 
+ARG ARCJET_KEY
+ARG CONTENTAGEN_API_KEY
+ARG CONTENTAGEN_AGENT_ID
 
 WORKDIR /app
 
@@ -58,30 +61,17 @@ RUN bun install
 # ---
 
 # Stage 3: Create the final, small production image
-FROM node:lts-alpine AS runner
-WORKDIR /app
+FROM nginx:alpine AS runner
 
-ENV NODE_ENV=production
-ARG ARCJET_KEY
+# Copy the built static files from the 'builder' stage
+COPY --from=builder /app/apps/blog/dist /usr/share/nginx/html
 
-ARG CONTENTAGEN_API_KEY
-ARG CONTENTAGEN_AGENT_ID
-# Copy the pruned, production-only node_modules from the 'deps' stage.
-# This will solve the original 'module not found' error.
-COPY --from=deps /app/node_modules ./node_modules
+# Copy custom nginx configuration if needed
+# COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy the built application from the 'builder' stage
-COPY --from=builder /app/apps/blog/dist ./dist
+# Expose port 80 for nginx
+EXPOSE 80
 
-# Also copy the final package.json to the root of the app directory.
-# This is good practice and helps with Node's module resolution.
-COPY --from=deps /app/package.json ./package.json
-
-# Set and expose the port. Default to 4321 if not provided.
-ARG PORT=4321
-ENV PORT=${PORT}
-EXPOSE ${PORT}
-
-# Start the server using the entrypoint from the build output
-CMD ["node", "./dist/server/entry.mjs"]
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
 

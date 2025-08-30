@@ -1,35 +1,8 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import { sdk, agentId } from "../contentagen";
 import BlogPost from "../layouts/BlogPost.astro";
-
-export async function getStaticPaths() {
-   let allPosts = [];
-   let currentPage = 1;
-   let hasMorePages = true;
-
-   // Fetch all approved posts with pagination
-   while (hasMorePages) {
-      const response = await sdk.listContentByAgent({
-         agentId: [agentId],
-         status: ["approved"],
-         limit: 100, // Maximum allowed by SDK
-         page: currentPage,
-      });
-
-      const posts = response.posts ?? [];
-      allPosts.push(...posts);
-
-      // Check if we got fewer posts than the limit, meaning we've reached the end
-      hasMorePages = posts.length === 100;
-      currentPage++;
-   }
-
-   return allPosts.map((post) => ({
-      params: { slug: post.meta?.slug },
-   }));
-}
 
 const { slug } = Astro.params;
 const post = await sdk.getContentBySlug({ slug: slug ?? "", agentId });
