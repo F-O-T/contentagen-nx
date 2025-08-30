@@ -6,9 +6,10 @@ import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useSubscription } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { CreateContentCredenza } from "../features/create-content-credenza";
 import { useState, useCallback } from "react";
+import { useSearch } from "@tanstack/react-router";
 
 const getStatusDisplay = (status: string | null) => {
    if (!status)
@@ -53,6 +54,7 @@ const getStatusDisplay = (status: string | null) => {
 export function ContentListPage() {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
+   const { agentId } = useSearch({ from: "/_dashboard/content/" });
    const [page, setPage] = useState(1);
    const [limit, setLimit] = useState(7);
    const [selectedStatuses, setSelectedStatuses] = useState<string[]>([
@@ -66,7 +68,16 @@ export function ContentListPage() {
       "analyzing",
       "grammar_checking",
    ]);
-   const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
+   const [selectedAgents, setSelectedAgents] = useState<string[]>(
+      agentId ? [agentId] : [],
+   );
+
+   // Update selectedAgents when agentId from URL changes
+   useEffect(() => {
+      if (agentId) {
+         setSelectedAgents([agentId]);
+      }
+   }, [agentId]);
 
    // Get available agents for filtering
    const { data: agentsData } = useSuspenseQuery(

@@ -11,7 +11,7 @@ export function AgentNavigationButtons({
 }: AgentNavigationButtonsProps) {
    return (
       <div className="grid grid-cols-2 gap-4">
-         <Link to="/agents/$agentId/content" params={{ agentId }}>
+         <Link to="/content" search={{ agentId }}>
             <SquaredIconButton>
                <FileText className="w-6 h-6" />
                <span>Your agent content</span>
