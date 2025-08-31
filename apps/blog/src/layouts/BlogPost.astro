@@ -18,86 +18,105 @@ const htmlBody = marked.parse(post.body);
 />
 
 <Navbar />
-<main class="container mx-auto p-4 max-w-4xl">
-  <article>
+<main class="container mx-auto px-4 py-8 max-w-4xl">
+  <article class="grid gap-4">
     {post.imageUrl && (
-      <div class="mb-8">
-        <Image
-          src={post.imageUrl}
-          alt={post.meta?.title ?? ""}
-          width={1020}
-          height={510}
-          class={"rounded-lg aspect-video object-cover"}
-          format="webp"
-          loading="lazy"
-        />
+      <div >
+        <div class="relative overflow-hidden rounded-2xl shadow-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+          <Image
+            src={post.imageUrl}
+            alt={post.meta?.title ?? ""}
+            width={1020}
+            height={510}
+            class="w-full h-auto object-cover transition-transform duration-700 hover:scale-105"
+            format="webp"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none"></div>
+        </div>
       </div>
     )}
 
-    <div class="flex flex-col items-center gap-4">
-      <header class="text-center flex flex-col items-center gap-4">
-        <div class="text-sm text-muted-foreground flex flex-col items-center gap-4">
-          <FormattedDate date={new Date(post.createdAt) } />
+    <div class="flex flex-col items-center gap-8">
+      <header class="text-center max-w-3xl mx-auto grid gap-4">
+        <h1 class="text-4xl font-bold text-foreground leading-tight">
+          {post.meta?.title ?? ""}
+        </h1>
+
+        <div class="flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 py-4 border-y border-primary">
+          <div class="flex items-center gap-2">
+            {author.profilePhoto && (
+              <img
+                src={`data:${author.profilePhoto.contentType};base64,${author.profilePhoto.image}`}
+                alt={author.name}
+                class="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700"
+              />
+            )}
+            <div>
+              <span class="text-sm font-medium text-foreground">By {author.name}</span>
+              <div class="text-xs text-muted-foreground">Author</div>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:items-end gap-1">
+            <FormattedDate date={new Date(post.createdAt)} />
+            {post.stats?.readTimeMinutes && (
+              <div class="text-sm text-muted-foreground">
+                <span>{post.stats.readTimeMinutes} min read</span>
+              </div>
+            )}
+          </div>
         </div>
-         <h1 class="text-4xl font-bold text-foreground">
-           {post.meta?.title ?? ""}
-         </h1>
-
-         <!-- Author Information -->
-         <div class="flex items-center gap-3 text-sm text-muted-foreground">
-           {author.profilePhoto && (
-             <img
-               src={`data:${author.profilePhoto.contentType};base64,${author.profilePhoto.image}`}
-               alt={author.name}
-               class="w-8 h-8 rounded-full object-cover"
-             />
-           )}
-           <span>By {author.name}</span>
-         </div>
-
-         {post.stats?.readTimeMinutes && (
-           <div class="text-sm text-start text-muted-foreground">
-             <span>Read time: {post.stats.readTimeMinutes} min</span>
-           </div>
-         )}
       </header>
-      <div class="prose  mx-auto">
+      <div class="prose prose-lg mx-auto ">
         {htmlBody && <div set:html={htmlBody} />}
-       </div>
-     </div>
+      </div>
+    </div>
    </article>
 
-   <!-- Related Posts Section -->
-   {relatedPosts.length > 0 && (
-     <section class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-       <h2 class="text-2xl font-bold text-foreground mb-6">Related Posts</h2>
-       <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-         {relatedPosts.map((relatedPost) => (
-           <a
-             href={`/${relatedPost.meta?.slug}/`}
-             class="block group"
-           >
-             {relatedPost.imageUrl && (
-               <Image
-                 src={relatedPost.imageUrl}
-                 alt={relatedPost.meta?.title ?? ""}
-                 width={400}
-                 height={200}
-                 class="w-full rounded-lg mb-3 transition-transform group-hover:scale-105 aspect-video object-cover"
-                 format="webp"
-                 loading="lazy"
-               />
-             )}
-             <h3 class="text-lg font-semibold text-foreground group-hover:text-blue-600 transition-colors line-clamp-2">
-               {relatedPost.meta?.title ?? ""}
-             </h3>
-             <p class="text-sm text-muted-foreground mt-1">
-               <FormattedDate date={new Date(relatedPost.createdAt)} />
-             </p>
-           </a>
-         ))}
-       </div>
-     </section>
-   )}
+  <!-- Related Posts Section -->
+  {relatedPosts.length > 0 && (
+    <section class="grid gap-4 border-t border-primary pt-8">
+      <div class="text-center ">
+        <h2 class="text-3xl font-bold text-foreground ">Related Posts</h2>
+        <p class="text-muted-foreground max-w-2xl mx-auto">
+          Discover more articles that might interest you
+        </p>
+      </div>
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {relatedPosts.map((relatedPost) => (
+          <article class="bg-accent rounded-lg border-primary group">
+            <a
+              href={`/${relatedPost.meta?.slug}/`}
+              class="block"
+            >
+              {relatedPost.imageUrl && (
+                <div class="relative overflow-hidden">
+                  <Image
+                    src={relatedPost.imageUrl}
+                    alt={relatedPost.meta?.title ?? ""}
+                    width={400}
+                    height={200}
+                    class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                    format="webp"
+                    loading="lazy"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+              )}
+              <div class="p-4 grid gap-4">
+                <h3 class="text-lg font-semibold text-foreground  transition-colors line-clamp-2  leading-tight">
+                  {relatedPost.meta?.title ?? ""}
+                </h3>
+                <p class="text-sm text-muted-foreground">
+                  <FormattedDate date={new Date(relatedPost.createdAt)} />
+                </p>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+    </section>
+  )}
  </main>
  <Footer />
