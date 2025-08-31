@@ -191,7 +191,7 @@ export function ContentListPage() {
    }, [selectableItems, allSelectableSelected]);
 
    return (
-      <main className="h-full w-full flex flex-col gap-6 p-4">
+      <main className="h-full w-full flex flex-col gap-4 p-4">
          <TalkingMascot message="Here you can manage all your content requests. Create, edit, or explore your requests below!" />
          <ContentListToolbar
             page={page}
@@ -205,6 +205,7 @@ export function ContentListPage() {
             onStatusesChange={setSelectedStatuses}
             onAgentsChange={setSelectedAgents}
             agents={agents}
+            selectedItems={selectedItems}
          />
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {data.items.map((item) => {

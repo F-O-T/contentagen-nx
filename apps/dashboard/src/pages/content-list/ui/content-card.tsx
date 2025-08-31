@@ -16,7 +16,7 @@ import {
    CredenzaTrigger,
    CredenzaBody,
 } from "@packages/ui/components/credenza";
-import { Trash2, Eye, Check } from "lucide-react";
+import { Trash2, Eye } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Badge } from "@packages/ui/components/badge";
 import type { RouterOutput } from "@packages/api/client";
@@ -25,6 +25,7 @@ import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
+import { formatValueForDisplay } from "@packages/helpers/text";
 
 export function ContentRequestCard({
    request,
@@ -107,7 +108,9 @@ export function ContentRequestCard({
                   <Badge variant="outline">
                      {new Date(request.createdAt).toLocaleDateString()}
                   </Badge>
-                  <Badge className="text-xs">{request.status}</Badge>
+                  <Badge className="text-xs">
+                     {formatValueForDisplay(request.status ?? "")}
+                  </Badge>
                </CardFooter>
             </Card>
          </CredenzaTrigger>

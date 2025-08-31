@@ -33,6 +33,7 @@ interface ContentListToolbarProps {
    onStatusesChange: (statuses: Statuses) => void;
    onAgentsChange: (agents: string[]) => void;
    agents: RouterOutput["agent"]["list"];
+   selectedItems: Set<string>;
 }
 
 export function ContentListToolbar({
@@ -47,6 +48,7 @@ export function ContentListToolbar({
    onStatusesChange,
    onAgentsChange,
    agents,
+   selectedItems,
 }: ContentListToolbarProps) {
    const [openFilter, setOpenFilter] = useState(false);
    const [openBulk, setOpenBulk] = useState(false);
@@ -138,7 +140,11 @@ export function ContentListToolbar({
             onAgentsChange={onAgentsChange}
             agents={agents}
          />
-         <BulkActionsCredenza open={openBulk} onOpenChange={setOpenBulk} />
+         <BulkActionsCredenza
+            open={openBulk}
+            onOpenChange={setOpenBulk}
+            selectedItems={Array.from(selectedItems)}
+         />
       </>
    );
 }

@@ -110,6 +110,66 @@ export async function deleteContent(
    }
 }
 
+export async function deleteBulkContent(
+   dbClient: DatabaseInstance,
+   ids: string[],
+): Promise<{ deletedCount: number }> {
+   try {
+      if (!ids || ids.length === 0) {
+         return { deletedCount: 0 };
+      }
+
+      const result = await dbClient
+         .delete(content)
+         .where(inArray(content.id, ids))
+         .returning();
+
+      return { deletedCount: result.length };
+   } catch (err) {
+      throw new DatabaseError(
+         `Failed to delete bulk content: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function approveBulkContent(
+   dbClient: DatabaseInstance,
+   ids: string[],
+): Promise<{ approvedCount: number }> {
+   try {
+      if (!ids || ids.length === 0) {
+         return { approvedCount: 0 };
+      }
+
+      // First, verify all content items are in draft status
+      const contentsToApprove = await dbClient.query.content.findMany({
+         where: inArray(content.id, ids),
+         columns: { id: true, status: true, meta: true, agentId: true },
+      });
+
+      const draftContentIds = contentsToApprove
+         .filter((item) => item.status === "draft")
+         .map((item) => item.id);
+
+      if (draftContentIds.length === 0) {
+         return { approvedCount: 0 };
+      }
+
+      // Update status to approved for draft content only
+      const result = await dbClient
+         .update(content)
+         .set({ status: "approved" })
+         .where(inArray(content.id, draftContentIds))
+         .returning();
+
+      return { approvedCount: result.length };
+   } catch (err) {
+      throw new DatabaseError(
+         `Failed to approve bulk content: ${(err as Error).message}`,
+      );
+   }
+}
+
 export async function listContents(
    dbClient: DatabaseInstance,
    agentIds: string[],
