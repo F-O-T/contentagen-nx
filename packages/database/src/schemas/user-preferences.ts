@@ -17,22 +17,13 @@ import { z } from "zod";
 import { user } from "./auth";
 
 export const preferenceCategoryEnum = pgEnum("preference_category", [
-   "global_writing_style", // User-level writing preferences that apply across all agents
-   "notification_settings", // User notification preferences
-   "productivity", // Workflow and productivity preferences
-   "general", // Other user preferences
+   "global_writing_style",
 ]);
 
 export type PreferenceCategory =
    (typeof preferenceCategoryEnum.enumValues)[number];
 
-export const PreferenceValueSchema = z.union([
-   z.string(),
-   z.number(),
-   z.boolean(),
-   z.array(z.string()),
-   z.object({}).catchall(z.any()),
-]);
+export const PreferenceValueSchema = z.union([z.string()]);
 
 export const userPreference = pgTable(
    "user_preference",
