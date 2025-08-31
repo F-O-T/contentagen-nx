@@ -11,6 +11,7 @@ import {
    CredenzaTitle,
 } from "@packages/ui/components/credenza";
 import { AlertTriangleIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface DeleteConfirmationCredenzaProps {
    open?: boolean;
@@ -20,6 +21,8 @@ interface DeleteConfirmationCredenzaProps {
    title?: string;
    description?: string;
    message?: string;
+   icon?: LucideIcon;
+   variant?: "destructive" | "default";
 }
 
 const DeleteConfirmationCredenza = ({
@@ -28,6 +31,8 @@ const DeleteConfirmationCredenza = ({
    onCancel,
    onDelete,
    message,
+   icon: Icon = AlertTriangleIcon,
+   variant = "destructive",
 }: DeleteConfirmationCredenzaProps) => {
    const handleCancel = () => {
       onCancel?.();
@@ -49,8 +54,8 @@ const DeleteConfirmationCredenza = ({
                </CredenzaDescription>
             </CredenzaHeader>
             <CredenzaBody className="grid gap-4 place-items-center text-center ">
-               <AlertTriangleIcon className="h-12 w-12" />
-               <Alert variant="destructive" className="font-semibold">
+               <Icon className="h-12 w-12" />
+               <Alert variant={variant} className="font-semibold">
                   <AlertDescription>{message}</AlertDescription>
                </Alert>
             </CredenzaBody>
@@ -60,7 +65,7 @@ const DeleteConfirmationCredenza = ({
                      Cancel
                   </Button>
                </CredenzaClose>
-               <Button variant="destructive" onClick={handleDelete}>
+               <Button variant={variant} onClick={handleDelete}>
                   Confirm
                </Button>
             </CredenzaFooter>

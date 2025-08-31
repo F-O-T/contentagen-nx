@@ -17,6 +17,7 @@ import {
    CredenzaTrigger,
    CredenzaBody,
 } from "@packages/ui/components/credenza";
+import { ContentDeleteConfirmationCredenza } from "../features/content-delete-confirmation-credenza";
 import { Trash2, Eye } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Badge } from "@packages/ui/components/badge";
@@ -50,6 +51,7 @@ export function ContentRequestCard({
    );
 
    const [isCredenzaOpen, setIsCredenzaOpen] = useState(false);
+   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
    const deleteMutation = useMutation(
       trpc.content.delete.mutationOptions({
@@ -76,78 +78,97 @@ export function ContentRequestCard({
       setIsCredenzaOpen(false);
    }, [navigate, request.id]);
 
-   const handleDelete = useCallback(async () => {
+   const handleDelete = useCallback(() => {
+      setShowDeleteConfirmation(true);
+   }, []);
+
+   const confirmDelete = useCallback(async () => {
       await deleteMutation.mutateAsync({ id: request.id });
+      setShowDeleteConfirmation(false);
    }, [deleteMutation, request.id]);
 
    return (
-      <Credenza open={isCredenzaOpen} onOpenChange={setIsCredenzaOpen}>
-         <CredenzaTrigger asChild>
-            <Card className="cursor-pointer">
-               <CardHeader>
-                  <CardTitle className="line-clamp-1">
-                     {request.meta?.title}
-                  </CardTitle>
-                  <CardDescription className="line-clamp-2">
-                     {request.meta?.description ?? "No description found"}
-                  </CardDescription>
-                  <CardAction>
-                     <Checkbox
-                        checked={selectedItems.has(request.id)}
-                        onCheckedChange={(checked) =>
-                           handleSelectionChange(request.id, checked as boolean)
+      <>
+         <Credenza open={isCredenzaOpen} onOpenChange={setIsCredenzaOpen}>
+            <CredenzaTrigger asChild>
+               <Card className="cursor-pointer">
+                  <CardHeader>
+                     <CardTitle className="line-clamp-1">
+                        {request.meta?.title}
+                     </CardTitle>
+                     <CardDescription className="line-clamp-2">
+                        {request.meta?.description ?? "No description found"}
+                     </CardDescription>
+                     <CardAction>
+                        <Checkbox
+                           checked={selectedItems.has(request.id)}
+                           onCheckedChange={(checked) =>
+                              handleSelectionChange(
+                                 request.id,
+                                 checked as boolean,
+                              )
+                           }
+                           onClick={(e) => e.stopPropagation()}
+                        />
+                     </CardAction>
+                  </CardHeader>
+                  <CardContent>
+                     <AgentWriterCard
+                        photo={profilePhoto?.data}
+                        name={
+                           request.agent?.personaConfig.metadata.name ||
+                           "Unknown"
                         }
-                        onClick={(e) => e.stopPropagation()}
+                        description={
+                           request.agent?.personaConfig.metadata.description ||
+                           "No description"
+                        }
                      />
-                  </CardAction>
-               </CardHeader>
-               <CardContent>
-                  <AgentWriterCard
-                     photo={profilePhoto?.data}
-                     name={
-                        request.agent?.personaConfig.metadata.name || "Unknown"
-                     }
-                     description={
-                        request.agent?.personaConfig.metadata.description ||
-                        "No description"
-                     }
-                  />
-               </CardContent>
-               <CardFooter className="flex items-center justify-between">
-                  <Badge variant="outline">
-                     {new Date(request.createdAt).toLocaleDateString()}
-                  </Badge>
-                  <Badge className="text-xs">
-                     {formatValueForDisplay(request.status ?? "")}
-                  </Badge>
-               </CardFooter>
-            </Card>
-         </CredenzaTrigger>
-         <CredenzaContent>
-            <CredenzaHeader>
-               <CredenzaTitle>{request.meta?.title || "Content"}</CredenzaTitle>
-               <CredenzaDescription>
-                  {request.meta?.description || "No description available"}
-               </CredenzaDescription>
-            </CredenzaHeader>
-            <CredenzaBody className="grid grid-cols-2 gap-2">
-               <SquaredIconButton onClick={handleView}>
-                  <Eye className="h-4 w-4" />
-                  View your content details
-               </SquaredIconButton>
+                  </CardContent>
+                  <CardFooter className="flex items-center justify-between">
+                     <Badge variant="outline">
+                        {new Date(request.createdAt).toLocaleDateString()}
+                     </Badge>
+                     <Badge className="text-xs">
+                        {formatValueForDisplay(request.status ?? "")}
+                     </Badge>
+                  </CardFooter>
+               </Card>
+            </CredenzaTrigger>
+            <CredenzaContent>
+               <CredenzaHeader>
+                  <CredenzaTitle>
+                     {request.meta?.title || "Content"}
+                  </CredenzaTitle>
+                  <CredenzaDescription>
+                     {request.meta?.description || "No description available"}
+                  </CredenzaDescription>
+               </CredenzaHeader>
+               <CredenzaBody className="grid grid-cols-2 gap-2">
+                  <SquaredIconButton onClick={handleView}>
+                     <Eye className="h-4 w-4" />
+                     View your content details
+                  </SquaredIconButton>
 
-               <SquaredIconButton
-                  destructive
-                  onClick={handleDelete}
-                  disabled={deleteMutation.isPending}
-               >
-                  <Trash2 className="h-4 w-4" />
-                  {deleteMutation.isPending
-                     ? "Deleting..."
-                     : "Delete this content"}
-               </SquaredIconButton>
-            </CredenzaBody>
-         </CredenzaContent>
-      </Credenza>
+                  <SquaredIconButton
+                     destructive
+                     onClick={handleDelete}
+                     disabled={deleteMutation.isPending}
+                  >
+                     <Trash2 className="h-4 w-4" />
+                     {deleteMutation.isPending
+                        ? "Deleting..."
+                        : "Delete this content"}
+                  </SquaredIconButton>
+               </CredenzaBody>
+            </CredenzaContent>
+         </Credenza>
+         <ContentDeleteConfirmationCredenza
+            open={showDeleteConfirmation}
+            onOpenChange={setShowDeleteConfirmation}
+            contentTitle={request.meta?.title || "this content"}
+            onConfirm={confirmDelete}
+         />
+      </>
    );
 }
