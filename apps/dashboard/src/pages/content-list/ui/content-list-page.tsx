@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
-import { ContentRequestCard } from "./content-card";
-import { LoadingContentCard } from "./loading-content-card";
+import { ContentCardsList } from "./content-cards-list";
+import { ContentCardsSkeleton } from "./content-cards-skeleton";
 import { ContentListToolbar } from "./content-list-toolbar";
 import {
    ContentListProvider,
@@ -11,65 +12,11 @@ import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useSubscription } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
 
-const getStatusDisplay = (status: string | null) => {
-   if (!status)
-      return { label: "Unknown", progress: 0, variant: "secondary" as const };
-
-   const statusConfig = {
-      pending: { label: "Pending", progress: 0, variant: "secondary" as const },
-      planning: {
-         label: "Planning",
-         progress: 15,
-         variant: "default" as const,
-      },
-      researching: {
-         label: "Researching",
-         progress: 35,
-         variant: "default" as const,
-      },
-      writing: { label: "Writing", progress: 60, variant: "default" as const },
-      editing: { label: "Editing", progress: 80, variant: "default" as const },
-      analyzing: {
-         label: "Analyzing",
-         progress: 95,
-         variant: "default" as const,
-      },
-      draft: { label: "Draft", progress: 100, variant: "default" as const },
-      approved: {
-         label: "Approved",
-         progress: 100,
-         variant: "destructive" as const,
-      },
-   };
-
-   return (
-      statusConfig[status as keyof typeof statusConfig] || {
-         label: status,
-         progress: 0,
-         variant: "secondary" as const,
-      }
-   );
-};
 //TODO: criar um component padrao para paginacao + toolbar, bulk actions de aprovar, deletar ou rejeitar
 function ContentListPageContent() {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
-   const {
-      page,
-      limit,
-      filteredStatuses,
-      hasGeneratingContent,
-      selectedAgents,
-   } = useContentList();
-
-   const { data } = useSuspenseQuery(
-      trpc.content.listAllContent.queryOptions({
-         status: filteredStatuses,
-         page,
-         limit,
-         ...(selectedAgents.length > 0 && { agentIds: selectedAgents }),
-      }),
-   );
+   const { page, limit, hasGeneratingContent } = useContentList();
 
    useSubscription(
       trpc.content.onStatusChanged.subscriptionOptions(
@@ -104,43 +51,9 @@ function ContentListPageContent() {
       <main className="h-full w-full flex flex-col gap-4 p-4">
          <TalkingMascot message="Here you can manage all your content requests. Create, edit, or explore your requests below!" />
          <ContentListToolbar />
-         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {data.items.map((item) => {
-               const isGenerating =
-                  item.status &&
-                  [
-                     "pending",
-                     "planning",
-                     "researching",
-                     "writing",
-                     "editing",
-                     "analyzing",
-                  ].includes(item.status);
-
-               if (isGenerating) {
-                  const statusInfo = getStatusDisplay(item.status);
-                  return (
-                     <LoadingContentCard
-                        key={item.id}
-                        status={item.status}
-                        progress={statusInfo.progress}
-                     />
-                  );
-               }
-
-               return <ContentRequestCard key={item.id} request={item} />;
-            })}
-         </div>
-         {data.items.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-               <p className="text-lg">
-                  No content found matching your filters.
-               </p>
-               <p className="text-sm mt-2">
-                  Try adjusting your filter criteria or create new content.
-               </p>
-            </div>
-         )}
+         <Suspense fallback={<ContentCardsSkeleton />}>
+            <ContentCardsList />
+         </Suspense>
       </main>
    );
 }
