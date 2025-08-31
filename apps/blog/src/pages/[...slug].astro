@@ -34,26 +34,31 @@ export async function getStaticPaths() {
    });
    const author = await sdk.getAuthorByAgentId({ agentId });
 
-   // Fetch full content for each post and related posts in parallel
-   const postsWithRelated = await Promise.all(
-      response.posts.map(async (postMeta) => {
-         // Get the full post content by slug
-         const fullPost = await sdk.getContentBySlug({
-            slug: postMeta.meta.slug,
-            agentId,
-         });
+    // Fetch full content for each post and related posts in parallel
+    const postsWithRelated = await Promise.all(
+       response.posts.map(async (postMeta) => {
+          const slug = postMeta.meta?.slug;
+          if (!slug) {
+             throw new Error(`Post missing slug: ${postMeta.id}`);
+          }
 
-         const relatedPosts = await getRelatedPosts(postMeta.meta.slug);
-         return {
-            params: { slug: postMeta.meta.slug },
-            props: {
-               post: fullPost,
-               author,
-               relatedPosts,
-            },
-         };
-      }),
-   );
+          // Get the full post content by slug
+          const fullPost = await sdk.getContentBySlug({
+             slug,
+             agentId,
+          });
+
+          const relatedPosts = await getRelatedPosts(slug);
+          return {
+             params: { slug },
+             props: {
+                post: fullPost,
+                author,
+                relatedPosts,
+             },
+          };
+       }),
+    );
 
    return postsWithRelated;
 }

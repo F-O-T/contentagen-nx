@@ -5,33 +5,46 @@ import Footer from "../components/Footer.astro";
 import BaseHead from "../components/BaseHead.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import { marked } from "marked";
+import type { ContentSelect } from "@packages/database/schema";
 
-const { post, author, relatedPosts } = Astro.props;
+interface Props {
+  post: ContentSelect;
+  author: {
+    name: string;
+    profilePhoto: {
+      image: string;
+      contentType: string;
+    } | null;
+  };
+  relatedPosts: ContentSelect[];
+}
+
+const { post, author, relatedPosts } = Astro.props as Props;
 const htmlBody = marked.parse(post.body);
 ---
 
 <BaseHead
   title={post.meta?.title ?? ""}
   description={post.meta?.description ?? ""}
-  image={post.imageUrl}
+  image={post.imageUrl ?? undefined}
   keywords={post.meta?.keywords}
 />
 
 <Navbar />
 <main class="container mx-auto px-4 py-8 max-w-4xl">
   <article class="grid gap-4">
-    {post.imageUrl && (
-      <div >
-        <div class="relative overflow-hidden rounded-2xl shadow-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-          <Image
-            src={post.imageUrl}
-            alt={post.meta?.title ?? ""}
-            width={1020}
-            height={510}
-            class="w-full h-auto object-cover transition-transform duration-700 hover:scale-105"
-            format="webp"
-            loading="lazy"
-          />
+     {post.imageUrl && (
+       <div >
+         <div class="relative overflow-hidden rounded-2xl shadow-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+           <Image
+             src={post.imageUrl ?? undefined}
+             alt={post.meta?.title ?? ""}
+             width={1020}
+             height={510}
+             class="w-full h-auto object-cover transition-transform duration-700 hover:scale-105"
+             format="webp"
+             loading="lazy"
+           />
           <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none"></div>
         </div>
       </div>
@@ -90,17 +103,17 @@ const htmlBody = marked.parse(post.body);
               href={`/${relatedPost.meta?.slug}/`}
               class="block"
             >
-              {relatedPost.imageUrl && (
-                <div class="relative overflow-hidden">
-                  <Image
-                    src={relatedPost.imageUrl}
-                    alt={relatedPost.meta?.title ?? ""}
-                    width={400}
-                    height={200}
-                    class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
-                    format="webp"
-                    loading="lazy"
-                  />
+               {relatedPost.imageUrl && (
+                 <div class="relative overflow-hidden">
+                   <Image
+                     src={relatedPost.imageUrl ?? undefined}
+                     alt={relatedPost.meta?.title ?? ""}
+                     width={400}
+                     height={200}
+                     class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                     format="webp"
+                     loading="lazy"
+                   />
                   <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
               )}
