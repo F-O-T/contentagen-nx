@@ -1,5 +1,6 @@
 import {
    Card,
+   CardAction,
    CardContent,
    CardDescription,
    CardFooter,
@@ -22,25 +23,25 @@ import { Badge } from "@packages/ui/components/badge";
 import type { RouterOutput } from "@packages/api/client";
 import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
 import { useTRPC } from "@/integrations/clients";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import {
+   useSuspenseQuery,
+   useMutation,
+   useQueryClient,
+} from "@tanstack/react-query";
+import { useCallback, useState } from "react";
+import { toast } from "sonner";
 import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
 import { formatValueForDisplay } from "@packages/helpers/text";
+import { useContentList } from "../lib/content-list-context";
 
 export function ContentRequestCard({
    request,
-   isSelected = false,
-   onSelectionChange,
-   onView,
-   onDelete,
 }: {
    request: RouterOutput["content"]["listAllContent"]["items"][0];
-   isSelected?: boolean;
-   onSelectionChange?: (id: string, selected: boolean) => void;
-   onView?: (id: string) => void;
-   onDelete?: (id: string) => void;
 }) {
+   const { selectedItems, handleSelectionChange } = useContentList();
    const trpc = useTRPC();
+   const queryClient = useQueryClient();
    const navigate = useNavigate();
    const { data: profilePhoto } = useSuspenseQuery(
       trpc.agentFile.getProfilePhoto.queryOptions({
@@ -50,47 +51,55 @@ export function ContentRequestCard({
 
    const [isCredenzaOpen, setIsCredenzaOpen] = useState(false);
 
-   const handleView = () => {
+   const deleteMutation = useMutation(
+      trpc.content.delete.mutationOptions({
+         onSuccess: async () => {
+            toast.success("Content deleted successfully");
+            setIsCredenzaOpen(false);
+            // Invalidate queries to refresh the list
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.listAllContent.queryKey(),
+            });
+         },
+         onError: (error) => {
+            toast.error("Failed to delete content");
+            console.error("Delete error:", error);
+         },
+      }),
+   );
+
+   const handleView = useCallback(() => {
       navigate({
          to: "/content/$id",
          params: { id: request.id },
       });
-      onView?.(request.id);
       setIsCredenzaOpen(false);
-   };
+   }, [navigate, request.id]);
 
-   const handleDelete = () => {
-      onDelete?.(request.id);
-      setIsCredenzaOpen(false);
-   };
+   const handleDelete = useCallback(async () => {
+      await deleteMutation.mutateAsync({ id: request.id });
+   }, [deleteMutation, request.id]);
 
    return (
       <Credenza open={isCredenzaOpen} onOpenChange={setIsCredenzaOpen}>
          <CredenzaTrigger asChild>
-            <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <Card className="cursor-pointer">
                <CardHeader>
-                  <div className="flex items-start justify-between">
-                     <div className="flex-1 min-w-0">
-                        <CardTitle className="line-clamp-1">
-                           {request.meta?.title}
-                        </CardTitle>
-                        <CardDescription className="line-clamp-2 mt-1">
-                           {request.meta?.description ?? "No description found"}
-                        </CardDescription>
-                     </div>
-                     <div data-checkbox className="ml-2">
-                        <Checkbox
-                           checked={isSelected}
-                           onCheckedChange={(checked) =>
-                              onSelectionChange?.(
-                                 request.id,
-                                 checked as boolean,
-                              )
-                           }
-                           onClick={(e) => e.stopPropagation()}
-                        />
-                     </div>
-                  </div>
+                  <CardTitle className="line-clamp-1">
+                     {request.meta?.title}
+                  </CardTitle>
+                  <CardDescription className="line-clamp-2">
+                     {request.meta?.description ?? "No description found"}
+                  </CardDescription>
+                  <CardAction>
+                     <Checkbox
+                        checked={selectedItems.has(request.id)}
+                        onCheckedChange={(checked) =>
+                           handleSelectionChange(request.id, checked as boolean)
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                     />
+                  </CardAction>
                </CardHeader>
                <CardContent>
                   <AgentWriterCard
@@ -127,9 +136,15 @@ export function ContentRequestCard({
                   View your content details
                </SquaredIconButton>
 
-               <SquaredIconButton destructive onClick={handleDelete}>
+               <SquaredIconButton
+                  destructive
+                  onClick={handleDelete}
+                  disabled={deleteMutation.isPending}
+               >
                   <Trash2 className="h-4 w-4" />
-                  Delete this content
+                  {deleteMutation.isPending
+                     ? "Deleting..."
+                     : "Delete this content"}
                </SquaredIconButton>
             </CredenzaBody>
          </CredenzaContent>

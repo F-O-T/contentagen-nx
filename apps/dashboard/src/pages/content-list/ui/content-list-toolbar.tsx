@@ -18,47 +18,32 @@ import {
 import { FilteringCredenza } from "../features/filtering-credenza";
 import { BulkActionsCredenza } from "../features/bulk-actions-credenza";
 import { CreateContentCredenza } from "../features/create-content-credenza";
-import type { RouterInput, RouterOutput } from "@packages/api/client";
+import { useContentList } from "../lib/content-list-context";
 
-type Statuses = RouterInput["content"]["listAllContent"]["status"];
-interface ContentListToolbarProps {
-   page: number;
-   totalPages: number;
-   onPageChange: (page: number) => void;
-   onSelectAll?: () => void;
-   selectedItemsCount?: number;
-   allSelected?: boolean;
-   selectedStatuses: Statuses;
-   selectedAgents: string[];
-   onStatusesChange: (statuses: Statuses) => void;
-   onAgentsChange: (agents: string[]) => void;
-   agents: RouterOutput["agent"]["list"];
-   selectedItems: Set<string>;
-}
-
-export function ContentListToolbar({
-   page,
-   totalPages,
-   onPageChange,
-   onSelectAll,
-   selectedItemsCount = 0,
-   allSelected = false,
-   selectedStatuses,
-   selectedAgents,
-   onStatusesChange,
-   onAgentsChange,
-   agents,
-   selectedItems,
-}: ContentListToolbarProps) {
+export function ContentListToolbar() {
+   const {
+      page,
+      totalPages,
+      handlePageChange,
+      handleSelectAll,
+      selectedItemsCount,
+      allSelectableSelected,
+      selectedStatuses,
+      selectedAgents,
+      setSelectedStatuses,
+      setSelectedAgents,
+      agents,
+      selectedItems,
+   } = useContentList();
    const [openFilter, setOpenFilter] = useState(false);
    const [openBulk, setOpenBulk] = useState(false);
    const [openNewContent, setOpenNewContent] = useState(false);
    const actions = useMemo(
       () => [
          {
-            label: allSelected ? "Unselect All" : "Select All",
+            label: allSelectableSelected ? "Unselect All" : "Select All",
             icon: CheckSquare,
-            onClick: onSelectAll,
+            onClick: handleSelectAll,
          },
          {
             label: "Filtering",
@@ -77,7 +62,7 @@ export function ContentListToolbar({
             disabled: selectedItemsCount === 0,
          },
       ],
-      [onSelectAll, selectedItemsCount, allSelected],
+      [handleSelectAll, selectedItemsCount, allSelectableSelected],
    );
 
    return (
@@ -87,7 +72,7 @@ export function ContentListToolbar({
                <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => onPageChange(page - 1)}
+                  onClick={() => handlePageChange(page - 1)}
                   disabled={page === 1}
                >
                   <ChevronLeft className="h-4 w-4" />
@@ -100,7 +85,7 @@ export function ContentListToolbar({
                <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => onPageChange(page + 1)}
+                  onClick={() => handlePageChange(page + 1)}
                   disabled={page === totalPages}
                >
                   <ChevronRight className="h-4 w-4" />
@@ -136,9 +121,9 @@ export function ContentListToolbar({
             onOpenChange={setOpenFilter}
             selectedStatuses={selectedStatuses}
             selectedAgents={selectedAgents}
-            onStatusesChange={onStatusesChange}
-            onAgentsChange={onAgentsChange}
-            agents={agents}
+            onStatusesChange={setSelectedStatuses}
+            onAgentsChange={setSelectedAgents}
+            agents={agents || []}
          />
          <BulkActionsCredenza
             open={openBulk}
