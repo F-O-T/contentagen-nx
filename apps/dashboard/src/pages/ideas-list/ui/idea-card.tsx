@@ -9,16 +9,8 @@ import {
 } from "@packages/ui/components/card";
 import { Badge } from "@packages/ui/components/badge";
 import { Checkbox } from "@packages/ui/components/checkbox";
-import { MoreVertical } from "lucide-react";
 import type { RouterOutput } from "@packages/api/client";
 import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
-import {
-   DropdownMenu,
-   DropdownMenuTrigger,
-   DropdownMenuContent,
-   DropdownMenuItem,
-} from "@packages/ui/components/dropdown-menu";
-import { Link } from "@tanstack/react-router";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
