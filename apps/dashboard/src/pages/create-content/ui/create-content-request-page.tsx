@@ -26,6 +26,7 @@ export function AgentContentRequestPage() {
                      "writing",
                      "editing",
                      "analyzing",
+                     "grammar_checking",
                   ],
                }),
             });

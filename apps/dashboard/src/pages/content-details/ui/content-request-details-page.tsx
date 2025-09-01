@@ -45,6 +45,7 @@ export function ContentRequestDetailsPage() {
             "writing",
             "editing",
             "analyzing",
+            "grammar_checking",
          ].includes(data.status),
       [data?.status],
    );

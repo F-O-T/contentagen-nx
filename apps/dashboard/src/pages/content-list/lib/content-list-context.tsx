@@ -102,6 +102,7 @@ export function ContentListProvider({
                   "writing",
                   "editing",
                   "analyzing",
+                  "grammar_checking",
                ].includes(item.status),
          ) || false,
       [data],
@@ -141,6 +142,7 @@ export function ContentListProvider({
                   "writing",
                   "editing",
                   "analyzing",
+                  "grammar_checking",
                ].includes(item.status || ""),
          ) || []
       );

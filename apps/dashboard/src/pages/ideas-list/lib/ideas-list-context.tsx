@@ -87,8 +87,8 @@ export function IdeasListProvider({
    );
 
    const selectableItems = useMemo(() => {
-      return data?.items || [];
-   }, [data]);
+      return data?.items.filter((item) => item.status === "pending") || [];
+   }, [data?.items]);
 
    const allSelected = useMemo(() => {
       const selectableIds = selectableItems.map(

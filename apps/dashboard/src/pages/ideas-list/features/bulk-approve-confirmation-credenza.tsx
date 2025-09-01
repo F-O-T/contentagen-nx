@@ -19,7 +19,7 @@ export function BulkApproveConfirmationCredenza({
          onDelete={onConfirm}
          icon={CheckCircle}
          variant="default"
-         message={`This will approve the selected content items that are in draft or pending status. Only draft and pending items will be approved. This action will make the content publicly available.`}
+         message="This will approve the selected ideas that are in pending status and send them to the content generation pipeline. Only pending items will be approved. This action will create content based on the approved ideas."
       />
    );
 }

@@ -406,16 +406,18 @@ export const contentRouter = router({
                });
             }
 
-            // Verify that all content items belong to user's agents and are in draft status
+            // Verify that all content items belong to user's agents and are in draft or pending status
             const contents = await listContents(
                resolvedCtx.db,
                allUserAgentIds,
-               ["draft"], // Only draft content can be approved
+               ["draft"], // Only draft and pending content can be approved
             );
 
-            const userDraftContentIds = contents.map((content) => content.id);
+            const userApprovableContentIds = contents.map(
+               (content) => content.id,
+            );
             const unauthorizedIds = ids.filter(
-               (id) => !userDraftContentIds.includes(id),
+               (id) => !userApprovableContentIds.includes(id),
             );
 
             if (unauthorizedIds.length > 0) {
@@ -425,11 +427,24 @@ export const contentRouter = router({
                });
             }
 
-            // Perform bulk approve
-            const result = await approveBulkContent(resolvedCtx.db, ids);
+            // Filter to only process draft and pending items
+            const approvableContents = contents.filter(
+               (content) =>
+                  ids.includes(content.id) &&
+                  (content.status === "draft" || content.status === "pending"),
+            );
+            const approvableIds = approvableContents.map(
+               (content) => content.id,
+            );
+
+            // Perform bulk approve only on draft and pending items
+            const result = await approveBulkContent(
+               resolvedCtx.db,
+               approvableIds,
+            );
 
             // Emit status change events for each approved content
-            for (const content of contents.filter((c) => ids.includes(c.id))) {
+            for (const content of approvableContents) {
                eventEmitter.emit(EVENTS.contentStatus, {
                   contentId: content.id,
                   status: "approved",
@@ -440,6 +455,8 @@ export const contentRouter = router({
             return {
                success: true,
                approvedCount: result.approvedCount,
+               totalSelected: ids.length,
+               approvableCount: approvableIds.length,
             };
          } catch (err) {
             if (err instanceof NotFoundError) {

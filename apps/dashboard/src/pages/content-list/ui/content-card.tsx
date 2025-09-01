@@ -102,6 +102,11 @@ export function ContentRequestCard({
                      <CardAction>
                         <Checkbox
                            checked={selectedItems.has(request.id)}
+                           disabled={
+                              !["draft", "approved", "pending"].includes(
+                                 request.status || "",
+                              )
+                           }
                            onCheckedChange={(checked) =>
                               handleSelectionChange(
                                  request.id,

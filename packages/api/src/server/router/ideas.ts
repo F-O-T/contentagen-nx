@@ -3,7 +3,6 @@ import {
    getIdeaById,
    updateIdea,
    deleteIdea,
-   listIdeasByAgent,
    getAgentIdeasCount,
 } from "@packages/database/repositories/ideas-repository";
 import {
@@ -241,5 +240,108 @@ export const ideasRouter = router({
             contentRequest: { description: idea.content },
          });
          return { success: true, content };
+      }),
+
+   bulkApprove: protectedProcedure
+      .input(z.object({ ids: z.array(z.string()).min(1) }))
+      .mutation(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
+         const db = resolvedCtx.db;
+         const { ids } = input;
+
+         if (!ids || ids.length === 0) {
+            throw new TRPCError({
+               code: "BAD_REQUEST",
+               message: "At least one idea ID is required.",
+            });
+         }
+
+         const userId = resolvedCtx.session?.user.id;
+         const organizationId =
+            resolvedCtx.session?.session?.activeOrganizationId;
+
+         if (!userId) {
+            throw new TRPCError({
+               code: "UNAUTHORIZED",
+               message: "User must be authenticated to approve ideas.",
+            });
+         }
+
+         // Get all agents belonging to the user to verify ownership
+         const agents = await listAgents(resolvedCtx.db, {
+            userId,
+            organizationId: organizationId ?? "",
+         });
+         const allUserAgentIds = agents.map((agent) => agent.id);
+
+         if (allUserAgentIds.length === 0) {
+            throw new TRPCError({
+               code: "FORBIDDEN",
+               message: "No agents found for this user.",
+            });
+         }
+
+         // Fetch all ideas to verify ownership and status
+         const ideasList = await db.query.ideas.findMany({
+            where: (ideas, { inArray, and, eq }) =>
+               and(
+                  inArray(ideas.id, ids),
+                  inArray(ideas.agentId, allUserAgentIds),
+                  eq(ideas.status, "pending"), // Only pending ideas can be approved
+               ),
+            with: {
+               agent: true,
+            },
+         });
+
+         const foundIds = ideasList.map((idea) => idea.id);
+         const notFoundIds = ids.filter((id) => !foundIds.includes(id));
+
+         if (notFoundIds.length > 0) {
+            throw new TRPCError({
+               code: "NOT_FOUND",
+               message: `Ideas not found or not accessible: ${notFoundIds.join(", ")}`,
+            });
+         }
+
+         // Filter to only process pending items (already filtered in query, but being explicit)
+         const approvableIdeas = ideasList.filter(
+            (idea) => idea.status === "pending",
+         );
+
+         let approvedCount = 0;
+
+         // Process each approvable idea
+         for (const idea of approvableIdeas) {
+            try {
+               // Update status
+               await updateIdea(db, idea.id, { status: "approved" });
+
+               // Create content
+               const content = await createContent(db, {
+                  agentId: idea.agentId,
+                  request: { description: idea.content },
+               });
+
+               // Enqueue job
+               await enqueueContentPlanningJob({
+                  agentId: idea.agentId,
+                  contentId: content.id,
+                  contentRequest: { description: idea.content },
+               });
+
+               approvedCount++;
+            } catch (error) {
+               console.error(`Failed to approve idea ${idea.id}:`, error);
+               // Continue with other ideas even if one fails
+            }
+         }
+
+         return {
+            success: true,
+            approvedCount,
+            totalSelected: ids.length,
+            approvableCount: approvableIdeas.length,
+         };
       }),
 });

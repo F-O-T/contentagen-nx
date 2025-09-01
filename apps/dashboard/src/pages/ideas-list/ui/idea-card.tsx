@@ -66,6 +66,7 @@ export function IdeaCard({
                   <CardAction>
                      <Checkbox
                         checked={selectedItems.has(idea.id)}
+                        disabled={idea.status !== "pending"}
                         onCheckedChange={(checked) =>
                            handleSelectionChange(idea.id, checked as boolean)
                         }

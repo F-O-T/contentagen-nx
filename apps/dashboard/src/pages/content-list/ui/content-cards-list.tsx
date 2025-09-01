@@ -27,6 +27,11 @@ const getStatusDisplay = (status: string | null) => {
          progress: 95,
          variant: "default" as const,
       },
+      grammar_checking: {
+         label: "Grammar Checking",
+         progress: 98,
+         variant: "default" as const,
+      },
       draft: { label: "Draft", progress: 100, variant: "default" as const },
       approved: {
          label: "Approved",
@@ -70,6 +75,7 @@ export function ContentCardsList() {
                      "writing",
                      "editing",
                      "analyzing",
+                     "grammar_checking",
                   ].includes(item.status);
 
                if (isGenerating) {
