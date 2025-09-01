@@ -4,6 +4,7 @@ import {
    updateAgent,
    deleteAgent,
    listAgents,
+   getTotalAgents,
 } from "@packages/database/repositories/agent-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
@@ -235,30 +236,59 @@ export const agentRouter = router({
             throw err;
          }
       }),
-   list: protectedProcedure.query(async ({ ctx }) => {
-      const resolvedCtx = await ctx;
-      try {
-         const userId = resolvedCtx.session?.user.id;
-         const organizationId =
-            resolvedCtx.session?.session?.activeOrganizationId;
-         if (!userId && !organizationId) {
-            throw new TRPCError({
-               code: "UNAUTHORIZED",
-               message: "User or organization ID is required to list agents.",
-            });
+   list: protectedProcedure
+      .input(
+         z
+            .object({
+               page: z.number().min(1).default(1),
+               limit: z.number().min(1).max(100).default(8),
+            })
+            .optional(),
+      )
+      .query(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
+         try {
+            const userId = resolvedCtx.session?.user.id;
+            const organizationId =
+               resolvedCtx.session?.session?.activeOrganizationId;
+            if (!userId && !organizationId) {
+               throw new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message:
+                     "User or organization ID is required to list agents.",
+               });
+            }
+
+            const { page = 1, limit = 8 } = input || {};
+
+            const [agents, total] = await Promise.all([
+               listAgents(resolvedCtx.db, {
+                  userId,
+                  organizationId: organizationId || undefined,
+                  page,
+                  limit,
+               }),
+               getTotalAgents(resolvedCtx.db, {
+                  userId,
+                  organizationId: organizationId || undefined,
+               }),
+            ]);
+
+            return {
+               items: agents,
+               total,
+               page,
+               limit,
+               totalPages: Math.ceil(total / limit),
+            };
+         } catch (err) {
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
          }
-         if (!organizationId) {
-            return await listAgents(resolvedCtx.db, { userId });
-         }
-         return await listAgents(resolvedCtx.db, { userId, organizationId });
-      } catch (err) {
-         if (err instanceof DatabaseError) {
-            throw new TRPCError({
-               code: "INTERNAL_SERVER_ERROR",
-               message: err.message,
-            });
-         }
-         throw err;
-      }
-   }),
+      }),
 });

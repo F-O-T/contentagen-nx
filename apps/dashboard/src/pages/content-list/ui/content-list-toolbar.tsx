@@ -129,7 +129,7 @@ export function ContentListToolbar() {
             selectedAgents={selectedAgents}
             onStatusesChange={setSelectedStatuses}
             onAgentsChange={setSelectedAgents}
-            agents={agents || []}
+            agents={agents}
          />
          <BulkActionsCredenza
             open={openBulk}

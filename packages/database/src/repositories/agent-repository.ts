@@ -81,25 +81,46 @@ export async function deleteAgent(
 
 export async function listAgents(
    dbClient: DatabaseInstance,
-   { userId, organizationId }: { userId?: string; organizationId?: string },
+   {
+      userId,
+      organizationId,
+      page = 1,
+      limit = 8,
+   }: {
+      userId?: string;
+      organizationId?: string;
+      page?: number;
+      limit?: number;
+   },
 ): Promise<AgentSelect[]> {
    try {
+      const offset = (page - 1) * limit;
+
       if (userId && organizationId) {
          return await dbClient.query.agent.findMany({
             where: or(
                eq(agent.userId, userId),
                eq(agent.organizationId, organizationId),
             ),
+            limit,
+            offset,
+            orderBy: (agent, { desc }) => [desc(agent.createdAt)],
          });
       }
       if (userId) {
          return await dbClient.query.agent.findMany({
             where: eq(agent.userId, userId),
+            limit,
+            offset,
+            orderBy: (agent, { desc }) => [desc(agent.createdAt)],
          });
       }
       if (organizationId) {
          return await dbClient.query.agent.findMany({
             where: eq(agent.organizationId, organizationId),
+            limit,
+            offset,
+            orderBy: (agent, { desc }) => [desc(agent.createdAt)],
          });
       }
       return [];
@@ -115,8 +136,22 @@ export async function getTotalAgents(
    { userId, organizationId }: { userId?: string; organizationId?: string },
 ): Promise<number> {
    try {
-      const agents = await listAgents(dbClient, { userId, organizationId });
-      return agents.length;
+      let whereClause;
+      if (userId && organizationId) {
+         whereClause = or(
+            eq(agent.userId, userId),
+            eq(agent.organizationId, organizationId),
+         );
+      } else if (userId) {
+         whereClause = eq(agent.userId, userId);
+      } else if (organizationId) {
+         whereClause = eq(agent.organizationId, organizationId);
+      } else {
+         return 0;
+      }
+
+      const result = await dbClient.$count(agent, whereClause);
+      return result;
    } catch (err) {
       throw new DatabaseError(
          `Failed to get total agents: ${(err as Error).message}`,

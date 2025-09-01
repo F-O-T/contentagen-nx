@@ -23,7 +23,10 @@ export function CreateContentCredenza({
 }) {
    const trpc = useTRPC();
    const { data, isLoading } = useSuspenseQuery(trpc.agent.list.queryOptions());
-   const userHasAgents = useMemo(() => !!(data && data.length > 0), [data]);
+   const userHasAgents = useMemo(
+      () => !!(data && data.items.length > 0),
+      [data],
+   );
 
    return (
       <Credenza open={open} onOpenChange={onOpenChange}>
@@ -49,7 +52,7 @@ export function CreateContentCredenza({
                )}
                {!isLoading &&
                   userHasAgents &&
-                  data.map((agent) => (
+                  data.items.map((agent) => (
                      <Link
                         key={agent.id}
                         to={"/agents/$agentId/content/request"}

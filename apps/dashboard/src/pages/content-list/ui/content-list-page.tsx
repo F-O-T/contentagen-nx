@@ -84,7 +84,7 @@ export function ContentListPage() {
    );
 
    return (
-      <ContentListProvider data={data} agents={agents}>
+      <ContentListProvider data={data} agents={agents.items}>
          <ContentListPageContent />
       </ContentListProvider>
    );

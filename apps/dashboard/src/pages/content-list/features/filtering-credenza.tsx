@@ -18,7 +18,7 @@ interface FilteringCredenzaProps {
    selectedAgents: string[];
    onStatusesChange: (statuses: Statuses) => void;
    onAgentsChange: (agents: string[]) => void;
-   agents: RouterOutput["agent"]["list"];
+   agents?: RouterOutput["agent"]["list"]["items"];
 }
 
 const allStatuses = [
@@ -106,7 +106,7 @@ export function FilteringCredenza({
                <div>
                   <h3 className="text-sm font-medium mb-3">Agent</h3>
                   <div className="space-y-2 max-h-40 overflow-y-auto">
-                     {agents.map((agent) => (
+                     {agents?.map((agent) => (
                         <div
                            key={agent.id}
                            className="flex items-center space-x-2"

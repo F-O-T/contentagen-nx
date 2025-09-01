@@ -1,4 +1,3 @@
-import React from "react";
 import {
    Card,
    CardHeader,
@@ -8,27 +7,26 @@ import {
    CardAction,
    CardDescription,
 } from "@packages/ui/components/card";
-import { InfoItem } from "@packages/ui/components/info-item";
+import { Checkbox } from "@packages/ui/components/checkbox";
+import { Badge } from "@packages/ui/components/badge";
 import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuItem,
-   DropdownMenuTrigger,
-} from "@packages/ui/components/dropdown-menu";
-import { Button } from "@packages/ui/components/button";
-import { Link } from "@tanstack/react-router";
-import {
-   Edit,
-   MoreVertical,
-   Users,
-   FileText,
-   CheckCircle2,
-   Trash,
-} from "lucide-react";
+   Credenza,
+   CredenzaContent,
+   CredenzaHeader,
+   CredenzaTitle,
+   CredenzaDescription,
+   CredenzaTrigger,
+   CredenzaBody,
+} from "@packages/ui/components/credenza";
+import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
+import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { formatValueToTitleCase } from "@packages/ui/lib/utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { useTRPC } from "@/integrations/clients";
+import { useAgentList } from "../lib/agent-list-context";
+import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { Eye, Edit, Trash2, PlusIcon } from "lucide-react";
 import { DeleteAgentDialog } from "@/features/agent-actions/ui/delete-agent-dialog";
 import { EditAgentAction } from "@/features/agent-actions/ui/edit-agent-action";
 import type { AgentSelect } from "@packages/database/schema";
@@ -39,136 +37,142 @@ type AgentCardProps = {
 };
 
 export function AgentCard({ agent }: AgentCardProps) {
-   const queryClient = useQueryClient();
    const trpc = useTRPC();
-   const { mutate: transferAgent, isPending: isTransferPending } = useMutation(
-      trpc.agent.transferToOrganization.mutationOptions({
-         onError: () => {
-            toast.error("Failed to transfer agent");
-         },
-         onSuccess: () => {
-            queryClient.invalidateQueries({
-               queryKey: trpc.agent.list.queryKey(),
-            });
-            toast.success("Agent transferred to organization");
-         },
+   const { selectedItems, handleSelectionChange } = useAgentList();
+   const { data: profilePhoto } = useSuspenseQuery(
+      trpc.agentFile.getProfilePhoto.queryOptions({
+         agentId: agent.id,
       }),
    );
 
+   const [isCredenzaOpen, setIsCredenzaOpen] = useState(false);
+   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+   const navigate = useNavigate();
+
+   const personaConfig = agent.personaConfig as PersonaConfig;
+
+   // Extract voice communication style
+   const voiceStyle = personaConfig.voice?.communication
+      ? formatValueToTitleCase(
+           personaConfig.voice.communication.replace("_", " "),
+        )
+      : "Not specified";
+
+   // Extract audience base
+   const audienceBase = personaConfig.audience?.base
+      ? formatValueToTitleCase(personaConfig.audience.base.replace("_", " "))
+      : "Not specified";
+
+   // Extract purpose/channel if available
+   const purpose = personaConfig.purpose
+      ? formatValueToTitleCase(personaConfig.purpose.replace("_", " "))
+      : "Not specified";
+
    const { handleEdit } = EditAgentAction({ agentId: agent.id });
-   const infoItems = React.useMemo(() => {
-      const personaConfig = agent.personaConfig as PersonaConfig;
 
-      // Extract voice communication style
-      const voiceStyle = personaConfig.voice?.communication
-         ? formatValueToTitleCase(
-              personaConfig.voice.communication.replace("_", " "),
-           )
-         : "Not specified";
+   const handleViewDetails = () => {
+      navigate({
+         to: "/agents/$agentId",
+         params: { agentId: agent.id },
+      });
+      setIsCredenzaOpen(false);
+   };
 
-      // Extract audience base
-      const audienceBase = personaConfig.audience?.base
-         ? formatValueToTitleCase(personaConfig.audience.base.replace("_", " "))
-         : "Not specified";
+   const handleViewContent = () => {
+      navigate({
+         to: "/agents/$agentId/content/request",
+         params: { agentId: agent.id },
+      });
+      setIsCredenzaOpen(false);
+   };
 
-      // Extract purpose/channel if available
-      const purpose = personaConfig.purpose
-         ? formatValueToTitleCase(personaConfig.purpose.replace("_", " "))
-         : null;
+   const handleEditAgent = () => {
+      handleEdit();
+      setIsCredenzaOpen(false);
+   };
 
-      return [
-         {
-            icon: <Users />,
-            label: "Voice & Audience",
-            value: `${voiceStyle} • ${audienceBase}`,
-         },
-         ...(purpose
-            ? [
-                 {
-                    icon: <FileText />,
-                    label: "Purpose",
-                    value: purpose,
-                 },
-              ]
-            : []),
-      ];
-   }, [agent]);
-   const [dropdownOpen, setDropdownOpen] = React.useState(false);
-   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+   const handleDelete = () => {
+      setDeleteDialogOpen(true);
+   };
+
    return (
-      <Card>
-         <CardHeader>
-            <CardTitle className="line-clamp-1">
-               {(agent.personaConfig as PersonaConfig).metadata.name}
-            </CardTitle>
-            <CardDescription className="line-clamp-1">
-               {(agent.personaConfig as PersonaConfig).metadata.description}
-            </CardDescription>
-            <CardAction>
-               <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-                  <DropdownMenuTrigger asChild>
-                     <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => setDropdownOpen(true)}
-                     >
-                        <MoreVertical className="w-5 h-5" />
-                     </Button>
-                  </DropdownMenuTrigger>
+      <>
+         <Credenza open={isCredenzaOpen} onOpenChange={setIsCredenzaOpen}>
+            <CredenzaTrigger asChild>
+               <Card className="cursor-pointer">
+                  <CardHeader>
+                     <CardTitle className="line-clamp-1">
+                        {personaConfig.metadata.name}
+                     </CardTitle>
+                     <CardDescription className="line-clamp-2">
+                        {personaConfig.metadata.description}
+                     </CardDescription>
+                     <CardAction>
+                        <Checkbox
+                           checked={selectedItems.has(agent.id)}
+                           onCheckedChange={(checked) =>
+                              handleSelectionChange(
+                                 agent.id,
+                                 checked as boolean,
+                              )
+                           }
+                           onClick={(e) => e.stopPropagation()}
+                        />
+                     </CardAction>
+                  </CardHeader>
 
-                  <DropdownMenuContent align="end">
-                     <DropdownMenuItem onClick={handleEdit}>
-                        <Edit className="w-4 h-4 mr-2" /> Edit
-                     </DropdownMenuItem>
-                     {!agent.organizationId && (
-                        <DropdownMenuItem
-                           onClick={() => transferAgent({ id: agent.id })}
-                           disabled={isTransferPending}
-                        >
-                           <CheckCircle2 className="w-4 h-4 mr-2" /> Transfer to
-                           Organization
-                        </DropdownMenuItem>
-                     )}
-                     <DropdownMenuItem
-                        onClick={() => setDeleteDialogOpen(true)}
-                     >
-                        <Trash className="w-4 h-4 mr-2" /> Delete
-                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-               </DropdownMenu>
-               <DeleteAgentDialog
-                  agentId={agent.id}
-                  agentName={
-                     (agent.personaConfig as PersonaConfig).metadata.name
-                  }
-                  open={deleteDialogOpen}
-                  onOpenChange={setDeleteDialogOpen}
-               />
-            </CardAction>
-         </CardHeader>
+                  <CardContent>
+                     <AgentWriterCard
+                        photo={profilePhoto?.data}
+                        name={personaConfig.metadata.name}
+                        description={personaConfig.metadata.description}
+                     />
+                  </CardContent>
 
-         <CardContent className="flex flex-col gap-2">
-            {infoItems.map((item) => (
-               <InfoItem
-                  key={item.label}
-                  icon={item.icon}
-                  label={item.label}
-                  value={item.value}
-               />
-            ))}
-         </CardContent>
+                  <CardFooter className="flex items-center justify-between">
+                     <Badge variant="outline">{purpose}</Badge>
+                     <Badge className="text-xs">
+                        {voiceStyle} • {audienceBase}
+                     </Badge>
+                  </CardFooter>
+               </Card>
+            </CredenzaTrigger>
+            <CredenzaContent>
+               <CredenzaHeader>
+                  <CredenzaTitle>{personaConfig.metadata.name}</CredenzaTitle>
+                  <CredenzaDescription>
+                     {personaConfig.metadata.description}
+                  </CredenzaDescription>
+               </CredenzaHeader>
+               <CredenzaBody className="grid grid-cols-2 gap-2">
+                  <SquaredIconButton onClick={handleViewDetails}>
+                     <Eye className="h-4 w-4" />
+                     View agent details
+                  </SquaredIconButton>
 
-         <CardFooter className="grid grid-cols-1 gap-2">
-            <Link
-               to={`/agents/$agentId`}
-               params={{ agentId: agent.id }}
-               className="flex-1"
-            >
-               <Button className="w-full" size="sm">
-                  View details
-               </Button>
-            </Link>
-         </CardFooter>
-      </Card>
+                  <SquaredIconButton onClick={handleViewContent}>
+                     <PlusIcon className="h-4 w-4" />
+                     Create new content
+                  </SquaredIconButton>
+
+                  <SquaredIconButton onClick={handleEditAgent}>
+                     <Edit className="h-4 w-4" />
+                     Edit agent
+                  </SquaredIconButton>
+
+                  <SquaredIconButton destructive onClick={handleDelete}>
+                     <Trash2 className="h-4 w-4" />
+                     Delete agent
+                  </SquaredIconButton>
+               </CredenzaBody>
+            </CredenzaContent>
+         </Credenza>
+         <DeleteAgentDialog
+            agentId={agent.id}
+            agentName={personaConfig.metadata.name}
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+         />
+      </>
    );
 }

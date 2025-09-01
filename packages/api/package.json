@@ -16,7 +16,6 @@
    },
    "scripts": {
       "build": "tsc",
-      "dev": "tsc",
       "check": "biome check --write ./src",
       "typecheck": "tsc --noEmit --emitDeclarationOnly false"
    },

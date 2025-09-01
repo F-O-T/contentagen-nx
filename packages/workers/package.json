@@ -18,9 +18,7 @@
    "name": "@packages/workers",
    "scripts": {
       "check": "biome check --write ./src",
-      "typecheck": "bunx --bun tsc --noEmit ",
-      "dev": "bunx trigger.dev@latest dev",
-      "deploy": "bunx trigger.dev@latest deploy"
+      "typecheck": "bunx --bun tsc --noEmit "
    },
    "private": true,
    "type": "module",

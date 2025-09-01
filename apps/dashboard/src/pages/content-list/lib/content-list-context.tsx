@@ -33,7 +33,7 @@ interface ContentListContextType {
 
    // Data state
    data?: RouterOutput["content"]["listAllContent"];
-   agents?: RouterOutput["agent"]["list"];
+   agents?: RouterOutput["agent"]["list"]["items"];
    hasGeneratingContent: boolean;
    selectableItems: RouterOutput["content"]["listAllContent"]["items"];
 
@@ -58,7 +58,7 @@ export const useContentList = () => {
 interface ContentListProviderProps {
    children: ReactNode;
    data?: RouterOutput["content"]["listAllContent"];
-   agents?: RouterOutput["agent"]["list"];
+   agents?: RouterOutput["agent"]["list"]["items"];
 }
 
 export function ContentListProvider({
