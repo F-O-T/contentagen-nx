@@ -13,7 +13,7 @@ function AgentListPageContent() {
    );
 
    return (
-      <main className="h-full w-full flex flex-col gap-4 p-4">
+      <main className="h-full w-full flex flex-col gap-4 ">
          <TalkingMascot message="Here you can manage all your AI agents. Create, edit, or explore your team below!" />
          <AgentListToolbar />
          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

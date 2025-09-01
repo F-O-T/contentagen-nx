@@ -23,8 +23,13 @@ interface IdeasListContextType {
    selectedItemsCount: number;
 
    // Data state
-   data?: RouterOutput["ideas"]["listAllIdeas"];
+   data?:
+      | RouterOutput["ideas"]["listAllIdeas"]
+      | RouterOutput["ideas"]["listByAgentPaginated"];
    selectableItems: RouterOutput["ideas"]["listAllIdeas"]["items"];
+
+   // Filtering state
+   agentId?: string;
 
    // Constants
    limit: number;
@@ -43,10 +48,17 @@ export const useIdeasList = () => {
 
 interface IdeasListProviderProps {
    children: ReactNode;
-   data?: RouterOutput["ideas"]["listAllIdeas"];
+   data?:
+      | RouterOutput["ideas"]["listAllIdeas"]
+      | RouterOutput["ideas"]["listByAgentPaginated"];
+   agentId?: string;
 }
 
-export function IdeasListProvider({ children, data }: IdeasListProviderProps) {
+export function IdeasListProvider({
+   children,
+   data,
+   agentId,
+}: IdeasListProviderProps) {
    const [page, setPage] = useState(1);
    const [limit] = useState(8);
    const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
@@ -121,6 +133,9 @@ export function IdeasListProvider({ children, data }: IdeasListProviderProps) {
       // Data
       data,
       selectableItems,
+
+      // Filtering
+      agentId,
 
       // Constants
       limit,

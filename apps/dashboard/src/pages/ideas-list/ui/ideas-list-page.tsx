@@ -6,16 +6,35 @@ import { IdeasListProvider, useIdeasList } from "../lib/ideas-list-context";
 import { useTRPC } from "@/integrations/clients";
 import type { RouterOutput } from "@packages/api/client";
 
+interface IdeasListPageProps {
+   agentId?: string;
+}
+
 function IdeasListPageContent() {
    const trpc = useTRPC();
-   const { page, limit } = useIdeasList();
-   const { data } = useSuspenseQuery(
+   const { page, limit, agentId } = useIdeasList();
+
+   const allIdeasQuery = useSuspenseQuery(
       trpc.ideas.listAllIdeas.queryOptions({ page, limit }),
    );
 
+   const agentIdeasQuery = useSuspenseQuery(
+      trpc.ideas.listByAgentPaginated.queryOptions({
+         agentId: agentId!,
+         page,
+         limit,
+      }),
+   );
+
+   const { data } = agentId ? agentIdeasQuery : allIdeasQuery;
+
+   const message = agentId
+      ? "Here you can manage ideas for this specific agent. Create, edit, or explore your creative concepts below!"
+      : "Here you can manage all your ideas. Create, edit, or explore your creative concepts below!";
+
    return (
       <main className="h-full w-full flex flex-col gap-4 p-4">
-         <TalkingMascot message="Here you can manage all your ideas. Create, edit, or explore your creative concepts below!" />
+         <TalkingMascot message={message} />
          <IdeasListToolbar />
          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {data.items.map(
@@ -30,14 +49,25 @@ function IdeasListPageContent() {
    );
 }
 
-export function IdeasListPage() {
+export function IdeasListPage({ agentId }: IdeasListPageProps) {
    const trpc = useTRPC();
-   const { data } = useSuspenseQuery(
+
+   const allIdeasQuery = useSuspenseQuery(
       trpc.ideas.listAllIdeas.queryOptions({ page: 1, limit: 8 }),
    );
 
+   const agentIdeasQuery = useSuspenseQuery(
+      trpc.ideas.listByAgentPaginated.queryOptions({
+         agentId: agentId!,
+         page: 1,
+         limit: 8,
+      }),
+   );
+
+   const { data } = agentId ? agentIdeasQuery : allIdeasQuery;
+
    return (
-      <IdeasListProvider data={data}>
+      <IdeasListProvider data={data} agentId={agentId}>
          <IdeasListPageContent />
       </IdeasListProvider>
    );
