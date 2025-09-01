@@ -65,6 +65,14 @@ const loggerMiddleware = t.middleware(async ({ path, type, next }) => {
 });
 const isAuthed = t.middleware(async ({ ctx, next }) => {
    const resolvedCtx = await ctx;
+   const apikey = resolvedCtx.headers.get("sdk-api-key");
+
+   if (apikey) {
+      throw new TRPCError({
+         code: "FORBIDDEN",
+         message: "This endpoint does not accept API Key authentication.",
+      });
+   }
    if (!resolvedCtx.session?.user) {
       throw new TRPCError({ code: "FORBIDDEN" });
    }
