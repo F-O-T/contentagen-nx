@@ -9,6 +9,7 @@ import { useSubscription } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
 import { useMemo } from "react";
 import { ContentLoadingDisplay } from "./content-loading-display";
+import { useMissingImagesNotification } from "../../content-list/lib/use-missing-images-notification";
 
 export function ContentRequestDetailsPage() {
    const { id } = useParams({
@@ -16,6 +17,9 @@ export function ContentRequestDetailsPage() {
    });
    const trpc = useTRPC();
    const queryClient = useQueryClient();
+
+   // Initialize missing images notification hook
+   useMissingImagesNotification();
    const { data } = useSuspenseQuery(
       trpc.content.get.queryOptions({
          id,

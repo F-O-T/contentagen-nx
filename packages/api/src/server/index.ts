@@ -10,6 +10,7 @@ import { statisticsRouter } from "./router/statistics";
 import { authHelpersRouter } from "./router/auth-helpers";
 import { sdkRouter } from "./router/sdk";
 import { ideasRouter } from "./router/ideas";
+import { preferencesRouter } from "./router/preferences";
 import type { OpenRouterClient } from "@packages/openrouter/client";
 
 export const appRouter = router({
@@ -20,6 +21,7 @@ export const appRouter = router({
    statistics: statisticsRouter,
    ideas: ideasRouter,
    sdk: sdkRouter,
+   preferences: preferencesRouter,
 });
 export const createApi = ({
    auth,

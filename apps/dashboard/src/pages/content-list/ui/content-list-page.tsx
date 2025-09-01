@@ -11,12 +11,16 @@ import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useSubscription } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
+import { useMissingImagesNotification } from "../lib/use-missing-images-notification";
 
 //TODO: criar um component padrao para paginacao + toolbar, bulk actions de aprovar, deletar ou rejeitar
 function ContentListPageContent() {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
    const { page, limit, hasGeneratingContent } = useContentList();
+
+   // Initialize missing images notification hook
+   useMissingImagesNotification();
 
    useSubscription(
       trpc.content.onStatusChanged.subscriptionOptions(
