@@ -8,6 +8,7 @@ import {
    CardDescription,
 } from "@packages/ui/components/card";
 import { Badge } from "@packages/ui/components/badge";
+import { Checkbox } from "@packages/ui/components/checkbox";
 import { MoreVertical } from "lucide-react";
 import type { RouterOutput } from "@packages/api/client";
 import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
@@ -33,6 +34,8 @@ import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Eye } from "lucide-react";
+import { useIdeasList } from "../lib/ideas-list-context";
+import { formatValueForDisplay } from "@packages/helpers/text";
 export function IdeaCard({
    idea,
 }: {
@@ -45,6 +48,7 @@ export function IdeaCard({
       }),
    );
 
+   const { selectedItems, handleSelectionChange } = useIdeasList();
    const [isCredenzaOpen, setIsCredenzaOpen] = useState(false);
    const navigate = useNavigate();
 
@@ -68,19 +72,13 @@ export function IdeaCard({
                      {idea.content}
                   </CardDescription>
                   <CardAction>
-                     <DropdownMenu>
-                        <DropdownMenuTrigger className="flex items-center justify-center p-2 rounded hover:bg-muted">
-                           <MoreVertical className="w-5 h-5" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                           <DropdownMenuItem asChild>
-                              <Link to="/ideas/$id" params={{ id: idea.id }}>
-                                 View Details
-                              </Link>
-                           </DropdownMenuItem>
-                           {/* Add more actions here as needed */}
-                        </DropdownMenuContent>
-                     </DropdownMenu>
+                     <Checkbox
+                        checked={selectedItems.has(idea.id)}
+                        onCheckedChange={(checked) =>
+                           handleSelectionChange(idea.id, checked as boolean)
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                     />
                   </CardAction>
                </CardHeader>
                <CardContent className="flex flex-col gap-2">
@@ -99,7 +97,9 @@ export function IdeaCard({
                         ? new Date(idea.createdAt).toLocaleDateString()
                         : "Unknown"}
                   </Badge>
-                  <Badge className="text-xs">{idea.status ?? "Unknown"}</Badge>
+                  <Badge className="text-xs">
+                     {formatValueForDisplay(idea.status ?? "")}
+                  </Badge>
                </CardFooter>
             </Card>
          </CredenzaTrigger>
