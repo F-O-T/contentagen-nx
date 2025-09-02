@@ -5,6 +5,8 @@ import { registerGracefulShutdown } from "../../helpers";
 import { runGenerateIdea } from "../../functions/writing/generate-idea";
 import { emitIdeaStatusChanged } from "@packages/server-events";
 import type { PersonaConfig } from "@packages/database/schema";
+import { createDb } from "@packages/database/client";
+import { createIdea } from "@packages/database/repositories/ideas-repository";
 
 export interface IdeasGenerationJobData {
    agentId: string;
@@ -38,19 +40,12 @@ export async function runIdeasGeneration(
       sources,
       userId,
       personaConfig,
-      ideaIds,
+      ideaIds: _ideaIds, // Not used anymore, keeping for backward compatibility
    } = payload;
 
-   try {
-      // Emit status for all idea IDs
-      for (const ideaId of ideaIds) {
-         emitIdeaStatusChanged({
-            ideaId,
-            status: "pending",
-            message: "Generating ideas...",
-         });
-      }
+   let createdIdeaIds: string[] = [];
 
+   try {
       // Generate ideas using the improved function
       const { ideas: generatedIdeas } = await runGenerateIdea({
          brandContext,
@@ -63,24 +58,42 @@ export async function runIdeasGeneration(
          `[IdeasGeneration] Successfully generated ${generatedIdeas.length} ideas for keywords: ${keywords.join(", ")}`,
       );
 
-      // Emit status update
-      for (const ideaId of ideaIds) {
+      // Create database entries for each generated idea
+      const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
+      const createdIdeaIds: string[] = [];
+
+      for (let i = 0; i < generatedIdeas.length; i++) {
+         const idea = generatedIdeas[i];
+         if (!idea || !idea.title || !idea.description) {
+            console.warn(
+               `[IdeasGeneration] Skipping invalid idea at index ${i}`,
+            );
+            continue;
+         }
+
+         const createdIdea = await createIdea(db, {
+            agentId,
+            content: {
+               title: idea.title,
+               description: idea.description,
+            },
+            status: "pending",
+         });
+
+         createdIdeaIds.push(createdIdea.id);
+
          emitIdeaStatusChanged({
-            ideaId,
+            ideaId: createdIdea.id,
             status: "pending",
             message: "Ideas generated, applying grammar check...",
          });
       }
 
-      // Create bulk grammar check jobs
+      // Create bulk grammar check jobs for all created ideas
       const grammarCheckJobs = [];
-      for (
-         let i = 0;
-         i < Math.min(generatedIdeas.length, ideaIds.length);
-         i++
-      ) {
+      for (let i = 0; i < generatedIdeas.length; i++) {
          const idea = generatedIdeas[i];
-         const ideaId = ideaIds[i];
+         const ideaId = createdIdeaIds[i];
 
          if (idea && ideaId) {
             grammarCheckJobs.push({
@@ -95,11 +108,11 @@ export async function runIdeasGeneration(
                sources, // Pass the sources from planning queue
             });
          }
+      }
 
-         // Enqueue all grammar check jobs in bulk
-         if (grammarCheckJobs.length > 0) {
-            await enqueueBulkIdeasGrammarCheckJob(grammarCheckJobs);
-         }
+      // Enqueue all grammar check jobs in bulk
+      if (grammarCheckJobs.length > 0) {
+         await enqueueBulkIdeasGrammarCheckJob(grammarCheckJobs);
       }
 
       return {
@@ -107,19 +120,18 @@ export async function runIdeasGeneration(
          keywords,
          generatedIdeas,
          sources,
-         ideaIds,
+         ideaIds: createdIdeaIds,
       };
    } catch (error) {
       console.error("[IdeasGeneration] PIPELINE ERROR", {
          agentId,
          keywords,
-         ideaIds,
          error: error instanceof Error ? error.message : error,
          stack: error instanceof Error && error.stack ? error.stack : undefined,
       });
 
-      // Emit failure status for all idea IDs
-      for (const ideaId of ideaIds) {
+      // Emit failure status for any created idea IDs (if any were created before the error)
+      for (const ideaId of createdIdeaIds) {
          emitIdeaStatusChanged({
             ideaId,
             status: "pending",
