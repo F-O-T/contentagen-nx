@@ -27,7 +27,7 @@ function IdeasListPageContent() {
    const { data } = useSuspenseQuery(queryOptions);
 
    return (
-      <main className="h-full w-full flex flex-col gap-4 p-4">
+      <main className="h-full w-full flex flex-col gap-4 ">
          <TalkingMascot message={message} />
          <IdeasListToolbar />
          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

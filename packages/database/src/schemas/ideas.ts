@@ -1,7 +1,6 @@
 import {
    pgTable,
    uuid,
-   text,
    jsonb,
    timestamp,
    index,
@@ -27,7 +26,19 @@ export const IdeiaMetaSchema = z.object({
    source: z.string().optional(),
 });
 export type IdeaMeta = z.infer<typeof IdeiaMetaSchema>;
-
+export const IdeaContentSchema = z.object({
+   title: z.string().min(1).describe("Title of the idea"),
+   description: z.string().min(1).describe("Detailed description of the idea"),
+});
+export const ConfidenceScoreSchema = z.object({
+   score: z.string().min(1).describe("Confidence score between 0 and 100"),
+   rationale: z
+      .string()
+      .optional()
+      .describe("Rationale for the confidence score"),
+});
+export type ConfidenceScoreSchema = z.infer<typeof ConfidenceScoreSchema>;
+export type IdeaContentSchema = z.infer<typeof IdeaContentSchema>;
 export const ideas = pgTable(
    "ideas",
    {
@@ -35,7 +46,17 @@ export const ideas = pgTable(
       agentId: uuid("agent_id")
          .notNull()
          .references(() => agent.id, { onDelete: "cascade" }),
-      content: text("content").notNull(),
+      content: jsonb("content").$type<IdeaContentSchema>().notNull().default({
+         title: "",
+         description: "",
+      }),
+      confidence: jsonb("confidence")
+         .$type<ConfidenceScoreSchema>()
+         .notNull()
+         .default({
+            score: "0",
+            rationale: "",
+         }),
       status: ideiaStatusEnum("status").default("pending"),
       meta: jsonb("meta").$type<IdeaMeta>().default({}),
       createdAt: timestamp("created_at")
