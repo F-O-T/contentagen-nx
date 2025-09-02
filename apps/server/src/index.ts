@@ -22,6 +22,7 @@ import { contentPlanningQueue } from "@packages/workers/queues/content/content-p
 import { contentWritingQueue } from "@packages/workers/queues/content/content-writing-queue";
 
 import { ideasPlanningQueue } from "@packages/workers/queues/ideas/ideas-planning-queue";
+import { ideasGenerationQueue } from "@packages/workers/queues/ideas/ideas-generation-queue";
 import { ideasGrammarCheckQueue } from "@packages/workers/queues/ideas/ideas-grammar-checker-queue";
 import { ideasPostProcessingQueue } from "@packages/workers/queues/ideas/ideas-post-processing-queue";
 import { contentGrammarCheckQueue } from "@packages/workers/queues/content/content-grammar-checker-queue";
@@ -46,6 +47,7 @@ createBullBoard({
       new BullMQAdapter(documentChunkQueue),
 
       new BullMQAdapter(ideasPlanningQueue),
+      new BullMQAdapter(ideasGenerationQueue),
       new BullMQAdapter(ideasGrammarCheckQueue),
       new BullMQAdapter(ideasPostProcessingQueue),
       new BullMQAdapter(billingLlmIngestionQueue),

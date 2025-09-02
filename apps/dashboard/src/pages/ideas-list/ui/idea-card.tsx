@@ -25,7 +25,7 @@ import {
 import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Eye, Loader2 } from "lucide-react";
+import { Eye, Loader2, TrendingUp } from "lucide-react";
 import { useIdeasList } from "../lib/ideas-list-context";
 import { formatValueForDisplay } from "@packages/helpers/text";
 export function IdeaCard({
@@ -52,10 +52,10 @@ export function IdeaCard({
       setIsCredenzaOpen(false);
    };
 
-   const contentText =
-      (idea.content as any)?.title || (idea.content as string) || "";
    const isGenerating =
-      idea.status === "pending" && contentText.includes("Generating");
+      idea.status === "pending" &&
+      (idea.content.title.includes("Generating") ||
+         idea.content.description.includes("Generating"));
 
    return (
       <Credenza open={isCredenzaOpen} onOpenChange={setIsCredenzaOpen}>
@@ -68,12 +68,15 @@ export function IdeaCard({
                      {isGenerating && (
                         <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
                      )}
-                     Idea #{idea.id.slice(-8)}
+                     {isGenerating
+                        ? `Idea #${idea.id.slice(-8)}`
+                        : idea.content.title || `Idea #${idea.id.slice(-8)}`}
                   </CardTitle>
                   <CardDescription className="line-clamp-2">
                      {isGenerating
                         ? "Generating ideas..."
-                        : contentText || "No content available"}
+                        : idea.content.description ||
+                          "No description available"}
                   </CardDescription>
                   <CardAction>
                      <Checkbox
@@ -97,11 +100,13 @@ export function IdeaCard({
                   />
                </CardContent>
                <CardFooter className="flex items-center justify-between">
-                  <Badge variant="outline">
-                     {idea.createdAt
-                        ? new Date(idea.createdAt).toLocaleDateString()
-                        : "Unknown"}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                     <Badge variant="outline">
+                        {idea.createdAt
+                           ? new Date(idea.createdAt).toLocaleDateString()
+                           : "Unknown"}
+                     </Badge>
+                  </div>
                   <Badge
                      className={`text-xs ${isGenerating ? "bg-blue-500" : ""}`}
                   >
@@ -114,11 +119,15 @@ export function IdeaCard({
          </CredenzaTrigger>
          <CredenzaContent>
             <CredenzaHeader>
-               <CredenzaTitle>Idea #{idea.id.slice(-8)}</CredenzaTitle>
+               <CredenzaTitle>
+                  {isGenerating
+                     ? `Idea #${idea.id.slice(-8)}`
+                     : contentTitle || `Idea #${idea.id.slice(-8)}`}
+               </CredenzaTitle>
                <CredenzaDescription>
                   {isGenerating
                      ? "Generating ideas..."
-                     : contentText || "No content available"}
+                     : contentDescription || "No description available"}
                </CredenzaDescription>
             </CredenzaHeader>
             <CredenzaBody className="grid grid-cols-1 gap-2">

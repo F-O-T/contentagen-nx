@@ -27,8 +27,11 @@ export const IdeiaMetaSchema = z.object({
 });
 export type IdeaMeta = z.infer<typeof IdeiaMetaSchema>;
 export const IdeaContentSchema = z.object({
-   title: z.string().min(1).describe("Title of the idea"),
-   description: z.string().min(1).describe("Detailed description of the idea"),
+   title: z.string().min(1).describe("The headline of the blog post idea"),
+   description: z
+      .string()
+      .min(1)
+      .describe("The meta description of the blog post idea"),
 });
 export const ConfidenceScoreSchema = z.object({
    score: z.string().min(1).describe("Confidence score between 0 and 100"),

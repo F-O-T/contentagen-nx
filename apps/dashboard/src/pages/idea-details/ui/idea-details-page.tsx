@@ -16,6 +16,8 @@ import {
    Tag,
    Link2,
    MoreVertical,
+   TrendingUp,
+   MessageSquare,
 } from "lucide-react";
 import { CardAction } from "@packages/ui/components/card";
 import {
@@ -82,6 +84,11 @@ export function IdeaDetailsPage() {
                         value={idea.status ?? "Unknown"}
                      />
                      <InfoItem
+                        icon={<TrendingUp className="w-4 h-4" />}
+                        label="Confidence Score"
+                        value={`${(idea as any).confidence?.score || "0"}%`}
+                     />
+                     <InfoItem
                         icon={<Calendar className="w-4 h-4" />}
                         label="Created"
                         value={
@@ -101,6 +108,24 @@ export function IdeaDetailsPage() {
                      />
                   </CardContent>
                </Card>
+               {(idea as any).confidence?.rationale && (
+                  <Card>
+                     <CardHeader>
+                        <CardTitle>Confidence Analysis</CardTitle>
+                        <CardDescription>
+                           AI-powered evaluation of this idea's potential.
+                        </CardDescription>
+                     </CardHeader>
+                     <CardContent>
+                        <div className="flex items-start gap-2">
+                           <MessageSquare className="w-4 h-4 mt-0.5 text-muted-foreground" />
+                           <p className="text-sm text-muted-foreground">
+                              {(idea as any).confidence?.rationale}
+                           </p>
+                        </div>
+                     </CardContent>
+                  </Card>
+               )}
                <Card>
                   <CardHeader>
                      <CardTitle>Meta</CardTitle>
@@ -156,8 +181,29 @@ export function IdeaDetailsPage() {
                         </DropdownMenu>
                      </CardAction>
                   </CardHeader>
-                  <CardContent>
-                     <Markdown content={idea.content ?? "No content"} />
+                  <CardContent className="space-y-4">
+                     {(idea as any).content?.title && (
+                        <div>
+                           <h3 className="text-lg font-semibold mb-2">Title</h3>
+                           <p className="text-foreground">
+                              {(idea as any).content.title}
+                           </p>
+                        </div>
+                     )}
+                     {(idea as any).content?.description && (
+                        <div>
+                           <h3 className="text-lg font-semibold mb-2">
+                              Description
+                           </h3>
+                           <Markdown
+                              content={(idea as any).content.description}
+                           />
+                        </div>
+                     )}
+                     {!(
+                        (idea as any).content?.title ||
+                        (idea as any).content?.description
+                     ) && <Markdown content={idea.content ?? "No content"} />}
                   </CardContent>
                </Card>
             </div>

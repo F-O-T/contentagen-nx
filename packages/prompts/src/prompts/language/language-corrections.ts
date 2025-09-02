@@ -30,6 +30,86 @@ export const languageCorrectionSchema = z.object({
 });
 
 export type LanguageCorrectionSchema = z.infer<typeof languageCorrectionSchema>;
+
+export const ideaGrammarCorrectionSchema = z.object({
+   title: z.object({
+      correctedDraft: z
+         .string()
+         .describe(
+            "The grammatically corrected and linguistically optimized title",
+         ),
+      corrections: z
+         .array(
+            z.object({
+               original: z.string().describe("Original title text segment"),
+               corrected: z.string().describe("Corrected title text segment"),
+               type: z
+                  .enum([
+                     "grammar",
+                     "spelling",
+                     "style",
+                     "cultural",
+                     "regional",
+                  ])
+                  .describe("Type of correction"),
+               explanation: z
+                  .string()
+                  .describe("Brief explanation of the correction"),
+            }),
+         )
+         .describe("List of corrections made to the title")
+         .optional(),
+      qualityScore: z
+         .number()
+         .min(0)
+         .max(100)
+         .describe("Quality score of the corrected title")
+         .optional(),
+   }),
+   description: z.object({
+      correctedDraft: z
+         .string()
+         .describe(
+            "The grammatically corrected and linguistically optimized description",
+         ),
+      corrections: z
+         .array(
+            z.object({
+               original: z
+                  .string()
+                  .describe("Original description text segment"),
+               corrected: z
+                  .string()
+                  .describe("Corrected description text segment"),
+               type: z
+                  .enum([
+                     "grammar",
+                     "spelling",
+                     "style",
+                     "cultural",
+                     "regional",
+                  ])
+                  .describe("Type of correction"),
+               explanation: z
+                  .string()
+                  .describe("Brief explanation of the correction"),
+            }),
+         )
+         .describe("List of corrections made to the description")
+         .optional(),
+      qualityScore: z
+         .number()
+         .min(0)
+         .max(100)
+         .describe("Quality score of the corrected description")
+         .optional(),
+   }),
+});
+
+export type IdeaGrammarCorrectionSchema = z.infer<
+   typeof ideaGrammarCorrectionSchema
+>;
+
 export function languageCorrectionBasePrompt({
    languageDisplay,
    languageRules,

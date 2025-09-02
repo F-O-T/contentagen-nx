@@ -2,29 +2,30 @@ import { Worker, Queue, type Job } from "bullmq";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../../helpers";
-import { runGenerateIdea } from "../../functions/writing/generate-idea";
-import { runGrammarChecker } from "../../functions/writing/grammar-checker";
-import type { PersonaConfig } from "@packages/database/schema";
+import { runIdeaGrammarChecker } from "../../functions/writing/grammar-checker";
 import { emitIdeaStatusChanged } from "@packages/server-events";
+import type { PersonaConfig } from "@packages/database/schema";
 
 export interface IdeasGrammarCheckJobData {
    agentId: string;
    keywords: string[];
-   brandContext: string;
    sources: string[];
-   webSnippets: string;
    userId: string;
    personaConfig: PersonaConfig;
-   ideaIds: string[];
+   ideaId: string;
+   idea: { title: string; description: string };
+   brandContext: string;
+   webSnippets: string;
 }
 
 export interface IdeasGrammarCheckJobResult {
    agentId: string;
    keywords: string[];
-   correctedIdeas: string[];
+   ideaId: string;
+   title: string;
+   description: string;
    sources: string[];
    userId: string;
-   ideaIds: string[];
 }
 
 import { enqueueIdeasPostProcessingJob } from "./ideas-post-processing-queue";
@@ -35,81 +36,145 @@ export async function runIdeasGrammarCheck(
    const {
       agentId,
       keywords,
-      brandContext,
-      webSnippets,
       userId,
       personaConfig,
-      ideaIds,
+      ideaId,
+      idea,
    } = payload;
 
    try {
-      // Emit status for all idea IDs
-      for (const ideaId of ideaIds) {
-         emitIdeaStatusChanged({
+      // Emit status for this idea
+      emitIdeaStatusChanged({
+         ideaId,
+         status: "pending",
+         message: "Checking grammar...",
+      });
+
+      console.log(`[IdeasGrammarCheck] Processing single idea: ${idea.title}`);
+
+      // Validate idea has required content before grammar checking
+      if (!idea || !idea.title?.trim() || !idea.description?.trim()) {
+         console.warn(
+            `[IdeasGrammarCheck] Invalid idea, skipping grammar check:`,
+            idea,
+         );
+
+         const correctedIdea = {
+            title: idea?.title?.trim() || `Content Idea`,
+            description:
+               idea?.description?.trim() ||
+               `Generated content for keywords: ${keywords.join(", ")}`,
+         };
+
+         // Enqueue post-processing for this single idea
+         await enqueueIdeasPostProcessingJob({
+            agentId,
+            keywords,
             ideaId,
-            status: "pending",
-            message: "Checking grammar and generating ideas...",
+            title: correctedIdea.title,
+            description: correctedIdea.description,
+            sources: payload.sources,
+            userId,
+            brandContext: payload.brandContext,
+            webSnippets: payload.webSnippets,
          });
+
+         return {
+            agentId,
+            keywords,
+            ideaId,
+            title: correctedIdea.title,
+            description: correctedIdea.description,
+            sources: payload.sources,
+            userId,
+         };
       }
 
-      // 1. Generate ideas (LLM)
-      const { ideas } = await runGenerateIdea({
-         brandContext,
-         webSnippets,
-         keywords,
+      // Apply grammar checking to the single idea
+      const result = await runIdeaGrammarChecker({
+         idea,
+         userId,
          personaConfig,
       });
 
-      // 2. Apply grammar checking to each idea
-      const correctedIdeas: string[] = [];
-      for (const idea of ideas) {
-         try {
-            const { correctedDraft } = await runGrammarChecker({
-               personaConfig,
-               text: idea,
-               userId,
-            });
-            correctedIdeas.push(correctedDraft);
-         } catch (error) {
-            console.error(
-               "[IdeasGrammarCheck] Grammar check failed for idea, using original",
-               error,
-            );
-            // If grammar check fails, use original idea
-            console.warn(
-               `Grammar check failed for idea: ${idea}, using original`,
-            );
-            correctedIdeas.push(idea);
-         }
+      // Validate the corrected idea
+      let correctedIdea: { title: string; description: string };
+
+      if (
+         result.correctedIdea?.title?.trim() &&
+         result.correctedIdea.description?.trim()
+      ) {
+         correctedIdea = result.correctedIdea;
+         console.log(
+            `[IdeasGrammarCheck] Grammar check successful for idea: ${ideaId}`,
+         );
+      } else {
+         console.warn(
+            `[IdeasGrammarCheck] Grammar check returned invalid result, using original`,
+         );
+         correctedIdea = idea;
       }
 
-      // 3. Enqueue post-processing job
+      // Enqueue post-processing for this single idea
       await enqueueIdeasPostProcessingJob({
          agentId,
          keywords,
-         correctedIdeas,
+         ideaId,
+         title: correctedIdea.title,
+         description: correctedIdea.description,
          sources: payload.sources,
          userId,
-         ideaIds,
+         brandContext: payload.brandContext,
+         webSnippets: payload.webSnippets,
       });
 
       return {
          agentId,
          keywords,
-         correctedIdeas,
+         ideaId,
+         title: correctedIdea.title,
+         description: correctedIdea.description,
          sources: payload.sources,
          userId,
-         ideaIds,
       };
    } catch (error) {
       console.error("[IdeasGrammarCheck] PIPELINE ERROR", {
          agentId,
          keywords,
-         ideaIds,
+         ideaId,
          error: error instanceof Error ? error.message : error,
          stack: error instanceof Error && error.stack ? error.stack : undefined,
       });
-      throw error;
+
+      // On error, use the original idea and still enqueue post-processing
+      const fallbackIdea = {
+         title: idea?.title?.trim() || `Content Idea`,
+         description:
+            idea?.description?.trim() ||
+            `Generated content for keywords: ${keywords.join(", ")}`,
+      };
+
+      await enqueueIdeasPostProcessingJob({
+         agentId,
+         keywords,
+         ideaId,
+         title: fallbackIdea.title,
+         description: fallbackIdea.description,
+         sources: payload.sources,
+         userId,
+         brandContext: payload.brandContext,
+         webSnippets: payload.webSnippets,
+      });
+
+      return {
+         agentId,
+         keywords,
+         ideaId,
+         title: fallbackIdea.title,
+         description: fallbackIdea.description,
+         sources: payload.sources,
+         userId,
+      };
    }
 }
 
@@ -129,6 +194,17 @@ export async function enqueueIdeasGrammarCheckJob(
    jobOptions?: Parameters<Queue<IdeasGrammarCheckJobData>["add"]>[2],
 ) {
    return ideasGrammarCheckQueue.add(QUEUE_NAME, data, jobOptions);
+}
+
+export async function enqueueBulkIdeasGrammarCheckJob(
+   jobs: IdeasGrammarCheckJobData[],
+) {
+   const bulkJobs = jobs.map((jobData) => ({
+      name: QUEUE_NAME,
+      data: jobData,
+   }));
+
+   return ideasGrammarCheckQueue.addBulk(bulkJobs);
 }
 
 export const ideasGrammarCheckWorker = new Worker<IdeasGrammarCheckJobData>(
