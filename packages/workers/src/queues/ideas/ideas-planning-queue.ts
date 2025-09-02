@@ -62,7 +62,6 @@ export async function runIdeasPlanning(
          sources,
          userId,
          personaConfig,
-         ideaIds: [], // Will be populated by generation step
       });
 
       return {

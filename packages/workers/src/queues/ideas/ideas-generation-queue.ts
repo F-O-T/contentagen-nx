@@ -7,6 +7,7 @@ import { emitIdeaStatusChanged } from "@packages/server-events";
 import type { PersonaConfig } from "@packages/database/schema";
 import { createDb } from "@packages/database/client";
 import { createIdea } from "@packages/database/repositories/ideas-repository";
+import type { IdeaContentSchema } from "@packages/database/schema";
 
 export interface IdeasGenerationJobData {
    agentId: string;
@@ -16,13 +17,12 @@ export interface IdeasGenerationJobData {
    sources: string[];
    userId: string;
    personaConfig: PersonaConfig;
-   ideaIds: string[];
 }
 
 export interface IdeasGenerationJobResult {
    agentId: string;
    keywords: string[];
-   generatedIdeas: { title: string; description: string }[];
+   generatedIdeas: IdeaContentSchema[];
    sources: string[];
    ideaIds: string[];
 }
@@ -40,10 +40,9 @@ export async function runIdeasGeneration(
       sources,
       userId,
       personaConfig,
-      ideaIds: _ideaIds, // Not used anymore, keeping for backward compatibility
    } = payload;
 
-   let createdIdeaIds: string[] = [];
+   const createdIdeaIds: string[] = [];
 
    try {
       // Generate ideas using the improved function
@@ -58,16 +57,19 @@ export async function runIdeasGeneration(
          `[IdeasGeneration] Successfully generated ${generatedIdeas.length} ideas for keywords: ${keywords.join(", ")}`,
       );
 
-      // Create database entries for each generated idea
+      // Create database entries for each generated idea and track successful creations
       const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
-      const createdIdeaIds: string[] = [];
+      const createdIdeasMap: Array<{
+         idea: IdeaContentSchema;
+         ideaId: string;
+      }> = [];
 
-      for (let i = 0; i < generatedIdeas.length; i++) {
-         const idea = generatedIdeas[i];
+      for (const idea of generatedIdeas) {
          if (!idea || !idea.title || !idea.description) {
-            console.warn(
-               `[IdeasGeneration] Skipping invalid idea at index ${i}`,
-            );
+            console.warn(`[IdeasGeneration] Skipping invalid idea`, {
+               title: idea?.title,
+               description: idea?.description,
+            });
             continue;
          }
 
@@ -81,6 +83,7 @@ export async function runIdeasGeneration(
          });
 
          createdIdeaIds.push(createdIdea.id);
+         createdIdeasMap.push({ idea, ideaId: createdIdea.id });
 
          emitIdeaStatusChanged({
             ideaId: createdIdea.id,
@@ -89,26 +92,18 @@ export async function runIdeasGeneration(
          });
       }
 
-      // Create bulk grammar check jobs for all created ideas
-      const grammarCheckJobs = [];
-      for (let i = 0; i < generatedIdeas.length; i++) {
-         const idea = generatedIdeas[i];
-         const ideaId = createdIdeaIds[i];
-
-         if (idea && ideaId) {
-            grammarCheckJobs.push({
-               agentId,
-               keywords,
-               brandContext,
-               webSnippets,
-               userId,
-               personaConfig,
-               ideaId, // Process one idea at a time
-               idea, // Pass the specific idea to check
-               sources, // Pass the sources from planning queue
-            });
-         }
-      }
+      // Create bulk grammar check jobs for all successfully created ideas
+      const grammarCheckJobs = createdIdeasMap.map(({ idea, ideaId }) => ({
+         agentId,
+         keywords,
+         brandContext,
+         webSnippets,
+         userId,
+         personaConfig,
+         ideaId,
+         idea,
+         sources,
+      }));
 
       // Enqueue all grammar check jobs in bulk
       if (grammarCheckJobs.length > 0) {
