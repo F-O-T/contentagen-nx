@@ -136,22 +136,28 @@ export async function getTotalAgents(
    { userId, organizationId }: { userId?: string; organizationId?: string },
 ): Promise<number> {
    try {
-      let whereClause;
       if (userId && organizationId) {
-         whereClause = or(
-            eq(agent.userId, userId),
-            eq(agent.organizationId, organizationId),
-         );
-      } else if (userId) {
-         whereClause = eq(agent.userId, userId);
-      } else if (organizationId) {
-         whereClause = eq(agent.organizationId, organizationId);
-      } else {
-         return 0;
+         const result = await dbClient.query.agent.findMany({
+            where: or(
+               eq(agent.userId, userId),
+               eq(agent.organizationId, organizationId),
+            ),
+         });
+         return result.length;
       }
-
-      const result = await dbClient.$count(agent, whereClause);
-      return result;
+      if (userId) {
+         const result = await dbClient.query.agent.findMany({
+            where: eq(agent.userId, userId),
+         });
+         return result.length;
+      }
+      if (organizationId) {
+         const result = await dbClient.query.agent.findMany({
+            where: eq(agent.organizationId, organizationId),
+         });
+         return result.length;
+      }
+      return 0;
    } catch (err) {
       throw new DatabaseError(
          `Failed to get total agents: ${(err as Error).message}`,
