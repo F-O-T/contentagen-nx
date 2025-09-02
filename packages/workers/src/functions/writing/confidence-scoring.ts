@@ -9,7 +9,7 @@ import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
 
 const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
-
+//TODO: improve the rationale right now, every now and then it doesnt return in markdown correctly
 export async function runConfidenceScoring(payload: {
    title: string;
    description: string;
