@@ -8,12 +8,12 @@ runs:
       with:
         bun-version: latest
 
-     - name: Install dependencies
-       run: bun install --frozen-lockfile
-       shell: bash
+    - name: Install dependencies
+      run: bun install --frozen-lockfile
+      shell: bash
 
-     - name: Set Nx SHAs
-       uses: nrwl/nx-set-shas@v4
-       with:
-         main-branch-name: master
+    - name: Set Nx SHAs
+      uses: nrwl/nx-set-shas@v4
+      with:
+        main-branch-name: master
 
