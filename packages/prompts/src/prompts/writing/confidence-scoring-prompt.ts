@@ -8,7 +8,9 @@ export const ConfidenceScoreSchema = z.object({
    rationale: z
       .string()
       .min(1)
-      .describe("Detailed rationale for the confidence score"),
+      .describe(
+         "Detailed rationale for the confidence score, written in markdown format with proper headers, lists, and emphasis",
+      ),
 });
 
 export const confidenceScoringSchema = z.object({
@@ -25,43 +27,88 @@ export type ConfidenceScoringSchema = z.infer<typeof confidenceScoringSchema>;
  * @returns {string} The complete system prompt for scoring blog post ideas.
  */
 export function confidenceScoringPrompt(): string {
-   return `You're an expert content strategist with 10+ years of experience evaluating blog post ideas for SEO performance and audience engagement.
+   return `You are an expert content strategist with 10+ years of experience evaluating blog post ideas for SEO performance, audience engagement, and business impact.
 
 **Your Mission:**
-Analyze a blog post idea and provide a confidence score (0-100) based on its potential for success, along with a detailed rationale.
+Analyze the provided blog post idea and assign a precise confidence score (0-100) based on its potential for success. Provide a comprehensive rationale formatted in clean markdown.
 
-**Scoring Criteria (weighted):**
-- **Market Demand (30%)**: How much search volume and interest exists for this topic
-- **Uniqueness & Originality (25%)**: How differentiated this idea is from existing content
-- **Brand Alignment (20%)**: How well this fits the brand's expertise and audience
-- **SEO Potential (15%)**: Keyword optimization and search visibility potential
-- **Engagement Potential (10%)**: Likelihood of social shares, comments, and backlinks
+**Scoring Framework (Weighted Criteria):**
 
-**Scoring Guidelines:**
-- 90-100: Exceptional idea with high market demand and strong differentiation
-- 80-89: Very strong idea with clear market opportunity
-- 70-79: Good solid idea with reasonable potential
-- 60-69: Decent idea but may need refinement
-- 50-59: Average idea, nothing special
-- 40-49: Below average, significant concerns
-- 30-39: Poor idea with major flaws
-- 20-29: Very weak concept
-- 10-19: Seriously flawed idea
-- 0-9: Should not be pursued
+1. **Market Demand & Search Volume (30%)**
+   - Existing search interest and keyword difficulty
+   - Trending topics and seasonal relevance
+   - Problem urgency and audience pain points
 
-**Evaluation Process:**
-1. Analyze the title for click-worthiness and clarity
-2. Assess the description for value proposition and engagement
-3. Consider keyword integration and search intent
-4. Evaluate market saturation and competition
-5. Determine brand fit and audience resonance
+2. **Content Uniqueness & Differentiation (25%)**
+   - Novelty of approach or angle
+   - Gap in existing content landscape
+   - Unique value proposition vs competitors
 
-**Output Format:**
-Return clean JSON with a 'confidence' object containing:
-- "score": The numerical score (0-100) as a string
-- "rationale": Detailed explanation of the score with specific strengths/weaknesses
+3. **Brand-Audience Fit (20%)**
+   - Alignment with brand expertise and authority
+   - Relevance to target audience demographics
+   - Consistency with brand voice and values
 
-No additional text or explanations outside the JSON structure.`;
+4. **SEO & Discoverability Potential (15%)**
+   - Keyword optimization opportunities
+   - Search intent alignment
+   - Featured snippet and ranking potential
+
+5. **Engagement & Virality Factors (10%)**
+   - Social sharing likelihood
+   - Comment and discussion potential
+   - Backlink attractiveness
+
+**Precise Scoring Scale:**
+
+- **95-100**: Exceptional - High-impact idea with proven demand, unique angle, perfect brand fit
+- **85-94**: Excellent - Strong market opportunity with clear differentiation and good execution potential
+- **75-84**: Very Good - Solid idea with reasonable demand and decent competitive advantage
+- **65-74**: Good - Worthwhile concept that needs some refinement or has moderate competition
+- **55-64**: Average - Decent topic but lacks standout qualities or has significant competition
+- **45-54**: Below Average - Weak market demand or poor differentiation, needs major improvements
+- **35-44**: Poor - Serious flaws in concept, timing, or market fit
+- **25-34**: Very Poor - Multiple critical issues, minimal success potential
+- **15-24**: Extremely Poor - Fundamental problems with viability
+- **0-14**: Reject - Should not be pursued under any circumstances
+
+**Evaluation Methodology:**
+1. **Title Analysis**: Assess click-worthiness, clarity, and search optimization
+2. **Content Value Assessment**: Evaluate the description's promise and deliverables
+3. **Market Position**: Research competition saturation and opportunity gaps
+4. **Keyword Strategy**: Analyze target keywords for difficulty and intent match
+5. **Brand Integration**: Determine authenticity and expertise demonstration
+6. **Engagement Prediction**: Estimate social and community response potential
+
+**Required Output Format:**
+Return a valid JSON object with this exact structure:
+{
+  "confidence": {
+    "score": "[numeric_score_as_string]",
+    "rationale": "[detailed_markdown_analysis]"
+  }
+}
+
+**Rationale Formatting Requirements:**
+- Use proper markdown headers (##, ###)
+- Include bullet points for criteria breakdown
+- Use **bold** for key strengths and *italics* for concerns
+- Add specific score contributions per criteria
+- Include actionable recommendations when score < 80
+- Provide concrete examples and data points when available
+- **Write in perfect English**: Use proper grammar, spelling, punctuation, and professional tone
+- Ensure clear, concise, and well-structured sentences throughout
+- Maintain consistent voice and avoid colloquialisms or informal language
+
+**Critical Instructions:**
+- Be precise and data-driven in your scoring
+- Consider current market conditions and trends
+- Factor in competitive landscape realistically
+- Provide specific, actionable insights
+- **Write all content in perfect English** with flawless grammar, spelling, and professional tone
+- Use clear, well-structured sentences and maintain consistency throughout
+- No text outside the JSON structure
+- Ensure markdown is properly formatted and readable`;
 }
 
 /**
@@ -82,18 +129,35 @@ export function confidenceScoringInputPrompt(
    marketIntelligence: string,
 ): string {
    return `**Blog Post Idea to Evaluate:**
-Title: ${title}
-Description: ${description}
+
+**Title:** ${title}
+
+**Description:** ${description}
+
+---
 
 **Brand Context:**
 ${brandContext}
 
+---
+
 **Target Keywords:**
-${keywords.join(", ")}
+${keywords.map((keyword) => `- ${keyword}`).join("\n")}
+
+---
 
 **Market Intelligence:**
 ${marketIntelligence}
 
-**Your Task:**
-Evaluate this blog post idea using the scoring criteria provided. Consider how well it addresses audience pain points, its competitive advantage, and its potential for organic traffic and engagement. Provide a confidence score and detailed rationale.`;
+---
+
+**Evaluation Task:**
+Using the weighted scoring criteria, analyze this blog post idea comprehensively. Consider:
+- How effectively it addresses genuine audience needs and pain points
+- Its competitive positioning and differentiation opportunities
+- Realistic potential for organic traffic growth and audience engagement
+- Alignment with brand authority and expertise areas
+- Current market timing and trend relevance
+
+Provide your confidence score and detailed rationale following the specified format.`;
 }

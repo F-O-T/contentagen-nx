@@ -52,7 +52,6 @@ export async function runIdeasPlanning(
                description: `Generating idea ${i + 1} for keywords: ${keywords.join(", ")}`,
             },
             status: "pending",
-            meta: { tags: keywords, source: "planning-stage" },
          });
 
          ideaIds.push(placeholderIdea.id);
@@ -85,6 +84,7 @@ export async function runIdeasPlanning(
          keywords,
          brandContext,
          webSnippets,
+         sources,
          userId,
          personaConfig,
          ideaIds,

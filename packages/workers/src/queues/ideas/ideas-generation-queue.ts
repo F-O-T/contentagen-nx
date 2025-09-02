@@ -11,6 +11,7 @@ export interface IdeasGenerationJobData {
    keywords: string[];
    brandContext: string;
    webSnippets: string;
+   sources: string[];
    userId: string;
    personaConfig: PersonaConfig;
    ideaIds: string[];
@@ -20,6 +21,7 @@ export interface IdeasGenerationJobResult {
    agentId: string;
    keywords: string[];
    generatedIdeas: { title: string; description: string }[];
+   sources: string[];
    ideaIds: string[];
 }
 
@@ -33,6 +35,7 @@ export async function runIdeasGeneration(
       keywords,
       brandContext,
       webSnippets,
+      sources,
       userId,
       personaConfig,
       ideaIds,
@@ -89,7 +92,7 @@ export async function runIdeasGeneration(
                personaConfig,
                ideaId, // Process one idea at a time
                idea, // Pass the specific idea to check
-               sources: [], // Will be populated by planning queue
+               sources, // Pass the sources from planning queue
             });
          }
 
@@ -103,6 +106,7 @@ export async function runIdeasGeneration(
          agentId,
          keywords,
          generatedIdeas,
+         sources,
          ideaIds,
       };
    } catch (error) {

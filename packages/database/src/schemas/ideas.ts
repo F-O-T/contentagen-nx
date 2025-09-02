@@ -23,7 +23,7 @@ export const ideiaStatusEnum = pgEnum("ideia_status", [
 
 export const IdeiaMetaSchema = z.object({
    tags: z.array(z.string()).optional(),
-   source: z.string().optional(),
+   sources: z.array(z.string()).optional(),
 });
 export type IdeaMeta = z.infer<typeof IdeiaMetaSchema>;
 export const IdeaContentSchema = z.object({
@@ -61,7 +61,10 @@ export const ideas = pgTable(
             rationale: "",
          }),
       status: ideiaStatusEnum("status").default("pending"),
-      meta: jsonb("meta").$type<IdeaMeta>().default({}),
+      meta: jsonb("meta").$type<IdeaMeta>().default({
+         tags: [],
+         sources: [],
+      }),
       createdAt: timestamp("created_at")
          .$defaultFn(() => new Date())
          .notNull(),

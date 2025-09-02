@@ -33,14 +33,7 @@ import { enqueueIdeasPostProcessingJob } from "./ideas-post-processing-queue";
 export async function runIdeasGrammarCheck(
    payload: IdeasGrammarCheckJobData,
 ): Promise<IdeasGrammarCheckJobResult> {
-   const {
-      agentId,
-      keywords,
-      userId,
-      personaConfig,
-      ideaId,
-      idea,
-   } = payload;
+   const { agentId, keywords, userId, personaConfig, ideaId, idea } = payload;
 
    try {
       // Emit status for this idea

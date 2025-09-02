@@ -117,7 +117,7 @@ export async function runGenerateIdea(payload: {
 
          // If this is not the last attempt, wait before retrying
          if (attempt < MAX_RETRIES) {
-            const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000); // Exponential backoff, max 10s
+            const delay = Math.min(1000 * 2 ** (attempt - 1), 10000); // Exponential backoff, max 10s
             console.log(`[runGenerateIdea] Waiting ${delay}ms before retry...`);
             await new Promise((resolve) => setTimeout(resolve, delay));
          }

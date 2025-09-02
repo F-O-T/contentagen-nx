@@ -2,13 +2,18 @@ import { z } from "zod";
 
 export const IdeaContentSchema = z.object({
    title: z.string().min(1).describe("The headline of the blog post idea"),
-   description: z.string().min(1).describe("The meta description of the blog post idea"),
+   description: z
+      .string()
+      .min(1)
+      .describe("The meta description of the blog post idea"),
 });
 
 export const ideaSchema = z.object({
    ideas: z
       .array(IdeaContentSchema)
-      .describe("An array of unique and engaging blog post ideas with titles and descriptions"),
+      .describe(
+         "An array of unique and engaging blog post ideas with titles and descriptions",
+      ),
 });
 
 export type IdeaSchema = z.infer<typeof ideaSchema>;

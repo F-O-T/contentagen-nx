@@ -25,7 +25,7 @@ import {
 import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Eye, Loader2, TrendingUp } from "lucide-react";
+import { Eye } from "lucide-react";
 import { useIdeasList } from "../lib/ideas-list-context";
 import { formatValueForDisplay } from "@packages/helpers/text";
 export function IdeaCard({
@@ -64,19 +64,11 @@ export function IdeaCard({
                className={`cursor-pointer ${isGenerating ? "border-blue-500 bg-blue-50/50" : ""}`}
             >
                <CardHeader>
-                  <CardTitle className="line-clamp-1 flex items-center gap-2">
-                     {isGenerating && (
-                        <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                     )}
-                     {isGenerating
-                        ? `Idea #${idea.id.slice(-8)}`
-                        : idea.content.title || `Idea #${idea.id.slice(-8)}`}
+                  <CardTitle className="line-clamp-1 ">
+                     {idea.content.title}
                   </CardTitle>
                   <CardDescription className="line-clamp-2">
-                     {isGenerating
-                        ? "Generating ideas..."
-                        : idea.content.description ||
-                          "No description available"}
+                     {idea.content.description}
                   </CardDescription>
                   <CardAction>
                      <Checkbox
@@ -119,15 +111,9 @@ export function IdeaCard({
          </CredenzaTrigger>
          <CredenzaContent>
             <CredenzaHeader>
-               <CredenzaTitle>
-                  {isGenerating
-                     ? `Idea #${idea.id.slice(-8)}`
-                     : contentTitle || `Idea #${idea.id.slice(-8)}`}
-               </CredenzaTitle>
+               <CredenzaTitle>{idea.content.title}</CredenzaTitle>
                <CredenzaDescription>
-                  {isGenerating
-                     ? "Generating ideas..."
-                     : contentDescription || "No description available"}
+                  {idea.content.description}
                </CredenzaDescription>
             </CredenzaHeader>
             <CredenzaBody className="grid grid-cols-1 gap-2">
