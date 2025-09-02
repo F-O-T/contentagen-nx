@@ -118,7 +118,7 @@ export const sdkRouter = router({
       .query(async ({ ctx, input }) => {
          const { agentId, limit = 10, page = 1, status } = input;
          const resolvedCtx = await ctx;
-         const all = await listContents(resolvedCtx.db, [agentId], status);
+         const all = await listContents(resolvedCtx.db, agentId, status);
          const start = (page - 1) * limit;
          const end = start + limit;
          const posts = all.slice(start, end);
