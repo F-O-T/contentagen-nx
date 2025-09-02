@@ -33,6 +33,7 @@ import {
    CredenzaFooter,
 } from "@packages/ui/components/credenza";
 import { EditContentBody } from "../features/edit-content-body";
+import { UploadContentImage } from "./upload-content-image";
 
 export function GeneratedContentDisplay({
    content,
@@ -69,6 +70,7 @@ export function GeneratedContentDisplay({
       }),
    );
    const [addImageUrlOpen, setAddImageUrlOpen] = useState(false);
+   const [uploadImageOpen, setUploadImageOpen] = useState(false);
 
    // TanStack Form with zod validation
    const schema = z.object({
@@ -181,9 +183,9 @@ export function GeneratedContentDisplay({
                            Regenerate Content
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                           onClick={() => setAddImageUrlOpen(true)}
+                           onClick={() => setUploadImageOpen(true)}
                         >
-                           Add Image URL
+                           Upload Image
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setEditingBody(true)}>
                            Edit Content Body
@@ -212,6 +214,11 @@ export function GeneratedContentDisplay({
                )}
             </CardContent>
          </Card>
+         <UploadContentImage
+            content={content}
+            open={uploadImageOpen}
+            onOpenChange={setUploadImageOpen}
+         />
          <Credenza open={addImageUrlOpen} onOpenChange={setAddImageUrlOpen}>
             <CredenzaContent>
                <CredenzaHeader>
