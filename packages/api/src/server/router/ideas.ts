@@ -9,11 +9,14 @@ import {
    IdeaInsertSchema,
    IdeaUpdateSchema,
 } from "@packages/database/schemas/ideas";
-import { protectedProcedure, router } from "../trpc";
+import { protectedProcedure, publicProcedure, router } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { ideas } from "@packages/database/schemas/ideas";
+import { eventEmitter, EVENTS } from "@packages/server-events";
+import { on } from "node:events";
+import type { IdeaStatusChangedPayload } from "@packages/server-events";
 
 import { listAllIdeasPaginated } from "@packages/database/repositories/ideas-repository";
 import { listAgents } from "@packages/database/repositories/agent-repository";
@@ -237,13 +240,13 @@ export const ideasRouter = router({
          // 3. Create content
          const content = await createContent(db, {
             agentId: idea.agentId,
-            request: { description: idea.content },
+            request: { description: idea.content.description },
          });
          // 4. Enqueue job
          await enqueueContentPlanningJob({
             agentId: idea.agentId,
             contentId: content.id,
-            contentRequest: { description: idea.content },
+            contentRequest: { description: idea.content.description },
          });
          return { success: true, content };
       }),
@@ -326,14 +329,14 @@ export const ideasRouter = router({
                // Create content
                const content = await createContent(db, {
                   agentId: idea.agentId,
-                  request: { description: idea.content },
+                  request: { description: idea.content.description },
                });
 
                // Enqueue job
                await enqueueContentPlanningJob({
                   agentId: idea.agentId,
                   contentId: content.id,
-                  contentRequest: { description: idea.content },
+                  contentRequest: { description: idea.content.description },
                });
 
                approvedCount++;
@@ -349,5 +352,18 @@ export const ideasRouter = router({
             totalSelected: ids.length,
             approvableCount: approvableIdeas.length,
          };
+      }),
+
+   onStatusChanged: publicProcedure
+      .input(z.object({ ideaId: z.string().optional() }).optional())
+      .subscription(async function* (opts) {
+         for await (const [payload] of on(eventEmitter, EVENTS.ideaStatus, {
+            signal: opts.signal,
+         })) {
+            const event = payload as IdeaStatusChangedPayload;
+            if (!opts.input?.ideaId || opts.input.ideaId === event.ideaId) {
+               yield event;
+            }
+         }
       }),
 });

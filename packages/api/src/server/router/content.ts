@@ -1,4 +1,22 @@
 import { enqueueContentPlanningJob } from "@packages/workers/queues/content/content-planning-queue";
+import { protectedProcedure, publicProcedure, router } from "../trpc";
+import {
+   eventEmitter,
+   EVENTS,
+   type ContentStatusChangedPayload,
+} from "@packages/server-events";
+import { on } from "node:events";
+import {
+   ContentInsertSchema,
+   ContentUpdateSchema,
+   ContentSelectSchema,
+} from "@packages/database/schema";
+import { enqueueIdeasPlanningJob } from "@packages/workers/queues/ideas/ideas-planning-queue";
+import {
+   addToCollection,
+   getCollection,
+   queryCollection,
+} from "@packages/chroma-db/helpers";
 import { listAgents } from "@packages/database/repositories/agent-repository";
 import {
    createContent,
@@ -25,25 +43,6 @@ const ContentImageUploadInput = z.object({
 const ContentImageStreamInput = z.object({
    id: z.uuid(),
 });
-
-import { protectedProcedure, publicProcedure, router } from "../trpc";
-import {
-   eventEmitter,
-   EVENTS,
-   type ContentStatusChangedPayload,
-} from "@packages/server-events";
-import { on } from "node:events";
-import {
-   ContentInsertSchema,
-   ContentUpdateSchema,
-   ContentSelectSchema,
-} from "@packages/database/schema";
-import { enqueueIdeaGenerationJob } from "@packages/workers/queues/content/ideas-queue";
-import {
-   addToCollection,
-   getCollection,
-   queryCollection,
-} from "@packages/chroma-db/helpers";
 
 export const contentRouter = router({
    regenerate: protectedProcedure
@@ -198,6 +197,7 @@ export const contentRouter = router({
             try {
                buffer = Buffer.from(fileBuffer, "base64");
             } catch (error) {
+               console.error("Error decoding base64 file buffer:", error);
                throw new TRPCError({
                   code: "BAD_REQUEST",
                   message: "Invalid base64 data",
@@ -554,11 +554,32 @@ export const contentRouter = router({
                } as ContentStatusChangedPayload);
             }
 
+            // Generate ideas for approved content that has keywords
+            let ideasGeneratedCount = 0;
+            for (const content of approvableContents) {
+               if (content.meta?.keywords && content.meta.keywords.length > 0) {
+                  try {
+                     await enqueueIdeasPlanningJob({
+                        agentId: content.agent.id,
+                        keywords: content.meta.keywords,
+                     });
+                     ideasGeneratedCount++;
+                  } catch (error) {
+                     console.error(
+                        `Failed to enqueue idea generation for content ${content.id}:`,
+                        error,
+                     );
+                     // Continue with other content items even if one fails
+                  }
+               }
+            }
+
             return {
                success: true,
                approvedCount: result.approvedCount,
                totalSelected: ids.length,
                approvableCount: approvableIds.length,
+               ideasGeneratedCount,
             };
          } catch (err) {
             if (err instanceof NotFoundError) {
@@ -678,7 +699,7 @@ export const contentRouter = router({
                      "Content must have keywords in meta to generate ideas.",
                });
             }
-            await enqueueIdeaGenerationJob({
+            await enqueueIdeasPlanningJob({
                agentId: content.agentId,
                keywords: content.meta?.keywords,
             });

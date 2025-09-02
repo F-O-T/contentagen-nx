@@ -20,7 +20,10 @@ import { contentPostProcessingQueue } from "@packages/workers/queues/content/con
 import { contentResearchingQueue } from "@packages/workers/queues/content/content-researching-queue";
 import { contentPlanningQueue } from "@packages/workers/queues/content/content-planning-queue";
 import { contentWritingQueue } from "@packages/workers/queues/content/content-writing-queue";
-import { ideaGenerationQueue } from "@packages/workers/queues/content/ideas-queue";
+
+import { ideasPlanningQueue } from "@packages/workers/queues/ideas/ideas-planning-queue";
+import { ideasGrammarCheckQueue } from "@packages/workers/queues/ideas/ideas-grammar-checker-queue";
+import { ideasPostProcessingQueue } from "@packages/workers/queues/ideas/ideas-post-processing-queue";
 import { contentGrammarCheckQueue } from "@packages/workers/queues/content/content-grammar-checker-queue";
 import { chunkSavingQueue } from "@packages/workers/queues/knowledge/chunk-saving";
 import { documentChunkQueue } from "@packages/workers/queues/knowledge/document-chunk-queue";
@@ -41,7 +44,10 @@ createBullBoard({
       new BullMQAdapter(brandCrawlQueue),
       new BullMQAdapter(chunkSavingQueue),
       new BullMQAdapter(documentChunkQueue),
-      new BullMQAdapter(ideaGenerationQueue),
+
+      new BullMQAdapter(ideasPlanningQueue),
+      new BullMQAdapter(ideasGrammarCheckQueue),
+      new BullMQAdapter(ideasPostProcessingQueue),
       new BullMQAdapter(billingLlmIngestionQueue),
       new BullMQAdapter(billingWebSearchIngestionQueue),
       new BullMQAdapter(contentEditingQueue),

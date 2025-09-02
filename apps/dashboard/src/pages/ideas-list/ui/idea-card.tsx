@@ -25,7 +25,7 @@ import {
 import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Eye } from "lucide-react";
+import { Eye, Loader2 } from "lucide-react";
 import { useIdeasList } from "../lib/ideas-list-context";
 import { formatValueForDisplay } from "@packages/helpers/text";
 export function IdeaCard({
@@ -52,16 +52,28 @@ export function IdeaCard({
       setIsCredenzaOpen(false);
    };
 
+   const contentText =
+      (idea.content as any)?.title || (idea.content as string) || "";
+   const isGenerating =
+      idea.status === "pending" && contentText.includes("Generating");
+
    return (
       <Credenza open={isCredenzaOpen} onOpenChange={setIsCredenzaOpen}>
          <CredenzaTrigger asChild>
-            <Card className="cursor-pointer">
+            <Card
+               className={`cursor-pointer ${isGenerating ? "border-blue-500 bg-blue-50/50" : ""}`}
+            >
                <CardHeader>
-                  <CardTitle className="line-clamp-1">
+                  <CardTitle className="line-clamp-1 flex items-center gap-2">
+                     {isGenerating && (
+                        <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                     )}
                      Idea #{idea.id.slice(-8)}
                   </CardTitle>
                   <CardDescription className="line-clamp-2">
-                     {idea.content}
+                     {isGenerating
+                        ? "Generating ideas..."
+                        : contentText || "No content available"}
                   </CardDescription>
                   <CardAction>
                      <Checkbox
@@ -90,8 +102,12 @@ export function IdeaCard({
                         ? new Date(idea.createdAt).toLocaleDateString()
                         : "Unknown"}
                   </Badge>
-                  <Badge className="text-xs">
-                     {formatValueForDisplay(idea.status ?? "")}
+                  <Badge
+                     className={`text-xs ${isGenerating ? "bg-blue-500" : ""}`}
+                  >
+                     {isGenerating
+                        ? "Generating"
+                        : formatValueForDisplay(idea.status ?? "")}
                   </Badge>
                </CardFooter>
             </Card>
@@ -99,7 +115,11 @@ export function IdeaCard({
          <CredenzaContent>
             <CredenzaHeader>
                <CredenzaTitle>Idea #{idea.id.slice(-8)}</CredenzaTitle>
-               <CredenzaDescription>{idea.content}</CredenzaDescription>
+               <CredenzaDescription>
+                  {isGenerating
+                     ? "Generating ideas..."
+                     : contentText || "No content available"}
+               </CredenzaDescription>
             </CredenzaHeader>
             <CredenzaBody className="grid grid-cols-1 gap-2">
                <SquaredIconButton onClick={handleViewDetails}>
