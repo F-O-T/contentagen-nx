@@ -12,7 +12,16 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getCollection, queryCollection } from "@packages/chroma-db/helpers";
 
+// Reusable image schema for SDK responses
+const ImageSchema = z
+   .object({
+      data: z.string(),
+      contentType: z.string(),
+   })
+   .nullable();
+
 import { getAgentById } from "@packages/database/repositories/agent-repository";
+import { getContentById } from "@packages/database/repositories/content-repository";
 import { streamFileForProxy } from "@packages/files/client";
 
 export const sdkRouter = router({
@@ -21,9 +30,7 @@ export const sdkRouter = router({
       .output(
          z.object({
             name: z.string(),
-            profilePhoto: z
-               .object({ image: z.base64(), contentType: z.string() })
-               .nullable(),
+            profilePhoto: ImageSchema,
          }),
       )
       .query(async ({ ctx, input }) => {
@@ -45,7 +52,7 @@ export const sdkRouter = router({
                   minioClient,
                );
                profilePhoto = {
-                  image: buffer.toString("base64"),
+                  data: buffer.toString("base64"),
                   contentType,
                };
             } catch (err) {
@@ -100,34 +107,133 @@ export const sdkRouter = router({
                status: true,
                createdAt: true,
                stats: true,
-            }).array(),
+            })
+               .extend({
+                  image: ImageSchema,
+               })
+               .array(),
             total: z.number(),
          }),
       )
       .query(async ({ ctx, input }) => {
          const { agentId, limit = 10, page = 1, status } = input;
-         const all = await listContents((await ctx).db, agentId, status);
+         const resolvedCtx = await ctx;
+         const all = await listContents(resolvedCtx.db, agentId, status);
          const start = (page - 1) * limit;
          const end = start + limit;
          const posts = all.slice(start, end);
-         return { posts, total: all.length };
+
+         // Stream images for each post
+         const postsWithImages = await Promise.all(
+            posts.map(async (post) => {
+               let image = null;
+               if (post.imageUrl) {
+                  try {
+                     const { buffer, contentType } = await streamFileForProxy(
+                        post.imageUrl,
+                        resolvedCtx.minioBucket,
+                        resolvedCtx.minioClient,
+                     );
+                     image = {
+                        data: buffer.toString("base64"),
+                        contentType,
+                     };
+                  } catch (error) {
+                     console.error(
+                        "Error fetching image for post:",
+                        post.id,
+                        error,
+                     );
+                     image = null;
+                  }
+               }
+               return {
+                  ...post,
+                  image,
+               };
+            }),
+         );
+
+         return { posts: postsWithImages, total: all.length };
       }),
    getContentBySlug: sdkProcedure
       .input(GetContentBySlugInputSchema)
-      .output(ContentSelectSchema)
+      .output(
+         ContentSelectSchema.extend({
+            image: ImageSchema,
+         }),
+      )
       .query(async ({ ctx, input }) => {
          try {
-            return await getContentBySlug(
-               (await ctx).db,
+            const resolvedCtx = await ctx;
+            const content = await getContentBySlug(
+               resolvedCtx.db,
                input.slug,
                input.agentId,
             );
+
+            let image = null;
+            if (content.imageUrl) {
+               try {
+                  const { buffer, contentType } = await streamFileForProxy(
+                     content.imageUrl,
+                     resolvedCtx.minioBucket,
+                     resolvedCtx.minioClient,
+                  );
+                  image = {
+                     data: buffer.toString("base64"),
+                     contentType,
+                  };
+               } catch (error) {
+                  console.error(
+                     "Error fetching image for content:",
+                     content.id,
+                     error,
+                  );
+                  image = null;
+               }
+            }
+
+            return {
+               ...content,
+               image,
+            };
          } catch (err) {
             throw new TRPCError({
                code: "NOT_FOUND",
                message:
                   err instanceof Error ? err.message : "Content not found",
             });
+         }
+      }),
+   getContentImage: sdkProcedure
+      .input(z.object({ contentId: z.string() }))
+      .output(ImageSchema)
+      .query(async ({ ctx, input }) => {
+         try {
+            const db = (await ctx).db;
+            const content = await getContentById(db, input.contentId);
+
+            if (!content?.imageUrl) {
+               return null;
+            }
+
+            const bucketName = (await ctx).minioBucket;
+            const key = content.imageUrl;
+
+            const { buffer, contentType } = await streamFileForProxy(
+               key,
+               bucketName,
+               (await ctx).minioClient,
+            );
+
+            return {
+               data: buffer.toString("base64"),
+               contentType,
+            };
+         } catch (error) {
+            console.error("Error fetching content image:", error);
+            return null;
          }
       }),
 });
