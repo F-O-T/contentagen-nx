@@ -181,8 +181,28 @@ export const contentRouter = router({
       .mutation(async ({ ctx, input }) => {
          try {
             const { id, fileName, fileBuffer } = input;
-            const key = `content/${id}/image/${fileName}`;
-            const buffer = Buffer.from(fileBuffer, "base64");
+
+            // Validate base64 format
+            if (!fileBuffer || fileBuffer.length === 0) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Invalid or empty file data",
+               });
+            }
+
+            // Sanitize fileName to prevent directory traversal
+            const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+            const key = `content/${id}/image/${sanitizedFileName}`;
+
+            let buffer: Buffer;
+            try {
+               buffer = Buffer.from(fileBuffer, "base64");
+            } catch (error) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Invalid base64 data",
+               });
+            }
 
             // Compress the image
             const compressedBuffer = await compressImage(buffer, {

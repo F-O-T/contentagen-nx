@@ -107,18 +107,22 @@ export function ManageAgentPhoto({
       if (!selectedFile) return;
 
       try {
-         // Convert file to base64 using a more efficient method
-         const buffer = await selectedFile.arrayBuffer();
-         const uint8Array = new Uint8Array(buffer);
-
-         // Convert Uint8Array to binary string in chunks to avoid argument limit
-         let binary = "";
-         const chunkSize = 8192; // Process in 8KB chunks
-         for (let i = 0; i < uint8Array.length; i += chunkSize) {
-            const chunk = uint8Array.slice(i, i + chunkSize);
-            binary += String.fromCharCode.apply(null, Array.from(chunk));
-         }
-         const base64 = btoa(binary);
+         // Use FileReader for efficient base64 conversion
+         const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+               const result = reader.result as string;
+               // Remove the data URL prefix to get just the base64
+               const base64Data = result.split(",")[1];
+               if (!base64Data) {
+                  reject(new Error("Failed to extract base64 data"));
+                  return;
+               }
+               resolve(base64Data);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(selectedFile);
+         });
 
          await uploadPhotoMutation.mutateAsync({
             agentId,

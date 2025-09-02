@@ -3,7 +3,7 @@ import { agent } from "../schemas/agent";
 import type { AgentSelect, AgentInsert } from "../schemas/agent";
 import type { DatabaseInstance } from "../client";
 import { DatabaseError, NotFoundError } from "@packages/errors";
-import { eq, or } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 
 export async function createAgent(
    dbClient: DatabaseInstance,
@@ -137,25 +137,30 @@ export async function getTotalAgents(
 ): Promise<number> {
    try {
       if (userId && organizationId) {
-         const result = await dbClient.query.agent.findMany({
-            where: or(
-               eq(agent.userId, userId),
-               eq(agent.organizationId, organizationId),
-            ),
-         });
-         return result.length;
+         const result = await dbClient
+            .select({ value: sql<number>`cast(count(*) as int)` })
+            .from(agent)
+            .where(
+               or(
+                  eq(agent.userId, userId),
+                  eq(agent.organizationId, organizationId),
+               ),
+            );
+         return result[0]?.value ?? 0;
       }
       if (userId) {
-         const result = await dbClient.query.agent.findMany({
-            where: eq(agent.userId, userId),
-         });
-         return result.length;
+         const result = await dbClient
+            .select({ value: sql<number>`cast(count(*) as int)` })
+            .from(agent)
+            .where(eq(agent.userId, userId));
+         return result[0]?.value ?? 0;
       }
       if (organizationId) {
-         const result = await dbClient.query.agent.findMany({
-            where: eq(agent.organizationId, organizationId),
-         });
-         return result.length;
+         const result = await dbClient
+            .select({ value: sql<number>`cast(count(*) as int)` })
+            .from(agent)
+            .where(eq(agent.organizationId, organizationId));
+         return result[0]?.value ?? 0;
       }
       return 0;
    } catch (err) {
