@@ -12,12 +12,8 @@ runs:
       run: bun install --frozen-lockfile
       shell: bash
 
-    - name: Set Nx SHAs
-      uses: nrwl/nx-set-shas@v4
-      with:
-        main-branch-name: master
-
-    - name: Connect to Nx Cloud
-      run: npx nx connect
-      shell: bash
+     - name: Set Nx SHAs
+       uses: nrwl/nx-set-shas@v4
+       with:
+         main-branch-name: master
 
