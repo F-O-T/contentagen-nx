@@ -27,6 +27,7 @@ export const ideasRouter = router({
          z.object({
             page: z.number().min(1).default(1),
             limit: z.number().min(1).max(100).default(10),
+            agentId: z.string().optional(),
          }),
       )
       .query(async ({ ctx, input }) => {
@@ -45,8 +46,13 @@ export const ideasRouter = router({
                userId,
                organizationId: organizationId ?? "",
             });
-            const agentIds = agents.map((agent) => agent.id);
-            if (agentIds.length === 0) return { items: [], total: 0 };
+            const getAgentIds = () => {
+               if (input.agentId) {
+                  return [input.agentId];
+               }
+               return agents.map((agent) => agent.id);
+            };
+            const agentIds = getAgentIds();
             const all = await listAllIdeasPaginated(
                resolvedCtx.db,
                input.page,

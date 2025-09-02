@@ -1,8 +1,16 @@
 {
    "extends": "//",
+   "files": {
+      "includes": [
+         "**",
+         "!**/*.css"
+      ]
+   },
    "overrides": [
       {
-         "includes": ["**/*.astro"],
+         "includes": [
+            "**/*.astro"
+         ],
          "linter": {
             "rules": {
                "style": {

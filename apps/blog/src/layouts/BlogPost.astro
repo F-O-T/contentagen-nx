@@ -8,15 +8,15 @@ import { marked } from "marked";
 import type { ContentSelect } from "@packages/database/schema";
 
 interface Props {
-  post: ContentSelect;
-  author: {
-    name: string;
-    profilePhoto: {
-      image: string;
-      contentType: string;
-    } | null;
-  };
-  relatedPosts: ContentSelect[];
+   post: ContentSelect;
+   author: {
+      name: string;
+      profilePhoto: {
+         image: string;
+         contentType: string;
+      } | null;
+   };
+   relatedPosts: ContentSelect[];
 }
 
 const { post, author, relatedPosts } = Astro.props as Props;

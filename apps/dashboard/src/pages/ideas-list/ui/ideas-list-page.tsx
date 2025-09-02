@@ -18,35 +18,13 @@ function IdeasListPageContent() {
       ? "Here you can manage ideas for this specific agent. Create, edit, or explore your creative concepts below!"
       : "Here you can manage all your ideas. Create, edit, or explore your creative concepts below!";
 
-   if (agentId) {
-      const { data } = useSuspenseQuery(
-         trpc.ideas.listByAgentPaginated.queryOptions({
-            agentId,
-            page,
-            limit,
-         }),
-      );
+   const queryOptions = trpc.ideas.listAllIdeas.queryOptions({
+      page,
+      limit,
+      agentId,
+   });
 
-      return (
-         <main className="h-full w-full flex flex-col gap-4 p-4">
-            <TalkingMascot message={message} />
-            <IdeasListToolbar />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-               {data.items.map(
-                  (
-                     item: RouterOutput["ideas"]["listAllIdeas"]["items"][number],
-                  ) => (
-                     <IdeaCard key={item.id} idea={item} />
-                  ),
-               )}
-            </div>
-         </main>
-      );
-   }
-
-   const { data } = useSuspenseQuery(
-      trpc.ideas.listAllIdeas.queryOptions({ page, limit }),
-   );
+   const { data } = useSuspenseQuery(queryOptions);
 
    return (
       <main className="h-full w-full flex flex-col gap-4 p-4">
@@ -68,24 +46,12 @@ function IdeasListPageContent() {
 export function IdeasListPage({ agentId }: IdeasListPageProps) {
    const trpc = useTRPC();
 
-   if (agentId) {
-      const { data } = useSuspenseQuery(
-         trpc.ideas.listByAgentPaginated.queryOptions({
-            agentId,
-            page: 1,
-            limit: 8,
-         }),
-      );
-
-      return (
-         <IdeasListProvider data={data} agentId={agentId}>
-            <IdeasListPageContent />
-         </IdeasListProvider>
-      );
-   }
-
    const { data } = useSuspenseQuery(
-      trpc.ideas.listAllIdeas.queryOptions({ page: 1, limit: 8 }),
+      trpc.ideas.listAllIdeas.queryOptions({
+         agentId: agentId ?? "",
+         page: 1,
+         limit: 8,
+      }),
    );
 
    return (

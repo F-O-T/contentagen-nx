@@ -23,9 +23,7 @@ interface IdeasListContextType {
    selectedItemsCount: number;
 
    // Data state
-   data?:
-      | RouterOutput["ideas"]["listAllIdeas"]
-      | RouterOutput["ideas"]["listByAgentPaginated"];
+   data?: RouterOutput["ideas"]["listAllIdeas"];
    selectableItems: RouterOutput["ideas"]["listAllIdeas"]["items"];
 
    // Filtering state
@@ -48,9 +46,7 @@ export const useIdeasList = () => {
 
 interface IdeasListProviderProps {
    children: ReactNode;
-   data?:
-      | RouterOutput["ideas"]["listAllIdeas"]
-      | RouterOutput["ideas"]["listByAgentPaginated"];
+   data?: RouterOutput["ideas"]["listAllIdeas"];
    agentId?: string;
 }
 
