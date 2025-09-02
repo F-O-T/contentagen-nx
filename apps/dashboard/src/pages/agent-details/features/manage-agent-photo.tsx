@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useTRPC } from "@/integrations/clients";
@@ -53,21 +53,6 @@ export function ManageAgentPhoto({
 
    // Determine what image to display: new preview, existing photo, or nothing
    const displayImage = filePreview || profilePhotoData?.data;
-
-   // Create preview URL using useMemo for proper lifecycle management
-   const previewUrl = useMemo(() => {
-      if (!selectedFile) return null;
-      return URL.createObjectURL(selectedFile);
-   }, [selectedFile]);
-
-   // Cleanup object URL when component unmounts or selectedFile changes
-   useEffect(() => {
-      return () => {
-         if (previewUrl) {
-            URL.revokeObjectURL(previewUrl);
-         }
-      };
-   }, [previewUrl]);
 
    const uploadPhotoMutation = useMutation(
       trpc.agentFile.uploadProfilePhoto.mutationOptions({

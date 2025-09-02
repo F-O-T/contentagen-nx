@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
@@ -50,21 +50,6 @@ export function UploadContentImage({
 
    // Determine what image to display: new preview, existing image, or nothing
    const displayImage = filePreview || currentImageData?.data;
-
-   // Create preview URL using useMemo for proper lifecycle management
-   const previewUrl = useMemo(() => {
-      if (!selectedFile) return null;
-      return URL.createObjectURL(selectedFile);
-   }, [selectedFile]);
-
-   // Cleanup object URL when component unmounts or selectedFile changes
-   useEffect(() => {
-      return () => {
-         if (previewUrl) {
-            URL.revokeObjectURL(previewUrl);
-         }
-      };
-   }, [previewUrl]);
 
    const uploadImageMutation = useMutation(
       trpc.content.uploadImage.mutationOptions({

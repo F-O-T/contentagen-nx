@@ -29,7 +29,7 @@ export const agentFileRouter = router({
    uploadProfilePhoto: protectedProcedure
       .input(AgentProfilePhotoUploadInput)
       .mutation(async ({ ctx, input }) => {
-         const { agentId, fileName, fileBuffer, contentType } = input;
+         const { agentId, fileName, fileBuffer } = input;
          const key = `${agentId}/profile-photo/${fileName}`;
          const buffer = Buffer.from(fileBuffer, "base64");
 

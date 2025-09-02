@@ -180,7 +180,7 @@ export const contentRouter = router({
       .input(ContentImageUploadInput)
       .mutation(async ({ ctx, input }) => {
          try {
-            const { id, fileName, fileBuffer, contentType } = input;
+            const { id, fileName, fileBuffer } = input;
             const key = `content/${id}/image/${fileName}`;
             const buffer = Buffer.from(fileBuffer, "base64");
 
