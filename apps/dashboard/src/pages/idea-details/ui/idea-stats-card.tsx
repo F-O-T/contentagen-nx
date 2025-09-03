@@ -23,7 +23,7 @@ export function IdeaStatsCard({ idea }: IdeaStatsCardProps) {
    }, [idea]);
 
    return (
-      <div className="w-full gap-2 grid md:grid-cols-2">
+      <div className="w-full gap-4 grid md:grid-cols-2">
          {items.map((item) => (
             <StatsCard
                key={item.label}
