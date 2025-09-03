@@ -13,15 +13,9 @@ import {
 } from "@packages/ui/components/card";
 import { Progress } from "@packages/ui/components/progress";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import {
-   AlertCircle,
-   Check,
-   Crown,
-   Loader2,
-   Sparkles,
-   Zap,
-} from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { useCallback } from "react";
+import { SubscriptionPricingCards } from "@/widgets/subscription/ui/subscription-pricing-cards";
 
 export function ProfilePageBilling() {
    const trpc = useTRPC();
@@ -30,91 +24,9 @@ export function ProfilePageBilling() {
    );
    const activeSubscription = customerState?.activeSubscriptions[0];
    const activeMeter = customerState?.activeMeters[0];
-   console.log(activeMeter);
-   console.log(activeSubscription);
    const handleManageSubscription = useCallback(async () => {
       return await betterAuthClient.customer.portal();
    }, []);
-
-   const goToBasicCheckout = useCallback(async () => {
-      return await betterAuthClient.checkout({
-         slug: "basic",
-      });
-   }, []);
-
-   const goToHobbyCheckout = useCallback(async () => {
-      return await betterAuthClient.checkout({
-         slug: "hobby",
-      });
-   }, []);
-
-   const plans = useMemo(
-      () => [
-         {
-            id: "hobby",
-            name: "Hobby",
-            icon: Sparkles,
-            iconColor: "text-blue-500",
-            badge: {
-               text: "Free",
-               variant: "secondary" as const,
-               className: "bg-green-100 text-green-800",
-            },
-            description:
-               "Perfect for getting started with basic content generation",
-            features: [
-               {
-                  icon: Zap,
-                  iconColor: "text-green-500",
-                  text: "$1.00 included usage per month",
-               },
-               {
-                  icon: AlertCircle,
-                  iconColor: "text-muted-foreground",
-                  text: "Usage beyond limit is not available",
-               },
-            ],
-            cardClassName: `border-2 border-dashed ${
-               activeSubscription?.amount === 100
-                  ? "border-blue-500 bg-blue-50/50"
-                  : "border-gray-200"
-            }`,
-            isCurrentPlan: activeSubscription?.amount === 100,
-         },
-         {
-            id: "basic",
-            name: "Basic",
-            icon: Crown,
-            iconColor: "text-yellow-500",
-            badge: {
-               text: "Premium",
-               variant: "secondary" as const,
-               className: "bg-purple-100 text-purple-800",
-            },
-            description:
-               "Full access with generous usage and pay-as-you-go flexibility",
-            features: [
-               {
-                  icon: Zap,
-                  iconColor: "text-blue-500",
-                  text: "$5.00 included usage per month",
-               },
-               {
-                  icon: Crown,
-                  iconColor: "text-yellow-500",
-                  text: "Everything after is charged on the meter",
-               },
-            ],
-            cardClassName: `border-2 ${
-               activeSubscription?.amount === 500
-                  ? "border-blue-500 bg-blue-50/50"
-                  : "border-gray-200"
-            }`,
-            isCurrentPlan: activeSubscription?.amount === 500,
-         },
-      ],
-      [activeSubscription],
-   );
 
    if (isLoading) {
       return (
@@ -183,105 +95,17 @@ export function ProfilePageBilling() {
 
    if (!activeSubscription) {
       return (
-         <section className="py-16 md:py-32">
-            <div className="mx-auto max-w-5xl px-6">
-               <div className="mx-auto max-w-2xl space-y-6 text-center">
-                  <h1 className="text-center text-4xl font-semibold lg:text-5xl">
-                     Pricing that Scales with You
-                  </h1>
-                  <p>
-                     Gemini is evolving to be more than just the models. It
-                     supports an entire to the APIs and platforms helping
-                     developers and businesses innovate.
-                  </p>
-               </div>
-
-               <div className="mt-8 grid gap-6 md:mt-20 md:grid-cols-5 md:gap-0">
-                  {/* Free/Hobby Plan */}
-                  <div className="rounded-lg flex flex-col justify-between space-y-8 border p-6 md:col-span-2 md:my-2 md:rounded-r-none md:border-r-0 lg:p-10">
-                     <div className="space-y-4">
-                        <div>
-                           <h2 className="font-medium">Free</h2>
-                           <span className="my-3 block text-2xl font-semibold">
-                              $0 / mo
-                           </span>
-                           <p className="text-muted-foreground text-sm">
-                              Per editor
-                           </p>
-                        </div>
-
-                        <Button
-                           onClick={goToHobbyCheckout}
-                           variant="outline"
-                           className="w-full"
-                        >
-                           Get Started
-                        </Button>
-
-                        <hr className="border-dashed" />
-
-                        <ul className="list-outside space-y-3 text-sm">
-                           {plans
-                              .find((p) => p.id === "hobby")
-                              ?.features.map((feature, index) => (
-                                 <li
-                                    key={index}
-                                    className="flex items-center gap-2"
-                                 >
-                                    <Check className="size-3" />
-                                    {feature.text}
-                                 </li>
-                              ))}
-                        </ul>
-                     </div>
-                  </div>
-
-                  {/* Pro/Basic Plan */}
-                  <div className="dark:bg-muted rounded-lg border p-6 shadow-lg shadow-gray-950/5 md:col-span-3 lg:p-10 dark:[--color-muted:var(--color-zinc-900)]">
-                     <div className="grid gap-6 sm:grid-cols-2">
-                        <div className="space-y-4">
-                           <div>
-                              <h2 className="font-medium">Pro</h2>
-                              <span className="my-3 block text-2xl font-semibold">
-                                 $19 / mo
-                              </span>
-                              <p className="text-muted-foreground text-sm">
-                                 Per editor
-                              </p>
-                           </div>
-
-                           <Button
-                              onClick={goToBasicCheckout}
-                              className="w-full"
-                           >
-                              Get Started
-                           </Button>
-                        </div>
-
-                        <div>
-                           <div className="text-sm font-medium">
-                              Everything in free plus :
-                           </div>
-
-                           <ul className="mt-4 list-outside space-y-3 text-sm">
-                              {plans
-                                 .find((p) => p.id === "basic")
-                                 ?.features.map((feature, index) => (
-                                    <li
-                                       key={index}
-                                       className="flex items-center gap-2"
-                                    >
-                                       <Check className="size-3" />
-                                       {feature.text}
-                                    </li>
-                                 ))}
-                           </ul>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-            </div>
-         </section>
+         <Card>
+            <CardHeader>
+               <CardTitle>No active plan</CardTitle>
+               <CardDescription>
+                  You don't have an active subscription plan.
+               </CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <SubscriptionPricingCards />
+            </CardContent>
+         </Card>
       );
    }
 

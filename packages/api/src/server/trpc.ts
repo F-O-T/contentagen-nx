@@ -126,9 +126,44 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 
    return result;
 });
+const hasActiveSubscription = t.middleware(async ({ ctx, next }) => {
+   const resolvedCtx = await ctx;
+
+   // First ensure user is authenticated
+   if (!resolvedCtx.session?.user) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+   }
+
+   // Get customer state to check for active subscriptions
+   const customerState = await resolvedCtx.auth.api.state({
+      headers: resolvedCtx.headers,
+   });
+
+   // Check if user has any active subscriptions
+   const hasActiveSub = customerState.activeSubscriptions?.some(
+      (sub) => sub.status === "active",
+   );
+
+   if (!hasActiveSub) {
+      throw new TRPCError({
+         code: "FORBIDDEN",
+         message: "Active subscription required",
+      });
+   }
+
+   return next({
+      ctx: {
+         session: { ...resolvedCtx.session },
+         customerState,
+      },
+   });
+});
 
 export const publicProcedure = t.procedure
    .use(loggerMiddleware)
    .use(timingMiddleware);
 export const protectedProcedure = publicProcedure.use(isAuthed);
 export const sdkProcedure = publicProcedure.use(sdkAuth);
+export const subscriptionProcedure = protectedProcedure.use(
+   hasActiveSubscription,
+);

@@ -7,7 +7,7 @@ import { ingestLlmBilling } from "../functions/billing/ingest-usage";
 export interface BillingLlmIngestionJob {
    inputTokens?: number;
    outputTokens?: number;
-   effort: "small" | "medium";
+   effort: "small";
    userId: string;
 }
 
