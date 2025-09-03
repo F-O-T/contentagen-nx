@@ -69,6 +69,8 @@ export const contentStatusEnum = pgEnum("content_status", [
    "grammar_checking",
 ]);
 
+export const shareStatusEnum = pgEnum("share_status", ["private", "shared"]);
+
 export const content = pgTable(
    "content",
    {
@@ -79,6 +81,7 @@ export const content = pgTable(
       imageUrl: text("image_url"),
       body: text("body").notNull().default(""),
       status: contentStatusEnum("status").default("pending"),
+      shareStatus: shareStatusEnum("share_status").default("private"),
       meta: jsonb("meta").$type<ContentMeta>().default({}),
       request: jsonb("request").$type<ContentRequest>().notNull(),
       stats: jsonb("stats").$type<ContentStats>().default({}),
@@ -99,6 +102,7 @@ export const contentRelations = relations(content, ({ one }) => ({
 }));
 
 export type ContentStatus = (typeof contentStatusEnum.enumValues)[number];
+export type ShareStatus = (typeof shareStatusEnum.enumValues)[number];
 export type ContentSelect = typeof content.$inferSelect;
 export type ContentInsert = typeof content.$inferInsert;
 export const ContentInsertSchema = createInsertSchema(content);

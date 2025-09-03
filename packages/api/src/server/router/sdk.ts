@@ -107,6 +107,7 @@ export const sdkRouter = router({
                status: true,
                createdAt: true,
                stats: true,
+               shareStatus: true,
             })
                .extend({
                   image: ImageSchema,

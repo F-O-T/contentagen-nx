@@ -1,6 +1,14 @@
 import { useRouter } from "@tanstack/react-router";
 import { Button } from "@packages/ui/components/button";
-import { Edit, Trash2, RotateCcw, CheckCircle, Upload } from "lucide-react";
+import {
+   Edit,
+   Trash2,
+   RotateCcw,
+   CheckCircle,
+   Upload,
+   Share,
+   Lock,
+} from "lucide-react";
 import {
    Card,
    CardContent,
@@ -13,7 +21,7 @@ import {
    TooltipTrigger,
    TooltipContent,
 } from "@packages/ui/components/tooltip";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -30,6 +38,7 @@ export function ContentDetailsQuickActions({
 }) {
    const router = useRouter();
    const trpc = useTRPC();
+   const queryClient = useQueryClient();
    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
    const [uploadImageOpen, setUploadImageOpen] = useState(false);
 
@@ -76,6 +85,27 @@ export function ContentDetailsQuickActions({
       }),
    );
 
+   const toggleShareMutation = useMutation(
+      trpc.content.toggleShare.mutationOptions({
+         onSuccess: async (data) => {
+            toast.success(
+               `Content ${data.shareStatus === "shared" ? "shared" : "made private"} successfully!`,
+            );
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.get.queryKey({ id: content.id }),
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.listAllContent.queryKey(),
+            });
+         },
+         onError: (error) => {
+            toast.error(
+               `Error toggling share status: ${error.message ?? "Unknown error"}`,
+            );
+         },
+      }),
+   );
+
    const handleRegenerate = () => {
       regenerateMutation.mutate({ id: content.id });
    };
@@ -87,6 +117,10 @@ export function ContentDetailsQuickActions({
    const handleDeleteConfirm = () => {
       deleteMutation.mutate({ id: content.id });
       setDeleteDialogOpen(false);
+   };
+
+   const handleToggleShare = () => {
+      toggleShareMutation.mutate({ id: content.id });
    };
 
    const actions = [
@@ -113,6 +147,13 @@ export function ContentDetailsQuickActions({
          label: "Approve Content",
          onClick: handleApprove,
          disabled: approveMutation.isPending || content.status === "approved",
+      },
+      {
+         icon: content.shareStatus === "shared" ? Lock : Share,
+         label:
+            content.shareStatus === "shared" ? "Make Private" : "Share Content",
+         onClick: handleToggleShare,
+         disabled: toggleShareMutation.isPending,
       },
       {
          icon: Trash2,

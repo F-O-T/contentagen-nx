@@ -189,6 +189,7 @@ export async function listContents(
             status: true,
             createdAt: true,
             stats: true,
+            shareStatus: true,
          },
          with: {
             agent: true,

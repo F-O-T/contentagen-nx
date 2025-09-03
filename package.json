@@ -3,6 +3,10 @@
    "version": "0.0.1",
    "license": "Apache-2.0",
    "type": "module",
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/F-O-T/contentagen-nx.git"
+   },
    "devDependencies": {
       "@biomejs/biome": "2.2.2",
       "@commitlint/cli": "^19.8.1",

@@ -33,6 +33,7 @@ import {
    approveBulkContent,
    listContents,
 } from "@packages/database/repositories/content-repository";
+import { canModifyContent } from "@packages/database";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -770,6 +771,79 @@ export const contentRouter = router({
                keywords: content.meta?.keywords,
             });
             return { success: true };
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
+      }),
+   toggleShare: protectedProcedure
+      .input(ContentInsertSchema.pick({ id: true }))
+      .mutation(async ({ ctx, input }) => {
+         try {
+            if (!input.id) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Content ID is required.",
+               });
+            }
+
+            const resolvedCtx = await ctx;
+            const db = resolvedCtx.db;
+            const userId = resolvedCtx.session?.user.id;
+            const organizationId =
+               resolvedCtx.session?.session?.activeOrganizationId;
+
+            if (!userId) {
+               throw new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message: "User must be authenticated to toggle share status.",
+               });
+            }
+
+            // Check if user can modify this content
+            const canModify = await canModifyContent(
+               db,
+               input.id,
+               userId,
+               organizationId ?? "",
+            );
+
+            if (!canModify) {
+               throw new TRPCError({
+                  code: "FORBIDDEN",
+                  message: "You don't have permission to modify this content.",
+               });
+            }
+
+            // Get content after access check
+            const content = await getContentById(db, input.id);
+            if (!content) {
+               throw new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Content not found.",
+               });
+            }
+
+            const newShareStatus =
+               content.shareStatus === "shared" ? "private" : "shared";
+
+            const updated = await updateContent(db, input.id, {
+               shareStatus: newShareStatus,
+            });
+
+            return {
+               success: true,
+               shareStatus: newShareStatus,
+               content: updated,
+            };
          } catch (err) {
             if (err instanceof NotFoundError) {
                throw new TRPCError({ code: "NOT_FOUND", message: err.message });

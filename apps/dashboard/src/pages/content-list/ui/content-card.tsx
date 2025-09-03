@@ -18,7 +18,7 @@ import {
    CredenzaBody,
 } from "@packages/ui/components/credenza";
 import { ContentDeleteConfirmationCredenza } from "../features/content-delete-confirmation-credenza";
-import { Trash2, Eye } from "lucide-react";
+import { Trash2, Eye, Lock, Globe } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Badge } from "@packages/ui/components/badge";
 import type { RouterOutput } from "@packages/api/client";
@@ -134,9 +134,16 @@ export function ContentRequestCard({
                      <Badge variant="outline">
                         {new Date(request.createdAt).toLocaleDateString()}
                      </Badge>
-                     <Badge className="text-xs">
-                        {formatValueForDisplay(request.status ?? "")}
-                     </Badge>
+                     <div className="flex items-center gap-2">
+                        <Badge className="text-xs">
+                           {formatValueForDisplay(request.status ?? "")}
+                        </Badge>
+                        {request.shareStatus === "shared" ? (
+                           <Globe className="w-4 h-4 text-muted-foreground" />
+                        ) : (
+                           <Lock className="w-4 h-4 text-muted-foreground" />
+                        )}
+                     </div>
                   </CardFooter>
                </Card>
             </CredenzaTrigger>
