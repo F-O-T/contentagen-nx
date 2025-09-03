@@ -1,15 +1,11 @@
 import { AgentCreationManualForm } from "@/features/manual-agent-creation-form/ui/agent-creation-manual-form";
 import { useTRPC } from "@/integrations/clients";
-import { useIsomorphicLayoutEffect } from "@packages/ui/hooks/use-isomorphic-layout-effect";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 export function CreateAgentPage() {
    const navigate = useNavigate();
    const trpc = useTRPC();
-   const { data: customer } = useSuspenseQuery(
-      trpc.authHelpers.getCustomerState.queryOptions(),
-   );
 
    const agentMutation = useMutation(
       trpc.agent.create.mutationOptions({
@@ -26,17 +22,6 @@ export function CreateAgentPage() {
          },
       }),
    );
-   useIsomorphicLayoutEffect(() => {
-      if (!customer.activeSubscriptions?.length) {
-         toast.error(
-            "You must have an active subscription to create an agent.",
-         );
-         navigate({
-            to: "/agents",
-            replace: true,
-         });
-      }
-   }, [customer, navigate]);
    return (
       <AgentCreationManualForm
          onSubmit={async (values) => {

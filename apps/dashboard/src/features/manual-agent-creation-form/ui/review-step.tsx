@@ -183,7 +183,7 @@ export function ReviewStepSubscribe({ form }: { form: AgentForm }) {
       >
          {({ canSubmit, isSubmitting }) => (
             <Button type="submit" disabled={!canSubmit || isSubmitting}>
-               {isSubmitting ? "Creating..." : "Create Agent"}
+               {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
          )}
       </form.Subscribe>
