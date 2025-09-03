@@ -2,15 +2,14 @@ import { z } from "zod";
 import { parseEnv } from "./helpers";
 
 const EnvSchema = z.object({
-   POLAR_PREMIUM_PLAN: z.string(),
-   POLAR_PRO_PLAN: z.string(),
    DATABASE_URL: z.string(),
    BETTER_AUTH_GOOGLE_CLIENT_ID: z.string(),
    BETTER_AUTH_GOOGLE_CLIENT_SECRET: z.string(),
    ARCJET_KEY: z.string(),
    ARCJET_ENV: z.string().optional(),
    POLAR_ACCESS_TOKEN: z.string(),
-   POLAR_SUCCESS_URL: z.string(),
+   POLAR_FREE_PLAN_ID: z.string(),
+   POLAR_PAID_PLAN_ID: z.string(),
    RESEND_API_KEY: z.string(),
    BETTER_AUTH_SECRET: z.string(),
    BETTER_AUTH_TRUSTED_ORIGINS: z.string(),
