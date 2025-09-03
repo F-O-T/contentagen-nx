@@ -3,13 +3,19 @@ import { GeneratedContentDisplay } from "./generated-content-display";
 import { useTRPC } from "@/integrations/clients";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
-import { ContentStatsCard, ContentDetailsCard } from "./request-details-cards";
-import { ContentQualityCard } from "./content-quality";
+import {
+   ContentBasicDetailsCard,
+   ContentMetaDetailsCard,
+} from "./request-details-cards";
+
+import { ContentDetailsQuickActions } from "./content-details-quick-actions";
+import { ContentStatsCard } from "./content-stats-card";
 import { useSubscription } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
 import { useMemo } from "react";
 import { ContentLoadingDisplay } from "./content-loading-display";
 import { useMissingImagesNotification } from "../../content-list/lib/use-missing-images-notification";
+import { useState } from "react";
 
 export function ContentRequestDetailsPage() {
    const { id } = useParams({
@@ -17,6 +23,7 @@ export function ContentRequestDetailsPage() {
    });
    const trpc = useTRPC();
    const queryClient = useQueryClient();
+   const [editingBody, setEditingBody] = useState(false);
 
    // Initialize missing images notification hook
    useMissingImagesNotification();
@@ -78,17 +85,26 @@ export function ContentRequestDetailsPage() {
          {isGenerating && data?.status ? (
             <ContentLoadingDisplay status={data.status} />
          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-               <div className="col-span-1 gap-4 flex flex-col">
-                  <ContentQualityCard content={data} />
+            <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
+               <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
                   <ContentStatsCard content={data} />
-                  <ContentDetailsCard
+
+                  <GeneratedContentDisplay
+                     content={data}
+                     editingBody={editingBody}
+                     setEditingBody={setEditingBody}
+                  />
+               </div>
+               <div className="col-span-1 gap-4 flex flex-col">
+                  <ContentDetailsQuickActions
+                     content={data}
+                     onEditBody={() => setEditingBody(true)}
+                  />
+                  <ContentBasicDetailsCard content={data} />
+                  <ContentMetaDetailsCard
                      content={data}
                      relatedSlugs={relatedSlugs}
                   />
-               </div>
-               <div className="col-span-1 md:col-span-2">
-                  <GeneratedContentDisplay content={data} />
                </div>
             </div>
          )}
