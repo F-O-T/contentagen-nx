@@ -3,7 +3,7 @@ import {
    protectedProcedure,
    publicProcedure,
    router,
-   subscriptionProcedure,
+   organizationProcedure,
 } from "../trpc";
 import {
    eventEmitter,
@@ -51,7 +51,7 @@ const ContentImageStreamInput = z.object({
 });
 
 export const contentRouter = router({
-   regenerate: subscriptionProcedure
+   regenerate: organizationProcedure
       .input(ContentInsertSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
          try {
@@ -153,7 +153,7 @@ export const contentRouter = router({
             }
          }
       }),
-   addImageUrl: subscriptionProcedure
+   addImageUrl: organizationProcedure
       .input(ContentUpdateSchema.pick({ id: true, imageUrl: true }))
       .mutation(async ({ ctx, input }) => {
          try {
@@ -181,7 +181,7 @@ export const contentRouter = router({
             throw err;
          }
       }),
-   uploadImage: subscriptionProcedure
+   uploadImage: organizationProcedure
       .input(ContentImageUploadInput)
       .mutation(async ({ ctx, input }) => {
          try {
@@ -299,7 +299,7 @@ export const contentRouter = router({
             throw err;
          }
       }),
-   create: subscriptionProcedure
+   create: organizationProcedure
       .input(
          ContentInsertSchema.pick({
             agentId: true, // agentId is required for creation
@@ -501,7 +501,7 @@ export const contentRouter = router({
                      if (!agentSlugMap.has(agentId)) {
                         agentSlugMap.set(agentId, []);
                      }
-                     agentSlugMap.get(agentId)!.push(content.meta.slug);
+                     agentSlugMap.get(agentId)?.push(content.meta.slug);
                   }
                });
 
@@ -535,7 +535,7 @@ export const contentRouter = router({
             throw err;
          }
       }),
-   bulkApprove: subscriptionProcedure
+   bulkApprove: organizationProcedure
       .input(z.object({ ids: z.array(z.string()).min(1) }))
       .mutation(async ({ ctx, input }) => {
          try {
@@ -719,7 +719,8 @@ export const contentRouter = router({
          }
       }),
 
-   approve: subscriptionProcedure
+   approve: organizationProcedure
+
       .input(ContentInsertSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
          try {

@@ -1,4 +1,5 @@
 import type { AuthInstance } from "@packages/authentication/server";
+import type { Polar } from "@polar-sh/sdk";
 import type { DatabaseInstance } from "@packages/database/client";
 import { createTRPCContext as createTRPCContextInternal, router } from "./trpc";
 import { agentFileRouter } from "./router/agent-file";
@@ -30,6 +31,7 @@ export const createApi = ({
    minioClient,
    minioBucket,
    chromaClient,
+   polarClient,
 }: {
    openRouterClient: OpenRouterClient; // Replace with actual type if available
    minioBucket: string;
@@ -37,6 +39,7 @@ export const createApi = ({
    db: DatabaseInstance;
    minioClient: MinioClient;
    chromaClient: ChromaClient;
+   polarClient: Polar;
 }) => {
    return {
       trpcRouter: appRouter,
@@ -48,6 +51,7 @@ export const createApi = ({
             headers,
             minioBucket,
             chromaClient,
+            polarClient,
             openRouterClient, // Pass the OpenRouter client to the context
          }),
    };

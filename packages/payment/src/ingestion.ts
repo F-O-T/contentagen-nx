@@ -19,6 +19,15 @@ interface IngestBillingParams {
    externalCustomerId: string;
    metadata: EventCreateCustomer["metadata"];
 }
+export async function getCustomerState(
+   client: Polar,
+   externalId: IngestBillingParams["externalCustomerId"],
+) {
+   return await client.customers.getStateExternal({
+      externalId,
+   });
+}
+
 export async function ingestBilling(
    client: Polar,
    params: IngestBillingParams,

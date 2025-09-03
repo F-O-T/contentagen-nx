@@ -9,7 +9,12 @@ import {
    IdeaInsertSchema,
    IdeaUpdateSchema,
 } from "@packages/database/schemas/ideas";
-import { protectedProcedure, publicProcedure, router } from "../trpc";
+import {
+   protectedProcedure,
+   publicProcedure,
+   router,
+   organizationProcedure,
+} from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -216,7 +221,7 @@ export const ideasRouter = router({
          }
       }),
 
-   approve: protectedProcedure
+   approve: organizationProcedure
       .input(z.object({ id: z.string() }))
       .mutation(async ({ ctx, input }) => {
          const resolvedCtx = await ctx;
@@ -255,7 +260,7 @@ export const ideasRouter = router({
          return { success: true, content };
       }),
 
-   bulkApprove: protectedProcedure
+   bulkApprove: organizationProcedure
       .input(z.object({ ids: z.array(z.string()).min(1) }))
       .mutation(async ({ ctx, input }) => {
          const resolvedCtx = await ctx;

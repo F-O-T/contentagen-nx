@@ -8,7 +8,13 @@ import {
 import { serverEnv } from "@packages/environment/server";
 import type { Polar } from "@polar-sh/sdk";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
-import { emailOTP, openAPI, organization, apiKey } from "better-auth/plugins";
+import {
+   emailOTP,
+   openAPI,
+   admin,
+   organization,
+   apiKey,
+} from "better-auth/plugins";
 import { getDomain, isProduction } from "@packages/environment/helpers";
 import { POLAR_PLANS, POLAR_PLAN_SLUGS } from "@packages/payment/plans";
 import { polar, portal, checkout, usage } from "@polar-sh/better-auth";
@@ -73,6 +79,7 @@ export const getAuthOptions = (
          },
       },
       plugins: [
+         admin(),
          polar({
             client: polarClient,
             createCustomerOnSignUp: true,

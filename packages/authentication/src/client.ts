@@ -1,6 +1,7 @@
 import { createAuthClient as createBetterAuthClient } from "better-auth/react";
 import { polarClient } from "@polar-sh/better-auth";
 import {
+   adminClient,
    apiKeyClient,
    emailOTPClient,
    organizationClient,
@@ -17,6 +18,7 @@ export const createAuthClient = ({ apiBaseUrl }: AuthClientOptions) =>
          emailOTPClient(),
          apiKeyClient(),
          polarClient(),
+         adminClient(),
          organizationClient(),
       ],
    });

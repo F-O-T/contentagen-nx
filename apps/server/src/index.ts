@@ -5,7 +5,7 @@ import { ArcjetShield } from "./integrations/arcjet";
 import { posthogPlugin } from "./integrations/posthog";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { createApi } from "@packages/api/server";
-import { auth } from "./integrations/auth";
+import { auth, polarClient } from "./integrations/auth";
 import { db } from "./integrations/database";
 import { minioClient } from "./integrations/minio";
 import { chromaClient, openRouterClient } from "./integrations/chromadb";
@@ -64,6 +64,7 @@ createBullBoard({
    },
 });
 const trpcApi = createApi({
+   polarClient,
    chromaClient,
    openRouterClient,
    minioClient,

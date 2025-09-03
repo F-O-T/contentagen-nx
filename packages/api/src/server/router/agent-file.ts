@@ -1,7 +1,7 @@
 import { listFiles, uploadFile } from "@packages/files/client";
 import { compressImage } from "@packages/files/image-helper";
 import { z } from "zod";
-import { protectedProcedure, router, subscriptionProcedure } from "../trpc";
+import { protectedProcedure, router, organizationProcedure } from "../trpc";
 import {
    updateAgent,
    getAgentById,
@@ -26,7 +26,7 @@ const AgentProfilePhotoUploadInput = z.object({
 });
 
 export const agentFileRouter = router({
-   uploadProfilePhoto: subscriptionProcedure
+   uploadProfilePhoto: organizationProcedure
       .input(AgentProfilePhotoUploadInput)
       .mutation(async ({ ctx, input }) => {
          const { agentId, fileName, fileBuffer } = input;
@@ -54,7 +54,7 @@ export const agentFileRouter = router({
          await updateAgent(db, agentId, { profilePhotoUrl: key });
          return { url };
       }),
-   generateBrandKnowledge: subscriptionProcedure
+   generateBrandKnowledge: organizationProcedure
       .input(
          AgentInsertSchema.pick({ id: true }).extend({
             websiteUrl: z.url(),

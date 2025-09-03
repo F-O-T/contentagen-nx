@@ -8,7 +8,11 @@ import {
 } from "@packages/database/repositories/agent-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
-import { protectedProcedure, router } from "../trpc";
+import {
+   protectedProcedure,
+   organizationOwnerProcedure,
+   router,
+} from "../trpc";
 import { AgentUpdateSchema, type AgentInsert } from "@packages/database/schema";
 import {
    AgentSelectSchema,
@@ -45,7 +49,7 @@ export const agentRouter = router({
          }
       }),
 
-   transferToOrganization: protectedProcedure
+   transferToOrganization: organizationOwnerProcedure
       .input(AgentSelectSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
          const { id } = input;
@@ -131,7 +135,7 @@ export const agentRouter = router({
             avgQualityScore,
          };
       }),
-   create: protectedProcedure
+   create: organizationOwnerProcedure
       .input(PersonaConfigSchema)
       .mutation(async ({ ctx, input }) => {
          const resolvedCtx = await ctx;
