@@ -6,20 +6,14 @@ import {
    type SendEmailOTPOptions,
 } from "@packages/transactional/client";
 import { serverEnv } from "@packages/environment/server";
-
 import type { Polar } from "@polar-sh/sdk";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
-import {
-   getDatabaseAdapter,
-   getEmailAndPasswordOptions,
-   getEmailVerificationOptions,
-   getSocialProviders,
-} from "./helpers";
 import { emailOTP, openAPI, organization, apiKey } from "better-auth/plugins";
 import { getDomain, isProduction } from "@packages/environment/helpers";
 import { POLAR_PLANS, POLAR_PLAN_SLUGS } from "@packages/payment/plans";
 import { polar, portal, checkout, usage } from "@polar-sh/better-auth";
 import { findMemberByUserId } from "@packages/database/repositories/auth-repository";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 export interface AuthOptions {
    db: DatabaseInstance;
    polarClient: Polar;
@@ -39,7 +33,9 @@ export const getAuthOptions = (
    polarClient: Polar,
 ) =>
    ({
-      database: getDatabaseAdapter(db),
+      database: drizzleAdapter(db, {
+         provider: "pg",
+      }),
       databaseHooks: {
          session: {
             create: {
@@ -87,7 +83,7 @@ export const getAuthOptions = (
                   authenticatedUsersOnly: true,
                   products: [
                      POLAR_PLANS[POLAR_PLAN_SLUGS.BASIC],
-                     POLAR_PLANS[POLAR_PLAN_SLUGS.TEAM],
+                     POLAR_PLANS[POLAR_PLAN_SLUGS.HOBBY],
                   ],
                }),
                usage(),
@@ -129,9 +125,22 @@ export const getAuthOptions = (
             apiKeyHeaders: "sdk-api-key",
          }),
       ],
-      socialProviders: getSocialProviders(),
-      emailAndPassword: getEmailAndPasswordOptions(),
-      emailVerification: getEmailVerificationOptions(),
+      socialProviders: {
+         google: {
+            prompt: "select_account" as const,
+            clientId: serverEnv.BETTER_AUTH_GOOGLE_CLIENT_ID as string,
+            clientSecret: serverEnv.BETTER_AUTH_GOOGLE_CLIENT_SECRET as string,
+         },
+      },
+      emailAndPassword: {
+         enabled: true,
+         requireEmailVerification: true,
+      },
+      emailVerification: {
+         autoSignInAfterVerification: true,
+         sendOnSignUp: true,
+      },
+
       secret: serverEnv.BETTER_AUTH_SECRET,
       trustedOrigins: serverEnv.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
       advanced: {

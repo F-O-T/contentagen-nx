@@ -11,9 +11,6 @@ export const USAGE_TYPE = {
 } as const;
 
 export const BILLING_CONFIG = {
-   llmUsdPerMillion: 2.5,
-   llmTokensPerMillion: 1_000_000,
-   llmCreditValueUsd: 5,
    webBaseCreditUsd: 0.008,
    margin: 0.1,
 };
