@@ -4,14 +4,7 @@ import type { OpenRouterClient } from "./client";
 
 export const MODELS = {
    small: "deepseek/deepseek-chat-v3.1",
-   medium: "google/gemini-2.5-flash",
 };
-export const REASONING_EFFORT = {
-   low: 2048,
-   medium: 4096,
-   high: 8192,
-};
-type reasoningEffort = "low" | "medium" | "high";
 
 type GenerateTextParams = Parameters<typeof generateText>[0];
 type GenerateObjectParams = Parameters<typeof generateObject>[0];
@@ -19,20 +12,15 @@ export async function generateOpenRouterText(
    client: OpenRouterClient,
    lllmConfig: {
       model: keyof typeof MODELS;
-      reasoning?: reasoningEffort;
    },
    params: Omit<GenerateTextParams, "model">,
 ) {
-   const { model, reasoning } = lllmConfig;
+   const { model } = lllmConfig;
    const result = await generateText({
       ...params,
       model: client(MODELS[model], {
          usage: {
             include: true,
-         },
-         reasoning: {
-            max_tokens: reasoning ? REASONING_EFFORT[reasoning] : 0,
-            enabled: Boolean(reasoning),
          },
       }),
    });
@@ -42,12 +30,11 @@ export async function generateOpenRouterObject(
    client: OpenRouterClient,
    lllmConfig: {
       model: keyof typeof MODELS;
-      reasoning?: reasoningEffort;
    },
    schema: ZodObject,
    params: Omit<GenerateObjectParams, "model" | "schema">,
 ) {
-   const { model, reasoning } = lllmConfig;
+   const { model } = lllmConfig;
    const result = await generateObject({
       ...params,
       schema,
@@ -55,10 +42,6 @@ export async function generateOpenRouterObject(
       model: client(MODELS[model], {
          usage: {
             include: true,
-         },
-         reasoning: {
-            max_tokens: reasoning ? REASONING_EFFORT[reasoning] : 0,
-            enabled: Boolean(reasoning),
          },
       }),
    });
