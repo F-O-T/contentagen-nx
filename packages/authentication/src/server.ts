@@ -52,7 +52,7 @@ export const getAuthOptions = (
                         session.userId,
                      );
 
-                     if (member.organizationId) {
+                     if (member?.organizationId) {
                         console.log(
                            `Setting activeOrganizationId for user ${session.userId} to ${member.organizationId}`,
                         );
