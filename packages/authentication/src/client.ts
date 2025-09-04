@@ -19,6 +19,10 @@ export const createAuthClient = ({ apiBaseUrl }: AuthClientOptions) =>
          apiKeyClient(),
          polarClient(),
          adminClient(),
-         organizationClient(),
+         organizationClient({
+            teams: {
+               enabled: true,
+            },
+         }),
       ],
    });

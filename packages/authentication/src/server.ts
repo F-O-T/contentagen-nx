@@ -20,6 +20,7 @@ import { POLAR_PLANS, POLAR_PLAN_SLUGS } from "@packages/payment/plans";
 import { polar, portal, checkout, usage } from "@polar-sh/better-auth";
 import { findMemberByUserId } from "@packages/database/repositories/auth-repository";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { getCustomerState } from "@packages/payment/ingestion";
 export interface AuthOptions {
    db: DatabaseInstance;
    polarClient: Polar;
@@ -111,6 +112,16 @@ export const getAuthOptions = (
          openAPI(),
          organization({
             organizationLimit: 1,
+            teams: {
+               enabled: true,
+               maximumTeams: 10,
+               maximumMembersPerTeam: 50,
+               allowRemovingAllTeams: false,
+            },
+            allowUserToCreateOrganization: async (user) => {
+               const state = await getCustomerState(polarClient, user.id);
+               return state?.activeSubscriptions.length > 0;
+            },
             async sendInvitationEmail(data) {
                const inviteLink = `${getDomain()}/callback/organization/invitation/${data.id}`;
                await sendOrganizationInvitation(resendClient, {
