@@ -5,22 +5,32 @@ import Footer from "../components/Footer.astro";
 import BaseHead from "../components/BaseHead.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import { marked } from "marked";
-import type { ContentSelect } from "@packages/database/schema";
+import type { ContentSelectSchema, AuthorByAgentIdSchema } from "@contentagen/sdk";
+import type { z } from "zod";
 
 interface Props {
-   post: ContentSelect;
-   author: {
-      name: string;
-      profilePhoto: {
-         image: string;
-         contentType: string;
-      } | null;
-   };
-   relatedPosts: ContentSelect[];
+    post: z.infer<typeof ContentSelectSchema>;
+    author: z.infer<typeof AuthorByAgentIdSchema>;
+    relatedPosts: z.infer<typeof ContentSelectSchema>[];
 }
 
 const { post, author, relatedPosts } = Astro.props as Props;
 const htmlBody = marked.parse(post.body);
+
+// PostHog tracking script for blog post views
+const trackingScript = import.meta.env.PROD ? `
+<script>
+  if (window.posthog) {
+    window.posthog.capture('blog_post_view', {
+      post_id: '${post.id}',
+      post_slug: '${post.meta?.slug || ""}',
+      post_title: '${post.meta?.title || ""}',
+      agent_id: '${post.agentId}',
+      timestamp: new Date().toISOString()
+    });
+  }
+</script>
+` : '';
 ---
 
 <BaseHead
@@ -30,25 +40,39 @@ const htmlBody = marked.parse(post.body);
   keywords={post.meta?.keywords}
 />
 
+<!-- PostHog Blog Post View Tracking -->
+{import.meta.env.PROD && <script set:html={trackingScript} is:inline />}
+
 <Navbar />
 <main class="container mx-auto px-4 py-8 max-w-4xl">
   <article class="grid gap-4">
-     {post.imageUrl && (
-       <div >
-         <div class="relative overflow-hidden rounded-2xl shadow-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-           <Image
-             src={post.imageUrl ?? undefined}
-             alt={post.meta?.title ?? ""}
-             width={1020}
-             height={510}
-             class="w-full h-auto object-cover transition-transform duration-700 hover:scale-105"
-             format="webp"
-             loading="lazy"
-           />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none"></div>
-        </div>
-      </div>
-    )}
+     {(post.image || post.imageUrl) && (
+        <div >
+          <div class="relative overflow-hidden rounded-2xl shadow-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+            {post.image ? (
+              <img
+                src={`data:${post.image.contentType};base64,${post.image.data}`}
+                alt={post.meta?.title ?? ""}
+                width={1020}
+                height={510}
+                class="w-full h-auto object-cover transition-transform duration-700 hover:scale-105"
+                loading="lazy"
+              />
+             ) : post.imageUrl ? (
+               <Image
+                 src={post.imageUrl}
+                 alt={post.meta?.title ?? ""}
+                 width={1020}
+                 height={510}
+                 class="w-full h-auto object-cover transition-transform duration-700 hover:scale-105"
+                 format="webp"
+                 loading="lazy"
+               />
+             ) : null}
+           <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none"></div>
+         </div>
+       </div>
+     )}
 
     <div class="flex flex-col items-center gap-8">
       <header class="text-center max-w-3xl mx-auto grid gap-4">
@@ -58,13 +82,13 @@ const htmlBody = marked.parse(post.body);
 
         <div class="flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 py-4 border-y border-primary">
           <div class="flex items-center gap-2">
-            {author.profilePhoto && (
-              <img
-                src={`data:${author.profilePhoto.contentType};base64,${author.profilePhoto.image}`}
-                alt={author.name}
-                class="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700"
-              />
-            )}
+             {author.profilePhoto && (
+               <img
+                 src={`data:${author.profilePhoto.contentType};base64,${author.profilePhoto.data}`}
+                 alt={author.name}
+                 class="w-12 h-12 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700"
+               />
+             )}
             <div>
               <span class="text-sm font-medium text-foreground">By {author.name}</span>
               <div class="text-xs text-muted-foreground">Author</div>
@@ -103,20 +127,31 @@ const htmlBody = marked.parse(post.body);
               href={`/${relatedPost.meta?.slug}/`}
               class="block"
             >
-               {relatedPost.imageUrl && (
-                 <div class="relative overflow-hidden">
-                   <Image
-                     src={relatedPost.imageUrl ?? undefined}
-                     alt={relatedPost.meta?.title ?? ""}
-                     width={400}
-                     height={200}
-                     class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
-                     format="webp"
-                     loading="lazy"
-                   />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </div>
-              )}
+                {(relatedPost.image || relatedPost.imageUrl) && (
+                  <div class="relative overflow-hidden">
+                    {relatedPost.image ? (
+                      <img
+                        src={`data:${relatedPost.image.contentType};base64,${relatedPost.image.data}`}
+                        alt={relatedPost.meta?.title ?? ""}
+                        width={400}
+                        height={200}
+                        class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                     ) : relatedPost.imageUrl ? (
+                       <Image
+                         src={relatedPost.imageUrl}
+                         alt={relatedPost.meta?.title ?? ""}
+                         width={400}
+                         height={200}
+                         class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+                         format="webp"
+                         loading="lazy"
+                       />
+                     ) : null}
+                   <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                 </div>
+               )}
               <div class="p-4 grid gap-4">
                 <h3 class="text-lg font-semibold text-foreground  transition-colors line-clamp-2  leading-tight">
                   {relatedPost.meta?.title ?? ""}
