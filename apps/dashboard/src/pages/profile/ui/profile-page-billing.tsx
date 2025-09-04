@@ -26,7 +26,6 @@ export function ProfilePageBilling() {
       trpc.authHelpers.isOrganizationOwner.queryOptions(),
    );
    const activeSubscription = customerState?.activeSubscriptions[0];
-   const activeMeter = customerState?.activeMeters[0];
    const handleManageSubscription = useCallback(async () => {
       return await betterAuthClient.customer.portal();
    }, []);
@@ -132,6 +131,68 @@ export function ProfilePageBilling() {
       }).format(new Date(date));
    };
 
+   const computeMeterDetails = (
+      meter: { consumedUnits: number; creditedUnits: number },
+      subscriptionAmountCents: number,
+      currency: string,
+   ) => {
+      const consumed = meter?.consumedUnits ?? 0;
+      const credited = meter?.creditedUnits ?? 0;
+
+      // If credited is -1 we treat it as unlimited / not priced per unit
+      if (credited === -1 || credited === 0) {
+         return {
+            perUnitCents: 0,
+            consumedAmountCents: 0,
+            perUnitFormatted: "—",
+            consumedFormatted: "—",
+         };
+      }
+
+      // compute per-unit cost in cents (may be fractional) and total consumed amount in cents (float)
+      const perUnitCentsFloat = subscriptionAmountCents / credited; // fractional cents per unit
+      const consumedAmountCentsFloat = perUnitCentsFloat * consumed;
+
+      // Format per-unit price with higher precision for very small values
+      const formatCurrencyFlexible = (
+         amountCents: number,
+         currencyCode: string,
+      ) => {
+         const amountDollars = amountCents / 100;
+         const absAmount = Math.abs(amountDollars);
+
+         // If exactly zero, fall back to the normal formatter
+         if (absAmount === 0) {
+            return formatCurrency(Math.round(amountCents), currencyCode);
+         }
+
+         // For very small per-unit prices, show extra decimal places so value isn't rounded to $0.00
+         if (absAmount < 0.01) {
+            return new Intl.NumberFormat("en-US", {
+               style: "currency",
+               currency: currencyCode.toUpperCase(),
+               minimumFractionDigits: 6,
+               maximumFractionDigits: 8,
+            }).format(amountDollars);
+         }
+
+         // Otherwise show regular 2-decimal currency
+         return formatCurrency(Math.round(amountCents), currencyCode);
+      };
+
+      const consumedAmountCentsRounded = Math.round(consumedAmountCentsFloat);
+
+      return {
+         perUnitCents: perUnitCentsFloat,
+         consumedAmountCents: consumedAmountCentsRounded,
+         perUnitFormatted: formatCurrencyFlexible(perUnitCentsFloat, currency),
+         consumedFormatted: formatCurrency(
+            consumedAmountCentsRounded,
+            currency,
+         ),
+      };
+   };
+
    const calculateUsagePercentage = (consumed: number, credited: number) => {
       if (credited === 0) return 0;
       return Math.min((consumed / credited) * 100, 100);
@@ -150,9 +211,22 @@ export function ProfilePageBilling() {
       }
    };
 
+   // Compute meter details and usage percentage using the helper
+   const selectedMeter =
+      customerState?.activeMeters?.find((m) => (m?.creditedUnits ?? 0) > 0) ??
+      customerState?.activeMeters?.[0];
+
+   const meterDetails = selectedMeter
+      ? computeMeterDetails(
+           selectedMeter as { consumedUnits: number; creditedUnits: number },
+           activeSubscription?.amount ?? 0,
+           activeSubscription?.currency ?? "USD",
+        )
+      : null;
+
    const usagePercentage = calculateUsagePercentage(
-      activeMeter?.consumedUnits ?? 0,
-      activeMeter?.creditedUnits ?? 0,
+      selectedMeter?.consumedUnits ?? 0,
+      selectedMeter?.creditedUnits ?? 0,
    );
    const isNearLimit = usagePercentage > 80;
 
@@ -202,23 +276,58 @@ export function ProfilePageBilling() {
                      Usage this month
                   </h4>
                   <div className="space-y-4">
-                     {activeMeter ? (
-                        <div key={activeMeter.id}>
-                           <div className="flex justify-between text-sm mb-1">
-                              <span>
-                                 {activeMeter.consumedUnits.toLocaleString()} /{" "}
-                                 {activeMeter.creditedUnits === -1
+                     {selectedMeter ? (
+                        <div key={selectedMeter.id}>
+                           <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-medium">
+                                 Usage:{" "}
+                                 {selectedMeter.consumedUnits.toLocaleString()}{" "}
+                                 /{" "}
+                                 {selectedMeter.creditedUnits === -1
                                     ? "∞"
-                                    : activeMeter.creditedUnits.toLocaleString()}
+                                    : selectedMeter.creditedUnits.toLocaleString()}{" "}
+                                 units
                               </span>
+                              {meterDetails?.consumedFormatted && (
+                                 <span className="text-sm font-semibold text-green-600">
+                                    {meterDetails.consumedFormatted}
+                                 </span>
+                              )}
                            </div>
                            <Progress value={usagePercentage} className="h-2" />
-                           {isNearLimit && activeMeter.creditedUnits !== -1 && (
-                              <p className="text-xs text-orange-600 mt-1 flex items-center">
-                                 <AlertCircle className="h-3 w-3 mr-1" />
-                                 Approaching limit
-                              </p>
-                           )}
+                           <div className="flex justify-between text-xs text-foreground/60 mt-1">
+                              <span>
+                                 Remaining:{" "}
+                                 {selectedMeter.creditedUnits === -1
+                                    ? "∞"
+                                    : (
+                                         selectedMeter.creditedUnits -
+                                         selectedMeter.consumedUnits
+                                      ).toLocaleString()}{" "}
+                                 units
+                              </span>
+                              {meterDetails &&
+                                 selectedMeter.creditedUnits !== -1 && (
+                                    <span>
+                                       Remaining value:{" "}
+                                       {formatCurrency(
+                                          Math.round(
+                                             (selectedMeter.creditedUnits -
+                                                selectedMeter.consumedUnits) *
+                                                meterDetails.perUnitCents,
+                                          ),
+                                          activeSubscription?.currency ?? "USD",
+                                       )}
+                                    </span>
+                                 )}
+                           </div>
+                           {isNearLimit &&
+                              selectedMeter.creditedUnits !== -1 && (
+                                 <p className="text-xs text-orange-600 mt-1 flex items-center">
+                                    <AlertCircle className="h-3 w-3 mr-1" />
+                                    Approaching limit
+                                 </p>
+                              )}
                         </div>
                      ) : (
                         <p className="text-sm text-foreground/60">
