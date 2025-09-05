@@ -131,7 +131,6 @@ export function ContentDetailsQuickActions({
       label: string;
       onClick: () => void;
       disabled: boolean;
-      isCustomComponent?: boolean;
    }
 
    const actions: ActionItem[] = [
