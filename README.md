@@ -1,48 +1,8 @@
-<div align="center">
-  <h1>🤖 ContentaGen</h1>
-  <p><strong>Build Your Own AI Content Team.</strong></p>
-  <p>An open-source, agent-based platform for creating strategic, brand-aligned SEO content at scale.</p>
-</div>
-
-<p align="center">
-  <a href="https://github.com/your-username/contentagen/actions/workflows/check.yml">
-    <img src="https://github.com/your-username/contentagen/actions/workflows/check.yml/badge.svg" alt="Biome Check Status">
-  </a>
-  <a href="https://github.com/your-username/contentagen/actions/workflows/typecheck.yml">
-    <img src="https://github.com/your-username/contentagen/actions/workflows/typecheck.yml/badge.svg" alt="TypeScript Typecheck Status">
-  </a>
-  <a href="https://github.com/your-username/contentagen/blob/master/LICENSE">
-    <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License">
-  </a>
-</p>
-
----
-
-**ContentaGen** is not just another AI writer. It's a strategic content operations platform that allows you to build, manage, and deploy a team of specialized AI agents. Each agent can be fine-tuned with a unique persona, brand voice, and knowledge base, ensuring every piece of content is perfectly aligned with your SEO and brand strategy.
-
-## ✨ Key Features
-
--   🧠 **Custom AI Agents**: Create highly configurable agents with distinct personalities, voices, tones, and target audiences.
--   📚 **Brand Brain**: Automatically build a dedicated knowledge base for each agent by simply providing a website URL. Your agent learns your brand, products, and style.
--   🚀 **Automated Content Workflow**: Streamline your entire content lifecycle, from idea generation and research to writing, editing, and post-processing.
--   🔗 **Headless CMS & SDK**: Treat your generated content as a headless source. Fetch articles, posts, and data programmatically using our TypeScript SDK to power any frontend application.
--   🏢 **Multi-Tenancy & Organizations**: Manage multiple brands or clients within a single dashboard, with support for team members and invitations.
--   🛠️ **Modern, Open-Source Stack**: Built with TypeScript, ElysiaJS, React, Astro, and Drizzle ORM in a high-performance Nx monorepo using Bun.
-
-## 🚀 Live Demos
+## Live Demos
 
 -   **Dashboard**: `https://app.contentagen.com` 
--   **Blog Example**: `https://blog.contentagen.com` - A live blog powered entirely by content from a ContentaGen agent!
-
-## 🏁 Getting Started
-
-Get the ContentaGen platform running on your local machine in a few steps.
-
-### Prerequisites
-
--   [Bun](https://bun.sh/) (v1.1.0 or higher)
--   [Docker](https://www.docker.com/) and Docker Compose
-
+-   **Blog Example**: `https://blog.contentagen.com` - A live blog powered entirely by the sdk
+-   
 ## 📂 Project Structure
 
 This project is a monorepo managed by [Nx](https://nx.dev).
