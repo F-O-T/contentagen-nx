@@ -15,7 +15,7 @@ const openrouter = createOpenrouterClient(serverEnv.OPENROUTER_API_KEY);
 // Configuration constants
 const MAX_RETRIES = 3;
 const TIMEOUT_MS = 60000; // 60 seconds
-const EXPECTED_IDEAS_COUNT = 5; // Match the number of placeholder ideas created
+const EXPECTED_IDEAS_COUNT = 4; // Match the number of placeholder ideas created
 
 export async function runGenerateIdea(payload: {
    personaConfig: PersonaConfig;
