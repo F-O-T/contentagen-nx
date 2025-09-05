@@ -193,20 +193,15 @@ export function ContentDetailsQuickActions({
                {actions.map((action, index) => (
                   <Tooltip key={`content-action-${index + 1}`}>
                      <TooltipTrigger asChild>
-                        {action.isCustomComponent &&
-                           action.label === "Blog Preview" ? (
-                           <BlogPreviewCredenza content={content} />
-                        ) : (
-                           <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={action.onClick}
-                              disabled={action.disabled}
-                              className="flex items-center gap-2"
-                           >
-                              <action.icon className="w-4 h-4" />
-                           </Button>
-                        )}
+                        <Button
+                           size="icon"
+                           variant="outline"
+                           onClick={action.onClick}
+                           disabled={action.disabled}
+                           className="flex items-center gap-2"
+                        >
+                           <action.icon className="w-4 h-4" />
+                        </Button>
                      </TooltipTrigger>
                      <TooltipContent>{action.label}</TooltipContent>
                   </Tooltip>
