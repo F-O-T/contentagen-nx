@@ -8,6 +8,7 @@ import {
    Upload,
    Share,
    Lock,
+   Eye,
 } from "lucide-react";
 import {
    Card,
@@ -28,6 +29,7 @@ import { useState } from "react";
 import type { ContentSelect } from "@packages/database/schema";
 import { ContentDeleteConfirmationCredenza } from "../../content-list/features/content-delete-confirmation-credenza";
 import { UploadContentImage } from "./upload-content-image";
+import { BlogPreviewCredenza } from "./blog-preview-credenza";
 
 export function ContentDetailsQuickActions({
    content,
@@ -123,7 +125,15 @@ export function ContentDetailsQuickActions({
       toggleShareMutation.mutate({ id: content.id });
    };
 
-   const actions = [
+   interface ActionItem {
+      icon: React.ComponentType<{ className?: string }>;
+      label: string;
+      onClick: () => void;
+      disabled: boolean;
+      isCustomComponent?: boolean;
+   }
+
+   const actions: ActionItem[] = [
       {
          icon: RotateCcw,
          label: "Regenerate Content",
@@ -141,6 +151,13 @@ export function ContentDetailsQuickActions({
          label: "Upload Image",
          onClick: () => setUploadImageOpen(true),
          disabled: false,
+      },
+      {
+         icon: Eye,
+         label: "Blog Preview",
+         onClick: () => {},
+         disabled: false,
+         isCustomComponent: true,
       },
       {
          icon: CheckCircle,
@@ -176,15 +193,20 @@ export function ContentDetailsQuickActions({
                {actions.map((action, index) => (
                   <Tooltip key={`content-action-${index + 1}`}>
                      <TooltipTrigger asChild>
-                        <Button
-                           size="icon"
-                           variant="outline"
-                           onClick={action.onClick}
-                           disabled={action.disabled}
-                           className="flex items-center gap-2"
-                        >
-                           <action.icon className="w-4 h-4" />
-                        </Button>
+                        {action.isCustomComponent &&
+                        action.label === "Blog Preview" ? (
+                           <BlogPreviewCredenza content={content} />
+                        ) : (
+                           <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={action.onClick}
+                              disabled={action.disabled}
+                              className="flex items-center gap-2"
+                           >
+                              <action.icon className="w-4 h-4" />
+                           </Button>
+                        )}
                      </TooltipTrigger>
                      <TooltipContent>{action.label}</TooltipContent>
                   </Tooltip>
