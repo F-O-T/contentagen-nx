@@ -43,6 +43,7 @@ export function ContentDetailsQuickActions({
    const queryClient = useQueryClient();
    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
    const [uploadImageOpen, setUploadImageOpen] = useState(false);
+   const [blogPreviewOpen, setBlogPreviewOpen] = useState(false);
 
    const regenerateMutation = useMutation(
       trpc.content.regenerate.mutationOptions({
@@ -155,9 +156,8 @@ export function ContentDetailsQuickActions({
       {
          icon: Eye,
          label: "Blog Preview",
-         onClick: () => {},
+         onClick: () => setBlogPreviewOpen(true),
          disabled: false,
-         isCustomComponent: true,
       },
       {
          icon: CheckCircle,
@@ -194,7 +194,7 @@ export function ContentDetailsQuickActions({
                   <Tooltip key={`content-action-${index + 1}`}>
                      <TooltipTrigger asChild>
                         {action.isCustomComponent &&
-                        action.label === "Blog Preview" ? (
+                           action.label === "Blog Preview" ? (
                            <BlogPreviewCredenza content={content} />
                         ) : (
                            <Button
@@ -225,6 +225,11 @@ export function ContentDetailsQuickActions({
             content={content}
             open={uploadImageOpen}
             onOpenChange={setUploadImageOpen}
+         />
+         <BlogPreviewCredenza
+            content={content}
+            open={blogPreviewOpen}
+            onOpenChange={setBlogPreviewOpen}
          />
       </>
    );

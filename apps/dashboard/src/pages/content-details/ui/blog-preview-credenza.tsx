@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
    Credenza,
    CredenzaContent,
@@ -7,8 +6,6 @@ import {
    CredenzaBody,
    CredenzaDescription,
 } from "@packages/ui/components/credenza";
-import { Button } from "@packages/ui/components/button";
-import { Eye } from "lucide-react";
 import type { ContentSelect } from "@packages/database/schema";
 import { useQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
@@ -17,10 +14,15 @@ import { ScrollArea } from "@packages/ui/components/scroll-area";
 
 interface BlogPreviewCredenzaProps {
    content: ContentSelect;
+   open?: boolean;
+   onOpenChange?: (open: boolean) => void;
 }
 
-export function BlogPreviewCredenza({ content }: BlogPreviewCredenzaProps) {
-   const [open, setOpen] = useState(false);
+export function BlogPreviewCredenza({
+   content,
+   open,
+   onOpenChange,
+}: BlogPreviewCredenzaProps) {
    const trpc = useTRPC();
 
    // Fetch content image if imageUrl exists
@@ -55,17 +57,8 @@ export function BlogPreviewCredenza({ content }: BlogPreviewCredenzaProps) {
       agentData?.personaConfig?.metadata?.name || "ContentaGen Team";
 
    return (
-      <Credenza open={open} onOpenChange={setOpen}>
-         <Button
-            size="icon"
-            variant="outline"
-            onClick={() => setOpen(true)}
-            className="flex items-center gap-2"
-         >
-            <Eye className="w-4 h-4" />
-         </Button>
-
-         <CredenzaContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <Credenza open={open} onOpenChange={onOpenChange}>
+         <CredenzaContent>
             <CredenzaHeader>
                <CredenzaTitle>Blog Post Preview</CredenzaTitle>
                <CredenzaDescription>
@@ -73,8 +66,8 @@ export function BlogPreviewCredenza({ content }: BlogPreviewCredenzaProps) {
                </CredenzaDescription>
             </CredenzaHeader>
 
-            <CredenzaBody className="max-h-96">
-               <ScrollArea>
+            <CredenzaBody className="max-h-96 overflow-y-auto">
+               <ScrollArea className="h-full ">
                   <article className="space-y-4">
                      {contentImage?.data && (
                         <div className="relative overflow-hidden rounded-2xl shadow-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
