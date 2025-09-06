@@ -12,7 +12,7 @@ import {
    getNextVersionNumber,
    getVersionByNumber,
 } from "@packages/database/repositories/content-version-repository";
-import { createDiff } from "@packages/helpers/text";
+import { createDiff, createLineDiff } from "@packages/helpers/text";
 
 const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
 
@@ -38,8 +38,11 @@ export async function runSaveContent(payload: {
          try {
             // Calculate diff from specified base version or latest version
             let diff = null;
+            let lineDiff = null;
+            let changedFields: string[] = [];
             try {
                let baseVersionBody = "";
+               let baseVersionMeta: ContentMeta = {};
 
                if (baseVersion) {
                   // Get the specific version to compare against
@@ -49,6 +52,7 @@ export async function runSaveContent(payload: {
                      baseVersion,
                   );
                   baseVersionBody = baseVersionData.body;
+                  baseVersionMeta = baseVersionData.meta;
                } else {
                   // Use latest version (current behavior)
                   const previousVersion = await getLatestVersionByContentId(
@@ -56,9 +60,37 @@ export async function runSaveContent(payload: {
                      contentId,
                   );
                   baseVersionBody = previousVersion.body;
+                  baseVersionMeta = previousVersion.meta;
                }
 
                diff = createDiff(baseVersionBody, content);
+               lineDiff = createLineDiff(baseVersionBody, content);
+
+               // Track which fields changed
+               if (meta.title !== baseVersionMeta.title) {
+                  changedFields.push("title");
+               }
+               if (meta.description !== baseVersionMeta.description) {
+                  changedFields.push("description");
+               }
+               if (
+                  JSON.stringify(meta.keywords) !==
+                  JSON.stringify(baseVersionMeta.keywords)
+               ) {
+                  changedFields.push("keywords");
+               }
+               if (meta.slug !== baseVersionMeta.slug) {
+                  changedFields.push("slug");
+               }
+               if (
+                  JSON.stringify(meta.sources) !==
+                  JSON.stringify(baseVersionMeta.sources)
+               ) {
+                  changedFields.push("sources");
+               }
+               if (content !== baseVersionBody) {
+                  changedFields.push("body");
+               }
             } catch (err) {
                // If no base version exists, diff will be null
                console.log("No base version found for diff calculation");
@@ -75,6 +107,8 @@ export async function runSaveContent(payload: {
                body: content,
                meta: meta || {},
                diff,
+               lineDiff,
+               changedFields,
             });
 
             // Update the content's current version

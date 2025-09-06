@@ -11,6 +11,7 @@ import { Button } from "@packages/ui/components/button";
 import { Separator } from "@packages/ui/components/separator";
 import { ScrollArea } from "@packages/ui/components/scroll-area";
 import { User, Calendar, FileText, GitCompare } from "lucide-react";
+import { EnhancedDiffRenderer } from "./enhanced-diff-renderer";
 
 interface VersionDetailsCredenzaProps {
    version: any;
@@ -27,47 +28,6 @@ export function VersionDetailsCredenza({
 
    const formatDate = (date: string) => {
       return new Date(date).toLocaleString();
-   };
-
-   const renderDiff = (diff: any[]) => {
-      if (!diff || !Array.isArray(diff)) {
-         return <p className="text-muted-foreground">No diff available</p>;
-      }
-
-      return (
-         <div className="space-y-1 font-mono text-sm">
-            {diff.map((change, index) => {
-               const [operation, text] = change;
-               let className = "";
-               let prefix = "";
-
-               switch (operation) {
-                  case -1: // deleted
-                     className =
-                        "bg-red-50 text-red-800 border-l-4 border-red-500 pl-2";
-                     prefix = "- ";
-                     break;
-                  case 1: // inserted
-                     className =
-                        "bg-green-50 text-green-800 border-l-4 border-green-500 pl-2";
-                     prefix = "+ ";
-                     break;
-                  case 0: // unchanged
-                  default:
-                     className = "text-muted-foreground";
-                     prefix = "  ";
-                     break;
-               }
-
-               return (
-                  <div key={index} className={className}>
-                     {prefix}
-                     {text}
-                  </div>
-               );
-            })}
-         </div>
-      );
    };
 
    return (
@@ -118,8 +78,8 @@ export function VersionDetailsCredenza({
                      </ScrollArea>
                   </div>
 
-                  {/* Diff Section */}
-                  {version.diff && (
+                  {/* Enhanced Diff Section */}
+                  {(version.lineDiff || version.diff) && (
                      <>
                         <Separator />
                         <div className="space-y-2">
@@ -127,9 +87,53 @@ export function VersionDetailsCredenza({
                               <GitCompare className="h-5 w-5" />
                               Changes from Previous Version
                            </h3>
-                           <ScrollArea className="h-64 w-full border rounded-md p-4 bg-muted/20">
-                              {renderDiff(version.diff)}
-                           </ScrollArea>
+                           {version.lineDiff ? (
+                              <EnhancedDiffRenderer
+                                 lineDiff={version.lineDiff}
+                                 changedFields={version.changedFields}
+                              />
+                           ) : version.diff ? (
+                              <ScrollArea className="h-64 w-full border rounded-md p-4 bg-muted/20">
+                                 <div className="font-mono text-sm">
+                                    {version.diff.map(
+                                       (change: any[], index: number) => {
+                                          const [operation, text] = change;
+                                          let className = "";
+                                          let prefix = "";
+
+                                          switch (operation) {
+                                             case -1: // deleted
+                                                className =
+                                                   "bg-red-50 text-red-800 border-l-4 border-red-500 pl-2";
+                                                prefix = "- ";
+                                                break;
+                                             case 1: // inserted
+                                                className =
+                                                   "bg-green-50 text-green-800 border-l-4 border-green-500 pl-2";
+                                                prefix = "+ ";
+                                                break;
+                                             case 0: // unchanged
+                                             default:
+                                                className =
+                                                   "text-muted-foreground";
+                                                prefix = "  ";
+                                                break;
+                                          }
+
+                                          return (
+                                             <div
+                                                key={index}
+                                                className={className}
+                                             >
+                                                {prefix}
+                                                {text}
+                                             </div>
+                                          );
+                                       },
+                                    )}
+                                 </div>
+                              </ScrollArea>
+                           ) : null}
                         </div>
                      </>
                   )}
