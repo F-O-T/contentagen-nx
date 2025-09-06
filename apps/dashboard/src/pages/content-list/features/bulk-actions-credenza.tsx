@@ -19,14 +19,14 @@ interface BulkActionsCredenzaProps {
    open: boolean;
    onOpenChange: (open: boolean) => void;
    selectedItems: string[];
-   onUnselectAll: () => void;
+   onClearSelection: () => void;
 }
 
 export function BulkActionsCredenza({
    open,
    onOpenChange,
    selectedItems,
-   onUnselectAll,
+   onClearSelection,
 }: BulkActionsCredenzaProps) {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
@@ -45,7 +45,7 @@ export function BulkActionsCredenza({
                   : `Successfully approved ${result.approvedCount} content items`;
             toast.success(message);
             onOpenChange(false);
-            onUnselectAll();
+            onClearSelection();
             await queryClient.invalidateQueries({
                queryKey: trpc.content.listAllContent.queryKey(),
             });
@@ -64,7 +64,7 @@ export function BulkActionsCredenza({
                `Successfully deleted ${result.deletedCount} content items`,
             );
             onOpenChange(false);
-            onUnselectAll();
+            onClearSelection();
             await queryClient.invalidateQueries({
                queryKey: trpc.content.listAllContent.queryKey(),
             });

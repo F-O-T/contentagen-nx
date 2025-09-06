@@ -23,6 +23,7 @@ interface ContentListContextType {
    handleSelectionChange: (id: string, selected: boolean) => void;
    allSelectableSelected: boolean;
    handleSelectAll: () => void;
+   clearSelection: () => void;
    selectedItemsCount: number;
 
    // Filtering state
@@ -179,6 +180,10 @@ export function ContentListProvider({
       });
    }, [selectableItems, allSelectableSelected]);
 
+   const clearSelection = useCallback(() => {
+      setSelectedItems(new Set());
+   }, []);
+
    const value: ContentListContextType = {
       // Pagination
       page,
@@ -190,6 +195,7 @@ export function ContentListProvider({
       handleSelectionChange,
       allSelectableSelected,
       handleSelectAll,
+      clearSelection,
       selectedItemsCount: selectedItems.size,
 
       // Filtering

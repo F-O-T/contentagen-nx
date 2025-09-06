@@ -22,6 +22,7 @@ interface IdeasListContextType {
    handleSelectionChange: (id: string, selected: boolean) => void;
    allSelected: boolean;
    handleSelectAll: () => void;
+   clearSelection: () => void;
    selectedItemsCount: number;
 
    // Data state
@@ -130,16 +131,20 @@ export function IdeasListProvider({
          (item: RouterOutput["ideas"]["listAllIdeas"]["items"][0]) => item.id,
       );
 
-      setSelectedItems((prev) => {
+      setSelectedItems(() => {
          if (allSelected) {
             // If all items are selected, deselect all
             return new Set();
          } else {
-            // Select all items
-            return new Set([...prev, ...selectableIds]);
+            // Select all selectable items (replace any existing selection)
+            return new Set(selectableIds);
          }
       });
    }, [selectableItems, allSelected]);
+
+   const clearSelection = useCallback(() => {
+      setSelectedItems(new Set());
+   }, []);
 
    const value: IdeasListContextType = {
       // Pagination
@@ -153,6 +158,7 @@ export function IdeasListProvider({
       handleSelectionChange,
       allSelected,
       handleSelectAll,
+      clearSelection,
       selectedItemsCount: selectedItems.size,
 
       // Data

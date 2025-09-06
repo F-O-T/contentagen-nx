@@ -26,15 +26,10 @@ export function IdeasListToolbar() {
       allSelected,
       selectedItems,
       selectedItemsCount,
+      clearSelection,
    } = useIdeasList();
 
    const [openBulk, setOpenBulk] = useState(false);
-
-   const handleUnselectAll = () => {
-      if (allSelected) {
-         handleSelectAll();
-      }
-   };
 
    const actions = useMemo(
       () => [
@@ -104,7 +99,7 @@ export function IdeasListToolbar() {
             open={openBulk}
             onOpenChange={setOpenBulk}
             selectedItems={Array.from(selectedItems)}
-            onUnselectAll={handleUnselectAll}
+            onClearSelection={clearSelection}
          />
       </>
    );

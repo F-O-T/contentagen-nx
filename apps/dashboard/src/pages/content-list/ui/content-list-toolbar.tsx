@@ -34,13 +34,9 @@ export function ContentListToolbar() {
       setSelectedAgents,
       agents,
       selectedItems,
+      clearSelection,
    } = useContentList();
 
-   const handleUnselectAll = () => {
-      if (allSelectableSelected) {
-         handleSelectAll();
-      }
-   };
    const [openFilter, setOpenFilter] = useState(false);
    const [openBulk, setOpenBulk] = useState(false);
    const [openNewContent, setOpenNewContent] = useState(false);
@@ -135,7 +131,7 @@ export function ContentListToolbar() {
             open={openBulk}
             onOpenChange={setOpenBulk}
             selectedItems={Array.from(selectedItems)}
-            onUnselectAll={handleUnselectAll}
+            onClearSelection={clearSelection}
          />
       </>
    );
