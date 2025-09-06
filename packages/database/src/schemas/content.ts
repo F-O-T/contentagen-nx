@@ -6,6 +6,7 @@ import {
    timestamp,
    index,
    pgEnum,
+   integer,
 } from "drizzle-orm/pg-core";
 import { agent } from "./agent";
 import { z } from "zod";
@@ -86,6 +87,7 @@ export const content = pgTable(
       meta: jsonb("meta").$type<ContentMeta>().default({}),
       request: jsonb("request").$type<ContentRequest>().notNull(),
       stats: jsonb("stats").$type<ContentStats>().default({}),
+      currentVersion: integer("current_version").default(0),
       createdAt: timestamp("created_at")
          .$defaultFn(() => new Date())
          .notNull(),

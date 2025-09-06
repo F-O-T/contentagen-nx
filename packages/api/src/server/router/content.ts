@@ -33,7 +33,15 @@ import {
    deleteBulkContent,
    approveBulkContent,
    listContents,
+   updateContentCurrentVersion,
 } from "@packages/database/repositories/content-repository";
+import {
+   createContentVersion,
+   getAllVersionsByContentId,
+   getLatestVersionByContentId,
+   getNextVersionNumber,
+   getVersionByNumber,
+} from "@packages/database/repositories/content-version-repository";
 import { canModifyContent } from "@packages/database";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
@@ -276,7 +284,11 @@ export const contentRouter = router({
          }
       }),
    editBody: protectedProcedure
-      .input(ContentUpdateSchema.pick({ id: true, body: true }))
+      .input(
+         ContentUpdateSchema.pick({ id: true, body: true }).extend({
+            baseVersion: z.number().optional(), // Optional version to compare against
+         }),
+      )
       .mutation(async ({ ctx, input }) => {
          try {
             const db = (await ctx).db;
@@ -286,10 +298,76 @@ export const contentRouter = router({
                   message: "Content ID and body are required.",
                });
             }
+
+            // Get the current content to calculate diff
+            const currentContent = await getContentById(db, input.id);
+            if (!currentContent) {
+               throw new TRPCError({
+                  code: "NOT_FOUND",
+                  message: "Content not found.",
+               });
+            }
+
+            // Get the user ID
+            const userId = (await ctx).session?.user.id;
+            if (!userId) {
+               throw new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message: "User must be authenticated to edit content.",
+               });
+            }
+
+            // Calculate diff from specified base version or latest version
+            let diff = null;
+            try {
+               let baseVersionBody = "";
+
+               if (input.baseVersion) {
+                  // Get the specific version to compare against
+                  const baseVersion = await getVersionByNumber(
+                     db,
+                     input.id,
+                     input.baseVersion,
+                  );
+                  baseVersionBody = baseVersion.body;
+               } else {
+                  // Use latest version (current behavior)
+                  const previousVersion = await getLatestVersionByContentId(
+                     db,
+                     input.id,
+                  );
+                  baseVersionBody = previousVersion.body;
+               }
+
+               const { createDiff } = await import("@packages/helpers/text");
+               diff = createDiff(baseVersionBody, input.body);
+            } catch (err) {
+               // If no base version exists, diff will be null
+               console.log("No base version found for diff calculation");
+            }
+
+            // Get next version number
+            const versionNumber = await getNextVersionNumber(db, input.id);
+
+            // Create new version
+            await createContentVersion(db, {
+               contentId: input.id,
+               userId,
+               version: versionNumber,
+               body: input.body,
+               meta: currentContent.meta || {},
+               diff,
+            });
+
+            // Update the content's current version
+            await updateContentCurrentVersion(db, input.id, versionNumber);
+
+            // Update the content
             const updated = await updateContent(db, input.id, {
                body: input.body,
             });
-            return { success: true, content: updated };
+
+            return { success: true, content: updated, version: versionNumber };
          } catch (err) {
             if (err instanceof NotFoundError) {
                throw new TRPCError({ code: "NOT_FOUND", message: err.message });
@@ -324,7 +402,19 @@ export const contentRouter = router({
             }
             const created = await createContent((await ctx).db, {
                ...input,
+               currentVersion: 1, // Set initial version
             });
+
+            // Create initial version
+            await createContentVersion((await ctx).db, {
+               contentId: created.id,
+               userId,
+               version: 1,
+               body: created.body || "",
+               meta: created.meta || {},
+               diff: null, // No diff for initial version
+            });
+
             await enqueueContentPlanningJob({
                agentId: input.agentId,
                contentId: created.id,
@@ -942,6 +1032,63 @@ export const contentRouter = router({
                );
 
             return slugs;
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
+      }),
+   getVersions: protectedProcedure
+      .input(z.object({ contentId: z.string() }))
+      .query(async ({ ctx, input }) => {
+         try {
+            if (!input.contentId) {
+               throw new TRPCError({
+                  code: "BAD_REQUEST",
+                  message: "Content ID is required.",
+               });
+            }
+
+            const resolvedCtx = await ctx;
+            const userId = resolvedCtx.session?.user.id;
+            const organizationId =
+               resolvedCtx.session?.session?.activeOrganizationId;
+
+            if (!userId) {
+               throw new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message: "User must be authenticated to view versions.",
+               });
+            }
+
+            // Check if user can access this content
+            const canAccess = await canModifyContent(
+               resolvedCtx.db,
+               input.contentId,
+               userId,
+               organizationId ?? "",
+            );
+
+            if (!canAccess) {
+               throw new TRPCError({
+                  code: "FORBIDDEN",
+                  message:
+                     "You don't have permission to view versions for this content.",
+               });
+            }
+
+            const versions = await getAllVersionsByContentId(
+               resolvedCtx.db,
+               input.contentId,
+            );
+            return versions;
          } catch (err) {
             if (err instanceof NotFoundError) {
                throw new TRPCError({ code: "NOT_FOUND", message: err.message });

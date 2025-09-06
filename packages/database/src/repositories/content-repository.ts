@@ -91,6 +91,28 @@ export async function updateContent(
    }
 }
 
+export async function updateContentCurrentVersion(
+   dbClient: DatabaseInstance,
+   id: string,
+   version: number,
+): Promise<Content> {
+   try {
+      const result = await dbClient
+         .update(content)
+         .set({ currentVersion: version })
+         .where(eq(content.id, id))
+         .returning();
+      const updated = result?.[0];
+      if (!updated) throw new NotFoundError("Content not found");
+      return updated;
+   } catch (err) {
+      if (err instanceof NotFoundError) throw err;
+      throw new DatabaseError(
+         `Failed to update content current version: ${(err as Error).message}`,
+      );
+   }
+}
+
 export async function deleteContent(
    dbClient: DatabaseInstance,
    id: string,

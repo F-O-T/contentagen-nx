@@ -64,6 +64,7 @@ export async function runContentPostProcessing(
          meta: metadata,
          stats,
          contentId,
+         userId, // Pass userId for versioning
       });
    } catch (error) {
       console.error("[ContentPostProcessing] PIPELINE ERROR", {

@@ -1,8 +1,18 @@
-import { updateContent } from "@packages/database/repositories/content-repository";
+import {
+   updateContent,
+   updateContentCurrentVersion,
+} from "@packages/database/repositories/content-repository";
 import { createDb } from "@packages/database/client";
 import { serverEnv } from "@packages/environment/server";
 import type { ContentMeta, ContentStats } from "@packages/database/schema";
 import { emitContentStatusChanged } from "@packages/server-events";
+import {
+   createContentVersion,
+   getLatestVersionByContentId,
+   getNextVersionNumber,
+   getVersionByNumber,
+} from "@packages/database/repositories/content-version-repository";
+import { createDiff } from "@packages/helpers/text";
 
 const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
 
@@ -11,8 +21,10 @@ export async function runSaveContent(payload: {
    content: string;
    stats: ContentStats;
    meta: ContentMeta;
+   userId?: string;
+   baseVersion?: number; // Optional version to compare against
 }) {
-   const { contentId, content, meta, stats } = payload;
+   const { contentId, content, meta, stats, userId, baseVersion } = payload;
    try {
       await updateContent(db, contentId, {
          body: content,
@@ -20,6 +32,58 @@ export async function runSaveContent(payload: {
          meta,
          status: "draft",
       });
+
+      // Create new version if userId is provided
+      if (userId) {
+         try {
+            // Calculate diff from specified base version or latest version
+            let diff = null;
+            try {
+               let baseVersionBody = "";
+
+               if (baseVersion) {
+                  // Get the specific version to compare against
+                  const baseVersionData = await getVersionByNumber(
+                     db,
+                     contentId,
+                     baseVersion,
+                  );
+                  baseVersionBody = baseVersionData.body;
+               } else {
+                  // Use latest version (current behavior)
+                  const previousVersion = await getLatestVersionByContentId(
+                     db,
+                     contentId,
+                  );
+                  baseVersionBody = previousVersion.body;
+               }
+
+               diff = createDiff(baseVersionBody, content);
+            } catch (err) {
+               // If no base version exists, diff will be null
+               console.log("No base version found for diff calculation");
+            }
+
+            // Get next version number
+            const versionNumber = await getNextVersionNumber(db, contentId);
+
+            // Create new version
+            await createContentVersion(db, {
+               contentId,
+               userId,
+               version: versionNumber,
+               body: content,
+               meta: meta || {},
+               diff,
+            });
+
+            // Update the content's current version
+            await updateContentCurrentVersion(db, contentId, versionNumber);
+         } catch (versionError) {
+            console.error("Error creating content version:", versionError);
+            // Don't fail the entire operation if versioning fails
+         }
+      }
 
       // Emit final draft status
       emitContentStatusChanged({

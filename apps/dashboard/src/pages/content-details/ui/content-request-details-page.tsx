@@ -16,6 +16,8 @@ import { useMemo } from "react";
 import { ContentLoadingDisplay } from "./content-loading-display";
 import { useMissingImagesNotification } from "../../content-list/lib/use-missing-images-notification";
 import { useState } from "react";
+import { ContentVersionsCard } from "./content-versions-card";
+import { VersionDetailsCredenza } from "./version-details-credenza";
 
 export function ContentRequestDetailsPage() {
    const { id } = useParams({
@@ -24,6 +26,13 @@ export function ContentRequestDetailsPage() {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
    const [editingBody, setEditingBody] = useState(false);
+   const [selectedVersion, setSelectedVersion] = useState<any>(null);
+   const [versionDetailsOpen, setVersionDetailsOpen] = useState(false);
+
+   const handleVersionClick = (version: any) => {
+      setSelectedVersion(version);
+      setVersionDetailsOpen(true);
+   };
 
    // Initialize missing images notification hook
    useMissingImagesNotification();
@@ -105,9 +114,18 @@ export function ContentRequestDetailsPage() {
                      content={data}
                      relatedSlugs={relatedSlugs}
                   />
+                  <ContentVersionsCard
+                     contentId={id}
+                     onVersionClick={handleVersionClick}
+                  />
                </div>
             </div>
          )}
+         <VersionDetailsCredenza
+            version={selectedVersion}
+            isOpen={versionDetailsOpen}
+            onClose={() => setVersionDetailsOpen(false)}
+         />
       </main>
    );
 }
