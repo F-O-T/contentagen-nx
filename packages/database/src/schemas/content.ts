@@ -15,6 +15,7 @@ import {
    createUpdateSchema,
 } from "drizzle-zod";
 import { relations } from "drizzle-orm";
+import { contentVersion } from "./content-version";
 
 export const ContentRequestSchema = z.object({
    description: z.string().min(1, "Description is required"),
@@ -94,11 +95,12 @@ export const content = pgTable(
    },
    (table) => [index("content_agent_id_idx").on(table.agentId)],
 );
-export const contentRelations = relations(content, ({ one }) => ({
+export const contentRelations = relations(content, ({ one, many }) => ({
    agent: one(agent, {
       fields: [content.agentId],
       references: [agent.id],
    }),
+   versions: many(contentVersion),
 }));
 
 export type ContentStatus = (typeof contentStatusEnum.enumValues)[number];
