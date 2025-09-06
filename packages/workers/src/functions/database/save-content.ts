@@ -39,7 +39,7 @@ export async function runSaveContent(payload: {
             // Calculate diff from specified base version or latest version
             let diff = null;
             let lineDiff = null;
-            let changedFields: string[] = [];
+            const changedFields: string[] = [];
             try {
                let baseVersionBody = "";
                let baseVersionMeta: ContentMeta = {};

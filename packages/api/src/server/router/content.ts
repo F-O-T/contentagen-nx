@@ -207,6 +207,25 @@ export const contentRouter = router({
                });
             }
 
+            // Get current content to check for existing image
+            const db = (await ctx).db;
+            const currentContent = await getContentById(db, id);
+
+            // Delete old image if it exists
+            if (currentContent?.imageUrl) {
+               try {
+                  const bucketName = (await ctx).minioBucket;
+                  const minioClient = (await ctx).minioClient;
+                  await minioClient.removeObject(
+                     bucketName,
+                     currentContent.imageUrl,
+                  );
+               } catch (error) {
+                  console.error("Error deleting old content image:", error);
+                  // Continue with upload even if deletion fails
+               }
+            }
+
             // Sanitize fileName to prevent directory traversal
             const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
             const key = `content/${id}/image/${sanitizedFileName}`;
@@ -231,7 +250,6 @@ export const contentRouter = router({
             const bucketName = (await ctx).minioBucket;
             const minioClient = (await ctx).minioClient;
 
-            // Upload to S3/Minio
             const url = await uploadFile(
                key,
                compressedBuffer,
@@ -241,7 +259,6 @@ export const contentRouter = router({
             );
 
             // Update content imageUrl with the file key
-            const db = (await ctx).db;
             await updateContent(db, id, { imageUrl: key });
 
             return { url, success: true };

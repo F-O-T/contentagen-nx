@@ -125,7 +125,7 @@ export function createLineDiff(
 
       // Find the end of the difference
       let diffEnd = commonStart;
-      let maxLookahead = Math.min(
+      const maxLookahead = Math.min(
          lines1.length - i - commonStart,
          lines2.length - j - commonStart,
       );

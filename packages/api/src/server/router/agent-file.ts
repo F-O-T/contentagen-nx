@@ -30,6 +30,26 @@ export const agentFileRouter = router({
       .input(AgentProfilePhotoUploadInput)
       .mutation(async ({ ctx, input }) => {
          const { agentId, fileName, fileBuffer } = input;
+
+         // Get current agent to check for existing profile photo
+         const db = (await ctx).db;
+         const currentAgent = await getAgentById(db, agentId);
+
+         // Delete old profile photo if it exists
+         if (currentAgent?.profilePhotoUrl) {
+            try {
+               const bucketName = (await ctx).minioBucket;
+               const minioClient = (await ctx).minioClient;
+               await minioClient.removeObject(
+                  bucketName,
+                  currentAgent.profilePhotoUrl,
+               );
+            } catch (error) {
+               console.error("Error deleting old profile photo:", error);
+               // Continue with upload even if deletion fails
+            }
+         }
+
          const key = `${agentId}/profile-photo/${fileName}`;
          const buffer = Buffer.from(fileBuffer, "base64");
 
@@ -50,7 +70,6 @@ export const agentFileRouter = router({
             minioClient,
          );
          // Update agent profilePhotoUrl
-         const db = (await ctx).db;
          await updateAgent(db, agentId, { profilePhotoUrl: key });
          return { url };
       }),
