@@ -25,10 +25,6 @@ export function VersionDetailsCredenza({
 }: VersionDetailsCredenzaProps) {
    if (!version) return null;
 
-   const formatDate = (date: Date) => {
-      return new Date(date).toLocaleString();
-   };
-
    const stats = {
       additions: version.meta?.lineDiff?.filter((item) => item.type === "add")
          .length,
@@ -76,7 +72,7 @@ export function VersionDetailsCredenza({
                         <ScrollArea className="h-64 w-full border rounded-md p-4 bg-muted/20">
                            <div className="font-mono text-sm">
                               {version.meta.diff.map(
-                                 (change: any[], index: number) => {
+                                 (change, index: number) => {
                                     const [operation, text] = change;
                                     let className = "";
                                     let prefix = "";
@@ -92,7 +88,6 @@ export function VersionDetailsCredenza({
                                              "bg-green-50 text-green-800 border-l-4 border-green-500 pl-2";
                                           prefix = "+ ";
                                           break;
-                                       case 0: // unchanged
                                        default:
                                           className = "text-muted-foreground";
                                           prefix = "  ";
@@ -100,7 +95,10 @@ export function VersionDetailsCredenza({
                                     }
 
                                     return (
-                                       <div key={index} className={className}>
+                                       <div
+                                          key={`changes-${index + 1}`}
+                                          className={className}
+                                       >
                                           {prefix}
                                           {text}
                                        </div>

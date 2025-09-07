@@ -49,6 +49,11 @@ export function BulkActionsCredenza({
             await queryClient.invalidateQueries({
                queryKey: trpc.content.listAllContent.queryKey(),
             });
+            // Invalidate all content versions since multiple items were affected
+            await queryClient.invalidateQueries({
+               queryKey: ["trpc", "content", "getVersions"],
+               exact: false,
+            });
          },
          onError: (error) => {
             toast.error("Failed to approve content items");

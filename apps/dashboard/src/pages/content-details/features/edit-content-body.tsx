@@ -22,13 +22,18 @@ export function EditContentBody({
             console.error("Error editing content body:", error);
             toast.error("Failed to edit content body. Please try again.");
          },
-         onSuccess: () => {
+         onSuccess: async () => {
             toast.success("Content body edited successfully!");
-            queryClient.invalidateQueries({
-               queryKey: [
-                  trpc.content.listAllContent.queryKey(),
-                  trpc.content.get.queryKey({ id: content.id }),
-               ],
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.listAllContent.queryKey(),
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.get.queryKey({ id: content.id }),
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.getVersions.queryKey({
+                  contentId: content.id,
+               }),
             });
          },
       }),
@@ -50,6 +55,11 @@ export function EditContentBody({
          });
          await queryClient.invalidateQueries({
             queryKey: trpc.content.listAllContent.queryKey(),
+         });
+         await queryClient.invalidateQueries({
+            queryKey: trpc.content.getVersions.queryKey({
+               contentId: content.id,
+            }),
          });
          setEditing(false);
       },

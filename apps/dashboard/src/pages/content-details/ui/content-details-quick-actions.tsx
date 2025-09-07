@@ -60,8 +60,19 @@ export function ContentDetailsQuickActions({
 
    const approveMutation = useMutation(
       trpc.content.approve.mutationOptions({
-         onSuccess: () => {
+         onSuccess: async () => {
             toast.success("Content approved successfully!");
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.get.queryKey({ id: content.id }),
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.listAllContent.queryKey(),
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.getVersions.queryKey({
+                  contentId: content.id,
+               }),
+            });
          },
          onError: (error) => {
             toast.error(
