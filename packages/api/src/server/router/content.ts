@@ -415,20 +415,24 @@ export const contentRouter = router({
             }
             const created = await createContent((await ctx).db, {
                ...input,
-               currentVersion: 1, // Set initial version
-            });
-
-            // Create initial version
-            await createContentVersion((await ctx).db, {
-               contentId: created.id,
-               userId,
-               version: 1,
-               meta: {
-                  diff: null, // No diff for initial version
-                  lineDiff: null,
-                  changedFields: [],
-               },
-            });
+const db = (await ctx).db;
+const created = await db.transaction(async (tx) => {
+  const c = await createContent(tx, {
+    ...input,
+    currentVersion: 1, // Set initial version
+  });
+  await createContentVersion(tx, {
+    contentId: c.id,
+    userId,
+    version: 1,
+    meta: {
+      diff: null,       // No diff for initial version
+      lineDiff: null,
+      changedFields: [],
+    },
+  });
+  return c;
+});
 
             await enqueueContentPlanningJob({
                agentId: input.agentId,
