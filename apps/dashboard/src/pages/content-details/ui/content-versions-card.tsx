@@ -11,7 +11,6 @@ import { Button } from "@packages/ui/components/button";
 import { User, FileText } from "lucide-react";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import type { ContentVersionSelect } from "@packages/database/schema";
 import type { RouterOutput } from "@packages/api/client";
 
 interface ContentVersionsCardProps {
