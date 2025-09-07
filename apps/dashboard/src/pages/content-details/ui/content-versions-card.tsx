@@ -99,14 +99,16 @@ export function ContentVersionsCard({
                   </Button>
                </div>
             ))}
-            {versions.length > 5 && (
-               <div className="text-center pt-2">
                   <Button
                      variant="outline"
                      size="sm"
-                     onClick={() => onVersionClick(versions[0])}
+                     onClick={() => {
+                        const first = versions[0];
+                        if (first) onVersionClick(first);
+                     }}
                   >
                      View All {versions.length} Versions
+                  </Button>
                   </Button>
                </div>
             )}
