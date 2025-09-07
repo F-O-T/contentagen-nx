@@ -30,15 +30,16 @@ export function ContentVersionsCard({
       }),
    );
 
-   const formatDate = (date: string) => {
+   const formatDate = (date: Date | string) => {
       const d = new Date(date);
       const now = new Date();
-      const diffTime = Math.abs(now.getTime() - d.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 1) return "today";
-      if (diffDays === 2) return "yesterday";
-      if (diffDays <= 7) return `${diffDays - 1} days ago`;
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const diffDays = Math.floor(
+         Math.abs(now.getTime() - d.getTime()) / msPerDay,
+      );
+      if (diffDays === 0) return "today";
+      if (diffDays === 1) return "yesterday";
+      if (diffDays < 7) return `${diffDays} days ago`;
       return d.toLocaleDateString();
    };
 
