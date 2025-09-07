@@ -8,6 +8,7 @@ import type {
 } from "../schemas/content-version";
 import type { DatabaseInstance } from "../client";
 import { DatabaseError, NotFoundError } from "@packages/errors";
+import { updateContentCurrentVersion } from "./content-repository";
 
 export async function createContentVersion(
    dbClient: DatabaseInstance,
@@ -171,4 +172,25 @@ export async function getNextVersionNumber(
       }
       throw err;
    }
+}
+
+export async function createNextVersionWithUpdate<T>(
+   dbClient: DatabaseInstance,
+   contentId: string,
+   userId: string,
+   meta: ContentVersionInsert["meta"],
+   updateBody: (tx: DatabaseInstance) => Promise<T>,
+): Promise<number> {
+   return await dbClient.transaction(async (tx) => {
+      const next = await getNextVersionNumber(tx, contentId);
+      await createContentVersion(tx, {
+         contentId,
+         userId,
+         version: next,
+         meta,
+      });
+      await updateContentCurrentVersion(tx, contentId, next);
+      await updateBody(tx);
+      return next;
+   });
 }

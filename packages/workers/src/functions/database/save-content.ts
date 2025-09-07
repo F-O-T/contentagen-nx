@@ -23,7 +23,23 @@ export async function runSaveContent(payload: {
    userId?: string;
    baseVersion?: number; // Optional version to compare against
 }) {
-   const { contentId, content, meta, stats, userId, baseVersion } = payload;
+   const {
+      contentId,
+      content,
+      meta,
+      stats,
+      userId,
+      baseVersion: _baseVersion,
+   } = payload;
+   let baseContentForDiff: Awaited<ReturnType<typeof getContentById>> | null =
+      null;
+   if (userId) {
+      try {
+         baseContentForDiff = await getContentById(db, contentId);
+      } catch (e) {
+         baseContentForDiff = null;
+      }
+   }
    try {
       await updateContent(db, contentId, {
          body: content,
@@ -53,18 +69,9 @@ export async function runSaveContent(payload: {
          let baseVersionBody = "";
          let baseContentMeta: ContentMeta = {};
 
-         // Get current content for base comparison
-         const currentContent = await getContentById(db, contentId);
-         baseContentMeta = currentContent.meta || {};
-
-         if (baseVersion) {
-            // For diff-only versions, compare against current content
-            // TODO: Implement proper content reconstruction from historical diffs
-            baseVersionBody = currentContent.body;
-         } else {
-            // Use current content body as base for comparison
-            baseVersionBody = currentContent.body;
-         }
+         const currentContent = baseContentForDiff;
+         baseContentMeta = currentContent?.meta || {};
+         baseVersionBody = currentContent?.body ?? "";
 
          diff = createDiff(baseVersionBody, content);
          lineDiff = createLineDiff(baseVersionBody, content);
