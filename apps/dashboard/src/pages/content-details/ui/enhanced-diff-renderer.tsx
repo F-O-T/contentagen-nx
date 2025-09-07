@@ -87,7 +87,7 @@ export function EnhancedDiffRenderer({
             case "add":
                return (
                   <span
-                     key={index}
+                     key={`${change.type}-${index}-${change.text}`}
                      className="bg-green-200 dark:bg-green-700 px-0.5 rounded-sm"
                   >
                      {change.text}
@@ -96,15 +96,18 @@ export function EnhancedDiffRenderer({
             case "remove":
                return (
                   <span
-                     key={index}
+                     key={`${change.type}-${index}-${change.text}`}
                      className="bg-red-200 dark:bg-red-700 px-0.5 rounded-sm line-through"
                   >
                      {change.text}
                   </span>
                );
-            case "unchanged":
             default:
-               return <span key={index}>{change.text}</span>;
+               return (
+                  <span key={`unchanged-${index}-${change.text}`}>
+                     {change.text}
+                  </span>
+               );
          }
       });
    };
