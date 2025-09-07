@@ -413,26 +413,24 @@ export const contentRouter = router({
                   message: "User must be authenticated to create content.",
                });
             }
-            const created = await createContent((await ctx).db, {
-               ...input,
-const db = (await ctx).db;
-const created = await db.transaction(async (tx) => {
-  const c = await createContent(tx, {
-    ...input,
-    currentVersion: 1, // Set initial version
-  });
-  await createContentVersion(tx, {
-    contentId: c.id,
-    userId,
-    version: 1,
-    meta: {
-      diff: null,       // No diff for initial version
-      lineDiff: null,
-      changedFields: [],
-    },
-  });
-  return c;
-});
+            const db = (await ctx).db;
+            const created = await db.transaction(async (tx) => {
+               const c = await createContent(tx, {
+                  ...input,
+                  currentVersion: 1, // Set initial version
+               });
+               await createContentVersion(tx, {
+                  contentId: c.id,
+                  userId,
+                  version: 1,
+                  meta: {
+                     diff: null, // No diff for initial version
+                     lineDiff: null,
+                     changedFields: [],
+                  },
+               });
+               return c;
+            });
 
             await enqueueContentPlanningJob({
                agentId: input.agentId,
