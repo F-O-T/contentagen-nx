@@ -123,11 +123,13 @@ export function ContentRequestDetailsPage() {
                </div>
             </div>
          )}
-         <VersionDetailsCredenza
-            version={selectedVersion ?? ({} as ContentVersionSelect)}
-            isOpen={versionDetailsOpen}
-            onClose={() => setVersionDetailsOpen(false)}
-         />
+         {selectedVersion && (
+            <VersionDetailsCredenza
+               version={selectedVersion}
+               isOpen={versionDetailsOpen}
+               onClose={() => setVersionDetailsOpen(false)}
+            />
+         )}
       </main>
    );
 }
