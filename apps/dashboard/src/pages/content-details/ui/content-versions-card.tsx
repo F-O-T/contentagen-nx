@@ -12,10 +12,13 @@ import { User, FileText } from "lucide-react";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { ContentVersionSelect } from "@packages/database/schema";
+import type { RouterOutput } from "@packages/api/client";
 
 interface ContentVersionsCardProps {
    contentId: string;
-   onVersionClick: (version: ContentVersionSelect) => void;
+   onVersionClick: (
+      version: RouterOutput["content"]["getVersions"][number],
+   ) => void;
 }
 
 export function ContentVersionsCard({
@@ -100,16 +103,6 @@ export function ContentVersionsCard({
                   </Button>
                </div>
             ))}
-            <Button
-               variant="outline"
-               size="sm"
-               onClick={() => {
-                  const first = versions[0];
-                  if (first) onVersionClick(first);
-               }}
-            >
-               View All {versions.length} Versions
-            </Button>
          </CardContent>
       </Card>
    );

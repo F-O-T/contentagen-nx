@@ -10,10 +10,10 @@ import {
 import { ScrollArea } from "@packages/ui/components/scroll-area";
 import { FileText, GitCompare, Minus, Plus } from "lucide-react";
 import { EnhancedDiffRenderer } from "./enhanced-diff-renderer";
-import type { ContentVersionSelect } from "@packages/database/schema";
+import type { RouterOutput } from "@packages/api/client";
 
 interface VersionDetailsCredenzaProps {
-   version: ContentVersionSelect;
+   version: RouterOutput["content"]["getVersions"][number];
    isOpen: boolean;
    onClose: () => void;
 }
