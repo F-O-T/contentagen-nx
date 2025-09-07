@@ -18,6 +18,7 @@ import { useMissingImagesNotification } from "../../content-list/lib/use-missing
 import { useState } from "react";
 import { ContentVersionsCard } from "./content-versions-card";
 import { VersionDetailsCredenza } from "./version-details-credenza";
+import type { ContentVersionSelect } from "@packages/database/schema";
 
 export function ContentRequestDetailsPage() {
    const { id } = useParams({
@@ -26,10 +27,11 @@ export function ContentRequestDetailsPage() {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
    const [editingBody, setEditingBody] = useState(false);
-   const [selectedVersion, setSelectedVersion] = useState<any>(null);
+   const [selectedVersion, setSelectedVersion] =
+      useState<ContentVersionSelect | null>(null);
    const [versionDetailsOpen, setVersionDetailsOpen] = useState(false);
 
-   const handleVersionClick = (version: any) => {
+   const handleVersionClick = (version: ContentVersionSelect) => {
       setSelectedVersion(version);
       setVersionDetailsOpen(true);
    };
@@ -122,7 +124,7 @@ export function ContentRequestDetailsPage() {
             </div>
          )}
          <VersionDetailsCredenza
-            version={selectedVersion}
+            version={selectedVersion ?? ({} as ContentVersionSelect)}
             isOpen={versionDetailsOpen}
             onClose={() => setVersionDetailsOpen(false)}
          />

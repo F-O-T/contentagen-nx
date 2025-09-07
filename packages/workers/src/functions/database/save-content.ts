@@ -1,6 +1,7 @@
 import {
    updateContent,
    updateContentCurrentVersion,
+   getContentById,
 } from "@packages/database/repositories/content-repository";
 import { createDb } from "@packages/database/client";
 import { serverEnv } from "@packages/environment/server";
@@ -8,9 +9,7 @@ import type { ContentMeta, ContentStats } from "@packages/database/schema";
 import { emitContentStatusChanged } from "@packages/server-events";
 import {
    createContentVersion,
-   getLatestVersionByContentId,
    getNextVersionNumber,
-   getVersionByNumber,
 } from "@packages/database/repositories/content-version-repository";
 import { createDiff, createLineDiff } from "@packages/helpers/text";
 
@@ -32,102 +31,94 @@ export async function runSaveContent(payload: {
          meta,
          status: "draft",
       });
-
-      // Create new version if userId is provided
-      if (userId) {
-         try {
-            // Calculate diff from specified base version or latest version
-            let diff = null;
-            let lineDiff = null;
-            const changedFields: string[] = [];
-            try {
-               let baseVersionBody = "";
-               let baseVersionMeta: ContentMeta = {};
-
-               if (baseVersion) {
-                  // Get the specific version to compare against
-                  const baseVersionData = await getVersionByNumber(
-                     db,
-                     contentId,
-                     baseVersion,
-                  );
-                  baseVersionBody = baseVersionData.body;
-                  baseVersionMeta = baseVersionData.meta;
-               } else {
-                  // Use latest version (current behavior)
-                  const previousVersion = await getLatestVersionByContentId(
-                     db,
-                     contentId,
-                  );
-                  baseVersionBody = previousVersion.body;
-                  baseVersionMeta = previousVersion.meta;
-               }
-
-               diff = createDiff(baseVersionBody, content);
-               lineDiff = createLineDiff(baseVersionBody, content);
-
-               // Track which fields changed
-               if (meta.title !== baseVersionMeta.title) {
-                  changedFields.push("title");
-               }
-               if (meta.description !== baseVersionMeta.description) {
-                  changedFields.push("description");
-               }
-               if (
-                  JSON.stringify(meta.keywords) !==
-                  JSON.stringify(baseVersionMeta.keywords)
-               ) {
-                  changedFields.push("keywords");
-               }
-               if (meta.slug !== baseVersionMeta.slug) {
-                  changedFields.push("slug");
-               }
-               if (
-                  JSON.stringify(meta.sources) !==
-                  JSON.stringify(baseVersionMeta.sources)
-               ) {
-                  changedFields.push("sources");
-               }
-               if (content !== baseVersionBody) {
-                  changedFields.push("body");
-               }
-            } catch (err) {
-               // If no base version exists, diff will be null
-               console.log("No base version found for diff calculation");
-            }
-
-            // Get next version number
-            const versionNumber = await getNextVersionNumber(db, contentId);
-
-            // Create new version
-            await createContentVersion(db, {
-               contentId,
-               userId,
-               version: versionNumber,
-               body: content,
-               meta: meta || {},
-               diff,
-               lineDiff,
-               changedFields,
-            });
-
-            // Update the content's current version
-            await updateContentCurrentVersion(db, contentId, versionNumber);
-         } catch (versionError) {
-            console.error("Error creating content version:", versionError);
-            // Don't fail the entire operation if versioning fails
-         }
-      }
-
-      // Emit final draft status
-      emitContentStatusChanged({
-         contentId,
-         status: "draft",
-      });
-
-      return { contentId, content };
    } catch (error) {
       console.error("Error saving content to database:", error);
       throw error;
    }
+
+   if (!userId) {
+      emitContentStatusChanged({
+         contentId,
+         status: "draft",
+      });
+      return { contentId, content };
+   }
+
+   try {
+      let diff = null;
+      let lineDiff = null;
+      const changedFields: string[] = [];
+
+      try {
+         let baseVersionBody = "";
+         let baseContentMeta: ContentMeta = {};
+
+         // Get current content for base comparison
+         const currentContent = await getContentById(db, contentId);
+         baseContentMeta = currentContent.meta || {};
+
+         if (baseVersion) {
+            // For diff-only versions, compare against current content
+            // TODO: Implement proper content reconstruction from historical diffs
+            baseVersionBody = currentContent.body;
+         } else {
+            // Use current content body as base for comparison
+            baseVersionBody = currentContent.body;
+         }
+
+         diff = createDiff(baseVersionBody, content);
+         lineDiff = createLineDiff(baseVersionBody, content);
+
+         if (meta.title !== baseContentMeta.title) {
+            changedFields.push("title");
+         }
+         if (meta.description !== baseContentMeta.description) {
+            changedFields.push("description");
+         }
+         if (
+            JSON.stringify(meta.keywords) !==
+            JSON.stringify(baseContentMeta.keywords)
+         ) {
+            changedFields.push("keywords");
+         }
+         if (meta.slug !== baseContentMeta.slug) {
+            changedFields.push("slug");
+         }
+         if (
+            JSON.stringify(meta.sources) !==
+            JSON.stringify(baseContentMeta.sources)
+         ) {
+            changedFields.push("sources");
+         }
+         if (content !== baseVersionBody) {
+            changedFields.push("body");
+         }
+      } catch (err) {
+         console.log("No base version found for diff calculation");
+      }
+
+      const versionNumber = await getNextVersionNumber(db, contentId);
+
+      await createContentVersion(db, {
+         contentId,
+         userId,
+         version: versionNumber,
+         meta: {
+            diff,
+            lineDiff,
+            changedFields,
+         },
+      });
+
+      await updateContentCurrentVersion(db, contentId, versionNumber);
+   } catch (versionError) {
+      console.error("Error creating content version:", versionError);
+   }
+
+   emitContentStatusChanged({
+      contentId,
+      status: "draft",
+   });
+
+   return { contentId, content };
 }

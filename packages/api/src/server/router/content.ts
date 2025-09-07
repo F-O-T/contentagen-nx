@@ -38,9 +38,7 @@ import {
 import {
    createContentVersion,
    getAllVersionsByContentId,
-   getLatestVersionByContentId,
    getNextVersionNumber,
-   getVersionByNumber,
 } from "@packages/database/repositories/content-version-repository";
 import { canModifyContent } from "@packages/database";
 import { NotFoundError, DatabaseError } from "@packages/errors";
@@ -48,6 +46,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { uploadFile, streamFileForProxy } from "@packages/files/client";
 import { compressImage } from "@packages/files/image-helper";
+import { createDiff, createLineDiff } from "@packages/helpers/text";
 
 const ContentImageUploadInput = z.object({
    id: z.uuid(),
@@ -336,28 +335,23 @@ export const contentRouter = router({
 
             // Calculate diff from specified base version or latest version
             let diff = null;
+            let lineDiff = null;
+            const changedFields: string[] = [];
+
             try {
                let baseVersionBody = "";
 
-               if (input.baseVersion) {
-                  // Get the specific version to compare against
-                  const baseVersion = await getVersionByNumber(
-                     db,
-                     input.id,
-                     input.baseVersion,
-                  );
-                  baseVersionBody = baseVersion.body;
-               } else {
-                  // Use latest version (current behavior)
-                  const previousVersion = await getLatestVersionByContentId(
-                     db,
-                     input.id,
-                  );
-                  baseVersionBody = previousVersion.body;
-               }
+               // For now, we'll use the current content as the base for comparison
+               // TODO: Implement proper content reconstruction from diffs for historical comparison
+               baseVersionBody = currentContent.body;
 
-               const { createDiff } = await import("@packages/helpers/text");
                diff = createDiff(baseVersionBody, input.body);
+               lineDiff = createLineDiff(baseVersionBody, input.body);
+
+               // Track which fields changed (only body in this case)
+               if (input.body !== baseVersionBody) {
+                  changedFields.push("body");
+               }
             } catch (err) {
                // If no base version exists, diff will be null
                console.log("No base version found for diff calculation");
@@ -371,9 +365,11 @@ export const contentRouter = router({
                contentId: input.id,
                userId,
                version: versionNumber,
-               body: input.body,
-               meta: currentContent.meta || {},
-               diff,
+               meta: {
+                  diff: diff,
+                  lineDiff: lineDiff,
+                  changedFields,
+               },
             });
 
             // Update the content's current version
@@ -427,9 +423,11 @@ export const contentRouter = router({
                contentId: created.id,
                userId,
                version: 1,
-               body: created.body || "",
-               meta: created.meta || {},
-               diff: null, // No diff for initial version
+               meta: {
+                  diff: null, // No diff for initial version
+                  lineDiff: null,
+                  changedFields: [],
+               },
             });
 
             await enqueueContentPlanningJob({

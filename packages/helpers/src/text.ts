@@ -1,9 +1,14 @@
 import slugfy from "slugify";
 export type Diff = [number, string][];
 export type LineDiff = {
-   type: "add" | "remove" | "context";
+   type: "add" | "remove" | "context" | "modify";
    lineNumber?: number;
    content: string;
+   oldContent?: string; // For modified lines, store the original content
+   inlineChanges?: Array<{
+      type: "add" | "remove" | "unchanged";
+      text: string;
+   }>; // Character-level changes within the line
 }[];
 
 export function createDiff(text1: string, text2: string): Diff {
@@ -74,137 +79,205 @@ export function createLineDiff(
    const lines1 = text1.split("\n");
    const lines2 = text2.split("\n");
 
-   const diff: LineDiff = [];
+   // Create a more sophisticated diff that detects line-level changes
+   const lineDiff = computeLineDiff(lines1, lines2);
 
-   let i = 0;
-   let j = 0;
+   // Add inline character-level diffs for modified lines
+   const enhancedDiff = lineDiff.map((item) => {
+      if (item.type === "modify" && item.oldContent) {
+         const inlineChanges = computeInlineChanges(
+            item.oldContent,
+            item.content,
+         );
+         return { ...item, inlineChanges };
+      }
+      return item;
+   });
+
+   // If there are no changes, return empty diff
+   if (!enhancedDiff.some((item) => item.type !== "context")) {
+      return [];
+   }
+
+   // Filter to only show changes and surrounding context
+   return filterDiffWithContext(enhancedDiff, contextLines);
+}
+
+function computeLineDiff(lines1: string[], lines2: string[]): LineDiff {
+   const diff: LineDiff = [];
+   const len1 = lines1.length;
+   const len2 = lines2.length;
+
+   let i = 0,
+      j = 0;
    let lineNumber = 1;
 
-   while (i < lines1.length || j < lines2.length) {
-      // Find the next difference
-      let commonStart = -1;
-      for (let k = 0; k < Math.min(lines1.length - i, lines2.length - j); k++) {
-         const line1 = lines1[i + k];
-         const line2 = lines2[j + k];
-         if (line1 !== line2) {
-            commonStart = k;
-            break;
-         }
-      }
+   while (i < len1 || j < len2) {
+      const line1 = i < len1 ? lines1[i] : undefined;
+      const line2 = j < len2 ? lines2[j] : undefined;
 
-      if (commonStart === -1) {
-         // No differences found, add remaining common lines
-         const remainingLines = Math.max(lines1.length - i, lines2.length - j);
-         for (let k = 0; k < remainingLines; k++) {
-            const line = (
-               lines1[i + k] !== undefined ? lines1[i + k] : lines2[j + k]
-            ) as string;
+      if (line1 === line2 && line1 !== undefined) {
+         // Lines are identical
+         diff.push({
+            type: "context",
+            lineNumber: lineNumber,
+            content: line1,
+         });
+         i++;
+         j++;
+         lineNumber++;
+      } else if (line1 !== undefined && line2 !== undefined) {
+         // Lines are different - check if it's a modification or replacement
+         const similarity = calculateLineSimilarity(line1, line2);
+
+         if (similarity > 0.3) {
+            // If lines are similar enough, treat as modification
             diff.push({
-               type: "context",
-               lineNumber: lineNumber++,
-               content: line,
+               type: "modify",
+               lineNumber: lineNumber,
+               content: line2,
+               oldContent: line1,
             });
-         }
-         break;
-      }
-
-      // Add context lines before the change
-      const contextStart = Math.max(0, i - contextLines);
-      for (let k = contextStart; k < i; k++) {
-         if (k < lines1.length) {
-            const line = lines1[k];
-            if (line !== undefined) {
-               diff.push({
-                  type: "context",
-                  lineNumber: lineNumber++,
-                  content: line,
-               });
-            }
-         }
-      }
-
-      // Find the end of the difference
-      let diffEnd = commonStart;
-      const maxLookahead = Math.min(
-         lines1.length - i - commonStart,
-         lines2.length - j - commonStart,
-      );
-
-      for (let k = 0; k < maxLookahead; k++) {
-         const line1 = lines1[i + commonStart + k];
-         const line2 = lines2[j + commonStart + k];
-         if (line1 === line2) {
-            diffEnd = commonStart + k;
-            break;
-         }
-      }
-
-      // Add removed lines
-      for (let k = 0; k < diffEnd; k++) {
-         if (i + k < lines1.length) {
-            const line = lines1[i + k];
-            if (line !== undefined) {
-               diff.push({
-                  type: "remove",
-                  lineNumber: lineNumber++,
-                  content: line,
-               });
-            }
-         }
-      }
-
-      // Add added lines
-      for (let k = 0; k < diffEnd; k++) {
-         if (j + k < lines2.length) {
-            const line = lines2[j + k];
-            if (line !== undefined) {
-               diff.push({
-                  type: "add",
-                  lineNumber: lineNumber++,
-                  content: line,
-               });
-            }
-         }
-      }
-
-      i += diffEnd;
-      j += diffEnd;
-
-      // Add context lines after the change
-      const contextEnd = Math.min(lines1.length, i + contextLines);
-      for (let k = i; k < contextEnd; k++) {
-         if (k < lines1.length && lines1[k] === lines2[j]) {
-            const line = lines1[k];
-            if (line !== undefined) {
-               diff.push({
-                  type: "context",
-                  lineNumber: lineNumber++,
-                  content: line,
-               });
-            }
             i++;
             j++;
+            lineNumber++;
          } else {
-            break;
+            // Treat as separate remove and add operations
+            diff.push({
+               type: "remove",
+               lineNumber: lineNumber,
+               content: line1,
+            });
+            diff.push({
+               type: "add",
+               lineNumber: lineNumber,
+               content: line2,
+            });
+            i++;
+            j++;
+            lineNumber++;
          }
+      } else if (line1 !== undefined) {
+         // Line was removed
+         diff.push({
+            type: "remove",
+            lineNumber: lineNumber,
+            content: line1,
+         });
+         i++;
+         lineNumber++;
+      } else if (line2 !== undefined) {
+         // Line was added
+         diff.push({
+            type: "add",
+            lineNumber: lineNumber,
+            content: line2,
+         });
+         j++;
+         lineNumber++;
       }
    }
 
    return diff;
 }
+
+function calculateLineSimilarity(line1: string, line2: string): number {
+   const len1 = line1.length;
+   const len2 = line2.length;
+
+   if (len1 === 0 && len2 === 0) return 1;
+   if (len1 === 0 || len2 === 0) return 0;
+
+   // Simple similarity based on common characters
+   let commonChars = 0;
+   const minLen = Math.min(len1, len2);
+
+   for (let i = 0; i < minLen; i++) {
+      if (line1[i] === line2[i]) {
+         commonChars++;
+      }
+   }
+
+   return commonChars / Math.max(len1, len2);
+}
+
+function computeInlineChanges(
+   oldText: string,
+   newText: string,
+): Array<{ type: "add" | "remove" | "unchanged"; text: string }> {
+   const charDiff = createDiff(oldText, newText);
+   const inlineChanges: Array<{
+      type: "add" | "remove" | "unchanged";
+      text: string;
+   }> = [];
+
+   for (const [op, text] of charDiff) {
+      switch (op) {
+         case -1:
+            inlineChanges.push({ type: "remove", text });
+            break;
+         case 1:
+            inlineChanges.push({ type: "add", text });
+            break;
+         case 0:
+            inlineChanges.push({ type: "unchanged", text });
+            break;
+      }
+   }
+
+   return inlineChanges;
+}
+
+function filterDiffWithContext(diff: LineDiff, contextLines: number): LineDiff {
+   const filteredDiff: LineDiff = [];
+   const changeIndices = new Set<number>();
+
+   // Find all change indices
+   for (let idx = 0; idx < diff.length; idx++) {
+      if (diff[idx]?.type !== "context") {
+         changeIndices.add(idx);
+      }
+   }
+
+   // Add context around changes
+   const includeIndices = new Set<number>();
+   for (const changeIdx of changeIndices) {
+      for (
+         let j = Math.max(0, changeIdx - contextLines);
+         j <= Math.min(diff.length - 1, changeIdx + contextLines);
+         j++
+      ) {
+         includeIndices.add(j);
+      }
+   }
+
+   // Build filtered result
+   for (const idx of Array.from(includeIndices).sort((a, b) => a - b)) {
+      const item = diff[idx];
+      if (item) {
+         filteredDiff.push(item);
+      }
+   }
+
+   return filteredDiff;
+}
+
 export function createSlug(name: string): string {
    return slugfy(name, { lower: true, strict: true });
 }
+
 export function countWords(text: string) {
    return text
       .trim()
       .split(/\s+/)
       .filter((word) => word.length > 0).length;
 }
+
 export function extractTitleFromMarkdown(markdown: string): string {
    const match = markdown.match(/^#\s+(.*)/m);
    return match?.[1]?.trim() ?? "";
 }
+
 export function readTimeMinutes(wordCount: number): number {
    const wordsPerMinute = 200; // Average reading speed
    return Math.ceil(wordCount / wordsPerMinute);

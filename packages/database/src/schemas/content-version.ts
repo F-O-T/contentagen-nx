@@ -10,14 +10,34 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { user } from "./auth";
-import { content, type ContentMeta } from "./content";
-type Diff = [number, string][]; // Tuple of position and text
-type LineDiff = {
-   type: "add" | "remove" | "context";
-   lineNumber?: number;
-   content: string;
-}[];
-
+import { content } from "./content";
+import z from "zod";
+export const VersionMetaSchema = z.object({
+   diff: z
+      .array(z.tuple([z.number(), z.string()]))
+      .nullable()
+      .optional(),
+   lineDiff: z
+      .array(
+         z.object({
+            type: z.enum(["add", "remove", "context", "modify"]),
+            lineNumber: z.number().optional(),
+            content: z.string(),
+            oldContent: z.string().optional(),
+            inlineChanges: z
+               .array(
+                  z.object({
+                     type: z.enum(["add", "remove", "unchanged"]),
+                     text: z.string(),
+                  }),
+               )
+               .optional(),
+         }),
+      )
+      .nullable()
+      .optional(),
+   changedFields: z.array(z.string()).optional(),
+});
 export const contentVersion = pgTable("content_version", {
    id: uuid("id").primaryKey().defaultRandom(),
    contentId: uuid("content_id")
@@ -27,11 +47,7 @@ export const contentVersion = pgTable("content_version", {
       .notNull()
       .references(() => user.id, { onDelete: "set null" }),
    version: integer("version").notNull(),
-   body: text("body").notNull(),
-   meta: jsonb("meta").$type<ContentMeta>().notNull(),
-   diff: jsonb("diff").$type<Diff>(), // Store diff from previous version
-   lineDiff: jsonb("line_diff").$type<LineDiff>(), // Store enhanced line-based diff
-   changedFields: jsonb("changed_fields").$type<string[]>(), // Store which fields were changed
+   meta: jsonb("meta").$type<z.infer<typeof VersionMetaSchema>>().default({}),
    createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
       .notNull(),

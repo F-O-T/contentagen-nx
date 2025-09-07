@@ -5,16 +5,15 @@ import {
    CredenzaTitle,
    CredenzaBody,
    CredenzaFooter,
+   CredenzaDescription,
 } from "@packages/ui/components/credenza";
-import { Badge } from "@packages/ui/components/badge";
-import { Button } from "@packages/ui/components/button";
-import { Separator } from "@packages/ui/components/separator";
 import { ScrollArea } from "@packages/ui/components/scroll-area";
-import { User, Calendar, FileText, GitCompare } from "lucide-react";
+import { FileText, GitCompare, Minus, Plus } from "lucide-react";
 import { EnhancedDiffRenderer } from "./enhanced-diff-renderer";
+import type { ContentVersionSelect } from "@packages/database/schema";
 
 interface VersionDetailsCredenzaProps {
-   version: any;
+   version: ContentVersionSelect;
    isOpen: boolean;
    onClose: () => void;
 }
@@ -26,159 +25,126 @@ export function VersionDetailsCredenza({
 }: VersionDetailsCredenzaProps) {
    if (!version) return null;
 
-   const formatDate = (date: string) => {
+   const formatDate = (date: Date) => {
       return new Date(date).toLocaleString();
    };
 
+   const stats = {
+      additions: version.meta?.lineDiff?.filter((item) => item.type === "add")
+         .length,
+      deletions: version.meta?.lineDiff?.filter(
+         (item) => item.type === "remove",
+      ).length,
+      modifications: version.meta?.lineDiff?.filter(
+         (item) => item.type === "modify",
+      ).length,
+      changes:
+         version.meta?.lineDiff?.filter((item) => item.type !== "context")
+            .length || 0,
+   };
    return (
       <Credenza open={isOpen} onOpenChange={onClose}>
-         <CredenzaContent className="max-w-4xl max-h-[90vh]">
+         <CredenzaContent className="">
             <CredenzaHeader>
-               <CredenzaTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Version {version.version} Details
+               <CredenzaTitle className="">
+                  Changes from the previous version
                </CredenzaTitle>
+               <CredenzaDescription>
+                  The whole set of changes made in this version
+               </CredenzaDescription>
             </CredenzaHeader>
 
             <CredenzaBody>
-               <div className="space-y-6">
-                  {/* Version Info */}
-                  <div className="grid grid-cols-2 gap-4">
-                     <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                           <Badge variant="outline">v{version.version}</Badge>
-                           <span className="text-sm text-muted-foreground">
-                              Version Number
-                           </span>
-                        </div>
+               <div className="space-y-2">
+                  {version.version === 1 ? (
+                     <div className="text-muted-foreground text-sm p-4 text-center border rounded-md bg-blue-50 dark:bg-blue-900/20">
+                        <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p>Initial version of this content</p>
+                        <p className="text-xs mt-1">
+                           This is the first version, so there are no changes to
+                           display
+                        </p>
                      </div>
-                     <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                           <User className="h-4 w-4" />
-                           <span className="text-sm">{version.userId}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                           <Calendar className="h-4 w-4" />
-                           <span className="text-sm">
-                              {formatDate(version.createdAt)}
-                           </span>
-                        </div>
-                     </div>
-                  </div>
+                  ) : version.meta &&
+                    (version.meta.lineDiff || version.meta.diff) ? (
+                     version.meta.lineDiff ? (
+                        <EnhancedDiffRenderer
+                           lineDiff={version.meta.lineDiff}
+                           changedFields={version.meta.changedFields}
+                        />
+                     ) : version.meta.diff ? (
+                        <ScrollArea className="h-64 w-full border rounded-md p-4 bg-muted/20">
+                           <div className="font-mono text-sm">
+                              {version.meta.diff.map(
+                                 (change: any[], index: number) => {
+                                    const [operation, text] = change;
+                                    let className = "";
+                                    let prefix = "";
 
-                  <Separator />
+                                    switch (operation) {
+                                       case -1: // deleted
+                                          className =
+                                             "bg-red-50 text-red-800 border-l-4 border-red-500 pl-2";
+                                          prefix = "- ";
+                                          break;
+                                       case 1: // inserted
+                                          className =
+                                             "bg-green-50 text-green-800 border-l-4 border-green-500 pl-2";
+                                          prefix = "+ ";
+                                          break;
+                                       case 0: // unchanged
+                                       default:
+                                          className = "text-muted-foreground";
+                                          prefix = "  ";
+                                          break;
+                                    }
 
-                  {/* Content Preview */}
-                  <div className="space-y-2">
-                     <h3 className="text-lg font-semibold">Content</h3>
-                     <ScrollArea className="h-48 w-full border rounded-md p-4">
-                        <div className="whitespace-pre-wrap text-sm">
-                           {version.body || "No content available"}
-                        </div>
-                     </ScrollArea>
-                  </div>
-
-                  {/* Enhanced Diff Section */}
-                  {(version.lineDiff || version.diff) && (
-                     <>
-                        <Separator />
-                        <div className="space-y-2">
-                           <h3 className="text-lg font-semibold flex items-center gap-2">
-                              <GitCompare className="h-5 w-5" />
-                              Changes from Previous Version
-                           </h3>
-                           {version.lineDiff ? (
-                              <EnhancedDiffRenderer
-                                 lineDiff={version.lineDiff}
-                                 changedFields={version.changedFields}
-                              />
-                           ) : version.diff ? (
-                              <ScrollArea className="h-64 w-full border rounded-md p-4 bg-muted/20">
-                                 <div className="font-mono text-sm">
-                                    {version.diff.map(
-                                       (change: any[], index: number) => {
-                                          const [operation, text] = change;
-                                          let className = "";
-                                          let prefix = "";
-
-                                          switch (operation) {
-                                             case -1: // deleted
-                                                className =
-                                                   "bg-red-50 text-red-800 border-l-4 border-red-500 pl-2";
-                                                prefix = "- ";
-                                                break;
-                                             case 1: // inserted
-                                                className =
-                                                   "bg-green-50 text-green-800 border-l-4 border-green-500 pl-2";
-                                                prefix = "+ ";
-                                                break;
-                                             case 0: // unchanged
-                                             default:
-                                                className =
-                                                   "text-muted-foreground";
-                                                prefix = "  ";
-                                                break;
-                                          }
-
-                                          return (
-                                             <div
-                                                key={index}
-                                                className={className}
-                                             >
-                                                {prefix}
-                                                {text}
-                                             </div>
-                                          );
-                                       },
-                                    )}
-                                 </div>
-                              </ScrollArea>
-                           ) : null}
-                        </div>
-                     </>
-                  )}
-
-                  {/* Metadata */}
-                  {version.meta && (
-                     <>
-                        <Separator />
-                        <div className="space-y-2">
-                           <h3 className="text-lg font-semibold">Metadata</h3>
-                           <div className="grid grid-cols-2 gap-4 text-sm">
-                              {version.meta.title && (
-                                 <div>
-                                    <span className="font-medium">Title:</span>{" "}
-                                    {version.meta.title}
-                                 </div>
+                                    return (
+                                       <div key={index} className={className}>
+                                          {prefix}
+                                          {text}
+                                       </div>
+                                    );
+                                 },
                               )}
-                              {version.meta.description && (
-                                 <div>
-                                    <span className="font-medium">
-                                       Description:
-                                    </span>{" "}
-                                    {version.meta.description}
-                                 </div>
-                              )}
-                              {version.meta.keywords &&
-                                 version.meta.keywords.length > 0 && (
-                                    <div className="col-span-2">
-                                       <span className="font-medium">
-                                          Keywords:
-                                       </span>{" "}
-                                       {version.meta.keywords.join(", ")}
-                                    </div>
-                                 )}
                            </div>
-                        </div>
-                     </>
+                        </ScrollArea>
+                     ) : null
+                  ) : (
+                     <div className="text-muted-foreground text-sm p-4 text-center border rounded-md bg-muted/20">
+                        <GitCompare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p>No changes detected</p>
+                        <p className="text-xs mt-1">
+                           This version is identical to the previous version
+                        </p>
+                     </div>
                   )}
                </div>
             </CredenzaBody>
-
-            <CredenzaFooter>
-               <Button variant="outline" onClick={onClose}>
-                  Close
-               </Button>
+            <CredenzaFooter className="flex items-center gap-4 text-xs text-muted-foreground">
+               <div className="flex items-center gap-2">
+                  <Plus className="h-3 w-3 text-green-600" />
+                  <span>Added lines</span>
+               </div>
+               <div className="flex items-center gap-2">
+                  <Minus className="h-3 w-3 text-red-600" />
+                  <span>Removed lines</span>
+               </div>
+               <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 flex items-center justify-center text-yellow-600 font-bold">
+                     ~
+                  </span>
+                  <span>Modified lines</span>
+               </div>
+               <div className="flex items-center gap-2">
+                  <FileText className="h-3 w-3" />
+                  <span>Context lines</span>
+               </div>
+               <div className="text-xs text-muted-foreground ml-auto">
+                  {stats.changes} change{stats.changes !== 1 ? "s" : ""} across{" "}
+                  {version?.meta?.lineDiff?.length} line
+                  {version.meta?.lineDiff?.length !== 1 ? "s" : ""}
+               </div>
             </CredenzaFooter>
          </CredenzaContent>
       </Credenza>

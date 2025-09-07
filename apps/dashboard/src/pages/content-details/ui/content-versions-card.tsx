@@ -1,6 +1,8 @@
 import {
    Card,
+   CardAction,
    CardContent,
+   CardDescription,
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
@@ -9,10 +11,11 @@ import { Button } from "@packages/ui/components/button";
 import { User, FileText } from "lucide-react";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import type { ContentVersionSelect } from "@packages/database/schema";
 
 interface ContentVersionsCardProps {
    contentId: string;
-   onVersionClick: (version: any) => void;
+   onVersionClick: (version: ContentVersionSelect) => void;
 }
 
 export function ContentVersionsCard({
@@ -22,7 +25,7 @@ export function ContentVersionsCard({
    const trpc = useTRPC();
 
    const { data: versions } = useSuspenseQuery(
-      (trpc.content as any).getVersions.queryOptions({
+      trpc.content.getVersions.queryOptions({
          contentId,
       }),
    );
@@ -61,13 +64,17 @@ export function ContentVersionsCard({
       <Card>
          <CardHeader>
             <CardTitle className="flex items-center gap-2">
-               <FileText className="h-5 w-5" />
                Content Versions
-               <Badge variant="secondary">{versions.length}</Badge>
             </CardTitle>
+            <CardDescription>
+               A history of all changes made to this content
+            </CardDescription>
+            <CardAction>
+               <Badge variant="outline">{versions.length}</Badge>
+            </CardAction>
          </CardHeader>
-         <CardContent className="space-y-3">
-            {versions.slice(0, 5).map((version: any) => (
+         <CardContent className="space-y-2">
+            {versions.slice(0, 5).map((version) => (
                <div
                   key={version.id}
                   className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
@@ -78,7 +85,7 @@ export function ContentVersionsCard({
                         <div className="flex items-center gap-2">
                            <Badge variant="outline">v{version.version}</Badge>
                            <span className="text-sm text-muted-foreground">
-                              {formatDate(version.createdAt)}
+                              {formatDate(version.createdAt.toDateString())}
                            </span>
                         </div>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
