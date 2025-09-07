@@ -51,27 +51,28 @@ export function EnhancedDiffRenderer({
       }
    };
 
-   const getPrefix = (type: string) => {
+   const getPrefix = (type: LineDiffItem["type"]) => {
       switch (type) {
-         case "add":
-            return (
-               <Plus className="h-3 w-3 text-green-600 dark:text-green-400" />
-            );
-         case "remove":
-            return <Minus className="h-3 w-3 text-red-600 dark:text-red-400" />;
-         case "modify":
-            return (
-               <span className="h-3 w-3 flex items-center justify-center text-yellow-600 dark:text-yellow-400 font-bold">
-                  ~
-               </span>
-            );
-         case "context":
-         default:
-            return (
-               <span className="w-3 h-3 flex items-center justify-center text-muted-foreground">
-                  ·
-               </span>
-            );
+        case "add":
+          return (
+            <Plus className="h-3 w-3 text-green-600 dark:text-green-400" />
+          );
+        case "remove":
+          return (
+            <Minus className="h-3 w-3 text-red-600 dark:text-red-400" />
+          );
+        case "modify":
+          return (
+            <span className="h-3 w-3 flex items-center justify-center text-yellow-600 dark:text-yellow-400 font-bold">
+              ~
+            </span>
+          );
+        default:
+          return (
+            <span className="w-3 h-3 flex items-center justify-center text-muted-foreground">
+              ·
+            </span>
+          );
       }
    };
 
