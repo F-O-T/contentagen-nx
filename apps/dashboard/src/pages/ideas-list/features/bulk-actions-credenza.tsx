@@ -35,7 +35,7 @@ export function BulkActionsCredenza({
    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
    const bulkApproveMutation = useMutation(
-      (trpc.ideas as any).bulkApprove?.mutationOptions({
+      trpc.ideas.bulkApprove?.mutationOptions({
          onSuccess: async (result: {
             approvedCount: number;
             totalSelected?: number;
@@ -54,11 +54,11 @@ export function BulkActionsCredenza({
                queryKey: trpc.ideas.listAllIdeas.queryKey(),
             });
          },
-         onError: (error: Error) => {
+         onError: (error) => {
             toast.error("Failed to approve ideas");
             console.error("Bulk approve error:", error);
          },
-      }) || {},
+      }),
    );
 
    const bulkDeleteMutation = useMutation(
@@ -89,11 +89,7 @@ export function BulkActionsCredenza({
    };
 
    const confirmBulkApprove = () => {
-      if ((trpc.ideas as any).bulkApprove) {
-         (bulkApproveMutation.mutate as any)({ ids: selectedItems });
-      } else {
-         toast.error("Bulk approve functionality is not available yet");
-      }
+      bulkApproveMutation.mutate({ ids: selectedItems });
       setShowApproveConfirmation(false);
    };
 
