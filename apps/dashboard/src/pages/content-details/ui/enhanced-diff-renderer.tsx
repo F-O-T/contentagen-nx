@@ -45,7 +45,6 @@ export function EnhancedDiffRenderer({
             return "bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-800 dark:text-red-200";
          case "modify":
             return "bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 text-yellow-800 dark:text-yellow-200";
-         case "context":
          default:
             return "text-muted-foreground bg-muted/10 hover:bg-muted/20 transition-colors";
       }
@@ -180,7 +179,7 @@ export function EnhancedDiffRenderer({
                      index > 0;
 
                   return (
-                     <div key={index}>
+                     <div key={`line-${index}-${item.content}`}>
                         {showSeparator && (
                            <div className="border-t border-muted-foreground/20 my-1" />
                         )}

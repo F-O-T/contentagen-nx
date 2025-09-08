@@ -124,7 +124,7 @@ export function AgentListProvider({ children, data }: AgentListProviderProps) {
 
       // Constants
       limit,
-      total: (data as any)?.total || 0,
+      total: data?.total || 0,
    };
 
    return React.createElement(AgentListContext.Provider, { value }, children);
