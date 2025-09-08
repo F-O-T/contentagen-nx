@@ -78,29 +78,19 @@ export function ContentVersionsCard({
          </CardHeader>
          <CardContent className="space-y-2">
             {versions.slice(0, 5).map((version) => (
-               <div
+               <Card
                   key={version.id}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                  className="cursor-pointer"
                   onClick={() => onVersionClick(version)}
                >
-                  <div className="flex items-center gap-3">
-                     <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                           <Badge variant="outline">v{version.version}</Badge>
-                           <span className="text-sm text-muted-foreground">
-                              {formatDate(version.createdAt.toDateString())}
-                           </span>
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                           <User className="h-3 w-3" />
-                           <span>{version.userId}</span>
-                        </div>
-                     </div>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                     View Details
-                  </Button>
-               </div>
+                  <CardHeader>
+                     <CardTitle>Version {version.version}</CardTitle>
+                     <CardDescription>
+                        Changes made in this version{" "}
+                        {version.meta?.diff?.length}
+                     </CardDescription>
+                  </CardHeader>
+               </Card>
             ))}
          </CardContent>
       </Card>
