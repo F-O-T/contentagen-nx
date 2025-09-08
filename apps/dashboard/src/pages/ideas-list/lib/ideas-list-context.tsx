@@ -61,7 +61,6 @@ export function IdeasListProvider({
    const [page, setPage] = useState(1);
    const [limit] = useState(8);
    const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-   const [ideasData] = useState(data);
    // const trpc = useTRPC();
 
    const totalPages = useMemo(() => {
@@ -88,8 +87,8 @@ export function IdeasListProvider({
    );
 
    const selectableItems = useMemo(() => {
-      return ideasData?.items.filter((item) => item.status === "pending") || [];
-   }, [ideasData?.items]);
+      return data?.items.filter((item) => item.status === "pending") || [];
+   }, [data?.items]);
 
    // Real-time updates
 
@@ -139,7 +138,7 @@ export function IdeasListProvider({
       selectedItemsCount: selectedItems.size,
 
       // Data
-      data: ideasData,
+      data,
       selectableItems,
 
       // Real-time updates
@@ -149,7 +148,7 @@ export function IdeasListProvider({
 
       // Constants
       limit,
-      total: ideasData?.total || 0,
+      total: data?.total ?? 0,
    };
 
    return React.createElement(IdeasListContext.Provider, { value }, children);
