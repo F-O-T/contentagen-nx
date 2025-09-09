@@ -185,7 +185,6 @@ export function generateWritingPrompt(config: PersonaConfig): string {
       createAudienceSection(config),
       createVoiceSection(config),
       searchIntegrationSystemPrompt(),
-      writingDraftSystemPrompt(),
    ];
    return sections.filter(Boolean).join(`\n\n${"=".repeat(80)}\n\n`);
 }

@@ -20,6 +20,7 @@ export function useContentRequestForm({
    const form = useAppForm({
       defaultValues: {
          description: defaultValues?.description || "",
+         layout: defaultValues?.layout || "article",
       } as ContentRequestFormData,
       onSubmit: async ({ value }) => {
          await onSubmit(value);

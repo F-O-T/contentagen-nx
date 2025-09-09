@@ -1,7 +1,11 @@
 import {
+   changelogDraftSystemPrompt,
+   interviewDraftSystemPrompt,
+   tutorialDraftSystemPrompt,
    writingDraftInputPrompt,
    type WritingDraftSchema,
    writingDraftSchema,
+   writingDraftSystemPrompt,
 } from "@packages/prompts/prompt/writing/writing-draft";
 import { generateOpenRouterObject } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
@@ -23,6 +27,25 @@ export async function runWriteContentDraft(payload: {
    const { brandDocument, webSearchContent, contentRequest, personaConfig } =
       data;
    try {
+      const getSystemPrompt = () => {
+         if (contentRequest.layout === "tutorial") {
+            return tutorialDraftSystemPrompt();
+         }
+         if (contentRequest.layout === "interview") {
+            return interviewDraftSystemPrompt();
+         }
+         if (contentRequest.layout === "changelog") {
+            return changelogDraftSystemPrompt();
+         }
+         return writingDraftSystemPrompt();
+      };
+      const systemPrompt = [
+         generateWritingPrompt(personaConfig),
+         getSystemPrompt(),
+      ]
+         .filter(Boolean)
+         .join(`\n\n${"=".repeat(80)}\n\n`);
+
       const result = await generateOpenRouterObject(
          openrouter,
          {
@@ -35,7 +58,7 @@ export async function runWriteContentDraft(payload: {
                brandDocument,
                webSearchContent,
             ),
-            system: generateWritingPrompt(personaConfig),
+            system: systemPrompt,
          },
       );
 

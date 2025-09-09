@@ -7,8 +7,7 @@ import {
    CardTitle,
 } from "@packages/ui/components/card";
 import { Badge } from "@packages/ui/components/badge";
-import { Button } from "@packages/ui/components/button";
-import { User, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { RouterOutput } from "@packages/api/client";
@@ -31,19 +30,6 @@ export function ContentVersionsCard({
          contentId,
       }),
    );
-
-   const formatDate = (date: Date | string) => {
-      const d = new Date(date);
-      const now = new Date();
-      const msPerDay = 1000 * 60 * 60 * 24;
-      const diffDays = Math.floor(
-         Math.abs(now.getTime() - d.getTime()) / msPerDay,
-      );
-      if (diffDays === 0) return "today";
-      if (diffDays === 1) return "yesterday";
-      if (diffDays < 7) return `${diffDays} days ago`;
-      return d.toLocaleDateString();
-   };
 
    if (!versions || !Array.isArray(versions) || versions.length === 0) {
       return (
