@@ -8,6 +8,17 @@ export const tutorialEditorSchema = z.object({
 
 export type TutorialEditorSchema = z.infer<typeof tutorialEditorSchema>;
 
+export function tutorialEditorInputPrompt(input: string): string {
+   return `
+Transform this tutorial draft into a clear, encouraging, step-by-step guide that feels like learning from a supportive mentor:
+
+**TUTORIAL-DRAFT-START:**
+${input}
+**TUTORIAL-DRAFT-END:**
+
+Remember: Break down complex concepts into manageable steps, use encouraging language throughout, include validation checkpoints, and create a learning experience that builds confidence while teaching effectively. Make this tutorial feel like having a patient, knowledgeable mentor guiding someone through their learning journey.
+`;
+}
 export function tutorialEditorPrompt() {
    return `
 # Human-First Tutorial Editor System Prompt

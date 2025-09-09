@@ -250,6 +250,7 @@ export const ideasRouter = router({
             agentId: idea.agentId,
             request: {
                description: `${idea.content.title}\n\n${idea.content.description}`,
+               layout: "article",
             },
          });
          // 4. Enqueue job
@@ -258,6 +259,7 @@ export const ideasRouter = router({
             contentId: content.id,
             contentRequest: {
                description: `${idea.content.title}\n\n${idea.content.description}`,
+               layout: "article",
             },
          });
          return { success: true, content };
@@ -343,14 +345,20 @@ export const ideasRouter = router({
                // Create content
                const content = await createContent(db, {
                   agentId: idea.agentId,
-                  request: { description: idea.content.description },
+                  request: {
+                     layout: "article",
+                     description: idea.content.description,
+                  },
                });
 
                // Enqueue job
                await enqueueContentPlanningJob({
                   agentId: idea.agentId,
                   contentId: content.id,
-                  contentRequest: { description: idea.content.description },
+                  contentRequest: {
+                     layout: "article",
+                     description: idea.content.description,
+                  },
                });
 
                approvedCount++;

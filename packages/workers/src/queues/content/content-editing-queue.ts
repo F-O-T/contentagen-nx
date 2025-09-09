@@ -48,6 +48,7 @@ export async function runContentEditing(
 
       const { content: editedDraft } = await runEditContentDraft({
          data: {
+            contentRequest,
             draft,
          },
          userId,

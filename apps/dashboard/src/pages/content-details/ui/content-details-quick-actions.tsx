@@ -49,6 +49,17 @@ export function ContentDetailsQuickActions({
       trpc.content.regenerate.mutationOptions({
          onSuccess: async () => {
             toast.success("Content regeneration triggered!");
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.get.queryKey({ id: content.id }),
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.listAllContent.queryKey(),
+            });
+            await queryClient.invalidateQueries({
+               queryKey: trpc.content.getVersions.queryKey({
+                  contentId: content.id,
+               }),
+            });
          },
          onError: (error) => {
             toast.error(

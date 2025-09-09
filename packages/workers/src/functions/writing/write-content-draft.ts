@@ -8,19 +8,19 @@ import {
    changelogDraftSystemPrompt,
    changelogDraftInputPrompt,
    changelogDraftSchema,
-   ChangelogDraftSchema,
+   type ChangelogDraftSchema,
 } from "@packages/prompts/prompt/writing/changelog-writing-draft";
 import {
    interviewDraftSystemPrompt,
    interviewDraftInputPrompt,
    interviewDraftSchema,
-   InterviewDraftSchema,
+   type InterviewDraftSchema,
 } from "@packages/prompts/prompt/writing/interview-writing-draft";
 import {
    tutorialDraftSystemPrompt,
    tutorialDraftInputPrompt,
    tutorialDraftSchema,
-   TutorialDraftSchema,
+   type TutorialDraftSchema,
 } from "@packages/prompts/prompt/writing/tutorial-writing-draft";
 import { generateOpenRouterObject } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
