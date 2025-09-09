@@ -8,7 +8,7 @@ const getLayoutLabel = (value: string): string => {
 };
 
 export function BasicInfoStep({ form }: { form: ContentRequestForm }) {
-   const layoutOptions = ContentRequestSchema.shape.layout.unwrap().options;
+   const layoutOptions = ContentRequestSchema.shape.layout.options;
 
    return (
       <div className="space-y-4">
