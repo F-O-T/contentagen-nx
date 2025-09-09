@@ -54,6 +54,7 @@ export function AgentContentRequestPage() {
                agentId,
                request: {
                   description: values.description,
+                  layout: values.layout,
                },
             });
          }}

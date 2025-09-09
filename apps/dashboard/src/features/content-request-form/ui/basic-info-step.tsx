@@ -1,3 +1,4 @@
+import { ContentRequestSchema } from "@packages/database/schema";
 import type { ContentRequestForm } from "../lib/use-content-request-form";
 import { Button } from "@packages/ui/components/button";
 import { TiptapEditor } from "@packages/ui/components/tiptap-editor";
@@ -7,7 +8,7 @@ const getLayoutLabel = (value: string): string => {
 };
 
 export function BasicInfoStep({ form }: { form: ContentRequestForm }) {
-   const layoutOptions = ["tutorial", "interview", "article", "changelog"] as const;
+   const layoutOptions = ContentRequestSchema.shape.layout.unwrap().options;
 
    return (
       <div className="space-y-4">
@@ -27,7 +28,7 @@ export function BasicInfoStep({ form }: { form: ContentRequestForm }) {
                </field.FieldContainer>
             )}
          </form.AppField>
-         
+
          <form.AppField name="layout">
             {(field) => (
                <field.FieldContainer className="space-y-2">

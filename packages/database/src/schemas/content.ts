@@ -20,9 +20,7 @@ import { contentVersion } from "./content-version";
 
 export const ContentRequestSchema = z.object({
    description: z.string().min(1, "Description is required"),
-   layout: z
-      .enum(["tutorial", "interview", "article", "changelog"])
-      .default("article"),
+   layout: z.enum(["tutorial", "interview", "article", "changelog"]),
 });
 export type ContentRequest = z.infer<typeof ContentRequestSchema>;
 export const ContentStatsSchema = z.object({
