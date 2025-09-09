@@ -437,6 +437,7 @@ export const contentRouter = router({
                contentId: created.id,
                contentRequest: {
                   description: input.request.description,
+                  layout: input.request.layout,
                },
             });
             return created;

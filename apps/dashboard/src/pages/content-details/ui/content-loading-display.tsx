@@ -30,14 +30,14 @@ const contentSteps = [
       description: "Writing your content",
    },
    {
-      id: "editing",
-      label: "Editing",
-      description: "Refining and polishing the content",
-   },
-   {
       id: "grammar_checking",
       label: "Grammar Checking",
       description: "Checking and correcting grammar",
+   },
+   {
+      id: "editing",
+      label: "Editing",
+      description: "Refining and polishing the content",
    },
    {
       id: "analyzing",

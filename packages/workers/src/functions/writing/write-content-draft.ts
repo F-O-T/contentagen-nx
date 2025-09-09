@@ -1,12 +1,27 @@
 import {
-   changelogDraftSystemPrompt,
-   interviewDraftSystemPrompt,
-   tutorialDraftSystemPrompt,
    writingDraftInputPrompt,
    type WritingDraftSchema,
    writingDraftSchema,
    writingDraftSystemPrompt,
 } from "@packages/prompts/prompt/writing/writing-draft";
+import {
+   changelogDraftSystemPrompt,
+   changelogDraftInputPrompt,
+   changelogDraftSchema,
+   ChangelogDraftSchema,
+} from "@packages/prompts/prompt/writing/changelog-writing-draft";
+import {
+   interviewDraftSystemPrompt,
+   interviewDraftInputPrompt,
+   interviewDraftSchema,
+   InterviewDraftSchema,
+} from "@packages/prompts/prompt/writing/interview-writing-draft";
+import {
+   tutorialDraftSystemPrompt,
+   tutorialDraftInputPrompt,
+   tutorialDraftSchema,
+   TutorialDraftSchema,
+} from "@packages/prompts/prompt/writing/tutorial-writing-draft";
 import { generateOpenRouterObject } from "@packages/openrouter/helpers";
 import { createOpenrouterClient } from "@packages/openrouter/client";
 import { serverEnv } from "@packages/environment/server";
@@ -39,6 +54,46 @@ export async function runWriteContentDraft(payload: {
          }
          return writingDraftSystemPrompt();
       };
+      const getSchema = () => {
+         if (contentRequest.layout === "tutorial") {
+            return tutorialDraftSchema;
+         }
+         if (contentRequest.layout === "interview") {
+            return interviewDraftSchema;
+         }
+         if (contentRequest.layout === "changelog") {
+            return changelogDraftSchema;
+         }
+         return writingDraftSchema;
+      };
+      const getInputPrompt = () => {
+         if (contentRequest.layout === "tutorial") {
+            return tutorialDraftInputPrompt(
+               contentRequest.description,
+               brandDocument,
+               webSearchContent,
+            );
+         }
+         if (contentRequest.layout === "interview") {
+            return interviewDraftInputPrompt(
+               contentRequest.description,
+               brandDocument,
+               webSearchContent,
+            );
+         }
+         if (contentRequest.layout === "changelog") {
+            return changelogDraftInputPrompt(
+               contentRequest.description,
+               brandDocument,
+               webSearchContent,
+            );
+         }
+         return writingDraftInputPrompt(
+            contentRequest.description,
+            brandDocument,
+            webSearchContent,
+         );
+      };
       const systemPrompt = [
          generateWritingPrompt(personaConfig),
          getSystemPrompt(),
@@ -51,13 +106,9 @@ export async function runWriteContentDraft(payload: {
          {
             model: "small",
          },
-         writingDraftSchema,
+         getSchema(),
          {
-            prompt: writingDraftInputPrompt(
-               contentRequest.description,
-               brandDocument,
-               webSearchContent,
-            ),
+            prompt: getInputPrompt(),
             system: systemPrompt,
          },
       );
@@ -69,7 +120,11 @@ export async function runWriteContentDraft(payload: {
          userId,
       });
 
-      const { draft } = result.object as WritingDraftSchema;
+      const { draft } = result.object as
+         | WritingDraftSchema
+         | ChangelogDraftSchema
+         | InterviewDraftSchema
+         | TutorialDraftSchema;
       return {
          draft,
       };
