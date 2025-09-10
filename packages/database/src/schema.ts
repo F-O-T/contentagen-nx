@@ -2,7 +2,6 @@ export * from "./schemas/auth";
 export * from "./schemas/agent";
 export * from "./schemas/competitor";
 export * from "./schemas/competitor-feature";
-export * from "./schemas/feature-update";
 export * from "./schemas/content";
 export * from "./schemas/content-version";
 export * from "./schemas/export-log";

@@ -1,12 +1,6 @@
 export * from "drizzle-orm/sql";
 export { alias } from "drizzle-orm/pg-core";
 
-// Schemas
-export * from "./schemas/competitor";
-export * from "./schemas/competitor-feature";
-export * from "./schemas/feature-update";
-
-// Repositories
 export * from "./repositories/access-control-repository";
 export * from "./repositories/agent-repository";
 export * from "./repositories/auth-repository";

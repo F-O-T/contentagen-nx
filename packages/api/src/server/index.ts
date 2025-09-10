@@ -13,6 +13,7 @@ import { sdkRouter } from "./router/sdk";
 import { ideasRouter } from "./router/ideas";
 import { preferencesRouter } from "./router/preferences";
 import type { OpenRouterClient } from "@packages/openrouter/client";
+import { competitorRouter } from "./router/competitor";
 
 export const appRouter = router({
    agent: agentRouter,
@@ -23,6 +24,7 @@ export const appRouter = router({
    ideas: ideasRouter,
    sdk: sdkRouter,
    preferences: preferencesRouter,
+   competitor: competitorRouter,
 });
 export const createApi = ({
    auth,

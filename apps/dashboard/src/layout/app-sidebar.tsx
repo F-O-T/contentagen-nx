@@ -9,7 +9,7 @@ import {
    SidebarMenu,
    SidebarMenuItem,
 } from "@packages/ui/components/sidebar";
-import { Bot, FilesIcon, LayoutDashboardIcon, Lightbulb } from "lucide-react";
+import { Bot, FilesIcon, LayoutDashboardIcon, Lightbulb, Target } from "lucide-react";
 import type * as React from "react";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
@@ -45,6 +45,11 @@ export function AppSidebar({
          icon: Lightbulb,
          title: "Your Ideas",
          url: "/ideas",
+      },
+      {
+         icon: Target,
+         title: "Competitors",
+         url: "/competitors",
       },
    ];
 

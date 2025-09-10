@@ -24,9 +24,11 @@ import { Route as DashboardHomeRouteImport } from './routes/_dashboard/home'
 import { Route as DashboardApikeyRouteImport } from './routes/_dashboard/apikey'
 import { Route as DashboardIdeasIndexRouteImport } from './routes/_dashboard/ideas/index'
 import { Route as DashboardContentIndexRouteImport } from './routes/_dashboard/content/index'
+import { Route as DashboardCompetitorsIndexRouteImport } from './routes/_dashboard/competitors/index'
 import { Route as DashboardAgentsIndexRouteImport } from './routes/_dashboard/agents/index'
 import { Route as DashboardIdeasIdRouteImport } from './routes/_dashboard/ideas/$id'
 import { Route as DashboardContentIdRouteImport } from './routes/_dashboard/content/$id'
+import { Route as DashboardCompetitorsIdRouteImport } from './routes/_dashboard/competitors/$id'
 import { Route as DashboardAgentsFlowRouteImport } from './routes/_dashboard/agents/_flow'
 import { Route as DashboardAgentsAgentIdIndexRouteImport } from './routes/_dashboard/agents/$agentId/index'
 import { Route as DashboardAgentsFlowManualRouteImport } from './routes/_dashboard/agents/_flow/manual'
@@ -110,6 +112,12 @@ const DashboardContentIndexRoute = DashboardContentIndexRouteImport.update({
   path: '/content/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardCompetitorsIndexRoute =
+  DashboardCompetitorsIndexRouteImport.update({
+    id: '/competitors/',
+    path: '/competitors/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardAgentsIndexRoute = DashboardAgentsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -123,6 +131,11 @@ const DashboardIdeasIdRoute = DashboardIdeasIdRouteImport.update({
 const DashboardContentIdRoute = DashboardContentIdRouteImport.update({
   id: '/content/$id',
   path: '/content/$id',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCompetitorsIdRoute = DashboardCompetitorsIdRouteImport.update({
+  id: '/competitors/$id',
+  path: '/competitors/$id',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardAgentsFlowRoute = DashboardAgentsFlowRouteImport.update({
@@ -172,9 +185,11 @@ export interface FileRoutesByFullPath {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/callback': typeof CallbackAuthedRouteWithChildren
   '/agents': typeof DashboardAgentsFlowRouteWithChildren
+  '/competitors/$id': typeof DashboardCompetitorsIdRoute
   '/content/$id': typeof DashboardContentIdRoute
   '/ideas/$id': typeof DashboardIdeasIdRoute
   '/agents/': typeof DashboardAgentsIndexRoute
+  '/competitors': typeof DashboardCompetitorsIndexRoute
   '/content': typeof DashboardContentIndexRoute
   '/ideas': typeof DashboardIdeasIndexRoute
   '/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
@@ -195,8 +210,10 @@ export interface FileRoutesByTo {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/callback': typeof CallbackAuthedRouteWithChildren
   '/agents': typeof DashboardAgentsIndexRoute
+  '/competitors/$id': typeof DashboardCompetitorsIdRoute
   '/content/$id': typeof DashboardContentIdRoute
   '/ideas/$id': typeof DashboardIdeasIdRoute
+  '/competitors': typeof DashboardCompetitorsIndexRoute
   '/content': typeof DashboardContentIndexRoute
   '/ideas': typeof DashboardIdeasIndexRoute
   '/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
@@ -221,9 +238,11 @@ export interface FileRoutesById {
   '/callback/_authed': typeof CallbackAuthedRouteWithChildren
   '/_dashboard/agents': typeof DashboardAgentsRouteWithChildren
   '/_dashboard/agents/_flow': typeof DashboardAgentsFlowRouteWithChildren
+  '/_dashboard/competitors/$id': typeof DashboardCompetitorsIdRoute
   '/_dashboard/content/$id': typeof DashboardContentIdRoute
   '/_dashboard/ideas/$id': typeof DashboardIdeasIdRoute
   '/_dashboard/agents/': typeof DashboardAgentsIndexRoute
+  '/_dashboard/competitors/': typeof DashboardCompetitorsIndexRoute
   '/_dashboard/content/': typeof DashboardContentIndexRoute
   '/_dashboard/ideas/': typeof DashboardIdeasIndexRoute
   '/_dashboard/agents/$agentId/edit': typeof DashboardAgentsAgentIdEditRoute
@@ -246,9 +265,11 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/callback'
     | '/agents'
+    | '/competitors/$id'
     | '/content/$id'
     | '/ideas/$id'
     | '/agents/'
+    | '/competitors'
     | '/content'
     | '/ideas'
     | '/agents/$agentId/edit'
@@ -269,8 +290,10 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/callback'
     | '/agents'
+    | '/competitors/$id'
     | '/content/$id'
     | '/ideas/$id'
+    | '/competitors'
     | '/content'
     | '/ideas'
     | '/agents/$agentId/edit'
@@ -294,9 +317,11 @@ export interface FileRouteTypes {
     | '/callback/_authed'
     | '/_dashboard/agents'
     | '/_dashboard/agents/_flow'
+    | '/_dashboard/competitors/$id'
     | '/_dashboard/content/$id'
     | '/_dashboard/ideas/$id'
     | '/_dashboard/agents/'
+    | '/_dashboard/competitors/'
     | '/_dashboard/content/'
     | '/_dashboard/ideas/'
     | '/_dashboard/agents/$agentId/edit'
@@ -419,6 +444,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardContentIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/_dashboard/competitors/': {
+      id: '/_dashboard/competitors/'
+      path: '/competitors'
+      fullPath: '/competitors'
+      preLoaderRoute: typeof DashboardCompetitorsIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/agents/': {
       id: '/_dashboard/agents/'
       path: '/'
@@ -438,6 +470,13 @@ declare module '@tanstack/react-router' {
       path: '/content/$id'
       fullPath: '/content/$id'
       preLoaderRoute: typeof DashboardContentIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_dashboard/competitors/$id': {
+      id: '/_dashboard/competitors/$id'
+      path: '/competitors/$id'
+      fullPath: '/competitors/$id'
+      preLoaderRoute: typeof DashboardCompetitorsIdRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/_dashboard/agents/_flow': {
@@ -523,8 +562,10 @@ interface DashboardRouteChildren {
   DashboardOrganizationRoute: typeof DashboardOrganizationRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
   DashboardAgentsRoute: typeof DashboardAgentsRouteWithChildren
+  DashboardCompetitorsIdRoute: typeof DashboardCompetitorsIdRoute
   DashboardContentIdRoute: typeof DashboardContentIdRoute
   DashboardIdeasIdRoute: typeof DashboardIdeasIdRoute
+  DashboardCompetitorsIndexRoute: typeof DashboardCompetitorsIndexRoute
   DashboardContentIndexRoute: typeof DashboardContentIndexRoute
   DashboardIdeasIndexRoute: typeof DashboardIdeasIndexRoute
 }
@@ -535,8 +576,10 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardOrganizationRoute: DashboardOrganizationRoute,
   DashboardProfileRoute: DashboardProfileRoute,
   DashboardAgentsRoute: DashboardAgentsRouteWithChildren,
+  DashboardCompetitorsIdRoute: DashboardCompetitorsIdRoute,
   DashboardContentIdRoute: DashboardContentIdRoute,
   DashboardIdeasIdRoute: DashboardIdeasIdRoute,
+  DashboardCompetitorsIndexRoute: DashboardCompetitorsIndexRoute,
   DashboardContentIndexRoute: DashboardContentIndexRoute,
   DashboardIdeasIndexRoute: DashboardIdeasIndexRoute,
 }
