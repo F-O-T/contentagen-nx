@@ -1,7 +1,5 @@
 import { ContentRequestCard } from "./content-card";
 import { LoadingContentCard } from "./loading-content-card";
-import { useTRPC } from "@/integrations/clients";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useContentList } from "../lib/content-list-context";
 
 const getStatusDisplay = (status: string | null) => {
@@ -50,17 +48,15 @@ const getStatusDisplay = (status: string | null) => {
 };
 
 export function ContentCardsList() {
-   const trpc = useTRPC();
-   const { page, limit, filteredStatuses, selectedAgents } = useContentList();
+   const { data } = useContentList();
 
-   const { data } = useSuspenseQuery(
-      trpc.content.listAllContent.queryOptions({
-         status: filteredStatuses,
-         page,
-         limit,
-         ...(selectedAgents.length > 0 && { agentIds: selectedAgents }),
-      }),
-   );
+   if (!data) {
+      return (
+         <div className="text-center py-12 text-muted-foreground">
+            <p className="text-lg">Loading content...</p>
+         </div>
+      );
+   }
 
    return (
       <>

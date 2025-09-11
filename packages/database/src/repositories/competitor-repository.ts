@@ -1,6 +1,10 @@
 import { competitor } from "../schemas/competitor";
 import { eq, and, or, sql } from "drizzle-orm";
-import type { CompetitorSelect, CompetitorInsert, CompetitorWithFeatures } from "../schemas/competitor";
+import type {
+   CompetitorSelect,
+   CompetitorInsert,
+   CompetitorWithFeatures,
+} from "../schemas/competitor";
 import type { DatabaseInstance } from "../client";
 import { DatabaseError, NotFoundError } from "@packages/errors";
 
@@ -111,7 +115,6 @@ export async function listCompetitors(
             orderBy: (competitor, { desc }) => [desc(competitor.createdAt)],
             with: {
                features: {
-                  limit: 5,
                   orderBy: (competitorFeature, { desc }) => [
                      desc(competitorFeature.extractedAt),
                   ],

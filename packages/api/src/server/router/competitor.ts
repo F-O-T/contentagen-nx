@@ -7,6 +7,7 @@ import {
    deleteCompetitor,
    listCompetitors,
    searchCompetitors,
+   getTotalCompetitors,
 } from "@packages/database/repositories/competitor-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
@@ -36,24 +37,24 @@ export const competitorRouter = router({
                });
             }
 
-            if (input.search) {
-               const competitors = await searchCompetitors(resolvedCtx.db, {
-                  query: input.search,
-                  userId,
-                  organizationId: organizationId || undefined,
-                  page: input.page,
-                  limit: input.limit,
-               });
-               return { items: competitors };
-            }
-
             const competitors = await listCompetitors(resolvedCtx.db, {
                userId,
                organizationId: organizationId || undefined,
                page: input.page,
                limit: input.limit,
             });
-            return { items: competitors };
+
+            const total = await getTotalCompetitors(resolvedCtx.db, {
+               userId,
+               organizationId: organizationId || undefined,
+            });
+
+            return {
+               items: competitors,
+               total,
+               page: input.page,
+               limit: input.limit,
+            };
          } catch (err) {
             if (err instanceof DatabaseError) {
                throw new TRPCError({

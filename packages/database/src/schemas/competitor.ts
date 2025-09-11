@@ -11,7 +11,6 @@ export const competitor = pgTable(
       id: uuid("id").primaryKey().defaultRandom(),
       name: text("name").notNull(),
       websiteUrl: text("website_url").notNull(),
-      changelogUrl: text("changelog_url"),
       userId: text("user_id").references(() => user.id, {
          onDelete: "cascade",
       }),

@@ -1,26 +1,50 @@
-import type { CompetitorSelect } from "@packages/database/schema";
 import {
    Card,
-   CardContent,
    CardHeader,
    CardTitle,
+   CardDescription,
+   CardAction,
+   CardFooter,
 } from "@packages/ui/components/card";
-import { Button } from "@packages/ui/components/button";
 import { Badge } from "@packages/ui/components/badge";
-import { ExternalLink, Edit, Trash2, Globe, Calendar } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Edit, Trash2, Globe, Eye } from "lucide-react";
+import { useRouter } from "@tanstack/react-router";
 import { DeleteCompetitorConfirmationDialog } from "../features/delete-competitor-confirmation-dialog";
 import { CreateEditCompetitorDialog } from "../features/create-edit-competitor-dialog";
-import { useState } from "react";
+import {
+   Credenza,
+   CredenzaContent,
+   CredenzaHeader,
+   CredenzaTitle,
+   CredenzaDescription,
+   CredenzaTrigger,
+   CredenzaBody,
+} from "@packages/ui/components/credenza";
+import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
+import { useCompetitorList } from "../lib/competitor-list-context";
+import { useCallback, useState } from "react";
+import { Checkbox } from "@packages/ui/components/checkbox";
+import type { RouterOutput } from "@packages/api/client";
 
 interface CompetitorCardProps {
-   competitor: CompetitorSelect;
+   competitor: RouterOutput["competitor"]["list"]["items"][number];
 }
 
 export function CompetitorCard({ competitor }: CompetitorCardProps) {
+   const { selectedItems, handleSelectionChange } = useCompetitorList();
    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
    const [showEditDialog, setShowEditDialog] = useState(false);
-
+   const [isCredenzaOpen, setIsCredenzaOpen] = useState(false);
+   const router = useRouter();
+   const handleNavigate = useCallback(() => {
+      router.navigate({
+         to: "/competitors/$id",
+         params: { id: competitor.id },
+      });
+   }, [competitor.id, router]);
+   const handleExternalNavigation = useCallback(() => {
+      window.open(competitor.websiteUrl, "_blank");
+   }, [competitor.websiteUrl]);
    const formatDate = (date: Date) => {
       return new Intl.DateTimeFormat("en-US", {
          year: "numeric",
@@ -31,84 +55,80 @@ export function CompetitorCard({ competitor }: CompetitorCardProps) {
 
    return (
       <>
-         <Card className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-               <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg line-clamp-2">
-                     {competitor.name}
-                  </CardTitle>
-                  <div className="flex gap-1 ml-2">
-                     <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                     >
-                        <a 
-                           href={competitor.websiteUrl}
-                           target="_blank"
-                           rel="noopener noreferrer"
-                        >
-                           <ExternalLink className="h-4 w-4" />
-                        </a>
-                     </Button>
-                     <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowEditDialog(true)}
-                     >
-                        <Edit className="h-4 w-4" />
-                     </Button>
-                     <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowDeleteDialog(true)}
-                     >
-                        <Trash2 className="h-4 w-4" />
-                     </Button>
-                  </div>
-               </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-               <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                     <Globe className="h-4 w-4" />
-                     <span className="truncate">{competitor.websiteUrl}</span>
-                  </div>
-
-                  {competitor.changelogUrl && (
-                     <div className="flex items-center gap-2 text-sm text-blue-600">
-                        <ExternalLink className="h-4 w-4" />
-                        <span className="truncate">Changelog available</span>
-                     </div>
-                  )}
-
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                     <Calendar className="h-4 w-4" />
-                     <span>
-                        Added {formatDate(new Date(competitor.createdAt))}
-                     </span>
-                  </div>
-
-                  {competitor.features && competitor.features.length > 0 && (
-                     <div className="flex flex-wrap gap-1">
+         <Credenza open={isCredenzaOpen} onOpenChange={setIsCredenzaOpen}>
+            <CredenzaTrigger asChild>
+               <Card className="cursor-pointer">
+                  <CardHeader>
+                     <CardTitle className="line-clamp-1">
+                        {competitor.name}
+                     </CardTitle>
+                     <CardDescription className="line-clamp-2">
+                        {competitor.websiteUrl}
+                     </CardDescription>
+                     <CardAction>
+                        <Checkbox
+                           checked={selectedItems.has(competitor.id)}
+                           onCheckedChange={(checked) =>
+                              handleSelectionChange(
+                                 competitor.id,
+                                 checked as boolean,
+                              )
+                           }
+                           onClick={(e) => e.stopPropagation()}
+                        />
+                     </CardAction>
+                  </CardHeader>
+                  <CardFooter className="flex items-center justify-between">
+                     <Badge variant="outline">
+                        {formatDate(new Date(competitor.createdAt))}
+                     </Badge>
+                     {competitor.features && competitor.features.length > 0 && (
                         <Badge variant="secondary" className="text-xs">
-                           {competitor.features.length} features tracked
+                           {competitor.features.length} features
                         </Badge>
-                     </div>
-                  )}
+                     )}
+                  </CardFooter>
+               </Card>
+            </CredenzaTrigger>
+            <CredenzaContent>
+               <CredenzaHeader>
+                  <CredenzaTitle>{competitor.name}</CredenzaTitle>
+                  <CredenzaDescription>
+                     Your competitor website: {competitor.websiteUrl}
+                  </CredenzaDescription>
+               </CredenzaHeader>
+               <CredenzaBody className="grid grid-cols-2 gap-2">
+                  <SquaredIconButton onClick={handleNavigate}>
+                     <Eye className="h-4 w-4" />
+                     View details
+                  </SquaredIconButton>
 
-                  <div className="flex justify-between items-center pt-2">
-                     <Link
-                        to="/competitors/$id"
-                        params={{ id: competitor.id }}
-                        className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
-                     >
-                        View details →
-                     </Link>
-                  </div>
-               </div>
-            </CardContent>
-         </Card>
+                  <SquaredIconButton
+                     onClick={() => {
+                        setShowEditDialog(true);
+                        setIsCredenzaOpen(false);
+                     }}
+                  >
+                     <Edit className="h-4 w-4" />
+                     Edit competitor
+                  </SquaredIconButton>
+                  <SquaredIconButton onClick={handleExternalNavigation}>
+                     <Globe className="h-4 w-4" />
+                     Visit website
+                  </SquaredIconButton>
+                  <SquaredIconButton
+                     destructive
+                     onClick={() => {
+                        setShowDeleteDialog(true);
+                        setIsCredenzaOpen(false);
+                     }}
+                  >
+                     <Trash2 className="h-4 w-4" />
+                     Delete competitor
+                  </SquaredIconButton>
+               </CredenzaBody>
+            </CredenzaContent>
+         </Credenza>
 
          <DeleteCompetitorConfirmationDialog
             competitor={competitor}

@@ -7,20 +7,13 @@ import {
 } from "@packages/ui/components/card";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
-import {
-   ExternalLink,
-   Edit,
-   Globe,
-   Calendar,
-   FileText,
-   Settings,
-} from "lucide-react";
+import { ExternalLink, Edit, Globe, Calendar } from "lucide-react";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
-import { Suspense } from "react";
-import { CompetitorFeaturesList } from "./competitor-features-list";
 import { CompetitorDetailsActions } from "./competitor-details-actions";
+import { CompetitorStatsCard } from "./competitor-stats-card";
+import { CompetitorFeaturesCard } from "./competitor-features-card";
 import { CreateEditCompetitorDialog } from "../../competitor-list/features/create-edit-competitor-dialog";
 import { useState } from "react";
 
@@ -43,12 +36,12 @@ export function CompetitorDetailsPage() {
 
    return (
       <>
-         <main className="h-full w-full flex flex-col gap-4 p-4">
+         <main className="h-full w-full flex flex-col gap-4">
             <TalkingMascot message="View detailed information about this competitor and track their features!" />
 
             <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
-               {/* Main Information */}
                <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
+                  <CompetitorStatsCard />
                   <Card>
                      <CardHeader>
                         <div className="flex items-start justify-between">
@@ -56,14 +49,12 @@ export function CompetitorDetailsPage() {
                               {competitor.name}
                            </CardTitle>
                            <div className="flex gap-2">
-                              <Button
-                                 variant="outline"
-                                 size="sm"
-                                 asChild
-                                 target="_blank"
-                                 rel="noopener noreferrer"
-                              >
-                                 <a href={competitor.websiteUrl}>
+                              <Button variant="outline" size="sm" asChild>
+                                 <a
+                                    href={competitor.websiteUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                 >
                                     <ExternalLink className="h-4 w-4 mr-2" />
                                     Website
                                  </a>
@@ -92,20 +83,6 @@ export function CompetitorDetailsPage() {
                            </a>
                         </div>
 
-                        {competitor.changelogUrl && (
-                           <div className="flex items-center gap-2 text-sm text-blue-600">
-                              <FileText className="h-4 w-4" />
-                              <a
-                                 href={competitor.changelogUrl}
-                                 target="_blank"
-                                 rel="noopener noreferrer"
-                                 className="hover:text-blue-800 hover:underline"
-                              >
-                                 View Changelog
-                              </a>
-                           </div>
-                        )}
-
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                            <Calendar className="h-4 w-4" />
                            <span>
@@ -133,26 +110,11 @@ export function CompetitorDetailsPage() {
                            )}
                      </CardContent>
                   </Card>
-
-                  {/* Features Section */}
-                  <Card>
-                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                           <Settings className="h-5 w-5" />
-                           Tracked Features
-                        </CardTitle>
-                     </CardHeader>
-                     <CardContent>
-                        <CompetitorFeaturesList
-                           features={competitor.features}
-                        />
-                     </CardContent>
-                  </Card>
                </div>
 
-               {/* Actions Sidebar */}
-               <div className="col-span-1 flex flex-col gap-4">
+               <div className="col-span-1 gap-4 flex flex-col">
                   <CompetitorDetailsActions competitor={competitor} />
+                  <CompetitorFeaturesCard features={competitor.features} />
                </div>
             </div>
          </main>
