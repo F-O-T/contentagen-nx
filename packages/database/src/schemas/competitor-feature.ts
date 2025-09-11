@@ -49,4 +49,3 @@ export const CompetitorFeatureInsertSchema =
    createInsertSchema(competitorFeature);
 export const CompetitorFeatureSelectSchema =
    createSelectSchema(competitorFeature);
-

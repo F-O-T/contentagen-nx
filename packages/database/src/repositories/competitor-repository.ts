@@ -1,6 +1,6 @@
 import { competitor } from "../schemas/competitor";
 import { eq, and, or, sql } from "drizzle-orm";
-import type { CompetitorSelect, CompetitorInsert } from "../schemas/competitor";
+import type { CompetitorSelect, CompetitorInsert, CompetitorWithFeatures } from "../schemas/competitor";
 import type { DatabaseInstance } from "../client";
 import { DatabaseError, NotFoundError } from "@packages/errors";
 
@@ -24,7 +24,7 @@ export async function createCompetitor(
 export async function getCompetitorById(
    dbClient: DatabaseInstance,
    id: string,
-): Promise<CompetitorSelect> {
+): Promise<CompetitorWithFeatures> {
    try {
       const result = await dbClient.query.competitor.findFirst({
          where: eq(competitor.id, id),
@@ -96,7 +96,7 @@ export async function listCompetitors(
       page?: number;
       limit?: number;
    },
-): Promise<CompetitorSelect[]> {
+): Promise<CompetitorWithFeatures[]> {
    try {
       const offset = (page - 1) * limit;
 
@@ -213,7 +213,7 @@ export async function searchCompetitors(
       page?: number;
       limit?: number;
    },
-): Promise<CompetitorSelect[]> {
+): Promise<CompetitorWithFeatures[]> {
    try {
       const offset = (page - 1) * limit;
 

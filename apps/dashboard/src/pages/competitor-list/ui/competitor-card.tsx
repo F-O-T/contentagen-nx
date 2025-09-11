@@ -1,5 +1,10 @@
 import type { CompetitorSelect } from "@packages/database/schema";
-import { Card, CardContent, CardHeader, CardTitle } from "@packages/ui/components/card";
+import {
+   Card,
+   CardContent,
+   CardHeader,
+   CardTitle,
+} from "@packages/ui/components/card";
 import { Button } from "@packages/ui/components/button";
 import { Badge } from "@packages/ui/components/badge";
 import { ExternalLink, Edit, Trash2, Globe, Calendar } from "lucide-react";
@@ -37,10 +42,12 @@ export function CompetitorCard({ competitor }: CompetitorCardProps) {
                         variant="ghost"
                         size="sm"
                         asChild
-                        target="_blank"
-                        rel="noopener noreferrer"
                      >
-                        <a href={competitor.websiteUrl}>
+                        <a 
+                           href={competitor.websiteUrl}
+                           target="_blank"
+                           rel="noopener noreferrer"
+                        >
                            <ExternalLink className="h-4 w-4" />
                         </a>
                      </Button>
@@ -67,7 +74,7 @@ export function CompetitorCard({ competitor }: CompetitorCardProps) {
                      <Globe className="h-4 w-4" />
                      <span className="truncate">{competitor.websiteUrl}</span>
                   </div>
-                  
+
                   {competitor.changelogUrl && (
                      <div className="flex items-center gap-2 text-sm text-blue-600">
                         <ExternalLink className="h-4 w-4" />
@@ -77,7 +84,9 @@ export function CompetitorCard({ competitor }: CompetitorCardProps) {
 
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                      <Calendar className="h-4 w-4" />
-                     <span>Added {formatDate(new Date(competitor.createdAt))}</span>
+                     <span>
+                        Added {formatDate(new Date(competitor.createdAt))}
+                     </span>
                   </div>
 
                   {competitor.features && competitor.features.length > 0 && (

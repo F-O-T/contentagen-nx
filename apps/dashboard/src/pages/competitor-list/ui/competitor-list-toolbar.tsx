@@ -14,7 +14,7 @@ export function CompetitorListToolbar() {
       e.preventDefault();
       navigate({
          to: "/competitors",
-         search: { search: searchQuery || undefined },
+         search: { page: 1, search: searchQuery || undefined },
       });
    };
 
@@ -34,8 +34,8 @@ export function CompetitorListToolbar() {
                Search
             </Button>
          </form>
-         
-         <Button 
+
+         <Button
             onClick={() => setShowCreateDialog(true)}
             className="w-full sm:w-auto"
          >

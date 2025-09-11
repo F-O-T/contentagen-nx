@@ -1,7 +1,7 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { Suspense } from "react";
 import { useTRPC } from "@/integrations/clients";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { CompetitorCardsList } from "./competitor-cards-list";
 import { CompetitorCardsSkeleton } from "./competitor-cards-skeleton";

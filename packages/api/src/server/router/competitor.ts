@@ -1,20 +1,17 @@
 import { protectedProcedure, router, organizationProcedure } from "../trpc";
-import {
-   CompetitorInsertSchema,
-   CompetitorSelectSchema,
-} from "@packages/database/schema";
+import { CompetitorInsertSchema } from "@packages/database/schema";
 import {
    createCompetitor,
    getCompetitorById,
    updateCompetitor,
    deleteCompetitor,
    listCompetitors,
-   getTotalCompetitors,
    searchCompetitors,
 } from "@packages/database/repositories/competitor-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { enqueueCompetitorCrawlJob } from "@packages/workers/queues/competitors/competitor-crawl-queue";
 
 export const competitorRouter = router({
    list: protectedProcedure
@@ -43,7 +40,7 @@ export const competitorRouter = router({
                const competitors = await searchCompetitors(resolvedCtx.db, {
                   query: input.search,
                   userId,
-                  organizationId,
+                  organizationId: organizationId || undefined,
                   page: input.page,
                   limit: input.limit,
                });
@@ -52,7 +49,7 @@ export const competitorRouter = router({
 
             const competitors = await listCompetitors(resolvedCtx.db, {
                userId,
-               organizationId,
+               organizationId: organizationId || undefined,
                page: input.page,
                limit: input.limit,
             });
@@ -98,6 +95,15 @@ export const competitorRouter = router({
                userId,
                organizationId,
             });
+
+            // Enqueue competitor analysis job
+            await enqueueCompetitorCrawlJob({
+               competitorId: created.id,
+               userId,
+               organizationId,
+               websiteUrl: input.websiteUrl,
+            });
+
             return created;
          } catch (err) {
             if (err instanceof DatabaseError) {
@@ -213,6 +219,58 @@ export const competitorRouter = router({
          }
       }),
 
+   analyze: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const userId = resolvedCtx.session?.user.id;
+            const organizationId =
+               resolvedCtx.session?.session?.activeOrganizationId;
+
+            if (!userId || !organizationId) {
+               throw new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message: "User must be authenticated to analyze competitors.",
+               });
+            }
+
+            const competitor = await getCompetitorById(resolvedCtx.db, input.id);
+
+            // Verify the competitor belongs to the user/organization
+            if (
+               competitor.userId !== userId &&
+               competitor.organizationId !== organizationId
+            ) {
+               throw new TRPCError({
+                  code: "FORBIDDEN",
+                  message: "You don't have permission to analyze this competitor.",
+               });
+            }
+
+            // Enqueue competitor analysis job
+            await enqueueCompetitorCrawlJob({
+               competitorId: competitor.id,
+               userId,
+               organizationId,
+               websiteUrl: competitor.websiteUrl,
+            });
+
+            return { success: true };
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
+      }),
+
    get: protectedProcedure
       .input(z.object({ id: z.string().uuid() }))
       .query(async ({ ctx, input }) => {
@@ -285,7 +343,7 @@ export const competitorRouter = router({
             const competitors = await searchCompetitors(resolvedCtx.db, {
                query: input.query,
                userId,
-               organizationId,
+               organizationId: organizationId || undefined,
                page: input.page,
                limit: input.limit,
             });
@@ -301,4 +359,3 @@ export const competitorRouter = router({
          }
       }),
 });
-

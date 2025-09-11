@@ -1,13 +1,23 @@
 import type { CompetitorFeatureSelect } from "@packages/database/schema";
 import { Card, CardContent } from "@packages/ui/components/card";
 import { Badge } from "@packages/ui/components/badge";
-import { Calendar, TrendingUp, Hash } from "lucide-react";
+import { Calendar, TrendingUp, Hash, ExternalLink } from "lucide-react";
 
 interface CompetitorFeaturesListProps {
    features: CompetitorFeatureSelect[];
 }
 
-export function CompetitorFeaturesList({ features }: CompetitorFeaturesListProps) {
+interface FeatureMeta {
+   confidence?: number;
+   category?: string;
+   tags?: string[];
+   isNew?: boolean;
+   isTrending?: boolean;
+}
+
+export function CompetitorFeaturesList({
+   features,
+}: CompetitorFeaturesListProps) {
    const formatDate = (date: Date) => {
       return new Intl.DateTimeFormat("en-US", {
          year: "numeric",
@@ -16,71 +26,100 @@ export function CompetitorFeaturesList({ features }: CompetitorFeaturesListProps
       }).format(date);
    };
 
+   const getMeta = (feature: CompetitorFeatureSelect): FeatureMeta => {
+      return (feature.meta as FeatureMeta) || {};
+   };
+
    if (!features || features.length === 0) {
       return (
          <div className="text-center py-8">
             <p className="text-gray-500 mb-2">No features tracked yet</p>
-            <p className="text-sm text-gray-400">Features will be automatically extracted from competitor data</p>
+            <p className="text-sm text-gray-400">
+               Features will be automatically extracted from competitor data
+            </p>
          </div>
       );
    }
 
    return (
       <div className="space-y-3">
-         {features.map((feature) => (
-            <Card key={feature.id} className="p-4">
-               <CardContent className="p-0">
-                  <div className="space-y-2">
-                     <div className="flex items-start justify-between">
-                        <h4 className="font-medium text-sm leading-relaxed">
-                           {feature.title}
-                        </h4>
-                        <div className="flex gap-1">
-                           {feature.isNew && (
-                              <Badge variant="default" className="text-xs">
-                                 New
-                              </Badge>
-                           )}
-                           {feature.isTrending && (
-                              <Badge variant="secondary" className="text-xs">
-                                 Trending
-                              </Badge>
-                           )}
+         {features.map((feature) => {
+            const meta = getMeta(feature);
+            return (
+               <Card key={feature.id} className="p-4">
+                  <CardContent className="p-0">
+                     <div className="space-y-2">
+                        <div className="flex items-start justify-between">
+                           <h4 className="font-medium text-sm leading-relaxed">
+                              {feature.featureName}
+                           </h4>
+                           <div className="flex gap-1">
+                              {meta.isNew && (
+                                 <Badge variant="default" className="text-xs">
+                                    New
+                                 </Badge>
+                              )}
+                              {meta.isTrending && (
+                                 <Badge variant="secondary" className="text-xs">
+                                    Trending
+                                 </Badge>
+                              )}
+                           </div>
                         </div>
-                     </div>
-                     
-                     {feature.description && (
-                        <p className="text-sm text-gray-600 line-clamp-2">
-                           {feature.description}
-                        </p>
-                     )}
-                     
-                     {feature.category && (
-                        <div className="flex items-center gap-1">
-                           <Hash className="h-3 w-3 text-gray-400" />
-                           <Badge variant="outline" className="text-xs">
-                              {feature.category}
-                           </Badge>
-                        </div>
-                     )}
-                     
-                     <div className="flex items-center justify-between text-xs text-gray-500">
-                        <div className="flex items-center gap-1">
-                           <Calendar className="h-3 w-3" />
-                           <span>Detected {formatDate(new Date(feature.extractedAt))}</span>
-                        </div>
-                        
-                        {feature.confidenceScore && (
+
+                        {feature.summary && (
+                           <p className="text-sm text-gray-600 line-clamp-2">
+                              {feature.summary}
+                           </p>
+                        )}
+
+                        {meta.category && (
                            <div className="flex items-center gap-1">
-                              <TrendingUp className="h-3 w-3" />
-                              <span>{Math.round(feature.confidenceScore * 100)}% confidence</span>
+                              <Hash className="h-3 w-3 text-gray-400" />
+                              <Badge variant="outline" className="text-xs">
+                                 {meta.category}
+                              </Badge>
                            </div>
                         )}
+
+                        {feature.sourceUrl && (
+                           <div className="flex items-center gap-1">
+                              <ExternalLink className="h-3 w-3 text-gray-400" />
+                              <a
+                                 href={feature.sourceUrl}
+                                 target="_blank"
+                                 rel="noopener noreferrer"
+                                 className="text-xs text-blue-600 hover:underline"
+                              >
+                                 View source
+                              </a>
+                           </div>
+                        )}
+
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                           <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              <span>
+                                 Detected{" "}
+                                 {formatDate(new Date(feature.extractedAt))}
+                              </span>
+                           </div>
+
+                           {meta.confidence && (
+                              <div className="flex items-center gap-1">
+                                 <TrendingUp className="h-3 w-3" />
+                                 <span>
+                                    {Math.round(meta.confidence * 100)}%
+                                    confidence
+                                 </span>
+                              </div>
+                           )}
+                        </div>
                      </div>
-                  </div>
-               </CardContent>
-            </Card>
-         ))}
+                  </CardContent>
+               </Card>
+            );
+         })}
       </div>
    );
 }

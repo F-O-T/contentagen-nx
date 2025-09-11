@@ -20,7 +20,8 @@ import { contentPostProcessingQueue } from "@packages/workers/queues/content/con
 import { contentResearchingQueue } from "@packages/workers/queues/content/content-researching-queue";
 import { contentPlanningQueue } from "@packages/workers/queues/content/content-planning-queue";
 import { contentWritingQueue } from "@packages/workers/queues/content/content-writing-queue";
-
+import { competitorAnalysisQueue } from "@packages/workers/queues/competitors/competitor-analysis-queue";
+import { competitorCrawlQueue } from "@packages/workers/queues/competitors/competitor-crawl-queue";
 import { ideasPlanningQueue } from "@packages/workers/queues/ideas/ideas-planning-queue";
 import { ideasGenerationQueue } from "@packages/workers/queues/ideas/ideas-generation-queue";
 import { ideasGrammarCheckQueue } from "@packages/workers/queues/ideas/ideas-grammar-checker-queue";
@@ -45,7 +46,8 @@ createBullBoard({
       new BullMQAdapter(brandCrawlQueue),
       new BullMQAdapter(chunkSavingQueue),
       new BullMQAdapter(documentChunkQueue),
-
+      new BullMQAdapter(competitorAnalysisQueue),
+      new BullMQAdapter(competitorCrawlQueue),
       new BullMQAdapter(ideasPlanningQueue),
       new BullMQAdapter(ideasGenerationQueue),
       new BullMQAdapter(ideasGrammarCheckQueue),

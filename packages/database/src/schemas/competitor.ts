@@ -3,6 +3,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { organization, user } from "./auth";
 import { relations } from "drizzle-orm";
 import { competitorFeature } from "./competitor-feature";
+import type { CompetitorFeatureSelect } from "./competitor-feature";
 
 export const competitor = pgTable(
    "competitor",
@@ -35,6 +36,10 @@ export const competitorRelations = relations(competitor, ({ many }) => ({
 
 export type CompetitorSelect = typeof competitor.$inferSelect;
 export type CompetitorInsert = typeof competitor.$inferInsert;
+
+export type CompetitorWithFeatures = CompetitorSelect & {
+   features: CompetitorFeatureSelect[];
+};
 
 export const CompetitorInsertSchema = createInsertSchema(competitor);
 export const CompetitorSelectSchema = createSelectSchema(competitor);
