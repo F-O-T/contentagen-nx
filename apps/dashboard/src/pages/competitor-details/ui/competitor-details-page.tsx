@@ -18,8 +18,6 @@ export function CompetitorDetailsPage() {
       trpc.competitor.get.queryOptions({ id }),
    );
 
-
-
    return (
       <>
          <main className="h-full w-full flex flex-col gap-4">
@@ -39,7 +37,6 @@ export function CompetitorDetailsPage() {
                      createdAt={competitor.createdAt}
                      updatedAt={competitor.updatedAt}
                   />
-
                </div>
             </div>
          </main>
@@ -52,8 +49,3 @@ export function CompetitorDetailsPage() {
       </>
    );
 }
-
-
-
-
-

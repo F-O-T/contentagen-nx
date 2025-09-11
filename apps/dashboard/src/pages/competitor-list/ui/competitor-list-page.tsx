@@ -6,9 +6,7 @@ import { useSearch } from "@tanstack/react-router";
 import { CompetitorCardsList } from "./competitor-cards-list";
 import { CompetitorCardsSkeleton } from "./competitor-cards-skeleton";
 import { CompetitorListToolbar } from "./competitor-list-toolbar";
-import {
-   CompetitorListProvider,
-} from "../lib/competitor-list-context";
+import { CompetitorListProvider } from "../lib/competitor-list-context";
 
 function CompetitorListPageContent() {
    return (

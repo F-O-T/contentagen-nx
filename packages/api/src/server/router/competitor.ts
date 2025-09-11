@@ -72,8 +72,6 @@ export const competitorRouter = router({
             name: true,
             websiteUrl: true,
             changelogUrl: true,
-         }).partial({
-            changelogUrl: true,
          }),
       )
       .mutation(async ({ ctx, input }) => {
@@ -120,7 +118,7 @@ export const competitorRouter = router({
    update: protectedProcedure
       .input(
          z.object({
-            id: z.string().uuid(),
+            id: z.uuid(),
             data: CompetitorInsertSchema.pick({
                name: true,
                websiteUrl: true,
@@ -176,7 +174,7 @@ export const competitorRouter = router({
       }),
 
    delete: protectedProcedure
-      .input(z.object({ id: z.string().uuid() }))
+      .input(z.object({ id: z.uuid() }))
       .mutation(async ({ ctx, input }) => {
          try {
             const resolvedCtx = await ctx;
@@ -221,7 +219,7 @@ export const competitorRouter = router({
       }),
 
    analyze: protectedProcedure
-      .input(z.object({ id: z.string().uuid() }))
+      .input(z.object({ id: z.uuid() }))
       .mutation(async ({ ctx, input }) => {
          try {
             const resolvedCtx = await ctx;
@@ -236,7 +234,10 @@ export const competitorRouter = router({
                });
             }
 
-            const competitor = await getCompetitorById(resolvedCtx.db, input.id);
+            const competitor = await getCompetitorById(
+               resolvedCtx.db,
+               input.id,
+            );
 
             // Verify the competitor belongs to the user/organization
             if (
@@ -245,7 +246,8 @@ export const competitorRouter = router({
             ) {
                throw new TRPCError({
                   code: "FORBIDDEN",
-                  message: "You don't have permission to analyze this competitor.",
+                  message:
+                     "You don't have permission to analyze this competitor.",
                });
             }
 
@@ -273,7 +275,7 @@ export const competitorRouter = router({
       }),
 
    get: protectedProcedure
-      .input(z.object({ id: z.string().uuid() }))
+      .input(z.object({ id: z.uuid() }))
       .query(async ({ ctx, input }) => {
          try {
             const resolvedCtx = await ctx;
