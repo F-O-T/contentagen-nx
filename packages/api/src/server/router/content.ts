@@ -65,6 +65,8 @@ const ContentImageStreamInput = z.object({
 
 export const contentRouter = router({
    regenerate: organizationProcedure
+      .use(hasGenerationCredits)
+
       .input(ContentInsertSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
          try {
@@ -409,6 +411,7 @@ export const contentRouter = router({
          }
       }),
    create: organizationProcedure
+      .use(hasGenerationCredits)
 
       .input(
          ContentInsertSchema.pick({
@@ -663,6 +666,7 @@ export const contentRouter = router({
          }
       }),
    bulkApprove: organizationProcedure
+      .use(hasGenerationCredits)
       .input(z.object({ ids: z.array(z.string()).min(1) }))
       .mutation(async ({ ctx, input }) => {
          try {
@@ -891,6 +895,7 @@ export const contentRouter = router({
       }),
 
    approve: organizationProcedure
+      .use(hasGenerationCredits)
 
       .input(ContentInsertSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
