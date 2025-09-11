@@ -66,7 +66,6 @@ const ContentImageStreamInput = z.object({
 export const contentRouter = router({
    regenerate: organizationProcedure
       .use(hasGenerationCredits)
-
       .input(ContentInsertSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
          try {
