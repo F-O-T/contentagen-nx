@@ -223,7 +223,6 @@ export const ideasRouter = router({
       }),
 
    approve: organizationProcedure
-      .use(hasGenerationCredits)
 
       .input(z.object({ id: z.string() }))
       .mutation(async ({ ctx, input }) => {
@@ -266,7 +265,6 @@ export const ideasRouter = router({
       }),
 
    bulkApprove: organizationProcedure
-      .use(hasGenerationCredits)
 
       .input(z.object({ ids: z.array(z.string()).min(1) }))
       .mutation(async ({ ctx, input }) => {

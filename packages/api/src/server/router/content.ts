@@ -46,7 +46,11 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { uploadFile, streamFileForProxy } from "@packages/files/client";
 import { compressImage } from "@packages/files/image-helper";
-import { createDiff, createLineDiff } from "@packages/helpers/text";
+import {
+   createDiff,
+   createLineDiff,
+   calculateContentStats,
+} from "@packages/helpers/text";
 
 const ContentImageUploadInput = z.object({
    id: z.uuid(),
@@ -61,8 +65,6 @@ const ContentImageStreamInput = z.object({
 
 export const contentRouter = router({
    regenerate: organizationProcedure
-      .use(hasGenerationCredits)
-
       .input(ContentInsertSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
          try {
@@ -375,9 +377,21 @@ export const contentRouter = router({
             // Update the content's current version
             await updateContentCurrentVersion(db, input.id, versionNumber);
 
+            // Calculate new stats for the updated content
+            const newStats = calculateContentStats(input.body);
+
+            // Merge existing stats with new stats, preserving existing values unless new ones should override
+            const updatedStats = {
+               ...currentContent.stats,
+               ...newStats,
+               qualityScore:
+                  currentContent.stats?.qualityScore ?? newStats.qualityScore,
+            };
+
             // Update the content
             const updated = await updateContent(db, input.id, {
                body: input.body,
+               stats: updatedStats,
             });
 
             return { success: true, content: updated, version: versionNumber };
@@ -395,7 +409,6 @@ export const contentRouter = router({
          }
       }),
    create: organizationProcedure
-      .use(hasGenerationCredits)
 
       .input(
          ContentInsertSchema.pick({
@@ -650,7 +663,6 @@ export const contentRouter = router({
          }
       }),
    bulkApprove: organizationProcedure
-      .use(hasGenerationCredits)
       .input(z.object({ ids: z.array(z.string()).min(1) }))
       .mutation(async ({ ctx, input }) => {
          try {
@@ -879,7 +891,6 @@ export const contentRouter = router({
       }),
 
    approve: organizationProcedure
-      .use(hasGenerationCredits)
 
       .input(ContentInsertSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
