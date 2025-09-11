@@ -1,4 +1,9 @@
-import { protectedProcedure, router, organizationProcedure } from "../trpc";
+import {
+   protectedProcedure,
+   router,
+   organizationProcedure,
+   hasGenerationCredits,
+} from "../trpc";
 import { CompetitorInsertSchema } from "@packages/database/schema";
 import {
    createCompetitor,
@@ -67,6 +72,7 @@ export const competitorRouter = router({
       }),
 
    create: organizationProcedure
+      .use(hasGenerationCredits)
       .input(
          CompetitorInsertSchema.pick({
             name: true,
@@ -219,6 +225,8 @@ export const competitorRouter = router({
       }),
 
    analyze: protectedProcedure
+      .use(hasGenerationCredits)
+
       .input(z.object({ id: z.uuid() }))
       .mutation(async ({ ctx, input }) => {
          try {

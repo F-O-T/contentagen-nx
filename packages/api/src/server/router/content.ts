@@ -357,6 +357,7 @@ export const contentRouter = router({
                   changedFields.push("body");
                }
             } catch (err) {
+               console.error(err);
                // If no base version exists, diff will be null
                console.log("No base version found for diff calculation");
             }
@@ -757,7 +758,7 @@ export const contentRouter = router({
                   if (!slug || !agentId) continue;
                   if (!agentSlugMap.has(agentId))
                      agentSlugMap.set(agentId, new Set());
-                  agentSlugMap.get(agentId)!.add(slug);
+                  agentSlugMap.get(agentId)?.add(slug);
                }
 
                // Persist slugs per agent

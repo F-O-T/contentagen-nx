@@ -67,8 +67,8 @@ export function CompetitorFeaturesCard({
                         </CardHeader>
                         <CardFooter className="flex items-center gap-2">
                            <Badge variant={"outline"}>
-                              Confidence level in this feature:{" "}
-                              {feature.meta?.confidence}
+                              {Math.round(feature.meta?.confidence ?? 0 * 100)}%
+                              confidence
                            </Badge>
                         </CardFooter>
                      </Card>

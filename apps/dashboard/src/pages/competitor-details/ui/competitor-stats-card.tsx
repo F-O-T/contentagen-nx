@@ -26,8 +26,7 @@ export function CompetitorStatsCard() {
                     description: "Features with >80% confidence",
                     value: competitor.features
                        .filter((f) => {
-                          const meta = (f.meta as any) || {};
-                          return (meta.confidence || 0) > 0.8;
+                          return (f.meta?.confidence || 0) > 0.8;
                        })
                        .length.toString(),
                  },
@@ -36,8 +35,7 @@ export function CompetitorStatsCard() {
                     description: "Features with 50-80% confidence",
                     value: competitor.features
                        .filter((f) => {
-                          const meta = (f.meta as any) || {};
-                          const confidence = meta.confidence || 0;
+                          const confidence = f.meta?.confidence || 0;
                           return confidence > 0.5 && confidence <= 0.8;
                        })
                        .length.toString(),
@@ -49,7 +47,7 @@ export function CompetitorStatsCard() {
          competitor.features && competitor.features.length > 0
             ? Math.round(
                  competitor.features.reduce((acc, f) => {
-                    const confidence = ((f.meta as any)?.confidence || 0) * 100;
+                    const confidence = (f.meta?.confidence || 0) * 100;
                     return acc + confidence;
                  }, 0) / competitor.features.length,
               )
