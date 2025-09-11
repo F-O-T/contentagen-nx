@@ -1,16 +1,9 @@
 import type { CompetitorSelect } from "@packages/database/schema";
-import {
-   Dialog,
-   DialogContent,
-   DialogDescription,
-   DialogFooter,
-   DialogHeader,
-   DialogTitle,
-} from "@packages/ui/components/dialog";
-import { Button } from "@packages/ui/components/button";
+import { DeleteConfirmationCredenza } from "@packages/ui/components/delete-confirmation-credenza";
 import { useTRPC } from "@/integrations/clients";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { AlertTriangleIcon } from "lucide-react";
 
 interface DeleteCompetitorConfirmationDialogProps {
    competitor: CompetitorSelect;
@@ -46,36 +39,18 @@ export function DeleteCompetitorConfirmationDialog({
    };
 
    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-         <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-               <DialogTitle>Delete Competitor</DialogTitle>
-               <DialogDescription>
-                  Are you sure you want to delete "{competitor.name}"? This
-                  action cannot be undone and will remove all associated feature
-                  tracking data.
-               </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-               <Button
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  disabled={deleteCompetitorMutation.isPending}
-               >
-                  Cancel
-               </Button>
-               <Button
-                  variant="destructive"
-                  onClick={handleDelete}
-                  disabled={deleteCompetitorMutation.isPending}
-               >
-                  {deleteCompetitorMutation.isPending
-                     ? "Deleting..."
-                     : "Delete"}
-               </Button>
-            </DialogFooter>
-         </DialogContent>
-      </Dialog>
+      <DeleteConfirmationCredenza
+         open={open}
+         onOpenChange={onOpenChange}
+         onDelete={handleDelete}
+         onCancel={() => onOpenChange(false)}
+         title="Delete Competitor"
+         message={`Are you sure you want to delete "${competitor.name}"? This action cannot be undone and will remove all associated feature tracking data.`}
+         icon={AlertTriangleIcon}
+         variant="destructive"
+      />
    );
 }
+
+
 

@@ -1,12 +1,12 @@
 import type { CompetitorSelect } from "@packages/database/schema";
 import {
-   Dialog,
-   DialogContent,
-   DialogDescription,
-   DialogFooter,
-   DialogHeader,
-   DialogTitle,
-} from "@packages/ui/components/dialog";
+   Credenza,
+   CredenzaContent,
+   CredenzaDescription,
+   CredenzaFooter,
+   CredenzaHeader,
+   CredenzaTitle,
+} from "@packages/ui/components/credenza";
 import { Button } from "@packages/ui/components/button";
 import { useAppForm } from "@packages/ui/components/form";
 import { useTRPC } from "@/integrations/clients";
@@ -40,49 +40,20 @@ export function CreateEditCompetitorDialog({
       defaultValues: {
          name: competitor?.name || "",
          websiteUrl: competitor?.websiteUrl || "",
-         changelogUrl: competitor?.changelogUrl || "",
       },
-      onSubmit: async ({ value }) => {
-         const cleanedData = {
-            ...value,
-            changelogUrl: value.changelogUrl || undefined,
-         };
-
+      onSubmit: async ({ value, formApi }) => {
          if (competitor) {
             await updateCompetitorMutation.mutateAsync({
                id: competitor.id,
-               data: cleanedData,
+               data: value,
             });
          } else {
-            await createCompetitorMutation.mutateAsync(cleanedData);
+            await createCompetitorMutation.mutateAsync(value);
          }
+         return formApi.reset();
       },
       validators: {
-         onChange: ({ value }) => {
-            const errors: Record<string, string> = {};
-
-            if (!value.name.trim()) {
-               errors.name = "Name is required";
-            } else if (value.name.length > 100) {
-               errors.name = "Name is too long";
-            }
-
-            try {
-               new URL(value.websiteUrl);
-            } catch {
-               errors.websiteUrl = "Please enter a valid URL";
-            }
-
-            if (value.changelogUrl?.trim()) {
-               try {
-                  new URL(value.changelogUrl);
-               } catch {
-                  errors.changelogUrl = "Please enter a valid URL";
-               }
-            }
-
-            return Object.keys(errors).length ? errors : null;
-         },
+         onChange: createCompetitorSchema,
       },
    });
 
@@ -134,18 +105,18 @@ export function CreateEditCompetitorDialog({
       createCompetitorMutation.isPending || updateCompetitorMutation.isPending;
 
    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-         <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-               <DialogTitle>
+      <Credenza open={open} onOpenChange={onOpenChange}>
+         <CredenzaContent className="sm:max-w-[425px]">
+            <CredenzaHeader>
+               <CredenzaTitle>
                   {competitor ? "Edit Competitor" : "Add New Competitor"}
-               </DialogTitle>
-               <DialogDescription>
+               </CredenzaTitle>
+               <CredenzaDescription>
                   {competitor
                      ? "Update the competitor information below."
                      : "Add a new competitor to track and analyze."}
-               </DialogDescription>
-            </DialogHeader>
+               </CredenzaDescription>
+            </CredenzaHeader>
             <form onSubmit={handleSubmit}>
                <div className="grid gap-4 py-4">
                   <form.AppField name="name">
@@ -181,27 +152,8 @@ export function CreateEditCompetitorDialog({
                         </field.FieldContainer>
                      )}
                   </form.AppField>
-
-                  <form.AppField name="changelogUrl">
-                     {(field) => (
-                        <field.FieldContainer>
-                           <field.FieldLabel>
-                              Changelog URL (Optional)
-                           </field.FieldLabel>
-                           <Input
-                              placeholder="https://example.com/changelog"
-                              value={field.state.value}
-                              onChange={(e) =>
-                                 field.handleChange(e.target.value)
-                              }
-                              onBlur={field.handleBlur}
-                           />
-                           <field.FieldMessage />
-                        </field.FieldContainer>
-                     )}
-                  </form.AppField>
                </div>
-               <DialogFooter>
+               <CredenzaFooter>
                   <Button
                      type="button"
                      variant="outline"
@@ -217,9 +169,9 @@ export function CreateEditCompetitorDialog({
                           ? "Update"
                           : "Create"}
                   </Button>
-               </DialogFooter>
+               </CredenzaFooter>
             </form>
-         </DialogContent>
-      </Dialog>
+         </CredenzaContent>
+      </Credenza>
    );
 }
