@@ -14,12 +14,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { type FormEvent, useCallback } from "react";
 import { Input } from "@packages/ui/components/input";
-
-const createCompetitorSchema = {
-   name: "",
-   websiteUrl: "",
-   changelogUrl: "",
-};
+import { z } from "zod";
+const createCompetitorSchema = z.object({
+   name: z.string().min(1, "Name is required"),
+   websiteUrl: z.url("Please enter a valid URL"),
+});
 
 export type CreateCompetitorFormData = typeof createCompetitorSchema;
 
@@ -74,7 +73,7 @@ export function CreateEditCompetitorDialog({
                errors.websiteUrl = "Please enter a valid URL";
             }
 
-            if (value.changelogUrl && value.changelogUrl.trim()) {
+            if (value.changelogUrl?.trim()) {
                try {
                   new URL(value.changelogUrl);
                } catch {
@@ -96,20 +95,21 @@ export function CreateEditCompetitorDialog({
       [form],
    );
 
-   const createCompetitorMutation = useMutation({
-      mutationFn: trpc.competitor.create.mutate,
-      onSuccess: () => {
-         toast.success("Competitor created successfully!");
-         queryClient.invalidateQueries({
-            queryKey: trpc.competitor.list.queryKey(),
-         });
-         onOpenChange(false);
-         form.reset();
-      },
-      onError: (error) => {
-         toast.error(`Failed to create competitor: ${error.message}`);
-      },
-   });
+   const createCompetitorMutation = useMutation(
+      trpc.competitor.create.mutationOptions({
+         onSuccess: () => {
+            toast.success("Competitor created successfully!");
+            queryClient.invalidateQueries({
+               queryKey: trpc.competitor.list.queryKey(),
+            });
+            onOpenChange(false);
+            form.reset();
+         },
+         onError: (error) => {
+            toast.error(`Failed to create competitor: ${error.message}`);
+         },
+      }),
+   );
 
    const updateCompetitorMutation = useMutation(
       trpc.competitor.update.mutationOptions({

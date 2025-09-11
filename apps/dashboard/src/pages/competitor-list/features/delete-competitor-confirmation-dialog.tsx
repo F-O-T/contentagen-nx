@@ -26,19 +26,20 @@ export function DeleteCompetitorConfirmationDialog({
    const trpc = useTRPC();
    const queryClient = useQueryClient();
 
-   const deleteCompetitorMutation = useMutation({
-      mutationFn: trpc.competitor.delete.mutate,
-      onSuccess: () => {
-         toast.success(`${competitor.name} has been deleted successfully.`);
-         queryClient.invalidateQueries({
-            queryKey: trpc.competitor.list.queryKey(),
-         });
-         onOpenChange(false);
-      },
-      onError: (error) => {
-         toast.error(`Failed to delete competitor: ${error.message}`);
-      },
-   });
+   const deleteCompetitorMutation = useMutation(
+      trpc.competitor.delete.mutationOptions({
+         onSuccess: () => {
+            toast.success(`${competitor.name} has been deleted successfully.`);
+            queryClient.invalidateQueries({
+               queryKey: trpc.competitor.list.queryKey(),
+            });
+            onOpenChange(false);
+         },
+         onError: (error) => {
+            toast.error(`Failed to delete competitor: ${error.message}`);
+         },
+      }),
+   );
 
    const handleDelete = () => {
       deleteCompetitorMutation.mutate({ id: competitor.id });
@@ -50,8 +51,9 @@ export function DeleteCompetitorConfirmationDialog({
             <DialogHeader>
                <DialogTitle>Delete Competitor</DialogTitle>
                <DialogDescription>
-                  Are you sure you want to delete "{competitor.name}"? This action
-                  cannot be undone and will remove all associated feature tracking data.
+                  Are you sure you want to delete "{competitor.name}"? This
+                  action cannot be undone and will remove all associated feature
+                  tracking data.
                </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -67,10 +69,13 @@ export function DeleteCompetitorConfirmationDialog({
                   onClick={handleDelete}
                   disabled={deleteCompetitorMutation.isPending}
                >
-                  {deleteCompetitorMutation.isPending ? "Deleting..." : "Delete"}
+                  {deleteCompetitorMutation.isPending
+                     ? "Deleting..."
+                     : "Delete"}
                </Button>
             </DialogFooter>
          </DialogContent>
       </Dialog>
    );
 }
+
