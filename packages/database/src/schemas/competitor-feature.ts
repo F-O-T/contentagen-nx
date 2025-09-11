@@ -9,7 +9,27 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { competitor } from "./competitor";
 import { relations } from "drizzle-orm";
+import z from "zod";
 
+export const CompetitorFeatureMetaSchema = z.object({
+   category: z
+      .string()
+      .describe(
+         "Type of feature (e.g., 'User Interface', 'Analytics', 'Integration', etc.)",
+      )
+      .optional(),
+   confidence: z
+      .number()
+      .min(0)
+      .max(1)
+      .describe("Confidence level that this is a real feature (0-1)")
+      .optional(),
+   tags: z
+      .array(z.string())
+      .optional()
+      .describe("Relevant keywords or tags for this feature"),
+});
+export type CompetitorFeatureMeta = z.infer<typeof CompetitorFeatureMetaSchema>;
 export const competitorFeature = pgTable(
    "competitor_feature",
    {
@@ -22,7 +42,7 @@ export const competitorFeature = pgTable(
       rawContent: text("raw_content").notNull(),
       sourceUrl: text("source_url"),
       extractedAt: timestamp("extracted_at").defaultNow().notNull(),
-      meta: jsonb("meta").$type<Record<string, unknown>>().default({}),
+      meta: jsonb("meta").$type<CompetitorFeatureMeta>().default({}),
    },
    (table) => [
       index("competitor_feature_competitor_id_feature_name_idx").on(

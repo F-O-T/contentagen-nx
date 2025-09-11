@@ -31,8 +31,7 @@ export async function enqueueCompetitorAnalysisJob(job: CompetitorAnalysisJob) {
 export const competitorAnalysisWorker = new Worker<CompetitorAnalysisJob>(
    QUEUE_NAME,
    async (job: Job<CompetitorAnalysisJob>) => {
-      const { competitorId, userId, organizationId, websiteUrl, crawlResults } =
-         job.data;
+      const { competitorId, userId, websiteUrl, crawlResults } = job.data;
 
       const { features } = await runAnalyzeCompetitorFeatures({
          userId,
