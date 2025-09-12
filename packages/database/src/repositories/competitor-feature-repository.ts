@@ -314,6 +314,24 @@ export async function bulkDeleteFeatures(
    }
 }
 
+export async function deleteFeaturesByCompetitorId(
+   dbClient: DatabaseInstance,
+   competitorId: string,
+): Promise<{ deletedCount: number }> {
+   try {
+      const result = await dbClient
+         .delete(competitorFeature)
+         .where(eq(competitorFeature.competitorId, competitorId))
+         .returning();
+
+      return { deletedCount: result.length };
+   } catch (err) {
+      throw new DatabaseError(
+         `Failed to delete competitor features by competitor ID: ${(err as Error).message}`,
+      );
+   }
+}
+
 export async function getFeaturesStats(
    dbClient: DatabaseInstance,
    {

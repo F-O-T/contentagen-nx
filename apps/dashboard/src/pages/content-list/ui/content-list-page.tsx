@@ -39,7 +39,7 @@ function ContentListPageContent() {
    );
 
    return (
-      <main className="h-full w-full flex flex-col gap-4 p-4">
+      <main className="h-full w-full flex flex-col gap-4">
          <TalkingMascot message="Here you can manage all your content, Create, Delete, or explore it below!" />
          <ContentListToolbar />
          <Suspense fallback={<ContentCardsSkeleton />}>

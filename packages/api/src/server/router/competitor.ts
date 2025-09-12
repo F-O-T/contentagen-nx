@@ -19,6 +19,7 @@ import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { enqueueCompetitorCrawlJob } from "@packages/workers/queues/competitors/competitor-crawl-queue";
+import { deleteFeaturesByCompetitorId } from "@packages/database/repositories/competitor-feature-repository";
 
 export const competitorRouter = router({
    list: protectedProcedure
@@ -257,6 +258,9 @@ export const competitorRouter = router({
                      "You don't have permission to analyze this competitor.",
                });
             }
+
+            // Delete existing competitor features before starting fresh analysis
+            await deleteFeaturesByCompetitorId(resolvedCtx.db, competitor.id);
 
             // Enqueue competitor analysis job
             await enqueueCompetitorCrawlJob({

@@ -83,7 +83,7 @@ export function CompetitorCard({ competitor }: CompetitorCardProps) {
                         {formatDate(new Date(competitor.createdAt))}
                      </Badge>
                      {competitor.features && competitor.features.length > 0 && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge className="text-xs">
                            {competitor.features.length} features
                         </Badge>
                      )}

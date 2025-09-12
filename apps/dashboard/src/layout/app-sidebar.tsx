@@ -15,16 +15,23 @@ import {
    LayoutDashboardIcon,
    Lightbulb,
    Target,
+   FileText,
 } from "lucide-react";
 import type * as React from "react";
+import { Link } from "@tanstack/react-router";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import type { Session } from "@/integrations/clients";
 
 type NavigationItems = {
-   url: keyof FileRoutesByTo;
+   url?: keyof FileRoutesByTo;
    title: string;
    icon: typeof LayoutDashboardIcon;
+   subItems?: {
+      url: keyof FileRoutesByTo;
+      title: string;
+      icon?: typeof LayoutDashboardIcon;
+   }[];
 };
 
 export function AppSidebar({
@@ -33,24 +40,25 @@ export function AppSidebar({
 }: React.ComponentProps<typeof Sidebar> & { session: Session | null }) {
    const navMain: NavigationItems[] = [
       {
-         icon: LayoutDashboardIcon,
-         title: "Dashboard",
-         url: "/home",
-      },
-      {
-         icon: Bot,
-         title: "Your Agents",
-         url: "/agents",
-      },
-      {
          icon: FilesIcon,
-         title: "Your Content",
-         url: "/content",
-      },
-      {
-         icon: Lightbulb,
-         title: "Your Ideas",
-         url: "/ideas",
+         title: "Content",
+         subItems: [
+            {
+               url: "/agents",
+               title: "Content Agents",
+               icon: Bot,
+            },
+            {
+               url: "/ideas",
+               title: "Content Ideas",
+               icon: Lightbulb,
+            },
+            {
+               url: "/content",
+               title: "Created Content",
+               icon: FileText,
+            },
+         ],
       },
       {
          icon: Target,
@@ -64,7 +72,7 @@ export function AppSidebar({
          <SidebarHeader>
             <SidebarMenu>
                <SidebarMenuItem>
-                  <div className="flex items-center gap-2">
+                  <Link to="/home" className="flex items-center gap-2">
                      <figure className="text-primary">
                         <img
                            alt="Project logo"
@@ -76,7 +84,7 @@ export function AppSidebar({
                      <span className="text-lg font-semibold">
                         {brandConfig.name}
                      </span>
-                  </div>
+                  </Link>
                </SidebarMenuItem>
             </SidebarMenu>
          </SidebarHeader>
