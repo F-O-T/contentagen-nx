@@ -3,18 +3,26 @@ import {
    AvatarImage,
    AvatarFallback,
 } from "@packages/ui/components/avatar";
+import { cn } from "@packages/ui/lib/utils";
 
 export function AgentWriterCard({
    name,
    description,
    photo,
+   isHeader = false,
 }: {
    name: string;
    description: string;
+   isHeader?: boolean;
    photo?: string;
 }) {
    return (
-      <div className="flex items-center gap-4 rounded-lg bg-muted p-4">
+      <div
+         className={cn(
+            "flex items-center gap-4 rounded-lg",
+            !isHeader && "bg-muted p-4",
+         )}
+      >
          <div className="relative">
             <Avatar className="w-8 h-8">
                <AvatarImage src={photo} alt={name} />
