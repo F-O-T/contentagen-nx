@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { translate } from "@packages/localization";
 import { Bot, FileText } from "lucide-react";
 import { StatsCard } from "@packages/ui/components/stats-card";
 import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
@@ -15,18 +16,28 @@ export function DashboardHomePage() {
    const statsCards = useMemo(
       () => [
          {
-            title: "Total Agents",
-            description: "Active agents registered",
+            title: translate(
+               "pages.home.stats-cards.agent-stats.title",
+            ),
+            description: translate(
+               "pages.home.stats-cards.agent-stats.description",
+            ),
             value: data.totalAgents,
          },
          {
-            title: "Words Written (30d)",
-            description: "Words generated in last 30 days",
+            title: translate(
+               "pages.home.stats-cards.words-written.title",
+            ),
+            description: translate(
+               "pages.home.stats-cards.words-written.description",
+            ),
             value: data.wordCount30d?.toLocaleString() ?? "0",
          },
          {
-            title: "Content Generated (30d)",
-            description: "Pieces of content generated",
+            title: translate("pages.home.stats-cards.content-generated.title"),
+            description: translate(
+               "pages.home.stats-cards.content-generated.description",
+            ),
             value: data.contentGenerated,
          },
       ],

@@ -11,6 +11,8 @@ WORKDIR /app
 COPY bun.lock ./
 COPY package.json ./
 COPY apps/dashboard/package.json ./apps/dashboard/
+COPY packages/localization/package.json ./packages/localization/
+
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/brand/package.json ./packages/brand/
 COPY packages/server-events/package.json ./packages/server-events/
@@ -70,6 +72,8 @@ COPY packages/environment/package.json ./packages/environment/
 COPY packages/chroma-db/package.json ./packages/chroma-db/
 COPY packages/redis/package.json ./packages/redis/
 COPY packages/openrouter/package.json ./packages/openrouter/
+COPY packages/localization/package.json ./packages/localization/
+
 COPY packages/prompts/package.json ./packages/prompts/
 COPY packages/database/package.json ./packages/database/
 COPY packages/files/package.json ./packages/files/
