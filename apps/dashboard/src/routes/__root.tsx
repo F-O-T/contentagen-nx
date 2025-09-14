@@ -12,7 +12,6 @@ import {
 } from "@tanstack/react-router";
 import type { RouterContext } from "../router";
 import brandConfig from "@packages/brand/index.json";
-import "@packages/localization";
 export const Route = createRootRouteWithContext<RouterContext>()({
    ssr: true,
    wrapInSuspense: true,
