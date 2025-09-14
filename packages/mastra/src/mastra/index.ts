@@ -5,7 +5,7 @@ import { LibSQLStore } from "@mastra/libsql";
 import { documentSynthesizerAgent } from "./agents/document-syntethizer-agent";
 import { documentGenerationAgent } from "./agents/document-generation-agent";
 import { createBrandKnowledgeWorkflow } from "./workflows/create-brand-knowledge-and-index-documents";
-import  { RuntimeContext } from "@mastra/core/runtime-context";
+import { RuntimeContext } from "@mastra/core/runtime-context";
 
 export type CustomRuntimeContext = {
    language: "en" | "pt";
@@ -32,8 +32,7 @@ export const mastra = new Mastra({
 });
 
 export function setRuntimeContext(context: CustomRuntimeContext) {
- 
-const runtimeContext = new RuntimeContext<CustomRuntimeContext>();
+   const runtimeContext = new RuntimeContext<CustomRuntimeContext>();
 
    runtimeContext.set("language", context.language);
 }

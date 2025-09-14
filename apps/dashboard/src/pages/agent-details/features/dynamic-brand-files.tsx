@@ -76,7 +76,10 @@ export function GenerateBrandFilesCredenza({
             <CredenzaHeader>
                <CredenzaTitle>Generate Brand Files from Website</CredenzaTitle>
             </CredenzaHeader>
-            <form className="flex flex-col gap-4" onSubmit={(e) => handleSubmit(e)}>
+            <form
+               className="flex flex-col gap-4"
+               onSubmit={(e) => handleSubmit(e)}
+            >
                <CredenzaBody>
                   <form.AppField name="websiteUrl">
                      {(field) => (
