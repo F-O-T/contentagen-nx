@@ -42,7 +42,7 @@ COPY packages/arcjet/package.json ./packages/arcjet/
 COPY packages/authentication/package.json ./packages/authentication/
 COPY packages/server-events/package.json ./packages/server-events/
 COPY packages/localization/package.json ./packages/localization/
-
+COPY packages/mastra/package.json ./packages/mastra/
 COPY packages/brand/package.json ./packages/brand/
 COPY packages/helpers/package.json ./packages/helpers/
 COPY packages/chroma-db/package.json ./packages/chroma-db/
@@ -119,6 +119,7 @@ COPY packages/errors/package.json ./packages/errors/
 COPY packages/server-events/package.json ./packages/server-events/
 COPY packages/localization/package.json ./packages/localization/
 
+COPY packages/mastra/package.json ./packages/mastra/
 
 COPY packages/files/package.json ./packages/files/
 COPY packages/openrouter/package.json ./packages/openrouter/
