@@ -41,11 +41,16 @@ export const createTRPCContext = async ({
    auth: AuthInstance;
    headers: Headers;
    session: AuthInstance["$Infer"]["Session"] | null;
+   language: string;
 }> => {
    const session = await auth.api.getSession({
       headers,
    });
    await ensureCollections(chromaClient);
+   
+   // Extract language from headers
+   const language = headers.get('X-Locale') || headers.get('Accept-Language')?.split(',')[0] || 'en';
+   
    return {
       openRouterClient,
       polarClient,
@@ -56,6 +61,7 @@ export const createTRPCContext = async ({
       session,
       auth,
       headers,
+      language,
    };
 };
 

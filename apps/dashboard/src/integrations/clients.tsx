@@ -3,6 +3,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { clientEnv } from "@packages/environment/client";
 import { createAuthClient } from "@packages/authentication/client";
 import { createTrpcClient } from "@packages/api/client";
+import { getCurrentLanguage } from "@packages/localization";
 import type { AppRouter } from "@packages/api/server";
 import {
    createTRPCContext,
@@ -19,6 +20,7 @@ export function makeTrpcClient(headers?: Headers) {
    return createTrpcClient({
       serverUrl: clientEnv.VITE_SERVER_URL,
       headers,
+      language: getCurrentLanguage(),
    });
 }
 

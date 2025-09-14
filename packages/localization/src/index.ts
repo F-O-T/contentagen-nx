@@ -42,3 +42,16 @@ export function translate(key: TranslationKey) {
    }
    return result;
 }
+
+// Utility to get current language for HTTP requests
+export function getCurrentLanguage(): string {
+   return i18n.language || 'en';
+}
+
+// Utility to get language headers for HTTP requests
+export function getLanguageHeaders(): Record<string, string> {
+   return {
+      'Accept-Language': getCurrentLanguage(),
+      'X-Locale': getCurrentLanguage(),
+   };
+}

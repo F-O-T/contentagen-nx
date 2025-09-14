@@ -13,8 +13,9 @@ import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
 export interface APIClientOptions {
    serverUrl: string;
    headers?: Record<string, string> | Headers;
+   language?: string;
 }
-export const createTrpcClient = ({ serverUrl, headers }: APIClientOptions) => {
+export const createTrpcClient = ({ serverUrl, headers, language }: APIClientOptions) => {
    return createTRPCClient<AppRouter>({
       links: [
          loggerLink(),
@@ -35,6 +36,13 @@ export const createTrpcClient = ({ serverUrl, headers }: APIClientOptions) => {
                transformer: SuperJSON,
                fetch(url, options) {
                   const requestHeaders = new Headers(options?.headers);
+
+                  // Add language headers
+                  const clientLanguage = language || (typeof window !== 'undefined' ? document.documentElement.lang : 'en');
+                  if (clientLanguage) {
+                     requestHeaders.set('Accept-Language', clientLanguage);
+                     requestHeaders.set('X-Locale', clientLanguage);
+                  }
 
                   if (headers) {
                      const incomingHeaders = new Headers(headers as Headers);

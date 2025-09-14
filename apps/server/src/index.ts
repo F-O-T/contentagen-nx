@@ -77,7 +77,7 @@ const trpcApi = createApi({
 const app = new Elysia()
    .use(
       cors({
-         allowedHeaders: ["Content-Type", "Authorization", "sdk-api-key"],
+         allowedHeaders: ["Content-Type", "Authorization", "sdk-api-key", "Accept-Language", "X-Locale"],
          credentials: true,
          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
          origin: (request: Request) => {

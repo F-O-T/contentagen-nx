@@ -12,6 +12,8 @@ import {
 } from "@tanstack/react-router";
 import type { RouterContext } from "../router";
 import brandConfig from "@packages/brand/index.json";
+import "@packages/localization";
+import i18n from "@packages/localization";
 export const Route = createRootRouteWithContext<RouterContext>()({
    ssr: true,
    wrapInSuspense: true,
@@ -33,6 +35,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
          {
             name: "viewport",
             content: "width=device-width, initial-scale=1.0",
+         },
+         {
+            name: "language",
+            content: i18n.language,
          },
       ],
       scripts: [
@@ -70,7 +76,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootComponent() {
    return (
-      <html lang="en">
+      <html lang={i18n.language}>
          <head>
             <HeadContent />
          </head>
