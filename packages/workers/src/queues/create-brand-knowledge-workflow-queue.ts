@@ -16,6 +16,8 @@ export async function runCreateBrandKnowledgeWorkflow(
    const { websiteUrl, userId, agentId } = payload;
 
    try {
+      // Emit initial status when workflow starts
+
       const run = await mastra
          .getWorkflow("createBrandKnowledgeWorkflow")
          .createRunAsync();

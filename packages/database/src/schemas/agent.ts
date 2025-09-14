@@ -72,7 +72,6 @@ export const PersonaConfigSchema = z.object({
 
 export const brandKnowledgeStatusEnum = pgEnum("brand_knowledge_status", [
    "pending",
-   "crawling",
    "analyzing",
    "chunking",
    "completed",

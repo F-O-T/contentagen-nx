@@ -26,6 +26,10 @@
       "@packages/chroma-db": "workspace:*",
       "@packages/environment": "workspace:*",
       "@packages/tavily": "workspace:*",
+      "@packages/files": "workspace:*",
+      "@packages/openrouter": "workspace:*",
+      "@packages/database": "workspace:*",
+      "@packages/server-events": "workspace:*",
       "ai": "catalog:openrouter",
       "zod": "catalog:validation"
    },

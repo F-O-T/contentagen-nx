@@ -23,7 +23,7 @@ export function AgentDetailsPage() {
    const isRunning = useMemo(
       () =>
          agent &&
-         ["pending", "crawling", "analyzing", "chunking"].includes(
+         ["pending", "analyzing", "chunking"].includes(
             agent.brandKnowledgeStatus,
          ),
       [agent],

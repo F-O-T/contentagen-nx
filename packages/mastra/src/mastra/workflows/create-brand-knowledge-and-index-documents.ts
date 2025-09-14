@@ -73,7 +73,11 @@ const getFullBrandAnalysis = createStep({
    execute: async ({ inputData }) => {
       const { userId, websiteUrl, agentId } = inputData;
 
-      // Update status to analyzing
+      await updateAgentKnowledgeStatus(
+         agentId,
+         "pending",
+         "Starting brand knowledge workflow",
+      );
       await updateAgentKnowledgeStatus(
          agentId,
          "analyzing",
@@ -115,6 +119,12 @@ Return the complete analysis as a well-structured markdown document.
       }
 
       const { fullBrandAnalysis } = result.object;
+      await updateAgentKnowledgeStatus(
+         agentId,
+         "analyzing",
+         "Brand website analysis completed",
+      );
+
       return {
          fullBrandAnalysis,
          userId,
