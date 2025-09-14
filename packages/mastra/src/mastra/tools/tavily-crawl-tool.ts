@@ -16,17 +16,6 @@ export const tavilyCrawlTool = createTool({
       websiteUrl: z.string().describe("The website URL to crawl"),
       userId: z.string().describe("The user ID for billing purposes"),
    }),
-   outputSchema: z.object({
-      results: z
-         .array(
-            z.object({
-               rawContent: z
-                  .string()
-                  .describe("The raw content from the crawled page"),
-            }),
-         )
-         .describe("Array of crawled page results"),
-   }),
    execute: async ({ context }) => {
       const { websiteUrl, userId } = context;
 

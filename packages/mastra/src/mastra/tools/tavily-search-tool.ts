@@ -16,17 +16,6 @@ export const tavilySearchTool = createTool({
       query: z.string().describe("The search query"),
       userId: z.string().describe("The user ID for billing purposes"),
    }),
-   outputSchema: z.object({
-      results: z
-         .array(
-            z.object({
-               content: z
-                  .string()
-                  .describe("The raw content from the crawled page"),
-            }),
-         )
-         .describe("Array of crawled page results"),
-   }),
    execute: async ({ context }) => {
       const { query, userId } = context;
 

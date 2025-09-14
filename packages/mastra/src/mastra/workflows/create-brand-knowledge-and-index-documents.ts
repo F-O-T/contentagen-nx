@@ -75,11 +75,6 @@ const getFullBrandAnalysis = createStep({
 
       await updateAgentKnowledgeStatus(
          agentId,
-         "pending",
-         "Starting brand knowledge workflow",
-      );
-      await updateAgentKnowledgeStatus(
-         agentId,
          "analyzing",
          "Analyzing brand website and gathering information",
       );
