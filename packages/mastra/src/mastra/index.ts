@@ -1,18 +1,21 @@
 import { Mastra } from "@mastra/core/mastra";
 import { PinoLogger } from "@mastra/loggers";
 import { LibSQLStore } from "@mastra/libsql";
-import { weatherWorkflow } from "./workflows/weather-workflow";
-import { weatherAgent } from "./agents/weather-agent";
+
+import { documentSynthesizerAgent } from "./agents/document-syntethizer-agent";
+import { documentGenerationAgent } from "./agents/document-generation-agent";
+import { createBrandKnowledgeWorkflow } from "./workflows/create-brand-knowledge-and-index-documents";
 
 export const mastra = new Mastra({
    bundler: {
-      externals: ["@packages/workers"],
+      externals: ["@packages/openrouter", "@packages/workers"],
    },
    workflows: {
-      weatherWorkflow,
+      createBrandKnowledgeWorkflow,
    },
    agents: {
-      weatherAgent,
+      documentSynthesizerAgent,
+      documentGenerationAgent,
    },
    storage: new LibSQLStore({
       // stores telemetry, evals, ... into memory storage, if it needs to persist, change to file:../mastra.db

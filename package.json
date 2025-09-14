@@ -61,7 +61,7 @@
             "@arcjet/bun": "^1.0.0-beta.8"
          },
          "validation": {
-            "zod": "4.0.14"
+            "zod": "4.1.8"
          },
          "payment": {
             "@polar-sh/sdk": "0.34.11"

@@ -6,8 +6,8 @@
    "type": "module",
    "exports": {
       ".": {
-         "types": "./dist/src/index.d.ts",
-         "default": "./src/index.ts"
+         "types": "./dist/src/mastra/index.d.ts",
+         "default": "./src/mastra/index.ts"
       }
    },
    "scripts": {
@@ -17,16 +17,17 @@
       "typecheck": "tsc --noEmit --emitDeclarationOnly false"
    },
    "dependencies": {
-      "@openrouter/ai-sdk-provider": "catalog:openrouter",
       "@mastra/core": "^0.16.3",
       "@mastra/libsql": "^0.14.1",
       "@mastra/loggers": "^0.10.11",
       "@mastra/memory": "^0.15.1",
+      "@mastra/rag": "^1.2.4",
+      "@openrouter/ai-sdk-provider": "catalog:openrouter",
       "@packages/chroma-db": "workspace:*",
+      "@packages/environment": "workspace:*",
       "@packages/tavily": "workspace:*",
       "ai": "catalog:openrouter",
-      "zod": "catalog:validation",
-      "@packages/environment": "workspace:*"
+      "zod": "catalog:validation"
    },
    "devDependencies": {
       "dotenv-cli": "catalog:enviroment",

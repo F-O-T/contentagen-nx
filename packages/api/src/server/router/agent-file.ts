@@ -12,7 +12,7 @@ import {
    getCollection,
 } from "@packages/chroma-db/helpers";
 import { AgentInsertSchema } from "@packages/database/schema";
-import { enqueueAutoBrandKnowledgeJob } from "@packages/workers/queues/knowledge/brand-knowledge-crawl";
+import { enqueueCreateBrandKnowledgeWorkflowJob } from "@packages/workers/queues/create-brand-knowledge-workflow-queue";
 
 const AgentFileDeleteInput = z.object({
    fileName: z.string(),
@@ -90,7 +90,7 @@ export const agentFileRouter = router({
                "Missing required fields: id, userId, or websiteUrl",
             );
          }
-         await enqueueAutoBrandKnowledgeJob({
+         await enqueueCreateBrandKnowledgeWorkflowJob({
             agentId: input.id,
             userId: userId,
             websiteUrl: input.websiteUrl,

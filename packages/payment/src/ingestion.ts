@@ -8,10 +8,10 @@ export const POLAR_BILLING_EVENTS = {
 export const USAGE_TYPE = {
    LLM: "llm_usage",
    WEB_SEARCH: "web_search",
+   RAG: "rag_usage",
 } as const;
 
 export const BILLING_CONFIG = {
-   webBaseCreditUsd: 0.008,
    margin: 0.1,
 };
 
@@ -65,10 +65,19 @@ export const createWebSearchUsageMetadata = (params: {
    if (params.method === "crawl" || params.method === "advanced") {
       baseAmount = 2;
    }
-   const creditsDebited = calculateCreditsDebited(baseAmount);
+   const creditsDebited = calculateCreditsDebited(10 * baseAmount);
    return {
       usage_type: USAGE_TYPE.WEB_SEARCH,
       method: params.method,
+      credits_debited: creditsDebited,
+   };
+};
+
+export const createRagUsageMetadata = (params: { agentId: string }) => {
+   const creditsDebited = calculateCreditsDebited(10);
+   return {
+      usage_type: USAGE_TYPE.RAG,
+      agent_id: params.agentId,
       credits_debited: creditsDebited,
    };
 };

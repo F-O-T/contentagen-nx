@@ -19,6 +19,7 @@ import { contentEditingQueue } from "@packages/workers/queues/content/content-ed
 import { contentPostProcessingQueue } from "@packages/workers/queues/content/content-post-processing-queue";
 import { contentResearchingQueue } from "@packages/workers/queues/content/content-researching-queue";
 import { contentPlanningQueue } from "@packages/workers/queues/content/content-planning-queue";
+import { createBrandKnowledgeWorkflowQueue } from "@packages/workers/queues/create-brand-knowledge-workflow-queue";
 import { contentWritingQueue } from "@packages/workers/queues/content/content-writing-queue";
 import { competitorAnalysisQueue } from "@packages/workers/queues/competitors/competitor-analysis-queue";
 import { competitorCrawlQueue } from "@packages/workers/queues/competitors/competitor-crawl-queue";
@@ -27,25 +28,14 @@ import { ideasGenerationQueue } from "@packages/workers/queues/ideas/ideas-gener
 import { ideasGrammarCheckQueue } from "@packages/workers/queues/ideas/ideas-grammar-checker-queue";
 import { ideasPostProcessingQueue } from "@packages/workers/queues/ideas/ideas-post-processing-queue";
 import { contentGrammarCheckQueue } from "@packages/workers/queues/content/content-grammar-checker-queue";
-import { chunkSavingQueue } from "@packages/workers/queues/knowledge/chunk-saving";
-import { documentChunkQueue } from "@packages/workers/queues/knowledge/document-chunk-queue";
-import { brandCrawlQueue } from "@packages/workers/queues/knowledge/brand-knowledge-crawl";
-import { brandAnalyzeQueue } from "@packages/workers/queues/knowledge/brand-knowledge-analyze";
-import { brandUploadQueue } from "@packages/workers/queues/knowledge/brand-knowledge-upload";
-import { brandCreateDocsQueue } from "@packages/workers/queues/knowledge/brand-knowledge-create-docs";
 
 import { isProduction } from "@packages/environment/helpers";
 const serverAdapter = new ElysiaAdapter("/ui");
 
 createBullBoard({
    queues: [
-      new BullMQAdapter(brandAnalyzeQueue),
-      new BullMQAdapter(brandUploadQueue),
-      new BullMQAdapter(brandCreateDocsQueue),
+      new BullMQAdapter(createBrandKnowledgeWorkflowQueue),
       new BullMQAdapter(contentGrammarCheckQueue),
-      new BullMQAdapter(brandCrawlQueue),
-      new BullMQAdapter(chunkSavingQueue),
-      new BullMQAdapter(documentChunkQueue),
       new BullMQAdapter(competitorAnalysisQueue),
       new BullMQAdapter(competitorCrawlQueue),
       new BullMQAdapter(ideasPlanningQueue),
@@ -77,7 +67,13 @@ const trpcApi = createApi({
 const app = new Elysia()
    .use(
       cors({
-         allowedHeaders: ["Content-Type", "Authorization", "sdk-api-key", "Accept-Language", "X-Locale"],
+         allowedHeaders: [
+            "Content-Type",
+            "Authorization",
+            "sdk-api-key",
+            "Accept-Language",
+            "X-Locale",
+         ],
          credentials: true,
          methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
          origin: (request: Request) => {

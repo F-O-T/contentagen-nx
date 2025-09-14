@@ -1,11 +1,8 @@
 import {
    Card,
    CardHeader,
-   CardTitle,
-   CardContent,
    CardFooter,
    CardAction,
-   CardDescription,
 } from "@packages/ui/components/card";
 import { Checkbox } from "@packages/ui/components/checkbox";
 import { Badge } from "@packages/ui/components/badge";

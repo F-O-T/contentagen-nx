@@ -3,6 +3,7 @@
 # Dependencies
 .trigger
 .mastra
+mastra.db**
 node_modules
 .pnp
 .pnp.js
