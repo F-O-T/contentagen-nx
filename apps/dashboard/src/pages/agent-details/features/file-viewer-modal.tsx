@@ -46,7 +46,7 @@ export function FileViewerModal() {
       close,
       Modal: () => (
          <Credenza open={isOpen} onOpenChange={close}>
-            <CredenzaContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+            <CredenzaContent className="">
                <CredenzaHeader>
                   <CredenzaTitle className="flex items-center gap-2">
                      <FileText className="w-5 h-5" />
@@ -56,7 +56,7 @@ export function FileViewerModal() {
                      View the content of the selected file.
                   </CredenzaDescription>
                </CredenzaHeader>
-               <CredenzaBody className="flex-1 flex flex-col">
+               <CredenzaBody className="h-96 overflow-y-auto flex flex-col">
                   {isLoading ? (
                      <div className="flex items-center justify-center h-32">
                         <Loader2 className="w-6 h-6 animate-spin" />
@@ -65,9 +65,7 @@ export function FileViewerModal() {
                         </span>
                      </div>
                   ) : (
-                     <div className="h-80">
-                        <Markdown content={data?.content ?? ""} />
-                     </div>
+                     <Markdown content={data?.content ?? ""} />
                   )}
                </CredenzaBody>
             </CredenzaContent>

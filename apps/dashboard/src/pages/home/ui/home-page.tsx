@@ -16,18 +16,14 @@ export function DashboardHomePage() {
    const statsCards = useMemo(
       () => [
          {
-            title: translate(
-               "pages.home.stats-cards.agent-stats.title",
-            ),
+            title: translate("pages.home.stats-cards.agent-stats.title"),
             description: translate(
                "pages.home.stats-cards.agent-stats.description",
             ),
             value: data.totalAgents,
          },
          {
-            title: translate(
-               "pages.home.stats-cards.words-written.title",
-            ),
+            title: translate("pages.home.stats-cards.words-written.title"),
             description: translate(
                "pages.home.stats-cards.words-written.description",
             ),

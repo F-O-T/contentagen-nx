@@ -47,10 +47,13 @@ export const createTRPCContext = async ({
       headers,
    });
    await ensureCollections(chromaClient);
-   
+
    // Extract language from headers
-   const language = headers.get('X-Locale') || headers.get('Accept-Language')?.split(',')[0] || 'en';
-   
+   const language =
+      headers.get("X-Locale") ||
+      headers.get("Accept-Language")?.split(",")[0] ||
+      "en";
+
    return {
       openRouterClient,
       polarClient,

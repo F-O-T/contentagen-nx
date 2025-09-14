@@ -72,9 +72,13 @@ const getFullBrandAnalysis = createStep({
 
    execute: async ({ inputData }) => {
       const { userId, websiteUrl, agentId } = inputData;
-      
+
       // Update status to analyzing
-      await updateAgentKnowledgeStatus(agentId, "analyzing", "Analyzing brand website and gathering information");
+      await updateAgentKnowledgeStatus(
+         agentId,
+         "analyzing",
+         "Analyzing brand website and gathering information",
+      );
       const inputPrompt = `
 Help me with my business brand analysis.
 websiteUrl: ${websiteUrl}
@@ -127,9 +131,13 @@ const createBrandDocuments = createStep({
    outputSchema: createBrandDocumentsOutputSchema,
    execute: async ({ inputData }) => {
       const { fullBrandAnalysis, userId, agentId, websiteUrl } = inputData;
-      
+
       // Update status to chunking (preparing documents)
-      await updateAgentKnowledgeStatus(agentId, "chunking", "Creating business documents from brand analysis");
+      await updateAgentKnowledgeStatus(
+         agentId,
+         "chunking",
+         "Creating business documents from brand analysis",
+      );
       const inputPrompt = `
 Generate 5 distinct business documents from this brand analysis:
 
@@ -181,9 +189,13 @@ const saveAndIndexBrandDocuments = createStep({
    outputSchema: CreateBrandKnowledgeOutput,
    execute: async ({ inputData }) => {
       const { generatedDocuments, agentId, websiteUrl } = inputData;
-      
+
       // Update status to chunking (processing and indexing)
-      await updateAgentKnowledgeStatus(agentId, "chunking", "Processing and indexing documents");
+      await updateAgentKnowledgeStatus(
+         agentId,
+         "chunking",
+         "Processing and indexing documents",
+      );
 
       type UploadedFile = {
          fileName: string;
@@ -296,8 +308,12 @@ const saveAndIndexBrandDocuments = createStep({
       }
 
       // Update status to completed
-      await updateAgentKnowledgeStatus(agentId, "completed", `Successfully processed ${allChunks.length} document chunks`);
-      
+      await updateAgentKnowledgeStatus(
+         agentId,
+         "completed",
+         `Successfully processed ${allChunks.length} document chunks`,
+      );
+
       return {
          chunkCount: allChunks.length,
       };
