@@ -27,7 +27,7 @@ export const tavilySearchTool = createTool({
             searchDepth: "advanced",
          });
          const usageData = createWebSearchUsageMetadata({
-            method: "crawl",
+            method: "advanced",
          });
          await ingestBilling(polarClient, {
             externalCustomerId: userId,

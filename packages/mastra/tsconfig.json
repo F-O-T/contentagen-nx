@@ -14,7 +14,7 @@
       "composite": false,
       "emitDeclarationOnly": false,
       "declarationMap": false,
-      "declaration": false,
+      "declaration": true,
       "baseUrl": ".",
       "jsx": "react-jsx"
    }

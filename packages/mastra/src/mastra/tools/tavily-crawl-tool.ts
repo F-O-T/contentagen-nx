@@ -13,7 +13,7 @@ export const tavilyCrawlTool = createTool({
    id: "tavily-crawl",
    description: "Crawls a website url to extract knowledge and content",
    inputSchema: z.object({
-      websiteUrl: z.string().describe("The website URL to crawl"),
+      websiteUrl: z.url().describe("The website URL to crawl"),
       userId: z.string().describe("The user ID for billing purposes"),
    }),
    execute: async ({ context }) => {
@@ -22,10 +22,7 @@ export const tavilyCrawlTool = createTool({
       try {
          const tavily = createTavilyClient(serverEnv.TAVILY_API_KEY);
          const polarClient = getPaymentClient(serverEnv.POLAR_ACCESS_TOKEN);
-         const crawResult = await tavilyCrawl(tavily, websiteUrl, {
-            autoParameters: true,
-            searchDepth: "advanced",
-         });
+         const crawResult = await tavilyCrawl(tavily, websiteUrl);
          const usageData = createWebSearchUsageMetadata({
             method: "crawl",
          });

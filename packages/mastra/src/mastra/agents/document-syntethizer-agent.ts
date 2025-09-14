@@ -1,7 +1,5 @@
 import { Agent } from "@mastra/core/agent";
 import { LanguageDetector } from "@mastra/core/processors";
-import { Memory } from "@mastra/memory";
-import { LibSQLStore } from "@mastra/libsql";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
 import { tavilyCrawlTool } from "../tools/tavily-crawl-tool";
@@ -151,9 +149,4 @@ When structured output is requested, focus on delivering exactly what the schema
          threshold: 0.8,
       }),
    ],
-   memory: new Memory({
-      storage: new LibSQLStore({
-         url: "file:../mastra.db",
-      }),
-   }),
 });

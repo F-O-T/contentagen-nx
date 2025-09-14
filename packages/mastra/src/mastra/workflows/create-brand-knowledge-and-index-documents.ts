@@ -82,6 +82,7 @@ const createBrandDocumentsOutputSchema = CreateBrandKnowledgeInput.extend({
             title: z.string().describe("Document title"),
          }),
       )
+      .length(5)
       .describe("Exactly 5 business documents generated from brand analysis"),
 });
 const getFullBrandAnalysisOutputSchema = CreateBrandKnowledgeInput.extend({
@@ -174,7 +175,7 @@ Generate 5 distinct business documents from this brand analysis:
 ${fullBrandAnalysis}
 
 Requirements:
-- Generate exactly 5 documents: Executive Summary, Market Analysis, Strategic Recommendations, Customer Insights, and Competitive Intelligence
+- Generate exactly 5 documents: Brand Identity Profile, Product/Service Catalog, Market Presence Report, Customer Base Analysis, and Brand Assets Inventory
 - Each document must be comprehensive, actionable, and in perfect markdown format
 - Base all recommendations on the provided brand analysis data
 - Include specific metrics, timelines, and implementation details
@@ -250,9 +251,20 @@ const saveAndIndexBrandDocuments = createStep({
       const uploadedFiles: UploadedFile[] = [];
       const allChunks: ChunkItem[] = [];
 
+      // Helper function to sanitize document type for safe filenames
+      const sanitizeDocumentType = (type: string): string => {
+         return type
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric with hyphens
+            .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
+      };
+
       for (let docIndex = 0; docIndex < generatedDocuments.length; docIndex++) {
          const document = generatedDocuments[docIndex];
-         const fileName = `brand-doc-${docIndex + 1}-${document?.type}.md`;
+         const sanitizedType = sanitizeDocumentType(
+            document?.type || "document",
+         );
+         const fileName = `brand-doc-${docIndex + 1}-${sanitizedType}.md`;
          const key = `${agentId}/${fileName}`;
 
          try {
