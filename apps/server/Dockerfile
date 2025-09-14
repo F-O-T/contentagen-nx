@@ -41,6 +41,7 @@ COPY packages/api/package.json ./packages/api/
 COPY packages/arcjet/package.json ./packages/arcjet/
 COPY packages/authentication/package.json ./packages/authentication/
 COPY packages/server-events/package.json ./packages/server-events/
+COPY packages/localization/package.json ./packages/localization/
 
 COPY packages/brand/package.json ./packages/brand/
 COPY packages/helpers/package.json ./packages/helpers/
@@ -116,6 +117,7 @@ COPY packages/database/package.json ./packages/database/
 COPY packages/environment/package.json ./packages/environment/
 COPY packages/errors/package.json ./packages/errors/
 COPY packages/server-events/package.json ./packages/server-events/
+COPY packages/localization/package.json ./packages/localization/
 
 
 COPY packages/files/package.json ./packages/files/
