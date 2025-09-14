@@ -1,4 +1,9 @@
 import { createWorkflow, createStep } from "@mastra/core/workflows";
+import { getPaymentClient } from "@packages/payment/client";
+import {
+   createAiUsageMetadata,
+   ingestBilling,
+} from "@packages/payment/ingestion";
 import { documentSynthesizerAgent } from "../agents/document-syntethizer-agent";
 import { documentGenerationAgent } from "../agents/document-generation-agent";
 import { MDocument } from "@mastra/rag";
@@ -13,6 +18,26 @@ import crypto from "node:crypto";
 import { z } from "zod";
 import type { BrandKnowledgeStatus } from "@packages/database/schemas/agent";
 
+type LLMUsage = {
+   inputTokens: number;
+   outputTokens: number;
+   totalTokens: number;
+   reasoningTokens?: number | null;
+   cachedInputTokens?: number | null;
+};
+
+async function ingestUsage(usage: LLMUsage, userId: string) {
+   const paymentClient = getPaymentClient(serverEnv.POLAR_ACCESS_TOKEN);
+   const usageMetadata = createAiUsageMetadata({
+      effort: "small",
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+   });
+   await ingestBilling(paymentClient, {
+      externalCustomerId: userId,
+      metadata: usageMetadata,
+   });
+}
 // Helper function to update agent status and emit server events
 async function updateAgentKnowledgeStatus(
    agentId: string,
@@ -106,7 +131,7 @@ Return the complete analysis as a well-structured markdown document.
             }),
          },
       );
-
+      await ingestUsage(result.usage as LLMUsage, userId);
       if (!result?.object) {
          throw new Error(
             `Failed to generate brand analysis: documentSynthesizerAgent.generateVNext returned ${result ? "invalid result" : "null/undefined"}`,
@@ -171,6 +196,7 @@ Return the documents in the specified structured format.
          },
       );
 
+      await ingestUsage(result.usage as LLMUsage, userId);
       if (!result?.object) {
          throw new Error(
             `Failed to generate brand documents: documentGenerationAgent.generateVNext returned ${result ? "invalid result" : "null/undefined"}`,

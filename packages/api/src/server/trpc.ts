@@ -12,7 +12,7 @@ import {
    isOrganizationOwner,
 } from "@packages/database/repositories/auth-repository";
 import { getCustomerState } from "@packages/payment/ingestion";
-
+import { setRuntimeContext } from "@packages/mastra";
 export const createTRPCContext = async ({
    auth,
    polarClient,
@@ -50,10 +50,11 @@ export const createTRPCContext = async ({
 
    // Extract language from headers
    const language =
-      headers.get("X-Locale") ||
-      headers.get("Accept-Language")?.split(",")[0] ||
-      "en";
-
+      (headers.get("X-Locale") as Parameters<
+         typeof setRuntimeContext
+      >[0]["language"]) ||
+      ("en" as Parameters<typeof setRuntimeContext>[0]["language"]);
+   setRuntimeContext({ language });
    return {
       openRouterClient,
       polarClient,
