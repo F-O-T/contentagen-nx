@@ -12,7 +12,7 @@ import {
 import {
    Bot,
    FilesIcon,
-   LayoutDashboardIcon,
+   type LayoutDashboardIcon,
    Lightbulb,
    Target,
    FileText,

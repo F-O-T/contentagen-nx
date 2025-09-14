@@ -4,6 +4,7 @@ import {
    organizationProcedure,
    hasGenerationCredits,
    organizationOwnerProcedure,
+   publicProcedure,
 } from "../trpc";
 import { CompetitorInsertSchema } from "@packages/database/schema";
 import {
@@ -20,6 +21,12 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { enqueueCompetitorCrawlJob } from "@packages/workers/queues/competitors/competitor-crawl-queue";
 import { deleteFeaturesByCompetitorId } from "@packages/database/repositories/competitor-feature-repository";
+import {
+   eventEmitter,
+   EVENTS,
+   type CompetitorStatusChangedPayload,
+} from "@packages/server-events";
+import { on } from "node:events";
 
 export const competitorRouter = router({
    list: protectedProcedure
@@ -370,6 +377,25 @@ export const competitorRouter = router({
                });
             }
             throw err;
+         }
+      }),
+   onStatusChanged: publicProcedure
+      .input(z.object({ competitorId: z.string().optional() }).optional())
+      .subscription(async function* (opts) {
+         for await (const [payload] of on(
+            eventEmitter,
+            EVENTS.competitorStatus,
+            {
+               signal: opts.signal,
+            },
+         )) {
+            const event = payload as CompetitorStatusChangedPayload;
+            if (
+               !opts.input?.competitorId ||
+               opts.input.competitorId === event.competitorId
+            ) {
+               yield event;
+            }
          }
       }),
 });

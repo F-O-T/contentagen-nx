@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { type FormEvent, useCallback } from "react";
 import { Input } from "@packages/ui/components/input";
 import { z } from "zod";
+import { useRouter } from "@tanstack/react-router";
 const createCompetitorSchema = z.object({
    name: z.string().min(1, "Name is required"),
    websiteUrl: z.url("Please enter a valid URL"),
@@ -65,13 +66,19 @@ export function CreateEditCompetitorDialog({
       },
       [form],
    );
-
+   const router = useRouter();
    const createCompetitorMutation = useMutation(
       trpc.competitor.create.mutationOptions({
-         onSuccess: () => {
+         onSuccess: async (data) => {
             toast.success("Competitor created successfully!");
-            queryClient.invalidateQueries({
+            await queryClient.invalidateQueries({
                queryKey: trpc.competitor.list.queryKey(),
+            });
+            router.navigate({
+               to: "/competitors/$id",
+               params: {
+                  id: data.id,
+               },
             });
             onOpenChange(false);
             form.reset();
@@ -84,12 +91,12 @@ export function CreateEditCompetitorDialog({
 
    const updateCompetitorMutation = useMutation(
       trpc.competitor.update.mutationOptions({
-         onSuccess: () => {
+         onSuccess: async () => {
             toast.success("Competitor updated successfully!");
-            queryClient.invalidateQueries({
+            await queryClient.invalidateQueries({
                queryKey: trpc.competitor.list.queryKey(),
             });
-            queryClient.invalidateQueries({
+            await queryClient.invalidateQueries({
                queryKey: trpc.competitor.get.queryKey(),
             });
             onOpenChange(false);

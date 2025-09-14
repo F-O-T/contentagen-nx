@@ -4,6 +4,7 @@ import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../../helpers";
 import { runCrawlCompetitorWebsite } from "../../functions/web-search/crawl-competitor-website";
 import { enqueueCompetitorAnalysisJob } from "./competitor-analysis-queue";
+import { updateCompetitorStatus } from "../../functions/database/update-competitor-status";
 
 export type CompetitorCrawlJob = {
    competitorId: string;
@@ -29,18 +30,33 @@ export const competitorCrawlWorker = new Worker<CompetitorCrawlJob>(
    async (job: Job<CompetitorCrawlJob>) => {
       const { competitorId, userId, organizationId, websiteUrl } = job.data;
 
-      const { results } = await runCrawlCompetitorWebsite({
-         userId,
-         websiteUrl,
-      });
+      try {
+         // Update status to crawling
+         await updateCompetitorStatus({
+            competitorId,
+            status: "crawling",
+         });
 
-      await enqueueCompetitorAnalysisJob({
-         competitorId,
-         userId,
-         organizationId,
-         websiteUrl,
-         crawlResults: results,
-      });
+         const { results } = await runCrawlCompetitorWebsite({
+            userId,
+            websiteUrl,
+         });
+
+         await enqueueCompetitorAnalysisJob({
+            competitorId,
+            userId,
+            organizationId,
+            websiteUrl,
+            crawlResults: results,
+         });
+      } catch (error) {
+         // Update status to failed on error
+         await updateCompetitorStatus({
+            competitorId,
+            status: "failed",
+         });
+         throw error;
+      }
    },
    { connection: redis, removeOnComplete: { count: 10 } },
 );

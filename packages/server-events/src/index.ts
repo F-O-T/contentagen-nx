@@ -2,10 +2,12 @@ import { EventEmitter } from "node:events";
 import type { ContentStatus } from "@packages/database/schemas/content";
 import type { BrandKnowledgeStatus } from "@packages/database/schemas/agent";
 import type { IdeiaStatus } from "@packages/database/schemas/ideas";
+import type { CompetitorStatus } from "@packages/database/schema";
 // 1. Define event names as constants
 export const EVENTS = {
    agentKnowledgeStatus: "agent.knowledge.status",
    contentStatus: "content.status",
+   competitorStatus: "competitor.status",
    ideaStatus: "idea.status",
 } as const;
 
@@ -18,6 +20,10 @@ export type AgentKnowledgeStatusChangedPayload = {
    agentId: string;
    status: BrandKnowledgeStatus;
    message?: string;
+};
+export type CompetitorStatusChangedPayload = {
+   competitorId: string;
+   status: CompetitorStatus;
 };
 export type IdeaStatusChangedPayload = {
    ideaId: string;
@@ -34,6 +40,11 @@ export function emitAgentKnowledgeStatusChanged(
 // 4. Helper to emit a status change event (strongly typed)
 export function emitContentStatusChanged(payload: ContentStatusChangedPayload) {
    eventEmitter.emit(EVENTS.contentStatus, payload);
+}
+export function emitCompetitorStatusChanged(
+   payload: CompetitorStatusChangedPayload,
+) {
+   eventEmitter.emit(EVENTS.competitorStatus, payload);
 }
 export function emitIdeaStatusChanged(payload: IdeaStatusChangedPayload) {
    eventEmitter.emit(EVENTS.ideaStatus, payload);

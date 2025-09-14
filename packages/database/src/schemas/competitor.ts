@@ -1,9 +1,24 @@
-import { pgTable, uuid, text, timestamp, index } from "drizzle-orm/pg-core";
+import {
+   pgTable,
+   uuid,
+   text,
+   timestamp,
+   index,
+   pgEnum,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { organization, user } from "./auth";
 import { relations } from "drizzle-orm";
 import { competitorFeature } from "./competitor-feature";
 import type { CompetitorFeatureSelect } from "./competitor-feature";
+
+export const competitorStatusEnum = pgEnum("competitor_status", [
+   "pending",
+   "crawling",
+   "analyzing",
+   "completed",
+   "failed",
+]);
 
 export const competitor = pgTable(
    "competitor",
@@ -11,6 +26,7 @@ export const competitor = pgTable(
       id: uuid("id").primaryKey().defaultRandom(),
       name: text("name").notNull(),
       websiteUrl: text("website_url").notNull(),
+      status: competitorStatusEnum("status").default("pending"),
       userId: text("user_id").references(() => user.id, {
          onDelete: "cascade",
       }),
@@ -35,6 +51,7 @@ export const competitorRelations = relations(competitor, ({ many }) => ({
 
 export type CompetitorSelect = typeof competitor.$inferSelect;
 export type CompetitorInsert = typeof competitor.$inferInsert;
+export type CompetitorStatus = (typeof competitor.status.enumValues)[number];
 
 export type CompetitorWithFeatures = CompetitorSelect & {
    features: CompetitorFeatureSelect[];

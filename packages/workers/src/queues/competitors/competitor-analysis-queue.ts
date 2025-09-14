@@ -4,6 +4,7 @@ import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../../helpers";
 import { runAnalyzeCompetitorFeatures } from "../../functions/analysis/analyze-competitor-features";
 import { runSaveCompetitorFeatures } from "../../functions/database/save-competitor-features";
+import { updateCompetitorStatus } from "../../functions/database/update-competitor-status";
 
 export type CompetitorAnalysisJob = {
    competitorId: string;
@@ -33,26 +34,47 @@ export const competitorAnalysisWorker = new Worker<CompetitorAnalysisJob>(
    async (job: Job<CompetitorAnalysisJob>) => {
       const { competitorId, userId, websiteUrl, crawlResults } = job.data;
 
-      const { features } = await runAnalyzeCompetitorFeatures({
-         userId,
-         websiteData: crawlResults.map((r) => r.rawContent).join("\n\n"),
-      });
-
-      await runSaveCompetitorFeatures({
-         competitorId,
-         features: features.map((feature) => ({
+      try {
+         // Update status to analyzing
+         await updateCompetitorStatus({
             competitorId,
-            featureName: feature.name,
-            summary: feature.summary,
-            rawContent: feature.rawContent,
-            sourceUrl: feature.sourceUrl || websiteUrl,
-            meta: {
-               confidence: feature.confidence,
-               category: feature.category,
-               tags: feature.tags,
-            },
-         })),
-      });
+            status: "analyzing",
+         });
+
+         const { features } = await runAnalyzeCompetitorFeatures({
+            userId,
+            websiteData: crawlResults.map((r) => r.rawContent).join("\n\n"),
+         });
+
+         await runSaveCompetitorFeatures({
+            competitorId,
+            features: features.map((feature) => ({
+               competitorId,
+               featureName: feature.name,
+               summary: feature.summary,
+               rawContent: feature.rawContent,
+               sourceUrl: feature.sourceUrl || websiteUrl,
+               meta: {
+                  confidence: feature.confidence,
+                  category: feature.category,
+                  tags: feature.tags,
+               },
+            })),
+         });
+
+         // Update status to completed
+         await updateCompetitorStatus({
+            competitorId,
+            status: "completed",
+         });
+      } catch (error) {
+         // Update status to failed on error
+         await updateCompetitorStatus({
+            competitorId,
+            status: "failed",
+         });
+         throw error;
+      }
    },
    { connection: redis, removeOnComplete: { count: 10 } },
 );
