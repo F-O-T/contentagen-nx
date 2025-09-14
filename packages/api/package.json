@@ -20,6 +20,7 @@
       "typecheck": "tsc --noEmit --emitDeclarationOnly false"
    },
    "dependencies": {
+      "@packages/localization": "workspace:*",
       "@packages/server-events": "workspace:*",
       "@packages/workers": "workspace:*",
       "@packages/authentication": "workspace:*",

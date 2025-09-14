@@ -15,7 +15,11 @@ export interface APIClientOptions {
    headers?: Record<string, string> | Headers;
    language?: string;
 }
-export const createTrpcClient = ({ serverUrl, headers, language }: APIClientOptions) => {
+export const createTrpcClient = ({
+   serverUrl,
+   headers,
+   language,
+}: APIClientOptions) => {
    return createTRPCClient<AppRouter>({
       links: [
          loggerLink(),
@@ -38,10 +42,14 @@ export const createTrpcClient = ({ serverUrl, headers, language }: APIClientOpti
                   const requestHeaders = new Headers(options?.headers);
 
                   // Add language headers
-                  const clientLanguage = language || (typeof window !== 'undefined' ? document.documentElement.lang : 'en');
+                  const clientLanguage =
+                     language ||
+                     (typeof window !== "undefined"
+                        ? document.documentElement.lang
+                        : "en");
                   if (clientLanguage) {
-                     requestHeaders.set('Accept-Language', clientLanguage);
-                     requestHeaders.set('X-Locale', clientLanguage);
+                     requestHeaders.set("Accept-Language", clientLanguage);
+                     requestHeaders.set("X-Locale", clientLanguage);
                   }
 
                   if (headers) {

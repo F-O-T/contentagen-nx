@@ -170,6 +170,7 @@
         "@packages/chroma-db": "workspace:*",
         "@packages/database": "workspace:*",
         "@packages/files": "workspace:*",
+        "@packages/localization": "workspace:*",
         "@packages/server-events": "workspace:*",
         "@packages/workers": "workspace:*",
         "@trpc/client": "catalog:trpc",
