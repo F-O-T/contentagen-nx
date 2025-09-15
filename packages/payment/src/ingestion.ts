@@ -13,6 +13,8 @@ export const USAGE_TYPE = {
 
 export const BILLING_CONFIG = {
    margin: 0.1,
+   llmPricePerMillionTokens: 2.5, // $2.5 per 1M tokens
+   webSearchCost: 0.0008, // $0.08 cents per search
 };
 
 interface IngestBillingParams {
@@ -61,15 +63,19 @@ export const createAiUsageMetadata = (params: {
 export const createWebSearchUsageMetadata = (params: {
    method: "crawl" | "search" | "advanced";
 }) => {
-   let baseAmount = 1;
+   let costMultiplier = 1;
    if (params.method === "crawl" || params.method === "advanced") {
-      baseAmount = 2;
+      costMultiplier = 2;
    }
-   const creditsDebited = calculateCreditsDebited(10 * baseAmount);
+
+   const actualCost = BILLING_CONFIG.webSearchCost * costMultiplier;
+   const tokenEquivalent = convertWebSearchCostToTokens(actualCost);
+
    return {
       usage_type: USAGE_TYPE.WEB_SEARCH,
       method: params.method,
-      credits_debited: creditsDebited,
+      credits_debited: tokenEquivalent,
+      actual_cost: actualCost,
    };
 };
 
@@ -83,4 +89,9 @@ export const createRagUsageMetadata = (params: { agentId: string }) => {
 };
 function calculateCreditsDebited(amount: number) {
    return Math.ceil(amount * BILLING_CONFIG.margin);
+}
+
+function convertWebSearchCostToTokens(cost: number): number {
+   const tokens = (cost / BILLING_CONFIG.llmPricePerMillionTokens) * 1000000;
+   return calculateCreditsDebited(Math.round(tokens));
 }
