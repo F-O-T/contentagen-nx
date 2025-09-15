@@ -4,6 +4,7 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
 import { tavilyCrawlTool } from "../tools/tavily-crawl-tool";
 import { tavilySearchTool } from "../tools/tavily-search-tool";
+import { dateTool } from "../tools/date-tool";
 const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
 });
@@ -31,6 +32,9 @@ AVAILABLE TOOLS:
 - tavilySearchTool: Search the web for additional information
   * Input: query (string), userId (string)
   * Use when: Need to fill information gaps or find external sources
+- dateTool: Get the current date in YYYY-MM-DD format
+  * Input: timezone (string, optional)
+  * Use when: Need to include current date information in documents
 
 BRAND ANALYSIS DOCUMENT STRUCTURE:
 When creating brand analysis documents, use this comprehensive structure:
@@ -140,7 +144,7 @@ CRITICAL SUCCESS FACTORS:
 When structured output is requested, focus on delivering exactly what the schema requires without additional commentary.
    `,
    model: openrouter("deepseek/deepseek-chat-v3.1"),
-   tools: { tavilyCrawlTool, tavilySearchTool },
+   tools: { tavilyCrawlTool, tavilySearchTool, dateTool },
    inputProcessors: [
       new LanguageDetector({
          model: openrouter("deepseek/deepseek-chat-v3.1"),

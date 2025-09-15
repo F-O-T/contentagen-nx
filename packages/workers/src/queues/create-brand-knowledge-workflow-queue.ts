@@ -2,13 +2,17 @@ import { Worker, Queue, type Job } from "bullmq";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../helpers";
-import { mastra, setRuntimeContext, type CustomRuntimeContext } from "@packages/mastra";
+import {
+   mastra,
+   setRuntimeContext,
+   type CustomRuntimeContext,
+} from "@packages/mastra";
 
 export interface CreateBrandKnowledgeWorkflowJobData {
    websiteUrl: string;
    userId: string;
    agentId: string;
-   language?: CustomRuntimeContext['language'];
+   language?: CustomRuntimeContext["language"];
 }
 
 export async function runCreateBrandKnowledgeWorkflow(
@@ -21,8 +25,6 @@ export async function runCreateBrandKnowledgeWorkflow(
       if (language) {
          setRuntimeContext({ language });
       }
-
-      // Emit initial status when workflow starts
 
       const run = await mastra
          .getWorkflow("createBrandKnowledgeWorkflow")

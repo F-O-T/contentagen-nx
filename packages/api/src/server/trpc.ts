@@ -54,7 +54,7 @@ export const createTRPCContext = async ({
          typeof setRuntimeContext
       >[0]["language"]) ||
       ("en" as Parameters<typeof setRuntimeContext>[0]["language"]);
-   setRuntimeContext({ language });
+   setRuntimeContext({ language, userId: session?.session.userId ?? "" });
    return {
       openRouterClient,
       polarClient,
