@@ -12,7 +12,7 @@ export const USAGE_TYPE = {
 } as const;
 
 export const BILLING_CONFIG = {
-   margin: 0.1,
+   margin: 0.15,
    llmPricePerMillionTokens: 2.5, // $2.5 per 1M tokens
    webSearchCost: 0.0008, // $0.08 cents per search
 };
