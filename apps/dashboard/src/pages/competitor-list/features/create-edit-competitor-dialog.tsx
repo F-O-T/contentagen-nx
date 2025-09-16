@@ -17,7 +17,6 @@ import { Input } from "@packages/ui/components/input";
 import { z } from "zod";
 import { useRouter } from "@tanstack/react-router";
 const createCompetitorSchema = z.object({
-   name: z.string().min(1, "Name is required"),
    websiteUrl: z.url("Please enter a valid URL"),
 });
 
@@ -126,23 +125,6 @@ export function CreateEditCompetitorDialog({
             </CredenzaHeader>
             <form onSubmit={handleSubmit}>
                <div className="grid gap-4 py-4">
-                  <form.AppField name="name">
-                     {(field) => (
-                        <field.FieldContainer>
-                           <field.FieldLabel>Name *</field.FieldLabel>
-                           <Input
-                              placeholder="Competitor name"
-                              value={field.state.value}
-                              onChange={(e) =>
-                                 field.handleChange(e.target.value)
-                              }
-                              onBlur={field.handleBlur}
-                           />
-                           <field.FieldMessage />
-                        </field.FieldContainer>
-                     )}
-                  </form.AppField>
-
                   <form.AppField name="websiteUrl">
                      {(field) => (
                         <field.FieldContainer>

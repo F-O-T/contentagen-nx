@@ -1,11 +1,11 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { Progress } from "@packages/ui/components/progress";
-import type { CompetitorStatus } from "@packages/database/schema";
+import type { CompetitorFeaturesStatus } from "@packages/database/schemas/competitor";
 import { useMemo, useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 
 interface CompetitorLoadingDisplayProps {
-   status: CompetitorStatus;
+   status: CompetitorFeaturesStatus;
 }
 
 const competitorSteps = [

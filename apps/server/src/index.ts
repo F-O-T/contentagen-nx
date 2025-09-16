@@ -21,23 +21,24 @@ import { contentResearchingQueue } from "@packages/workers/queues/content/conten
 import { contentPlanningQueue } from "@packages/workers/queues/content/content-planning-queue";
 import { createBrandKnowledgeWorkflowQueue } from "@packages/workers/queues/create-brand-knowledge-workflow-queue";
 import { contentWritingQueue } from "@packages/workers/queues/content/content-writing-queue";
-import { competitorAnalysisQueue } from "@packages/workers/queues/competitors/competitor-analysis-queue";
-import { competitorCrawlQueue } from "@packages/workers/queues/competitors/competitor-crawl-queue";
 import { ideasPlanningQueue } from "@packages/workers/queues/ideas/ideas-planning-queue";
 import { ideasGenerationQueue } from "@packages/workers/queues/ideas/ideas-generation-queue";
 import { ideasGrammarCheckQueue } from "@packages/workers/queues/ideas/ideas-grammar-checker-queue";
 import { ideasPostProcessingQueue } from "@packages/workers/queues/ideas/ideas-post-processing-queue";
 import { contentGrammarCheckQueue } from "@packages/workers/queues/content/content-grammar-checker-queue";
-
+import { crawlCompetitorForFeaturesQueue } from "@packages/workers/queues/crawl-competitor-for-features-queue";
+import { extractCompetitorBrandInfoQueue } from "@packages/workers/queues/extract-competitor-brand-info-queue";
+import { createCompetitorKnowledgeWorkflowQueue } from "@packages/workers/queues/create-competitor-knowledge-workflow-queue";
 import { isProduction } from "@packages/environment/helpers";
 const serverAdapter = new ElysiaAdapter("/ui");
 
 createBullBoard({
    queues: [
+      new BullMQAdapter(crawlCompetitorForFeaturesQueue),
+      new BullMQAdapter(createCompetitorKnowledgeWorkflowQueue),
       new BullMQAdapter(createBrandKnowledgeWorkflowQueue),
+      new BullMQAdapter(extractCompetitorBrandInfoQueue),
       new BullMQAdapter(contentGrammarCheckQueue),
-      new BullMQAdapter(competitorAnalysisQueue),
-      new BullMQAdapter(competitorCrawlQueue),
       new BullMQAdapter(ideasPlanningQueue),
       new BullMQAdapter(ideasGenerationQueue),
       new BullMQAdapter(ideasGrammarCheckQueue),
