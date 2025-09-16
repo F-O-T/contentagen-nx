@@ -281,16 +281,9 @@ export const competitorRouter = router({
                });
             }
 
-            // Delete existing competitor features before starting fresh analysis
             await deleteFeaturesByCompetitorId(resolvedCtx.db, competitor.id);
 
-            // Enqueue competitor analysis job
             await enqueueCrawlCompetitorForFeaturesJob({
-               competitorId: competitor.id,
-               userId,
-               websiteUrl: competitor.websiteUrl,
-            });
-            await enqueueCreateCompetitorKnowledgeWorkflowJob({
                competitorId: competitor.id,
                userId,
                websiteUrl: competitor.websiteUrl,
@@ -363,7 +356,10 @@ export const competitorRouter = router({
             competitorId: z.uuid(),
             page: z.number().min(1).optional().default(1),
             limit: z.number().min(1).max(100).optional().default(12),
-            sortBy: z.enum(["extractedAt", "featureName"]).optional().default("extractedAt"),
+            sortBy: z
+               .enum(["extractedAt", "featureName"])
+               .optional()
+               .default("extractedAt"),
             sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
          }),
       )
@@ -377,19 +373,24 @@ export const competitorRouter = router({
             if (!userId || !organizationId) {
                throw new TRPCError({
                   code: "UNAUTHORIZED",
-                  message: "User must be authenticated to view competitor features.",
+                  message:
+                     "User must be authenticated to view competitor features.",
                });
             }
 
             // Verify the competitor exists and belongs to the user/organization
-            const competitor = await getCompetitorById(resolvedCtx.db, input.competitorId);
+            const competitor = await getCompetitorById(
+               resolvedCtx.db,
+               input.competitorId,
+            );
             if (
                competitor.userId !== userId &&
                competitor.organizationId !== organizationId
             ) {
                throw new TRPCError({
                   code: "FORBIDDEN",
-                  message: "You don't have permission to view this competitor's features.",
+                  message:
+                     "You don't have permission to view this competitor's features.",
                });
             }
 
@@ -400,7 +401,10 @@ export const competitorRouter = router({
                   sortBy: input.sortBy,
                   sortOrder: input.sortOrder,
                }),
-               getTotalFeaturesByCompetitorId(resolvedCtx.db, input.competitorId),
+               getTotalFeaturesByCompetitorId(
+                  resolvedCtx.db,
+                  input.competitorId,
+               ),
             ]);
 
             const totalPages = Math.ceil(total / input.limit);
