@@ -5,21 +5,17 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
-import { Calendar, Globe, User } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { InfoItem } from "@packages/ui/components/info-item";
+import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
+import type { RouterOutput } from "@packages/api/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/integrations/clients";
 interface CompetitorInfoCardProps {
-   name: string;
-   websiteUrl: string;
-   createdAt: Date;
-   updatedAt: Date;
+   competitor: RouterOutput["competitor"]["list"]["items"][number];
 }
 
-export function CompetitorInfoCard({
-   name,
-   websiteUrl,
-   createdAt,
-   updatedAt,
-}: CompetitorInfoCardProps) {
+export function CompetitorInfoCard({ competitor }: CompetitorInfoCardProps) {
    const formatDate = (date: Date) => {
       return new Intl.DateTimeFormat("en-US", {
          year: "numeric",
@@ -27,7 +23,12 @@ export function CompetitorInfoCard({
          day: "numeric",
       }).format(date);
    };
-
+   const trpc = useTRPC();
+   const { data } = useSuspenseQuery(
+      trpc.competitorFile.getLogo.queryOptions({
+         competitorId: competitor.id,
+      }),
+   );
    return (
       <Card>
          <CardHeader>
@@ -37,27 +38,22 @@ export function CompetitorInfoCard({
             </CardDescription>
          </CardHeader>
          <CardContent className="space-y-2">
-            <InfoItem
-               icon={<User className="h-4 w-4" />}
-               label="Name"
-               value={name}
-            />
-            <InfoItem
-               icon={<Globe className="h-4 w-4" />}
-               label="Website"
-               value={websiteUrl}
+            <AgentWriterCard
+               name={competitor.name || ""}
+               description={competitor.description || ""}
+               photo={data?.data || ""}
             />
             <div className="grid grid-cols-2 gap-2">
                <InfoItem
                   icon={<Calendar className="h-4 w-4" />}
                   label="Added on"
-                  value={formatDate(new Date(createdAt))}
+                  value={formatDate(new Date(competitor.createdAt))}
                />
 
                <InfoItem
                   icon={<Calendar className="h-4 w-4" />}
                   label="Last updated"
-                  value={formatDate(new Date(updatedAt))}
+                  value={formatDate(new Date(competitor.updatedAt))}
                />
             </div>
          </CardContent>

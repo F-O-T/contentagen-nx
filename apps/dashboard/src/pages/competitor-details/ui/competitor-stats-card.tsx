@@ -1,8 +1,8 @@
+import { useMemo } from "react";
 import { StatsCard } from "@packages/ui/components/stats-card";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
 import { useParams } from "@tanstack/react-router";
-import { useMemo } from "react";
 
 export function CompetitorStatsCard() {
    const trpc = useTRPC();
@@ -16,48 +16,44 @@ export function CompetitorStatsCard() {
    );
 
    const items = useMemo(() => {
-      const totalFeatures = competitor.features?.length || 0;
+      const features = competitor?.features ?? [];
+      const totalFeatures = features.length;
+
+      let highCount = 0;
+      let mediumCount = 0;
+      let sumConfidence = 0;
+
+      for (const f of features) {
+         const confidence = f.meta?.confidence ?? 0;
+         sumConfidence += confidence * 100;
+         if (confidence > 0.8) highCount++;
+         else if (confidence > 0.5) mediumCount++;
+      }
 
       const confidenceDetails =
-         competitor.features && competitor.features.length > 0
+         totalFeatures > 0
             ? [
                  {
                     title: "High Confidence",
                     description: "Features with >80% confidence",
-                    value: competitor.features
-                       .filter((f) => {
-                          return (f.meta?.confidence || 0) > 0.8;
-                       })
-                       .length.toString(),
+                    value: String(highCount),
                  },
                  {
                     title: "Medium Confidence",
                     description: "Features with 50-80% confidence",
-                    value: competitor.features
-                       .filter((f) => {
-                          const confidence = f.meta?.confidence || 0;
-                          return confidence > 0.5 && confidence <= 0.8;
-                       })
-                       .length.toString(),
+                    value: String(mediumCount),
                  },
               ]
             : undefined;
 
       const avgConfidence =
-         competitor.features && competitor.features.length > 0
-            ? Math.round(
-                 competitor.features.reduce((acc, f) => {
-                    const confidence = (f.meta?.confidence || 0) * 100;
-                    return acc + confidence;
-                 }, 0) / competitor.features.length,
-              )
-            : 0;
+         totalFeatures > 0 ? Math.round(sumConfidence / totalFeatures) : 0;
 
       return [
          {
             label: "Total Features",
             description: "All tracked features detected",
-            value: totalFeatures.toString(),
+            value: String(totalFeatures),
          },
          {
             label: "Average Confidence",
@@ -66,7 +62,7 @@ export function CompetitorStatsCard() {
             details: confidenceDetails,
          },
       ];
-   }, [competitor]);
+   }, [competitor?.features]);
 
    return (
       <div className="w-full gap-4 grid md:grid-cols-2">

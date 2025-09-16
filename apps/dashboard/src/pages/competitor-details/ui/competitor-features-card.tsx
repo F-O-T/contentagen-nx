@@ -1,4 +1,3 @@
-import type { CompetitorFeatureSelect } from "@packages/database/schema";
 import {
    Card,
    CardAction,
@@ -9,14 +8,33 @@ import {
    CardTitle,
 } from "@packages/ui/components/card";
 import { Badge } from "@packages/ui/components/badge";
+import { Button } from "@packages/ui/components/button";
+import { useTRPC } from "@/integrations/clients";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
 interface CompetitorFeaturesCardProps {
-   features: CompetitorFeatureSelect[];
+   competitorId: string;
 }
 
 export function CompetitorFeaturesCard({
-   features,
+   competitorId,
 }: CompetitorFeaturesCardProps) {
+   const trpc = useTRPC();
+   const [currentPage, setCurrentPage] = useState(1);
+   const itemsPerPage = 8;
+
+   const { data } = useSuspenseQuery(
+      trpc.competitor.getFeatures.queryOptions({
+         competitorId,
+         page: currentPage,
+         limit: itemsPerPage,
+      }),
+   );
+
+   const { features, total, totalPages } = data;
+
    if (!features || features.length === 0) {
       return (
          <Card>
@@ -38,6 +56,14 @@ export function CompetitorFeaturesCard({
       );
    }
 
+   const handlePreviousPage = () => {
+      setCurrentPage((prev) => Math.max(1, prev - 1));
+   };
+
+   const handleNextPage = () => {
+      setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+   };
+
    return (
       <Card>
          <CardHeader>
@@ -48,36 +74,57 @@ export function CompetitorFeaturesCard({
                All the features of your competitors that are being tracked
             </CardDescription>
             <CardAction>
-               <Badge variant={"outline"}>{features.length}</Badge>
+               <Badge variant={"outline"}>{total} total</Badge>
             </CardAction>
          </CardHeader>
          <CardContent>
             <div className="space-y-3">
-               {features.map((feature) => {
-                  return (
-                     <Card key={feature.id} className="">
-                        <CardHeader>
-                           <CardTitle>{feature.featureName}</CardTitle>
-                           <CardDescription>{feature.summary}</CardDescription>
-                           <CardAction>
-                              <Badge variant={"outline"}>
-                                 {feature.meta?.category}
-                              </Badge>
-                           </CardAction>
-                        </CardHeader>
-                        <CardFooter className="flex items-center gap-2">
+               {features.map((feature) => (
+                  <Card key={feature.id} className="">
+                     <CardHeader>
+                        <CardTitle>{feature.featureName}</CardTitle>
+                        <CardDescription>{feature.summary}</CardDescription>
+                        <CardAction>
                            <Badge variant={"outline"}>
-                              {Math.round(
-                                 Number(feature?.meta?.confidence) * 100,
-                              )}
-                              % confidence
+                              {feature.meta?.category}
                            </Badge>
-                        </CardFooter>
-                     </Card>
-                  );
-               })}
+                        </CardAction>
+                     </CardHeader>
+                     <CardFooter className="flex items-center gap-2">
+                        <Badge variant={"outline"}>
+                           {Math.round(Number(feature?.meta?.confidence) * 100)}
+                           % confidence
+                        </Badge>
+                     </CardFooter>
+                  </Card>
+               ))}
             </div>
          </CardContent>
+         {totalPages > 1 && (
+            <CardFooter className="flex items-center justify-center gap-4">
+               <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 1}
+               >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+               </Button>
+               <span className="text-sm text-muted-foreground ">
+                  Page {currentPage} of {totalPages}
+               </span>
+               <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+               >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+               </Button>
+            </CardFooter>
+         )}
       </Card>
    );
 }
