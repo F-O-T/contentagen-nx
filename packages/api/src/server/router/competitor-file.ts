@@ -11,7 +11,6 @@ import {
    deleteFromCollection,
    getCollection,
 } from "@packages/chroma-db/helpers";
-import { enqueueCreateCompetitorKnowledgeWorkflowJob } from "@packages/workers/queues/create-competitor-knowledge-workflow-queue";
 
 const CompetitorFileDeleteInput = z.object({
    fileName: z.string(),
