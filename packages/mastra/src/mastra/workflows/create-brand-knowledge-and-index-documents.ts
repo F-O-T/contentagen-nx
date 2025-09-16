@@ -405,9 +405,9 @@ const saveAndIndexBrandDocuments = createStep({
       // Process documents using the helper function
       for (let docIndex = 0; docIndex < generatedDocuments.length; docIndex++) {
          const document = generatedDocuments[docIndex];
-         
+
          if (!document) continue;
-         
+
          try {
             const result = await buildAndUploadDocument({
                document,

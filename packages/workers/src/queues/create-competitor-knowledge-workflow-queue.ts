@@ -82,4 +82,3 @@ export const createCompetitorKnowledgeWorkflowWorker = new Worker(
    },
 );
 registerGracefulShutdown(createCompetitorKnowledgeWorkflowWorker);
-
