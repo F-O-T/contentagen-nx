@@ -1,18 +1,24 @@
-import { useState, useRef } from "react";
-import { useTRPC } from "@/integrations/clients";
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
-import { Button } from "@packages/ui/components/button";
-import {
-   Dialog,
-   DialogContent,
-   DialogDescription,
-   DialogFooter,
-   DialogHeader,
-   DialogTitle,
-} from "@packages/ui/components/dialog";
-import { Upload, X } from "lucide-react";
+import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
+import {
+   Credenza,
+   CredenzaContent,
+   CredenzaHeader,
+   CredenzaTitle,
+   CredenzaDescription,
+   CredenzaBody,
+   CredenzaFooter,
+   CredenzaClose,
+} from "@packages/ui/components/credenza";
+import {
+   Dropzone,
+   DropzoneContent,
+   DropzoneEmptyState,
+} from "@packages/ui/components/dropzone";
+import { Button } from "@packages/ui/components/button";
 
 interface CompetitorLogoUploadDialogProps {
    open: boolean;
@@ -28,167 +34,146 @@ export function CompetitorLogoUploadDialog({
    const trpc = useTRPC();
    const { id } = useParams({ from: "/_dashboard/competitors/$id" });
    const queryClient = useQueryClient();
-   const fileInputRef = useRef<HTMLInputElement>(null);
    const [selectedFile, setSelectedFile] = useState<File | null>(null);
-   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+   const [filePreview, setFilePreview] = useState<string | undefined>();
+
+   // Determine what image to display: new preview, existing logo, or nothing
+   const displayImage = filePreview || currentLogo;
 
    const uploadLogoMutation = useMutation(
       trpc.competitorFile.uploadLogo.mutationOptions({
-         onSuccess: () => {
+         onSuccess: async () => {
             toast.success("Logo uploaded successfully!");
-            queryClient.invalidateQueries({
+            await queryClient.invalidateQueries({
                queryKey: trpc.competitor.get.queryKey({ id }),
             });
             onOpenChange(false);
             setSelectedFile(null);
-            setPreviewUrl(null);
+            setFilePreview(undefined);
          },
          onError: (error) => {
-            toast.error("Failed to upload logo: " + error.message);
+            toast.error(`Failed to upload logo: ${error.message}`);
          },
       }),
    );
 
-   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (file) {
-         // Validate file type
-         if (!file.type.startsWith("image/")) {
-            toast.error("Please select an image file");
-            return;
-         }
+   const handleFileSelect = (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+      if (!file) return;
 
-         // Validate file size (5MB limit)
-         if (file.size > 5 * 1024 * 1024) {
-            toast.error("File size must be less than 5MB");
-            return;
-         }
-
-         setSelectedFile(file);
-         
-         // Create preview
-         const reader = new FileReader();
-         reader.onload = (e) => {
-            setPreviewUrl(e.target?.result as string);
-         };
-         reader.readAsDataURL(file);
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+         toast.error("Please select an image file");
+         return;
       }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+         toast.error("File size must be less than 5MB");
+         return;
+      }
+
+      setSelectedFile(file);
+
+      // Create file preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+         if (typeof e.target?.result === "string") {
+            setFilePreview(e.target.result);
+         }
+      };
+      reader.readAsDataURL(file);
    };
 
    const handleUpload = async () => {
       if (!selectedFile) return;
 
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-         const base64 = e.target?.result as string;
-         const base64Data = base64.split(",")[1]; // Remove data URL prefix
+      try {
+         // Use FileReader for efficient base64 conversion
+         const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+               const result = reader.result as string;
+               // Remove the data URL prefix to get just the base64
+               const base64Data = result.split(",")[1];
+               if (!base64Data) {
+                  reject(new Error("Failed to extract base64 data"));
+                  return;
+               }
+               resolve(base64Data);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(selectedFile);
+         });
 
          await uploadLogoMutation.mutateAsync({
             competitorId: id,
             fileName: selectedFile.name,
-            fileBuffer: base64Data,
+            fileBuffer: base64,
             contentType: selectedFile.type,
          });
-      };
-      reader.readAsDataURL(selectedFile);
-   };
-
-   const handleRemoveFile = () => {
-      setSelectedFile(null);
-      setPreviewUrl(null);
-      if (fileInputRef.current) {
-         fileInputRef.current.value = "";
+      } catch (error) {
+         console.error("Upload failed:", error);
+         toast.error("Failed to upload logo");
       }
    };
 
    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-         <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-               <DialogTitle>Upload Competitor Logo</DialogTitle>
-               <DialogDescription>
-                  Upload a logo for this competitor. Supported formats: JPG, PNG, WebP (max 5MB)
-               </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4">
-               {/* Current Logo */}
-               {currentLogo && (
-                  <div className="space-y-2">
-                     <label className="text-sm font-medium">Current Logo</label>
-                     <div className="flex items-center gap-2 p-2 border rounded">
+      <Credenza open={open} onOpenChange={onOpenChange}>
+         <CredenzaContent>
+            <CredenzaHeader>
+               <CredenzaTitle>Upload Competitor Logo</CredenzaTitle>
+               <CredenzaDescription>
+                  Upload a logo for this competitor. Supported formats: JPG,
+                  PNG, WebP (max 5MB)
+               </CredenzaDescription>
+            </CredenzaHeader>
+            <CredenzaBody className="space-y-4">
+               {/* Dropzone */}
+               <Dropzone
+                  accept={{
+                     "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
+                  }}
+                  maxSize={5 * 1024 * 1024} // 5MB
+                  maxFiles={1}
+                  onDrop={handleFileSelect}
+                  disabled={uploadLogoMutation.isPending}
+                  src={selectedFile ? [selectedFile] : undefined}
+               >
+                  <DropzoneEmptyState>
+                     {currentLogo && (
                         <img
-                           src={currentLogo}
                            alt="Current logo"
-                           className="w-12 h-12 object-contain"
+                           className="object-contain"
+                           src={currentLogo}
                         />
-                        <span className="text-sm text-muted-foreground truncate">
-                           {currentLogo.split("/").pop()}
-                        </span>
-                     </div>
-                  </div>
-               )}
-
-               {/* File Upload */}
-               <div className="space-y-2">
-                  <label className="text-sm font-medium">Select New Logo</label>
-                  <input
-                     ref={fileInputRef}
-                     type="file"
-                     accept="image/*"
-                     onChange={handleFileSelect}
-                     className="hidden"
-                  />
-                  <Button
-                     variant="outline"
-                     className="w-full"
-                     onClick={() => fileInputRef.current?.click()}
-                  >
-                     <Upload className="w-4 h-4 mr-2" />
-                     Choose File
-                  </Button>
-               </div>
-
-               {/* Preview */}
-               {previewUrl && (
-                  <div className="space-y-2">
-                     <label className="text-sm font-medium">Preview</label>
-                     <div className="flex items-center gap-2 p-2 border rounded">
+                     )}
+                  </DropzoneEmptyState>
+                  <DropzoneContent>
+                     {displayImage && (
                         <img
-                           src={previewUrl}
                            alt="Preview"
-                           className="w-12 h-12 object-contain"
+                           className="h-full w-full object-contain rounded-md"
+                           src={displayImage}
                         />
-                        <div className="flex-1">
-                           <p className="text-sm font-medium">{selectedFile?.name}</p>
-                           <p className="text-xs text-muted-foreground">
-                              {selectedFile && `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`}
-                           </p>
-                        </div>
-                        <Button
-                           variant="ghost"
-                           size="icon"
-                           onClick={handleRemoveFile}
-                        >
-                           <X className="w-4 h-4" />
-                        </Button>
-                     </div>
-                  </div>
-               )}
-            </div>
-
-            <DialogFooter>
-               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                  Cancel
-               </Button>
+                     )}
+                  </DropzoneContent>
+               </Dropzone>
+            </CredenzaBody>
+            <CredenzaFooter className="grid grid-cols-2 gap-2">
+               <CredenzaClose asChild>
+                  <Button variant="outline">Cancel</Button>
+               </CredenzaClose>
                <Button
                   onClick={handleUpload}
                   disabled={!selectedFile || uploadLogoMutation.isPending}
                >
-                  {uploadLogoMutation.isPending ? "Uploading..." : "Upload Logo"}
+                  {uploadLogoMutation.isPending
+                     ? "Uploading..."
+                     : "Upload Logo"}
                </Button>
-            </DialogFooter>
-         </DialogContent>
-      </Dialog>
+            </CredenzaFooter>
+         </CredenzaContent>
+      </Credenza>
    );
 }

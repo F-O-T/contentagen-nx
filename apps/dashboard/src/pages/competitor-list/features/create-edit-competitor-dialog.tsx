@@ -38,7 +38,6 @@ export function CreateEditCompetitorDialog({
 
    const form = useAppForm({
       defaultValues: {
-         name: competitor?.name || "",
          websiteUrl: competitor?.websiteUrl || "",
       },
       onSubmit: async ({ value, formApi }) => {

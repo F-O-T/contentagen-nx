@@ -35,6 +35,9 @@ export function CompetitorDetailsPage() {
       trpc.competitor.get.queryOptions({ id }),
    );
 
+   const { data: photo } = useSuspenseQuery(
+      trpc.competitorFile.getLogo.queryOptions({ competitorId: id }),
+   );
    // Calculate subscription enabled state using useMemo
    const isAnalyzingFeatures = useMemo(
       () =>
@@ -150,7 +153,7 @@ export function CompetitorDetailsPage() {
          <CompetitorLogoUploadDialog
             open={showLogoUploadDialog}
             onOpenChange={setShowLogoUploadDialog}
-            currentLogo={competitor.logoPhoto ?? ""}
+            currentLogo={photo?.data ?? ""}
          />
          <fileViewer.Modal />
       </>
