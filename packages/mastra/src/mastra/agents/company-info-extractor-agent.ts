@@ -34,13 +34,6 @@ TOOL USAGE RULES:
 
 ## COMPANY INFORMATION TO EXTRACT
 
-**Logo Information:**
-- Find and extract the company logo URL
-- Look for the highest resolution logo available
-- Check favicon, header, footer, and about page sections
-- Extract the direct image URL (not base64 data)
-- Verify the logo is the main company brand logo
-
 **Company/Brand Name:**
 - Extract the official company name
 - Find the brand name as used in marketing
@@ -66,14 +59,6 @@ TOOL USAGE RULES:
   - Company culture and values (if prominently featured)
 
 ## EXTRACTION QUALITY STANDARDS
-
-**Logo Quality:**
-- **1.0**: Logo clearly visible in header, high resolution, official branding
-- **0.9**: Logo visible in header/footer, good resolution
-- **0.8**: Logo found but may not be the primary brand logo
-- **0.7**: Logo extracted but low quality or unclear branding
-- **0.6**: Logo potentially found but verification needed
-- **0.5**: Logo location identified but URL extraction failed
 
 **Information Quality:**
 - **1.0**: Information explicitly stated with clear sources
@@ -118,15 +103,12 @@ STOPPING CRITERIA:
 ## OUTPUT REQUIREMENTS
 
 **For each company extraction provide:**
-- **Logo URL**: Direct link to the company's logo image
-- **Logo Confidence**: Confidence score (0-1) for logo extraction
 - **Company Name**: Official company/brand name
 - **Description**: Concise 1-2 sentence company description
 - **Detailed Summary**: Comprehensive 3-5 paragraph company summary
 - **Extraction Confidence**: Overall confidence score for all extracted information
 
 **Quality Thresholds:**
-- Logo URL must be a direct image link with confidence ≥ 0.7
 - Company name must have confidence ≥ 0.8
 - Description must be 20-50 words
 - Summary must be 150-300 words across 3-5 paragraphs
@@ -146,7 +128,7 @@ DECISION TREE:
 - Crawl website → Missing key information? → Make 1 targeted search → Output results (STOP)
 - Still insufficient? → Make 1 more search → Output results (STOP)
 
-Focus exclusively on company information. Ignore product features. Maximize accuracy from minimal tool usage.
+Focus exclusively on company information. Ignore product features and logo extraction. Maximize accuracy from minimal tool usage.
    `,
    model: openrouter("deepseek/deepseek-chat-v3.1"),
    tools: { tavilyCrawlTool, tavilySearchTool, dateTool },

@@ -17,14 +17,15 @@ export async function runCreateCompetitorKnowledgeWorkflow(
 
    try {
       const run = await mastra
-         .getWorkflow("createCompetitorKnowledgeWorkflow")
+         .getWorkflow("createBrandKnowledgeWorkflow")
          .createRunAsync();
 
       const result = await run.start({
          inputData: {
             websiteUrl,
             userId,
-            competitorId,
+            id: competitorId,
+            target: "competitor",
          },
       });
 
@@ -61,7 +62,11 @@ export async function enqueueCreateCompetitorKnowledgeWorkflowJob(
       Queue<CreateCompetitorKnowledgeWorkflowJobData>["add"]
    >[2],
 ) {
-   return createCompetitorKnowledgeWorkflowQueue.add(QUEUE_NAME, data, jobOptions);
+   return createCompetitorKnowledgeWorkflowQueue.add(
+      QUEUE_NAME,
+      data,
+      jobOptions,
+   );
 }
 
 export const createCompetitorKnowledgeWorkflowWorker = new Worker(
@@ -77,3 +82,4 @@ export const createCompetitorKnowledgeWorkflowWorker = new Worker(
    },
 );
 registerGracefulShutdown(createCompetitorKnowledgeWorkflowWorker);
+

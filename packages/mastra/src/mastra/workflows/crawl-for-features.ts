@@ -237,7 +237,7 @@ const saveCompetitorFeatures = createStep({
 });
 
 export const crawlCompetitorForFeatures = createWorkflow({
-   id: "create-competitor-knowledge-and-index-documents",
+   id: "crawl-for-competitor-features",
    description: "Extract competitor features and index them",
    inputSchema: CreateCompetitorKnowledgeInput,
    outputSchema: CreateCompetitorKnowledgeOutput,
