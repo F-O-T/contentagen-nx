@@ -16,6 +16,10 @@ import {
    searchCompetitors,
    getTotalCompetitors,
 } from "@packages/database/repositories/competitor-repository";
+import {
+   getFeaturesByCompetitorId,
+   getTotalFeaturesByCompetitorId,
+} from "@packages/database/repositories/competitor-feature-repository";
 import { NotFoundError, DatabaseError } from "@packages/errors";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -339,6 +343,75 @@ export const competitorRouter = router({
             }
 
             return competitor;
+         } catch (err) {
+            if (err instanceof NotFoundError) {
+               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+            }
+            if (err instanceof DatabaseError) {
+               throw new TRPCError({
+                  code: "INTERNAL_SERVER_ERROR",
+                  message: err.message,
+               });
+            }
+            throw err;
+         }
+      }),
+
+   getFeatures: protectedProcedure
+      .input(
+         z.object({
+            competitorId: z.uuid(),
+            page: z.number().min(1).optional().default(1),
+            limit: z.number().min(1).max(100).optional().default(12),
+            sortBy: z.enum(["extractedAt", "featureName"]).optional().default("extractedAt"),
+            sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
+         }),
+      )
+      .query(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const userId = resolvedCtx.session?.user.id;
+            const organizationId =
+               resolvedCtx.session?.session?.activeOrganizationId;
+
+            if (!userId || !organizationId) {
+               throw new TRPCError({
+                  code: "UNAUTHORIZED",
+                  message: "User must be authenticated to view competitor features.",
+               });
+            }
+
+            // Verify the competitor exists and belongs to the user/organization
+            const competitor = await getCompetitorById(resolvedCtx.db, input.competitorId);
+            if (
+               competitor.userId !== userId &&
+               competitor.organizationId !== organizationId
+            ) {
+               throw new TRPCError({
+                  code: "FORBIDDEN",
+                  message: "You don't have permission to view this competitor's features.",
+               });
+            }
+
+            const [features, total] = await Promise.all([
+               getFeaturesByCompetitorId(resolvedCtx.db, input.competitorId, {
+                  page: input.page,
+                  limit: input.limit,
+                  sortBy: input.sortBy,
+                  sortOrder: input.sortOrder,
+               }),
+               getTotalFeaturesByCompetitorId(resolvedCtx.db, input.competitorId),
+            ]);
+
+            const totalPages = Math.ceil(total / input.limit);
+
+            return {
+               features,
+               total,
+               page: input.page,
+               limit: input.limit,
+               totalPages,
+            };
          } catch (err) {
             if (err instanceof NotFoundError) {
                throw new TRPCError({ code: "NOT_FOUND", message: err.message });
