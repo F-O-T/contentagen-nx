@@ -25,6 +25,9 @@ import { useCompetitorList } from "../lib/competitor-list-context";
 import { useCallback, useState } from "react";
 import { Checkbox } from "@packages/ui/components/checkbox";
 import type { RouterOutput } from "@packages/api/client";
+import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/integrations/clients";
 
 interface CompetitorCardProps {
    competitor: RouterOutput["competitor"]["list"]["items"][number];
@@ -52,19 +55,22 @@ export function CompetitorCard({ competitor }: CompetitorCardProps) {
          day: "numeric",
       }).format(date);
    };
-
+   const trpc = useTRPC();
+   const { data } = useSuspenseQuery(
+      trpc.competitorFile.getLogo.queryOptions({ competitorId: competitor.id }),
+   );
    return (
       <>
          <Credenza open={isCredenzaOpen} onOpenChange={setIsCredenzaOpen}>
             <CredenzaTrigger asChild>
                <Card className="cursor-pointer">
                   <CardHeader>
-                     <CardTitle className="line-clamp-1">
-                        {competitor.name}
-                     </CardTitle>
-                     <CardDescription className="line-clamp-2">
-                        {competitor.websiteUrl}
-                     </CardDescription>
+                     <AgentWriterCard
+                        isHeader
+                        name={competitor.name ?? ""}
+                        description={competitor.description ?? ""}
+                        photo={data?.data ?? ""}
+                     />
                      <CardAction>
                         <Checkbox
                            checked={selectedItems.has(competitor.id)}
