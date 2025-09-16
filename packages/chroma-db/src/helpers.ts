@@ -9,6 +9,8 @@ export const embedder = new OpenAIEmbeddingFunction({
 export const CollectionName = {
    AgentKnowledge: "agent_knowledge",
    RelatedSlugs: "related_slugs",
+   BrandKnowledge: "brand_knowledge",
+   CompetitorKnowledge: "competitor_knowledge",
 } as const;
 
 export type CollectionName =
