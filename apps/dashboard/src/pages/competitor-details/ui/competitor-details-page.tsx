@@ -8,6 +8,7 @@ import { CompetitorInfoCard } from "./competitor-info-card";
 import { CreateEditCompetitorDialog } from "../../competitor-list/features/create-edit-competitor-dialog";
 import { CompetitorFileViewerModal } from "../features/competitor-file-viewer-modal";
 import { CompetitorFeaturesGrid } from "./competitor-features-grid";
+import { CompetitorFeaturesPage } from "./competitor-features-grid";
 import { CompetitorLogoUploadDialog } from "../features/competitor-logo-upload-dialog";
 import { useState, useMemo } from "react";
 import { CompetitorLoadingDisplay } from "./competitor-loading-display";
@@ -244,13 +245,16 @@ export function CompetitorDetailsPage() {
                      )}
 
                      {/* Features Grid */}
-                     <CompetitorFeaturesGrid features={competitor.features} />
+                     <CompetitorFeaturesPage />
                   </div>
 
                   {/* Sidebar - Right Side (1 column) */}
                   <div className="col-span-1 gap-4 flex flex-col">
                      {/* Quick Actions */}
-                     <CompetitorDetailsActions competitor={competitor} />
+                     <CompetitorDetailsActions 
+                        competitor={competitor} 
+                        onLogoUpload={() => setShowLogoUploadDialog(true)} 
+                     />
 
                      {/* Basic Info */}
                      <CompetitorInfoCard

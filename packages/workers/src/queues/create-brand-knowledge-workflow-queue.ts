@@ -24,7 +24,8 @@ export async function runCreateBrandKnowledgeWorkflow(
          inputData: {
             websiteUrl,
             userId,
-            agentId,
+            id: agentId,
+            target: "brand",
          },
       });
 

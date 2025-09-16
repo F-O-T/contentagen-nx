@@ -6,7 +6,7 @@ import {
    CardDescription,
 } from "@packages/ui/components/card";
 import { Button } from "@packages/ui/components/button";
-import { ExternalLink, RefreshCw, Edit, Trash } from "lucide-react";
+import { ExternalLink, RefreshCw, Edit, Trash, Upload } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
@@ -22,10 +22,12 @@ import type { RouterOutput } from "@packages/api/client";
 
 interface CompetitorDetailsActionsProps {
    competitor: RouterOutput["competitor"]["list"]["items"][number];
+   onLogoUpload?: () => void;
 }
 
 export function CompetitorDetailsActions({
    competitor,
+   onLogoUpload,
 }: CompetitorDetailsActionsProps) {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
@@ -68,6 +70,12 @@ export function CompetitorDetailsActions({
          label: analyzeMutation.isPending ? "Analyzing..." : "Refresh Analysis",
          onClick: handleAnalyze,
          disabled: analyzeMutation.isPending,
+      },
+      {
+         icon: Upload,
+         label: "Upload Logo",
+         onClick: onLogoUpload,
+         disabled: !onLogoUpload,
       },
       {
          icon: Edit,

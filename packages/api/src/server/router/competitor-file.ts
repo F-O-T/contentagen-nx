@@ -35,13 +35,13 @@ export const competitorFileRouter = router({
          const currentCompetitor = await getCompetitorById(db, competitorId);
 
          // Delete old logo if it exists
-         if (currentCompetitor?.logoPath) {
+         if (currentCompetitor?.logoPhoto) {
             try {
                const bucketName = (await ctx).minioBucket;
                const minioClient = (await ctx).minioClient;
                await minioClient.removeObject(
                   bucketName,
-                  currentCompetitor.logoPath,
+                  currentCompetitor.logoPhoto,
                );
             } catch (error) {
                console.error("Error deleting old logo:", error);
@@ -69,10 +69,10 @@ export const competitorFileRouter = router({
             minioClient,
          );
          // Update competitor logoPath
-         await updateCompetitor(db, competitorId, { logoPath: key });
+         await updateCompetitor(db, competitorId, { logoPhoto: key });
          return { url };
       }),
-   
+
    getFileContent: protectedProcedure
       .input(z.object({ competitorId: z.uuid(), fileName: z.string() }))
       .query(async ({ ctx, input }) => {
@@ -87,7 +87,7 @@ export const competitorFileRouter = router({
          const content = Buffer.concat(chunks).toString("utf-8");
          return { content };
       }),
-   
+
    listCompetitorFiles: protectedProcedure
       .input(z.object({ competitorId: z.uuid() }))
       .query(async ({ ctx, input }) => {
@@ -99,7 +99,9 @@ export const competitorFileRouter = router({
       }),
 
    delete: protectedProcedure
-      .input(z.object({ competitorId: z.uuid() }).and(CompetitorFileDeleteInput))
+      .input(
+         z.object({ competitorId: z.uuid() }).and(CompetitorFileDeleteInput),
+      )
       .mutation(async ({ ctx, input }) => {
          const { competitorId, fileName } = input;
          const key = `${competitorId}/${fileName}`;
@@ -115,14 +117,21 @@ export const competitorFileRouter = router({
             },
          });
          await resolvedCtx.minioClient.removeObject(bucketName, key);
-         const competitor = await getCompetitorById(resolvedCtx.db, competitorId);
+         const competitor = await getCompetitorById(
+            resolvedCtx.db,
+            competitorId,
+         );
          const uploadedFiles = (
-            Array.isArray(competitor.uploadedFiles) ? competitor.uploadedFiles : []
+            Array.isArray(competitor.uploadedFiles)
+               ? competitor.uploadedFiles
+               : []
          ).filter((f) => f.fileName !== fileName);
-         await updateCompetitor(resolvedCtx.db, competitorId, { uploadedFiles });
+         await updateCompetitor(resolvedCtx.db, competitorId, {
+            uploadedFiles,
+         });
          return { success: true };
       }),
-   
+
    deleteAllFiles: protectedProcedure
       .input(z.object({ competitorId: z.uuid() }))
       .mutation(async ({ ctx, input }) => {
@@ -130,7 +139,10 @@ export const competitorFileRouter = router({
          const resolvedCtx = await ctx;
 
          // Get the competitor to check current uploaded files
-         const competitor = await getCompetitorById(resolvedCtx.db, competitorId);
+         const competitor = await getCompetitorById(
+            resolvedCtx.db,
+            competitorId,
+         );
          const uploadedFiles = Array.isArray(competitor.uploadedFiles)
             ? competitor.uploadedFiles
             : [];
@@ -182,18 +194,21 @@ export const competitorFileRouter = router({
             message: `Successfully deleted ${uploadedFiles.length} files`,
          };
       }),
-   
+
    getLogo: protectedProcedure
       .input(z.object({ competitorId: z.uuid() }))
       .query(async ({ ctx, input }) => {
          const resolvedCtx = await ctx;
-         const competitor = await getCompetitorById(resolvedCtx.db, input.competitorId);
-         if (!competitor?.logoPath) {
+         const competitor = await getCompetitorById(
+            resolvedCtx.db,
+            input.competitorId,
+         );
+         if (!competitor?.logoPhoto) {
             return null;
          }
 
          const bucketName = resolvedCtx.minioBucket;
-         const key = competitor.logoPath;
+         const key = competitor.logoPhoto;
 
          try {
             const { buffer, contentType } = await streamFileForProxy(
@@ -212,3 +227,4 @@ export const competitorFileRouter = router({
          }
       }),
 });
+
