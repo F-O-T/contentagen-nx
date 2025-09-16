@@ -1,8 +1,6 @@
 import {
    Card,
    CardHeader,
-   CardTitle,
-   CardDescription,
    CardAction,
    CardFooter,
 } from "@packages/ui/components/card";
