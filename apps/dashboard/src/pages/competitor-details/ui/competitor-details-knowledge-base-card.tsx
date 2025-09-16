@@ -107,9 +107,9 @@ export function CompetitorDetailsKnowledgeBaseCard({
       <>
          <Card className="h-full">
             <CardHeader>
-               <CardTitle>Brand Knowledge</CardTitle>
+               <CardTitle>Competitor brand Knowledge</CardTitle>
                <CardDescription>
-                  Files generated using your website url
+                  Files generated using the competitor's website url
                </CardDescription>
                <CardAction>
                   {competitor.analysisStatus === "completed" && (
