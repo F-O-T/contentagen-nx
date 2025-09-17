@@ -6,117 +6,51 @@ import {
    Sparkles,
    Play,
    TrendingUp,
+   Layout,
+   Target,
+   CalendarCheck,
 } from "@lucide/astro";
+import { Image } from "astro:assets";
+import cardImage from "../assets/dark/dark-hero.webp";
 ---
 
-<section class="bg-zinc-50 py-16 md:py-24 dark:bg-transparent">
-  <div class="mx-auto max-w-5xl px-6">
-    <div class="mx-auto grid gap-4 lg:grid-cols-2">
-      <!-- Competitor Analysis Feature Card -->
-      <div class="group relative rounded-none shadow-zinc-950/5 bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
-        <!-- Card Decorators -->
-        <span class="border-primary absolute -left-px -top-px block size-2 border-l-2 border-t-2"></span>
-        <span class="border-primary absolute -right-px -top-px block size-2 border-r-2 border-t-2"></span>
-        <span class="border-primary absolute -bottom-px -left-px block size-2 border-b-2 border-l-2"></span>
-        <span class="border-primary absolute -bottom-px -right-px block size-2 border-b-2 border-r-2"></span>
-        
-        <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3" data-slot="card-header">
-          <div class="p-6">
-            <span class="text-muted-foreground flex items-center gap-2">
-              <Brain class="size-4" />
-              Competitor Intelligence
-            </span>
-            <p class="mt-6 text-xl font-semibold md:text-2xl">Turn competitor strategies into your content advantage.</p>
-          </div>
-        </div>
+<section class="py-24">
+  <div class="mx-auto w-full max-w-5xl px-6">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div class="bg-card text-card-foreground col-span-full overflow-hidden border shadow-sm pl-6 pt-6">
+        <Layout class="text-primary size-5" />
+        <h3 class="text-foreground mt-5 text-lg font-semibold">Competitor Intelligence</h3>
+        <p class="text-muted-foreground mt-3 max-w-xl text-balance">Turn competitor strategies into your content advantage with AI-powered competitive analysis.</p>
+        <div class="mask-b-from-95% -ml-2 -mt-2 mr-0.5 pl-2 pt-2">
+          <div class="bg-background rounded-tl-(--radius) ring-foreground/5 relative mx-auto mt-8 h-96 overflow-hidden border border-transparent shadow ring-1">
+            <Image
+              src={cardImage}
+              alt="Competitor intelligence dashboard"
+              class="object-top-left h-full w-full object-cover"
+            width={1207}
+            height={929}
 
-        <div class="relative border-t border-dashed max-sm:mb-6">
-          <div
-            aria-hidden
-            class="absolute inset-0"
-            style="background: radial-gradient(125% 125% at 50% 0%, transparent 40%, var(--color-blue-600), var(--color-white) 100%)"
-          ></div>
-          <div class="aspect-[76/59] p-1 px-6">
-            <div class="w-full h-full bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg flex items-center justify-center">
-              <Brain class="w-16 h-16 text-blue-600" />
-            </div>
+            />
           </div>
         </div>
       </div>
-
-      <!-- Multi-Agent System Feature Card -->
-      <div class="group relative rounded-none shadow-zinc-950/5 bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
-        <span class="border-primary absolute -left-px -top-px block size-2 border-l-2 border-t-2"></span>
-        <span class="border-primary absolute -right-px -top-px block size-2 border-r-2 border-t-2"></span>
-        <span class="border-primary absolute -bottom-px -left-px block size-2 border-b-2 border-l-2"></span>
-        <span class="border-primary absolute -bottom-px -right-px block size-2 border-b-2 border-r-2"></span>
-        
-        <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3" data-slot="card-header">
-          <div class="p-6">
-            <span class="text-muted-foreground flex items-center gap-2">
-              <Users class="size-4" />
-              Strategic Content Ideas
-            </span>
-            <p class="mt-6 text-xl font-semibold md:text-2xl">Generate content ideas that fill market gaps and outperform rivals.</p>
-          </div>
-        </div>
-
-        <div class="px-6" data-slot="card-content">
-          <div class="relative max-sm:mb-6" style="mask: radial-gradient(75% 75% at 100% 50%, transparent, transparent 75%, black);">
-            <div class="aspect-[76/59] overflow-hidden rounded-lg border">
-              <div class="w-full h-full bg-gradient-to-br from-green-100 to-blue-100 rounded-lg flex items-center justify-center">
-                <Users class="w-16 h-16 text-blue-600" />
-              </div>
-            </div>
-          </div>
-        </div>
+      
+      <div class="bg-card text-card-foreground rounded-xl border py-6 shadow-sm p-6">
+        <Target class="text-primary size-5" />
+        <h3 class="text-foreground mt-5 text-lg font-semibold">Strategic Analysis</h3>
+        <p class="text-muted-foreground mt-3 text-balance">Analyze competitor content strategies to identify market gaps and opportunities.</p>
       </div>
 
-      <!-- Automated Ideas Generation Feature Card - Full Width -->
-      <div class="group relative rounded-none shadow-zinc-950/5 bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm p-6 lg:col-span-2">
-        <span class="border-primary absolute -left-px -top-px block size-2 border-l-2 border-t-2"></span>
-        <span class="border-primary absolute -right-px -top-px block size-2 border-r-2 border-t-2"></span>
-        <span class="border-primary absolute -bottom-px -left-px block size-2 border-b-2 border-l-2"></span>
-        <span class="border-primary absolute -bottom-px -right-px block size-2 border-b-2 border-r-2"></span>
-        
-        <p class="mx-auto my-6 max-w-md text-balance text-center text-xl font-semibold md:text-2xl">
-          Automate your content strategy with AI-powered competitive intelligence.
-        </p>
-
-        <div class="flex justify-center gap-8 overflow-hidden">
-          <div class="flex flex-col items-center">
-            <div class="bg-gradient-to-b from-border to-transparent size-fit rounded-2xl p-px">
-              <div class="bg-gradient-to-b from-background to-muted/25 relative flex aspect-square w-fit items-center justify-center rounded-[15px] p-4">
-                <Search class="size-6 text-primary" />
-              </div>
-            </div>
-            <span class="text-muted-foreground mt-2 block text-center text-sm">Track & Analyze</span>
-          </div>
-          <div class="flex flex-col items-center">
-            <div class="bg-gradient-to-b from-border to-transparent size-fit rounded-2xl p-px">
-              <div class="bg-gradient-to-b from-background to-muted/25 relative flex aspect-square w-fit items-center justify-center rounded-[15px] p-4">
-                <Sparkles class="size-6 text-primary" />
-              </div>
-            </div>
-            <span class="text-muted-foreground mt-2 block text-center text-sm">Generate Ideas</span>
-          </div>
-          <div class="flex flex-col items-center">
-            <div class="bg-gradient-to-b from-border to-transparent size-fit rounded-2xl p-px">
-              <div class="bg-gradient-to-b from-background to-muted/25 relative flex aspect-square w-fit items-center justify-center rounded-[15px] p-4">
-                <Play class="size-6 text-primary" />
-              </div>
-            </div>
-            <span class="text-muted-foreground mt-2 block text-center text-sm">Create Content</span>
-          </div>
-          <div class="flex flex-col items-center hidden sm:flex">
-            <div class="bg-gradient-to-b from-border to-transparent size-fit rounded-2xl p-px">
-              <div class="bg-gradient-to-b from-background to-muted/25 relative flex aspect-square w-fit items-center justify-center rounded-[15px] p-4">
-                <TrendingUp class="size-6 text-primary" />
-              </div>
-            </div>
-            <span class="text-muted-foreground mt-2 block text-center text-sm">Dominate SERPs</span>
-          </div>
-        </div>
+      <div class="bg-card text-card-foreground rounded-xl border py-6 shadow-sm p-6">
+        <CalendarCheck class="text-primary size-5" />
+        <h3 class="text-foreground mt-5 text-lg font-semibold">Content Planning</h3>
+        <p class="text-muted-foreground mt-3 text-balance">Generate data-driven content ideas that outperform competitors in search rankings.</p>
+      </div>
+      
+      <div class="bg-card text-card-foreground rounded-xl border py-6 shadow-sm p-6">
+        <Sparkles class="text-primary size-5" />
+        <h3 class="text-foreground mt-5 text-lg font-semibold">AI-Powered Insights</h3>
+        <p class="text-muted-foreground mt-3 text-balance">Get actionable recommendations to improve your content strategy and dominate SERPs.</p>
       </div>
     </div>
   </div>

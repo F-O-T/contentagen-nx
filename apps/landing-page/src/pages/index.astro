@@ -2,7 +2,6 @@
 export const prerender = true;
 import Layout from "../layouts/Landing.astro";
 import Footer from "../sections/Footer.astro";
-import Navbar from "../sections/Navbar.astro";
 import Hero from "../sections/Hero.astro";
 import Pricing from "@/sections/Pricing.astro";
 import SDK from "../sections/SDK.astro";
@@ -11,20 +10,25 @@ import BrandLearning from "../sections/BrandLearning.astro";
 import CompetitorIntelligence from "../sections/CompetitorIntelligence.astro";
 import ContentWorkflow from "../sections/ContentWorkflow.astro";
 import SocialProof from "../sections/SocialProof.astro";
+import FAQ from "../sections/FAQ.astro";
 import CTA from "../sections/CTA.astro";
+import StickyNavbar from "../components/StickyNavbar.astro";
 ---
 <Layout>
-  <div class="flex flex-col space-y-8">
-    <Navbar />
+  <div class="flex flex-col">
+    <StickyNavbar client:load />
     <Hero />
-    <BrandLearning />
-    <CompetitorIntelligence />
-    <ContentWorkflow />
-    <SDK />
-    <SocialProof />
-    <OpenSource />
-    <Pricing />
-    <CTA />
-    <Footer />
+    <div class="flex flex-col space-y-8">
+      <BrandLearning />
+      <CompetitorIntelligence />
+      <ContentWorkflow />
+      <SDK />
+      <SocialProof />
+      <OpenSource />
+      <Pricing />
+      <FAQ />
+      <CTA />
+      <Footer />
+    </div>
   </div>
   </Layout>

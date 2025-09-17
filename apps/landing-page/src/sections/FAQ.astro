@@ -1,0 +1,81 @@
+---
+import { AstroAccordion } from "../components/astro-accordion";
+interface FAQItem {
+   id: string;
+   question: string;
+   answer: string;
+}
+
+const faqItems: FAQItem[] = [
+   {
+      id: "item-1",
+      question: "How does ContentAgen learn about my brand?",
+      answer:
+         "ContentAgen analyzes your website, existing content, and brand guidelines to understand your voice, tone, and messaging. Our AI adapts to your unique style and creates content that sounds authentically like your brand.",
+   },
+   {
+      id: "item-2",
+      question: "What types of content can ContentAgen create?",
+      answer:
+         "We can generate blog posts, social media content, product descriptions, email campaigns, ad copy, and more. Our AI agents are trained on various content formats and can adapt to your specific content needs.",
+   },
+   {
+      id: "item-3",
+      question: "How accurate is the competitor intelligence feature?",
+      answer:
+         "Our competitor analysis uses real-time web scraping and AI analysis to track competitor content, strategies, and trends. We provide insights on content gaps, trending topics, and competitive positioning with high accuracy.",
+   },
+   {
+      id: "item-4",
+      question: "Can I customize the AI agents for my industry?",
+      answer:
+         "Yes! Our AI agents can be trained on industry-specific knowledge, terminology, and best practices. Whether you're in SaaS, e-commerce, healthcare, or any other industry, we can tailor the content generation to your sector.",
+   },
+   {
+      id: "item-5",
+      question: "What happens if I exceed my word limit?",
+      answer:
+         "If you reach your monthly word limit, you can upgrade your plan or purchase additional word credits. We'll notify you when you're approaching your limit so you can plan accordingly.",
+   },
+   {
+      id: "item-6",
+      question: "Do you offer API access?",
+      answer:
+         "Yes, our Team plan includes API access so you can integrate ContentAgen directly into your existing workflows, CMS, or applications. Full API documentation and support are provided.",
+   },
+];
+---
+
+<section id="faq" class="py-16 md:py-24 bg-muted h-screen grid grid-cols-1">
+  <div class="mx-auto max-w-6xl px-6 my-auto">
+    <div class="grid gap-8 md:grid-cols-5 md:gap-12">
+      <div class="md:col-span-2">
+        <h2 class="text-foreground text-4xl font-semibold">FAQs</h2>
+        <p class="text-muted-foreground mt-4 text-balance text-lg">Your questions answered</p>
+        <p class="text-muted-foreground mt-6 hidden md:block">
+          Can't find what you're looking for? Contact our{' '}
+          <a
+            href="mailto:support@contentagen.com"
+            class="text-primary font-medium hover:underline"
+          >
+            customer support team
+          </a>
+        </p>
+      </div>
+
+      <div class="md:col-span-3">
+        <AstroAccordion data={faqItems} client:load/>
+      </div>
+
+      <p class="text-muted-foreground mt-6 md:hidden">
+        Can't find what you're looking for? Contact our{' '}
+        <a
+          href="mailto:support@contentagen.com"
+          class="text-primary font-medium hover:underline"
+        >
+          customer support team
+        </a>
+      </p>
+    </div>
+  </div>
+</section>

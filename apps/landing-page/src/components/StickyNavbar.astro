@@ -1,0 +1,193 @@
+---
+import { Button } from "@packages/ui/components/button";
+import Logo from "./Logo.astro";
+import { NavMenu } from "./nav-menu";
+import { NavigationSheet } from "./navigation-sheet";
+import ThemeToggler from "./ThemeToggler.astro";
+---
+
+<nav 
+  id="sticky-navbar" 
+  class="fixed top-6 inset-x-4 h-16 bg-background/80 backdrop-blur-md border dark:border-slate-700/70 max-w-7xl mx-auto rounded-full z-50 opacity-0 translate-y-[-20px] pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-lg shadow-black/5 dark:shadow-black/20"
+>
+  <div class="h-full flex items-center justify-between mx-auto px-6 relative">
+    <!-- Logo with app name and subtle hover animation -->
+    <div class="flex items-center gap-3 transition-transform duration-300 hover:scale-105">
+      <Logo size={32} class="text-primary" />
+      <span class="text-xl font-bold text-foreground hidden sm:block">
+        ContentaGen
+      </span>
+    </div>
+
+    <!-- Desktop Menu with stagger animation -->
+    <div class="hidden md:block navbar-menu">
+      <NavMenu client:load />
+    </div>
+
+    <!-- Action buttons with hover animations -->
+    <div class="flex items-center gap-3 navbar-actions">
+      <div class="transition-transform duration-300 hover:scale-110">
+        <ThemeToggler />
+      </div>
+      
+      <Button
+        variant="outline"
+        className="hidden sm:inline-flex rounded-full transition-all duration-300 hover:bg-primary/5 hover:border-primary/20 hover:scale-105"
+      >
+        <a href="https://app.contentagen.com/auth/sign-in" target="_blank" rel="noopener noreferrer" class="no-underline">
+          Sign In
+        </a>
+      </Button>
+      
+      <Button className="rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
+        <a href="https://app.contentagen.com/auth/sign-up" target="_blank" rel="noopener noreferrer" class="no-underline text-white">
+          Get Started
+        </a>
+      </Button>
+
+      <!-- Mobile Menu with bounce animation -->
+      <div class="md:hidden transition-transform duration-300 hover:scale-110">
+        <NavigationSheet client:load />
+      </div>
+    </div>
+  </div>
+
+  <!-- Animated border gradient -->
+  <div class="absolute inset-0 rounded-full bg-gradient-to-r from-primary/20 via-transparent to-primary/20 opacity-0 transition-opacity duration-500 navbar-glow"></div>
+</nav>
+
+<style>
+
+  #sticky-navbar.visible {
+    animation: slideInDown 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes slideInDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    50% {
+      opacity: 1;
+      transform: translateY(-2px) scale(1.02);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .navbar-menu {
+    animation-delay: 0.1s;
+  }
+
+  .navbar-actions {
+    animation-delay: 0.2s;
+  }
+
+  .navbar-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.1;
+    }
+  }
+
+  /* Hover effect for the entire navbar */
+  #sticky-navbar:hover .navbar-glow {
+    opacity: 0.2;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Backdrop blur enhancement */
+  @supports (backdrop-filter: blur(12px)) {
+    #sticky-navbar {
+      backdrop-filter: blur(12px) saturate(150%);
+    }
+    
+    :global(.dark) #sticky-navbar {
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+</style>
+
+<script>
+  function initStickyNavbar() {
+    const stickyNavbar = document.getElementById('sticky-navbar');
+    const heroSection = document.getElementById('hero');
+    
+    if (!stickyNavbar || !heroSection) return;
+
+    let isVisible = false;
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const heroHeight = heroSection.offsetHeight;
+      const shouldShow = scrollPosition > heroHeight * 0.8;
+
+      if (shouldShow && !isVisible) {
+        isVisible = true;
+        stickyNavbar.classList.add('visible');
+        stickyNavbar.style.opacity = '1';
+        stickyNavbar.style.transform = 'translateY(0) scale(1)';
+        stickyNavbar.style.pointerEvents = 'auto';
+      } else if (!shouldShow && isVisible) {
+        isVisible = false;
+        stickyNavbar.classList.remove('visible');
+        stickyNavbar.style.opacity = '0';
+        stickyNavbar.style.transform = 'translateY(-20px) scale(0.95)';
+        stickyNavbar.style.pointerEvents = 'none';
+      }
+    };
+
+    // Add scroll event listener with throttling for better performance
+    let ticking = false;
+    const scrollHandler = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    // Smooth scroll behavior for navigation links
+    const addSmoothScrolling = () => {
+      const navLinks = stickyNavbar.querySelectorAll('a[href^="#"]');
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          const href = link.getAttribute('href');
+          if (href && href.startsWith('#')) {
+            const target = document.querySelector(href);
+            if (target) {
+              e.preventDefault();
+              target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+              });
+            }
+          }
+        });
+      });
+    };
+
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+    addSmoothScrolling();
+    
+    // Initial check
+    handleScroll();
+  }
+
+  // Initialize when DOM is loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStickyNavbar);
+  } else {
+    initStickyNavbar();
+  }
+</script>

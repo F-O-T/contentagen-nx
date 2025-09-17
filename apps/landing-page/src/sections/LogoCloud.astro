@@ -1,53 +1,30 @@
 ---
 import { Picture } from "astro:assets";
-import duomeLogo from "../assets/teams/duome-logo.webp";
-import enduroLogo from "../assets/teams/enduro-logo.webp";
 import liciteiLogo from "../assets/teams/licitei-logo.svg";
-
-const _partners = [
-   // {
-   //    alt: "Enduro for Tri Logo",
-   //    logo: enduroLogo,
-   //    url: "https://www.endurofortri.com/en",
-   // },
-   // {
-   //    alt: "Duome Logo",
-   //    logo: duomeLogo,
-   //    url: "https://www.duome.app/",
-   // },
-   {
-      alt: "Licitei Logo",
-      logo: liciteiLogo,
-      url: "https://app.licitei.co/", // esse precisa mudar
-   },
-   // Add more partners as needed
-];
 ---
 
-<section class="container mx-auto px-4 py-8 flex justify-start items-center  space-x-4">
-
-
-			<p class="text-muted-foreground text-lg">Trusted by teams at :</p>
-			<div class="flex items-center justify-center gap-4">
-				{_partners.map((partner) => (
-					<div class="flex">
-						<a
-							href={partner.url}
-							target="_blank"
-							rel="noopener noreferrer"
-							aria-label={`Visit ${partner.alt} website (opens in new tab)`}
-						>
-				<Picture
-          formats={['webp']}
-          loading={"lazy"}
-								class="h-10 w-10"
-								src={partner.logo}
-								alt={`${partner.alt} - Partner company logo`}
-							/>
-						</a>
-					</div>
-				))}
-			</div>
-
-
+<section>
+  <div class="mx-auto max-w-5xl px-6 py-8">
+    <div>
+      <p class="text-muted-foreground font-medium">Trusted by teams at :</p>
+      <div class="mt-4 flex items-center gap-12">
+        <div class="flex">
+          <a
+            href="https://app.licitei.co/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Visit Licitei website (opens in new tab)"
+          >
+            <Picture
+              class="mx-auto h-5 w-fit"
+              src={liciteiLogo}
+              alt="Licitei Logo"
+              formats={["webp"]}
+              loading="lazy"
+            />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
