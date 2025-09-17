@@ -89,7 +89,7 @@ function RootComponent() {
                >
                   <Toaster />
                   <Outlet /> {/* Start rendering router matches */}
-                  <TanStackRouterDevtools position="bottom-left" />
+                  {/* <TanStackRouterDevtools position="bottom-left" /> */}
                </ThemeProvider>
             </PostHogWrapper>
             <Scripts />
