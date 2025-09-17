@@ -1,0 +1,51 @@
+---
+import { Calendar, Ellipsis, Bold, Italic, Underline } from "@lucide/astro";
+
+const { class: className = "", variant = "elevated" } = Astro.props as {
+  class?: string;
+  variant?: "elevated" | "outlined" | "mixed";
+};
+
+const variantClasses =
+  variant === "elevated"
+    ? "shadow-black-950/10 shadow-lg"
+    : variant === "outlined"
+    ? "border-foreground/10 border"
+    : "border-foreground/10 border shadow-md shadow-black/5";
+---
+
+<div class={`relative ${className}`}>
+  <div
+    class={`bg-background -translate-x-1/8 absolute flex -translate-y-[110%] items-center gap-2 rounded-lg p-1 ${variantClasses}`}
+  >
+    <button
+      size="sm"
+      class="rounded-sm bg-primary text-primary-foreground px-3 py-1 text-sm font-medium"
+    >
+      <Calendar class="size-3 mr-1" />
+      <span>Brand Voice</span>
+    </button>
+    <span class="bg-border block h-4 w-px"></span>
+    <div class="flex gap-0.5">
+      <button size="sm" class="rounded-md p-1 hover:bg-accent">
+        <Bold class="size-4" />
+      </button>
+      <button size="sm" class="rounded-md p-1 hover:bg-accent">
+        <Italic class="size-4" />
+      </button>
+      <button size="sm" class="rounded-md p-1 hover:bg-accent">
+        <Underline class="size-4" />
+      </button>
+    </div>
+    <span class="bg-border block h-4 w-px"></span>
+    <button size="icon" class="size-8 hover:bg-accent">
+      <Ellipsis class="size-3" />
+    </button>
+  </div>
+  <span>
+    <span class="bg-secondary text-secondary-foreground px-2 py-1 rounded"
+      >Brand Style</span
+    >
+    perfectly captured.
+  </span>
+</div>

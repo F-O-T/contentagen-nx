@@ -10,7 +10,7 @@ import { Menu } from "lucide-react";
 import { useState } from "react";
 import { menuItems } from "../data/menu-items";
 
-export default function MobileMenu() {
+export function MobileMenu() {
    const [open, setOpen] = useState(false);
 
    return (

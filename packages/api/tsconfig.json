@@ -1,20 +1,10 @@
 {
    "extends": "@tooling/typescript/internal-package.json",
-   "include": [
-      "src",
-      "__tests__/*.test.ts"
-   ],
-   "exclude": [
-      "node_modules"
-   ],
+   "include": ["src", "__tests__/*.test.ts"],
+   "exclude": ["node_modules"],
    "compilerOptions": {
-      "types": [
-         "vite/client"
-      ],
-      "lib": [
-         "dom",
-         "ES2022"
-      ],
+      "types": ["vite/client"],
+      "lib": ["dom", "ES2022"],
       "jsx": "react-jsx"
    }
 }

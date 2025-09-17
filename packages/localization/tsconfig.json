@@ -1,16 +1,9 @@
 {
    "extends": "@tooling/typescript/internal-package.json",
-   "include": [
-      "src"
-   ],
-   "exclude": [
-      "node_modules"
-   ],
+   "include": ["src"],
+   "exclude": ["node_modules"],
    "compilerOptions": {
-      "lib": [
-         "dom",
-         "ES2022"
-      ],
+      "lib": ["dom", "ES2022"],
       "composite": false,
       "emitDeclarationOnly": false,
       "declarationMap": false,

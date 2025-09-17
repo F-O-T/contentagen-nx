@@ -1,0 +1,93 @@
+---
+import { Calendar, Ellipsis, Bold, Italic, Underline } from "@lucide/astro";
+---
+
+<section id="brand-learning">
+  <div class=" py-24">
+    <div class="mx-auto w-full max-w-5xl px-6">
+      <div>
+        <span class="text-primary">Brand Intelligence</span>
+        <h2 class="text-foreground mt-4 text-4xl font-semibold">An AI That Truly Understands Your Brand</h2>
+        <p class="text-muted-foreground mb-12 mt-4 text-lg">ContentaGen goes beyond surface-level prompts. Our system performs a deep analysis of your website and brand documents to build a unique "Brand Brain." This ensures every piece of content perfectly captures your voice, style, and business objectives, eliminating endless revisions and edits.</p>
+      </div>
+
+      <div class="border-foreground/5 space-y-6 [--color-border:color-mix(in_oklab,var(--color-foreground)10%,transparent)] sm:space-y-0 sm:divide-y">
+        <!-- Row 1 -->
+        <div class="grid sm:grid-cols-5 sm:divide-x">
+          <div class="[mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_50%,transparent_100%)] sm:col-span-2">
+            <ul class="text-muted-foreground mx-auto w-fit font-mono text-2xl font-medium">
+              {["Brand Voice", "Style Guide", "Products", "Messaging", "Knowledge"].map((item, index) => (
+                <li
+                  class={`${index === 2 ? "text-foreground relative before:absolute before:-translate-x-[110%] before:text-primary before:content-['Brand_Brain']" : ""}`}
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div class="mt-6 sm:col-span-3 sm:mt-0 sm:border-l sm:pl-12">
+            <h3 class="text-foreground text-xl font-semibold">Deep Website Analysis</h3>
+            <p class="text-muted-foreground mt-4 text-lg">Our system crawls your website to understand your business, products, and messaging, forming the foundation of your Brand Brain.</p>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="grid sm:grid-cols-5 sm:divide-x">
+          <div class="pt-12 sm:col-span-3 sm:border-r sm:pr-12">
+            <h3 class="text-foreground text-xl font-semibold">Brand Voice & Style DNA</h3>
+            <p class="text-muted-foreground mt-4 text-lg">AI agents identify your unique tone, terminology, and stylistic patterns to create a brand voice profile that guides all content creation.</p>
+          </div>
+          <div class="row-start-1 flex items-center justify-center pt-12 sm:col-span-2 sm:row-start-auto">
+            <div class="relative pt-8">
+              <div class="bg-background -translate-x-1/8 absolute flex -translate-y-[110%] items-center gap-2 rounded-lg p-1 shadow-black-950/10 shadow-lg">
+                <button size="sm" class="rounded-sm bg-primary text-primary-foreground px-3 py-1 text-sm font-medium">
+                  <Calendar class="size-3 mr-1" />
+                  <span>Brand Voice</span>
+                </button>
+                <span class="bg-border block h-4 w-px"></span>
+                <div class="flex gap-0.5">
+                  <button size="sm" class="rounded-md p-1 hover:bg-accent">
+                    <Bold class="size-4" />
+                  </button>
+                  <button size="sm" class="rounded-md p-1 hover:bg-accent">
+                    <Italic class="size-4" />
+                  </button>
+                  <button size="sm" class="rounded-md p-1 hover:bg-accent">
+                    <Underline class="size-4" />
+                  </button>
+                </div>
+                <span class="bg-border block h-4 w-px"></span>
+                <button size="icon" class="size-8 hover:bg-accent">
+                  <Ellipsis class="size-3" />
+                </button>
+              </div>
+              <span>
+                <span class="bg-secondary text-secondary-foreground px-2 py-1 rounded">Brand Style</span>
+                perfectly captured.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="grid sm:grid-cols-5 sm:divide-x">
+          <div class="[mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_50%,transparent_100%)] sm:col-span-2">
+            <ul class="text-muted-foreground mx-auto w-fit font-mono text-2xl font-medium">
+              {["Brand Voice", "Style Guide", "Products", "Messaging", "Knowledge"].map((item, index) => (
+                <li
+                  class={`${index === 2 ? "text-foreground relative before:absolute before:-translate-x-[110%] before:text-primary before:content-['Brand_Brain']" : ""}`}
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div class="mt-6 sm:col-span-3 sm:mt-0 sm:border-l sm:pl-12">
+            <h3 class="text-foreground text-xl font-semibold">Centralized Brand Brain</h3>
+            <p class="text-muted-foreground mt-4 text-lg">All your brand knowledge is indexed, giving your AI agents instant, accurate recall for perfectly consistent content, every time.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

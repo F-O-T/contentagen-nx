@@ -6,7 +6,7 @@ import ThemeToggler from "../components/ThemeToggler.astro";
 import { menuItems } from "../data/menu-items";
 ---
   <nav id="navbar" class="bg-muted">
-    <div id="navbar-inner" class="container mx-auto  flex  items-center justify-between gap-4 p-4 ">
+    <div id="navbar-inner" class="container mx-auto max-w-6xl flex  items-center justify-between gap-4 p-4 ">
      
         <Logo class="size-12 text-primary" />
       
@@ -30,22 +30,10 @@ import { menuItems } from "../data/menu-items";
       <div class="flex items-center gap-4">
           <ThemeToggler />
           <MobileMenu client:load />
-          <Button id="get-started-btn" className="hidden md:inline">Enter waitlist</Button>
+          <a href="https://app.contentagen.com/auth/sign-up" target="_blank" rel="noopener noreferrer">
+            <Button className="hidden md:inline" aria-label="Get started with Contentagen">Get Started</Button>
+          </a>
         </div>
     </div>
   </nav>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const navbarBtn = document.getElementById('get-started-btn');
-      if (navbarBtn) {
-        navbarBtn.addEventListener('click', function (e) {
-          e.preventDefault();
-          const target = document.getElementById('cta-section');
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-          }
-        });
-      }
-    });
-  </script>
 

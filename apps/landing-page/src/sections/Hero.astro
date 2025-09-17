@@ -1,61 +1,66 @@
 ---
 import lightHero from "../assets/light/light-hero.webp";
 import darkHero from "../assets/dark/dark-hero.webp";
-import { Sparkles } from "@lucide/astro";
-import { Badge } from "@packages/ui/components/badge";
+import { ChevronRight, CirclePlay } from "@lucide/astro";
 import { Button } from "@packages/ui/components/button";
 import LogoCloud from "../sections/LogoCloud.astro";
 import { Image } from "astro:assets";
 ---
 
-  <section id="hero-section" class=" flex flex-col items-center justify-center container mx-auto px-4 py-16 space-y-8">
-        <div class="space-y-4 flex flex-col items-center justify-center text-center  ">
-            <Badge className="flex gap-2 px-4 py-2 items-center font-semibold" >
-              <Sparkles  />
-              Introducing Contenta Agents
-            </Badge>
-    <h1 class="text-4xl font-bold  sm:text-5xl text-foreground">AI Blog Posts, <span class="text-primary">Instantly
+<main class="overflow-hidden min-h-screen bg-gradient-to-b to-muted from-background grid grid-cols-1">
+    <div id="hero" class="relative py-36 ">
+      <div class="relative z-10 mx-auto w-full max-w-6xl px-6">
+        <div class="md:w-1/2">
+          <div>
+            <h1 class="max-w-md text-balance text-5xl font-medium ">
+              AI Content That <span class="text-primary">Actually Sounds Like You</span>
+            </h1>
+            <p class="text-muted-foreground my-8 max-w-2xl text-balance text-base">
+              Stop wasting hours editing generic AI articles. ContentaGen's autonomous agents learn your unique brand voice, analyze market trends, and produce high-quality, SEO-optimized content that drives real results.
+            </p>
 
-    </span></h1>
-          <p class="text-xl text-muted-foreground">Automated, SEO-ready content for creators and agencies.</p>
-          <div class="flex items-center justify-center gap-4">
-      <Button id="cta-btn" size="lg">
-        Enter on the waitlist
-      </Button>
+            <div class="flex items-center gap-3">
+              <a href="https://app.contentagen.com/auth/sign-in" target="_blank" rel="noopener noreferrer">
+                <Button size="lg" className="pr-4.5">
+                  <span class="text-nowrap">Get Started</span>
+                  <ChevronRight className="opacity-50" />
+                </Button>
+              </a>
+              <a href="#pricing">
+                <Button size="lg" variant="outline" className="pl-5">
+                  <span class="text-nowrap">See pricing</span>
+                </Button>
+              </a>
+            </div>
+          </div>
+
+          <LogoCloud />
+        </div>
+      </div>
+
+      <div class="perspective-near mt-24 translate-x-12 md:absolute md:-right-6 md:bottom-16 md:left-1/2 md:top-40 md:mt-0 md:translate-x-0">
+        <div class="before:border-foreground/5 before:bg-foreground/5 relative h-full before:absolute before:-inset-x-4 before:bottom-7 before:top-0 before:skew-x-6 before:rounded-[calc(var(--radius)+1rem)] before:border">
+          <div class="bg-background rounded-[calc(var(--radius)+1rem)] shadow-foreground/10 ring-foreground/5 relative h-full -translate-y-12 skew-x-6 overflow-hidden border border-transparent shadow-md ring-1">
+            <Image
+              src={lightHero}
+              alt="Contentagen dashboard interface showing AI blog post generation in light mode"
+              class="object-top-left size-full object-cover block dark:hidden"
+              width={Number(lightHero.width)}
+              height={Number(lightHero.height)}
+              loading="eager"
+              fetchpriority="high"
+            />
+            <Image
+              src={darkHero}
+              alt="Contentagen dashboard interface showing AI blog post generation in dark mode"
+              class="object-top-left size-full object-cover hidden dark:block"
+              width={Number(darkHero.width)}
+              height={Number(darkHero.height)}
+              loading="eager"
+              fetchpriority="high"
+            />
           </div>
         </div>
-    <div class="relative w-full flex justify-center">
-      <Image
-        src={lightHero}
-        alt="hero-image light"
-        class="rounded-xl shadow-xl ring-2 ring-black/10 block dark:hidden"
-        width={Number(lightHero.width)}
-        height={Number(lightHero.height)}
-        loading="lazy"
-      />
-      <Image
-        src={darkHero}
-        alt="hero-image dark"
-        class="rounded-xl shadow-xl ring-2 ring-black/10 hidden dark:block"
-        width={Number(darkHero.width)}
-        height={Number(darkHero.height)}
-        loading="lazy"
-      />
+      </div>
     </div>
-    <LogoCloud />
-  </section>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const button = document.getElementById('cta-btn');
-    if (button) {
-      button.addEventListener('click', function (e) {
-        const target = document.getElementById('cta-section');
-        if (target) {
-          e.preventDefault();
-          target.scrollIntoView({ behavior: 'smooth' });
-        }
-      });
-    }
-  });
-</script>
+</main>

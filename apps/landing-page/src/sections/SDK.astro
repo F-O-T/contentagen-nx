@@ -1,0 +1,47 @@
+---
+import { Cpu, Lock, Sparkles, Zap } from "@lucide/astro";
+import { Image } from "astro:assets";
+import image from "../assets/sdk.webp";
+---
+
+<section id="sdk" class="py-16 md:py-32 bg-muted">
+  <div class="mx-auto max-w-6xl space-y-8 px-6 md:space-y-12">
+    <div class="mx-auto max-w-xl space-y-6 text-center md:space-y-12">
+      <h2 class="text-balance text-4xl font-medium lg:text-5xl">The ContentaGen SDK brings your content to life.</h2>
+      <p>Our TypeScript SDK is more than just an API client. It's a complete content management toolkit — designed for developers who need reliable access to AI-generated content.</p>
+    </div>
+    
+    <Image class="rounded-(--radius)" src={image} alt="SDK illustration" width={1207} height={929} loading="lazy" />
+
+    <div class="relative mx-auto grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-8 lg:grid-cols-4">
+      <div class="space-y-3">
+        <div class="flex items-center gap-2">
+          <Zap class="size-4" />
+          <h3 class="text-sm font-medium">Type Safe</h3>
+        </div>
+        <p class="text-muted-foreground text-sm">Full TypeScript support with Zod validation and automatic date parsing.</p>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <Cpu class="size-4" />
+          <h3 class="text-sm font-medium">Developer Friendly</h3>
+        </div>
+        <p class="text-muted-foreground text-sm">Consistent error codes, robust handling, and intuitive API design.</p>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <Lock class="size-4" />
+          <h3 class="text-sm font-medium">Security</h3>
+        </div>
+        <p class="text-muted-foreground text-sm">Secure API authentication and content access controls.</p>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2">
+          <Sparkles class="size-4" />
+          <h3 class="text-sm font-medium">AI Powered</h3>
+        </div>
+        <p class="text-muted-foreground text-sm">Built specifically for AI-generated content management.</p>
+      </div>
+    </div>
+  </div>
+</section>

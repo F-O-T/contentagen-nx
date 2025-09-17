@@ -1,0 +1,74 @@
+---
+import { Badge } from "@packages/ui/components/badge";
+import { Workflow } from "@lucide/astro";
+
+const steps = [
+   {
+      title: "Define Your Agent",
+      description:
+         "Configure your AI agent with your brand's unique voice, style, and purpose to create a consistent content foundation.",
+   },
+   {
+      title: "Provide a Prompt",
+      description:
+         "Give your agent a simple topic, a list of keywords, or a detailed content brief to kickstart the creation process.",
+   },
+   {
+      title: "AI-Powered Research",
+      description:
+         "The agent analyzes SERPs, competitor articles, and your internal Brand Brain to gather the most relevant information.",
+   },
+   {
+      title: "Drafting & Writing",
+      description:
+         "A full-length, structured article is written from scratch, adhering strictly to your brand guidelines and voice.",
+   },
+   {
+      title: "Review & Approve",
+      description:
+         "Review the generated draft in your dashboard, make any final tweaks, and approve it for publishing with a single click.",
+   },
+   {
+      title: "Publish",
+      description:
+         "Deploy your polished content directly to your blog or CMS using our powerful SDK and future integrations.",
+   },
+];
+---
+
+<section id="content-workflow" class=" relative py-16 md:py-24">
+  <div class="mx-auto max-w-6xl px-6">
+    <div class="mx-auto max-w-3xl text-center">
+      <h2 class="text-balance text-2xl font-bold md:text-3xl lg:text-4xl">
+        Your Content Workflow, <span class="text-primary">Fully Automated.</span>
+      </h2>
+      <p class="text-muted-foreground mx-auto mt-4 max-w-2xl text-balance">
+        From a simple idea to a published, SEO-optimized article in minutes. ContentaGen automates the entire content pipeline while maintaining the quality and brand consistency you demand.
+      </p>
+    </div>
+
+    <div class="max-w-(--breakpoint-sm) mx-auto py-12 md:py-20 px-6">
+      <div class="relative ml-6">
+        <!-- Timeline line -->
+        <div class="absolute left-0 inset-y-0 border-l-2" />
+
+        {steps.map(({ title, description }, index) => (
+          <div key={index} class="relative pl-10 pb-10 last:pb-0">
+            <!-- Timeline Icon -->
+            <div class="absolute left-px -translate-x-1/2 h-9 w-9 border-2 border-muted-foreground/40 flex items-center justify-center rounded-full bg-accent ring-8 ring-background">
+              <span class="font-semibold text-lg">{index + 1}</span>
+            </div>
+
+            <!-- Content -->
+            <div class="pt-1 space-y-2">
+              <h3 class="text-xl font-medium tracking-[-0.015em]">
+                {title}
+              </h3>
+              <p class="text-muted-foreground">{description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

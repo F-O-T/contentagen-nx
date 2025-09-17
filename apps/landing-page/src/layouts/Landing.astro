@@ -15,7 +15,11 @@ import { getAstroPosthogConfig } from "@packages/posthog/client";
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<link rel="canonical" href="https://contentagen.com/" />
-		
+
+		<!-- Preload Critical Resources -->
+		<link rel="preload" as="image" href="/src/assets/light/light-hero.webp" media="(prefers-color-scheme: light)" />
+		<link rel="preload" as="image" href="/src/assets/dark/dark-hero.webp" media="(prefers-color-scheme: dark)" />
+
 		<!-- Open Graph Metadata -->
 		<meta property="og:title" content={`${brandConfig.name}`} />
 		<meta property="og:description" content={`Discover ${brandConfig.name}, a modern solution for all your needs. Join us to explore innovative features, seamless integrations, and unparalleled support.`} />
