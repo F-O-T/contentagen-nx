@@ -5,57 +5,42 @@ import {
    CardTitle,
    CardDescription,
 } from "@packages/ui/components/card";
-import { Button } from "@packages/ui/components/button";
-import {
-   Brain,
-   Search,
-   FileText,
-   Database,
-   Target,
-   Zap,
-   ChevronRight,
-   Sparkles,
-} from "@lucide/astro";
+import { Brain, Search, Database } from "@lucide/astro";
 
 const features = [
    {
       icon: Search,
-      title: "Website Analysis",
+      title: "Deep Website Analysis",
       description:
-         "Our Mastra workflows crawl your website using advanced tools like Tavily to extract comprehensive business information.",
+         "Our system crawls your website to understand your business, products, and messaging, forming the foundation of your Brand Brain.",
    },
    {
-      icon: Target,
-      title: "Feature Extraction",
+      icon: Brain,
+      title: "Brand Voice & Style DNA",
       description:
-         "AI agents analyze your platform to identify and categorize features with confidence scores for accurate content creation.",
+         "AI agents identify your unique tone, terminology, and stylistic patterns to create a brand voice profile that guides all content creation.",
    },
    {
       icon: Database,
-      title: "Knowledge Indexing",
+      title: "Centralized Brand Brain",
       description:
-         "Information is chunked, embedded, and stored in our vector database for intelligent retrieval during content generation.",
+         "All your brand knowledge is indexed, giving your AI agents instant, accurate recall for perfectly consistent content, every time.",
    },
 ];
 ---
 
 <section id="brand-learning" class="py-16 md:py-24">
-  <div class="mx-auto max-w-5xl px-6">
+  <div class="mx-auto max-w-6xl px-6">
     <div class="grid gap-6 md:grid-cols-2 md:gap-12">
       <h2 class="text-3xl font-medium text-balance md:text-4xl">
-        The ContentaGen ecosystem brings together 
-        <span class="text-primary">deep brand learning</span> 
-        with intelligent content generation.
+        An AI That Truly <span class="text-primary">Understands Your Brand</span> 
       </h2>
       <div class="space-y-6">
         <p class="text-muted-foreground">
-          ContentaGen is evolving to be more than just content creation. It supports an entire ecosystem — 
-          from advanced Mastra workflows to AI agents that comprehensively learn your brand identity.
+         ContentaGen goes beyond surface-level prompts. Our system performs a deep analysis of your website and brand documents to build a unique "Brand Brain."
         </p>
         <p>
-          <span class="font-bold">Deep brand intelligence.</span> Our sophisticated AI system analyzes your 
-          website, extracts features, and creates comprehensive brand documents — ensuring every piece of 
-          content is perfectly aligned with your voice and business objectives.
+          <span class="font-bold">This is deep brand intelligence.</span> This ensures every piece of content perfectly captures your voice, style, and business objectives, eliminating endless revisions and edits.
         </p>
       </div>
     </div>
@@ -66,10 +51,11 @@ const features = [
           variant="soft"
       >
         <CardHeader>
-          <CardTitle className="flex gap-2 items-center">          <feature.icon class="text-primary size-5" />
-{feature.title}</CardTitle>
+          <CardTitle className="flex gap-2 items-center">          
+            <feature.icon class="text-primary size-5" />
+            {feature.title}
+          </CardTitle>
           <CardDescription>{feature.description}</CardDescription>
-
         </CardHeader>
         </Card>
       ))}

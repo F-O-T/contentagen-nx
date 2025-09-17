@@ -3,41 +3,36 @@ import { Badge } from "@packages/ui/components/badge";
 import { Workflow } from "@lucide/astro";
 
 const steps = [
-  {
-    title: "Research",
-    description:
-      "Gather information and analyze requirements to understand the problem and define objectives.",
-  },
-  {
-    title: "Planning",
-    description:
-      "Create a roadmap, define the scope, and outline the necessary steps to achieve the goal.",
-  },
-  {
-    title: "Design",
-    description:
-      "Develop wireframes, mockups, and prototypes to visualize the structure and user experience.",
-  },
-  {
-    title: "Development",
-    description:
-      "Write code, integrate features, and build the core functionality of the application.",
-  },
-  {
-    title: "Testing",
-    description:
-      "Perform quality assurance, fix bugs, and optimize performance before release.",
-  },
-  {
-    title: "Deployment",
-    description:
-      "Launch the project in a live environment and ensure smooth deployment.",
-  },
-  {
-    title: "Maintenance",
-    description:
-      "Monitor performance, update features, and provide ongoing support and improvements.",
-  },
+   {
+      title: "Define Your Agent",
+      description:
+         "Configure your AI agent with your brand's unique voice, style, and purpose to create a consistent content foundation.",
+   },
+   {
+      title: "Provide a Prompt",
+      description:
+         "Give your agent a simple topic, a list of keywords, or a detailed content brief to kickstart the creation process.",
+   },
+   {
+      title: "AI-Powered Research",
+      description:
+         "The agent analyzes SERPs, competitor articles, and your internal Brand Brain to gather the most relevant information.",
+   },
+   {
+      title: "Drafting & Writing",
+      description:
+         "A full-length, structured article is written from scratch, adhering strictly to your brand guidelines and voice.",
+   },
+   {
+      title: "Review & Approve",
+      description:
+         "Review the generated draft in your dashboard, make any final tweaks, and approve it for publishing with a single click.",
+   },
+   {
+      title: "Publish",
+      description:
+         "Deploy your polished content directly to your blog or CMS using our powerful SDK and future integrations.",
+   },
 ];
 ---
 
@@ -49,12 +44,10 @@ const steps = [
         <Badge variant="secondary">Content Pipeline</Badge>
       </div>
       <h2 class="text-balance text-2xl font-bold md:text-3xl lg:text-4xl">
-        Streamlined Content Workflow: 
-        <span class="text-primary">From Idea to Publish</span>
+        Your Content Workflow, <span class="text-primary">Fully Automated.</span>
       </h2>
       <p class="text-muted-foreground mx-auto mt-4 max-w-2xl text-balance">
-        From initial idea to published content, ContentaGen automates your entire content 
-        creation pipeline while maintaining quality and brand consistency.
+        From a simple idea to a published, SEO-optimized article in minutes. ContentaGen automates the entire content pipeline while maintaining the quality and brand consistency you demand.
       </p>
     </div>
 

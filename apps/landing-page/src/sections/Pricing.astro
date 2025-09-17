@@ -28,49 +28,49 @@ interface PricingPlan {
 
 const pricingPlans: PricingPlan[] = [
    {
-      name: "Free",
+      name: "Hobby",
       price: "$0",
       period: "/ mo",
-      description: "Perfect for getting started",
+      description: "For individuals & personal projects.",
       variant: "outline",
       features: [
          "1 AI Agent",
-         "10 blog posts per month",
-         "Basic SEO optimization",
-         "Email support",
+         "5 Content Ideas / month",
+         "2,000 Words / month",
+         "Basic Brand Learning",
+         "Community Support",
       ],
    },
    {
-      name: "Pro",
+      name: "Creator",
       price: "$29",
       period: "/ mo",
-      description: "For growing content creators",
+      description: "For creators, marketers & small teams.",
       variant: "default",
       popular: true,
       features: [
          "5 AI Agents",
-         "100 blog posts per month",
-         "Advanced SEO optimization",
-         "Custom brand voice",
-         "Priority support",
-         "Analytics dashboard",
-         "API access",
+         "50 Content Ideas / month",
+         "25,000 Words / month",
+         "Deep Brand Learning",
+         "1 Competitor Tracked",
+         "Priority Support",
       ],
    },
    {
-      name: "Enterprise",
+      name: "Team",
       price: "$99",
       period: "/ mo",
-      description: "For agencies and teams",
+      description: "For agencies & growing businesses.",
       variant: "outline",
       features: [
          "Unlimited AI Agents",
-         "Unlimited blog posts",
-         "White-label solution",
-         "Custom integrations",
-         "Dedicated support",
-         "Advanced analytics",
-         "Team collaboration",
+         "Unlimited Content Ideas",
+         "100,000 Words / month",
+         "Team Collaboration",
+         "5 Competitors Tracked",
+         "API Access",
+         "Dedicated Support",
       ],
    },
 ];
@@ -80,18 +80,18 @@ const pricingPlans: PricingPlan[] = [
   <div class="mx-auto max-w-5xl px-6">
     <div class="mx-auto max-w-2xl text-center">
       <h2 class="text-balance text-2xl font-bold md:text-3xl lg:text-4xl">
-        Pricing that scales with your business
+        Simple, transparent pricing
       </h2>
       <p class="text-muted-foreground mx-auto mt-4 max-w-xl text-balance">
-        Choose the perfect plan for your needs and start optimizing your workflow today
+        Choose the plan that fits your content strategy. No hidden fees, cancel anytime.
       </p>
     </div>
 
     <div class="relative mt-12">
       <div class="grid gap-6 md:grid-cols-3">
-        {pricingPlans.map((plan, index) => (
+        {pricingPlans.map((plan) => (
           <Card
-            className={`relative ${plan.popular ? 'ring-2 ring-primary scale-105 shadow-xl' : 'shadow-lg'}`}
+            className={`relative flex flex-col ${plan.popular ? 'ring-2 ring-primary scale-105 shadow-xl' : 'shadow-lg'}`}
           >
             <CardHeader className="p-8">
               <div class="flex items-center justify-between">
@@ -120,7 +120,7 @@ const pricingPlans: PricingPlan[] = [
               </a>
             </div>
 
-            <ul role="list" class="space-y-3 p-8">
+            <ul role="list" class="space-y-3 p-8 flex-1">
               {plan.features.map((feature) => (
                 <li class="flex items-center gap-2">
                   <Check class="text-primary size-3" stroke-width="3.5" />

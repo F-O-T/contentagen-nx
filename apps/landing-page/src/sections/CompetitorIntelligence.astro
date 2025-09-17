@@ -1,12 +1,18 @@
 ---
-import { Card, CardContent, CardHeader } from "@packages/ui/components/card";
-import { Brain, Users, Search, Sparkles, Play, TrendingUp } from "@lucide/astro";
+import {
+   Brain,
+   Users,
+   Search,
+   Sparkles,
+   Play,
+   TrendingUp,
+} from "@lucide/astro";
 ---
 
 <section class="bg-zinc-50 py-16 md:py-24 dark:bg-transparent">
   <div class="mx-auto max-w-5xl px-6">
     <div class="mx-auto grid gap-4 lg:grid-cols-2">
-      <!-- Brand Deep Learning Feature Card -->
+      <!-- Competitor Analysis Feature Card -->
       <div class="group relative rounded-none shadow-zinc-950/5 bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
         <!-- Card Decorators -->
         <span class="border-primary absolute -left-px -top-px block size-2 border-l-2 border-t-2"></span>
@@ -18,9 +24,9 @@ import { Brain, Users, Search, Sparkles, Play, TrendingUp } from "@lucide/astro"
           <div class="p-6">
             <span class="text-muted-foreground flex items-center gap-2">
               <Brain class="size-4" />
-              Brand Deep Learning Workflow
+              Competitor Intelligence
             </span>
-            <p class="mt-6 text-xl font-semibold md:text-2xl">Learn about your competitors' strategies, content patterns, and market positioning.</p>
+            <p class="mt-6 text-xl font-semibold md:text-2xl">Turn competitor strategies into your content advantage.</p>
           </div>
         </div>
 
@@ -31,7 +37,6 @@ import { Brain, Users, Search, Sparkles, Play, TrendingUp } from "@lucide/astro"
             style="background: radial-gradient(125% 125% at 50% 0%, transparent 40%, var(--color-blue-600), var(--color-white) 100%)"
           ></div>
           <div class="aspect-[76/59] p-1 px-6">
-            <!-- TODO: Replace with actual brand learning workflow image -->
             <div class="w-full h-full bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg flex items-center justify-center">
               <Brain class="w-16 h-16 text-blue-600" />
             </div>
@@ -41,7 +46,6 @@ import { Brain, Users, Search, Sparkles, Play, TrendingUp } from "@lucide/astro"
 
       <!-- Multi-Agent System Feature Card -->
       <div class="group relative rounded-none shadow-zinc-950/5 bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
-        <!-- Card Decorators -->
         <span class="border-primary absolute -left-px -top-px block size-2 border-l-2 border-t-2"></span>
         <span class="border-primary absolute -right-px -top-px block size-2 border-r-2 border-t-2"></span>
         <span class="border-primary absolute -bottom-px -left-px block size-2 border-b-2 border-l-2"></span>
@@ -51,16 +55,15 @@ import { Brain, Users, Search, Sparkles, Play, TrendingUp } from "@lucide/astro"
           <div class="p-6">
             <span class="text-muted-foreground flex items-center gap-2">
               <Users class="size-4" />
-              Multi-Agent System
+              Strategic Content Ideas
             </span>
-            <p class="mt-6 text-xl font-semibold md:text-2xl">Deploy specialized AI agents that work together for comprehensive content strategy.</p>
+            <p class="mt-6 text-xl font-semibold md:text-2xl">Generate content ideas that fill market gaps and outperform rivals.</p>
           </div>
         </div>
 
         <div class="px-6" data-slot="card-content">
           <div class="relative max-sm:mb-6" style="mask: radial-gradient(75% 75% at 100% 50%, transparent, transparent 75%, black);">
             <div class="aspect-[76/59] overflow-hidden rounded-lg border">
-              <!-- TODO: Replace with multi-agent system visualization image -->
               <div class="w-full h-full bg-gradient-to-br from-green-100 to-blue-100 rounded-lg flex items-center justify-center">
                 <Users class="w-16 h-16 text-blue-600" />
               </div>
@@ -71,55 +74,47 @@ import { Brain, Users, Search, Sparkles, Play, TrendingUp } from "@lucide/astro"
 
       <!-- Automated Ideas Generation Feature Card - Full Width -->
       <div class="group relative rounded-none shadow-zinc-950/5 bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm p-6 lg:col-span-2">
-        <!-- Card Decorators -->
         <span class="border-primary absolute -left-px -top-px block size-2 border-l-2 border-t-2"></span>
         <span class="border-primary absolute -right-px -top-px block size-2 border-r-2 border-t-2"></span>
         <span class="border-primary absolute -bottom-px -left-px block size-2 border-b-2 border-l-2"></span>
         <span class="border-primary absolute -bottom-px -right-px block size-2 border-b-2 border-r-2"></span>
         
         <p class="mx-auto my-6 max-w-md text-balance text-center text-xl font-semibold md:text-2xl">
-          Automated ideas generation powered by competitive intelligence and market analysis.
+          Automate your content strategy with AI-powered competitive intelligence.
         </p>
 
         <div class="flex justify-center gap-8 overflow-hidden">
-          <!-- Research -->
           <div class="flex flex-col items-center">
             <div class="bg-gradient-to-b from-border to-transparent size-fit rounded-2xl p-px">
               <div class="bg-gradient-to-b from-background to-muted/25 relative flex aspect-square w-fit items-center justify-center rounded-[15px] p-4">
                 <Search class="size-6 text-primary" />
               </div>
             </div>
-            <span class="text-muted-foreground mt-2 block text-center text-sm">Research</span>
+            <span class="text-muted-foreground mt-2 block text-center text-sm">Track & Analyze</span>
           </div>
-
-          <!-- Generate -->
           <div class="flex flex-col items-center">
             <div class="bg-gradient-to-b from-border to-transparent size-fit rounded-2xl p-px">
               <div class="bg-gradient-to-b from-background to-muted/25 relative flex aspect-square w-fit items-center justify-center rounded-[15px] p-4">
                 <Sparkles class="size-6 text-primary" />
               </div>
             </div>
-            <span class="text-muted-foreground mt-2 block text-center text-sm">Generate</span>
+            <span class="text-muted-foreground mt-2 block text-center text-sm">Generate Ideas</span>
           </div>
-
-          <!-- Execute -->
           <div class="flex flex-col items-center">
             <div class="bg-gradient-to-b from-border to-transparent size-fit rounded-2xl p-px">
               <div class="bg-gradient-to-b from-background to-muted/25 relative flex aspect-square w-fit items-center justify-center rounded-[15px] p-4">
                 <Play class="size-6 text-primary" />
               </div>
             </div>
-            <span class="text-muted-foreground mt-2 block text-center text-sm">Execute</span>
+            <span class="text-muted-foreground mt-2 block text-center text-sm">Create Content</span>
           </div>
-
-          <!-- Optimize -->
           <div class="flex flex-col items-center hidden sm:flex">
             <div class="bg-gradient-to-b from-border to-transparent size-fit rounded-2xl p-px">
               <div class="bg-gradient-to-b from-background to-muted/25 relative flex aspect-square w-fit items-center justify-center rounded-[15px] p-4">
                 <TrendingUp class="size-6 text-primary" />
               </div>
             </div>
-            <span class="text-muted-foreground mt-2 block text-center text-sm">Optimize</span>
+            <span class="text-muted-foreground mt-2 block text-center text-sm">Dominate SERPs</span>
           </div>
         </div>
       </div>
