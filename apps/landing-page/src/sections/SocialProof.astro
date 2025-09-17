@@ -1,26 +1,30 @@
 ---
-import { Quote } from "@lucide/astro";
-import {
-   Avatar,
-   AvatarFallback,
-   AvatarImage,
-} from "@packages/ui/components/avatar";
-import { Check, Star, Clock, Shield, Zap, Users } from "@lucide/astro";
+import liciteiLogo from "../assets/teams/licitei-logo.svg";
+import { Image } from "astro:assets";
 ---
 
-<section class="relative py-16 md:py-32 bg-muted">
-  <div class="mx-auto max-w-7xl px-6">
+<section class="relative py-16 md:py-24 bg-muted">
+  <div class="mx-auto max-w-5xl px-6">
+    <div class="mx-auto max-w-2xl text-center">
+      <blockquote>
+        <p class="text-lg font-medium sm:text-xl md:text-3xl">Using ContentaGen has been like unlocking a secret content creation superpower. It's the perfect fusion of AI intelligence and human creativity, enabling us to create content that is as engaging as it is effective.</p>
 
-    <!-- Featured Testimonial -->
-    <div class=" py-24 mb-16 rounded-2xl">
-      <div class="mx-auto w-full max-w-2xl px-6 text-center">
-        <div class="max-w-xl">
-          <Quote className="fill-background stroke-background mx-auto size-8 drop-shadow-sm" />
-          <blockquote class="mt-6">
-            <p class="text-foreground text-xl">ContentaGen revolutionized our content creation process. The AI-powered multi-agent system delivers exceptional quality at unprecedented speed, enabling us to scale our content operations while maintaining our high editorial standards.</p>
-            <footer class="mt-6 flex flex-col items-center justify-center">
-      </div>
+        <div class="mt-12 flex items-center justify-center gap-6">
+          <Image
+            src={liciteiLogo}
+            alt="Licitei Logo"
+            class="size-12 rounded-full"
+            width={48}
+            height={48}
+            loading="lazy"
+          />
+
+          <div class="space-y-1 border-l pl-6">
+            <cite class="font-medium">Licitei Team</cite>
+            <span class="text-muted-foreground block text-sm">Content Team, Licitei</span>
+          </div>
+        </div>
+      </blockquote>
     </div>
-
   </div>
 </section>

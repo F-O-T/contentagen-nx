@@ -76,19 +76,19 @@ const pricingPlans: PricingPlan[] = [
 ];
 ---
 
-<section id="pricing" class="bg-muted relative py-16 md:py-32">
-  <div class="mx-auto max-w-7xl px-6">
+<section id="pricing" class="bg-muted relative py-16 md:py-24">
+  <div class="mx-auto max-w-5xl px-6">
     <div class="mx-auto max-w-2xl text-center">
-      <h2 class="text-balance text-3xl font-bold md:text-4xl lg:text-5xl">
+      <h2 class="text-balance text-2xl font-bold md:text-3xl lg:text-4xl">
         Pricing that scales with your business
       </h2>
-      <p class="text-muted-foreground mx-auto mt-4 max-w-xl text-balance text-lg">
+      <p class="text-muted-foreground mx-auto mt-4 max-w-xl text-balance">
         Choose the perfect plan for your needs and start optimizing your workflow today
       </p>
     </div>
 
-    <div class="relative mt-12 md:mt-20">
-      <div class="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
+    <div class="relative mt-12">
+      <div class="grid gap-6 md:grid-cols-3">
         {pricingPlans.map((plan, index) => (
           <Card
             className={`relative ${plan.popular ? 'ring-2 ring-primary scale-105 shadow-xl' : 'shadow-lg'}`}

@@ -10,17 +10,17 @@ import { Image } from "astro:assets";
 
 <main class="overflow-hidden">
   <section class="bg-gradient-to-b to-muted from-background ">
-    <div class="relative py-24  container mx-auto px-8">
-      <div class="relative z-10 mx-auto w-full max-w-7xl ">
+    <div class="relative py-24 container mx-auto px-8">
+      <div class="relative z-10 mx-auto w-full max-w-5xl">
 
-        <div class="grid grid-cols-1 gap-12 md:grid-cols-[1fr_1.8fr] md:gap-8 items-center">
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12 items-center">
 
           <div class="flex flex-col space-y-6 text-center md:text-left">
-            <h1 class="text-4xl font-bold leading-tight md:text-5xl lg:text-6xl text-foreground">
+            <h1 class="text-3xl font-bold leading-tight md:text-4xl lg:text-5xl text-foreground">
               Publish Smarter: <span class="text-primary">AI-Powered Blog Posts</span> in Seconds
             </h1>
 
-            <p class="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto md:mx-0">
+            <p class="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto md:mx-0">
               Effortlessly generate SEO-optimized articles tailored for creators, marketers, and agencies. Save time, boost reach, and grow your audience with Contentagen.
             </p>
 
@@ -34,10 +34,10 @@ import { Image } from "astro:assets";
               <LogoCloud />
           </div>
 
-          <div class="relative md:order-last">
+          <div class="relative">
             <div class="perspective-near">
-              <div class="before:border-foreground/5 before:bg-foreground/5 relative h-full before:absolute before:-inset-x-4 before:bottom-7 before:top-0 before:skew-x-6 before:rounded-[calc(var(--radius)+1rem)] before:border">
-                <div class="bg-background rounded-lg shadow-foreground/10 ring-foreground/5 relative h-full -translate-y-12 skew-x-6 overflow-hidden border border-transparent shadow-md ring-1">
+              <div class="before:border-foreground/5 before:bg-foreground/5 relative h-full before:absolute before:-inset-x-2 before:bottom-4 before:top-0 before:skew-x-3 before:rounded-lg before:border">
+                <div class="bg-background rounded-lg shadow-foreground/10 ring-foreground/5 relative h-full -translate-y-6 skew-x-3 overflow-hidden border border-transparent shadow-md ring-1">
                   <Image
                     src={lightHero}
                     alt="Contentagen dashboard interface showing AI blog post generation in light mode"
