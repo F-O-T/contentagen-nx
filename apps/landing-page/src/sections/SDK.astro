@@ -1,0 +1,55 @@
+---
+import { Cpu, Zap } from "@lucide/astro";
+import { Image } from "astro:assets";
+import lightImage from "../assets/light/light-hero.webp";
+import darkImage from "../assets/dark/dark-hero.webp";
+---
+
+<section id="sdk" class="py-16 md:py-32">
+  <div class="mx-auto max-w-5xl space-y-8 px-6 md:space-y-16">
+    <h2 class="relative z-10 max-w-xl text-4xl font-medium lg:text-5xl">The ContentaGen SDK brings your content to life.</h2>
+    <div class="relative">
+      <div class="relative z-10 space-y-4 md:w-1/2">
+        <p>
+          Our TypeScript SDK is more than just an API client. <span class="font-medium">It's a complete content management toolkit</span> — designed for developers who need reliable access to AI-generated content.
+        </p>
+        <p>Seamlessly integrate ContentaGen into your applications with type-safe methods for listing content, retrieving posts by slug, and discovering related articles.</p>
+
+        <div class="grid grid-cols-2 gap-3 pt-6 sm:gap-4">
+          <div class="space-y-3">
+            <div class="flex items-center gap-2">
+              <Zap class="size-4" />
+              <h3 class="text-sm font-medium">Type Safe</h3>
+            </div>
+            <p class="text-muted-foreground text-sm">Full TypeScript support with Zod validation and automatic date parsing.</p>
+          </div>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <Cpu class="size-4" />
+              <h3 class="text-sm font-medium">Developer Friendly</h3>
+            </div>
+            <p class="text-muted-foreground text-sm">Consistent error codes, robust handling, and intuitive API design.</p>
+          </div>
+        </div>
+      </div>
+      <div class="md:mask-l-from-35% md:mask-l-to-55% mt-12 h-fit md:absolute md:-inset-y-12 md:inset-x-0 md:mt-0">
+        <div class="border-border/50 relative rounded-2xl border border-dotted p-2">
+          <Image
+            src={darkImage}
+            class="hidden rounded-[12px] dark:block"
+            alt="sdk illustration dark"
+            width={1207}
+            height={929}
+          />
+          <Image
+            src={lightImage}
+            class="rounded-[12px] shadow dark:hidden"
+            alt="sdk illustration light"
+            width={1207}
+            height={929}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,79 @@
+---
+import {
+   Card,
+   CardHeader,
+   CardTitle,
+   CardDescription,
+} from "@packages/ui/components/card";
+import { Button } from "@packages/ui/components/button";
+import {
+   Brain,
+   Search,
+   FileText,
+   Database,
+   Target,
+   Zap,
+   ChevronRight,
+   Sparkles,
+} from "@lucide/astro";
+
+const features = [
+   {
+      icon: Search,
+      title: "Website Analysis",
+      description:
+         "Our Mastra workflows crawl your website using advanced tools like Tavily to extract comprehensive business information.",
+   },
+   {
+      icon: Target,
+      title: "Feature Extraction",
+      description:
+         "AI agents analyze your platform to identify and categorize features with confidence scores for accurate content creation.",
+   },
+   {
+      icon: Database,
+      title: "Knowledge Indexing",
+      description:
+         "Information is chunked, embedded, and stored in our vector database for intelligent retrieval during content generation.",
+   },
+];
+---
+
+<section id="brand-learning" class="py-16 md:py-32">
+  <div class="mx-auto max-w-5xl px-6">
+    <div class="grid gap-6 md:grid-cols-2 md:gap-12">
+      <h2 class="text-4xl font-medium text-balance">
+        The ContentaGen ecosystem brings together 
+        <span class="text-primary">deep brand learning</span> 
+        with intelligent content generation.
+      </h2>
+      <div class="space-y-6">
+        <p class="text-muted-foreground">
+          ContentaGen is evolving to be more than just content creation. It supports an entire ecosystem — 
+          from advanced Mastra workflows to AI agents that comprehensively learn your brand identity.
+        </p>
+        <p>
+          <span class="font-bold">Deep brand intelligence.</span> Our sophisticated AI system analyzes your 
+          website, extracts features, and creates comprehensive brand documents — ensuring every piece of 
+          content is perfectly aligned with your voice and business objectives.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-16 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {features.map((feature) => (
+        <Card
+          variant="soft"
+      >
+        <CardHeader>
+          <CardTitle className="flex gap-2 items-center">          <feature.icon class="text-primary size-5" />
+{feature.title}</CardTitle>
+          <CardDescription>{feature.description}</CardDescription>
+
+        </CardHeader>
+        </Card>
+      ))}
+    </div>
+
+  </div>
+</section>

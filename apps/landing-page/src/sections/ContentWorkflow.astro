@@ -1,0 +1,85 @@
+---
+import { Badge } from "@packages/ui/components/badge";
+import { Workflow } from "@lucide/astro";
+
+const steps = [
+  {
+    title: "Research",
+    description:
+      "Gather information and analyze requirements to understand the problem and define objectives.",
+  },
+  {
+    title: "Planning",
+    description:
+      "Create a roadmap, define the scope, and outline the necessary steps to achieve the goal.",
+  },
+  {
+    title: "Design",
+    description:
+      "Develop wireframes, mockups, and prototypes to visualize the structure and user experience.",
+  },
+  {
+    title: "Development",
+    description:
+      "Write code, integrate features, and build the core functionality of the application.",
+  },
+  {
+    title: "Testing",
+    description:
+      "Perform quality assurance, fix bugs, and optimize performance before release.",
+  },
+  {
+    title: "Deployment",
+    description:
+      "Launch the project in a live environment and ensure smooth deployment.",
+  },
+  {
+    title: "Maintenance",
+    description:
+      "Monitor performance, update features, and provide ongoing support and improvements.",
+  },
+];
+---
+
+<section id="content-workflow" class="bg-gradient-to-b from-background to-muted relative py-16 md:py-32">
+  <div class="mx-auto max-w-7xl px-6">
+    <div class="mx-auto max-w-3xl text-center">
+      <div class="inline-flex items-center gap-2 mb-4">
+        <Workflow class="h-5 w-5 text-primary" />
+        <Badge variant="secondary">Content Pipeline</Badge>
+      </div>
+      <h2 class="text-balance text-3xl font-bold md:text-4xl lg:text-5xl">
+        Streamlined Content Workflow: 
+        <span class="text-primary">From Idea to Publish</span>
+      </h2>
+      <p class="text-muted-foreground mx-auto mt-4 max-w-2xl text-balance text-lg">
+        From initial idea to published content, ContentaGen automates your entire content 
+        creation pipeline while maintaining quality and brand consistency.
+      </p>
+    </div>
+
+    <div class="max-w-(--breakpoint-sm) mx-auto py-12 md:py-20 px-6">
+      <div class="relative ml-6">
+        <!-- Timeline line -->
+        <div class="absolute left-0 inset-y-0 border-l-2" />
+
+        {steps.map(({ title, description }, index) => (
+          <div key={index} class="relative pl-10 pb-10 last:pb-0">
+            <!-- Timeline Icon -->
+            <div class="absolute left-px -translate-x-1/2 h-9 w-9 border-2 border-muted-foreground/40 flex items-center justify-center rounded-full bg-accent ring-8 ring-background">
+              <span class="font-semibold text-lg">{index + 1}</span>
+            </div>
+
+            <!-- Content -->
+            <div class="pt-1 space-y-2">
+              <h3 class="text-xl font-medium tracking-[-0.015em]">
+                {title}
+              </h3>
+              <p class="text-muted-foreground">{description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
