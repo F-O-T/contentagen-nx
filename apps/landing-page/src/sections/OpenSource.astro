@@ -3,10 +3,30 @@ import { Card, CardContent, CardHeader } from "@packages/ui/components/card";
 import { Button } from "@packages/ui/components/button";
 import { Badge } from "@packages/ui/components/badge";
 import { Github, Heart, Users, Code, Star, GitFork } from "@lucide/astro";
+const cards = [
+   {
+      icon: Users,
+      title: "Community Driven",
+      description:
+         "Join a growing community of developers and content creators. Your feedback shapes the future of ContentaGen.",
+   },
+   {
+      icon: Code,
+      title: "Full Transparency",
+      description:
+         "Every line of code is public. See exactly how ContentaGen works, from AI prompts to database schemas.",
+   },
+   {
+      icon: Heart,
+      title: "Free Forever",
+      description:
+         "Self-host ContentaGen for free, forever. No vendor lock-in, no hidden costs, just pure open source freedom.",
+   },
+];
 ---
 
 <section id="open-source" class="bg-muted py-16 md:py-24 ">
-  <div class="@container mx-auto max-w-6xl px-6">
+  <div class="container mx-auto max-w-6xl">
     <div class="text-center">
       <h2 class="text-balance text-2xl font-semibold md:text-3xl lg:text-4xl">
         Built in the Open: 
@@ -17,61 +37,27 @@ import { Github, Heart, Users, Code, Star, GitFork } from "@lucide/astro";
         contribute to development, or fork it for your own projects.
       </p>
     </div>
-    <div class="@min-4xl:max-w-full @min-4xl:grid-cols-3 mx-auto mt-8 grid max-w-sm gap-6 *:text-center md:mt-16">
-      <Card class="group shadow-zinc-950/5">
-        <CardHeader class="pb-3">
-          <div class="mask-radial-from-40% mask-radial-to-60% relative mx-auto size-36 duration-200 [--color-border:color-mix(in_oklab,var(--color-zinc-950)10%,transparent)] group-hover:[--color-border:color-mix(in_oklab,var(--color-zinc-950)20%,transparent)] dark:[--color-border:color-mix(in_oklab,var(--color-white)15%,transparent)] dark:group-hover:[--color-border:color-mix(in_oklab,var(--color-white)20%,transparent)]">
-            <div
-              aria-hidden="true"
-              class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:24px_24px] dark:opacity-50"
-            />
-            <div class="bg-background absolute inset-0 m-auto flex size-12 items-center justify-center border-l border-t">
-              <Users class="size-6" aria-hidden="true" />
-            </div>
-          </div>
-          <h3 class="mt-6 font-medium">Community Driven</h3>
-        </CardHeader>
-        <CardContent>
-          <p class="text-sm">Join a growing community of developers and content creators. Your feedback shapes the future of ContentaGen.</p>
-        </CardContent>
-      </Card>
-
-      <Card class="group shadow-zinc-950/5">
-        <CardHeader class="pb-3">
-          <div class="mask-radial-from-40% mask-radial-to-60% relative mx-auto size-36 duration-200 [--color-border:color-mix(in_oklab,var(--color-zinc-950)10%,transparent)] group-hover:[--color-border:color-mix(in_oklab,var(--color-zinc-950)20%,transparent)] dark:[--color-border:color-mix(in_oklab,var(--color-white)15%,transparent)] dark:group-hover:[--color-border:color-mix(in_oklab,var(--color-white)20%,transparent)]">
-            <div
-              aria-hidden="true"
-              class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:24px_24px] dark:opacity-50"
-            />
-            <div class="bg-background absolute inset-0 m-auto flex size-12 items-center justify-center border-l border-t">
-              <Code class="size-6" aria-hidden="true" />
-            </div>
-          </div>
-          <h3 class="mt-6 font-medium">Full Transparency</h3>
-        </CardHeader>
-        <CardContent>
-          <p class="text-sm">Every line of code is public. See exactly how ContentaGen works, from AI prompts to database schemas.</p>
-        </CardContent>
-      </Card>
-
-      <Card class="group shadow-zinc-950/5">
-        <CardHeader class="pb-3">
-          <div class="mask-radial-from-40% mask-radial-to-60% relative mx-auto size-36 duration-200 [--color-border:color-mix(in_oklab,var(--color-zinc-950)10%,transparent)] group-hover:[--color-border:color-mix(in_oklab,var(--color-zinc-950)20%,transparent)] dark:[--color-border:color-mix(in_oklab,var(--color-white)15%,transparent)] dark:group-hover:[--color-border:color-mix(in_oklab,var(--color-white)20%,transparent)]">
-            <div
-              aria-hidden="true"
-              class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:24px_24px] dark:opacity-50"
-            />
-            <div class="bg-background absolute inset-0 m-auto flex size-12 items-center justify-center border-l border-t">
-              <Heart class="size-6" aria-hidden="true" />
-            </div>
-          </div>
-          <h3 class="mt-6 font-medium">Free Forever</h3>
-        </CardHeader>
-        <CardContent>
-          <p class="text-sm">Self-host ContentaGen for free, forever. No vendor lock-in, no hidden costs, just pure open source freedom.</p>
-        </CardContent>
-      </Card>
-    </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+        {cards.map(card => (
+          <Card class="group shadow-zinc-950/5">
+            <CardHeader class="pb-3">
+              <div class="mask-radial-from-40% mask-radial-to-60% relative mx-auto size-36 duration-200 [--color-border:color-mix(in_oklab,var(--color-zinc-950)10%,transparent)] group-hover:[--color-border:color-mix(in_oklab,var(--color-zinc-950)20%,transparent)] dark:[--color-border:color-mix(in_oklab,var(--color-white)15%,transparent)] dark:group-hover:[--color-border:color-mix(in_oklab,var(--color-white)20%,transparent)]">
+                <div
+                  aria-hidden="true"
+                  class="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:24px_24px] dark:opacity-50"
+                />
+                <div class="bg-background absolute inset-0 m-auto flex size-12 items-center justify-center border-l border-t">
+                  <card.icon class="size-6" aria-hidden="true" />
+                </div>
+              </div>
+              <h3 class="mt-6 font-medium">{card.title}</h3>
+            </CardHeader>
+            <CardContent>
+              <p class="text-sm">{card.description}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
   </div>
 </section>
