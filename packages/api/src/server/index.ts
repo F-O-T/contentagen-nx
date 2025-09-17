@@ -15,6 +15,7 @@ import { preferencesRouter } from "./router/preferences";
 import type { OpenRouterClient } from "@packages/openrouter/client";
 import { competitorRouter } from "./router/competitor";
 import { competitorFileRouter } from "./router/competitor-file";
+import { organizationBrandKnowledgeRouter } from "./router/organization-brand-knowledge";
 
 export const appRouter = router({
    agent: agentRouter,
@@ -27,6 +28,7 @@ export const appRouter = router({
    preferences: preferencesRouter,
    competitor: competitorRouter,
    competitorFile: competitorFileRouter,
+   organizationBrandKnowledge: organizationBrandKnowledgeRouter,
 });
 export const createApi = ({
    auth,

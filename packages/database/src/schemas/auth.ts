@@ -4,6 +4,7 @@ import {
    timestamp,
    boolean,
    integer,
+   jsonb,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -78,6 +79,9 @@ export const organization = pgTable("organization", {
    name: text("name").notNull(),
    slug: text("slug").unique(),
    logo: text("logo"),
+   uploadedFiles: jsonb("uploaded_files")
+      .$type<{ fileName: string; fileUrl: string; uploadedAt: string }[]>()
+      .default([]),
    createdAt: timestamp("created_at").notNull(),
    metadata: text("metadata"),
 });

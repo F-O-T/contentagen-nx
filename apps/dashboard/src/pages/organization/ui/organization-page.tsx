@@ -14,6 +14,7 @@ import { CreateOrganizationCredenza } from "../features/create-organization-cred
 import { InfoItem } from "@packages/ui/components/info-item";
 import { useIsomorphicLayoutEffect } from "@packages/ui/hooks/use-isomorphic-layout-effect";
 import { OrganizationPageMembersTable } from "./organization-page-members-table";
+import { OrganizationKnowledgeBaseCard } from "./organization-knowledge-base-card";
 
 export function OrganizationPage() {
    const [open, setOpen] = useState(false);
@@ -77,6 +78,12 @@ export function OrganizationPage() {
                         ))}
                      </CardContent>
                   </Card>
+                  
+                  <OrganizationKnowledgeBaseCard 
+                     organizationId={org.id}
+                     uploadedFiles={org.uploadedFiles || []}
+                     brandKnowledgeStatus={org.brandKnowledgeStatus || "pending"}
+                  />
                </div>
             </div>
          ) : (
