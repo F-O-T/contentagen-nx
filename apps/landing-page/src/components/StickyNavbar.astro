@@ -2,13 +2,13 @@
 import { Button } from "@packages/ui/components/button";
 import Logo from "./Logo.astro";
 import { NavMenu } from "./nav-menu";
-import { NavigationSheet } from "./navigation-sheet";
+import { MobileMenu } from "./mobile-menu";
 import ThemeToggler from "./ThemeToggler.astro";
 ---
 
 <nav 
   id="sticky-navbar" 
-  class="fixed top-6 inset-x-4 h-16 bg-background/80 backdrop-blur-md border dark:border-slate-700/70 max-w-7xl mx-auto rounded-full z-50 opacity-0 translate-y-[-20px] pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-lg shadow-black/5 dark:shadow-black/20"
+  class="fixed top-6 inset-x-4 h-16 bg-background/80 backdrop-blur-md border dark:border-slate-700/70 max-w-7xl mx-auto rounded-lg  z-50 opacity-0 translate-y-[-20px] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-lg shadow-black/5 dark:shadow-black/20 pointer-events-none"
 >
   <div class="h-full flex items-center justify-between mx-auto px-6 relative">
     <!-- Logo with app name and subtle hover animation -->
@@ -20,7 +20,7 @@ import ThemeToggler from "./ThemeToggler.astro";
     </div>
 
     <!-- Desktop Menu with stagger animation -->
-    <div class="hidden md:block navbar-menu">
+    <div class="hidden md:block ">
       <NavMenu client:load />
     </div>
 
@@ -30,24 +30,15 @@ import ThemeToggler from "./ThemeToggler.astro";
         <ThemeToggler />
       </div>
       
-      <Button
-        variant="outline"
-        className="hidden sm:inline-flex rounded-full transition-all duration-300 hover:bg-primary/5 hover:border-primary/20 hover:scale-105"
-      >
-        <a href="https://app.contentagen.com/auth/sign-in" target="_blank" rel="noopener noreferrer" class="no-underline">
-          Sign In
-        </a>
-      </Button>
-      
-      <Button className="rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
-        <a href="https://app.contentagen.com/auth/sign-up" target="_blank" rel="noopener noreferrer" class="no-underline text-white">
+      <Button >
+        <a href="https://app.contentagen.com/auth/sign-in" target="_blank" rel="noopener noreferrer" class="no-underline text-white">
           Get Started
         </a>
       </Button>
 
       <!-- Mobile Menu with bounce animation -->
       <div class="md:hidden transition-transform duration-300 hover:scale-110">
-        <NavigationSheet client:load />
+        <MobileMenu client:load />
       </div>
     </div>
   </div>
@@ -60,6 +51,7 @@ import ThemeToggler from "./ThemeToggler.astro";
 
   #sticky-navbar.visible {
     animation: slideInDown 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    pointer-events: auto;
   }
 
   @keyframes slideInDown {
@@ -74,6 +66,7 @@ import ThemeToggler from "./ThemeToggler.astro";
     100% {
       opacity: 1;
       transform: translateY(0) scale(1);
+      pointer-events: auto;
     }
   }
 
@@ -87,6 +80,7 @@ import ThemeToggler from "./ThemeToggler.astro";
 
   .navbar-glow {
     animation: pulse-glow 3s ease-in-out infinite;
+    pointer-events: none;
   }
 
   @keyframes pulse-glow {
@@ -133,15 +127,9 @@ import ThemeToggler from "./ThemeToggler.astro";
       if (shouldShow && !isVisible) {
         isVisible = true;
         stickyNavbar.classList.add('visible');
-        stickyNavbar.style.opacity = '1';
-        stickyNavbar.style.transform = 'translateY(0) scale(1)';
-        stickyNavbar.style.pointerEvents = 'auto';
       } else if (!shouldShow && isVisible) {
         isVisible = false;
         stickyNavbar.classList.remove('visible');
-        stickyNavbar.style.opacity = '0';
-        stickyNavbar.style.transform = 'translateY(-20px) scale(0.95)';
-        stickyNavbar.style.pointerEvents = 'none';
       }
     };
 

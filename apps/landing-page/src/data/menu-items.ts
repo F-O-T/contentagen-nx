@@ -1,27 +1,17 @@
 export const menuItems = [
    {
-      href: "#features",
-      name: "Features",
-      description: "Discover our AI-powered content creation capabilities",
-   },
-   {
-      href: "#how-it-works",
-      name: "How It Works",
-      description: "Learn about our content generation process",
-   },
-   {
-      href: "#integrations",
-      name: "Integrations",
-      description: "Connect with your favorite tools and platforms",
-   },
-   {
       href: "#pricing",
       name: "Pricing",
       description: "Simple, transparent pricing for every team",
    },
    {
-      href: "/docs",
+      href: "https://docs.contentagen.com/",
       name: "Docs",
+      description: "Complete guides and API references",
+   },
+   {
+      href: "https://blog.contentagen.com/",
+      name: "Blog",
       description: "Complete guides and API references",
    },
 ];
