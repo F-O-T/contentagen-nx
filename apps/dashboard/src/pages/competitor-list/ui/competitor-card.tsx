@@ -1,8 +1,6 @@
 import {
    Card,
    CardHeader,
-   CardTitle,
-   CardDescription,
    CardAction,
    CardFooter,
 } from "@packages/ui/components/card";
@@ -26,7 +24,7 @@ import { useCallback, useState } from "react";
 import { Checkbox } from "@packages/ui/components/checkbox";
 import type { RouterOutput } from "@packages/api/client";
 import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
-import { trpc, useTRPC } from "@/integrations/clients";
+import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 interface CompetitorCardProps {
