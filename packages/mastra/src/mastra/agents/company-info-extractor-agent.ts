@@ -1,5 +1,4 @@
 import { Agent } from "@mastra/core/agent";
-import { LanguageDetector } from "@mastra/core/processors";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
 import { tavilyCrawlTool } from "../tools/tavily-crawl-tool";
@@ -132,12 +131,4 @@ Focus exclusively on company information. Ignore product features and logo extra
    `,
    model: openrouter("deepseek/deepseek-chat-v3.1"),
    tools: { tavilyCrawlTool, tavilySearchTool, dateTool },
-   inputProcessors: [
-      new LanguageDetector({
-         model: openrouter("deepseek/deepseek-chat-v3.1"),
-         targetLanguages: ["en", "pt"],
-         strategy: "translate",
-         threshold: 0.8,
-      }),
-   ],
 });

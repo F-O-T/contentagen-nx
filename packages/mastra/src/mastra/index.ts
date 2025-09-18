@@ -14,11 +14,22 @@ export type CustomRuntimeContext = {
 };
 export const mastra = new Mastra({
    bundler: {
-      externals: ["@packages/openrouter", "@packages/workers"],
+      sourcemap: true,
+      transpilePackages: [
+         "@packages/files/client",
+         "@packages/payment/client",
+         "@packages/payment/ingestion",
+         "@packages/tavily/helpers",
+         "@packages/tavily/client",
+         "@packages/chroma-db/client",
+         "@packages/chroma-db/helpers",
+         "@packages/environment/helpers",
+         "@packages/environment/server",
+      ],
    },
+
    workflows: {
       createBrandKnowledgeWorkflow,
-      createCompetitorKnowledgeWorkflow: createBrandKnowledgeWorkflow, // Use same workflow, target parameter determines behavior
       crawlCompetitorForFeatures,
       extractCompetitorBrandInfoWorkflow,
    },

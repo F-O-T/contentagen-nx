@@ -11,17 +11,17 @@
       }
    },
    "scripts": {
-      "dev": "dotenv -e .env -- bunx --bun mastra dev",
+      "dev": "dotenv -e .env -- bunx mastra dev",
       "build": "tsc",
       "check": "biome check --write ./src",
       "typecheck": "tsc --noEmit --emitDeclarationOnly false"
    },
    "dependencies": {
-      "@mastra/core": "^0.16.3",
+      "@mastra/core": "^0.17.1",
       "@mastra/libsql": "^0.14.1",
-      "@mastra/loggers": "^0.10.11",
-      "@mastra/memory": "^0.15.1",
-      "@mastra/rag": "^1.2.4",
+      "@mastra/loggers": "^0.10.12",
+      "@mastra/memory": "^0.15.2",
+      "@mastra/rag": "^1.2.5",
       "@openrouter/ai-sdk-provider": "catalog:openrouter",
       "@packages/chroma-db": "workspace:*",
       "@packages/environment": "workspace:*",

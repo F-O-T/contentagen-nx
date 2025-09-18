@@ -24,7 +24,7 @@ export const tavilySearchTool = createTool({
          const polarClient = getPaymentClient(serverEnv.POLAR_ACCESS_TOKEN);
          const searchResult = await tavilySearch(tavily, query, {
             autoParameters: true,
-            searchDepth: "advanced",
+            searchDepth: "basic",
          });
          const usageData = createWebSearchUsageMetadata({
             method: "advanced",

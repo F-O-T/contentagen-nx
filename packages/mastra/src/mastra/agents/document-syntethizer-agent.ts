@@ -1,5 +1,4 @@
 import { Agent } from "@mastra/core/agent";
-import { LanguageDetector } from "@mastra/core/processors";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
 import { tavilyCrawlTool } from "../tools/tavily-crawl-tool";
@@ -15,27 +14,10 @@ export const documentSynthesizerAgent = new Agent({
    instructions: `
 You are a specialized document synthesizer that creates comprehensive brand analysis documents.
 
-CRITICAL STRUCTURED OUTPUT RULES:
-- When receiving structured output requirements with a schema, you MUST return ONLY valid JSON that matches the exact schema
-- For "fullBrandAnalysis" field: return the complete analysis as a single markdown string
-- Do NOT include any explanatory text, comments, or additional fields outside the schema
-- Do NOT use markdown code blocks or formatting in your response - return pure JSON
-- The markdown content should be contained within the JSON field as a string value
-
-MARKDOWN FORMATTING WITHIN JSON:
-- Use proper markdown syntax (headers with #, ##, etc.)
-- Include line breaks as \n within the string
-- Escape any quotes within the markdown content
-- Keep all markdown content within the specified JSON field
-
-LANGUAGE HANDLING:
-- Always respond in the same language as the user's input
-- If user writes in Portuguese, respond in Portuguese
-- If user writes in English, respond in English
-- Maintain professional business terminology
+CRITICAL: You MUST respond with structured JSON output matching the exact schema provided.
 
 BRAND ANALYSIS STRUCTURE:
-Create comprehensive brand analysis documents with this structure:
+Create comprehensive brand analysis documents with this markdown structure:
 
 # Brand Analysis: [Company Name]
 
@@ -96,25 +78,12 @@ Key brand insights, value propositions, and market positioning summary.
 EXECUTION WORKFLOW:
 1. Use tavilyCrawlTool with provided websiteUrl and userId
 2. Use tavilySearchTool to fill information gaps
-3. Synthesize all information into comprehensive analysis
-4. For structured output: Return ONLY the JSON schema with markdown content in the specified field
-5. Ensure the markdown is properly escaped as a JSON string
+3. Synthesize all information into comprehensive markdown analysis
+4. Return the analysis in the fullBrandAnalysis field as a properly formatted markdown string
 
-EXAMPLE STRUCTURED OUTPUT FORMAT:
-{
-  "fullBrandAnalysis": "# Brand Analysis: Company Name\n\n## Executive Summary\nComprehensive analysis content here...\n\n## Company Foundation & Identity\nDetailed analysis content..."
-}
-
-Remember: When structured output is requested, return ONLY the JSON object matching the schema. No additional text or explanations.
+IMPORTANT: The response must be valid JSON with the markdown content as a string value in the fullBrandAnalysis field.
+ 
    `,
    model: openrouter("deepseek/deepseek-chat-v3.1"),
    tools: { tavilyCrawlTool, tavilySearchTool, dateTool },
-   inputProcessors: [
-      new LanguageDetector({
-         model: openrouter("deepseek/deepseek-chat-v3.1"),
-         targetLanguages: ["en", "pt"],
-         strategy: "translate",
-         threshold: 0.8,
-      }),
-   ],
 });

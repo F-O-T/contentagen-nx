@@ -1,5 +1,4 @@
 import { Agent } from "@mastra/core/agent";
-import { LanguageDetector } from "@mastra/core/processors";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
 
@@ -18,12 +17,6 @@ export const documentGenerationAgent = new Agent({
  - Each document must be properly formatted markdown within the specified fields
  - Do not add extra fields or deviate from the schema structure
  - Generate exactly 5 documents as specified in the schema
- 
- LANGUAGE HANDLING:
- - Always respond in the same language as the input brand analysis
- - If input is Portuguese, generate all documents in Portuguese
- - If input is English, generate all documents in English
- - Maintain professional business terminology
  
  DOCUMENTATION FOCUS:
  Your primary goal is to document what the brand IS right now, not what it could become. Focus on:
@@ -305,12 +298,4 @@ export const documentGenerationAgent = new Agent({
  Focus on creating a complete, accurate snapshot of the brand as it exists today, providing detailed documentation that serves as a comprehensive reference for the brand's current identity, capabilities, and market presence.
     `,
    model: openrouter("deepseek/deepseek-chat-v3.1"),
-   inputProcessors: [
-      new LanguageDetector({
-         model: openrouter("deepseek/deepseek-chat-v3.1"),
-         targetLanguages: ["en", "pt"],
-         strategy: "translate",
-         threshold: 0.8,
-      }),
-   ],
 });

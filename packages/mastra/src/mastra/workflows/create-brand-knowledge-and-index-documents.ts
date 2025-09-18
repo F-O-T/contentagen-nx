@@ -249,19 +249,8 @@ const getFullBrandAnalysis = createStep({
          "Analyzing brand website and gathering information",
       );
       const inputPrompt = `
-Help me with my business brand analysis.
 websiteUrl: ${websiteUrl}
 userId: ${userId}
-
- Requirements:
-- Use the tavilyCrawlTool to analyze the website content
-- Use tavilySearchTool to fill any information gaps
-- Generate a complete brand analysis in perfect markdown format
-- Include all sections: company foundation, business model, products, market positioning, credentials, digital presence, and strategic insights
-- Extract specific details, metrics, and concrete information
-- Maintain professional analysis throughout
-
-Return the complete analysis as a well-structured markdown document.
 `;
       const result = await documentSynthesizerAgent.generateVNext(
          [

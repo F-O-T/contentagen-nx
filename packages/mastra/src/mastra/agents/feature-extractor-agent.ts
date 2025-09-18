@@ -193,12 +193,4 @@ Focus exclusively on features. Ignore everything else. Maximize accuracy from mi
    `,
    model: openrouter("deepseek/deepseek-chat-v3.1"),
    tools: { tavilyCrawlTool, tavilySearchTool, dateTool },
-   inputProcessors: [
-      new LanguageDetector({
-         model: openrouter("deepseek/deepseek-chat-v3.1"),
-         targetLanguages: ["en", "pt"],
-         strategy: "translate",
-         threshold: 0.8,
-      }),
-   ],
 });
