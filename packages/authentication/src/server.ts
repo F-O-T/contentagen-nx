@@ -21,12 +21,19 @@ import { polar, portal, checkout, usage } from "@polar-sh/better-auth";
 import { findMemberByUserId } from "@packages/database/repositories/auth-repository";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { getCustomerState } from "@packages/payment/ingestion";
+import { z } from "zod";
 export interface AuthOptions {
    db: DatabaseInstance;
    polarClient: Polar;
    resendClient: ResendClient;
 }
-
+const brandKnowledgeStatusEnum = z.enum([
+   "pending",
+   "analyzing",
+   "chunking",
+   "completed",
+   "failed",
+]);
 export interface AuthPluginOptions {
    polar: ReturnType<typeof polar>;
    emailOTP: ReturnType<typeof emailOTP>;
@@ -112,6 +119,21 @@ export const getAuthOptions = (
          openAPI(),
          organization({
             organizationLimit: 1,
+            schema: {
+               organization: {
+                  additionalFields: {
+                     websiteUrl: {
+                        type: "string",
+                     },
+                     summary: {
+                        type: "string",
+                     },
+                     description: {
+                        type: "string",
+                     },
+                  },
+               },
+            },
             teams: {
                enabled: true,
                maximumTeams: 10,

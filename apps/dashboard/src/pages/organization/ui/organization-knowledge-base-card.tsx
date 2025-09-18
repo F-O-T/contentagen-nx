@@ -47,16 +47,14 @@ export function OrganizationKnowledgeBaseCard({
 }: {
    organizationId: string;
    uploadedFiles?: UploadedFile[];
-   brandKnowledgeStatus?: "pending" | "analyzing" | "chunking" | "completed" | "failed";
+   brandKnowledgeStatus?:
+      | "pending"
+      | "analyzing"
+      | "chunking"
+      | "completed"
+      | "failed";
 }) {
    const [showGenerateCredenza, setShowGenerateCredenza] = useState(false);
-   const queryClient = useQueryClient();
-   const trpc = useTRPC();
-
-   const uploadedFiles = useMemo(
-      () => uploadedFiles || [],
-      [uploadedFiles],
-   );
 
    const getStatusBadge = () => {
       switch (brandKnowledgeStatus) {
@@ -81,9 +79,7 @@ export function OrganizationKnowledgeBaseCard({
                <CardDescription>
                   Files generated using your organization website url
                </CardDescription>
-               <CardAction>
-                  {getStatusBadge()}
-               </CardAction>
+               <CardAction>{getStatusBadge()}</CardAction>
             </CardHeader>
             <CardContent className="grid gap-2">
                {uploadedFiles.map((file, index) => (
@@ -121,7 +117,9 @@ export function OrganizationKnowledgeBaseCard({
                            <DropdownMenuItem
                               onClick={() => {
                                  // TODO: Implement file deletion for organization files
-                                 toast.info("File deletion not implemented yet");
+                                 toast.info(
+                                    "File deletion not implemented yet",
+                                 );
                               }}
                            >
                               Delete
@@ -134,7 +132,8 @@ export function OrganizationKnowledgeBaseCard({
             </CardContent>
             <CardFooter className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
                <span>
-                  {uploadedFiles.length} file{uploadedFiles.length !== 1 ? "s" : ""} uploaded
+                  {uploadedFiles.length} file
+                  {uploadedFiles.length !== 1 ? "s" : ""} uploaded
                </span>
                <Button
                   variant="outline"
@@ -153,3 +152,4 @@ export function OrganizationKnowledgeBaseCard({
       </>
    );
 }
+

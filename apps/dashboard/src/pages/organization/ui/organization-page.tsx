@@ -1,51 +1,19 @@
 import { useTRPC } from "@/integrations/clients";
-import {
-   Card,
-   CardHeader,
-   CardTitle,
-   CardDescription,
-   CardContent,
-} from "@packages/ui/components/card";
-import { Building2, Users, CalendarDays } from "lucide-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { CreateOrganizationCredenza } from "../features/create-organization-credenza";
-import { InfoItem } from "@packages/ui/components/info-item";
 import { useIsomorphicLayoutEffect } from "@packages/ui/hooks/use-isomorphic-layout-effect";
 import { OrganizationPageMembersTable } from "./organization-page-members-table";
-import { OrganizationKnowledgeBaseCard } from "./organization-knowledge-base-card";
+import { OrganizationStatsCard } from "./organization-stats-card";
+import { OrganizationQuickActions } from "./organization-quick-actions";
+import { OrganizationBrandConfigurationCard } from "./organization-brand-configuration-card";
 
 export function OrganizationPage() {
    const [open, setOpen] = useState(false);
    const trpc = useTRPC();
    const { data: org, isLoading: orgLoading } = useSuspenseQuery(
       trpc.authHelpers.getDefaultOrganization.queryOptions(),
-   );
-
-   const detailsInfoItems = useMemo(
-      () => [
-         {
-            label: "Name",
-            value: org?.name ?? "—",
-            icon: <Building2 className="w-4 h-4" />,
-         },
-         {
-            label: "Created At",
-            value: org?.createdAt
-               ? new Date(org.createdAt).toLocaleString()
-               : "—",
-            icon: <CalendarDays className="w-4 h-4" />,
-         },
-         {
-            label: "Members",
-            value: Array.isArray(org?.members)
-               ? String(org.members.length)
-               : "—",
-            icon: <Users className="w-4 h-4" />,
-         },
-      ],
-      [org],
    );
 
    useIsomorphicLayoutEffect(() => {
@@ -56,34 +24,13 @@ export function OrganizationPage() {
       <div className="flex flex-col gap-4">
          <TalkingMascot message="Create and manage your organization here. Invite team members and control access." />
          {org ? (
-            <div className="grid  grid-cols-3 gap-4">
-               <OrganizationPageMembersTable organization={org} />
-
-               <div className="col-span-1 flex flex-col gap-4">
-                  <Card>
-                     <CardHeader>
-                        <CardTitle>Organization Details</CardTitle>
-                        <CardDescription>
-                           View your organization info and invite new members.
-                        </CardDescription>
-                     </CardHeader>
-                     <CardContent className="grid gap-2">
-                        {detailsInfoItems.map((item) => (
-                           <InfoItem
-                              key={item.label}
-                              icon={item.icon}
-                              label={item.label}
-                              value={item.value}
-                           />
-                        ))}
-                     </CardContent>
-                  </Card>
-                  
-                  <OrganizationKnowledgeBaseCard 
-                     organizationId={org.id}
-                     uploadedFiles={org.uploadedFiles || []}
-                     brandKnowledgeStatus={org.brandKnowledgeStatus || "pending"}
-                  />
+            <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
+               <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
+                  <OrganizationStatsCard />
+                  <OrganizationPageMembersTable organization={org} />
+               </div>
+               <div className="col-span-1 gap-4 flex flex-col">
+                  <OrganizationQuickActions organization={org} />
                </div>
             </div>
          ) : (

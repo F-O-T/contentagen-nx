@@ -5,8 +5,16 @@ import {
    boolean,
    integer,
    jsonb,
+   pgEnum,
 } from "drizzle-orm/pg-core";
 
+export const brandKnowledgeStatusEnum = pgEnum("brand_knowledge_status", [
+   "pending",
+   "analyzing",
+   "chunking",
+   "completed",
+   "failed",
+]);
 export const user = pgTable("user", {
    id: text("id").primaryKey(),
    name: text("name").notNull(),
@@ -79,11 +87,17 @@ export const organization = pgTable("organization", {
    name: text("name").notNull(),
    slug: text("slug").unique(),
    logo: text("logo"),
+   createdAt: timestamp("created_at").notNull(),
+   metadata: text("metadata"),
+   websiteUrl: text("website_url"),
+   summary: text("summary"),
+   description: text("description"),
+   brandKnowledgeStatus: brandKnowledgeStatusEnum("brand_knowledge_status")
+      .default("pending")
+      .notNull(),
    uploadedFiles: jsonb("uploaded_files")
       .$type<{ fileName: string; fileUrl: string; uploadedAt: string }[]>()
       .default([]),
-   createdAt: timestamp("created_at").notNull(),
-   metadata: text("metadata"),
 });
 
 export const member = pgTable("member", {
