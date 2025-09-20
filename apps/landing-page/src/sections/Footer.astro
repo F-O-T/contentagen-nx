@@ -87,8 +87,8 @@ const year = new Date().getFullYear();
                 <li>
                   <a
                     href={item.href}
-                    target={item.target || '_self'}
-                    rel={item.target === '_blank' ? 'noopener noreferrer' : undefined}
+                    target={'target' in item ? item.target : '_self'}
+                    rel={'target' in item && item.target === '_blank' ? 'noopener noreferrer' : undefined}
                     class="text-muted-foreground hover:text-primary block transition-colors duration-150 text-sm"
                   >
                     <span>{item.title}</span>
