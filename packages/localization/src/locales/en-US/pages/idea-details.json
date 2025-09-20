@@ -1,0 +1,43 @@
+{
+   "mascot-message": "Review and manage your content idea details.",
+   "stats": {
+      "confidence-score": "Confidence Score",
+      "confidence-score-description": "AI confidence in this idea's potential",
+      "total-keywords": "Total keywords",
+      "total-keywords-description": "Total keywords associated with this idea"
+   },
+   "quick-actions": {
+      "title": "Quick Actions",
+      "description": "Perform common tasks related to this idea.",
+      "approve-idea": "Approve Idea",
+      "delete-idea": "Delete Idea"
+   },
+   "rationale": {
+      "title": "Score Rationale",
+      "description": "AI reasoning behind the confidence score"
+   },
+   "content": {
+      "title": "Idea Preview",
+      "description": "Preview of the generated content",
+      "untitled": "Untitled Idea",
+      "unknown-date": "Unknown date"
+   },
+   "meta": {
+      "title": "Meta Information",
+      "description": "Additional details about this idea.",
+      "status": "Status",
+      "tags": "Tags",
+      "sources": "Sources",
+      "created": "Created",
+      "updated": "Updated",
+      "none": "None",
+      "unknown": "Unknown"
+   },
+   "toasts": {
+      "approve-success": "Idea approved successfully and sent to content generation",
+      "approve-error": "Error approving idea",
+      "delete-success": "Idea deleted successfully",
+      "delete-error": "Error deleting idea",
+      "unknown-error": "Unknown error"
+   }
+}

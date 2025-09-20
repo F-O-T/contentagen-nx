@@ -17,6 +17,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
 import { useState } from "react";
+import { translate } from "@packages/localization";
 import type { IdeaSelect } from "@packages/database/schema";
 import { ApproveConfirmationCredenza } from "../features/approve-confirmation-credenza";
 import { IdeaDeleteConfirmationCredenza } from "../features/delete-confirmation-credenza";
@@ -31,7 +32,7 @@ export function IdeaDetailsQuickActions({ idea }: { idea: IdeaSelect }) {
       trpc.ideas.approve.mutationOptions({
          onSuccess: async (data) => {
             toast.success(
-               "Idea approved successfully and sent to content generation",
+               translate("pages.idea-details.toasts.approve-success"),
             );
             router.navigate({
                to: "/content/$id",
@@ -43,7 +44,7 @@ export function IdeaDetailsQuickActions({ idea }: { idea: IdeaSelect }) {
          },
          onError: (error) => {
             toast.error(
-               `Error approving idea: ${error.message ?? "Unknown error"}`,
+               `${translate("pages.idea-details.toasts.approve-error")}: ${error.message ?? translate("pages.idea-details.toasts.unknown-error")}`,
             );
          },
       }),
@@ -52,7 +53,9 @@ export function IdeaDetailsQuickActions({ idea }: { idea: IdeaSelect }) {
    const deleteMutation = useMutation(
       trpc.ideas.delete.mutationOptions({
          onSuccess: () => {
-            toast.success("Idea deleted successfully");
+            toast.success(
+               translate("pages.idea-details.toasts.delete-success"),
+            );
             router.navigate({
                to: "/ideas",
                search: { agentId: idea.agentId },
@@ -60,7 +63,7 @@ export function IdeaDetailsQuickActions({ idea }: { idea: IdeaSelect }) {
          },
          onError: (error) => {
             toast.error(
-               `Error deleting idea: ${error.message ?? "Unknown error"}`,
+               `${translate("pages.idea-details.toasts.delete-error")}: ${error.message ?? translate("pages.idea-details.toasts.unknown-error")}`,
             );
          },
       }),
@@ -79,13 +82,13 @@ export function IdeaDetailsQuickActions({ idea }: { idea: IdeaSelect }) {
    const actions = [
       {
          icon: CheckCircle,
-         label: "Approve Idea",
+         label: translate("pages.idea-details.quick-actions.approve-idea"),
          onClick: () => setApproveDialogOpen(true),
          disabled: idea.status === "approved" || idea.status === "rejected",
       },
       {
          icon: Trash2,
-         label: "Delete Idea",
+         label: translate("pages.idea-details.quick-actions.delete-idea"),
          onClick: () => setDeleteDialogOpen(true),
          disabled: false,
       },
@@ -95,9 +98,11 @@ export function IdeaDetailsQuickActions({ idea }: { idea: IdeaSelect }) {
       <>
          <Card>
             <CardHeader>
-               <CardTitle>Quick Actions</CardTitle>
+               <CardTitle>
+                  {translate("pages.idea-details.quick-actions.title")}
+               </CardTitle>
                <CardDescription>
-                  Perform common tasks related to this idea.
+                  {translate("pages.idea-details.quick-actions.description")}
                </CardDescription>
             </CardHeader>
             <CardContent className="w-full flex items-center justify-center gap-2 flex-wrap">

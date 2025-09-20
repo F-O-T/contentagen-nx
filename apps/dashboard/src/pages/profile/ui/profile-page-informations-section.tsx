@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { translate } from "@packages/localization";
 
 import {
    Card,
@@ -55,34 +56,44 @@ export function ProfileInformation() {
          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                <div>
-                  <CardTitle>Profile Information</CardTitle>
+                  <CardTitle>
+                     {translate("pages.profile.information.title")}
+                  </CardTitle>
                   <CardDescription>
-                     Update your personal information and account details.
+                     {translate("pages.profile.information.description")}
                   </CardDescription>
                </div>
                <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                      <Button variant="ghost" size="icon">
                         <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">More options</span>
+                        <span className="sr-only">
+                           {translate("pages.profile.information.more-options")}
+                        </span>
                      </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                      <DropdownMenuItem onClick={() => setShowEmailModal(true)}>
                         <MailIcon className="h-4 w-4" />
-                        Update Email
+                        {translate(
+                           "pages.profile.information.actions.update-email",
+                        )}
                      </DropdownMenuItem>
                      <DropdownMenuItem
                         onClick={() => setShowPasswordModal(true)}
                      >
                         <KeyIcon className="h-4 w-4" />
-                        Update Password
+                        {translate(
+                           "pages.profile.information.actions.update-password",
+                        )}
                      </DropdownMenuItem>
                      <DropdownMenuItem
                         onClick={() => setShowProfileModal(true)}
                      >
                         <UserIcon className="h-4 w-4" />
-                        Update Name & Photo
+                        {translate(
+                           "pages.profile.information.actions.update-profile",
+                        )}
                      </DropdownMenuItem>
                   </DropdownMenuContent>
                </DropdownMenu>
@@ -103,14 +114,20 @@ export function ProfileInformation() {
                <div className="flex flex-col gap-4 w-full h-full">
                   <InfoItem
                      icon={<UserIcon className="h-4 w-4" />}
-                     label="Name"
-                     value={session?.user?.name || "Anonymous"}
+                     label={translate("pages.profile.information.fields.name")}
+                     value={
+                        session?.user?.name ||
+                        translate("pages.profile.information.fields.anonymous")
+                     }
                      className="normal-case"
                   />
                   <InfoItem
                      icon={<MailIcon className="h-4 w-4" />}
-                     label="Email"
-                     value={session?.user?.email || "No email set"}
+                     label={translate("pages.profile.information.fields.email")}
+                     value={
+                        session?.user?.email ||
+                        translate("pages.profile.information.fields.no-email")
+                     }
                      className="normal-case"
                   />
                </div>

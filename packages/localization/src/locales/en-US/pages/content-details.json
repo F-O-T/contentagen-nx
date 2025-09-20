@@ -1,0 +1,50 @@
+{
+   "mascot-message": "Review, edit, and manage your content details here.",
+   "stats": {
+      "word-count": "Word Count",
+      "word-count-description": "Total words in the content",
+      "content-quality": "Content Quality",
+      "content-quality-description": "AI-assessed quality score"
+   },
+   "details": {
+      "basic-info": "Basic Information",
+      "meta-info": "Meta Information",
+      "title": "Title",
+      "status": "Status",
+      "agent": "Agent",
+      "created": "Created",
+      "updated": "Updated"
+   },
+   "quick-actions": {
+      "title": "Quick Actions",
+      "description": "Perform common tasks related to this content.",
+      "regenerate": "Regenerate Content",
+      "edit": "Edit Content Body",
+      "upload-image": "Upload Image",
+      "preview": "Blog Preview",
+      "approve": "Approve Content",
+      "share": "Share Content",
+      "make-private": "Make Private",
+      "delete": "Delete Content"
+   },
+   "versions": {
+      "title": "Content Versions",
+      "description": "View and manage different versions of this content.",
+      "current": "Current",
+      "view-details": "View Details"
+   },
+   "content": {
+      "title": "Generated Content",
+      "loading": "Generating content...",
+      "edit": "Edit Content",
+      "save": "Save Changes",
+      "cancel": "Cancel"
+   },
+   "status": {
+      "draft": "Draft",
+      "pending": "Pending",
+      "published": "Published",
+      "generating": "Generating",
+      "failed": "Failed"
+   }
+}

@@ -1,4 +1,5 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
+import { translate } from "@packages/localization";
 import { AgentPersonaCard } from "./agent-details-persona-card";
 import { AgentStatsCard } from "./agent-stats-card";
 import { Suspense, useMemo } from "react";
@@ -39,12 +40,20 @@ export function AgentDetailsPage() {
                });
 
                if (data.status === "failed") {
-                  toast.error(data.message || "Brand knowledge job failed");
+                  toast.error(
+                     data.message ||
+                        translate(
+                           "pages.agent-details.toasts.knowledge-failed",
+                        ),
+                  );
                   return;
                }
                if (data.status === "completed") {
                   toast.success(
-                     data.message || "Brand knowledge job completed",
+                     data.message ||
+                        translate(
+                           "pages.agent-details.toasts.knowledge-completed",
+                        ),
                   );
 
                   return;
@@ -60,7 +69,9 @@ export function AgentDetailsPage() {
    return (
       <Suspense>
          <main className="flex flex-col gap-4">
-            <TalkingMascot message="Manage your agent's configuration and knowledge base." />
+            <TalkingMascot
+               message={translate("pages.agent-details.mascot-message")}
+            />
             <div className="grid md:grid-cols-3 grid-cols-1  gap-4">
                <div className="col-span-1  md:col-span-2 flex flex-col  gap-4">
                   <AgentStatsCard />

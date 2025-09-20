@@ -1,0 +1,25 @@
+{
+   "mascot-message": "Here you can manage all your content, Create, Delete, or explore it below!",
+   "toolbar": {
+      "select-all": "Select All",
+      "unselect-all": "Unselect All",
+      "filtering": "Filtering",
+      "new-content": "New content",
+      "bulk-actions": "Bulk Actions",
+      "pagination": {
+         "of": "of"
+      }
+   },
+   "bulk-actions": {
+      "delete-confirmation": {
+         "message": "This will permanently delete {{count}} content item",
+         "message_plural": "This will permanently delete {{count}} content items"
+      },
+      "approve-confirmation": {
+         "message": "This will approve the selected content items that are in draft or pending status. Only draft and pending items will be approved. This action will make the content publicly available."
+      }
+   },
+   "delete-confirmation": {
+      "message": "This will permanently delete \"{{title}}\" and all associated data. This action cannot be undone."
+   }
+}

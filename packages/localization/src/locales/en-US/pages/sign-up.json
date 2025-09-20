@@ -1,0 +1,33 @@
+{
+   "title": "Sign Up",
+   "description": "Create your account to start using the app.",
+   "steps": {
+      "basic-info": "Your personal information",
+      "password": "Password"
+   },
+   "form": {
+      "name": {
+         "label": "Name",
+         "placeholder": "Enter your name"
+      },
+      "email": {
+         "label": "Email",
+         "placeholder": "Enter your email"
+      },
+      "password": {
+         "label": "Password",
+         "placeholder": "Create a password"
+      },
+      "confirm-password": {
+         "label": "Confirm Password",
+         "placeholder": "Confirm your password"
+      },
+      "next": "Next",
+      "previous": "Previous",
+      "submit": "Create Account"
+   },
+   "footer": {
+      "have-account": "Already have an account?",
+      "sign-in-link": "Sign in here"
+   }
+}

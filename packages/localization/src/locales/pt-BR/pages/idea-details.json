@@ -1,0 +1,43 @@
+{
+   "mascot-message": "Revise e gerencie os detalhes da sua ideia de conteúdo.",
+   "stats": {
+      "confidence-score": "Pontuação de Confiança",
+      "confidence-score-description": "Confiança da IA no potencial desta ideia",
+      "total-keywords": "Total de palavras-chave",
+      "total-keywords-description": "Total de palavras-chave associadas a esta ideia"
+   },
+   "quick-actions": {
+      "title": "Ações Rápidas",
+      "description": "Execute tarefas comuns relacionadas a esta ideia.",
+      "approve-idea": "Aprovar Ideia",
+      "delete-idea": "Deletar Ideia"
+   },
+   "rationale": {
+      "title": "Justificativa da Pontuação",
+      "description": "Raciocínio da IA por trás da pontuação de confiança"
+   },
+   "content": {
+      "title": "Prévia da Ideia",
+      "description": "Prévia do conteúdo gerado",
+      "untitled": "Ideia Sem Título",
+      "unknown-date": "Data desconhecida"
+   },
+   "meta": {
+      "title": "Meta Informações",
+      "description": "Detalhes adicionais sobre esta ideia.",
+      "status": "Status",
+      "tags": "Tags",
+      "sources": "Fontes",
+      "created": "Criado",
+      "updated": "Atualizado",
+      "none": "Nenhum",
+      "unknown": "Desconhecido"
+   },
+   "toasts": {
+      "approve-success": "Ideia aprovada com sucesso e enviada para geração de conteúdo",
+      "approve-error": "Erro ao aprovar ideia",
+      "delete-success": "Ideia deletada com sucesso",
+      "delete-error": "Erro ao deletar ideia",
+      "unknown-error": "Erro desconhecido"
+   }
+}

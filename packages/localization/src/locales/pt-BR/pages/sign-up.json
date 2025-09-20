@@ -1,0 +1,33 @@
+{
+   "title": "Cadastrar",
+   "description": "Crie sua conta para começar a usar o aplicativo.",
+   "steps": {
+      "basic-info": "Suas informações pessoais",
+      "password": "Senha"
+   },
+   "form": {
+      "name": {
+         "label": "Nome",
+         "placeholder": "Digite seu nome"
+      },
+      "email": {
+         "label": "Email",
+         "placeholder": "Digite seu email"
+      },
+      "password": {
+         "label": "Senha",
+         "placeholder": "Crie uma senha"
+      },
+      "confirm-password": {
+         "label": "Confirmar Senha",
+         "placeholder": "Confirme sua senha"
+      },
+      "next": "Próximo",
+      "previous": "Anterior",
+      "submit": "Criar Conta"
+   },
+   "footer": {
+      "have-account": "Já tem uma conta?",
+      "sign-in-link": "Entre aqui"
+   }
+}

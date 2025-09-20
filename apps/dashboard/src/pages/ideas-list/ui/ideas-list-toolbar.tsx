@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    DropdownMenu,
@@ -34,12 +35,14 @@ export function IdeasListToolbar() {
    const actions = useMemo(
       () => [
          {
-            label: allSelected ? "Unselect All" : "Select All",
+            label: allSelected
+               ? translate("pages.ideas-list.toolbar.unselect-all")
+               : translate("pages.ideas-list.toolbar.select-all"),
             icon: CheckSquare,
             onClick: handleSelectAll,
          },
          {
-            label: "Bulk Actions",
+            label: translate("pages.ideas-list.toolbar.bulk-actions"),
             icon: Archive,
             onClick: () => setOpenBulk(true),
             disabled: selectedItemsCount === 0,
@@ -62,7 +65,8 @@ export function IdeasListToolbar() {
                </Button>
 
                <span className="text-sm text-muted-foreground px-2">
-                  {page} of {totalPages}
+                  {page} {translate("pages.ideas-list.toolbar.pagination.of")}{" "}
+                  {totalPages}
                </span>
 
                <Button

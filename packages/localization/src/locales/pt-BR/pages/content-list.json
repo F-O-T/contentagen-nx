@@ -1,0 +1,25 @@
+{
+   "mascot-message": "Aqui você pode gerenciar todo o seu conteúdo, criar, excluir ou explorá-lo abaixo!",
+   "toolbar": {
+      "select-all": "Selecionar Todos",
+      "unselect-all": "Desmarcar Todos",
+      "filtering": "Filtragem",
+      "new-content": "Novo conteúdo",
+      "bulk-actions": "Ações em Lote",
+      "pagination": {
+         "of": "de"
+      }
+   },
+   "bulk-actions": {
+      "delete-confirmation": {
+         "message": "Isso excluirá permanentemente {{count}} item de conteúdo",
+         "message_plural": "Isso excluirá permanentemente {{count}} itens de conteúdo"
+      },
+      "approve-confirmation": {
+         "message": "Isso aprovará os itens de conteúdo selecionados que estão em status de rascunho ou pendente. Apenas itens de rascunho e pendentes serão aprovados. Esta ação tornará o conteúdo publicamente disponível."
+      }
+   },
+   "delete-confirmation": {
+      "message": "Isso excluirá permanentemente \"{{title}}\" e todos os dados associados. Esta ação não pode ser desfeita."
+   }
+}

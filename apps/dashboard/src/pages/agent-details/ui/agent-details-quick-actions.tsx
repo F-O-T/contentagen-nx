@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { Button } from "@packages/ui/components/button";
+import { translate } from "@packages/localization";
 import { File, Edit, Trash, Plus, Camera, AlertTriangle } from "lucide-react";
 import {
    Card,
@@ -95,9 +96,11 @@ export function AgentDetailsQuickActions({ agent }: { agent: AgentSelect }) {
       <>
          <Card>
             <CardHeader>
-               <CardTitle>Quick Actions</CardTitle>
+               <CardTitle>
+                  {translate("pages.agent-details.quick-actions.title")}
+               </CardTitle>
                <CardDescription>
-                  Perform common tasks related to the agent.
+                  {translate("pages.agent-details.quick-actions.description")}
                </CardDescription>
             </CardHeader>
             <CardContent className="w-full flex items-center justify-center gap-4">

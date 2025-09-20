@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    DropdownMenu,
@@ -43,22 +44,24 @@ export function ContentListToolbar() {
    const actions = useMemo(
       () => [
          {
-            label: allSelectableSelected ? "Unselect All" : "Select All",
+            label: allSelectableSelected
+               ? translate("pages.content-list.toolbar.unselect-all")
+               : translate("pages.content-list.toolbar.select-all"),
             icon: CheckSquare,
             onClick: handleSelectAll,
          },
          {
-            label: "Filtering",
+            label: translate("pages.content-list.toolbar.filtering"),
             icon: Filter,
             onClick: () => setOpenFilter(true),
          },
          {
-            label: "New content",
+            label: translate("pages.content-list.toolbar.new-content"),
             icon: PlusIcon,
             onClick: () => setOpenNewContent(true),
          },
          {
-            label: "Bulk Actions",
+            label: translate("pages.content-list.toolbar.bulk-actions"),
             icon: Archive,
             onClick: () => setOpenBulk(true),
             disabled: selectedItemsCount === 0,
@@ -81,7 +84,8 @@ export function ContentListToolbar() {
                </Button>
 
                <span className="text-sm text-muted-foreground px-2">
-                  {page} of {totalPages}
+                  {page} {translate("pages.content-list.toolbar.pagination.of")}{" "}
+                  {totalPages}
                </span>
 
                <Button

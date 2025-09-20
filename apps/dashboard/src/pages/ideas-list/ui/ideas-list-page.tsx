@@ -1,4 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { translate } from "@packages/localization";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { IdeaCard } from "./idea-card";
 import { IdeasListToolbar } from "./ideas-list-toolbar";
@@ -15,8 +16,8 @@ function IdeasListPageContent() {
    const { page, limit, agentId } = useIdeasList();
 
    const message = agentId
-      ? "Here you can manage ideas for this specific agent. Create, edit, or explore your creative concepts below!"
-      : "Here you can manage all your ideas. Create, edit, or explore your creative concepts below!";
+      ? translate("pages.ideas-list.mascot-message.agent-specific")
+      : translate("pages.ideas-list.mascot-message.general");
 
    const queryOptions = trpc.ideas.listAllIdeas.queryOptions({
       page,

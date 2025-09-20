@@ -1,5 +1,6 @@
 import { StatsCard } from "@packages/ui/components/stats-card";
 import { useMemo } from "react";
+import { translate } from "@packages/localization";
 import type { ContentSelect } from "@packages/database/schema";
 
 interface ContentStatsCardProps {
@@ -13,13 +14,17 @@ export function ContentStatsCard({ content }: ContentStatsCardProps) {
 
       return [
          {
-            label: "Word Count",
-            description: "Total words in the content",
+            label: translate("pages.content-details.stats.word-count"),
+            description: translate(
+               "pages.content-details.stats.word-count-description",
+            ),
             value: wordCount.toLocaleString(),
          },
          {
-            label: "Content Quality",
-            description: "AI-assessed quality score",
+            label: translate("pages.content-details.stats.content-quality"),
+            description: translate(
+               "pages.content-details.stats.content-quality-description",
+            ),
             value: `${qualityScore}/100`,
          },
       ];

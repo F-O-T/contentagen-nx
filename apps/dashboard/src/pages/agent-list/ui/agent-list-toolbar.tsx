@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    DropdownMenu,
@@ -23,12 +24,14 @@ export function AgentListToolbar() {
    const actions = useMemo(
       () => [
          {
-            label: allSelected ? "Unselect All" : "Select All",
+            label: allSelected
+               ? translate("pages.agent-list.toolbar.unselect-all")
+               : translate("pages.agent-list.toolbar.select-all"),
             icon: CheckSquare,
             onClick: handleSelectAll,
          },
          {
-            label: "Create new agent",
+            label: translate("pages.agent-list.toolbar.create-new-agent"),
             icon: PlusIcon,
             onClick: () => {
                // This will be handled by the Link component
@@ -52,7 +55,8 @@ export function AgentListToolbar() {
             </Button>
 
             <span className="text-sm text-muted-foreground px-2">
-               {page} of {totalPages}
+               {page} {translate("pages.agent-list.toolbar.pagination.of")}{" "}
+               {totalPages}
             </span>
 
             <Button

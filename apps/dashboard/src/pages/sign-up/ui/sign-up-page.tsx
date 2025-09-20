@@ -1,3 +1,4 @@
+import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
@@ -14,8 +15,8 @@ import { Link } from "@tanstack/react-router";
 import { useSignUp } from "../lib/use-sign-up";
 
 const steps = [
-   { id: "basic-info", title: "Your personal information" },
-   { id: "password", title: "Password" },
+   { id: "basic-info", title: "basic-info" },
+   { id: "password", title: "password" },
 ] as const;
 
 const { Stepper } = defineStepper(...steps);
@@ -29,10 +30,10 @@ export function SignUpPage() {
             <Card>
                <CardHeader>
                   <CardTitle className="text-3xl font-bold tracking-tight text-center ">
-                     Sign Up
+                     {translate("pages.sign-up.title")}
                   </CardTitle>
                   <CardDescription className="text-base text-center text-muted-foreground/60">
-                     Create your account to start using the app.
+                     {translate("pages.sign-up.description")}
                   </CardDescription>
                </CardHeader>
                <CardContent className="space-y-4">
@@ -48,12 +49,18 @@ export function SignUpPage() {
                               <form.AppField name="name">
                                  {(field) => (
                                     <field.FieldContainer>
-                                       <field.FieldLabel>Name</field.FieldLabel>
+                                       <field.FieldLabel>
+                                          {translate(
+                                             "pages.sign-up.form.name.label",
+                                          )}
+                                       </field.FieldLabel>
                                        <Input
                                           value={field.state.value}
                                           id={field.name}
                                           name={field.name}
-                                          placeholder="Enter your name"
+                                          placeholder={translate(
+                                             "pages.sign-up.form.name.placeholder",
+                                          )}
                                           autoComplete="name"
                                           onBlur={field.handleBlur}
                                           onChange={(e) =>
@@ -68,14 +75,18 @@ export function SignUpPage() {
                                  {(field) => (
                                     <field.FieldContainer>
                                        <field.FieldLabel>
-                                          Email
+                                          {translate(
+                                             "pages.sign-up.form.email.label",
+                                          )}
                                        </field.FieldLabel>
                                        <Input
                                           value={field.state.value}
                                           id={field.name}
                                           name={field.name}
                                           type="email"
-                                          placeholder="example@email.com"
+                                          placeholder={translate(
+                                             "pages.sign-up.form.email.placeholder",
+                                          )}
                                           autoComplete="email"
                                           onBlur={field.handleBlur}
                                           onChange={(e) =>
@@ -94,13 +105,17 @@ export function SignUpPage() {
                                  {(field) => (
                                     <field.FieldContainer>
                                        <field.FieldLabel>
-                                          Password
+                                          {translate(
+                                             "pages.sign-up.form.password.label",
+                                          )}
                                        </field.FieldLabel>
                                        <PasswordInput
                                           value={field.state.value}
                                           id={field.name}
                                           name={field.name}
-                                          placeholder="Enter your password"
+                                          placeholder={translate(
+                                             "pages.sign-up.form.password.placeholder",
+                                          )}
                                           autoComplete="new-password"
                                           onBlur={field.handleBlur}
                                           onChange={(e) =>
@@ -115,13 +130,17 @@ export function SignUpPage() {
                                  {(field) => (
                                     <field.FieldContainer>
                                        <field.FieldLabel>
-                                          Confirm your password
+                                          {translate(
+                                             "pages.sign-up.form.confirm-password.label",
+                                          )}
                                        </field.FieldLabel>
                                        <PasswordInput
                                           value={field.state.value}
                                           id={field.name}
                                           name={field.name}
-                                          placeholder="Confirm your password"
+                                          placeholder={translate(
+                                             "pages.sign-up.form.confirm-password.placeholder",
+                                          )}
                                           autoComplete="new-password"
                                           onBlur={field.handleBlur}
                                           onChange={(e) =>
@@ -142,7 +161,7 @@ export function SignUpPage() {
                            disabled={methods.isFirst}
                            type="button"
                         >
-                           Previous
+                           {translate("pages.sign-up.form.previous")}
                         </Button>
                         {methods.isLast ? (
                            <form.Subscribe>
@@ -156,7 +175,7 @@ export function SignUpPage() {
                                     className="shadow-lg transition-all duration-300 group bg-primary shadow-primary/20 hover:bg-primary/90 flex gap-2 items-center justify-center"
                                     type="submit"
                                  >
-                                    Sign Up
+                                    {translate("pages.sign-up.form.submit")}
                                  </Button>
                               )}
                            </form.Subscribe>
@@ -186,7 +205,7 @@ export function SignUpPage() {
                                        type="button"
                                        disabled={!canGoNext}
                                     >
-                                       Next
+                                       {translate("pages.sign-up.form.next")}
                                     </Button>
                                  );
                               }}
@@ -197,12 +216,12 @@ export function SignUpPage() {
                </CardContent>
                <CardFooter className="flex items-center justify-center">
                   <p className="text-sm text-center">
-                     Already have an account?
+                     {translate("pages.sign-up.footer.have-account")}
                      <Link
                         to="/auth/sign-in"
                         className="ml-1 underline text-muted-foreground"
                      >
-                        Sign In
+                        {translate("pages.sign-up.footer.sign-in-link")}
                      </Link>
                   </p>
                </CardFooter>

@@ -1,0 +1,11 @@
+{
+   "mascot-message": "Here you can manage all your AI agents. Create, edit, or explore your team below!",
+   "toolbar": {
+      "select-all": "Select All",
+      "unselect-all": "Unselect All",
+      "create-new-agent": "Create new agent",
+      "pagination": {
+         "of": "of"
+      }
+   }
+}

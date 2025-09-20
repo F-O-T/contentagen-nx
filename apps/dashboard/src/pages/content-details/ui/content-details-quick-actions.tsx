@@ -1,5 +1,6 @@
 import { useRouter } from "@tanstack/react-router";
 import { Button } from "@packages/ui/components/button";
+import { translate } from "@packages/localization";
 import {
    Edit,
    Trash2,
@@ -158,44 +159,46 @@ export function ContentDetailsQuickActions({
    const actions: ActionItem[] = [
       {
          icon: RotateCcw,
-         label: "Regenerate Content",
+         label: translate("pages.content-details.quick-actions.regenerate"),
          onClick: handleRegenerate,
          disabled: regenerateMutation.isPending,
       },
       {
          icon: Edit,
-         label: "Edit Content Body",
+         label: translate("pages.content-details.quick-actions.edit"),
          onClick: onEditBody,
          disabled: false,
       },
       {
          icon: Upload,
-         label: "Upload Image",
+         label: translate("pages.content-details.quick-actions.upload-image"),
          onClick: () => setUploadImageOpen(true),
          disabled: false,
       },
       {
          icon: Eye,
-         label: "Blog Preview",
+         label: translate("pages.content-details.quick-actions.preview"),
          onClick: () => setBlogPreviewOpen(true),
          disabled: false,
       },
       {
          icon: CheckCircle,
-         label: "Approve Content",
+         label: translate("pages.content-details.quick-actions.approve"),
          onClick: handleApprove,
          disabled: approveMutation.isPending || content.status === "approved",
       },
       {
          icon: content.shareStatus === "shared" ? Lock : Share,
          label:
-            content.shareStatus === "shared" ? "Make Private" : "Share Content",
+            content.shareStatus === "shared"
+               ? translate("pages.content-details.quick-actions.make-private")
+               : translate("pages.content-details.quick-actions.share"),
          onClick: handleToggleShare,
          disabled: toggleShareMutation.isPending,
       },
       {
          icon: Trash2,
-         label: "Delete Content",
+         label: translate("pages.content-details.quick-actions.delete"),
          onClick: () => setDeleteDialogOpen(true),
          disabled: false,
       },
@@ -205,9 +208,11 @@ export function ContentDetailsQuickActions({
       <>
          <Card>
             <CardHeader>
-               <CardTitle>Quick Actions</CardTitle>
+               <CardTitle>
+                  {translate("pages.content-details.quick-actions.title")}
+               </CardTitle>
                <CardDescription>
-                  Perform common tasks related to this content.
+                  {translate("pages.content-details.quick-actions.description")}
                </CardDescription>
             </CardHeader>
             <CardContent className="w-full flex items-center justify-center gap-2 flex-wrap">

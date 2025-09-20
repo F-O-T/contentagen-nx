@@ -1,0 +1,11 @@
+{
+   "mascot-message": "Aqui você pode gerenciar todos os seus agentes de IA. Crie, edite ou explore sua equipe abaixo!",
+   "toolbar": {
+      "select-all": "Selecionar Todos",
+      "unselect-all": "Desmarcar Todos",
+      "create-new-agent": "Criar novo agente",
+      "pagination": {
+         "of": "de"
+      }
+   }
+}

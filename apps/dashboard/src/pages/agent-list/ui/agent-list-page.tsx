@@ -1,4 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { translate } from "@packages/localization";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { AgentCard } from "./agent-card";
 import { AgentListToolbar } from "./agent-list-toolbar";
@@ -14,7 +15,9 @@ function AgentListPageContent() {
 
    return (
       <main className="h-full w-full flex flex-col gap-4 ">
-         <TalkingMascot message="Here you can manage all your AI agents. Create, edit, or explore your team below!" />
+         <TalkingMascot
+            message={translate("pages.agent-list.mascot-message")}
+         />
          <AgentListToolbar />
          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {data?.items?.map((agent) => (

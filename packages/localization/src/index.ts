@@ -1,5 +1,8 @@
 import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import LanguageDetector from "i18next-browser-languagedetector";
 import enUSResources from "./locales/en-US";
+import ptBRResources from "./locales/pt-BR";
 
 type RecursiveKeyOf<T> = T extends object
    ? {
@@ -17,6 +20,7 @@ export type TranslationKey = RecursiveKeyOf<TranslationResources>;
 
 const resources = {
    en: enUSResources,
+   pt: ptBRResources,
 };
 
 declare module "i18next" {
@@ -25,13 +29,23 @@ declare module "i18next" {
    }
 }
 
-i18n.init({
-   resources,
-   supportedLngs: ["en"],
-   defaultNS: "translation",
-   load: "languageOnly",
-   fallbackLng: "en",
-});
+i18n
+   .use(LanguageDetector)
+   .use(initReactI18next)
+   .init({
+      resources,
+      supportedLngs: ["en", "pt"],
+      defaultNS: "translation",
+      load: "languageOnly",
+      fallbackLng: "en",
+      detection: {
+         order: ["localStorage", "navigator"],
+         caches: ["localStorage"],
+      },
+      interpolation: {
+         escapeValue: false,
+      },
+   });
 
 export default i18n;
 

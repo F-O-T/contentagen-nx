@@ -1,5 +1,6 @@
 import { useParams } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { translate } from "@packages/localization";
 
 import { useTRPC } from "@/integrations/clients";
 import { IdeaDetailsQuickActions } from "./idea-details-quick-actions";
@@ -18,7 +19,9 @@ export function IdeaDetailsPage() {
 
    return (
       <main className="flex flex-col gap-4">
-         <TalkingMascot message="Review and manage your content idea details." />
+         <TalkingMascot
+            message={translate("pages.idea-details.mascot-message")}
+         />
          <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
             <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
                <IdeaStatsCard idea={idea} />

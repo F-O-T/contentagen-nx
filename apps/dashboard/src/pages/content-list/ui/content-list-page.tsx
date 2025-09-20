@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { translate } from "@packages/localization";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { ContentCardsList } from "./content-cards-list";
 import { ContentCardsSkeleton } from "./content-cards-skeleton";
@@ -40,7 +41,9 @@ function ContentListPageContent() {
 
    return (
       <main className="h-full w-full flex flex-col gap-4">
-         <TalkingMascot message="Here you can manage all your content, Create, Delete, or explore it below!" />
+         <TalkingMascot
+            message={translate("pages.content-list.mascot-message")}
+         />
          <ContentListToolbar />
          <Suspense fallback={<ContentCardsSkeleton />}>
             <ContentCardsList />

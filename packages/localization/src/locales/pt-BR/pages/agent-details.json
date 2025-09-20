@@ -1,0 +1,43 @@
+{
+   "mascot-message": "Gerencie a configuração e base de conhecimento do seu agente.",
+   "stats": {
+      "total-content": "Conteúdo Total",
+      "total-content-description": "Todo o conteúdo produzido pelo agente.",
+      "total-words": "Total de Palavras Escritas",
+      "total-words-description": "Palavras escritas cumulativas em todo o conteúdo.",
+      "drafts": "Rascunhos",
+      "drafts-description": "Número de rascunhos que o agente salvou.",
+      "published": "Publicados",
+      "published-description": "Número de peças publicadas produzidas pelo agente."
+   },
+   "persona": {
+      "title": "Persona do Agente",
+      "description": "Configure a personalidade e comportamento do seu agente.",
+      "name": "Nome",
+      "persona": "Persona",
+      "edit": "Editar Agente"
+   },
+   "knowledge-base": {
+      "title": "Base de Conhecimento",
+      "description": "Gerencie o conhecimento e dados de treinamento do seu agente.",
+      "upload": "Enviar Arquivos",
+      "processing": "Processando...",
+      "completed": "Concluído",
+      "failed": "Falhou"
+   },
+   "quick-actions": {
+      "title": "Ações Rápidas",
+      "description": "Execute tarefas comuns relacionadas ao agente.",
+      "edit-agent": "Editar Agente",
+      "delete-agent": "Deletar Agente",
+      "duplicate-agent": "Duplicar Agente"
+   },
+   "navigation": {
+      "previous": "Agente Anterior",
+      "next": "Próximo Agente"
+   },
+   "toasts": {
+      "knowledge-failed": "Trabalho de conhecimento da marca falhou",
+      "knowledge-completed": "Trabalho de conhecimento da marca concluído"
+   }
+}

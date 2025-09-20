@@ -5,6 +5,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
 import { useParams } from "@tanstack/react-router";
 import { useMemo } from "react";
+import { translate } from "@packages/localization";
 
 export function AgentStatsCard() {
    const trpc = useTRPC();
@@ -20,14 +21,16 @@ export function AgentStatsCard() {
 
    const items = useMemo(() => {
       const drafts = {
-         title: "Drafts",
-         description: "Number of drafts the agent has saved.",
+         title: translate("pages.agent-details.stats.drafts"),
+         description: translate("pages.agent-details.stats.drafts-description"),
          value: data.totalDraft.toString(),
       };
 
       const published = {
-         title: "Published",
-         description: "Number of published pieces produced by the agent.",
+         title: translate("pages.agent-details.stats.published"),
+         description: translate(
+            "pages.agent-details.stats.published-description",
+         ),
          value: data.totalPublished.toString(),
       };
 
@@ -37,14 +40,18 @@ export function AgentStatsCard() {
 
       return [
          {
-            label: "Total Content",
-            description: "All the content produced by the agent.",
+            label: translate("pages.agent-details.stats.total-content"),
+            description: translate(
+               "pages.agent-details.stats.total-content-description",
+            ),
             value: totalContentValue,
             details: [drafts, published],
          },
          {
-            label: "Total Words Written",
-            description: "Cumulative words written across all content.",
+            label: translate("pages.agent-details.stats.total-words"),
+            description: translate(
+               "pages.agent-details.stats.total-words-description",
+            ),
             value: data.wordsWritten?.toLocaleString() ?? "0",
          },
          {

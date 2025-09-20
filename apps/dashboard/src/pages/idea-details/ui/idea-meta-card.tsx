@@ -7,56 +7,61 @@ import {
 } from "@packages/ui/components/card";
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Calendar, Clock, Tag, Link2, Circle } from "lucide-react";
+import { translate } from "@packages/localization";
 import type { IdeaSelect } from "@packages/database/schema";
 
 export function IdeaMetaCard({ idea }: { idea: IdeaSelect }) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>Meta Information</CardTitle>
+            <CardTitle>{translate("pages.idea-details.meta.title")}</CardTitle>
             <CardDescription>
-               Additional details about this idea.
+               {translate("pages.idea-details.meta.description")}
             </CardDescription>
          </CardHeader>
          <CardContent className="flex flex-col gap-2">
             <InfoItem
                icon={<Circle className="w-4 h-4" />}
-               label="Status"
-               value={idea.status ?? "Unknown"}
+               label={translate("pages.idea-details.meta.status")}
+               value={
+                  idea.status ?? translate("pages.idea-details.meta.unknown")
+               }
             />
             <InfoItem
                icon={<Tag className="w-4 h-4" />}
-               label="Tags"
+               label={translate("pages.idea-details.meta.tags")}
                value={
-                  idea.meta?.tags?.length ? idea.meta.tags.join(", ") : "None"
+                  idea.meta?.tags?.length
+                     ? idea.meta.tags.join(", ")
+                     : translate("pages.idea-details.meta.none")
                }
             />
             <InfoItem
                icon={<Link2 className="w-4 h-4" />}
-               label="Sources"
+               label={translate("pages.idea-details.meta.sources")}
                value={
                   idea.meta?.sources?.length
                      ? idea.meta.sources.join(", ")
-                     : "None"
+                     : translate("pages.idea-details.meta.none")
                }
             />
             <div className="grid gap-2 grid-cols-2">
                <InfoItem
                   icon={<Calendar className="w-4 h-4" />}
-                  label="Created"
+                  label={translate("pages.idea-details.meta.created")}
                   value={
                      idea.createdAt
                         ? new Date(idea.createdAt).toLocaleString()
-                        : "Unknown"
+                        : translate("pages.idea-details.meta.unknown")
                   }
                />
                <InfoItem
                   icon={<Clock className="w-4 h-4" />}
-                  label="Updated"
+                  label={translate("pages.idea-details.meta.updated")}
                   value={
                      idea.updatedAt
                         ? new Date(idea.updatedAt).toLocaleString()
-                        : "Unknown"
+                        : translate("pages.idea-details.meta.unknown")
                   }
                />
             </div>

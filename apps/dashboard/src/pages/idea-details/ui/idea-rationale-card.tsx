@@ -6,6 +6,7 @@ import {
    CardTitle,
 } from "@packages/ui/components/card";
 import { Markdown } from "@packages/ui/components/markdown";
+import { translate } from "@packages/localization";
 import type { IdeaSelect } from "@packages/database/schema";
 
 interface IdeaRationaleCardProps {
@@ -22,9 +23,11 @@ export function IdeaRationaleCard({ idea }: IdeaRationaleCardProps) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>Score Rationale</CardTitle>
+            <CardTitle>
+               {translate("pages.idea-details.rationale.title")}
+            </CardTitle>
             <CardDescription>
-               AI reasoning behind the confidence score
+               {translate("pages.idea-details.rationale.description")}
             </CardDescription>
          </CardHeader>
          <CardContent>

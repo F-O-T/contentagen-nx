@@ -1,0 +1,21 @@
+{
+   "title": "Entrar",
+   "description": "Digite seus dados para acessar sua conta.",
+   "google-button": "Entrar com Google",
+   "form": {
+      "email": {
+         "label": "Email",
+         "placeholder": "Digite seu email"
+      },
+      "password": {
+         "label": "Senha",
+         "placeholder": "Digite sua senha"
+      },
+      "submit": "Entrar"
+   },
+   "footer": {
+      "forgot-password": "Esqueceu sua senha?",
+      "no-account": "Não tem uma conta?",
+      "sign-up-link": "Cadastre-se aqui"
+   }
+}

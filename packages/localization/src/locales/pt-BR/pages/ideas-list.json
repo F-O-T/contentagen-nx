@@ -1,0 +1,24 @@
+{
+   "mascot-message": {
+      "general": "Aqui você pode gerenciar todas as suas ideias. Crie, edite ou explore seus conceitos criativos abaixo!",
+      "agent-specific": "Aqui você pode gerenciar ideias para este agente específico. Crie, edite ou explore seus conceitos criativos abaixo!"
+   },
+   "toolbar": {
+      "select-all": "Selecionar Todos",
+      "unselect-all": "Desmarcar Todos",
+      "filtering": "Filtragem",
+      "bulk-actions": "Ações em Lote",
+      "pagination": {
+         "of": "de"
+      }
+   },
+   "bulk-actions": {
+      "delete-confirmation": {
+         "message": "Isso excluirá permanentemente {{count}} ideia",
+         "message_plural": "Isso excluirá permanentemente {{count}} ideias"
+      },
+      "approve-confirmation": {
+         "message": "Isso aprovará as ideias selecionadas que estão em status pendente e as enviará para o pipeline de geração de conteúdo. Apenas itens pendentes serão aprovados. Esta ação criará conteúdo baseado nas ideias aprovadas."
+      }
+   }
+}

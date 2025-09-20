@@ -1,4 +1,5 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
+import { translate } from "@packages/localization";
 import { GeneratedContentDisplay } from "./generated-content-display";
 import { useTRPC } from "@/integrations/clients";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -93,7 +94,9 @@ export function ContentRequestDetailsPage() {
    return (
       <main className="h-full w-full flex flex-col gap-4">
          {!isGenerating && (
-            <TalkingMascot message="Here's your content request details! You can review, edit, and manage your generated content. Use the export options to get your content in different formats." />
+            <TalkingMascot
+               message={translate("pages.content-details.mascot-message")}
+            />
          )}
 
          {isGenerating && data?.status ? (

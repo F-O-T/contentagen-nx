@@ -1,0 +1,21 @@
+{
+   "title": "Sign In",
+   "description": "Enter your details to access your account.",
+   "google-button": "Sign in with Google",
+   "form": {
+      "email": {
+         "label": "Email",
+         "placeholder": "Enter your email"
+      },
+      "password": {
+         "label": "Password",
+         "placeholder": "Enter your password"
+      },
+      "submit": "Sign In"
+   },
+   "footer": {
+      "forgot-password": "Forgot your password",
+      "no-account": "Don't have an account?",
+      "sign-up-link": "Sign up here"
+   }
+}

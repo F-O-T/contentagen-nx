@@ -1,5 +1,6 @@
 import { StatsCard } from "@packages/ui/components/stats-card";
 import { useMemo } from "react";
+import { translate } from "@packages/localization";
 import type { IdeaSelect } from "@packages/database/schema";
 
 interface IdeaStatsCardProps {
@@ -10,13 +11,17 @@ export function IdeaStatsCard({ idea }: IdeaStatsCardProps) {
    const items = useMemo(() => {
       return [
          {
-            label: "Confidence Score",
-            description: "AI confidence in this idea's potential",
+            label: translate("pages.idea-details.stats.confidence-score"),
+            description: translate(
+               "pages.idea-details.stats.confidence-score-description",
+            ),
             value: `${idea.confidence.score}%`,
          },
          {
-            label: "Total keywords",
-            description: "Total keywords associated with this idea",
+            label: translate("pages.idea-details.stats.total-keywords"),
+            description: translate(
+               "pages.idea-details.stats.total-keywords-description",
+            ),
             value: idea.meta?.tags?.length?.toString() || "0",
          },
       ];

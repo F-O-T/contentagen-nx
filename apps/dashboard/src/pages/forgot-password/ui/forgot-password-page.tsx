@@ -1,3 +1,4 @@
+import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
@@ -20,8 +21,8 @@ import { Link } from "@tanstack/react-router";
 import { useForgotPassword } from "../lib/use-forgot-password";
 
 const steps = [
-   { id: "enter-email", title: "Enter your email" },
-   { id: "enter-otp-password", title: "Code and new password" },
+   { id: "enter-email", title: "enter-email" },
+   { id: "enter-otp-password", title: "enter-otp-password" },
 ] as const;
 
 const { Stepper } = defineStepper(...steps);
@@ -35,12 +36,16 @@ export function ForgotPasswordPage() {
             <Card>
                <CardHeader>
                   <CardTitle className="text-3xl font-bold tracking-tight text-center">
-                     Forgot my password
+                     {translate("pages.forgot-password.title")}
                   </CardTitle>
                   <CardDescription className="text-base text-center text-muted-foreground/60">
                      {methods.current.id === "enter-email"
-                        ? "Enter your email to receive the recovery code."
-                        : "Enter the code received and your new password."}
+                        ? translate(
+                             "pages.forgot-password.descriptions.enter-email",
+                          )
+                        : translate(
+                             "pages.forgot-password.descriptions.enter-otp-password",
+                          )}
                   </CardDescription>
                </CardHeader>
                <CardContent className="space-y-4">
@@ -55,13 +60,19 @@ export function ForgotPasswordPage() {
                            <form.AppField name="email">
                               {(field) => (
                                  <field.FieldContainer>
-                                    <field.FieldLabel>Email</field.FieldLabel>
+                                    <field.FieldLabel>
+                                       {translate(
+                                          "pages.forgot-password.form.email.label",
+                                       )}
+                                    </field.FieldLabel>
                                     <Input
                                        value={field.state.value}
                                        id={field.name}
                                        name={field.name}
                                        type="email"
-                                       placeholder="example@email.com"
+                                       placeholder={translate(
+                                          "pages.forgot-password.form.email.placeholder",
+                                       )}
                                        autoComplete="email"
                                        onBlur={field.handleBlur}
                                        onChange={(e) =>
@@ -78,7 +89,11 @@ export function ForgotPasswordPage() {
                               <form.AppField name="otp">
                                  {(field) => (
                                     <field.FieldContainer className="flex flex-col items-center">
-                                       <field.FieldLabel>Code</field.FieldLabel>
+                                       <field.FieldLabel>
+                                          {translate(
+                                             "pages.forgot-password.form.otp.label",
+                                          )}
+                                       </field.FieldLabel>
                                        <InputOTP
                                           value={field.state.value}
                                           onBlur={field.handleBlur}

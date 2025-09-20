@@ -1,3 +1,4 @@
+import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
@@ -19,10 +20,10 @@ export function SignInPage() {
       <Card className="border shadow-xl transition-all duration-300 border-muted/50 bg-card backdrop-blur-xl animate-in fade-in-50 slide-in-from-bottom-6">
          <CardHeader>
             <CardTitle className="text-3xl font-bold tracking-tight text-center ">
-               Sign In
+               {translate("pages.sign-in.title")}
             </CardTitle>
             <CardDescription className="text-base text-center text-muted-foreground/60">
-               Enter your details to access your account.
+               {translate("pages.sign-in.description")}
             </CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
@@ -38,21 +39,25 @@ export function SignInPage() {
                      fill="currentColor"
                   />
                </svg>{" "}
-               Sign in with Google
+               {translate("pages.sign-in.google-button")}
             </Button>
             <Separator />
             <form className="space-y-4 " onSubmit={(e) => handleSubmit(e)}>
                <form.AppField name="email">
                   {(field) => (
                      <field.FieldContainer>
-                        <field.FieldLabel>Email</field.FieldLabel>
+                        <field.FieldLabel>
+                           {translate("pages.sign-in.form.email.label")}
+                        </field.FieldLabel>
                         <Input
                            autoComplete="email"
                            id={field.name}
                            name={field.name}
                            onBlur={field.handleBlur}
                            onChange={(e) => field.handleChange(e.target.value)}
-                           placeholder="Enter your email"
+                           placeholder={translate(
+                              "pages.sign-in.form.email.placeholder",
+                           )}
                            type="email"
                            value={field.state.value}
                         />
@@ -63,14 +68,18 @@ export function SignInPage() {
                <form.AppField name="password">
                   {(field) => (
                      <field.FieldContainer>
-                        <field.FieldLabel>Password</field.FieldLabel>
+                        <field.FieldLabel>
+                           {translate("pages.sign-in.form.password.label")}
+                        </field.FieldLabel>
                         <PasswordInput
                            autoComplete="current-password"
                            id={field.name}
                            name={field.name}
                            onBlur={field.handleBlur}
                            onChange={(e) => field.handleChange(e.target.value)}
-                           placeholder="Enter your password"
+                           placeholder={translate(
+                              "pages.sign-in.form.password.placeholder",
+                           )}
                            value={field.state.value}
                         />
                         <field.FieldMessage />
@@ -87,7 +96,7 @@ export function SignInPage() {
                         type="submit"
                         variant="default"
                      >
-                        Sign In
+                        {translate("pages.sign-in.form.submit")}
                         <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                      </Button>
                   )}
@@ -99,15 +108,15 @@ export function SignInPage() {
                className="text-sm block underline text-muted-foreground text-center"
                to="/auth/forgot-password"
             >
-               Forgot your password
+               {translate("pages.sign-in.footer.forgot-password")}
             </Link>
             <p className="text-sm text-center">
-               Don't have an account?
+               {translate("pages.sign-in.footer.no-account")}
                <Link
                   className="ml-1 underline text-muted-foreground"
                   to="/auth/sign-up"
                >
-                  Create account
+                  {translate("pages.sign-in.footer.sign-up-link")}
                </Link>
             </p>
          </CardFooter>

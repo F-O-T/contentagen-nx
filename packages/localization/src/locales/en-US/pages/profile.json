@@ -1,0 +1,42 @@
+{
+   "mascot-message": "Welcome to your profile! Update your details, manage billing, and set your preferences below.",
+   "information": {
+      "title": "Profile Information",
+      "description": "Update your personal information and account details.",
+      "more-options": "More options",
+      "actions": {
+         "update-email": "Update Email",
+         "update-password": "Update Password",
+         "update-profile": "Update Name & Photo"
+      },
+      "fields": {
+         "name": "Name",
+         "email": "Email",
+         "anonymous": "Anonymous",
+         "no-email": "No email set"
+      }
+   },
+   "billing": {
+      "title": "Billing & Subscription",
+      "description": "Manage your subscription and billing information.",
+      "current-plan": "Current Plan",
+      "usage": "Usage",
+      "upgrade": "Upgrade Plan",
+      "manage-billing": "Manage Billing"
+   },
+   "sessions": {
+      "title": "Active Sessions",
+      "description": "Manage your active login sessions.",
+      "current-session": "Current Session",
+      "revoke": "Revoke",
+      "revoke-all": "Revoke All Other Sessions"
+   },
+   "preferences": {
+      "title": "Preferences",
+      "description": "Customize your experience.",
+      "workflow": {
+         "title": "Workflow Preferences",
+         "notify-missing-images": "Notify about missing images"
+      }
+   }
+}

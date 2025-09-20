@@ -1,0 +1,43 @@
+{
+   "mascot-message": "Manage your agent's configuration and knowledge base.",
+   "stats": {
+      "total-content": "Total Content",
+      "total-content-description": "All the content produced by the agent.",
+      "total-words": "Total Words Written",
+      "total-words-description": "Cumulative words written across all content.",
+      "drafts": "Drafts",
+      "drafts-description": "Number of drafts the agent has saved.",
+      "published": "Published",
+      "published-description": "Number of published pieces produced by the agent."
+   },
+   "persona": {
+      "title": "Agent Persona",
+      "description": "Configure your agent's personality and behavior.",
+      "name": "Name",
+      "persona": "Persona",
+      "edit": "Edit Agent"
+   },
+   "knowledge-base": {
+      "title": "Knowledge Base",
+      "description": "Manage your agent's knowledge and training data.",
+      "upload": "Upload Files",
+      "processing": "Processing...",
+      "completed": "Completed",
+      "failed": "Failed"
+   },
+   "quick-actions": {
+      "title": "Quick Actions",
+      "description": "Perform common tasks related to the agent.",
+      "edit-agent": "Edit Agent",
+      "delete-agent": "Delete Agent",
+      "duplicate-agent": "Duplicate Agent"
+   },
+   "navigation": {
+      "previous": "Previous Agent",
+      "next": "Next Agent"
+   },
+   "toasts": {
+      "knowledge-failed": "Brand knowledge job failed",
+      "knowledge-completed": "Brand knowledge job completed"
+   }
+}

@@ -1,0 +1,50 @@
+{
+   "mascot-message": "Revise, edite e gerencie os detalhes do seu conteúdo aqui.",
+   "stats": {
+      "word-count": "Contagem de Palavras",
+      "word-count-description": "Total de palavras no conteúdo",
+      "content-quality": "Qualidade do Conteúdo",
+      "content-quality-description": "Pontuação de qualidade avaliada por IA"
+   },
+   "details": {
+      "basic-info": "Informações Básicas",
+      "meta-info": "Meta Informações",
+      "title": "Título",
+      "status": "Status",
+      "agent": "Agente",
+      "created": "Criado",
+      "updated": "Atualizado"
+   },
+   "quick-actions": {
+      "title": "Ações Rápidas",
+      "description": "Execute tarefas comuns relacionadas a este conteúdo.",
+      "regenerate": "Regenerar Conteúdo",
+      "edit": "Editar Corpo do Conteúdo",
+      "upload-image": "Enviar Imagem",
+      "preview": "Prévia do Blog",
+      "approve": "Aprovar Conteúdo",
+      "share": "Compartilhar Conteúdo",
+      "make-private": "Tornar Privado",
+      "delete": "Deletar Conteúdo"
+   },
+   "versions": {
+      "title": "Versões do Conteúdo",
+      "description": "Visualize e gerencie diferentes versões deste conteúdo.",
+      "current": "Atual",
+      "view-details": "Ver Detalhes"
+   },
+   "content": {
+      "title": "Conteúdo Gerado",
+      "loading": "Gerando conteúdo...",
+      "edit": "Editar Conteúdo",
+      "save": "Salvar Alterações",
+      "cancel": "Cancelar"
+   },
+   "status": {
+      "draft": "Rascunho",
+      "pending": "Pendente",
+      "published": "Publicado",
+      "generating": "Gerando",
+      "failed": "Falhou"
+   }
+}

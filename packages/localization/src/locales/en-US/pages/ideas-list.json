@@ -1,0 +1,24 @@
+{
+   "mascot-message": {
+      "general": "Here you can manage all your ideas. Create, edit, or explore your creative concepts below!",
+      "agent-specific": "Here you can manage ideas for this specific agent. Create, edit, or explore your creative concepts below!"
+   },
+   "toolbar": {
+      "select-all": "Select All",
+      "unselect-all": "Unselect All",
+      "filtering": "Filtering",
+      "bulk-actions": "Bulk Actions",
+      "pagination": {
+         "of": "of"
+      }
+   },
+   "bulk-actions": {
+      "delete-confirmation": {
+         "message": "This will permanently delete {{count}} idea",
+         "message_plural": "This will permanently delete {{count}} ideas"
+      },
+      "approve-confirmation": {
+         "message": "This will approve the selected ideas that are in pending status and send them to the content generation pipeline. Only pending items will be approved. This action will create content based on the approved ideas."
+      }
+   }
+}

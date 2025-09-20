@@ -1,0 +1,42 @@
+{
+   "mascot-message": "Bem-vindo ao seu perfil! Atualize seus dados, gerencie a cobrança e defina suas preferências abaixo.",
+   "information": {
+      "title": "Informações do Perfil",
+      "description": "Atualize suas informações pessoais e detalhes da conta.",
+      "more-options": "Mais opções",
+      "actions": {
+         "update-email": "Atualizar Email",
+         "update-password": "Atualizar Senha",
+         "update-profile": "Atualizar Nome e Foto"
+      },
+      "fields": {
+         "name": "Nome",
+         "email": "Email",
+         "anonymous": "Anônimo",
+         "no-email": "Nenhum email definido"
+      }
+   },
+   "billing": {
+      "title": "Cobrança e Assinatura",
+      "description": "Gerencie sua assinatura e informações de cobrança.",
+      "current-plan": "Plano Atual",
+      "usage": "Uso",
+      "upgrade": "Fazer Upgrade",
+      "manage-billing": "Gerenciar Cobrança"
+   },
+   "sessions": {
+      "title": "Sessões Ativas",
+      "description": "Gerencie suas sessões de login ativas.",
+      "current-session": "Sessão Atual",
+      "revoke": "Revogar",
+      "revoke-all": "Revogar Todas as Outras Sessões"
+   },
+   "preferences": {
+      "title": "Preferências",
+      "description": "Personalize sua experiência.",
+      "workflow": {
+         "title": "Preferências de Fluxo de Trabalho",
+         "notify-missing-images": "Notificar sobre imagens ausentes"
+      }
+   }
+}
