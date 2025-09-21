@@ -1,8 +1,6 @@
 {
    "dependencies": {
       "@astrojs/ts-plugin": "catalog:astro",
-      "@arcjet/astro": "catalog:security",
-      "@astrojs/node": "catalog:astro",
       "@astrojs/check": "catalog:astro",
       "@astrojs/mdx": "catalog:astro",
       "@astrojs/starlight": "catalog:astro",

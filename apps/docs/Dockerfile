@@ -1,5 +1,5 @@
 # apps/docs/Dockerfile
-# Stage 1: Install all dependencies and build the application
+# Stage 1: Install dependencies and build the application
 FROM oven/bun:latest AS builder
 
 WORKDIR /app
@@ -27,56 +27,29 @@ COPY . .
 # Build the docs application.
 # The build output will be in /app/apps/docs/dist
 ENV NODE_ENV=production
-ARG ARCJET_KEY
 RUN bun run --filter=docs build
 
 # ---
 
-# Stage 2: Create a clean, production-only node_modules folder
-FROM oven/bun:latest AS deps
+# Stage 2: Create the final production image with nginx
+FROM nginx:alpine AS runner
 
-WORKDIR /app
+# Copy nginx configuration
+COPY apps/docs/nginx.conf /etc/nginx/nginx.conf
 
-# Copy all package manifests and lockfile again
-COPY bun.lock ./
-COPY package.json ./
-COPY apps/docs/package.json ./apps/docs/
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/brand/package.json ./packages/brand/
-COPY packages/posthog/package.json ./packages/posthog/
-COPY packages/environment/package.json ./packages/environment/
-COPY packages/errors/package.json ./packages/errors/
-COPY packages/database/package.json ./packages/database/
-COPY tooling/typescript/package.json ./tooling/typescript/
+# Copy the entrypoint script
+COPY apps/docs/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Install only production dependencies. This creates a lean, clean node_modules folder.
-RUN bun install 
+# Copy the built static files from the 'builder' stage
+COPY --from=builder /app/apps/docs/dist /usr/share/nginx/html
 
-# ---
-
-# Stage 3: Create the final, small production image
-FROM node:lts-alpine AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
-
-# Copy the pruned, production-only node_modules from the 'deps' stage.
-# This will solve the original 'module not found' error.
-COPY --from=deps /app/node_modules ./node_modules
-
-# Copy the built application from the 'builder' stage
-COPY --from=builder /app/apps/docs/dist ./dist
-
-# Also copy the final package.json to the root of the app directory.
-# This is good practice and helps with Node's module resolution.
-COPY --from=deps /app/package.json ./package.json
-
-# Set and expose the port. Default to 4321 if not provided.
-ARG PORT
+# Set and expose the port. Default to 4323 if not provided.
+ARG PORT=4323
 ENV PORT=${PORT}
 EXPOSE ${PORT}
 
-# Start the server using the entrypoint from the build output
-CMD ["node", "./dist/server/entry.mjs"]
+# Start nginx using the entrypoint script
+ENTRYPOINT ["/entrypoint.sh"]
 
 
