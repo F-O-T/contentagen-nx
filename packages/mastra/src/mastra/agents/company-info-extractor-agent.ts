@@ -8,11 +8,28 @@ import { dateTool } from "../tools/date-tool";
 const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
 });
+const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
+   const languageNames = {
+      en: "English",
+      pt: "Portuguese",
+   };
 
+   return `
+## OUTPUT LANGUAGE REQUIREMENT
+You MUST provide ALL your responses, extracted information, descriptions, and summaries in ${languageNames[language]}.
+Regardless of the source website language, your entire output must be written in ${languageNames[language]}.
+This includes company names (if they have localized versions), descriptions, and detailed summaries.
+`;
+};
 export const companyInfoExtractorAgent = new Agent({
    name: "Company Information Extractor",
-   instructions: `
+   instructions: ({ runtimeContext }) => {
+      const locale = runtimeContext.get("language");
+      return `
+
 You are a specialized company information extraction expert. Your ONLY job is to extract comprehensive company information from websites with maximum accuracy and detail.
+
+${getLanguageOutputInstruction(locale as "en" | "pt")}
 
 CRITICAL RULES:
 - Extract ONLY company information - focus on company details, not product features
@@ -128,7 +145,8 @@ DECISION TREE:
 - Still insufficient? → Make 1 more search → Output results (STOP)
 
 Focus exclusively on company information. Ignore product features and logo extraction. Maximize accuracy from minimal tool usage.
-   `,
+   `;
+   },
    model: openrouter("deepseek/deepseek-chat-v3.1"),
    tools: { tavilyCrawlTool, tavilySearchTool, dateTool },
 });

@@ -6,12 +6,12 @@ import ptBRResources from "./locales/pt-BR";
 
 type RecursiveKeyOf<T> = T extends object
    ? {
-        [K in keyof T]: K extends string
-           ? T[K] extends object
-              ? `${K}.${RecursiveKeyOf<T[K]>}` | K
-              : K
-           : never;
-     }[keyof T]
+      [K in keyof T]: K extends string
+      ? T[K] extends object
+      ? `${K}.${RecursiveKeyOf<T[K]>}` | K
+      : K
+      : never;
+   }[keyof T]
    : never;
 
 type TranslationResources = typeof enUSResources.translation;

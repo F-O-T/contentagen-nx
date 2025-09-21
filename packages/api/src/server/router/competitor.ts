@@ -120,17 +120,29 @@ export const competitorRouter = router({
                   competitorId: created.id,
                   userId,
                   websiteUrl: input.websiteUrl,
+                  runtimeContext: {
+                     language: resolvedCtx.language,
+                     userId,
+                  },
                }),
 
                await enqueueCreateCompetitorKnowledgeWorkflowJob({
                   competitorId: created.id,
                   userId,
                   websiteUrl: input.websiteUrl,
+                  runtimeContext: {
+                     language: resolvedCtx.language,
+                     userId,
+                  },
                }),
                await enqueueExtractCompetitorBrandInfoJob({
                   competitorId: created.id,
                   userId,
                   websiteUrl: input.websiteUrl,
+                  runtimeContext: {
+                     language: resolvedCtx.language,
+                     userId,
+                  },
                }),
             ]);
 

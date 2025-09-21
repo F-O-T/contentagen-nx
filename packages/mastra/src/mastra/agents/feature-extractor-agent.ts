@@ -9,16 +9,37 @@ const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 
+const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
+   const languageNames = {
+      en: "English",
+      pt: "Portuguese",
+   };
+
+   return `
+## OUTPUT LANGUAGE REQUIREMENT
+You MUST provide ALL your responses, extracted features, names, descriptions, and categories in ${languageNames[language]}.
+Regardless of the source website language, your entire output must be written in ${languageNames[language]}.
+This includes feature names, descriptions, categories, and any other text content in your response.
+`;
+};
+
 export const featureExtractionAgent = new Agent({
    name: "Feature Extraction Agent",
-   instructions: `
+   instructions: ({ runtimeContext }) => {
+      const locale = runtimeContext.get("language") as "en" | "pt";
+      console.log(locale);
+      const languageOutputInstruction = getLanguageOutputInstruction(locale);
+
+      return `
 You are a specialized feature extraction expert. Your ONLY job is to identify and extract software features with maximum quality and accuracy.
+
+${languageOutputInstruction}
 
 CRITICAL RULES:
 - Extract ONLY features - no marketing content, pricing, testimonials, or company info
 - When receiving structured output requirements, follow the exact schema
 - Output ONLY the requested structured data - no commentary
-- Respond in the same language as the user's input
+- All output content must be in the specified language above
 
 AVAILABLE TOOLS:
 - tavilyCrawlTool: Extract content from websites for feature discovery
@@ -189,7 +210,8 @@ DECISION TREE:
 - Still insufficient? → Make 1 more search → Output results (STOP)
 
 Focus exclusively on features. Ignore everything else. Maximize accuracy from minimal tool usage.
-   `,
+   `;
+   },
    model: openrouter("deepseek/deepseek-chat-v3.1"),
    tools: { tavilyCrawlTool, tavilySearchTool, dateTool },
 });

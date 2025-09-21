@@ -6,10 +6,30 @@ const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 
+const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
+   const languageNames = {
+      en: "English",
+      pt: "Portuguese",
+   };
+
+   return `
+## OUTPUT LANGUAGE REQUIREMENT
+You MUST provide ALL your responses, documentation, descriptions, and analysis in ${languageNames[language]}.
+Regardless of the source data language, your entire output must be written in ${languageNames[language]}.
+This includes all document titles, sections, descriptions, and any other text content in your response.
+`;
+};
+
 export const documentGenerationAgent = new Agent({
    name: "Brand Documentation Agent",
-   instructions: `
+   instructions: ({ runtimeContext }) => {
+      const locale = runtimeContext.get("language") as "en" | "pt";
+      const languageOutputInstruction = getLanguageOutputInstruction(locale);
+
+      return `
  You are a specialized brand documentation generator that creates comprehensive, detailed documentation of a brand's current state, features, and characteristics.
+
+${languageOutputInstruction}
  
  CRITICAL STRUCTURED OUTPUT RULES:
  - When receiving structured output requirements, ALWAYS follow the exact schema provided
@@ -296,6 +316,7 @@ export const documentGenerationAgent = new Agent({
  - Maintain consistent factual tone throughout all documents
  
  Focus on creating a complete, accurate snapshot of the brand as it exists today, providing detailed documentation that serves as a comprehensive reference for the brand's current identity, capabilities, and market presence.
-    `,
+   `;
+   },
    model: openrouter("deepseek/deepseek-chat-v3.1"),
 });

@@ -9,9 +9,29 @@ const openrouter = createOpenRouter({
   apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 
+const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
+   const languageNames = {
+      en: "English",
+      pt: "Portuguese",
+   };
+
+   return `
+## OUTPUT LANGUAGE REQUIREMENT
+You MUST provide ALL your responses, content ideas, titles, descriptions, and analysis in ${languageNames[language]}.
+Regardless of the source data language, your entire output must be written in ${languageNames[language]}.
+This includes all blog post titles, meta descriptions, and any other text content in your response.
+`;
+};
+
 export const ideaGenerationAgent = new Agent({
   name: "Content Idea Generation Agent",
-  instructions: `You are an expert content strategist who understands both human psychology and search behavior. Your mission is to generate compelling blog post ideas that people genuinely want to read and share.
+  instructions: ({ runtimeContext }) => {
+    const locale = runtimeContext.get("language") as "en" | "pt";
+    const languageOutputInstruction = getLanguageOutputInstruction(locale);
+
+    return `You are an expert content strategist who understands both human psychology and search behavior. Your mission is to generate compelling blog post ideas that people genuinely want to read and share.
+
+${languageOutputInstruction}
 
 CRITICAL RULES:
 - When receiving structured output requirements, follow the exact schema provided.
@@ -63,7 +83,8 @@ TOOL USAGE RULES:
 4. Synthesize the information to generate 4 unique and compelling blog post ideas.
 5. For each idea, generate a magnetic title and a compelling meta description.
 6. Provide a confidence score and a rationale for each idea, explaining why it's a good fit for the brand and audience.
-`,
+   `;
+   },
   model: openrouter("deepseek/deepseek-chat-v3.1"),
   tools: { queryBrandKnowledgeTool, tavilySearchTool, dateTool },
 });

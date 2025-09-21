@@ -2,11 +2,15 @@ import { Worker, Queue, type Job } from "bullmq";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../helpers";
-import { mastra } from "@packages/mastra";
+import { mastra, setRuntimeContext } from "@packages/mastra";
 export type CompetitorCrawlJob = {
    competitorId: string;
    userId: string;
    websiteUrl: string;
+   runtimeContext?: {
+      language: "en" | "pt";
+      userId: string;
+   };
 };
 
 const QUEUE = "crawl-competitor-for-features";
@@ -29,11 +33,16 @@ export async function enqueueCrawlCompetitorForFeaturesJob(
 export const competitorCrawlWorker = new Worker<CompetitorCrawlJob>(
    QUEUE,
    async (job: Job<CompetitorCrawlJob>) => {
-      const { competitorId, userId, websiteUrl } = job.data;
+      const { competitorId, userId, websiteUrl, runtimeContext } = job.data;
+
+      // Restore runtime context if it exists
 
       const run = await mastra
          .getWorkflow("crawlCompetitorForFeatures")
          .createRunAsync();
+      if (runtimeContext) {
+         setRuntimeContext(runtimeContext);
+      }
 
       const result = await run.start({
          inputData: {

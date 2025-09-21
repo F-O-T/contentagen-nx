@@ -41,7 +41,7 @@ export const createTRPCContext = async ({
    auth: AuthInstance;
    headers: Headers;
    session: AuthInstance["$Infer"]["Session"] | null;
-   language: string;
+   language: Parameters<typeof setRuntimeContext>[0]["language"];
 }> => {
    const session = await auth.api.getSession({
       headers,

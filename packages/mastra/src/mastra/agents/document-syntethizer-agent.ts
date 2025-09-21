@@ -9,10 +9,30 @@ const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 
+const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
+   const languageNames = {
+      en: "English",
+      pt: "Portuguese",
+   };
+
+   return `
+## OUTPUT LANGUAGE REQUIREMENT
+You MUST provide ALL your responses, analysis, documentation, and structured output in ${languageNames[language]}.
+Regardless of the source data language, your entire output must be written in ${languageNames[language]}.
+This includes all document titles, sections, descriptions, and any other text content in your response.
+`;
+};
+
 export const documentSynthesizerAgent = new Agent({
    name: "Document Synthesizer Agent",
-   instructions: `
+   instructions: ({ runtimeContext }) => {
+      const locale = runtimeContext.get("language") as "en" | "pt";
+      const languageOutputInstruction = getLanguageOutputInstruction(locale);
+
+      return `
 You are a specialized document synthesizer that creates comprehensive brand analysis documents.
+
+${languageOutputInstruction}
 
 CRITICAL: You MUST respond with structured JSON output matching the exact schema provided.
 
@@ -83,7 +103,8 @@ EXECUTION WORKFLOW:
 
 IMPORTANT: The response must be valid JSON with the markdown content as a string value in the fullBrandAnalysis field.
  
-   `,
+   `;
+   },
    model: openrouter("deepseek/deepseek-chat-v3.1"),
    tools: { tavilyCrawlTool, tavilySearchTool, dateTool },
 });
