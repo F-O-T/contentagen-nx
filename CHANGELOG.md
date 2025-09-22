@@ -7,15 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0]
+
 ### Added
-- Language support for LLMs output across API, Mastra, and workers
+- Language support for LLMs output (English and Portuguese) across API, Mastra, and workers
 - Real GitHub repository statistics fetching and display on landing page
 - Idea generation workflow with dedicated agent
+- RAG package with database setup and runtime context
+- Tests workflow and localization tests
 
 ### Changed
-- Migrated documentation to static site using nginx and alpine image
-
-## [0.1.0]
+- Migrated documentation to static site using nginx and alpine image with gzip compression and long-term caching
+- Improved workflow context propagation for consistent language behavior
+- Removed unused RuntimeContext import from workers
 
 ### Added
 - Content version history: versions card, selectable version rows, and a details modal with line-by-line and inline diffs, changed-fields badges, and change stats.
