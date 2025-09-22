@@ -1,3 +1,5 @@
+//TODO: Once everything is fully migrated to the rag package, we can remove this internal package
+
 import { isProduction } from "@packages/environment/helpers";
 import { serverEnv } from "@packages/environment/server";
 import { CloudClient, ChromaClient as InternalChromaCLient } from "chromadb";

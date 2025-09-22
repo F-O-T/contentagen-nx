@@ -1,3 +1,5 @@
+//TODO: Once everything is fully migrated to the mastra package, we can remove this internal package
+
 import type { PersonaConfig } from "@packages/database/schemas/agent";
 import { metadataBasePrompt } from "../prompts/metadata/base";
 import { firstPersonPrompt } from "../prompts/voice/first_person";
