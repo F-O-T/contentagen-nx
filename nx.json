@@ -32,5 +32,31 @@
    },
    "tui": {
       "enabled": true
+   },
+   "release": {
+      "projects": ["*"],
+      "projectsRelationship": "fixed",
+      "releaseTagPattern": "v{version}",
+      "version": {
+         "conventionalCommits": true,
+         "preserveLocalDependencyProtocols": true,
+         "versionActionsOptions": {
+            "skipLockFileUpdate": false
+         }
+      },
+      "changelog": {
+         "workspaceChangelog": {
+            "createRelease": "github",
+            "file": true
+         },
+         "projectChangelogs": {
+            "createRelease": false,
+            "file": true
+         }
+      },
+      "git": {
+         "commit": true,
+         "tag": true
+      }
    }
 }

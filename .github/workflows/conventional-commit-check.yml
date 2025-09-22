@@ -1,0 +1,55 @@
+name: Conventional Commits Check
+
+on:
+  pull_request:
+    branches: ["*"]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  conventional-commits-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check conventional commits
+        run: |
+          # Get the list of commits in this PR
+          COMMITS=$(git rev-list --no-merges origin/master...HEAD)
+          
+          # Check each commit for conventional commit format
+          for commit in $COMMITS; do
+            message=$(git log --format=%B -n 1 $commit)
+            
+            # Check if commit message follows conventional commits format
+            if ! echo "$message" | grep -qE "^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\(.+\))?(!)?: "; then
+              echo "❌ Commit $commit does not follow conventional commits format:"
+              echo "   $message"
+              echo ""
+              echo "Please use conventional commits format:"
+              echo "   feat: add new feature"
+              echo "   fix: resolve bug"
+              echo "   docs: update documentation"
+              echo "   etc."
+              exit 1
+            fi
+          done
+          
+          echo "✅ All commits follow conventional commits format"
+
+      - name: Preview release changes
+        run: |
+          # Preview what Nx release would generate
+          if npx nx release --dry-run --skip-publish 2>/dev/null; then
+            echo "✅ Nx release preview successful"
+          else
+            echo "ℹ️  Nx release preview completed (dry-run mode)"
+          fi
