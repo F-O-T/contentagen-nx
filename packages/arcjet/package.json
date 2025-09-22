@@ -1,27 +1,27 @@
 {
-   "devDependencies": {
-      "@tooling/typescript": "workspace:*",
-      "typescript": "catalog:development"
-   },
-   "dependencies": {
-      "@arcjet/astro": "catalog:security",
-      "@arcjet/inspect": "catalog:security",
-      "@arcjet/node": "catalog:security",
-      "@arcjet/bun": "catalog:security",
-      "@packages/environment": "workspace:*"
-   },
-   "license": "Apache-2.0",
-   "name": "@packages/arcjet",
-   "scripts": {
-      "check": "biome check --write ./src",
-      "typecheck": "bunx --bun tsc --noEmit "
-   },
-   "private": true,
-   "type": "module",
-   "exports": {
-      "./astro": "./src/astro.ts",
-      "./dashboard": "./src/dashboard.ts",
-      "./server": "./src/server.ts"
-   },
-   "version": "0.0.0"
+  "devDependencies": {
+    "@tooling/typescript": "workspace:*",
+    "typescript": "catalog:development"
+  },
+  "dependencies": {
+    "@arcjet/astro": "catalog:security",
+    "@arcjet/inspect": "catalog:security",
+    "@arcjet/node": "catalog:security",
+    "@arcjet/bun": "catalog:security",
+    "@packages/environment": "workspace:*"
+  },
+  "license": "Apache-2.0",
+  "name": "@packages/arcjet",
+  "scripts": {
+    "check": "biome check --write ./src",
+    "typecheck": "bunx --bun tsc --noEmit "
+  },
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./astro": "./src/astro.ts",
+    "./dashboard": "./src/dashboard.ts",
+    "./server": "./src/server.ts"
+  },
+  "version": "0.2.0"
 }

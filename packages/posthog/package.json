@@ -1,24 +1,24 @@
 {
-   "devDependencies": {
-      "@tooling/typescript": "workspace:*",
-      "typescript": "catalog:development"
-   },
-   "license": "Apache-2.0",
-   "name": "@packages/posthog",
-   "scripts": {
-      "check": "biome check --write ./src",
-      "typecheck": "bunx --bun tsc --noEmit "
-   },
-   "private": true,
-   "type": "module",
-   "exports": {
-      "./client": "./src/client.tsx",
-      "./server": "./src/server.ts"
-   },
-   "version": "0.0.0",
-   "dependencies": {
-      "@packages/environment": "workspace:*",
-      "posthog-js": "^1.259.0",
-      "posthog-node": "^5.5.0"
-   }
+  "devDependencies": {
+    "@tooling/typescript": "workspace:*",
+    "typescript": "catalog:development"
+  },
+  "license": "Apache-2.0",
+  "name": "@packages/posthog",
+  "scripts": {
+    "check": "biome check --write ./src",
+    "typecheck": "bunx --bun tsc --noEmit "
+  },
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./client": "./src/client.tsx",
+    "./server": "./src/server.ts"
+  },
+  "version": "0.2.0",
+  "dependencies": {
+    "@packages/environment": "workspace:*",
+    "posthog-js": "^1.259.0",
+    "posthog-node": "^5.5.0"
+  }
 }

@@ -1,42 +1,42 @@
 {
-   "name": "@packages/mastra",
-   "version": "0.1.0",
-   "license": "Apache-2.0",
-   "private": true,
-   "type": "module",
-   "exports": {
-      ".": {
-         "types": "./dist/src/mastra/index.d.ts",
-         "default": "./src/mastra/index.ts"
-      }
-   },
-   "scripts": {
-      "dev": "dotenv -e .env -- bunx mastra dev",
-      "build": "tsc",
-      "check": "biome check --write ./src",
-      "typecheck": "tsc --noEmit --emitDeclarationOnly false"
-   },
-   "dependencies": {
-      "@mastra/core": "^0.17.1",
-      "@mastra/libsql": "^0.14.1",
-      "@mastra/loggers": "^0.10.12",
-      "@mastra/memory": "^0.15.2",
-      "@mastra/rag": "^1.2.5",
-      "@openrouter/ai-sdk-provider": "catalog:openrouter",
-      "@packages/chroma-db": "workspace:*",
-      "@packages/environment": "workspace:*",
-      "@packages/tavily": "workspace:*",
-      "@packages/files": "workspace:*",
-      "@packages/openrouter": "workspace:*",
-      "@packages/database": "workspace:*",
-      "@packages/server-events": "workspace:*",
-      "ai": "catalog:openrouter",
-      "zod": "catalog:validation"
-   },
-   "devDependencies": {
-      "dotenv-cli": "catalog:enviroment",
-      "shx": "catalog:enviroment",
-      "@tooling/typescript": "workspace:*",
-      "typescript": "catalog:development"
-   }
+  "name": "@packages/mastra",
+  "version": "0.2.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/src/mastra/index.d.ts",
+      "default": "./src/mastra/index.ts"
+    }
+  },
+  "scripts": {
+    "dev": "dotenv -e .env -- bunx mastra dev",
+    "build": "tsc",
+    "check": "biome check --write ./src",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@mastra/core": "^0.17.1",
+    "@mastra/libsql": "^0.14.1",
+    "@mastra/loggers": "^0.10.12",
+    "@mastra/memory": "^0.15.2",
+    "@mastra/rag": "^1.2.5",
+    "@openrouter/ai-sdk-provider": "catalog:openrouter",
+    "@packages/chroma-db": "workspace:*",
+    "@packages/environment": "workspace:*",
+    "@packages/tavily": "workspace:*",
+    "@packages/files": "workspace:*",
+    "@packages/openrouter": "workspace:*",
+    "@packages/database": "workspace:*",
+    "@packages/server-events": "workspace:*",
+    "ai": "catalog:openrouter",
+    "zod": "catalog:validation"
+  },
+  "devDependencies": {
+    "dotenv-cli": "catalog:enviroment",
+    "shx": "catalog:enviroment",
+    "@tooling/typescript": "workspace:*",
+    "typescript": "catalog:development"
+  }
 }

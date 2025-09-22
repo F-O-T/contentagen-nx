@@ -14,7 +14,7 @@
     "./prompt/*": "./src/prompts/*.ts"
   },
   "name": "@packages/prompts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "index.ts",
   "types": "index.ts",
   "description": "Prompt templates for LLM tasks (knowledge distillation, etc)",

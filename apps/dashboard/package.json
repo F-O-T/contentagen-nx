@@ -53,5 +53,6 @@
     "@vitejs/plugin-react": "catalog:vite",
     "typescript": "catalog:development",
     "vite": "catalog:vite"
-  }
+  },
+  "version": "0.2.0"
 }

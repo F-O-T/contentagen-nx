@@ -1,32 +1,32 @@
 {
-   "dependencies": {
-      "@packages/mastra": "workspace:*",
-      "@packages/helpers": "workspace:*",
-      "@packages/payment": "workspace:*",
-      "@packages/chroma-db": "workspace:*",
-      "@packages/redis": "workspace:*",
-      "@packages/files": "workspace:*",
-      "@packages/openrouter": "workspace:*",
-      "@packages/prompts": "workspace:*",
-      "bullmq": "^5.56.9",
-      "@packages/server-events": "workspace:*"
-   },
-   "devDependencies": {
-      "@tooling/typescript": "workspace:*",
-      "typescript": "catalog:development"
-   },
-   "license": "Apache-2.0",
-   "name": "@packages/workers",
-   "scripts": {
-      "check": "biome check --write ./src",
-      "typecheck": "bunx --bun tsc --noEmit "
-   },
-   "private": true,
-   "type": "module",
-   "exports": {
-      "./functions/*": "./src/functions/*.ts",
-      "./queues/*": "./src/queues/*.ts",
-      "./producers/*": "./src/producers/*.ts"
-   },
-   "version": "0.0.0"
+  "dependencies": {
+    "@packages/mastra": "workspace:*",
+    "@packages/helpers": "workspace:*",
+    "@packages/payment": "workspace:*",
+    "@packages/chroma-db": "workspace:*",
+    "@packages/redis": "workspace:*",
+    "@packages/files": "workspace:*",
+    "@packages/openrouter": "workspace:*",
+    "@packages/prompts": "workspace:*",
+    "bullmq": "^5.56.9",
+    "@packages/server-events": "workspace:*"
+  },
+  "devDependencies": {
+    "@tooling/typescript": "workspace:*",
+    "typescript": "catalog:development"
+  },
+  "license": "Apache-2.0",
+  "name": "@packages/workers",
+  "scripts": {
+    "check": "biome check --write ./src",
+    "typecheck": "bunx --bun tsc --noEmit "
+  },
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./functions/*": "./src/functions/*.ts",
+    "./queues/*": "./src/queues/*.ts",
+    "./producers/*": "./src/producers/*.ts"
+  },
+  "version": "0.2.0"
 }
