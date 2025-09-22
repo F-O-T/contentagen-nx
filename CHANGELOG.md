@@ -1,3 +1,13 @@
+## 0.4.0 (2025-09-22)
+
+### 🚀 Features
+
+- Add brand, competitor knowledge and related slugs models ([5cd4b1b](https://github.com/F-O-T/contentagen-nx/commit/5cd4b1b))
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.3.0 (2025-09-22)
 
 ### 🚀 Features
