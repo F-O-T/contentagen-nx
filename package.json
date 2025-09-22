@@ -41,7 +41,11 @@
       "format": "biome check --write .",
       "typecheck": "nx run-many -t typecheck --parallel=3",
       "test": "nx run-many -t test --parallel=3",
-      "sdk:publish": "nx run sdk:publish"
+      "release": "nx release",
+      "release:dry": "nx release --dry-run",
+      "release:version": "nx release version",
+      "release:changelog": "nx release changelog",
+      "release:publish": "nx release publish"
    },
    "trustedDependencies": [
       "@parcel/watcher",
