@@ -1,6 +1,5 @@
 import OpenAI from "openai";
 import { serverEnv } from "@packages/environment/server";
-import { sql, cosineDistance } from "drizzle-orm";
 
 const openai = new OpenAI({
    apiKey: serverEnv.OPENAI_API_KEY,
@@ -72,11 +71,3 @@ export const createBatchEmbeddings = async (
       );
    }
 };
-
-export const cosineSimilarity = (
-   embeddingColumn: any,
-   queryVector: number[],
-) => {
-   return sql<number>`1 - (${cosineDistance(embeddingColumn, queryVector)})`;
-};
-
