@@ -4,10 +4,10 @@ import {
    type BrandKnowledgeInsert,
    type BrandKnowledgeType,
 } from "../schemas/brand-knowledge-schema";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, gt, cosineDistance } from "drizzle-orm";
 import type { PgVectorDatabaseInstance } from "../client";
 import { DatabaseError, NotFoundError } from "@packages/errors";
-import { createEmbedding, cosineSimilarity } from "../helpers";
+import { createEmbedding } from "../helpers";
 
 async function createBrandKnowledge(
    dbClient: PgVectorDatabaseInstance,
@@ -110,16 +110,18 @@ async function searchBrandKnowledgeByCosineSimilarityAndExternalId(
    try {
       const { limit = 10, similarityThreshold = 0.7, type } = options;
 
+      const similarity = sql<number>`1 - (${cosineDistance(brandKnowledge.embedding, queryEmbedding)})`;
+
       let whereConditions = and(
          eq(brandKnowledge.externalId, externalId),
-         sql`${cosineSimilarity(brandKnowledge.embedding, queryEmbedding)} >= ${similarityThreshold}`,
+         gt(similarity, similarityThreshold),
       );
 
       if (type) {
          whereConditions = and(
             eq(brandKnowledge.externalId, externalId),
             eq(brandKnowledge.type, type),
-            sql`${cosineSimilarity(brandKnowledge.embedding, queryEmbedding)} >= ${similarityThreshold}`,
+            gt(similarity, similarityThreshold),
          );
       }
 
@@ -127,9 +129,7 @@ async function searchBrandKnowledgeByCosineSimilarityAndExternalId(
          .select()
          .from(brandKnowledge)
          .where(whereConditions)
-         .orderBy(
-            desc(cosineSimilarity(brandKnowledge.embedding, queryEmbedding)),
-         )
+         .orderBy(() => desc(similarity))
          .limit(limit);
 
       return result;

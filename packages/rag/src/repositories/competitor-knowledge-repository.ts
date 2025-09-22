@@ -4,10 +4,10 @@ import {
    type CompetitorKnowledgeInsert,
    type CompetitorKnowledgeType,
 } from "../schemas/competitor-knowledge-schema";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, gt, cosineDistance } from "drizzle-orm";
 import type { PgVectorDatabaseInstance } from "../client";
 import { DatabaseError, NotFoundError } from "@packages/errors";
-import { createEmbedding, cosineSimilarity } from "../helpers";
+import { createEmbedding } from "../helpers";
 
 async function createCompetitorKnowledge(
    dbClient: PgVectorDatabaseInstance,
@@ -110,16 +110,18 @@ async function searchCompetitorKnowledgeByCosineSimilarityAndExternalId(
    try {
       const { limit = 10, similarityThreshold = 0.7, type } = options;
 
+      const similarity = sql<number>`1 - (${cosineDistance(competitorKnowledge.embedding, queryEmbedding)})`;
+
       let whereConditions = and(
          eq(competitorKnowledge.externalId, externalId),
-         sql`${cosineSimilarity(competitorKnowledge.embedding, queryEmbedding)} >= ${similarityThreshold}`,
+         gt(similarity, similarityThreshold),
       );
 
       if (type) {
          whereConditions = and(
             eq(competitorKnowledge.externalId, externalId),
             eq(competitorKnowledge.type, type),
-            sql`${cosineSimilarity(competitorKnowledge.embedding, queryEmbedding)} >= ${similarityThreshold}`,
+            gt(similarity, similarityThreshold),
          );
       }
 
@@ -127,11 +129,7 @@ async function searchCompetitorKnowledgeByCosineSimilarityAndExternalId(
          .select()
          .from(competitorKnowledge)
          .where(whereConditions)
-         .orderBy(
-            desc(
-               cosineSimilarity(competitorKnowledge.embedding, queryEmbedding),
-            ),
-         )
+         .orderBy(() => desc(similarity))
          .limit(limit);
 
       return result;
@@ -162,4 +160,3 @@ export async function searchCompetitorKnowledgeByTextAndExternalId(
       );
    }
 }
-

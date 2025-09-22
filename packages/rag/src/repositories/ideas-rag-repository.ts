@@ -4,7 +4,7 @@ import {
    type IdeasRagInsert,
    type IdeaLayoutType,
 } from "../schemas/ideas-rag-schema";
-import { eq, and, desc, sql, or, ilike, cosineDistance, gt } from "drizzle-orm";
+import { eq, and, desc, sql, cosineDistance, gt } from "drizzle-orm";
 import type { PgVectorDatabaseInstance } from "../client";
 import { DatabaseError, NotFoundError } from "@packages/errors";
 import { createEmbedding } from "../helpers";
@@ -14,10 +14,7 @@ async function createIdeasRag(
    data: IdeasRagInsert,
 ) {
    try {
-      const result = await dbClient
-         .insert(ideasRag)
-         .values(data)
-         .returning();
+      const result = await dbClient.insert(ideasRag).values(data).returning();
       return result[0];
    } catch (err) {
       throw new DatabaseError(
@@ -28,10 +25,7 @@ async function createIdeasRag(
 
 export async function createIdeasRagWithEmbedding(
    dbClient: PgVectorDatabaseInstance,
-   data: Omit<
-      IdeasRagInsert,
-      "embedding" | "id" | "createdAt" | "updatedAt"
-   >,
+   data: Omit<IdeasRagInsert, "embedding" | "id" | "createdAt" | "updatedAt">,
 ) {
    try {
       // Create embedding from title and description combined
@@ -108,10 +102,7 @@ async function searchIdeasRagByCosineSimilarityAndAgentId(
       );
 
       if (layout) {
-         whereConditions = and(
-            whereConditions,
-            eq(ideasRag.layout, layout),
-         );
+         whereConditions = and(whereConditions, eq(ideasRag.layout, layout));
       }
 
       const result = await dbClient
@@ -160,13 +151,13 @@ export async function checkForDuplicateIdeas(
    try {
       // Combine title and description for better duplicate detection
       const combinedText = `${title} ${description}`;
-      
+
       // Search for similar ideas using semantic similarity
       const similarIdeas = await searchIdeasRagByTextAndAgentId(
          dbClient,
          combinedText,
          agentId,
-         { similarityThreshold, limit: 1 }
+         { similarityThreshold, limit: 1 },
       );
 
       return similarIdeas.length > 0;
@@ -176,3 +167,4 @@ export async function checkForDuplicateIdeas(
       );
    }
 }
+

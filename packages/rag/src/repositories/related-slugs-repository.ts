@@ -3,10 +3,10 @@ import {
    type RelatedSlugs,
    type RelatedSlugsInsert,
 } from "../schemas/related-slugs-schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, gt, cosineDistance } from "drizzle-orm";
 import type { PgVectorDatabaseInstance } from "../client";
 import { DatabaseError, NotFoundError } from "@packages/errors";
-import { createEmbedding, cosineSimilarity } from "../helpers";
+import { createEmbedding } from "../helpers";
 
 async function createRelatedSlugs(
    dbClient: PgVectorDatabaseInstance,
@@ -113,15 +113,13 @@ async function searchRelatedSlugsByCosineSimilarity(
    try {
       const { limit = 10, similarityThreshold = 0.7 } = options;
 
+      const similarity = sql<number>`1 - (${cosineDistance(relatedSlugs.embedding, queryEmbedding)})`;
+
       const result = await dbClient
          .select()
          .from(relatedSlugs)
-         .where(
-            sql`${cosineSimilarity(relatedSlugs.embedding, queryEmbedding)} >= ${similarityThreshold}`,
-         )
-         .orderBy(
-            desc(cosineSimilarity(relatedSlugs.embedding, queryEmbedding)),
-         )
+         .where(gt(similarity, similarityThreshold))
+         .orderBy(() => desc(similarity))
          .limit(limit);
 
       return result;
