@@ -29,8 +29,9 @@
   "dependencies": {
     "drizzle-orm": "catalog:database",
     "drizzle-zod": "catalog:database",
-    "zod": "catalog:validation",
-    "pg": "catalog:database"
+    "openai": "^5.22.0",
+    "pg": "catalog:database",
+    "zod": "catalog:validation"
   },
   "devDependencies": {
     "@tooling/typescript": "workspace:*",
