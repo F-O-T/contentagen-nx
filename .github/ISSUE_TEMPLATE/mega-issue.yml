@@ -1,0 +1,133 @@
+name: Mega Issue
+description: For tracking large, complex initiatives that span multiple teams or require significant coordination
+title: "[MEGA] "
+labels: ["mega-issue", "epic"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Mega Issue Template
+        
+        Use this template for tracking large, complex initiatives that span multiple teams, require significant coordination, or involve major architectural changes.
+
+  - type: input
+    id: business-value
+    attributes:
+      label: Business Value
+      description: What business value does this mega issue deliver?
+      placeholder: "e.g., Increase user engagement by 25%, reduce infrastructure costs by 30%"
+    validations:
+      required: true
+
+  - type: textarea
+    id: overview
+    attributes:
+      label: Overview
+      description: High-level description of the initiative
+      placeholder: "Describe the overall goal and scope of this mega issue"
+    validations:
+      required: true
+
+  - type: textarea
+    id: success-criteria
+    attributes:
+      label: Success Criteria
+      description: What defines success for this initiative?
+      placeholder: |
+        - Clear, measurable success criteria
+        - Key performance indicators
+        - Acceptance criteria
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is in scope and out of scope for this initiative?
+      placeholder: |
+        **In Scope:**
+        - List of items included in this initiative
+        
+        **Out of Scope:**
+        - List of items explicitly excluded
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: What are the key dependencies for this initiative?
+      placeholder: |
+        - External dependencies
+        - Team dependencies
+        - Technical dependencies
+        - Resource requirements
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks and Mitigations
+      description: What are the potential risks and how will they be mitigated?
+      placeholder: |
+        - Risk 1: Description and mitigation plan
+        - Risk 2: Description and mitigation plan
+
+  - type: textarea
+    id: stakeholders
+    attributes:
+      label: Stakeholders
+      description: Who are the key stakeholders for this initiative?
+      placeholder: |
+        - Product: @person1, @person2
+        - Engineering: @person3, @person4
+        - Design: @person5
+        - Other teams: @team1, @team2
+
+  - type: textarea
+    id: timeline
+    attributes:
+      label: High-Level Timeline
+      description: What is the expected timeline for this initiative?
+      placeholder: |
+        - Phase 1: Date range
+        - Phase 2: Date range
+        - Phase 3: Date range
+        - Expected completion: Date
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Mega Issue Checklist
+      description: Complete this checklist before creating the mega issue
+      options:
+        - label: Business case and value proposition documented
+          required: true
+        - label: Success criteria clearly defined and measurable
+          required: true
+        - label: Scope boundaries established
+          required: true
+        - label: Key stakeholders identified and consulted
+          required: true
+        - label: Dependencies documented
+          required: true
+        - label: High-level timeline established
+          required: true
+        - label: Risk assessment completed
+          required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Next Steps
+
+        Once this mega issue is created:
+        1. Break down into smaller epics and issues
+        2. Create project board for tracking
+        3. Set up regular sync meetings
+        4. Establish communication channels
+        5. Define milestone reviews
+
+        ---
+        *Template created for tracking large-scale initiatives*
