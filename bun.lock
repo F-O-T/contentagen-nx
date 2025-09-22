@@ -90,10 +90,8 @@
       "name": "docs",
       "version": "0.2.0",
       "dependencies": {
-        "@arcjet/astro": "catalog:security",
         "@astrojs/check": "catalog:astro",
         "@astrojs/mdx": "catalog:astro",
-        "@astrojs/node": "catalog:astro",
         "@astrojs/starlight": "catalog:astro",
         "@astrojs/starlight-tailwind": "catalog:astro",
         "@astrojs/ts-plugin": "catalog:astro",
@@ -388,6 +386,23 @@
         "@packages/chroma-db": "workspace:*",
         "@packages/database": "workspace:*",
         "@packages/openrouter": "workspace:*",
+      },
+    },
+    "packages/rag": {
+      "name": "@packages/rag",
+      "dependencies": {
+        "drizzle-orm": "catalog:database",
+        "drizzle-zod": "catalog:database",
+        "pg": "catalog:database",
+        "zod": "catalog:validation",
+      },
+      "devDependencies": {
+        "@tooling/typescript": "workspace:*",
+        "@types/pg": "catalog:database",
+        "dotenv-cli": "catalog:enviroment",
+        "drizzle-kit": "catalog:database",
+        "shx": "catalog:enviroment",
+        "typescript": "catalog:development",
       },
     },
     "packages/redis": {
@@ -1326,6 +1341,8 @@
     "@packages/posthog": ["@packages/posthog@workspace:packages/posthog"],
 
     "@packages/prompts": ["@packages/prompts@workspace:packages/prompts"],
+
+    "@packages/rag": ["@packages/rag@workspace:packages/rag"],
 
     "@packages/redis": ["@packages/redis@workspace:packages/redis"],
 
