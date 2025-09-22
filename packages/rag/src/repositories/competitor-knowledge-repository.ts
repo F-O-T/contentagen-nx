@@ -1,6 +1,6 @@
 import {
    competitorKnowledge,
-   type CompetitorKnowledge,
+   type CompetitorKnowledgeSelect,
    type CompetitorKnowledgeInsert,
    type CompetitorKnowledgeType,
 } from "../schemas/competitor-knowledge-schema";
@@ -106,7 +106,7 @@ async function searchCompetitorKnowledgeByCosineSimilarityAndExternalId(
    queryEmbedding: number[],
    externalId: string,
    options: SearchOptions = {},
-): Promise<CompetitorKnowledge[]> {
+): Promise<CompetitorKnowledgeSelect[]> {
    try {
       const { limit = 10, similarityThreshold = 0.7, type } = options;
 
@@ -128,7 +128,9 @@ async function searchCompetitorKnowledgeByCosineSimilarityAndExternalId(
          .from(competitorKnowledge)
          .where(whereConditions)
          .orderBy(
-            desc(cosineSimilarity(competitorKnowledge.embedding, queryEmbedding)),
+            desc(
+               cosineSimilarity(competitorKnowledge.embedding, queryEmbedding),
+            ),
          )
          .limit(limit);
 
@@ -145,7 +147,7 @@ export async function searchCompetitorKnowledgeByTextAndExternalId(
    queryText: string,
    externalId: string,
    options: SearchOptions = {},
-): Promise<CompetitorKnowledge[]> {
+): Promise<CompetitorKnowledgeSelect[]> {
    try {
       const { embedding } = await createEmbedding(queryText);
       return await searchCompetitorKnowledgeByCosineSimilarityAndExternalId(
@@ -160,3 +162,4 @@ export async function searchCompetitorKnowledgeByTextAndExternalId(
       );
    }
 }
+
