@@ -1,4 +1,4 @@
-name: Mega Issue
+name: 🚀 Mega Issue
 description: For tracking large, complex initiatives that span multiple teams or require significant coordination
 title: "[MEGA] "
 labels: ["mega-issue", "epic"]
@@ -6,9 +6,75 @@ body:
   - type: markdown
     attributes:
       value: |
-        # Mega Issue Template
+        # 🚀 Mega Issue Template
         
         Use this template for tracking large, complex initiatives that span multiple teams, require significant coordination, or involve major architectural changes.
+
+  - type: dropdown
+    id: initiative-type
+    attributes:
+      label: Initiative Type
+      description: What type of mega initiative is this?
+      options:
+        - Platform Overhaul
+        - New Product Line
+        - Major Refactor
+        - Infrastructure Migration
+        - Security Enhancement
+        - Performance Optimization
+        - Compliance Initiative
+        - Strategic Partnership Integration
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope-app
+    attributes:
+      label: App Scope
+      description: Which apps are affected by this initiative?
+      options:
+        - blog
+        - dashboard
+        - docs
+        - landing-page
+        - server
+        - All Apps
+        - Multiple Apps (specify in description)
+        - Unknown / Not Applicable
+
+  - type: dropdown
+    id: scope-package
+    attributes:
+      label: Package Scope
+      description: Which packages are affected by this initiative?
+      options:
+        - api
+        - arcjet
+        - authentication
+        - brand
+        - chroma-db
+        - database
+        - environment
+        - errors
+        - files
+        - helpers
+        - localization
+        - mastra
+        - openrouter
+        - payment
+        - posthog
+        - prompts
+        - rag
+        - redis
+        - server-events
+        - tavily
+        - transactional
+        - ui
+        - workers
+        - All Packages
+        - Multiple Packages (specify in description)
+        - Unknown / Not Applicable
 
   - type: input
     id: business-value

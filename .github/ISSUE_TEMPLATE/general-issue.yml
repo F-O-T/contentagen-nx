@@ -26,6 +26,52 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: scope-app
+    attributes:
+      label: App Scope
+      description: Which app is this issue related to? (if applicable)
+      options:
+        - blog
+        - dashboard
+        - docs
+        - landing-page
+        - server
+        - Multiple Apps
+        - Unknown / Not Applicable
+
+  - type: dropdown
+    id: scope-package
+    attributes:
+      label: Package Scope
+      description: Which package is this issue related to? (if applicable)
+      options:
+        - api
+        - arcjet
+        - authentication
+        - brand
+        - chroma-db
+        - database
+        - environment
+        - errors
+        - files
+        - helpers
+        - localization
+        - mastra
+        - openrouter
+        - payment
+        - posthog
+        - prompts
+        - rag
+        - redis
+        - server-events
+        - tavily
+        - transactional
+        - ui
+        - workers
+        - Multiple Packages
+        - Unknown / Not Applicable
+
   - type: textarea
     id: description
     attributes:

@@ -11,6 +11,71 @@ body:
 
         Thanks for taking the time to report a bug! Please fill out the information below to help us understand and reproduce the issue.
 
+  - type: dropdown
+    id: bug-type
+    attributes:
+      label: Bug Type
+      description: What type of bug is this?
+      options:
+        - UI/UX Bug
+        - Functional Bug
+        - Performance Issue
+        - Security Vulnerability
+        - Compatibility Issue
+        - Data Corruption
+        - Crash/Exception
+        - Configuration Issue
+        - Documentation Bug
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope-app
+    attributes:
+      label: App Scope
+      description: Which app is affected by this bug?
+      options:
+        - blog
+        - dashboard
+        - docs
+        - landing-page
+        - server
+        - Multiple Apps
+        - Unknown / Not Applicable
+
+  - type: dropdown
+    id: scope-package
+    attributes:
+      label: Package Scope
+      description: Which package is affected by this bug? (if applicable)
+      options:
+        - api
+        - arcjet
+        - authentication
+        - brand
+        - chroma-db
+        - database
+        - environment
+        - errors
+        - files
+        - helpers
+        - localization
+        - mastra
+        - openrouter
+        - payment
+        - posthog
+        - prompts
+        - rag
+        - redis
+        - server-events
+        - tavily
+        - transactional
+        - ui
+        - workers
+        - Multiple Packages
+        - Unknown / Not Applicable
+
   - type: textarea
     id: description
     attributes:

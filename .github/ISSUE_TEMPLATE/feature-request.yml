@@ -11,6 +11,71 @@ body:
 
         Thanks for suggesting a new feature! Please fill out the information below to help us understand your request.
 
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What type of feature is this?
+      options:
+        - New Feature
+        - Enhancement
+        - UI/UX Improvement
+        - Performance Enhancement
+        - Integration
+        - API Enhancement
+        - Configuration Option
+        - Documentation Enhancement
+        - Accessibility Improvement
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope-app
+    attributes:
+      label: App Scope
+      description: Which app is this feature for?
+      options:
+        - blog
+        - dashboard
+        - docs
+        - landing-page
+        - server
+        - Multiple Apps
+        - Unknown / Not Applicable
+
+  - type: dropdown
+    id: scope-package
+    attributes:
+      label: Package Scope
+      description: Which package is this feature for? (if applicable)
+      options:
+        - api
+        - arcjet
+        - authentication
+        - brand
+        - chroma-db
+        - database
+        - environment
+        - errors
+        - files
+        - helpers
+        - localization
+        - mastra
+        - openrouter
+        - payment
+        - posthog
+        - prompts
+        - rag
+        - redis
+        - server-events
+        - tavily
+        - transactional
+        - ui
+        - workers
+        - Multiple Packages
+        - Unknown / Not Applicable
+
   - type: textarea
     id: summary
     attributes:
