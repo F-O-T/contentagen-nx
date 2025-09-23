@@ -16,8 +16,6 @@ import {
    emitAgentKnowledgeStatusChanged,
    emitCompetitorAnalysisStatusChanged,
 } from "@packages/server-events";
-import { getChromaClient } from "@packages/chroma-db/client";
-import { getCollection, addToCollection } from "@packages/chroma-db/helpers";
 import crypto from "node:crypto";
 import { z } from "zod";
 import type { BrandKnowledgeStatus } from "@packages/database/schemas/agent";

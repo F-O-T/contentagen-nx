@@ -10,8 +10,6 @@ import { serverEnv } from "@packages/environment/server";
 import { createDb } from "@packages/database/client";
 import { updateCompetitor } from "@packages/database/repositories/competitor-repository";
 import { emitCompetitorFeaturesStatusChanged } from "@packages/server-events";
-import { getChromaClient } from "@packages/chroma-db/client";
-import { getCollection, addToCollection } from "@packages/chroma-db/helpers";
 import crypto from "node:crypto";
 import { z } from "zod";
 import type { CompetitorFeaturesStatus } from "@packages/database/schemas/competitor";

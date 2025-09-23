@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@packages/mastra": "workspace:*",
+    "@packages/agents": "workspace:*",
     "@packages/helpers": "workspace:*",
     "@packages/payment": "workspace:*",
     "@packages/chroma-db": "workspace:*",
@@ -24,9 +24,7 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./functions/*": "./src/functions/*.ts",
-    "./queues/*": "./src/queues/*.ts",
-    "./producers/*": "./src/producers/*.ts"
+    "./queues/*": "./src/queues/*.ts"
   },
   "version": "0.4.0"
 }

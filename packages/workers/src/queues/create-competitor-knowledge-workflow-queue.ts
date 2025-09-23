@@ -2,7 +2,7 @@ import { Worker, Queue, type Job } from "bullmq";
 import { serverEnv } from "@packages/environment/server";
 import { createRedisClient } from "@packages/redis";
 import { registerGracefulShutdown } from "../helpers";
-import { mastra, setRuntimeContext } from "@packages/mastra";
+import { mastra, setRuntimeContext } from "@packages/agents";
 
 export interface CreateCompetitorKnowledgeWorkflowJobData {
    websiteUrl: string;
