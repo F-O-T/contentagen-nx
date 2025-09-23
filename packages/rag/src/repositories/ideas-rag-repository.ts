@@ -6,7 +6,7 @@ import {
 } from "../schemas/ideas-rag-schema";
 import { eq, and, desc, sql, cosineDistance, gt } from "drizzle-orm";
 import type { PgVectorDatabaseInstance } from "../client";
-import { DatabaseError, NotFoundError } from "@packages/errors";
+import { AppError, propagateError } from "@packages/utils/errors";
 import { createEmbedding } from "../helpers";
 
 async function createIdeasRag(
@@ -17,7 +17,7 @@ async function createIdeasRag(
       const result = await dbClient.insert(ideasRag).values(data).returning();
       return result[0];
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to create ideas RAG entry: ${(err as Error).message}`,
       );
    }
@@ -36,8 +36,8 @@ export async function createIdeasRagWithEmbedding(
          embedding,
       });
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to create ideas RAG entry with embedding: ${(err as Error).message}`,
       );
    }
@@ -55,7 +55,7 @@ export async function deleteIdeasRagByIdeaId(
 
       return result.length;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to delete ideas RAG entries by idea ID: ${(err as Error).message}`,
       );
    }
@@ -73,7 +73,7 @@ export async function deleteIdeasRagByAgentId(
 
       return result.length;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to delete ideas RAG entries by agent ID: ${(err as Error).message}`,
       );
    }
@@ -114,7 +114,7 @@ async function searchIdeasRagByCosineSimilarityAndAgentId(
 
       return result;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to search ideas RAG by cosine similarity and agent ID: ${(err as Error).message}`,
       );
    }
@@ -135,7 +135,7 @@ export async function searchIdeasRagByTextAndAgentId(
          options,
       );
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to search ideas RAG by text and agent ID: ${(err as Error).message}`,
       );
    }
@@ -162,7 +162,7 @@ export async function checkForDuplicateIdeas(
 
       return similarIdeas.length > 0;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to check for duplicate ideas: ${(err as Error).message}`,
       );
    }

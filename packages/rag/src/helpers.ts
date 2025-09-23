@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { serverEnv } from "@packages/environment/server";
+import { AppError } from "@packages/utils/errors";
 
 const openai = new OpenAI({
    apiKey: serverEnv.OPENAI_API_KEY,
@@ -15,7 +16,7 @@ export const createEmbedding = async (text: string) => {
 
       const embedding = response.data[0]?.embedding;
       if (!embedding) {
-         throw new Error("Failed to create embedding: No embedding found");
+         throw AppError.internal("Failed to create embedding: No embedding found");
       }
       const tokenCount = response.usage?.total_tokens || 0;
 
@@ -24,7 +25,8 @@ export const createEmbedding = async (text: string) => {
          tokenCount,
       };
    } catch (error) {
-      throw new Error(
+      if (error instanceof AppError) throw error;
+      throw AppError.internal(
          `Failed to create embedding: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
    }

@@ -6,7 +6,7 @@ import {
 } from "../schemas/competitor-knowledge-schema";
 import { eq, and, desc, sql, gt, cosineDistance } from "drizzle-orm";
 import type { PgVectorDatabaseInstance } from "../client";
-import { DatabaseError, NotFoundError } from "@packages/errors";
+import { AppError, propagateError } from "@packages/utils/errors";
 import { createEmbedding } from "../helpers";
 
 async function createCompetitorKnowledge(
@@ -20,7 +20,7 @@ async function createCompetitorKnowledge(
          .returning();
       return result[0];
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to create competitor knowledge: ${(err as Error).message}`,
       );
    }
@@ -40,8 +40,8 @@ export async function createCompetitorKnowledgeWithEmbedding(
          embedding,
       });
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to create competitor knowledge with embedding: ${(err as Error).message}`,
       );
    }
@@ -65,7 +65,7 @@ export async function deleteCompetitorKnowledgeByExternalIdAndType(
 
       return result.length;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to delete competitor knowledge by external ID and type: ${(err as Error).message}`,
       );
    }
@@ -89,7 +89,7 @@ export async function deleteAllCompetitorKnowledgeByExternalIdAndType(
 
       return result.length;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to delete all competitor knowledge by external ID and type: ${(err as Error).message}`,
       );
    }
@@ -134,7 +134,7 @@ async function searchCompetitorKnowledgeByCosineSimilarityAndExternalId(
 
       return result;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to search competitor knowledge by cosine similarity and external ID: ${(err as Error).message}`,
       );
    }
@@ -155,7 +155,7 @@ export async function searchCompetitorKnowledgeByTextAndExternalId(
          options,
       );
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to search competitor knowledge by text and external ID: ${(err as Error).message}`,
       );
    }
