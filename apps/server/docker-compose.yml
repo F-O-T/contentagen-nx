@@ -37,14 +37,19 @@ services:
       timeout: 20s
       retries: 3
 
-  chroma:
-    image: docker.io/chromadb/chroma:latest
-    ports:
-      - "8000:8000"
+  pgvector:
+    image: docker.io/pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
     volumes:
-      - chroma-data:/data
+      - pgvector-data:/var/lib/postgresql/data
+    ports:
+      - "8000:5432"
+
 volumes:
   pgdata:
   miniodata:
-  chroma-data:
+  pgvector-data:
   redisdata:
