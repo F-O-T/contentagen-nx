@@ -8,7 +8,7 @@
     "typescript": "catalog:development"
   },
   "license": "Apache-2.0",
-  "name": "@packages/helpers",
+  "name": "@packages/utils",
   "scripts": {
     "check": "biome check --write ./src",
     "typecheck": "bunx --bun tsc --noEmit "
