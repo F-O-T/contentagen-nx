@@ -1,5 +1,0 @@
-{
-   "extends": "@tooling/typescript/internal-package.json",
-   "compilerOptions": {},
-   "exclude": ["node_modules", "build", "dist"]
-}

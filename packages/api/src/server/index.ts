@@ -12,7 +12,6 @@ import { authHelpersRouter } from "./router/auth-helpers";
 import { sdkRouter } from "./router/sdk";
 import { ideasRouter } from "./router/ideas";
 import { preferencesRouter } from "./router/preferences";
-import type { OpenRouterClient } from "@packages/openrouter/client";
 import { competitorRouter } from "./router/competitor";
 import { competitorFileRouter } from "./router/competitor-file";
 
