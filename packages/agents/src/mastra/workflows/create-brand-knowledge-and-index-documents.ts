@@ -1,4 +1,5 @@
 import { createWorkflow, createStep } from "@mastra/core/workflows";
+import { createBrandKnowledgeWithEmbedding } from "@packages/rag/repositories/brand-knowledge-repository";
 import { getPaymentClient } from "@packages/payment/client";
 import {
    createAiUsageMetadata,
@@ -16,10 +17,10 @@ import {
    emitAgentKnowledgeStatusChanged,
    emitCompetitorAnalysisStatusChanged,
 } from "@packages/server-events";
-import crypto from "node:crypto";
 import { z } from "zod";
 import type { BrandKnowledgeStatus } from "@packages/database/schemas/agent";
 import type { CompetitorAnalysisStatus } from "@packages/database/schemas/competitor";
+import { createPgVector } from "@packages/rag/client";
 
 type LLMUsage = {
    inputTokens: number;
@@ -379,7 +380,9 @@ const saveAndIndexBrandDocuments = createStep({
       };
 
       const minioClient = getMinioClient(serverEnv);
-      const chroma = getChromaClient();
+      const ragClient = createPgVector({
+         pgVectorURL: serverEnv.PG_VECTOR_URL,
+      });
       const bucketName = serverEnv.MINIO_BUCKET;
 
       // Process documents sequentially to keep resource usage predictable.
@@ -426,30 +429,14 @@ const saveAndIndexBrandDocuments = createStep({
 
       if (allChunks.length > 0) {
          try {
-            const collection = await getCollection(
-               chroma,
-               getTargetCollectionName(target) as Parameters<
-                  typeof getCollection
-               >[1],
-            );
-
-            const documents = allChunks.map((item) => item.text);
-            const ids = allChunks.map(() => crypto.randomUUID());
-            const metadatas = allChunks.map((item) =>
-               createChunkMetadata(
-                  target,
-                  item.agentId,
-                  item.sourceId,
-                  websiteUrl,
-               ),
-            );
-
-            await addToCollection(collection, {
-               documents,
-               ids,
-               metadatas,
+            allChunks.forEach(async (chunk) => {
+               await createBrandKnowledgeWithEmbedding(ragClient, {
+                  chunk: chunk.text,
+                  externalId: chunk.agentId,
+                  sourceId: chunk.sourceId,
+                  type: "document",
+               });
             });
-
             console.log(
                `[saveAndIndexBrandDocuments] Successfully indexed ${allChunks.length} chunks to Chroma`,
             );

@@ -25,6 +25,7 @@
     "@mastra/rag": "^1.2.5",
     "@openrouter/ai-sdk-provider": "catalog:openrouter",
     "@packages/environment": "workspace:*",
+    "@packages/rag": "workspace:*",
     "@packages/files": "workspace:*",
     "@packages/database": "workspace:*",
     "@packages/server-events": "workspace:*",

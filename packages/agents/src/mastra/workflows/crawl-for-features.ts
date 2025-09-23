@@ -1,4 +1,6 @@
 import { createWorkflow, createStep } from "@mastra/core/workflows";
+import { createCompetitorKnowledgeWithEmbedding } from "@packages/rag/repositories/competitor-knowledge-repository";
+import { createPgVector } from "@packages/rag/client";
 import { bulkCreateFeatures } from "@packages/database/repositories/competitor-feature-repository";
 import { getPaymentClient } from "@packages/payment/client";
 import {
@@ -10,7 +12,6 @@ import { serverEnv } from "@packages/environment/server";
 import { createDb } from "@packages/database/client";
 import { updateCompetitor } from "@packages/database/repositories/competitor-repository";
 import { emitCompetitorFeaturesStatusChanged } from "@packages/server-events";
-import crypto from "node:crypto";
 import { z } from "zod";
 import type { CompetitorFeaturesStatus } from "@packages/database/schemas/competitor";
 
@@ -165,13 +166,15 @@ const saveCompetitorFeatures = createStep({
    inputSchema: extractCompetitorFeaturesOutputSchema,
    outputSchema: CreateCompetitorKnowledgeOutput,
    execute: async ({ inputData }) => {
-      const { extractedFeatures, competitorId, websiteUrl } = inputData;
+      const { extractedFeatures, competitorId } = inputData;
 
       // Update status to chunking (processing and indexing)
       await updateCompetitorFeaturesStatus(competitorId, "analyzing");
 
       const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
-      const chroma = getChromaClient();
+      const ragClient = createPgVector({
+         pgVectorURL: serverEnv.PG_VECTOR_URL,
+      });
 
       const featuresForDb = extractedFeatures.map((feature) => ({
          competitorId,
@@ -190,27 +193,14 @@ const saveCompetitorFeatures = createStep({
 
       if (features.length > 0) {
          try {
-            const collection = await getCollection(
-               chroma,
-               "CompetitorKnowledge",
-            );
-
-            const documents = features.map((item) => item.summary);
-            const ids = features.map(() => crypto.randomUUID());
-            const metadatas = features.map((item) => ({
-               competitorId: item.competitorId,
-               //TODO: type all the source types
-               sourceType: "competitor_feature",
-               sourceId: item.id,
-               websiteUrl,
-               featureName: item.featureName,
-               featureCategory: item.meta?.category ?? "",
-            }));
-
-            await addToCollection(collection, {
-               documents,
-               ids,
-               metadatas,
+            //TODO: create a method to handle this in bulk
+            features.forEach(async (feature) => {
+               await createCompetitorKnowledgeWithEmbedding(ragClient, {
+                  chunk: feature.summary,
+                  externalId: competitorId,
+                  sourceId: feature.id,
+                  type: "feature",
+               });
             });
 
             console.log(
