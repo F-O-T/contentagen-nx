@@ -7,13 +7,17 @@
   "license": "Apache-2.0",
   "name": "@packages/transactional",
   "scripts": {
+    "build": "tsc",
     "check": "biome check --write ./src",
     "typecheck": "bunx --bun tsc --noEmit "
   },
   "private": true,
   "type": "module",
   "exports": {
-    "./client": "./src/client.tsx"
+    "./client": {
+      "types": "./dist/src/client.d.ts",
+      "default": "./src/client.tsx"
+    }
   },
   "version": "0.4.0",
   "dependencies": {

@@ -6,14 +6,21 @@
   "license": "Apache-2.0",
   "name": "@packages/posthog",
   "scripts": {
+    "build": "tsc",
     "check": "biome check --write ./src",
     "typecheck": "bunx --bun tsc --noEmit "
   },
   "private": true,
   "type": "module",
   "exports": {
-    "./client": "./src/client.tsx",
-    "./server": "./src/server.ts"
+    "./client": {
+      "types": "./dist/src/client.d.ts",
+      "default": "./src/client.tsx"
+    },
+    "./server": {
+      "types": "./dist/src/server.d.ts",
+      "default": "./src/server.ts"
+    }
   },
   "version": "0.4.0",
   "dependencies": {

@@ -1,3 +1,4 @@
+//TODO: Use this on the errors to track the errors
 import { PostHog } from "posthog-node";
 import { posthogPublicKey, posthogHost } from "./shared-posthog-config";
 
