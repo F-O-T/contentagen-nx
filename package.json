@@ -167,6 +167,9 @@
       "openrouter": {
         "@openrouter/ai-sdk-provider": "1.1.2",
         "ai": "5.0.5"
+      },
+      "workers": {
+        "bullmq": "5.58.7"
       }
     },
     "packages": [

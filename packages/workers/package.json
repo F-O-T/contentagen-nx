@@ -5,7 +5,7 @@
     "@packages/payment": "workspace:*",
     "@packages/redis": "workspace:*",
     "@packages/files": "workspace:*",
-    "bullmq": "^5.56.9",
+    "bullmq": "catalog:workers",
     "@packages/server-events": "workspace:*"
   },
   "devDependencies": {

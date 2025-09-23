@@ -32,7 +32,7 @@ type LLMUsage = {
 async function ingestUsage(usage: LLMUsage, userId: string) {
    const paymentClient = getPaymentClient(serverEnv.POLAR_ACCESS_TOKEN);
    const usageMetadata = createAiUsageMetadata({
-      effort: "small",
+      effort: "deepseek-v3.1-terminus",
       inputTokens: usage.inputTokens,
       outputTokens: usage.outputTokens,
    });

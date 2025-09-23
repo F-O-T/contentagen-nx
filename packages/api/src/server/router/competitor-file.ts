@@ -7,10 +7,7 @@ import {
    getCompetitorById,
 } from "@packages/database/repositories/competitor-repository";
 import { getFile, streamFileForProxy } from "@packages/files/client";
-import {
-   deleteFromCollection,
-   getCollection,
-} from "@packages/chroma-db/helpers";
+import { deleteAllCompetitorKnowledgeByExternalIdAndType } from "@packages/rag/repositories/competitor-knowledge-repository";
 
 const CompetitorFileDeleteInput = z.object({
    fileName: z.string(),
@@ -106,15 +103,17 @@ export const competitorFileRouter = router({
          const key = `${competitorId}/${fileName}`;
          const bucketName = (await ctx).minioBucket;
          const resolvedCtx = await ctx;
-         const collection = await getCollection(
-            resolvedCtx.chromaClient,
-            "CompetitorKnowledge",
+         await deleteAllCompetitorKnowledgeByExternalIdAndType(
+            resolvedCtx.ragClient,
+            competitorId,
+            "document",
          );
-         await deleteFromCollection(collection, {
-            where: {
-               sourceId: key,
-            },
-         });
+         await deleteAllCompetitorKnowledgeByExternalIdAndType(
+            resolvedCtx.ragClient,
+            competitorId,
+            "feature",
+         );
+
          await resolvedCtx.minioClient.removeObject(bucketName, key);
          const competitor = await getCompetitorById(
             resolvedCtx.db,
@@ -165,19 +164,11 @@ export const competitorFileRouter = router({
 
          // Delete from ChromaDB collection
          try {
-            const collection = await getCollection(
-               resolvedCtx.chromaClient,
-               "CompetitorKnowledge",
+            await deleteAllCompetitorKnowledgeByExternalIdAndType(
+               resolvedCtx.ragClient,
+               competitorId,
+               "document",
             );
-
-            const sourceIds = uploadedFiles.map(
-               (file) => `${competitorId}/${file.fileName}`,
-            );
-            await deleteFromCollection(collection, {
-               where: {
-                  sourceId: { $in: sourceIds },
-               },
-            });
          } catch (error) {
             console.error("Failed to delete from ChromaDB:", error);
          }

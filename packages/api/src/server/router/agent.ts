@@ -6,8 +6,7 @@ import {
    listAgents,
    getTotalAgents,
 } from "@packages/database/repositories/agent-repository";
-import { NotFoundError, DatabaseError } from "@packages/utils/errors";
-import { TRPCError } from "@trpc/server";
+import { APIError, propagateError } from "@packages/utils/errors";
 import {
    protectedProcedure,
    organizationOwnerProcedure,
@@ -58,35 +57,24 @@ export const agentRouter = router({
          const organizationId =
             resolvedCtx.session?.session?.activeOrganizationId;
          if (!userId) {
-            throw new TRPCError({
-               code: "UNAUTHORIZED",
-               message: "User not authenticated.",
-            });
+            throw APIError.unauthorized("User not authenticated.");
          }
          if (!organizationId) {
-            throw new TRPCError({
-               code: "BAD_REQUEST",
-               message: "No active organization found in session.",
-            });
+            throw APIError.validation(
+               "No active organization found in session.",
+            );
          }
          const agent = await getAgentById(resolvedCtx.db, id);
          if (!agent) {
-            throw new TRPCError({
-               code: "NOT_FOUND",
-               message: "Agent not found.",
-            });
+            throw APIError.notFound("Agent not found.");
          }
          if (agent.userId !== userId) {
-            throw new TRPCError({
-               code: "FORBIDDEN",
-               message: "You do not own this agent.",
-            });
+            throw APIError.forbidden("You do not own this agent.");
          }
          if (agent.organizationId) {
-            throw new TRPCError({
-               code: "BAD_REQUEST",
-               message: "Agent is already owned by an organization.",
-            });
+            throw APIError.forbidden(
+               "Agent is already owned by an organization.",
+            );
          }
          // Optionally, you may want to check the user's role here, depending on business logic
          const updatedAgent = await updateAgent(resolvedCtx.db, id, {
@@ -142,10 +130,9 @@ export const agentRouter = router({
          try {
             const userId = resolvedCtx.session?.user.id;
             if (!userId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message: "User ID is required to create an agent.",
-               });
+               throw APIError.unauthorized(
+                  "User ID is required to create an agent.",
+               );
             }
             const agentData: Omit<
                AgentInsert,
@@ -156,13 +143,8 @@ export const agentRouter = router({
             };
             return await createAgent(resolvedCtx.db, { ...agentData });
          } catch (err) {
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
          }
       }),
    update: protectedProcedure
@@ -176,10 +158,7 @@ export const agentRouter = router({
          const resolvedCtx = await ctx;
          const { id, ...updateFields } = input;
          if (!id) {
-            throw new TRPCError({
-               code: "BAD_REQUEST",
-               message: "Agent ID is required for update.",
-            });
+            throw APIError.validation("Agent ID is required for update.");
          }
          try {
             await updateAgent(resolvedCtx.db, id, {
@@ -188,16 +167,8 @@ export const agentRouter = router({
             });
             return { success: true };
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
-            }
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
          }
       }),
    delete: protectedProcedure
@@ -209,16 +180,8 @@ export const agentRouter = router({
             await deleteAgent(resolvedCtx.db, id);
             return { success: true };
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
-            }
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
          }
       }),
    get: protectedProcedure
@@ -228,16 +191,8 @@ export const agentRouter = router({
          try {
             return await getAgentById(resolvedCtx.db, input.id);
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
-            }
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
          }
       }),
    list: protectedProcedure
@@ -256,11 +211,9 @@ export const agentRouter = router({
             const organizationId =
                resolvedCtx.session?.session?.activeOrganizationId;
             if (!userId && !organizationId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message:
-                     "User or organization ID is required to list agents.",
-               });
+               throw APIError.unauthorized(
+                  "User or organization ID is required to list agents.",
+               );
             }
 
             const { page = 1, limit = 8 } = input || {};
@@ -286,13 +239,8 @@ export const agentRouter = router({
                totalPages: Math.ceil(total / limit),
             };
          } catch (err) {
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
          }
       }),
 });
