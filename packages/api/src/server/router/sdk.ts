@@ -10,9 +10,7 @@ import {
 import { ContentSelectSchema } from "@packages/database/schemas/content";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { getCollection, queryCollection } from "@packages/chroma-db/helpers";
 
-// Reusable image schema for SDK responses
 const ImageSchema = z
    .object({
       data: z.string(),
@@ -23,6 +21,7 @@ const ImageSchema = z
 import { getAgentById } from "@packages/database/repositories/agent-repository";
 import { getContentById } from "@packages/database/repositories/content-repository";
 import { streamFileForProxy } from "@packages/files/client";
+import { searchRelatedSlugsByText } from "@packages/rag/repositories/related-slugs-repository";
 
 export const sdkRouter = router({
    getAuthorByAgentId: sdkProcedure
@@ -75,25 +74,14 @@ export const sdkRouter = router({
             });
          }
          const resolvedCtx = await ctx;
-         const collection = await getCollection(
-            resolvedCtx.chromaClient,
-            "RelatedSlugs",
-         );
-         const results = await queryCollection(collection, {
-            queryTexts: [input.slug],
-            nResults: 5,
-            whereDocument: {
-               $not_contains: input.slug,
+         const slugs = await searchRelatedSlugsByText(
+            resolvedCtx.ragClient,
+            input.slug,
+            input.agentId,
+            {
+               limit: 5,
             },
-
-            include: ["documents", "metadatas", "distances"],
-            where: { agentId: input.agentId },
-         });
-         const slugs = results.documents
-            .flat()
-            .filter(
-               (doc): doc is string => typeof doc === "string" && doc !== null,
-            );
+         );
          return slugs;
       }),
    listContentByAgent: sdkProcedure

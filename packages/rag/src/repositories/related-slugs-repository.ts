@@ -3,9 +3,9 @@ import {
    type RelatedSlugs,
    type RelatedSlugsInsert,
 } from "../schemas/related-slugs-schema";
-import { eq, desc, sql, gt, cosineDistance } from "drizzle-orm";
+import { eq, desc, sql, gt, cosineDistance, and } from "drizzle-orm";
 import type { PgVectorDatabaseInstance } from "../client";
-import { DatabaseError, NotFoundError } from "@packages/errors";
+import { AppError, propagateError } from "@packages/utils/errors";
 import { createEmbedding } from "../helpers";
 
 async function createRelatedSlugs(
@@ -19,9 +19,8 @@ async function createRelatedSlugs(
          .returning();
       return result[0];
    } catch (err) {
-      throw new DatabaseError(
-         `Failed to create related slugs: ${(err as Error).message}`,
-      );
+      console.error("Failed to create related slugs:", err);
+      throw AppError.database("Failed to create related slugs");
    }
 }
 
@@ -39,10 +38,8 @@ export async function createRelatedSlugsWithEmbedding(
          embedding,
       });
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
-         `Failed to create related slugs with embedding: ${(err as Error).message}`,
-      );
+      console.error("Failed to create related slugs with embedding:", err);
+      propagateError(err);
    }
 }
 
@@ -58,7 +55,8 @@ export async function deleteRelatedSlugsBySlug(
 
       return result.length;
    } catch (err) {
-      throw new DatabaseError(
+      console.error("Failed to delete related slugs by slug:", err);
+      throw AppError.database(
          `Failed to delete related slugs by slug: ${(err as Error).message}`,
       );
    }
@@ -76,26 +74,9 @@ export async function bulkDeleteRelatedSlugsBySlugs(
 
       return result.length;
    } catch (err) {
-      throw new DatabaseError(
+      console.error("Failed to bulk delete related slugs by slugs:", err);
+      throw AppError.database(
          `Failed to bulk delete related slugs by slugs: ${(err as Error).message}`,
-      );
-   }
-}
-
-export async function findRelatedSlugsBySlug(
-   dbClient: PgVectorDatabaseInstance,
-   slug: string,
-): Promise<RelatedSlugs[]> {
-   try {
-      const result = await dbClient
-         .select()
-         .from(relatedSlugs)
-         .where(eq(relatedSlugs.slug, slug));
-
-      return result;
-   } catch (err) {
-      throw new DatabaseError(
-         `Failed to find related slugs by slug: ${(err as Error).message}`,
       );
    }
 }
@@ -108,6 +89,7 @@ interface RelatedSlugsSearchOptions {
 async function searchRelatedSlugsByCosineSimilarity(
    dbClient: PgVectorDatabaseInstance,
    queryEmbedding: number[],
+   externalId: string,
    options: RelatedSlugsSearchOptions = {},
 ): Promise<RelatedSlugs[]> {
    try {
@@ -115,17 +97,23 @@ async function searchRelatedSlugsByCosineSimilarity(
 
       const similarity = sql<number>`1 - (${cosineDistance(relatedSlugs.embedding, queryEmbedding)})`;
 
-      const result = await dbClient
-         .select()
-         .from(relatedSlugs)
-         .where(gt(similarity, similarityThreshold))
-         .orderBy(() => desc(similarity))
-         .limit(limit);
+      const result = await dbClient.query.relatedSlugs.findMany({
+         where: and(
+            gt(similarity, similarityThreshold),
+            eq(relatedSlugs.externalId, externalId),
+         ),
+         orderBy: [desc(similarity)],
+         limit,
+      });
 
       return result;
    } catch (err) {
-      throw new DatabaseError(
-         `Failed to search related slugs by cosine similarity: ${(err as Error).message}`,
+      console.error(
+         "Failed to search related slugs by cosine similarity:",
+         err,
+      );
+      throw AppError.database(
+         "Failed to search related slugs by cosine similarity",
       );
    }
 }
@@ -133,6 +121,7 @@ async function searchRelatedSlugsByCosineSimilarity(
 export async function searchRelatedSlugsByText(
    dbClient: PgVectorDatabaseInstance,
    queryText: string,
+   externalId: string,
    options: RelatedSlugsSearchOptions = {},
 ): Promise<RelatedSlugs[]> {
    try {
@@ -140,10 +129,12 @@ export async function searchRelatedSlugsByText(
       return await searchRelatedSlugsByCosineSimilarity(
          dbClient,
          embedding,
+         externalId,
          options,
       );
    } catch (err) {
-      throw new DatabaseError(
+      console.error("Failed to search related slugs by text:", err);
+      throw AppError.database(
          `Failed to search related slugs by text: ${(err as Error).message}`,
       );
    }
