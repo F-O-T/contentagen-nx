@@ -6,7 +6,7 @@ import type {
    CompetitorWithFeatures,
 } from "../schemas/competitor";
 import type { DatabaseInstance } from "../client";
-import { DatabaseError, NotFoundError } from "@packages/errors";
+import { AppError, propagateError } from "@packages/utils/errors";
 
 export async function createCompetitor(
    dbClient: DatabaseInstance,
@@ -15,11 +15,11 @@ export async function createCompetitor(
    try {
       const result = await dbClient.insert(competitor).values(data).returning();
       const created = result?.[0];
-      if (!created) throw new NotFoundError("Competitor not created");
+      if (!created) throw AppError.database("Competitor not created");
       return created;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to create competitor: ${(err as Error).message}`,
       );
    }
@@ -36,11 +36,11 @@ export async function getCompetitorById(
             features: true,
          },
       });
-      if (!result) throw new NotFoundError("Competitor not found");
+      if (!result) throw AppError.database("Competitor not found");
       return result;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to get competitor: ${(err as Error).message}`,
       );
    }
@@ -58,11 +58,11 @@ export async function updateCompetitor(
          .where(eq(competitor.id, id))
          .returning();
       const updated = result?.[0];
-      if (!updated) throw new NotFoundError("Competitor not found");
+      if (!updated) throw AppError.database("Competitor not found");
       return updated;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to update competitor: ${(err as Error).message}`,
       );
    }
@@ -78,10 +78,10 @@ export async function deleteCompetitor(
          .where(eq(competitor.id, id))
          .returning();
       const deleted = result?.[0];
-      if (!deleted) throw new NotFoundError("Competitor not found");
+      if (!deleted) throw AppError.database("Competitor not found");
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to delete competitor: ${(err as Error).message}`,
       );
    }
@@ -156,7 +156,7 @@ export async function listCompetitors(
       }
       return [];
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to list competitors: ${(err as Error).message}`,
       );
    }
@@ -195,7 +195,7 @@ export async function getTotalCompetitors(
       }
       return 0;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to get total competitors: ${(err as Error).message}`,
       );
    }
@@ -271,7 +271,7 @@ export async function searchCompetitors(
          },
       });
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to search competitors: ${(err as Error).message}`,
       );
    }

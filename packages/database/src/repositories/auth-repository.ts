@@ -1,5 +1,5 @@
 import type { DatabaseInstance } from "../client";
-import { DatabaseError, NotFoundError } from "@packages/errors";
+import { AppError, propagateError } from "@packages/utils/errors";
 
 export async function findMemberByUserId(
    dbClient: DatabaseInstance,
@@ -11,8 +11,8 @@ export async function findMemberByUserId(
       });
       return result;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to find user by id: ${(err as Error).message}`,
       );
    }
@@ -26,11 +26,11 @@ export async function findOrganizationById(
       const result = await dbClient.query.organization.findFirst({
          where: (org, { eq }) => eq(org.id, organizationId),
       });
-      if (!result) throw new NotFoundError("Organization not found");
+      if (!result) throw AppError.database("Organization not found");
       return result;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to find organization by id: ${(err as Error).message}`,
       );
    }
@@ -52,7 +52,7 @@ export async function isOrganizationOwner(
       });
       return !!result;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to check organization ownership: ${(err as Error).message}`,
       );
    }
@@ -71,7 +71,7 @@ export async function getOrganizationMembers(
       });
       return result;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to get organization members: ${(err as Error).message}`,
       );
    }

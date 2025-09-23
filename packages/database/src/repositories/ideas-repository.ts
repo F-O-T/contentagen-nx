@@ -1,7 +1,7 @@
 import { ideas } from "../schemas/ideas";
 import type { IdeaSelect, IdeaInsert } from "../schemas/ideas";
 import type { DatabaseInstance } from "../client";
-import { DatabaseError, NotFoundError } from "@packages/errors";
+import { AppError, propagateError } from "@packages/utils/errors";
 import { eq, inArray } from "drizzle-orm";
 
 export async function createIdea(
@@ -11,11 +11,11 @@ export async function createIdea(
    try {
       const result = await dbClient.insert(ideas).values(data).returning();
       const created = result?.[0];
-      if (!created) throw new NotFoundError("Idea not created");
+      if (!created) throw AppError.database("Idea not created");
       return created;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to create idea: ${(err as Error).message}`,
       );
    }
@@ -29,11 +29,11 @@ export async function getIdeaById(
       const result = await dbClient.query.ideas.findFirst({
          where: eq(ideas.id, id),
       });
-      if (!result) throw new NotFoundError("Idea not found");
+      if (!result) throw AppError.database("Idea not found");
       return result;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(`Failed to get idea: ${(err as Error).message}`);
+      propagateError(err);
+      throw AppError.database(`Failed to get idea: ${(err as Error).message}`);
    }
 }
 
@@ -49,11 +49,11 @@ export async function updateIdea(
          .where(eq(ideas.id, id))
          .returning();
       const updated = result?.[0];
-      if (!updated) throw new NotFoundError("Idea not found");
+      if (!updated) throw AppError.database("Idea not found");
       return updated;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to update idea: ${(err as Error).message}`,
       );
    }
@@ -69,10 +69,10 @@ export async function deleteIdea(
          .where(eq(ideas.id, id))
          .returning();
       const deleted = result?.[0];
-      if (!deleted) throw new NotFoundError("Idea not found");
+      if (!deleted) throw AppError.database("Idea not found");
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to delete idea: ${(err as Error).message}`,
       );
    }
@@ -87,7 +87,7 @@ export async function listIdeasByAgent(
          where: eq(ideas.agentId, agentId),
       });
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to list ideas: ${(err as Error).message}`,
       );
    }
@@ -104,7 +104,7 @@ export async function getAgentIdeasCount(
          .where(eq(ideas.agentId, agentId));
       return result.length;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to get agent ideas count: ${(err as Error).message}`,
       );
    }
@@ -132,7 +132,7 @@ export async function listAllIdeasPaginated(
       });
       return { items, total: totalRes.length };
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to list ideas: ${(err as Error).message}`,
       );
    }

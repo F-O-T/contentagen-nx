@@ -2,7 +2,7 @@ import { agent } from "../schemas/agent";
 
 import type { AgentSelect, AgentInsert } from "../schemas/agent";
 import type { DatabaseInstance } from "../client";
-import { DatabaseError, NotFoundError } from "@packages/errors";
+import { AppError, propagateError } from "@packages/utils/errors";
 import { eq, or, sql } from "drizzle-orm";
 
 export async function createAgent(
@@ -12,11 +12,11 @@ export async function createAgent(
    try {
       const result = await dbClient.insert(agent).values(data).returning();
       const created = result?.[0];
-      if (!created) throw new NotFoundError("Agent not created");
+      if (!created) throw AppError.database("Agent not created");
       return created;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to create agent: ${(err as Error).message}`,
       );
    }
@@ -30,11 +30,11 @@ export async function getAgentById(
       const result = await dbClient.query.agent.findFirst({
          where: eq(agent.id, id),
       });
-      if (!result) throw new NotFoundError("Agent not found");
+      if (!result) throw AppError.database("Agent not found");
       return result;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(`Failed to get agent: ${(err as Error).message}`);
+      propagateError(err);
+      throw AppError.database(`Failed to get agent: ${(err as Error).message}`);
    }
 }
 
@@ -50,11 +50,11 @@ export async function updateAgent(
          .where(eq(agent.id, id))
          .returning();
       const updated = result?.[0];
-      if (!updated) throw new NotFoundError("Agent not found");
+      if (!updated) throw AppError.database("Agent not found");
       return updated;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to update agent: ${(err as Error).message}`,
       );
    }
@@ -70,10 +70,10 @@ export async function deleteAgent(
          .where(eq(agent.id, id))
          .returning();
       const deleted = result?.[0];
-      if (!deleted) throw new NotFoundError("Agent not found");
+      if (!deleted) throw AppError.database("Agent not found");
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to delete agent: ${(err as Error).message}`,
       );
    }
@@ -125,7 +125,7 @@ export async function listAgents(
       }
       return [];
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to list agents: ${(err as Error).message}`,
       );
    }
@@ -164,7 +164,7 @@ export async function getTotalAgents(
       }
       return 0;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to get total agents: ${(err as Error).message}`,
       );
    }

@@ -5,7 +5,7 @@ import type {
    CompetitorFeatureInsert,
 } from "../schemas/competitor-feature";
 import type { DatabaseInstance } from "../client";
-import { DatabaseError, NotFoundError } from "@packages/errors";
+import { AppError, propagateError } from "@packages/utils/errors";
 
 const buildOwnerExists = (userId?: string, organizationId?: string) => {
    if (!userId && !organizationId) return sql`TRUE`;
@@ -34,11 +34,11 @@ export async function createCompetitorFeature(
          .values(data)
          .returning();
       const created = result?.[0];
-      if (!created) throw new NotFoundError("Competitor feature not created");
+      if (!created) throw AppError.database("Competitor feature not created");
       return created;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to create competitor feature: ${(err as Error).message}`,
       );
    }
@@ -55,11 +55,11 @@ export async function getCompetitorFeatureById(
             competitor: true,
          },
       });
-      if (!result) throw new NotFoundError("Competitor feature not found");
+      if (!result) throw AppError.database("Competitor feature not found");
       return result;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to get competitor feature: ${(err as Error).message}`,
       );
    }
@@ -77,11 +77,11 @@ export async function updateCompetitorFeature(
          .where(eq(competitorFeature.id, id))
          .returning();
       const updated = result?.[0];
-      if (!updated) throw new NotFoundError("Competitor feature not found");
+      if (!updated) throw AppError.database("Competitor feature not found");
       return updated;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to update competitor feature: ${(err as Error).message}`,
       );
    }
@@ -97,10 +97,10 @@ export async function deleteCompetitorFeature(
          .where(eq(competitorFeature.id, id))
          .returning();
       const deleted = result?.[0];
-      if (!deleted) throw new NotFoundError("Competitor feature not found");
+      if (!deleted) throw AppError.database("Competitor feature not found");
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to delete competitor feature: ${(err as Error).message}`,
       );
    }
@@ -147,7 +147,7 @@ export async function getFeaturesByCompetitorId(
          },
       });
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to get features by competitor ID: ${(err as Error).message}`,
       );
    }
@@ -164,7 +164,7 @@ export async function getTotalFeaturesByCompetitorId(
          .where(eq(competitorFeature.competitorId, competitorId));
       return result[0]?.value ?? 0;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to get total features by competitor ID: ${(err as Error).message}`,
       );
    }
@@ -212,7 +212,7 @@ export async function searchFeatures(
          },
       });
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to search competitor features: ${(err as Error).message}`,
       );
    }
@@ -265,7 +265,7 @@ export async function getRecentFeatures(
          },
       });
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to get recent competitor features: ${(err as Error).message}`,
       );
    }
@@ -286,7 +286,7 @@ export async function bulkCreateFeatures(
          .returning();
       return result;
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to bulk create competitor features: ${(err as Error).message}`,
       );
    }
@@ -308,7 +308,7 @@ export async function bulkDeleteFeatures(
 
       return { deletedCount: result.length };
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to bulk delete competitor features: ${(err as Error).message}`,
       );
    }
@@ -326,7 +326,7 @@ export async function deleteFeaturesByCompetitorId(
 
       return { deletedCount: result.length };
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to delete competitor features by competitor ID: ${(err as Error).message}`,
       );
    }
@@ -386,7 +386,7 @@ export async function getFeaturesStats(
          avgFeaturesPerCompetitor,
       };
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to get competitor features stats: ${(err as Error).message}`,
       );
    }

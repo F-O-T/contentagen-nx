@@ -7,7 +7,7 @@ import type {
    ContentVersionInsert,
 } from "../schemas/content-version";
 import type { DatabaseInstance } from "../client";
-import { DatabaseError, NotFoundError } from "@packages/errors";
+import { AppError, propagateError } from "@packages/utils/errors";
 import { updateContentCurrentVersion } from "./content-repository";
 
 export async function createContentVersion(
@@ -20,11 +20,11 @@ export async function createContentVersion(
          .values(data)
          .returning();
       const created = result?.[0];
-      if (!created) throw new NotFoundError("Content version not created");
+      if (!created) throw AppError.database("Content version not created");
       return created;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to create content version: ${(err as Error).message}`,
       );
    }
@@ -38,11 +38,11 @@ export async function getContentVersionById(
       const result = await dbClient.query.contentVersion.findFirst({
          where: eq(contentVersion.id, id),
       });
-      if (!result) throw new NotFoundError("Content version not found");
+      if (!result) throw AppError.database("Content version not found");
       return result;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to get content version: ${(err as Error).message}`,
       );
    }
@@ -60,11 +60,11 @@ export async function updateContentVersion(
          .where(eq(contentVersion.id, id))
          .returning();
       const updated = result?.[0];
-      if (!updated) throw new NotFoundError("Content version not found");
+      if (!updated) throw AppError.database("Content version not found");
       return updated;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to update content version: ${(err as Error).message}`,
       );
    }
@@ -80,10 +80,10 @@ export async function deleteContentVersion(
          .where(eq(contentVersion.id, id))
          .returning();
       const deleted = result?.[0];
-      if (!deleted) throw new NotFoundError("Content version not found");
+      if (!deleted) throw AppError.database("Content version not found");
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to delete content version: ${(err as Error).message}`,
       );
    }
@@ -99,11 +99,11 @@ export async function getLatestVersionByContentId(
          orderBy: desc(contentVersion.version),
       });
       if (!result)
-         throw new NotFoundError("No versions found for this content");
+         throw AppError.database("No versions found for this content");
       return result;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to get latest content version: ${(err as Error).message}`,
       );
    }
@@ -119,7 +119,7 @@ export async function getAllVersionsByContentId(
          orderBy: desc(contentVersion.version),
       });
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to get content versions: ${(err as Error).message}`,
       );
    }
@@ -137,11 +137,11 @@ export async function getVersionByNumber(
             eq(contentVersion.version, version),
          ),
       });
-      if (!result) throw new NotFoundError("Content version not found");
+      if (!result) throw AppError.database("Content version not found");
       return result;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to get content version by number: ${(err as Error).message}`,
       );
    }
@@ -166,7 +166,10 @@ export async function getNextVersionNumber(
       const latest = await getLatestVersionByContentId(dbClient, contentId);
       return latest.version + 1;
    } catch (err) {
-      if (err instanceof NotFoundError) {
+      if (
+         err instanceof Error &&
+         err.message === "No versions found for this content"
+      ) {
          // No versions exist yet, start with version 1
          return 1;
       }

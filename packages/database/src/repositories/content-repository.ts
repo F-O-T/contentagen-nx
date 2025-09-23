@@ -6,7 +6,7 @@ import type {
    ContentInsert,
 } from "../schemas/content";
 import type { DatabaseInstance } from "../client";
-import { DatabaseError, NotFoundError } from "@packages/errors";
+import { AppError, propagateError } from "@packages/utils/errors";
 import { eq } from "drizzle-orm";
 
 // Get content by slug
@@ -24,11 +24,11 @@ export async function getContentBySlug(
                sql`${fields.agentId} = ${agentId}`,
             ),
       });
-      if (!result) throw new NotFoundError("Content not found");
+      if (!result) throw AppError.database("Content not found");
       return result;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to get content by slug and agentId: ${(err as Error).message}`,
       );
    }
@@ -41,11 +41,11 @@ export async function createContent(
    try {
       const result = await dbClient.insert(content).values(data).returning();
       const created = result?.[0];
-      if (!created) throw new NotFoundError("Content not created");
+      if (!created) throw AppError.database("Content not created");
       return created;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to create content: ${(err as Error).message}`,
       );
    }
@@ -59,11 +59,11 @@ export async function getContentById(
       const result = await dbClient.query.content.findFirst({
          where: eq(content.id, id),
       });
-      if (!result) throw new NotFoundError("Content not found");
+      if (!result) throw AppError.database("Content not found");
       return result;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to get content: ${(err as Error).message}`,
       );
    }
@@ -81,11 +81,11 @@ export async function updateContent(
          .where(eq(content.id, id))
          .returning();
       const updated = result?.[0];
-      if (!updated) throw new NotFoundError("Content not found");
+      if (!updated) throw AppError.database("Content not found");
       return updated;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to update content: ${(err as Error).message}`,
       );
    }
@@ -103,11 +103,11 @@ export async function updateContentCurrentVersion(
          .where(eq(content.id, id))
          .returning();
       const updated = result?.[0];
-      if (!updated) throw new NotFoundError("Content not found");
+      if (!updated) throw AppError.database("Content not found");
       return updated;
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to update content current version: ${(err as Error).message}`,
       );
    }
@@ -123,10 +123,10 @@ export async function deleteContent(
          .where(eq(content.id, id))
          .returning();
       const deleted = result?.[0];
-      if (!deleted) throw new NotFoundError("Content not found");
+      if (!deleted) throw AppError.database("Content not found");
    } catch (err) {
-      if (err instanceof NotFoundError) throw err;
-      throw new DatabaseError(
+      propagateError(err);
+      throw AppError.database(
          `Failed to delete content: ${(err as Error).message}`,
       );
    }
@@ -148,7 +148,7 @@ export async function deleteBulkContent(
 
       return { deletedCount: result.length };
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to delete bulk content: ${(err as Error).message}`,
       );
    }
@@ -186,7 +186,7 @@ export async function approveBulkContent(
 
       return { approvedCount: result.length };
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to approve bulk content: ${(err as Error).message}`,
       );
    }
@@ -219,7 +219,7 @@ export async function listContents(
          orderBy: (content, { desc }) => [desc(content.updatedAt)],
       });
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to list contents: ${(err as Error).message}`,
       );
    }
@@ -260,7 +260,7 @@ export async function getContentStatsLast30Days(
       }, 0);
       return { count: items.length, wordsCount };
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to get content stats: ${(err as Error).message}`,
       );
    }
@@ -276,7 +276,7 @@ export async function getAgentContentStats(
          orderBy: (content, { desc }) => [desc(content.updatedAt)],
       });
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to get agent content stats: ${(err as Error).message}`,
       );
    }
@@ -309,7 +309,7 @@ export async function getMostUsedKeywordsByAgent(
          .slice(0, limit)
          .map(([kw]) => kw);
    } catch (err) {
-      throw new DatabaseError(
+      throw AppError.database(
          `Failed to get most used keywords: ${(err as Error).message}`,
       );
    }

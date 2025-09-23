@@ -185,14 +185,14 @@ export class APIError extends TRPCError {
       return new APIError(ErrorCodes.INTERNAL_SERVER_ERROR, message);
    }
 }
-export function propagateError(err: unknown): never {
+export function propagateError(err: unknown) {
    if (err instanceof AppError) {
       throw err;
    }
    if (err instanceof Error) {
       throw new AppError(err.message);
    }
-   throw new AppError("Unknown error occurred");
+   return;
 }
 
 export function validateInput<T extends ZodObject>(
