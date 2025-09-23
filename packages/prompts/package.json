@@ -5,7 +5,7 @@
     "typecheck": "bunx --bun tsc --noEmit "
   },
   "dependencies": {
-    "@packages/chroma-db": "workspace:*",
+    "@packages/rag": "workspace:*",
     "@packages/openrouter": "workspace:*",
     "@packages/database": "workspace:*"
   },

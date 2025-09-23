@@ -26,7 +26,7 @@
     "@packages/authentication": "workspace:*",
     "@packages/database": "workspace:*",
     "@packages/files": "workspace:*",
-    "@packages/chroma-db": "workspace:*",
+    "@packages/rag": "workspace:*",
     "@trpc/client": "catalog:trpc",
     "@trpc/server": "catalog:trpc",
     "superjson": "catalog:trpc",

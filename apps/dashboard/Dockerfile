@@ -22,7 +22,7 @@ COPY packages/api/package.json ./packages/api/
 COPY packages/authentication/package.json ./packages/authentication/
 COPY packages/mastra/package.json ./packages/mastra/
 COPY packages/environment/package.json ./packages/environment/
-COPY packages/chroma-db/package.json ./packages/chroma-db/
+COPY packages/rag/package.json ./packages/rag/
 COPY packages/database/package.json ./packages/database/
 COPY packages/files/package.json ./packages/files/
 COPY packages/redis/package.json ./packages/redis/
@@ -71,7 +71,7 @@ COPY packages/posthog/package.json ./packages/posthog/
 COPY packages/api/package.json ./packages/api/
 COPY packages/authentication/package.json ./packages/authentication/
 COPY packages/environment/package.json ./packages/environment/
-COPY packages/chroma-db/package.json ./packages/chroma-db/
+COPY packages/rag/package.json ./packages/rag/
 COPY packages/redis/package.json ./packages/redis/
 COPY packages/openrouter/package.json ./packages/openrouter/
 COPY packages/localization/package.json ./packages/localization/

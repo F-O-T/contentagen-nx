@@ -45,7 +45,7 @@ COPY packages/localization/package.json ./packages/localization/
 COPY packages/mastra/package.json ./packages/mastra/
 COPY packages/brand/package.json ./packages/brand/
 COPY packages/helpers/package.json ./packages/helpers/
-COPY packages/chroma-db/package.json ./packages/chroma-db/
+COPY packages/rag/package.json ./packages/rag/
 COPY packages/database/package.json ./packages/database/
 COPY packages/environment/package.json ./packages/environment/
 COPY packages/errors/package.json ./packages/errors/

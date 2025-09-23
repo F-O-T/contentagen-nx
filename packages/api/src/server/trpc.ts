@@ -4,9 +4,8 @@ import SuperJSON from "superjson";
 import type { AuthInstance } from "@packages/authentication/server";
 import type { DatabaseInstance } from "@packages/database/client";
 import type { MinioClient } from "@packages/files/client";
-import type { ChromaClient } from "@packages/chroma-db/client";
+import type { PgVectorDatabaseInstance } from "@packages/rag/client";
 import type { OpenRouterClient } from "@packages/openrouter/client";
-import { ensureCollections } from "@packages/chroma-db/helpers";
 import {
    findMemberByUserId,
    isOrganizationOwner,
@@ -20,24 +19,21 @@ export const createTRPCContext = async ({
    headers,
    minioClient,
    minioBucket,
-   chromaClient,
-   openRouterClient,
+   ragClient,
 }: {
-   openRouterClient: OpenRouterClient; // Replace with actual type if available
    auth: AuthInstance;
    db: DatabaseInstance;
    minioClient: MinioClient;
    minioBucket: string;
    headers: Headers;
-   chromaClient: ChromaClient;
+   ragClient: PgVectorDatabaseInstance;
    polarClient: Polar;
 }): Promise<{
    polarClient: Polar;
-   openRouterClient: OpenRouterClient; // Pass the OpenRouter client to the context
    minioBucket: string;
    db: DatabaseInstance;
    minioClient: MinioClient;
-   chromaClient: ChromaClient;
+   ragClient: PgVectorDatabaseInstance;
    auth: AuthInstance;
    headers: Headers;
    session: AuthInstance["$Infer"]["Session"] | null;
@@ -46,22 +42,17 @@ export const createTRPCContext = async ({
    const session = await auth.api.getSession({
       headers,
    });
-   await ensureCollections(chromaClient);
 
-   // Extract language from headers
-   const language =
-      (headers.get("X-Locale") as Parameters<
-         typeof setRuntimeContext
-      >[0]["language"]) ||
-      ("en" as Parameters<typeof setRuntimeContext>[0]["language"]);
+   const language = headers.get("X-Locale") as Parameters<
+      typeof setRuntimeContext
+   >[0]["language"];
    setRuntimeContext({ language, userId: session?.session.userId ?? "" });
    return {
-      openRouterClient,
       polarClient,
       minioBucket,
       minioClient,
       db,
-      chromaClient,
+      ragClient,
       session,
       auth,
       headers,
