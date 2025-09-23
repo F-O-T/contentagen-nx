@@ -5,28 +5,12 @@ const openai = new OpenAI({
    apiKey: serverEnv.OPENAI_API_KEY,
 });
 
-export interface EmbeddingOptions {
-   model?: string;
-   dimensions?: number;
-}
-
-export interface CreateEmbeddingResult {
-   embedding: number[];
-   tokenCount: number;
-   model: string;
-}
-
-export const createEmbedding = async (
-   text: string,
-   options: EmbeddingOptions = {},
-): Promise<CreateEmbeddingResult> => {
-   const { model = "text-embedding-3-small", dimensions = 1536 } = options;
-
+export const createEmbedding = async (text: string) => {
    try {
       const response = await openai.embeddings.create({
-         model,
+         model: "text-embedding-3-small",
          input: text,
-         dimensions,
+         dimensions: 1536,
       });
 
       const embedding = response.data[0]?.embedding;
@@ -38,7 +22,6 @@ export const createEmbedding = async (
       return {
          embedding,
          tokenCount,
-         model,
       };
    } catch (error) {
       throw new Error(
