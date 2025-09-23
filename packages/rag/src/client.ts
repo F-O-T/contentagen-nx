@@ -9,7 +9,7 @@ export interface PgVectorDatabaseClientOptions {
 
 export type PgVectorDatabaseInstance = NodePgDatabase<typeof schema>;
 
-export const createDb = (
+export const createPgVector = (
    opts?: PgVectorDatabaseClientOptions,
 ): PgVectorDatabaseInstance => {
    return drizzle({

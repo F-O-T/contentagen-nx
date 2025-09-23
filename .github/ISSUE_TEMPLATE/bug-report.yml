@@ -16,6 +16,7 @@ body:
     attributes:
       label: Bug Type
       description: What type of bug is this?
+      multiple: true
       options:
         - UI/UX Bug
         - Functional Bug
@@ -35,6 +36,8 @@ body:
     attributes:
       label: App Scope
       description: Which app is affected by this bug?
+      multiple: true
+
       options:
         - blog
         - dashboard
@@ -49,6 +52,7 @@ body:
     attributes:
       label: Package Scope
       description: Which package is affected by this bug? (if applicable)
+      multiple: true
       options:
         - api
         - arcjet

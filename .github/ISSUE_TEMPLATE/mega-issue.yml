@@ -33,6 +33,7 @@ body:
     attributes:
       label: App Scope
       description: Which apps are affected by this initiative?
+      multiple: true
       options:
         - blog
         - dashboard
@@ -48,6 +49,7 @@ body:
     attributes:
       label: Package Scope
       description: Which packages are affected by this initiative?
+      multiple: true
       options:
         - api
         - arcjet

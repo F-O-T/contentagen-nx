@@ -46,28 +46,3 @@ export const createEmbedding = async (
       );
    }
 };
-
-export const createBatchEmbeddings = async (
-   texts: string[],
-   options: EmbeddingOptions = {},
-): Promise<CreateEmbeddingResult[]> => {
-   const { model = "text-embedding-3-small", dimensions = 1536 } = options;
-
-   try {
-      const response = await openai.embeddings.create({
-         model,
-         input: texts,
-         dimensions,
-      });
-
-      return response.data.map((data) => ({
-         embedding: data.embedding,
-         tokenCount: response.usage?.total_tokens || 0,
-         model,
-      }));
-   } catch (error) {
-      throw new Error(
-         `Failed to create batch embeddings: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
-   }
-};

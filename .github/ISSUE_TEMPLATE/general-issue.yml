@@ -31,6 +31,7 @@ body:
     attributes:
       label: App Scope
       description: Which app is this issue related to? (if applicable)
+      multiple: true
       options:
         - blog
         - dashboard
@@ -45,6 +46,7 @@ body:
     attributes:
       label: Package Scope
       description: Which package is this issue related to? (if applicable)
+      multiple: true
       options:
         - api
         - arcjet

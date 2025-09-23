@@ -109,7 +109,7 @@ async function searchIdeasRagByCosineSimilarityAndAgentId(
          .select()
          .from(ideasRag)
          .where(whereConditions)
-         .orderBy((t) => desc(similarity))
+         .orderBy(() => desc(similarity))
          .limit(limit);
 
       return result;
@@ -167,4 +167,3 @@ export async function checkForDuplicateIdeas(
       );
    }
 }
-
