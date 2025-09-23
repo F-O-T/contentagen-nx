@@ -1,31 +1,17 @@
 import cors from "@elysiajs/cors";
 import { Elysia } from "elysia";
 import { serverEnv as env } from "@packages/environment/server";
-import { ArcjetShield } from "./integrations/arcjet";
 import { posthogPlugin } from "./integrations/posthog";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { createApi } from "@packages/api/server";
 import { auth, polarClient } from "./integrations/auth";
 import { db } from "./integrations/database";
 import { minioClient } from "./integrations/minio";
-import { chromaClient, openRouterClient } from "./integrations/chromadb";
 import { bullAuth } from "./integrations/bull-auth-guard";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { ElysiaAdapter } from "@bull-board/elysia";
 import { createBullBoard } from "@bull-board/api";
-import { billingLlmIngestionQueue } from "@packages/workers/queues/billing-llm-ingestion-queue";
-import { billingWebSearchIngestionQueue } from "@packages/workers/queues/billing-websearch-ingestion-queue";
-import { contentEditingQueue } from "@packages/workers/queues/content/content-editing-queue";
-import { contentPostProcessingQueue } from "@packages/workers/queues/content/content-post-processing-queue";
-import { contentResearchingQueue } from "@packages/workers/queues/content/content-researching-queue";
-import { contentPlanningQueue } from "@packages/workers/queues/content/content-planning-queue";
 import { createBrandKnowledgeWorkflowQueue } from "@packages/workers/queues/create-brand-knowledge-workflow-queue";
-import { contentWritingQueue } from "@packages/workers/queues/content/content-writing-queue";
-import { ideasPlanningQueue } from "@packages/workers/queues/ideas/ideas-planning-queue";
-import { ideasGenerationQueue } from "@packages/workers/queues/ideas/ideas-generation-queue";
-import { ideasGrammarCheckQueue } from "@packages/workers/queues/ideas/ideas-grammar-checker-queue";
-import { ideasPostProcessingQueue } from "@packages/workers/queues/ideas/ideas-post-processing-queue";
-import { contentGrammarCheckQueue } from "@packages/workers/queues/content/content-grammar-checker-queue";
 import { crawlCompetitorForFeaturesQueue } from "@packages/workers/queues/crawl-competitor-for-features-queue";
 import { extractCompetitorBrandInfoQueue } from "@packages/workers/queues/extract-competitor-brand-info-queue";
 import { createCompetitorKnowledgeWorkflowQueue } from "@packages/workers/queues/create-competitor-knowledge-workflow-queue";
@@ -38,18 +24,6 @@ createBullBoard({
       new BullMQAdapter(createCompetitorKnowledgeWorkflowQueue),
       new BullMQAdapter(createBrandKnowledgeWorkflowQueue),
       new BullMQAdapter(extractCompetitorBrandInfoQueue),
-      new BullMQAdapter(contentGrammarCheckQueue),
-      new BullMQAdapter(ideasPlanningQueue),
-      new BullMQAdapter(ideasGenerationQueue),
-      new BullMQAdapter(ideasGrammarCheckQueue),
-      new BullMQAdapter(ideasPostProcessingQueue),
-      new BullMQAdapter(billingLlmIngestionQueue),
-      new BullMQAdapter(billingWebSearchIngestionQueue),
-      new BullMQAdapter(contentEditingQueue),
-      new BullMQAdapter(contentPostProcessingQueue),
-      new BullMQAdapter(contentResearchingQueue),
-      new BullMQAdapter(contentPlanningQueue),
-      new BullMQAdapter(contentWritingQueue),
    ],
    serverAdapter,
    options: {
@@ -58,8 +32,6 @@ createBullBoard({
 });
 const trpcApi = createApi({
    polarClient,
-   chromaClient,
-   openRouterClient,
    minioClient,
    minioBucket: env.MINIO_BUCKET,
    auth,
@@ -92,7 +64,6 @@ const app = new Elysia()
          },
       }),
    )
-   .use(ArcjetShield)
    .use(posthogPlugin)
    .mount(auth.handler)
    .all(
