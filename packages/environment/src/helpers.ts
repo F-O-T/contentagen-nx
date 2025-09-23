@@ -1,4 +1,4 @@
-import { validateInput } from "@packages/errors/helpers";
+import { validateInput } from "@packages/utils/errors";
 import type { ZodObject, z } from "zod";
 
 export const isProduction = process.env.NODE_ENV === "production";
