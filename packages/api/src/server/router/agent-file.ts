@@ -7,10 +7,6 @@ import {
    getAgentById,
 } from "@packages/database/repositories/agent-repository";
 import { getFile, streamFileForProxy } from "@packages/files/client";
-import {
-   deleteFromCollection,
-   getCollection,
-} from "@packages/chroma-db/helpers";
 import { AgentInsertSchema } from "@packages/database/schema";
 import { enqueueCreateBrandKnowledgeWorkflowJob } from "@packages/workers/queues/create-brand-knowledge-workflow-queue";
 
