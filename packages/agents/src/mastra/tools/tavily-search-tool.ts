@@ -5,10 +5,8 @@ import {
 } from "@packages/payment/ingestion";
 import { getPaymentClient } from "@packages/payment/client";
 import { z } from "zod";
-import { createTavilyClient } from "@packages/tavily/client";
-import { tavilySearch } from "@packages/tavily/helpers";
 import { serverEnv } from "@packages/environment/server";
-
+import { tavily } from "@tavily/core";
 export const tavilySearchTool = createTool({
    id: "tavily-search",
    description: "Searches the web for relevant content",
@@ -20,14 +18,14 @@ export const tavilySearchTool = createTool({
       const { query, userId } = context;
 
       try {
-         const tavily = createTavilyClient(serverEnv.TAVILY_API_KEY);
+         const tavilyClient = tavily({ apiKey: serverEnv.TAVILY_API_KEY });
          const polarClient = getPaymentClient(serverEnv.POLAR_ACCESS_TOKEN);
-         const searchResult = await tavilySearch(tavily, query, {
+         const searchResult = await tavilyClient.search(query, {
             autoParameters: true,
             searchDepth: "basic",
          });
          const usageData = createWebSearchUsageMetadata({
-            method: "advanced",
+            method: "search",
          });
          await ingestBilling(polarClient, {
             externalCustomerId: userId,

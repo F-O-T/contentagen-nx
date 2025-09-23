@@ -5,10 +5,8 @@ import {
 } from "@packages/payment/ingestion";
 import { getPaymentClient } from "@packages/payment/client";
 import { z } from "zod";
-import { createTavilyClient } from "@packages/tavily/client";
-import { tavilyCrawl } from "@packages/tavily/helpers";
 import { serverEnv } from "@packages/environment/server";
-
+import { tavily } from "@tavily/core";
 export const tavilyCrawlTool = createTool({
    id: "tavily-crawl",
    description: "Crawls a website url to extract knowledge and content",
@@ -25,9 +23,9 @@ export const tavilyCrawlTool = createTool({
       const { websiteUrl, userId } = context;
 
       try {
-         const tavily = createTavilyClient(serverEnv.TAVILY_API_KEY);
+         const tavilyClient = tavily({ apiKey: serverEnv.TAVILY_API_KEY });
          const polarClient = getPaymentClient(serverEnv.POLAR_ACCESS_TOKEN);
-         const crawResult = await tavilyCrawl(tavily, websiteUrl, {
+         const crawResult = await tavilyClient.crawl(websiteUrl, {
             maxDepth: 2,
             instructions: context.instructions,
          });
