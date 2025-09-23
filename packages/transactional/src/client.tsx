@@ -1,4 +1,5 @@
 import OTPEmail from "./emails/otp";
+import { AppError } from "@packages/utils/errors";
 import OrganizationInvitationEmail from "./emails/organization-invitation";
 import brandConfig from "@packages/brand/index.json";
 import { Resend } from "resend";
@@ -11,7 +12,7 @@ export interface SendEmailOTPOptions {
 export type ResendClient = ReturnType<typeof getResendClient>;
 export const getResendClient = (RESEND_API_KEY: string) => {
    if (!RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY is not defined");
+      throw AppError.validation("RESEND_API_KEY is required");
    }
    const internalClient = new Resend(RESEND_API_KEY);
    return internalClient;

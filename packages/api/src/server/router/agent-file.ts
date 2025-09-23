@@ -124,6 +124,7 @@ export const agentFileRouter = router({
          const key = `${agentId}/${fileName}`;
          const bucketName = (await ctx).minioBucket;
          const resolvedCtx = await ctx;
+
          const collection = await getCollection(
             resolvedCtx.chromaClient,
             "AgentKnowledge",

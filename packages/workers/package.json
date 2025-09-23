@@ -3,7 +3,6 @@
     "@packages/agents": "workspace:*",
     "@packages/utils": "workspace:*",
     "@packages/payment": "workspace:*",
-    "@packages/redis": "workspace:*",
     "@packages/files": "workspace:*",
     "bullmq": "catalog:workers",
     "@packages/server-events": "workspace:*"

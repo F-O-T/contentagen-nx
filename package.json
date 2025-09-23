@@ -169,7 +169,8 @@
         "ai": "5.0.5"
       },
       "workers": {
-        "bullmq": "5.58.7"
+        "bullmq": "5.58.7",
+        "ioredis": "5.7.0"
       }
     },
     "packages": [

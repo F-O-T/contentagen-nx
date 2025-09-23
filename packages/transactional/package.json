@@ -21,6 +21,7 @@
     "react-dom": "catalog:react",
     "resend": "catalog:transactional",
     "@react-email/components": "catalog:transactional",
-    "@packages/brand": "workspace:*"
+    "@packages/brand": "workspace:*",
+    "@packages/utils": "workspace:*"
   }
 }

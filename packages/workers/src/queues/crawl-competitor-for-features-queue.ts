@@ -1,7 +1,6 @@
 import { Worker, Queue, type Job } from "bullmq";
 import { serverEnv } from "@packages/environment/server";
-import { createRedisClient } from "@packages/redis";
-import { registerGracefulShutdown } from "../helpers";
+import { registerGracefulShutdown, createRedisClient } from "../helpers";
 import { mastra, setRuntimeContext } from "@packages/agents";
 export type CompetitorCrawlJob = {
    competitorId: string;
