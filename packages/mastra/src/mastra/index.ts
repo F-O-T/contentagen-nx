@@ -6,7 +6,6 @@ import { featureExtractionAgent } from "./agents/feature-extractor-agent";
 import { companyInfoExtractorAgent } from "./agents/company-info-extractor-agent";
 import { ideaGenerationAgent } from "./agents/ideas-agent";
 import { createBrandKnowledgeWorkflow } from "./workflows/create-brand-knowledge-and-index-documents";
-import { generateIdeasWorkflow } from "./workflows/generate-ideas";
 import { RuntimeContext } from "@mastra/core/runtime-context";
 import { crawlCompetitorForFeatures } from "./workflows/crawl-for-features";
 import { extractCompetitorBrandInfoWorkflow } from "./workflows/extract-brand-info";
@@ -32,7 +31,6 @@ export const mastra = new Mastra({
 
    workflows: {
       createBrandKnowledgeWorkflow,
-      generateIdeasWorkflow,
       crawlCompetitorForFeatures,
       extractCompetitorBrandInfoWorkflow,
    },
