@@ -1,13 +1,6 @@
 ---
 import { Button } from "@packages/ui/components/button";
-import {
-   Github,
-   Heart,
-   Users,
-   Code,
-   Star,
-   GitFork,
-} from "@lucide/astro";
+import { Github, Heart, Users, Code, Star, GitFork } from "@lucide/astro";
 import { fetchGitHubRepoStats } from "@/services/github";
 
 const githubStats = await fetchGitHubRepoStats();
