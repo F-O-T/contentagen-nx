@@ -16,7 +16,7 @@
     "./plans": "./src/plans.ts",
     "./ingestion": "./src/ingestion.ts"
   },
-  "version": "0.3.0",
+  "version": "0.4.0",
   "dependencies": {
     "@packages/openrouter": "workspace:*",
     "@packages/environment": "workspace:*",

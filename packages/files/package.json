@@ -16,7 +16,7 @@
     "./image-helper": "./src/image-helpers.ts",
     "./text-file-helper": "./src/text-file-helpers.ts"
   },
-  "version": "0.3.0",
+  "version": "0.4.0",
   "dependencies": {
     "@packages/environment": "workspace:*",
     "fflate": "catalog:files",
