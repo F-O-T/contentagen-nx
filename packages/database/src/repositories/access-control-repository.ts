@@ -1,6 +1,6 @@
 import type { DatabaseInstance } from "../client";
 import type { ContentSelect } from "../schemas/content";
-import { DatabaseError, NotFoundError } from "@packages/errors";
+import { AppError } from "@packages/utils/errors";
 import { eq } from "drizzle-orm";
 
 /**
@@ -38,9 +38,8 @@ export async function hasContentAccess(
          canWrite: false,
       };
    } catch (err) {
-      throw new DatabaseError(
-         `Failed to check content access: ${(err as Error).message}`,
-      );
+      console.error("Failed to check content access permissions:", err);
+      throw AppError.database("Failed to check content access permissions");
    }
 }
 

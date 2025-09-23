@@ -19,9 +19,18 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./server": "./src/server.ts",
-    "./client": "./src/client.ts",
-    "./helpers": "./src/helpers.ts"
+    "./server": {
+      "types": "./dist/src/server.d.ts",
+      "default": "./src/server.ts"
+    },
+    "./client": {
+      "types": "./dist/src/client.d.ts",
+      "default": "./src/client.ts"
+    },
+    "./helpers": {
+      "types": "./dist/src/helpers.d.ts",
+      "default": "./src/helpers.ts"
+    }
   },
   "version": "0.4.0"
 }
