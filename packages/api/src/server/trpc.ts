@@ -5,13 +5,12 @@ import type { AuthInstance } from "@packages/authentication/server";
 import type { DatabaseInstance } from "@packages/database/client";
 import type { MinioClient } from "@packages/files/client";
 import type { PgVectorDatabaseInstance } from "@packages/rag/client";
-import type { OpenRouterClient } from "@packages/openrouter/client";
 import {
    findMemberByUserId,
    isOrganizationOwner,
 } from "@packages/database/repositories/auth-repository";
 import { getCustomerState } from "@packages/payment/ingestion";
-import { setRuntimeContext } from "@packages/mastra";
+import { setRuntimeContext } from "@packages/agents";
 export const createTRPCContext = async ({
    auth,
    polarClient,
