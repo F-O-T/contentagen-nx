@@ -27,7 +27,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Eye } from "lucide-react";
 import { useIdeasList } from "../lib/ideas-list-context";
-import { formatValueForDisplay } from "@packages/helpers/text";
+import { formatValueForDisplay } from "@packages/utils/text";
 export function IdeaCard({
    idea,
 }: {

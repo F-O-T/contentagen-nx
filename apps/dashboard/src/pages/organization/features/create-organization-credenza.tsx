@@ -1,5 +1,5 @@
 import { betterAuthClient, useTRPC } from "@/integrations/clients";
-import { createSlug } from "@packages/helpers/text";
+import { createSlug } from "@packages/utils/text";
 import { Button } from "@packages/ui/components/button";
 import {
    Credenza,

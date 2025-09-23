@@ -9,8 +9,8 @@ import { getAstroPosthogConfig } from "@packages/posthog/client";
 		  <link rel="sitemap" href="/sitemap-index.xml" />
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<meta name="description" content={`Discover ${brandConfig.name}, a modern solution for all your needs. Join us to explore innovative features, seamless integrations, and unparalleled support.`} />
-		<meta name="keywords" content={`${brandConfig.name}, modern solutions, integrations, support`} />
+		<meta name="description" content="ContentaGen's AI agents learn your brand voice and create SEO-optimized blog posts that increase organic traffic by 65%+ while cutting content production time by 80%. Perfect for B2B SaaS and content teams." />
+		<meta name="keywords" content="AI content generation, B2B SaaS content, SEO blog posts, content automation, brand voice AI" />
 		<meta name="author" content={`${brandConfig.author}`} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
@@ -27,7 +27,7 @@ import { getAstroPosthogConfig } from "@packages/posthog/client";
 		<meta property="og:url" content="https://contentagen.com" />
 		<meta property="og:type" content="website" />
 		{import.meta.env.PROD && <script set:html={getAstroPosthogConfig()} is:inline/>}
-		<title>{brandConfig.name} - Modern Solutions for Your Needs</title>
+		<title>ContentaGen - Generate Ready-to-Publish Content in Minutes for B2B SaaS</title>
 	</head>
 	<body>
 	    <slot />

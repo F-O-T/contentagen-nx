@@ -32,7 +32,7 @@ import {
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
-import { formatValueForDisplay } from "@packages/helpers/text";
+import { formatValueForDisplay } from "@packages/utils/text";
 import { useContentList } from "../lib/content-list-context";
 import { useSearch } from "@tanstack/react-router";
 

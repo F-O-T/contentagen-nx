@@ -22,7 +22,7 @@ import { useCallback, useMemo, useState } from "react";
 import { CreateApiKeyCredenza } from "../features/create-api-key-credenza";
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { DeleteApiKeyCredenza } from "../features/delete-api-key-credenza";
-import { formatWindow } from "@packages/helpers/number";
+import { formatWindow } from "@packages/utils/number";
 import { UpdateApiKeyCredenza } from "../features/update-api-key-credenza";
 
 interface ModalState {

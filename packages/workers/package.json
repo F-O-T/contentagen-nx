@@ -1,13 +1,10 @@
 {
   "dependencies": {
     "@packages/agents": "workspace:*",
-    "@packages/helpers": "workspace:*",
+    "@packages/utils": "workspace:*",
     "@packages/payment": "workspace:*",
-    "@packages/chroma-db": "workspace:*",
     "@packages/redis": "workspace:*",
     "@packages/files": "workspace:*",
-    "@packages/openrouter": "workspace:*",
-    "@packages/prompts": "workspace:*",
     "bullmq": "^5.56.9",
     "@packages/server-events": "workspace:*"
   },

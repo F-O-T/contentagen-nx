@@ -6,7 +6,7 @@ import {
    listAgents,
    getTotalAgents,
 } from "@packages/database/repositories/agent-repository";
-import { NotFoundError, DatabaseError } from "@packages/errors";
+import { NotFoundError, DatabaseError } from "@packages/utils/errors";
 import { TRPCError } from "@trpc/server";
 import {
    protectedProcedure,
@@ -20,7 +20,7 @@ import {
 } from "@packages/database/schemas/agent";
 import { getAgentContentStats } from "@packages/database/repositories/content-repository";
 import { getAgentIdeasCount } from "@packages/database/repositories/ideas-repository";
-import { countWords } from "@packages/helpers/text";
+import { countWords } from "@packages/utils/text";
 import { publicProcedure } from "../trpc";
 import { z } from "zod";
 

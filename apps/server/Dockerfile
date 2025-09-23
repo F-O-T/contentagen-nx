@@ -55,7 +55,6 @@ COPY packages/payment/package.json ./packages/payment/
 COPY packages/posthog/package.json ./packages/posthog/
 COPY packages/prompts/package.json ./packages/prompts/
 COPY packages/redis/package.json ./packages/redis/
-COPY packages/tavily/package.json ./packages/tavily/
 COPY packages/transactional/package.json ./packages/transactional/
 COPY packages/workers/package.json ./packages/workers/
 
@@ -129,7 +128,6 @@ COPY packages/prompts/package.json ./packages/prompts/
 COPY packages/redis/package.json ./packages/redis/
 COPY packages/helpers/package.json ./packages/helpers/
 
-COPY packages/tavily/package.json ./packages/tavily/
 COPY packages/transactional/package.json ./packages/transactional/
 COPY packages/workers/package.json ./packages/workers/
 

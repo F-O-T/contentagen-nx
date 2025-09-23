@@ -50,7 +50,7 @@ import {
    createDiff,
    createLineDiff,
    calculateContentStats,
-} from "@packages/helpers/text";
+} from "@packages/utils/text";
 
 const ContentImageUploadInput = z.object({
    id: z.uuid(),

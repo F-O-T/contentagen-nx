@@ -27,7 +27,6 @@ COPY packages/database/package.json ./packages/database/
 COPY packages/files/package.json ./packages/files/
 COPY packages/redis/package.json ./packages/redis/
 COPY packages/openrouter/package.json ./packages/openrouter/
-COPY packages/tavily/package.json ./packages/tavily/
 COPY packages/prompts/package.json ./packages/prompts/
 COPY packages/payment/package.json ./packages/payment/
 COPY packages/transactional/package.json ./packages/transactional/
@@ -75,7 +74,6 @@ COPY packages/rag/package.json ./packages/rag/
 COPY packages/redis/package.json ./packages/redis/
 COPY packages/openrouter/package.json ./packages/openrouter/
 COPY packages/localization/package.json ./packages/localization/
-COPY packages/tavily/package.json ./packages/tavily/
 COPY packages/mastra/package.json ./packages/mastra/
 
 COPY packages/prompts/package.json ./packages/prompts/

@@ -15,7 +15,7 @@ import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-c
 import type { AgentSelect } from "@packages/database/schema";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
-import { formatValueForDisplay } from "@packages/helpers/text";
+import { formatValueForDisplay } from "@packages/utils/text";
 
 export const AgentPersonaCard = ({ agent }: { agent: AgentSelect }) => {
    const trpc = useTRPC();
