@@ -5,6 +5,7 @@
     "@packages/payment": "workspace:*",
     "@packages/files": "workspace:*",
     "bullmq": "catalog:workers",
+    "ioredis": "catalog:workers",
     "@packages/server-events": "workspace:*"
   },
   "devDependencies": {

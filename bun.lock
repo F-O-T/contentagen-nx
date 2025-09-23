@@ -438,6 +438,7 @@
         "@packages/server-events": "workspace:*",
         "@packages/utils": "workspace:*",
         "bullmq": "catalog:workers",
+        "ioredis": "catalog:workers",
       },
       "devDependencies": {
         "@tooling/typescript": "workspace:*",
@@ -566,6 +567,7 @@
     },
     "workers": {
       "bullmq": "5.58.7",
+      "ioredis": "5.7.0",
     },
   },
   "packages": {

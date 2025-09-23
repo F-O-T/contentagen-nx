@@ -22,7 +22,6 @@ const parseEndpoint = (endpointUrl: string) => {
       };
    } catch (error) {
       console.error(`Invalid endpoint URL provided: ${endpointUrl} - ${error}`);
-      // Return a sensible default or throw an error
       return {
          endPoint: "localhost",
          port: 9000,
