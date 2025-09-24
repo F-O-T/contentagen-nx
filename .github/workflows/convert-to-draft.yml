@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows:
       - "Typecheck"
-      - "Tests" 
+      - "Tests"
       - "Biome Check"
     types:
       - completed
@@ -25,16 +25,16 @@ jobs:
     if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Comment on PR and ensure draft
+      - name: Comment on PR and ensure draft (safe base-repo run)
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Determine PR number
+            // Determine PR number:
             let prNumber = undefined;
             if (context.eventName === 'workflow_dispatch') {
               prNumber = parseInt(process.env.INPUT_PR_NUMBER || '', 10) || undefined;
-            } else if (context.payload?.workflow_run?.pull_requests?.length) {
+            } else if (context.payload && context.payload.workflow_run && Array.isArray(context.payload.workflow_run.pull_requests) && context.payload.workflow_run.pull_requests.length) {
               prNumber = context.payload.workflow_run.pull_requests[0].number;
             }
 
@@ -43,10 +43,13 @@ jobs:
               return;
             }
 
-            const { owner, repo } = context.repo;
-            console.log(`Processing PR #${prNumber} in ${owner}/${repo}`);
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
 
-            // Create comment
+            console.log(`Processing PR #${prNumber} in ${owner}/${repo}`);
+            console.log(`Event: ${context.eventName}`);
+            console.log(`Actor: ${context.actor}`);
+
             const body = [
               `## ❌ Typecheck Failed`,
               '',
@@ -59,59 +62,106 @@ jobs:
               'Make sure all checks pass locally before marking the PR as "Ready for review".'
             ].join('\n');
 
+            // Create a comment
             try {
-              await github.rest.issues.createComment({ 
-                owner, 
-                repo, 
-                issue_number: prNumber, 
-                body 
-              });
+              await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
               console.log(`✅ Comment created on PR #${prNumber}`);
-            } catch (error) {
-              console.log(`❌ Failed to create comment: ${error.message}`);
+            } catch (err) {
+              console.log(`❌ Failed to create comment: ${err.message}`);
+              return;
             }
 
-            // Get current PR status
+            // Get PR via REST
             let prData;
             try {
-              const response = await github.rest.pulls.get({ 
-                owner, 
-                repo, 
-                pull_number: prNumber 
-              });
+              const response = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
               prData = response.data;
-            } catch (error) {
-              console.log(`❌ Failed to get PR data: ${error.message}`);
+              console.log(`PR #${prNumber} current state: draft=${prData.draft}, state=${prData.state}`);
+            } catch (err) {
+              console.log(`❌ Failed to get PR data: ${err.message}`);
               return;
             }
 
             if (prData.draft) {
-              console.log('✅ PR is already a draft; nothing to do.');
+              console.log('✅ PR already draft; nothing to do.');
               return;
             }
 
-            // Convert to draft using REST API
+            // Try REST update first
+            console.log('Attempting to convert PR to draft via REST API...');
             try {
-              const response = await github.rest.pulls.update({ 
+              const res = await github.rest.pulls.update({ owner, repo, pull_number: prNumber, draft: true });
+              if (res && res.data && res.data.draft === true) {
+                console.log('✅ PR converted to draft via REST.');
+                return;
+              }
+              console.log('⚠️ REST update did not set draft to true; attempting GraphQL fallback.');
+            } catch (err) {
+              console.log(`⚠️ REST update failed: ${err.message}; attempting GraphQL fallback.`);
+            }
+
+            // GraphQL fallback with better error handling
+            if (!prData.node_id) {
+              console.log('❌ PR node_id unavailable; cannot run GraphQL fallback.');
+              return;
+            }
+
+            console.log('Attempting to convert PR to draft via GraphQL API...');
+            try {
+              const mutation = `
+                mutation ConvertToDraft($id: ID!) {
+                  convertPullRequestToDraft(input: { pullRequestId: $id }) {
+                    pullRequest { 
+                      number 
+                      isDraft 
+                    }
+                  }
+                }
+              `;
+              
+              const gqlRes = await github.graphql(mutation, { id: prData.node_id });
+              console.log('GraphQL response:', JSON.stringify(gqlRes, null, 2));
+              
+              const converted = gqlRes && gqlRes.convertPullRequestToDraft && gqlRes.convertPullRequestToDraft.pullRequest && gqlRes.convertPullRequestToDraft.pullRequest.isDraft;
+              if (converted === true) {
+                console.log('✅ PR converted to draft via GraphQL.');
+                return;
+              }
+              console.log('⚠️ GraphQL did not set isDraft true.');
+            } catch (err) {
+              console.log(`❌ GraphQL convertPullRequestToDraft failed: ${err.message}`);
+              console.log('Full error:', JSON.stringify(err, null, 2));
+              
+              // Check if it's a permissions issue
+              if (err.message && err.message.includes('Resource not accessible by integration')) {
+                console.log('');
+                console.log('🔍 TROUBLESHOOTING: This appears to be a permissions issue.');
+                console.log('Possible solutions:');
+                console.log('1. Check repository Settings > Actions > General > Workflow permissions');
+                console.log('2. Ensure "Read and write permissions" is selected');
+                console.log('3. Make sure this workflow file exists on the default branch (master/main)');
+                console.log('4. If the PR is from a fork, additional restrictions may apply');
+                console.log('');
+              }
+            }
+
+            console.log('❌ Unable to mark PR as draft via REST or GraphQL.');
+            
+            // Add a follow-up comment explaining the issue
+            try {
+              const followUpComment = `⚠️ **Unable to automatically convert PR to draft**
+              
+              The workflow detected a typecheck failure but couldn't automatically convert this PR to draft due to permission restrictions. 
+
+              **Please manually convert this PR to draft** and fix the typecheck issues before marking it ready for review.`;
+              
+              await github.rest.issues.createComment({ 
                 owner, 
                 repo, 
-                pull_number: prNumber, 
-                draft: true 
+                issue_number: prNumber, 
+                body: followUpComment 
               });
-              
-              if (response.data.draft === true) {
-                console.log('✅ PR successfully converted to draft via REST API');
-              } else {
-                console.log('⚠️  REST API call succeeded but draft status unclear');
-              }
-            } catch (error) {
-              console.log(`❌ Failed to convert PR to draft: ${error.message}`);
-              
-              // Log additional context for debugging
-              console.log('Error details:', {
-                status: error.status,
-                message: error.message,
-                prNumber,
-                currentDraftStatus: prData.draft
-              });
+              console.log('✅ Added follow-up comment about manual draft conversion needed.');
+            } catch (err) {
+              console.log(`❌ Failed to add follow-up comment: ${err.message}`);
             }
