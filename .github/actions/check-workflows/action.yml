@@ -11,6 +11,9 @@ inputs:
     description: "Whether to fail the job (use at workflow level)"
     required: false
     default: "true"
+  github_token:
+    description: "Token to use for GitHub API calls (pass secrets.GITHUB_TOKEN from the workflow)"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -18,16 +21,18 @@ runs:
       id: comment_and_draft
       uses: actions/github-script@v7
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ inputs.github_token }}
         script: |
           const { owner, repo } = context.repo;
-          const prNumber = context.issue.number || (context.payload.pull_request && context.payload.pull_request.number);
+          // robust detection of PR number
+          const prNumber = context.issue && context.issue.number
+            ? context.issue.number
+            : (context.payload && context.payload.pull_request && context.payload.pull_request.number)
+              ? context.payload.pull_request.number
+              : undefined;
+
           if (!prNumber) {
             console.log('Not a PR context; skipping.');
-            return;
-          }
-          if (process.env.JOB_STATUS !== 'failure') {
-            console.log('Job did not fail; skipping.');
             return;
           }
 
@@ -43,7 +48,6 @@ runs:
             'Make sure all checks pass locally before marking the PR as "Ready for review".'
           ].join("\n");
 
-          // Create comment
           try {
             await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
             console.log(`Comment created on PR #${prNumber}`);
@@ -52,7 +56,6 @@ runs:
             throw err;
           }
 
-          // Try to convert PR to draft
           try {
             const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
             console.log('PR draft status before update:', pr.draft);
@@ -65,23 +68,18 @@ runs:
             }
           } catch (err) {
             console.error('Failed to convert PR to draft:', err && err.message ? err.message : err);
-            if (err.status === 403) {
-              console.error('Permission denied (403). Ensure the workflow permissions include: pull-requests: write or consider using pull_request_target if appropriate.');
+            if (err && err.status === 403) {
+              console.error('Permission denied (403). Ensure the calling workflow grants: permissions: pull-requests: write');
             }
             throw err;
           }
       env:
         WORKFLOW_NAME: ${{ inputs.workflow_name }}
         COMMAND: ${{ inputs.command }}
-        JOB_STATUS: ${{ job.status }}
 
     - name: Optionally fail the job
       shell: bash
       run: |
-        if [ "${{ inputs.should_fail }}" = "true" ] && [ "${{ job.status }}" = "failure" ]; then
+        if [ "${{ inputs.should_fail }}" = "true" ]; then
           exit 1
         fi
-      env:
-        WORKFLOW_NAME: ${{ inputs.workflow_name }}
-        COMMAND: ${{ inputs.command }}
-        JOB_STATUS: ${{ job.status }}

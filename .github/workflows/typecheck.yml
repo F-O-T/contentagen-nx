@@ -30,5 +30,6 @@ jobs:
         if: ${{ failure() }}
         uses: ./.github/actions/check-workflows
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow_name: "Typecheck"
           command: "bunx nx affected -t typecheck --base=origin/master --head=HEAD"

@@ -25,5 +25,6 @@ jobs:
         if: ${{ failure() }}
         uses: ./.github/actions/check-workflows
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow_name: "Tests"
           command: "bunx nx affected -t test --base=origin/master --head=HEAD"
