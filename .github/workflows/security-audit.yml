@@ -1,10 +1,9 @@
 name: Bun Security Audit
 
 on:
-  push:
-    branches: [master, main]
   pull_request:
-    branches: [master, main]
+    branches: ["*"]
+    types: [opened, synchronize, reopened, ready_for_review]
   schedule:
     # Run weekly on Mondays at 3 AM UTC
     - cron: '0 3 * * 1'
@@ -82,8 +81,7 @@ jobs:
               issue_number: prNumber,
               owner: context.repo.owner,
               repo: context.repo.repo,
-                body: "## 🔒 Security Audit Failed\n\nThis PR introduces security vulnerabilities that must be addressed:\n\n**Next Steps:**\n1. Run `bun audit` locally to see the full report\n2. Update the vulnerable dependencies\n3. Commit the updated `package.json` and `bun.lockb`\n4. The security check will automatically pass once vulnerabilities are fixed\n\n**Critical vulnerabilities block merging** and must be fixed immediately.\n\n🛡️ *This is an automated security check*"
-
+              body: "## 🔒 Security Audit Failed\n\nThis PR introduces security vulnerabilities that must be addressed:\n\n**Next Steps:**\n1. Run `bun audit` locally to see the full report\n2. Update the vulnerable dependencies\n3. Commit the updated `package.json` and `bun.lockb`\n4. The security check will automatically pass once vulnerabilities are fixed\n\n**Critical vulnerabilities block merging** and must be fixed immediately.\n\n🛡️ *This is an automated security check*"
             });
 
       - name: Generate Security Report
@@ -140,26 +138,26 @@ jobs:
                 labels: ['security', 'audit-failed', 'priority-critical'],
                 body: `## Security Audit Failed
 
-The automated security audit has detected critical vulnerabilities in the repository dependencies.
+                  The automated security audit has detected critical vulnerabilities in the repository dependencies.
 
-### Action Required
-- Run \`bun audit\` to see the full vulnerability report
-- Update all vulnerable dependencies immediately
-- Ensure all security patches are applied
+              ### Action Required
+              - Run \`bun audit\` to see the full vulnerability report
+              - Update all vulnerable dependencies immediately
+              - Ensure all security patches are applied
 
-### Audit Details
-- **Repository**: ${{ github.repository }}
-- **Branch**: ${{ github.ref_name }}
-- **Timestamp**: $(date)
+              ### Audit Details
+              - **Repository**: \`${{ github.repository }}\`
+              - **Branch**: \`${{ github.ref_name }}\`
+              - **Timestamp**: \$(date)
 
-### Next Steps
-1. Fix all critical and high-severity vulnerabilities
-2. Update the \`package.json\` and \`bun.lockb\` files
-3. Commit and push the security updates
-4. Verify the audit passes
+              ### Next Steps
+              1. Fix all critical and high-severity vulnerabilities
+              2. Update the \`package.json\` and \`bun.lockb\` files
+              3. Commit and push the security updates
+              4. Verify the audit passes
 
-This issue will be automatically closed once the security audit passes.
+              This issue will be automatically closed once the security audit passes.
 
-🛡️ *Automated security alert*`
+              🛡️ *Automated security alert*`
               });
             }
