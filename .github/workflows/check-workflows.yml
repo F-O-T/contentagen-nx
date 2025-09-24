@@ -4,6 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
+# Must also set repo Settings → Actions → Workflow permissions = Read and write
 permissions:
   contents: read
   pull-requests: write
