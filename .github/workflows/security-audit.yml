@@ -25,26 +25,26 @@ jobs:
       - name: Run Bun audit (capture output)
         id: audit
         run: |
-          # Run audit but never fail the job; capture output
           bun audit || true > audit.txt
-          echo "Audit output saved to audit.txt"
 
-      - name: Build PR comment body (safe quoting)
+      - name: Build PR comment body (heredoc, safe)
         run: |
-          {
-            echo "### 🔒 Bun Security Audit"
-            echo
-            echo "Repository: ${{ github.repository }}  "
-            echo "Ref: \`${{ github.ref }}\`"
-            echo
-            echo "#### Results"
-            echo
-            echo '```
-            cat audit.txt
-            echo '```'
-            echo
-            echo "_Tip: run \`bun audit\` locally and update vulnerable dependencies if needed._"
-          } > audit-comment.md
+          cat > audit-comment.md << 'EOF'
+          ### 🔒 Bun Security Audit
+
+          Repository: ${{ github.repository }}  
+          Ref: `${{ github.ref }}`
+
+          #### Results
+
+          ```
+          EOF
+          cat audit.txt >> audit-comment.md
+          cat >> audit-comment.md << 'EOF'
+          ```
+
+          _Tip: run `bun audit` locally and update vulnerable dependencies if needed._
+          EOF
 
       - name: Comment audit results on PR
         if: ${{ github.event_name == 'pull_request' }}
