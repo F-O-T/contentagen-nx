@@ -1,167 +1,47 @@
-name: PR Comment & Convert to Draft on Typecheck Failure
+name: PR Comment on Typecheck Failure
 
 on:
   workflow_run:
     workflows:
       - "Typecheck"
       - "Tests"
-      - "Biome Check"
+      - "Biome Check" 
     types:
       - completed
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: '(for manual testing) PR number to act on'
-        required: false
-        type: number
 
 permissions:
   contents: read
-  pull-requests: write
   issues: write
 
 jobs:
-  comment-and-draft:
-    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure') || github.event_name == 'workflow_dispatch' }}
+  comment:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Comment on PR and ensure draft (safe base-repo run)
+      - name: Comment on PR
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Determine PR number:
-            let prNumber = undefined;
-            if (context.eventName === 'workflow_dispatch') {
-              prNumber = parseInt(process.env.INPUT_PR_NUMBER || '', 10) || undefined;
-            } else if (context.payload && context.payload.workflow_run && Array.isArray(context.payload.workflow_run.pull_requests) && context.payload.workflow_run.pull_requests.length) {
-              prNumber = context.payload.workflow_run.pull_requests[0].number;
-            }
-
-            if (!prNumber) {
-              console.log('No PR number available. For manual runs, pass pr_number via workflow_dispatch inputs.');
-              return;
-            }
-
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-
-            console.log(`Processing PR #${prNumber} in ${owner}/${repo}`);
-            console.log(`Event: ${context.eventName}`);
-            console.log(`Actor: ${context.actor}`);
-
-            const body = [
-              `## ❌ Typecheck Failed`,
-              '',
-              'The workflow failed. Please run the following locally and fix all issues.',
-              '',
-              '```bash',
-              'bunx nx affected -t typecheck --base=origin/master --head=HEAD',
-              '```',
-              '',
-              'Make sure all checks pass locally before marking the PR as "Ready for review".'
-            ].join('\n');
-
-            // Create a comment
-            try {
-              await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
-              console.log(`✅ Comment created on PR #${prNumber}`);
-            } catch (err) {
-              console.log(`❌ Failed to create comment: ${err.message}`);
-              return;
-            }
-
-            // Get PR via REST
-            let prData;
-            try {
-              const response = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
-              prData = response.data;
-              console.log(`PR #${prNumber} current state: draft=${prData.draft}, state=${prData.state}`);
-            } catch (err) {
-              console.log(`❌ Failed to get PR data: ${err.message}`);
-              return;
-            }
-
-            if (prData.draft) {
-              console.log('✅ PR already draft; nothing to do.');
-              return;
-            }
-
-            // Try REST update first
-            console.log('Attempting to convert PR to draft via REST API...');
-            try {
-              const res = await github.rest.pulls.update({ owner, repo, pull_number: prNumber, draft: true });
-              if (res && res.data && res.data.draft === true) {
-                console.log('✅ PR converted to draft via REST.');
-                return;
-              }
-              console.log('⚠️ REST update did not set draft to true; attempting GraphQL fallback.');
-            } catch (err) {
-              console.log(`⚠️ REST update failed: ${err.message}; attempting GraphQL fallback.`);
-            }
-
-            // GraphQL fallback with better error handling
-            if (!prData.node_id) {
-              console.log('❌ PR node_id unavailable; cannot run GraphQL fallback.');
-              return;
-            }
-
-            console.log('Attempting to convert PR to draft via GraphQL API...');
-            try {
-              const mutation = `
-                mutation ConvertToDraft($id: ID!) {
-                  convertPullRequestToDraft(input: { pullRequestId: $id }) {
-                    pullRequest { 
-                      number 
-                      isDraft 
-                    }
-                  }
-                }
-              `;
-              
-              const gqlRes = await github.graphql(mutation, { id: prData.node_id });
-              console.log('GraphQL response:', JSON.stringify(gqlRes, null, 2));
-              
-              const converted = gqlRes && gqlRes.convertPullRequestToDraft && gqlRes.convertPullRequestToDraft.pullRequest && gqlRes.convertPullRequestToDraft.pullRequest.isDraft;
-              if (converted === true) {
-                console.log('✅ PR converted to draft via GraphQL.');
-                return;
-              }
-              console.log('⚠️ GraphQL did not set isDraft true.');
-            } catch (err) {
-              console.log(`❌ GraphQL convertPullRequestToDraft failed: ${err.message}`);
-              console.log('Full error:', JSON.stringify(err, null, 2));
-              
-              // Check if it's a permissions issue
-              if (err.message && err.message.includes('Resource not accessible by integration')) {
-                console.log('');
-                console.log('🔍 TROUBLESHOOTING: This appears to be a permissions issue.');
-                console.log('Possible solutions:');
-                console.log('1. Check repository Settings > Actions > General > Workflow permissions');
-                console.log('2. Ensure "Read and write permissions" is selected');
-                console.log('3. Make sure this workflow file exists on the default branch (master/main)');
-                console.log('4. If the PR is from a fork, additional restrictions may apply');
-                console.log('');
-              }
-            }
-
-            console.log('❌ Unable to mark PR as draft via REST or GraphQL.');
+            const run = context.payload.workflow_run;
+            const prs = run.pull_requests || [];
+            if (!prs.length) return;
             
-            // Add a follow-up comment explaining the issue
-            try {
-              const followUpComment = `⚠️ **Unable to automatically convert PR to draft**
-              
-              The workflow detected a typecheck failure but couldn't automatically convert this PR to draft due to permission restrictions. 
+            const prNumber = prs[0].number;
+            const body = `## ❌ ${run.name} Failed
+            
+            The workflow failed. Please:
+            1. Run locally: \`bunx nx affected -t typecheck --base=origin/master --head=HEAD\`
 
-              **Please manually convert this PR to draft** and fix the typecheck issues before marking it ready for review.`;
-              
-              await github.rest.issues.createComment({ 
-                owner, 
-                repo, 
-                issue_number: prNumber, 
-                body: followUpComment 
-              });
-              console.log('✅ Added follow-up comment about manual draft conversion needed.');
-            } catch (err) {
-              console.log(`❌ Failed to add follow-up comment: ${err.message}`);
-            }
+            2. Fix all issues
+            3. **Convert this PR to draft** until checks pass
+            4. Mark as "Ready for review" when done
+
+            [Convert to Draft](https://github.com/${context.repo.owner}/${context.repo.repo}/pull/${prNumber})`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body
+            });
