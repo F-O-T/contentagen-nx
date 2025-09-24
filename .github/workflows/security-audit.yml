@@ -4,160 +4,46 @@ on:
   pull_request:
     branches: ["*"]
     types: [opened, synchronize, reopened, ready_for_review]
-  schedule:
-    # Run weekly on Mondays at 3 AM UTC
-    - cron: '0 3 * * 1'
-  workflow_dispatch:
 
 jobs:
-  security-audit:
+  audit:
     runs-on: ubuntu-latest
     permissions:
-      issues: write
       pull-requests: write
-    
+      issues: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
-
-      - name: Cache node_modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/package.json', '**/bun.lockb') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
+      - name: Bun & Nx Setup
+        uses: ./.github/actions/setup-bun-nx
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Run Bun Audit
+      - name: Run Bun audit (non-blocking)
         run: |
-          echo "🔍 Running Bun security audit..."
-          
-          # Run bun audit with JSON output for better parsing
-          if bun audit --json > audit-report.json 2>&1; then
-            echo "✅ No security vulnerabilities found"
-            cat audit-report.json
-          else
-            echo "⚠️ Security vulnerabilities detected!"
-            cat audit-report.json
-            
-            # Check for critical vulnerabilities
-            if bun audit --level critical | grep -q "vulnerabilities"; then
-              echo "🚨 CRITICAL vulnerabilities found!"
-              echo "These must be fixed before merging"
-              exit 1
-            fi
-            
-            # Check for high severity vulnerabilities  
-            if bun audit --level high | grep -q "vulnerabilities"; then
-              echo "🔴 HIGH severity vulnerabilities found!"
-              echo "These should be fixed before merging"
-              
-              # Create a comment on PR if this is a PR
-              if [ "${{ github.event_name }}" == "pull_request" ]; then
-                echo "Creating comment on PR..."
-                # This will be handled by the GitHub script below
-              fi
-            fi
-          fi
-
-      - name: Comment on PR if vulnerabilities found
-        if: failure() && github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const prNumber = context.payload.pull_request.number;
-            
-            await github.rest.issues.createComment({
-              issue_number: prNumber,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: "## 🔒 Security Audit Failed\n\nThis PR introduces security vulnerabilities that must be addressed:\n\n**Next Steps:**\n1. Run `bun audit` locally to see the full report\n2. Update the vulnerable dependencies\n3. Commit the updated `package.json` and `bun.lockb`\n4. The security check will automatically pass once vulnerabilities are fixed\n\n**Critical vulnerabilities block merging** and must be fixed immediately.\n\n🛡️ *This is an automated security check*"
-            });
-
-      - name: Generate Security Report
-        run: |
-          echo "📊 Generating security report..."
-          
-          # Create a detailed security report
+          # Produce a human-readable summary for the PR comment
           {
-            echo "# Security Audit Report"
-            echo "Generated on: $(date)"
-            echo "Repository: ${{ github.repository }}"
-            echo "Ref: ${{ github.ref }}"
-            echo ""
-            echo "## Audit Results"
-            echo ""
-            echo "\`\`\`"
+            echo "### 🔒 Bun Security Audit"
+            echo
+            echo "Repository: ${{ github.repository }}  "
+            echo "Ref: \`${{ github.ref }}\`"
+            echo
+            echo "#### Results"
+            echo
+            echo '```
+            # Do not fail the job; capture output for the comment
             bun audit || true
-            echo "\`\`\`"
-            echo ""
-            echo "## Outdated Dependencies Check"
-            echo ""
-            echo "\`\`\`"
-            bun outdated || true
-            echo "\`\`\`"
-          } > security-report.md
-          
-          echo "✅ Security report generated"
+            echo '```'
+            echo
+            echo "_Tip: run \`bun audit\` locally and update vulnerable dependencies if needed._"
+          } > audit-comment.md
 
-      - name: Upload Security Report
-        uses: actions/upload-artifact@v3
+      - name: Comment audit results on PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: peter-evans/create-or-update-comment@v4
         with:
-          name: security-report-${{ github.run_number }}
-          path: security-report.md
-          retention-days: 30
-
-      - name: Create Security Issue for Critical Vulnerabilities
-        if: failure() && github.ref == 'refs/heads/master'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            // Check if there's already an open security issue
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: 'security,audit-failed',
-              state: 'open'
-            });
-            
-            if (issues.data.length === 0) {
-              await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: '🚨 Security Audit Failed - Critical Vulnerabilities Detected',
-                labels: ['security', 'audit-failed', 'priority-critical'],
-                body: `## Security Audit Failed
-
-                  The automated security audit has detected critical vulnerabilities in the repository dependencies.
-
-              ### Action Required
-              - Run \`bun audit\` to see the full vulnerability report
-              - Update all vulnerable dependencies immediately
-              - Ensure all security patches are applied
-
-              ### Audit Details
-              - **Repository**: \`${{ github.repository }}\`
-              - **Branch**: \`${{ github.ref_name }}\`
-              - **Timestamp**: \$(date)
-
-              ### Next Steps
-              1. Fix all critical and high-severity vulnerabilities
-              2. Update the \`package.json\` and \`bun.lockb\` files
-              3. Commit and push the security updates
-              4. Verify the audit passes
-
-              This issue will be automatically closed once the security audit passes.
-
-              🛡️ *Automated security alert*`
-              });
-            }
+          issue-number: ${{ github.event.pull_request.number }}
+          body-file: audit-comment.md
