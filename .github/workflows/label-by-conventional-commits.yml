@@ -2,7 +2,7 @@ name: Label PRs Based on Conventional Commits
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize, reopened,]
 
 jobs:
   label-by-title:

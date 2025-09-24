@@ -2,7 +2,7 @@ name: Changelog Check
 
 on:
   pull_request:
-    types: [opened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   changelog-check:
@@ -21,7 +21,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const { context } = github;
+            const { context, core } = github;
             const pr = context.payload.pull_request;
             const prNumber = pr.number;
             
@@ -68,25 +68,7 @@ jobs:
                 issue_number: prNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `## 📝 Changelog Required
-
-This PR contains changes that appear to affect the public API or user experience. **A changelog entry is required before this PR can be accepted.**
-
-### What to include:
-- A brief description of the changes
-- Any breaking changes or new features
-- Migration guides if needed
-
-### Where to add:
-- Look for a \`CHANGELOG.md\` or similar file in the repository
-- Add your entry under the appropriate version (usually "Unreleased" or "Next")
-
-### Next steps:
-1. Add your changelog entry
-2. Commit the changes to this PR
-3. The check will automatically pass once a changelog is detected
-
-**If this change doesn't require a changelog entry** (e.g., internal refactor, test fixes, documentation), please add the \`no-changelog-needed\` label to this PR.`
+                body: "## 📝 Changelog Required\n\nThis PR contains changes that appear to affect the public API or user experience. **A changelog entry is required before this PR can be accepted.**\n\n### What to include:\n- A brief description of the changes\n- Any breaking changes or new features\n- Migration guides if needed\n\n### Where to add:\n- Look for a `CHANGELOG.md` or similar file in the repository\n- Add your entry under the appropriate version (usually \"Unreleased\" or \"Next\")\n\n### Next steps:\n1. Add your changelog entry\n2. Commit the changes to this PR\n3. The check will automatically pass once a changelog is detected\n\n**If this change doesn't require a changelog entry** (e.g., internal refactor, test fixes, documentation), please add the `no-changelog-needed` label to this PR."
               });
               
               // Add label to indicate changelog is needed
@@ -115,11 +97,7 @@ This PR contains changes that appear to affect the public API or user experience
                   issue_number: prNumber,
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  body: `## ⚠️ PR Converted to Draft
-
-This PR has been converted back to **draft** status because it's missing a required changelog entry.
-
-Please add the changelog entry and then mark the PR as "Ready for review" again.`
+                  body: "## ⚠️ PR Converted to Draft\n\nThis PR has been converted back to **draft** status because it's missing a required changelog entry.\n\nPlease add the changelog entry and then mark the PR as \"Ready for review\" again."
                 });
               }
             } else if (hasChangelog) {
@@ -149,4 +127,11 @@ Please add the changelog entry and then mark the PR as "Ready for review" again.
                   console.log('Could not remove needs-changelog label:', error.message);
                 }
               }
+            }
+            
+            // Set the workflow status
+            if (requiresChangelog && !hasChangelog && !hasNoChangelogLabel) {
+              core.setFailed('Changelog entry is required for this PR');
+            } else {
+              console.log('Changelog check passed');
             }
