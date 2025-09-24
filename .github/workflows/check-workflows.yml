@@ -1,0 +1,45 @@
+name: Convert PR to Draft
+
+on:
+  pull_request:
+    types:
+      [
+        opened,
+        synchronize,
+        reopened,
+        ready_for_review,
+        review_requested,
+        auto_merge_enabled,
+      ]
+
+# If you want to cancel the previous workflow if a new one is triggered, use the following concurrency setting.
+concurrency:
+  # Group by pull request
+  group: ${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  convert_to_draft:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+    # TIPS:
+    # If you want to support a by-pass not to convert to draft, the subsequent code is commented out.
+    # If the event is a pull request and the pull request doesn't have the "disable-convert-to-draft" label,
+    # then the workflow will run.
+    #if: ${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'disable-convert-to-draft') }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Convert PR to Draft
+        uses: yu-iskw/convert-to-draft-action@v0.3.0
+        with:
+          # Required
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          # Optional
+          leave_comment: "1"
+          # Optional
+          comment_body: |
+            This PR was automatically converted to draft because Biome check failed.\n\nPlease run `bunx nx affected -t check` locally and ensure all checks pass before marking this PR as Ready for review again.
