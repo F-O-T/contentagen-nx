@@ -6,5 +6,28 @@
       "types": ["vite/client"],
       "lib": ["dom", "ES2022"],
       "jsx": "react-jsx"
-   }
+  },
+  "references": [
+    {
+      "path": "../payment"
+    },
+    {
+      "path": "../utils"
+    },
+    {
+      "path": "../rag"
+    },
+    {
+      "path": "../files"
+    },
+    {
+      "path": "../database"
+    },
+    {
+      "path": "../workers"
+    },
+    {
+      "path": "../server-events"
+    }
+  ]
 }

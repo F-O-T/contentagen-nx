@@ -10,5 +10,10 @@
    "paths": {
       "@/*": ["./src/*"],
       "@packages/ui/*": ["../../packages/ui/src/*"]
-   }
+  },
+  "references": [
+    {
+      "path": "../../packages/ui"
+    }
+  ]
 }

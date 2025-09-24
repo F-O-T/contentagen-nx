@@ -1,4 +1,23 @@
 {
    "extends": "@tooling/typescript/internal-package.json",
-   "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../environment"
+    },
+    {
+      "path": "../server-events"
+    },
+    {
+      "path": "../files"
+    },
+    {
+      "path": "../payment"
+    },
+    {
+      "path": "../utils"
+    }
+  ]
 }

@@ -10,5 +10,19 @@
       "declaration": false,
       "baseUrl": ".",
       "jsx": "react-jsx"
-   }
+  },
+  "references": [
+    {
+      "path": "../environment"
+    },
+    {
+      "path": "../payment"
+    },
+    {
+      "path": "../database"
+    },
+    {
+      "path": "../transactional"
+    }
+  ]
 }

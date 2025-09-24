@@ -10,5 +10,25 @@
       "declaration": true,
       "baseUrl": ".",
       "jsx": "react-jsx"
-   }
+  },
+  "references": [
+    {
+      "path": "../payment"
+    },
+    {
+      "path": "../server-events"
+    },
+    {
+      "path": "../database"
+    },
+    {
+      "path": "../files"
+    },
+    {
+      "path": "../rag"
+    },
+    {
+      "path": "../environment"
+    }
+  ]
 }

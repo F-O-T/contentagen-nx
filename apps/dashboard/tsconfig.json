@@ -25,5 +25,31 @@
         "../../packages/ui/src/*"
       ]
     },
-  }
+  },
+  "references": [
+    {
+      "path": "../../packages/files"
+    },
+    {
+      "path": "../../packages/database"
+    },
+    {
+      "path": "../../packages/utils"
+    },
+    {
+      "path": "../../packages/transactional"
+    },
+    {
+      "path": "../../packages/ui"
+    },
+    {
+      "path": "../../packages/posthog"
+    },
+    {
+      "path": "../../packages/environment"
+    },
+    {
+      "path": "../../packages/api"
+    }
+  ]
 }

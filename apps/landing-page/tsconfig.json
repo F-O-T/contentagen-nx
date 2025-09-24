@@ -13,5 +13,18 @@
    },
    "exclude": ["node_modules", "dist"],
    "extends": "@tooling/typescript/astro.json",
-   "include": [".astro/types.d.ts", "**/*.ts", "**/*.astro", "**/*.tsx"]
+  "include": [
+    ".astro/types.d.ts",
+    "**/*.ts",
+    "**/*.astro",
+    "**/*.tsx"
+  ],
+  "references": [
+    {
+      "path": "../../packages/ui"
+    },
+    {
+      "path": "../../packages/posthog"
+    }
+  ]
 }
