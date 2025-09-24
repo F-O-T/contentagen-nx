@@ -1,11 +1,10 @@
 name: PR Comment & Convert to Draft on Typecheck Failure
 
-
 on:
   workflow_run:
     workflows:
       - "Typecheck"
-      - "Tests"
+      - "Tests" 
       - "Biome Check"
     types:
       - completed
@@ -26,16 +25,16 @@ jobs:
     if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure') || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Comment on PR and ensure draft (safe base-repo run)
+      - name: Comment on PR and ensure draft
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Determine PR number:
+            // Determine PR number
             let prNumber = undefined;
             if (context.eventName === 'workflow_dispatch') {
               prNumber = parseInt(process.env.INPUT_PR_NUMBER || '', 10) || undefined;
-            } else if (context.payload && context.payload.workflow_run && Array.isArray(context.payload.workflow_run.pull_requests) && context.payload.workflow_run.pull_requests.length) {
+            } else if (context.payload?.workflow_run?.pull_requests?.length) {
               prNumber = context.payload.workflow_run.pull_requests[0].number;
             }
 
@@ -44,9 +43,10 @@ jobs:
               return;
             }
 
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
+            const { owner, repo } = context.repo;
+            console.log(`Processing PR #${prNumber} in ${owner}/${repo}`);
 
+            // Create comment
             const body = [
               `## ❌ Typecheck Failed`,
               '',
@@ -59,51 +59,59 @@ jobs:
               'Make sure all checks pass locally before marking the PR as "Ready for review".'
             ].join('\n');
 
-            // Create a comment
-            await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
-            console.log(`Comment created on PR #${prNumber}`);
+            try {
+              await github.rest.issues.createComment({ 
+                owner, 
+                repo, 
+                issue_number: prNumber, 
+                body 
+              });
+              console.log(`✅ Comment created on PR #${prNumber}`);
+            } catch (error) {
+              console.log(`❌ Failed to create comment: ${error.message}`);
+            }
 
-            // Get PR via REST
-            const { data: prData } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
-            if (prData.draft) {
-              console.log('PR already draft; nothing to do.');
+            // Get current PR status
+            let prData;
+            try {
+              const response = await github.rest.pulls.get({ 
+                owner, 
+                repo, 
+                pull_number: prNumber 
+              });
+              prData = response.data;
+            } catch (error) {
+              console.log(`❌ Failed to get PR data: ${error.message}`);
               return;
             }
 
-            // Try REST update first
+            if (prData.draft) {
+              console.log('✅ PR is already a draft; nothing to do.');
+              return;
+            }
+
+            // Convert to draft using REST API
             try {
-              const res = await github.rest.pulls.update({ owner, repo, pull_number: prNumber, draft: true });
-              if (res && res.data && res.data.draft === true) {
-                console.log('PR converted to draft via REST.');
-                return;
+              const response = await github.rest.pulls.update({ 
+                owner, 
+                repo, 
+                pull_number: prNumber, 
+                draft: true 
+              });
+              
+              if (response.data.draft === true) {
+                console.log('✅ PR successfully converted to draft via REST API');
+              } else {
+                console.log('⚠️  REST API call succeeded but draft status unclear');
               }
-              console.log('REST update did not set draft to true; attempting GraphQL fallback.');
-            } catch (err) {
-              console.log('REST update failed; attempting GraphQL fallback.');
+            } catch (error) {
+              console.log(`❌ Failed to convert PR to draft: ${error.message}`);
+              
+              // Log additional context for debugging
+              console.log('Error details:', {
+                status: error.status,
+                message: error.message,
+                prNumber,
+                currentDraftStatus: prData.draft
+              });
             }
-
-            // GraphQL fallback
-            if (prData.node_id) {
-              try {
-                const mutation = `
-                  mutation ConvertToDraft($id: ID!) {
-                    convertPullRequestToDraft(input: { pullRequestId: $id }) {
-                      pullRequest { number isDraft }
-                    }
-                  }
-                `;
-                const gqlRes = await github.graphql(mutation, { id: prData.node_id });
-                const converted = gqlRes && gqlRes.convertPullRequestToDraft && gqlRes.convertPullRequestToDraft.pullRequest && gqlRes.convertPullRequestToDraft.pullRequest.isDraft;
-                if (converted === true) {
-                  console.log('PR converted to draft via GraphQL.');
-                  return;
-                }
-                console.log('GraphQL did not set isDraft true.');
-              } catch (err) {
-                console.log('GraphQL convertPullRequestToDraft failed:', err && err.message ? err.message : err);
-              }
-            } else {
-              console.log('PR node_id unavailable; cannot run GraphQL fallback.');
-            }
-
-            console.log('Unable to mark PR as draft via REST or GraphQL.');
