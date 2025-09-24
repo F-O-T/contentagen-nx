@@ -23,9 +23,8 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run Bun audit (capture output)
-        id: audit
         run: |
-          bun audit || true > audit.txt
+         bun audit > audit.txt 2>&1 || true
 
       - name: Build PR comment body (heredoc, safe)
         run: |
