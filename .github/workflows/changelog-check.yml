@@ -1,0 +1,152 @@
+name: Changelog Check
+
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+
+jobs:
+  changelog-check:
+    if: ${{ github.event.pull_request.draft == false }}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if changelog is needed
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { context } = github;
+            const pr = context.payload.pull_request;
+            const prNumber = pr.number;
+            
+            // Get the list of files changed in the PR
+            const filesResponse = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+            
+            const changedFiles = filesResponse.data.map(file => file.filename);
+            const labels = [];
+            
+            // Check if this is a feature or fix that would require a changelog
+            const requiresChangelog = changedFiles.some(file => {
+              // Look for source code files (not docs, tests, or config)
+              return /\.(ts|js|tsx|jsx|py|java|go|rs|cpp|c|h)$/.test(file) &&
+                     !file.includes('test') &&
+                     !file.includes('spec') &&
+                     !file.includes('docs') &&
+                     !file.includes('documentation') &&
+                     !file.includes('example') &&
+                     !file.includes('demo');
+            });
+            
+            // Check if changelog file was added or modified
+            const hasChangelog = changedFiles.some(file => 
+              file.toLowerCase().includes('changelog') ||
+              file.toLowerCase().includes('change-log') ||
+              file.toLowerCase().includes('changes') ||
+              file.toLowerCase().includes('release') ||
+              file.toLowerCase().includes('history')
+            );
+            
+            // Check if PR has any of these labels already
+            const existingLabels = pr.labels || [];
+            const hasNoChangelogLabel = existingLabels.some(label => 
+              label.name === 'no-changelog-needed'
+            );
+            
+            if (requiresChangelog && !hasChangelog && !hasNoChangelogLabel) {
+              // Add a comment requesting changelog
+              await github.rest.issues.createComment({
+                issue_number: prNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 📝 Changelog Required
+
+This PR contains changes that appear to affect the public API or user experience. **A changelog entry is required before this PR can be accepted.**
+
+### What to include:
+- A brief description of the changes
+- Any breaking changes or new features
+- Migration guides if needed
+
+### Where to add:
+- Look for a \`CHANGELOG.md\` or similar file in the repository
+- Add your entry under the appropriate version (usually "Unreleased" or "Next")
+
+### Next steps:
+1. Add your changelog entry
+2. Commit the changes to this PR
+3. The check will automatically pass once a changelog is detected
+
+**If this change doesn't require a changelog entry** (e.g., internal refactor, test fixes, documentation), please add the \`no-changelog-needed\` label to this PR.`
+              });
+              
+              // Add label to indicate changelog is needed
+              try {
+                await github.rest.issues.addLabels({
+                  issue_number: prNumber,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  labels: ['needs-changelog']
+                });
+              } catch (error) {
+                console.log('Could not add needs-changelog label:', error.message);
+              }
+              
+              // If PR is ready for review but missing changelog, convert back to draft
+              if (context.event.action === 'ready_for_review') {
+                await github.rest.pulls.update({
+                  pull_number: prNumber,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  draft: true
+                });
+                
+                // Add comment explaining why it was converted back to draft
+                await github.rest.issues.createComment({
+                  issue_number: prNumber,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `## ⚠️ PR Converted to Draft
+
+This PR has been converted back to **draft** status because it's missing a required changelog entry.
+
+Please add the changelog entry and then mark the PR as "Ready for review" again.`
+                });
+              }
+            } else if (hasChangelog) {
+              // Add label to indicate changelog is included
+              try {
+                await github.rest.issues.addLabels({
+                  issue_number: prNumber,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  labels: ['has-changelog']
+                });
+              } catch (error) {
+                console.log('Could not add has-changelog label:', error.message);
+              }
+              
+              // Remove needs-changelog label if it exists
+              const needsChangelogLabel = existingLabels.find(label => label.name === 'needs-changelog');
+              if (needsChangelogLabel) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    issue_number: prNumber,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: 'needs-changelog'
+                  });
+                } catch (error) {
+                  console.log('Could not remove needs-changelog label:', error.message);
+                }
+              }
+            }

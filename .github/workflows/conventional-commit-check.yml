@@ -44,11 +44,4 @@ jobs:
           
           echo "✅ All commits follow conventional commits format"
 
-      - name: Preview release changes
-        run: |
-          # Preview what Nx release would generate
-          if bunx nx release --dry-run --skip-publish --first-release 2>/dev/null; then
-            echo "✅ Nx release preview successful"
-          else
-            echo "ℹ️  Nx release preview completed (dry-run mode)"
-          fi
+      
