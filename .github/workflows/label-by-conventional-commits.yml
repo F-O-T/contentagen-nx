@@ -15,7 +15,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const context = github.context;
+            const { context } = github;
             const prTitle = context.payload.pull_request.title;
             const prNumber = context.payload.pull_request.number;
             
@@ -88,3 +88,4 @@ jobs:
                 labels: labels
               });
             }
+
