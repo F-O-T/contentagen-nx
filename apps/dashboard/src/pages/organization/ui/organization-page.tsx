@@ -14,6 +14,7 @@ import { CreateOrganizationCredenza } from "../features/create-organization-cred
 import { InfoItem } from "@packages/ui/components/info-item";
 import { useIsomorphicLayoutEffect } from "@packages/ui/hooks/use-isomorphic-layout-effect";
 import { OrganizationPageMembersTable } from "./organization-page-members-table";
+import { translate } from "@packages/localization";
 
 export function OrganizationPage() {
    const [open, setOpen] = useState(false);
@@ -25,19 +26,19 @@ export function OrganizationPage() {
    const detailsInfoItems = useMemo(
       () => [
          {
-            label: "Name",
+            label: translate("pages.organization.fields.name"),
             value: org?.name ?? "—",
             icon: <Building2 className="w-4 h-4" />,
          },
          {
-            label: "Created At",
+            label: translate("pages.organization.fields.created-at"),
             value: org?.createdAt
                ? new Date(org.createdAt).toLocaleString()
                : "—",
             icon: <CalendarDays className="w-4 h-4" />,
          },
          {
-            label: "Members",
+            label: translate("pages.organization.fields.members"),
             value: Array.isArray(org?.members)
                ? String(org.members.length)
                : "—",
@@ -53,7 +54,9 @@ export function OrganizationPage() {
 
    return (
       <div className="flex flex-col gap-4">
-         <TalkingMascot message="Create and manage your organization here. Invite team members and control access." />
+         <TalkingMascot
+            message={translate("pages.organization.mascot-message")}
+         />
          {org ? (
             <div className="grid  grid-cols-3 gap-4">
                <OrganizationPageMembersTable organization={org} />
@@ -61,9 +64,11 @@ export function OrganizationPage() {
                <div className="col-span-1 flex flex-col gap-4">
                   <Card>
                      <CardHeader>
-                        <CardTitle>Organization Details</CardTitle>
+                        <CardTitle>
+                           {translate("pages.organization.details.title")}
+                        </CardTitle>
                         <CardDescription>
-                           View your organization info and invite new members.
+                           {translate("pages.organization.details.description")}
                         </CardDescription>
                      </CardHeader>
                      <CardContent className="grid gap-2">
@@ -81,7 +86,7 @@ export function OrganizationPage() {
             </div>
          ) : (
             <div className="text-muted-foreground">
-               No organization found. Please create one to continue.
+               {translate("pages.organization.messages.no-organization")}
             </div>
          )}
          <CreateOrganizationCredenza open={open} onOpenChange={setOpen} />

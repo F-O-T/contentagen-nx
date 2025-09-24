@@ -56,13 +56,13 @@ export function DashboardHomePage() {
             <Link to="/agents">
                <SquaredIconButton>
                   <Bot className="w-5 h-5 " />
-                  Agents
+                  {translate("pages.home.navigation.agents")}
                </SquaredIconButton>
             </Link>
             <Link to="/content" search={{ page: 1 }}>
                <SquaredIconButton>
                   <FileText className="w-5 h-5" />
-                  Content
+                  {translate("pages.home.navigation.content")}
                </SquaredIconButton>
             </Link>
          </div>

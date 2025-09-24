@@ -19,6 +19,7 @@ import {
 } from "@packages/ui/components/dropzone";
 import { Button } from "@packages/ui/components/button";
 import type { ContentSelect } from "@packages/database/schemas/content";
+import { translate } from "@packages/localization";
 
 interface UploadContentImageProps {
    content: ContentSelect;
@@ -54,7 +55,7 @@ export function UploadContentImage({
    const uploadImageMutation = useMutation(
       trpc.content.uploadImage.mutationOptions({
          onSuccess: async () => {
-            toast.success("Image uploaded successfully!");
+            toast.success(translate("pages.content-details.upload.success"));
             await queryClient.invalidateQueries({
                queryKey: trpc.content.get.queryKey({ id: content.id }),
             });
@@ -67,7 +68,7 @@ export function UploadContentImage({
          },
          onError: (error) => {
             console.error("Upload error:", error);
-            toast.error("Failed to upload image");
+            toast.error(translate("pages.content-details.upload.error"));
          },
       }),
    );
@@ -78,13 +79,17 @@ export function UploadContentImage({
 
       // Validate file type
       if (!file.type.startsWith("image/")) {
-         toast.error("Please select an image file");
+         toast.error(
+            translate("pages.content-details.upload.validation.invalid-file"),
+         );
          return;
       }
 
       // Validate file size (10MB limit)
       if (file.size > 10 * 1024 * 1024) {
-         toast.error("File size must be less than 10MB");
+         toast.error(
+            translate("pages.content-details.upload.validation.file-too-large"),
+         );
          return;
       }
 
@@ -129,7 +134,7 @@ export function UploadContentImage({
          });
       } catch (error) {
          console.error("Upload failed:", error);
-         toast.error("Failed to upload image");
+         toast.error(translate("pages.content-details.upload.error"));
       }
    };
 
@@ -137,10 +142,11 @@ export function UploadContentImage({
       <Credenza open={isOpen} onOpenChange={setIsOpen}>
          <CredenzaContent className="sm:max-w-md">
             <CredenzaHeader>
-               <CredenzaTitle>Upload Content Image</CredenzaTitle>
+               <CredenzaTitle>
+                  {translate("pages.content-details.upload.title")}
+               </CredenzaTitle>
                <CredenzaDescription>
-                  Upload an image for your content. The image will be displayed
-                  with your generated content.
+                  {translate("pages.content-details.upload.description")}
                </CredenzaDescription>
             </CredenzaHeader>
             <CredenzaBody className="space-y-4">
@@ -177,15 +183,17 @@ export function UploadContentImage({
             </CredenzaBody>
             <CredenzaFooter className="grid grid-cols-2 gap-2">
                <CredenzaClose asChild>
-                  <Button variant="outline">Cancel</Button>
+                  <Button variant="outline">
+                     {translate("common.actions.cancel")}
+                  </Button>
                </CredenzaClose>
                <Button
                   onClick={handleUpload}
                   disabled={!selectedFile || uploadImageMutation.isPending}
                >
                   {uploadImageMutation.isPending
-                     ? "Uploading..."
-                     : "Upload Image"}
+                     ? translate("pages.content-details.upload.uploading")
+                     : translate("pages.content-details.upload.upload-button")}
                </Button>
             </CredenzaFooter>
          </CredenzaContent>

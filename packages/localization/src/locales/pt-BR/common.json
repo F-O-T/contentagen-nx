@@ -1,0 +1,29 @@
+{
+   "actions": {
+      "cancel": "Cancelar",
+      "delete": "Excluir",
+      "update": "Atualizar",
+      "view": "Visualizar",
+      "updating": "Atualizando...",
+      "creating": "Criando...",
+      "deleting": "Excluindo..."
+   },
+   "status": {
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "loading": "Carregando..."
+   },
+   "messages": {
+      "loading": "Carregando..."
+   },
+   "form": {
+      "field-required": "Este campo é obrigatório"
+   },
+   "navigation": {
+      "close": "Fechar"
+   },
+   "time": {
+      "last-modified": "Última Modificação",
+      "time": "Hora"
+   }
+}

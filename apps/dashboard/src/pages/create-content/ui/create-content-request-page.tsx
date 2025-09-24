@@ -3,6 +3,7 @@ import { useParams, useRouter } from "@tanstack/react-router";
 import { ContentRequestForm } from "@/features/content-request-form/ui/content-request-form";
 import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
+import { translate } from "@packages/localization";
 
 export function AgentContentRequestPage() {
    const trpc = useTRPC();
@@ -15,7 +16,11 @@ export function AgentContentRequestPage() {
    const contentRequestMutation = useMutation(
       trpc.content.create.mutationOptions({
          onSuccess: (data) => {
-            toast.success("Content begun generation successfully!");
+            toast.success(
+               translate(
+                  "pages.content-request-form.messages.generation-started",
+               ),
+            );
             queryClient.invalidateQueries({
                queryKey: trpc.content.listAllContent.queryKey({
                   status: [
@@ -39,7 +44,9 @@ export function AgentContentRequestPage() {
          },
          onError: (error) => {
             console.error("Failed to create content request:", error);
-            toast.error(`Failed to create content`);
+            toast.error(
+               translate("pages.content-request-form.messages.creation-failed"),
+            );
          },
       }),
    );

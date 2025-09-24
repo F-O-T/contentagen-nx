@@ -13,6 +13,21 @@
       }
    },
    "bulk-actions": {
+      "title": "Bulk Actions",
+      "description": "Perform actions on {{count}} selected items",
+      "approve": {
+         "label": "Approve",
+         "items": "{{count}} items",
+         "success": "Successfully approved {{count}} ideas",
+         "success-partial": "Successfully approved {{approved}} out of {{total}} selected ideas ({{skipped}} were already approved or in wrong status)",
+         "error": "Failed to approve ideas"
+      },
+      "delete": {
+         "label": "Delete",
+         "items": "{{count}} items",
+         "success": "Successfully deleted ideas",
+         "error": "Failed to delete ideas"
+      },
       "delete-confirmation": {
          "message": "This will permanently delete {{count}} idea",
          "message_plural": "This will permanently delete {{count}} ideas"
@@ -20,5 +35,12 @@
       "approve-confirmation": {
          "message": "This will approve the selected ideas that are in pending status and send them to the content generation pipeline. Only pending items will be approved. This action will create content based on the approved ideas."
       }
+   },
+   "card": {
+      "unknown-agent": "Unknown",
+      "no-description": "No description",
+      "unknown-date": "Unknown",
+      "generating": "Generating",
+      "view-details": "View idea details"
    }
 }

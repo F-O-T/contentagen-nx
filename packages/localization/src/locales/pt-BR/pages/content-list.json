@@ -21,5 +21,37 @@
    },
    "delete-confirmation": {
       "message": "Isso excluirá permanentemente \"{{title}}\" e todos os dados associados. Esta ação não pode ser desfeita."
+   },
+   "card": {
+      "no-description": "Nenhuma descrição encontrada",
+      "unknown-agent": "Desconhecido",
+      "no-agent-description": "Sem descrição",
+      "untitled-content": "Conteúdo",
+      "no-description-available": "Nenhuma descrição disponível",
+      "view-details": "Ver detalhes do seu conteúdo",
+      "delete-content": "Deletar este conteúdo",
+      "this-content": "este conteúdo"
+   },
+   "list": {
+      "loading": "Carregando conteúdo...",
+      "no-results": "Nenhum conteúdo encontrado que corresponda aos seus filtros.",
+      "no-results-hint": "Tente ajustar seus critérios de filtro ou criar novo conteúdo."
+   },
+   "status": {
+      "unknown": "Desconhecido",
+      "pending": "Pendente",
+      "planning": "Planejando",
+      "researching": "Pesquisando",
+      "writing": "Escrevendo",
+      "editing": "Editando",
+      "analyzing": "Analisando",
+      "grammar-checking": "Verificando Gramática",
+      "draft": "Rascunho",
+      "approved": "Aprovado"
+   },
+   "messages": {
+      "delete-success": "Conteúdo deletado com sucesso",
+      "delete-error": "Falha ao deletar conteúdo",
+      "status-updated": "Status do conteúdo atualizado para {{status}}"
    }
 }

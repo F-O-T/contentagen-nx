@@ -9,6 +9,7 @@ import { Markdown } from "@packages/ui/components/markdown";
 // Removed Credenza imports since edit will be inline
 import type { ContentSelect } from "@packages/database/schemas/content";
 import { EditContentBody } from "../features/edit-content-body";
+import { translate } from "@packages/localization";
 
 export function GeneratedContentDisplay({
    content,
@@ -22,9 +23,11 @@ export function GeneratedContentDisplay({
    return (
       <Card>
          <CardHeader>
-            <CardTitle>Generated Content</CardTitle>
+            <CardTitle>
+               {translate("pages.content-details.content.title")}
+            </CardTitle>
             <CardDescription>
-               Your AI-generated content with export and edit options
+               {translate("pages.content-details.content.description")}
             </CardDescription>
          </CardHeader>
          <CardContent>

@@ -1,4 +1,4 @@
-import i18n from "i18next";
+import i18n, { type TOptions } from "i18next";
 import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import enUSResources from "./locales/en-US";
@@ -17,6 +17,7 @@ type RecursiveKeyOf<T> = T extends object
 type TranslationResources = typeof enUSResources.translation;
 
 export type TranslationKey = RecursiveKeyOf<TranslationResources>;
+export type TranslationOptions = TOptions;
 
 const resources = {
    en: enUSResources,
@@ -49,9 +50,9 @@ i18n
 
 export default i18n;
 
-export function translate(key: TranslationKey) {
-   const result = i18n.t(key);
-   if (result === key) {
+export function translate(key: TranslationKey, options?: TOptions) {
+   const result = i18n.t(key, options);
+   if (result === key && !options) {
       console.warn(`Translation key not found: ${key}`);
    }
    return result;

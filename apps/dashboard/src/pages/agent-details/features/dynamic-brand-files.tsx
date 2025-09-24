@@ -15,6 +15,7 @@ import { useParams } from "@tanstack/react-router";
 import { useCallback, type FormEvent } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { translate } from "@packages/localization";
 export function GenerateBrandFilesCredenza({
    open,
    onOpenChange,
@@ -23,7 +24,11 @@ export function GenerateBrandFilesCredenza({
    onOpenChange: (open: boolean) => void;
 }) {
    const schema = z.object({
-      websiteUrl: z.url("Please enter a valid URL"),
+      websiteUrl: z.url(
+         translate(
+            "pages.agent-details.modals.brand-files.validation.invalid-url",
+         ),
+      ),
    });
    const agentId = useParams({
       from: "/_dashboard/agents/$agentId/",
@@ -35,11 +40,19 @@ export function GenerateBrandFilesCredenza({
       trpc.agentFile.generateBrandKnowledge.mutationOptions({
          onError: (error) => {
             console.error("Error generating brand files:", error);
-            toast.error("An error occurred while generating brand files.");
+            toast.error(
+               translate(
+                  "pages.agent-details.modals.brand-files.messages.generation-error",
+               ),
+            );
             // Optionally, display an error message to the user here
          },
          onSuccess: async () => {
-            toast.success("Brand files generation initiated.");
+            toast.success(
+               translate(
+                  "pages.agent-details.modals.brand-files.messages.generation-started",
+               ),
+            );
             await queryClient.invalidateQueries({
                queryKey: trpc.agent.get.queryKey({ id: agentId }),
             });
@@ -74,7 +87,9 @@ export function GenerateBrandFilesCredenza({
       <Credenza open={open} onOpenChange={onOpenChange}>
          <CredenzaContent>
             <CredenzaHeader>
-               <CredenzaTitle>Generate Brand Files from Website</CredenzaTitle>
+               <CredenzaTitle>
+                  {translate("pages.agent-details.modals.brand-files.title")}
+               </CredenzaTitle>
             </CredenzaHeader>
             <form
                className="flex flex-col gap-4"
@@ -84,7 +99,11 @@ export function GenerateBrandFilesCredenza({
                   <form.AppField name="websiteUrl">
                      {(field) => (
                         <field.FieldContainer>
-                           <field.FieldLabel>Website url</field.FieldLabel>
+                           <field.FieldLabel>
+                              {translate(
+                                 "pages.agent-details.modals.brand-files.website-url-label",
+                              )}
+                           </field.FieldLabel>
                            <Input
                               id={field.name}
                               name={field.name}
@@ -92,7 +111,9 @@ export function GenerateBrandFilesCredenza({
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder="Enter your website URL"
+                              placeholder={translate(
+                                 "pages.agent-details.modals.brand-files.website-url-placeholder",
+                              )}
                               type="url"
                               value={field.state.value}
                            />
@@ -112,7 +133,9 @@ export function GenerateBrandFilesCredenza({
                            type="submit"
                            variant="default"
                         >
-                           Generate brand files
+                           {translate(
+                              "pages.agent-details.modals.brand-files.generate-button",
+                           )}
                         </Button>
                      )}
                   </form.Subscribe>

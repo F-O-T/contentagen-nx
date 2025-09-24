@@ -1,0 +1,78 @@
+{
+   "title": "Gerenciamento de Chaves API",
+   "mascot-message": "Esta chave API é para nosso SDK. Gerencie suas chaves aqui e mantenha suas integrações funcionando perfeitamente!",
+   "statistics": {
+      "title": "Estatísticas das Chaves API",
+      "description": "Visão geral das suas chaves API e estatísticas de uso.",
+      "total-keys": "Total de Chaves API",
+      "total-usage": "Uso Total",
+      "rate-limit": "Limite de Taxa"
+   },
+   "section": {
+      "title": "Chaves API",
+      "description": "Gerencie suas chaves API para acesso programático. Você pode visualizar e excluir chaves aqui."
+   },
+   "actions": {
+      "create": "Criar Chave API",
+      "update": "Atualizar",
+      "delete": "Excluir",
+      "copy": "Copiar Chave",
+      "regenerate": "Regenerar Chave"
+   },
+   "table": {
+      "headers": {
+         "name": "Nome",
+         "key": "Chave",
+         "usage": "Uso",
+         "rate-limit": "Limite de Taxa",
+         "created": "Criado",
+         "actions": "Ações"
+      },
+      "unlimited": "Ilimitado",
+      "not-found": "não encontrado"
+   },
+   "messages": {
+      "create-success": "Chave API criada com sucesso!",
+      "create-error": "Falha ao criar chave API. Tente novamente.",
+      "delete-success": "Chave API excluída com sucesso!",
+      "delete-error": "Falha ao excluir chave API. Tente novamente.",
+      "copy-success": "Chave API copiada para a área de transferência!",
+      "update-success": "Chave API atualizada com sucesso!",
+      "update-error": "Falha ao atualizar chave API. Tente novamente.",
+      "regenerate-success": "Chave API regenerada com sucesso!"
+   },
+   "modals": {
+      "delete": {
+         "title": "Excluir Chave API",
+         "description": "Tem certeza de que deseja excluir esta chave API? Esta ação não pode ser desfeita.",
+         "warning": "Esta ação é irreversível. A chave API e seu acesso serão permanentemente excluídos.",
+         "confirm": "Excluir",
+         "cancel": "Cancelar"
+      },
+      "create": {
+         "title": "Criar Nova Chave API",
+         "name-label": "Nome da Chave",
+         "name-placeholder": "Digite um nome para sua chave API",
+         "create": "Criar Chave",
+         "cancel": "Cancelar"
+      },
+      "update": {
+         "title": "Atualizar Chave API",
+         "description": "Você só pode atualizar o nome da sua chave API.",
+         "name-label": "Nome",
+         "name-placeholder": "Digite um novo nome para sua chave API",
+         "update": "Atualizar Chave API"
+      },
+      "api-key-alert": {
+         "title": "Esta é sua chave API",
+         "description": "Por favor, copie e armazene esta chave API com segurança.",
+         "warning": "Você não poderá vê-la novamente.",
+         "key-label": "Chave API",
+         "copy-button": "Copiar para a área de transferência"
+      }
+   },
+   "aria-labels": {
+      "more-actions": "Mais ações",
+      "api-key-actions": "Ações da chave API"
+   }
+}

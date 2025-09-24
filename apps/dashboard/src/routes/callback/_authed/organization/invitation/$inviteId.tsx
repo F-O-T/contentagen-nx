@@ -10,6 +10,7 @@ import {
 import { Button } from "@packages/ui/components/button";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { translate } from "@packages/localization";
 
 export const Route = createFileRoute(
    "/callback/_authed/organization/invitation/$inviteId",
@@ -49,11 +50,13 @@ function RouteComponent() {
             onError: (error) => {
                console.error("Failed to accept invitation:", error);
                toast.error(
-                  "Failed to accept invitation. Please try again later.",
+                  translate("pages.organization-invitation.messages.error"),
                );
             },
             onSuccess: async () => {
-               toast.success("Invitation accepted successfully!");
+               toast.success(
+                  translate("pages.organization-invitation.messages.success"),
+               );
                await handleLogout();
             },
          },
@@ -63,7 +66,9 @@ function RouteComponent() {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>Organization Invitation</CardTitle>
+            <CardTitle>
+               {translate("pages.organization-invitation.title")}
+            </CardTitle>
          </CardHeader>
          <CardContent>
             <Button
@@ -71,7 +76,7 @@ function RouteComponent() {
                className="mt-4"
                onClick={acceptInvitation}
             >
-               Accept Invitation
+               {translate("pages.organization-invitation.actions.accept")}
             </Button>
          </CardContent>
       </Card>

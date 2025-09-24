@@ -27,40 +27,40 @@ export const AgentPersonaCard = ({ agent }: { agent: AgentSelect }) => {
    const items = useMemo(
       () => [
          {
-            label: "Content Type",
+            label: translate("pages.agent-details.persona.content-type"),
             value: formatValueForDisplay(agent.personaConfig?.purpose ?? ""),
             icon: FileText,
          },
          {
-            label: "Voice Tone",
+            label: translate("pages.agent-details.persona.voice-tone"),
             value: formatValueForDisplay(
                agent.personaConfig?.voice?.communication ?? "",
             ),
             icon: Megaphone,
          },
          {
-            label: "Target Audience",
+            label: translate("pages.agent-details.persona.target-audience"),
             value: formatValueForDisplay(
                agent.personaConfig?.audience?.base ?? "",
             ),
             icon: Users,
          },
          {
-            label: "Formatting Style",
+            label: translate("pages.agent-details.persona.formatting-style"),
             value: formatValueForDisplay(
                agent.personaConfig?.formatting?.style ?? "",
             ),
             icon: Type,
          },
          {
-            label: "Language",
+            label: translate("pages.agent-details.persona.language"),
             value: formatValueForDisplay(
                agent.personaConfig?.language?.primary ?? "",
             ),
             icon: Type,
          },
          {
-            label: "Brand Integration",
+            label: translate("pages.agent-details.persona.brand-integration"),
             value: formatValueForDisplay(
                agent.personaConfig?.brand?.integrationStyle ?? "",
             ),
@@ -73,9 +73,11 @@ export const AgentPersonaCard = ({ agent }: { agent: AgentSelect }) => {
    return (
       <Card>
          <CardHeader>
-            <CardTitle className="line-clamp-1">Agent Persona</CardTitle>
+            <CardTitle className="line-clamp-1">
+               {translate("pages.agent-details.persona.title")}
+            </CardTitle>
             <CardDescription className="line-clamp-1">
-               Configuration summary
+               {translate("pages.agent-details.persona.description")}
             </CardDescription>
          </CardHeader>
          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">

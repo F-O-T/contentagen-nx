@@ -15,6 +15,7 @@ import {
 } from "@packages/ui/components/input-otp";
 import { ArrowRight } from "lucide-react";
 import { useEmailVerification } from "../lib/use-email-verification";
+import { translate } from "@packages/localization";
 
 export function EmailVerificationPage() {
    const { handleResendEmail, handleSubmit, form } = useEmailVerification();
@@ -23,10 +24,10 @@ export function EmailVerificationPage() {
       <Card className="border shadow-xl transition-all duration-300 border-muted/50 bg-card backdrop-blur-xl animate-in fade-in-50 slide-in-from-bottom-6">
          <CardHeader>
             <CardTitle className="text-3xl font-bold tracking-tight text-center">
-               Email Verification
+               {translate("pages.email-verification.title")}
             </CardTitle>
             <CardDescription className="text-base text-center text-muted-foreground/60">
-               Enter the verification code sent to your email.
+               {translate("pages.email-verification.description")}
             </CardDescription>
          </CardHeader>
          <CardContent>
@@ -39,7 +40,11 @@ export function EmailVerificationPage() {
                <form.AppField name="otp">
                   {(field) => (
                      <field.FieldContainer className="flex flex-col items-center">
-                        <field.FieldLabel>Verification Code</field.FieldLabel>
+                        <field.FieldLabel>
+                           {translate(
+                              "pages.email-verification.form.verification-code.label",
+                           )}
+                        </field.FieldLabel>
                         <InputOTP
                            autoComplete="one-time-code"
                            className="gap-2 "
@@ -77,7 +82,7 @@ export function EmailVerificationPage() {
                         type="submit"
                         variant="default"
                      >
-                        Submit Code
+                        {translate("pages.email-verification.form.submit")}
                         <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                      </Button>
                   )}
@@ -90,7 +95,7 @@ export function EmailVerificationPage() {
                onClick={handleResendEmail}
                variant="link"
             >
-               Resend verification code
+               {translate("pages.email-verification.form.resend")}
             </Button>
          </CardFooter>
       </Card>

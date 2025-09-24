@@ -49,7 +49,9 @@ export function ContentDetailsQuickActions({
    const regenerateMutation = useMutation(
       trpc.content.regenerate.mutationOptions({
          onSuccess: async () => {
-            toast.success("Content regeneration triggered!");
+            toast.success(
+               translate("pages.content-details.messages.regenerate-success"),
+            );
             await queryClient.invalidateQueries({
                queryKey: trpc.content.get.queryKey({ id: content.id }),
             });
@@ -64,7 +66,9 @@ export function ContentDetailsQuickActions({
          },
          onError: (error) => {
             toast.error(
-               `Error regenerating content: ${error.message ?? "Unknown error"}`,
+               translate("pages.content-details.messages.regenerate-error", {
+                  error: error.message ?? "Unknown error",
+               }),
             );
          },
       }),
@@ -73,7 +77,9 @@ export function ContentDetailsQuickActions({
    const approveMutation = useMutation(
       trpc.content.approve.mutationOptions({
          onSuccess: async () => {
-            toast.success("Content approved successfully!");
+            toast.success(
+               translate("pages.content-details.messages.approve-success"),
+            );
             await queryClient.invalidateQueries({
                queryKey: trpc.content.get.queryKey({ id: content.id }),
             });
@@ -88,7 +94,9 @@ export function ContentDetailsQuickActions({
          },
          onError: (error) => {
             toast.error(
-               `Error approving content: ${error.message ?? "Unknown error"}`,
+               translate("pages.content-details.messages.approve-error", {
+                  error: error.message ?? "Unknown error",
+               }),
             );
          },
       }),
@@ -97,7 +105,9 @@ export function ContentDetailsQuickActions({
    const deleteMutation = useMutation(
       trpc.content.delete.mutationOptions({
          onSuccess: () => {
-            toast.success("Content deleted successfully");
+            toast.success(
+               translate("pages.content-details.messages.delete-success"),
+            );
             router.navigate({
                to: "/content",
                search: { agentId: content.agentId, page: 1 },
@@ -105,7 +115,9 @@ export function ContentDetailsQuickActions({
          },
          onError: (error) => {
             toast.error(
-               `Error deleting content: ${error.message ?? "Unknown error"}`,
+               translate("pages.content-details.messages.delete-error", {
+                  error: error.message ?? "Unknown error",
+               }),
             );
          },
       }),
@@ -114,8 +126,14 @@ export function ContentDetailsQuickActions({
    const toggleShareMutation = useMutation(
       trpc.content.toggleShare.mutationOptions({
          onSuccess: async (data) => {
+            const status =
+               data.shareStatus === "shared"
+                  ? translate("pages.content-details.status.shared")
+                  : translate("pages.content-details.status.private");
             toast.success(
-               `Content ${data.shareStatus === "shared" ? "shared" : "made private"} successfully!`,
+               translate("pages.content-details.messages.share-success", {
+                  status,
+               }),
             );
             await queryClient.invalidateQueries({
                queryKey: trpc.content.get.queryKey({ id: content.id }),
@@ -126,7 +144,9 @@ export function ContentDetailsQuickActions({
          },
          onError: (error) => {
             toast.error(
-               `Error toggling share status: ${error.message ?? "Unknown error"}`,
+               translate("pages.content-details.messages.share-error", {
+                  error: error.message ?? "Unknown error",
+               }),
             );
          },
       }),
@@ -238,7 +258,10 @@ export function ContentDetailsQuickActions({
          <ContentDeleteConfirmationCredenza
             open={deleteDialogOpen}
             onOpenChange={setDeleteDialogOpen}
-            contentTitle={content.meta?.title || "Untitled Content"}
+            contentTitle={
+               content.meta?.title ||
+               translate("pages.content-details.messages.untitled-content")
+            }
             onConfirm={handleDeleteConfirm}
          />
 

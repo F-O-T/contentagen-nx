@@ -28,6 +28,7 @@ import { DeleteAgentDialog } from "@/features/agent-actions/ui/delete-agent-dial
 import { EditAgentAction } from "@/features/agent-actions/ui/edit-agent-action";
 import type { AgentSelect } from "@packages/database/schema";
 import type { PersonaConfig } from "@packages/database/schemas/agent";
+import { translate } from "@packages/localization";
 
 type AgentCardProps = {
    agent: AgentSelect;
@@ -53,17 +54,17 @@ export function AgentCard({ agent }: AgentCardProps) {
       ? formatValueToTitleCase(
            personaConfig.voice.communication.replace("_", " "),
         )
-      : "Not specified";
+      : translate("pages.agent-list.agent-card.not-specified");
 
    // Extract audience base
    const audienceBase = personaConfig.audience?.base
       ? formatValueToTitleCase(personaConfig.audience.base.replace("_", " "))
-      : "Not specified";
+      : translate("pages.agent-list.agent-card.not-specified");
 
    // Extract purpose/channel if available
    const purpose = personaConfig.purpose
       ? formatValueToTitleCase(personaConfig.purpose.replace("_", " "))
-      : "Not specified";
+      : translate("pages.agent-list.agent-card.not-specified");
 
    const { handleEdit } = EditAgentAction({ agentId: agent.id });
 
@@ -137,22 +138,28 @@ export function AgentCard({ agent }: AgentCardProps) {
                <CredenzaBody className="grid grid-cols-2 gap-2">
                   <SquaredIconButton onClick={handleViewDetails}>
                      <Eye className="h-4 w-4" />
-                     View agent details
+                     {translate(
+                        "pages.agent-details.quick-actions.view-details",
+                     )}
                   </SquaredIconButton>
 
                   <SquaredIconButton onClick={handleViewContent}>
                      <PlusIcon className="h-4 w-4" />
-                     Create new content
+                     {translate(
+                        "pages.agent-details.quick-actions.create-content",
+                     )}
                   </SquaredIconButton>
 
                   <SquaredIconButton onClick={handleEditAgent}>
                      <Edit className="h-4 w-4" />
-                     Edit agent
+                     {translate("pages.agent-details.quick-actions.edit-agent")}
                   </SquaredIconButton>
 
                   <SquaredIconButton destructive onClick={handleDelete}>
                      <Trash2 className="h-4 w-4" />
-                     Delete agent
+                     {translate(
+                        "pages.agent-details.quick-actions.delete-agent",
+                     )}
                   </SquaredIconButton>
                </CredenzaBody>
             </CredenzaContent>

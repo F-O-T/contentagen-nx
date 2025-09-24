@@ -26,6 +26,7 @@ import { useState } from "react";
 import type { betterAuthClient } from "@/integrations/clients";
 import { SendInvitationCredenza } from "../features/send-invitation-credenza";
 import { DeleteOrganizationCredenza } from "../features/delete-organization-credenza";
+import { translate } from "@packages/localization";
 export function OrganizationPageMembersTable({
    organization,
 }: {
@@ -37,9 +38,11 @@ export function OrganizationPageMembersTable({
       <>
          <Card className="col-span-2">
             <CardHeader>
-               <CardTitle>Organization Members</CardTitle>
+               <CardTitle>
+                  {translate("pages.organization.members.title")}
+               </CardTitle>
                <CardDescription>
-                  List of all members in your organization.
+                  {translate("pages.organization.details.description")}
                </CardDescription>
                <CardAction>
                   <DropdownMenu>
@@ -58,14 +61,17 @@ export function OrganizationPageMembersTable({
                               setDeleteOpen(true);
                            }}
                         >
-                           Delete Organization
+                           {translate("pages.organization.actions.delete")}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                            onSelect={() => {
                               setInviteOpen(true);
                            }}
                         >
-                           <UserPlus className="w-4 h-4 mr-2" /> Invite Members
+                           <UserPlus className="w-4 h-4 mr-2" />{" "}
+                           {translate(
+                              "pages.organization.actions.invite-member",
+                           )}
                         </DropdownMenuItem>
                      </DropdownMenuContent>
                   </DropdownMenu>
@@ -77,9 +83,15 @@ export function OrganizationPageMembersTable({
                   <Table>
                      <TableHeader>
                         <TableRow>
-                           <TableHead>Name</TableHead>
-                           <TableHead>Email</TableHead>
-                           <TableHead>Role</TableHead>
+                           <TableHead>
+                              {translate("pages.organization.fields.name")}
+                           </TableHead>
+                           <TableHead>
+                              {translate("pages.organization.table.email")}
+                           </TableHead>
+                           <TableHead>
+                              {translate("pages.organization.members.role")}
+                           </TableHead>
                         </TableRow>
                      </TableHeader>
                      <TableBody>
@@ -102,7 +114,9 @@ export function OrganizationPageMembersTable({
                      </TableBody>
                   </Table>
                ) : (
-                  <div className="text-muted-foreground">No members found.</div>
+                  <div className="text-muted-foreground">
+                     {translate("pages.organization.messages.no-members")}
+                  </div>
                )}
             </CardContent>
          </Card>

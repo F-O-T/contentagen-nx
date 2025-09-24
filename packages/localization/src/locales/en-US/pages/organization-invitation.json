@@ -1,0 +1,18 @@
+{
+   "title": "Organization Invitation",
+   "description": "You have been invited to join an organization.",
+   "actions": {
+      "accept": "Accept Invitation",
+      "decline": "Decline Invitation"
+   },
+   "messages": {
+      "success": "Invitation accepted successfully!",
+      "error": "Failed to accept invitation. Please try again later.",
+      "decline-success": "Invitation declined successfully.",
+      "decline-error": "Failed to decline invitation. Please try again later.",
+      "expired": "This invitation has expired.",
+      "invalid": "Invalid invitation link.",
+      "already-member": "You are already a member of this organization."
+   },
+   "loading": "Processing invitation..."
+}

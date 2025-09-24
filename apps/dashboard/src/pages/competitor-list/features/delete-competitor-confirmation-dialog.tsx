@@ -4,6 +4,7 @@ import { useTRPC } from "@/integrations/clients";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AlertTriangleIcon } from "lucide-react";
+import { translate } from "@packages/localization";
 
 interface DeleteCompetitorConfirmationDialogProps {
    competitor: CompetitorSelect;
@@ -22,14 +23,22 @@ export function DeleteCompetitorConfirmationDialog({
    const deleteCompetitorMutation = useMutation(
       trpc.competitor.delete.mutationOptions({
          onSuccess: () => {
-            toast.success(`${competitor.name} has been deleted successfully.`);
+            toast.success(
+               translate("pages.competitor-list.messages.delete-success", {
+                  name: competitor.name,
+               }),
+            );
             queryClient.invalidateQueries({
                queryKey: trpc.competitor.list.queryKey(),
             });
             onOpenChange(false);
          },
          onError: (error) => {
-            toast.error(`Failed to delete competitor: ${error.message}`);
+            toast.error(
+               translate("pages.competitor-list.messages.delete-error", {
+                  error: error.message,
+               }),
+            );
          },
       }),
    );
@@ -44,8 +53,10 @@ export function DeleteCompetitorConfirmationDialog({
          onOpenChange={onOpenChange}
          onDelete={handleDelete}
          onCancel={() => onOpenChange(false)}
-         title="Delete Competitor"
-         message={`Are you sure you want to delete "${competitor.name}"? This action cannot be undone and will remove all associated feature tracking data.`}
+         title={translate("pages.competitor-list.modals.delete.title")}
+         message={translate("pages.competitor-list.modals.delete.description", {
+            name: competitor.name,
+         })}
          icon={AlertTriangleIcon}
          variant="destructive"
       />

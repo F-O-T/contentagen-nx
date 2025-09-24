@@ -29,5 +29,20 @@
    "footer": {
       "have-account": "Already have an account?",
       "sign-in-link": "Sign in here"
+   },
+   "validation": {
+      "email-invalid": "Please enter a valid email",
+      "name-min-length": "Please enter a valid name",
+      "password-min-length": "Please enter a password with at least 8 characters",
+      "passwords-no-match": "Passwords do not match"
+   },
+   "errors": {
+      "unknown": "Unknown error",
+      "user-exists": "This email is already registered"
+   },
+   "messages": {
+      "loading": "Signing up...",
+      "success": "Sign up successful",
+      "welcome": "Welcome"
    }
 }

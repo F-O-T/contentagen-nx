@@ -53,40 +53,44 @@ export function AgentDetailsQuickActions({ agent }: { agent: AgentSelect }) {
    const actions = [
       {
          icon: File,
-         label: "Generate brand files",
+         label: translate(
+            "pages.agent-details.quick-actions.generate-brand-files",
+         ),
          onClick: () => setOpen(true),
          disabled: shouldDisableBrandFileGeneration,
       },
 
       {
          icon: Edit,
-         label: "Edit agent",
+         label: translate("pages.agent-details.quick-actions.edit-agent"),
          onClick: handleEdit,
          disabled: false,
       },
       {
          icon: Trash,
-         label: "Delete agent",
+         label: translate("pages.agent-details.quick-actions.delete-agent"),
          onClick: () => setDeleteDialogOpen(true),
          disabled: false,
       },
       {
          icon: Plus,
-         label: "Create content",
+         label: translate("pages.agent-details.quick-actions.create-content"),
          onClick: handleCreateContent,
          disabled: false,
       },
       {
          icon: Camera,
-         label: "Manage agent photo",
+         label: translate(
+            "pages.agent-details.quick-actions.manage-agent-photo",
+         ),
          onClick: () => setManagePhotoOpen(true),
          disabled: false,
       },
       {
          icon: AlertTriangle,
          label: hasUploadedFiles
-            ? "Delete all uploaded files"
-            : "No files to delete",
+            ? translate("pages.agent-details.quick-actions.delete-all-files")
+            : translate("pages.agent-details.quick-actions.no-files-to-delete"),
          onClick: () => setDeleteAllFilesOpen(true),
          disabled: !hasUploadedFiles,
       },

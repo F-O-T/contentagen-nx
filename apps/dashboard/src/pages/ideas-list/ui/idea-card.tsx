@@ -84,10 +84,13 @@ export function IdeaCard({
                <CardContent className="flex flex-col gap-2">
                   <AgentWriterCard
                      photo={data?.data}
-                     name={idea.agent?.personaConfig.metadata.name || "Unknown"}
+                     name={
+                        idea.agent?.personaConfig.metadata.name ||
+                        translate("pages.ideas-list.card.unknown-agent")
+                     }
                      description={
                         idea.agent?.personaConfig.metadata.description ||
-                        "No description"
+                        translate("pages.ideas-list.card.no-description")
                      }
                   />
                </CardContent>
@@ -96,14 +99,14 @@ export function IdeaCard({
                      <Badge variant="outline">
                         {idea.createdAt
                            ? new Date(idea.createdAt).toLocaleDateString()
-                           : "Unknown"}
+                           : translate("pages.ideas-list.card.unknown-date")}
                      </Badge>
                   </div>
                   <Badge
                      className={`text-xs ${isGenerating ? "bg-blue-500" : ""}`}
                   >
                      {isGenerating
-                        ? "Generating"
+                        ? translate("pages.ideas-list.card.generating")
                         : formatValueForDisplay(idea.status ?? "")}
                   </Badge>
                </CardFooter>
@@ -119,7 +122,7 @@ export function IdeaCard({
             <CredenzaBody className="grid grid-cols-1 gap-2">
                <SquaredIconButton onClick={handleViewDetails}>
                   <Eye className="h-4 w-4" />
-                  View idea details
+                  {translate("pages.ideas-list.card.view-details")}
                </SquaredIconButton>
             </CredenzaBody>
          </CredenzaContent>

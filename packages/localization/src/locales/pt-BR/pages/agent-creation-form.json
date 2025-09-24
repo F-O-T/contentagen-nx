@@ -1,0 +1,193 @@
+{
+   "title": "Criar Agente",
+   "steps": {
+      "basic-info": "Informações Básicas",
+      "audience": "Audiência",
+      "purpose": "Propósito",
+      "voice-tone": "Voz e Tom",
+      "brand": "Marca",
+      "language": "Idioma",
+      "formatting": "Formatação",
+      "review": "Revisão"
+   },
+   "mascot-messages": {
+      "basic-info": "Vamos dar um nome especial ao seu agente de conteúdo!",
+      "audience": "Para quem seu agente está escrevendo?",
+      "purpose": "Qual é o principal propósito ou canal para o conteúdo deste agente?",
+      "voice-tone": "Agora, vamos definir a voz e o tom do seu agente.",
+      "brand": "Quão rigorosamente seu agente deve seguir as diretrizes da marca?",
+      "language": "Que idioma e variante seu agente deve usar?",
+      "formatting": "Como seu agente deve formatar o conteúdo?",
+      "review": "Perfeito! Revise a configuração do seu agente e crie seu agente.",
+      "default": "Vamos começar com as informações básicas do seu agente."
+   },
+   "mascot-messages-edit": {
+      "basic-info": "Vamos atualizar as informações do seu agente!",
+      "audience": "Para quem seu agente deve estar escrevendo?",
+      "purpose": "Qual é o principal propósito ou canal para o conteúdo deste agente?",
+      "voice-tone": "Vamos ajustar a voz e o tom do seu agente.",
+      "brand": "Quão rigorosamente seu agente deve seguir as diretrizes da marca?",
+      "language": "Que idioma e variante seu agente deve usar?",
+      "formatting": "Como seu agente deve formatar o conteúdo?",
+      "review": "Perfeito! Revise suas alterações e atualize seu agente.",
+      "default": "Vamos atualizar a configuração do seu agente."
+   },
+   "basic-info": {
+      "agent-name": {
+         "label": "Nome do Agente *",
+         "placeholder": "ex., Agente de Notícias de Tecnologia"
+      },
+      "description": {
+         "label": "Descrição *",
+         "placeholder": "Descreva o que este agente faz..."
+      }
+   },
+   "purpose": {
+      "primary-channel": {
+         "label": "Canal Principal *"
+      },
+      "options": {
+         "blog_post": "Post de Blog"
+      }
+   },
+   "audience": {
+      "audience-base": {
+         "label": "Base de Audiência *"
+      },
+      "options": {
+         "general_public": "Público Geral",
+         "professionals": "Profissionais",
+         "beginners": "Iniciantes",
+         "customers": "Clientes"
+      }
+   },
+   "voice-tone": {
+      "communication-style": {
+         "label": "Estilo de Comunicação *"
+      },
+      "example-communication": "Exemplo de Comunicação",
+      "first-person-example": "Exemplo em Primeira Pessoa:",
+      "first-person-text": {
+         "line1": "No meu trabalho com mais de 500 clientes, descobri...",
+         "line2": "Deixe-me guiá-lo através do meu processo...",
+         "line3": "Recomendo esta abordagem porque a testei pessoalmente."
+      },
+      "third-person-example": "Exemplo em Terceira Pessoa:",
+      "third-person-text": {
+         "line1": "[Marca] desenvolveu uma metodologia que...",
+         "line2": "Seus clientes consistentemente alcançam X% de melhoria porque...",
+         "line3": "De acordo com a pesquisa da [Marca], esta abordagem é recomendada."
+      },
+      "assistance-prompt": "Como posso ajudá-lo?"
+   },
+   "language": {
+      "primary-language": {
+         "label": "Idioma Principal *"
+      },
+      "variant": {
+         "label": "Variante (opcional)",
+         "placeholder": "Selecionar variante...",
+         "placeholder-select-language": "Selecione o idioma principal primeiro"
+      },
+      "languages": {
+         "english": "Inglês",
+         "portuguese": "Português",
+         "spanish": "Espanhol",
+         "english-us": "Inglês (EUA)",
+         "english-uk": "Inglês (Reino Unido)",
+         "portuguese-brazil": "Português (Brasil)",
+         "portuguese-portugal": "Português (Portugal)",
+         "spanish-spain": "Espanhol (Espanha)",
+         "spanish-mexico": "Espanhol (México)"
+      },
+      "none": "Nenhum"
+   },
+   "formatting": {
+      "style": {
+         "label": "Estilo *"
+      },
+      "list-style": "Estilo de Lista",
+      "example-formatting": "Exemplo de Formatação",
+      "options": {
+         "structured": "Estruturado",
+         "narrative": "Narrativo",
+         "list_based": "Baseado em Lista",
+         "bullets": "Marcadores",
+         "numbered": "Numerado"
+      },
+      "examples": {
+         "list-style": {
+            "bullets": {
+               "title": "Exemplo de Lista com Marcadores:",
+               "items": [
+                  "Ponto chave um",
+                  "Ponto chave dois",
+                  "Ponto chave três"
+               ]
+            },
+            "numbered": {
+               "title": "Exemplo de Lista Numerada:",
+               "items": ["Passo um", "Passo dois", "Passo três"]
+            }
+         },
+         "fallback": "Saída de exemplo no formato selecionado."
+      }
+   },
+   "brand": {
+      "integration-style": {
+         "label": "Estilo de Integração *"
+      },
+      "example-integration": "Exemplo de Integração",
+      "examples": {
+         "strict_guideline": {
+            "title": "Exemplo de Diretriz Rigorosa:",
+            "text": "Todo conteúdo deve seguir rigorosamente as diretrizes da marca e usar apenas mensagens aprovadas.\nIncluir explicitamente o nome da marca pelo menos uma vez em cada resposta."
+         },
+         "flexible_guideline": {
+            "title": "Exemplo de Diretriz Flexível:",
+            "text": "Use as diretrizes da marca como base, mas adapte o tom e estilo para o contexto e audiência.\nIncorpore naturalmente o nome da marca e produtos de forma orgânica."
+         },
+         "reference_only": {
+            "title": "Exemplo Apenas de Referência:",
+            "text": "Trate o documento da marca como conhecimento de base.\nMencione soluções da marca apenas quando diretamente relevantes às necessidades do usuário."
+         },
+         "creative_blend": {
+            "title": "Exemplo de Mistura Criativa:",
+            "text": "Use traços da personalidade da marca como inspiração para narrativas criativas.\nIntegre elementos da marca naturalmente na narrativa."
+         },
+         "default": "Mensagem de integração de exemplo para o estilo selecionado."
+      },
+      "blacklist-words": {
+         "label": "Palavras Proibidas (opcional)",
+         "placeholder": "Digite palavras a evitar..."
+      },
+      "options": {
+         "strict_guideline": "Diretriz Rigorosa",
+         "flexible_guideline": "Diretriz Flexível",
+         "reference_only": "Apenas Referência",
+         "creative_blend": "Mistura Criativa"
+      }
+   },
+   "review": {
+      "fields": {
+         "agent-name": "Nome do Agente",
+         "audience": "Audiência",
+         "purpose": "Propósito",
+         "brand-integration": "Integração da Marca",
+         "language": "Idioma",
+         "formatting-style": "Estilo de Formatação",
+         "communication-style": "Estilo de Comunicação",
+         "language-variant": "Variante do Idioma",
+         "list-style": "Estilo de Lista",
+         "description": "Descrição",
+         "blacklist-words": "Palavras Proibidas"
+      },
+      "submitting": "Enviando...",
+      "submit": "Enviar"
+   },
+   "actions": {
+      "next": "Próximo",
+      "back": "Voltar",
+      "create-agent": "Criar Agente"
+   }
+}

@@ -20,6 +20,7 @@ import {
    useMutation,
    useQueryClient,
 } from "@tanstack/react-query";
+import { translate } from "@packages/localization";
 
 export function ProfilePageSessionsSection() {
    const queryClient = useQueryClient();
@@ -68,7 +69,7 @@ export function ProfilePageSessionsSection() {
    });
 
    function handleDelete(token: string) {
-      if (!window.confirm("Are you sure you want to revoke this session?"))
+      if (!window.confirm(translate("pages.profile.sessions.revoke-confirm")))
          return;
       revokeSessionMutation.mutate(token);
    }
@@ -78,10 +79,11 @@ export function ProfilePageSessionsSection() {
          <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                <div>
-                  <CardTitle>Sessions</CardTitle>
+                  <CardTitle>
+                     {translate("pages.profile.sessions.sessions-title")}
+                  </CardTitle>
                   <CardDescription>
-                     View and manage your active sessions. Revoke any session to
-                     log out from that device.
+                     {translate("pages.profile.sessions.sessions-description")}
                   </CardDescription>
                </div>
                <div className="mt-2 sm:mt-0">
@@ -90,7 +92,9 @@ export function ProfilePageSessionsSection() {
                         <Button
                            variant="ghost"
                            size="icon"
-                           aria-label="Manage Sessions"
+                           aria-label={translate(
+                              "pages.profile.sessions.manage-sessions",
+                           )}
                         >
                            <MoreVertical className="w-5 h-5" />
                         </Button>
@@ -105,8 +109,12 @@ export function ProfilePageSessionsSection() {
                         >
                            <Trash2 className="w-4 h-4 mr-2" />
                            {revokeOtherSessionsMutation.isPending
-                              ? "Revoking Other Sessions..."
-                              : "Revoke Other Sessions"}
+                              ? translate(
+                                   "pages.profile.sessions.revoke-other-loading",
+                                )
+                              : translate(
+                                   "pages.profile.sessions.revoke-other",
+                                )}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                            onSelect={(e) => {
@@ -118,8 +126,12 @@ export function ProfilePageSessionsSection() {
                         >
                            <Trash2 className="w-4 h-4 mr-2 text-destructive" />
                            {revokeAllSessionsMutation.isPending
-                              ? "Revoking All Sessions..."
-                              : "Revoke All Sessions"}
+                              ? translate(
+                                   "pages.profile.sessions.revoke-all-loading",
+                                )
+                              : translate(
+                                   "pages.profile.sessions.revoke-all-sessions",
+                                )}
                         </DropdownMenuItem>{" "}
                      </DropdownMenuContent>
                   </DropdownMenu>
@@ -130,7 +142,7 @@ export function ProfilePageSessionsSection() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                {sessions.length === 0 ? (
                   <div className="col-span-full text-center text-muted-foreground py-8">
-                     No active sessions found.
+                     {translate("pages.profile.sessions.no-sessions")}
                   </div>
                ) : (
                   sessions.map((s) => {
@@ -144,14 +156,23 @@ export function ProfilePageSessionsSection() {
                         >
                            <CardHeader>
                               <CardTitle className="truncate text-base">
-                                 {s.userAgent || "Unknown Device"}
+                                 {s.userAgent ||
+                                    translate(
+                                       "pages.profile.sessions.unknown-device",
+                                    )}
                               </CardTitle>
                               <CardDescription className="truncate">
-                                 IP: {s.ipAddress || "-"}
+                                 {translate(
+                                    "pages.profile.sessions.ip-address",
+                                 )}{" "}
+                                 {s.ipAddress || "-"}
                               </CardDescription>
                               {isCurrent && (
                                  <span className="text-green-600 flex items-center gap-1 text-xs font-semibold">
-                                    <CheckCircle2 className="w-4 h-4" /> Current
+                                    <CheckCircle2 className="w-4 h-4" />{" "}
+                                    {translate(
+                                       "pages.profile.sessions.current",
+                                    )}
                                  </span>
                               )}
                               <CardAction>
@@ -160,7 +181,9 @@ export function ProfilePageSessionsSection() {
                                        <Button
                                           variant="ghost"
                                           size="icon"
-                                          aria-label="Session Actions"
+                                          aria-label={translate(
+                                             "pages.profile.sessions.session-actions",
+                                          )}
                                           disabled={
                                              revokeSessionMutation.isPending
                                           }
@@ -181,8 +204,12 @@ export function ProfilePageSessionsSection() {
                                        >
                                           <Trash2 className="w-4 h-4 mr-2 text-destructive" />
                                           {revokeSessionMutation.isPending
-                                             ? "Revoking..."
-                                             : "Revoke Session"}
+                                             ? translate(
+                                                  "pages.profile.sessions.revoke-session-loading",
+                                               )
+                                             : translate(
+                                                  "pages.profile.sessions.revoke-session",
+                                               )}
                                        </DropdownMenuItem>
                                     </DropdownMenuContent>
                                  </DropdownMenu>
@@ -191,13 +218,17 @@ export function ProfilePageSessionsSection() {
                            <CardContent>
                               <div className="flex flex-col gap-1 text-xs text-muted-foreground">
                                  <span>
-                                    Created:{" "}
+                                    {translate(
+                                       "pages.profile.sessions.created",
+                                    )}{" "}
                                     {s.createdAt
                                        ? new Date(s.createdAt).toLocaleString()
                                        : "-"}
                                  </span>
                                  <span>
-                                    Last Active:{" "}
+                                    {translate(
+                                       "pages.profile.sessions.last-active",
+                                    )}{" "}
                                     {s.updatedAt
                                        ? new Date(s.updatedAt).toLocaleString()
                                        : "-"}

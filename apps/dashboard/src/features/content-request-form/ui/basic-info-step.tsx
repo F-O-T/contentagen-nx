@@ -2,6 +2,7 @@ import { ContentRequestSchema } from "@packages/database/schema";
 import type { ContentRequestForm } from "../lib/use-content-request-form";
 import { Button } from "@packages/ui/components/button";
 import { TiptapEditor } from "@packages/ui/components/tiptap-editor";
+import { translate } from "@packages/localization";
 
 const getLayoutLabel = (value: string): string => {
    return value.charAt(0).toUpperCase() + value.slice(1);
@@ -15,14 +16,20 @@ export function BasicInfoStep({ form }: { form: ContentRequestForm }) {
          <form.AppField name="description">
             {(field) => (
                <field.FieldContainer>
-                  <field.FieldLabel>Headline *</field.FieldLabel>
+                  <field.FieldLabel>
+                     {translate(
+                        "pages.content-request-form.basic-info.headline.label",
+                     )}
+                  </field.FieldLabel>
                   <TiptapEditor
                      id={field.name}
                      name={field.name}
                      value={field.state.value}
                      onChange={field.handleChange}
                      onBlur={field.handleBlur}
-                     placeholder="Describe what you want the content to cover..."
+                     placeholder={translate(
+                        "pages.content-request-form.basic-info.headline.placeholder",
+                     )}
                   />
                   <field.FieldMessage />
                </field.FieldContainer>
@@ -32,7 +39,11 @@ export function BasicInfoStep({ form }: { form: ContentRequestForm }) {
          <form.AppField name="layout">
             {(field) => (
                <field.FieldContainer className="space-y-2">
-                  <field.FieldLabel>Layout *</field.FieldLabel>
+                  <field.FieldLabel>
+                     {translate(
+                        "pages.content-request-form.basic-info.layout.label",
+                     )}
+                  </field.FieldLabel>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                      {layoutOptions.map((option) => (
                         <button
@@ -88,7 +99,7 @@ export function BasicInfoStepSubscribe({
 
             return (
                <Button onClick={next} type="button" disabled={!canGoNext}>
-                  Next
+                  {translate("pages.content-request-form.actions.next")}
                </Button>
             );
          }}

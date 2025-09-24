@@ -29,7 +29,11 @@ function ContentListPageContent() {
          {},
          {
             onData(statusData) {
-               toast.success(`Content status updated to ${statusData.status}`);
+               toast.success(
+                  translate("pages.content-list.messages.status-updated", {
+                     status: statusData.status,
+                  }),
+               );
                queryClient.invalidateQueries({
                   queryKey: trpc.content.listAllContent.queryKey(),
                });

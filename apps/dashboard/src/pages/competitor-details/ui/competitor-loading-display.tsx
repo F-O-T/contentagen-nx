@@ -3,48 +3,64 @@ import { Progress } from "@packages/ui/components/progress";
 import type { CompetitorFeaturesStatus } from "@packages/database/schemas/competitor";
 import { useMemo, useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
+import { translate } from "@packages/localization";
 
 interface CompetitorLoadingDisplayProps {
    status: CompetitorFeaturesStatus;
 }
 
-const competitorSteps = [
-   {
-      id: "pending",
-      label: "Initializing",
-      description: "Setting up competitor analysis",
-   },
-   {
-      id: "crawling",
-      label: "Crawling",
-      description: "Gathering data from competitor website",
-   },
-   {
-      id: "analyzing",
-      label: "Analyzing",
-      description: "Extracting features and insights",
-   },
-] as const;
+const getCompetitorSteps = () =>
+   [
+      {
+         id: "pending",
+         label: translate(
+            "pages.competitor-details.loading.steps.pending.label",
+         ),
+         description: translate(
+            "pages.competitor-details.loading.steps.pending.description",
+         ),
+      },
+      {
+         id: "crawling",
+         label: translate(
+            "pages.competitor-details.loading.steps.crawling.label",
+         ),
+         description: translate(
+            "pages.competitor-details.loading.steps.crawling.description",
+         ),
+      },
+      {
+         id: "analyzing",
+         label: translate(
+            "pages.competitor-details.loading.steps.analyzing.label",
+         ),
+         description: translate(
+            "pages.competitor-details.loading.steps.analyzing.description",
+         ),
+      },
+   ] as const;
 
 export function CompetitorLoadingDisplay({
    status,
 }: CompetitorLoadingDisplayProps) {
    const containerRef = useRef<HTMLDivElement>(null);
 
+   const competitorSteps = useMemo(() => getCompetitorSteps(), []);
+
    const currentStepIndex = useMemo(() => {
       const index = competitorSteps.findIndex((step) => step.id === status);
       return index >= 0 ? index : 0;
-   }, [status]);
+   }, [status, competitorSteps]);
 
    const progressPercentage = useMemo(() => {
       return Math.round(
          ((currentStepIndex + 1) / competitorSteps.length) * 100,
       );
-   }, [currentStepIndex]);
+   }, [currentStepIndex, competitorSteps.length]);
 
    const currentStep = useMemo(() => {
       return competitorSteps[currentStepIndex];
-   }, [currentStepIndex]);
+   }, [currentStepIndex, competitorSteps]);
 
    useEffect(() => {
       if (containerRef.current) {
@@ -60,10 +76,10 @@ export function CompetitorLoadingDisplay({
             behavior: "smooth",
          });
       }
-   }, [currentStepIndex]);
+   }, [currentStepIndex, competitorSteps.length]);
 
    const getCurrentMessage = useMemo(() => {
-      return `${currentStep?.description || "Processing competitor data"}...`;
+      return `${currentStep?.description || translate("pages.competitor-details.loading.progress.fallback-message")}...`;
    }, [currentStep]);
 
    return (
@@ -87,10 +103,21 @@ export function CompetitorLoadingDisplay({
             <Progress value={progressPercentage} className="w-full" />
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                <span>
-                  Step {currentStepIndex + 1} of {competitorSteps.length}
+                  {translate(
+                     "pages.competitor-details.loading.progress.step-counter",
+                     {
+                        current: currentStepIndex + 1,
+                        total: competitorSteps.length,
+                     },
+                  )}
                </span>
                <span>•</span>
-               <span>{progressPercentage}% complete</span>
+               <span>
+                  {translate(
+                     "pages.competitor-details.loading.progress.percentage",
+                     { percent: progressPercentage },
+                  )}
+               </span>
             </div>
          </div>
       </div>

@@ -1,0 +1,29 @@
+{
+   "actions": {
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "update": "Update",
+      "view": "View",
+      "updating": "Updating...",
+      "creating": "Creating...",
+      "deleting": "Deleting..."
+   },
+   "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "loading": "Loading..."
+   },
+   "messages": {
+      "loading": "Loading..."
+   },
+   "form": {
+      "field-required": "This field is required"
+   },
+   "navigation": {
+      "close": "Close"
+   },
+   "time": {
+      "last-modified": "Last Modified",
+      "time": "Time"
+   }
+}

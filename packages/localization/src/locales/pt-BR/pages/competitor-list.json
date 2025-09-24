@@ -1,0 +1,79 @@
+{
+   "title": "Gerenciamento de Concorrentes",
+   "mascot-message": "Acompanhe e analise seus concorrentes para se manter à frente do mercado!",
+   "toolbar": {
+      "select-all": "Selecionar Todos",
+      "unselect-all": "Desmarcar Todos",
+      "new-competitor": "Novo Concorrente",
+      "selected-count": "{{count}} selecionados",
+      "of": "de"
+   },
+   "table": {
+      "headers": {
+         "name": "Nome",
+         "website": "Website",
+         "industry": "Setor",
+         "status": "Status",
+         "last-analyzed": "Última Análise",
+         "actions": "Ações"
+      },
+      "no-data": "Nenhum concorrente encontrado",
+      "loading": "Carregando concorrentes..."
+   },
+   "actions": {
+      "view": "Visualizar",
+      "edit": "Editar",
+      "delete": "Excluir",
+      "analyze": "Analisar",
+      "export": "Exportar"
+   },
+   "status": {
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "analyzing": "Analisando"
+   },
+   "messages": {
+      "delete-success": "{{name}} foi excluído com sucesso.",
+      "delete-error": "Falha ao excluir concorrente: {{error}}",
+      "create-success": "Concorrente criado com sucesso!",
+      "create-error": "Falha ao criar concorrente: {{error}}",
+      "update-success": "Concorrente atualizado com sucesso!",
+      "update-error": "Falha ao atualizar concorrente: {{error}}",
+      "analyze-success": "Análise iniciada com sucesso!",
+      "analyze-error": "Falha ao iniciar análise. Tente novamente."
+   },
+   "empty-state": {
+      "no-competitors": "Nenhum concorrente ainda"
+   },
+   "card": {
+      "features-count": "{{count}} funcionalidades",
+      "website-label": "Site do seu concorrente: {{url}}",
+      "view-details": "Ver detalhes",
+      "edit-competitor": "Editar concorrente",
+      "visit-website": "Visitar site",
+      "delete-competitor": "Excluir concorrente"
+   },
+   "validation": {
+      "invalid-url": "Por favor, insira uma URL válida"
+   },
+   "modals": {
+      "delete": {
+         "title": "Excluir Concorrente",
+         "description": "Tem certeza de que deseja excluir \"{{name}}\"? Esta ação não pode ser desfeita e removerá todos os dados de rastreamento de recursos associados.",
+         "confirm": "Excluir",
+         "cancel": "Cancelar"
+      },
+      "create-edit": {
+         "create-title": "Adicionar Novo Concorrente",
+         "edit-title": "Editar Concorrente",
+         "create-description": "Adicione um novo concorrente para rastrear e analisar.",
+         "edit-description": "Atualize as informações do concorrente abaixo.",
+         "website-url-label": "URL do Site *",
+         "website-url-placeholder": "https://exemplo.com",
+         "cancel": "Cancelar",
+         "create": "Criar",
+         "update": "Atualizar",
+         "saving": "Salvando..."
+      }
+   }
+}

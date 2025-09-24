@@ -7,13 +7,25 @@
       "content-quality-description": "Pontuação de qualidade avaliada por IA"
    },
    "details": {
-      "basic-info": "Informações Básicas",
+      "basic-info": "Detalhes do Conteúdo",
+      "basic-info-description": "Informações básicas sobre o seu conteúdo",
       "meta-info": "Meta Informações",
+      "meta-info-description": "Palavras-chave, fontes e detalhes técnicos",
       "title": "Título",
+      "description": "Descrição",
       "status": "Status",
       "agent": "Agente",
-      "created": "Criado",
-      "updated": "Atualizado"
+      "created": "Criado Em",
+      "updated": "Última Atualização",
+      "keywords": "Palavras-chave",
+      "sources": "Fontes",
+      "slug": "Slug",
+      "related-slugs": "Slugs Relacionados",
+      "related-slugs-none": "Nenhum",
+      "read-time": "Tempo de Leitura",
+      "read-time-minutes": "{{minutes}} min",
+      "content-stats": "Estatísticas do Conteúdo",
+      "content-stats-description": "Estatísticas e metadados sobre o seu conteúdo gerado"
    },
    "quick-actions": {
       "title": "Ações Rápidas",
@@ -29,22 +41,99 @@
    },
    "versions": {
       "title": "Versões do Conteúdo",
-      "description": "Visualize e gerencie diferentes versões deste conteúdo.",
+      "description": "Um histórico de todas as mudanças feitas neste conteúdo",
       "current": "Atual",
-      "view-details": "Ver Detalhes"
+      "view-details": "Ver Detalhes",
+      "no-versions": "Nenhuma versão disponível ainda.",
+      "version-number": "Versão {{number}}",
+      "changes-count": "Mudanças feitas nesta versão {{count}}"
    },
    "content": {
       "title": "Conteúdo Gerado",
+      "description": "Seu conteúdo gerado por IA com opções de exportação e edição",
       "loading": "Gerando conteúdo...",
       "edit": "Editar Conteúdo",
       "save": "Salvar Alterações",
       "cancel": "Cancelar"
+   },
+   "loading": {
+      "steps": {
+         "pending": {
+            "label": "Inicializando",
+            "description": "Configurando a geração do seu conteúdo"
+         },
+         "planning": {
+            "label": "Planejando",
+            "description": "Analisando requisitos e criando estratégia"
+         },
+         "researching": {
+            "label": "Pesquisando",
+            "description": "Coletando informações e dados relevantes"
+         },
+         "writing": {
+            "label": "Escrevendo",
+            "description": "Escrevendo seu conteúdo"
+         },
+         "grammar_checking": {
+            "label": "Verificando Gramática",
+            "description": "Verificando e corrigindo gramática"
+         },
+         "editing": {
+            "label": "Editando",
+            "description": "Refinando e polindo o conteúdo"
+         },
+         "analyzing": {
+            "label": "Analisando",
+            "description": "Verificação de qualidade e geração de metadados"
+         }
+      },
+      "progress": {
+         "step-counter": "Etapa {{current}} de {{total}}",
+         "percentage": "{{percent}}% concluído",
+         "fallback-message": "Processando seu conteúdo"
+      }
+   },
+   "edit": {
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "placeholder": "Edite seu conteúdo...",
+      "success": "Corpo do conteúdo editado com sucesso!",
+      "error": "Falha ao editar corpo do conteúdo. Tente novamente.",
+      "validation": {
+         "body-required": "Corpo é obrigatório"
+      }
+   },
+   "upload": {
+      "title": "Enviar Imagem do Conteúdo",
+      "description": "Envie uma imagem para o seu conteúdo. A imagem será exibida com o seu conteúdo gerado.",
+      "success": "Imagem enviada com sucesso!",
+      "error": "Falha ao enviar imagem",
+      "uploading": "Enviando...",
+      "upload-button": "Enviar Imagem",
+      "validation": {
+         "invalid-file": "Por favor, selecione um arquivo de imagem",
+         "file-too-large": "O tamanho do arquivo deve ser menor que 10MB"
+      }
+   },
+   "messages": {
+      "regenerate-success": "Regeneração de conteúdo acionada!",
+      "regenerate-error": "Erro ao regenerar conteúdo: {{error}}",
+      "approve-success": "Conteúdo aprovado com sucesso!",
+      "approve-error": "Erro ao aprovar conteúdo: {{error}}",
+      "delete-success": "Conteúdo deletado com sucesso",
+      "delete-error": "Erro ao deletar conteúdo: {{error}}",
+      "share-success": "Conteúdo {{status}} com sucesso!",
+      "share-error": "Erro ao alterar status de compartilhamento: {{error}}",
+      "status-updated": "Status do conteúdo atualizado para {{status}}",
+      "untitled-content": "Conteúdo Sem Título"
    },
    "status": {
       "draft": "Rascunho",
       "pending": "Pendente",
       "published": "Publicado",
       "generating": "Gerando",
-      "failed": "Falhou"
+      "failed": "Falhou",
+      "shared": "compartilhado",
+      "private": "tornado privado"
    }
 }

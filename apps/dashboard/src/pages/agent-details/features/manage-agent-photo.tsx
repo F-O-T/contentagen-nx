@@ -19,6 +19,7 @@ import {
    DropzoneEmptyState,
 } from "@packages/ui/components/dropzone";
 import { Button } from "@packages/ui/components/button";
+import { translate } from "@packages/localization";
 
 import type { AgentSelect } from "@packages/database/schema";
 
@@ -57,7 +58,11 @@ export function ManageAgentPhoto({
    const uploadPhotoMutation = useMutation(
       trpc.agentFile.uploadProfilePhoto.mutationOptions({
          onSuccess: async () => {
-            toast.success("Profile photo updated successfully!");
+            toast.success(
+               translate(
+                  "pages.agent-details.modals.manage-photo.messages.success",
+               ),
+            );
             await queryClient.invalidateQueries({
                queryKey: trpc.agent.get.queryKey({ id: agentId }),
             });
@@ -70,7 +75,11 @@ export function ManageAgentPhoto({
          },
          onError: (error) => {
             console.error("Upload error:", error);
-            toast.error("Failed to upload profile photo");
+            toast.error(
+               translate(
+                  "pages.agent-details.modals.manage-photo.messages.upload-failed",
+               ),
+            );
          },
       }),
    );
@@ -81,13 +90,21 @@ export function ManageAgentPhoto({
 
       // Validate file type
       if (!file.type.startsWith("image/")) {
-         toast.error("Please select an image file");
+         toast.error(
+            translate(
+               "pages.agent-details.modals.manage-photo.messages.select-image",
+            ),
+         );
          return;
       }
 
       // Validate file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
-         toast.error("File size must be less than 5MB");
+         toast.error(
+            translate(
+               "pages.agent-details.modals.manage-photo.messages.file-size-limit",
+            ),
+         );
          return;
       }
 
@@ -132,7 +149,11 @@ export function ManageAgentPhoto({
          });
       } catch (error) {
          console.error("Upload failed:", error);
-         toast.error("Failed to upload photo");
+         toast.error(
+            translate(
+               "pages.agent-details.modals.manage-photo.messages.general-error",
+            ),
+         );
       }
    };
 
@@ -140,10 +161,13 @@ export function ManageAgentPhoto({
       <Credenza open={isOpen} onOpenChange={setIsOpen}>
          <CredenzaContent>
             <CredenzaHeader>
-               <CredenzaTitle>Manage Agent Photo</CredenzaTitle>
+               <CredenzaTitle>
+                  {translate("pages.agent-details.modals.manage-photo.title")}
+               </CredenzaTitle>
                <CredenzaDescription>
-                  Upload a new profile photo for your agent. The image will be
-                  displayed in your agent's profile.
+                  {translate(
+                     "pages.agent-details.modals.manage-photo.description",
+                  )}
                </CredenzaDescription>
             </CredenzaHeader>
             <CredenzaBody className="space-y-4">
@@ -180,15 +204,23 @@ export function ManageAgentPhoto({
             </CredenzaBody>
             <CredenzaFooter className="grid grid-cols-2 gap-2">
                <CredenzaClose asChild>
-                  <Button variant="outline">Cancel</Button>
+                  <Button variant="outline">
+                     {translate(
+                        "pages.agent-details.modals.manage-photo.cancel",
+                     )}
+                  </Button>
                </CredenzaClose>
                <Button
                   onClick={handleUpload}
                   disabled={!selectedFile || uploadPhotoMutation.isPending}
                >
                   {uploadPhotoMutation.isPending
-                     ? "Uploading..."
-                     : "Upload Photo"}
+                     ? translate(
+                          "pages.agent-details.modals.manage-photo.uploading",
+                       )
+                     : translate(
+                          "pages.agent-details.modals.manage-photo.upload",
+                       )}
                </Button>
             </CredenzaFooter>
          </CredenzaContent>

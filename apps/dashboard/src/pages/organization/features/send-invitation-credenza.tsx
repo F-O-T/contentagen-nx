@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, type FormEvent } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { translate } from "@packages/localization";
 
 export function SendInvitationCredenza({
    open,
@@ -26,7 +27,7 @@ export function SendInvitationCredenza({
    organizationId: string;
 }) {
    const schema = z.object({
-      email: z.email("Please enter a valid email"),
+      email: z.email(translate("pages.organization.toasts.invalid-email")),
    });
    const trpc = useTRPC();
    const queryClient = useQueryClient();
@@ -41,7 +42,11 @@ export function SendInvitationCredenza({
             },
             {
                onSuccess: async () => {
-                  toast.success(`Invitation sent to ${values.email}`);
+                  toast.success(
+                     translate("pages.organization.toasts.invitation-sent", {
+                        email: values.email,
+                     }),
+                  );
                   await queryClient.invalidateQueries({
                      queryKey:
                         trpc.authHelpers.getDefaultOrganization.queryKey(),
@@ -49,7 +54,9 @@ export function SendInvitationCredenza({
                },
                onError: (e) => {
                   console.error("Error sending invitation:", e);
-                  toast.error(`Failed to send invitation`);
+                  toast.error(
+                     translate("pages.organization.toasts.invitation-failed"),
+                  );
                },
             },
          );
@@ -86,10 +93,11 @@ export function SendInvitationCredenza({
       <Credenza open={open} onOpenChange={onOpenChange}>
          <CredenzaContent>
             <CredenzaHeader>
-               <CredenzaTitle>Invite Member</CredenzaTitle>
+               <CredenzaTitle>
+                  {translate("pages.organization.modals.invite.title")}
+               </CredenzaTitle>
                <CredenzaDescription>
-                  Enter the email address of the person you want to invite as a
-                  member.
+                  {translate("pages.organization.modals.invite.description")}
                </CredenzaDescription>
             </CredenzaHeader>
             <form onSubmit={handleSubmit}>
@@ -97,7 +105,11 @@ export function SendInvitationCredenza({
                   <form.AppField name="email">
                      {(field) => (
                         <field.FieldContainer>
-                           <field.FieldLabel>Email</field.FieldLabel>
+                           <field.FieldLabel>
+                              {translate(
+                                 "pages.organization.modals.invite.email-label",
+                              )}
+                           </field.FieldLabel>
                            <Input
                               id={field.name}
                               name={field.name}
@@ -105,7 +117,9 @@ export function SendInvitationCredenza({
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder="Enter email address"
+                              placeholder={translate(
+                                 "pages.organization.modals.invite.email-placeholder",
+                              )}
                               value={field.state.value}
                            />
                            <field.FieldMessage />
@@ -123,7 +137,7 @@ export function SendInvitationCredenza({
                            type="submit"
                            variant="default"
                         >
-                           Send Invitation
+                           {translate("pages.organization.modals.invite.send")}
                         </Button>
                      )}
                   </form.Subscribe>

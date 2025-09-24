@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { betterAuthClient } from "@/integrations/clients";
+import { translate } from "@packages/localization";
 
 export function useForgotPassword() {
    const router = useRouter();
@@ -11,14 +12,25 @@ export function useForgotPassword() {
    const schema = z
       .object({
          confirmPassword: z.string(),
-         email: z.string().email("Enter a valid email"),
-         otp: z.string().min(6, "The code must be 6 digits"),
+         email: z
+            .string()
+            .email(translate("pages.forgot-password.validation.email-invalid")),
+         otp: z
+            .string()
+            .min(6, translate("pages.forgot-password.validation.otp-length")),
          password: z
             .string()
-            .min(8, "The password must be at least 8 characters"),
+            .min(
+               8,
+               translate(
+                  "pages.forgot-password.validation.password-min-length",
+               ),
+            ),
       })
       .refine((data) => data.password === data.confirmPassword, {
-         message: "Passwords do not match",
+         message: translate(
+            "pages.forgot-password.validation.passwords-no-match",
+         ),
          path: ["confirmPassword"],
       });
 
@@ -40,19 +52,28 @@ export function useForgotPassword() {
             },
             {
                onError: () => {
-                  toast.error("Error resetting password", {
-                     id: "forgot-password-toast",
-                  });
+                  toast.error(
+                     translate("pages.forgot-password.messages.reset-error"),
+                     {
+                        id: "forgot-password-toast",
+                     },
+                  );
                },
                onRequest: () => {
-                  toast.loading("Resetting password...", {
-                     id: "forgot-password-toast",
-                  });
+                  toast.loading(
+                     translate("pages.forgot-password.messages.reset-loading"),
+                     {
+                        id: "forgot-password-toast",
+                     },
+                  );
                },
                onSuccess: () => {
-                  toast.success("Password reset successfully!", {
-                     id: "forgot-password-toast",
-                  });
+                  toast.success(
+                     translate("pages.forgot-password.messages.reset-success"),
+                     {
+                        id: "forgot-password-toast",
+                     },
+                  );
                   router.navigate({
                      to: "/auth/sign-in",
                   });
@@ -87,21 +108,30 @@ export function useForgotPassword() {
          {
             onError: () => {
                setSendingOtp(false);
-               toast.error("Error sending recovery code", {
-                  id: "send-otp-toast",
-               });
+               toast.error(
+                  translate("pages.forgot-password.messages.send-error"),
+                  {
+                     id: "send-otp-toast",
+                  },
+               );
             },
             onRequest: () => {
                setSendingOtp(true);
-               toast.loading("Sending recovery code...", {
-                  id: "send-otp-toast",
-               });
+               toast.loading(
+                  translate("pages.forgot-password.messages.send-loading"),
+                  {
+                     id: "send-otp-toast",
+                  },
+               );
             },
             onSuccess: () => {
                setSendingOtp(false);
-               toast.success("Code sent to your email.", {
-                  id: "send-otp-toast",
-               });
+               toast.success(
+                  translate("pages.forgot-password.messages.send-success"),
+                  {
+                     id: "send-otp-toast",
+                  },
+               );
             },
          },
       );

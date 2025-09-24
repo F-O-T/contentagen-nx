@@ -1,38 +1,59 @@
 import { ContentRequestCard } from "./content-card";
 import { LoadingContentCard } from "./loading-content-card";
 import { useContentList } from "../lib/content-list-context";
+import { translate } from "@packages/localization";
 
 const getStatusDisplay = (status: string | null) => {
    if (!status)
-      return { label: "Unknown", progress: 0, variant: "secondary" as const };
+      return {
+         label: translate("pages.content-list.status.unknown"),
+         progress: 0,
+         variant: "secondary" as const,
+      };
 
    const statusConfig = {
-      pending: { label: "Pending", progress: 0, variant: "secondary" as const },
+      pending: {
+         label: translate("pages.content-list.status.pending"),
+         progress: 0,
+         variant: "secondary" as const,
+      },
       planning: {
-         label: "Planning",
+         label: translate("pages.content-list.status.planning"),
          progress: 15,
          variant: "default" as const,
       },
       researching: {
-         label: "Researching",
+         label: translate("pages.content-list.status.researching"),
          progress: 35,
          variant: "default" as const,
       },
-      writing: { label: "Writing", progress: 60, variant: "default" as const },
-      editing: { label: "Editing", progress: 80, variant: "default" as const },
+      writing: {
+         label: translate("pages.content-list.status.writing"),
+         progress: 60,
+         variant: "default" as const,
+      },
+      editing: {
+         label: translate("pages.content-list.status.editing"),
+         progress: 80,
+         variant: "default" as const,
+      },
       analyzing: {
-         label: "Analyzing",
+         label: translate("pages.content-list.status.analyzing"),
          progress: 95,
          variant: "default" as const,
       },
       grammar_checking: {
-         label: "Grammar Checking",
+         label: translate("pages.content-list.status.grammar-checking"),
          progress: 98,
          variant: "default" as const,
       },
-      draft: { label: "Draft", progress: 100, variant: "default" as const },
+      draft: {
+         label: translate("pages.content-list.status.draft"),
+         progress: 100,
+         variant: "default" as const,
+      },
       approved: {
-         label: "Approved",
+         label: translate("pages.content-list.status.approved"),
          progress: 100,
          variant: "destructive" as const,
       },
@@ -53,7 +74,9 @@ export function ContentCardsList() {
    if (!data) {
       return (
          <div className="text-center py-12 text-muted-foreground">
-            <p className="text-lg">Loading content...</p>
+            <p className="text-lg">
+               {translate("pages.content-list.list.loading")}
+            </p>
          </div>
       );
    }
@@ -91,10 +114,10 @@ export function ContentCardsList() {
          {data.items.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
                <p className="text-lg">
-                  No content found matching your filters.
+                  {translate("pages.content-list.list.no-results")}
                </p>
                <p className="text-sm mt-2">
-                  Try adjusting your filter criteria or create new content.
+                  {translate("pages.content-list.list.no-results-hint")}
                </p>
             </div>
          )}

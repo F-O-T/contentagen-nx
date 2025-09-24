@@ -26,6 +26,7 @@ import type { RouterOutput } from "@packages/api/client";
 import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { translate } from "@packages/localization";
 
 interface CompetitorCardProps {
    competitor: RouterOutput["competitor"]["list"]["items"][number];
@@ -91,7 +92,10 @@ export function CompetitorCard({ competitor }: CompetitorCardProps) {
                      </Badge>
                      {competitor.features && competitor.features.length > 0 && (
                         <Badge className="text-xs">
-                           {competitor.features.length} features
+                           {translate(
+                              "pages.competitor-list.card.features-count",
+                              { count: competitor.features.length },
+                           )}
                         </Badge>
                      )}
                   </CardFooter>
@@ -101,13 +105,15 @@ export function CompetitorCard({ competitor }: CompetitorCardProps) {
                <CredenzaHeader>
                   <CredenzaTitle>{competitor.name}</CredenzaTitle>
                   <CredenzaDescription>
-                     Your competitor website: {competitor.websiteUrl}
+                     {translate("pages.competitor-list.card.website-label", {
+                        url: competitor.websiteUrl,
+                     })}
                   </CredenzaDescription>
                </CredenzaHeader>
                <CredenzaBody className="grid grid-cols-2 gap-2">
                   <SquaredIconButton onClick={handleNavigate}>
                      <Eye className="h-4 w-4" />
-                     View details
+                     {translate("pages.competitor-list.card.view-details")}
                   </SquaredIconButton>
 
                   <SquaredIconButton
@@ -117,11 +123,11 @@ export function CompetitorCard({ competitor }: CompetitorCardProps) {
                      }}
                   >
                      <Edit className="h-4 w-4" />
-                     Edit competitor
+                     {translate("pages.competitor-list.card.edit-competitor")}
                   </SquaredIconButton>
                   <SquaredIconButton onClick={handleExternalNavigation}>
                      <Globe className="h-4 w-4" />
-                     Visit website
+                     {translate("pages.competitor-list.card.visit-website")}
                   </SquaredIconButton>
                   <SquaredIconButton
                      destructive
@@ -131,7 +137,7 @@ export function CompetitorCard({ competitor }: CompetitorCardProps) {
                      }}
                   >
                      <Trash2 className="h-4 w-4" />
-                     Delete competitor
+                     {translate("pages.competitor-list.card.delete-competitor")}
                   </SquaredIconButton>
                </CredenzaBody>
             </CredenzaContent>

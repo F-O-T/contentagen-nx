@@ -8,36 +8,112 @@
       "drafts": "Rascunhos",
       "drafts-description": "Número de rascunhos que o agente salvou.",
       "published": "Publicados",
-      "published-description": "Número de peças publicadas produzidas pelo agente."
+      "published-description": "Número de peças publicadas produzidas pelo agente.",
+      "avg-quality-score": "Pontuação de Qualidade Média",
+      "avg-quality-score-description": "Pontuação de qualidade média em todo o conteúdo gerado.",
+      "total-ideas": "Total de Ideias",
+      "total-ideas-description": "Total de ideias geradas pelo agente."
    },
    "persona": {
       "title": "Persona do Agente",
-      "description": "Configure a personalidade e comportamento do seu agente.",
+      "description": "Resumo da configuração",
       "name": "Nome",
       "persona": "Persona",
-      "edit": "Editar Agente"
+      "edit": "Editar Agente",
+      "content-type": "Tipo de Conteúdo",
+      "voice-tone": "Tom de Voz",
+      "target-audience": "Público-alvo",
+      "formatting-style": "Estilo de Formatação",
+      "language": "Idioma",
+      "brand-integration": "Integração da Marca"
    },
    "knowledge-base": {
-      "title": "Base de Conhecimento",
-      "description": "Gerencie o conhecimento e dados de treinamento do seu agente.",
+      "title": "Conhecimento da Marca",
+      "description": "Arquivos gerados usando a URL do seu site",
       "upload": "Enviar Arquivos",
       "processing": "Processando...",
       "completed": "Concluído",
-      "failed": "Falhou"
+      "failed": "Falhou",
+      "empty-state": {
+         "title": "Ainda não há arquivos da marca",
+         "description": "Envie arquivos Markdown com os valores, voz ou diretrizes da sua marca."
+      },
+      "status": {
+         "indexed": "100% indexado",
+         "uploaded": "Enviado"
+      },
+      "file-count": {
+         "files-uploaded": "arquivos enviados",
+         "more-file": "mais arquivo",
+         "more-files": "s",
+         "allowed": "permitido",
+         "upload-limit-reached": "Limite de envio atingido"
+      },
+      "messages": {
+         "file-deleted": "Arquivo excluído com sucesso!",
+         "delete-failed": "Falha ao excluir arquivo"
+      }
    },
    "quick-actions": {
       "title": "Ações Rápidas",
       "description": "Execute tarefas comuns relacionadas ao agente.",
-      "edit-agent": "Editar Agente",
-      "delete-agent": "Deletar Agente",
-      "duplicate-agent": "Duplicar Agente"
+      "generate-brand-files": "Gerar arquivos da marca",
+      "edit-agent": "Editar agente",
+      "delete-agent": "Excluir agente",
+      "create-content": "Criar conteúdo",
+      "view-details": "Ver detalhes do agente",
+      "manage-agent-photo": "Gerenciar foto do agente",
+      "delete-all-files": "Excluir todos os arquivos enviados",
+      "no-files-to-delete": "Nenhum arquivo para excluir"
    },
    "navigation": {
       "previous": "Agente Anterior",
-      "next": "Próximo Agente"
+      "next": "Próximo Agente",
+      "agent-content": "Seu conteúdo do agente",
+      "agent-ideas": "Suas ideias do agente"
    },
    "toasts": {
       "knowledge-failed": "Trabalho de conhecimento da marca falhou",
       "knowledge-completed": "Trabalho de conhecimento da marca concluído"
+   },
+   "modals": {
+      "manage-photo": {
+         "title": "Gerenciar Foto do Agente",
+         "description": "Envie uma nova foto de perfil para seu agente. A imagem será exibida no perfil do seu agente.",
+         "cancel": "Cancelar",
+         "upload": "Enviar Foto",
+         "uploading": "Enviando...",
+         "messages": {
+            "success": "Foto de perfil atualizada com sucesso!",
+            "upload-failed": "Falha ao enviar foto de perfil",
+            "select-image": "Por favor, selecione um arquivo de imagem",
+            "file-size-limit": "O tamanho do arquivo deve ser menor que 5MB",
+            "general-error": "Falha ao enviar foto"
+         }
+      },
+      "file-viewer": {
+         "description": "Visualize o conteúdo do arquivo selecionado.",
+         "loading": "Carregando conteúdo..."
+      },
+      "brand-files": {
+         "title": "Gerar Arquivos da Marca do Site",
+         "website-url-label": "URL do site",
+         "website-url-placeholder": "Digite a URL do seu site",
+         "generate-button": "Gerar arquivos da marca",
+         "validation": {
+            "invalid-url": "Por favor, digite uma URL válida"
+         },
+         "messages": {
+            "generation-error": "Ocorreu um erro ao gerar arquivos da marca.",
+            "generation-started": "Geração de arquivos da marca iniciada."
+         }
+      },
+      "delete-all-files": {
+         "message": "Isso excluirá permanentemente todos os {{count}} arquivos enviados para este agente, incluindo documentos, entradas da base de conhecimento e dados de processamento de arquivos. Esta ação não pode ser desfeita.",
+         "messages": {
+            "success": "Todos os arquivos excluídos com sucesso!",
+            "error": "Falha ao excluir todos os arquivos"
+         }
+      }
    }
 }

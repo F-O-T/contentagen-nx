@@ -11,6 +11,7 @@ import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-c
 import type { RouterOutput } from "@packages/api/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
+import { translate } from "@packages/localization";
 interface CompetitorInfoCardProps {
    competitor: RouterOutput["competitor"]["list"]["items"][number];
 }
@@ -32,9 +33,11 @@ export function CompetitorInfoCard({ competitor }: CompetitorInfoCardProps) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>Your competitor details</CardTitle>
+            <CardTitle>
+               {translate("pages.competitor-details.info-card.title")}
+            </CardTitle>
             <CardDescription>
-               All the details about your competitor
+               {translate("pages.competitor-details.info-card.description")}
             </CardDescription>
          </CardHeader>
          <CardContent className="space-y-2">
@@ -46,13 +49,17 @@ export function CompetitorInfoCard({ competitor }: CompetitorInfoCardProps) {
             <div className="grid grid-cols-2 gap-2">
                <InfoItem
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Added on"
+                  label={translate(
+                     "pages.competitor-details.info-card.added-on",
+                  )}
                   value={formatDate(new Date(competitor.createdAt))}
                />
 
                <InfoItem
                   icon={<Calendar className="h-4 w-4" />}
-                  label="Last updated"
+                  label={translate(
+                     "pages.competitor-details.info-card.last-updated",
+                  )}
                   value={formatDate(new Date(competitor.updatedAt))}
                />
             </div>

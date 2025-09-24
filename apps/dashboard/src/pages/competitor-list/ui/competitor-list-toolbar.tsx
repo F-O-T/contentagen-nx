@@ -6,6 +6,7 @@ import {
    DropdownMenuItem,
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
+import { translate } from "@packages/localization";
 import {
    ChevronLeft,
    ChevronRight,
@@ -31,12 +32,14 @@ export function CompetitorListToolbar() {
    const actions = useMemo(
       () => [
          {
-            label: allSelectableSelected ? "Unselect All" : "Select All",
+            label: allSelectableSelected
+               ? translate("pages.competitor-list.toolbar.unselect-all")
+               : translate("pages.competitor-list.toolbar.select-all"),
             icon: CheckSquare,
             onClick: handleSelectAll,
          },
          {
-            label: "New Competitor",
+            label: translate("pages.competitor-list.toolbar.new-competitor"),
             icon: PlusIcon,
             onClick: () => setShowCreateDialog(true),
          },
@@ -59,7 +62,8 @@ export function CompetitorListToolbar() {
                </Button>
 
                <span className="text-sm text-muted-foreground px-2">
-                  {page} of {totalPages}
+                  {page} {translate("pages.competitor-list.toolbar.of")}{" "}
+                  {totalPages}
                </span>
 
                <Button
@@ -74,7 +78,9 @@ export function CompetitorListToolbar() {
 
             {selectedItemsCount > 0 && (
                <span className="text-sm text-muted-foreground">
-                  {selectedItemsCount} selected
+                  {translate("pages.competitor-list.toolbar.selected-count", {
+                     count: selectedItemsCount,
+                  })}
                </span>
             )}
 

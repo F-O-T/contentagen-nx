@@ -3,64 +3,88 @@ import { Progress } from "@packages/ui/components/progress";
 import type { ContentStatus } from "@packages/database/schemas/content";
 import { useMemo, useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
+import { translate } from "@packages/localization";
 
 interface ContentLoadingDisplayProps {
    status: ContentStatus;
 }
 
-const contentSteps = [
-   {
-      id: "pending",
-      label: "Initializing",
-      description: "Setting up your content generation",
-   },
-   {
-      id: "planning",
-      label: "Planning",
-      description: "Analyzing requirements and creating strategy",
-   },
-   {
-      id: "researching",
-      label: "Researching",
-      description: "Gathering relevant information and data",
-   },
-   {
-      id: "writing",
-      label: "Writing",
-      description: "Writing your content",
-   },
-   {
-      id: "grammar_checking",
-      label: "Grammar Checking",
-      description: "Checking and correcting grammar",
-   },
-   {
-      id: "editing",
-      label: "Editing",
-      description: "Refining and polishing the content",
-   },
-   {
-      id: "analyzing",
-      label: "Analyzing",
-      description: "Quality check and metadata generation",
-   },
-] as const;
+const getContentSteps = () =>
+   [
+      {
+         id: "pending",
+         label: translate("pages.content-details.loading.steps.pending.label"),
+         description: translate(
+            "pages.content-details.loading.steps.pending.description",
+         ),
+      },
+      {
+         id: "planning",
+         label: translate("pages.content-details.loading.steps.planning.label"),
+         description: translate(
+            "pages.content-details.loading.steps.planning.description",
+         ),
+      },
+      {
+         id: "researching",
+         label: translate(
+            "pages.content-details.loading.steps.researching.label",
+         ),
+         description: translate(
+            "pages.content-details.loading.steps.researching.description",
+         ),
+      },
+      {
+         id: "writing",
+         label: translate("pages.content-details.loading.steps.writing.label"),
+         description: translate(
+            "pages.content-details.loading.steps.writing.description",
+         ),
+      },
+      {
+         id: "grammar_checking",
+         label: translate(
+            "pages.content-details.loading.steps.grammar_checking.label",
+         ),
+         description: translate(
+            "pages.content-details.loading.steps.grammar_checking.description",
+         ),
+      },
+      {
+         id: "editing",
+         label: translate("pages.content-details.loading.steps.editing.label"),
+         description: translate(
+            "pages.content-details.loading.steps.editing.description",
+         ),
+      },
+      {
+         id: "analyzing",
+         label: translate(
+            "pages.content-details.loading.steps.analyzing.label",
+         ),
+         description: translate(
+            "pages.content-details.loading.steps.analyzing.description",
+         ),
+      },
+   ] as const;
 
 export function ContentLoadingDisplay({ status }: ContentLoadingDisplayProps) {
    const containerRef = useRef<HTMLDivElement>(null);
 
+   const contentSteps = useMemo(() => getContentSteps(), []);
+
    const currentStepIndex = useMemo(() => {
       const index = contentSteps.findIndex((step) => step.id === status);
       return index >= 0 ? index : 0;
-   }, [status]);
+   }, [status, contentSteps]);
 
    const progressPercentage = useMemo(() => {
       return Math.round(((currentStepIndex + 1) / contentSteps.length) * 100);
-   }, [currentStepIndex]);
+   }, [currentStepIndex, contentSteps.length]);
 
    const currentStep = useMemo(() => {
       return contentSteps[currentStepIndex];
-   }, [currentStepIndex]);
+   }, [currentStepIndex, contentSteps]);
 
    useEffect(() => {
       if (containerRef.current) {
@@ -76,10 +100,10 @@ export function ContentLoadingDisplay({ status }: ContentLoadingDisplayProps) {
             behavior: "smooth",
          });
       }
-   }, [currentStepIndex]);
+   }, [currentStepIndex, contentSteps.length]);
 
    const getCurrentMessage = useMemo(() => {
-      return `${currentStep?.description || "Processing your content"}...`;
+      return `${currentStep?.description || translate("pages.content-details.loading.progress.fallback-message")}...`;
    }, [currentStep]);
 
    return (
@@ -103,10 +127,21 @@ export function ContentLoadingDisplay({ status }: ContentLoadingDisplayProps) {
             <Progress value={progressPercentage} className="w-full" />
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                <span>
-                  Step {currentStepIndex + 1} of {contentSteps.length}
+                  {translate(
+                     "pages.content-details.loading.progress.step-counter",
+                     {
+                        current: currentStepIndex + 1,
+                        total: contentSteps.length,
+                     },
+                  )}
                </span>
                <span>•</span>
-               <span>{progressPercentage}% complete</span>
+               <span>
+                  {translate(
+                     "pages.content-details.loading.progress.percentage",
+                     { percent: progressPercentage },
+                  )}
+               </span>
             </div>
          </div>
       </div>

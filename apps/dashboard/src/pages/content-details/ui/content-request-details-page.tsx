@@ -79,7 +79,11 @@ export function ContentRequestDetailsPage() {
          },
          {
             async onData(data) {
-               toast.success(`Content status updated to ${data.status}`);
+               toast.success(
+                  translate("pages.content-details.messages.status-updated", {
+                     status: data.status,
+                  }),
+               );
                await queryClient.invalidateQueries({
                   queryKey: trpc.content.get.queryKey({
                      id,

@@ -4,6 +4,7 @@ import { type FormEvent, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { betterAuthClient } from "@/integrations/clients";
+import { translate } from "@packages/localization";
 
 type codes = "INVALID_OTP" | "default";
 
@@ -13,13 +14,18 @@ export const useEmailVerification = () => {
       select: (s) => s.email,
    });
    const schema = z.object({
-      otp: z.string().min(6, "Enter a 6-digit code").max(6),
+      otp: z
+         .string()
+         .min(6, translate("pages.email-verification.validation.otp-length"))
+         .max(6),
    });
 
    const getErrorMessage = useMemo(
       () => ({
-         default: "Unknown error",
-         INVALID_OTP: "Invalid verification code",
+         default: translate("pages.email-verification.messages.unknown-error"),
+         INVALID_OTP: translate(
+            "pages.email-verification.messages.invalid-otp",
+         ),
       }),
       [],
    );
@@ -35,22 +41,32 @@ export const useEmailVerification = () => {
             onError: ({ error }) => {
                toast.error(
                   getErrorMessage[error.code as codes] ||
-                     "An error occurred while verifying the email",
+                     translate(
+                        "pages.email-verification.messages.verification-error",
+                     ),
                   {
                      id: "verification-code-toast",
                   },
                );
             },
             onRequest: () => {
-               toast.loading("Please wait while we send the code...", {
-                  id: "verification-code-toast",
-               });
+               toast.loading(
+                  translate("pages.email-verification.messages.loading-send"),
+                  {
+                     id: "verification-code-toast",
+                  },
+               );
             },
             onSuccess: () => {
-               toast.success("Code sent successfully", {
-                  description: "Check your email to continue.",
-                  id: "verification-code-toast",
-               });
+               toast.success(
+                  translate("pages.email-verification.messages.success-send"),
+                  {
+                     description: translate(
+                        "pages.email-verification.messages.success-send-description",
+                     ),
+                     id: "verification-code-toast",
+                  },
+               );
             },
          },
       );
@@ -65,22 +81,37 @@ export const useEmailVerification = () => {
             {
                onError: ({ error }) => {
                   toast.error(
-                     getErrorMessage[error.code as codes] || "Unknown error",
+                     getErrorMessage[error.code as codes] ||
+                        translate(
+                           "pages.email-verification.messages.unknown-error",
+                        ),
                      {
                         id: "email-verification-toast",
                      },
                   );
                },
                onRequest: () => {
-                  toast.loading("Validating the code, please wait...", {
-                     id: "email-verification-toast",
-                  });
+                  toast.loading(
+                     translate(
+                        "pages.email-verification.messages.loading-verify",
+                     ),
+                     {
+                        id: "email-verification-toast",
+                     },
+                  );
                },
                onSuccess: () => {
-                  toast.success("Email verified successfully", {
-                     description: "You will be redirected to login.",
-                     id: "email-verification-toast",
-                  });
+                  toast.success(
+                     translate(
+                        "pages.email-verification.messages.success-verify",
+                     ),
+                     {
+                        description: translate(
+                           "pages.email-verification.messages.success-verify-description",
+                        ),
+                        id: "email-verification-toast",
+                     },
+                  );
                   router.navigate({
                      to: "/home",
                   });

@@ -3,6 +3,7 @@ import { StatsCard } from "@packages/ui/components/stats-card";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
 import { useParams } from "@tanstack/react-router";
+import { translate } from "@packages/localization";
 
 export function CompetitorStatsCard() {
    const trpc = useTRPC();
@@ -34,13 +35,21 @@ export function CompetitorStatsCard() {
          totalFeatures > 0
             ? [
                  {
-                    title: "High Confidence",
-                    description: "Features with >80% confidence",
+                    title: translate(
+                       "pages.competitor-details.stats.high-confidence",
+                    ),
+                    description: translate(
+                       "pages.competitor-details.stats.high-confidence-description",
+                    ),
                     value: String(highCount),
                  },
                  {
-                    title: "Medium Confidence",
-                    description: "Features with 50-80% confidence",
+                    title: translate(
+                       "pages.competitor-details.stats.medium-confidence",
+                    ),
+                    description: translate(
+                       "pages.competitor-details.stats.medium-confidence-description",
+                    ),
                     value: String(mediumCount),
                  },
               ]
@@ -51,13 +60,19 @@ export function CompetitorStatsCard() {
 
       return [
          {
-            label: "Total Features",
-            description: "All tracked features detected",
+            label: translate("pages.competitor-details.stats.total-features"),
+            description: translate(
+               "pages.competitor-details.stats.total-features-description",
+            ),
             value: String(totalFeatures),
          },
          {
-            label: "Average Confidence",
-            description: "Detection confidence across all features",
+            label: translate(
+               "pages.competitor-details.stats.average-confidence",
+            ),
+            description: translate(
+               "pages.competitor-details.stats.average-confidence-description",
+            ),
             value: `${avgConfidence}%`,
             details: confidenceDetails,
          },

@@ -13,6 +13,7 @@ import { useCallback } from "react";
 import { betterAuthClient, useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { translate } from "@packages/localization";
 export function DeleteApiKeyCredenza({
    open,
    onOpenChange,
@@ -34,7 +35,9 @@ export function DeleteApiKeyCredenza({
          },
          {
             onSuccess: async () => {
-               toast.success("API key deleted successfully");
+               toast.success(
+                  translate("pages.api-key.messages.delete-success"),
+               );
                await queryClient.invalidateQueries({
                   queryKey: trpc.authHelpers.getApiKeys.queryKey(),
                });
@@ -42,7 +45,7 @@ export function DeleteApiKeyCredenza({
             },
             onError: (error) => {
                console.error("Failed to delete API key:", error);
-               toast.error("Failed to delete API key. Please try again.");
+               toast.error(translate("pages.api-key.messages.delete-error"));
             },
          },
       );
@@ -52,10 +55,11 @@ export function DeleteApiKeyCredenza({
       <Credenza open={open} onOpenChange={onOpenChange}>
          <CredenzaContent>
             <CredenzaHeader>
-               <CredenzaTitle>Delete API Key</CredenzaTitle>
+               <CredenzaTitle>
+                  {translate("pages.api-key.modals.delete.title")}
+               </CredenzaTitle>
                <CredenzaDescription>
-                  Are you sure you want to delete this API key? This action
-                  cannot be undone.
+                  {translate("pages.api-key.modals.delete.description")}
                </CredenzaDescription>
             </CredenzaHeader>
             <CredenzaBody className="grid grid-cols-1 pb-0 flex flex-col items-center gap-4">
@@ -63,16 +67,15 @@ export function DeleteApiKeyCredenza({
                   <AlertTriangle size={48} />
                </span>
                <div className="text-center text-sm text-destructive font-semibold">
-                  This action is irreversible. The API key and its access will
-                  be permanently deleted.
+                  {translate("pages.api-key.modals.delete.warning")}
                </div>
             </CredenzaBody>
             <CredenzaFooter className="grid grid-cols-2 gap-2">
                <Button variant="secondary" onClick={handleCancel}>
-                  Cancel
+                  {translate("common.actions.cancel")}
                </Button>
                <Button variant="destructive" onClick={handleDelete}>
-                  Delete
+                  {translate("common.actions.delete")}
                </Button>
             </CredenzaFooter>
          </CredenzaContent>

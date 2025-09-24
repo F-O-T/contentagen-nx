@@ -17,6 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { translate } from "@packages/localization";
 function ApiKeyAlertCredenza({
    apiKey,
    open,
@@ -29,7 +30,7 @@ function ApiKeyAlertCredenza({
    const handleCopyApiKey = useCallback(() => {
       if (apiKey) {
          navigator.clipboard.writeText(apiKey);
-         toast.success("API key copied to clipboard");
+         toast.success(translate("pages.api-key.messages.copy-success"));
       }
       onOpenChange(false);
    }, [apiKey, onOpenChange]);
@@ -37,23 +38,31 @@ function ApiKeyAlertCredenza({
       <Credenza open={open} onOpenChange={onOpenChange}>
          <CredenzaContent>
             <CredenzaHeader>
-               <CredenzaTitle>This is your API key</CredenzaTitle>
+               <CredenzaTitle>
+                  {translate("pages.api-key.modals.api-key-alert.title")}
+               </CredenzaTitle>
                <CredenzaDescription>
-                  Please copy and store this API key securely.
+                  {translate("pages.api-key.modals.api-key-alert.description")}
                   <br />
-                  <strong>You will not be able to see it again.</strong>
+                  <strong>
+                     {translate("pages.api-key.modals.api-key-alert.warning")}
+                  </strong>
                </CredenzaDescription>
             </CredenzaHeader>
             <CredenzaBody className="grid grid-cols-1 pb-0">
                <InfoItem
                   icon={<Key />}
-                  label="API Key"
+                  label={translate(
+                     "pages.api-key.modals.api-key-alert.key-label",
+                  )}
                   value={apiKey}
                   key={"api-key"}
                />
             </CredenzaBody>
             <CredenzaFooter>
-               <Button onClick={handleCopyApiKey}>Copy to clipboard</Button>
+               <Button onClick={handleCopyApiKey}>
+                  {translate("pages.api-key.modals.api-key-alert.copy-button")}
+               </Button>
             </CredenzaFooter>
          </CredenzaContent>
       </Credenza>
@@ -71,7 +80,9 @@ export function CreateApiKeyCredenza({
    const [alertOpen, setAlertOpen] = useState(false);
    const trpc = useTRPC();
    const schema = z.object({
-      name: z.string("Please enter a name").min(1, "Name is required"),
+      name: z
+         .string(translate("common.form.field-required"))
+         .min(1, translate("common.form.field-required")),
    });
    const queryClient = useQueryClient();
    const createApiKey = useCallback(
@@ -82,7 +93,9 @@ export function CreateApiKeyCredenza({
             },
             {
                onSuccess: ({ data }) => {
-                  toast.success(`API key created successfully`);
+                  toast.success(
+                     translate("pages.api-key.messages.create-success"),
+                  );
                   if (data?.key) setNewApiKey(data.key);
                   setAlertOpen(true);
                   queryClient.invalidateQueries({
@@ -91,7 +104,7 @@ export function CreateApiKeyCredenza({
                },
                onError: (e) => {
                   console.error("Error creating API key:", e);
-                  toast.error(`Failed to create API key`);
+                  toast.error(translate("pages.api-key.messages.create-error"));
                },
             },
          );
@@ -124,14 +137,20 @@ export function CreateApiKeyCredenza({
          <Credenza open={open} onOpenChange={onOpenChange}>
             <CredenzaContent>
                <CredenzaHeader>
-                  <CredenzaTitle>Create api key</CredenzaTitle>
+                  <CredenzaTitle>
+                     {translate("pages.api-key.modals.create.title")}
+                  </CredenzaTitle>
                </CredenzaHeader>
                <form onSubmit={(e) => handleSubmit(e)}>
                   <CredenzaBody>
                      <form.AppField name="name">
                         {(field) => (
                            <field.FieldContainer>
-                              <field.FieldLabel>Name</field.FieldLabel>
+                              <field.FieldLabel>
+                                 {translate(
+                                    "pages.api-key.modals.create.name-label",
+                                 )}
+                              </field.FieldLabel>
                               <Input
                                  id={field.name}
                                  name={field.name}
@@ -139,7 +158,9 @@ export function CreateApiKeyCredenza({
                                  onChange={(e) =>
                                     field.handleChange(e.target.value)
                                  }
-                                 placeholder="Enter a name for your API key"
+                                 placeholder={translate(
+                                    "pages.api-key.modals.create.name-placeholder",
+                                 )}
                                  value={field.state.value}
                               />
                               <field.FieldMessage />
@@ -158,7 +179,7 @@ export function CreateApiKeyCredenza({
                               type="submit"
                               variant="default"
                            >
-                              Create API Key
+                              {translate("pages.api-key.modals.create.create")}
                            </Button>
                         )}
                      </form.Subscribe>

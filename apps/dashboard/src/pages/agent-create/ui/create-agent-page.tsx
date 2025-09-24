@@ -3,6 +3,7 @@ import { useTRPC } from "@/integrations/clients";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { translate } from "@packages/localization";
 export function CreateAgentPage() {
    const navigate = useNavigate();
    const trpc = useTRPC();
@@ -10,15 +11,18 @@ export function CreateAgentPage() {
    const agentMutation = useMutation(
       trpc.agent.create.mutationOptions({
          onSuccess: (data) => {
-            toast.success("Agent created successfully!");
+            toast.success(translate("pages.agent-create.messages.success"));
             navigate({
                params: { agentId: data.id },
                to: "/agents/$agentId",
             });
          },
          onError: (error) => {
-            console.error("Error creating agent:", error);
-            toast.error("Failed to create agent");
+            console.error(
+               translate("pages.agent-create.messages.error-console"),
+               error,
+            );
+            toast.error(translate("pages.agent-create.messages.error"));
          },
       }),
    );

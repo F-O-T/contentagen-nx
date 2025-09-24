@@ -1,6 +1,6 @@
 import { Button } from "@packages/ui/components/button";
 import { InfoItem } from "@packages/ui/components/info-item";
-
+import { translate } from "@packages/localization";
 import type { AgentForm } from "../lib/use-agent-form";
 import {
    UserIcon,
@@ -16,17 +16,29 @@ import {
 // Helper function to format values consistently
 const formatValue = (value: string): string => {
    if (!value) return "";
-   // Handle language codes specially
+   // Handle language codes specially using translations
    const languageMap: Record<string, string> = {
-      en: "English",
-      pt: "Portuguese",
-      es: "Spanish",
-      "en-US": "English (US)",
-      "en-GB": "English (UK)",
-      "pt-BR": "Portuguese (Brazil)",
-      "pt-PT": "Portuguese (Portugal)",
-      "es-ES": "Spanish (Spain)",
-      "es-MX": "Spanish (Mexico)",
+      en: translate("pages.agent-creation-form.language.languages.english"),
+      pt: translate("pages.agent-creation-form.language.languages.portuguese"),
+      es: translate("pages.agent-creation-form.language.languages.spanish"),
+      "en-US": translate(
+         "pages.agent-creation-form.language.languages.english-us",
+      ),
+      "en-GB": translate(
+         "pages.agent-creation-form.language.languages.english-uk",
+      ),
+      "pt-BR": translate(
+         "pages.agent-creation-form.language.languages.portuguese-brazil",
+      ),
+      "pt-PT": translate(
+         "pages.agent-creation-form.language.languages.portuguese-portugal",
+      ),
+      "es-ES": translate(
+         "pages.agent-creation-form.language.languages.spanish-spain",
+      ),
+      "es-MX": translate(
+         "pages.agent-creation-form.language.languages.spanish-mexico",
+      ),
    };
 
    if (languageMap[value]) {
@@ -42,36 +54,40 @@ export function ReviewStep({ form }: { form: AgentForm }) {
    const singleColumnItems = [
       {
          icon: <UserIcon className="w-4 h-4" />,
-         label: "Agent Name",
+         label: translate("pages.agent-creation-form.review.fields.agent-name"),
          value: String(form.getFieldValue("metadata.name") ?? ""),
       },
       {
          icon: <UsersIcon className="w-4 h-4" />,
-         label: "Audience",
+         label: translate("pages.agent-creation-form.review.fields.audience"),
          value: formatValue(String(form.getFieldValue("audience.base") ?? "")),
       },
       {
          icon: <LayoutGridIcon className="w-4 h-4" />,
-         label: "Purpose",
+         label: translate("pages.agent-creation-form.review.fields.purpose"),
          value: formatValue(String(form.getFieldValue("purpose") ?? "")),
       },
       {
          icon: <Brain className="w-4 h-4" />,
-         label: "Brand Integration",
+         label: translate(
+            "pages.agent-creation-form.review.fields.brand-integration",
+         ),
          value: formatValue(
             String(form.getFieldValue("brand.integrationStyle") ?? ""),
          ),
       },
       {
          icon: <GlobeIcon className="w-4 h-4" />,
-         label: "Language",
+         label: translate("pages.agent-creation-form.review.fields.language"),
          value: formatValue(
             String(form.getFieldValue("language.primary") ?? ""),
          ),
       },
       {
          icon: <PaintbrushIcon className="w-4 h-4" />,
-         label: "Formatting Style",
+         label: translate(
+            "pages.agent-creation-form.review.fields.formatting-style",
+         ),
          value: formatValue(
             String(form.getFieldValue("formatting.style") ?? ""),
          ),
@@ -81,7 +97,9 @@ export function ReviewStep({ form }: { form: AgentForm }) {
    // Communication style as a double-width item
    const communicationStyle = {
       icon: <SpeakerIcon className="w-4 h-4" />,
-      label: "Communication Style",
+      label: translate(
+         "pages.agent-creation-form.review.fields.communication-style",
+      ),
       value: formatValue(
          String(form.getFieldValue("voice.communication") ?? ""),
       ),
@@ -94,7 +112,9 @@ export function ReviewStep({ form }: { form: AgentForm }) {
    if (languageVariant) {
       optionalItems.push({
          icon: <GlobeIcon className="w-4 h-4" />,
-         label: "Language Variant",
+         label: translate(
+            "pages.agent-creation-form.review.fields.language-variant",
+         ),
          value: formatValue(String(languageVariant)),
       });
    }
@@ -103,7 +123,7 @@ export function ReviewStep({ form }: { form: AgentForm }) {
    if (listStyle) {
       optionalItems.push({
          icon: <PaintbrushIcon className="w-4 h-4" />,
-         label: "List Style",
+         label: translate("pages.agent-creation-form.review.fields.list-style"),
          value: formatValue(String(listStyle)),
       });
    }
@@ -118,7 +138,9 @@ export function ReviewStep({ form }: { form: AgentForm }) {
    if (description) {
       fullWidthItems.push({
          icon: <FileTextIcon className="w-4 h-4" />,
-         label: "Description",
+         label: translate(
+            "pages.agent-creation-form.review.fields.description",
+         ),
          value: String(description).replace(/<[^>]*>/g, ""),
       });
    }
@@ -127,7 +149,9 @@ export function ReviewStep({ form }: { form: AgentForm }) {
    if (blacklistWords) {
       fullWidthItems.push({
          icon: <Brain className="w-4 h-4" />,
-         label: "Blacklist Words",
+         label: translate(
+            "pages.agent-creation-form.review.fields.blacklist-words",
+         ),
          value: String(blacklistWords).replace(/<[^>]*>/g, ""),
       });
    }
@@ -173,7 +197,13 @@ export function ReviewStep({ form }: { form: AgentForm }) {
    );
 }
 
-export function ReviewStepSubscribe({ form }: { form: AgentForm }) {
+export function ReviewStepSubscribe({
+   form,
+   mode = "create",
+}: {
+   form: AgentForm;
+   mode?: "create" | "edit";
+}) {
    return (
       <form.Subscribe
          selector={(state) => ({
@@ -183,7 +213,15 @@ export function ReviewStepSubscribe({ form }: { form: AgentForm }) {
       >
          {({ canSubmit, isSubmitting }) => (
             <Button type="submit" disabled={!canSubmit || isSubmitting}>
-               {isSubmitting ? "Submitting..." : "Submit"}
+               {isSubmitting
+                  ? mode === "edit"
+                     ? translate("common.actions.updating")
+                     : translate("common.actions.creating")
+                  : mode === "edit"
+                    ? translate("common.actions.update")
+                    : translate(
+                         "pages.agent-creation-form.actions.create-agent",
+                      )}
             </Button>
          )}
       </form.Subscribe>

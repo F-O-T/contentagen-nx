@@ -35,6 +35,7 @@ import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
 import { formatValueForDisplay } from "@packages/utils/text";
 import { useContentList } from "../lib/content-list-context";
 import { useSearch } from "@tanstack/react-router";
+import { translate } from "@packages/localization";
 
 export function ContentRequestCard({
    request,
@@ -58,7 +59,9 @@ export function ContentRequestCard({
    const deleteMutation = useMutation(
       trpc.content.delete.mutationOptions({
          onSuccess: async () => {
-            toast.success("Content deleted successfully");
+            toast.success(
+               translate("pages.content-list.messages.delete-success"),
+            );
             setIsCredenzaOpen(false);
             // Invalidate queries to refresh the list
             await queryClient.invalidateQueries({
@@ -66,7 +69,7 @@ export function ContentRequestCard({
             });
          },
          onError: (error) => {
-            toast.error("Failed to delete content");
+            toast.error(translate("pages.content-list.messages.delete-error"));
             console.error("Delete error:", error);
          },
       }),
@@ -100,7 +103,8 @@ export function ContentRequestCard({
                         {request.meta?.title}
                      </CardTitle>
                      <CardDescription className="line-clamp-2">
-                        {request.meta?.description ?? "No description found"}
+                        {request.meta?.description ??
+                           translate("pages.content-list.card.no-description")}
                      </CardDescription>
                      <CardAction>
                         <Checkbox
@@ -125,11 +129,13 @@ export function ContentRequestCard({
                         photo={profilePhoto?.data}
                         name={
                            request.agent?.personaConfig.metadata.name ||
-                           "Unknown"
+                           translate("pages.content-list.card.unknown-agent")
                         }
                         description={
                            request.agent?.personaConfig.metadata.description ||
-                           "No description"
+                           translate(
+                              "pages.content-list.card.no-agent-description",
+                           )
                         }
                      />
                   </CardContent>
@@ -153,16 +159,20 @@ export function ContentRequestCard({
             <CredenzaContent>
                <CredenzaHeader>
                   <CredenzaTitle>
-                     {request.meta?.title || "Content"}
+                     {request.meta?.title ||
+                        translate("pages.content-list.card.untitled-content")}
                   </CredenzaTitle>
                   <CredenzaDescription>
-                     {request.meta?.description || "No description available"}
+                     {request.meta?.description ||
+                        translate(
+                           "pages.content-list.card.no-description-available",
+                        )}
                   </CredenzaDescription>
                </CredenzaHeader>
                <CredenzaBody className="grid grid-cols-2 gap-2">
                   <SquaredIconButton onClick={handleView}>
                      <Eye className="h-4 w-4" />
-                     View your content details
+                     {translate("pages.content-list.card.view-details")}
                   </SquaredIconButton>
 
                   <SquaredIconButton
@@ -172,8 +182,8 @@ export function ContentRequestCard({
                   >
                      <Trash2 className="h-4 w-4" />
                      {deleteMutation.isPending
-                        ? "Deleting..."
-                        : "Delete this content"}
+                        ? translate("common.actions.deleting")
+                        : translate("pages.content-list.card.delete-content")}
                   </SquaredIconButton>
                </CredenzaBody>
             </CredenzaContent>
@@ -181,7 +191,10 @@ export function ContentRequestCard({
          <ContentDeleteConfirmationCredenza
             open={showDeleteConfirmation}
             onOpenChange={setShowDeleteConfirmation}
-            contentTitle={request.meta?.title || "this content"}
+            contentTitle={
+               request.meta?.title ||
+               translate("pages.content-list.card.this-content")
+            }
             onConfirm={confirmDelete}
          />
       </>

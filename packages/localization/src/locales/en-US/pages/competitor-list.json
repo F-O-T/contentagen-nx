@@ -1,0 +1,79 @@
+{
+   "title": "Competitor Management",
+   "mascot-message": "Track and analyze your competitors to stay ahead of the market!",
+   "toolbar": {
+      "select-all": "Select All",
+      "unselect-all": "Unselect All",
+      "new-competitor": "New Competitor",
+      "selected-count": "{{count}} selected",
+      "of": "of"
+   },
+   "table": {
+      "headers": {
+         "name": "Name",
+         "website": "Website",
+         "industry": "Industry",
+         "status": "Status",
+         "last-analyzed": "Last Analyzed",
+         "actions": "Actions"
+      },
+      "no-data": "No competitors found",
+      "loading": "Loading competitors..."
+   },
+   "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "analyze": "Analyze",
+      "export": "Export"
+   },
+   "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "analyzing": "Analyzing"
+   },
+   "messages": {
+      "delete-success": "{{name}} has been deleted successfully.",
+      "delete-error": "Failed to delete competitor: {{error}}",
+      "create-success": "Competitor created successfully!",
+      "create-error": "Failed to create competitor: {{error}}",
+      "update-success": "Competitor updated successfully!",
+      "update-error": "Failed to update competitor: {{error}}",
+      "analyze-success": "Analysis started successfully!",
+      "analyze-error": "Failed to start analysis. Please try again."
+   },
+   "empty-state": {
+      "no-competitors": "No competitors yet"
+   },
+   "card": {
+      "features-count": "{{count}} features",
+      "website-label": "Your competitor website: {{url}}",
+      "view-details": "View details",
+      "edit-competitor": "Edit competitor",
+      "visit-website": "Visit website",
+      "delete-competitor": "Delete competitor"
+   },
+   "validation": {
+      "invalid-url": "Please enter a valid URL"
+   },
+   "modals": {
+      "delete": {
+         "title": "Delete Competitor",
+         "description": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone and will remove all associated feature tracking data.",
+         "confirm": "Delete",
+         "cancel": "Cancel"
+      },
+      "create-edit": {
+         "create-title": "Add New Competitor",
+         "edit-title": "Edit Competitor",
+         "create-description": "Add a new competitor to track and analyze.",
+         "edit-description": "Update the competitor information below.",
+         "website-url-label": "Website URL *",
+         "website-url-placeholder": "https://example.com",
+         "cancel": "Cancel",
+         "create": "Create",
+         "update": "Update",
+         "saving": "Saving..."
+      }
+   }
+}

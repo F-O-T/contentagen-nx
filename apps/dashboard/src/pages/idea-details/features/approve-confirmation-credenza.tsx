@@ -1,5 +1,6 @@
 import { DeleteConfirmationCredenza } from "@packages/ui/components/delete-confirmation-credenza";
 import { CheckCircle } from "lucide-react";
+import { translate } from "@packages/localization";
 
 interface ApproveConfirmationCredenzaProps {
    open: boolean;
@@ -19,7 +20,7 @@ export function ApproveConfirmationCredenza({
          onDelete={onConfirm}
          icon={CheckCircle}
          variant="default"
-         message="This will approve the idea and send it to the content generation pipeline. This action will create content based on the approved idea."
+         message={translate("pages.idea-details.confirmations.approve-message")}
       />
    );
 }

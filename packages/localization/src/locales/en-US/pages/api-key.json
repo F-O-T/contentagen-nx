@@ -1,0 +1,78 @@
+{
+   "title": "API Key Management",
+   "mascot-message": "This API key is for our SDK. Manage your keys here and keep your integrations running smoothly!",
+   "statistics": {
+      "title": "API Key Statistics",
+      "description": "Overview of your API keys and usage statistics.",
+      "total-keys": "Total API Keys",
+      "total-usage": "Total Usage",
+      "rate-limit": "Rate Limit"
+   },
+   "section": {
+      "title": "API Keys",
+      "description": "Manage your API keys for programmatic access. You can view and delete keys here."
+   },
+   "actions": {
+      "create": "Create API Key",
+      "update": "Update",
+      "delete": "Delete",
+      "copy": "Copy Key",
+      "regenerate": "Regenerate Key"
+   },
+   "table": {
+      "headers": {
+         "name": "Name",
+         "key": "Key",
+         "usage": "Usage",
+         "rate-limit": "Rate Limit",
+         "created": "Created",
+         "actions": "Actions"
+      },
+      "unlimited": "Unlimited",
+      "not-found": "not found"
+   },
+   "messages": {
+      "create-success": "API key created successfully!",
+      "create-error": "Failed to create API key. Please try again.",
+      "delete-success": "API key deleted successfully!",
+      "delete-error": "Failed to delete API key. Please try again.",
+      "copy-success": "API key copied to clipboard!",
+      "update-success": "API key updated successfully!",
+      "update-error": "Failed to update API key. Please try again.",
+      "regenerate-success": "API key regenerated successfully!"
+   },
+   "modals": {
+      "delete": {
+         "title": "Delete API Key",
+         "description": "Are you sure you want to delete this API key? This action cannot be undone.",
+         "warning": "This action is irreversible. The API key and its access will be permanently deleted.",
+         "confirm": "Delete",
+         "cancel": "Cancel"
+      },
+      "create": {
+         "title": "Create New API Key",
+         "name-label": "Key Name",
+         "name-placeholder": "Enter a name for your API key",
+         "create": "Create Key",
+         "cancel": "Cancel"
+      },
+      "update": {
+         "title": "Update API Key",
+         "description": "You can only update the name of your API key.",
+         "name-label": "Name",
+         "name-placeholder": "Enter a new name for your API key",
+         "update": "Update API Key"
+      },
+      "api-key-alert": {
+         "title": "This is your API key",
+         "description": "Please copy and store this API key securely.",
+         "warning": "You will not be able to see it again.",
+         "key-label": "API Key",
+         "copy-button": "Copy to clipboard"
+      }
+   },
+   "aria-labels": {
+      "more-actions": "More actions",
+      "api-key-actions": "API Key actions"
+   }
+}

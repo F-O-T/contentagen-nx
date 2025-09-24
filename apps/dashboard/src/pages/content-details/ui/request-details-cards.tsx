@@ -11,6 +11,7 @@ import { InfoItem } from "@packages/ui/components/info-item";
 import { Separator } from "@packages/ui/components/separator";
 import { Calendar, Clock, Type, Link2, Tags, Globe } from "lucide-react";
 import { useMemo } from "react";
+import { translate } from "@packages/localization";
 
 export function ContentBasicDetailsCard({
    content,
@@ -21,12 +22,12 @@ export function ContentBasicDetailsCard({
       () => [
          {
             icon: <Type className="h-4 w-4" />,
-            label: "Title",
+            label: translate("pages.content-details.details.title"),
             value: content.meta?.title ? `# ${content.meta.title}` : "",
          },
          {
             icon: <Link2 className="h-4 w-4" />,
-            label: "Description",
+            label: translate("pages.content-details.details.description"),
             value: content.meta?.description
                ? `\n- ${content.meta.description}`
                : "",
@@ -39,12 +40,12 @@ export function ContentBasicDetailsCard({
       () => [
          {
             icon: <Calendar className="h-4 w-4" />,
-            label: "Last Updated",
+            label: translate("pages.content-details.details.updated"),
             value: new Date(content.updatedAt).toLocaleDateString(),
          },
          {
             icon: <Calendar className="h-4 w-4" />,
-            label: "Created At",
+            label: translate("pages.content-details.details.created"),
             value: new Date(content.createdAt).toLocaleDateString(),
          },
       ],
@@ -54,9 +55,13 @@ export function ContentBasicDetailsCard({
    return (
       <Card>
          <CardHeader>
-            <CardTitle className="text-lg">Content Details</CardTitle>
+            <CardTitle className="text-lg">
+               {translate("pages.content-details.details.basic-info")}
+            </CardTitle>
             <CardDescription>
-               Basic information about your content
+               {translate(
+                  "pages.content-details.details.basic-info-description",
+               )}
             </CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
@@ -95,14 +100,14 @@ export function ContentMetaDetailsCard({
       () => [
          {
             icon: <Tags className="h-4 w-4" />,
-            label: "Keywords",
+            label: translate("pages.content-details.details.keywords"),
             value: content.meta?.keywords?.length
                ? content.meta.keywords.map((kw) => `- ${kw}`).join("\n")
                : "",
          },
          {
             icon: <Globe className="h-4 w-4" />,
-            label: "Sources",
+            label: translate("pages.content-details.details.sources"),
             value: content.meta?.sources?.length
                ? content.meta.sources
                     .map((src) => `- [${src}](${src})`)
@@ -111,15 +116,15 @@ export function ContentMetaDetailsCard({
          },
          {
             icon: <Link2 className="h-4 w-4" />,
-            label: "Slug",
+            label: translate("pages.content-details.details.slug"),
             value: content.meta?.slug ? `# ${content.meta.slug}` : "",
          },
          {
             icon: <Link2 className="h-4 w-4" />,
-            label: "Related Slugs",
+            label: translate("pages.content-details.details.related-slugs"),
             value: relatedSlugs?.length
                ? relatedSlugs.map((slug) => `- ${slug}`).join("\n")
-               : "None",
+               : translate("pages.content-details.details.related-slugs-none"),
          },
       ],
       [
@@ -133,9 +138,13 @@ export function ContentMetaDetailsCard({
    return (
       <Card>
          <CardHeader>
-            <CardTitle className="text-lg">Meta Information</CardTitle>
+            <CardTitle className="text-lg">
+               {translate("pages.content-details.details.meta-info")}
+            </CardTitle>
             <CardDescription>
-               Keywords, sources, and technical details
+               {translate(
+                  "pages.content-details.details.meta-info-description",
+               )}
             </CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
@@ -159,13 +168,16 @@ export function ContentStatsCard({ content }: { content: ContentSelect }) {
       () => [
          {
             icon: <Type className="h-4 w-4" />,
-            label: "Word Count",
+            label: translate("pages.content-details.stats.word-count"),
             value: content.stats?.wordsCount || "",
          },
          {
             icon: <Clock className="h-4 w-4" />,
-            label: "Read Time",
-            value: `${content.stats?.readTimeMinutes || 0} min`,
+            label: translate("pages.content-details.details.read-time"),
+            value: translate(
+               "pages.content-details.details.read-time-minutes",
+               { minutes: content.stats?.readTimeMinutes || 0 },
+            ),
          },
       ],
       [content.stats?.wordsCount, content.stats?.readTimeMinutes],
@@ -174,9 +186,13 @@ export function ContentStatsCard({ content }: { content: ContentSelect }) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle className="text-lg">Content Stats</CardTitle>
+            <CardTitle className="text-lg">
+               {translate("pages.content-details.details.content-stats")}
+            </CardTitle>
             <CardDescription>
-               Statistics and metadata about your generated content
+               {translate(
+                  "pages.content-details.details.content-stats-description",
+               )}
             </CardDescription>
          </CardHeader>
 

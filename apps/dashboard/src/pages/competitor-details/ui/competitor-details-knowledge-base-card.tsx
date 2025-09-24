@@ -24,6 +24,7 @@ import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
 import { AGENT_FILE_UPLOAD_LIMIT } from "@packages/files/text-file-helper";
 import type { CompetitorSelect } from "@packages/database/schema";
+import { translate } from "@packages/localization";
 
 export type UploadedFile = {
    fileName: string;
@@ -35,10 +36,11 @@ function KnowledgeBaseEmptyState() {
    return (
       <div className="text-center py-8 text-muted-foreground">
          <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-         <p>No brand files yet</p>
+         <p>{translate("pages.competitor-details.knowledge-base.no-files")}</p>
          <p className="text-sm">
-            Upload Markdown files with your brand's values, voice, or
-            guidelines.
+            {translate(
+               "pages.competitor-details.knowledge-base.no-files-description",
+            )}
          </p>
       </div>
    );
@@ -57,13 +59,21 @@ export function CompetitorDetailsKnowledgeBaseCard({
    const deleteFileMutation = useMutation(
       trpc.competitorFile.delete.mutationOptions({
          onSuccess: async () => {
-            toast.success("File deleted successfully!");
+            toast.success(
+               translate(
+                  "pages.competitor-details.knowledge-base.messages.delete-success",
+               ),
+            );
             await queryClient.invalidateQueries({
                queryKey: trpc.competitor.get.queryKey({ id }),
             });
          },
          onError: () => {
-            toast.error("Failed to delete file");
+            toast.error(
+               translate(
+                  "pages.competitor-details.knowledge-base.messages.delete-error",
+               ),
+            );
          },
       }),
    );
@@ -107,13 +117,21 @@ export function CompetitorDetailsKnowledgeBaseCard({
       <>
          <Card className="h-full">
             <CardHeader>
-               <CardTitle>Competitor brand Knowledge</CardTitle>
+               <CardTitle>
+                  {translate("pages.competitor-details.knowledge-base.title")}
+               </CardTitle>
                <CardDescription>
-                  Files generated using the competitor's website url
+                  {translate(
+                     "pages.competitor-details.knowledge-base.description",
+                  )}
                </CardDescription>
                <CardAction>
                   {competitor.analysisStatus === "completed" && (
-                     <Badge className="font-semibold">100% indexed</Badge>
+                     <Badge className="font-semibold">
+                        {translate(
+                           "pages.competitor-details.knowledge-base.indexed-badge",
+                        )}
+                     </Badge>
                   )}
                </CardAction>
             </CardHeader>
@@ -130,8 +148,14 @@ export function CompetitorDetailsKnowledgeBaseCard({
                               {file.fileName}
                            </p>
                            <p className="text-xs text-muted-foreground">
-                              Uploaded{" "}
-                              {new Date(file.uploadedAt).toLocaleDateString()}
+                              {translate(
+                                 "pages.competitor-details.knowledge-base.uploaded-on",
+                                 {
+                                    date: new Date(
+                                       file.uploadedAt,
+                                    ).toLocaleDateString(),
+                                 },
+                              )}
                            </p>
                         </div>
                      </div>
@@ -145,12 +169,16 @@ export function CompetitorDetailsKnowledgeBaseCard({
                            <DropdownMenuItem
                               onSelect={() => handleViewFile(file.fileName)}
                            >
-                              View
+                              {translate(
+                                 "pages.competitor-details.knowledge-base.actions.view",
+                              )}
                            </DropdownMenuItem>
                            <DropdownMenuItem
                               onSelect={() => handleDeleteFile(file.fileName)}
                            >
-                              Delete
+                              {translate(
+                                 "pages.competitor-details.knowledge-base.actions.delete",
+                              )}
                            </DropdownMenuItem>
                         </DropdownMenuContent>
                      </DropdownMenu>
@@ -160,13 +188,26 @@ export function CompetitorDetailsKnowledgeBaseCard({
             </CardContent>
             <CardFooter className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
                <span>
-                  {uploadedFiles.length} of {AGENT_FILE_UPLOAD_LIMIT} files
-                  uploaded
+                  {translate(
+                     "pages.competitor-details.knowledge-base.files-count",
+                     {
+                        current: uploadedFiles.length,
+                        total: AGENT_FILE_UPLOAD_LIMIT,
+                     },
+                  )}
                </span>
                <span>
                   {canAddMore
-                     ? `${remainingSlots} more file${remainingSlots > 1 ? "s" : ""} allowed`
-                     : "Upload limit reached"}
+                     ? translate(
+                          "pages.competitor-details.knowledge-base.remaining-files",
+                          {
+                             count: remainingSlots,
+                             plural: remainingSlots > 1 ? "s" : "",
+                          },
+                       )
+                     : translate(
+                          "pages.competitor-details.knowledge-base.upload-limit-reached",
+                       )}
                </span>
             </CardFooter>
          </Card>

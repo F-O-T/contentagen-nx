@@ -19,6 +19,7 @@ import { CreateEditCompetitorDialog } from "../../competitor-list/features/creat
 import { useState } from "react";
 import { DeleteCompetitorConfirmationDialog } from "../../competitor-list/features/delete-competitor-confirmation-dialog";
 import type { RouterOutput } from "@packages/api/client";
+import { translate } from "@packages/localization";
 
 interface CompetitorDetailsActionsProps {
    competitor: RouterOutput["competitor"]["list"]["items"][number];
@@ -37,14 +38,18 @@ export function CompetitorDetailsActions({
    const analyzeMutation = useMutation(
       trpc.competitor.analyze.mutationOptions({
          onSuccess: () => {
-            toast.success("Competitor analysis started!");
+            toast.success(
+               translate("pages.competitor-details.messages.analysis-started"),
+            );
             queryClient.invalidateQueries({
                queryKey: trpc.competitor.get.queryKey({ id: competitor.id }),
             });
          },
          onError: (error) => {
             toast.error(
-               `Error starting analysis: ${error.message ?? "Unknown error"}`,
+               translate("pages.competitor-details.messages.analysis-error", {
+                  error: error.message ?? "Unknown error",
+               }),
             );
          },
       }),
@@ -61,31 +66,43 @@ export function CompetitorDetailsActions({
    const actions = [
       {
          icon: ExternalLink,
-         label: "Visit Website",
+         label: translate(
+            "pages.competitor-details.actions.buttons.visit-website",
+         ),
          onClick: handleVisitWebsite,
          disabled: false,
       },
       {
          icon: RefreshCw,
-         label: analyzeMutation.isPending ? "Analyzing..." : "Refresh Analysis",
+         label: analyzeMutation.isPending
+            ? translate("pages.competitor-details.actions.buttons.analyzing")
+            : translate(
+                 "pages.competitor-details.actions.buttons.refresh-analysis",
+              ),
          onClick: handleAnalyze,
          disabled: analyzeMutation.isPending,
       },
       {
          icon: Upload,
-         label: "Upload Logo",
+         label: translate(
+            "pages.competitor-details.actions.buttons.upload-logo",
+         ),
          onClick: onLogoUpload,
          disabled: !onLogoUpload,
       },
       {
          icon: Edit,
-         label: "Edit Competitor",
+         label: translate(
+            "pages.competitor-details.actions.buttons.edit-competitor",
+         ),
          onClick: () => setShowEditDialog(true),
          disabled: false,
       },
       {
          icon: Trash,
-         label: "Delete Competitor",
+         label: translate(
+            "pages.competitor-details.actions.buttons.delete-competitor",
+         ),
          onClick: () => setShowDeleteDialog(true),
          disabled: false,
       },
@@ -95,9 +112,13 @@ export function CompetitorDetailsActions({
       <>
          <Card>
             <CardHeader>
-               <CardTitle>Quick Actions</CardTitle>
+               <CardTitle>
+                  {translate("pages.competitor-details.actions.card.title")}
+               </CardTitle>
                <CardDescription>
-                  Perform common tasks related to the competitor.
+                  {translate(
+                     "pages.competitor-details.actions.card.description",
+                  )}
                </CardDescription>
             </CardHeader>
             <CardContent className="w-full flex items-center justify-center gap-2">

@@ -11,6 +11,7 @@ import { FileText } from "lucide-react";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { RouterOutput } from "@packages/api/client";
+import { translate } from "@packages/localization";
 
 interface ContentVersionsCardProps {
    contentId: string;
@@ -37,12 +38,12 @@ export function ContentVersionsCard({
             <CardHeader>
                <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
-                  Content Versions
+                  {translate("pages.content-details.versions.title")}
                </CardTitle>
             </CardHeader>
             <CardContent>
                <p className="text-muted-foreground text-sm">
-                  No versions available yet.
+                  {translate("pages.content-details.versions.no-versions")}
                </p>
             </CardContent>
          </Card>
@@ -53,10 +54,10 @@ export function ContentVersionsCard({
       <Card>
          <CardHeader>
             <CardTitle className="flex items-center gap-2">
-               Content Versions
+               {translate("pages.content-details.versions.title")}
             </CardTitle>
             <CardDescription>
-               A history of all changes made to this content
+               {translate("pages.content-details.versions.description")}
             </CardDescription>
             <CardAction>
                <Badge variant="outline">{versions.length}</Badge>
@@ -70,10 +71,17 @@ export function ContentVersionsCard({
                   onClick={() => onVersionClick(version)}
                >
                   <CardHeader>
-                     <CardTitle>Version {version.version}</CardTitle>
+                     <CardTitle>
+                        {translate(
+                           "pages.content-details.versions.version-number",
+                           { number: version.version },
+                        )}
+                     </CardTitle>
                      <CardDescription>
-                        Changes made in this version{" "}
-                        {version.meta?.diff?.length}
+                        {translate(
+                           "pages.content-details.versions.changes-count",
+                           { count: version.meta?.diff?.length },
+                        )}
                      </CardDescription>
                   </CardHeader>
                </Card>

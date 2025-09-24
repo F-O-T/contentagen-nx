@@ -21,5 +21,37 @@
    },
    "delete-confirmation": {
       "message": "This will permanently delete \"{{title}}\" and all associated data. This action cannot be undone."
+   },
+   "card": {
+      "no-description": "No description found",
+      "unknown-agent": "Unknown",
+      "no-agent-description": "No description",
+      "untitled-content": "Content",
+      "no-description-available": "No description available",
+      "view-details": "View your content details",
+      "delete-content": "Delete this content",
+      "this-content": "this content"
+   },
+   "list": {
+      "loading": "Loading content...",
+      "no-results": "No content found matching your filters.",
+      "no-results-hint": "Try adjusting your filter criteria or create new content."
+   },
+   "status": {
+      "unknown": "Unknown",
+      "pending": "Pending",
+      "planning": "Planning",
+      "researching": "Researching",
+      "writing": "Writing",
+      "editing": "Editing",
+      "analyzing": "Analyzing",
+      "grammar-checking": "Grammar Checking",
+      "draft": "Draft",
+      "approved": "Approved"
+   },
+   "messages": {
+      "delete-success": "Content deleted successfully",
+      "delete-error": "Failed to delete content",
+      "status-updated": "Content status updated to {{status}}"
    }
 }

@@ -23,6 +23,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
+import { translate } from "@packages/localization";
 import { AGENT_FILE_UPLOAD_LIMIT } from "@packages/files/text-file-helper";
 import type { AgentSelect } from "@packages/database/schema";
 
@@ -36,10 +37,13 @@ function KnowledgeBaseEmptyState() {
    return (
       <div className="text-center py-8 text-muted-foreground">
          <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-         <p>No brand files yet</p>
+         <p>
+            {translate("pages.agent-details.knowledge-base.empty-state.title")}
+         </p>
          <p className="text-sm">
-            Upload Markdown files with your brand's values, voice, or
-            guidelines.
+            {translate(
+               "pages.agent-details.knowledge-base.empty-state.description",
+            )}
          </p>
       </div>
    );
@@ -59,13 +63,21 @@ export function AgentDetailsKnowledgeBaseCard({
    const deleteFileMutation = useMutation(
       trpc.agentFile.delete.mutationOptions({
          onSuccess: async () => {
-            toast.success("File deleted successfully!");
+            toast.success(
+               translate(
+                  "pages.agent-details.knowledge-base.messages.file-deleted",
+               ),
+            );
             await queryClient.invalidateQueries({
                queryKey: trpc.agent.get.queryKey({ id: agentId }),
             });
          },
          onError: () => {
-            toast.error("Failed to delete file");
+            toast.error(
+               translate(
+                  "pages.agent-details.knowledge-base.messages.delete-failed",
+               ),
+            );
          },
       }),
    );
@@ -109,13 +121,19 @@ export function AgentDetailsKnowledgeBaseCard({
       <>
          <Card className="h-full">
             <CardHeader>
-               <CardTitle>Brand Knowledge</CardTitle>
+               <CardTitle>
+                  {translate("pages.agent-details.knowledge-base.title")}
+               </CardTitle>
                <CardDescription>
-                  Files generated using your website url
+                  {translate("pages.agent-details.knowledge-base.description")}
                </CardDescription>
                <CardAction>
                   {agent.brandKnowledgeStatus === "completed" && (
-                     <Badge className="font-semibold">100% indexed</Badge>
+                     <Badge className="font-semibold">
+                        {translate(
+                           "pages.agent-details.knowledge-base.status.indexed",
+                        )}
+                     </Badge>
                   )}
                </CardAction>
             </CardHeader>
@@ -132,7 +150,9 @@ export function AgentDetailsKnowledgeBaseCard({
                               {file.fileName}
                            </p>
                            <p className="text-xs text-muted-foreground">
-                              Uploaded{" "}
+                              {translate(
+                                 "pages.agent-details.knowledge-base.status.uploaded",
+                              )}{" "}
                               {new Date(file.uploadedAt).toLocaleDateString()}
                            </p>
                         </div>
@@ -147,12 +167,12 @@ export function AgentDetailsKnowledgeBaseCard({
                            <DropdownMenuItem
                               onSelect={() => handleViewFile(file.fileName)}
                            >
-                              View
+                              {translate("common.actions.view")}
                            </DropdownMenuItem>
                            <DropdownMenuItem
                               onSelect={() => handleDeleteFile(file.fileName)}
                            >
-                              Delete
+                              {translate("common.actions.delete")}
                            </DropdownMenuItem>
                         </DropdownMenuContent>
                      </DropdownMenu>
@@ -162,13 +182,17 @@ export function AgentDetailsKnowledgeBaseCard({
             </CardContent>
             <CardFooter className="mt-auto flex items-center justify-between text-xs text-muted-foreground">
                <span>
-                  {uploadedFiles.length} of {AGENT_FILE_UPLOAD_LIMIT} files
-                  uploaded
+                  {uploadedFiles.length}{" "}
+                  {translate(
+                     "pages.agent-details.knowledge-base.file-count.files-uploaded",
+                  )}
                </span>
                <span>
                   {canAddMore
-                     ? `${remainingSlots} more file${remainingSlots > 1 ? "s" : ""} allowed`
-                     : "Upload limit reached"}
+                     ? `${remainingSlots} ${translate("pages.agent-details.knowledge-base.file-count.more-file")}${remainingSlots > 1 ? translate("pages.agent-details.knowledge-base.file-count.more-files") : ""} ${translate("pages.agent-details.knowledge-base.file-count.allowed")}`
+                     : translate(
+                          "pages.agent-details.knowledge-base.file-count.upload-limit-reached",
+                       )}
                </span>
             </CardFooter>
          </Card>

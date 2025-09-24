@@ -7,5 +7,12 @@
       "pagination": {
          "of": "de"
       }
+   },
+   "agent-card": {
+      "not-specified": "Não especificado"
+   },
+   "create-button": {
+      "aria-label": "Criar novo agente",
+      "text": "Criar um novo agente"
    }
 }

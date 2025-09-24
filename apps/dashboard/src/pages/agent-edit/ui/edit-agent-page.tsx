@@ -3,6 +3,7 @@ import { useTRPC } from "@/integrations/clients";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { translate } from "@packages/localization";
 export function EditAgentPage() {
    const navigate = useNavigate();
    const trpc = useTRPC();
@@ -12,14 +13,17 @@ export function EditAgentPage() {
    const agentMutation = useMutation(
       trpc.agent.update.mutationOptions({
          onSuccess: () => {
-            toast.success("Agent created successfully!");
+            toast.success(translate("pages.agent-edit.messages.success"));
             navigate({
                to: "/agents",
             });
          },
          onError: (error) => {
-            console.error("Error creating agent:", error);
-            toast.error("Failed to create agent");
+            console.error(
+               translate("pages.agent-edit.messages.error-console"),
+               error,
+            );
+            toast.error(translate("pages.agent-edit.messages.error"));
          },
       }),
    );
@@ -30,6 +34,7 @@ export function EditAgentPage() {
 
    return (
       <AgentCreationManualForm
+         mode="edit"
          onSubmit={async (values) => {
             await agentMutation.mutateAsync({
                id: agentId,

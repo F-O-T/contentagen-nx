@@ -1,0 +1,189 @@
+{
+   "title": "Create Agent",
+   "steps": {
+      "basic-info": "Basic Information",
+      "audience": "Audience",
+      "purpose": "Purpose",
+      "voice-tone": "Voice & Tone",
+      "brand": "Brand",
+      "language": "Language",
+      "formatting": "Formatting",
+      "review": "Review"
+   },
+   "mascot-messages": {
+      "basic-info": "Let's give your content agent a special name!",
+      "audience": "Who is your agent writing for?",
+      "purpose": "What is the main purpose or channel for this agent's content?",
+      "voice-tone": "Now, let's define your agent's voice and tone.",
+      "brand": "How closely should your agent follow your brand guidelines?",
+      "language": "What language and variant should your agent use?",
+      "formatting": "How should your agent format the content?",
+      "review": "Perfect! Review your agent configuration and create your agent.",
+      "default": "Let's get started with your agent's basic information."
+   },
+   "mascot-messages-edit": {
+      "basic-info": "Let's update your agent's information!",
+      "audience": "Who should your agent be writing for?",
+      "purpose": "What's the main purpose or channel for this agent's content?",
+      "voice-tone": "Let's adjust your agent's voice and tone.",
+      "brand": "How closely should your agent follow your brand guidelines?",
+      "language": "What language and variant should your agent use?",
+      "formatting": "How should your agent format the content?",
+      "review": "Perfect! Review your changes and update your agent.",
+      "default": "Let's update your agent's configuration."
+   },
+   "basic-info": {
+      "agent-name": {
+         "label": "Agent Name *",
+         "placeholder": "e.g., Tech News Agent"
+      },
+      "description": {
+         "label": "Description *",
+         "placeholder": "Describe what this agent does..."
+      }
+   },
+   "purpose": {
+      "primary-channel": {
+         "label": "Primary Channel *"
+      },
+      "options": {
+         "blog_post": "Blog Post"
+      }
+   },
+   "audience": {
+      "audience-base": {
+         "label": "Audience Base *"
+      },
+      "options": {
+         "general_public": "General Public",
+         "professionals": "Professionals",
+         "beginners": "Beginners",
+         "customers": "Customers"
+      }
+   },
+   "voice-tone": {
+      "communication-style": {
+         "label": "Communication Style *"
+      },
+      "example-communication": "Example Communication",
+      "first-person-example": "First Person Example:",
+      "first-person-text": {
+         "line1": "In my work with 500+ clients, I've discovered...",
+         "line2": "Let me walk you through my process...",
+         "line3": "I recommend this approach because I've personally tested it."
+      },
+      "third-person-example": "Third Person Example:",
+      "third-person-text": {
+         "line1": "[Brand] has developed a methodology that...",
+         "line2": "Their clients consistently achieve X% improvement because...",
+         "line3": "According to [Brand's] research, this approach is recommended."
+      },
+      "assistance-prompt": "How can I assist you?"
+   },
+   "language": {
+      "primary-language": {
+         "label": "Primary Language *"
+      },
+      "variant": {
+         "label": "Variant (optional)",
+         "placeholder": "Select variant...",
+         "placeholder-select-language": "Select primary language first"
+      },
+      "languages": {
+         "english": "English",
+         "portuguese": "Portuguese",
+         "spanish": "Spanish",
+         "english-us": "English (US)",
+         "english-uk": "English (UK)",
+         "portuguese-brazil": "Portuguese (Brazil)",
+         "portuguese-portugal": "Portuguese (Portugal)",
+         "spanish-spain": "Spanish (Spain)",
+         "spanish-mexico": "Spanish (Mexico)"
+      },
+      "none": "None"
+   },
+   "formatting": {
+      "style": {
+         "label": "Style *"
+      },
+      "list-style": "List Style",
+      "example-formatting": "Example Formatting",
+      "options": {
+         "structured": "Structured",
+         "narrative": "Narrative",
+         "list_based": "List Based",
+         "bullets": "Bullets",
+         "numbered": "Numbered"
+      },
+      "examples": {
+         "list-style": {
+            "bullets": {
+               "title": "Bulleted List Example:",
+               "items": ["Key point one", "Key point two", "Key point three"]
+            },
+            "numbered": {
+               "title": "Numbered List Example:",
+               "items": ["Step one", "Step two", "Step three"]
+            }
+         },
+         "fallback": "Sample output in the selected format."
+      }
+   },
+   "brand": {
+      "integration-style": {
+         "label": "Integration Style *"
+      },
+      "example-integration": "Example Integration",
+      "examples": {
+         "strict_guideline": {
+            "title": "Strict Guideline Example:",
+            "text": "All content must strictly follow brand guidelines and use only approved messaging.\nExplicitly include the brand name at least once in every response."
+         },
+         "flexible_guideline": {
+            "title": "Flexible Guideline Example:",
+            "text": "Use brand guidelines as a foundation, but adapt tone and style for context and audience.\nNaturally incorporate the brand name and products in a way that feels organic."
+         },
+         "reference_only": {
+            "title": "Reference Only Example:",
+            "text": "Treat the brand document as background knowledge.\nMention brand solutions only when directly relevant to the user's needs."
+         },
+         "creative_blend": {
+            "title": "Creative Blend Example:",
+            "text": "Use brand personality traits as inspiration for creative storytelling.\nIntegrate brand elements naturally into the narrative."
+         },
+         "default": "Sample integration message for the selected style."
+      },
+      "blacklist-words": {
+         "label": "Blacklist Words (optional)",
+         "placeholder": "Enter words to avoid..."
+      },
+      "options": {
+         "strict_guideline": "Strict Guideline",
+         "flexible_guideline": "Flexible Guideline",
+         "reference_only": "Reference Only",
+         "creative_blend": "Creative Blend"
+      }
+   },
+   "review": {
+      "fields": {
+         "agent-name": "Agent Name",
+         "audience": "Audience",
+         "purpose": "Purpose",
+         "brand-integration": "Brand Integration",
+         "language": "Language",
+         "formatting-style": "Formatting Style",
+         "communication-style": "Communication Style",
+         "language-variant": "Language Variant",
+         "list-style": "List Style",
+         "description": "Description",
+         "blacklist-words": "Blacklist Words"
+      },
+      "submitting": "Submitting...",
+      "submit": "Submit"
+   },
+   "actions": {
+      "next": "Next",
+      "back": "Back",
+      "create-agent": "Create Agent"
+   }
+}

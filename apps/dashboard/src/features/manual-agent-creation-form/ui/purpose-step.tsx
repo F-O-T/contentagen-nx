@@ -1,10 +1,19 @@
 import { Button } from "@packages/ui/components/button";
 import { PurposeChannelSchema } from "@packages/database/schemas/agent";
 import type { AgentForm } from "../lib/use-agent-form";
+import { translate } from "@packages/localization";
 
 // Helper function to convert schema values to display labels
 const getChannelLabel = (value: string): string => {
-   return value.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+   const purposeTranslations = {
+      blog_post: translate(
+         "pages.agent-creation-form.purpose.options.blog_post",
+      ),
+   } as const;
+
+   return (
+      purposeTranslations[value as keyof typeof purposeTranslations] || value
+   );
 };
 
 export function PurposeStep({ form }: { form: AgentForm }) {
@@ -15,7 +24,11 @@ export function PurposeStep({ form }: { form: AgentForm }) {
       <form.AppField name="purpose">
          {(field) => (
             <field.FieldContainer className="space-y-2">
-               <field.FieldLabel>Primary Channel *</field.FieldLabel>
+               <field.FieldLabel>
+                  {translate(
+                     "pages.agent-creation-form.purpose.primary-channel.label",
+                  )}
+               </field.FieldLabel>
                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                   {channelOptions.map((option) => (
                      <button
@@ -57,7 +70,7 @@ export function PurposeStepSubscribe({
             const isValid = value && (!errors || errors.length === 0);
             return (
                <Button onClick={next} type="button" disabled={!isValid}>
-                  Next
+                  {translate("pages.agent-creation-form.actions.next")}
                </Button>
             );
          }}

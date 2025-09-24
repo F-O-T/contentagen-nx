@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
 import { DeleteConfirmationCredenza } from "@packages/ui/components/delete-confirmation-credenza";
+import { translate } from "@packages/localization";
 import type { AgentSelect } from "@packages/database/schema";
 
 interface DeleteAllFilesProps {
@@ -27,7 +28,12 @@ export function DeleteAllFiles({
    const deleteAllMutation = useMutation(
       trpc.agentFile.deleteAllFiles.mutationOptions({
          onSuccess: async (data) => {
-            toast.success(data.message || "All files deleted successfully!");
+            toast.success(
+               data.message ||
+                  translate(
+                     "pages.agent-details.modals.delete-all-files.messages.success",
+                  ),
+            );
             await queryClient.invalidateQueries({
                queryKey: trpc.agent.get.queryKey({ id: agent.id }),
             });
@@ -35,7 +41,11 @@ export function DeleteAllFiles({
          },
          onError: (error) => {
             console.error("Delete all files error:", error);
-            toast.error("Failed to delete all files");
+            toast.error(
+               translate(
+                  "pages.agent-details.modals.delete-all-files.messages.error",
+               ),
+            );
          },
       }),
    );
@@ -53,7 +63,10 @@ export function DeleteAllFiles({
          open={isOpen}
          onOpenChange={setIsOpen}
          onDelete={handleDeleteAll}
-         message={`This will permanently delete all ${uploadedFilesCount} uploaded files for this agent, including documents, knowledge base entries, and file processing data. This action cannot be undone.`}
+         message={translate(
+            "pages.agent-details.modals.delete-all-files.message",
+            { count: uploadedFilesCount },
+         )}
       />
    );
 }

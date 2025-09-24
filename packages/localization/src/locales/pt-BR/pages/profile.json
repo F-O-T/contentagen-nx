@@ -22,21 +22,155 @@
       "current-plan": "Plano Atual",
       "usage": "Uso",
       "upgrade": "Fazer Upgrade",
-      "manage-billing": "Gerenciar Cobrança"
+      "manage-billing": "Gerenciar Cobrança",
+      "current-plan-title": "Plano atual",
+      "current-plan-description": "Estes são os detalhes do seu plano de assinatura atual. Você pode gerenciar sua assinatura ou visualizar métricas de uso abaixo.",
+      "manage-subscription": "Gerenciar assinatura",
+      "next-billing": "Próxima data de cobrança:",
+      "usage-this-month": "Uso este mês",
+      "usage-units": "unidades",
+      "remaining": "Restante:",
+      "remaining-value": "Valor restante:",
+      "approaching-limit": "Aproximando do limite",
+      "no-usage-meters": "Nenhum medidor de uso disponível para este plano.",
+      "no-active-plan": "Nenhum plano ativo",
+      "no-active-plan-description": "Você não possui um plano de assinatura ativo.",
+      "loading": "Plano atual",
+      "plan-features": "Recursos do Plano",
+      "usage-this-month-loading": "Uso Este Mês"
    },
    "sessions": {
       "title": "Sessões Ativas",
       "description": "Gerencie suas sessões de login ativas.",
       "current-session": "Sessão Atual",
       "revoke": "Revogar",
-      "revoke-all": "Revogar Todas as Outras Sessões"
+      "revoke-all": "Revogar Todas as Outras Sessões",
+      "sessions-title": "Sessões",
+      "sessions-description": "Visualize e gerencie suas sessões ativas. Revogue qualquer sessão para fazer logout desse dispositivo.",
+      "manage-sessions": "Gerenciar Sessões",
+      "revoke-other": "Revogar Outras Sessões",
+      "revoke-other-loading": "Revogando Outras Sessões...",
+      "revoke-all-sessions": "Revogar Todas as Sessões",
+      "revoke-all-loading": "Revogando Todas as Sessões...",
+      "no-sessions": "Nenhuma sessão ativa encontrada.",
+      "unknown-device": "Dispositivo Desconhecido",
+      "ip-address": "IP:",
+      "current": "Atual",
+      "session-actions": "Ações da Sessão",
+      "revoke-session": "Revogar Sessão",
+      "revoke-session-loading": "Revogando...",
+      "created": "Criado:",
+      "last-active": "Última Atividade:",
+      "revoke-confirm": "Tem certeza de que deseja revogar esta sessão?"
    },
    "preferences": {
       "title": "Preferências",
       "description": "Personalize sua experiência.",
       "workflow": {
          "title": "Preferências de Fluxo de Trabalho",
-         "notify-missing-images": "Notificar sobre imagens ausentes"
+         "notify-missing-images": "Notificar sobre imagens ausentes",
+         "workflow-title": "Preferências do fluxo de trabalho de conteúdo",
+         "workflow-description": "Personalize suas configurações de fluxo de trabalho de conteúdo.",
+         "missing-urls-title": "Notificar sobre URLs ausentes",
+         "missing-urls-description": "Receba notificações quando posts estiverem sem URLs de imagem."
+      }
+   },
+   "toast": {
+      "preference-updated": "Preferência atualizada com sucesso",
+      "preference-failed": "Falha ao atualizar preferência"
+   },
+   "forms": {
+      "update-profile": {
+         "title": "Atualizar Nome e Foto",
+         "fields": {
+            "name": {
+               "label": "Nome",
+               "placeholder": "Digite seu nome"
+            },
+            "image": {
+               "label": "Imagem do Perfil"
+            }
+         },
+         "actions": {
+            "cancel": "Cancelar",
+            "save": "Salvar Alterações"
+         },
+         "confirm": {
+            "title": "Confirmar Atualização do Perfil",
+            "description": "Tem certeza de que deseja atualizar as informações do seu perfil?",
+            "cancel": "Cancelar",
+            "confirm": "Sim, Atualizar Perfil"
+         },
+         "messages": {
+            "loading": "Atualizando perfil...",
+            "success": "Perfil atualizado com sucesso.",
+            "error": "Falha ao atualizar perfil."
+         },
+         "validation": {
+            "name-required": "Nome é obrigatório"
+         }
+      },
+      "update-email": {
+         "title": "Alterar Endereço de Email",
+         "fields": {
+            "current-email": {
+               "label": "Email Atual"
+            },
+            "new-email": {
+               "label": "Novo Email",
+               "placeholder": "Digite o novo endereço de email"
+            }
+         },
+         "actions": {
+            "cancel": "Cancelar",
+            "send": "Enviar Verificação"
+         },
+         "confirm": {
+            "title": "Confirmar Alteração de Email",
+            "description": "Tem certeza de que deseja alterar seu endereço de email?",
+            "cancel": "Cancelar",
+            "confirm": "Sim, Alterar Email"
+         },
+         "messages": {
+            "loading": "Enviando email de verificação...",
+            "success": "Email de verificação enviado. Verifique sua caixa de entrada.",
+            "error": "Falha ao alterar email."
+         },
+         "validation": {
+            "email-invalid": "Por favor, digite um endereço de email válido"
+         }
+      },
+      "update-password": {
+         "title": "Alterar Senha",
+         "fields": {
+            "current-password": {
+               "label": "Senha Atual",
+               "placeholder": "Digite a senha atual"
+            },
+            "new-password": {
+               "label": "Nova Senha",
+               "placeholder": "Digite a nova senha"
+            }
+         },
+         "actions": {
+            "cancel": "Cancelar",
+            "change": "Alterar Senha"
+         },
+         "confirm": {
+            "title": "Confirmar Alteração de Senha",
+            "description": "Tem certeza de que deseja alterar sua senha?",
+            "cancel": "Cancelar",
+            "confirm": "Sim, Alterar Senha"
+         },
+         "messages": {
+            "loading": "Alterando senha...",
+            "success": "Senha alterada com sucesso.",
+            "error": "Falha ao alterar senha."
+         },
+         "validation": {
+            "current-required": "Senha atual é obrigatória",
+            "new-min-length": "A senha deve ter pelo menos 8 caracteres"
+         }
       }
    }
 }

@@ -14,6 +14,7 @@ import {
    useQueryClient,
    useSuspenseQuery,
 } from "@tanstack/react-query";
+import { translate } from "@packages/localization";
 
 export function WorkflowPreferences() {
    const trpc = useTRPC();
@@ -38,9 +39,9 @@ export function WorkflowPreferences() {
             notifyMissingImages: checked,
          });
 
-         toast.success("Preference updated successfully");
+         toast.success(translate("pages.profile.toast.preference-updated"));
       } catch (error) {
-         toast.error("Failed to update preference");
+         toast.error(translate("pages.profile.toast.preference-failed"));
          console.error("Error updating workflow preference:", error);
       }
    };
@@ -48,17 +49,27 @@ export function WorkflowPreferences() {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>Content workflow Preferences</CardTitle>
+            <CardTitle>
+               {translate("pages.profile.preferences.workflow.workflow-title")}
+            </CardTitle>
             <CardDescription>
-               Customize your content workflow settings.
+               {translate(
+                  "pages.profile.preferences.workflow.workflow-description",
+               )}
             </CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
             <Card>
                <CardHeader>
-                  <CardTitle>Notify on missing urls</CardTitle>
+                  <CardTitle>
+                     {translate(
+                        "pages.profile.preferences.workflow.missing-urls-title",
+                     )}
+                  </CardTitle>
                   <CardDescription>
-                     Receive notifications when posts are missing image URLs.
+                     {translate(
+                        "pages.profile.preferences.workflow.missing-urls-description",
+                     )}
                   </CardDescription>
                   <CardAction>
                      <Switch

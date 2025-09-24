@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { FileText, Loader2 } from "lucide-react";
 import { Markdown } from "@packages/ui/components/markdown";
+import { translate } from "@packages/localization";
 import {
    Credenza,
    CredenzaBody,
@@ -53,7 +54,9 @@ export function FileViewerModal() {
                      {fileName}
                   </CredenzaTitle>
                   <CredenzaDescription>
-                     View the content of the selected file.
+                     {translate(
+                        "pages.agent-details.modals.file-viewer.description",
+                     )}
                   </CredenzaDescription>
                </CredenzaHeader>
                <CredenzaBody className="h-96 overflow-y-auto flex flex-col">
@@ -61,7 +64,9 @@ export function FileViewerModal() {
                      <div className="flex items-center justify-center h-32">
                         <Loader2 className="w-6 h-6 animate-spin" />
                         <span className="ml-2 text-muted-foreground">
-                           Loading content...
+                           {translate(
+                              "pages.agent-details.modals.file-viewer.loading",
+                           )}
                         </span>
                      </div>
                   ) : (

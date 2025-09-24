@@ -12,5 +12,9 @@
          "title": "Conteúdo Gerado (30d)",
          "description": "Peças de conteúdo geradas"
       }
+   },
+   "navigation": {
+      "agents": "Agentes",
+      "content": "Conteúdo"
    }
 }

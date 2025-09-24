@@ -19,7 +19,6 @@
    "content": {
       "title": "Prévia da Ideia",
       "description": "Prévia do conteúdo gerado",
-      "untitled": "Ideia Sem Título",
       "unknown-date": "Data desconhecida"
    },
    "meta": {
@@ -39,5 +38,9 @@
       "delete-success": "Ideia deletada com sucesso",
       "delete-error": "Erro ao deletar ideia",
       "unknown-error": "Erro desconhecido"
+   },
+   "confirmations": {
+      "approve-message": "Isso aprovará a ideia e a enviará para o pipeline de geração de conteúdo. Esta ação criará conteúdo baseado na ideia aprovada.",
+      "delete-message": "Isso excluirá permanentemente a ideia e todos os dados associados. Esta ação não pode ser desfeita."
    }
 }

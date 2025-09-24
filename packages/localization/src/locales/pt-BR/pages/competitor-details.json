@@ -1,0 +1,94 @@
+{
+   "mascot-message": "Visualize informações detalhadas sobre este concorrente e acompanhe suas funcionalidades!",
+   "section": {
+      "title": "Resumo da Análise da Marca",
+      "description": "Um resumo detalhado do seu concorrente."
+   },
+   "loading": {
+      "steps": {
+         "pending": {
+            "label": "Inicializando",
+            "description": "Configurando análise do concorrente"
+         },
+         "crawling": {
+            "label": "Coletando",
+            "description": "Coletando dados do site do concorrente"
+         },
+         "analyzing": {
+            "label": "Analisando",
+            "description": "Extraindo recursos e insights"
+         }
+      },
+      "progress": {
+         "step-counter": "Etapa {{current}} de {{total}}",
+         "percentage": "{{percent}}% concluído",
+         "fallback-message": "Processando dados do concorrente"
+      }
+   },
+   "info-card": {
+      "title": "Detalhes do seu concorrente",
+      "description": "Todos os detalhes sobre o seu concorrente",
+      "added-on": "Adicionado em",
+      "last-updated": "Última atualização"
+   },
+   "stats": {
+      "total-features": "Total de Funcionalidades",
+      "total-features-description": "Todas as funcionalidades detectadas rastreadas",
+      "average-confidence": "Confiança Média",
+      "average-confidence-description": "Confiança de detecção em todas as funcionalidades",
+      "high-confidence": "Alta Confiança",
+      "high-confidence-description": "Funcionalidades com >80% de confiança",
+      "medium-confidence": "Confiança Média",
+      "medium-confidence-description": "Funcionalidades com 50-80% de confiança"
+   },
+   "features": {
+      "title": "Funcionalidades Rastreadas",
+      "description": "Todas as funcionalidades dos seus concorrentes que estão sendo rastreadas",
+      "no-features": "Nenhuma funcionalidade rastreada ainda",
+      "no-features-description": "As funcionalidades serão extraídas automaticamente dos dados do concorrente",
+      "total-badge": "{{total}} total",
+      "confidence-badge": "{{confidence}}% de confiança",
+      "pagination": {
+         "previous": "Anterior",
+         "next": "Próximo",
+         "page-of": "Página {{current}} de {{total}}"
+      }
+   },
+   "knowledge-base": {
+      "title": "Conhecimento da marca do concorrente",
+      "description": "Arquivos gerados usando a URL do site do concorrente",
+      "indexed-badge": "100% indexado",
+      "no-files": "Nenhum arquivo da marca ainda",
+      "no-files-description": "Envie arquivos Markdown com valores, voz ou diretrizes da sua marca.",
+      "uploaded-on": "Enviado em {{date}}",
+      "files-count": "{{current}} de {{total}} arquivos enviados",
+      "remaining-files": "Mais {{count}} arquivo{{plural}} permitido{{plural}}",
+      "upload-limit-reached": "Limite de upload atingido",
+      "actions": {
+         "view": "Visualizar",
+         "delete": "Excluir"
+      },
+      "messages": {
+         "delete-success": "Arquivo excluído com sucesso!",
+         "delete-error": "Falha ao excluir arquivo"
+      }
+   },
+   "actions": {
+      "card": {
+         "title": "Ações Rápidas",
+         "description": "Execute tarefas comuns relacionadas ao concorrente."
+      },
+      "buttons": {
+         "visit-website": "Visitar Site",
+         "refresh-analysis": "Atualizar Análise",
+         "analyzing": "Analisando...",
+         "upload-logo": "Enviar Logo",
+         "edit-competitor": "Editar Concorrente",
+         "delete-competitor": "Excluir Concorrente"
+      }
+   },
+   "messages": {
+      "analysis-started": "Análise do concorrente iniciada!",
+      "analysis-error": "Erro ao iniciar análise: {{error}}"
+   }
+}

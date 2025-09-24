@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
+import { translate } from "@packages/localization";
 import { CompetitorCardsList } from "./competitor-cards-list";
 import { CompetitorCardsSkeleton } from "./competitor-cards-skeleton";
 import { CompetitorListToolbar } from "./competitor-list-toolbar";
@@ -11,7 +12,9 @@ import { CompetitorListProvider } from "../lib/competitor-list-context";
 function CompetitorListPageContent() {
    return (
       <main className="h-full w-full flex flex-col gap-4">
-         <TalkingMascot message="Track and analyze your competitors to stay ahead of the market!" />
+         <TalkingMascot
+            message={translate("pages.competitor-list.mascot-message")}
+         />
          <CompetitorListToolbar />
          <Suspense fallback={<CompetitorCardsSkeleton />}>
             <CompetitorCardsList />

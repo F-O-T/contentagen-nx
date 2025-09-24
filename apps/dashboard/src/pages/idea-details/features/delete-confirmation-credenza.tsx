@@ -1,4 +1,5 @@
 import { DeleteConfirmationCredenza } from "@packages/ui/components/delete-confirmation-credenza";
+import { translate } from "@packages/localization";
 
 interface DeleteConfirmationCredenzaProps {
    open: boolean;
@@ -16,7 +17,7 @@ export function IdeaDeleteConfirmationCredenza({
          open={open}
          onOpenChange={onOpenChange}
          onDelete={onConfirm}
-         message="This will permanently delete the idea and all associated data. This action cannot be undone."
+         message={translate("pages.idea-details.confirmations.delete-message")}
       />
    );
 }

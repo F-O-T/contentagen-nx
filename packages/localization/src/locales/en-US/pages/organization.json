@@ -1,0 +1,82 @@
+{
+   "title": "Organization Management",
+   "mascot-message": "Create and manage your organization here. Invite team members and control access.",
+   "details": {
+      "title": "Organization Details",
+      "description": "View your organization info and invite new members."
+   },
+   "fields": {
+      "name": "Name",
+      "created-at": "Created At",
+      "members": "Members"
+   },
+   "actions": {
+      "edit": "Edit Organization",
+      "invite-member": "Invite Member",
+      "manage-members": "Manage Members",
+      "delete": "Delete Organization"
+   },
+   "members": {
+      "title": "Members",
+      "invite": "Invite New Member",
+      "role": "Role",
+      "joined": "Joined",
+      "actions": "Actions",
+      "remove": "Remove",
+      "change-role": "Change Role"
+   },
+   "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+   },
+   "invitations": {
+      "title": "Pending Invitations",
+      "email": "Email",
+      "role": "Role",
+      "invited": "Invited",
+      "cancel": "Cancel",
+      "resend": "Resend"
+   },
+   "messages": {
+      "no-organization": "No organization found. Please create one to continue.",
+      "no-members": "No members found.",
+      "invite-success": "Invitation sent successfully!",
+      "invite-error": "Failed to send invitation. Please try again.",
+      "remove-success": "Member removed successfully!",
+      "remove-error": "Failed to remove member. Please try again.",
+      "update-success": "Organization updated successfully!",
+      "update-error": "Failed to update organization. Please try again."
+   },
+   "modals": {
+      "invite": {
+         "title": "Invite Member",
+         "description": "Enter the email address of the person you want to invite as a member.",
+         "email-label": "Email",
+         "email-placeholder": "Enter email address",
+         "role-label": "Role",
+         "send": "Send Invitation",
+         "cancel": "Cancel"
+      },
+      "remove": {
+         "title": "Remove Member",
+         "description": "Are you sure you want to remove this member from the organization?",
+         "confirm": "Remove",
+         "cancel": "Cancel"
+      },
+      "delete": {
+         "title": "Delete Organization",
+         "description": "Are you sure you want to delete this organization? This action cannot be undone.",
+         "confirm": "Delete",
+         "cancel": "Cancel"
+      }
+   },
+   "toasts": {
+      "invitation-sent": "Invitation sent to {{email}}",
+      "invitation-failed": "Failed to send invitation",
+      "invalid-email": "Please enter a valid email"
+   },
+   "table": {
+      "email": "Email"
+   }
+}

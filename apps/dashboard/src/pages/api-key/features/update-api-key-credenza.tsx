@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, type FormEvent } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { translate } from "@packages/localization";
 
 export function UpdateApiKeyCredenza({
    keyId,
@@ -29,7 +30,9 @@ export function UpdateApiKeyCredenza({
 }) {
    const trpc = useTRPC();
    const schema = z.object({
-      name: z.string("Please enter a name").min(1, "Name is required"),
+      name: z
+         .string(translate("common.form.field-required"))
+         .min(1, translate("common.form.field-required")),
    });
    const queryClient = useQueryClient();
 
@@ -42,7 +45,9 @@ export function UpdateApiKeyCredenza({
             },
             {
                onSuccess: async () => {
-                  toast.success("API key updated successfully");
+                  toast.success(
+                     translate("pages.api-key.messages.update-success"),
+                  );
                   await queryClient.invalidateQueries({
                      queryKey: trpc.authHelpers.getApiKeys.queryKey(),
                   });
@@ -50,7 +55,7 @@ export function UpdateApiKeyCredenza({
                },
                onError: (e) => {
                   console.error("Error updating API key:", e);
-                  toast.error("Failed to update API key");
+                  toast.error(translate("pages.api-key.messages.update-error"));
                },
             },
          );
@@ -82,9 +87,11 @@ export function UpdateApiKeyCredenza({
       <Credenza open={open} onOpenChange={onOpenChange}>
          <CredenzaContent>
             <CredenzaHeader>
-               <CredenzaTitle>Update API key</CredenzaTitle>
+               <CredenzaTitle>
+                  {translate("pages.api-key.modals.update.title")}
+               </CredenzaTitle>
                <CredenzaDescription>
-                  You can only update the name of your API key.
+                  {translate("pages.api-key.modals.update.description")}
                </CredenzaDescription>
             </CredenzaHeader>
             <form onSubmit={handleSubmit}>
@@ -92,7 +99,11 @@ export function UpdateApiKeyCredenza({
                   <form.AppField name="name">
                      {(field) => (
                         <field.FieldContainer>
-                           <field.FieldLabel>Name</field.FieldLabel>
+                           <field.FieldLabel>
+                              {translate(
+                                 "pages.api-key.modals.update.name-label",
+                              )}
+                           </field.FieldLabel>
                            <Input
                               id={field.name}
                               name={field.name}
@@ -100,7 +111,9 @@ export function UpdateApiKeyCredenza({
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder="Enter a new name for your API key"
+                              placeholder={translate(
+                                 "pages.api-key.modals.update.name-placeholder",
+                              )}
                               value={field.state.value}
                            />
                            <field.FieldMessage />
@@ -119,7 +132,7 @@ export function UpdateApiKeyCredenza({
                            type="submit"
                            variant="default"
                         >
-                           Update API Key
+                           {translate("pages.api-key.modals.update.update")}
                         </Button>
                      )}
                   </form.Subscribe>

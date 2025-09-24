@@ -1,0 +1,8 @@
+{
+   "title": "Editar Agente",
+   "messages": {
+      "success": "Agente atualizado com sucesso!",
+      "error": "Falha ao atualizar agente",
+      "error-console": "Erro ao atualizar agente:"
+   }
+}

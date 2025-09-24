@@ -125,13 +125,17 @@ export function ForgotPasswordPage() {
                                  {(field) => (
                                     <field.FieldContainer>
                                        <field.FieldLabel>
-                                          New password
+                                          {translate(
+                                             "pages.forgot-password.labels.new-password",
+                                          )}
                                        </field.FieldLabel>
                                        <PasswordInput
                                           value={field.state.value}
                                           id={field.name}
                                           name={field.name}
-                                          placeholder="Enter your new password"
+                                          placeholder={translate(
+                                             "pages.forgot-password.placeholders.enter-new-password",
+                                          )}
                                           autoComplete="new-password"
                                           onBlur={field.handleBlur}
                                           onChange={(e) =>
@@ -146,13 +150,17 @@ export function ForgotPasswordPage() {
                                  {(field) => (
                                     <field.FieldContainer>
                                        <field.FieldLabel>
-                                          Confirm new password
+                                          {translate(
+                                             "pages.forgot-password.labels.confirm-new-password",
+                                          )}
                                        </field.FieldLabel>
                                        <PasswordInput
                                           value={field.state.value}
                                           id={field.name}
                                           name={field.name}
-                                          placeholder="Confirm your new password"
+                                          placeholder={translate(
+                                             "pages.forgot-password.placeholders.confirm-new-password",
+                                          )}
                                           autoComplete="new-password"
                                           onBlur={field.handleBlur}
                                           onChange={(e) =>
@@ -173,7 +181,7 @@ export function ForgotPasswordPage() {
                            disabled={methods.isFirst}
                            type="button"
                         >
-                           Previous
+                           {translate("pages.forgot-password.actions.previous")}
                         </Button>
                         {methods.isLast ? (
                            <form.Subscribe>
@@ -187,7 +195,9 @@ export function ForgotPasswordPage() {
                                     className="shadow-lg transition-all duration-300 group bg-primary shadow-primary/20 hover:bg-primary/90 flex gap-2 items-center justify-center"
                                     type="submit"
                                  >
-                                    Reset password
+                                    {translate(
+                                       "pages.forgot-password.actions.reset-password",
+                                    )}
                                  </Button>
                               )}
                            </form.Subscribe>
@@ -212,7 +222,9 @@ export function ForgotPasswordPage() {
                                        type="button"
                                        disabled={!isEmailValid || sendingOtp}
                                     >
-                                       Next
+                                       {translate(
+                                          "pages.forgot-password.actions.next",
+                                       )}
                                     </Button>
                                  );
                               }}
@@ -223,12 +235,14 @@ export function ForgotPasswordPage() {
                </CardContent>
                <CardFooter className="flex items-center justify-center">
                   <p className="text-sm text-center">
-                     Remembered your password?
+                     {translate(
+                        "pages.forgot-password.actions.remembered-password",
+                     )}
                      <Link
                         to="/auth/sign-in"
                         className="ml-1 underline text-muted-foreground"
                      >
-                        Sign in
+                        {translate("pages.forgot-password.actions.sign-in")}
                      </Link>
                   </p>
                </CardFooter>

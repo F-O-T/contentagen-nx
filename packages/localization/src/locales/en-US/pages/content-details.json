@@ -7,13 +7,25 @@
       "content-quality-description": "AI-assessed quality score"
    },
    "details": {
-      "basic-info": "Basic Information",
+      "basic-info": "Content Details",
+      "basic-info-description": "Basic information about your content",
       "meta-info": "Meta Information",
+      "meta-info-description": "Keywords, sources, and technical details",
       "title": "Title",
+      "description": "Description",
       "status": "Status",
       "agent": "Agent",
-      "created": "Created",
-      "updated": "Updated"
+      "created": "Created At",
+      "updated": "Last Updated",
+      "keywords": "Keywords",
+      "sources": "Sources",
+      "slug": "Slug",
+      "related-slugs": "Related Slugs",
+      "related-slugs-none": "None",
+      "read-time": "Read Time",
+      "read-time-minutes": "{{minutes}} min",
+      "content-stats": "Content Stats",
+      "content-stats-description": "Statistics and metadata about your generated content"
    },
    "quick-actions": {
       "title": "Quick Actions",
@@ -29,22 +41,99 @@
    },
    "versions": {
       "title": "Content Versions",
-      "description": "View and manage different versions of this content.",
+      "description": "A history of all changes made to this content",
       "current": "Current",
-      "view-details": "View Details"
+      "view-details": "View Details",
+      "no-versions": "No versions available yet.",
+      "version-number": "Version {{number}}",
+      "changes-count": "Changes made in this version {{count}}"
    },
    "content": {
       "title": "Generated Content",
+      "description": "Your AI-generated content with export and edit options",
       "loading": "Generating content...",
       "edit": "Edit Content",
       "save": "Save Changes",
       "cancel": "Cancel"
+   },
+   "loading": {
+      "steps": {
+         "pending": {
+            "label": "Initializing",
+            "description": "Setting up your content generation"
+         },
+         "planning": {
+            "label": "Planning",
+            "description": "Analyzing requirements and creating strategy"
+         },
+         "researching": {
+            "label": "Researching",
+            "description": "Gathering relevant information and data"
+         },
+         "writing": {
+            "label": "Writing",
+            "description": "Writing your content"
+         },
+         "grammar_checking": {
+            "label": "Grammar Checking",
+            "description": "Checking and correcting grammar"
+         },
+         "editing": {
+            "label": "Editing",
+            "description": "Refining and polishing the content"
+         },
+         "analyzing": {
+            "label": "Analyzing",
+            "description": "Quality check and metadata generation"
+         }
+      },
+      "progress": {
+         "step-counter": "Step {{current}} of {{total}}",
+         "percentage": "{{percent}}% complete",
+         "fallback-message": "Processing your content"
+      }
+   },
+   "edit": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "placeholder": "Edit your content...",
+      "success": "Content body edited successfully!",
+      "error": "Failed to edit content body. Please try again.",
+      "validation": {
+         "body-required": "Body is required"
+      }
+   },
+   "upload": {
+      "title": "Upload Content Image",
+      "description": "Upload an image for your content. The image will be displayed with your generated content.",
+      "success": "Image uploaded successfully!",
+      "error": "Failed to upload image",
+      "uploading": "Uploading...",
+      "upload-button": "Upload Image",
+      "validation": {
+         "invalid-file": "Please select an image file",
+         "file-too-large": "File size must be less than 10MB"
+      }
+   },
+   "messages": {
+      "regenerate-success": "Content regeneration triggered!",
+      "regenerate-error": "Error regenerating content: {{error}}",
+      "approve-success": "Content approved successfully!",
+      "approve-error": "Error approving content: {{error}}",
+      "delete-success": "Content deleted successfully",
+      "delete-error": "Error deleting content: {{error}}",
+      "share-success": "Content {{status}} successfully!",
+      "share-error": "Error toggling share status: {{error}}",
+      "status-updated": "Content status updated to {{status}}",
+      "untitled-content": "Untitled Content"
    },
    "status": {
       "draft": "Draft",
       "pending": "Pending",
       "published": "Published",
       "generating": "Generating",
-      "failed": "Failed"
+      "failed": "Failed",
+      "shared": "shared",
+      "private": "made private"
    }
 }

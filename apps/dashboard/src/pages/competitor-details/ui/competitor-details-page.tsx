@@ -1,4 +1,5 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
+import { translate } from "@packages/localization";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
@@ -103,7 +104,9 @@ export function CompetitorDetailsPage() {
       <>
          <main className="h-full w-full flex flex-col gap-4">
             {!isAnalyzingAnalysis && (
-               <TalkingMascot message="View detailed information about this competitor and track their features!" />
+               <TalkingMascot
+                  message={translate("pages.competitor-details.mascot-message")}
+               />
             )}
 
             {isAnalyzingAnalysis && competitor?.featuresStatus ? (
@@ -127,10 +130,14 @@ export function CompetitorDetailsPage() {
                      <Card>
                         <CardHeader>
                            <CardTitle className="flex items-center gap-2">
-                              Brand Analysis Summary
+                              {translate(
+                                 "pages.competitor-details.section.title",
+                              )}
                            </CardTitle>
                            <CardDescription>
-                              A detailed summary of your competitor.
+                              {translate(
+                                 "pages.competitor-details.section.description",
+                              )}
                            </CardDescription>
                         </CardHeader>
                         <CardContent>

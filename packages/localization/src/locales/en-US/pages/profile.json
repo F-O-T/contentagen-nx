@@ -22,21 +22,155 @@
       "current-plan": "Current Plan",
       "usage": "Usage",
       "upgrade": "Upgrade Plan",
-      "manage-billing": "Manage Billing"
+      "manage-billing": "Manage Billing",
+      "current-plan-title": "Current plan",
+      "current-plan-description": "This is your current subscription plan details. You can manage your subscription or view usage metrics below.",
+      "manage-subscription": "Manage subscription",
+      "next-billing": "Next billing date:",
+      "usage-this-month": "Usage this month",
+      "usage-units": "units",
+      "remaining": "Remaining:",
+      "remaining-value": "Remaining value:",
+      "approaching-limit": "Approaching limit",
+      "no-usage-meters": "No usage meters available for this plan.",
+      "no-active-plan": "No active plan",
+      "no-active-plan-description": "You don't have an active subscription plan.",
+      "loading": "Current plan",
+      "plan-features": "Plan Features",
+      "usage-this-month-loading": "Usage This Month"
    },
    "sessions": {
       "title": "Active Sessions",
       "description": "Manage your active login sessions.",
       "current-session": "Current Session",
       "revoke": "Revoke",
-      "revoke-all": "Revoke All Other Sessions"
+      "revoke-all": "Revoke All Other Sessions",
+      "sessions-title": "Sessions",
+      "sessions-description": "View and manage your active sessions. Revoke any session to log out from that device.",
+      "manage-sessions": "Manage Sessions",
+      "revoke-other": "Revoke Other Sessions",
+      "revoke-other-loading": "Revoking Other Sessions...",
+      "revoke-all-sessions": "Revoke All Sessions",
+      "revoke-all-loading": "Revoking All Sessions...",
+      "no-sessions": "No active sessions found.",
+      "unknown-device": "Unknown Device",
+      "ip-address": "IP:",
+      "current": "Current",
+      "session-actions": "Session Actions",
+      "revoke-session": "Revoke Session",
+      "revoke-session-loading": "Revoking...",
+      "created": "Created:",
+      "last-active": "Last Active:",
+      "revoke-confirm": "Are you sure you want to revoke this session?"
    },
    "preferences": {
       "title": "Preferences",
       "description": "Customize your experience.",
       "workflow": {
          "title": "Workflow Preferences",
-         "notify-missing-images": "Notify about missing images"
+         "notify-missing-images": "Notify about missing images",
+         "workflow-title": "Content workflow Preferences",
+         "workflow-description": "Customize your content workflow settings.",
+         "missing-urls-title": "Notify on missing urls",
+         "missing-urls-description": "Receive notifications when posts are missing image URLs."
+      }
+   },
+   "toast": {
+      "preference-updated": "Preference updated successfully",
+      "preference-failed": "Failed to update preference"
+   },
+   "forms": {
+      "update-profile": {
+         "title": "Update Name & Photo",
+         "fields": {
+            "name": {
+               "label": "Name",
+               "placeholder": "Enter your name"
+            },
+            "image": {
+               "label": "Profile Image"
+            }
+         },
+         "actions": {
+            "cancel": "Cancel",
+            "save": "Save Changes"
+         },
+         "confirm": {
+            "title": "Confirm Profile Update",
+            "description": "Are you sure you want to update your profile information?",
+            "cancel": "Cancel",
+            "confirm": "Yes, Update Profile"
+         },
+         "messages": {
+            "loading": "Updating profile...",
+            "success": "Profile updated successfully.",
+            "error": "Failed to update profile."
+         },
+         "validation": {
+            "name-required": "Name is required"
+         }
+      },
+      "update-email": {
+         "title": "Change Email Address",
+         "fields": {
+            "current-email": {
+               "label": "Current Email"
+            },
+            "new-email": {
+               "label": "New Email",
+               "placeholder": "Enter new email address"
+            }
+         },
+         "actions": {
+            "cancel": "Cancel",
+            "send": "Send Verification"
+         },
+         "confirm": {
+            "title": "Confirm Email Change",
+            "description": "Are you sure you want to change your email address?",
+            "cancel": "Cancel",
+            "confirm": "Yes, Change Email"
+         },
+         "messages": {
+            "loading": "Sending verification email...",
+            "success": "Verification email sent. Please check your inbox.",
+            "error": "Failed to change email."
+         },
+         "validation": {
+            "email-invalid": "Please enter a valid email address"
+         }
+      },
+      "update-password": {
+         "title": "Change Password",
+         "fields": {
+            "current-password": {
+               "label": "Current Password",
+               "placeholder": "Enter current password"
+            },
+            "new-password": {
+               "label": "New Password",
+               "placeholder": "Enter new password"
+            }
+         },
+         "actions": {
+            "cancel": "Cancel",
+            "change": "Change Password"
+         },
+         "confirm": {
+            "title": "Confirm Password Change",
+            "description": "Are you sure you want to change your password?",
+            "cancel": "Cancel",
+            "confirm": "Yes, Change Password"
+         },
+         "messages": {
+            "loading": "Changing password...",
+            "success": "Password changed successfully.",
+            "error": "Failed to change password."
+         },
+         "validation": {
+            "current-required": "Current password is required",
+            "new-min-length": "Password must be at least 8 characters"
+         }
       }
    }
 }

@@ -1,0 +1,94 @@
+{
+   "mascot-message": "View detailed information about this competitor and track their features!",
+   "section": {
+      "title": "Brand Analysis Summary",
+      "description": "A detailed summary of your competitor."
+   },
+   "loading": {
+      "steps": {
+         "pending": {
+            "label": "Initializing",
+            "description": "Setting up competitor analysis"
+         },
+         "crawling": {
+            "label": "Crawling",
+            "description": "Gathering data from competitor website"
+         },
+         "analyzing": {
+            "label": "Analyzing",
+            "description": "Extracting features and insights"
+         }
+      },
+      "progress": {
+         "step-counter": "Step {{current}} of {{total}}",
+         "percentage": "{{percent}}% complete",
+         "fallback-message": "Processing competitor data"
+      }
+   },
+   "info-card": {
+      "title": "Your competitor details",
+      "description": "All the details about your competitor",
+      "added-on": "Added on",
+      "last-updated": "Last updated"
+   },
+   "stats": {
+      "total-features": "Total Features",
+      "total-features-description": "All tracked features detected",
+      "average-confidence": "Average Confidence",
+      "average-confidence-description": "Detection confidence across all features",
+      "high-confidence": "High Confidence",
+      "high-confidence-description": "Features with >80% confidence",
+      "medium-confidence": "Medium Confidence",
+      "medium-confidence-description": "Features with 50-80% confidence"
+   },
+   "features": {
+      "title": "Tracked Features",
+      "description": "All the features of your competitors that are being tracked",
+      "no-features": "No features tracked yet",
+      "no-features-description": "Features will be automatically extracted from competitor data",
+      "total-badge": "{{total}} total",
+      "confidence-badge": "{{confidence}}% confidence",
+      "pagination": {
+         "previous": "Previous",
+         "next": "Next",
+         "page-of": "Page {{current}} of {{total}}"
+      }
+   },
+   "knowledge-base": {
+      "title": "Competitor brand Knowledge",
+      "description": "Files generated using the competitor's website url",
+      "indexed-badge": "100% indexed",
+      "no-files": "No brand files yet",
+      "no-files-description": "Upload Markdown files with your brand's values, voice, or guidelines.",
+      "uploaded-on": "Uploaded {{date}}",
+      "files-count": "{{current}} of {{total}} files uploaded",
+      "remaining-files": "{{count}} more file{{plural}} allowed",
+      "upload-limit-reached": "Upload limit reached",
+      "actions": {
+         "view": "View",
+         "delete": "Delete"
+      },
+      "messages": {
+         "delete-success": "File deleted successfully!",
+         "delete-error": "Failed to delete file"
+      }
+   },
+   "actions": {
+      "card": {
+         "title": "Quick Actions",
+         "description": "Perform common tasks related to the competitor."
+      },
+      "buttons": {
+         "visit-website": "Visit Website",
+         "refresh-analysis": "Refresh Analysis",
+         "analyzing": "Analyzing...",
+         "upload-logo": "Upload Logo",
+         "edit-competitor": "Edit Competitor",
+         "delete-competitor": "Delete Competitor"
+      }
+   },
+   "messages": {
+      "analysis-started": "Competitor analysis started!",
+      "analysis-error": "Error starting analysis: {{error}}"
+   }
+}

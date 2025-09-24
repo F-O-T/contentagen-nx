@@ -29,5 +29,20 @@
    "footer": {
       "have-account": "Já tem uma conta?",
       "sign-in-link": "Entre aqui"
+   },
+   "validation": {
+      "email-invalid": "Digite um email válido",
+      "name-min-length": "Digite um nome válido",
+      "password-min-length": "Digite uma senha com pelo menos 8 caracteres",
+      "passwords-no-match": "As senhas não coincidem"
+   },
+   "errors": {
+      "unknown": "Erro desconhecido",
+      "user-exists": "Este email já está registrado"
+   },
+   "messages": {
+      "loading": "Criando conta...",
+      "success": "Conta criada com sucesso",
+      "welcome": "Bem-vindo"
    }
 }

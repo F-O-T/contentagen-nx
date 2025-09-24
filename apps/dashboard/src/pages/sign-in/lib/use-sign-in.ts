@@ -5,18 +5,23 @@ import { type FormEvent, useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { betterAuthClient } from "@/integrations/clients";
+import { translate } from "@packages/localization";
 
 type codes = "INVALID_EMAIL_OR_PASSWORD" | "default";
 export const useSignIn = () => {
    const schema = z.object({
-      email: z.email("Please enter a valid email address"),
-      password: z.string().min(8, "Password must be at least 8 characters"),
+      email: z.email(translate("pages.sign-in.validation.email-invalid")),
+      password: z
+         .string()
+         .min(8, translate("pages.sign-in.validation.password-min-length")),
    });
    const router = useRouter();
    const getErrorMessage = useMemo(
       () => ({
-         default: "Unknown error",
-         INVALID_EMAIL_OR_PASSWORD: "Invalid email or password",
+         default: translate("pages.sign-in.errors.unknown"),
+         INVALID_EMAIL_OR_PASSWORD: translate(
+            "pages.sign-in.errors.invalid-credentials",
+         ),
       }),
       [],
    );
@@ -29,14 +34,15 @@ export const useSignIn = () => {
          {
             onError: ({ error }) => {
                toast.error(
-                  getErrorMessage[error.code as codes] || "Unknown error",
+                  getErrorMessage[error.code as codes] ||
+                     translate("pages.sign-in.errors.unknown"),
                   {
                      id: "sign-in-toast",
                   },
                );
             },
             onRequest: () => {
-               toast.loading("Signing in...", {
+               toast.loading(translate("pages.sign-in.messages.loading"), {
                   id: "sign-in-toast",
                });
             },
@@ -53,20 +59,24 @@ export const useSignIn = () => {
             {
                onError: ({ error }) => {
                   toast.error(
-                     getErrorMessage[error.code as codes] || "Unknown error",
+                     getErrorMessage[error.code as codes] ||
+                        translate("pages.sign-in.errors.unknown"),
                      {
                         id: "sign-in-toast",
                      },
                   );
                },
                onRequest: () => {
-                  toast.loading("Signing in...", {
+                  toast.loading(translate("pages.sign-in.messages.loading"), {
                      id: "sign-in-toast",
                   });
                },
                onSuccess: ({ data }) => {
-                  toast.success("Sign in successful", {
-                     description: `Welcome to ${brandConfig.name} ${data.user.name}`,
+                  toast.success(translate("pages.sign-in.messages.success"), {
+                     description: translate("pages.sign-in.messages.welcome", {
+                        brand: brandConfig.name,
+                        name: data.user.name,
+                     }),
                      id: "sign-in-toast",
                   });
                   router.navigate({

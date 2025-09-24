@@ -7,13 +7,16 @@ import {
    CardTitle,
 } from "@packages/ui/components/card";
 import { WorkflowPreferences } from "./workflow-preferences";
+import { translate } from "@packages/localization";
 
 export function PreferencesSection() {
    return (
       <div className="space-y-6">
          <Card>
             <CardHeader>
-               <CardTitle>Preferences</CardTitle>
+               <CardTitle>
+                  {translate("pages.profile.preferences.title")}
+               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4">
                <ThemeToggler />

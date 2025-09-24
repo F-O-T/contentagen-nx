@@ -16,6 +16,7 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useCallback } from "react";
 import { SubscriptionPricingCards } from "@/widgets/subscription/ui/subscription-pricing-cards";
+import { translate } from "@packages/localization";
 
 export function ProfilePageBilling() {
    const trpc = useTRPC();
@@ -40,7 +41,7 @@ export function ProfilePageBilling() {
             <CardHeader>
                <CardTitle className="flex items-center">
                   <div className="flex items-center gap-2">
-                     Current plan
+                     {translate("pages.profile.billing.loading")}
                      <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
                   </div>
                </CardTitle>
@@ -60,7 +61,7 @@ export function ProfilePageBilling() {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                      <h4 className="font-medium text-foreground mb-3">
-                        Plan Features
+                        {translate("pages.profile.billing.plan-features")}
                      </h4>
                      <div className="space-y-2">
                         {[1, 2, 3].map((i) => (
@@ -74,7 +75,9 @@ export function ProfilePageBilling() {
 
                   <div>
                      <h4 className="font-medium text-foreground mb-3">
-                        Usage This Month
+                        {translate(
+                           "pages.profile.billing.usage-this-month-loading",
+                        )}
                      </h4>
                      <div className="space-y-4">
                         {[1, 2, 3].map((i) => (
@@ -103,9 +106,13 @@ export function ProfilePageBilling() {
       return (
          <Card>
             <CardHeader>
-               <CardTitle>No active plan</CardTitle>
+               <CardTitle>
+                  {translate("pages.profile.billing.no-active-plan")}
+               </CardTitle>
                <CardDescription>
-                  You don't have an active subscription plan.
+                  {translate(
+                     "pages.profile.billing.no-active-plan-description",
+                  )}
                </CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -233,14 +240,15 @@ export function ProfilePageBilling() {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>Current plan</CardTitle>
+            <CardTitle>
+               {translate("pages.profile.billing.current-plan-title")}
+            </CardTitle>
             <CardDescription>
-               This is your current subscription plan details. You can manage
-               your subscription or view usage metrics below.
+               {translate("pages.profile.billing.current-plan-description")}
             </CardDescription>
             <CardAction>
                <Button onClick={handleManageSubscription} variant="outline">
-                  Manage subscription
+                  {translate("pages.profile.billing.manage-subscription")}
                </Button>
             </CardAction>
          </CardHeader>
@@ -257,7 +265,7 @@ export function ProfilePageBilling() {
                      </span>
                   </h3>
                   <p className="text-sm text-foreground/70">
-                     Next billing date:{" "}
+                     {translate("pages.profile.billing.next-billing")}{" "}
                      {formatDate(activeSubscription.currentPeriodEnd)}
                   </p>
                </div>
@@ -273,7 +281,7 @@ export function ProfilePageBilling() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <div>
                   <h4 className="font-medium text-foreground mb-3">
-                     Usage this month
+                     {translate("pages.profile.billing.usage-this-month")}
                   </h4>
                   <div className="space-y-4">
                      {selectedMeter ? (
@@ -286,7 +294,9 @@ export function ProfilePageBilling() {
                                  {selectedMeter.creditedUnits === -1
                                     ? "∞"
                                     : selectedMeter.creditedUnits.toLocaleString()}{" "}
-                                 units
+                                 {translate(
+                                    "pages.profile.billing.usage-units",
+                                 )}
                               </span>
                               {meterDetails?.consumedFormatted && (
                                  <span className="text-sm font-semibold text-green-600">
@@ -297,19 +307,23 @@ export function ProfilePageBilling() {
                            <Progress value={usagePercentage} className="h-2" />
                            <div className="flex justify-between text-xs text-foreground/60 mt-1">
                               <span>
-                                 Remaining:{" "}
+                                 {translate("pages.profile.billing.remaining")}{" "}
                                  {selectedMeter.creditedUnits === -1
                                     ? "∞"
                                     : (
                                          selectedMeter.creditedUnits -
                                          selectedMeter.consumedUnits
                                       ).toLocaleString()}{" "}
-                                 units
+                                 {translate(
+                                    "pages.profile.billing.usage-units",
+                                 )}
                               </span>
                               {meterDetails &&
                                  selectedMeter.creditedUnits !== -1 && (
                                     <span>
-                                       Remaining value:{" "}
+                                       {translate(
+                                          "pages.profile.billing.remaining-value",
+                                       )}{" "}
                                        {formatCurrency(
                                           Math.round(
                                              (selectedMeter.creditedUnits -
@@ -325,13 +339,15 @@ export function ProfilePageBilling() {
                               selectedMeter.creditedUnits !== -1 && (
                                  <p className="text-xs text-orange-600 mt-1 flex items-center">
                                     <AlertCircle className="h-3 w-3 mr-1" />
-                                    Approaching limit
+                                    {translate(
+                                       "pages.profile.billing.approaching-limit",
+                                    )}
                                  </p>
                               )}
                         </div>
                      ) : (
                         <p className="text-sm text-foreground/60">
-                           No usage meters available for this plan.
+                           {translate("pages.profile.billing.no-usage-meters")}
                         </p>
                      )}
                   </div>

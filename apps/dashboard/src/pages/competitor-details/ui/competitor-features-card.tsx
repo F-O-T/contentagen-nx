@@ -13,6 +13,7 @@ import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { translate } from "@packages/localization";
 
 interface CompetitorFeaturesCardProps {
    competitorId: string;
@@ -40,15 +41,20 @@ export function CompetitorFeaturesCard({
          <Card>
             <CardHeader>
                <CardTitle className="flex items-center gap-2">
-                  Tracked Features
+                  {translate("pages.competitor-details.features.title")}
                </CardTitle>
             </CardHeader>
             <CardContent>
                <div className="text-center py-8">
-                  <p className="text-gray-500 mb-2">No features tracked yet</p>
+                  <p className="text-gray-500 mb-2">
+                     {translate(
+                        "pages.competitor-details.features.no-features",
+                     )}
+                  </p>
                   <p className="text-sm text-gray-400">
-                     Features will be automatically extracted from competitor
-                     data
+                     {translate(
+                        "pages.competitor-details.features.no-features-description",
+                     )}
                   </p>
                </div>
             </CardContent>
@@ -68,13 +74,17 @@ export function CompetitorFeaturesCard({
       <Card>
          <CardHeader>
             <CardTitle className="flex items-center gap-2">
-               Tracked Features
+               {translate("pages.competitor-details.features.title")}
             </CardTitle>
             <CardDescription>
-               All the features of your competitors that are being tracked
+               {translate("pages.competitor-details.features.description")}
             </CardDescription>
             <CardAction>
-               <Badge variant={"outline"}>{total} total</Badge>
+               <Badge variant={"outline"}>
+                  {translate("pages.competitor-details.features.total-badge", {
+                     total,
+                  })}
+               </Badge>
             </CardAction>
          </CardHeader>
          <CardContent>
@@ -92,8 +102,14 @@ export function CompetitorFeaturesCard({
                      </CardHeader>
                      <CardFooter className="flex items-center gap-2">
                         <Badge variant={"outline"}>
-                           {Math.round(Number(feature?.meta?.confidence) * 100)}
-                           % confidence
+                           {translate(
+                              "pages.competitor-details.features.confidence-badge",
+                              {
+                                 confidence: Math.round(
+                                    Number(feature?.meta?.confidence) * 100,
+                                 ),
+                              },
+                           )}
                         </Badge>
                      </CardFooter>
                   </Card>
@@ -109,10 +125,15 @@ export function CompetitorFeaturesCard({
                   disabled={currentPage === 1}
                >
                   <ChevronLeft className="h-4 w-4" />
-                  Previous
+                  {translate(
+                     "pages.competitor-details.features.pagination.previous",
+                  )}
                </Button>
                <span className="text-sm text-muted-foreground ">
-                  Page {currentPage} of {totalPages}
+                  {translate(
+                     "pages.competitor-details.features.pagination.page-of",
+                     { current: currentPage, total: totalPages },
+                  )}
                </span>
                <Button
                   variant="outline"
@@ -120,7 +141,9 @@ export function CompetitorFeaturesCard({
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}
                >
-                  Next
+                  {translate(
+                     "pages.competitor-details.features.pagination.next",
+                  )}
                   <ChevronRight className="h-4 w-4" />
                </Button>
             </CardFooter>

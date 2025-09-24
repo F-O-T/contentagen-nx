@@ -17,5 +17,18 @@
       "forgot-password": "Esqueceu sua senha?",
       "no-account": "Não tem uma conta?",
       "sign-up-link": "Cadastre-se aqui"
+   },
+   "validation": {
+      "email-invalid": "Digite um endereço de email válido",
+      "password-min-length": "A senha deve ter pelo menos 8 caracteres"
+   },
+   "errors": {
+      "unknown": "Erro desconhecido",
+      "invalid-credentials": "Email ou senha inválidos"
+   },
+   "messages": {
+      "loading": "Entrando...",
+      "success": "Login realizado com sucesso",
+      "welcome": "Bem-vindo ao {{brand}} {{name}}"
    }
 }

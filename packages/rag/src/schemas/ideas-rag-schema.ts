@@ -10,7 +10,7 @@ import {
 
 export const ideaLayoutType = pgEnum("idea_layout_type", [
    "tutorial",
-   "interview", 
+   "interview",
    "article",
    "changelog",
 ]);

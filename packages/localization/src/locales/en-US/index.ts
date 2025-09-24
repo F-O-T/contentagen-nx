@@ -9,6 +9,17 @@ import profileEnUs from "./pages/profile.json";
 import agentDetailsEnUs from "./pages/agent-details.json";
 import contentDetailsEnUs from "./pages/content-details.json";
 import ideaDetailsEnUs from "./pages/idea-details.json";
+import emailVerificationEnUs from "./pages/email-verification.json";
+import organizationInvitationEnUs from "./pages/organization-invitation.json";
+import apiKeyEnUs from "./pages/api-key.json";
+import competitorListEnUs from "./pages/competitor-list.json";
+import competitorDetailsEnUs from "./pages/competitor-details.json";
+import organizationEnUs from "./pages/organization.json";
+import agentCreationFormEnUs from "./pages/agent-creation-form.json";
+import contentRequestFormEnUs from "./pages/content-request-form.json";
+import agentCreateEnUs from "./pages/agent-create.json";
+import agentEditEnUs from "./pages/agent-edit.json";
+import commonEnUs from "./common.json";
 
 const resources = {
    translation: {
@@ -23,6 +34,17 @@ const resources = {
       "pages.agent-details": agentDetailsEnUs,
       "pages.content-details": contentDetailsEnUs,
       "pages.idea-details": ideaDetailsEnUs,
+      "pages.email-verification": emailVerificationEnUs,
+      "pages.organization-invitation": organizationInvitationEnUs,
+      "pages.api-key": apiKeyEnUs,
+      "pages.competitor-list": competitorListEnUs,
+      "pages.competitor-details": competitorDetailsEnUs,
+      "pages.organization": organizationEnUs,
+      "pages.agent-creation-form": agentCreationFormEnUs,
+      "pages.content-request-form": contentRequestFormEnUs,
+      "pages.agent-create": agentCreateEnUs,
+      "pages.agent-edit": agentEditEnUs,
+      common: commonEnUs,
    },
 };
 

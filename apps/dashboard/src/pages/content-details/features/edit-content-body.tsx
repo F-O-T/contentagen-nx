@@ -7,6 +7,7 @@ import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Check, X } from "lucide-react";
+import { translate } from "@packages/localization";
 export function EditContentBody({
    content,
    setEditing,
@@ -20,10 +21,10 @@ export function EditContentBody({
       trpc.content.editBody.mutationOptions({
          onError: (error) => {
             console.error("Error editing content body:", error);
-            toast.error("Failed to edit content body. Please try again.");
+            toast.error(translate("pages.content-details.edit.error"));
          },
          onSuccess: async () => {
-            toast.success("Content body edited successfully!");
+            toast.success(translate("pages.content-details.edit.success"));
             await queryClient.invalidateQueries({
                queryKey: trpc.content.listAllContent.queryKey(),
             });
@@ -42,7 +43,16 @@ export function EditContentBody({
    const editForm = useAppForm({
       defaultValues: { body: content?.body ?? "" },
       validators: {
-         onBlur: z.object({ body: z.string().min(1, "Body is required") }),
+         onBlur: z.object({
+            body: z
+               .string()
+               .min(
+                  1,
+                  translate(
+                     "pages.content-details.edit.validation.body-required",
+                  ),
+               ),
+         }),
       },
       onSubmit: async ({ value, formApi }) => {
          await editBodyMutation.mutateAsync({
@@ -82,19 +92,23 @@ export function EditContentBody({
                      variant="ghost"
                      size="icon"
                      disabled={!formState.canSubmit || formState.isSubmitting}
-                     aria-label="Save"
+                     aria-label={translate("pages.content-details.edit.save")}
                   >
-                     <span className="sr-only">Save</span>
+                     <span className="sr-only">
+                        {translate("pages.content-details.edit.save")}
+                     </span>
                      <Check size={20} />
                   </Button>
                   <Button
                      type="button"
                      variant="ghost"
                      size="icon"
-                     aria-label="Cancel"
+                     aria-label={translate("pages.content-details.edit.cancel")}
                      onClick={() => setEditing(false)}
                   >
-                     <span className="sr-only">Cancel</span>
+                     <span className="sr-only">
+                        {translate("pages.content-details.edit.cancel")}
+                     </span>
                      <X size={20} />
                   </Button>
                </div>
@@ -108,7 +122,9 @@ export function EditContentBody({
                      value={field.state.value}
                      onChange={field.handleChange}
                      onBlur={field.handleBlur}
-                     placeholder="Edit your content..."
+                     placeholder={translate(
+                        "pages.content-details.edit.placeholder",
+                     )}
                      error={field.state.meta.errors.length > 0}
                   />
                   <field.FieldMessage />

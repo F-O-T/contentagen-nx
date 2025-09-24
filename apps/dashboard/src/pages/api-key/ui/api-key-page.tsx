@@ -7,6 +7,7 @@ import {
    CardContent,
    CardAction,
 } from "@packages/ui/components/card";
+import { translate } from "@packages/localization";
 import {
    DropdownMenu,
    DropdownMenuTrigger,
@@ -53,18 +54,18 @@ export function ApiKeyPage() {
    const closeModal = useCallback(() => setModalState({ type: "none" }), []);
 
    const formatKeyStart = useCallback((start?: string | null) => {
-      if (!start) return "not found";
+      if (!start) return translate("pages.api-key.table.not-found");
       return `${start.slice(0, 8)}...`;
    }, []);
 
    const stats = useMemo(() => {
       return [
          {
-            label: "Total API Keys",
+            label: translate("pages.api-key.statistics.total-keys"),
             value: data.length,
          },
          {
-            label: "Total Usage",
+            label: translate("pages.api-key.statistics.total-usage"),
             value: data.reduce((sum, k) => sum + (k.requestCount ?? 0), 0),
          },
       ];
@@ -74,18 +75,20 @@ export function ApiKeyPage() {
       if (key.rateLimitMax && key.rateLimitTimeWindow) {
          return `${key.requestCount ?? 0} used - ${key.rateLimitMax} per ${formatWindow(key.rateLimitTimeWindow)}`;
       }
-      return "Unlimited";
+      return translate("pages.api-key.table.unlimited");
    }, []);
 
    return (
       <div className="flex flex-col gap-4">
-         <TalkingMascot message="This API key is for our SDK. Manage your keys here and keep your integrations running smoothly!" />
+         <TalkingMascot message={translate("pages.api-key.mascot-message")} />
          <div className="grid grid-cols-1 md:grid-cols-3  gap-4">
             <Card className="col-span-1 order-first md:order-last ">
                <CardHeader>
-                  <CardTitle>API Key Statistics</CardTitle>
+                  <CardTitle>
+                     {translate("pages.api-key.statistics.title")}
+                  </CardTitle>
                   <CardDescription>
-                     Overview of your API keys and usage statistics.
+                     {translate("pages.api-key.statistics.description")}
                   </CardDescription>
                   <CardAction>
                      <DropdownMenu>
@@ -93,7 +96,9 @@ export function ApiKeyPage() {
                            <Button
                               variant="ghost"
                               size="icon"
-                              aria-label="More actions"
+                              aria-label={translate(
+                                 "pages.api-key.aria-labels.more-actions",
+                              )}
                            >
                               <MoreVertical className="w-5 h-5" />
                            </Button>
@@ -101,7 +106,7 @@ export function ApiKeyPage() {
                         <DropdownMenuContent align="end">
                            <DropdownMenuItem onSelect={openCreate}>
                               <Key />
-                              Create API Key
+                              {translate("pages.api-key.actions.create")}
                            </DropdownMenuItem>
                         </DropdownMenuContent>
                      </DropdownMenu>
@@ -125,10 +130,11 @@ export function ApiKeyPage() {
             </Card>
             <Card className="col-span-1 md:col-span-2">
                <CardHeader>
-                  <CardTitle>API Keys</CardTitle>
+                  <CardTitle>
+                     {translate("pages.api-key.section.title")}
+                  </CardTitle>
                   <CardDescription>
-                     Manage your API keys for programmatic access. You can view
-                     and delete keys here.
+                     {translate("pages.api-key.section.description")}
                   </CardDescription>
                   {/* CardAction removed dropdown menu */}
                </CardHeader>
@@ -159,7 +165,9 @@ export function ApiKeyPage() {
                                  <Button
                                     variant="ghost"
                                     size="icon"
-                                    aria-label="API Key actions"
+                                    aria-label={translate(
+                                       "pages.api-key.aria-labels.api-key-actions",
+                                    )}
                                  >
                                     <MoreVertical className="w-5 h-5" />
                                  </Button>
@@ -170,7 +178,7 @@ export function ApiKeyPage() {
                                        openUpdate(key.id, key.name || "")
                                     }
                                  >
-                                    Update
+                                    {translate("pages.api-key.actions.update")}
                                  </DropdownMenuItem>
                                  <DropdownMenuItem
                                     className="text-red-600"
@@ -178,7 +186,7 @@ export function ApiKeyPage() {
                                        openDelete(key.id);
                                     }}
                                  >
-                                    Delete
+                                    {translate("pages.api-key.actions.delete")}
                                  </DropdownMenuItem>
                               </DropdownMenuContent>
                            </DropdownMenu>
