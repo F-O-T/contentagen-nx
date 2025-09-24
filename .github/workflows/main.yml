@@ -151,9 +151,9 @@ jobs:
             try {
               const followUpComment = `⚠️ **Unable to automatically convert PR to draft**
               
-The workflow detected a typecheck failure but couldn't automatically convert this PR to draft due to permission restrictions. 
+              The workflow detected a typecheck failure but couldn't automatically convert this PR to draft due to permission restrictions. 
 
-**Please manually convert this PR to draft** and fix the typecheck issues before marking it ready for review.`;
+              **Please manually convert this PR to draft** and fix the typecheck issues before marking it ready for review.`;
               
               await github.rest.issues.createComment({ 
                 owner, 
