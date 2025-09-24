@@ -20,3 +20,9 @@ jobs:
 
       - name: Run Nx affected check
         run: bunx nx affected -t check --base=origin/master --head=HEAD
+
+      - name: Check workflow status and comment
+        uses: ./.github/actions/check-workflows
+        with:
+          workflow_name: "Biome"
+          command: "bunx nx affected -t check --base=origin/master --head=HEAD"

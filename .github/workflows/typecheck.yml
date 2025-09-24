@@ -20,3 +20,9 @@ jobs:
 
       - name: Run Nx affected typecheck
         run: bunx nx affected -t typecheck --base=origin/master --head=HEAD
+
+      - name: Check workflow status and comment
+        uses: ./.github/actions/check-workflows
+        with:
+          workflow_name: "Typecheck"
+          command: "bunx nx affected -t typecheck --base=origin/master --head=HEAD"

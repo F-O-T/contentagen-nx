@@ -20,3 +20,9 @@ jobs:
 
       - name: Run Nx affected tests
         run: bunx nx affected -t test --base=origin/master --head=HEAD
+
+      - name: Check workflow status and comment
+        uses: ./.github/actions/check-workflows
+        with:
+          workflow_name: "Tests"
+          command: "bunx nx affected -t test --base=origin/master --head=HEAD"
