@@ -21,6 +21,7 @@ import { z } from "zod";
 import type { BrandKnowledgeStatus } from "@packages/database/schemas/agent";
 import type { CompetitorAnalysisStatus } from "@packages/database/schemas/competitor";
 import { createPgVector } from "@packages/rag/client";
+import { createCompetitorKnowledgeWithEmbedding } from "@packages/rag/repositories/competitor-knowledge-repository";
 
 type LLMUsage = {
    inputTokens: number;
@@ -117,30 +118,6 @@ async function updateTargetUploadedFiles(
    }
 }
 
-// Helper function to get collection name based on target
-function getTargetCollectionName(target: "brand" | "competitor"): string {
-   return target === "brand" ? "AgentKnowledge" : "CompetitorKnowledge";
-}
-
-// Helper function to create chunk metadata based on target
-function createChunkMetadata(
-   target: "brand" | "competitor",
-   targetId: string,
-   sourceId: string,
-   websiteUrl: string,
-) {
-   const baseMetadata = {
-      sourceType: target === "brand" ? "brand_document" : "competitor_document",
-      sourceId,
-      websiteUrl,
-   };
-
-   return target === "brand"
-      ? { ...baseMetadata, agentId: targetId }
-      : { ...baseMetadata, competitorId: targetId };
-}
-
-// Helper function to sanitize document type for safe filenames
 function sanitizeDocumentType(type: string): string {
    return type
       .toLowerCase()
@@ -356,7 +333,7 @@ const saveAndIndexBrandDocuments = createStep({
    inputSchema: createBrandDocumentsOutputSchema,
    outputSchema: CreateBrandKnowledgeOutput,
    execute: async ({ inputData }) => {
-      const { generatedDocuments, id, target, websiteUrl } = inputData;
+      const { generatedDocuments, id, target } = inputData;
 
       // Update status to chunking (processing and indexing)
       await updateTargetStatus(
@@ -429,14 +406,26 @@ const saveAndIndexBrandDocuments = createStep({
 
       if (allChunks.length > 0) {
          try {
-            allChunks.forEach(async (chunk) => {
-               await createBrandKnowledgeWithEmbedding(ragClient, {
-                  chunk: chunk.text,
-                  externalId: chunk.agentId,
-                  sourceId: chunk.sourceId,
-                  type: "document",
+            if (target === "brand") {
+               allChunks.forEach(async (chunk) => {
+                  await createBrandKnowledgeWithEmbedding(ragClient, {
+                     chunk: chunk.text,
+                     externalId: chunk.agentId,
+                     sourceId: chunk.sourceId,
+                     type: "document",
+                  });
                });
-            });
+            }
+            if (target === "competitor") {
+               allChunks.forEach(async (chunk) => {
+                  await createCompetitorKnowledgeWithEmbedding(ragClient, {
+                     chunk: chunk.text,
+                     externalId: chunk.agentId,
+                     sourceId: chunk.sourceId,
+                     type: "document",
+                  });
+               });
+            }
             console.log(
                `[saveAndIndexBrandDocuments] Successfully indexed ${allChunks.length} chunks to Chroma`,
             );
