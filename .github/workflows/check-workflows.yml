@@ -50,27 +50,85 @@ jobs:
             core.setOutput('node_id', full.data.node_id);
             core.setOutput('is_draft', full.data.draft ? 'true' : 'false');
 
-      - name: Check if workflow failed
+      - name: Check if any workflow failed
         id: check_status
         if: steps.pr.outputs.found == 'true'
         uses: actions/github-script@v7
         with:
           script: |
-            const workflowRun = context.payload.workflow_run;
-            const conclusion = workflowRun.conclusion;
+            const { owner, repo } = context.repo;
+            const headSha = context.payload.workflow_run.head_sha;
             
-            // Check if the workflow that just completed failed
-            const failed = ['failure', 'cancelled', 'timed_out', 'action_required'].includes(conclusion?.toLowerCase());
+            // Get all workflow runs for this commit
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner, repo,
+              head_sha: headSha,
+              per_page: 100
+            });
             
-            core.setOutput('failed', failed ? 'true' : 'false');
-            core.setOutput('workflow_name', workflowRun.name);
-            core.setOutput('conclusion', conclusion || 'unknown');
+            // Filter for our CI workflows that have completed
+            const ciWorkflows = ["Tests", "Typescript typechecking", "Biome check"];
+            const completedRuns = runs.data.workflow_runs.filter(run => 
+              ciWorkflows.includes(run.name) && 
+              run.status === 'completed'
+            );
+            
+            // Check if any of the completed workflows failed
+            const anyFailed = completedRuns.some(run => 
+              ['failure', 'cancelled', 'timed_out', 'action_required'].includes(run.conclusion?.toLowerCase())
+            );
+            
+            // Get the names of failed workflows for the comment
+            const failedWorkflows = completedRuns
+              .filter(run => ['failure', 'cancelled', 'timed_out', 'action_required'].includes(run.conclusion?.toLowerCase()))
+              .map(run => run.name);
+            
+            // Check if all CI workflows have completed
+            const allCompleted = ciWorkflows.every(name => 
+              completedRuns.some(run => run.name === name)
+            );
+            
+            core.setOutput('any_failed', anyFailed ? 'true' : 'false');
+            core.setOutput('failed_workflows', JSON.stringify(failedWorkflows));
+            core.setOutput('all_completed', allCompleted ? 'true' : 'false');
+
+      - name: Cancel all in-progress runs
+        if: >
+          steps.pr.outputs.found == 'true' &&
+          steps.pr.outputs.is_draft == 'false' &&
+          steps.check_status.outputs.any_failed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const headSha = context.payload.workflow_run.head_sha;
+            
+            // Get all in-progress workflow runs for this commit
+            const runs = await github.rest.actions.listWorkflowRuns({
+              owner, repo,
+              head_sha: headSha,
+              status: 'in_progress',
+              per_page: 100
+            });
+            
+            // Cancel each in-progress run
+            for (const run of runs.data.workflow_runs) {
+              try {
+                await github.rest.actions.cancelWorkflowRun({
+                  owner, repo,
+                  run_id: run.id
+                });
+                console.log(`Cancelled workflow run: ${run.name} (ID: ${run.id})`);
+              } catch (error) {
+                console.error(`Failed to cancel workflow run: ${run.name} (ID: ${run.id})`, error);
+              }
+            }
 
       - name: Mark PR as draft
         if: >
           steps.pr.outputs.found == 'true' &&
           steps.pr.outputs.is_draft == 'false' &&
-          steps.check_status.outputs.failed == 'true'
+          steps.check_status.outputs.any_failed == 'true'
         uses: voiceflow/draft-pr@latest
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -79,16 +137,18 @@ jobs:
       - name: Comment on PR
         if: >
           steps.pr.outputs.found == 'true' &&
-          steps.check_status.outputs.failed == 'true'
+          steps.check_status.outputs.any_failed == 'true'
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ steps.pr.outputs.number }}
           body: |
-            This PR was automatically converted to draft because the "${{ steps.check_status.outputs.workflow_name }}" workflow failed with conclusion: ${{ steps.check_status.outputs.conclusion }}.
-
+            This PR was automatically converted to draft because the following workflows failed:
+            
+            ${{ fromJSON(steps.check_status.outputs.failed_workflows).* }}
+            
             Please run locally and fix issues:
             - Tests: `bunx nx affected -t test`
             - Typecheck: `bunx nx affected -t typecheck`
             - Biome: `bunx nx affected -t check`
-
+            
             Mark as "Ready for review" after everything passes.
