@@ -1,0 +1,136 @@
+name: Stale Issue and PR Management
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  stale-issues:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    
+    steps:
+      - name: Mark stale issues and PRs
+        uses: actions/stale@v9
+        with:
+          # Issue configuration
+          stale-issue-message: |
+            👋 This issue has been inactive for 30 days and has been marked as stale.
+            
+            If this issue is still relevant, please add a comment to keep it open.
+            If it's no longer needed, feel free to close it.
+            
+            Thank you for your contribution! 🙏
+            
+            *This is an automated message. You can disable stale bot by adding the `no-stale` label.*
+          stale-issue-label: 'stale'
+          exempt-issue-labels: 'pinned,security,good first issue,help wanted,no-stale'
+          days-before-issue-stale: 30
+          days-before-issue-close: 14
+          
+          # PR configuration
+          stale-pr-message: |
+            👋 This pull request has been inactive for 14 days and has been marked as stale.
+            
+            If you're still working on this, please add a comment to keep it open.
+            If it's no longer needed, feel free to close it.
+            
+            Thank you for your contribution! 🙏
+            
+            *This is an automated message. You can disable stale bot by adding the `no-stale` label.*
+          stale-pr-label: 'stale'
+          exempt-pr-labels: 'pinned,security,work-in-progress,no-stale'
+          days-before-pr-stale: 14
+          days-before-pr-close: 7
+          
+          # Operations
+          operations-per-run: 30
+          remove-stale-when-updated: true
+          delete-branch: true
+          
+          # Milestone management
+          start-milestone: 'Milestone 1'
+          exempt-all-milestones: true
+
+      - name: Remove needs-triage from old items
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const context = github.context;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            
+            // Remove needs-triage label from issues older than 7 days
+            const issues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              labels: 'needs-triage',
+              state: 'open',
+              per_page: 100
+            });
+            
+            for (const issue of issues.data) {
+              const createdDate = new Date(issue.created_at);
+              const daysOld = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24));
+              
+              if (daysOld > 7) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner,
+                    repo,
+                    issue_number: issue.number,
+                    name: 'needs-triage'
+                  });
+                  
+                  // Add a comment explaining the label removal
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: issue.number,
+                    body: `🔄 This issue no longer needs triage as it's been open for ${daysOld} days. The \`needs-triage\` label has been removed automatically.`
+                  });
+                } catch (error) {
+                  console.log(`Could not remove label from issue #${issue.number}:`, error.message);
+                }
+              }
+            }
+
+      - name: Ping maintainers on high-priority stale items
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const context = github.context;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            
+            // Find high-priority items that are stale and old
+            const issues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              labels: 'stale,bug,enhancement',
+              state: 'open',
+              per_page: 50
+            });
+            
+            for (const issue of issues.data) {
+              const createdDate = new Date(issue.created_at);
+              const daysOld = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24));
+              
+              // If it's been stale for more than 20 days and is high priority
+              if (daysOld > 50) {
+                try {
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: issue.number,
+                    body: `🔔 @yorizel This high-priority issue has been open for ${daysOld} days and marked as stale. Please review and decide whether to close it or keep it active.`
+                  });
+                } catch (error) {
+                  console.log(`Could not ping maintainer for issue #${issue.number}:`, error.message);
+                }
+              }
+            }
