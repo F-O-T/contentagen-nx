@@ -21,6 +21,9 @@ export const mastra = new Mastra({
          "@packages/payment/ingestion",
          "@packages/environment/helpers",
          "@packages/environment/server",
+         "@packages/database/client",
+         "@packages/rag/client",
+         "@packages/utils/errors",
       ],
    },
 

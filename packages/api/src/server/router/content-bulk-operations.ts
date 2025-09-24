@@ -1,9 +1,5 @@
 import { enqueueIdeasPlanningJob } from "@packages/workers/queues/ideas/ideas-planning-queue";
-import {
-   protectedProcedure,
-   router,
-   organizationProcedure,
-} from "../trpc";
+import { protectedProcedure, router, organizationProcedure } from "../trpc";
 import {
    eventEmitter,
    EVENTS,
@@ -17,11 +13,10 @@ import {
 } from "@packages/database/repositories/content-repository";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
-import { 
-   getCollection, 
-   addToCollection, 
-   deleteFromCollection 
-} from "@packages/rag/operations/collection-operations";
+import {
+   bulkDeleteRelatedSlugsBySlugs,
+   createRelatedSlugsWithEmbedding,
+} from "@packages/rag/repositories/related-slugs-repository";
 
 export const contentBulkOperationsRouter = router({
    bulkDelete: protectedProcedure
@@ -98,13 +93,8 @@ export const contentBulkOperationsRouter = router({
                );
 
             if (slugsToDelete.length > 0) {
-               const chromaClient = resolvedCtx.chromaClient;
-               const collection = await getCollection(
-                  chromaClient,
-                  "RelatedSlugs",
-               );
+               const ragClient = resolvedCtx.ragClient;
 
-               // Delete slugs for each agent
                const agentSlugMap = new Map<string, string[]>();
                contentsToDelete.forEach((content) => {
                   if (content.meta?.slug) {
@@ -116,14 +106,8 @@ export const contentBulkOperationsRouter = router({
                   }
                });
 
-               // Delete slugs for each agent
-               agentSlugMap.forEach(async (slugs, agentId) => {
-                  for (const slug of slugs) {
-                     await deleteFromCollection(collection, {
-                        where: { agentId },
-                        whereDocument: { $contains: slug },
-                     });
-                  }
+               agentSlugMap.forEach(async (slugs) => {
+                  await bulkDeleteRelatedSlugsBySlugs(ragClient, slugs);
                });
             }
 
@@ -208,13 +192,8 @@ export const contentBulkOperationsRouter = router({
 
             // Save related slugs for approved content into ChromaDB
             try {
-               const chromaClient = resolvedCtx.chromaClient;
-               const collection = await getCollection(
-                  chromaClient,
-                  "RelatedSlugs",
-               );
+               const ragClient = resolvedCtx.ragClient;
 
-               // Build a map of agentId -> Set<slug> to dedupe per agent
                const agentSlugMap = new Map<string, Set<string>>();
                for (const c of approvableContents) {
                   const slug = c.meta?.slug;
@@ -230,10 +209,11 @@ export const contentBulkOperationsRouter = router({
                   const slugs = Array.from(slugSet);
                   if (slugs.length === 0) continue;
                   try {
-                     await addToCollection(collection, {
-                        documents: slugs,
-                        ids: slugs.map(() => crypto.randomUUID()),
-                        metadatas: slugs.map(() => ({ agentId })),
+                     slugs.forEach(async (slug) => {
+                        await createRelatedSlugsWithEmbedding(ragClient, {
+                           externalId: agentId,
+                           slug: slug,
+                        });
                      });
                   } catch (err) {
                      console.error(

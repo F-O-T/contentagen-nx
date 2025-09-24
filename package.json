@@ -34,7 +34,7 @@
     "check": "nx run-many -t check --parallel=3",
     "dev:all": "nx run-many -t dev --parallel=6",
     "dev:sdk-blog": "nx run-many -t dev --parallel=2 -p blog server",
-    "dev:mastra": "nx run-many -t dev --parallel=1 -p mastra",
+    "dev:mastra": "nx run-many -t dev --parallel=1 -p agents",
     "dev:content-apps": "nx run-many -t dev --parallel=3 -p  landing-page blog docs",
     "dev:landing-page": "nx run-many -t dev --parallel=1 -p  landing-page ",
     "dev:blog": "nx run-many -t dev --parallel=1 -p  blog ",
