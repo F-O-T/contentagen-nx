@@ -54,13 +54,21 @@ jobs:
                 continue;
               }
 
-              // Convert to draft
-              await github.rest.pulls.update({
+              // Convert to draft using the dedicated endpoint
+              const resp = await github.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/convert-to-draft', {
                 owner,
                 repo,
                 pull_number: pr.number,
-                draft: true,
               });
+              core.info(`convert-to-draft status for #${pr.number}: ${resp.status}`);
+
+              // Verify state
+              const { data: updated } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: pr.number,
+              });
+              core.info(`PR #${pr.number} draft=${updated.draft}`);
 
               // Leave a comment
               const msg = `This PR was automatically converted to draft because required checks failed (${run.name}).\n\nPlease run tests, typecheck, and biome locally and ensure all checks pass before marking this PR as Ready for review again.`;

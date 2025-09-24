@@ -11,7 +11,7 @@
       "verbatimModuleSyntax": true,
       "isolatedModules": true,
       "incremental": true,
-      "disableSourceOfProjectReferenceRedirect": true,
+      "disableSourceOfProjectReferenceRedirect": false,
       "tsBuildInfoFile": "${configDir}/.cache/tsbuildinfo.json",
       "strict": true,
       "noUncheckedIndexedAccess": true,
