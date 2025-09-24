@@ -17,7 +17,7 @@
   "scripts": {
     "build": "tsc",
     "check": "biome check --write ./src",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+    "typecheck": "tsc "
   },
   "dependencies": {
     "@packages/localization": "workspace:*",

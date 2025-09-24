@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "check": "bunx --bun biome check --write .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc ",
     "dev": "node server",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",

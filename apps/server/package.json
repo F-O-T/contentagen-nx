@@ -30,7 +30,7 @@
     "dev": "bun run container-start && bun run --watch src/index.ts",
     "format": "biome format",
     "start": "./server",
-    "typecheck": "bunx --bun tsc --noEmit "
+    "typecheck": "bunx --bun tsc  "
   },
   "version": "0.4.0"
 }

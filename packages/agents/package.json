@@ -14,7 +14,7 @@
     "dev": "dotenv -e .env -- bunx mastra dev",
     "build": "tsc",
     "check": "biome check --write ./src",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+    "typecheck": "tsc "
   },
   "dependencies": {
     "@mastra/core": "^0.17.1",
