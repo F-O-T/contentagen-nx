@@ -34,27 +34,12 @@ jobs:
               labels.push('gigantic-pr');
               
               // Add a comment explaining the size
+              const commentBody = "## 🐘 Gigantic PR Detected\n\nThis PR is quite large and will require significant review time.\n\n**PR Stats:**\n- 📁 Files changed: " + filesChanged + "\n- ➕ Additions: " + additions.toLocaleString() + "\n- ➖ Deletions: " + deletions.toLocaleString() + "\n- 📊 Total changes: " + totalChanges.toLocaleString() + "\n\n**Review Considerations:**\n- Please ensure this PR is focused on a single logical change\n- Consider breaking it into smaller, focused PRs if possible\n- Allow extra time for thorough review\n- Make sure all tests pass and documentation is updated\n\nThank you for your contribution! 🙏";
               await github.rest.issues.createComment({
                 issue_number: prNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `## 🐘 Gigantic PR Detected
-
-This PR is quite large and will require significant review time:
-
-**PR Stats:**
-- 📁 Files changed: ${filesChanged}
-- ➕ Additions: ${additions.toLocaleString()}
-- ➖ Deletions: ${deletions.toLocaleString()}
-- 📊 Total changes: ${totalChanges.toLocaleString()}
-
-**Review Considerations:**
-- Please ensure this PR is focused on a single logical change
-- Consider breaking it into smaller, focused PRs if possible
-- Allow extra time for thorough review
-- Make sure all tests pass and documentation is updated
-
-Thank you for your contribution! 🙏`
+                body: commentBody
               });
             }
             

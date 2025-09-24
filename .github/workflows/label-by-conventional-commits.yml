@@ -71,15 +71,22 @@ jobs:
             
             // Add size label based on files changed
             const filesChanged = context.payload.pull_request.changed_files;
+            let sizeLabel = '';
+            let sizeMessage = '';
             if (filesChanged <= 3) {
-              labels.push('size/S');
+              sizeLabel = 'size/S';
+              sizeMessage = 'This PR is small and should be quick to review.';
             } else if (filesChanged <= 10) {
-              labels.push('size/M');
+              sizeLabel = 'size/M';
+              sizeMessage = 'This PR is medium-sized and may need careful review.';
             } else if (filesChanged <= 25) {
-              labels.push('size/L');
+              sizeLabel = 'size/L';
+              sizeMessage = 'This PR is large and will require thorough review.';
             } else {
-              labels.push('size/XL');
+              sizeLabel = 'size/XL';
+              sizeMessage = 'This PR is extra large and will require significant review time.';
             }
+            labels.push(sizeLabel);
             
             if (labels.length > 0) {
               await github.rest.issues.addLabels({
@@ -87,6 +94,15 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 labels: labels
+              });
+              
+              // Leave a size context comment
+              const comment = "PR Size Label: " + sizeLabel + "\n\n" + sizeMessage + "\n\nFiles changed: " + filesChanged;
+              await github.rest.issues.createComment({
+                issue_number: prNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
               });
             }
 

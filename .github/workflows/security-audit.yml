@@ -82,19 +82,8 @@ jobs:
               issue_number: prNumber,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## 🔒 Security Audit Failed
+                body: "## 🔒 Security Audit Failed\n\nThis PR introduces security vulnerabilities that must be addressed:\n\n**Next Steps:**\n1. Run `bun audit` locally to see the full report\n2. Update the vulnerable dependencies\n3. Commit the updated `package.json` and `bun.lockb`\n4. The security check will automatically pass once vulnerabilities are fixed\n\n**Critical vulnerabilities block merging** and must be fixed immediately.\n\n🛡️ *This is an automated security check*"
 
-This PR introduces security vulnerabilities that must be addressed:
-
-**Next Steps:**
-1. Run \`bun audit\` locally to see the full report
-2. Update the vulnerable dependencies
-3. Commit the updated \`package.json\` and \`bun.lockb\`
-4. The security check will automatically pass once vulnerabilities are fixed
-
-**Critical vulnerabilities block merging** and must be fixed immediately.
-
-🛡️ *This is an automated security check*`
             });
 
       - name: Generate Security Report
@@ -135,7 +124,6 @@ This PR introduces security vulnerabilities that must be addressed:
         uses: actions/github-script@v7
         with:
           script: |
-            
             // Check if there's already an open security issue
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
