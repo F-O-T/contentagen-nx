@@ -1,0 +1,45 @@
+name: Auto-draft new PRs
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  auto-draft:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+    
+    steps:
+      - name: Mark PR as draft
+        uses: trstringer/mark-pr-as-draft@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: `👋 Thanks for opening this PR! 
+
+This PR has been automatically marked as draft to ensure quality and prevent accidental merges.
+
+**Before marking this PR as "Ready for review":**
+- ✅ Make sure all your changes are complete
+- ✅ Run tests locally: \`bunx nx affected -t test\`
+- ✅ Run typecheck locally: \`bunx nx affected -t typecheck\`
+- ✅ Run lint/format checks: \`bunx nx affected -t check\`
+- ✅ Review your changes one more time
+
+**When you're 100% confident everything is ready**, click "Ready for review" to trigger the automated checks.
+
+If checks fail, the PR will be automatically converted back to draft with specific guidance on what needs to be fixed.`
+            });
