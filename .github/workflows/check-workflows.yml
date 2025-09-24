@@ -1,49 +1,84 @@
-name: PR CI
+name: Convert PR to Draft (aggregator)
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_run:
+    workflows: ["Tests", "Typescript typechecking", "Biome check"]
+    types: [completed]
+
+concurrency:
+  group: pr-${{ github.event.workflow_run.pull_requests[0].number }}
+  cancel-in-progress: true
 
 jobs:
-  # Example check jobs (rename to match real jobs)
-  tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # run tests...
-      - run: echo "run tests here"
-
-  typecheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # run typecheck...
-      - run: echo "run typecheck here"
-
-  biome_check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # run biome/lint...
-      - run: echo "run lint/checks here"
-
   convert_to_draft:
-    name: Convert PR to Draft (on failure)
-    needs: [tests, typecheck, biome_check]
-    if: always()
+    if: >
+      ${{
+        github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.pull_requests[0].draft == false
+      }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
       pull-requests: write
+
     steps:
+      - name: Decide if conversion is needed
+        id: decide
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.workflow_run.pull_requests[0];
+            if (!pr) {
+              core.setOutput('should_convert', 'false');
+              core.setOutput('reason', 'no_pr');
+              return;
+            }
+            const headSha = context.payload.workflow_run.head_sha;
+            const required = ["Tests", "Typescript typechecking", "Biome check"];
+
+            // Get latest completed runs for this head SHA
+            const runsResp = await github.rest.actions.listWorkflowRunsForRepo({
+              owner, repo,
+              event: 'pull_request',
+              per_page: 100,
+              head_sha: headSha
+            });
+
+            // Map latest completed conclusion per required workflow
+            const status = {};
+            for (const name of required) {
+              const wr = runsResp.data.workflow_runs
+                .filter(r => r.name === name && r.head_sha === headSha && r.status === 'completed')
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+              status[name] = wr ? wr.conclusion : 'missing';
+            }
+
+            const allCompleted = required.every(n => status[n] !== 'missing');
+            if (!allCompleted) {
+              core.setOutput('should_convert', 'false');
+              core.setOutput('reason', 'not_all_completed');
+              return;
+            }
+
+            const failed = required.some(n =>
+              ['failure','cancelled','timed_out','action_required'].includes(status[n])
+            );
+            core.setOutput('should_convert', failed ? 'true' : 'false');
+
       - name: Convert PR to Draft
-        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        if: ${{ steps.decide.outputs.should_convert == 'true' }}
         uses: yu-iskw/convert-to-draft-action@v0.4.4
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           leave_comment: "1"
           comment_body: |
-            This PR was automatically converted to draft because Biome check failed.
+            This PR was automatically converted to draft because required checks (Tests / Typecheck / Biome) did not pass.
 
-            Please run `bunx nx affected -t check` locally and ensure all checks pass before marking this PR as Ready for review again.
+            Please run locally and fix issues:
+            - Tests: `bunx nx affected -t test`
+            - Typecheck: `bunx nx affected -t typecheck`
+            - Biome: `bunx nx affected -t check`
+
+            Mark as "Ready for review" after everything passes.
