@@ -1,8 +1,9 @@
 name: Changelog Check
 
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+  pull_request:
+    branches: ["*"]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   changelog-check:
