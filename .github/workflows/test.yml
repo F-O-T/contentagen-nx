@@ -9,6 +9,9 @@ jobs:
   test:
     if: ${{ github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
     
     steps:
       - name: Checkout code
@@ -22,3 +25,7 @@ jobs:
 
       - name: Run Nx affected tests
         run: bunx nx affected -t test --base=origin/master --head=HEAD
+
+      - name: Auto-draft PR on failure
+        if: ${{ failure() }}
+        uses: ./.github/actions/auto-draft-pr
