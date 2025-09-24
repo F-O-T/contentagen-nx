@@ -1,7 +1,7 @@
 name: 📝 General Issue
 description: For questions, documentation issues, or other general topics
 title: "[GENERAL] "
-labels: ["question", "triage"]
+labels: ["question", "needs-triage", "type: question"]
 body:
   - type: markdown
     attributes:

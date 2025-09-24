@@ -1,7 +1,7 @@
 name: 🚀 Mega Issue
 description: For tracking large, complex initiatives
 title: "[MEGA] "
-labels: ["mega-issue", "epic"]
+labels: ["mega-issue", "epic", "type: epic"]
 body:
   - type: markdown
     attributes:

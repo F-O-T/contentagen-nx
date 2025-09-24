@@ -2,20 +2,21 @@ name: Label PRs Based on Conventional Commits
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened,]
+    branches: ["*"]
+    types: [opened, synchronize, reopened]
 
 jobs:
   label-by-title:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      issues: write
     
     steps:
       - name: Label PR based on conventional commit title
         uses: actions/github-script@v7
         with:
           script: |
-            const context = github.context;
             const prTitle = context.payload.pull_request.title;
             const prNumber = context.payload.pull_request.number;
             

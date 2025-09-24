@@ -1,0 +1,128 @@
+name: Sync Labels
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 2" # Weekly on Tuesdays at 03:00 UTC
+  push:
+    branches: [ master, main ]
+    paths:
+      - .github/workflows/**
+      - .github/ISSUE_TEMPLATE/**
+
+jobs:
+  sync-labels:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Ensure repository labels exist and are up-to-date
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            // Define desired labels (name, color without '#', description)
+            const labels = [
+              { name: 'needs-triage', color: 'e4e669', description: 'Needs triage' },
+              { name: 'has-changelog', color: '0e8a16', description: 'Changelog entry present' },
+              { name: 'needs-changelog', color: 'e4e669', description: 'Changelog entry required' },
+
+              // Core categories
+              { name: 'bug', color: 'd73a4a', description: 'Something isn’t working' },
+              { name: 'fix', color: 'd73a4a', description: 'Bug fix change' },
+              { name: 'enhancement', color: 'a2eeef', description: 'New feature or request' },
+              { name: 'feature', color: 'a2eeef', description: 'Feature work' },
+              { name: 'documentation', color: '0075ca', description: 'Improvements or additions to documentation' },
+              { name: 'test', color: 'a2eeef', description: 'Testing related changes' },
+              { name: 'style', color: 'c5def5', description: 'Code style/formatting' },
+              { name: 'refactor', color: 'a2eeef', description: 'Code refactoring' },
+              { name: 'performance', color: '0e8a16', description: 'Performance improvements' },
+              { name: 'chore', color: 'cfd3d7', description: 'Chore or maintenance' },
+              { name: 'ci', color: '86e6e6', description: 'CI/CD related changes' },
+              { name: 'build', color: '0366d6', description: 'Build system or dependencies' },
+              { name: 'question', color: 'd876e3', description: 'Further information is requested' },
+
+              // Work types
+              { name: 'mega-issue', color: '5319e7', description: 'Tracks a large initiative' },
+              { name: 'epic', color: '5319e7', description: 'High-level initiative' },
+              { name: 'task', color: 'ededed', description: 'Task level work' },
+
+              // Type labels used by templates/automation
+              { name: 'type: bug', color: 'd73a4a', description: 'Type: bug' },
+              { name: 'type: feature', color: '0e8a16', description: 'Type: feature' },
+              { name: 'type: question', color: 'd876e3', description: 'Type: question' },
+              { name: 'type: epic', color: '5319e7', description: 'Type: epic' },
+              { name: 'type: task', color: 'fbca04', description: 'Type: task' },
+              { name: 'type: docs', color: '0075ca', description: 'Type: docs' },
+
+              // Size and PR context labels
+              { name: 'size/S', color: '0e8a16', description: 'Small change set' },
+              { name: 'size/M', color: 'fbca04', description: 'Medium change set' },
+              { name: 'size/L', color: 'd93f0b', description: 'Large change set' },
+              { name: 'size/XL', color: 'b60205', description: 'Extra large change set' },
+              { name: 'gigantic-pr', color: 'b60205', description: 'Extremely large PR' },
+              { name: 'many-files', color: '5319e7', description: 'Touches many files' },
+              { name: 'massive-changes', color: 'b60205', description: 'Very high diff volume' },
+
+              // Stale and contribution helpers
+              { name: 'stale', color: 'cfd3d7', description: 'Marked as stale due to inactivity' },
+              { name: 'no-stale', color: 'c2e0c6', description: 'Exempt from stale bot' },
+              { name: 'work-in-progress', color: 'bfdadc', description: 'WIP: not ready for review' },
+              { name: 'pinned', color: '0052cc', description: 'Pinned issue' },
+              { name: 'good first issue', color: '7057ff', description: 'Good for newcomers' },
+              { name: 'help wanted', color: '008672', description: 'Extra attention is needed' },
+
+              // Security/audit
+              { name: 'security', color: 'ee0701', description: 'Security related' },
+              { name: 'audit-failed', color: 'b60205', description: 'Security audit failed' },
+              { name: 'priority-critical', color: 'b60205', description: 'Critical priority' }
+            ];
+
+            // Fetch existing labels (with pagination)
+            const existingLabels = await github.paginate(
+              github.rest.issues.listLabelsForRepo,
+              { owner, repo, per_page: 100 }
+            );
+            const existingMap = new Map(existingLabels.map(l => [l.name, l]));
+
+            for (const label of labels) {
+              const current = existingMap.get(label.name);
+              if (!current) {
+                try {
+                  await github.rest.issues.createLabel({
+                    owner,
+                    repo,
+                    name: label.name,
+                    color: label.color,
+                    description: label.description
+                  });
+                  console.log(`Created label: ${label.name}`);
+                } catch (error) {
+                  console.log(`Failed to create label ${label.name}:`, error.message);
+                }
+              } else {
+                const needsUpdate =
+                  (current.color || '').toLowerCase() !== label.color.toLowerCase() ||
+                  (current.description || '') !== (label.description || '');
+                if (needsUpdate) {
+                  try {
+                    await github.rest.issues.updateLabel({
+                      owner,
+                      repo,
+                      name: label.name,
+                      color: label.color,
+                      description: label.description
+                    });
+                    console.log(`Updated label: ${label.name}`);
+                  } catch (error) {
+                    console.log(`Failed to update label ${label.name}:`, error.message);
+                  }
+                } else {
+                  console.log(`Label up-to-date: ${label.name}`);
+                }
+              }
+            }
+
+            console.log('✅ Label sync complete.');

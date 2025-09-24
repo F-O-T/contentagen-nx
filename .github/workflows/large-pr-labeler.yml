@@ -2,7 +2,8 @@ name: Large PR Labeler
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    branches: ["*"]
+    types: [opened, synchronize, reopened]
 
 jobs:
   large-pr-check:
@@ -10,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      issues: write
     
     steps:
       - name: Check PR size and add labels
         uses: actions/github-script@v7
         with:
           script: |
-            const context = github.context;
             const pr = context.payload.pull_request;
             const prNumber = pr.number;
             

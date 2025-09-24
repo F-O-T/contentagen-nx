@@ -60,7 +60,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const context = github.context;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             
@@ -103,7 +102,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const context = github.context;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             

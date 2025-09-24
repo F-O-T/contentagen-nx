@@ -21,7 +21,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const { context, core } = github;
             const pr = context.payload.pull_request;
             const prNumber = pr.number;
             
@@ -84,7 +83,7 @@ jobs:
               }
               
               // If PR is ready for review but missing changelog, convert back to draft
-              if (context.event.action === 'ready_for_review') {
+              if (context.payload.action === 'ready_for_review') {
                 await github.rest.pulls.update({
                   pull_number: prNumber,
                   owner: context.repo.owner,
