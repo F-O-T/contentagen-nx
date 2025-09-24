@@ -51,7 +51,7 @@ jobs:
   convert_to_draft:
     name: Convert PR to Draft (on failure)
     needs: [tests, typecheck, biome_check]
-    if: ${{ always() }}
+    if: ${{ always() && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -67,17 +67,17 @@ jobs:
             const pr = await github.rest.pulls.get({ owner, repo, pull_number: number });
             if (pr.data.draft) {
               core.info('PR already in draft.');
-              return;
-            }
-            const mutation = `
-              mutation($id: ID!) {
-                convertPullRequestToDraft(input: { pullRequestId: $id }) {
-                  pullRequest { number isDraft }
+            } else {
+              const mutation = `
+                mutation($id: ID!) {
+                  convertPullRequestToDraft(input: { pullRequestId: $id }) {
+                    pullRequest { number isDraft }
+                  }
                 }
-              }
-            `;
-            const res = await github.graphql(mutation, { id: pr.data.node_id });
-            core.info(`Converted to draft: ${JSON.stringify(res)}`);
+              `;
+              await github.graphql(mutation, { id: pr.data.node_id });
+              core.info(`Converted PR #${number} to draft.`);
+            }
 
       - name: Comment on PR
         if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
