@@ -17,22 +17,20 @@ runs:
     - name: Comment and convert PR to draft
       id: comment_and_draft
       uses: actions/github-script@v7
-      env:
-        WORKFLOW_NAME: ${{ inputs.workflow_name }}
-        COMMAND: ${{ inputs.command }}
-        JOB_STATUS: ${{ job.status }}
       with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const { owner, repo } = context.repo;
-          const prNumber = context.issue.number;
+          const prNumber = context.issue.number || (context.payload.pull_request && context.payload.pull_request.number);
           if (!prNumber) {
-            core.info('Not a PR context; skipping.');
+            console.log('Not a PR context; skipping.');
             return;
           }
           if (process.env.JOB_STATUS !== 'failure') {
-            core.info('Job did not fail; skipping.');
+            console.log('Job did not fail; skipping.');
             return;
           }
+
           const body = [
             `## ❌ ${process.env.WORKFLOW_NAME} Failed`,
             "",
@@ -44,14 +42,46 @@ runs:
             "",
             'Make sure all checks pass locally before marking the PR as "Ready for review".'
           ].join("\n");
-          await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
-          const pr = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
-          if (!pr.data.draft) {
-            await github.rest.pulls.update({ owner, repo, pull_number: prNumber, draft: true });
+
+          // Create comment
+          try {
+            await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
+            console.log(`Comment created on PR #${prNumber}`);
+          } catch (err) {
+            console.error('Failed to create comment:', err && err.message ? err.message : err);
+            throw err;
           }
+
+          // Try to convert PR to draft
+          try {
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            console.log('PR draft status before update:', pr.draft);
+
+            if (!pr.draft) {
+              const res = await github.rest.pulls.update({ owner, repo, pull_number: prNumber, draft: true });
+              console.log('pulls.update response draft value:', res.data.draft);
+            } else {
+              console.log('PR already in draft mode; no update needed.');
+            }
+          } catch (err) {
+            console.error('Failed to convert PR to draft:', err && err.message ? err.message : err);
+            if (err.status === 403) {
+              console.error('Permission denied (403). Ensure the workflow permissions include: pull-requests: write or consider using pull_request_target if appropriate.');
+            }
+            throw err;
+          }
+      env:
+        WORKFLOW_NAME: ${{ inputs.workflow_name }}
+        COMMAND: ${{ inputs.command }}
+        JOB_STATUS: ${{ job.status }}
+
     - name: Optionally fail the job
       shell: bash
       run: |
         if [ "${{ inputs.should_fail }}" = "true" ] && [ "${{ job.status }}" = "failure" ]; then
           exit 1
         fi
+      env:
+        WORKFLOW_NAME: ${{ inputs.workflow_name }}
+        COMMAND: ${{ inputs.command }}
+        JOB_STATUS: ${{ job.status }}
