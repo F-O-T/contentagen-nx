@@ -189,6 +189,9 @@ export function propagateError(err: unknown) {
    if (err instanceof AppError) {
       throw err;
    }
+   if (err instanceof APIError) {
+      throw err;
+   }
    if (err instanceof Error) {
       throw new AppError(err.message);
    }
