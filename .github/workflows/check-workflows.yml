@@ -1,9 +1,13 @@
-name: Convert PR to Draft (target)
+name: Convert PR to Draft (after CI)
 
 on:
-  pull_request_target:
-    branches: ["*"]
-    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_run:
+    workflows: ["Tests", "Typescript typechecking", "Biome check"]
+    types: [completed]
+
+concurrency:
+  group: wr-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: true
 
 permissions:
   actions: read
@@ -13,65 +17,91 @@ permissions:
 
 jobs:
   convert_to_draft:
-    name: Convert PR to Draft after checks
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for CI workflows to complete for this commit
-        id: wait
+      - name: Resolve PR by head SHA
+        id: pr
         uses: actions/github-script@v7
         with:
           script: |
             const { owner, repo } = context.repo;
-            const pr = context.payload.pull_request;
-            const headSha = pr.head.sha;
+            const headSha = context.payload.workflow_run.head_sha;
+
+            // Find PR(s) associated with this commit
+            const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner, repo, commit_sha: headSha
+            });
+            if (!prs.data.length) {
+              core.notice('No PR associated with this commit SHA.');
+              core.setOutput('found', 'false');
+              return;
+            }
+            // Choose the open PR targeting this repo/branch (first match is fine for single-PR flows)
+            const pr = prs.data.find(p => p.state === 'open') || prs.data[0];
+
+            // Get full PR for node_id and draft flag
+            const full = await github.rest.pulls.get({
+              owner, repo, pull_number: pr.number
+            });
+
+            core.setOutput('found', 'true');
+            core.setOutput('number', String(full.data.number));
+            core.setOutput('node_id', full.data.node_id);
+            core.setOutput('is_draft', full.data.draft ? 'true' : 'false');
+
+      - name: Check all CI runs for this commit
+        id: ci
+        if: steps.pr.outputs.found == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const headSha = context.payload.workflow_run.head_sha;
             const required = ["Tests", "Typescript typechecking", "Biome check"];
 
-            const until = Date.now() + 15 * 60 * 1000;
-            let allCompleted = false;
-            let anyFailed = false;
+            const runs = await github.rest.actions.listWorkflowRunsForRepo({
+              owner, repo, event: 'pull_request', per_page: 100
+            });
 
-            while (Date.now() < until) {
-              const runs = await github.rest.actions.listWorkflowRunsForRepo({
-                owner, repo, event: 'pull_request', per_page: 100
-              });
-
-              const latest = {};
-              for (const run of runs.data.workflow_runs) {
-                if (run.head_sha !== headSha) continue;
-                if (!required.includes(run.name)) continue;
-                if (run.status !== 'completed') continue;
-                const prev = latest[run.name];
-                if (!prev || new Date(run.created_at) > new Date(prev.created_at)) {
-                  latest[run.name] = run;
-                }
+            const latest = {};
+            for (const run of runs.data.workflow_runs) {
+              if (run.head_sha !== headSha) continue;
+              if (!required.includes(run.name)) continue;
+              if (run.status !== 'completed') continue;
+              const prev = latest[run.name];
+              if (!prev || new Date(run.created_at) > new Date(prev.created_at)) {
+                latest[run.name] = run;
               }
-
-              allCompleted = required.every(n => latest[n]);
-              if (allCompleted) {
-                anyFailed = required.some(n => {
-                  const c = String(latest[n].conclusion || '').toLowerCase();
-                  return ['failure','cancelled','timed_out','action_required'].includes(c);
-                });
-                break;
-              }
-              await new Promise(r => setTimeout(r, 15000));
             }
+
+            const allCompleted = required.every(n => latest[n]);
+            const anyFailed = required.some(n => {
+              const c = String(latest[n]?.conclusion || '').toLowerCase();
+              return ['failure','cancelled','timed_out','action_required'].includes(c);
+            });
 
             core.setOutput('all_completed', allCompleted ? 'true' : 'false');
             core.setOutput('any_failed', anyFailed ? 'true' : 'false');
 
-      - name: Mark as draft
-        if: ${{ steps.wait.outputs.all_completed == 'true' && steps.wait.outputs.any_failed == 'true' && github.event.pull_request.draft == false }}
+      - name: Mark PR as draft
+        if: >
+          steps.pr.outputs.found == 'true' &&
+          steps.pr.outputs.is_draft == 'false' &&
+          steps.ci.outputs.all_completed == 'true' &&
+          steps.ci.outputs.any_failed == 'true'
         uses: voiceflow/draft-pr@latest
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          pull-request-node-id: ${{ github.event.pull_request.node_id }}
+          pull-request-node-id: ${{ steps.pr.outputs.node_id }}
 
-      - name: Leave failure guidance comment
-        if: ${{ steps.wait.outputs.all_completed == 'true' && steps.wait.outputs.any_failed == 'true' }}
+      - name: Comment on PR
+        if: >
+          steps.pr.outputs.found == 'true' &&
+          steps.ci.outputs.all_completed == 'true' &&
+          steps.ci.outputs.any_failed == 'true'
         uses: peter-evans/create-or-update-comment@v4
         with:
-          issue-number: ${{ github.event.pull_request.number }}
+          issue-number: ${{ steps.pr.outputs.number }}
           body: |
             This PR was automatically converted to draft because required checks (Tests / Typecheck / Biome) did not pass.
 
