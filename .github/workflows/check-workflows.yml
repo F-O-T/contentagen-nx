@@ -1,54 +1,73 @@
-name: PR CI
+name: Convert PR to Draft (target)
+
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
+  actions: read
   contents: read
   pull-requests: write
   issues: write
 
 jobs:
-  tests:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.draft == false }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-bun-nx
-      - run: bunx nx affected -t test --base=origin/master --head=HEAD
-
-  typecheck:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.draft == false }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-bun-nx
-      - run: bunx nx affected -t typecheck --base=origin/master --head=HEAD
-
-  biome_check:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.draft == false }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-bun-nx
-      - run: bunx nx affected -t check --base=origin/master --head=HEAD
-
   convert_to_draft:
-    name: Convert PR to Draft (on failure)
-    needs: [tests, typecheck, biome_check]
-    if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
+    name: Convert PR to Draft after checks
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-      issues: write
     steps:
+      - name: Wait for CI workflows to complete for this commit
+        id: wait
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const headSha = pr.head.sha;
+            const required = ["Tests", "Typescript typechecking", "Biome check"];
+
+            const until = Date.now() + 15 * 60 * 1000;
+            let allCompleted = false;
+            let anyFailed = false;
+
+            while (Date.now() < until) {
+              const runs = await github.rest.actions.listWorkflowRunsForRepo({
+                owner, repo, event: 'pull_request', per_page: 100
+              });
+
+              const latest = {};
+              for (const run of runs.data.workflow_runs) {
+                if (run.head_sha !== headSha) continue;
+                if (!required.includes(run.name)) continue;
+                if (run.status !== 'completed') continue;
+                const prev = latest[run.name];
+                if (!prev || new Date(run.created_at) > new Date(prev.created_at)) {
+                  latest[run.name] = run;
+                }
+              }
+
+              allCompleted = required.every(n => latest[n]);
+              if (allCompleted) {
+                anyFailed = required.some(n => {
+                  const c = String(latest[n].conclusion || '').toLowerCase();
+                  return ['failure','cancelled','timed_out','action_required'].includes(c);
+                });
+                break;
+              }
+              await new Promise(r => setTimeout(r, 15000));
+            }
+
+            core.setOutput('all_completed', allCompleted ? 'true' : 'false');
+            core.setOutput('any_failed', anyFailed ? 'true' : 'false');
+
       - name: Mark as draft
+        if: ${{ steps.wait.outputs.all_completed == 'true' && steps.wait.outputs.any_failed == 'true' && github.event.pull_request.draft == false }}
         uses: voiceflow/draft-pr@latest
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-node-id: ${{ github.event.pull_request.node_id }}
 
       - name: Leave failure guidance comment
+        if: ${{ steps.wait.outputs.all_completed == 'true' && steps.wait.outputs.any_failed == 'true' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
