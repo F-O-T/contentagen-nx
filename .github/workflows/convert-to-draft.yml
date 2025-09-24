@@ -3,7 +3,7 @@ name: PR Comment & Convert to Draft on Typecheck Failure
 on:
   workflow_run:
     workflows:
-      - "TypeScript Typechecking"
+      - "Typecheck"
       - "Tests"
       - "Biome Check"
     types:
