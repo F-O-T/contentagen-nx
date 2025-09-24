@@ -1,22 +1,19 @@
 name: Changelog Check
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 jobs:
   changelog-check:
-    if: ${{ github.event.pull_request.draft == false }}
+    # Run for non-draft PRs, and also on label changes even if draft
+    if: ${{ github.event.pull_request.draft == false || github.event.action == 'labeled' || github.event.action == 'unlabeled' }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      issues: write
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Check if changelog is needed
         uses: actions/github-script@v7
         with:
@@ -32,12 +29,11 @@ jobs:
             });
             
             const changedFiles = filesResponse.data.map(file => file.filename);
-            const labels = [];
+            const existingLabels = pr.labels || [];
             
             // Check if this is a feature or fix that would require a changelog
             const requiresChangelog = changedFiles.some(file => {
-              // Look for source code files (not docs, tests, or config)
-              return /\.(ts|js|tsx|jsx|py|java|go|rs|cpp|c|h)$/.test(file) &&
+              return /(\.(ts|js|tsx|jsx|py|java|go|rs|cpp|c|h)$)/.test(file) &&
                      !file.includes('test') &&
                      !file.includes('spec') &&
                      !file.includes('docs') &&
@@ -55,22 +51,25 @@ jobs:
               file.toLowerCase().includes('history')
             );
             
-            // Check if PR has any of these labels already
-            const existingLabels = pr.labels || [];
+            // Check if PR has the skip label already
             const hasNoChangelogLabel = existingLabels.some(label => 
               label.name === 'no-changelog-needed'
             );
             
             if (requiresChangelog && !hasChangelog && !hasNoChangelogLabel) {
-              // Add a comment requesting changelog
-              await github.rest.issues.createComment({
-                issue_number: prNumber,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: "## 📝 Changelog Required\n\nThis PR contains changes that appear to affect the public API or user experience. **A changelog entry is required before this PR can be accepted.**\n\n### What to include:\n- A brief description of the changes\n- Any breaking changes or new features\n- Migration guides if needed\n\n### Where to add:\n- Look for a `CHANGELOG.md` or similar file in the repository\n- Add your entry under the appropriate version (usually \"Unreleased\" or \"Next\")\n\n### Next steps:\n1. Add your changelog entry\n2. Commit the changes to this PR\n3. The check will automatically pass once a changelog is detected\n\n**If this change doesn't require a changelog entry** (e.g., internal refactor, test fixes, documentation), please add the `no-changelog-needed` label to this PR."
-              });
+              // Add a comment requesting changelog (best-effort)
+              try {
+                await github.rest.issues.createComment({
+                  issue_number: prNumber,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: "## 📝 Changelog Required\n\nThis PR contains changes that appear to affect the public API or user experience. **A changelog entry is required before this PR can be accepted.**\n\n### What to include:\n- A brief description of the changes\n- Any breaking changes or new features\n- Migration guides if needed\n\n### Where to add:\n- Look for a `CHANGELOG.md` or similar file in the repository\n- Add your entry under the appropriate version (usually \"Unreleased\" or \"Next\")\n\n### Next steps:\n1. Add your changelog entry\n2. Commit the changes to this PR\n3. The check will automatically pass once a changelog is detected\n\n**If this change doesn't require a changelog entry** (e.g., internal refactor, test fixes, documentation), please add the `no-changelog-needed` label to this PR."
+                });
+              } catch (error) {
+                core.info('Could not add comment: ' + (error?.message || String(error)));
+              }
               
-              // Add label to indicate changelog is needed
+              // Add label to indicate changelog is needed (best-effort)
               try {
                 await github.rest.issues.addLabels({
                   issue_number: prNumber,
@@ -79,28 +78,30 @@ jobs:
                   labels: ['needs-changelog']
                 });
               } catch (error) {
-                console.log('Could not add needs-changelog label:', error.message);
+                core.info('Could not add needs-changelog label: ' + (error?.message || String(error)));
               }
               
               // If PR is ready for review but missing changelog, convert back to draft
               if (context.payload.action === 'ready_for_review') {
-                await github.rest.pulls.update({
-                  pull_number: prNumber,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  draft: true
-                });
-                
-                // Add comment explaining why it was converted back to draft
-                await github.rest.issues.createComment({
-                  issue_number: prNumber,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: "## ⚠️ PR Converted to Draft\n\nThis PR has been converted back to **draft** status because it's missing a required changelog entry.\n\nPlease add the changelog entry and then mark the PR as \"Ready for review\" again."
-                });
+                try {
+                  await github.rest.pulls.update({
+                    pull_number: prNumber,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    draft: true
+                  });
+                  await github.rest.issues.createComment({
+                    issue_number: prNumber,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    body: "## ⚠️ PR Converted to Draft\n\nThis PR has been converted back to **draft** status because it's missing a required changelog entry.\n\nPlease add the changelog entry and then mark the PR as \"Ready for review\" again."
+                  });
+                } catch (error) {
+                  core.info('Could not convert PR to draft: ' + (error?.message || String(error)));
+                }
               }
             } else if (hasChangelog) {
-              // Add label to indicate changelog is included
+              // Add label to indicate changelog is included (best-effort)
               try {
                 await github.rest.issues.addLabels({
                   issue_number: prNumber,
@@ -109,10 +110,10 @@ jobs:
                   labels: ['has-changelog']
                 });
               } catch (error) {
-                console.log('Could not add has-changelog label:', error.message);
+                core.info('Could not add has-changelog label: ' + (error?.message || String(error)));
               }
               
-              // Remove needs-changelog label if it exists
+              // Remove needs-changelog label if it exists (best-effort)
               const needsChangelogLabel = existingLabels.find(label => label.name === 'needs-changelog');
               if (needsChangelogLabel) {
                 try {
@@ -123,7 +124,7 @@ jobs:
                     name: 'needs-changelog'
                   });
                 } catch (error) {
-                  console.log('Could not remove needs-changelog label:', error.message);
+                  core.info('Could not remove needs-changelog label: ' + (error?.message || String(error)));
                 }
               }
             }
@@ -132,5 +133,5 @@ jobs:
             if (requiresChangelog && !hasChangelog && !hasNoChangelogLabel) {
               core.setFailed('Changelog entry is required for this PR');
             } else {
-              console.log('Changelog check passed');
+              core.info('Changelog check passed');
             }

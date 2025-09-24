@@ -25,8 +25,21 @@ jobs:
             const run = context.payload.workflow_run;
             const [owner, repo] = run.repository.full_name.split('/');
 
-            // Fetch PRs associated with this workflow run
-            const { data: prs } = await github.request(run.pull_requests_url);
+            // Pull requests associated with this workflow run
+            let prs = run.pull_requests || [];
+
+            // Fallback: find PR by head branch if none are attached
+            if (!prs.length) {
+              const headOwner = run.head_repository?.owner?.login || owner;
+              const headRef = run.head_branch;
+              const { data: list } = await github.rest.pulls.list({
+                owner,
+                repo,
+                state: 'open',
+                head: `${headOwner}:${headRef}`,
+              });
+              prs = list;
+            }
 
             for (const pr of prs) {
               // Convert to draft
@@ -38,11 +51,15 @@ jobs:
               });
 
               // Leave a comment
-              const msg = "This PR was automatically converted to draft because required checks failed (" + run.name + ").\n\nPlease run tests, typecheck, and biome locally and ensure all checks pass before marking this PR as Ready for review again.";
+              const msg = `This PR was automatically converted to draft because required checks failed (${run.name}).\n\nPlease run tests, typecheck, and biome locally and ensure all checks pass before marking this PR as Ready for review again.`;
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number: pr.number,
                 body: msg,
               });
+            }
+
+            if (!prs.length) {
+              core.info('No associated pull requests found for this workflow run.');
             }
