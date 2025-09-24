@@ -45,7 +45,7 @@ RUN chmod +x /entrypoint.sh
 COPY --from=builder /app/apps/docs/dist /usr/share/nginx/html
 
 # Set and expose the port. Default to 4323 if not provided.
-ARG PORT=4323
+ARG PORT
 ENV PORT=${PORT}
 EXPOSE ${PORT}
 

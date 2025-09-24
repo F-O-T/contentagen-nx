@@ -49,7 +49,7 @@ COPY apps/blog/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Set and expose the port. Default to 4322 if not provided.
-ARG PORT=4322
+ARG PORT
 ENV PORT=${PORT}
 EXPOSE ${PORT}
 
