@@ -12,7 +12,7 @@ on:
 jobs:
   auto-draft:
     if: >-
-      ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'failure' }}
+      ${{ github.event.workflow_run.event == 'pull_request' && contains(fromJson('["failure","timed_out","cancelled"]'), github.event.workflow_run.conclusion) }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -32,16 +32,28 @@ jobs:
             if (!prs.length) {
               const headOwner = run.head_repository?.owner?.login || owner;
               const headRef = run.head_branch;
-              const { data: list } = await github.rest.pulls.list({
-                owner,
-                repo,
-                state: 'open',
-                head: `${headOwner}:${headRef}`,
-              });
-              prs = list;
+              if (headRef) {
+                const { data: list } = await github.rest.pulls.list({
+                  owner,
+                  repo,
+                  state: 'open',
+                  head: `${headOwner}:${headRef}`,
+                });
+                prs = list;
+              }
+            }
+
+            if (!prs.length) {
+              core.info('No associated pull requests found for this workflow run.');
+              return;
             }
 
             for (const pr of prs) {
+              if (pr.draft) {
+                core.info(`PR #${pr.number} already in draft; skipping.`);
+                continue;
+              }
+
               // Convert to draft
               await github.rest.pulls.update({
                 owner,
@@ -58,8 +70,4 @@ jobs:
                 issue_number: pr.number,
                 body: msg,
               });
-            }
-
-            if (!prs.length) {
-              core.info('No associated pull requests found for this workflow run.');
             }
