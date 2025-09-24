@@ -1,87 +1,54 @@
 name: PR CI
-
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
-# Must also set repo Settings → Actions → Workflow permissions = Read and write
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   tests:
-    if: ${{ github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.draft == false }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          filter: tree:0
-      - name: Bun & Nx Setup
-        uses: ./.github/actions/setup-bun-nx
-      - name: Run Nx affected tests
-        run: bunx nx affected -t test --base=origin/master --head=HEAD
+      - uses: ./.github/actions/setup-bun-nx
+      - run: bunx nx affected -t test --base=origin/master --head=HEAD
 
   typecheck:
-    if: ${{ github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.draft == false }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          filter: tree:0
-      - name: Bun & Nx Setup
-        uses: ./.github/actions/setup-bun-nx
-      - name: Run Nx affected typecheck
-        run: bunx nx affected -t typecheck --base=origin/master --head=HEAD
+      - uses: ./.github/actions/setup-bun-nx
+      - run: bunx nx affected -t typecheck --base=origin/master --head=HEAD
 
   biome_check:
-    if: ${{ github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.draft == false }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          filter: tree:0
-      - name: Bun & Nx Setup
-        uses: ./.github/actions/setup-bun-nx
-      - name: Run Nx affected check
-        run: bunx nx affected -t check --base=origin/master --head=HEAD
+      - uses: ./.github/actions/setup-bun-nx
+      - run: bunx nx affected -t check --base=origin/master --head=HEAD
 
   convert_to_draft:
     name: Convert PR to Draft (on failure)
     needs: [tests, typecheck, biome_check]
-    if: ${{ always() && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
+      issues: write
     steps:
-      - name: Convert via GraphQL when any job failed/cancelled
-        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
-        uses: actions/github-script@v7
+      - name: Mark as draft
+        uses: voiceflow/draft-pr@latest
         with:
-          script: |
-            const { owner, repo } = context.repo;
-            const number = context.payload.pull_request.number;
-            const pr = await github.rest.pulls.get({ owner, repo, pull_number: number });
-            if (pr.data.draft) {
-              core.info('PR already in draft.');
-            } else {
-              const mutation = `
-                mutation($id: ID!) {
-                  convertPullRequestToDraft(input: { pullRequestId: $id }) {
-                    pullRequest { number isDraft }
-                  }
-                }
-              `;
-              await github.graphql(mutation, { id: pr.data.node_id });
-              core.info(`Converted PR #${number} to draft.`);
-            }
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Comment on PR
-        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+      - name: Leave failure guidance comment
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
