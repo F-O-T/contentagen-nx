@@ -2,7 +2,8 @@ name: TypeScript Typechecking
 
 on:
   pull_request:
-    types: [ready_for_review]  # Only trigger when PR is marked ready
+    branches: ["*"]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   check:
