@@ -21,14 +21,17 @@ jobs:
             const pr = context.payload.pull_request;
             const prNumber = pr.number;
             
-            // Get the list of files changed in the PR
-            const filesResponse = await github.rest.pulls.listFiles({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber
-            });
-            
-            const changedFiles = filesResponse.data.map(file => file.filename);
+            // Get the full list of files changed in the PR (with pagination)
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                per_page: 100,
+              }
+            );
+            const changedFiles = files.map(file => file.filename);
             const existingLabels = pr.labels || [];
             
             // Check if this is a feature or fix that would require a changelog
@@ -42,14 +45,9 @@ jobs:
                      !file.includes('demo');
             });
             
-            // Check if changelog file was added or modified
-            const hasChangelog = changedFiles.some(file => 
-              file.toLowerCase().includes('changelog') ||
-              file.toLowerCase().includes('change-log') ||
-              file.toLowerCase().includes('changes') ||
-              file.toLowerCase().includes('release') ||
-              file.toLowerCase().includes('history')
-            );
+            // Check if changelog file was added or modified (strict)
+            const changelogPattern = /(^|\/)((CHANGELOG|CHANGES|HISTORY|RELEASES)\.md)$/i;
+            const hasChangelog = changedFiles.some(file => changelogPattern.test(file));
             
             // Check if PR has the skip label already
             const hasNoChangelogLabel = existingLabels.some(label => 
@@ -63,7 +61,7 @@ jobs:
                   issue_number: prNumber,
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  body: "## 📝 Changelog Required\n\nThis PR contains changes that appear to affect the public API or user experience. **A changelog entry is required before this PR can be accepted.**\n\n### What to include:\n- A brief description of the changes\n- Any breaking changes or new features\n- Migration guides if needed\n\n### Where to add:\n- Look for a `CHANGELOG.md` or similar file in the repository\n- Add your entry under the appropriate version (usually \"Unreleased\" or \"Next\")\n\n### Next steps:\n1. Add your changelog entry\n2. Commit the changes to this PR\n3. The check will automatically pass once a changelog is detected\n\n**If this change doesn't require a changelog entry** (e.g., internal refactor, test fixes, documentation), please add the `no-changelog-needed` label to this PR."
+                  body: "## 📝 Changelog Required\n\nThis PR contains changes that appear to affect the public API or user experience. **A changelog entry is required before this PR can be accepted.**\n\n### What to include:\n- A brief description of the changes\n- Any breaking changes or new features\n- Migration guides if needed\n\n### Where to add:\n- Add to a `CHANGELOG.md` file in the repository (root or the affected package)\n- Put your entry under the appropriate version (usually \"Unreleased\" or \"Next\")\n\n### Next steps:\n1. Add your changelog entry\n2. Commit the changes to this PR\n3. The check will automatically pass once a changelog is detected\n\n**If this change doesn't require a changelog entry** (e.g., internal refactor, test fixes, documentation), please add the `no-changelog-needed` label to this PR."
                 });
               } catch (error) {
                 core.info('Could not add comment: ' + (error?.message || String(error)));
@@ -113,19 +111,16 @@ jobs:
                 core.info('Could not add has-changelog label: ' + (error?.message || String(error)));
               }
               
-              // Remove needs-changelog label if it exists (best-effort)
-              const needsChangelogLabel = existingLabels.find(label => label.name === 'needs-changelog');
-              if (needsChangelogLabel) {
-                try {
-                  await github.rest.issues.removeLabel({
-                    issue_number: prNumber,
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    name: 'needs-changelog'
-                  });
-                } catch (error) {
-                  core.info('Could not remove needs-changelog label: ' + (error?.message || String(error)));
-                }
+              // Remove needs-changelog label if it exists (best-effort; unconditionally try)
+              try {
+                await github.rest.issues.removeLabel({
+                  issue_number: prNumber,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: 'needs-changelog'
+                });
+              } catch (error) {
+                core.info('Could not remove needs-changelog label (maybe not present): ' + (error?.message || String(error)));
               }
             }
             
