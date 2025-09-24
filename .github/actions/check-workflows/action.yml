@@ -1,5 +1,5 @@
 name: "Check Workflows and Comment"
-description: "Checks if a workflow failed, posts a comment on the PR and attempts to convert the PR to draft (with extra debug logs)"
+description: "Checks if a workflow failed, posts a comment on the PR and attempts to convert the PR to draft (REST then GraphQL fallback)"
 inputs:
   workflow_name:
     description: "Name of the workflow that failed"
@@ -17,7 +17,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Comment and convert PR to draft (with diagnostics)
+    - name: Comment and convert PR to draft (REST + GraphQL fallback)
       id: comment_and_draft
       uses: actions/github-script@v7
       with:
@@ -41,11 +41,10 @@ runs:
             return;
           }
 
-          // Log who we're authenticated as
+          // Authenticated user + permission check
           try {
             const auth = await github.rest.users.getAuthenticated();
             console.log('Authenticated user:', auth.data.login);
-            // check collaborator permission level for that user
             const perm = await github.rest.repos.getCollaboratorPermissionLevel({
               owner,
               repo,
@@ -56,7 +55,6 @@ runs:
             console.error('Failed to get authenticated user or permission level:', err && err.message ? err.message : err);
           }
 
-          // Log PR origin info
           if (payloadPr) {
             console.log('PR head repo full_name:', payloadPr.head && payloadPr.head.repo && payloadPr.head.repo.full_name);
             console.log('PR head repo fork?:', payloadPr.head && payloadPr.head.repo && payloadPr.head.repo.fork);
@@ -75,6 +73,7 @@ runs:
             'Make sure all checks pass locally before marking the PR as "Ready for review".'
           ].join("\n");
 
+          // Create comment
           try {
             await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
             console.log(`Comment created on PR #${prNumber}`);
@@ -83,24 +82,70 @@ runs:
             throw err;
           }
 
+          // Get PR via REST
+          let pr;
           try {
-            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            const getRes = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            pr = getRes.data;
             console.log('PR draft status before update:', pr.draft);
+          } catch (err) {
+            console.error('Failed to get PR:', err && err.message ? err.message : err);
+            throw err;
+          }
 
+          // Try REST update first
+          try {
             if (!pr.draft) {
               const res = await github.rest.pulls.update({ owner, repo, pull_number: prNumber, draft: true });
               console.log('pulls.update HTTP status:', res.status);
-              console.log('pulls.update response object:', JSON.stringify(res.data, null, 2));
+              console.log('pulls.update response draft value:', res.data.draft);
+              if (res.data.draft === true) {
+                console.log('PR converted to draft via REST.');
+                return;
+              }
+              console.log('REST update did not set draft to true; attempting GraphQL fallback.');
             } else {
               console.log('PR already in draft mode; no update needed.');
+              return;
             }
           } catch (err) {
-            console.error('Failed to convert PR to draft:', err && err.message ? err.message : err);
-            if (err && err.status === 403) {
-              console.error('Permission denied (403). Ensure the calling token has permission to update pull requests.');
-            }
-            throw err;
+            console.error('REST pulls.update failed:', err && err.message ? err.message : err);
+            // continue to GraphQL fallback
           }
+
+          // GraphQL fallback: convertPullRequestToDraft
+          try {
+            const prNodeId = pr.node_id;
+            if (!prNodeId) {
+              console.error('No node_id available for PR; cannot perform GraphQL mutation.');
+            } else {
+              const mutation = `
+                mutation ConvertToDraft($id: ID!) {
+                  convertPullRequestToDraft(input: { pullRequestId: $id }) {
+                    clientMutationId
+                    pullRequest {
+                      number
+                      isDraft
+                      id
+                    }
+                  }
+                }
+              `;
+              const gqlRes = await github.graphql(mutation, { id: prNodeId });
+              console.log('GraphQL convertPullRequestToDraft result:', JSON.stringify(gqlRes, null, 2));
+              const converted = gqlRes && gqlRes.convertPullRequestToDraft && gqlRes.convertPullRequestToDraft.pullRequest && gqlRes.convertPullRequestToDraft.pullRequest.isDraft;
+              if (converted === true) {
+                console.log('PR converted to draft via GraphQL.');
+                return;
+              } else {
+                console.log('GraphQL mutation did not set isDraft true. Inspect the returned object above.');
+              }
+            }
+          } catch (err) {
+            console.error('GraphQL convertPullRequestToDraft failed:', err && err.message ? err.message : err);
+          }
+
+          console.error('Both REST and GraphQL attempts finished; PR was not marked as draft. If both returned without error but draft is still false, contact GitHub Support or try manually converting in the web UI.');
       env:
         WORKFLOW_NAME: ${{ inputs.workflow_name }}
         COMMAND: ${{ inputs.command }}
