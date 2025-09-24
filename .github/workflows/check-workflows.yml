@@ -2,6 +2,7 @@ name: Convert PR to Draft (target)
 
 on:
   pull_request_target:
+    branches: ["*"]
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
