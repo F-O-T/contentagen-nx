@@ -8,6 +8,12 @@ on:
       - "Biome Check"
     types:
       - completed
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: '(for manual testing) PR number to act on'
+        required: false
+        type: number
 
 permissions:
   contents: read
@@ -16,7 +22,7 @@ permissions:
 
 jobs:
   comment-and-draft:
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - name: Comment on PR and ensure draft (safe base-repo run)
@@ -24,17 +30,22 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const run = context.payload.workflow_run;
-            const prs = run.pull_requests || [];
-            if (!prs.length) {
-              console.log('No PR associated with this workflow_run; nothing to do.');
+            // Determine PR number:
+            let prNumber = undefined;
+            if (context.eventName === 'workflow_dispatch') {
+              // manual test run: use input pr_number if supplied
+              prNumber = parseInt(core ? core.getInput('pr_number') : (process.env.INPUT_PR_NUMBER || ''), 10) || undefined;
+            } else if (context.payload && context.payload.workflow_run && Array.isArray(context.payload.workflow_run.pull_requests) && context.payload.workflow_run.pull_requests.length) {
+              prNumber = context.payload.workflow_run.pull_requests[0].number;
+            }
+
+            if (!prNumber) {
+              console.log('No PR number available. For manual runs, pass pr_number via workflow_dispatch inputs.');
               return;
             }
 
-            const pr = prs[0]; // usually one PR per run for PR-triggered workflows
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const prNumber = pr.number;
 
             const body = [
               `## ❌ Typecheck Failed`,
