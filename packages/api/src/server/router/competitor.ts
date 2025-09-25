@@ -20,8 +20,7 @@ import {
    getFeaturesByCompetitorId,
    getTotalFeaturesByCompetitorId,
 } from "@packages/database/repositories/competitor-feature-repository";
-import { NotFoundError, DatabaseError } from "@packages/errors";
-import { TRPCError } from "@trpc/server";
+import { APIError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
 import { deleteFeaturesByCompetitorId } from "@packages/database/repositories/competitor-feature-repository";
 import {
@@ -52,10 +51,7 @@ export const competitorRouter = router({
                resolvedCtx.session?.session?.activeOrganizationId;
 
             if (!userId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message: "User must be authenticated to list competitors.",
-               });
+               throw APIError.unauthorized("User must be authenticated.");
             }
 
             const competitors = await listCompetitors(resolvedCtx.db, {
@@ -77,13 +73,9 @@ export const competitorRouter = router({
                limit: input.limit,
             };
          } catch (err) {
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.error("Error listing competitors:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to list competitors.");
          }
       }),
 
@@ -102,11 +94,9 @@ export const competitorRouter = router({
                resolvedCtx.session?.session?.activeOrganizationId;
 
             if (!userId || !organizationId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message:
-                     "User must be authenticated and belong to an organization to create competitors.",
-               });
+               throw APIError.unauthorized(
+                  "User must be authenticated and belong to an organization to create competitors.",
+               );
             }
 
             const created = await createCompetitor(resolvedCtx.db, {
@@ -148,13 +138,9 @@ export const competitorRouter = router({
 
             return created;
          } catch (err) {
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.error("Error creating competitor:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to create competitor.");
          }
       }),
 
@@ -176,10 +162,9 @@ export const competitorRouter = router({
                resolvedCtx.session?.session?.activeOrganizationId;
 
             if (!userId || !organizationId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message: "User must be authenticated to update competitors.",
-               });
+               throw APIError.unauthorized(
+                  "User must be authenticated and belong to an organization to update competitors.",
+               );
             }
 
             // Verify the competitor exists and belongs to the user/organization
@@ -188,11 +173,9 @@ export const competitorRouter = router({
                existing.userId !== userId &&
                existing.organizationId !== organizationId
             ) {
-               throw new TRPCError({
-                  code: "FORBIDDEN",
-                  message:
-                     "You don't have permission to update this competitor.",
-               });
+               throw APIError.forbidden(
+                  "You don't have permission to update this competitor.",
+               );
             }
 
             const updated = await updateCompetitor(
@@ -202,16 +185,9 @@ export const competitorRouter = router({
             );
             return updated;
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
-            }
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.error("Error updating competitor:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to update competitor.");
          }
       }),
 
@@ -225,10 +201,9 @@ export const competitorRouter = router({
                resolvedCtx.session?.session?.activeOrganizationId;
 
             if (!userId || !organizationId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message: "User must be authenticated to delete competitors.",
-               });
+               throw APIError.unauthorized(
+                  "User must be authenticated and belong to an organization to delete competitors.",
+               );
             }
 
             // Verify the competitor exists and belongs to the user/organization
@@ -237,26 +212,17 @@ export const competitorRouter = router({
                existing.userId !== userId &&
                existing.organizationId !== organizationId
             ) {
-               throw new TRPCError({
-                  code: "FORBIDDEN",
-                  message:
-                     "You don't have permission to delete this competitor.",
-               });
+               throw APIError.forbidden(
+                  "You don't have permission to delete this competitor.",
+               );
             }
 
             await deleteCompetitor(resolvedCtx.db, input.id);
             return { success: true };
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
-            }
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.error("Error deleting competitor:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to delete competitor.");
          }
       }),
 
@@ -272,10 +238,9 @@ export const competitorRouter = router({
                resolvedCtx.session?.session?.activeOrganizationId;
 
             if (!userId || !organizationId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message: "User must be authenticated to analyze competitors.",
-               });
+               throw APIError.unauthorized(
+                  "User must be authenticated and belong to an organization to analyze competitors.",
+               );
             }
 
             const competitor = await getCompetitorById(
@@ -288,11 +253,9 @@ export const competitorRouter = router({
                competitor.userId !== userId &&
                competitor.organizationId !== organizationId
             ) {
-               throw new TRPCError({
-                  code: "FORBIDDEN",
-                  message:
-                     "You don't have permission to analyze this competitor.",
-               });
+               throw APIError.forbidden(
+                  "You don't have permission to analyze this competitor.",
+               );
             }
 
             await deleteFeaturesByCompetitorId(resolvedCtx.db, competitor.id);
@@ -304,16 +267,9 @@ export const competitorRouter = router({
             });
             return { success: true };
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
-            }
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.error("Error analyzing competitor:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to analyze competitor.");
          }
       }),
 
@@ -327,10 +283,9 @@ export const competitorRouter = router({
                resolvedCtx.session?.session?.activeOrganizationId;
 
             if (!userId || !organizationId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message: "User must be authenticated to view competitors.",
-               });
+               throw APIError.unauthorized(
+                  "User must be authenticated and belong to an organization to view competitors.",
+               );
             }
 
             const competitor = await getCompetitorById(
@@ -343,24 +298,16 @@ export const competitorRouter = router({
                competitor.userId !== userId &&
                competitor.organizationId !== organizationId
             ) {
-               throw new TRPCError({
-                  code: "FORBIDDEN",
-                  message: "You don't have permission to view this competitor.",
-               });
+               throw APIError.forbidden(
+                  "You don't have permission to view this competitor.",
+               );
             }
 
             return competitor;
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
-            }
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.error("Error getting competitor:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to get competitor.");
          }
       }),
 
@@ -385,11 +332,9 @@ export const competitorRouter = router({
                resolvedCtx.session?.session?.activeOrganizationId;
 
             if (!userId || !organizationId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message:
-                     "User must be authenticated to view competitor features.",
-               });
+               throw APIError.unauthorized(
+                  "User must be authenticated and belong to an organization to view competitor features.",
+               );
             }
 
             // Verify the competitor exists and belongs to the user/organization
@@ -401,11 +346,9 @@ export const competitorRouter = router({
                competitor.userId !== userId &&
                competitor.organizationId !== organizationId
             ) {
-               throw new TRPCError({
-                  code: "FORBIDDEN",
-                  message:
-                     "You don't have permission to view this competitor's features.",
-               });
+               throw APIError.forbidden(
+                  "You don't have permission to view this competitor's features.",
+               );
             }
 
             const [features, total] = await Promise.all([
@@ -431,16 +374,9 @@ export const competitorRouter = router({
                totalPages,
             };
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw new TRPCError({ code: "NOT_FOUND", message: err.message });
-            }
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.error("Error getting competitor features:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to get competitor features.");
          }
       }),
 
@@ -460,10 +396,7 @@ export const competitorRouter = router({
                resolvedCtx.session?.session?.activeOrganizationId;
 
             if (!userId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message: "User must be authenticated to search competitors.",
-               });
+               throw APIError.unauthorized("User must be authenticated.");
             }
 
             const competitors = await searchCompetitors(resolvedCtx.db, {
@@ -475,13 +408,9 @@ export const competitorRouter = router({
             });
             return { items: competitors };
          } catch (err) {
-            if (err instanceof DatabaseError) {
-               throw new TRPCError({
-                  code: "INTERNAL_SERVER_ERROR",
-                  message: err.message,
-               });
-            }
-            throw err;
+            console.error("Error searching competitors:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to search competitors.");
          }
       }),
    onFeaturesStatusChanged: publicProcedure

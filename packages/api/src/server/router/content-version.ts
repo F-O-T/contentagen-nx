@@ -1,14 +1,15 @@
-import {
-   protectedProcedure,
-   router,
-} from "../trpc";
+import { protectedProcedure, router } from "../trpc";
 import {
    getAllVersionsByContentId,
    getNextVersionNumber,
    createContentVersion,
 } from "@packages/database/repositories/content-version-repository";
 import { canModifyContent } from "@packages/database/repositories/access-control-repository";
-import { getContentById, updateContent, updateContentCurrentVersion } from "@packages/database/repositories/content-repository";
+import {
+   getContentById,
+   updateContent,
+   updateContentCurrentVersion,
+} from "@packages/database/repositories/content-repository";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
 import { calculateContentStats } from "@packages/utils/text";
@@ -94,8 +95,7 @@ export const contentVersionRouter = router({
             const updatedStats = {
                ...currentContent.stats,
                ...newStats,
-               qualityScore:
-                  currentContent.stats?.qualityScore ?? newStats.qualityScore,
+               qualityScore: currentContent.stats?.qualityScore,
             };
 
             // Update the content
@@ -107,7 +107,9 @@ export const contentVersionRouter = router({
             return { success: true, content: updated, version: versionNumber };
          } catch (err) {
             propagateError(err);
-            throw APIError.internal("Failed to edit content and create version");
+            throw APIError.internal(
+               "Failed to edit content and create version",
+            );
          }
       }),
    getVersions: protectedProcedure
@@ -154,3 +156,4 @@ export const contentVersionRouter = router({
          }
       }),
 });
+
