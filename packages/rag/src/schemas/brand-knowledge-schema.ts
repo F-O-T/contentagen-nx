@@ -16,7 +16,7 @@ export const brandKnowledge = pgTable(
    "brand_knowledge",
    {
       id: uuid("id").primaryKey().defaultRandom(),
-      externalId: text("id").notNull(),
+      externalId: uuid("external_id").notNull(),
       sourceId: text("source_id").notNull(),
       chunk: text("chunk").notNull(),
       type: brandKnowledgeType("type").notNull(),
@@ -29,7 +29,7 @@ export const brandKnowledge = pgTable(
          .notNull(),
    },
    (table) => [
-      index("embeddingIndex").using(
+      index("brandKnowledgeEmbeddingIndex").using(
          "hnsw",
          table.embedding.op("vector_cosine_ops"),
       ),

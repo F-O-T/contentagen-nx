@@ -1,5 +1,5 @@
 import { createWorkflow, createStep } from "@mastra/core/workflows";
-import { createCompetitorKnowledgeWithEmbedding } from "@packages/rag/repositories/competitor-knowledge-repository";
+import { createCompetitorKnowledgeWithEmbeddingsBulk } from "@packages/rag/repositories/competitor-knowledge-repository";
 import { createPgVector } from "@packages/rag/client";
 import { bulkCreateFeatures } from "@packages/database/repositories/competitor-feature-repository";
 import { getPaymentClient } from "@packages/payment/client";
@@ -193,15 +193,16 @@ const saveCompetitorFeatures = createStep({
 
       if (features.length > 0) {
          try {
-            //TODO: create a method to handle this in bulk
-            features.forEach(async (feature) => {
-               await createCompetitorKnowledgeWithEmbedding(ragClient, {
-                  chunk: feature.summary,
-                  externalId: competitorId,
-                  sourceId: feature.id,
-                  type: "feature",
-               });
-            });
+            console.log(`[saveCompetitorFeatures] Creating embeddings for ${features.length} features`);
+            
+            const knowledgeData = features.map((feature) => ({
+               chunk: feature.summary,
+               externalId: competitorId,
+               sourceId: feature.id,
+               type: "feature" as const,
+            }));
+
+            await createCompetitorKnowledgeWithEmbeddingsBulk(ragClient, knowledgeData);
 
             console.log(
                `[saveCompetitorFeatures] Successfully indexed ${features.length} features to Chroma`,

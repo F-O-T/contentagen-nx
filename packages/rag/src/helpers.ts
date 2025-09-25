@@ -36,40 +36,33 @@ export const createEmbedding = async (text: string) => {
 
 export const createEmbeddings = async (
    texts: string[],
-): Promise<number[][]> => {
+): Promise<(number[] | null)[]> => {
    try {
       if (texts.length === 0) {
          return [];
       }
 
-      if (texts.length === 1) {
-         if (!texts[0]) {
-            throw AppError.internal(
-               "Failed to create embeddings: Missing text",
-            );
+      // Process embeddings individually to handle failures gracefully
+      const embeddings: (number[] | null)[] = [];
+      
+      for (let i = 0; i < texts.length; i++) {
+         const text = texts[i];
+         
+         if (!text || text.trim() === "") {
+            console.warn(`Skipping empty text at index ${i}`);
+            embeddings.push(null);
+            continue;
          }
-         const { embedding } = await createEmbedding(texts[0]);
-         return [embedding];
-      }
 
-      const response = await openai.embeddings.create({
-         model: "text-embedding-3-small",
-         input: texts,
-         dimensions: 1536,
-      });
-
-      const embeddings = response.data.map((item) => {
-         if (!item.embedding) {
-            throw AppError.internal(
-               "Failed to create embeddings: Missing embedding in response",
+         try {
+            const { embedding } = await createEmbedding(text);
+            embeddings.push(embedding);
+         } catch (error) {
+            console.warn(
+               `Failed to create embedding for text at index ${i}: ${error instanceof Error ? error.message : String(error)}`,
             );
+            embeddings.push(null);
          }
-         return item.embedding;
-      });
-      if (embeddings.length !== texts.length) {
-         throw AppError.internal(
-            "Failed to create embeddings: Mismatch in response length",
-         );
       }
 
       return embeddings;

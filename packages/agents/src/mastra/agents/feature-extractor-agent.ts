@@ -27,7 +27,6 @@ export const featureExtractionAgent = new Agent({
    name: "Feature Extraction Agent",
    instructions: ({ runtimeContext }) => {
       const locale = runtimeContext.get("language") as "en" | "pt";
-      console.log(locale);
       const languageOutputInstruction = getLanguageOutputInstruction(locale);
 
       return `

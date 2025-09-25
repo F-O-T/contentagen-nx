@@ -79,7 +79,7 @@
         "zod": "4.1.8"
       },
       "payment": {
-        "@polar-sh/sdk": "0.34.11"
+        "@polar-sh/sdk": "0.35.2"
       },
       "enviroment": {
         "dotenv-cli": "8.0.0",

@@ -7,24 +7,7 @@ import {
 import { eq, and, desc, sql, gt, cosineDistance } from "drizzle-orm";
 import type { PgVectorDatabaseInstance } from "../client";
 import { AppError, propagateError } from "@packages/utils/errors";
-import { createEmbedding } from "../helpers";
-
-async function createCompetitorKnowledge(
-   dbClient: PgVectorDatabaseInstance,
-   data: CompetitorKnowledgeInsert,
-) {
-   try {
-      const result = await dbClient
-         .insert(competitorKnowledge)
-         .values(data)
-         .returning();
-      return result[0];
-   } catch (err) {
-      throw AppError.database(
-         `Failed to create competitor knowledge: ${(err as Error).message}`,
-      );
-   }
-}
+import { createEmbedding, createEmbeddings } from "../helpers";
 
 export async function createCompetitorKnowledgeWithEmbedding(
    dbClient: PgVectorDatabaseInstance,
@@ -35,10 +18,14 @@ export async function createCompetitorKnowledgeWithEmbedding(
 ) {
    try {
       const { embedding } = await createEmbedding(data.chunk);
-      return await createCompetitorKnowledge(dbClient, {
-         ...data,
-         embedding,
-      });
+      const result = await dbClient
+         .insert(competitorKnowledge)
+         .values({
+            ...data,
+            embedding: sql`'${JSON.stringify(embedding)}'::vector`,
+         })
+         .returning();
+      return result[0];
    } catch (err) {
       propagateError(err);
       throw AppError.database(
@@ -157,6 +144,66 @@ export async function searchCompetitorKnowledgeByTextAndExternalId(
    } catch (err) {
       throw AppError.database(
          `Failed to search competitor knowledge by text and external ID: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function createCompetitorKnowledgeWithEmbeddingsBulk(
+   dbClient: PgVectorDatabaseInstance,
+   dataArray: Array<
+      Omit<
+         CompetitorKnowledgeInsert,
+         "embedding" | "id" | "createdAt" | "updatedAt"
+      >
+   >,
+): Promise<CompetitorKnowledgeSelect[]> {
+   try {
+      if (dataArray.length === 0) {
+         return [];
+      }
+
+      const texts = dataArray.map((data) => data.chunk);
+      const embeddings = await createEmbeddings(texts);
+
+      // Filter out items with null embeddings and log warnings
+      const validInsertData: Array<CompetitorKnowledgeInsert> = [];
+      let skippedCount = 0;
+
+      for (let i = 0; i < dataArray.length; i++) {
+         const data = dataArray[i];
+         const embedding = embeddings[i];
+
+         if (!embedding) {
+            console.warn(`Skipping competitor knowledge entry due to failed embedding: ${data.chunk.substring(0, 100)}...`);
+            skippedCount++;
+            continue;
+         }
+
+         validInsertData.push({
+            ...data,
+            embedding: embedding,
+         });
+      }
+
+      if (skippedCount > 0) {
+         console.warn(`Skipped ${skippedCount} entries due to embedding failures`);
+      }
+
+      if (validInsertData.length === 0) {
+         console.warn("No valid embeddings created, returning empty result");
+         return [];
+      }
+
+      const result = await dbClient
+         .insert(competitorKnowledge)
+         .values(validInsertData)
+         .returning();
+
+      return result;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to create competitor knowledge with embeddings in bulk: ${(err as Error).message}`,
       );
    }
 }
