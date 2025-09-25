@@ -10,7 +10,7 @@ export const queryForCompetitorKnowledge = createTool({
    inputSchema: z.object({
       externalId: z
          .string()
-         .describe("The external id for identifying the brand"),
+         .describe("The external id for identifying the competitor"),
       searchTerm: z.string().describe("The search term to query the database"),
       type: z
          .enum(["document", "feature"])

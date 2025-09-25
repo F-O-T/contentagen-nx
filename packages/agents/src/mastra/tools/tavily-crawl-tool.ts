@@ -16,7 +16,7 @@ export const tavilyCrawlTool = createTool({
       instructions: z
          .string()
          .describe(
-            "Natural language instructions for the crawler, e.g., 'Find all pages about the Python SDK' the max length is 400 characters",
+            "Natual language instructions for the crawler to follow when crawling the website",
          )
          .max(400),
    }),
