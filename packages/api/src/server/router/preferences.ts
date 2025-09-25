@@ -1,40 +1,15 @@
-import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { APIError, propagateError } from "@packages/utils/errors";
 import { protectedProcedure, router } from "../trpc";
 import {
-   createUserPreference,
-   getUserPreferences,
    getWorkflowPreferences,
-   updateUserPreference,
    updateWorkflowPreferences,
-   deleteUserPreferenceByKey,
 } from "@packages/database/repositories/user-preferences-repository";
 import { listAgents } from "@packages/database/repositories/agent-repository";
 import { listContents } from "@packages/database/repositories/content-repository";
 import type { WorkflowPreferences } from "@packages/database/schemas/user-preferences";
 
 export const preferencesRouter = router({
-   // Get all user preferences
-   getAll: protectedProcedure.query(async ({ ctx }) => {
-      try {
-         const resolvedCtx = await ctx;
-         const userId = resolvedCtx.session?.user.id;
-         if (!userId) {
-            throw new TRPCError({
-               code: "UNAUTHORIZED",
-               message: "User must be authenticated to get preferences.",
-            });
-         }
-         return await getUserPreferences(resolvedCtx.db, userId);
-      } catch (err) {
-         throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to get user preferences.",
-         });
-      }
-   }),
-
-   // Update workflow preferences
    updateWorkflow: protectedProcedure
       .input(
          z.object({
@@ -46,11 +21,7 @@ export const preferencesRouter = router({
             const resolvedCtx = await ctx;
             const userId = resolvedCtx.session?.user.id;
             if (!userId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message:
-                     "User must be authenticated to update workflow preferences.",
-               });
+               throw APIError.unauthorized("User must be authenticated.");
             }
 
             // Get current workflow preferences
@@ -75,150 +46,12 @@ export const preferencesRouter = router({
 
             return { success: true };
          } catch (err) {
-            throw new TRPCError({
-               code: "INTERNAL_SERVER_ERROR",
-               message: "Failed to update workflow preferences.",
-            });
+            console.error("Error updating workflow preferences:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to update workflow preferences.");
          }
       }),
 
-   // Update a user preference (legacy)
-   update: protectedProcedure
-      .input(
-         z.object({
-            category: z.enum(["global_writing_style", "workflow"]),
-            key: z.string().optional(),
-            value: z.union([z.string(), z.boolean()]),
-         }),
-      )
-      .mutation(async ({ ctx, input }) => {
-         try {
-            const resolvedCtx = await ctx;
-            const userId = resolvedCtx.session?.user.id;
-            if (!userId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message: "User must be authenticated to update preferences.",
-               });
-            }
-
-            if (input.category === "workflow") {
-               // For workflow preferences, use the new structured approach
-               const currentPrefs = (await getWorkflowPreferences(
-                  resolvedCtx.db,
-                  userId,
-               )) || {
-                  notifyMissingImages: false,
-               };
-
-               const updatedPrefs: WorkflowPreferences = {
-                  ...currentPrefs,
-                  notifyMissingImages: input.value as boolean,
-               };
-
-               await updateWorkflowPreferences(
-                  resolvedCtx.db,
-                  userId,
-                  updatedPrefs,
-               );
-            } else {
-               // Legacy behavior for other categories
-               const existingPreferences = await getUserPreferences(
-                  resolvedCtx.db,
-                  userId,
-               );
-               const existingPref = existingPreferences.find(
-                  (pref) => pref.category === input.category && !pref.key,
-               );
-
-               if (existingPref) {
-                  await updateUserPreference(resolvedCtx.db, existingPref.id, {
-                     value: input.value,
-                  });
-               } else {
-                  await createUserPreference(resolvedCtx.db, {
-                     userId,
-                     category: input.category,
-                     value: input.value,
-                  });
-               }
-            }
-
-            return { success: true };
-         } catch (err) {
-            throw new TRPCError({
-               code: "INTERNAL_SERVER_ERROR",
-               message: "Failed to update user preference.",
-            });
-         }
-      }),
-
-   // Create a new workflow preference
-   createWorkflow: protectedProcedure
-      .input(
-         z.object({
-            key: z.string(),
-            value: z.union([z.string(), z.boolean()]),
-         }),
-      )
-      .mutation(async ({ ctx, input }) => {
-         try {
-            const resolvedCtx = await ctx;
-            const userId = resolvedCtx.session?.user.id;
-            if (!userId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message: "User must be authenticated to create preferences.",
-               });
-            }
-
-            const result = await createUserPreference(resolvedCtx.db, {
-               userId,
-               category: "workflow",
-               key: input.key,
-               value: input.value,
-            });
-
-            return result;
-         } catch (err) {
-            throw new TRPCError({
-               code: "INTERNAL_SERVER_ERROR",
-               message: "Failed to create workflow preference.",
-            });
-         }
-      }),
-
-   // Delete a workflow preference
-   deleteWorkflow: protectedProcedure
-      .input(z.object({ key: z.string() }))
-      .mutation(async ({ ctx, input }) => {
-         try {
-            const resolvedCtx = await ctx;
-            const userId = resolvedCtx.session?.user.id;
-            if (!userId) {
-               throw new TRPCError({
-                  code: "UNAUTHORIZED",
-                  message: "User must be authenticated to delete preferences.",
-               });
-            }
-
-            await deleteUserPreferenceByKey(
-               resolvedCtx.db,
-               userId,
-               "workflow",
-               input.key,
-            );
-
-            return { success: true };
-         } catch (err) {
-            throw new TRPCError({
-               code: "INTERNAL_SERVER_ERROR",
-               message: "Failed to delete workflow preference.",
-            });
-         }
-      }),
-
-   // Check for posts missing image URLs
    checkMissingImages: protectedProcedure.query(async ({ ctx }) => {
       try {
          const resolvedCtx = await ctx;
@@ -227,10 +60,7 @@ export const preferencesRouter = router({
             resolvedCtx.session?.session?.activeOrganizationId;
 
          if (!userId) {
-            throw new TRPCError({
-               code: "UNAUTHORIZED",
-               message: "User must be authenticated to check missing images.",
-            });
+            throw APIError.unauthorized("User must be authenticated.");
          }
 
          // Get all agents belonging to the user
@@ -268,10 +98,9 @@ export const preferencesRouter = router({
             total: missingImages.length,
          };
       } catch (err) {
-         throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to check for missing images.",
-         });
+         console.error("Error checking for missing images:", err);
+         propagateError(err);
+         throw APIError.internal("Failed to check for missing images.");
       }
    }),
 
@@ -281,11 +110,7 @@ export const preferencesRouter = router({
          const resolvedCtx = await ctx;
          const userId = resolvedCtx.session?.user.id;
          if (!userId) {
-            throw new TRPCError({
-               code: "UNAUTHORIZED",
-               message:
-                  "User must be authenticated to get workflow preferences.",
-            });
+            throw APIError.unauthorized("User must be authenticated.");
          }
 
          const workflowPrefs = await getWorkflowPreferences(
@@ -298,10 +123,9 @@ export const preferencesRouter = router({
             notifyMissingImages: workflowPrefs?.notifyMissingImages ?? false,
          };
       } catch (err) {
-         throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to get workflow preferences.",
-         });
+         console.error("Error getting workflow preferences:", err);
+         propagateError(err);
+         throw APIError.internal("Failed to get workflow preferences.");
       }
    }),
 });

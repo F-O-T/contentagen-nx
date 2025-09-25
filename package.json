@@ -127,7 +127,7 @@
       },
       "auth": {
         "better-auth": "1.3.5",
-        "@polar-sh/better-auth": "^1.1.0"
+        "@polar-sh/better-auth": "1.1.4"
       },
       "development": {
         "typescript": "5.9.2"
