@@ -14,7 +14,6 @@ COPY packages/posthog/package.json ./packages/posthog/
 COPY packages/environment/package.json ./packages/environment/
 COPY packages/errors/package.json ./packages/errors/
 COPY packages/database/package.json ./packages/database/
-COPY packages/arcjet/package.json ./packages/arcjet/
 COPY tooling/typescript/package.json ./tooling/typescript/
 
 # Install all dependencies (including devDependencies needed for the build step)

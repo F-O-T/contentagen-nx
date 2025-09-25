@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@arcjet/astro": "catalog:security",
     "@astrojs/check": "catalog:astro",
     "@astrojs/mdx": "catalog:astro",
     "@astrojs/node": "catalog:astro",

@@ -3,16 +3,10 @@ FROM oven/bun:latest AS builder
 
 ARG POLAR_PREMIUM_PLAN
 ARG POLAR_PRO_PLAN
-
-
 ARG DATABASE_URL
 ARG BETTER_AUTH_GOOGLE_CLIENT_ID
 ARG BETTER_AUTH_GOOGLE_CLIENT_SECRET
-ARG ARCJET_KEY
-ARG ARCJET_ENV
-
 ARG POLAR_ACCESS_TOKEN
-ARG POLAR_SUCCESS_URL
 ARG RESEND_API_KEY
 ARG BETTER_AUTH_SECRET
 ARG BETTER_AUTH_TRUSTED_ORIGINS
@@ -27,9 +21,6 @@ ARG MINIO_SECRET_KEY
 ARG MINIO_BUCKET
 ARG TAVILY_API_KEY
 
-ARG CHROMA_DB_URL
-ARG CHROMA_TOKEN
-
 WORKDIR /app
 
 # Copy all package manifests and the lockfile first.
@@ -38,7 +29,6 @@ COPY package.json ./
 COPY apps/server/package.json ./apps/server/
 COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/api/package.json ./packages/api/
-COPY packages/arcjet/package.json ./packages/arcjet/
 COPY packages/authentication/package.json ./packages/authentication/
 COPY packages/server-events/package.json ./packages/server-events/
 COPY packages/localization/package.json ./packages/localization/
@@ -70,8 +60,6 @@ ENV POLAR_PRO_PLAN=${POLAR_PRO_PLAN}
 ENV DATABASE_URL=${DATABASE_URL}
 ENV BETTER_AUTH_GOOGLE_CLIENT_ID=${BETTER_AUTH_GOOGLE_CLIENT_ID}
 ENV BETTER_AUTH_GOOGLE_CLIENT_SECRET=${BETTER_AUTH_GOOGLE_CLIENT_SECRET}
-ENV ARCJET_KEY=${ARCJET_KEY}
-ENV ARCJET_ENV=${ARCJET_ENV}
 ENV POLAR_ACCESS_TOKEN=${POLAR_ACCESS_TOKEN}
 ENV POLAR_SUCCESS_URL=${POLAR_SUCCESS_URL}
 ENV RESEND_API_KEY=${RESEND_API_KEY}
@@ -87,8 +75,6 @@ ENV MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
 ENV MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
 ENV MINIO_BUCKET=${MINIO_BUCKET}
 ENV TAVILY_API_KEY=${TAVILY_API_KEY}
-ENV CHROMA_DB_URL=${CHROMA_DB_URL}
-ENV CHROMA_TOKEN=${CHROMA_TOKEN}
 RUN bun build \
     --minify-whitespace \
     --minify-syntax \
@@ -108,7 +94,6 @@ COPY package.json ./
 COPY apps/server/package.json ./apps/server/
 COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/api/package.json ./packages/api/
-COPY packages/arcjet/package.json ./packages/arcjet/
 COPY packages/authentication/package.json ./packages/authentication/
 COPY packages/brand/package.json ./packages/brand/
 COPY packages/chroma-db/package.json ./packages/chroma-db/
@@ -146,15 +131,11 @@ ENV POLAR_PRO_PLAN=${POLAR_PRO_PLAN}
 ENV DATABASE_URL=${DATABASE_URL}
 ENV BETTER_AUTH_GOOGLE_CLIENT_ID=${BETTER_AUTH_GOOGLE_CLIENT_ID}
 ENV BETTER_AUTH_GOOGLE_CLIENT_SECRET=${BETTER_AUTH_GOOGLE_CLIENT_SECRET}
-ENV ARCJET_KEY=${ARCJET_KEY}
-ENV ARCJET_ENV=${ARCJET_ENV}
 ENV POLAR_ACCESS_TOKEN=${POLAR_ACCESS_TOKEN}
-ENV POLAR_SUCCESS_URL=${POLAR_SUCCESS_URL}
 ENV RESEND_API_KEY=${RESEND_API_KEY}
 ENV BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
 ENV BETTER_AUTH_TRUSTED_ORIGINS=${BETTER_AUTH_TRUSTED_ORIGINS}
 ENV REDIS_URL=${REDIS_URL}
-ENV CHROMA_TOKEN=${CHROMA_TOKEN}
 ENV OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
 ENV OPENAI_API_KEY=${OPENAI_API_KEY}
 ENV AP_QUEUE_UI_PASSWORD=${AP_QUEUE_UI_PASSWORD}
@@ -164,7 +145,6 @@ ENV MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
 ENV MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
 ENV MINIO_BUCKET=${MINIO_BUCKET}
 ENV TAVILY_API_KEY=${TAVILY_API_KEY}
-ENV CHROMA_DB_URL=${CHROMA_DB_URL}
 
 # Copy the pruned, production-only node_modules from the 'deps' stage.
 COPY --from=deps /app/node_modules ./node_modules
