@@ -4,7 +4,7 @@ import { createPgVector } from "@packages/rag/client";
 import { searchBrandKnowledgeByTextAndExternalId } from "@packages/rag/repositories/brand-knowledge-repository";
 import { z } from "zod";
 
-export const dateTool = createTool({
+export const queryForBrandKnowledge = createTool({
    id: "query-for-brand-knowledge",
    description: "Query the pg vector database for brand knowledge",
    inputSchema: z.object({

@@ -9,13 +9,13 @@ import { createBrandKnowledgeWorkflow } from "./workflows/create-brand-knowledge
 import { RuntimeContext } from "@mastra/core/runtime-context";
 import { crawlCompetitorForFeatures } from "./workflows/crawl-for-features";
 import { extractCompetitorBrandInfoWorkflow } from "./workflows/extract-brand-info";
+import { contentStrategistAgent } from "./agents/strategist-agent";
 export type CustomRuntimeContext = {
    language: "en" | "pt";
    userId: string;
 };
 export const mastra = new Mastra({
    bundler: {
-      sourcemap: true,
       transpilePackages: [
          "@packages/files/client",
          "@packages/payment/client",
@@ -27,13 +27,13 @@ export const mastra = new Mastra({
          "@packages/utils/errors",
       ],
    },
-
    workflows: {
       createBrandKnowledgeWorkflow,
       crawlCompetitorForFeatures,
       extractCompetitorBrandInfoWorkflow,
    },
    agents: {
+      contentStrategistAgent,
       documentSynthesizerAgent,
       documentGenerationAgent,
       featureExtractionAgent,
