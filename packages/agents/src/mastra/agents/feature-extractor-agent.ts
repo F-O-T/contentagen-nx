@@ -212,6 +212,6 @@ DECISION TREE:
 Focus exclusively on features. Ignore everything else. Maximize accuracy from minimal tool usage.
    `;
    },
-   model: openrouter("deepseek/deepseek-chat-v3.1"),
+   model: openrouter("x-ai/grok-4-fast:free"),
    tools: { tavilyCrawlTool, tavilySearchTool, dateTool },
 });

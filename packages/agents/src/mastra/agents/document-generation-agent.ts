@@ -318,5 +318,5 @@ ${languageOutputInstruction}
  Focus on creating a complete, accurate snapshot of the brand as it exists today, providing detailed documentation that serves as a comprehensive reference for the brand's current identity, capabilities, and market presence.
    `;
    },
-   model: openrouter("deepseek/deepseek-chat-v3.1"),
+   model: openrouter("x-ai/grok-4-fast:free"),
 });

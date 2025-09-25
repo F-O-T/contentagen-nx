@@ -1,4 +1,5 @@
 import { Mastra } from "@mastra/core/mastra";
+import { researcherAgent } from "./agents/researcher-agent";
 import { PinoLogger } from "@mastra/loggers";
 import { documentSynthesizerAgent } from "./agents/document-syntethizer-agent";
 import { documentGenerationAgent } from "./agents/document-generation-agent";
@@ -37,6 +38,7 @@ export const mastra = new Mastra({
       documentGenerationAgent,
       featureExtractionAgent,
       companyInfoExtractorAgent,
+      researcherAgent,
    },
    logger: new PinoLogger({
       name: "Mastra",

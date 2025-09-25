@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { execSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -25,7 +23,9 @@ const checks = [
             const version = execSync("bun --version").toString().trim();
             return version;
          } catch (e) {
-            throw new Error("Bun is not installed. Please visit https://bun.sh/");
+            throw new Error(
+               "Bun is not installed. Please visit https://bun.sh/",
+            );
          }
       },
    },
@@ -46,7 +46,9 @@ const checks = [
       name: "Podman Compose",
       fn: () => {
          try {
-            const version = execSync("podman-compose version").toString().trim();
+            const version = execSync("podman-compose version")
+               .toString()
+               .trim();
             return version;
          } catch (e) {
             throw new Error(
@@ -70,16 +72,20 @@ const checks = [
       name: "Environment Files",
       fn: () => {
          const allDirs: string[] = [];
-         
+
          // Check apps directory
          if (fs.existsSync("apps")) {
-            const appDirs = fs.readdirSync("apps").map((name) => `apps/${name}`);
+            const appDirs = fs
+               .readdirSync("apps")
+               .map((name) => `apps/${name}`);
             allDirs.push(...appDirs);
          }
-         
+
          // Check packages directory
          if (fs.existsSync("packages")) {
-            const pkgDirs = fs.readdirSync("packages").map((name) => `packages/${name}`);
+            const pkgDirs = fs
+               .readdirSync("packages")
+               .map((name) => `packages/${name}`);
             allDirs.push(...pkgDirs);
          }
 
@@ -90,7 +96,7 @@ const checks = [
          for (const dir of allDirs) {
             const dirName = path.basename(dir);
             const hasExample = fs.existsSync(path.join(dir, ".env.example"));
-            
+
             if (!hasExample) {
                continue;
             }
@@ -101,7 +107,7 @@ const checks = [
             }
 
             // Special handling for RAG and database packages - they need both local and production env files
-            if ((dirName === "database" || dirName === "rag")) {
+            if (dirName === "database" || dirName === "rag") {
                if (!fs.existsSync(path.join(dir, ".env.local"))) {
                   missingLocal.push(dirName);
                }
@@ -116,10 +122,14 @@ const checks = [
             issues.push(`Missing .env files in: ${missingEnv.join(", ")}`);
          }
          if (missingLocal.length > 0) {
-            issues.push(`Missing .env.local files (database/rag only): ${missingLocal.join(", ")}`);
+            issues.push(
+               `Missing .env.local files (database/rag only): ${missingLocal.join(", ")}`,
+            );
          }
          if (missingProduction.length > 0) {
-            issues.push(`Missing .env.production.local files (database/rag only): ${missingProduction.join(", ")}`);
+            issues.push(
+               `Missing .env.production.local files (database/rag only): ${missingProduction.join(", ")}`,
+            );
          }
 
          if (issues.length > 0) {
@@ -130,7 +140,7 @@ const checks = [
          return "All environment files found";
       },
    },
-      {
+   {
       name: "TypeScript Configuration",
       fn: () => {
          if (!fs.existsSync("tsconfig.json")) {
@@ -151,7 +161,9 @@ const checks = [
 ];
 
 async function runDoctor() {
-   console.log(chalk.blue.bold("🩺 Running Content Writer Environment Doctor..."));
+   console.log(
+      chalk.blue.bold("🩺 Running Content Writer Environment Doctor..."),
+   );
    console.log("-".repeat(40));
 
    let allGood = true;
@@ -162,7 +174,8 @@ async function runDoctor() {
          const result = await Promise.resolve(check.fn());
          console.log(chalk.green(`✓ OK (${result})`));
       } catch (error) {
-         const errorMessage = error instanceof Error ? error.message : "Unknown error";
+         const errorMessage =
+            error instanceof Error ? error.message : "Unknown error";
          console.log(chalk.red(`✗ FAILED`));
          console.log(`  ${chalk.red(errorMessage)}`);
          allGood = false;
@@ -183,3 +196,4 @@ async function runDoctor() {
 }
 
 runDoctor();
+
