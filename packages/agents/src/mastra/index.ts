@@ -1,5 +1,4 @@
 import { Mastra } from "@mastra/core/mastra";
-import { contentReaderAgent } from "./agents/content-reviewer-agent";
 import { researcherAgent } from "./agents/researcher-agent";
 import { PinoLogger } from "@mastra/loggers";
 import { documentSynthesizerAgent } from "./agents/document-syntethizer-agent";
@@ -11,16 +10,10 @@ import { RuntimeContext } from "@mastra/core/runtime-context";
 import { crawlCompetitorForFeatures } from "./workflows/crawl-for-features";
 import { extractCompetitorBrandInfoWorkflow } from "./workflows/extract-brand-info";
 import { createNewContentWorkflow } from "./workflows/create-new-content-workflow";
-import { tutorialEditorAgent } from "./agents/tutorial-editor-agent";
-import { changelogEditorAgent } from "./agents/changelog-editor-agent";
-import { articleEditorAgent } from "./agents/article-editor-agent";
-import { interviewEditorAgent } from "./agents/interview-editor-agent";
 import { contentStrategistAgent } from "./agents/strategist-agent";
-import { tutorialWriterAgent } from "./agents/tutorial-writer-agent";
-import { changelogWriterAgent } from "./agents/changelog-writer-agent";
-import { articleWriterAgent } from "./agents/article-writer-agent";
-import { interviewWriterAgent } from "./agents/interview-writer-agent";
-import { createNewChangelogWorkflow } from "./workflows/create-new-changelog-workflow";
+import { createNewChangelogWorkflow } from "./workflows/content/create-new-changelog-workflow";
+import { changelogWriterAgent } from "./agents/changelog/changelog-writer-agent";
+import { changelogEditorAgent } from "./agents/changelog/changelog-editor-agent";
 export type CustomRuntimeContext = {
    language: "en" | "pt";
    userId: string;
@@ -46,21 +39,14 @@ export const mastra = new Mastra({
       extractCompetitorBrandInfoWorkflow,
    },
    agents: {
-      tutorialEditorAgent,
       changelogEditorAgent,
-      articleEditorAgent,
-      interviewEditorAgent,
-      tutorialWriterAgent,
       changelogWriterAgent,
-      articleWriterAgent,
-      interviewWriterAgent,
       contentStrategistAgent,
       documentSynthesizerAgent,
       documentGenerationAgent,
       featureExtractionAgent,
       companyInfoExtractorAgent,
       researcherAgent,
-      contentReaderAgent,
    },
    logger: new PinoLogger({
       name: "Mastra",

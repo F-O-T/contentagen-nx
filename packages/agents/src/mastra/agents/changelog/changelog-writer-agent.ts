@@ -1,5 +1,5 @@
 import { Agent } from "@mastra/core";
-import { dateTool } from "../tools/date-tool";
+import { dateTool } from "../../tools/date-tool";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
 

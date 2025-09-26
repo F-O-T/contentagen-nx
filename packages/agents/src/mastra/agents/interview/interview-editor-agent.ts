@@ -1,6 +1,6 @@
 import { Agent } from "@mastra/core";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { dateTool } from "../tools/date-tool";
+import { dateTool } from "../../tools/date-tool";
 import { serverEnv } from "@packages/environment/server";
 const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
