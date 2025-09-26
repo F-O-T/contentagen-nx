@@ -4,7 +4,7 @@ import {
    type CompetitorKnowledgeInsert,
    type CompetitorKnowledgeType,
 } from "../schemas/competitor-knowledge-schema";
-import { eq, and, desc, sql, gt, cosineDistance } from "drizzle-orm";
+import { eq, and, desc, sql, gt, cosineDistance, inArray } from "drizzle-orm";
 import type { PgVectorDatabaseInstance } from "../client";
 import { AppError, propagateError } from "@packages/utils/errors";
 import { createEmbedding, createEmbeddings } from "../helpers";
@@ -91,7 +91,7 @@ interface SearchOptions {
 async function searchCompetitorKnowledgeByCosineSimilarityAndExternalId(
    dbClient: PgVectorDatabaseInstance,
    queryEmbedding: number[],
-   externalId: string,
+   externalId: string | string[],
    options: SearchOptions = {},
 ) {
    try {
@@ -99,14 +99,18 @@ async function searchCompetitorKnowledgeByCosineSimilarityAndExternalId(
 
       const similarity = sql<number>`1 - (${cosineDistance(competitorKnowledge.embedding, queryEmbedding)})`;
 
+      const externalIdCondition = Array.isArray(externalId)
+         ? inArray(competitorKnowledge.externalId, externalId)
+         : eq(competitorKnowledge.externalId, externalId);
+
       let whereConditions = and(
-         eq(competitorKnowledge.externalId, externalId),
+         externalIdCondition,
          gt(similarity, similarityThreshold),
       );
 
       if (type) {
          whereConditions = and(
-            eq(competitorKnowledge.externalId, externalId),
+            externalIdCondition,
             eq(competitorKnowledge.type, type),
             gt(similarity, similarityThreshold),
          );
@@ -135,7 +139,7 @@ async function searchCompetitorKnowledgeByCosineSimilarityAndExternalId(
 export async function searchCompetitorKnowledgeByTextAndExternalId(
    dbClient: PgVectorDatabaseInstance,
    queryText: string,
-   externalId: string,
+   externalId: string | string[],
    options: SearchOptions = {},
 ) {
    try {
@@ -173,7 +177,9 @@ export async function createCompetitorKnowledgeWithEmbeddingsBulk(
       const insertData = dataArray.map((data, index) => {
          const embedding = embeddings[index];
          if (!embedding) {
-            throw new Error(`Failed to create embedding for chunk: ${data.chunk.substring(0, 100)}...`);
+            throw new Error(
+               `Failed to create embedding for chunk: ${data.chunk.substring(0, 100)}...`,
+            );
          }
          return {
             ...data,

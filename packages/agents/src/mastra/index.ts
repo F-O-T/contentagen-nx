@@ -9,7 +9,16 @@ import { createBrandKnowledgeWorkflow } from "./workflows/create-brand-knowledge
 import { RuntimeContext } from "@mastra/core/runtime-context";
 import { crawlCompetitorForFeatures } from "./workflows/crawl-for-features";
 import { extractCompetitorBrandInfoWorkflow } from "./workflows/extract-brand-info";
+import { createNewContentWorkflow } from "./workflows/create-new-content-workflow";
+import { tutorialEditorAgent } from "./agents/tutorial-editor-agent";
+import { changelogEditorAgent } from "./agents/changelog-editor-agent";
+import { articleEditorAgent } from "./agents/article-editor-agent";
+import { interviewEditorAgent } from "./agents/interview-editor-agent";
 import { contentStrategistAgent } from "./agents/strategist-agent";
+import { tutorialWriterAgent } from "./agents/tutorial-writer-agent";
+import { changelogWriterAgent } from "./agents/changelog-writer-agent";
+import { articleWriterAgent } from "./agents/article-writer-agent";
+import { interviewWriterAgent } from "./agents/interview-writer-agent";
 export type CustomRuntimeContext = {
    language: "en" | "pt";
    userId: string;
@@ -28,11 +37,20 @@ export const mastra = new Mastra({
       ],
    },
    workflows: {
+      createNewContentWorkflow,
       createBrandKnowledgeWorkflow,
       crawlCompetitorForFeatures,
       extractCompetitorBrandInfoWorkflow,
    },
    agents: {
+      tutorialEditorAgent,
+      changelogEditorAgent,
+      articleEditorAgent,
+      interviewEditorAgent,
+      tutorialWriterAgent,
+      changelogWriterAgent,
+      articleWriterAgent,
+      interviewWriterAgent,
       contentStrategistAgent,
       documentSynthesizerAgent,
       documentGenerationAgent,
