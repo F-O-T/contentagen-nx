@@ -1,4 +1,5 @@
 import { Mastra } from "@mastra/core/mastra";
+import { contentReaderAgent } from "./agents/content-reviewer-agent";
 import { researcherAgent } from "./agents/researcher-agent";
 import { PinoLogger } from "@mastra/loggers";
 import { documentSynthesizerAgent } from "./agents/document-syntethizer-agent";
@@ -19,6 +20,7 @@ import { tutorialWriterAgent } from "./agents/tutorial-writer-agent";
 import { changelogWriterAgent } from "./agents/changelog-writer-agent";
 import { articleWriterAgent } from "./agents/article-writer-agent";
 import { interviewWriterAgent } from "./agents/interview-writer-agent";
+import { createNewChangelogWorkflow } from "./workflows/create-new-changelog-workflow";
 export type CustomRuntimeContext = {
    language: "en" | "pt";
    userId: string;
@@ -37,6 +39,7 @@ export const mastra = new Mastra({
       ],
    },
    workflows: {
+      createNewChangelogWorkflow,
       createNewContentWorkflow,
       createBrandKnowledgeWorkflow,
       crawlCompetitorForFeatures,
@@ -57,6 +60,7 @@ export const mastra = new Mastra({
       featureExtractionAgent,
       companyInfoExtractorAgent,
       researcherAgent,
+      contentReaderAgent,
    },
    logger: new PinoLogger({
       name: "Mastra",

@@ -8,16 +8,16 @@ export const queryForCompetitorKnowledge = createTool({
    id: "query-for-competitor-knowledge",
    description: "Query the pg vector database for competitor knowledge",
    inputSchema: z.object({
-      externalId: z
-         .string()
-         .describe("The external id for identifying the competitor"),
+      externalIds: z
+         .array(z.string())
+         .describe("An array of external ids for identifying the competitors"),
       searchTerm: z.string().describe("The search term to query the database"),
       type: z
          .enum(["document", "feature"])
          .describe("The type of knowledge to search for"),
    }),
    execute: async ({ context }) => {
-      const { externalId, searchTerm, type } = context;
+      const { externalIds, searchTerm, type } = context;
 
       try {
          const ragClient = createPgVector({
@@ -26,7 +26,7 @@ export const queryForCompetitorKnowledge = createTool({
          const results = await searchCompetitorKnowledgeByTextAndExternalId(
             ragClient,
             searchTerm,
-            externalId,
+            externalIds,
             {
                type,
             },

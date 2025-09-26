@@ -7,9 +7,9 @@ import { AppError } from "@packages/utils/errors";
 import { interviewWriterAgent } from "../agents/interview-writer-agent";
 import { tutorialWriterAgent } from "../agents/tutorial-writer-agent";
 import { articleWriterAgent } from "../agents/article-writer-agent";
-import { changelogWriterAgent } from "../agents/changelog-writer-agent";
 import { articleEditorAgent } from "../agents/article-editor-agent";
-import { changelogEditorAgent } from "../agents/changelog-editor-agent";
+import { changelogWriterAgent } from "../agents/changelog/changelog-writer-agent";
+import { changelogEditorAgent } from "../agents/changelog/changelog-editor-agent";
 import { interviewEditorAgent } from "../agents/interview-editor-agent";
 import { tutorialEditorAgent } from "../agents/tutorial-editor-agent";
 
@@ -45,13 +45,13 @@ const contentResearchStep = createStep({
       const inputPrompt = `
 i need you to peform a research on this content request.
 
-request: ${inputData.request.description}
+request: ${request.description}
 
-this is the content request is intended to be written as a ${inputData.request.layout}
+this is the content request is intended to be written as a ${request.layout}
 
-competitorIds: ${inputData.competitorIds}
-organizationId: ${inputData.organizationId}
-userId: ${inputData.userId}
+competitorIds: ${competitorIds}
+organizationId: ${organizationId}
+userId: ${userId}
 `;
 
       const result = await researcherAgent.generateVNext(
@@ -135,19 +135,25 @@ const ContentWritingStepOutputSchema =
 const contentWritingStep = createStep({
    id: "content-writing-step",
    description: "Write the content based on the content strategy and research",
-   inputSchema: ContentStrategyStepOutputSchema.extend({
-      research: researchType,
-      strategy: strategyType,
+   inputSchema: z.object({
+      "content-research-step": ContentResearchStepOutputSchema.extend({
+         research: researchType,
+      }),
+      "content-strategy-step": ContentStrategyStepOutputSchema.extend({
+         strategy: strategyType,
+      }),
    }),
    outputSchema: ContentWritingStepOutputSchema,
    execute: async ({ inputData }) => {
       const {
-         userId,
-         competitorIds,
-         organizationId,
-         request,
-         research,
-         strategy,
+         "content-research-step": { research },
+         "content-strategy-step": {
+            strategy,
+            competitorIds,
+            organizationId,
+            request,
+            userId,
+         },
       } = inputData;
       const inputPrompt = `
 based on the content research and strategy, i need you to write the content.
@@ -262,4 +268,5 @@ export const createNewContentWorkflow = createWorkflow({
 })
    .parallel([contentResearchStep, contentStrategyStep])
    .then(contentWritingStep)
-   .then(contentEditorStep);
+   .then(contentEditorStep)
+   .commit();
