@@ -93,9 +93,9 @@ async function searchCompetitorKnowledgeByCosineSimilarityAndExternalId(
    queryEmbedding: number[],
    externalId: string,
    options: SearchOptions = {},
-): Promise<CompetitorKnowledgeSelect[]> {
+) {
    try {
-      const { limit = 10, similarityThreshold = 0.7, type } = options;
+      const { limit = 10, similarityThreshold = 0.5, type } = options;
 
       const similarity = sql<number>`1 - (${cosineDistance(competitorKnowledge.embedding, queryEmbedding)})`;
 
@@ -113,10 +113,15 @@ async function searchCompetitorKnowledgeByCosineSimilarityAndExternalId(
       }
 
       const result = await dbClient
-         .select()
+         .select({
+            chunk: competitorKnowledge.chunk,
+            type: competitorKnowledge.type,
+            externalId: competitorKnowledge.externalId,
+            similarity,
+         })
          .from(competitorKnowledge)
          .where(whereConditions)
-         .orderBy(() => desc(similarity))
+         .orderBy((t) => desc(t.similarity))
          .limit(limit);
 
       return result;
@@ -132,7 +137,7 @@ export async function searchCompetitorKnowledgeByTextAndExternalId(
    queryText: string,
    externalId: string,
    options: SearchOptions = {},
-): Promise<CompetitorKnowledgeSelect[]> {
+) {
    try {
       const { embedding } = await createEmbedding(queryText);
       return await searchCompetitorKnowledgeByCosineSimilarityAndExternalId(
@@ -165,38 +170,20 @@ export async function createCompetitorKnowledgeWithEmbeddingsBulk(
       const texts = dataArray.map((data) => data.chunk);
       const embeddings = await createEmbeddings(texts);
 
-      // Filter out items with null embeddings and log warnings
-      const validInsertData: Array<CompetitorKnowledgeInsert> = [];
-      let skippedCount = 0;
-
-      for (let i = 0; i < dataArray.length; i++) {
-         const data = dataArray[i];
-         const embedding = embeddings[i];
-
+      const insertData = dataArray.map((data, index) => {
+         const embedding = embeddings[index];
          if (!embedding) {
-            console.warn(`Skipping competitor knowledge entry due to failed embedding: ${data.chunk.substring(0, 100)}...`);
-            skippedCount++;
-            continue;
+            throw new Error(`Failed to create embedding for chunk: ${data.chunk.substring(0, 100)}...`);
          }
-
-         validInsertData.push({
+         return {
             ...data,
-            embedding: embedding,
-         });
-      }
-
-      if (skippedCount > 0) {
-         console.warn(`Skipped ${skippedCount} entries due to embedding failures`);
-      }
-
-      if (validInsertData.length === 0) {
-         console.warn("No valid embeddings created, returning empty result");
-         return [];
-      }
+            embedding,
+         };
+      });
 
       const result = await dbClient
          .insert(competitorKnowledge)
-         .values(validInsertData)
+         .values(insertData)
          .returning();
 
       return result;

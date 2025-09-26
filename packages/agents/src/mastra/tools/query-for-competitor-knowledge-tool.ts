@@ -5,8 +5,8 @@ import { searchCompetitorKnowledgeByTextAndExternalId } from "@packages/rag/repo
 import { z } from "zod";
 
 export const queryForCompetitorKnowledge = createTool({
-   id: "query-for-brand-knowledge",
-   description: "Query the pg vector database for brand knowledge",
+   id: "query-for-competitor-knowledge",
+   description: "Query the pg vector database for competitor knowledge",
    inputSchema: z.object({
       externalId: z
          .string()
@@ -29,8 +29,6 @@ export const queryForCompetitorKnowledge = createTool({
             externalId,
             {
                type,
-               limit: 10,
-               similarityThreshold: 0.7,
             },
          );
          return { results };
