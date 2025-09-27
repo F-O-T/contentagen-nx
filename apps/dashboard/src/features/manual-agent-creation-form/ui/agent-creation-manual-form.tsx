@@ -6,11 +6,6 @@ import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { useAgentForm } from "../lib/use-agent-form";
 import { translate } from "@packages/localization";
 import { BasicInfoStep, BasicInfoStepSubscribe } from "./basic-info-step";
-import { VoiceToneStep, VoiceToneStepSubscribe } from "./voice-tone-step";
-import { AudienceStep, AudienceStepSubscribe } from "./audience-step";
-import { FormattingStep, FormattingStepSubscribe } from "./formatting-step";
-import { LanguageStep, LanguageStepSubscribe } from "./language-step";
-import { BrandStep, BrandStepSubscribe } from "./brand-step";
 import { PurposeStep, PurposeStepSubscribe } from "./purpose-step";
 import { ReviewStep, ReviewStepSubscribe } from "./review-step";
 import {
@@ -24,28 +19,8 @@ const steps = [
       title: translate("pages.agent-creation-form.steps.basic-info"),
    },
    {
-      id: "step-audience",
-      title: translate("pages.agent-creation-form.steps.audience"),
-   },
-   {
       id: "step-purpose",
       title: translate("pages.agent-creation-form.steps.purpose"),
-   },
-   {
-      id: "step-voice-tone",
-      title: translate("pages.agent-creation-form.steps.voice-tone"),
-   },
-   {
-      id: "step-brand",
-      title: translate("pages.agent-creation-form.steps.brand"),
-   },
-   {
-      id: "step-language",
-      title: translate("pages.agent-creation-form.steps.language"),
-   },
-   {
-      id: "step-formatting",
-      title: translate("pages.agent-creation-form.steps.formatting"),
    },
    {
       id: "step-review",
@@ -75,27 +50,9 @@ export function AgentCreationManualForm({
             return translate(
                `pages.agent-creation-form.${messageType}.basic-info`,
             );
-         case "step-audience":
-            return translate(
-               `pages.agent-creation-form.${messageType}.audience`,
-            );
          case "step-purpose":
             return translate(
                `pages.agent-creation-form.${messageType}.purpose`,
-            );
-         case "step-voice-tone":
-            return translate(
-               `pages.agent-creation-form.${messageType}.voice-tone`,
-            );
-         case "step-brand":
-            return translate(`pages.agent-creation-form.${messageType}.brand`);
-         case "step-language":
-            return translate(
-               `pages.agent-creation-form.${messageType}.language`,
-            );
-         case "step-formatting":
-            return translate(
-               `pages.agent-creation-form.${messageType}.formatting`,
             );
          case "step-review":
             return translate(`pages.agent-creation-form.${messageType}.review`);
@@ -137,11 +94,7 @@ export function AgentCreationManualForm({
                   })}
                </Stepper.Navigation>
 
-               <TalkingMascot
-                  message={getMascotMessage(
-                     methods.current.id as "step-basic-info" | "step-brand",
-                  )}
-               />
+               <TalkingMascot message={getMascotMessage(methods.current.id)} />
 
                <Stepper.Panel className="h-full">
                   <AnimatePresence mode="wait" initial={false}>
@@ -157,16 +110,7 @@ export function AgentCreationManualForm({
                            "step-basic-info": () => (
                               <BasicInfoStep form={form} />
                            ),
-                           "step-audience": () => <AudienceStep form={form} />,
                            "step-purpose": () => <PurposeStep form={form} />,
-                           "step-voice-tone": () => (
-                              <VoiceToneStep form={form} />
-                           ),
-                           "step-brand": () => <BrandStep form={form} />,
-                           "step-language": () => <LanguageStep form={form} />,
-                           "step-formatting": () => (
-                              <FormattingStep form={form} />
-                           ),
                            "step-review": () => <ReviewStep form={form} />,
                         })}
                      </motion.div>
@@ -197,38 +141,8 @@ export function AgentCreationManualForm({
                               next={methods.next}
                            />
                         ),
-                        "step-audience": () => (
-                           <AudienceStepSubscribe
-                              form={form}
-                              next={methods.next}
-                           />
-                        ),
                         "step-purpose": () => (
                            <PurposeStepSubscribe
-                              form={form}
-                              next={methods.next}
-                           />
-                        ),
-                        "step-voice-tone": () => (
-                           <VoiceToneStepSubscribe
-                              form={form}
-                              next={methods.next}
-                           />
-                        ),
-                        "step-brand": () => (
-                           <BrandStepSubscribe
-                              form={form}
-                              next={methods.next}
-                           />
-                        ),
-                        "step-language": () => (
-                           <LanguageStepSubscribe
-                              form={form}
-                              next={methods.next}
-                           />
-                        ),
-                        "step-formatting": () => (
-                           <FormattingStepSubscribe
                               form={form}
                               next={methods.next}
                            />

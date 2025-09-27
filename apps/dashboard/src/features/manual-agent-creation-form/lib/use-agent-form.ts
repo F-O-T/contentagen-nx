@@ -13,16 +13,15 @@ export function useAgentForm({
    const form = useAppForm({
       defaultValues: {
          metadata: { name: "", description: "" },
-         voice: { communication: "I" },
-         audience: { base: "general_public" },
-         formatting: { style: "structured" },
-         language: { primary: "en" },
-         brand: { integrationStyle: "strict_guideline" },
+         instructions: {
+            audienceProfile: "",
+            writingGuidelines: "",
+            ragIntegration: "",
+         },
          purpose: undefined,
          ...defaultValues,
       } as PersonaConfig,
       onSubmit: async ({ value, formApi }) => {
-         // No custom parsing needed, just submit the PersonaConfig as is
          await onSubmit(value);
          formApi.reset();
       },
