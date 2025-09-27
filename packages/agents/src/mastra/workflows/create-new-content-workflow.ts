@@ -28,43 +28,48 @@ const CreateNewContentWorkflowInputSchema = z.object({
    request: ContentRequestSchema,
 });
 
-const CreateNewContentWorkflowOutputSchema =
-   CreateNewContentWorkflowInputSchema.extend({
-      rating: z.number().min(0).max(100),
-      reasonOfTheRating: z
-         .string()
-         .describe("The reason for the rating, written in markdown"),
-      editor: z.string().describe("The edited article, ready for review"),
-      metaDescription: z
-         .string()
-         .describe(
-            "The meta description, being a SEO optmizaed description of the article",
-         ),
-      keywords: z
-         .array(z.string())
-         .describe("The associeated keywords of the content"),
-      sources: z.array(z.string()).describe("The sources found on the search"),
-   });
+const type = CreateNewContentWorkflowInputSchema.extend({
+   rating: z.number().min(0).max(100),
+   reasonOfTheRating: z
+      .string()
+      .describe("The reason for the rating, written in markdown"),
+   editor: z.string().describe("The edited article, ready for review"),
+   metaDescription: z
+      .string()
+      .describe(
+         "The meta description, being a SEO optmizaed description of the article",
+      ),
+   keywords: z
+      .array(z.string())
+      .describe("The associeated keywords of the content"),
+   sources: z.array(z.string()).describe("The sources found on the search"),
+});
+const CreateNewContentWorkflowOutputSchema = z.object({
+   "create-new-changelog-workflow": type,
+   "create-new-article-workflow": type,
+   "create-new-tutorial-workflow": type,
+});
 
 const saveContentStep = createStep({
    id: "save-content-step",
    description: "Save the content to the database",
    inputSchema: CreateNewContentWorkflowOutputSchema,
-
    outputSchema: z.object({
       success: z.boolean(),
    }),
    execute: async ({ inputData }) => {
       const {
-         keywords,
-         metaDescription,
-         sources,
-         agentId,
-         editor,
-         rating,
-         reasonOfTheRating,
-         request,
-         contentId,
+         "create-new-changelog-workflow": {
+            editor,
+            keywords,
+            metaDescription,
+            rating,
+            reasonOfTheRating,
+            sources,
+            agentId,
+            contentId,
+            request,
+         },
       } = inputData;
 
       const dbClient = createDb({ databaseUrl: serverEnv.DATABASE_URL });
@@ -82,7 +87,7 @@ const saveContentStep = createStep({
          sources,
       };
       await updateContent(dbClient, contentId, {
-         status: "approved",
+         status: "draft",
          agentId,
          request,
          stats,

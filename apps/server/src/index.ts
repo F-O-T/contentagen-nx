@@ -15,11 +15,13 @@ import { createBrandKnowledgeWorkflowQueue } from "@packages/workers/queues/crea
 import { crawlCompetitorForFeaturesQueue } from "@packages/workers/queues/crawl-competitor-for-features-queue";
 import { extractCompetitorBrandInfoQueue } from "@packages/workers/queues/extract-competitor-brand-info-queue";
 import { createCompetitorKnowledgeWorkflowQueue } from "@packages/workers/queues/create-competitor-knowledge-workflow-queue";
+import { createNewContentWorkflowQueue } from "@packages/workers/queues/create-new-content-queue";
 import { isProduction } from "@packages/environment/helpers";
 const serverAdapter = new ElysiaAdapter("/ui");
 
 createBullBoard({
    queues: [
+      new BullMQAdapter(createNewContentWorkflowQueue),
       new BullMQAdapter(crawlCompetitorForFeaturesQueue),
       new BullMQAdapter(createCompetitorKnowledgeWorkflowQueue),
       new BullMQAdapter(createBrandKnowledgeWorkflowQueue),
