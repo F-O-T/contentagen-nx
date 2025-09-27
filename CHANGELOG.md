@@ -1,3 +1,15 @@
+## 0.8.0 (2025-09-27)
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/server-events to 0.4.0
+- Updated @packages/environment to 0.4.0
+- Updated @packages/database to 0.4.0
+- Updated @packages/payment to 0.4.0
+- Updated @packages/files to 0.4.0
+- Updated @packages/utils to 0.8.0
+- Updated @packages/rag to 0.4.0
+
 ## 0.6.0 (2025-09-27)
 
 ### 🧱 Updated Dependencies
