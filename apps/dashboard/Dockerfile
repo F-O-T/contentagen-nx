@@ -20,19 +20,15 @@ COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/posthog/package.json ./packages/posthog/
 COPY packages/api/package.json ./packages/api/
 COPY packages/authentication/package.json ./packages/authentication/
-COPY packages/mastra/package.json ./packages/mastra/
+COPY packages/agents/package.json ./packages/mastra/
 COPY packages/environment/package.json ./packages/environment/
 COPY packages/rag/package.json ./packages/rag/
 COPY packages/database/package.json ./packages/database/
 COPY packages/files/package.json ./packages/files/
-COPY packages/redis/package.json ./packages/redis/
-COPY packages/openrouter/package.json ./packages/openrouter/
-COPY packages/prompts/package.json ./packages/prompts/
 COPY packages/payment/package.json ./packages/payment/
 COPY packages/transactional/package.json ./packages/transactional/
-COPY packages/errors/package.json ./packages/errors/
 COPY packages/workers/package.json ./packages/workers/
-COPY packages/helpers/package.json ./packages/helpers/
+COPY packages/utils/package.json ./packages/utils/
 
 # Install all dependencies (including devDependencies needed for the build step)
 RUN bun install 
@@ -56,11 +52,11 @@ FROM oven/bun:latest AS deps
 WORKDIR /app
 
 # Copy all package manifests and lockfile again
-COPY packages/helpers/package.json ./packages/helpers/
-
 COPY bun.lock ./
 COPY package.json ./
 COPY apps/dashboard/package.json ./apps/dashboard/
+COPY packages/localization/package.json ./packages/localization/
+
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/brand/package.json ./packages/brand/
 COPY packages/server-events/package.json ./packages/server-events/
@@ -68,20 +64,15 @@ COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/posthog/package.json ./packages/posthog/
 COPY packages/api/package.json ./packages/api/
 COPY packages/authentication/package.json ./packages/authentication/
+COPY packages/agents/package.json ./packages/mastra/
 COPY packages/environment/package.json ./packages/environment/
 COPY packages/rag/package.json ./packages/rag/
-COPY packages/redis/package.json ./packages/redis/
-COPY packages/openrouter/package.json ./packages/openrouter/
-COPY packages/localization/package.json ./packages/localization/
-COPY packages/mastra/package.json ./packages/mastra/
-
-COPY packages/prompts/package.json ./packages/prompts/
 COPY packages/database/package.json ./packages/database/
 COPY packages/files/package.json ./packages/files/
 COPY packages/payment/package.json ./packages/payment/
 COPY packages/transactional/package.json ./packages/transactional/
-COPY packages/errors/package.json ./packages/errors/
 COPY packages/workers/package.json ./packages/workers/
+COPY packages/utils/package.json ./packages/utils/
 # Install only production dependencies. This creates a lean, clean node_modules folder.
 RUN bun install 
 
