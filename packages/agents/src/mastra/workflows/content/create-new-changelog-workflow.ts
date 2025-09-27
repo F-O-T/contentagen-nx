@@ -156,6 +156,8 @@ original:${request.description}
 final:${editor}
 
 `;
+      //TODO: Rework
+
       const result = await changelogReaderAgent.generateVNext(
          [
             {

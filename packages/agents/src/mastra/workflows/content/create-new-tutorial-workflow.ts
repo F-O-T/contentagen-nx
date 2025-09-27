@@ -217,6 +217,8 @@ original:${request.description}
 final:${editor}
 
 `;
+
+      //TODO: Rework
       const result = await tutorialReaderAgent.generateVNext(
          [
             {
@@ -246,6 +248,7 @@ final:${editor}
          userId,
          request,
          agentId,
+         editor,
          contentId,
          keywords: result.object.keywords,
          sources: ["Your tutorial"],
