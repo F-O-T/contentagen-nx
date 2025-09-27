@@ -5,6 +5,7 @@ import { AppError } from "@packages/utils/errors";
 import { tutorialWriterAgent } from "../../agents/tutorial/tutorial-writer-agent";
 import { tutorialEditorAgent } from "../../agents/tutorial/tutorial-editor-agent";
 import { tutorialReaderAgent } from "../../agents/tutorial/tutorial-reader-agent";
+import { researcherAgent } from "../../agents/researcher-agent";
 
 const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
@@ -25,17 +26,85 @@ const ContentWritingStepOutputSchema =
       competitorIds: true,
       organizationId: true,
    });
+const ResearchStepOutputSchema = CreateNewContentWorkflowInputSchema.extend({
+   research: z.object({
+      searchIntent: z.string(),
+      competitorAnalysis: z.string(),
+      contentGaps: z.string(),
+      strategicRecommendations: z.string(),
+   }),
+}).omit({
+   competitorIds: true,
+   organizationId: true,
+});
+export const researchStep = createStep({
+   id: "tutorial-research-step",
+   description: "Perform SERP research and competitive analysis",
+   inputSchema: CreateNewContentWorkflowInputSchema,
+   outputSchema: ResearchStepOutputSchema,
+   execute: async ({ inputData }) => {
+      const { userId, request } = inputData;
+      const inputPrompt = `
+I need you to perform comprehensive SERP research for the following content request:
+
+**Topic:** ${request.description}
+**Content Type:** ${request.layout}
+
+Please conduct thorough SERP analysis and competitive intelligence gathering to identify:
+1. Search intent and user expectations
+2. Top ranking competitors and their content strategies
+3. Content gaps and opportunities
+4. Strategic recommendations for outranking competitors
+
+Focus on finding the most effective content angle and structure that can achieve top rankings.
+`;
+
+      const result = await researcherAgent.generateVNext(
+         [
+            {
+               role: "user",
+               content: inputPrompt,
+            },
+         ],
+         {
+            output: ResearchStepOutputSchema.pick({
+               research: true,
+            }),
+         },
+      );
+
+      if (!result?.object.research) {
+         throw AppError.validation('Agent output is missing "research" field');
+      }
+
+      return {
+         research: result.object.research,
+         userId,
+         request,
+      };
+   },
+});
+
 const tutorialWritingStep = createStep({
    id: "tutorial-writing-step",
    description: "Write the tutorial based on the content strategy and research",
-   inputSchema: CreateNewContentWorkflowInputSchema,
+   inputSchema: ResearchStepOutputSchema,
    outputSchema: ContentWritingStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request } = inputData;
+      const { userId, request, research } = inputData;
+      const researchPrompt = `
+searchIntent: ${research.searchIntent}
+competitorAnalysis: ${research.competitorAnalysis}
+contentGaps: ${research.contentGaps}
+strategicRecommendations: ${research.strategicRecommendations}
+`;
+
       const inputPrompt = `
 create a new ${request.layout} based on the conent request.
 
 request: ${request.description}
+
+${researchPrompt}
 
 `;
       const result = await tutorialWriterAgent.generateVNext(
@@ -173,6 +242,7 @@ export const createNewTutorialWorkflow = createWorkflow({
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: ContentReviewerStepOutputSchema,
 })
+   .then(researchStep)
    .then(tutorialWritingStep)
    .then(tutorialEditorStep)
    .then(tutorialReadAndReviewStep)
