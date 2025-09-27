@@ -12,7 +12,7 @@ const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
    competitorIds: z.array(z.string()),
    organizationId: z.string(),
-
+   agentId: z.string(),
    request: ContentRequestSchema,
 });
 const writingType = z
@@ -39,7 +39,8 @@ export const strategyStep = createStep({
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: StrategyStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, competitorIds, organizationId, request } = inputData;
+      const { userId, agentId, competitorIds, organizationId, request } =
+         inputData;
       const inputPrompt = `
 I need you to create a comprehensive content strategy for the following request:
 
@@ -77,6 +78,7 @@ Focus on creating a strategy that leverages our brand's unique strengths and dif
       }
 
       return {
+         agentId,
          strategy: result.object.strategy,
          userId,
          request,
@@ -102,7 +104,7 @@ export const researchStep = createStep({
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: ResearchStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request } = inputData;
+      const { userId, agentId, request } = inputData;
       const inputPrompt = `
 I need you to perform comprehensive SERP research for the following content request:
 
@@ -139,6 +141,7 @@ Focus on finding the most effective content angle and structure that can achieve
       return {
          research: result.object.research,
          userId,
+         agentId,
          request,
       };
    },
@@ -161,7 +164,7 @@ const articleWritingStep = createStep({
    outputSchema: ContentWritingStepOutputSchema,
    execute: async ({ inputData }) => {
       const {
-         "article-research-step": { request, research, userId },
+         "article-research-step": { request, agentId, research, userId },
          "article-strategy-step": { strategy },
       } = inputData;
       const strategyPrompt = `
@@ -214,6 +217,7 @@ ${researchPrompt}
       return {
          writing: result.object.writing,
          userId,
+         agentId,
          request,
       };
    },
@@ -233,7 +237,7 @@ const articleEditorStep = createStep({
    }),
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, writing } = inputData;
+      const { userId, request, agentId, writing } = inputData;
       const inputPrompt = `
 i need you to edit this ${request.layout} draft.
 
@@ -259,6 +263,7 @@ output the edited content in markdown format.
          throw AppError.validation('Agent output is missing "editor" field');
       }
       return {
+         agentId,
          editor: result.object.editor,
          userId,
          request,
@@ -282,7 +287,7 @@ export const articleReadAndReviewStep = createStep({
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, editor } = inputData;
+      const { userId, agentId, request, editor } = inputData;
       const inputPrompt = `
 i need you to read and review this ${request.layout}.
 
@@ -314,10 +319,13 @@ final:${editor}
             'Agent output is missing "reasonOfTheRating" field',
          );
       }
+
       return {
          rating: result.object.rating,
          reasonOfTheRating: result.object.reasonOfTheRating,
+         agentId,
          userId,
+         editor,
          request,
       };
    },

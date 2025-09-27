@@ -1,16 +1,17 @@
 import { Worker, Queue, type Job } from "bullmq";
 import { serverEnv } from "@packages/environment/server";
 import { registerGracefulShutdown, createRedisClient } from "../helpers";
-import { mastra, setRuntimeContext } from "@packages/agents";
+import {
+   mastra,
+   setRuntimeContext,
+   type CustomRuntimeContext,
+} from "@packages/agents";
 
 export interface CreateCompetitorKnowledgeWorkflowJobData {
    websiteUrl: string;
    userId: string;
    competitorId: string;
-   runtimeContext?: {
-      language: "en" | "pt";
-      userId: string;
-   };
+   runtimeContext?: CustomRuntimeContext;
 }
 
 export async function runCreateCompetitorKnowledgeWorkflow(

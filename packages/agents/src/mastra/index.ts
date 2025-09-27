@@ -11,7 +11,6 @@ import { crawlCompetitorForFeatures } from "./workflows/crawl-for-features";
 import { extractCompetitorBrandInfoWorkflow } from "./workflows/extract-brand-info";
 import { createNewContentWorkflow } from "./workflows/create-new-content-workflow";
 import { contentStrategistAgent } from "./agents/strategist-agent";
-import { createNewChangelogWorkflow } from "./workflows/content/create-new-changelog-workflow";
 import { changelogWriterAgent } from "./agents/changelog/changelog-writer-agent";
 import { changelogEditorAgent } from "./agents/changelog/changelog-editor-agent";
 export type CustomRuntimeContext = {
@@ -32,7 +31,6 @@ export const mastra = new Mastra({
       ],
    },
    workflows: {
-      createNewChangelogWorkflow,
       createNewContentWorkflow,
       createBrandKnowledgeWorkflow,
       crawlCompetitorForFeatures,
