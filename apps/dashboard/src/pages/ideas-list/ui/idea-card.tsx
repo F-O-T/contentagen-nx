@@ -1,3 +1,4 @@
+import { translate } from "@packages/localization";
 import {
    Card,
    CardHeader,

@@ -29,12 +29,12 @@ export function ContentRequestDetailsPage() {
    const queryClient = useQueryClient();
    const [editingBody, setEditingBody] = useState(false);
    const [selectedVersion, setSelectedVersion] = useState<
-      RouterOutput["content"]["getVersions"][number] | null
+      RouterOutput["content"]["versions"]["getVersions"][number] | null
    >(null);
    const [versionDetailsOpen, setVersionDetailsOpen] = useState(false);
 
    const handleVersionClick = (
-      version: RouterOutput["content"]["getVersions"][number],
+      version: RouterOutput["content"]["versions"]["getVersions"][number],
    ) => {
       setSelectedVersion(version);
       setVersionDetailsOpen(true);

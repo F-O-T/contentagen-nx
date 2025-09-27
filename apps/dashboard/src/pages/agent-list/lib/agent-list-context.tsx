@@ -80,7 +80,7 @@ export function AgentListProvider({ children, data }: AgentListProviderProps) {
 
    const allSelected = useMemo(() => {
       const selectableIds = selectableItems.map(
-         (item: RouterOutput["agent"]["list"]["items"][0]) => item.id,
+         (item: (typeof selectableItems)[0]) => item.id,
       );
       return (
          selectableIds.length > 0 &&
@@ -90,7 +90,7 @@ export function AgentListProvider({ children, data }: AgentListProviderProps) {
 
    const handleSelectAll = useCallback(() => {
       const selectableIds = selectableItems.map(
-         (item: RouterOutput["agent"]["list"]["items"][0]) => item.id,
+         (item: (typeof selectableItems)[0]) => item.id,
       );
 
       setSelectedItems((prev) => {

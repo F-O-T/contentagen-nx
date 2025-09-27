@@ -18,7 +18,7 @@ export function EditContentBody({
    const trpc = useTRPC();
    const queryClient = useQueryClient();
    const editBodyMutation = useMutation(
-      trpc.content.editBody.mutationOptions({
+      trpc.content.versions.editBodyAndCreateNewVersion.mutationOptions({
          onError: (error) => {
             console.error("Error editing content body:", error);
             toast.error(translate("pages.content-details.edit.error"));
@@ -32,7 +32,7 @@ export function EditContentBody({
                queryKey: trpc.content.get.queryKey({ id: content.id }),
             });
             await queryClient.invalidateQueries({
-               queryKey: trpc.content.getVersions.queryKey({
+               queryKey: trpc.content.versions.getVersions.queryKey({
                   contentId: content.id,
                }),
             });
@@ -67,7 +67,7 @@ export function EditContentBody({
             queryKey: trpc.content.listAllContent.queryKey(),
          });
          await queryClient.invalidateQueries({
-            queryKey: trpc.content.getVersions.queryKey({
+            queryKey: trpc.content.versions.getVersions.queryKey({
                contentId: content.id,
             }),
          });

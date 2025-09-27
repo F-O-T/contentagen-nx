@@ -6,63 +6,63 @@ import {
    CardContent,
    CardFooter,
 } from "@packages/ui/components/card";
-
+import { translate } from "@packages/localization";
 import { Bot, FileText, Megaphone, Users, Type } from "lucide-react";
 import { useMemo } from "react";
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Separator } from "@packages/ui/components/separator";
 import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
-import type { AgentSelect } from "@packages/database/schema";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
 import { formatValueForDisplay } from "@packages/utils/text";
-
-export const AgentPersonaCard = ({ agent }: { agent: AgentSelect }) => {
+import type { RouterOutput } from "@packages/api/client";
+type Agent = RouterOutput["agent"]["get"];
+export const AgentPersonaCard = ({ agent }: { agent: Agent }) => {
    const trpc = useTRPC();
    const { data } = useSuspenseQuery(
       trpc.agentFile.getProfilePhoto.queryOptions({
-         agentId: agent.id,
+         agentId: agent?.id ?? "",
       }),
    );
    const items = useMemo(
       () => [
          {
             label: translate("pages.agent-details.persona.content-type"),
-            value: formatValueForDisplay(agent.personaConfig?.purpose ?? ""),
+            value: formatValueForDisplay(agent?.personaConfig?.purpose ?? ""),
             icon: FileText,
          },
          {
             label: translate("pages.agent-details.persona.voice-tone"),
             value: formatValueForDisplay(
-               agent.personaConfig?.voice?.communication ?? "",
+               agent?.personaConfig?.voice?.communication ?? "",
             ),
             icon: Megaphone,
          },
          {
             label: translate("pages.agent-details.persona.target-audience"),
             value: formatValueForDisplay(
-               agent.personaConfig?.audience?.base ?? "",
+               agent?.personaConfig?.audience?.base ?? "",
             ),
             icon: Users,
          },
          {
             label: translate("pages.agent-details.persona.formatting-style"),
             value: formatValueForDisplay(
-               agent.personaConfig?.formatting?.style ?? "",
+               agent?.personaConfig?.formatting?.style ?? "",
             ),
             icon: Type,
          },
          {
             label: translate("pages.agent-details.persona.language"),
             value: formatValueForDisplay(
-               agent.personaConfig?.language?.primary ?? "",
+               agent?.personaConfig?.language?.primary ?? "",
             ),
             icon: Type,
          },
          {
             label: translate("pages.agent-details.persona.brand-integration"),
             value: formatValueForDisplay(
-               agent.personaConfig?.brand?.integrationStyle ?? "",
+               agent?.personaConfig?.brand?.integrationStyle ?? "",
             ),
             icon: Bot,
          },
@@ -93,8 +93,8 @@ export const AgentPersonaCard = ({ agent }: { agent: AgentSelect }) => {
          <CardFooter className="grid gap-2">
             <Separator />
             <AgentWriterCard
-               name={agent.personaConfig?.metadata.name}
-               description={agent.personaConfig?.metadata.description}
+               name={agent?.personaConfig?.metadata.name ?? ""}
+               description={agent?.personaConfig?.metadata.description ?? ""}
                photo={data?.data}
             />
          </CardFooter>

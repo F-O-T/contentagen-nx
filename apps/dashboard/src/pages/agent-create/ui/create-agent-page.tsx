@@ -11,6 +11,9 @@ export function CreateAgentPage() {
    const agentMutation = useMutation(
       trpc.agent.create.mutationOptions({
          onSuccess: (data) => {
+            if (!data?.id) {
+               throw new Error("Failed to create agent");
+            }
             toast.success(translate("pages.agent-create.messages.success"));
             navigate({
                params: { agentId: data.id },

@@ -13,7 +13,7 @@ import { EnhancedDiffRenderer } from "./enhanced-diff-renderer";
 import type { RouterOutput } from "@packages/api/client";
 
 interface VersionDetailsCredenzaProps {
-   version: RouterOutput["content"]["getVersions"][number];
+   version: RouterOutput["content"]["versions"]["getVersions"][number];
    isOpen: boolean;
    onClose: () => void;
 }

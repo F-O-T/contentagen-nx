@@ -5,7 +5,7 @@ import { posthogPlugin } from "./integrations/posthog";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { createApi } from "@packages/api/server";
 import { auth, polarClient } from "./integrations/auth";
-import { db } from "./integrations/database";
+import { db, ragClient } from "./integrations/database";
 import { minioClient } from "./integrations/minio";
 import { bullAuth } from "./integrations/bull-auth-guard";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
@@ -36,6 +36,7 @@ const trpcApi = createApi({
    minioBucket: env.MINIO_BUCKET,
    auth,
    db,
+   ragClient,
 });
 const app = new Elysia()
    .use(

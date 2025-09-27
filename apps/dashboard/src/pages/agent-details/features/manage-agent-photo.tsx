@@ -21,10 +21,10 @@ import {
 import { Button } from "@packages/ui/components/button";
 import { translate } from "@packages/localization";
 
-import type { AgentSelect } from "@packages/database/schema";
-
+import type { RouterOutput } from "@packages/api/client";
+type Agent = RouterOutput["agent"]["get"];
 interface ManageAgentPhotoProps {
-   agent: AgentSelect;
+   agent: Agent;
    open?: boolean;
    onOpenChange?: (open: boolean) => void;
 }

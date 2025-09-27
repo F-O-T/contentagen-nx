@@ -28,7 +28,6 @@ import { listAllIdeasPaginated } from "@packages/database/repositories/ideas-rep
 import { listAgents } from "@packages/database/repositories/agent-repository";
 
 import { createContent } from "@packages/database/repositories/content-repository";
-import { enqueueContentPlanningJob } from "@packages/workers/queues/content/content-planning-queue";
 
 export const ideasRouter = router({
    listAllIdeas: protectedProcedure
@@ -253,15 +252,7 @@ export const ideasRouter = router({
                layout: "article",
             },
          });
-         // 4. Enqueue job
-         await enqueueContentPlanningJob({
-            agentId: idea.agentId,
-            contentId: content.id,
-            contentRequest: {
-               description: `${idea.content.title}\n\n${idea.content.description}`,
-               layout: "article",
-            },
-         });
+         //TODO 4. Enqueue job
          return { success: true, content };
       }),
 
@@ -343,23 +334,8 @@ export const ideasRouter = router({
                await updateIdea(db, idea.id, { status: "approved" });
 
                // Create content
-               const content = await createContent(db, {
-                  agentId: idea.agentId,
-                  request: {
-                     layout: "article",
-                     description: idea.content.description,
-                  },
-               });
 
-               // Enqueue job
-               await enqueueContentPlanningJob({
-                  agentId: idea.agentId,
-                  contentId: content.id,
-                  contentRequest: {
-                     layout: "article",
-                     description: idea.content.description,
-                  },
-               });
+               //TODO: Enqueue job
 
                approvedCount++;
             } catch (error) {

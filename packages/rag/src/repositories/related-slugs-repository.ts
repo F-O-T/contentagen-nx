@@ -81,6 +81,29 @@ export async function bulkDeleteRelatedSlugsBySlugs(
    }
 }
 
+export async function deleteRelatedSlugsByExternalId(
+   dbClient: PgVectorDatabaseInstance,
+   externalId: string,
+   slug: string,
+): Promise<number> {
+   try {
+      const result = await dbClient
+         .delete(relatedSlugs)
+         .where(and(
+            eq(relatedSlugs.externalId, externalId),
+            eq(relatedSlugs.slug, slug)
+         ))
+         .returning({ id: relatedSlugs.id });
+
+      return result.length;
+   } catch (err) {
+      console.error("Failed to delete related slugs by externalId and slug:", err);
+      throw AppError.database(
+         `Failed to delete related slugs by externalId and slug: ${(err as Error).message}`,
+      );
+   }
+}
+
 interface RelatedSlugsSearchOptions {
    limit?: number;
    similarityThreshold?: number;
@@ -91,13 +114,14 @@ async function searchRelatedSlugsByCosineSimilarity(
    queryEmbedding: number[],
    externalId: string,
    options: RelatedSlugsSearchOptions = {},
-): Promise<RelatedSlugs[]> {
+) {
    try {
       const { limit = 10, similarityThreshold = 0.7 } = options;
 
       const similarity = sql<number>`1 - (${cosineDistance(relatedSlugs.embedding, queryEmbedding)})`;
 
       const result = await dbClient.query.relatedSlugs.findMany({
+         columns: { slug: true },
          where: and(
             gt(similarity, similarityThreshold),
             eq(relatedSlugs.externalId, externalId),
@@ -123,7 +147,7 @@ export async function searchRelatedSlugsByText(
    queryText: string,
    externalId: string,
    options: RelatedSlugsSearchOptions = {},
-): Promise<RelatedSlugs[]> {
+) {
    try {
       const { embedding } = await createEmbedding(queryText);
       return await searchRelatedSlugsByCosineSimilarity(

@@ -1,4 +1,4 @@
-import { enqueueContentPlanningJob } from "@packages/workers/queues/content/content-planning-queue";
+import { enqueueCreateNewContentWorkflowJob } from "@packages/workers/queues/create-new-content-queue";
 import {
    hasGenerationCredits,
    protectedProcedure,
@@ -17,31 +17,30 @@ import {
    ContentUpdateSchema,
    ContentSelectSchema,
 } from "@packages/database/schema";
-import { enqueueIdeasPlanningJob } from "@packages/workers/queues/ideas/ideas-planning-queue";
-import { listAgents } from "@packages/database/repositories/agent-repository";
+import {
+   getAgentById,
+   listAgents,
+} from "@packages/database/repositories/agent-repository";
 import {
    createContent,
    getContentById,
    updateContent,
    deleteContent,
    listContents,
-   updateContentCurrentVersion,
 } from "@packages/database/repositories/content-repository";
 import { canModifyContent } from "@packages/database/repositories/access-control-repository";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
-import { uploadFile, streamFileForProxy } from "@packages/files/client";
-import { compressImage } from "@packages/files/image-helper";
-import { 
-   getCollection, 
-   addToCollection, 
-   deleteFromCollection,
-   queryCollection
-} from "@packages/rag/operations/collection-operations";
 import { contentVersionRouter } from "./content-version";
 import { contentBulkOperationsRouter } from "./content-bulk-operations";
 import { contentImagesRouter } from "./content-images";
-
+import { createContentVersion } from "@packages/database/repositories/content-version-repository";
+import {
+   searchRelatedSlugsByText,
+   createRelatedSlugsWithEmbedding,
+   deleteRelatedSlugsByExternalId,
+} from "@packages/rag/repositories/related-slugs-repository";
+import { listCompetitors } from "@packages/database/repositories/competitor-repository";
 
 export const contentRouter = router({
    versions: contentVersionRouter,
@@ -55,17 +54,31 @@ export const contentRouter = router({
             if (!input.id) {
                throw APIError.validation("Content ID is required.");
             }
+            const resolvedCtx = await ctx;
             const db = (await ctx).db;
             const content = await getContentById(db, input.id);
             if (!content) {
                throw APIError.notFound("Content not found.");
             }
-            // Optionally update status to 'generating'
+            const agent = await getAgentById(db, content.agentId);
+            const competitors = await listCompetitors(db, {
+               userId: agent.userId,
+               organizationId:
+                  resolvedCtx.session?.session?.activeOrganizationId ?? "",
+            });
             await updateContent(db, input.id, { status: "pending" });
-            await enqueueContentPlanningJob({
+            await enqueueCreateNewContentWorkflowJob({
                agentId: content.agentId,
                contentId: content.id,
-               contentRequest: content.request,
+               request: content.request,
+               userId: agent.userId,
+               organizationId:
+                  resolvedCtx.session?.session?.activeOrganizationId ?? "",
+               competitorIds: competitors.map((competitor) => competitor.id),
+               runtimeContext: {
+                  language: resolvedCtx.language,
+                  userId: agent.userId,
+               },
             });
             return { success: true };
          } catch (err) {
@@ -153,6 +166,7 @@ export const contentRouter = router({
                   "User must be authenticated to create content.",
                );
             }
+            const resolvedCtx = await ctx;
             const db = (await ctx).db;
             const created = await db.transaction(async (tx) => {
                const c = await createContent(tx, {
@@ -172,20 +186,30 @@ export const contentRouter = router({
                return c;
             });
 
-            await enqueueContentPlanningJob({
-               agentId: input.agentId,
+            const agent = await getAgentById(db, input.agentId);
+            const competitors = await listCompetitors(db, {
+               userId: agent.userId,
+               organizationId:
+                  resolvedCtx.session?.session?.activeOrganizationId ?? "",
+            });
+            await enqueueCreateNewContentWorkflowJob({
+               agentId: created.agentId,
                contentId: created.id,
-               contentRequest: {
-                  description: input.request.description,
-                  layout: input.request.layout,
+               request: created.request,
+               userId: agent.userId,
+               organizationId:
+                  resolvedCtx.session?.session?.activeOrganizationId ?? "",
+               competitorIds: competitors.map((competitor) => competitor.id),
+               runtimeContext: {
+                  language: resolvedCtx.language,
+                  userId: agent.userId,
                },
             });
             return created;
          } catch (err) {
-            if (err instanceof DatabaseError) {
-               throw APIError.database(err.message);
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
+            throw APIError.internal("Failed to create content");
          }
       }),
    update: protectedProcedure
@@ -199,13 +223,9 @@ export const contentRouter = router({
             await updateContent((await ctx).db, id, updateFields);
             return { success: true };
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw APIError.notFound(err.message);
-            }
-            if (err instanceof DatabaseError) {
-               throw APIError.database(err.message);
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
+            throw APIError.internal("Failed to update content");
          }
       }),
    delete: protectedProcedure
@@ -220,30 +240,21 @@ export const contentRouter = router({
             const db = (await ctx).db;
             const content = await getContentById(db, id);
 
-            // Delete related slug from ChromaDB if it exists
             if (content.meta?.slug) {
-               const chromaClient = (await ctx).chromaClient;
-               const collection = await getCollection(
-                  chromaClient,
-                  "RelatedSlugs",
+               const ragClient = (await ctx).ragClient;
+               await deleteRelatedSlugsByExternalId(
+                  ragClient,
+                  content.agentId,
+                  content.meta.slug,
                );
-               // Delete documents matching the slug and agentId
-               await deleteFromCollection(collection, {
-                  where: { agentId: content.agentId },
-                  whereDocument: { $contains: content.meta.slug },
-               });
             }
 
             await deleteContent(db, id);
             return { success: true };
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw APIError.notFound(err.message);
-            }
-            if (err instanceof DatabaseError) {
-               throw APIError.database(err.message);
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
+            throw APIError.internal("Failed to delete content");
          }
       }),
    get: protectedProcedure
@@ -255,13 +266,9 @@ export const contentRouter = router({
             }
             return await getContentById((await ctx).db, input.id);
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw APIError.notFound(err.message);
-            }
-            if (err instanceof DatabaseError) {
-               throw APIError.database(err.message);
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
+            throw APIError.internal("Failed to get content");
          }
       }),
    listByAgentId: protectedProcedure
@@ -289,10 +296,9 @@ export const contentRouter = router({
             );
             return contents;
          } catch (err) {
-            if (err instanceof DatabaseError) {
-               throw APIError.database(err.message);
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
+            throw APIError.internal("Failed to list contents");
          }
       }),
 
@@ -314,17 +320,11 @@ export const contentRouter = router({
                throw APIError.validation("Only draft content can be approved.");
             }
             await updateContent(db, input.id, { status: "approved" });
-            // Save slug to related_slugs collection with agentId metadata
             if (content.meta?.slug) {
-               const chromaClient = (await ctx).chromaClient;
-               const collection = await getCollection(
-                  chromaClient,
-                  "RelatedSlugs",
-               );
-               await addToCollection(collection, {
-                  documents: [content.meta.slug],
-                  ids: [crypto.randomUUID()],
-                  metadatas: [{ agentId: content.agentId }],
+               const ragClient = (await ctx).ragClient;
+               await createRelatedSlugsWithEmbedding(ragClient, {
+                  externalId: content.agentId,
+                  slug: content.meta.slug,
                });
             }
             if (!content.meta?.keywords || content.meta.keywords.length === 0) {
@@ -332,19 +332,16 @@ export const contentRouter = router({
                   "Content must have keywords in meta to generate ideas.",
                );
             }
-            await enqueueIdeasPlanningJob({
-               agentId: content.agentId,
-               keywords: content.meta?.keywords,
-            });
+            //TODO: IMPLEMENTAR IDEAS PLANNING
+            // await enqueueIdeasPlanningJob({
+            //    agentId: content.agentId,
+            //    keywords: content.meta?.keywords,
+            // });
             return { success: true };
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw APIError.notFound(err.message);
-            }
-            if (err instanceof DatabaseError) {
-               throw APIError.database(err.message);
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
+            throw APIError.internal("Failed to approve content");
          }
       }),
    toggleShare: protectedProcedure
@@ -400,13 +397,9 @@ export const contentRouter = router({
                content: updated,
             };
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw APIError.notFound(err.message);
-            }
-            if (err instanceof DatabaseError) {
-               throw APIError.database(err.message);
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
+            throw APIError.internal("Failed to toggle share status");
          }
       }),
    getRelatedSlugs: protectedProcedure
@@ -415,39 +408,19 @@ export const contentRouter = router({
          try {
             if (!input.slug || !input.agentId) {
                throw APIError.validation("Slug and Agent ID are required.");
-               return [];
             }
-            const resolvedCtx = await ctx;
-            const collection = await getCollection(
-               resolvedCtx.chromaClient,
-               "RelatedSlugs",
+            const ragClient = (await ctx).ragClient;
+            const result = await searchRelatedSlugsByText(
+               ragClient,
+               input.slug,
+               input.agentId,
             );
-            // Query for document matching the slug and metadata.agentId
-            const results = await queryCollection(collection, {
-               queryTexts: [input.slug],
-               nResults: 5,
-               whereDocument: {
-                  $not_contains: input.slug,
-               },
-               include: ["documents", "metadatas", "distances"],
-               where: { agentId: input.agentId },
-            });
-            const slugs = results.documents
-               .flat()
-               .filter(
-                  (doc): doc is string =>
-                     typeof doc === "string" && doc !== null,
-               );
-
+            const slugs = result.map((item) => item.slug);
             return slugs;
          } catch (err) {
-            if (err instanceof NotFoundError) {
-               throw APIError.notFound(err.message);
-            }
-            if (err instanceof DatabaseError) {
-               throw APIError.database(err.message);
-            }
-            throw err;
+            console.log(err);
+            propagateError(err);
+            throw APIError.internal("Failed to get related slugs");
          }
       }),
 });

@@ -44,7 +44,7 @@ export function UploadContentImage({
 
    // Fetch the current content image using the streaming route
    const { data: currentImageData } = useQuery(
-      trpc.content.getImage.queryOptions({
+      trpc.content.images.getImage.queryOptions({
          id: content.id,
       }),
    );
@@ -53,14 +53,16 @@ export function UploadContentImage({
    const displayImage = filePreview || currentImageData?.data;
 
    const uploadImageMutation = useMutation(
-      trpc.content.uploadImage.mutationOptions({
+      trpc.content.images.uploadImage.mutationOptions({
          onSuccess: async () => {
             toast.success(translate("pages.content-details.upload.success"));
             await queryClient.invalidateQueries({
                queryKey: trpc.content.get.queryKey({ id: content.id }),
             });
             await queryClient.invalidateQueries({
-               queryKey: trpc.content.getImage.queryKey({ id: content.id }),
+               queryKey: trpc.content.images.getImage.queryKey({
+                  id: content.id,
+               }),
             });
             setIsOpen(false);
             setSelectedFile(null);

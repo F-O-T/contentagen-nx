@@ -16,7 +16,7 @@ import { translate } from "@packages/localization";
 interface ContentVersionsCardProps {
    contentId: string;
    onVersionClick: (
-      version: RouterOutput["content"]["getVersions"][number],
+      version: RouterOutput["content"]["versions"]["getVersions"][number],
    ) => void;
 }
 
@@ -27,7 +27,7 @@ export function ContentVersionsCard({
    const trpc = useTRPC();
 
    const { data: versions } = useSuspenseQuery(
-      trpc.content.getVersions.queryOptions({
+      trpc.content.versions.getVersions.queryOptions({
          contentId,
       }),
    );

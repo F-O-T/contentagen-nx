@@ -1,4 +1,3 @@
-import { enqueueIdeasPlanningJob } from "@packages/workers/queues/ideas/ideas-planning-queue";
 import { protectedProcedure, router, organizationProcedure } from "../trpc";
 import {
    eventEmitter,
@@ -239,32 +238,11 @@ export const contentBulkOperationsRouter = router({
                } as ContentStatusChangedPayload);
             }
 
-            // Generate ideas for approved content that has keywords
-            let ideasGeneratedCount = 0;
-            for (const content of approvableContents) {
-               if (content.meta?.keywords && content.meta.keywords.length > 0) {
-                  try {
-                     await enqueueIdeasPlanningJob({
-                        agentId: content.agent.id,
-                        keywords: content.meta.keywords,
-                     });
-                     ideasGeneratedCount++;
-                  } catch (error) {
-                     console.error(
-                        `Failed to enqueue idea generation for content ${content.id}:`,
-                        error,
-                     );
-                     // Continue with other content items even if one fails
-                  }
-               }
-            }
-
             return {
                success: true,
                approvedCount: result.approvedCount,
                totalSelected: ids.length,
                approvableCount: approvableIds.length,
-               ideasGeneratedCount,
             };
          } catch (err) {
             propagateError(err);

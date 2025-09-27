@@ -35,7 +35,7 @@ export function BulkActionsCredenza({
    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
    const bulkApproveMutation = useMutation(
-      trpc.content.bulkApprove.mutationOptions({
+      trpc.content.bulk.bulkApprove.mutationOptions({
          onSuccess: async (result) => {
             const message =
                result.totalSelected &&
@@ -63,7 +63,7 @@ export function BulkActionsCredenza({
    );
 
    const bulkDeleteMutation = useMutation(
-      trpc.content.bulkDelete.mutationOptions({
+      trpc.content.bulk.bulkDelete.mutationOptions({
          onSuccess: async (result) => {
             toast.success(
                `Successfully deleted ${result.deletedCount} content items`,

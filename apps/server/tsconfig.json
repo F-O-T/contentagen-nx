@@ -33,6 +33,9 @@
       "path": "../../packages/environment"
     },
     {
+      "path": "../../packages/rag"
+    },
+    {
       "path": "../../packages/database"
     },
     {

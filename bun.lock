@@ -149,6 +149,7 @@
         "@packages/files": "workspace:*",
         "@packages/payment": "workspace:*",
         "@packages/posthog": "workspace:*",
+        "@packages/rag": "workspace:*",
         "@packages/transactional": "workspace:*",
         "@packages/utils": "workspace:*",
         "@packages/workers": "workspace:*",
@@ -470,7 +471,7 @@
       "astro": "5.13.0",
     },
     "auth": {
-      "@polar-sh/better-auth": "^1.1.4",
+      "@polar-sh/better-auth": "1.1.4",
       "better-auth": "1.3.5",
     },
     "chroma": {

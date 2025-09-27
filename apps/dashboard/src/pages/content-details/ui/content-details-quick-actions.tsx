@@ -59,7 +59,7 @@ export function ContentDetailsQuickActions({
                queryKey: trpc.content.listAllContent.queryKey(),
             });
             await queryClient.invalidateQueries({
-               queryKey: trpc.content.getVersions.queryKey({
+               queryKey: trpc.content.versions.getVersions.queryKey({
                   contentId: content.id,
                }),
             });
@@ -87,7 +87,7 @@ export function ContentDetailsQuickActions({
                queryKey: trpc.content.listAllContent.queryKey(),
             });
             await queryClient.invalidateQueries({
-               queryKey: trpc.content.getVersions.queryKey({
+               queryKey: trpc.content.versions.getVersions.queryKey({
                   contentId: content.id,
                }),
             });

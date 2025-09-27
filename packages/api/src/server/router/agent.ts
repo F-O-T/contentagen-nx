@@ -145,6 +145,7 @@ export const agentRouter = router({
          } catch (err) {
             console.log(err);
             propagateError(err);
+            throw APIError.internal("Agent creation failed.");
          }
       }),
    update: protectedProcedure
@@ -169,6 +170,7 @@ export const agentRouter = router({
          } catch (err) {
             console.log(err);
             propagateError(err);
+            throw APIError.internal("Agent update failed.");
          }
       }),
    delete: protectedProcedure
@@ -182,6 +184,7 @@ export const agentRouter = router({
          } catch (err) {
             console.log(err);
             propagateError(err);
+            throw APIError.internal("Agent deletion failed.");
          }
       }),
    get: protectedProcedure
@@ -193,6 +196,7 @@ export const agentRouter = router({
          } catch (err) {
             console.log(err);
             propagateError(err);
+            throw APIError.internal("Agent retrieval failed.");
          }
       }),
    list: protectedProcedure
@@ -231,6 +235,9 @@ export const agentRouter = router({
                }),
             ]);
 
+            if (!agents.length) {
+               throw APIError.notFound("No agents found.");
+            }
             return {
                items: agents,
                total,
@@ -241,6 +248,7 @@ export const agentRouter = router({
          } catch (err) {
             console.log(err);
             propagateError(err);
+            throw APIError.internal("No agents found.");
          }
       }),
 });

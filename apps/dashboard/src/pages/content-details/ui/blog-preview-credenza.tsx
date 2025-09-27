@@ -27,7 +27,7 @@ export function BlogPreviewCredenza({
 
    // Fetch content image if imageUrl exists
    const { data: contentImage } = useQuery(
-      trpc.content.getImage.queryOptions(
+      trpc.content.images.getImage.queryOptions(
          { id: content.id },
          {
             enabled: !!content.imageUrl,

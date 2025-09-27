@@ -9,7 +9,6 @@ import { useTRPC } from "@/integrations/clients";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { AgentDetailsQuickActions } from "./agent-details-quick-actions";
-import { AgentDetailsKnowledgeBaseCard } from "./agent-details-knowledge-base-card";
 import { AgentNavigationButtons } from "./agent-navigation-buttons";
 
 export function AgentDetailsPage() {
@@ -79,7 +78,6 @@ export function AgentDetailsPage() {
                </div>
                <div className="col-span-1 gap-4 flex flex-col">
                   <AgentDetailsQuickActions agent={agent} />
-                  <AgentDetailsKnowledgeBaseCard agent={agent} />
                </div>
                <div className="md:col-span-3">
                   <AgentNavigationButtons agentId={agentId} />

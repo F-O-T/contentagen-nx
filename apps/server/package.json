@@ -6,6 +6,7 @@
     "@packages/api": "workspace:*",
     "@packages/authentication": "workspace:*",
     "@packages/database": "workspace:*",
+    "@packages/rag": "workspace:*",
     "@packages/environment": "workspace:*",
     "@packages/files": "workspace:*",
     "@packages/payment": "workspace:*",
