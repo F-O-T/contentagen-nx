@@ -8,6 +8,9 @@
   ],
   "references": [
     {
+      "path": "../utils"
+    },
+    {
       "path": "../payment"
     },
     {

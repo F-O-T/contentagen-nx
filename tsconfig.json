@@ -36,6 +36,9 @@
     },
     {
       "path": "./packages/ui"
+    },
+    {
+      "path": "./packages/agents"
     }
   ]
 }

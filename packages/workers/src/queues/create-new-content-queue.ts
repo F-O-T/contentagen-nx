@@ -11,6 +11,7 @@ import type { ContentRequest } from "@packages/database/schemas/content";
 export type CreateNewContentWorkflowJobData = {
    userId: string;
    competitorIds: string[];
+   contentId: string;
    organizationId: string;
    agentId: string;
    request: ContentRequest;
@@ -26,6 +27,7 @@ export async function runCreateNewContentWorkflow(
       organizationId,
       request,
       runtimeContext,
+      contentId,
    } = payload;
 
    try {
@@ -38,6 +40,7 @@ export async function runCreateNewContentWorkflow(
       }
       const result = await run.start({
          inputData: {
+            contentId,
             competitorIds,
             organizationId,
             request,

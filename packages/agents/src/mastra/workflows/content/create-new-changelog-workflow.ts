@@ -8,6 +8,9 @@ import { changelogReaderAgent } from "../../agents/changelog/changelog-reader-ag
 
 const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
+   agentId: z.string(),
+   contentId: z.string(),
+
    competitorIds: z.array(z.string()),
    organizationId: z.string(),
    request: ContentRequestSchema,
@@ -34,7 +37,7 @@ const changelogWritingStep = createStep({
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: ContentWritingStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request } = inputData;
+      const { userId, agentId, contentId, request } = inputData;
       const inputPrompt = `
 create a new ${request.layout} based on the conent request.
 
@@ -60,6 +63,8 @@ request: ${request.description}
       }
       return {
          writing: result.object.writing,
+         agentId,
+         contentId,
          userId,
          request,
       };
@@ -80,7 +85,7 @@ const changelogEditorStep = createStep({
    }),
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, writing } = inputData;
+      const { userId, request, agentId, contentId, writing } = inputData;
       const inputPrompt = `
 i need you to edit this ${request.layout} draft.
 
@@ -106,6 +111,8 @@ output the edited content in markdown format.
          throw AppError.validation('Agent output is missing "editor" field');
       }
       return {
+         agentId,
+         contentId,
          editor: result.object.editor,
          userId,
          request,
@@ -119,6 +126,10 @@ const ContentReviewerStepOutputSchema =
       reasonOfTheRating: z
          .string()
          .describe("The reason for the rating, written in markdown"),
+      keywords: z
+         .array(z.string())
+         .describe("The associeated keywords of the content"),
+      sources: z.array(z.string()).describe("The sources found on the search"),
    }).omit({
       competitorIds: true,
       organizationId: true,
@@ -129,7 +140,7 @@ export const changelogReadAndReviewStep = createStep({
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, editor } = inputData;
+      const { userId, agentId, contentId, request, editor } = inputData;
       const inputPrompt = `
 i need you to read and review this ${request.layout}.
 
@@ -150,6 +161,7 @@ final:${editor}
             output: ContentReviewerStepOutputSchema.pick({
                rating: true,
                reasonOfTheRating: true,
+               keywords: true,
             }),
          },
       );
@@ -165,7 +177,11 @@ final:${editor}
          rating: result.object.rating,
          reasonOfTheRating: result.object.reasonOfTheRating,
          userId,
+         agentId,
+         contentId,
          request,
+         keywords: result.object.keywords,
+         sources: ["Your changelog"],
       };
    },
 });

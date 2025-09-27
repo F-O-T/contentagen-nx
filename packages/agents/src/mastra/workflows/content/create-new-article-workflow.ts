@@ -40,8 +40,14 @@ export const strategyStep = createStep({
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: StrategyStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, agentId, competitorIds, organizationId, request } =
-         inputData;
+      const {
+         contentId,
+         userId,
+         agentId,
+         competitorIds,
+         organizationId,
+         request,
+      } = inputData;
       const inputPrompt = `
 I need you to create a comprehensive content strategy for the following request:
 
@@ -82,6 +88,7 @@ Focus on creating a strategy that leverages our brand's unique strengths and dif
          agentId,
          strategy: result.object.strategy,
          userId,
+         contentId,
          request,
       };
    },
@@ -109,7 +116,7 @@ export const researchStep = createStep({
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: ResearchStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, agentId, request } = inputData;
+      const { contentId, userId, agentId, request } = inputData;
       const inputPrompt = `
 I need you to perform comprehensive SERP research for the following content request:
 
@@ -148,6 +155,7 @@ Focus on finding the most effective content angle and structure that can achieve
          userId,
          agentId,
          request,
+         contentId,
       };
    },
 });
@@ -169,7 +177,13 @@ const articleWritingStep = createStep({
    outputSchema: ContentWritingStepOutputSchema,
    execute: async ({ inputData }) => {
       const {
-         "article-research-step": { request, agentId, research, userId },
+         "article-research-step": {
+            request,
+            contentId,
+            agentId,
+            research,
+            userId,
+         },
          "article-strategy-step": { strategy },
       } = inputData;
       const strategyPrompt = `
@@ -225,6 +239,7 @@ ${researchPrompt}
          userId,
          agentId,
          request,
+         contentId,
       };
    },
 });
@@ -255,7 +270,8 @@ const articleEditorStep = createStep({
    }),
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, research, request, agentId, writing } = inputData;
+      const { userId, contentId, research, request, agentId, writing } =
+         inputData;
       const inputPrompt = `
 i need you to edit this ${request.layout} draft.
 
@@ -287,6 +303,8 @@ output the edited content in markdown format.
          editor: result.object.editor,
          userId,
          research,
+         contentId,
+
          request,
       };
    },
@@ -317,8 +335,15 @@ export const articleReadAndReviewStep = createStep({
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { metaDescription, research, userId, agentId, request, editor } =
-         inputData;
+      const {
+         contentId,
+         metaDescription,
+         research,
+         userId,
+         agentId,
+         request,
+         editor,
+      } = inputData;
       const inputPrompt = `
 i need you to read and review this ${request.layout}.
 
@@ -359,6 +384,8 @@ final:${editor}
          sources: research.research.sources,
          agentId,
          userId,
+         contentId,
+
          editor,
          request,
       };

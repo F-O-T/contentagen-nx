@@ -16,7 +16,6 @@ import {
 import { createNewTutorialWorkflow } from "./content/create-new-tutorial-workflow";
 import { createNewChangelogWorkflow } from "./content/create-new-changelog-workflow";
 import { createNewArticleWorkflow } from "./content/create-new-article-workflow";
-import { createNewInterviewWorkflow } from "./content/create-new-interview-workflow";
 import { createDb } from "@packages/database/client";
 import { serverEnv } from "@packages/environment/server";
 
@@ -119,14 +118,6 @@ export const createNewContentWorkflow = createWorkflow({
             },
          }) => layout === "changelog",
          createNewChangelogWorkflow,
-      ],
-      [
-         async ({
-            inputData: {
-               request: { layout },
-            },
-         }) => layout === "interview",
-         createNewInterviewWorkflow,
       ],
       [
          async ({

@@ -9,6 +9,8 @@ import { researcherAgent } from "../../agents/researcher-agent";
 
 const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
+   agentId: z.string(),
+   contentId: z.string(),
    competitorIds: z.array(z.string()),
    organizationId: z.string(),
    request: ContentRequestSchema,
@@ -43,7 +45,7 @@ export const researchStep = createStep({
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: ResearchStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request } = inputData;
+      const { userId, request, agentId, contentId } = inputData;
       const inputPrompt = `
 I need you to perform comprehensive SERP research for the following content request:
 
@@ -81,6 +83,8 @@ Focus on finding the most effective content angle and structure that can achieve
          research: result.object.research,
          userId,
          request,
+         agentId,
+         contentId,
       };
    },
 });
@@ -91,7 +95,7 @@ const tutorialWritingStep = createStep({
    inputSchema: ResearchStepOutputSchema,
    outputSchema: ContentWritingStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, research } = inputData;
+      const { userId, request, research, agentId, contentId } = inputData;
       const researchPrompt = `
 searchIntent: ${research.searchIntent}
 competitorAnalysis: ${research.competitorAnalysis}
@@ -128,6 +132,8 @@ ${researchPrompt}
          writing: result.object.writing,
          userId,
          request,
+         agentId,
+         contentId,
       };
    },
 });
@@ -146,7 +152,7 @@ const tutorialEditorStep = createStep({
    }),
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, writing } = inputData;
+      const { userId, request, writing, agentId, contentId } = inputData;
       const inputPrompt = `
 i need you to edit this ${request.layout} draft.
 
@@ -175,6 +181,8 @@ output the edited content in markdown format.
          editor: result.object.editor,
          userId,
          request,
+         agentId,
+         contentId,
       };
    },
 });
@@ -185,6 +193,10 @@ const ContentReviewerStepOutputSchema =
       reasonOfTheRating: z
          .string()
          .describe("The reason for the rating, written in markdown"),
+      keywords: z
+         .array(z.string())
+         .describe("The associeated keywords of the content"),
+      sources: z.array(z.string()).describe("The sources found on the search"),
    }).omit({
       competitorIds: true,
       organizationId: true,
@@ -195,7 +207,7 @@ export const tutorialReadAndReviewStep = createStep({
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, editor } = inputData;
+      const { userId, request, editor, agentId, contentId } = inputData;
       const inputPrompt = `
 i need you to read and review this ${request.layout}.
 
@@ -216,6 +228,7 @@ final:${editor}
             output: ContentReviewerStepOutputSchema.pick({
                rating: true,
                reasonOfTheRating: true,
+               keywords: true,
             }),
          },
       );
@@ -232,6 +245,10 @@ final:${editor}
          reasonOfTheRating: result.object.reasonOfTheRating,
          userId,
          request,
+         agentId,
+         contentId,
+         keywords: result.object.keywords,
+         sources: ["Your tutorial"],
       };
    },
 });
