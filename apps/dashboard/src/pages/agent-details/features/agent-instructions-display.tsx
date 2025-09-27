@@ -12,7 +12,6 @@ import { useMemo } from "react";
 
 interface AgentInstructionsDisplayProps {
    personaConfig: PersonaConfig;
-   onEdit: () => void;
 }
 
 interface InstructionCard {
@@ -24,7 +23,6 @@ interface InstructionCard {
 
 export function AgentInstructionsDisplay({
    personaConfig,
-   onEdit,
 }: AgentInstructionsDisplayProps) {
    const cards = useMemo(() => {
       const instructions = personaConfig.instructions;

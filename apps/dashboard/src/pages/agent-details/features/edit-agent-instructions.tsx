@@ -16,13 +16,16 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
-import type { PersonaConfig } from "@packages/database/schemas/agent";
+import type {
+   InstructionsConfig,
+   PersonaConfig,
+} from "@packages/database/schemas/agent";
 
 interface EditInstructionCard {
    titleKey: TranslationKey;
    descriptionKey: TranslationKey;
    placeholderKey: TranslationKey;
-   fieldName: KeyOf<InstructionsSchema>;
+   fieldName: keyof InstructionsConfig;
 }
 
 export function EditAgentInstructions({
@@ -178,4 +181,3 @@ export function EditAgentInstructions({
       </div>
    );
 }
-

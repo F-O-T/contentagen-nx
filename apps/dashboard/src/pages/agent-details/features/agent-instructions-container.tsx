@@ -13,20 +13,10 @@ export function AgentInstructionsContainer({
    isEditing,
    setIsEditing,
 }: AgentInstructionsContainerProps) {
-
    if (isEditing) {
-      return (
-         <EditAgentInstructions
-            agent={agent}
-            setEditing={setIsEditing}
-         />
-      );
+      return <EditAgentInstructions agent={agent} setEditing={setIsEditing} />;
    }
 
-   return (
-      <AgentInstructionsDisplay
-         personaConfig={agent.personaConfig}
-         onEdit={() => setIsEditing(true)}
-      />
-   );
+   return <AgentInstructionsDisplay personaConfig={agent.personaConfig} />;
 }
+
