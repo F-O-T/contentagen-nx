@@ -20,12 +20,39 @@
       "name": "Nome",
       "persona": "Persona",
       "edit": "Editar Agente",
-      "content-type": "Tipo de Conteúdo",
-      "voice-tone": "Tom de Voz",
-      "target-audience": "Público-alvo",
-      "formatting-style": "Estilo de Formatação",
-      "language": "Idioma",
-      "brand-integration": "Integração da Marca"
+      "content-type": "Tipo de Conteúdo"
+   },
+   "instructions": {
+      "title": "Instruções do Agente",
+      "description": "Personalize como seu agente cria conteúdo",
+      "configured": "Configurado",
+      "edit": {
+         "save": "Salvar",
+         "cancel": "Cancelar",
+         "error": "Falha ao atualizar instruções",
+         "success": "Instruções atualizadas com sucesso"
+      },
+      "tabs": {
+         "audience": {
+            "title": "Perfil do Público",
+            "description": "Descreva seu público-alvo e suas características",
+            "placeholder": "Descreva o perfil do seu público aqui... Por exemplo: 'Nosso público consiste em profissionais de tecnologia com idade entre 25-45 anos interessados em soluções de IA e automação.'"
+         },
+         "writing": {
+            "title": "Diretrizes de Escrita",
+            "description": "Defina estilo de escrita, tom e regras de formatação",
+            "placeholder": "Especifique suas diretrizes de escrita aqui... Por exemplo: 'Sempre escreva em terceira pessoa, evite traços, use títulos claros e mantenha parágrafos com menos de 4 frases.'"
+         },
+         "rag": {
+            "title": "Integração RAG",
+            "description": "Instruções para usar conhecimento e documentos da marca",
+            "placeholder": "Defina diretrizes de uso RAG... Por exemplo: 'Sempre priorize documentos da marca como fonte de verdade, cite pontos-chave de mensagens da marca e mantenha consistência na voz da marca.'"
+         }
+      },
+      "not-configured": "Não configurado",
+      "audience-profile": "Perfil do Público",
+      "writing-guidelines": "Diretrizes de Escrita",
+      "rag-integration": "Integração RAG"
    },
    "knowledge-base": {
       "title": "Conhecimento da Marca",
@@ -59,6 +86,7 @@
       "description": "Execute tarefas comuns relacionadas ao agente.",
       "generate-brand-files": "Gerar arquivos da marca",
       "edit-agent": "Editar agente",
+      "edit-instructions": "Editar instruções",
       "delete-agent": "Excluir agente",
       "create-content": "Criar conteúdo",
       "view-details": "Ver detalhes do agente",

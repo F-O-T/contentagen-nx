@@ -20,12 +20,40 @@
       "name": "Name",
       "persona": "Persona",
       "edit": "Edit Agent",
-      "content-type": "Content Type",
-      "voice-tone": "Voice Tone",
-      "target-audience": "Target Audience",
-      "formatting-style": "Formatting Style",
-      "language": "Language",
-      "brand-integration": "Brand Integration"
+      "content-type": "Content Type"
+   },
+   "instructions": {
+      "title": "Agent Instructions",
+      "description": "Customize how your agent creates content",
+      "edit": "Edit Instructions",
+      "configured": "Configured",
+      "edit": {
+         "save": "Save",
+         "cancel": "Cancel",
+         "error": "Failed to update instructions",
+         "success": "Instructions updated successfully"
+      },
+      "tabs": {
+         "audience": {
+            "title": "Audience Profile",
+            "description": "Describe your target audience and their characteristics",
+            "placeholder": "Describe your audience profile here... For example: 'Our audience consists of tech-savvy professionals aged 25-45 who are interested in AI and automation solutions.'"
+         },
+         "writing": {
+            "title": "Writing Guidelines",
+            "description": "Define writing style, tone, and formatting rules",
+            "placeholder": "Specify your writing guidelines here... For example: 'Always write in third person, avoid em dashes, use clear headings, and keep paragraphs under 4 sentences.'"
+         },
+         "rag": {
+            "title": "RAG Integration",
+            "description": "Instructions for using brand knowledge and documents",
+            "placeholder": "Define RAG usage guidelines... For example: 'Always prioritize brand documents as source of truth, cite key brand messaging points, and maintain brand voice consistency.'"
+         }
+      },
+      "not-configured": "Not configured",
+      "audience-profile": "Audience Profile",
+      "writing-guidelines": "Writing Guidelines",
+      "rag-integration": "RAG Integration"
    },
    "knowledge-base": {
       "title": "Brand Knowledge",
@@ -59,6 +87,7 @@
       "description": "Perform common tasks related to the agent.",
       "generate-brand-files": "Generate brand files",
       "edit-agent": "Edit agent",
+      "edit-instructions": "Edit instructions",
       "delete-agent": "Delete agent",
       "create-content": "Create content",
       "view-details": "View agent details",
