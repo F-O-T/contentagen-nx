@@ -18,7 +18,7 @@ export function useAgentForm({
             writingGuidelines: "",
             ragIntegration: "",
          },
-         purpose: undefined,
+         purpose: "blog_post",
          ...defaultValues,
       } as PersonaConfig,
       onSubmit: async ({ value, formApi }) => {
