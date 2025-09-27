@@ -7,7 +7,7 @@ import {
    CardFooter,
 } from "@packages/ui/components/card";
 import { translate } from "@packages/localization";
-import { Bot, FileText, Megaphone, Users, Type } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useMemo } from "react";
 import { InfoItem } from "@packages/ui/components/info-item";
 import { Separator } from "@packages/ui/components/separator";
@@ -31,41 +31,6 @@ export const AgentPersonaCard = ({ agent }: { agent: Agent }) => {
             value: formatValueForDisplay(agent?.personaConfig?.purpose ?? ""),
             icon: FileText,
          },
-         {
-            label: translate("pages.agent-details.persona.voice-tone"),
-            value: formatValueForDisplay(
-               agent?.personaConfig?.voice?.communication ?? "",
-            ),
-            icon: Megaphone,
-         },
-         {
-            label: translate("pages.agent-details.persona.target-audience"),
-            value: formatValueForDisplay(
-               agent?.personaConfig?.audience?.base ?? "",
-            ),
-            icon: Users,
-         },
-         {
-            label: translate("pages.agent-details.persona.formatting-style"),
-            value: formatValueForDisplay(
-               agent?.personaConfig?.formatting?.style ?? "",
-            ),
-            icon: Type,
-         },
-         {
-            label: translate("pages.agent-details.persona.language"),
-            value: formatValueForDisplay(
-               agent?.personaConfig?.language?.primary ?? "",
-            ),
-            icon: Type,
-         },
-         {
-            label: translate("pages.agent-details.persona.brand-integration"),
-            value: formatValueForDisplay(
-               agent?.personaConfig?.brand?.integrationStyle ?? "",
-            ),
-            icon: Bot,
-         },
       ],
       [agent],
    );
@@ -80,7 +45,7 @@ export const AgentPersonaCard = ({ agent }: { agent: Agent }) => {
                {translate("pages.agent-details.persona.description")}
             </CardDescription>
          </CardHeader>
-         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+         <CardContent className="grid grid-cols-1 gap-4">
             {items.map(({ label, value, icon: Icon }) => (
                <InfoItem
                   key={label}

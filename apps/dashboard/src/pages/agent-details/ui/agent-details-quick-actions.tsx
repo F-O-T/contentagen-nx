@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { Button } from "@packages/ui/components/button";
 import { translate } from "@packages/localization";
-import { Edit, Trash, Plus, Camera } from "lucide-react";
+import { Edit, Trash, Plus, Camera, FileEdit } from "lucide-react";
 import {
    Card,
    CardContent,
@@ -19,8 +19,14 @@ import { DeleteAgentDialog } from "@/features/agent-actions/ui/delete-agent-dial
 import { EditAgentAction } from "@/features/agent-actions/ui/edit-agent-action";
 import { ManageAgentPhoto } from "../features/manage-agent-photo";
 import type { RouterOutput } from "@packages/api/client";
+
+interface AgentDetailsQuickActionsProps {
+   agent: RouterOutput["agent"]["get"];
+   onEditInstructions?: () => void;
+}
+
 type Agent = RouterOutput["agent"]["get"];
-export function AgentDetailsQuickActions({ agent }: { agent: Agent }) {
+export function AgentDetailsQuickActions({ agent, onEditInstructions }: AgentDetailsQuickActionsProps) {
    const router = useRouter();
 
    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -40,6 +46,12 @@ export function AgentDetailsQuickActions({ agent }: { agent: Agent }) {
          label: translate("pages.agent-details.quick-actions.edit-agent"),
          onClick: handleEdit,
          disabled: false,
+      },
+      {
+         icon: FileEdit,
+         label: translate("pages.agent-details.quick-actions.edit-instructions"),
+         onClick: onEditInstructions,
+         disabled: !onEditInstructions,
       },
       {
          icon: Trash,

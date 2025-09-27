@@ -1,5 +1,3 @@
-// apps/dashboard/src/pages/agent-details/ui/agent-stats-card.tsx
-
 import { StatsCard } from "@packages/ui/components/stats-card";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
@@ -72,7 +70,7 @@ export function AgentStatsCard() {
    }, [data]);
 
    return (
-      <div className="w-full gap-4 grid md:grid-cols-2">
+      <div className="w-full h-full gap-4 grid md:grid-cols-2">
          {items.map((item) => (
             <StatsCard
                key={item.label}
