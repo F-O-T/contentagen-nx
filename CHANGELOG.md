@@ -1,3 +1,43 @@
+## 0.11.0 (2025-09-27)
+
+### 🚀 Features
+
+- **server:** Add create new content workflow to bullboard ([b603c18](https://github.com/F-O-T/contentagen-nx/commit/b603c18))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/server-events to 0.4.0
+- Updated @packages/environment to 0.4.0
+- Updated @packages/database to 0.4.0
+- Updated @packages/payment to 0.4.0
+- Updated @packages/files to 0.4.0
+- Updated @packages/utils to 0.11.0
+- Updated @packages/rag to 0.4.0
+
+### ❤️ Thank You
+
+- Manoel
+
+## 0.10.0 (2025-09-27)
+
+### 🚀 Features
+
+- **server:** Add create new content workflow to bullboard ([b603c18](https://github.com/F-O-T/contentagen-nx/commit/b603c18))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/server-events to 0.4.0
+- Updated @packages/environment to 0.4.0
+- Updated @packages/database to 0.4.0
+- Updated @packages/payment to 0.4.0
+- Updated @packages/files to 0.4.0
+- Updated @packages/utils to 0.10.0
+- Updated @packages/rag to 0.4.0
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.8.0 (2025-09-27)
 
 ### 🧱 Updated Dependencies
