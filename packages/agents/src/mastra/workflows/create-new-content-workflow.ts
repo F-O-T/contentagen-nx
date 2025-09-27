@@ -59,6 +59,7 @@ const saveContentStep = createStep({
          wordsCount: countWords(editor).toString(),
          readTimeMinutes: readTimeMinutes(countWords(editor)).toString(),
          qualityScore: rating.toString(),
+         reasonOfTheRating,
       };
       const meta: ContentMeta = {
          title: extractTitleFromMarkdown(editor),

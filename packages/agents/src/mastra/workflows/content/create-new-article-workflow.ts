@@ -277,6 +277,11 @@ const ContentReviewerStepOutputSchema =
       reasonOfTheRating: z
          .string()
          .describe("The reason for the rating, written in markdown"),
+      metaDescription: z
+         .string()
+         .describe(
+            "The meta description, being a SEO optmizaed description of the article",
+         ),
    }).omit({
       competitorIds: true,
       organizationId: true,
@@ -297,6 +302,7 @@ original:${request.description}
 final:${editor}
 
 `;
+      //TODO: add a new step to be just the post processing(meta description, keywords,sources etc,and just output it to be used on the main workflow on the final step to save the content)
       const result = await articleReaderAgent.generateVNext(
          [
             {
@@ -308,6 +314,7 @@ final:${editor}
             output: ContentReviewerStepOutputSchema.pick({
                rating: true,
                reasonOfTheRating: true,
+               metaDescription: true,
             }),
          },
       );
