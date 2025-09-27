@@ -46,7 +46,7 @@ function StatsContent({
    showAction?: React.ReactNode;
 }) {
    return (
-      <Card className={className ?? "col-span-1"}>
+      <Card className={className ?? "col-span-1 h-full w-full"}>
          <CardHeader>
             <CardTitle>{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
