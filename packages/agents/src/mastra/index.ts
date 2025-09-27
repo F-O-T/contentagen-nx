@@ -28,6 +28,7 @@ export const mastra = new Mastra({
          "@packages/database/client",
          "@packages/rag/client",
          "@packages/utils/errors",
+         "@packages/utils/text",
       ],
    },
    workflows: {

@@ -36,6 +36,15 @@ const CreateNewContentWorkflowOutputSchema =
          .string()
          .describe("The reason for the rating, written in markdown"),
       editor: z.string().describe("The edited article, ready for review"),
+      metaDescription: z
+         .string()
+         .describe(
+            "The meta description, being a SEO optmizaed description of the article",
+         ),
+      keywords: z
+         .array(z.string())
+         .describe("The associeated keywords of the content"),
+      sources: z.array(z.string()).describe("The sources found on the search"),
    });
 
 const saveContentStep = createStep({
@@ -43,9 +52,14 @@ const saveContentStep = createStep({
    description: "Save the content to the database",
    inputSchema: CreateNewContentWorkflowOutputSchema,
 
+   outputSchema: z.object({
+      success: z.boolean(),
+   }),
    execute: async ({ inputData }) => {
       const {
-         userId,
+         keywords,
+         metaDescription,
+         sources,
          agentId,
          editor,
          rating,
@@ -64,22 +78,21 @@ const saveContentStep = createStep({
       const meta: ContentMeta = {
          title: extractTitleFromMarkdown(editor),
          slug: createSlug(extractTitleFromMarkdown(editor)),
-         description: "",
-         keywords: [""],
-         sources: [""],
+         description: metaDescription,
+         keywords,
+         sources,
       };
       await updateContent(dbClient, contentId, {
          status: "approved",
          agentId,
          request,
          stats,
-         meta: {},
+         meta,
+         body: removeTitleFromMarkdown(editor),
       });
 
       return {
-         userId,
-         agentId,
-         request,
+         success: true,
       };
    },
 });

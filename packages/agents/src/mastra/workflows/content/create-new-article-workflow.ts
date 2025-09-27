@@ -12,6 +12,7 @@ const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
    competitorIds: z.array(z.string()),
    organizationId: z.string(),
+   contentId: z.string(),
    agentId: z.string(),
    request: ContentRequestSchema,
 });
@@ -88,6 +89,10 @@ Focus on creating a strategy that leverages our brand's unique strengths and dif
 
 const ResearchStepOutputSchema = CreateNewContentWorkflowInputSchema.extend({
    research: z.object({
+      keywords: z
+         .array(z.string())
+         .describe("The associeated keywords of the content"),
+      sources: z.array(z.string()).describe("The sources found on the search"),
       searchIntent: z.string(),
       competitorAnalysis: z.string(),
       contentGaps: z.string(),
@@ -215,6 +220,7 @@ ${researchPrompt}
          throw AppError.validation('Agent output is missing "research" field');
       }
       return {
+         research,
          writing: result.object.writing,
          userId,
          agentId,
@@ -224,7 +230,16 @@ ${researchPrompt}
 });
 const ContentEditorStepOutputSchema =
    CreateNewContentWorkflowInputSchema.extend({
+      research: ResearchStepOutputSchema.pick({
+         research: true,
+      }),
+
       editor: editorType,
+      metaDescription: z
+         .string()
+         .describe(
+            "The meta description, being a SEO optmizaed description of the article",
+         ),
    }).omit({
       competitorIds: true,
       organizationId: true,
@@ -234,10 +249,13 @@ const articleEditorStep = createStep({
    description: "Edit the article based on the content research",
    inputSchema: CreateNewContentWorkflowInputSchema.extend({
       writing: writingType,
+      research: ResearchStepOutputSchema.pick({
+         research: true,
+      }),
    }),
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, agentId, writing } = inputData;
+      const { userId, research, request, agentId, writing } = inputData;
       const inputPrompt = `
 i need you to edit this ${request.layout} draft.
 
@@ -255,6 +273,7 @@ output the edited content in markdown format.
          {
             output: ContentEditorStepOutputSchema.pick({
                editor: true,
+               metaDescription: true,
             }),
          },
       );
@@ -264,8 +283,10 @@ output the edited content in markdown format.
       }
       return {
          agentId,
+         metaDescription: result.object.metaDescription,
          editor: result.object.editor,
          userId,
+         research,
          request,
       };
    },
@@ -274,14 +295,18 @@ output the edited content in markdown format.
 const ContentReviewerStepOutputSchema =
    CreateNewContentWorkflowInputSchema.extend({
       rating: z.number().min(0).max(100),
-      reasonOfTheRating: z
-         .string()
-         .describe("The reason for the rating, written in markdown"),
       metaDescription: z
          .string()
          .describe(
             "The meta description, being a SEO optmizaed description of the article",
          ),
+      keywords: z
+         .array(z.string())
+         .describe("The associeated keywords of the content"),
+      sources: z.array(z.string()).describe("The sources found on the search"),
+      reasonOfTheRating: z
+         .string()
+         .describe("The reason for the rating, written in markdown"),
    }).omit({
       competitorIds: true,
       organizationId: true,
@@ -292,7 +317,8 @@ export const articleReadAndReviewStep = createStep({
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, agentId, request, editor } = inputData;
+      const { metaDescription, research, userId, agentId, request, editor } =
+         inputData;
       const inputPrompt = `
 i need you to read and review this ${request.layout}.
 
@@ -302,7 +328,6 @@ original:${request.description}
 final:${editor}
 
 `;
-      //TODO: add a new step to be just the post processing(meta description, keywords,sources etc,and just output it to be used on the main workflow on the final step to save the content)
       const result = await articleReaderAgent.generateVNext(
          [
             {
@@ -314,7 +339,6 @@ final:${editor}
             output: ContentReviewerStepOutputSchema.pick({
                rating: true,
                reasonOfTheRating: true,
-               metaDescription: true,
             }),
          },
       );
@@ -330,6 +354,9 @@ final:${editor}
       return {
          rating: result.object.rating,
          reasonOfTheRating: result.object.reasonOfTheRating,
+         metaDescription,
+         keywords: research.research.keywords,
+         sources: research.research.sources,
          agentId,
          userId,
          editor,
