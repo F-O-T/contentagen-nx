@@ -11,15 +11,8 @@ import { MDocument } from "@mastra/rag";
 import { uploadFile, getMinioClient } from "@packages/files/client";
 import { serverEnv } from "@packages/environment/server";
 import { createDb } from "@packages/database/client";
-import { updateAgent } from "@packages/database/repositories/agent-repository";
 import { updateCompetitor } from "@packages/database/repositories/competitor-repository";
-import {
-   emitAgentKnowledgeStatusChanged,
-   emitCompetitorAnalysisStatusChanged,
-} from "@packages/server-events";
 import { z } from "zod";
-import type { BrandKnowledgeStatus } from "@packages/database/schemas/agent";
-import type { CompetitorAnalysisStatus } from "@packages/database/schemas/competitor";
 import { createPgVector } from "@packages/rag/client";
 import { createCompetitorKnowledgeWithEmbedding } from "@packages/rag/repositories/competitor-knowledge-repository";
 
@@ -43,67 +36,9 @@ async function ingestUsage(usage: LLMUsage, userId: string) {
       metadata: usageMetadata,
    });
 }
-// Helper function to update agent status and emit server events
-async function updateAgentKnowledgeStatus(
-   agentId: string,
-   status: BrandKnowledgeStatus,
-   message?: string,
-) {
-   try {
-      const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
-      await updateAgent(db, agentId, { brandKnowledgeStatus: status });
-   } catch (err) {
-      // If DB update fails, still emit event so UI can update
-      console.error(
-         "[BrandKnowledge] Failed to update agent status in DB:",
-         err,
-      );
-   }
-   emitAgentKnowledgeStatusChanged({ agentId, status, message });
-}
-
-// Helper function to update competitor status and emit server events
-async function updateCompetitorAnalysisStatus(
-   competitorId: string,
-   status: CompetitorAnalysisStatus,
-   message?: string,
-) {
-   try {
-      const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
-      await updateCompetitor(db, competitorId, { analysisStatus: status });
-   } catch (err) {
-      // If DB update fails, still emit event so UI can update
-      console.error(
-         "[CompetitorAnalysis] Failed to update competitor status in DB:",
-         err,
-      );
-   }
-   emitCompetitorAnalysisStatusChanged({ competitorId, status, message });
-}
 
 // Unified helper function to handle status updates for both targets
-async function updateTargetStatus(
-   targetId: string,
-   target: "brand" | "competitor",
-   status: BrandKnowledgeStatus | CompetitorAnalysisStatus,
-   message?: string,
-) {
-   if (target === "brand") {
-      await updateAgentKnowledgeStatus(
-         targetId,
-         status as BrandKnowledgeStatus,
-         message,
-      );
-   } else {
-      await updateCompetitorAnalysisStatus(
-         targetId,
-         status as CompetitorAnalysisStatus,
-         message,
-      );
-   }
-}
 
-// Helper function to update uploaded files for the appropriate target
 async function updateTargetUploadedFiles(
    targetId: string,
    target: "brand" | "competitor",
@@ -112,7 +47,7 @@ async function updateTargetUploadedFiles(
    const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
 
    if (target === "brand") {
-      await updateAgent(db, targetId, { uploadedFiles });
+      return;
    } else {
       await updateCompetitor(db, targetId, { uploadedFiles });
    }
@@ -218,12 +153,6 @@ const getFullBrandAnalysis = createStep({
    execute: async ({ inputData }) => {
       const { userId, websiteUrl, id, target } = inputData;
 
-      await updateTargetStatus(
-         id,
-         target,
-         "analyzing",
-         "Analyzing brand website and gathering information",
-      );
       const inputPrompt = `
 websiteUrl: ${websiteUrl}
 userId: ${userId}
@@ -249,12 +178,6 @@ userId: ${userId}
       }
 
       const { fullBrandAnalysis } = result.object;
-      await updateTargetStatus(
-         id,
-         target,
-         "analyzing",
-         "Brand website analysis completed",
-      );
 
       return {
          fullBrandAnalysis,
@@ -275,12 +198,6 @@ const createBrandDocuments = createStep({
       const { fullBrandAnalysis, userId, id, target, websiteUrl } = inputData;
 
       // Update status to chunking (preparing documents)
-      await updateTargetStatus(
-         id,
-         target,
-         "chunking",
-         "Creating business documents from brand analysis",
-      );
       const inputPrompt = `
 Generate 5 distinct business documents from this brand analysis:
 
@@ -336,12 +253,6 @@ const saveAndIndexBrandDocuments = createStep({
       const { generatedDocuments, id, target } = inputData;
 
       // Update status to chunking (processing and indexing)
-      await updateTargetStatus(
-         id,
-         target,
-         "chunking",
-         "Processing and indexing documents",
-      );
 
       type UploadedFile = {
          fileName: string;
@@ -437,14 +348,6 @@ const saveAndIndexBrandDocuments = createStep({
             throw error;
          }
       }
-
-      // Update status to completed for both target types
-      await updateTargetStatus(
-         targetId,
-         target,
-         "completed",
-         `Successfully processed ${allChunks.length} document chunks`,
-      );
 
       return {
          chunkCount: allChunks.length,

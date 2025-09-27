@@ -24,9 +24,10 @@ interface AgentDetailsQuickActionsProps {
    agent: RouterOutput["agent"]["get"];
    onEditInstructions?: () => void;
 }
-
-type Agent = RouterOutput["agent"]["get"];
-export function AgentDetailsQuickActions({ agent, onEditInstructions }: AgentDetailsQuickActionsProps) {
+export function AgentDetailsQuickActions({
+   agent,
+   onEditInstructions,
+}: AgentDetailsQuickActionsProps) {
    const router = useRouter();
 
    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -49,7 +50,9 @@ export function AgentDetailsQuickActions({ agent, onEditInstructions }: AgentDet
       },
       {
          icon: FileEdit,
-         label: translate("pages.agent-details.quick-actions.edit-instructions"),
+         label: translate(
+            "pages.agent-details.quick-actions.edit-instructions",
+         ),
          onClick: onEditInstructions,
          disabled: !onEditInstructions,
       },

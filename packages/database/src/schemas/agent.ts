@@ -2,7 +2,6 @@ import { relations } from "drizzle-orm";
 import {
    index,
    jsonb,
-   pgEnum,
    pgTable,
    text,
    timestamp,
@@ -36,18 +35,6 @@ export const PersonaConfigSchema = z.object({
    purpose: PurposeChannelSchema.optional(),
 });
 
-// 8. Static Type exports
-
-export const brandKnowledgeStatusEnum = pgEnum("brand_knowledge_status", [
-   "pending",
-   "analyzing",
-   "chunking",
-   "completed",
-   "failed",
-]);
-
-export type BrandKnowledgeStatus =
-   (typeof brandKnowledgeStatusEnum.enumValues)[number];
 export const agent = pgTable(
    "agent",
    {
@@ -60,9 +47,6 @@ export const agent = pgTable(
          { onDelete: "cascade" },
       ),
       personaConfig: jsonb("persona_config").$type<PersonaConfig>().notNull(),
-      uploadedFiles: jsonb("uploaded_files")
-         .$type<{ fileName: string; fileUrl: string; uploadedAt: string }[]>()
-         .default([]),
       profilePhotoUrl: text("profile_photo_url"),
       createdAt: timestamp("created_at")
          .$defaultFn(() => new Date())
@@ -71,9 +55,6 @@ export const agent = pgTable(
          .$defaultFn(() => new Date())
          .notNull(),
       lastGeneratedAt: timestamp("last_generated_at"),
-      brandKnowledgeStatus: brandKnowledgeStatusEnum("brand_knowledge_status")
-         .default("pending")
-         .notNull(),
    },
    (table) => [index("agent_user_id_idx").on(table.userId)],
 );

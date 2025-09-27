@@ -49,19 +49,6 @@ export function AgentCard({ agent }: AgentCardProps) {
 
    const personaConfig = agent.personaConfig as PersonaConfig;
 
-   // Extract voice communication style
-   const voiceStyle = personaConfig.voice?.communication
-      ? formatValueToTitleCase(
-           personaConfig.voice.communication.replace("_", " "),
-        )
-      : translate("pages.agent-list.agent-card.not-specified");
-
-   // Extract audience base
-   const audienceBase = personaConfig.audience?.base
-      ? formatValueToTitleCase(personaConfig.audience.base.replace("_", " "))
-      : translate("pages.agent-list.agent-card.not-specified");
-
-   // Extract purpose/channel if available
    const purpose = personaConfig.purpose
       ? formatValueToTitleCase(personaConfig.purpose.replace("_", " "))
       : translate("pages.agent-list.agent-card.not-specified");
@@ -122,9 +109,6 @@ export function AgentCard({ agent }: AgentCardProps) {
 
                   <CardFooter className="flex items-center justify-between">
                      <Badge variant="outline">{purpose}</Badge>
-                     <Badge className="text-xs">
-                        {voiceStyle} • {audienceBase}
-                     </Badge>
                   </CardFooter>
                </Card>
             </CredenzaTrigger>

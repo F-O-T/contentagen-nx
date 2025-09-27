@@ -1,6 +1,5 @@
 import { EventEmitter } from "node:events";
 import type { ContentStatus } from "@packages/database/schemas/content";
-import type { BrandKnowledgeStatus } from "@packages/database/schemas/agent";
 import type { IdeiaStatus } from "@packages/database/schemas/ideas";
 import type {
    CompetitorFeaturesStatus,
@@ -20,11 +19,6 @@ export const EVENTS = {
 export type ContentStatusChangedPayload = {
    contentId: string;
    status: ContentStatus;
-};
-export type AgentKnowledgeStatusChangedPayload = {
-   agentId: string;
-   status: BrandKnowledgeStatus;
-   message?: string;
 };
 export type CompetitorStatusChangedPayload = {
    competitorId: string;
@@ -46,11 +40,6 @@ export type IdeaStatusChangedPayload = {
 };
 // 3. The event emitter instance
 export const eventEmitter = new EventEmitter();
-export function emitAgentKnowledgeStatusChanged(
-   payload: AgentKnowledgeStatusChangedPayload,
-) {
-   eventEmitter.emit(EVENTS.agentKnowledgeStatus, payload);
-}
 // 4. Helper to emit a status change event (strongly typed)
 export function emitContentStatusChanged(payload: ContentStatusChangedPayload) {
    eventEmitter.emit(EVENTS.contentStatus, payload);

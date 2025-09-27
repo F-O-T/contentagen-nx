@@ -20,34 +20,9 @@ import {
 import { getAgentContentStats } from "@packages/database/repositories/content-repository";
 import { getAgentIdeasCount } from "@packages/database/repositories/ideas-repository";
 import { countWords } from "@packages/utils/text";
-import { publicProcedure } from "../trpc";
 import { z } from "zod";
 
-import {
-   eventEmitter,
-   EVENTS,
-   type AgentKnowledgeStatusChangedPayload,
-} from "@packages/server-events";
-import { on } from "node:events";
-
 export const agentRouter = router({
-   onBrandKnowledgeStatusChanged: publicProcedure
-      .input(z.object({ agentId: z.string().optional() }).optional())
-      .subscription(async function* (opts) {
-         for await (const [payload] of on(
-            eventEmitter,
-            EVENTS.agentKnowledgeStatus,
-            {
-               signal: opts.signal,
-            },
-         )) {
-            const event = payload as AgentKnowledgeStatusChangedPayload;
-            if (!opts.input?.agentId || opts.input.agentId === event.agentId) {
-               yield event;
-            }
-         }
-      }),
-
    transferToOrganization: organizationOwnerProcedure
       .input(AgentSelectSchema.pick({ id: true }))
       .mutation(async ({ ctx, input }) => {
