@@ -18,9 +18,9 @@ import { organization, user } from "./auth";
 
 // 1. Instructions Configuration
 export const InstructionsSchema = z.object({
-   audienceProfile: z.string().optional(),
-   writingGuidelines: z.string().optional(),
-   ragIntegration: z.string().optional(),
+   audienceProfile: z.string().min(1, "This field is required").default("-"),
+   writingGuidelines: z.string().min(1, "This field is required").default("-"),
+   ragIntegration: z.string().min(1, "This field is required").default("-"),
 });
 
 // 2. Repurposing — strongly-typed channels
