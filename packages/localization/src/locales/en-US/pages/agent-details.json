@@ -25,7 +25,6 @@
    "instructions": {
       "title": "Agent Instructions",
       "description": "Customize how your agent creates content",
-      "edit": "Edit Instructions",
       "configured": "Configured",
       "edit": {
          "save": "Save",

@@ -40,21 +40,23 @@
       "version": {
          "conventionalCommits": true,
          "preserveLocalDependencyProtocols": true,
+         "fallbackCurrentVersionResolver": "disk",
          "versionActionsOptions": {
             "skipLockFileUpdate": true
          },
          "updateDependents": "never"
       },
+      "git": {
+         "commit": true,
+         "tag": true
+      },
       "changelog": {
          "workspaceChangelog": false,
          "projectChangelogs": {
             "createRelease": "github",
-            "file": "CHANGELOG.md"
+            "file": "CHANGELOG.md",
+            "automaticFromRef": true
          }
-      },
-      "git": {
-         "commit": true,
-         "tag": true
       }
    },
    "plugins": [
