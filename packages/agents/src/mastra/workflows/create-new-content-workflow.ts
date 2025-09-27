@@ -1,7 +1,18 @@
 import { createWorkflow, createStep } from "@mastra/core";
+import {
+   countWords,
+   readTimeMinutes,
+   createSlug,
+   extractTitleFromMarkdown,
+   removeTitleFromMarkdown,
+} from "@packages/utils/text";
 import { updateContent } from "@packages/database/repositories/content-repository";
 import { z } from "zod";
-import { ContentRequestSchema } from "@packages/database/schema";
+import {
+   ContentRequestSchema,
+   type ContentMeta,
+   type ContentStats,
+} from "@packages/database/schema";
 import { createNewTutorialWorkflow } from "./content/create-new-tutorial-workflow";
 import { createNewChangelogWorkflow } from "./content/create-new-changelog-workflow";
 import { createNewArticleWorkflow } from "./content/create-new-article-workflow";
@@ -44,15 +55,24 @@ const saveContentStep = createStep({
       } = inputData;
 
       const dbClient = createDb({ databaseUrl: serverEnv.DATABASE_URL });
-      const stats = {
-         wordsCount: countWords(editor),
-         readTime: calculateReadTime(editor),
+      const stats: ContentStats = {
+         wordsCount: countWords(editor).toString(),
+         readTimeMinutes: readTimeMinutes(countWords(editor)).toString(),
+         qualityScore: rating.toString(),
+      };
+      const meta: ContentMeta = {
+         title: extractTitleFromMarkdown(editor),
+         slug: createSlug(extractTitleFromMarkdown(editor)),
+         description: "",
+         keywords: [""],
+         sources: [""],
       };
       await updateContent(dbClient, contentId, {
          status: "approved",
          agentId,
          request,
-         stats: {},
+         stats,
+         meta: {},
       });
 
       return {

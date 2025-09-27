@@ -36,6 +36,12 @@ export const ContentStatsSchema = z.object({
       .string()
       .optional()
       .describe("A score representing the quality of the content."),
+   reasonOfTheRating: z
+      .string()
+      .optional()
+      .describe(
+         "The reason for the quality score rating, written in markdown.",
+      ),
 });
 export type ContentStats = z.infer<typeof ContentStatsSchema>;
 
