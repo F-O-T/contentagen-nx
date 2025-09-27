@@ -23,6 +23,7 @@
     "@packages/ui": "workspace:*",
     "@packages/transactional": "workspace:*",
     "@packages/utils": "workspace:*",
+    "zod": "catalog:validation",
     "sonner": "catalog:ui",
     "@tailwindcss/vite": "catalog:vite",
     "@tanstack/react-query": "catalog:tanstack",

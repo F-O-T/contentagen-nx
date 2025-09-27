@@ -193,8 +193,10 @@ const saveCompetitorFeatures = createStep({
 
       if (features.length > 0) {
          try {
-            console.log(`[saveCompetitorFeatures] Creating embeddings for ${features.length} features`);
-            
+            console.log(
+               `[saveCompetitorFeatures] Creating embeddings for ${features.length} features`,
+            );
+
             const knowledgeData = features.map((feature) => ({
                chunk: feature.summary,
                externalId: competitorId,
@@ -202,7 +204,10 @@ const saveCompetitorFeatures = createStep({
                type: "feature" as const,
             }));
 
-            await createCompetitorKnowledgeWithEmbeddingsBulk(ragClient, knowledgeData);
+            await createCompetitorKnowledgeWithEmbeddingsBulk(
+               ragClient,
+               knowledgeData,
+            );
 
             console.log(
                `[saveCompetitorFeatures] Successfully indexed ${features.length} features to Chroma`,

@@ -44,10 +44,10 @@ export const createEmbeddings = async (
 
       // Process embeddings individually to handle failures gracefully
       const embeddings: (number[] | null)[] = [];
-      
+
       for (let i = 0; i < texts.length; i++) {
          const text = texts[i];
-         
+
          if (!text || text.trim() === "") {
             console.warn(`Skipping empty text at index ${i}`);
             embeddings.push(null);

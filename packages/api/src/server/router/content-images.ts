@@ -1,9 +1,8 @@
+import { protectedProcedure, router, organizationProcedure } from "../trpc";
 import {
-   protectedProcedure,
-   router,
-   organizationProcedure,
-} from "../trpc";
-import { getContentById, updateContent } from "@packages/database/repositories/content-repository";
+   getContentById,
+   updateContent,
+} from "@packages/database/repositories/content-repository";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
 import { uploadFile, streamFileForProxy } from "@packages/files/client";

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { InstructionsSchema } from "@packages/database/schemas/agent";
+import { z } from "zod";
 import { useTRPC } from "@/integrations/clients";
 import type { AgentSelect } from "@packages/database/schema";
 import { Button } from "@packages/ui/components/button";
@@ -97,7 +97,12 @@ export function EditAgentInstructions({
          ragIntegration: "",
       },
       validators: {
-         onBlur: InstructionsSchema,
+         //TODO: Onblur is not working when using the schema from the database
+         onBlur: z.object({
+            audienceProfile: z.string().min(1, "This field is required"),
+            writingGuidelines: z.string().min(1, "This field is required"),
+            ragIntegration: z.string().min(1, "This field is required"),
+         }),
       },
       onSubmit: async ({ value }) => {
          const updatedPersonaConfig: PersonaConfig = {

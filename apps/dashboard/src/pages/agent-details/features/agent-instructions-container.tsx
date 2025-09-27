@@ -19,4 +19,3 @@ export function AgentInstructionsContainer({
 
    return <AgentInstructionsDisplay personaConfig={agent.personaConfig} />;
 }
-

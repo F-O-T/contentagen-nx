@@ -89,15 +89,20 @@ export async function deleteRelatedSlugsByExternalId(
    try {
       const result = await dbClient
          .delete(relatedSlugs)
-         .where(and(
-            eq(relatedSlugs.externalId, externalId),
-            eq(relatedSlugs.slug, slug)
-         ))
+         .where(
+            and(
+               eq(relatedSlugs.externalId, externalId),
+               eq(relatedSlugs.slug, slug),
+            ),
+         )
          .returning({ id: relatedSlugs.id });
 
       return result.length;
    } catch (err) {
-      console.error("Failed to delete related slugs by externalId and slug:", err);
+      console.error(
+         "Failed to delete related slugs by externalId and slug:",
+         err,
+      );
       throw AppError.database(
          `Failed to delete related slugs by externalId and slug: ${(err as Error).message}`,
       );

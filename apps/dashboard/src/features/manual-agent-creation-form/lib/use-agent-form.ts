@@ -1,10 +1,8 @@
 import { useAppForm } from "@packages/ui/components/form";
 import { type FormEvent, useCallback } from "react";
-import {
-   type PersonaConfig,
-   PersonaConfigSchema,
-} from "@packages/database/schemas/agent";
+import type { PersonaConfig } from "@packages/database/schemas/agent";
 import type { AgentCreationManualForm } from "../ui/agent-creation-manual-form";
+import z from "zod";
 
 export function useAgentForm({
    defaultValues,
@@ -26,7 +24,19 @@ export function useAgentForm({
          formApi.reset();
       },
       validators: {
-         onBlur: PersonaConfigSchema,
+         //TODO: Onblur is not working when using the schema from the database
+         onBlur: z.object({
+            metadata: z.object({
+               name: z.string().min(1, "This field is required"),
+               description: z.string().min(1, "This field is required"),
+            }),
+            instructions: z.object({
+               audienceProfile: z.string().min(1, "This field is required"),
+               writingGuidelines: z.string().min(1, "This field is required"),
+               ragIntegration: z.string().min(1, "This field is required"),
+            }),
+            purpose: z.enum(["blog_post"]),
+         }),
       },
    });
 
