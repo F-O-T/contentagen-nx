@@ -1,3 +1,5 @@
+import { CardMultiStepLoader } from "@/widgets/multi-step-loader/ui/card-multi-step-loader";
+import { useSubscription } from "@trpc/react-query";
 import {
    Card,
    CardAction,
@@ -29,7 +31,7 @@ import {
    useMutation,
    useQueryClient,
 } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
 import { formatValueForDisplay } from "@packages/utils/text";
@@ -53,9 +55,14 @@ export function ContentRequestCard({
       }),
    );
 
+   const isLoading = useMemo(() => {
+      return request.status === "pending";
+   }, [request.status]);
+
    const [isCredenzaOpen, setIsCredenzaOpen] = useState(false);
    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
+   useSubscription(trpc.content.onStatusChanged.subscriptionOptions());
    const deleteMutation = useMutation(
       trpc.content.delete.mutationOptions({
          onSuccess: async () => {
@@ -98,62 +105,94 @@ export function ContentRequestCard({
          <Credenza open={isCredenzaOpen} onOpenChange={setIsCredenzaOpen}>
             <CredenzaTrigger asChild>
                <Card className="cursor-pointer">
-                  <CardHeader>
-                     <CardTitle className="line-clamp-1">
-                        {request.meta?.title}
-                     </CardTitle>
-                     <CardDescription className="line-clamp-2">
-                        {request.meta?.description ??
-                           translate("pages.content-list.card.no-description")}
-                     </CardDescription>
-                     <CardAction>
-                        <Checkbox
-                           checked={selectedItems.has(request.id)}
-                           disabled={
-                              !["draft", "approved", "pending"].includes(
-                                 request.status || "",
-                              )
-                           }
-                           onCheckedChange={(checked) =>
-                              handleSelectionChange(
-                                 request.id,
-                                 checked as boolean,
-                              )
-                           }
-                           onClick={(e) => e.stopPropagation()}
+                  {isLoading ? (
+                     <CardContent className="">
+                        <CardMultiStepLoader
+                           loading={isLoading}
+                           loadingStates={[
+                              {
+                                 text: "🤔 Brewing creative ideas...",
+                              },
+                              {
+                                 text: "📚 Researching and analyzing...",
+                              },
+                              {
+                                 text: "✍️ Crafting compelling content...",
+                              },
+                              {
+                                 text: "🔍 Polishing and perfecting...",
+                              },
+                              {
+                                 text: "🎨 Adding final touches...",
+                              },
+                           ]}
                         />
-                     </CardAction>
-                  </CardHeader>
-                  <CardContent>
-                     <AgentWriterCard
-                        photo={profilePhoto?.data}
-                        name={
-                           request.agent?.personaConfig.metadata.name ||
-                           translate("pages.content-list.card.unknown-agent")
-                        }
-                        description={
-                           request.agent?.personaConfig.metadata.description ||
-                           translate(
-                              "pages.content-list.card.no-agent-description",
-                           )
-                        }
-                     />
-                  </CardContent>
-                  <CardFooter className="flex items-center justify-between">
-                     <Badge variant="outline">
-                        {new Date(request.createdAt).toLocaleDateString()}
-                     </Badge>
-                     <div className="flex items-center gap-2">
-                        <Badge className="text-xs">
-                           {formatValueForDisplay(request.status ?? "")}
-                        </Badge>
-                        {request.shareStatus === "shared" ? (
-                           <Globe className="w-4 h-4 text-muted-foreground" />
-                        ) : (
-                           <Lock className="w-4 h-4 text-muted-foreground" />
-                        )}
-                     </div>
-                  </CardFooter>
+                     </CardContent>
+                  ) : (
+                     <>
+                        <CardHeader>
+                           <CardTitle className="line-clamp-1">
+                              {request.meta?.title}
+                           </CardTitle>
+                           <CardDescription className="line-clamp-2">
+                              {request.meta?.description ??
+                                 translate(
+                                    "pages.content-list.card.no-description",
+                                 )}
+                           </CardDescription>
+                           <CardAction>
+                              <Checkbox
+                                 checked={selectedItems.has(request.id)}
+                                 disabled={
+                                    !["draft", "approved", "pending"].includes(
+                                       request.status || "",
+                                    )
+                                 }
+                                 onCheckedChange={(checked) =>
+                                    handleSelectionChange(
+                                       request.id,
+                                       checked as boolean,
+                                    )
+                                 }
+                                 onClick={(e) => e.stopPropagation()}
+                              />
+                           </CardAction>
+                        </CardHeader>
+                        <CardContent>
+                           <AgentWriterCard
+                              photo={profilePhoto?.data}
+                              name={
+                                 request.agent?.personaConfig.metadata.name ||
+                                 translate(
+                                    "pages.content-list.card.unknown-agent",
+                                 )
+                              }
+                              description={
+                                 request.agent?.personaConfig.metadata
+                                    .description ||
+                                 translate(
+                                    "pages.content-list.card.no-agent-description",
+                                 )
+                              }
+                           />
+                        </CardContent>
+                        <CardFooter className="flex items-center justify-between">
+                           <Badge variant="outline">
+                              {new Date(request.createdAt).toLocaleDateString()}
+                           </Badge>
+                           <div className="flex items-center gap-2">
+                              <Badge className="text-xs">
+                                 {formatValueForDisplay(request.status ?? "")}
+                              </Badge>
+                              {request.shareStatus === "shared" ? (
+                                 <Globe className="w-4 h-4 text-muted-foreground" />
+                              ) : (
+                                 <Lock className="w-4 h-4 text-muted-foreground" />
+                              )}
+                           </div>
+                        </CardFooter>
+                     </>
+                  )}
                </Card>
             </CredenzaTrigger>
             <CredenzaContent>

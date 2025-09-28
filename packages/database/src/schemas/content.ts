@@ -70,12 +70,6 @@ export const contentStatusEnum = pgEnum("content_status", [
    "pending",
    "draft",
    "approved",
-   "planning",
-   "researching",
-   "writing",
-   "editing",
-   "analyzing",
-   "grammar_checking",
 ]);
 
 export const shareStatusEnum = pgEnum("share_status", ["private", "shared"]);
@@ -94,7 +88,6 @@ export const content = pgTable(
       meta: jsonb("meta").$type<ContentMeta>().default({}),
       request: jsonb("request").$type<ContentRequest>().notNull(),
       stats: jsonb("stats").$type<ContentStats>().default({}),
-
       currentVersion: integer("current_version").default(0),
       createdAt: timestamp("created_at")
          .$defaultFn(() => new Date())
