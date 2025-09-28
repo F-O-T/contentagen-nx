@@ -1,5 +1,4 @@
 import { CardMultiStepLoader } from "@/widgets/multi-step-loader/ui/card-multi-step-loader";
-import { useSubscription } from "@trpc/react-query";
 import {
    Card,
    CardAction,
@@ -38,6 +37,7 @@ import { formatValueForDisplay } from "@packages/utils/text";
 import { useContentList } from "../lib/content-list-context";
 import { useSearch } from "@tanstack/react-router";
 import { translate } from "@packages/localization";
+import { useSubscription } from "@trpc/tanstack-react-query";
 
 export function ContentRequestCard({
    request,
@@ -62,7 +62,18 @@ export function ContentRequestCard({
    const [isCredenzaOpen, setIsCredenzaOpen] = useState(false);
    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
-   useSubscription(trpc.content.onStatusChanged.subscriptionOptions());
+   useSubscription(
+      trpc.content.onStatusChanged.subscriptionOptions(
+         {
+            contentId: request.id,
+         },
+         {
+            onData: ({ status }) => {
+               toast.info(status);
+            },
+         },
+      ),
+   );
    const deleteMutation = useMutation(
       trpc.content.delete.mutationOptions({
          onSuccess: async () => {
