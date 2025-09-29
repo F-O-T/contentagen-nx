@@ -220,6 +220,17 @@ final:${editor}
             }),
          },
       );
+      if (!result.object.metaDescription) {
+         throw AppError.validation(
+            'Agent output is missing "metaDescription" field',
+         );
+      }
+      if (!result?.object.rating) {
+         throw AppError.validation('Agent output is missing "review" field');
+      }
+      if (!result?.object.keywords) {
+         throw AppError.validation('Agent output is missing "review" field');
+      }
       if (!result?.object.rating) {
          throw AppError.validation('Agent output is missing "review" field');
       }
