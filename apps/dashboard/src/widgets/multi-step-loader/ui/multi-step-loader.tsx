@@ -23,7 +23,7 @@ const LoaderCore = ({
 
             return (
                <motion.div
-                  key={index}
+                  key={`#card-loader-${index + 1}`}
                   className={cn("text-left flex gap-2 mb-4")}
                   initial={{ opacity: 0, y: -(value * 40) }}
                   animate={{ opacity: opacity, y: -(value * 40) }}
@@ -88,7 +88,7 @@ export const MultiStepLoader = ({
       }, duration);
 
       return () => clearTimeout(timeout);
-   }, [currentState, loading, loop, loadingStates.length, duration]);
+   }, [loading, loop, loadingStates.length, duration]);
    return (
       <AnimatePresence mode="wait">
          {loading && (
