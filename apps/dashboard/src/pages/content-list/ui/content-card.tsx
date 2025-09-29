@@ -68,12 +68,9 @@ export function ContentRequestCard({
             contentId: request.id,
          },
          {
+            enabled: Boolean(isLoading),
             onData: ({ message, status }) => {
                toast.info(message || status);
-            },
-            onDone() {
-               // Subscription automatically disconnected when server returns
-               // This happens when content status becomes 'draft'
             },
          },
       ),
@@ -126,19 +123,19 @@ export function ContentRequestCard({
                            loading={isLoading}
                            loadingStates={[
                               {
-                                 text: "🤔 Brewing creative ideas...",
+                                 text: "Brewing creative ideas...",
                               },
                               {
-                                 text: "📚 Researching and analyzing...",
+                                 text: "Researching and analyzing...",
                               },
                               {
-                                 text: "✍️ Crafting compelling content...",
+                                 text: "Crafting compelling content...",
                               },
                               {
-                                 text: "🔍 Polishing and perfecting...",
+                                 text: "Polishing and perfecting...",
                               },
                               {
-                                 text: "🎨 Adding final touches...",
+                                 text: "Adding final touches...",
                               },
                            ]}
                         />

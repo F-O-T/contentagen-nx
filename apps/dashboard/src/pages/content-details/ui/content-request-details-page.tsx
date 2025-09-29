@@ -58,7 +58,7 @@ export function ContentRequestDetailsPage() {
 
    // Calculate subscription enabled state using useMemo
    const isGenerating = useMemo(
-      () => data?.status && ["pending", "draft"].includes(data.status),
+      () => data?.status && ["pending"].includes(data.status),
       [data?.status],
    );
 
