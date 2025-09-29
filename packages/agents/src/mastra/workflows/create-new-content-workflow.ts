@@ -59,19 +59,35 @@ const saveContentStep = createStep({
       success: z.boolean(),
    }),
    execute: async ({ inputData }) => {
+      // Helper function to get the correct workflow result
+      const getWorkflowResult = (data: typeof inputData) => {
+         const possibleKeys = [
+            "create-new-changelog-workflow",
+            "create-new-article-workflow",
+            "create-new-tutorial-workflow",
+         ] as const;
+
+         for (const key of possibleKeys) {
+            if (data[key]) {
+               return data[key];
+            }
+         }
+
+         throw new Error("No workflow result found");
+      };
+
+      const workflowResult = getWorkflowResult(inputData);
       const {
-         "create-new-changelog-workflow": {
-            editor,
-            keywords,
-            metaDescription,
-            rating,
-            reasonOfTheRating,
-            sources,
-            agentId,
-            contentId,
-            request,
-         },
-      } = inputData;
+         editor,
+         keywords,
+         metaDescription,
+         rating,
+         reasonOfTheRating,
+         sources,
+         agentId,
+         contentId,
+         request,
+      } = workflowResult;
 
       const dbClient = createDb({ databaseUrl: serverEnv.DATABASE_URL });
       const stats: ContentStats = {
