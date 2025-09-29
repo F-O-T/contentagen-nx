@@ -75,11 +75,16 @@
       },
       "releaseTagPatternRequireSemver": true,
       "changelog": {
-         "workspaceChangelog": true,
-         "automaticFromRef": true,
+         "git": {
+            "commit": true,
+            "tag": true
+         },
+         "workspaceChangelog": {
+            "createRelease": "github",
+            "file": "CHANGELOG.md"
+         },
          "projectChangelogs": {
             "entryWhenNoChanges": false,
-            "createRelease": "github",
             "file": "CHANGELOG.md"
          }
       }
