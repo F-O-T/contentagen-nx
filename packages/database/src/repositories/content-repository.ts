@@ -228,15 +228,7 @@ export async function listContents(
 export async function getContentStatsLast30Days(
    dbClient: DatabaseInstance,
    agentIds: string[],
-   status: Array<Exclude<Content["status"], null>> = [
-      "approved",
-      "draft",
-      "planning",
-      "researching",
-      "writing",
-      "editing",
-      "analyzing",
-   ],
+   status: Array<Exclude<Content["status"], null>> = ["approved", "draft"],
 ): Promise<{ count: number; wordsCount: number }> {
    try {
       const now = new Date();

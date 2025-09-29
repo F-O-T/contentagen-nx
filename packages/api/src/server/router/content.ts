@@ -406,8 +406,11 @@ export const contentRouter = router({
       .input(z.object({ slug: z.string(), agentId: z.string() }))
       .query(async ({ ctx, input }) => {
          try {
-            if (!input.slug || !input.agentId) {
-               throw APIError.validation("Slug and Agent ID are required.");
+            if (!input.agentId) {
+               throw APIError.validation(" Agent ID are required.");
+            }
+            if (!input.slug) {
+               return [];
             }
             const ragClient = (await ctx).ragClient;
             const result = await searchRelatedSlugsByText(

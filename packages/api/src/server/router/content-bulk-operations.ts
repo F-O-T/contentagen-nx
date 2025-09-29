@@ -55,17 +55,7 @@ export const contentBulkOperationsRouter = router({
             const contents = await listContents(
                resolvedCtx.db,
                allUserAgentIds,
-               [
-                  "approved",
-                  "draft",
-                  "pending",
-                  "planning",
-                  "researching",
-                  "writing",
-                  "editing",
-                  "analyzing",
-                  "grammar_checking",
-               ], // Include all possible statuses
+               ["approved", "draft", "pending"], // Include all possible statuses
             );
 
             const userContentIds = contents.map((content) => content.id);

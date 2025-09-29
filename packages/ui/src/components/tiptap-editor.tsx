@@ -39,7 +39,7 @@ export function TiptapEditor({
    error = false,
 }: TiptapEditorProps) {
    const editor = useEditor({
-      immediatelyRender: true,
+      immediatelyRender: false,
       extensions: [StarterKit, Markdown],
       content: value,
       editorProps: {
@@ -50,6 +50,7 @@ export function TiptapEditor({
             style: `min-height: ${minHeight};`,
          },
       },
+
       onUpdate: ({ editor }) => {
          const markdownStorage = (editor.storage as MDStorage).markdown;
          if (markdownStorage?.getMarkdown) {

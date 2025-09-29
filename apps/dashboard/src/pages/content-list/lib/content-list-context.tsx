@@ -73,17 +73,7 @@ export function ContentListProvider({
    const [limit] = useState(8);
    const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
-   const allStatuses: ContentStatuses = [
-      "draft",
-      "approved",
-      "pending",
-      "planning",
-      "researching",
-      "writing",
-      "editing",
-      "analyzing",
-      "grammar_checking",
-   ];
+   const allStatuses: ContentStatuses = ["draft", "approved", "pending"];
 
    const [selectedStatuses, setSelectedStatuses] = useState<ContentStatuses>(
       [],

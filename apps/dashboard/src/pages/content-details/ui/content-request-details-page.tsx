@@ -20,6 +20,7 @@ import { useState } from "react";
 import { ContentVersionsCard } from "./content-versions-card";
 import { VersionDetailsCredenza } from "./version-details-credenza";
 import type { RouterOutput } from "@packages/api/client";
+import { MultiStepLoader } from "@/widgets/multi-step-loader/ui/multi-step-loader";
 
 export function ContentRequestDetailsPage() {
    const { id } = useParams({
@@ -52,23 +53,13 @@ export function ContentRequestDetailsPage() {
    const { data: relatedSlugs } = useSuspenseQuery(
       trpc.content.getRelatedSlugs.queryOptions({
          slug: data?.meta?.slug ?? "",
-         agentId: data.agentId,
+         agentId: data.agentId ?? "",
       }),
    );
 
    // Calculate subscription enabled state using useMemo
    const isGenerating = useMemo(
-      () =>
-         data?.status &&
-         [
-            "pending",
-            "planning",
-            "researching",
-            "writing",
-            "editing",
-            "analyzing",
-            "grammar_checking",
-         ].includes(data.status),
+      () => data?.status && ["pending"].includes(data.status),
       [data?.status],
    );
 
@@ -104,7 +95,29 @@ export function ContentRequestDetailsPage() {
          )}
 
          {isGenerating && data?.status ? (
-            <ContentLoadingDisplay status={data.status} />
+            <MultiStepLoader
+               loading={isGenerating}
+               loadingStates={[
+                  {
+                     text: "🤔 Brewing creative ideas...",
+                  },
+                  {
+                     text: "📚 Researching and analyzing...",
+                  },
+                  {
+                     text: "✍️ Crafting compelling content...",
+                  },
+                  {
+                     text: "🔍 Polishing and perfecting...",
+                  },
+                  {
+                     text: "🎨 Adding final touches...",
+                  },
+                  {
+                     text: "🎉 Ready for review...",
+                  },
+               ]}
+            />
          ) : (
             <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
                <div className="col-span-1 md:col-span-2 flex flex-col gap-4">

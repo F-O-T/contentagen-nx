@@ -86,7 +86,7 @@ export const CardMultiStepLoader = ({
       }, duration);
 
       return () => clearTimeout(timeout);
-   }, [currentloading, loop, loadingStates.length, duration]);
+   }, [loading, loop, loadingStates.length, duration]);
 
    return (
       <AnimatePresence mode="wait">
