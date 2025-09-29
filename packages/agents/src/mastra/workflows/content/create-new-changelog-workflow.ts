@@ -1,11 +1,41 @@
 import { createStep, createWorkflow } from "@mastra/core";
 import { z } from "zod";
 import { ContentRequestSchema } from "@packages/database/schema";
-import { AppError } from "@packages/utils/errors";
+import { APIError, AppError, propagateError } from "@packages/utils/errors";
 import { changelogWriterAgent } from "../../agents/changelog/changelog-writer-agent";
 import { changelogEditorAgent } from "../../agents/changelog/changelog-editor-agent";
 import { changelogReaderAgent } from "../../agents/changelog/changelog-reader-agent";
 import { emitContentStatusChanged } from "@packages/server-events";
+import { createDb } from "@packages/database/client";
+import { updateContent } from "@packages/database/repositories/content-repository";
+import { serverEnv } from "@packages/environment/server";
+
+// Internal helper function to update content status and emit events
+async function updateContentStatus(
+   payload: Parameters<typeof emitContentStatusChanged>[0],
+) {
+   try {
+      const { contentId, status, message, layout } = payload;
+      const db = createDb({
+         databaseUrl: serverEnv.DATABASE_URL,
+      });
+
+      await updateContent(db, contentId, {
+         status,
+      });
+
+      emitContentStatusChanged({
+         contentId,
+         status,
+         message,
+         layout,
+      });
+   } catch (error) {
+      console.error("Failed to update content status:", error);
+      propagateError(error);
+      throw APIError.internal("Failed to update content status");
+   }
+}
 
 const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
@@ -38,55 +68,67 @@ const changelogWritingStep = createStep({
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: ContentWritingStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, agentId, contentId, request } = inputData;
+      try {
+         const { userId, agentId, contentId, request } = inputData;
 
-      // Emit event when writing starts
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Writing your changelog...",
-         layout: request.layout,
-      });
+         // Update content status and emit event when writing starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Writing your changelog...",
+            layout: request.layout,
+         });
 
-      const inputPrompt = `
+         const inputPrompt = `
 create a new ${request.layout} based on the conent request.
 
 request: ${request.description}
 
 `;
-      const result = await changelogWriterAgent.generateVNext(
-         [
+         const result = await changelogWriterAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
             {
-               role: "user",
-               content: inputPrompt,
+               output: ContentWritingStepOutputSchema.pick({
+                  writing: true,
+               }),
             },
-         ],
-         {
-            output: ContentWritingStepOutputSchema.pick({
-               writing: true,
-            }),
-         },
-      );
+         );
 
-      if (!result?.object.writing) {
-         throw AppError.validation('Agent output is missing "research" field');
+         if (!result?.object.writing) {
+            throw AppError.validation(
+               'Agent output is missing "research" field',
+            );
+         }
+
+         // Update content status and emit event when writing completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Changelog draft completed",
+            layout: request.layout,
+         });
+
+         return {
+            writing: result.object.writing,
+            agentId,
+            contentId,
+            userId,
+            request,
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to write changelog",
+            layout: inputData.request.layout,
+         });
+         throw error;
       }
-
-      // Emit event when writing completes
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Changelog draft completed",
-         layout: request.layout,
-      });
-
-      return {
-         writing: result.object.writing,
-         agentId,
-         contentId,
-         userId,
-         request,
-      };
    },
 });
 const ContentEditorStepOutputSchema =
@@ -104,56 +146,66 @@ const changelogEditorStep = createStep({
    }),
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, agentId, contentId, writing } = inputData;
+      try {
+         const { userId, request, agentId, contentId, writing } = inputData;
 
-      // Emit event when editing starts
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Editing your changelog...",
-         layout: request.layout,
-      });
+         // Update content status and emit event when editing starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Editing your changelog...",
+            layout: request.layout,
+         });
 
-      const inputPrompt = `
+         const inputPrompt = `
 i need you to edit this ${request.layout} draft.
 
 writing: ${writing}
 
 output the edited content in markdown format.
 `;
-      const result = await changelogEditorAgent.generateVNext(
-         [
+         const result = await changelogEditorAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
             {
-               role: "user",
-               content: inputPrompt,
+               output: ContentEditorStepOutputSchema.pick({
+                  editor: true,
+               }),
             },
-         ],
-         {
-            output: ContentEditorStepOutputSchema.pick({
-               editor: true,
-            }),
-         },
-      );
+         );
 
-      if (!result?.object.editor) {
-         throw AppError.validation('Agent output is missing "editor" field');
+         if (!result?.object.editor) {
+            throw AppError.validation('Agent output is missing "editor" field');
+         }
+
+         // Update content status and emit event when editing completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Changelog editing completed",
+            layout: request.layout,
+         });
+
+         return {
+            agentId,
+            contentId,
+            editor: result.object.editor,
+            userId,
+            request,
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to edit changelog",
+            layout: inputData.request.layout,
+         });
+         throw error;
       }
-
-      // Emit event when editing completes
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Changelog editing completed",
-         layout: request.layout,
-      });
-
-      return {
-         agentId,
-         contentId,
-         editor: result.object.editor,
-         userId,
-         request,
-      };
    },
 });
 
@@ -183,17 +235,18 @@ export const changelogReadAndReviewStep = createStep({
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, agentId, contentId, request, editor } = inputData;
+      try {
+         const { userId, agentId, contentId, request, editor } = inputData;
 
-      // Emit event when review starts
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Reviewing your changelog...",
-         layout: request.layout,
-      });
+         // Update content status and emit event when review starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Reviewing your changelog...",
+            layout: request.layout,
+         });
 
-      const inputPrompt = `
+         const inputPrompt = `
 i need you to read and review this ${request.layout}.
 
 
@@ -202,64 +255,75 @@ original:${request.description}
 final:${editor}
 
 `;
-      //TODO: Rework
+         //TODO: Rework
 
-      const result = await changelogReaderAgent.generateVNext(
-         [
+         const result = await changelogReaderAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
             {
-               role: "user",
-               content: inputPrompt,
+               output: ContentReviewerStepOutputSchema.pick({
+                  rating: true,
+                  reasonOfTheRating: true,
+                  keywords: true,
+                  metaDescription: true,
+               }),
             },
-         ],
-         {
-            output: ContentReviewerStepOutputSchema.pick({
-               rating: true,
-               reasonOfTheRating: true,
-               keywords: true,
-               metaDescription: true,
-            }),
-         },
-      );
-      if (!result.object.metaDescription) {
-         throw AppError.validation(
-            'Agent output is missing "metaDescription" field',
          );
-      }
-      if (!result?.object.rating) {
-         throw AppError.validation('Agent output is missing "review" field');
-      }
-      if (!result?.object.keywords) {
-         throw AppError.validation('Agent output is missing "review" field');
-      }
-      if (!result?.object.rating) {
-         throw AppError.validation('Agent output is missing "review" field');
-      }
-      if (!result?.object.reasonOfTheRating) {
-         throw AppError.validation(
-            'Agent output is missing "reasonOfTheRating" field',
-         );
-      }
+         if (!result.object.metaDescription) {
+            throw AppError.validation(
+               'Agent output is missing "metaDescription" field',
+            );
+         }
+         if (!result?.object.rating) {
+            throw AppError.validation('Agent output is missing "review" field');
+         }
+         if (!result?.object.keywords) {
+            throw AppError.validation('Agent output is missing "review" field');
+         }
+         if (!result?.object.rating) {
+            throw AppError.validation('Agent output is missing "review" field');
+         }
+         if (!result?.object.reasonOfTheRating) {
+            throw AppError.validation(
+               'Agent output is missing "reasonOfTheRating" field',
+            );
+         }
 
-      // Emit event when review completes
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Changelog review completed",
-         layout: request.layout,
-      });
+         // Update content status and emit event when review completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Changelog review completed",
+            layout: request.layout,
+         });
 
-      return {
-         rating: result.object.rating,
-         reasonOfTheRating: result.object.reasonOfTheRating,
-         metaDescription: result.object.metaDescription,
-         userId,
-         agentId,
-         contentId,
-         request,
-         keywords: result.object.keywords,
-         editor,
-         sources: ["Your changelog"],
-      };
+         return {
+            rating: result.object.rating,
+            reasonOfTheRating: result.object.reasonOfTheRating,
+            metaDescription: result.object.metaDescription,
+            userId,
+            agentId,
+            contentId,
+            request,
+            keywords: result.object.keywords,
+            editor,
+            sources: ["Your changelog"],
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to review changelog",
+            layout: inputData.request.layout,
+         });
+         console.error(error);
+         propagateError(error);
+         throw APIError.internal("Failed to review changelog");
+      }
    },
 });
 
@@ -268,6 +332,9 @@ export const createNewChangelogWorkflow = createWorkflow({
    description: "Create a new changelog",
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: ContentReviewerStepOutputSchema,
+   retryConfig: {
+      attempts: 3,
+   },
 })
    .then(changelogWritingStep)
    .then(changelogEditorStep)

@@ -1,13 +1,43 @@
 import { createStep, createWorkflow } from "@mastra/core";
 import { z } from "zod";
 import { ContentRequestSchema } from "@packages/database/schema";
-import { AppError } from "@packages/utils/errors";
+import { AppError, APIError, propagateError } from "@packages/utils/errors";
 import { articleWriterAgent } from "../../agents/article/article-writer-agent";
 import { articleEditorAgent } from "../../agents/article/article-editor-agent";
 import { articleReaderAgent } from "../../agents/article/artcile-reader-agent";
 import { researcherAgent } from "../../agents/researcher-agent";
 import { contentStrategistAgent } from "../../agents/strategist-agent";
 import { emitContentStatusChanged } from "@packages/server-events";
+import { createDb } from "@packages/database/client";
+import { updateContent } from "@packages/database/repositories/content-repository";
+import { serverEnv } from "@packages/environment/server";
+
+// Internal helper function to update content status and emit events
+async function updateContentStatus(
+   payload: Parameters<typeof emitContentStatusChanged>[0],
+) {
+   try {
+      const { contentId, status, message, layout } = payload;
+      const db = createDb({
+         databaseUrl: serverEnv.DATABASE_URL,
+      });
+
+      await updateContent(db, contentId, {
+         status,
+      });
+
+      emitContentStatusChanged({
+         contentId,
+         status,
+         message,
+         layout,
+      });
+   } catch (error) {
+      console.error("Failed to update content status:", error);
+      propagateError(error);
+      throw APIError.internal("Failed to update content status");
+   }
+}
 
 const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
@@ -41,24 +71,25 @@ export const strategyStep = createStep({
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: StrategyStepOutputSchema,
    execute: async ({ inputData }) => {
-      const {
-         contentId,
-         userId,
-         agentId,
-         competitorIds,
-         organizationId,
-         request,
-      } = inputData;
+      try {
+         const {
+            contentId,
+            userId,
+            agentId,
+            competitorIds,
+            organizationId,
+            request,
+         } = inputData;
 
-      // Emit event when strategy starts
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Developing content strategy for your article...",
-         layout: request.layout,
-      });
+         // Emit event when strategy starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Developing content strategy for your article...",
+            layout: request.layout,
+         });
 
-      const inputPrompt = `
+         const inputPrompt = `
 I need you to create a comprehensive content strategy for the following request:
 
 **User Request:** ${request.description}
@@ -76,39 +107,50 @@ Please develop a strategic brief that:
 Focus on creating a strategy that leverages our brand's unique strengths and differentiates us from competitors.
 `;
 
-      const result = await contentStrategistAgent.generateVNext(
-         [
+         const result = await contentStrategistAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
             {
-               role: "user",
-               content: inputPrompt,
+               output: StrategyStepOutputSchema.pick({
+                  strategy: true,
+               }),
             },
-         ],
-         {
-            output: StrategyStepOutputSchema.pick({
-               strategy: true,
-            }),
-         },
-      );
+         );
 
-      if (!result?.object.strategy) {
-         throw AppError.validation('Agent output is missing "strategy" field');
+         if (!result?.object.strategy) {
+            throw AppError.validation(
+               'Agent output is missing "strategy" field',
+            );
+         }
+
+         // Emit event when strategy completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Article strategy completed",
+            layout: request.layout,
+         });
+
+         return {
+            agentId,
+            strategy: result.object.strategy,
+            userId,
+            contentId,
+            request,
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to create article strategy",
+            layout: inputData.request.layout,
+         });
+         throw error;
       }
-
-      // Emit event when strategy completes
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Article strategy completed",
-         layout: request.layout,
-      });
-
-      return {
-         agentId,
-         strategy: result.object.strategy,
-         userId,
-         contentId,
-         request,
-      };
    },
 });
 
@@ -134,17 +176,18 @@ export const researchStep = createStep({
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: ResearchStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { contentId, userId, agentId, request } = inputData;
+      try {
+         const { contentId, userId, agentId, request } = inputData;
 
-      // Emit event when research starts
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Researching for your article...",
-         layout: request.layout,
-      });
+         // Emit event when research starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Researching for your article...",
+            layout: request.layout,
+         });
 
-      const inputPrompt = `
+         const inputPrompt = `
 I need you to perform comprehensive SERP research for the following content request:
 
 **Topic:** ${request.description}
@@ -159,39 +202,50 @@ Please conduct thorough SERP analysis and competitive intelligence gathering to 
 Focus on finding the most effective content angle and structure that can achieve top rankings.
 `;
 
-      const result = await researcherAgent.generateVNext(
-         [
+         const result = await researcherAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
             {
-               role: "user",
-               content: inputPrompt,
+               output: ResearchStepOutputSchema.pick({
+                  research: true,
+               }),
             },
-         ],
-         {
-            output: ResearchStepOutputSchema.pick({
-               research: true,
-            }),
-         },
-      );
+         );
 
-      if (!result?.object.research) {
-         throw AppError.validation('Agent output is missing "research" field');
+         if (!result?.object.research) {
+            throw AppError.validation(
+               'Agent output is missing "research" field',
+            );
+         }
+
+         // Emit event when research completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Article research completed",
+            layout: request.layout,
+         });
+
+         return {
+            research: result.object.research,
+            userId,
+            agentId,
+            request,
+            contentId,
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to research article",
+            layout: inputData.request.layout,
+         });
+         throw error;
       }
-
-      // Emit event when research completes
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Article research completed",
-         layout: request.layout,
-      });
-
-      return {
-         research: result.object.research,
-         userId,
-         agentId,
-         request,
-         contentId,
-      };
    },
 });
 const ContentWritingStepOutputSchema =
@@ -211,26 +265,27 @@ const articleWritingStep = createStep({
    inputSchema: ArticleWritingStepInputSchema,
    outputSchema: ContentWritingStepOutputSchema,
    execute: async ({ inputData }) => {
-      const {
-         "article-research-step": {
-            request,
+      try {
+         const {
+            "article-research-step": {
+               request,
+               contentId,
+               agentId,
+               research,
+               userId,
+            },
+            "article-strategy-step": { strategy },
+         } = inputData;
+
+         // Emit event when writing starts
+         await updateContentStatus({
             contentId,
-            agentId,
-            research,
-            userId,
-         },
-         "article-strategy-step": { strategy },
-      } = inputData;
+            status: "pending",
+            message: "Writing your article...",
+            layout: request.layout,
+         });
 
-      // Emit event when writing starts
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Writing your article...",
-         layout: request.layout,
-      });
-
-      const strategyPrompt = `
+         const strategyPrompt = `
 brandInsights: ${strategy.brandInsights}
       
 competitorInsights: ${strategy.competitorInsights}
@@ -244,13 +299,13 @@ contentAngles: ${strategy.contentAngles}
 brandPositioning: ${strategy.brandPositioning}
          
 `;
-      const researchPrompt = `
+         const researchPrompt = `
 searchIntent: ${research.searchIntent}
 competitorAnalysis: ${research.competitorAnalysis}
 contentGaps: ${research.contentGaps}
 strategicRecommendations: ${research.strategicRecommendations}
 `;
-      const inputPrompt = `
+         const inputPrompt = `
 create a new ${request.layout} based on the conent request.
 
 request: ${request.description}
@@ -260,40 +315,53 @@ ${strategyPrompt}
 ${researchPrompt}
 
 `;
-      const result = await articleWriterAgent.generateVNext(
-         [
+         const result = await articleWriterAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
             {
-               role: "user",
-               content: inputPrompt,
+               output: ContentWritingStepOutputSchema.pick({
+                  writing: true,
+               }),
             },
-         ],
-         {
-            output: ContentWritingStepOutputSchema.pick({
-               writing: true,
-            }),
-         },
-      );
+         );
 
-      if (!result?.object.writing) {
-         throw AppError.validation('Agent output is missing "research" field');
+         if (!result?.object.writing) {
+            throw AppError.validation(
+               'Agent output is missing "research" field',
+            );
+         }
+
+         // Emit event when writing completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Article draft completed",
+            layout: request.layout,
+         });
+
+         return {
+            research,
+            writing: result.object.writing,
+            userId,
+            agentId,
+            request,
+            contentId,
+         };
+      } catch (error) {
+         // Extract contentId and layout from the appropriate input data structure
+         const { contentId, request } = inputData["article-research-step"];
+         await updateContentStatus({
+            contentId,
+            status: "failed",
+            message: "Failed to write article",
+            layout: request.layout,
+         });
+         throw error;
       }
-
-      // Emit event when writing completes
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Article draft completed",
-         layout: request.layout,
-      });
-
-      return {
-         research,
-         writing: result.object.writing,
-         userId,
-         agentId,
-         request,
-         contentId,
-      };
    },
 });
 const ContentEditorStepOutputSchema =
@@ -323,61 +391,71 @@ const articleEditorStep = createStep({
    }),
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, contentId, research, request, agentId, writing } =
-         inputData;
+      try {
+         const { userId, contentId, research, request, agentId, writing } =
+            inputData;
 
-      // Emit event when editing starts
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Editing your article...",
-         layout: request.layout,
-      });
+         // Emit event when editing starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Editing your article...",
+            layout: request.layout,
+         });
 
-      const inputPrompt = `
+         const inputPrompt = `
 i need you to edit this ${request.layout} draft.
 
 writing: ${writing}
 
 output the edited content in markdown format.
 `;
-      const result = await articleEditorAgent.generateVNext(
-         [
+         const result = await articleEditorAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
             {
-               role: "user",
-               content: inputPrompt,
+               output: ContentEditorStepOutputSchema.pick({
+                  editor: true,
+                  metaDescription: true,
+               }),
             },
-         ],
-         {
-            output: ContentEditorStepOutputSchema.pick({
-               editor: true,
-               metaDescription: true,
-            }),
-         },
-      );
+         );
 
-      if (!result?.object.editor) {
-         throw AppError.validation('Agent output is missing "editor" field');
+         if (!result?.object.editor) {
+            throw AppError.validation('Agent output is missing "editor" field');
+         }
+
+         // Emit event when editing completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Article editing completed",
+            layout: request.layout,
+         });
+
+         return {
+            agentId,
+            metaDescription: result.object.metaDescription,
+            editor: result.object.editor,
+            userId,
+            research,
+            contentId,
+
+            request,
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to edit article",
+            layout: inputData.request.layout,
+         });
+         throw error;
       }
-
-      // Emit event when editing completes
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Article editing completed",
-         layout: request.layout,
-      });
-
-      return {
-         agentId,
-         metaDescription: result.object.metaDescription,
-         editor: result.object.editor,
-         userId,
-         research,
-         contentId,
-
-         request,
-      };
    },
 });
 
@@ -406,25 +484,26 @@ export const articleReadAndReviewStep = createStep({
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
-      const {
-         contentId,
-         metaDescription,
-         research,
-         userId,
-         agentId,
-         request,
-         editor,
-      } = inputData;
+      try {
+         const {
+            contentId,
+            metaDescription,
+            research,
+            userId,
+            agentId,
+            request,
+            editor,
+         } = inputData;
 
-      // Emit event when review starts
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Reviewing your article...",
-         layout: request.layout,
-      });
+         // Emit event when review starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Reviewing your article...",
+            layout: request.layout,
+         });
 
-      const inputPrompt = `
+         const inputPrompt = `
 i need you to read and review this ${request.layout}.
 
 
@@ -433,50 +512,59 @@ original:${request.description}
 final:${editor}
 
 `;
-      const result = await articleReaderAgent.generateVNext(
-         [
+         const result = await articleReaderAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
             {
-               role: "user",
-               content: inputPrompt,
+               output: ContentReviewerStepOutputSchema.pick({
+                  rating: true,
+                  reasonOfTheRating: true,
+               }),
             },
-         ],
-         {
-            output: ContentReviewerStepOutputSchema.pick({
-               rating: true,
-               reasonOfTheRating: true,
-            }),
-         },
-      );
-      if (!result?.object.rating) {
-         throw AppError.validation('Agent output is missing "review" field');
-      }
-      if (!result?.object.reasonOfTheRating) {
-         throw AppError.validation(
-            'Agent output is missing "reasonOfTheRating" field',
          );
+         if (!result?.object.rating) {
+            throw AppError.validation('Agent output is missing "review" field');
+         }
+         if (!result?.object.reasonOfTheRating) {
+            throw AppError.validation(
+               'Agent output is missing "reasonOfTheRating" field',
+            );
+         }
+
+         // Emit event when review completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Article review completed",
+            layout: request.layout,
+         });
+
+         return {
+            rating: result.object.rating,
+            reasonOfTheRating: result.object.reasonOfTheRating,
+            metaDescription,
+            keywords: research.research.keywords,
+            sources: research.research.sources,
+            agentId,
+            userId,
+            contentId,
+
+            editor,
+            request,
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to review article",
+            layout: inputData.request.layout,
+         });
+         throw error;
       }
-
-      // Emit event when review completes
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Article review completed",
-         layout: request.layout,
-      });
-
-      return {
-         rating: result.object.rating,
-         reasonOfTheRating: result.object.reasonOfTheRating,
-         metaDescription,
-         keywords: research.research.keywords,
-         sources: research.research.sources,
-         agentId,
-         userId,
-         contentId,
-
-         editor,
-         request,
-      };
    },
 });
 

@@ -1,12 +1,42 @@
 import { createStep, createWorkflow } from "@mastra/core";
 import { z } from "zod";
 import { ContentRequestSchema } from "@packages/database/schema";
-import { AppError } from "@packages/utils/errors";
+import { AppError, APIError, propagateError } from "@packages/utils/errors";
 import { tutorialWriterAgent } from "../../agents/tutorial/tutorial-writer-agent";
 import { tutorialEditorAgent } from "../../agents/tutorial/tutorial-editor-agent";
 import { tutorialReaderAgent } from "../../agents/tutorial/tutorial-reader-agent";
 import { researcherAgent } from "../../agents/researcher-agent";
 import { emitContentStatusChanged } from "@packages/server-events";
+import { createDb } from "@packages/database/client";
+import { updateContent } from "@packages/database/repositories/content-repository";
+import { serverEnv } from "@packages/environment/server";
+
+// Internal helper function to update content status and emit events
+async function updateContentStatus(
+   payload: Parameters<typeof emitContentStatusChanged>[0],
+) {
+   try {
+      const { contentId, status, message, layout } = payload;
+      const db = createDb({
+         databaseUrl: serverEnv.DATABASE_URL,
+      });
+
+      await updateContent(db, contentId, {
+         status,
+      });
+
+      emitContentStatusChanged({
+         contentId,
+         status,
+         message,
+         layout,
+      });
+   } catch (error) {
+      console.error("Failed to update content status:", error);
+      propagateError(error);
+      throw APIError.internal("Failed to update content status");
+   }
+}
 
 const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
@@ -46,17 +76,18 @@ export const researchStep = createStep({
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: ResearchStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, agentId, contentId } = inputData;
+      try {
+         const { userId, request, agentId, contentId } = inputData;
 
-      // Emit event when research starts
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Researching for your tutorial...",
-         layout: request.layout,
-      });
+         // Emit event when research starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Researching for your tutorial...",
+            layout: request.layout,
+         });
 
-      const inputPrompt = `
+         const inputPrompt = `
 I need you to perform comprehensive SERP research for the following content request:
 
 **Topic:** ${request.description}
@@ -71,39 +102,50 @@ Please conduct thorough SERP analysis and competitive intelligence gathering to 
 Focus on finding the most effective content angle and structure that can achieve top rankings.
 `;
 
-      const result = await researcherAgent.generateVNext(
-         [
+         const result = await researcherAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
             {
-               role: "user",
-               content: inputPrompt,
+               output: ResearchStepOutputSchema.pick({
+                  research: true,
+               }),
             },
-         ],
-         {
-            output: ResearchStepOutputSchema.pick({
-               research: true,
-            }),
-         },
-      );
+         );
 
-      if (!result?.object.research) {
-         throw AppError.validation('Agent output is missing "research" field');
+         if (!result?.object.research) {
+            throw AppError.validation(
+               'Agent output is missing "research" field',
+            );
+         }
+
+         // Emit event when research completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Tutorial research completed",
+            layout: request.layout,
+         });
+
+         return {
+            research: result.object.research,
+            userId,
+            request,
+            agentId,
+            contentId,
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to research tutorial",
+            layout: inputData.request.layout,
+         });
+         throw error;
       }
-
-      // Emit event when research completes
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Tutorial research completed",
-         layout: request.layout,
-      });
-
-      return {
-         research: result.object.research,
-         userId,
-         request,
-         agentId,
-         contentId,
-      };
    },
 });
 
@@ -113,24 +155,25 @@ const tutorialWritingStep = createStep({
    inputSchema: ResearchStepOutputSchema,
    outputSchema: ContentWritingStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, research, agentId, contentId } = inputData;
+      try {
+         const { userId, request, research, agentId, contentId } = inputData;
 
-      // Emit event when writing starts
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Writing your tutorial...",
-         layout: request.layout,
-      });
+         // Emit event when writing starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Writing your tutorial...",
+            layout: request.layout,
+         });
 
-      const researchPrompt = `
+         const researchPrompt = `
 searchIntent: ${research.searchIntent}
 competitorAnalysis: ${research.competitorAnalysis}
 contentGaps: ${research.contentGaps}
 strategicRecommendations: ${research.strategicRecommendations}
 `;
 
-      const inputPrompt = `
+         const inputPrompt = `
 create a new ${request.layout} based on the conent request.
 
 request: ${request.description}
@@ -138,39 +181,50 @@ request: ${request.description}
 ${researchPrompt}
 
 `;
-      const result = await tutorialWriterAgent.generateVNext(
-         [
+         const result = await tutorialWriterAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
             {
-               role: "user",
-               content: inputPrompt,
+               output: ContentWritingStepOutputSchema.pick({
+                  writing: true,
+               }),
             },
-         ],
-         {
-            output: ContentWritingStepOutputSchema.pick({
-               writing: true,
-            }),
-         },
-      );
+         );
 
-      if (!result?.object.writing) {
-         throw AppError.validation('Agent output is missing "research" field');
+         if (!result?.object.writing) {
+            throw AppError.validation(
+               'Agent output is missing "research" field',
+            );
+         }
+
+         // Emit event when writing completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Tutorial draft completed",
+            layout: request.layout,
+         });
+
+         return {
+            writing: result.object.writing,
+            userId,
+            request,
+            agentId,
+            contentId,
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to write tutorial",
+            layout: inputData.request.layout,
+         });
+         throw error;
       }
-
-      // Emit event when writing completes
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Tutorial draft completed",
-         layout: request.layout,
-      });
-
-      return {
-         writing: result.object.writing,
-         userId,
-         request,
-         agentId,
-         contentId,
-      };
    },
 });
 const ContentEditorStepOutputSchema =
@@ -188,56 +242,66 @@ const tutorialEditorStep = createStep({
    }),
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, writing, agentId, contentId } = inputData;
+      try {
+         const { userId, request, writing, agentId, contentId } = inputData;
 
-      // Emit event when editing starts
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Editing your tutorial...",
-         layout: request.layout,
-      });
+         // Emit event when editing starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Editing your tutorial...",
+            layout: request.layout,
+         });
 
-      const inputPrompt = `
+         const inputPrompt = `
 i need you to edit this ${request.layout} draft.
 
 writing: ${writing}
 
 output the edited content in markdown format.
 `;
-      const result = await tutorialEditorAgent.generateVNext(
-         [
+         const result = await tutorialEditorAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
             {
-               role: "user",
-               content: inputPrompt,
+               output: ContentEditorStepOutputSchema.pick({
+                  editor: true,
+               }),
             },
-         ],
-         {
-            output: ContentEditorStepOutputSchema.pick({
-               editor: true,
-            }),
-         },
-      );
+         );
 
-      if (!result?.object.editor) {
-         throw AppError.validation('Agent output is missing "editor" field');
+         if (!result?.object.editor) {
+            throw AppError.validation('Agent output is missing "editor" field');
+         }
+
+         // Emit event when editing completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Tutorial editing completed",
+            layout: request.layout,
+         });
+
+         return {
+            editor: result.object.editor,
+            userId,
+            request,
+            agentId,
+            contentId,
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to edit tutorial",
+            layout: inputData.request.layout,
+         });
+         throw error;
       }
-
-      // Emit event when editing completes
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Tutorial editing completed",
-         layout: request.layout,
-      });
-
-      return {
-         editor: result.object.editor,
-         userId,
-         request,
-         agentId,
-         contentId,
-      };
    },
 });
 
@@ -261,17 +325,18 @@ export const tutorialReadAndReviewStep = createStep({
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
-      const { userId, request, editor, agentId, contentId } = inputData;
+      try {
+         const { userId, request, editor, agentId, contentId } = inputData;
 
-      // Emit event when review starts
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Reviewing your tutorial...",
-         layout: request.layout,
-      });
+         // Emit event when review starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Reviewing your tutorial...",
+            layout: request.layout,
+         });
 
-      const inputPrompt = `
+         const inputPrompt = `
 i need you to read and review this ${request.layout}.
 
 
@@ -281,50 +346,59 @@ final:${editor}
 
 `;
 
-      //TODO: Rework
-      const result = await tutorialReaderAgent.generateVNext(
-         [
+         //TODO: Rework
+         const result = await tutorialReaderAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
             {
-               role: "user",
-               content: inputPrompt,
+               output: ContentReviewerStepOutputSchema.pick({
+                  rating: true,
+                  reasonOfTheRating: true,
+                  keywords: true,
+               }),
             },
-         ],
-         {
-            output: ContentReviewerStepOutputSchema.pick({
-               rating: true,
-               reasonOfTheRating: true,
-               keywords: true,
-            }),
-         },
-      );
-      if (!result?.object.rating) {
-         throw AppError.validation('Agent output is missing "review" field');
-      }
-      if (!result?.object.reasonOfTheRating) {
-         throw AppError.validation(
-            'Agent output is missing "reasonOfTheRating" field',
          );
+         if (!result?.object.rating) {
+            throw AppError.validation('Agent output is missing "review" field');
+         }
+         if (!result?.object.reasonOfTheRating) {
+            throw AppError.validation(
+               'Agent output is missing "reasonOfTheRating" field',
+            );
+         }
+
+         // Emit event when review completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Tutorial review completed",
+            layout: request.layout,
+         });
+
+         return {
+            rating: result.object.rating,
+            reasonOfTheRating: result.object.reasonOfTheRating,
+            userId,
+            request,
+            agentId,
+            editor,
+            contentId,
+            keywords: result.object.keywords,
+            sources: ["Your tutorial"],
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to review tutorial",
+            layout: inputData.request.layout,
+         });
+         throw error;
       }
-
-      // Emit event when review completes
-      emitContentStatusChanged({
-         contentId,
-         status: "pending",
-         message: "Tutorial review completed",
-         layout: request.layout,
-      });
-
-      return {
-         rating: result.object.rating,
-         reasonOfTheRating: result.object.reasonOfTheRating,
-         userId,
-         request,
-         agentId,
-         editor,
-         contentId,
-         keywords: result.object.keywords,
-         sources: ["Your tutorial"],
-      };
    },
 });
 
