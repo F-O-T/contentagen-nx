@@ -1,41 +1,41 @@
 {
-   "name": "@packages/agents",
-   "version": "0.15.0",
-   "license": "Apache-2.0",
-   "private": true,
-   "type": "module",
-   "exports": {
-      ".": {
-         "types": "./dist/src/mastra/index.d.ts",
-         "default": "./src/mastra/index.ts"
-      }
-   },
-   "scripts": {
-      "dev": "dotenv -e .env -- bunx mastra dev",
-      "build": "tsc",
-      "check": "biome check --write ./src",
-      "typecheck": "tsc "
-   },
-   "dependencies": {
-      "@mastra/core": "^0.18.0",
-      "@mastra/libsql": "^0.14.3",
-      "@mastra/loggers": "^0.10.13",
-      "@tavily/core": "0.5.12",
-      "@mastra/memory": "^0.15.3",
-      "@mastra/rag": "^1.2.6",
-      "@openrouter/ai-sdk-provider": "catalog:openrouter",
-      "@packages/environment": "workspace:*",
-      "@packages/rag": "workspace:*",
-      "@packages/files": "workspace:*",
-      "@packages/database": "workspace:*",
-      "@packages/server-events": "workspace:*",
-      "ai": "catalog:openrouter",
-      "zod": "catalog:validation"
-   },
-   "devDependencies": {
-      "dotenv-cli": "catalog:enviroment",
-      "shx": "catalog:enviroment",
-      "@tooling/typescript": "workspace:*",
-      "typescript": "catalog:development"
-   }
+  "name": "@packages/agents",
+  "version": "0.16.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/src/mastra/index.d.ts",
+      "default": "./src/mastra/index.ts"
+    }
+  },
+  "scripts": {
+    "dev": "dotenv -e .env -- bunx mastra dev",
+    "build": "tsc",
+    "check": "biome check --write ./src",
+    "typecheck": "tsc "
+  },
+  "dependencies": {
+    "@mastra/core": "^0.18.0",
+    "@mastra/libsql": "^0.14.3",
+    "@mastra/loggers": "^0.10.13",
+    "@tavily/core": "0.5.12",
+    "@mastra/memory": "^0.15.3",
+    "@mastra/rag": "^1.2.6",
+    "@openrouter/ai-sdk-provider": "catalog:openrouter",
+    "@packages/environment": "workspace:*",
+    "@packages/rag": "workspace:*",
+    "@packages/files": "workspace:*",
+    "@packages/database": "workspace:*",
+    "@packages/server-events": "workspace:*",
+    "ai": "catalog:openrouter",
+    "zod": "catalog:validation"
+  },
+  "devDependencies": {
+    "dotenv-cli": "catalog:enviroment",
+    "shx": "catalog:enviroment",
+    "@tooling/typescript": "workspace:*",
+    "typescript": "catalog:development"
+  }
 }
