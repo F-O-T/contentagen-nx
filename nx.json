@@ -67,11 +67,11 @@
          "versionActionsOptions": {
             "skipLockFileUpdate": true
          },
-         "git": {
-            "commit": true,
-            "tag": true
-         },
          "updateDependents": "never"
+      },
+      "git": {
+         "commit": true,
+         "tag": true
       },
       "releaseTagPatternRequireSemver": true,
       "changelog": {
