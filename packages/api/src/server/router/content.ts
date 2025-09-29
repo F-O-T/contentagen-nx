@@ -136,16 +136,24 @@ export const contentRouter = router({
    onStatusChanged: publicProcedure
       .input(z.object({ contentId: z.string().optional() }).optional())
       .subscription(async function* (opts) {
-         for await (const [payload] of on(eventEmitter, EVENTS.contentStatus, {
-            signal: opts.signal,
-         })) {
-            const event = payload as ContentStatusChangedPayload;
-            if (
-               !opts.input?.contentId ||
-               opts.input.contentId === event.contentId
-            ) {
-               yield event;
+         try {
+            for await (const [payload] of on(eventEmitter, EVENTS.contentStatus, {
+               signal: opts.signal,
+            })) {
+               const event = payload as ContentStatusChangedPayload;
+               if (payload.status === "draft") {
+                  return;
+               }
+               if (
+                  !opts.input?.contentId ||
+                  opts.input.contentId === event.contentId
+               ) {
+                  yield event;
+               }
             }
+         } finally {
+            // Cleanup any side effects when subscription stops
+            // The subscription stops when status becomes draft or client disconnects
          }
       }),
    create: organizationProcedure

@@ -1,31 +1,31 @@
 {
-  "dependencies": {
-    "@astrojs/ts-plugin": "catalog:astro",
-    "@astrojs/check": "catalog:astro",
-    "@astrojs/mdx": "catalog:astro",
-    "@astrojs/starlight": "catalog:astro",
-    "@astrojs/starlight-tailwind": "catalog:astro",
-    "@packages/ui": "workspace:*",
-    "@tailwindcss/vite": "catalog:vite",
-    "astro": "catalog:astro",
-    "sharp": "catalog:files",
-    "tailwindcss": "catalog:ui"
-  },
-  "devDependencies": {
-    "@tooling/typescript": "workspace:*",
-    "typescript": "catalog:development"
-  },
-  "name": "docs",
-  "license": "Apache-2.0",
-  "scripts": {
-    "astro": "bunx --bun astro",
-    "build": "bunx --bun astro build",
-    "check": "bunx --bun biome check --write ./src",
-    "dev": "bunx astro dev --port 4323",
-    "preview": "bunx --bun astro preview",
-    "start": "bunx --bun astro dev",
-    "typecheck": "bunx --bun astro check"
-  },
-  "type": "module",
-  "version": "0.4.0"
+   "dependencies": {
+      "@astrojs/ts-plugin": "catalog:astro",
+      "@astrojs/check": "catalog:astro",
+      "@astrojs/mdx": "catalog:astro",
+      "@astrojs/starlight": "catalog:astro",
+      "@astrojs/starlight-tailwind": "catalog:astro",
+      "@packages/ui": "workspace:*",
+      "@tailwindcss/vite": "catalog:vite",
+      "astro": "catalog:astro",
+      "sharp": "catalog:files",
+      "tailwindcss": "catalog:ui"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "typescript": "catalog:development"
+   },
+   "name": "docs",
+   "license": "Apache-2.0",
+   "scripts": {
+      "astro": "bunx --bun astro",
+      "build": "bunx --bun astro build",
+      "check": "bunx --bun biome check --write ./src",
+      "dev": "bunx astro dev --port 4323",
+      "preview": "bunx --bun astro preview",
+      "start": "bunx --bun astro dev",
+      "typecheck": "bunx --bun astro check"
+   },
+   "type": "module",
+   "version": "0.4.0"
 }

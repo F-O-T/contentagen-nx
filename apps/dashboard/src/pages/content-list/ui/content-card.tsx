@@ -71,6 +71,10 @@ export function ContentRequestCard({
             onData: ({ message, status }) => {
                toast.info(message || status);
             },
+            onDone() {
+               // Subscription automatically disconnected when server returns
+               // This happens when content status becomes 'draft'
+            },
          },
       ),
    );

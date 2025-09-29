@@ -71,7 +71,7 @@ export const CardMultiStepLoader = ({
    const [currentState, setCurrentState] = useState(0);
 
    useEffect(() => {
-      if (!loading) {
+      if (!loading || loadingStates.length === 0) {
          setCurrentState(0);
          return;
       }

@@ -1,4 +1,4 @@
 {
-  "extends": "@tooling/typescript/internal-package.json",
-  "references": []
+   "extends": "@tooling/typescript/internal-package.json",
+   "references": []
 }

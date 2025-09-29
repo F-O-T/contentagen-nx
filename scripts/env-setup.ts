@@ -19,7 +19,7 @@ const colors = {
 function setupEnvFile(dir: string, appName: string, envType: string = "local") {
    let envPath: string;
    const envExamplePath = path.join(dir, ".env.example");
-   
+
    // All packages/apps need a .env file
    if (envType === "local" || envType === "production") {
       // For database/rag packages with specific env types
@@ -31,7 +31,11 @@ function setupEnvFile(dir: string, appName: string, envType: string = "local") {
 
    if (fs.existsSync(envExamplePath)) {
       if (!fs.existsSync(envPath)) {
-         console.log(colors.green(`✓ Creating ${path.basename(envPath)} file for ${appName}`));
+         console.log(
+            colors.green(
+               `✓ Creating ${path.basename(envPath)} file for ${appName}`,
+            ),
+         );
          fs.copyFileSync(envExamplePath, envPath);
          console.log(
             colors.yellow(
@@ -40,7 +44,11 @@ function setupEnvFile(dir: string, appName: string, envType: string = "local") {
          );
          return true;
       } else {
-         console.log(colors.green(`✓ ${appName} ${path.basename(envPath)} file already exists`));
+         console.log(
+            colors.green(
+               `✓ ${appName} ${path.basename(envPath)} file already exists`,
+            ),
+         );
          return false;
       }
    } else {
@@ -51,7 +59,7 @@ function setupEnvFile(dir: string, appName: string, envType: string = "local") {
 
 function listAppDirectories() {
    const directories: string[] = [];
-   
+
    // Check apps directory
    const appsDir = "apps";
    if (fs.existsSync(appsDir)) {
@@ -97,7 +105,7 @@ function validateEnvFiles(appDirs: string[]) {
          missingExamples.push(appName);
          allValid = false;
       }
-      
+
       // Check for .env file for all packages/apps that have .env.example
       if (fs.existsSync(envExamplePath)) {
          const envPath = path.join(appDir, ".env");
@@ -106,7 +114,7 @@ function validateEnvFiles(appDirs: string[]) {
             allValid = false;
          }
       }
-      
+
       // Special handling for database and rag packages
       if (appName === "database" || appName === "rag") {
          const envLocalPath = path.join(appDir, ".env.local");
@@ -114,7 +122,7 @@ function validateEnvFiles(appDirs: string[]) {
             missingLocalFiles.push(appName);
             allValid = false;
          }
-         
+
          const envProductionPath = path.join(appDir, ".env.production.local");
          if (!fs.existsSync(envProductionPath)) {
             missingProductionFiles.push(appName);
@@ -139,17 +147,23 @@ function validateEnvFiles(appDirs: string[]) {
       }
       if (missingEnvFiles.length > 0) {
          console.log(
-            colors.yellow(`  Missing .env files: ${missingEnvFiles.join(", ")}`),
+            colors.yellow(
+               `  Missing .env files: ${missingEnvFiles.join(", ")}`,
+            ),
          );
       }
       if (missingLocalFiles.length > 0) {
          console.log(
-            colors.yellow(`  Missing .env.local files (database/rag only): ${missingLocalFiles.join(", ")}`),
+            colors.yellow(
+               `  Missing .env.local files (database/rag only): ${missingLocalFiles.join(", ")}`,
+            ),
          );
       }
       if (missingProductionFiles.length > 0) {
          console.log(
-            colors.yellow(`  Missing .env.production.local files (database/rag only): ${missingProductionFiles.join(", ")}`),
+            colors.yellow(
+               `  Missing .env.production.local files (database/rag only): ${missingProductionFiles.join(", ")}`,
+            ),
          );
       }
    }
@@ -167,7 +181,11 @@ program
    .command("setup")
    .description("Set up environment files for all applications")
    .option("-f, --force", "Overwrite existing .env files")
-   .option("-e, --env <type>", "Environment type to setup (local, production)", "local")
+   .option(
+      "-e, --env <type>",
+      "Environment type to setup (local, production)",
+      "local",
+   )
    .action((options) => {
       console.log(colors.blue(`🔧 Setting up environment files for monorepo`));
       console.log(colors.cyan("📁 Scanning for application directories..."));
@@ -177,7 +195,7 @@ program
 
       appDirs.forEach((appDir) => {
          const appName = path.basename(appDir);
-         
+
          // Skip if no .env.example exists
          if (!fs.existsSync(path.join(appDir, ".env.example"))) {
             return;
@@ -214,7 +232,10 @@ program
             }
 
             // Create .env.production.local
-            const envProductionPath = path.join(appDir, ".env.production.local");
+            const envProductionPath = path.join(
+               appDir,
+               ".env.production.local",
+            );
             if (options.force || !fs.existsSync(envProductionPath)) {
                if (setupEnvFile(appDir, appName, "production")) {
                   createdCount++;
@@ -229,14 +250,15 @@ program
          }
       });
 
-  
       console.log(
          colors.green(
             `🎉 Environment setup complete! Created ${createdCount} new environment files`,
          ),
       );
       console.log(colors.yellow("💡 Remember to:"));
-      console.log(colors.yellow("  1. Update all .env files with your actual values"));
+      console.log(
+         colors.yellow("  1. Update all .env files with your actual values"),
+      );
       console.log(colors.yellow("  2. Never commit .env files to git"));
       console.log(
          colors.yellow(
@@ -266,25 +288,26 @@ program
 
       const appDirs = listAppDirectories();
 
-      
       appDirs.forEach((appDir) => {
          const appName = path.basename(appDir);
          const envExamplePath = path.join(appDir, ".env.example");
 
          const hasExample = fs.existsSync(envExamplePath);
          let statusLine = `${colors.magenta(`${appName}:`)} ${hasExample ? "📄" : "❌"} .env.example`;
-         
+
          // Show .env file status for packages that have .env.example
          if (hasExample) {
             const hasEnv = fs.existsSync(path.join(appDir, ".env"));
             statusLine += ` ${hasEnv ? "📄" : "❌"} .env`;
-            
+
             // Special handling for database and rag packages
             if (appName === "database" || appName === "rag") {
                const hasLocal = fs.existsSync(path.join(appDir, ".env.local"));
                statusLine += ` ${hasLocal ? "📄" : "❌"} .env.local`;
-               
-               const hasProduction = fs.existsSync(path.join(appDir, ".env.production.local"));
+
+               const hasProduction = fs.existsSync(
+                  path.join(appDir, ".env.production.local"),
+               );
                statusLine += ` ${hasProduction ? "📄" : "❌"} .env.production.local`;
             }
          }
@@ -317,7 +340,7 @@ program
       // Remove app .env files
       appDirs.forEach((appDir) => {
          const envFiles = [".env.local", ".env.production.local", ".env"];
-         envFiles.forEach(envFile => {
+         envFiles.forEach((envFile) => {
             const envPath = path.join(appDir, envFile);
             if (fs.existsSync(envPath)) {
                fs.unlinkSync(envPath);
@@ -327,7 +350,6 @@ program
          });
       });
 
-      
       console.log(
          colors.green(
             `🎉 Cleanup complete! Removed ${removedCount} .env files`,
@@ -336,4 +358,3 @@ program
    });
 
 program.parse();
-

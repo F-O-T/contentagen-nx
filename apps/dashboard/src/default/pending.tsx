@@ -1,15 +1,26 @@
-import { Loader2 } from "lucide-react";
+import mascot from "@packages/brand/logo.svg";
+import { Typewriter } from "@packages/ui/components/typewriter";
 
-export function PendingComponent() {
+export function PendingComponent({ message }: { message?: string }) {
    return (
-      <div className="flex items-center justify-center h-full w-full">
-         <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <div className="text-center space-y-2">
-               <h2 className="text-lg font-semibold">Loading</h2>
-               <p className="text-sm text-muted-foreground">
-                  Please wait while we prepare your dashboard...
-               </p>
+      <div className="relative h-full w-full ">
+         <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+            <div className="flex flex-col items-center justify-center gap-4 ">
+               <div className="flex-shrink-0">
+                  <img
+                     alt="Content Agent Mascot"
+                     className="w-16 h-16 shadow-lg animate-bounce"
+                     src={mascot}
+                  />
+               </div>
+               <div className="flex-1 px-4 py-3 bg-accent rounded-2xl shadow-lg border border-primary transition-all duration-300 ease-in-out">
+                  <Typewriter
+                     message={
+                        message ||
+                        "Please wait while we prepare your dashboard..."
+                     }
+                  />
+               </div>
             </div>
          </div>
       </div>

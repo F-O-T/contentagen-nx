@@ -1,4 +1,5 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
+import { PendingComponent } from "@/default/pending";
 import { translate } from "@packages/localization";
 import { GeneratedContentDisplay } from "./generated-content-display";
 import { useTRPC } from "@/integrations/clients";
@@ -19,7 +20,6 @@ import { useState } from "react";
 import { ContentVersionsCard } from "./content-versions-card";
 import { VersionDetailsCredenza } from "./version-details-credenza";
 import type { RouterOutput } from "@packages/api/client";
-import { MultiStepLoader } from "@/widgets/multi-step-loader/ui/multi-step-loader";
 
 export function ContentRequestDetailsPage() {
    const { id } = useParams({
@@ -58,7 +58,7 @@ export function ContentRequestDetailsPage() {
 
    // Calculate subscription enabled state using useMemo
    const isGenerating = useMemo(
-      () => data?.status && ["pending"].includes(data.status),
+      () => data?.status && ["pending", "draft"].includes(data.status),
       [data?.status],
    );
 
@@ -68,14 +68,17 @@ export function ContentRequestDetailsPage() {
             contentId: id,
          },
          {
-            async onData(data) {
+            onData(data) {
                toast.success(
-                  data.message || 
-                  translate("pages.content-details.messages.status-updated", {
-                     status: data.status,
-                  }),
+                  data.message ||
+                     translate(
+                        "pages.content-details.messages.status-updated",
+                        {
+                           status: data.status,
+                        },
+                     ),
                );
-               await queryClient.invalidateQueries({
+               queryClient.invalidateQueries({
                   queryKey: trpc.content.get.queryKey({
                      id,
                   }),
@@ -95,29 +98,7 @@ export function ContentRequestDetailsPage() {
          )}
 
          {isGenerating && data?.status ? (
-            <MultiStepLoader
-               loading={isGenerating}
-               loadingStates={[
-                  {
-                     text: "🤔 Brewing creative ideas...",
-                  },
-                  {
-                     text: "📚 Researching and analyzing...",
-                  },
-                  {
-                     text: "✍️ Crafting compelling content...",
-                  },
-                  {
-                     text: "🔍 Polishing and perfecting...",
-                  },
-                  {
-                     text: "🎨 Adding final touches...",
-                  },
-                  {
-                     text: "🎉 Ready for review...",
-                  },
-               ]}
-            />
+            <PendingComponent message="Creating your new content, please wait..." />
          ) : (
             <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
                <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
