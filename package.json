@@ -55,7 +55,8 @@
       "release:dry": "nx release --dry-run --first-release",
       "release:version": "nx release version",
       "release:changelog": "nx release changelog",
-      "release:publish": "nx release publish"
+      "release:publish": "nx release publish",
+      "prepare": "husky"
    },
    "trustedDependencies": [
       "@parcel/watcher",
