@@ -6,6 +6,7 @@ import { tutorialWriterAgent } from "../../agents/tutorial/tutorial-writer-agent
 import { tutorialEditorAgent } from "../../agents/tutorial/tutorial-editor-agent";
 import { tutorialReaderAgent } from "../../agents/tutorial/tutorial-reader-agent";
 import { researcherAgent } from "../../agents/researcher-agent";
+import { emitContentStatusChanged } from "@packages/server-events";
 
 const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
@@ -46,6 +47,15 @@ export const researchStep = createStep({
    outputSchema: ResearchStepOutputSchema,
    execute: async ({ inputData }) => {
       const { userId, request, agentId, contentId } = inputData;
+      
+      // Emit event when research starts
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Researching for your tutorial...",
+         layout: request.layout,
+      });
+      
       const inputPrompt = `
 I need you to perform comprehensive SERP research for the following content request:
 
@@ -78,6 +88,14 @@ Focus on finding the most effective content angle and structure that can achieve
       if (!result?.object.research) {
          throw AppError.validation('Agent output is missing "research" field');
       }
+      
+      // Emit event when research completes
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Tutorial research completed",
+         layout: request.layout,
+      });
 
       return {
          research: result.object.research,
@@ -96,6 +114,15 @@ const tutorialWritingStep = createStep({
    outputSchema: ContentWritingStepOutputSchema,
    execute: async ({ inputData }) => {
       const { userId, request, research, agentId, contentId } = inputData;
+      
+      // Emit event when writing starts
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Writing your tutorial...",
+         layout: request.layout,
+      });
+      
       const researchPrompt = `
 searchIntent: ${research.searchIntent}
 competitorAnalysis: ${research.competitorAnalysis}
@@ -128,6 +155,15 @@ ${researchPrompt}
       if (!result?.object.writing) {
          throw AppError.validation('Agent output is missing "research" field');
       }
+      
+      // Emit event when writing completes
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Tutorial draft completed",
+         layout: request.layout,
+      });
+      
       return {
          writing: result.object.writing,
          userId,
@@ -153,6 +189,15 @@ const tutorialEditorStep = createStep({
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
       const { userId, request, writing, agentId, contentId } = inputData;
+      
+      // Emit event when editing starts
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Editing your tutorial...",
+         layout: request.layout,
+      });
+      
       const inputPrompt = `
 i need you to edit this ${request.layout} draft.
 
@@ -177,6 +222,15 @@ output the edited content in markdown format.
       if (!result?.object.editor) {
          throw AppError.validation('Agent output is missing "editor" field');
       }
+      
+      // Emit event when editing completes
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Tutorial editing completed",
+         layout: request.layout,
+      });
+      
       return {
          editor: result.object.editor,
          userId,
@@ -208,6 +262,15 @@ export const tutorialReadAndReviewStep = createStep({
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
       const { userId, request, editor, agentId, contentId } = inputData;
+      
+      // Emit event when review starts
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Reviewing your tutorial...",
+         layout: request.layout,
+      });
+      
       const inputPrompt = `
 i need you to read and review this ${request.layout}.
 
@@ -242,6 +305,15 @@ final:${editor}
             'Agent output is missing "reasonOfTheRating" field',
          );
       }
+      
+      // Emit event when review completes
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Tutorial review completed",
+         layout: request.layout,
+      });
+      
       return {
          rating: result.object.rating,
          reasonOfTheRating: result.object.reasonOfTheRating,

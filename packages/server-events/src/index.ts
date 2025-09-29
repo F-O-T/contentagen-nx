@@ -5,6 +5,7 @@ import type {
    CompetitorFeaturesStatus,
    CompetitorAnalysisStatus,
 } from "@packages/database/schemas/competitor";
+import type { ContentRequest } from "@packages/database/schemas/content";
 // 1. Define event names as constants
 export const EVENTS = {
    agentKnowledgeStatus: "agent.knowledge.status",
@@ -19,6 +20,8 @@ export const EVENTS = {
 export type ContentStatusChangedPayload = {
    contentId: string;
    status: ContentStatus;
+   message?: string;
+   layout?: ContentRequest["layout"];
 };
 export type CompetitorStatusChangedPayload = {
    competitorId: string;

@@ -7,6 +7,7 @@ import { articleEditorAgent } from "../../agents/article/article-editor-agent";
 import { articleReaderAgent } from "../../agents/article/artcile-reader-agent";
 import { researcherAgent } from "../../agents/researcher-agent";
 import { contentStrategistAgent } from "../../agents/strategist-agent";
+import { emitContentStatusChanged } from "@packages/server-events";
 
 const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
@@ -48,6 +49,15 @@ export const strategyStep = createStep({
          organizationId,
          request,
       } = inputData;
+      
+      // Emit event when strategy starts
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Developing content strategy for your article...",
+         layout: request.layout,
+      });
+      
       const inputPrompt = `
 I need you to create a comprehensive content strategy for the following request:
 
@@ -83,6 +93,14 @@ Focus on creating a strategy that leverages our brand's unique strengths and dif
       if (!result?.object.strategy) {
          throw AppError.validation('Agent output is missing "strategy" field');
       }
+      
+      // Emit event when strategy completes
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Article strategy completed",
+         layout: request.layout,
+      });
 
       return {
          agentId,
@@ -117,6 +135,15 @@ export const researchStep = createStep({
    outputSchema: ResearchStepOutputSchema,
    execute: async ({ inputData }) => {
       const { contentId, userId, agentId, request } = inputData;
+      
+      // Emit event when research starts
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Researching for your article...",
+         layout: request.layout,
+      });
+      
       const inputPrompt = `
 I need you to perform comprehensive SERP research for the following content request:
 
@@ -149,6 +176,14 @@ Focus on finding the most effective content angle and structure that can achieve
       if (!result?.object.research) {
          throw AppError.validation('Agent output is missing "research" field');
       }
+      
+      // Emit event when research completes
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Article research completed",
+         layout: request.layout,
+      });
 
       return {
          research: result.object.research,
@@ -186,6 +221,15 @@ const articleWritingStep = createStep({
          },
          "article-strategy-step": { strategy },
       } = inputData;
+      
+      // Emit event when writing starts
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Writing your article...",
+         layout: request.layout,
+      });
+      
       const strategyPrompt = `
 brandInsights: ${strategy.brandInsights}
       
@@ -233,6 +277,15 @@ ${researchPrompt}
       if (!result?.object.writing) {
          throw AppError.validation('Agent output is missing "research" field');
       }
+      
+      // Emit event when writing completes
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Article draft completed",
+         layout: request.layout,
+      });
+      
       return {
          research,
          writing: result.object.writing,
@@ -272,6 +325,15 @@ const articleEditorStep = createStep({
    execute: async ({ inputData }) => {
       const { userId, contentId, research, request, agentId, writing } =
          inputData;
+         
+      // Emit event when editing starts
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Editing your article...",
+         layout: request.layout,
+      });
+      
       const inputPrompt = `
 i need you to edit this ${request.layout} draft.
 
@@ -297,6 +359,15 @@ output the edited content in markdown format.
       if (!result?.object.editor) {
          throw AppError.validation('Agent output is missing "editor" field');
       }
+      
+      // Emit event when editing completes
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Article editing completed",
+         layout: request.layout,
+      });
+      
       return {
          agentId,
          metaDescription: result.object.metaDescription,
@@ -344,6 +415,15 @@ export const articleReadAndReviewStep = createStep({
          request,
          editor,
       } = inputData;
+      
+      // Emit event when review starts
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Reviewing your article...",
+         layout: request.layout,
+      });
+      
       const inputPrompt = `
 i need you to read and review this ${request.layout}.
 
@@ -375,6 +455,14 @@ final:${editor}
             'Agent output is missing "reasonOfTheRating" field',
          );
       }
+      
+      // Emit event when review completes
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Article review completed",
+         layout: request.layout,
+      });
 
       return {
          rating: result.object.rating,

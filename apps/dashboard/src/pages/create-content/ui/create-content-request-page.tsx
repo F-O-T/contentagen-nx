@@ -23,16 +23,7 @@ export function AgentContentRequestPage() {
             );
             queryClient.invalidateQueries({
                queryKey: trpc.content.listAllContent.queryKey({
-                  status: [
-                     "draft",
-                     "approved",
-                     "planning",
-                     "researching",
-                     "writing",
-                     "editing",
-                     "analyzing",
-                     "grammar_checking",
-                  ],
+                  status: ["draft", "approved"],
                }),
             });
             if (!data?.id) return state.history.back();

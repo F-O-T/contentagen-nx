@@ -62,17 +62,7 @@ export function ContentListPage() {
    const { data: agents } = useSuspenseQuery(trpc.agent.list.queryOptions());
    const { data } = useSuspenseQuery(
       trpc.content.listAllContent.queryOptions({
-         status: [
-            "draft",
-            "approved",
-            "pending",
-            "planning",
-            "researching",
-            "writing",
-            "editing",
-            "analyzing",
-            "grammar_checking",
-         ],
+         status: ["draft", "approved", "pending"],
          page: search.page,
          limit: 8,
       }),

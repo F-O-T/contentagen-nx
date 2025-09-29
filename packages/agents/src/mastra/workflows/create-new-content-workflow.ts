@@ -18,6 +18,7 @@ import { createNewChangelogWorkflow } from "./content/create-new-changelog-workf
 import { createNewArticleWorkflow } from "./content/create-new-article-workflow";
 import { createDb } from "@packages/database/client";
 import { serverEnv } from "@packages/environment/server";
+import { emitContentStatusChanged } from "@packages/server-events";
 
 const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
@@ -93,6 +94,14 @@ const saveContentStep = createStep({
          stats,
          meta,
          body: removeTitleFromMarkdown(editor),
+      });
+
+      // Emit event when content is saved as draft
+      emitContentStatusChanged({
+         contentId,
+         status: "draft",
+         message: "Content generation completed and saved as draft",
+         layout: request.layout,
       });
 
       return {

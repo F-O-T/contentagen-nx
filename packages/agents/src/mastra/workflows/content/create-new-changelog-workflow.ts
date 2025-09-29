@@ -5,6 +5,7 @@ import { AppError } from "@packages/utils/errors";
 import { changelogWriterAgent } from "../../agents/changelog/changelog-writer-agent";
 import { changelogEditorAgent } from "../../agents/changelog/changelog-editor-agent";
 import { changelogReaderAgent } from "../../agents/changelog/changelog-reader-agent";
+import { emitContentStatusChanged } from "@packages/server-events";
 
 const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
@@ -38,6 +39,15 @@ const changelogWritingStep = createStep({
    outputSchema: ContentWritingStepOutputSchema,
    execute: async ({ inputData }) => {
       const { userId, agentId, contentId, request } = inputData;
+
+      // Emit event when writing starts
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Writing your changelog...",
+         layout: request.layout,
+      });
+
       const inputPrompt = `
 create a new ${request.layout} based on the conent request.
 
@@ -61,6 +71,15 @@ request: ${request.description}
       if (!result?.object.writing) {
          throw AppError.validation('Agent output is missing "research" field');
       }
+
+      // Emit event when writing completes
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Changelog draft completed",
+         layout: request.layout,
+      });
+
       return {
          writing: result.object.writing,
          agentId,
@@ -86,6 +105,15 @@ const changelogEditorStep = createStep({
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
       const { userId, request, agentId, contentId, writing } = inputData;
+
+      // Emit event when editing starts
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Editing your changelog...",
+         layout: request.layout,
+      });
+
       const inputPrompt = `
 i need you to edit this ${request.layout} draft.
 
@@ -110,6 +138,15 @@ output the edited content in markdown format.
       if (!result?.object.editor) {
          throw AppError.validation('Agent output is missing "editor" field');
       }
+
+      // Emit event when editing completes
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Changelog editing completed",
+         layout: request.layout,
+      });
+
       return {
          agentId,
          contentId,
@@ -147,6 +184,15 @@ export const changelogReadAndReviewStep = createStep({
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
       const { userId, agentId, contentId, request, editor } = inputData;
+
+      // Emit event when review starts
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Reviewing your changelog...",
+         layout: request.layout,
+      });
+
       const inputPrompt = `
 i need you to read and review this ${request.layout}.
 
@@ -182,6 +228,15 @@ final:${editor}
             'Agent output is missing "reasonOfTheRating" field',
          );
       }
+
+      // Emit event when review completes
+      emitContentStatusChanged({
+         contentId,
+         status: "pending",
+         message: "Changelog review completed",
+         layout: request.layout,
+      });
+
       return {
          rating: result.object.rating,
          reasonOfTheRating: result.object.reasonOfTheRating,
