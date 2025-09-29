@@ -70,6 +70,7 @@ export const contentStatusEnum = pgEnum("content_status", [
    "pending",
    "draft",
    "approved",
+   "failed",
 ]);
 
 export const shareStatusEnum = pgEnum("share_status", ["private", "shared"]);
