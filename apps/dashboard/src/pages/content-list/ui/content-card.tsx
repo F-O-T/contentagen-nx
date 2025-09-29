@@ -68,8 +68,8 @@ export function ContentRequestCard({
             contentId: request.id,
          },
          {
-            onData: ({ status }) => {
-               toast.info(status);
+            onData: ({ message, status }) => {
+               toast.info(message || status);
             },
          },
       ),

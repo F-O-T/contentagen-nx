@@ -70,6 +70,7 @@ export function ContentRequestDetailsPage() {
          {
             async onData(data) {
                toast.success(
+                  data.message || 
                   translate("pages.content-details.messages.status-updated", {
                      status: data.status,
                   }),
