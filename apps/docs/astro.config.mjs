@@ -42,6 +42,9 @@ export default defineConfig({
    site: "https://docs.contentagen.com",
    output: "static",
    vite: {
+      ssr: {
+         noExternal: ["zod"],
+      },
       plugins: [tailwindcss()],
    },
 });

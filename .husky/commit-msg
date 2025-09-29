@@ -1,1 +1,8 @@
-npx --no -- commitlint --edit ${1}
+echo ""
+echo "🔒 Commit message format is enforced!"
+echo "✅ Use format: type(scope?): message"
+echo "🔧 Example: feat(login): add login form validation feature"
+echo "🔹 Valid types: feat, fix, docs, chore, refactor, test, etc."
+echo ""
+
+bunx commitlint --edit .git/COMMIT_EDITMSG

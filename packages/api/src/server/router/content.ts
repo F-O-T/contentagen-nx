@@ -137,9 +137,13 @@ export const contentRouter = router({
       .input(z.object({ contentId: z.string().optional() }).optional())
       .subscription(async function* (opts) {
          try {
-            for await (const [payload] of on(eventEmitter, EVENTS.contentStatus, {
-               signal: opts.signal,
-            })) {
+            for await (const [payload] of on(
+               eventEmitter,
+               EVENTS.contentStatus,
+               {
+                  signal: opts.signal,
+               },
+            )) {
                const event = payload as ContentStatusChangedPayload;
                if (payload.status === "draft") {
                   return;
