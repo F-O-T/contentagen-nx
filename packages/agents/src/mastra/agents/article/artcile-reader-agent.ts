@@ -7,10 +7,28 @@ const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 
+const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
+   const languageNames = {
+      en: "English",
+      pt: "Portuguese",
+   };
+
+   return `
+## OUTPUT LANGUAGE REQUIREMENT
+You MUST provide ALL your evaluations, assessments, scoring, feedback, and analysis in ${languageNames[language]}.
+Regardless of the article's original language, your entire evaluation output must be written in ${languageNames[language]}.
+This includes all scores, recommendations, strengths, gaps, and detailed analysis.
+`;
+};
+
 export const articleReaderAgent = new Agent({
    name: "Article Requirements Evaluator",
-   instructions: () => `
+   instructions: ({ runtimeContext }) => {
+      const locale = runtimeContext.get("language");
+      return `
 You are a specialized article evaluator that assesses how well an article meets the requirements specified in the original request and follows professional journalism and content creation standards.
+
+${getLanguageOutputInstruction(locale as "en" | "pt")}
 
 ## EVALUATION DIMENSIONS (Score 0-100 each)
 
@@ -205,7 +223,8 @@ Grades: A+ (95-100), A (90-94), B+ (85-89), B (80-84), C+ (75-79), C (70-74), D 
 - **Actionability Index**: [Practical application value]
 
 Focus primarily on requirements fulfillment and content quality. Provide specific evidence from the article content and prioritize recommendations by their impact on reader value and requirement satisfaction.
-`,
+`;
+   },
    model: openrouter("x-ai/grok-4-fast:free"),
    tools: { dateTool },
 });

@@ -14,7 +14,6 @@ import { ContentStatsCard } from "./content-stats-card";
 import { useSubscription } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
 import { useMemo } from "react";
-import { ContentLoadingDisplay } from "./content-loading-display";
 import { useMissingImagesNotification } from "../../content-list/lib/use-missing-images-notification";
 import { useState } from "react";
 import { ContentVersionsCard } from "./content-versions-card";

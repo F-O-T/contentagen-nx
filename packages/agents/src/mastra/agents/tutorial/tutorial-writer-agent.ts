@@ -16,8 +16,9 @@ const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
 
    return `
 ## OUTPUT LANGUAGE REQUIREMENT
-You MUST provide ALL your responses, content, and writing in ${languageNames[language]}.
-Your entire output must be written in ${languageNames[language]}.
+You MUST provide ALL your tutorial content, step-by-step instructions, educational explanations, and learning guidance in ${languageNames[language]}.
+Your entire tutorial output, including steps, explanations, examples, code snippets, and all educational content must be written in ${languageNames[language]}.
+This includes tutorial titles, learning objectives, prerequisites, and all instructional content elements.
 `;
 };
 export const tutorialWriterAgent = new Agent({

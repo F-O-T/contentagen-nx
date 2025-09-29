@@ -15,9 +15,9 @@ const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
 
    return `
 ## OUTPUT LANGUAGE REQUIREMENT
-You MUST provide ALL your responses, extracted information, descriptions, and summaries in ${languageNames[language]}.
-Regardless of the source website language, your entire output must be written in ${languageNames[language]}.
-This includes company names (if they have localized versions), descriptions, and detailed summaries.
+You MUST provide ALL your tutorial editing, step clarity improvements, educational enhancements, and learning optimizations in ${languageNames[language]}.
+Regardless of the source tutorial language, your entire editorial output must be written in ${languageNames[language]}.
+This includes all step-by-step refinements, clarity improvements, learning flow optimizations, and instructional enhancements.
 `;
 };
 

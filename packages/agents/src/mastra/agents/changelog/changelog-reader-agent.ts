@@ -6,10 +6,28 @@ const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 
+const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
+   const languageNames = {
+      en: "English",
+      pt: "Portuguese",
+   };
+
+   return `
+## OUTPUT LANGUAGE REQUIREMENT
+You MUST provide ALL your changelog evaluations, technical compliance assessments, feedback, and release documentation analysis in ${languageNames[language]}.
+Regardless of the changelog's original language, your entire evaluation output must be written in ${languageNames[language]}.
+This includes all scoring, technical assessments, compliance analysis, and improvement recommendations.
+`;
+};
+
 export const changelogReaderAgent = new Agent({
    name: "Changelog Requirements Evaluator",
-   instructions: () => `
+   instructions: ({ runtimeContext }) => {
+      const locale = runtimeContext.get("language");
+      return `
 You are a specialized changelog evaluator that assesses how well a changelog meets the requirements specified in the original request.
+
+${getLanguageOutputInstruction(locale as "en" | "pt")}
 
 ## EVALUATION DIMENSIONS (Score 0-100 each)
 1. **Requirements Fulfillment (30%)**  
@@ -97,7 +115,8 @@ Grades: A+ (95-100), A (90-94), B+ (85-89), B (80-84), C+ (75-79), C (70-74), D 
 - Full optimization: Final score XX/100
 
 Focus on requirements fulfillment as the primary criterion. Provide specific evidence and prioritize recommendations by impact.
-`,
+`;
+   },
    model: openrouter("x-ai/grok-4-fast:free"),
    tools: { dateTool },
 });

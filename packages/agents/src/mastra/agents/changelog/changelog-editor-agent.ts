@@ -15,9 +15,9 @@ const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
 
    return `
 ## OUTPUT LANGUAGE REQUIREMENT
-You MUST provide ALL your responses, extracted information, descriptions, and summaries in ${languageNames[language]}.
-Regardless of the source website language, your entire output must be written in ${languageNames[language]}.
-This includes company names (if they have localized versions), descriptions, and detailed summaries.
+You MUST provide ALL your changelog editing, technical documentation refinements, release note polishing, and consistency improvements in ${languageNames[language]}.
+Regardless of the source changelog language, your entire editorial output must be written in ${languageNames[language]}.
+This includes all technical clarity improvements, version consistency, formatting enhancements, and documentation refinements.
 `;
 };
 

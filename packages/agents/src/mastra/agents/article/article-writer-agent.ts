@@ -15,8 +15,9 @@ const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
 
    return `
 ## OUTPUT LANGUAGE REQUIREMENT
-You MUST provide ALL your responses, content, and writing in ${languageNames[language]}.
-Your entire output must be written in ${languageNames[language]}.
+You MUST provide ALL your article content, responses, storytelling, and journalistic writing in ${languageNames[language]}.
+Your entire article output, including engaging narratives, hooks, conclusions, and all editorial content must be written in ${languageNames[language]}.
+This includes article titles, meta descriptions, headers, and all long-form content elements.
 `;
 };
 export const articleWriterAgent = new Agent({

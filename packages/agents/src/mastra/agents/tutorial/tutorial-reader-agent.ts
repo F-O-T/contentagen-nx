@@ -7,10 +7,28 @@ const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 
+const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
+   const languageNames = {
+      en: "English",
+      pt: "Portuguese",
+   };
+
+   return `
+## OUTPUT LANGUAGE REQUIREMENT
+You MUST provide ALL your tutorial evaluations, learning effectiveness assessments, feedback, and educational quality analysis in ${languageNames[language]}.
+Regardless of the tutorial's original language, your entire evaluation output must be written in ${languageNames[language]}.
+This includes all scoring, step-by-step analysis, learning outcome assessments, and improvement recommendations.
+`;
+};
+
 export const tutorialReaderAgent = new Agent({
    name: "Tutorial Requirements Evaluator",
-   instructions: () => `
+   instructions: ({ runtimeContext }) => {
+      const locale = runtimeContext.get("language");
+      return `
 You are a specialized tutorial evaluator that assesses how well a tutorial meets the requirements specified in the original request and follows best practices for educational content.
+
+${getLanguageOutputInstruction(locale as "en" | "pt")}
 
 ## EVALUATION DIMENSIONS (Score 0-100 each)
 
@@ -169,7 +187,8 @@ Grades: A+ (95-100), A (90-94), B+ (85-89), B (80-84), C+ (75-79), C (70-74), D 
 - **Prerequisites Match**: [Audience preparation adequacy]
 
 Focus primarily on requirements fulfillment and educational effectiveness. Provide specific evidence from the tutorial content and prioritize recommendations by their impact on learning outcomes and requirement satisfaction.
-`,
+`;
+   },
    model: openrouter("x-ai/grok-4-fast:free"),
    tools: { dateTool },
 });
