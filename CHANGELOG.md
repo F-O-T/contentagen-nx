@@ -1,3 +1,23 @@
+## 0.15.0 (2025-09-29)
+
+### 🩹 Fixes
+
+- **mastra:** Validate agent output for required fields ([3965695](https://github.com/F-O-T/contentagen-nx/commit/3965695))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/server-events to 0.4.0
+- Updated @packages/environment to 0.4.0
+- Updated @packages/database to 0.4.0
+- Updated @packages/payment to 0.4.0
+- Updated @packages/files to 0.4.0
+- Updated @packages/utils to 0.15.0
+- Updated @packages/rag to 0.4.0
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.13.0 (2025-09-29)
 
 ### 🧱 Updated Dependencies
