@@ -7,6 +7,7 @@ import { articleEditorAgent } from "../../agents/article/article-editor-agent";
 import { articleReaderAgent } from "../../agents/article/artcile-reader-agent";
 import { researcherAgent } from "../../agents/researcher-agent";
 import { contentStrategistAgent } from "../../agents/strategist-agent";
+import { seoOptimizationAgent } from "../../agents/seo-agent";
 import { emitContentStatusChanged } from "@packages/server-events";
 import { createDb } from "@packages/database/client";
 import { updateContent } from "@packages/database/repositories/content-repository";
@@ -509,18 +510,11 @@ output the edited content in markdown format.
 const ContentReviewerStepOutputSchema =
    CreateNewContentWorkflowInputSchema.extend({
       rating: z.number().min(0).max(100),
-      metaDescription: z
-         .string()
-         .describe(
-            "The meta description, being a SEO optmizaed description of the article",
-         ),
-      keywords: z
-         .array(z.string())
-         .describe("The associeated keywords of the content"),
-      sources: z.array(z.string()).describe("The sources found on the search"),
       reasonOfTheRating: z
          .string()
          .describe("The reason for the rating, written in markdown"),
+      sources: z.array(z.string()).describe("The sources found on the search"),
+      editor: editorType,
    }).omit({
       competitorIds: true,
       organizationId: true,
@@ -532,15 +526,8 @@ export const articleReadAndReviewStep = createStep({
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
       try {
-         const {
-            contentId,
-            metaDescription,
-            research,
-            userId,
-            agentId,
-            request,
-            editor,
-         } = inputData;
+         const { contentId, research, userId, agentId, request, editor } =
+            inputData;
 
          // Emit event when review starts
          await updateContentStatus({
@@ -598,15 +585,12 @@ final:${editor}
          return {
             rating: result.object.rating,
             reasonOfTheRating: result.object.reasonOfTheRating,
-            metaDescription,
-            keywords: research.research.keywords,
-            sources: research.research.sources,
-            agentId,
             userId,
+            agentId,
             contentId,
-
-            editor,
             request,
+            editor,
+            sources: research.research.sources,
          };
       } catch (error) {
          await updateContentStatus({
@@ -620,14 +604,194 @@ final:${editor}
    },
 });
 
+const SeoOptimizationStepOutputSchema =
+   CreateNewContentWorkflowInputSchema.extend({
+      keywords: z
+         .array(z.string())
+         .describe(
+            "The associated keywords of the content for SEO optimization",
+         ),
+      metaDescription: z
+         .string()
+         .describe("The SEO optimized meta description of the content"),
+   }).omit({
+      competitorIds: true,
+      organizationId: true,
+   });
+
+export const articleSeoOptimizationStep = createStep({
+   id: "article-seo-optimization-step",
+   description: "Generate SEO keywords and meta description for the article",
+   inputSchema: ContentEditorStepOutputSchema,
+   outputSchema: SeoOptimizationStepOutputSchema,
+   execute: async ({ inputData }) => {
+      try {
+         const { agentId, userId, contentId, request, editor } = inputData;
+
+         // Update content status and emit event when SEO optimization starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Optimizing SEO for your article...",
+            layout: request.layout,
+         });
+
+         const inputPrompt = `
+I need you to perform SEO optimization for this ${request.layout} content.
+
+Content:
+${editor}
+
+Generate SEO-optimized keywords and meta description for this article content.
+
+Requirements:
+- Keywords should be relevant to the article topic and content
+- Meta description should be compelling and include primary keywords
+- Follow SEO best practices for character limits and optimization
+`;
+
+         const result = await seoOptimizationAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
+            {
+               output: SeoOptimizationStepOutputSchema.pick({
+                  keywords: true,
+                  metaDescription: true,
+               }),
+            },
+         );
+
+         if (!result?.object.keywords) {
+            throw AppError.validation(
+               'Agent output is missing "keywords" field',
+            );
+         }
+         if (!result?.object.metaDescription) {
+            throw AppError.validation(
+               'Agent output is missing "metaDescription" field',
+            );
+         }
+
+         // Ingest LLM usage for billing
+         if (result.usage) {
+            await ingestUsage(result.usage as LLMUsage, userId);
+         }
+
+         // Update content status and emit event when SEO optimization completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "SEO optimization completed",
+            layout: request.layout,
+         });
+
+         return {
+            keywords: result.object.keywords,
+            metaDescription: result.object.metaDescription,
+            userId,
+            contentId,
+            request,
+            agentId,
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to optimize SEO for article",
+            layout: inputData.request.layout,
+         });
+         console.error(error);
+         propagateError(error);
+         throw APIError.internal("Failed to optimize SEO for article");
+      }
+   },
+});
+
+const FinalResultStepOutputSchema = CreateNewContentWorkflowInputSchema.extend({
+   rating: z.number().min(0).max(100),
+   reasonOfTheRating: z
+      .string()
+      .describe("The reason for the rating, written in markdown"),
+   keywords: z
+      .array(z.string())
+      .describe("The associated keywords of the content"),
+   sources: z.array(z.string()).describe("The sources found on the search"),
+   metaDescription: z
+      .string()
+      .describe(
+         "The meta description, being a SEO optimized description of the article",
+      ),
+   editor: editorType,
+}).omit({
+   competitorIds: true,
+   organizationId: true,
+});
+
+export const articleFinalResultStep = createStep({
+   id: "article-final-result-step",
+   description: "Combine reader and SEO results into final output",
+   inputSchema: z.object({
+      "article-read-and-review-step": ContentReviewerStepOutputSchema,
+      "article-seo-optimization-step": SeoOptimizationStepOutputSchema,
+   }),
+   outputSchema: FinalResultStepOutputSchema,
+   execute: async ({ inputData }) => {
+      const readerResult = inputData["article-read-and-review-step"];
+      const seoResult = inputData["article-seo-optimization-step"];
+      const { contentId, request } = readerResult;
+      try {
+         // Update content status and emit event when final result compilation starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Compiling final results...",
+            layout: request.layout,
+         });
+
+         // Combine results - prioritize SEO keywords and meta description
+         const finalResult = {
+            rating: readerResult.rating,
+            reasonOfTheRating: readerResult.reasonOfTheRating,
+            keywords: seoResult.keywords,
+            sources: readerResult.sources,
+            metaDescription: seoResult.metaDescription,
+            editor: readerResult.editor,
+            userId: readerResult.userId,
+            agentId: readerResult.agentId,
+            contentId: readerResult.contentId,
+            request: readerResult.request,
+         };
+
+         // Update content status and emit event when final result compilation completes
+
+         return finalResult;
+      } catch (error) {
+         await updateContentStatus({
+            contentId: contentId,
+            status: "failed",
+            message: "Failed to compile final results",
+            layout: request.layout,
+         });
+         console.error(error);
+         propagateError(error);
+         throw APIError.internal("Failed to compile final results");
+      }
+   },
+});
+
 export const createNewArticleWorkflow = createWorkflow({
    id: "create-new-article-workflow",
    description: "Create a new article",
    inputSchema: CreateNewContentWorkflowInputSchema,
-   outputSchema: ContentReviewerStepOutputSchema,
+   outputSchema: FinalResultStepOutputSchema,
 })
    .parallel([researchStep, strategyStep])
    .then(articleWritingStep)
    .then(articleEditorStep)
-   .then(articleReadAndReviewStep)
+   .parallel([articleReadAndReviewStep, articleSeoOptimizationStep])
+   .then(articleFinalResultStep)
    .commit();

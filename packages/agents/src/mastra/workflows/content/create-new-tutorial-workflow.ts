@@ -6,6 +6,7 @@ import { tutorialWriterAgent } from "../../agents/tutorial/tutorial-writer-agent
 import { tutorialEditorAgent } from "../../agents/tutorial/tutorial-editor-agent";
 import { tutorialReaderAgent } from "../../agents/tutorial/tutorial-reader-agent";
 import { researcherAgent } from "../../agents/researcher-agent";
+import { seoOptimizationAgent } from "../../agents/seo-agent";
 import { emitContentStatusChanged } from "@packages/server-events";
 import { createDb } from "@packages/database/client";
 import { updateContent } from "@packages/database/repositories/content-repository";
@@ -353,10 +354,8 @@ const ContentReviewerStepOutputSchema =
       reasonOfTheRating: z
          .string()
          .describe("The reason for the rating, written in markdown"),
-      keywords: z
-         .array(z.string())
-         .describe("The associeated keywords of the content"),
       sources: z.array(z.string()).describe("The sources found on the search"),
+      editor: editorType,
    }).omit({
       competitorIds: true,
       organizationId: true,
@@ -400,7 +399,6 @@ final:${editor}
                output: ContentReviewerStepOutputSchema.pick({
                   rating: true,
                   reasonOfTheRating: true,
-                  keywords: true,
                }),
             },
          );
@@ -434,7 +432,6 @@ final:${editor}
             agentId,
             editor,
             contentId,
-            keywords: result.object.keywords,
             sources: ["Your tutorial"],
          };
       } catch (error) {
@@ -449,14 +446,194 @@ final:${editor}
    },
 });
 
+const SeoOptimizationStepOutputSchema =
+   CreateNewContentWorkflowInputSchema.extend({
+      keywords: z
+         .array(z.string())
+         .describe(
+            "The associated keywords of the content for SEO optimization",
+         ),
+      metaDescription: z
+         .string()
+         .describe("The SEO optimized meta description of the content"),
+   }).omit({
+      competitorIds: true,
+      organizationId: true,
+   });
+
+export const tutorialSeoOptimizationStep = createStep({
+   id: "tutorial-seo-optimization-step",
+   description: "Generate SEO keywords and meta description for the tutorial",
+   inputSchema: ContentEditorStepOutputSchema,
+   outputSchema: SeoOptimizationStepOutputSchema,
+   execute: async ({ inputData }) => {
+      try {
+         const { userId, agentId, contentId, request, editor } = inputData;
+
+         // Update content status and emit event when SEO optimization starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Optimizing SEO for your tutorial...",
+            layout: request.layout,
+         });
+
+         const inputPrompt = `
+I need you to perform SEO optimization for this ${request.layout} content.
+
+Content:
+${editor}
+
+Generate SEO-optimized keywords and meta description for this tutorial content.
+
+Requirements:
+- Keywords should be relevant to the tutorial topic and learning objectives
+- Meta description should be compelling and include primary keywords
+- Follow SEO best practices for character limits and optimization
+`;
+
+         const result = await seoOptimizationAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
+            {
+               output: SeoOptimizationStepOutputSchema.pick({
+                  keywords: true,
+                  metaDescription: true,
+               }),
+            },
+         );
+
+         if (!result?.object.keywords) {
+            throw AppError.validation(
+               'Agent output is missing "keywords" field',
+            );
+         }
+         if (!result?.object.metaDescription) {
+            throw AppError.validation(
+               'Agent output is missing "metaDescription" field',
+            );
+         }
+
+         // Ingest LLM usage for billing
+         if (result.usage) {
+            await ingestUsage(result.usage as LLMUsage, userId);
+         }
+
+         // Update content status and emit event when SEO optimization completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "SEO optimization completed",
+            layout: request.layout,
+         });
+
+         return {
+            keywords: result.object.keywords,
+            metaDescription: result.object.metaDescription,
+            userId,
+            contentId,
+            request,
+            agentId,
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to optimize SEO for tutorial",
+            layout: inputData.request.layout,
+         });
+         console.error(error);
+         propagateError(error);
+         throw APIError.internal("Failed to optimize SEO for tutorial");
+      }
+   },
+});
+
+const FinalResultStepOutputSchema = CreateNewContentWorkflowInputSchema.extend({
+   rating: z.number().min(0).max(100),
+   reasonOfTheRating: z
+      .string()
+      .describe("The reason for the rating, written in markdown"),
+   keywords: z
+      .array(z.string())
+      .describe("The associated keywords of the content"),
+   sources: z.array(z.string()).describe("The sources found on the search"),
+   metaDescription: z
+      .string()
+      .describe(
+         "The meta description, being a SEO optimized description of the article",
+      ),
+   editor: editorType,
+}).omit({
+   competitorIds: true,
+   organizationId: true,
+});
+
+export const tutorialFinalResultStep = createStep({
+   id: "tutorial-final-result-step",
+   description: "Combine reader and SEO results into final output",
+   inputSchema: z.object({
+      "tutorial-read-and-review-step": ContentReviewerStepOutputSchema,
+      "tutorial-seo-optimization-step": SeoOptimizationStepOutputSchema,
+   }),
+   outputSchema: FinalResultStepOutputSchema,
+   execute: async ({ inputData }) => {
+      const readerResult = inputData["tutorial-read-and-review-step"];
+      const seoResult = inputData["tutorial-seo-optimization-step"];
+      const { contentId, request } = readerResult;
+      try {
+         // Update content status and emit event when final result compilation starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Compiling final results...",
+            layout: request.layout,
+         });
+
+         // Combine results - prioritize SEO keywords and meta description
+         const finalResult = {
+            rating: readerResult.rating,
+            reasonOfTheRating: readerResult.reasonOfTheRating,
+            keywords: seoResult.keywords,
+            sources: readerResult.sources,
+            metaDescription: seoResult.metaDescription,
+            editor: readerResult.editor,
+            userId: readerResult.userId,
+            agentId: readerResult.agentId,
+            contentId: readerResult.contentId,
+            request: readerResult.request,
+         };
+
+         // Update content status and emit event when final result compilation completes
+
+         return finalResult;
+      } catch (error) {
+         await updateContentStatus({
+            contentId: contentId,
+            status: "failed",
+            message: "Failed to compile final results",
+            layout: request.layout,
+         });
+         console.error(error);
+         propagateError(error);
+         throw APIError.internal("Failed to compile final results");
+      }
+   },
+});
+
 export const createNewTutorialWorkflow = createWorkflow({
    id: "create-new-tutorial-workflow",
    description: "Create a new tutorial",
    inputSchema: CreateNewContentWorkflowInputSchema,
-   outputSchema: ContentReviewerStepOutputSchema,
+   outputSchema: FinalResultStepOutputSchema,
 })
    .then(researchStep)
    .then(tutorialWritingStep)
    .then(tutorialEditorStep)
-   .then(tutorialReadAndReviewStep)
+   .parallel([tutorialReadAndReviewStep, tutorialSeoOptimizationStep])
+   .then(tutorialFinalResultStep)
    .commit();

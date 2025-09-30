@@ -5,6 +5,7 @@ import { APIError, AppError, propagateError } from "@packages/utils/errors";
 import { changelogWriterAgent } from "../../agents/changelog/changelog-writer-agent";
 import { changelogEditorAgent } from "../../agents/changelog/changelog-editor-agent";
 import { changelogReaderAgent } from "../../agents/changelog/changelog-reader-agent";
+import { seoOptimizationAgent } from "../../agents/seo-agent";
 import { emitContentStatusChanged } from "@packages/server-events";
 import { createDb } from "@packages/database/client";
 import { updateContent } from "@packages/database/repositories/content-repository";
@@ -252,15 +253,7 @@ const ContentReviewerStepOutputSchema =
       reasonOfTheRating: z
          .string()
          .describe("The reason for the rating, written in markdown"),
-      keywords: z
-         .array(z.string())
-         .describe("The associeated keywords of the content"),
       sources: z.array(z.string()).describe("The sources found on the search"),
-      metaDescription: z
-         .string()
-         .describe(
-            "The meta description, being a SEO optmizaed description of the article",
-         ),
       editor: editorType,
    }).omit({
       competitorIds: true,
@@ -305,22 +298,9 @@ final:${editor}
                output: ContentReviewerStepOutputSchema.pick({
                   rating: true,
                   reasonOfTheRating: true,
-                  keywords: true,
-                  metaDescription: true,
                }),
             },
          );
-         if (!result.object.metaDescription) {
-            throw AppError.validation(
-               'Agent output is missing "metaDescription" field',
-            );
-         }
-         if (!result?.object.rating) {
-            throw AppError.validation('Agent output is missing "review" field');
-         }
-         if (!result?.object.keywords) {
-            throw AppError.validation('Agent output is missing "review" field');
-         }
          if (!result?.object.rating) {
             throw AppError.validation('Agent output is missing "review" field');
          }
@@ -346,12 +326,10 @@ final:${editor}
          return {
             rating: result.object.rating,
             reasonOfTheRating: result.object.reasonOfTheRating,
-            metaDescription: result.object.metaDescription,
             userId,
             agentId,
             contentId,
             request,
-            keywords: result.object.keywords,
             editor,
             sources: ["Your changelog"],
          };
@@ -369,16 +347,196 @@ final:${editor}
    },
 });
 
+const SeoOptimizationStepOutputSchema =
+   CreateNewContentWorkflowInputSchema.extend({
+      keywords: z
+         .array(z.string())
+         .describe(
+            "The associated keywords of the content for SEO optimization",
+         ),
+      metaDescription: z
+         .string()
+         .describe("The SEO optimized meta description of the content"),
+   }).omit({
+      competitorIds: true,
+      organizationId: true,
+   });
+
+export const changelogSeoOptimizationStep = createStep({
+   id: "changelog-seo-optimization-step",
+   description: "Generate SEO keywords and meta description for the changelog",
+   inputSchema: ContentEditorStepOutputSchema,
+   outputSchema: SeoOptimizationStepOutputSchema,
+   execute: async ({ inputData }) => {
+      try {
+         const { userId, agentId, contentId, request, editor } = inputData;
+
+         // Update content status and emit event when SEO optimization starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Optimizing SEO for your changelog...",
+            layout: request.layout,
+         });
+
+         const inputPrompt = `
+I need you to perform SEO optimization for this ${request.layout} changelog content.
+
+Content:
+${editor}
+
+Generate SEO-optimized keywords and meta description for this changelog content.
+
+Requirements:
+- Keywords should be relevant to changelog content and technology updates
+- Meta description should be compelling and include primary keywords
+- Follow SEO best practices for character limits and optimization
+`;
+
+         const result = await seoOptimizationAgent.generateVNext(
+            [
+               {
+                  role: "user",
+                  content: inputPrompt,
+               },
+            ],
+            {
+               output: SeoOptimizationStepOutputSchema.pick({
+                  keywords: true,
+                  metaDescription: true,
+               }),
+            },
+         );
+
+         if (!result?.object.keywords) {
+            throw AppError.validation(
+               'Agent output is missing "keywords" field',
+            );
+         }
+         if (!result?.object.metaDescription) {
+            throw AppError.validation(
+               'Agent output is missing "metaDescription" field',
+            );
+         }
+
+         // Ingest LLM usage for billing
+         if (result.usage) {
+            await ingestUsage(result.usage as LLMUsage, userId);
+         }
+
+         // Update content status and emit event when SEO optimization completes
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "SEO optimization completed",
+            layout: request.layout,
+         });
+
+         return {
+            keywords: result.object.keywords,
+            metaDescription: result.object.metaDescription,
+            userId,
+            agentId,
+            contentId,
+            request,
+         };
+      } catch (error) {
+         await updateContentStatus({
+            contentId: inputData.contentId,
+            status: "failed",
+            message: "Failed to optimize SEO for changelog",
+            layout: inputData.request.layout,
+         });
+         console.error(error);
+         propagateError(error);
+         throw APIError.internal("Failed to optimize SEO for changelog");
+      }
+   },
+});
+
+const FinalResultStepOutputSchema = CreateNewContentWorkflowInputSchema.extend({
+   rating: z.number().min(0).max(100),
+   reasonOfTheRating: z
+      .string()
+      .describe("The reason for the rating, written in markdown"),
+   keywords: z
+      .array(z.string())
+      .describe("The associated keywords of the content"),
+   sources: z.array(z.string()).describe("The sources found on the search"),
+   metaDescription: z
+      .string()
+      .describe(
+         "The meta description, being a SEO optimized description of the article",
+      ),
+   editor: editorType,
+}).omit({
+   competitorIds: true,
+   organizationId: true,
+});
+
+export const changelogFinalResultStep = createStep({
+   id: "changelog-final-result-step",
+   description: "Combine reader and SEO results into final output",
+   inputSchema: z.object({
+      "changelog-read-and-review-step": ContentReviewerStepOutputSchema,
+      "changelog-seo-optimization-step": SeoOptimizationStepOutputSchema,
+   }),
+   outputSchema: FinalResultStepOutputSchema,
+   execute: async ({ inputData }) => {
+      const readerResult = inputData["changelog-read-and-review-step"];
+      const seoResult = inputData["changelog-seo-optimization-step"];
+      const { contentId, request } = readerResult;
+      try {
+         // Update content status and emit event when final result compilation starts
+         await updateContentStatus({
+            contentId,
+            status: "pending",
+            message: "Compiling final results...",
+            layout: request.layout,
+         });
+
+         // Combine results - prioritize SEO keywords and meta description
+         const finalResult = {
+            rating: readerResult.rating,
+            reasonOfTheRating: readerResult.reasonOfTheRating,
+            keywords: seoResult.keywords,
+            sources: readerResult.sources,
+            metaDescription: seoResult.metaDescription,
+            editor: readerResult.editor,
+            userId: readerResult.userId,
+            agentId: readerResult.agentId,
+            contentId: readerResult.contentId,
+            request: readerResult.request,
+         };
+
+         // Update content status and emit event when final result compilation completes
+
+         return finalResult;
+      } catch (error) {
+         await updateContentStatus({
+            contentId: contentId,
+            status: "failed",
+            message: "Failed to compile final results",
+            layout: request.layout,
+         });
+         console.error(error);
+         propagateError(error);
+         throw APIError.internal("Failed to compile final results");
+      }
+   },
+});
+
 export const createNewChangelogWorkflow = createWorkflow({
    id: "create-new-changelog-workflow",
    description: "Create a new changelog",
    inputSchema: CreateNewContentWorkflowInputSchema,
-   outputSchema: ContentReviewerStepOutputSchema,
+   outputSchema: FinalResultStepOutputSchema,
    retryConfig: {
       attempts: 3,
    },
 })
    .then(changelogWritingStep)
    .then(changelogEditorStep)
-   .then(changelogReadAndReviewStep)
+   .parallel([changelogReadAndReviewStep, changelogSeoOptimizationStep])
+   .then(changelogFinalResultStep)
    .commit();
