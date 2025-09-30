@@ -211,7 +211,8 @@ export const agentRouter = router({
             ]);
 
             if (!agents.length) {
-               throw APIError.notFound("No agents found.");
+               console.error("No agents found");
+               return { items: [], total: 0, page: 1, limit: 8, totalPages: 1 };
             }
             return {
                items: agents,
