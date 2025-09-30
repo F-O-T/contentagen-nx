@@ -56,4 +56,5 @@ export function setRuntimeContext(context: CustomRuntimeContext) {
 
    runtimeContext.set("language", context.language);
    runtimeContext.set("userId", context.userId);
+   return runtimeContext;
 }

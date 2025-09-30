@@ -99,7 +99,6 @@ const changelogWritingStep = createStep({
       try {
          const { userId, agentId, contentId, request } = inputData;
 
-         // Update content status and emit event when writing starts
          await updateContentStatus({
             contentId,
             status: "pending",
