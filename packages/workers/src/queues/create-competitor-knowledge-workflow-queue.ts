@@ -26,10 +26,12 @@ export async function runCreateCompetitorKnowledgeWorkflow(
          .getWorkflow("createBrandKnowledgeWorkflow")
          .createRunAsync();
 
-      if (runtimeContext) {
-         setRuntimeContext(runtimeContext);
-      }
       const result = await run.start({
+         runtimeContext: setRuntimeContext({
+            language: runtimeContext?.language ?? "en",
+            userId,
+         }),
+
          inputData: {
             websiteUrl,
             userId,
