@@ -11,6 +11,11 @@ import { emitContentStatusChanged } from "@packages/server-events";
 import { createDb } from "@packages/database/client";
 import { updateContent } from "@packages/database/repositories/content-repository";
 import { serverEnv } from "@packages/environment/server";
+import { getPaymentClient } from "@packages/payment/client";
+import {
+   createAiUsageMetadata,
+   ingestBilling,
+} from "@packages/payment/ingestion";
 
 // Internal helper function to update content status and emit events
 async function updateContentStatus(
@@ -37,6 +42,28 @@ async function updateContentStatus(
       propagateError(error);
       throw APIError.internal("Failed to update content status");
    }
+}
+
+// LLM usage tracking
+type LLMUsage = {
+   inputTokens: number;
+   outputTokens: number;
+   totalTokens: number;
+   reasoningTokens?: number | null;
+   cachedInputTokens?: number | null;
+};
+
+async function ingestUsage(usage: LLMUsage, userId: string) {
+   const paymentClient = getPaymentClient(serverEnv.POLAR_ACCESS_TOKEN);
+   const usageMetadata = createAiUsageMetadata({
+      effort: "grok-4-fast",
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+   });
+   await ingestBilling(paymentClient, {
+      externalCustomerId: userId,
+      metadata: usageMetadata,
+   });
 }
 
 const CreateNewContentWorkflowInputSchema = z.object({
@@ -125,6 +152,11 @@ Focus on creating a strategy that leverages our brand's unique strengths and dif
             throw AppError.validation(
                'Agent output is missing "strategy" field',
             );
+         }
+
+         // Ingest LLM usage for billing
+         if (result.usage) {
+            await ingestUsage(result.usage as LLMUsage, userId);
          }
 
          // Emit event when strategy completes
@@ -220,6 +252,11 @@ Focus on finding the most effective content angle and structure that can achieve
             throw AppError.validation(
                'Agent output is missing "research" field',
             );
+         }
+
+         // Ingest LLM usage for billing
+         if (result.usage) {
+            await ingestUsage(result.usage as LLMUsage, userId);
          }
 
          // Emit event when research completes
@@ -335,6 +372,11 @@ ${researchPrompt}
             );
          }
 
+         // Ingest LLM usage for billing
+         if (result.usage) {
+            await ingestUsage(result.usage as LLMUsage, userId);
+         }
+
          // Emit event when writing completes
          await updateContentStatus({
             contentId,
@@ -427,6 +469,11 @@ output the edited content in markdown format.
 
          if (!result?.object.editor) {
             throw AppError.validation('Agent output is missing "editor" field');
+         }
+
+         // Ingest LLM usage for billing
+         if (result.usage) {
+            await ingestUsage(result.usage as LLMUsage, userId);
          }
 
          // Emit event when editing completes
@@ -533,6 +580,11 @@ final:${editor}
             throw AppError.validation(
                'Agent output is missing "reasonOfTheRating" field',
             );
+         }
+
+         // Ingest LLM usage for billing
+         if (result.usage) {
+            await ingestUsage(result.usage as LLMUsage, userId);
          }
 
          // Emit event when review completes
