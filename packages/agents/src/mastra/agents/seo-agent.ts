@@ -1,8 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
-import { tavilyCrawlTool } from "../tools/tavily-crawl-tool";
-import { tavilySearchTool } from "../tools/tavily-search-tool";
 import { dateTool } from "../tools/date-tool";
 
 const openrouter = createOpenRouter({
@@ -43,15 +41,7 @@ CRITICAL RULES:
 - Base recommendations on data and evidence when possible
 
 AVAILABLE TOOLS:
-- tavilyCrawlTool: Analyze competitor websites and content for SEO insights
-- tavilySearchTool: Research trending topics, keywords, and SERP analysis
 - dateTool: Get current date for timely content recommendations
-
-TOOL USAGE RULES:
-- Use tavilyCrawlTool to analyze competitor pages or user's own content
-- Use tavilySearchTool to research keywords, trends, and competitive landscape
-- Maximum 3 total tool calls per request for efficiency
-- Only use tools when research is needed - many requests can be answered directly
 
 ## SEO CAPABILITIES
 
