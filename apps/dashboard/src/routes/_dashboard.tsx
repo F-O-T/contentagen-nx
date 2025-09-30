@@ -16,7 +16,11 @@ export const Route = createFileRoute("/_dashboard")({
    component: RouteComponent,
    wrapInSuspense: true,
    notFoundComponent: NotFoundComponent,
-   pendingComponent: PendingComponent,
+   pendingComponent: () => (
+      <div className="h-screen w-screen">
+         <PendingComponent />
+      </div>
+   ),
    errorComponent: ErrorComponent,
    loader: async ({ context }) => {
       await context.queryClient.prefetchQuery(
