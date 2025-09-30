@@ -1,3 +1,31 @@
+## 0.4.1 (2025-09-30)
+
+### 🩹 Fixes
+
+- **api:** handle case when no agents are found by returning an empty response ([f8149ec](https://github.com/F-O-T/contentagen-nx/commit/f8149ec))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/workers to 0.5.0
+
+### ❤️ Thank You
+
+- Manoel
+
+## 0.18.0 (2025-09-30)
+
+### 🚀 Features
+
+- **agents:** remove unused tools from SEO Optimization Agent ([69c627b](https://github.com/F-O-T/contentagen-nx/commit/69c627b))
+- **agents:** return runtime context in setRuntimeContext function ([efd1322](https://github.com/F-O-T/contentagen-nx/commit/efd1322))
+- **agents:** add SEO optimization step ([3c7b9d3](https://github.com/F-O-T/contentagen-nx/commit/3c7b9d3))
+- **agents:** add SEO Optimization Agent and integrate into Mastra ([52afac1](https://github.com/F-O-T/contentagen-nx/commit/52afac1))
+- **agents:** add LLM usage tracking and billing ingestion ([51613f9](https://github.com/F-O-T/contentagen-nx/commit/51613f9))
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.17.0 (2025-09-29)
 
 ### 🚀 Features
