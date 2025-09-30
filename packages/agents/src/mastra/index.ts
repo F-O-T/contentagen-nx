@@ -1,4 +1,5 @@
 import { Mastra } from "@mastra/core/mastra";
+import { seoOptimizationAgent } from "./agents/seo-agent";
 import { researcherAgent } from "./agents/researcher-agent";
 import { PinoLogger } from "@mastra/loggers";
 import { documentSynthesizerAgent } from "./agents/document-syntethizer-agent";
@@ -11,8 +12,6 @@ import { crawlCompetitorForFeatures } from "./workflows/crawl-for-features";
 import { extractCompetitorBrandInfoWorkflow } from "./workflows/extract-brand-info";
 import { createNewContentWorkflow } from "./workflows/create-new-content-workflow";
 import { contentStrategistAgent } from "./agents/strategist-agent";
-import { changelogWriterAgent } from "./agents/changelog/changelog-writer-agent";
-import { changelogEditorAgent } from "./agents/changelog/changelog-editor-agent";
 export type CustomRuntimeContext = {
    language: "en" | "pt";
    userId: string;
@@ -38,8 +37,7 @@ export const mastra = new Mastra({
       extractCompetitorBrandInfoWorkflow,
    },
    agents: {
-      changelogEditorAgent,
-      changelogWriterAgent,
+      seoOptimizationAgent,
       contentStrategistAgent,
       documentSynthesizerAgent,
       documentGenerationAgent,
