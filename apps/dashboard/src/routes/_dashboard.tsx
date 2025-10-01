@@ -10,12 +10,10 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useIsomorphicLayoutEffect } from "@packages/ui/hooks/use-isomorphic-layout-effect";
 import { toast } from "sonner";
 import { PendingComponent } from "@/default/pending";
-import { NotFoundComponent } from "@/default/not-found";
 import { ErrorComponent } from "@/default/error";
 export const Route = createFileRoute("/_dashboard")({
    component: RouteComponent,
    wrapInSuspense: true,
-   notFoundComponent: NotFoundComponent,
    pendingComponent: () => (
       <div className="h-screen w-screen">
          <PendingComponent />

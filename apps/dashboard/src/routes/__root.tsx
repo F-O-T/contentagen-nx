@@ -14,9 +14,16 @@ import type { RouterContext } from "../router";
 import brandConfig from "@packages/brand/index.json";
 import "@packages/localization";
 import i18n from "@packages/localization";
+import { NotFoundComponent } from "@/default/not-found";
 export const Route = createRootRouteWithContext<RouterContext>()({
    ssr: true,
    wrapInSuspense: true,
+   notFoundComponent: () => (
+      <div className="h-screen w-screen">
+         <NotFoundComponent />
+      </div>
+   ),
+
    head: () => ({
       links: [
          {
