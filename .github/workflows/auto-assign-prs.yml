@@ -1,7 +1,8 @@
 name: Auto Assign Pull Requests
 
 on:
-  pull_request:
+  pull_request_target:
+    branches: [master]
     types: [opened, ready_for_review]
 
 jobs:

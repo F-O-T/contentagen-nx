@@ -1,8 +1,8 @@
 name: Label PRs Based on Conventional Commits
 
 on:
-  pull_request:
-    branches: ["*"]
+  pull_request_target:
+    branches: [master]
     types: [opened, synchronize, reopened]
 
 jobs:
