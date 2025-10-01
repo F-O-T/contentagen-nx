@@ -1,5 +1,6 @@
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
+import { AppError, propagateError } from "@packages/utils/errors";
 
 export const dateTool = createTool({
    id: "get-current-date",
@@ -36,7 +37,10 @@ export const dateTool = createTool({
          return { date: `${year}-${month}-${day}` };
       } catch (error) {
          console.error("Failed to get current date:", error);
-         throw error;
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to get current date: ${(error as Error).message}`,
+         );
       }
    },
 });

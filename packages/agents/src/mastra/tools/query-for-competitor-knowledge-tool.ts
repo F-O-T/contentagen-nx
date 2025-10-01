@@ -3,6 +3,7 @@ import { serverEnv } from "@packages/environment/server";
 import { createPgVector } from "@packages/rag/client";
 import { searchCompetitorKnowledgeByTextAndExternalId } from "@packages/rag/repositories/competitor-knowledge-repository";
 import { z } from "zod";
+import { AppError, propagateError } from "@packages/utils/errors";
 
 export const queryForCompetitorKnowledge = createTool({
    id: "query-for-competitor-knowledge",
@@ -33,8 +34,11 @@ export const queryForCompetitorKnowledge = createTool({
          );
          return { results };
       } catch (error) {
-         console.error("Failed to search brand knowledge:", error);
-         throw error;
+         console.error("Failed to search competitor knowledge:", error);
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to search competitor knowledge: ${(error as Error).message}`,
+         );
       }
    },
 });

@@ -3,6 +3,7 @@ import { serverEnv } from "@packages/environment/server";
 import { createPgVector } from "@packages/rag/client";
 import { searchBrandKnowledgeByTextAndExternalId } from "@packages/rag/repositories/brand-knowledge-repository";
 import { z } from "zod";
+import { AppError, propagateError } from "@packages/utils/errors";
 
 export const queryForBrandKnowledge = createTool({
    id: "query-for-brand-knowledge",
@@ -36,7 +37,10 @@ export const queryForBrandKnowledge = createTool({
          return { results };
       } catch (error) {
          console.error("Failed to search brand knowledge:", error);
-         throw error;
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to search brand knowledge: ${(error as Error).message}`,
+         );
       }
    },
 });

@@ -7,6 +7,7 @@ import { getPaymentClient } from "@packages/payment/client";
 import { z } from "zod";
 import { serverEnv } from "@packages/environment/server";
 import { tavily } from "@tavily/core";
+import { AppError, propagateError } from "@packages/utils/errors";
 export const tavilySearchTool = createTool({
    id: "tavily-search",
    description: "Searches the web for relevant content",
@@ -38,7 +39,10 @@ export const tavilySearchTool = createTool({
             `Brand crawl failed for userId=${userId}, query="${query}".`,
             error,
          );
-         throw error;
+         propagateError(error);
+         throw AppError.internal(
+            `Search failed for userId=${userId}, query="${query}": ${(error as Error).message}`,
+         );
       }
    },
 });
