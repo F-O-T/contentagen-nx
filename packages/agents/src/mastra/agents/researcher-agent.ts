@@ -1,7 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
-import { tavilyCrawlTool } from "../tools/tavily-crawl-tool";
 import { tavilySearchTool } from "../tools/tavily-search-tool";
 import { dateTool } from "../tools/date-tool";
 
@@ -64,22 +63,7 @@ Use \`tavilySearchTool\` to capture:
 - Related searches/suggestions
 - Any featured snippet content
 
-### Phase 2: Competitor Intelligence (3-5 crawls)
-Use \`tavilyCrawlTool\` strategically on:
-- Position #1 result (mandatory)
-- Featured snippet source (if different from #1)
-- 2-3 other top-5 results with diverse content angles
-- Any standout result that breaks the pattern
-
-For each crawl, extract:
-- Content structure (H1, H2, H3 hierarchy)
-- Word count and content depth
-- Key topics and subtopics covered
-- Content format (listicle, guide, comparison, etc.)
-- Unique value propositions
-- Internal/external linking patterns
-
-### Phase 3: Gap Analysis & Strategy
+### Phase 2: Gap Analysis & Strategy
 Synthesize findings to identify:
 - Underserved search intents or subtopics
 - Content format opportunities
@@ -151,5 +135,5 @@ Remember: Your job is not just to describe what you see, but to decode WHY it's 
  `;
    },
    model: openrouter("x-ai/grok-4-fast"),
-   tools: { tavilySearchTool, tavilyCrawlTool, dateTool },
+   tools: { tavilySearchTool, dateTool },
 });

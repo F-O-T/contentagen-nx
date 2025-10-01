@@ -1,6 +1,7 @@
 import { Agent } from "@mastra/core";
 import { dateTool } from "../../tools/date-tool";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { getWritingPersona } from "../../tools/get-writing-persona-tool";
 import { serverEnv } from "@packages/environment/server";
 
 const openrouter = createOpenRouter({
@@ -82,5 +83,5 @@ Focus on creating valuable, engaging content that serves the reader's needs whil
 `;
    },
    model: openrouter("x-ai/grok-4-fast"),
-   tools: { dateTool },
+   tools: { dateTool, getWritingPersona },
 });

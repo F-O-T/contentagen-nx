@@ -1,7 +1,11 @@
 import { Agent } from "@mastra/core/agent";
+import { getReadabilityScoreTool } from "../tools/get-readability-score-tool";
+import { getMetaDescriptionTool } from "../tools/get-meta-description-tool";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { getKeywordsTool } from "../tools/get-keyword-tool";
 import { serverEnv } from "@packages/environment/server";
 import { dateTool } from "../tools/date-tool";
+import { analyzeContentStructureTool } from "../tools/analyze-content-structure-tool";
 
 const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
@@ -305,5 +309,11 @@ Focus exclusively on ethical, sustainable, and effective SEO strategies that pro
    `;
    },
    model: openrouter("x-ai/grok-4-fast"),
-   tools: { dateTool },
+   tools: {
+      dateTool,
+      getKeywordsTool,
+      getMetaDescriptionTool,
+      analyzeContentStructureTool,
+      getReadabilityScoreTool,
+   },
 });

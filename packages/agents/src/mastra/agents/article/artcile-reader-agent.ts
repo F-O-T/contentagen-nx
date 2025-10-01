@@ -1,5 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { getAudiencePersona } from "../../tools/get-audience-persona-tool";
 import { serverEnv } from "@packages/environment/server";
 import { dateTool } from "../../tools/date-tool";
 
@@ -226,5 +227,5 @@ Focus primarily on requirements fulfillment and content quality. Provide specifi
 `;
    },
    model: openrouter("x-ai/grok-4-fast"),
-   tools: { dateTool },
+   tools: { dateTool, getAudiencePersona },
 });
