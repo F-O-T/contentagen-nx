@@ -24,18 +24,20 @@ const resources = {
    pt: ptBRResources,
 };
 
+export type SupportedLng = keyof typeof resources;
+
 declare module "i18next" {
    interface CustomTypeOptions {
       resources: typeof resources;
    }
 }
-
+const supportedLngs: SupportedLng[] = ["en", "pt"];
 i18n
    .use(LanguageDetector)
    .use(initReactI18next)
    .init({
       resources,
-      supportedLngs: ["en", "pt"],
+      supportedLngs,
       defaultNS: "translation",
       load: "languageOnly",
       fallbackLng: "en",
