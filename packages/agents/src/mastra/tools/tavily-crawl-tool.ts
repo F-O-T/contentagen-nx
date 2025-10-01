@@ -18,7 +18,7 @@ export const tavilyCrawlTool = createTool({
          .describe(
             "Natual language instructions for the crawler to follow when crawling the website",
          )
-         .max(400),
+         .transform((val) => val.slice(0, 400)),
    }),
    execute: async ({ context }) => {
       const { websiteUrl, userId } = context;
