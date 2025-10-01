@@ -16,6 +16,12 @@
     },
     {
       "path": "../payment"
+    },
+    {
+      "path": "../utils"
+    },
+    {
+      "path": "../agents"
     }
   ]
 }
