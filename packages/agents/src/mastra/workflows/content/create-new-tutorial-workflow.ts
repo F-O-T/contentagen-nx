@@ -177,7 +177,10 @@ Focus on finding the most effective content angle and structure that can achieve
             message: "Failed to research tutorial",
             layout: inputData.request.layout,
          });
-         throw error;
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to research tutorial: ${(error as Error).message}`
+         );
       }
    },
 });
@@ -261,7 +264,10 @@ ${researchPrompt}
             message: "Failed to write tutorial",
             layout: inputData.request.layout,
          });
-         throw error;
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to write tutorial: ${(error as Error).message}`
+         );
       }
    },
 });
@@ -343,7 +349,10 @@ output the edited content in markdown format.
             message: "Failed to edit tutorial",
             layout: inputData.request.layout,
          });
-         throw error;
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to edit tutorial: ${(error as Error).message}`
+         );
       }
    },
 });
@@ -441,7 +450,10 @@ final:${editor}
             message: "Failed to review tutorial",
             layout: inputData.request.layout,
          });
-         throw error;
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to review tutorial: ${(error as Error).message}`
+         );
       }
    },
 });

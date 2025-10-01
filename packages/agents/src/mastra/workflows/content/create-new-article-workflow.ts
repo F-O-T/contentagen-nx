@@ -182,7 +182,10 @@ Focus on creating a strategy that leverages our brand's unique strengths and dif
             message: "Failed to create article strategy",
             layout: inputData.request.layout,
          });
-         throw error;
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to create article strategy: ${(error as Error).message}`
+         );
       }
    },
 });
@@ -282,7 +285,10 @@ Focus on finding the most effective content angle and structure that can achieve
             message: "Failed to research article",
             layout: inputData.request.layout,
          });
-         throw error;
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to research article: ${(error as Error).message}`
+         );
       }
    },
 });
@@ -403,7 +409,10 @@ ${researchPrompt}
             message: "Failed to write article",
             layout: request.layout,
          });
-         throw error;
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to write article: ${(error as Error).message}`
+         );
       }
    },
 });
@@ -502,7 +511,10 @@ output the edited content in markdown format.
             message: "Failed to edit article",
             layout: inputData.request.layout,
          });
-         throw error;
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to edit article: ${(error as Error).message}`
+         );
       }
    },
 });
@@ -599,7 +611,10 @@ final:${editor}
             message: "Failed to review article",
             layout: inputData.request.layout,
          });
-         throw error;
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to review article: ${(error as Error).message}`
+         );
       }
    },
 });

@@ -19,6 +19,7 @@ import { createNewArticleWorkflow } from "./content/create-new-article-workflow"
 import { createDb } from "@packages/database/client";
 import { serverEnv } from "@packages/environment/server";
 import { emitContentStatusChanged } from "@packages/server-events";
+import { AppError, propagateError } from "@packages/utils/errors";
 
 const CreateNewContentWorkflowInputSchema = z.object({
    userId: z.string(),
@@ -59,7 +60,6 @@ const saveContentStep = createStep({
       success: z.boolean(),
    }),
    execute: async ({ inputData }) => {
-      // Helper function to get the correct workflow result
       const getWorkflowResult = (data: typeof inputData) => {
          const possibleKeys = [
             "create-new-changelog-workflow",
@@ -73,7 +73,7 @@ const saveContentStep = createStep({
             }
          }
 
-         throw new Error("No workflow result found");
+         throw AppError.validation("No workflow result found");
       };
 
       const workflowResult = getWorkflowResult(inputData);
@@ -90,39 +90,58 @@ const saveContentStep = createStep({
       } = workflowResult;
 
       const dbClient = createDb({ databaseUrl: serverEnv.DATABASE_URL });
-      const stats: ContentStats = {
-         wordsCount: countWords(editor).toString(),
-         readTimeMinutes: readTimeMinutes(countWords(editor)).toString(),
-         qualityScore: rating.toString(),
-         reasonOfTheRating,
-      };
-      const meta: ContentMeta = {
-         title: extractTitleFromMarkdown(editor),
-         slug: createSlug(extractTitleFromMarkdown(editor)),
-         description: metaDescription,
-         keywords,
-         sources,
-      };
-      await updateContent(dbClient, contentId, {
-         status: "draft",
-         agentId,
-         request,
-         stats,
-         meta,
-         body: removeTitleFromMarkdown(editor),
-      });
+      try {
+         const stats: ContentStats = {
+            wordsCount: countWords(editor).toString(),
+            readTimeMinutes: readTimeMinutes(countWords(editor)).toString(),
+            qualityScore: rating.toString(),
+            reasonOfTheRating,
+         };
+         const meta: ContentMeta = {
+            title: extractTitleFromMarkdown(editor),
+            slug: createSlug(extractTitleFromMarkdown(editor)),
+            description: metaDescription,
+            keywords,
+            sources,
+         };
+         await updateContent(dbClient, contentId, {
+            status: "draft",
+            agentId,
+            request,
+            stats,
+            meta,
+            body: removeTitleFromMarkdown(editor),
+         });
 
-      // Emit event when content is saved as draft
-      emitContentStatusChanged({
-         contentId,
-         status: "draft",
-         message: "Content generation completed and saved as draft",
-         layout: request.layout,
-      });
+         // Emit event when content is saved as draft
+         emitContentStatusChanged({
+            contentId,
+            status: "draft",
+            message: "Content generation completed and saved as draft",
+            layout: request.layout,
+         });
 
-      return {
-         success: true,
-      };
+         return {
+            success: true,
+         };
+      } catch (error) {
+         await updateContent(dbClient, contentId, {
+            status: "failed",
+         });
+
+         emitContentStatusChanged({
+            contentId,
+            status: "failed",
+            message: "Failed to save your new content on the database",
+            layout: request.layout,
+         });
+
+         console.error("Failed to save content:", error);
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to save content: ${(error as Error).message}`,
+         );
+      }
    },
 });
 
