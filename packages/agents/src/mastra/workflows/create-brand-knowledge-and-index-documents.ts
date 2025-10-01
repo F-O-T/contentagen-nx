@@ -15,6 +15,7 @@ import { updateCompetitor } from "@packages/database/repositories/competitor-rep
 import { z } from "zod";
 import { createPgVector } from "@packages/rag/client";
 import { createCompetitorKnowledgeWithEmbedding } from "@packages/rag/repositories/competitor-knowledge-repository";
+import { AppError, propagateError } from "@packages/utils/errors";
 
 type LLMUsage = {
    inputTokens: number;
@@ -307,7 +308,8 @@ const saveAndIndexBrandDocuments = createStep({
                `[saveAndIndexBrandDocuments] Error processing document ${docIndex + 1}:`,
                error,
             );
-            throw error;
+            propagateError(error);
+            throw AppError.internal(`Failed to process document ${docIndex + 1}`);
          }
       }
 
@@ -345,7 +347,8 @@ const saveAndIndexBrandDocuments = createStep({
                "[saveAndIndexBrandDocuments] Error saving chunks to Chroma:",
                error,
             );
-            throw error;
+            propagateError(error);
+            throw AppError.internal("Failed to save chunks to vector database");
          }
       }
 

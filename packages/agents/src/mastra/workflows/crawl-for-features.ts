@@ -14,6 +14,7 @@ import { updateCompetitor } from "@packages/database/repositories/competitor-rep
 import { emitCompetitorFeaturesStatusChanged } from "@packages/server-events";
 import { z } from "zod";
 import type { CompetitorFeaturesStatus } from "@packages/database/schemas/competitor";
+import { AppError, propagateError } from "@packages/utils/errors";
 
 type LLMUsage = {
    inputTokens: number;
@@ -49,6 +50,8 @@ async function updateCompetitorFeaturesStatus(
          "[CompetitorFeatures] Failed to update competitor features status in DB:",
          err,
       );
+      propagateError(err);
+      throw AppError.internal("Failed to update competitor features status");
    }
    emitCompetitorFeaturesStatusChanged({ competitorId, status });
 }
@@ -217,7 +220,8 @@ const saveCompetitorFeatures = createStep({
                "[saveCompetitorFeatures] Error saving features to Chroma:",
                error,
             );
-            throw error;
+            propagateError(error);
+            throw AppError.internal("Failed to save features to vector database");
          }
       }
 

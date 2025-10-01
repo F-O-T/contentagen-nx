@@ -10,6 +10,7 @@ import { createDb } from "@packages/database/client";
 import { updateCompetitor } from "@packages/database/repositories/competitor-repository";
 import crypto from "node:crypto";
 import { z } from "zod";
+import { AppError, propagateError } from "@packages/utils/errors";
 
 type LLMUsage = {
    inputTokens: number;
@@ -45,6 +46,8 @@ async function updateCompetitorAnalysisStatus(
          "[CompetitorBrand] Failed to update competitor analysis status in DB:",
          err,
       );
+      propagateError(err);
+      throw AppError.internal("Failed to update competitor analysis status");
    }
 }
 
@@ -183,7 +186,8 @@ const saveCompetitorBrandInfo = createStep({
             error,
          );
          await updateCompetitorAnalysisStatus(competitorId, "failed");
-         throw error;
+         propagateError(error);
+         throw AppError.internal("Failed to save competitor brand information");
       }
    },
 });
