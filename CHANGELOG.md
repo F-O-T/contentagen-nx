@@ -1,3 +1,18 @@
+## 0.18.0 (2025-10-01)
+
+### 🚀 Features
+
+- **agents:** add new tools for content analysis and SEO optimization ([c45b06d](https://github.com/F-O-T/contentagen-nx/commit/c45b06d))
+- **agents:** enhance agents with additional tools for improved functionality ([30d317f](https://github.com/F-O-T/contentagen-nx/commit/30d317f))
+
+### 🩹 Fixes
+
+- **agents:** improve error handling messages for various steps ([cbf526b](https://github.com/F-O-T/contentagen-nx/commit/cbf526b))
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.17.0 (2025-09-29)
 
 ### 🚀 Features
