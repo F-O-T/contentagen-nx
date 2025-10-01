@@ -184,23 +184,26 @@ Focus on creating a strategy that leverages our brand's unique strengths and dif
          });
          propagateError(error);
          throw AppError.internal(
-            `Failed to create article strategy: ${(error as Error).message}`
+            `Failed to create article strategy: ${(error as Error).message}`,
          );
       }
    },
 });
 
 const ResearchStepOutputSchema = CreateNewContentWorkflowInputSchema.extend({
-   research: z.object({
-      keywords: z
-         .array(z.string())
-         .describe("The associeated keywords of the content"),
-      sources: z.array(z.string()).describe("The sources found on the search"),
-      searchIntent: z.string(),
-      competitorAnalysis: z.string(),
-      contentGaps: z.string(),
-      strategicRecommendations: z.string(),
-   }),
+   searchIntent: z.string().describe("The search intent and user expectations"),
+   competitorAnalysis: z
+      .string()
+      .describe("Analysis of top ranking competitors and their strategies"),
+   contentGaps: z
+      .string()
+      .describe("Content gaps and opportunities identified"),
+   strategicRecommendations: z
+      .string()
+      .describe("Strategic recommendations for outranking competitors"),
+   sources: z
+      .array(z.string())
+      .describe("The URLs found during web search research"),
 }).omit({
    competitorIds: true,
    organizationId: true,
@@ -224,18 +227,19 @@ export const researchStep = createStep({
          });
 
          const inputPrompt = `
-I need you to perform comprehensive SERP research for the following content request:
+I need you to perform SERP research for the following content request:
 
 **Topic:** ${request.description}
 **Content Type:** ${request.layout}
 
-Please conduct thorough SERP analysis and competitive intelligence gathering to identify:
+Please conduct SERP analysis to identify:
 1. Search intent and user expectations
-2. Top ranking competitors and their content strategies
+2. Top ranking competitors and their strategies
 3. Content gaps and opportunities
-4. Strategic recommendations for outranking competitors
+4. Strategic recommendations for content
+5. Source URLs from web searches used for research
 
-Focus on finding the most effective content angle and structure that can achieve top rankings.
+Focus on the research findings only and include actual URLs found during your web searches.
 `;
 
          const result = await researcherAgent.generateVNext(
@@ -246,15 +250,19 @@ Focus on finding the most effective content angle and structure that can achieve
                },
             ],
             {
-               output: ResearchStepOutputSchema.pick({
-                  research: true,
+               output: ResearchStepOutputSchema.omit({
+                  agentId: true,
+                  contentId: true,
+                  userId: true,
+                  request: true,
                }),
             },
          );
 
-         if (!result?.object.research) {
+         console.log("Research Agent Result:", result.object);
+         if (!result?.object.searchIntent) {
             throw AppError.validation(
-               'Agent output is missing "research" field',
+               'Agent output is missing "searchIntent" field',
             );
          }
 
@@ -272,7 +280,7 @@ Focus on finding the most effective content angle and structure that can achieve
          });
 
          return {
-            research: result.object.research,
+            ...result.object,
             userId,
             agentId,
             request,
@@ -287,7 +295,7 @@ Focus on finding the most effective content angle and structure that can achieve
          });
          propagateError(error);
          throw AppError.internal(
-            `Failed to research article: ${(error as Error).message}`
+            `Failed to research article: ${(error as Error).message}`,
          );
       }
    },
@@ -295,6 +303,9 @@ Focus on finding the most effective content angle and structure that can achieve
 const ContentWritingStepOutputSchema =
    CreateNewContentWorkflowInputSchema.extend({
       writing: writingType,
+      sources: z
+         .array(z.string())
+         .describe("The URLs found during web search research"),
    }).omit({
       competitorIds: true,
       organizationId: true,
@@ -315,7 +326,11 @@ const articleWritingStep = createStep({
                request,
                contentId,
                agentId,
-               research,
+               searchIntent,
+               competitorAnalysis,
+               contentGaps,
+               strategicRecommendations,
+               sources,
                userId,
             },
             "article-strategy-step": { strategy },
@@ -344,10 +359,10 @@ brandPositioning: ${strategy.brandPositioning}
          
 `;
          const researchPrompt = `
-searchIntent: ${research.searchIntent}
-competitorAnalysis: ${research.competitorAnalysis}
-contentGaps: ${research.contentGaps}
-strategicRecommendations: ${research.strategicRecommendations}
+searchIntent: ${searchIntent}
+competitorAnalysis: ${competitorAnalysis}
+contentGaps: ${contentGaps}
+strategicRecommendations: ${strategicRecommendations}
 `;
          const inputPrompt = `
 create a new ${request.layout} based on the conent request.
@@ -393,8 +408,8 @@ ${researchPrompt}
          });
 
          return {
-            research,
             writing: result.object.writing,
+            sources,
             userId,
             agentId,
             request,
@@ -411,23 +426,17 @@ ${researchPrompt}
          });
          propagateError(error);
          throw AppError.internal(
-            `Failed to write article: ${(error as Error).message}`
+            `Failed to write article: ${(error as Error).message}`,
          );
       }
    },
 });
 const ContentEditorStepOutputSchema =
    CreateNewContentWorkflowInputSchema.extend({
-      research: ResearchStepOutputSchema.pick({
-         research: true,
-      }),
-
       editor: editorType,
-      metaDescription: z
-         .string()
-         .describe(
-            "The meta description, being a SEO optmizaed description of the article",
-         ),
+      sources: z
+         .array(z.string())
+         .describe("The URLs found during web search research"),
    }).omit({
       competitorIds: true,
       organizationId: true,
@@ -435,16 +444,11 @@ const ContentEditorStepOutputSchema =
 const articleEditorStep = createStep({
    id: "article-editor-step",
    description: "Edit the article based on the content research",
-   inputSchema: CreateNewContentWorkflowInputSchema.extend({
-      writing: writingType,
-      research: ResearchStepOutputSchema.pick({
-         research: true,
-      }),
-   }),
+   inputSchema: ContentWritingStepOutputSchema,
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
       try {
-         const { userId, contentId, research, request, agentId, writing } =
+         const { userId, contentId, request, agentId, writing, sources } =
             inputData;
 
          // Emit event when editing starts
@@ -472,7 +476,6 @@ output the edited content in markdown format.
             {
                output: ContentEditorStepOutputSchema.pick({
                   editor: true,
-                  metaDescription: true,
                }),
             },
          );
@@ -496,12 +499,10 @@ output the edited content in markdown format.
 
          return {
             agentId,
-            metaDescription: result.object.metaDescription,
             editor: result.object.editor,
             userId,
-            research,
+            sources,
             contentId,
-
             request,
          };
       } catch (error) {
@@ -513,7 +514,7 @@ output the edited content in markdown format.
          });
          propagateError(error);
          throw AppError.internal(
-            `Failed to edit article: ${(error as Error).message}`
+            `Failed to edit article: ${(error as Error).message}`,
          );
       }
    },
@@ -538,7 +539,7 @@ export const articleReadAndReviewStep = createStep({
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
       try {
-         const { contentId, research, userId, agentId, request, editor } =
+         const { contentId, sources, userId, agentId, request, editor } =
             inputData;
 
          // Emit event when review starts
@@ -602,7 +603,7 @@ final:${editor}
             contentId,
             request,
             editor,
-            sources: research.research.sources,
+            sources,
          };
       } catch (error) {
          await updateContentStatus({
@@ -613,7 +614,7 @@ final:${editor}
          });
          propagateError(error);
          throw AppError.internal(
-            `Failed to review article: ${(error as Error).message}`
+            `Failed to review article: ${(error as Error).message}`,
          );
       }
    },

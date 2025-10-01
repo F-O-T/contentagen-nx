@@ -309,7 +309,9 @@ const saveAndIndexBrandDocuments = createStep({
                error,
             );
             propagateError(error);
-            throw AppError.internal(`Failed to process document ${docIndex + 1}`);
+            throw AppError.internal(
+               `Failed to process document ${docIndex + 1}`,
+            );
          }
       }
 

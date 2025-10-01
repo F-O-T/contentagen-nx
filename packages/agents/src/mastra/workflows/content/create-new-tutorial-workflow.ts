@@ -83,17 +83,25 @@ const editorType = z.string().describe("The edited tutorial, ready for review");
 const ContentWritingStepOutputSchema =
    CreateNewContentWorkflowInputSchema.extend({
       writing: writingType,
+      sources: z.array(z.string()).describe("The URLs found during web search research"),
    }).omit({
       competitorIds: true,
       organizationId: true,
    });
 const ResearchStepOutputSchema = CreateNewContentWorkflowInputSchema.extend({
-   research: z.object({
-      searchIntent: z.string(),
-      competitorAnalysis: z.string(),
-      contentGaps: z.string(),
-      strategicRecommendations: z.string(),
-   }),
+   searchIntent: z.string().describe("The search intent and user expectations"),
+   competitorAnalysis: z
+      .string()
+      .describe("Analysis of top ranking competitors and their strategies"),
+   contentGaps: z
+      .string()
+      .describe("Content gaps and opportunities identified"),
+   strategicRecommendations: z
+      .string()
+      .describe("Strategic recommendations for outranking competitors"),
+   sources: z
+      .array(z.string())
+      .describe("The URLs found during web search research"),
 }).omit({
    competitorIds: true,
    organizationId: true,
@@ -116,18 +124,19 @@ export const researchStep = createStep({
          });
 
          const inputPrompt = `
-I need you to perform comprehensive SERP research for the following content request:
+I need you to perform SERP research for the following content request:
 
 **Topic:** ${request.description}
 **Content Type:** ${request.layout}
 
-Please conduct thorough SERP analysis and competitive intelligence gathering to identify:
+Please conduct SERP analysis to identify:
 1. Search intent and user expectations
-2. Top ranking competitors and their content strategies
+2. Top ranking competitors and their strategies
 3. Content gaps and opportunities
-4. Strategic recommendations for outranking competitors
+4. Strategic recommendations for content
+5. Source URLs from web searches used for research
 
-Focus on finding the most effective content angle and structure that can achieve top rankings.
+Focus on the research findings only and include actual URLs found during your web searches.
 `;
 
          const result = await researcherAgent.generateVNext(
@@ -138,15 +147,18 @@ Focus on finding the most effective content angle and structure that can achieve
                },
             ],
             {
-               output: ResearchStepOutputSchema.pick({
-                  research: true,
+               output: ResearchStepOutputSchema.omit({
+                  agentId: true,
+                  contentId: true,
+                  userId: true,
+                  request: true,
                }),
             },
          );
 
-         if (!result?.object.research) {
+         if (!result?.object.searchIntent) {
             throw AppError.validation(
-               'Agent output is missing "research" field',
+               'Agent output is missing "searchIntent" field',
             );
          }
 
@@ -164,7 +176,7 @@ Focus on finding the most effective content angle and structure that can achieve
          });
 
          return {
-            research: result.object.research,
+            ...result.object,
             userId,
             request,
             agentId,
@@ -179,7 +191,7 @@ Focus on finding the most effective content angle and structure that can achieve
          });
          propagateError(error);
          throw AppError.internal(
-            `Failed to research tutorial: ${(error as Error).message}`
+            `Failed to research tutorial: ${(error as Error).message}`,
          );
       }
    },
@@ -192,7 +204,17 @@ const tutorialWritingStep = createStep({
    outputSchema: ContentWritingStepOutputSchema,
    execute: async ({ inputData }) => {
       try {
-         const { userId, request, research, agentId, contentId } = inputData;
+         const {
+            userId,
+            request,
+            competitorAnalysis,
+            contentGaps,
+            searchIntent,
+            strategicRecommendations,
+            sources,
+            agentId,
+            contentId,
+         } = inputData;
 
          // Emit event when writing starts
          await updateContentStatus({
@@ -203,10 +225,10 @@ const tutorialWritingStep = createStep({
          });
 
          const researchPrompt = `
-searchIntent: ${research.searchIntent}
-competitorAnalysis: ${research.competitorAnalysis}
-contentGaps: ${research.contentGaps}
-strategicRecommendations: ${research.strategicRecommendations}
+searchIntent: ${searchIntent}
+competitorAnalysis: ${competitorAnalysis}
+contentGaps: ${contentGaps}
+strategicRecommendations: ${strategicRecommendations}
 `;
 
          const inputPrompt = `
@@ -252,6 +274,8 @@ ${researchPrompt}
 
          return {
             writing: result.object.writing,
+            sources,
+
             userId,
             request,
             agentId,
@@ -266,7 +290,7 @@ ${researchPrompt}
          });
          propagateError(error);
          throw AppError.internal(
-            `Failed to write tutorial: ${(error as Error).message}`
+            `Failed to write tutorial: ${(error as Error).message}`,
          );
       }
    },
@@ -274,6 +298,7 @@ ${researchPrompt}
 const ContentEditorStepOutputSchema =
    CreateNewContentWorkflowInputSchema.extend({
       editor: editorType,
+      sources: z.array(z.string()).describe("The URLs found during web search research"),
    }).omit({
       competitorIds: true,
       organizationId: true,
@@ -281,13 +306,18 @@ const ContentEditorStepOutputSchema =
 const tutorialEditorStep = createStep({
    id: "tutorial-editor-step",
    description: "Edit the tutorial based on the content research",
-   inputSchema: CreateNewContentWorkflowInputSchema.extend({
-      writing: writingType,
-   }),
+   inputSchema: ContentWritingStepOutputSchema,
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
       try {
-         const { userId, request, writing, agentId, contentId } = inputData;
+         const {
+            userId,
+            request,
+            writing,
+            agentId,
+            contentId,
+            sources,
+         } = inputData;
 
          // Emit event when editing starts
          await updateContentStatus({
@@ -341,6 +371,7 @@ output the edited content in markdown format.
             request,
             agentId,
             contentId,
+            sources,
          };
       } catch (error) {
          await updateContentStatus({
@@ -351,7 +382,7 @@ output the edited content in markdown format.
          });
          propagateError(error);
          throw AppError.internal(
-            `Failed to edit tutorial: ${(error as Error).message}`
+            `Failed to edit tutorial: ${(error as Error).message}`,
          );
       }
    },
@@ -376,7 +407,8 @@ export const tutorialReadAndReviewStep = createStep({
    outputSchema: ContentReviewerStepOutputSchema,
    execute: async ({ inputData }) => {
       try {
-         const { userId, request, editor, agentId, contentId } = inputData;
+         const { userId, request, editor, agentId, contentId, sources } =
+            inputData;
 
          // Emit event when review starts
          await updateContentStatus({
@@ -441,7 +473,7 @@ final:${editor}
             agentId,
             editor,
             contentId,
-            sources: ["Your tutorial"],
+            sources,
          };
       } catch (error) {
          await updateContentStatus({
@@ -452,7 +484,7 @@ final:${editor}
          });
          propagateError(error);
          throw AppError.internal(
-            `Failed to review tutorial: ${(error as Error).message}`
+            `Failed to review tutorial: ${(error as Error).message}`,
          );
       }
    },

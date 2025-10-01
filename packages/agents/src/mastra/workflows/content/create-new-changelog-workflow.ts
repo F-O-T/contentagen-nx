@@ -161,7 +161,7 @@ request: ${request.description}
          });
          propagateError(error);
          throw AppError.internal(
-            `Failed to write changelog: ${(error as Error).message}`
+            `Failed to write changelog: ${(error as Error).message}`,
          );
       }
    },
@@ -246,7 +246,7 @@ output the edited content in markdown format.
          });
          propagateError(error);
          throw AppError.internal(
-            `Failed to edit changelog: ${(error as Error).message}`
+            `Failed to edit changelog: ${(error as Error).message}`,
          );
       }
    },

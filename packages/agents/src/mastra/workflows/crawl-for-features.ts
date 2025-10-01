@@ -221,7 +221,9 @@ const saveCompetitorFeatures = createStep({
                error,
             );
             propagateError(error);
-            throw AppError.internal("Failed to save features to vector database");
+            throw AppError.internal(
+               "Failed to save features to vector database",
+            );
          }
       }
 
