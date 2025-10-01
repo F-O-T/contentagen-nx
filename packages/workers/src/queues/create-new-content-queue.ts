@@ -7,6 +7,7 @@ import {
    type CustomRuntimeContext,
 } from "@packages/agents";
 import type { ContentRequest } from "@packages/database/schemas/content";
+import { AppError, propagateError } from "@packages/utils/errors";
 
 export type CreateNewContentWorkflowJobData = {
    userId: string;
@@ -56,8 +57,17 @@ export async function runCreateNewContentWorkflow(
          result,
       };
    } catch (error) {
-      console.error("[CreateNewContentWorkflow] WORKFLOW ERROR");
-      throw error;
+      console.error("[CreateNewContentWorkflow] WORKFLOW ERROR", {
+         userId,
+         contentId,
+         request,
+         error: error instanceof Error ? error.message : error,
+         stack: error instanceof Error && error.stack ? error.stack : undefined,
+      });
+      propagateError(error);
+      throw AppError.internal(
+         `Create new content workflow failed: ${(error as Error).message}`
+      );
    }
 }
 
