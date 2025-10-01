@@ -12,9 +12,11 @@ import { crawlCompetitorForFeatures } from "./workflows/crawl-for-features";
 import { extractCompetitorBrandInfoWorkflow } from "./workflows/extract-brand-info";
 import { createNewContentWorkflow } from "./workflows/create-new-content-workflow";
 import { contentStrategistAgent } from "./agents/strategist-agent";
+import type { SupportedLng } from "@packages/localization";
 export type CustomRuntimeContext = {
-   language: "en" | "pt";
+   language: SupportedLng;
    userId: string;
+   agentId?: string;
 };
 export const mastra = new Mastra({
    bundler: {
@@ -56,5 +58,8 @@ export function setRuntimeContext(context: CustomRuntimeContext) {
 
    runtimeContext.set("language", context.language);
    runtimeContext.set("userId", context.userId);
+   if (context.agentId) {
+      runtimeContext.set("agentId", context.agentId);
+   }
    return runtimeContext;
 }
