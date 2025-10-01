@@ -6,6 +6,7 @@ import {
    setRuntimeContext,
    type CustomRuntimeContext,
 } from "@packages/agents";
+import { AppError, propagateError } from "@packages/utils/errors";
 
 export interface CreateBrandKnowledgeWorkflowJobData {
    websiteUrl: string;
@@ -54,7 +55,10 @@ export async function runCreateBrandKnowledgeWorkflow(
          error: error instanceof Error ? error.message : error,
          stack: error instanceof Error && error.stack ? error.stack : undefined,
       });
-      throw error;
+      propagateError(error);
+      throw AppError.internal(
+         `Brand knowledge workflow failed: ${(error as Error).message}`
+      );
    }
 }
 
