@@ -1,9 +1,9 @@
 name: Label PRs Based on Issue Template
 
 on:
-  pull_request_target:
-    branches: [master]
-    types: [opened, synchronize, reopened]
+  pull_request:
+    branches: ["*"]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   label-by-issue:
