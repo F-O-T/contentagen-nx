@@ -34,7 +34,8 @@ export const queryForBrandKnowledge = createTool({
                similarityThreshold: 0.7,
             },
          );
-         return { results };
+         // Always return something, even if it's an empty array
+         return { results: results || [] };
       } catch (error) {
          console.error("Failed to search brand knowledge:", error);
          propagateError(error);

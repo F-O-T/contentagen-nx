@@ -32,7 +32,8 @@ export const queryForCompetitorKnowledge = createTool({
                type,
             },
          );
-         return { results };
+         // Always return something, even if it's an empty array
+         return { results: results || [] };
       } catch (error) {
          console.error("Failed to search competitor knowledge:", error);
          propagateError(error);
