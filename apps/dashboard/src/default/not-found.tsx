@@ -1,3 +1,4 @@
+import mascot from "@packages/brand/logo.svg";
 import { Search } from "lucide-react";
 import { Button } from "@packages/ui/components/button";
 import { useNavigate } from "@tanstack/react-router";
@@ -8,11 +9,20 @@ export function NotFoundComponent() {
    return (
       <div className="flex items-center justify-center h-full w-full">
          <div className="flex flex-col items-center gap-6 max-w-md text-center">
-            <div className="flex flex-col items-center gap-2">
-               <div className="text-9xl font-bold text-muted-foreground">
-                  404
+            <div className="flex flex-col items-center gap-4">
+               <div className="flex-shrink-0">
+                  <img
+                     alt="Content Agent Mascot"
+                     className="w-20 h-20 shadow-lg"
+                     src={mascot}
+                  />
                </div>
-               <h2 className="text-2xl font-semibold">Page Not Found</h2>
+               <div className="flex flex-col items-center gap-2">
+                  <div className="text-6xl font-bold text-muted-foreground">
+                     404
+                  </div>
+                  <h2 className="text-2xl font-semibold">Page Not Found</h2>
+               </div>
             </div>
             <p className="text-muted-foreground">
                The page you're looking for doesn't exist or has been moved.
