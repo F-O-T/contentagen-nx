@@ -1,3 +1,13 @@
+## 0.19.0 (2025-10-02)
+
+### 🚀 Features
+
+- **agents:** implement brand and competitor document handling ([3f23b13](https://github.com/F-O-T/contentagen-nx/commit/3f23b13))
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.18.0 (2025-10-01)
 
 ### 🚀 Features
