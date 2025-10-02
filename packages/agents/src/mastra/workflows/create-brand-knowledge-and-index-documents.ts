@@ -48,6 +48,7 @@ async function updateTargetUploadedFiles(
    const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
 
    if (target === "brand") {
+      //TODO: Implement brand update logic in the future
       return;
    } else {
       await updateCompetitor(db, targetId, { uploadedFiles });
@@ -247,13 +248,12 @@ Return the documents in the specified structured format.
 
 const saveAndIndexBrandDocuments = createStep({
    id: "save-and-index-brand-documents-step",
-   description: "Save documents to MinIO, database, and Chroma",
+   description:
+      "Save brand documents to MinIO, database, and brand vector database",
    inputSchema: createBrandDocumentsOutputSchema,
    outputSchema: CreateBrandKnowledgeOutput,
    execute: async ({ inputData }) => {
-      const { generatedDocuments, id, target } = inputData;
-
-      // Update status to chunking (processing and indexing)
+      const { generatedDocuments, id } = inputData;
 
       type UploadedFile = {
          fileName: string;
@@ -278,10 +278,7 @@ const saveAndIndexBrandDocuments = createStep({
       const uploadedFiles: UploadedFile[] = [];
       const allChunks: ChunkItem[] = [];
 
-      // Determine the target ID based on the target type
-      const targetId = target === "brand" ? id : id;
-
-      // Process documents using the helper function
+      // Process documents using the helper function for brand
       for (let docIndex = 0; docIndex < generatedDocuments.length; docIndex++) {
          const document = generatedDocuments[docIndex];
 
@@ -291,8 +288,8 @@ const saveAndIndexBrandDocuments = createStep({
             const result = await buildAndUploadDocument({
                document,
                documentIndex: docIndex,
-               targetId,
-               target,
+               targetId: id,
+               target: "brand",
                bucketName,
                minioClient,
             });
@@ -301,56 +298,153 @@ const saveAndIndexBrandDocuments = createStep({
             allChunks.push(...result.chunks);
 
             console.log(
-               `[saveAndIndexBrandDocuments] Created ${result.chunks.length} chunks for document ${result.fileName}`,
+               `[saveAndIndexBrandDocuments] Created ${result.chunks.length} chunks for brand document ${result.fileName}`,
             );
          } catch (error) {
             console.error(
-               `[saveAndIndexBrandDocuments] Error processing document ${docIndex + 1}:`,
+               `[saveAndIndexBrandDocuments] Error processing brand document ${docIndex + 1}:`,
                error,
             );
             propagateError(error);
             throw AppError.internal(
-               `Failed to process document ${docIndex + 1}`,
+               `Failed to process brand document ${docIndex + 1}`,
             );
          }
       }
 
-      // Persist uploaded file metadata based on target type
+      // Persist uploaded file metadata for brand (no action needed for brand based on existing logic)
       const filesForDb = uploadedFiles.map(({ rawContent, ...rest }) => rest);
-      await updateTargetUploadedFiles(targetId, target, filesForDb);
+      await updateTargetUploadedFiles(id, "brand", filesForDb);
 
+      // Save chunks to brand vector database
       if (allChunks.length > 0) {
          try {
-            if (target === "brand") {
-               allChunks.forEach(async (chunk) => {
+            await Promise.all(
+               allChunks.map(async (chunk) => {
                   await createBrandKnowledgeWithEmbedding(ragClient, {
                      chunk: chunk.text,
                      externalId: chunk.agentId,
                      sourceId: chunk.sourceId,
                      type: "document",
                   });
-               });
-            }
-            if (target === "competitor") {
-               allChunks.forEach(async (chunk) => {
+               }),
+            );
+            console.log(
+               `[saveAndIndexBrandDocuments] Successfully indexed ${allChunks.length} chunks to brand vector database`,
+            );
+         } catch (error) {
+            console.error(
+               "[saveAndIndexBrandDocuments] Error saving chunks to brand vector database:",
+               error,
+            );
+            propagateError(error);
+            throw AppError.internal(
+               "Failed to save chunks to brand vector database",
+            );
+         }
+      }
+
+      return {
+         chunkCount: allChunks.length,
+      };
+   },
+});
+
+const saveAndIndexCompetitorDocuments = createStep({
+   id: "save-and-index-competitor-documents-step",
+   description:
+      "Save competitor documents to MinIO, database, and competitor vector database",
+   inputSchema: createBrandDocumentsOutputSchema,
+   outputSchema: CreateBrandKnowledgeOutput,
+   execute: async ({ inputData }) => {
+      const { generatedDocuments, id } = inputData;
+
+      type UploadedFile = {
+         fileName: string;
+         fileUrl: string;
+         uploadedAt: string;
+         rawContent: string;
+      };
+
+      type ChunkItem = {
+         text: string;
+         agentId: string;
+         sourceId: string;
+      };
+
+      const minioClient = getMinioClient(serverEnv);
+      const ragClient = createPgVector({
+         pgVectorURL: serverEnv.PG_VECTOR_URL,
+      });
+      const bucketName = serverEnv.MINIO_BUCKET;
+
+      // Process documents sequentially to keep resource usage predictable.
+      const uploadedFiles: UploadedFile[] = [];
+      const allChunks: ChunkItem[] = [];
+
+      // Process documents using the helper function for competitor
+      for (let docIndex = 0; docIndex < generatedDocuments.length; docIndex++) {
+         const document = generatedDocuments[docIndex];
+
+         if (!document) continue;
+
+         try {
+            const result = await buildAndUploadDocument({
+               document,
+               documentIndex: docIndex,
+               targetId: id,
+               target: "competitor",
+               bucketName,
+               minioClient,
+            });
+
+            uploadedFiles.push(result.file);
+            allChunks.push(...result.chunks);
+
+            console.log(
+               `[saveAndIndexCompetitorDocuments] Created ${result.chunks.length} chunks for competitor document ${result.fileName}`,
+            );
+         } catch (error) {
+            console.error(
+               `[saveAndIndexCompetitorDocuments] Error processing competitor document ${docIndex + 1}:`,
+               error,
+            );
+            propagateError(error);
+            throw AppError.internal(
+               `Failed to process competitor document ${docIndex + 1}`,
+            );
+         }
+      }
+
+      // Persist uploaded file metadata for competitor
+      const filesForDb = uploadedFiles.map(({ rawContent, ...rest }) => rest);
+      await updateTargetUploadedFiles(id, "competitor", filesForDb);
+
+      // Save chunks to competitor vector database
+      if (allChunks.length > 0) {
+         try {
+            await Promise.all(
+               allChunks.map(async (chunk) => {
                   await createCompetitorKnowledgeWithEmbedding(ragClient, {
                      chunk: chunk.text,
                      externalId: chunk.agentId,
                      sourceId: chunk.sourceId,
                      type: "document",
                   });
-               });
-            }
+               }),
+            );
             console.log(
-               `[saveAndIndexBrandDocuments] Successfully indexed ${allChunks.length} chunks to Chroma`,
+               `[saveAndIndexCompetitorDocuments] Successfully indexed ${allChunks.length} chunks to competitor vector database`,
             );
          } catch (error) {
             console.error(
-               "[saveAndIndexBrandDocuments] Error saving chunks to Chroma:",
+               "[saveAndIndexCompetitorDocuments] Error saving chunks to competitor vector database:",
                error,
             );
             propagateError(error);
-            throw AppError.internal("Failed to save chunks to vector database");
+            throw AppError.internal(
+               "Failed to save chunks to competitor vector database",
+            );
          }
       }
 
@@ -368,5 +462,14 @@ export const createBrandKnowledgeWorkflow = createWorkflow({
 })
    .then(getFullBrandAnalysis)
    .then(createBrandDocuments)
-   .then(saveAndIndexBrandDocuments)
+   .branch([
+      [
+         async ({ inputData: { target } }) => target === "brand",
+         saveAndIndexBrandDocuments,
+      ],
+      [
+         async ({ inputData: { target } }) => target === "competitor",
+         saveAndIndexCompetitorDocuments,
+      ],
+   ])
    .commit();
