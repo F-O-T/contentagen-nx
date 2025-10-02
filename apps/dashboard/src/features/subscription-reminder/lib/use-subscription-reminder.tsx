@@ -1,12 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { SubscriptionReminderCredenza } from "../ui/subscription-reminder-credenza";
+import { useTRPC } from "@/integrations/clients";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export function useSubscriptionReminder() {
    const [showReminder, setShowReminder] = useState(false);
+   const trpc = useTRPC();
+
+   const { data: customerState } = useSuspenseQuery(
+      trpc.authHelpers.getCustomerState.queryOptions(),
+   );
+   const memoizedHasActiveSubscription = useMemo(
+      () => Boolean(customerState?.activeSubscriptions[0]),
+      [customerState],
+   );
 
    useEffect(() => {
+
+      if (memoizedHasActiveSubscription) {
+         return;
+      }
+
       // Check if user has seen the reminder before
-      const hasSeenReminder = localStorage.getItem("subscription-reminder-seen");
+      const hasSeenReminder = localStorage.getItem(
+         "subscription-reminder-seen",
+      );
 
       // Only show reminder if they haven't seen it before
       if (!hasSeenReminder) {
@@ -17,7 +35,7 @@ export function useSubscriptionReminder() {
 
          return () => clearTimeout(timer);
       }
-   }, []);
+   }, [memoizedHasActiveSubscription]);
 
    const handleClose = () => {
       setShowReminder(false);
@@ -38,3 +56,4 @@ export function useSubscriptionReminder() {
       SubscriptionReminderComponent,
    };
 }
+

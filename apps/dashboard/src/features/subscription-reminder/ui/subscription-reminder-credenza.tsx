@@ -1,5 +1,4 @@
 import { useRouter } from "@tanstack/react-router";
-import { AlertTriangle, CreditCard } from "lucide-react";
 import {
    Credenza,
    CredenzaContent,
@@ -73,4 +72,3 @@ export function SubscriptionReminderCredenza({
       </Credenza>
    );
 }
-

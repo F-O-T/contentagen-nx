@@ -4,8 +4,6 @@ import { AppSidebar } from "./app-sidebar";
 import { SiteHeader } from "./site-header";
 
 import type { Session } from "@/integrations/clients";
-import { useTRPC } from "@/integrations/clients";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useSubscriptionReminder } from "@/features/subscription-reminder/lib/use-subscription-reminder";
 
 export function DashboardLayout({
@@ -15,13 +13,7 @@ export function DashboardLayout({
    children: React.ReactNode;
    session: Session | null;
 }) {
-   const trpc = useTRPC();
-   const { data: customerState } = useSuspenseQuery(
-      trpc.authHelpers.getCustomerState.queryOptions(),
-   );
-
-   const hasActiveSubscription = Boolean(customerState?.activeSubscriptions[0]);
-   const { SubscriptionReminderComponent } = useSubscriptionReminder(hasActiveSubscription);
+   const { SubscriptionReminderComponent } = useSubscriptionReminder();
 
    return (
       <SidebarProvider>
