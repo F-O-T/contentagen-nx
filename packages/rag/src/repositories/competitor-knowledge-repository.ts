@@ -22,7 +22,7 @@ export async function createCompetitorKnowledgeWithEmbedding(
          .insert(competitorKnowledge)
          .values({
             ...data,
-            embedding: sql`'${JSON.stringify(embedding)}'::vector`,
+            embedding,
          })
          .returning();
       return result[0];

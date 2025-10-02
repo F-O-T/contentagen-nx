@@ -16,10 +16,10 @@ export const brandKnowledge = pgTable(
    "brand_knowledge",
    {
       id: uuid("id").primaryKey().defaultRandom(),
-      externalId: uuid("external_id").notNull(),
+      externalId: text("external_id").notNull(),
       sourceId: text("source_id").notNull(),
       chunk: text("chunk").notNull(),
-      type: brandKnowledgeType("type").notNull(),
+      type: brandKnowledgeType("knowledge_type").notNull(),
       embedding: vector("embedding", { dimensions: 1536 }).notNull(),
       createdAt: timestamp("created_at")
          .$defaultFn(() => new Date())

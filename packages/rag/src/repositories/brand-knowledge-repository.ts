@@ -106,30 +106,31 @@ async function searchBrandKnowledgeByCosineSimilarityAndExternalId(
    queryEmbedding: number[],
    externalId: string,
    options: SearchOptions = {},
-): Promise<BrandKnowledge[]> {
+) {
    try {
       const { limit = 10, similarityThreshold = 0.7, type } = options;
 
       const similarity = sql<number>`1 - (${cosineDistance(brandKnowledge.embedding, queryEmbedding)})`;
 
-      let whereConditions = and(
+      const baseConditions = [
          eq(brandKnowledge.externalId, externalId),
          gt(similarity, similarityThreshold),
-      );
+      ];
 
-      if (type) {
-         whereConditions = and(
-            eq(brandKnowledge.externalId, externalId),
-            eq(brandKnowledge.type, type),
-            gt(similarity, similarityThreshold),
-         );
-      }
+      const whereConditions = type
+         ? and(...baseConditions, eq(brandKnowledge.type, type))
+         : and(...baseConditions);
 
       const result = await dbClient
-         .select()
+         .select({
+            chunk: brandKnowledge.chunk,
+            type: brandKnowledge.type,
+            externalId: brandKnowledge.externalId,
+            similarity,
+         })
          .from(brandKnowledge)
          .where(whereConditions)
-         .orderBy(() => desc(similarity))
+         .orderBy((t) => desc(t.similarity))
          .limit(limit);
 
       return result;
@@ -145,7 +146,7 @@ export async function searchBrandKnowledgeByTextAndExternalId(
    queryText: string,
    externalId: string,
    options: SearchOptions = {},
-): Promise<BrandKnowledge[]> {
+) {
    try {
       const { embedding } = await createEmbedding(queryText);
       return await searchBrandKnowledgeByCosineSimilarityAndExternalId(

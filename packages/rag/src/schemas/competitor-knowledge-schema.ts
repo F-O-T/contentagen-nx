@@ -19,7 +19,7 @@ export const competitorKnowledge = pgTable(
       externalId: uuid("external_id").notNull(),
       sourceId: text("source_id").notNull(),
       chunk: text("chunk").notNull(),
-      type: competitorKnowledgeType("type").notNull(),
+      type: competitorKnowledgeType("knowledge_type").notNull(),
       embedding: vector("embedding", { dimensions: 1536 }).notNull(),
       createdAt: timestamp("created_at")
          .$defaultFn(() => new Date())
