@@ -4,7 +4,7 @@ import {
    getNextVersionNumber,
    createContentVersion,
 } from "@packages/database/repositories/content-version-repository";
-import { canModifyContent } from "@packages/database/repositories/access-control-repository";
+import { hasContentAccess } from "@packages/database/repositories/access-control-repository";
 import {
    getContentById,
    updateContent,
@@ -132,14 +132,22 @@ export const contentVersionRouter = router({
             }
 
             // Check if user can access this content
-            const canAccess = await canModifyContent(
+            const content = await getContentById(
                resolvedCtx.db,
                input.contentId,
+            );
+            if (!content) {
+               throw APIError.notFound("Content not found.");
+            }
+
+            const { canRead } = await hasContentAccess(
+               resolvedCtx.db,
+               content,
                userId,
                organizationId ?? "",
             );
 
-            if (!canAccess) {
+            if (!canRead) {
                throw APIError.forbidden(
                   "You don't have permission to view versions for this content.",
                );

@@ -28,7 +28,7 @@ import {
    deleteContent,
    listContents,
 } from "@packages/database/repositories/content-repository";
-import { canModifyContent } from "@packages/database/repositories/access-control-repository";
+import { canModifyContent, getContentWithAccessControl } from "@packages/database/repositories/access-control-repository";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
 import { contentVersionRouter } from "./content-version";
@@ -276,7 +276,17 @@ export const contentRouter = router({
             if (!input.id) {
                throw APIError.validation("Content ID is required.");
             }
-            return await getContentById((await ctx).db, input.id);
+
+            const resolvedCtx = await ctx;
+            const userId = resolvedCtx.session?.user.id;
+            const organizationId = resolvedCtx.session?.session?.activeOrganizationId;
+
+            return await getContentWithAccessControl(
+               resolvedCtx.db,
+               input.id,
+               userId,
+               organizationId ?? ""
+            );
          } catch (err) {
             console.log(err);
             propagateError(err);
