@@ -2,10 +2,13 @@ import { useState, useEffect, useMemo } from "react";
 import { SubscriptionReminderCredenza } from "../ui/subscription-reminder-credenza";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useRouterState } from "@tanstack/react-router";
+import { toast } from "sonner";
 
 export function useSubscriptionReminder() {
    const [showReminder, setShowReminder] = useState(false);
    const trpc = useTRPC();
+   const routerState = useRouterState();
 
    const { data: customerState } = useSuspenseQuery(
       trpc.authHelpers.getCustomerState.queryOptions(),
@@ -16,31 +19,21 @@ export function useSubscriptionReminder() {
    );
 
    useEffect(() => {
-
       if (memoizedHasActiveSubscription) {
+         setShowReminder(false);
          return;
       }
 
-      // Check if user has seen the reminder before
-      const hasSeenReminder = localStorage.getItem(
-         "subscription-reminder-seen",
-      );
+      const timer = setTimeout(() => {
+         setShowReminder(true);
+      }, 500);
 
-      // Only show reminder if they haven't seen it before
-      if (!hasSeenReminder) {
-         // Show reminder after a short delay to allow page to load
-         const timer = setTimeout(() => {
-            setShowReminder(true);
-         }, 1000);
-
-         return () => clearTimeout(timer);
-      }
-   }, [memoizedHasActiveSubscription]);
+      return () => clearTimeout(timer);
+   }, [routerState.location.pathname, memoizedHasActiveSubscription]);
 
    const handleClose = () => {
       setShowReminder(false);
-      // Mark that user has seen the reminder
-      localStorage.setItem("subscription-reminder-seen", "true");
+      toast.info("You can upgrade your subscription anytime from the profile page to unlock all features.");
    };
 
    const SubscriptionReminderComponent = () => (
