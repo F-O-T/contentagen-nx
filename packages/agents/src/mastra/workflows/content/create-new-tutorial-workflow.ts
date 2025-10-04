@@ -83,7 +83,9 @@ const editorType = z.string().describe("The edited tutorial, ready for review");
 const ContentWritingStepOutputSchema =
    CreateNewContentWorkflowInputSchema.extend({
       writing: writingType,
-      sources: z.array(z.string()).describe("The URLs found during web search research"),
+      sources: z
+         .array(z.string())
+         .describe("The URLs found during web search research"),
    }).omit({
       competitorIds: true,
       organizationId: true,
@@ -298,7 +300,9 @@ ${researchPrompt}
 const ContentEditorStepOutputSchema =
    CreateNewContentWorkflowInputSchema.extend({
       editor: editorType,
-      sources: z.array(z.string()).describe("The URLs found during web search research"),
+      sources: z
+         .array(z.string())
+         .describe("The URLs found during web search research"),
    }).omit({
       competitorIds: true,
       organizationId: true,
@@ -310,14 +314,8 @@ const tutorialEditorStep = createStep({
    outputSchema: ContentEditorStepOutputSchema,
    execute: async ({ inputData }) => {
       try {
-         const {
-            userId,
-            request,
-            writing,
-            agentId,
-            contentId,
-            sources,
-         } = inputData;
+         const { userId, request, writing, agentId, contentId, sources } =
+            inputData;
 
          // Emit event when editing starts
          await updateContentStatus({
