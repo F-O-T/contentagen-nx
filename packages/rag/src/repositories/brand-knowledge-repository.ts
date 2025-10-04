@@ -7,7 +7,7 @@ import {
 import { eq, and, desc, sql, gt, cosineDistance } from "drizzle-orm";
 import type { PgVectorDatabaseInstance } from "../client";
 import { AppError, propagateError } from "@packages/utils/errors";
-import { createEmbedding } from "../helpers";
+import { createEmbedding, createEmbeddings } from "../helpers";
 
 async function createBrandKnowledge(
    dbClient: PgVectorDatabaseInstance,
@@ -158,6 +158,47 @@ export async function searchBrandKnowledgeByTextAndExternalId(
    } catch (err) {
       throw AppError.database(
          `Failed to search brand knowledge by text and external ID: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function createBrandKnowledgeWithEmbeddingsBulk(
+   dbClient: PgVectorDatabaseInstance,
+   dataArray: Array<
+      Omit<BrandKnowledgeInsert, "embedding" | "id" | "createdAt" | "updatedAt">
+   >,
+): Promise<BrandKnowledge[]> {
+   try {
+      if (dataArray.length === 0) {
+         return [];
+      }
+
+      const texts = dataArray.map((data) => data.chunk);
+      const embeddings = await createEmbeddings(texts);
+
+      const insertData = dataArray.map((data, index) => {
+         const embedding = embeddings[index];
+         if (!embedding) {
+            throw new Error(
+               `Failed to create embedding for chunk: ${data.chunk.substring(0, 100)}...`,
+            );
+         }
+         return {
+            ...data,
+            embedding,
+         };
+      });
+
+      const result = await dbClient
+         .insert(brandKnowledge)
+         .values(insertData)
+         .returning();
+
+      return result;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to create brand knowledge with embeddings in bulk: ${(err as Error).message}`,
       );
    }
 }
