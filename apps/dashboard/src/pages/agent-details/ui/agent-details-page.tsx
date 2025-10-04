@@ -28,6 +28,11 @@ export function AgentDetailsPage() {
             <div className="grid md:grid-cols-3 grid-cols-1  gap-4 h-full">
                <div className="col-span-1  md:col-span-2 flex flex-col   gap-4">
                   <AgentStatsCard />
+                  <AgentInstructionsContainer
+                     agent={agent}
+                     isEditing={isEditingInstructions}
+                     setIsEditing={setIsEditingInstructions}
+                  />
                </div>
                <div className="col-span-1 gap-4 flex flex-col">
                   <AgentDetailsQuickActions
@@ -35,17 +40,6 @@ export function AgentDetailsPage() {
                      onEditInstructions={() => setIsEditingInstructions(true)}
                   />
                   <AgentPersonaCard agent={agent} />
-               </div>
-
-               <div className="col-span-1 gap-4 flex flex-col md:col-span-3">
-                  <AgentInstructionsContainer
-                     agent={agent}
-                     isEditing={isEditingInstructions}
-                     setIsEditing={setIsEditingInstructions}
-                  />
-               </div>
-
-               <div className="md:col-span-3">
                   <AgentNavigationButtons agentId={agentId} />
                </div>
             </div>

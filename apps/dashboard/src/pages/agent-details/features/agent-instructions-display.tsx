@@ -7,6 +7,12 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
+import {
+   Tabs,
+   TabsList,
+   TabsTrigger,
+   TabsContent,
+} from "@packages/ui/components/tabs";
 import type { PersonaConfig } from "@packages/database/schemas/agent";
 import { useMemo } from "react";
 
@@ -56,22 +62,31 @@ export function AgentInstructionsDisplay({
    }, [personaConfig]);
 
    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-         {cards.map((card) => (
-            <Card key={card.titleKey} className="h-full">
-               <CardHeader>
-                  <CardTitle>{translate(card.titleKey)}</CardTitle>
-                  <CardDescription>
-                     {translate(card.descriptionKey)}
-                  </CardDescription>
-               </CardHeader>
-               <CardContent className="h-full">
-                  <Markdown
-                     content={card.value || translate(card.placeholderKey)}
-                  />
-               </CardContent>
-            </Card>
-         ))}
-      </div>
+      <Tabs defaultValue={cards[0]?.titleKey}>
+         <Card>
+            <CardHeader className="">
+               <TabsList className="w-full">
+                  {cards.map((card) => (
+                     <TabsTrigger key={card.titleKey} value={card.titleKey}>
+                        {translate(card.titleKey)}
+                     </TabsTrigger>
+                  ))}
+               </TabsList>
+            </CardHeader>
+            <CardContent>
+               {cards.map((card) => (
+                  <TabsContent key={card.titleKey} value={card.titleKey}>
+                     <div className="space-y-4">
+                        <Markdown
+                           content={
+                              card.value || translate(card.placeholderKey)
+                           }
+                        />
+                     </div>
+                  </TabsContent>
+               ))}
+            </CardContent>
+         </Card>
+      </Tabs>
    );
 }
