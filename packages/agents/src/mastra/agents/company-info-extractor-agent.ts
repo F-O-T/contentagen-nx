@@ -1,9 +1,16 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
-import { tavilyCrawlTool } from "../tools/tavily-crawl-tool";
-import { tavilySearchTool } from "../tools/tavily-search-tool";
-import { dateTool } from "../tools/date-tool";
+import {
+   getTavilyCrawlInstructions,
+   tavilyCrawlTool,
+} from "../tools/tavily-crawl-tool";
+import {
+   getTavilySearchInstructions,
+   tavilySearchTool,
+} from "../tools/tavily-search-tool";
+import { dateTool, getDateToolInstructions } from "../tools/date-tool";
+import { createToolSystemPrompt } from "../helpers";
 
 const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
@@ -37,16 +44,7 @@ CRITICAL RULES:
 - Output ONLY the requested structured data - no commentary
 - Respond in the same language as the user's input
 
-AVAILABLE TOOLS:
-- tavilyCrawlTool: Extract content from websites for company information
-- tavilySearchTool: Search for additional company details and information
-- dateTool: Get current date for documentation
-
-TOOL USAGE RULES:
-- Use tavilyCrawlTool ONCE per website URL provided
-- Use tavilySearchTool MAXIMUM 2 times and only if crawl results lack sufficient company info
-- Never repeat the same tool call with identical parameters
-- Stop tool usage once you have sufficient company data
+${createToolSystemPrompt([getTavilyCrawlInstructions(), getTavilySearchInstructions(), getDateToolInstructions()])}
 
 ## COMPANY INFORMATION TO EXTRACT
 

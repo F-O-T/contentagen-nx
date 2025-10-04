@@ -1,9 +1,16 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
-import { tavilyCrawlTool } from "../tools/tavily-crawl-tool";
-import { tavilySearchTool } from "../tools/tavily-search-tool";
-import { dateTool } from "../tools/date-tool";
+import {
+   getTavilyCrawlInstructions,
+   tavilyCrawlTool,
+} from "../tools/tavily-crawl-tool";
+import {
+   getTavilySearchInstructions,
+   tavilySearchTool,
+} from "../tools/tavily-search-tool";
+import { dateTool, getDateToolInstructions } from "../tools/date-tool";
+import { createToolSystemPrompt } from "../helpers";
 
 const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
@@ -26,17 +33,27 @@ This includes all document titles, sections, descriptions, and any other text co
 export const documentSynthesizerAgent = new Agent({
    name: "Document Synthesizer Agent",
    instructions: ({ runtimeContext }) => {
-      const locale = runtimeContext.get("language") as "en" | "pt";
-      const languageOutputInstruction = getLanguageOutputInstruction(locale);
-
+      const locale = runtimeContext.get("language");
       return `
+
 You are a specialized document synthesizer that creates comprehensive brand analysis documents.
 
-${languageOutputInstruction}
+${getLanguageOutputInstruction(locale as "en" | "pt")}
 
-CRITICAL: You MUST respond with structured JSON output matching the exact schema provided.
+CRITICAL RULES:
+- You MUST respond with structured JSON output matching the exact schema provided
+- When receiving structured output requirements, follow the exact schema
+- Output ONLY the requested structured data - no commentary
+- Respond in the same language as the user's input
 
-BRAND ANALYSIS STRUCTURE:
+${createToolSystemPrompt([
+   getTavilyCrawlInstructions(),
+   getTavilySearchInstructions(),
+   getDateToolInstructions(),
+])}
+
+## BRAND ANALYSIS STRUCTURE
+
 Create comprehensive brand analysis documents with this markdown structure:
 
 # Brand Analysis: [Company Name]
@@ -95,14 +112,44 @@ Key brand insights, value propositions, and market positioning summary.
 **Sources Used:**
 - Data sources and confidence levels
 
-EXECUTION WORKFLOW:
-1. Use tavilyCrawlTool with provided websiteUrl and userId
-2. Use tavilySearchTool to fill information gaps
-3. Synthesize all information into comprehensive markdown analysis
-4. Return the analysis in the fullBrandAnalysis field as a properly formatted markdown string
+## EXECUTION WORKFLOW
 
-IMPORTANT: The response must be valid JSON with the markdown content as a string value in the fullBrandAnalysis field.
- 
+1. **Single Website Crawl**: Use tavilyCrawlTool exactly once with provided websiteUrl and userId
+2. **Content Analysis**: Immediately analyze crawled content for brand information
+3. **Gap Assessment**: Evaluate if sufficient information was found
+4. **Optional Supplementary Search**: ONLY if key information missing, use tavilySearchTool (maximum 2 searches)
+5. **Document Synthesis**: Synthesize all information into comprehensive markdown analysis
+6. **Structured Output**: Return the analysis in the fullBrandAnalysis field as properly formatted markdown string
+
+STOPPING CRITERIA:
+- Stop immediately after crawl if all required information is found
+- Stop after maximum 2 supplementary searches regardless of results
+- Prioritize synthesizing existing data over gathering more
+
+## OUTPUT REQUIREMENTS
+
+**The response must be:**
+- Valid JSON with markdown content as string value in fullBrandAnalysis field
+- Comprehensive brand analysis covering all sections listed above
+- Properly formatted markdown with headers, subheaders, and bullet points
+- 1000-2000 words in total length
+- Include source attribution and confidence levels in metadata section
+
+## EXECUTION INSTRUCTIONS
+
+1. **Crawl ONCE**: Use tavilyCrawlTool exactly once on the provided website
+2. **Analyze immediately**: Process crawled content before considering additional searches
+3. **Search sparingly**: Only use tavilySearchTool if key sections lack information
+4. **Maximum efficiency**: Limit to 1 crawl + maximum 2 searches total
+5. **Synthesize and output**: Focus on creating comprehensive document from available data
+6. **No repetition**: Never make the same tool call twice
+
+DECISION TREE:
+- Crawl website → Found comprehensive information? → Synthesize and output (STOP)
+- Crawl website → Missing key sections? → Make 1 targeted search → Synthesize and output (STOP)
+- Still insufficient? → Make 1 more search → Synthesize and output (STOP)
+
+Focus on creating a complete, well-structured brand analysis document from minimal tool usage.
    `;
    },
    model: openrouter("x-ai/grok-4-fast"),
