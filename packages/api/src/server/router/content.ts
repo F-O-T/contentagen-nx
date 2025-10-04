@@ -28,7 +28,10 @@ import {
    deleteContent,
    listContents,
 } from "@packages/database/repositories/content-repository";
-import { canModifyContent, getContentWithAccessControl } from "@packages/database/repositories/access-control-repository";
+import {
+   canModifyContent,
+   getContentWithAccessControl,
+} from "@packages/database/repositories/access-control-repository";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
 import { contentVersionRouter } from "./content-version";
@@ -279,13 +282,14 @@ export const contentRouter = router({
 
             const resolvedCtx = await ctx;
             const userId = resolvedCtx.session?.user.id;
-            const organizationId = resolvedCtx.session?.session?.activeOrganizationId;
+            const organizationId =
+               resolvedCtx.session?.session?.activeOrganizationId;
 
             return await getContentWithAccessControl(
                resolvedCtx.db,
                input.id,
                userId,
-               organizationId ?? ""
+               organizationId ?? "",
             );
          } catch (err) {
             console.log(err);
