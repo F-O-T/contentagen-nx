@@ -33,7 +33,9 @@ export function useSubscriptionReminder() {
 
    const handleClose = () => {
       setShowReminder(false);
-      toast.info("You can upgrade your subscription anytime from the profile page to unlock all features.");
+      toast.info(
+         "You can upgrade your subscription anytime from the profile page to unlock all features.",
+      );
    };
 
    const SubscriptionReminderComponent = () => (
@@ -49,4 +51,3 @@ export function useSubscriptionReminder() {
       SubscriptionReminderComponent,
    };
 }
-
