@@ -8,6 +8,21 @@ import { z } from "zod";
 import { serverEnv } from "@packages/environment/server";
 import { tavily } from "@tavily/core";
 import { AppError, propagateError } from "@packages/utils/errors";
+
+export function getTavilyCrawlInstructions(): string {
+   return ` tavily-crawl: Extract detailed knowledge from specific websites.
+   - Use when you need in-depth content from a known URL
+   - Provide the full website URL to crawl
+   - Give specific instructions for what to extract (max 400 chars)
+   - Crawls up to 2 levels deep for comprehensive content
+   - Always provide user ID for billing purposes
+   - Instructions should focus on what information to extract
+   Examples:
+   - URL: "https://example.com" + instructions: "Extract product features and pricing"
+   - URL: "https://blog.example.com" + instructions: "Find recent posts about AI trends"
+   - URL: "https://docs.example.com" + instructions: "Get API endpoints and usage examples"`;
+}
+
 export const tavilyCrawlTool = createTool({
    id: "tavily-crawl",
    description: "Crawls a website url to extract knowledge and content",
