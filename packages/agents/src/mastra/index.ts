@@ -1,4 +1,5 @@
 import { Mastra } from "@mastra/core/mastra";
+import { createCompleteKnowledgeWorkflow } from "./workflows/create-complete-knowledge-workflow";
 import { seoOptimizationAgent } from "./agents/seo-agent";
 import { researcherAgent } from "./agents/researcher-agent";
 import { PinoLogger } from "@mastra/loggers";
@@ -33,6 +34,7 @@ export const mastra = new Mastra({
       ],
    },
    workflows: {
+      createCompleteKnowledgeWorkflow,
       createNewContentWorkflow,
       createBrandKnowledgeWorkflow,
       crawlCompetitorForFeatures,
