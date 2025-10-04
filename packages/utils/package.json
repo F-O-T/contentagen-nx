@@ -17,6 +17,10 @@
    "private": true,
    "type": "module",
    "exports": {
+      "./file": {
+         "types": "./dist/src/file.d.ts",
+         "default": "./src/file.ts"
+      },
       "./diff": {
          "types": "./dist/src/diff.d.ts",
          "default": "./src/diff.ts"
