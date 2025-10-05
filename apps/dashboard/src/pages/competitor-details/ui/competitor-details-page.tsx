@@ -10,7 +10,6 @@ import { CreateEditCompetitorDialog } from "../../competitor-list/features/creat
 import { CompetitorFileViewerModal } from "../features/competitor-file-viewer-modal";
 import { CompetitorLogoUploadDialog } from "../features/competitor-logo-upload-dialog";
 import { useState, useMemo } from "react";
-import { CompetitorLoadingDisplay } from "./competitor-loading-display";
 import { useSubscription } from "@trpc/tanstack-react-query";
 import { createToast } from "@/features/error-modal/lib/create-toast";
 import {
@@ -23,6 +22,7 @@ import {
 import { Markdown } from "@packages/ui/components/markdown";
 import { CompetitorFeaturesCard } from "./competitor-features-card";
 import { CompetitorDetailsKnowledgeBaseCard } from "./competitor-details-knowledge-base-card";
+import { PendingComponent } from "@/default/pending";
 
 export function CompetitorDetailsPage() {
    const trpc = useTRPC();
@@ -40,26 +40,18 @@ export function CompetitorDetailsPage() {
       trpc.competitorFile.getLogo.queryOptions({ competitorId: id }),
    );
    // Calculate subscription enabled state using useMemo
-   const isAnalyzingFeatures = useMemo(
-      () =>
-         competitor?.featuresStatus &&
-         ["pending", "crawling", "analyzing"].includes(
-            competitor.featuresStatus,
-         ),
-      [competitor?.featuresStatus],
-   );
 
-   const isAnalyzingAnalysis = useMemo(
+   const isGenerating = useMemo(
       () =>
-         competitor?.analysisStatus &&
+         competitor?.status &&
          ["pending", "analyzing", "chunking"].includes(
-            competitor.analysisStatus,
+            competitor.status, // updated from competitor.analysisStatus to competitor.status
          ),
-      [competitor?.analysisStatus],
+      [competitor?.status], // updated from competitor?.analysisStatus to competitor?.status
    );
 
    useSubscription(
-      trpc.competitor.onFeaturesStatusChanged.subscriptionOptions(
+      trpc.competitor.onStatusChange.subscriptionOptions(
          {
             competitorId: id,
          },
@@ -78,35 +70,7 @@ export function CompetitorDetailsPage() {
                   }),
                });
             },
-            enabled: Boolean(isAnalyzingFeatures),
-         },
-      ),
-   );
-
-   useSubscription(
-      trpc.competitor.onAnalysisStatusChanged.subscriptionOptions(
-         {
-            competitorId: id,
-         },
-         {
-            async onData(data) {
-               createToast({
-                  type: "success",
-                  message: translate(
-                     "pages.competitor-details.messages.analysis-status-updated",
-                     {
-                        status: data.status,
-                        message: data.message || "",
-                     },
-                  ),
-               });
-               await queryClient.invalidateQueries({
-                  queryKey: trpc.competitor.get.queryKey({
-                     id,
-                  }),
-               });
-            },
-            enabled: Boolean(isAnalyzingAnalysis),
+            enabled: Boolean(isGenerating),
          },
       ),
    );
@@ -114,52 +78,54 @@ export function CompetitorDetailsPage() {
    return (
       <>
          <main className="h-full w-full flex flex-col gap-4">
-            {!isAnalyzingAnalysis && (
-               <TalkingMascot
-                  message={translate("pages.competitor-details.mascot-message")}
-               />
-            )}
-
-            {isAnalyzingAnalysis && competitor?.featuresStatus ? (
-               <CompetitorLoadingDisplay status={competitor.featuresStatus} />
+            {isGenerating ? (
+               <PendingComponent message="Wait while we search your competitor" />
             ) : (
-               <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
-                  <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
-                     <CompetitorStatsCard />
+               <>
+                  <TalkingMascot
+                     message={translate(
+                        "pages.competitor-details.mascot-message",
+                     )}
+                  />
 
-                     <CompetitorFeaturesCard competitorId={competitor.id} />
+                  <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
+                     <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
+                        <CompetitorStatsCard />
+
+                        <CompetitorFeaturesCard competitorId={competitor.id} />
+                     </div>
+
+                     <div className="col-span-1 gap-4 flex flex-col">
+                        <CompetitorDetailsActions
+                           competitor={competitor}
+                           onLogoUpload={() => setShowLogoUploadDialog(true)}
+                        />
+
+                        <CompetitorInfoCard competitor={competitor} />
+
+                        <Card>
+                           <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                 {translate(
+                                    "pages.competitor-details.section.title",
+                                 )}
+                              </CardTitle>
+                              <CardDescription>
+                                 {translate(
+                                    "pages.competitor-details.section.description",
+                                 )}
+                              </CardDescription>
+                           </CardHeader>
+                           <CardContent>
+                              <Markdown content={competitor.summary ?? ""} />
+                           </CardContent>
+                        </Card>
+                        <CompetitorDetailsKnowledgeBaseCard
+                           competitor={competitor}
+                        />
+                     </div>
                   </div>
-
-                  <div className="col-span-1 gap-4 flex flex-col">
-                     <CompetitorDetailsActions
-                        competitor={competitor}
-                        onLogoUpload={() => setShowLogoUploadDialog(true)}
-                     />
-
-                     <CompetitorInfoCard competitor={competitor} />
-
-                     <Card>
-                        <CardHeader>
-                           <CardTitle className="flex items-center gap-2">
-                              {translate(
-                                 "pages.competitor-details.section.title",
-                              )}
-                           </CardTitle>
-                           <CardDescription>
-                              {translate(
-                                 "pages.competitor-details.section.description",
-                              )}
-                           </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                           <Markdown content={competitor.summary ?? ""} />
-                        </CardContent>
-                     </Card>
-                     <CompetitorDetailsKnowledgeBaseCard
-                        competitor={competitor}
-                     />
-                  </div>
-               </div>
+               </>
             )}
          </main>
 

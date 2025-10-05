@@ -43,7 +43,7 @@ export function CompetitorInfoCard({ competitor }: CompetitorInfoCardProps) {
          <CardContent className="space-y-2">
             <AgentWriterCard
                name={competitor.name || ""}
-               description={competitor.description || ""}
+               description={competitor.summary || ""}
                photo={data?.data || ""}
             />
             <div className="grid grid-cols-2 gap-2">

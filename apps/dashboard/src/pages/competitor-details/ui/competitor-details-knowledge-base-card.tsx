@@ -128,7 +128,7 @@ export function CompetitorDetailsKnowledgeBaseCard({
                   )}
                </CardDescription>
                <CardAction>
-                  {competitor.analysisStatus === "completed" && (
+                  {competitor.status === "completed" && (
                      <Badge className="font-semibold">
                         {translate(
                            "pages.competitor-details.knowledge-base.indexed-badge",
