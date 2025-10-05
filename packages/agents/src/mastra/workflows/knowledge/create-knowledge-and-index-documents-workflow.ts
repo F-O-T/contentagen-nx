@@ -285,7 +285,7 @@ const saveCompetitorDocumentsKnowledge = createStep({
             "competitor",
          );
 
-         await updateCompetitor(db, id, { uploadedFiles });
+         await updateCompetitor(db, id, { uploadedFiles, status: "completed" });
 
          const knowledgeData: Parameters<
             typeof createCompetitorKnowledgeWithEmbeddingsBulk
