@@ -14,8 +14,13 @@ import {
    CardContent,
    CardDescription,
    CardHeader,
-   CardTitle,
 } from "@packages/ui/components/card";
+import {
+   Tabs,
+   TabsList,
+   TabsTrigger,
+   TabsContent,
+} from "@packages/ui/components/tabs";
 import type {
    InstructionsConfig,
    PersonaConfig,
@@ -156,33 +161,45 @@ export function EditAgentInstructions({
             </div>
          </div>
 
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {instructionCards.map((card) => (
-               <Card key={card.titleKey}>
-                  <CardHeader>
-                     <CardTitle>{translate(card.titleKey)}</CardTitle>
-                     <CardDescription>
-                        {translate(card.descriptionKey)}
-                     </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                     <editForm.AppField name={card.fieldName}>
-                        {(field) => (
-                           <field.FieldContainer>
-                              <TiptapEditor
-                                 value={field.state.value}
-                                 onChange={field.handleChange}
-                                 onBlur={field.handleBlur}
-                                 placeholder={translate(card.placeholderKey)}
-                              />
-                              <field.FieldMessage />
-                           </field.FieldContainer>
-                        )}
-                     </editForm.AppField>
-                  </CardContent>
-               </Card>
-            ))}
-         </div>
+         <Tabs defaultValue={instructionCards[0]?.titleKey}>
+            <Card>
+               <CardHeader className="">
+                  <TabsList className="w-full">
+                     {instructionCards.map((card) => (
+                        <TabsTrigger key={card.titleKey} value={card.titleKey}>
+                           {translate(card.titleKey)}
+                        </TabsTrigger>
+                     ))}
+                  </TabsList>
+               </CardHeader>
+               <CardContent>
+                  {instructionCards.map((card) => (
+                     <TabsContent key={card.titleKey} value={card.titleKey}>
+                        <div className="space-y-4">
+                           <CardDescription>
+                              {translate(card.descriptionKey)}
+                           </CardDescription>
+                           <editForm.AppField name={card.fieldName}>
+                              {(field) => (
+                                 <field.FieldContainer>
+                                    <TiptapEditor
+                                       value={field.state.value}
+                                       onChange={field.handleChange}
+                                       onBlur={field.handleBlur}
+                                       placeholder={translate(
+                                          card.placeholderKey,
+                                       )}
+                                    />
+                                    <field.FieldMessage />
+                                 </field.FieldContainer>
+                              )}
+                           </editForm.AppField>
+                        </div>
+                     </TabsContent>
+                  ))}
+               </CardContent>
+            </Card>
+         </Tabs>
       </div>
    );
 }

@@ -1,12 +1,6 @@
 import { Markdown } from "@packages/ui/components/markdown";
 import { translate, type TranslationKey } from "@packages/localization";
-import {
-   Card,
-   CardContent,
-   CardDescription,
-   CardHeader,
-   CardTitle,
-} from "@packages/ui/components/card";
+import { Card, CardContent, CardHeader } from "@packages/ui/components/card";
 import {
    Tabs,
    TabsList,
