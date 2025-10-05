@@ -26,13 +26,11 @@ import { deleteFeaturesByCompetitorId } from "@packages/database/repositories/co
 import {
    eventEmitter,
    EVENTS,
-   type CompetitorFeaturesStatusChangedPayload,
-   type CompetitorAnalysisStatusChangedPayload,
+   type CompetitorStatusChangedPayload,
 } from "@packages/server-events";
 import { on } from "node:events";
-import { enqueueCrawlCompetitorForFeaturesJob } from "@packages/workers/queues/crawl-competitor-for-features-queue";
-import { enqueueCreateCompetitorKnowledgeWorkflowJob } from "@packages/workers/queues/create-competitor-knowledge-workflow-queue";
-import { enqueueExtractCompetitorBrandInfoJob } from "@packages/workers/queues/extract-competitor-brand-info-queue";
+import { enqueueCreateCompleteKnowledgeWorkflowJob } from "@packages/workers/queues/create-complete-knowledge-workflow-queue";
+import { enqueueCreateFeaturesKnowledgeJob } from "@packages/workers/queues/create-features-knowledge-queue";
 
 export const competitorRouter = router({
    list: protectedProcedure
@@ -104,37 +102,16 @@ export const competitorRouter = router({
                userId,
                organizationId,
             });
-
-            await Promise.all([
-               await enqueueCrawlCompetitorForFeaturesJob({
-                  competitorId: created.id,
+            await enqueueCreateCompleteKnowledgeWorkflowJob({
+               id: created.id,
+               target: "competitor",
+               userId,
+               websiteUrl: input.websiteUrl,
+               runtimeContext: {
+                  language: resolvedCtx.language,
                   userId,
-                  websiteUrl: input.websiteUrl,
-                  runtimeContext: {
-                     language: resolvedCtx.language,
-                     userId,
-                  },
-               }),
-
-               await enqueueCreateCompetitorKnowledgeWorkflowJob({
-                  competitorId: created.id,
-                  userId,
-                  websiteUrl: input.websiteUrl,
-                  runtimeContext: {
-                     language: resolvedCtx.language,
-                     userId,
-                  },
-               }),
-               await enqueueExtractCompetitorBrandInfoJob({
-                  competitorId: created.id,
-                  userId,
-                  websiteUrl: input.websiteUrl,
-                  runtimeContext: {
-                     language: resolvedCtx.language,
-                     userId,
-                  },
-               }),
-            ]);
+               },
+            });
 
             return created;
          } catch (err) {
@@ -260,8 +237,9 @@ export const competitorRouter = router({
 
             await deleteFeaturesByCompetitorId(resolvedCtx.db, competitor.id);
 
-            await enqueueCrawlCompetitorForFeaturesJob({
-               competitorId: competitor.id,
+            await enqueueCreateFeaturesKnowledgeJob({
+               id: competitor.id,
+               target: "competitor",
                userId,
                websiteUrl: competitor.websiteUrl,
             });
@@ -413,36 +391,17 @@ export const competitorRouter = router({
             throw APIError.internal("Failed to search competitors.");
          }
       }),
-   onFeaturesStatusChanged: publicProcedure
+   onStatusChange: publicProcedure
       .input(z.object({ competitorId: z.string().optional() }).optional())
       .subscription(async function* (opts) {
          for await (const [payload] of on(
             eventEmitter,
-            EVENTS.competitorFeaturesStatus,
+            EVENTS.competitorStatus,
             {
                signal: opts.signal,
             },
          )) {
-            const event = payload as CompetitorFeaturesStatusChangedPayload;
-            if (
-               !opts.input?.competitorId ||
-               opts.input.competitorId === event.competitorId
-            ) {
-               yield event;
-            }
-         }
-      }),
-   onAnalysisStatusChanged: publicProcedure
-      .input(z.object({ competitorId: z.string().optional() }).optional())
-      .subscription(async function* (opts) {
-         for await (const [payload] of on(
-            eventEmitter,
-            EVENTS.competitorAnalysisStatus,
-            {
-               signal: opts.signal,
-            },
-         )) {
-            const event = payload as CompetitorAnalysisStatusChangedPayload;
+            const event = payload as CompetitorStatusChangedPayload;
             if (
                !opts.input?.competitorId ||
                opts.input.competitorId === event.competitorId

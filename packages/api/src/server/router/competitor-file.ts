@@ -176,7 +176,6 @@ export const competitorFileRouter = router({
          // Update competitor's uploadedFiles to empty array
          await updateCompetitor(resolvedCtx.db, competitorId, {
             uploadedFiles: [],
-            analysisStatus: "pending",
          });
 
          return {

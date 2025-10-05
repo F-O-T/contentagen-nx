@@ -42,7 +42,7 @@ export const createTRPCContext = async ({
       headers,
    });
 
-   const language = headers.get("X-Locale") as Parameters<
+   const language = headers.get("x-Locale") as Parameters<
       typeof setRuntimeContext
    >[0]["language"];
    setRuntimeContext({ language, userId: session?.session.userId ?? "" });
