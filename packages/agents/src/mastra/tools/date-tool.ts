@@ -2,18 +2,15 @@ import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 import { AppError, propagateError } from "@packages/utils/errors";
 export function getDateToolInstructions(): string {
-   return ` get-current-date: Get the current date in YYYY-MM-DD format.
-   - Use when you need to know today's date
-   - Optionally specify a timezone for date calculation
-   - Returns date in YYYY-MM-DD format (e.g., "2024-03-15")
-   - Useful for date-sensitive operations, logging, or comparisons
-   - If no timezone specified, uses system local time
-   
-   Examples:
-   - Get current date in UTC: timezone: "UTC"
-   - Get current date in New York: timezone: "America/New_York"
-   - Get current date in Tokyo: timezone: "Asia/Tokyo"
-   - Get local date: no timezone parameter needed`;
+   return `
+## GET CURRENT DATE TOOL
+Returns today's date in YYYY-MM-DD format.
+
+**When to use:** Need current date for timestamps or metadata
+
+**Parameters:**
+- timezone (string, optional): IANA timezone (e.g., "UTC", "America/New_York")
+`;
 }
 export const dateTool = createTool({
    id: "get-current-date",
