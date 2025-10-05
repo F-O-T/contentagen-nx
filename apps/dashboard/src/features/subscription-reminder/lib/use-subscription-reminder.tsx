@@ -18,6 +18,7 @@ export function useSubscriptionReminder() {
       [customerState],
    );
 
+   // biome-ignore lint/correctness/useExhaustiveDependencies: <mandarotry>
    useEffect(() => {
       if (memoizedHasActiveSubscription) {
          setShowReminder(false);
