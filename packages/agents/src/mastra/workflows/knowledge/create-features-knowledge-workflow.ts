@@ -27,34 +27,49 @@ const extractFeaturesKnowledgeOutputSchema =
       extractedFeatures: z
          .array(
             z.object({
-               name: z.string().describe("Clear, concise name for the feature"),
+               name: z
+                  .string()
+                  .describe(
+                     "Clear, concise name for the feature (e.g., 'Real-time Collaboration', 'API Webhooks', 'Custom Reports')",
+                  ),
                summary: z
                   .string()
-                  .describe("Brief description of what the feature does"),
+                  .describe(
+                     "1-3 sentence description explaining what users can do with this feature and its primary benefit",
+                  ),
                category: z
                   .string()
                   .describe(
-                     "Type of feature (e.g., 'User Interface', 'Analytics', 'Integration', etc.)",
+                     "Functional category (e.g., 'Collaboration', 'Analytics', 'Integration', 'Security', 'Automation', 'Customization')",
                   ),
                confidence: z
                   .number()
                   .min(0)
                   .max(1)
                   .describe(
-                     "Confidence level that this is a real feature (0-1)",
+                     "Confidence score between 0 and 1 indicating certainty this is a legitimate product feature (0.8+ for clearly documented features, 0.5-0.8 for implied features, below 0.5 for uncertain)",
                   ),
                tags: z
                   .array(z.string())
-                  .describe("Relevant keywords or tags for this feature"),
+                  .describe(
+                     "3-5 relevant keywords or technology terms associated with this feature for searchability",
+                  ),
                rawContent: z
                   .string()
-                  .describe("The relevant text that describes this feature"),
+                  .describe(
+                     "The original text excerpt from the website that describes this feature, used as source material",
+                  ),
                sourceUrl: z
                   .string()
-                  .describe("URL where this feature was found"),
+                  .describe(
+                     "The specific URL where this feature was documented or mentioned",
+                  ),
             }),
          )
-         .describe("Array of extracted competitor features"),
+         .min(10)
+         .describe(
+            "Array of extracted features - aim for 15+ distinct, user-facing capabilities",
+         ),
    });
 const extractFeaturesKnowledge = createStep({
    id: "extract-features-knowledge-step",
@@ -62,28 +77,15 @@ const extractFeaturesKnowledge = createStep({
    inputSchema: CreateFeaturesKnowledgeInput,
    outputSchema: extractFeaturesKnowledgeOutputSchema,
 
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       const { userId, websiteUrl, id, target } = inputData;
 
       try {
-         const inputPrompt = `
-I need you to analyze this competitor website and extract all their features.
-websiteUrl: ${websiteUrl}
-userId: ${userId}
+         const inputPrompt = `Extract software features from: ${websiteUrl}
 
-Requirements:
-- Use the tavilyCrawlTool to extract content from the website
-- Use tavilySearchTool only if needed to gather more information
-- Extract specific features with high confidence (0.7+)
-- Categorize features appropriately
-- Include source URLs for each feature
-- Focus on core functionality, not marketing content
-- Extract minimum 10-15 quality features
+Focus on user-facing capabilities and actions. Target 15+ features (minimum 10).`;
 
-Return the features in the structured format according to the competitor feature schema.
-`;
-
-         const result = await featureExtractionAgent.generateVNext(
+         const result = await featureExtractionAgent.generate(
             [
                {
                   role: "user",
@@ -91,6 +93,7 @@ Return the features in the structured format according to the competitor feature
                },
             ],
             {
+               runtimeContext,
                output: extractFeaturesKnowledgeOutputSchema.pick({
                   extractedFeatures: true,
                }),

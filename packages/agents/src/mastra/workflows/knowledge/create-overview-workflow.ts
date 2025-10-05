@@ -19,16 +19,16 @@ export const CreateOverviewOutput = z.object({
 });
 
 const extractOverviewOutputSchema = CreateOverviewInput.extend({
-   companyName: z.string().describe("Official company/brand name"),
-   description: z.string().describe("Concise 1-2 sentence company description"),
+   companyName: z
+      .string()
+      .describe(
+         "The official company or brand name as it appears on their website",
+      ),
    detailedSummary: z
       .string()
-      .describe("Comprehensive 3-5 paragraph company summary"),
-   extractionConfidence: z
-      .number()
-      .min(0)
-      .max(1)
-      .describe("Overall confidence score for extracted information (0-1)"),
+      .describe(
+         "A comprehensive 3-5 paragraph summary (150-300 words) covering: what the company does (core business and offerings), who they serve (target customers and market), company background (founding, location, size if available), and what differentiates them from competitors",
+      ),
 });
 
 const extractOverview = createStep({
@@ -38,27 +38,15 @@ const extractOverview = createStep({
    inputSchema: CreateOverviewInput,
    outputSchema: extractOverviewOutputSchema,
 
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       const { userId, websiteUrl, id, target } = inputData;
 
       try {
-         const inputPrompt = `
-I need you to analyze this website and extract comprehensive company information.
-websiteUrl: ${websiteUrl}
-userId: ${userId}
+         const inputPrompt = `Extract company information from: ${websiteUrl}
 
-Requirements:
-- Use the tavilyCrawlTool to extract content from the website
-- Use tavilySearchTool only if needed to gather more company information
-- Extract the company name, description, and detailed summary
-- Focus on company information, not product features
-- Ensure high confidence scores for all extracted information
-- Provide comprehensive company background and details
+Provide the official company name and a comprehensive summary covering their business, customers, background, and differentiators.`;
 
-Return the company information in the structured format according to the company info extraction schema.
-`;
-
-         const result = await companyInfoExtractorAgent.generateVNext(
+         const result = await companyInfoExtractorAgent.generate(
             [
                {
                   role: "user",
@@ -66,11 +54,10 @@ Return the company information in the structured format according to the company
                },
             ],
             {
+               runtimeContext,
                output: extractOverviewOutputSchema.pick({
                   companyName: true,
                   detailedSummary: true,
-                  description: true,
-                  extractionConfidence: true,
                }),
             },
          );
@@ -83,18 +70,11 @@ Return the company information in the structured format according to the company
             );
          }
 
-         const {
-            companyName,
-            description,
-            detailedSummary,
-            extractionConfidence,
-         } = result.object;
+         const { companyName, detailedSummary } = result.object;
 
          return {
             companyName,
-            description,
             detailedSummary,
-            extractionConfidence,
             userId,
             websiteUrl,
             id,
@@ -116,8 +96,7 @@ const saveCompetitorOverview = createStep({
    inputSchema: extractOverviewOutputSchema,
    outputSchema: CreateOverviewOutput,
    execute: async ({ inputData }) => {
-      const { companyName, description, detailedSummary, id, websiteUrl } =
-         inputData;
+      const { companyName, detailedSummary, id, websiteUrl } = inputData;
 
       try {
          const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
@@ -125,7 +104,6 @@ const saveCompetitorOverview = createStep({
          await updateCompetitor(db, id, {
             name: companyName,
             websiteUrl: websiteUrl,
-            description: description,
             summary: detailedSummary,
          });
 

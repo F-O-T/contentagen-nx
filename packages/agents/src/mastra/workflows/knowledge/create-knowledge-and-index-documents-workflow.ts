@@ -90,7 +90,7 @@ const getFullAnalysis = createStep({
    inputSchema: CreateKnowledgeAndIndexDocumentsInput,
    outputSchema: getFullAnalysisOutputSchema,
 
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       const { userId, websiteUrl, id, target } = inputData;
 
       try {
@@ -98,7 +98,7 @@ const getFullAnalysis = createStep({
 websiteUrl: ${websiteUrl}
 userId: ${userId}
 `;
-         const result = await documentSynthesizerAgent.generateVNext(
+         const result = await documentSynthesizerAgent.generate(
             [
                {
                   role: "user",
@@ -106,6 +106,7 @@ userId: ${userId}
                },
             ],
             {
+               runtimeContext,
                output: getFullAnalysisOutputSchema.pick({
                   fullAnalysis: true,
                }),
@@ -146,27 +147,17 @@ const createDocuments = createStep({
    description: "Create business documents from analysis",
    inputSchema: getFullAnalysisOutputSchema,
    outputSchema: createDocumentsOutputSchema,
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       const { fullAnalysis, userId, id, target, websiteUrl } = inputData;
 
       try {
          const inputPrompt = `
-Generate 5 distinct business documents from this analysis:
 
 ${fullAnalysis}
 
-Requirements:
-- Generate exactly 5 documents: Brand Identity Profile, Product/Service Catalog, Market Presence Report, Customer Base Analysis, and Brand Assets Inventory
-- Each document must be comprehensive, actionable, and in perfect markdown format
-- Base all recommendations on the provided analysis data
-- Include specific metrics, timelines, and implementation details
-- Maintain consistency across all documents
-- Use professional business language
-
-Return the documents in the specified structured format.
 `;
 
-         const result = await documentGenerationAgent.generateVNext(
+         const result = await documentGenerationAgent.generate(
             [
                {
                   role: "user",
@@ -174,6 +165,7 @@ Return the documents in the specified structured format.
                },
             ],
             {
+               runtimeContext,
                output: createDocumentsOutputSchema,
             },
          );
