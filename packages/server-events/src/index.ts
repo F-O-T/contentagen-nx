@@ -1,18 +1,13 @@
 import { EventEmitter } from "node:events";
 import type { ContentStatus } from "@packages/database/schemas/content";
 import type { IdeiaStatus } from "@packages/database/schemas/ideas";
-import type {
-   CompetitorFeaturesStatus,
-   CompetitorAnalysisStatus,
-} from "@packages/database/schemas/competitor";
+import type { KnowledgeCreationStatus } from "@packages/database/schemas/competitor";
 import type { ContentRequest } from "@packages/database/schemas/content";
 // 1. Define event names as constants
 export const EVENTS = {
    agentKnowledgeStatus: "agent.knowledge.status",
    contentStatus: "content.status",
    competitorStatus: "competitor.status",
-   competitorFeaturesStatus: "competitor.features.status",
-   competitorAnalysisStatus: "competitor.analysis.status",
    ideaStatus: "idea.status",
 } as const;
 
@@ -25,15 +20,7 @@ export type ContentStatusChangedPayload = {
 };
 export type CompetitorStatusChangedPayload = {
    competitorId: string;
-   status: CompetitorFeaturesStatus | CompetitorAnalysisStatus;
-};
-export type CompetitorFeaturesStatusChangedPayload = {
-   competitorId: string;
-   status: CompetitorFeaturesStatus;
-};
-export type CompetitorAnalysisStatusChangedPayload = {
-   competitorId: string;
-   status: CompetitorAnalysisStatus;
+   status: KnowledgeCreationStatus;
    message?: string;
 };
 export type IdeaStatusChangedPayload = {
@@ -51,16 +38,6 @@ export function emitCompetitorStatusChanged(
    payload: CompetitorStatusChangedPayload,
 ) {
    eventEmitter.emit(EVENTS.competitorStatus, payload);
-}
-export function emitCompetitorFeaturesStatusChanged(
-   payload: CompetitorFeaturesStatusChangedPayload,
-) {
-   eventEmitter.emit(EVENTS.competitorFeaturesStatus, payload);
-}
-export function emitCompetitorAnalysisStatusChanged(
-   payload: CompetitorAnalysisStatusChangedPayload,
-) {
-   eventEmitter.emit(EVENTS.competitorAnalysisStatus, payload);
 }
 export function emitIdeaStatusChanged(payload: IdeaStatusChangedPayload) {
    eventEmitter.emit(EVENTS.ideaStatus, payload);
