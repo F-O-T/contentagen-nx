@@ -13,15 +13,11 @@ import { relations } from "drizzle-orm";
 import { competitorFeature } from "./competitor-feature";
 import type { CompetitorFeatureSelect } from "./competitor-feature";
 
-export const competitorFeaturesStatusEnum = pgEnum(
-   "competitor_features_status",
-   ["pending", "crawling", "analyzing", "completed", "failed"],
-);
-
-export const competitorAnalysisStatusEnum = pgEnum(
-   "competitor_analysis_status",
-   ["pending", "analyzing", "chunking", "completed", "failed"],
-);
+export const knowledgeCreationStatusEnum = pgEnum("knowledge_creation_status", [
+   "failed",
+   "analyzing",
+   "completed",
+]);
 
 export const competitor = pgTable(
    "competitor",
@@ -29,13 +25,9 @@ export const competitor = pgTable(
       id: uuid("id").primaryKey().defaultRandom(),
       websiteUrl: text("website_url").notNull(),
       name: text("name"),
-      description: text("description"),
       summary: text("summary"),
       logoPhoto: text("logo_photo"),
-      featuresStatus:
-         competitorFeaturesStatusEnum("features_status").default("pending"),
-      analysisStatus:
-         competitorAnalysisStatusEnum("analysis_status").default("pending"),
+      status: knowledgeCreationStatusEnum("status").default("analyzing"),
       userId: text("user_id").references(() => user.id, {
          onDelete: "cascade",
       }),
@@ -63,10 +55,8 @@ export const competitorRelations = relations(competitor, ({ many }) => ({
 
 export type CompetitorSelect = typeof competitor.$inferSelect;
 export type CompetitorInsert = typeof competitor.$inferInsert;
-export type CompetitorFeaturesStatus =
-   (typeof competitorFeaturesStatusEnum.enumValues)[number];
-export type CompetitorAnalysisStatus =
-   (typeof competitorAnalysisStatusEnum.enumValues)[number];
+export type KnowledgeCreationStatus =
+   (typeof knowledgeCreationStatusEnum.enumValues)[number];
 
 export type CompetitorWithFeatures = CompetitorSelect & {
    features: CompetitorFeatureSelect[];
