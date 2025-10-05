@@ -68,7 +68,7 @@ export function CompetitorCard({ competitor }: CompetitorCardProps) {
                   <CardHeader>
                      <AgentWriterCard
                         name={competitor.name ?? ""}
-                        description={competitor.description ?? ""}
+                        description={competitor.summary ?? ""}
                         photo={data?.data ?? ""}
                         isHeader
                      />
