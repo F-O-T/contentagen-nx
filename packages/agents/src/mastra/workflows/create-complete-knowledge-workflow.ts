@@ -25,7 +25,8 @@ export const CreateCompleteKnowledgeOutput = z.object({
 
 export const createCompleteKnowledgeWorkflow = createWorkflow({
    id: "create-complete-knowledge",
-   description: "Run all knowledge workflows in parallel",
+   description:
+      "Run all knowledge workflows in parallel and set final status based on target",
    inputSchema: CreateCompleteKnowledgeInput,
    outputSchema: CreateCompleteKnowledgeOutput,
 })
@@ -35,4 +36,3 @@ export const createCompleteKnowledgeWorkflow = createWorkflow({
       createKnowledgeAndIndexDocumentsWorkflow,
    ])
    .commit();
-
