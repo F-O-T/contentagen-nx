@@ -1,37 +1,37 @@
 {
-   "dependencies": {
-      "@packages/posthog": "workspace:*",
-      "@astrojs/check": "catalog:astro",
-      "@astrojs/node": "catalog:astro",
-      "@astrojs/react": "catalog:astro",
-      "@astrojs/sitemap": "catalog:astro",
-      "@astrojs/ts-plugin": "catalog:astro",
-      "@lucide/astro": "catalog:astro",
-      "@packages/brand": "workspace:*",
-      "@packages/ui": "workspace:*",
-      "@tailwindcss/vite": "catalog:ui",
-      "astro": "catalog:astro",
-      "react": "catalog:react",
-      "react-dom": "catalog:react",
-      "sonner": "catalog:ui",
-      "zod": "catalog:validation"
-   },
-   "devDependencies": {
-      "@tooling/typescript": "workspace:*",
-      "@types/react": "catalog:react",
-      "@types/react-dom": "catalog:react",
-      "typescript": "catalog:development"
-   },
-   "name": "landing-page",
-   "license": "Apache-2.0",
-   "scripts": {
-      "astro": "bunx --bun astro",
-      "build": "bunx --bun astro build",
-      "check": "bunx --bun biome check --write ./src",
-      "dev": "bunx astro dev --port 4322",
-      "preview": "bunx --bun astro preview",
-      "typecheck": "bunx --bun astro check"
-   },
-   "type": "module",
-   "version": "0.4.0"
+  "dependencies": {
+    "@packages/posthog": "workspace:*",
+    "@astrojs/check": "catalog:astro",
+    "@astrojs/node": "catalog:astro",
+    "@astrojs/react": "catalog:astro",
+    "@astrojs/sitemap": "catalog:astro",
+    "@astrojs/ts-plugin": "catalog:astro",
+    "@lucide/astro": "catalog:astro",
+    "@packages/brand": "workspace:*",
+    "@packages/ui": "workspace:*",
+    "@tailwindcss/vite": "catalog:ui",
+    "astro": "catalog:astro",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "sonner": "catalog:ui",
+    "zod": "catalog:validation"
+  },
+  "devDependencies": {
+    "@tooling/typescript": "workspace:*",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "typescript": "catalog:development"
+  },
+  "name": "landing-page",
+  "license": "Apache-2.0",
+  "scripts": {
+    "astro": "bunx --bun astro",
+    "build": "bunx --bun astro build",
+    "check": "bunx --bun biome check --write ./src",
+    "dev": "bunx astro dev --port 4322",
+    "preview": "bunx --bun astro preview",
+    "typecheck": "bunx --bun astro check"
+  },
+  "type": "module",
+  "version": "0.5.0"
 }

@@ -1,36 +1,36 @@
 {
-   "dependencies": {
-      "zod": "catalog:validation",
-      "@packages/utils": "workspace:*"
-   },
-   "devDependencies": {
-      "@tooling/typescript": "workspace:*",
-      "typescript": "catalog:development",
-      "vite": "catalog:vite",
-      "vitest": "catalog:testing"
-   },
-   "license": "Apache-2.0",
-   "name": "@packages/environment",
-   "scripts": {
-      "build": "tsc",
-      "check": "biome check --write ./src",
-      "typecheck": "bunx --bun tsc "
-   },
-   "private": true,
-   "type": "module",
-   "exports": {
-      "./server": {
-         "types": "./dist/src/server.d.ts",
-         "default": "./src/server.ts"
-      },
-      "./client": {
-         "types": "./dist/src/client.d.ts",
-         "default": "./src/client.ts"
-      },
-      "./helpers": {
-         "types": "./dist/src/helpers.d.ts",
-         "default": "./src/helpers.ts"
-      }
-   },
-   "version": "0.4.0"
+  "dependencies": {
+    "zod": "catalog:validation",
+    "@packages/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@tooling/typescript": "workspace:*",
+    "typescript": "catalog:development",
+    "vite": "catalog:vite",
+    "vitest": "catalog:testing"
+  },
+  "license": "Apache-2.0",
+  "name": "@packages/environment",
+  "scripts": {
+    "build": "tsc",
+    "check": "biome check --write ./src",
+    "typecheck": "bunx --bun tsc "
+  },
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./server": {
+      "types": "./dist/src/server.d.ts",
+      "default": "./src/server.ts"
+    },
+    "./client": {
+      "types": "./dist/src/client.d.ts",
+      "default": "./src/client.ts"
+    },
+    "./helpers": {
+      "types": "./dist/src/helpers.d.ts",
+      "default": "./src/helpers.ts"
+    }
+  },
+  "version": "0.5.0"
 }

@@ -1,31 +1,31 @@
 {
-   "devDependencies": {
-      "@tooling/typescript": "workspace:*",
-      "typescript": "catalog:development"
-   },
-   "license": "Apache-2.0",
-   "name": "@packages/posthog",
-   "scripts": {
-      "build": "tsc",
-      "check": "biome check --write ./src",
-      "typecheck": "bunx --bun tsc  "
-   },
-   "private": true,
-   "type": "module",
-   "exports": {
-      "./client": {
-         "types": "./dist/src/client.d.ts",
-         "default": "./src/client.tsx"
-      },
-      "./server": {
-         "types": "./dist/src/server.d.ts",
-         "default": "./src/server.ts"
-      }
-   },
-   "version": "0.4.0",
-   "dependencies": {
-      "@packages/environment": "workspace:*",
-      "posthog-js": "^1.259.0",
-      "posthog-node": "^5.5.0"
-   }
+  "devDependencies": {
+    "@tooling/typescript": "workspace:*",
+    "typescript": "catalog:development"
+  },
+  "license": "Apache-2.0",
+  "name": "@packages/posthog",
+  "scripts": {
+    "build": "tsc",
+    "check": "biome check --write ./src",
+    "typecheck": "bunx --bun tsc  "
+  },
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./client": {
+      "types": "./dist/src/client.d.ts",
+      "default": "./src/client.tsx"
+    },
+    "./server": {
+      "types": "./dist/src/server.d.ts",
+      "default": "./src/server.ts"
+    }
+  },
+  "version": "0.5.0",
+  "dependencies": {
+    "@packages/environment": "workspace:*",
+    "posthog-js": "^1.259.0",
+    "posthog-node": "^5.5.0"
+  }
 }
