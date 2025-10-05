@@ -8,23 +8,24 @@ import {
 } from "@packages/agents";
 import { AppError, propagateError } from "@packages/utils/errors";
 
-export interface CreateBrandKnowledgeWorkflowJobData {
+export interface CreateCompleteKnowledgeWorkflowJobData {
    websiteUrl: string;
    userId: string;
-   agentId: string;
+   id: string;
+   target: "brand" | "competitor";
    runtimeContext?: CustomRuntimeContext;
 }
 
-export async function runCreateBrandKnowledgeWorkflow(
-   payload: CreateBrandKnowledgeWorkflowJobData,
+export async function runCreateCompleteKnowledgeWorkflow(
+   payload: CreateCompleteKnowledgeWorkflowJobData,
 ) {
-   const { websiteUrl, userId, agentId, runtimeContext } = payload;
+   const { websiteUrl, userId, id, target, runtimeContext } = payload;
 
    // Restore runtime context if it exists
 
    try {
       const run = await mastra
-         .getWorkflow("createBrandKnowledgeWorkflow")
+         .getWorkflow("createCompleteKnowledgeWorkflow")
          .createRunAsync();
 
       const result = await run.start({
@@ -36,54 +37,60 @@ export async function runCreateBrandKnowledgeWorkflow(
          inputData: {
             websiteUrl,
             userId,
-            id: agentId,
-            target: "brand",
+            id,
+            target,
          },
       });
 
       return {
          userId,
-         agentId,
+         id,
          websiteUrl,
+         target,
          result,
       };
    } catch (error) {
-      console.error("[CreateBrandKnowledgeWorkflow] WORKFLOW ERROR", {
+      console.error("[CreateCompleteKnowledgeWorkflow] WORKFLOW ERROR", {
          websiteUrl,
          userId,
-         agentId,
+         id,
+         target,
          error: error instanceof Error ? error.message : error,
          stack: error instanceof Error && error.stack ? error.stack : undefined,
       });
       propagateError(error);
       throw AppError.internal(
-         `Brand knowledge workflow failed: ${(error as Error).message}`,
+         `Complete knowledge workflow failed: ${(error as Error).message}`,
       );
    }
 }
 
-const QUEUE_NAME = "create-brand-knowledge-workflow";
+const QUEUE_NAME = "create-complete-knowledge-workflow";
 const redis = createRedisClient(serverEnv.REDIS_URL);
 
-export const createBrandKnowledgeWorkflowQueue =
-   new Queue<CreateBrandKnowledgeWorkflowJobData>(QUEUE_NAME, {
+export const createCompleteKnowledgeWorkflowQueue =
+   new Queue<CreateCompleteKnowledgeWorkflowJobData>(QUEUE_NAME, {
       connection: redis,
    });
-registerGracefulShutdown(createBrandKnowledgeWorkflowQueue);
+registerGracefulShutdown(createCompleteKnowledgeWorkflowQueue);
 
-export async function enqueueCreateBrandKnowledgeWorkflowJob(
-   data: CreateBrandKnowledgeWorkflowJobData,
+export async function enqueueCreateCompleteKnowledgeWorkflowJob(
+   data: CreateCompleteKnowledgeWorkflowJobData,
    jobOptions?: Parameters<
-      Queue<CreateBrandKnowledgeWorkflowJobData>["add"]
+      Queue<CreateCompleteKnowledgeWorkflowJobData>["add"]
    >[2],
 ) {
-   return createBrandKnowledgeWorkflowQueue.add(QUEUE_NAME, data, jobOptions);
+   return createCompleteKnowledgeWorkflowQueue.add(
+      QUEUE_NAME,
+      data,
+      jobOptions,
+   );
 }
 
-export const createBrandKnowledgeWorkflowWorker = new Worker(
+export const createCompleteKnowledgeWorkflowWorker = new Worker(
    QUEUE_NAME,
-   async (job: Job<CreateBrandKnowledgeWorkflowJobData>) => {
-      await runCreateBrandKnowledgeWorkflow(job.data);
+   async (job: Job<CreateCompleteKnowledgeWorkflowJobData>) => {
+      await runCreateCompleteKnowledgeWorkflow(job.data);
    },
    {
       connection: redis,
@@ -92,4 +99,5 @@ export const createBrandKnowledgeWorkflowWorker = new Worker(
       },
    },
 );
-registerGracefulShutdown(createBrandKnowledgeWorkflowWorker);
+registerGracefulShutdown(createCompleteKnowledgeWorkflowWorker);
+
