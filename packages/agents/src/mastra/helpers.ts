@@ -27,17 +27,22 @@ export async function ingestUsage(usage: MastraLLMUsage, userId: string) {
 }
 export function createToolSystemPrompt(toolInstructions: string[]): string {
    if (!toolInstructions.length) {
-      return "No tools available.";
+      return "";
    }
-
-   const header = "You have access to the following tools: \n\n";
-   const footer =
-      "\n Use these tools as needed to accomplish the user's request.";
 
    const formattedInstructions = toolInstructions
       .filter((instruction) => instruction?.trim())
       .map((instruction) => instruction.trim())
-      .join("\n\n");
+      .join("\n");
 
-   return header + formattedInstructions + footer;
+   return `
+# AVAILABLE TOOLS
+
+${formattedInstructions}
+
+# RULES
+- Use tools only when necessary
+- Never repeat identical calls
+- Stop when you have sufficient information
+`;
 }
