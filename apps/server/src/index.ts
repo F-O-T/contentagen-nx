@@ -11,21 +11,22 @@ import { bullAuth } from "./integrations/bull-auth-guard";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { ElysiaAdapter } from "@bull-board/elysia";
 import { createBullBoard } from "@bull-board/api";
-import { createBrandKnowledgeWorkflowQueue } from "@packages/workers/queues/create-brand-knowledge-workflow-queue";
-import { crawlCompetitorForFeaturesQueue } from "@packages/workers/queues/crawl-competitor-for-features-queue";
-import { extractCompetitorBrandInfoQueue } from "@packages/workers/queues/extract-competitor-brand-info-queue";
-import { createCompetitorKnowledgeWorkflowQueue } from "@packages/workers/queues/create-competitor-knowledge-workflow-queue";
 import { createNewContentWorkflowQueue } from "@packages/workers/queues/create-new-content-queue";
+import { createOverviewQueue } from "@packages/workers/queues/create-overview-queue";
+import { createFeaturesKnowledgeQueue } from "@packages/workers/queues/create-features-knowledge-queue";
+import { createCompleteKnowledgeWorkflowQueue } from "@packages/workers/queues/create-complete-knowledge-workflow-queue";
+import { createKnowledgeAndIndexDocumentsQueue } from "@packages/workers/queues/create-knowledge-and-index-documents-queue";
+
 import { isProduction } from "@packages/environment/helpers";
 const serverAdapter = new ElysiaAdapter("/ui");
 
 createBullBoard({
    queues: [
       new BullMQAdapter(createNewContentWorkflowQueue),
-      new BullMQAdapter(crawlCompetitorForFeaturesQueue),
-      new BullMQAdapter(createCompetitorKnowledgeWorkflowQueue),
-      new BullMQAdapter(createBrandKnowledgeWorkflowQueue),
-      new BullMQAdapter(extractCompetitorBrandInfoQueue),
+      new BullMQAdapter(createOverviewQueue),
+      new BullMQAdapter(createFeaturesKnowledgeQueue),
+      new BullMQAdapter(createCompleteKnowledgeWorkflowQueue),
+      new BullMQAdapter(createKnowledgeAndIndexDocumentsQueue),
    ],
    serverAdapter,
    options: {
