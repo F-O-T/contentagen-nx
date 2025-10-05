@@ -95,7 +95,7 @@ const changelogWritingStep = createStep({
       "Write the changelog based on the content strategy and research",
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: ContentWritingStepOutputSchema,
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       try {
          const { userId, agentId, contentId, request } = inputData;
 
@@ -112,7 +112,7 @@ create a new ${request.layout} based on the conent request.
 request: ${request.description}
 
 `;
-         const result = await changelogWriterAgent.generateVNext(
+         const result = await changelogWriterAgent.generate(
             [
                {
                   role: "user",
@@ -120,6 +120,7 @@ request: ${request.description}
                },
             ],
             {
+               runtimeContext,
                output: ContentWritingStepOutputSchema.pick({
                   writing: true,
                }),
@@ -180,7 +181,7 @@ const changelogEditorStep = createStep({
       writing: writingType,
    }),
    outputSchema: ContentEditorStepOutputSchema,
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       try {
          const { userId, request, agentId, contentId, writing } = inputData;
 
@@ -199,7 +200,7 @@ writing: ${writing}
 
 output the edited content in markdown format.
 `;
-         const result = await changelogEditorAgent.generateVNext(
+         const result = await changelogEditorAgent.generate(
             [
                {
                   role: "user",
@@ -207,6 +208,7 @@ output the edited content in markdown format.
                },
             ],
             {
+               runtimeContext,
                output: ContentEditorStepOutputSchema.pick({
                   editor: true,
                }),
@@ -269,7 +271,7 @@ export const changelogReadAndReviewStep = createStep({
    description: "Read and review the changelog",
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: ContentReviewerStepOutputSchema,
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       try {
          const { userId, agentId, contentId, request, editor } = inputData;
 
@@ -292,7 +294,7 @@ final:${editor}
 `;
          //TODO: Rework
 
-         const result = await changelogReaderAgent.generateVNext(
+         const result = await changelogReaderAgent.generate(
             [
                {
                   role: "user",
@@ -300,6 +302,7 @@ final:${editor}
                },
             ],
             {
+               runtimeContext,
                output: ContentReviewerStepOutputSchema.pick({
                   rating: true,
                   reasonOfTheRating: true,
@@ -372,7 +375,7 @@ export const changelogSeoOptimizationStep = createStep({
    description: "Generate SEO keywords and meta description for the changelog",
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: SeoOptimizationStepOutputSchema,
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       try {
          const { userId, agentId, contentId, request, editor } = inputData;
 
@@ -398,7 +401,7 @@ Requirements:
 - Follow SEO best practices for character limits and optimization
 `;
 
-         const result = await seoOptimizationAgent.generateVNext(
+         const result = await seoOptimizationAgent.generate(
             [
                {
                   role: "user",
@@ -406,6 +409,7 @@ Requirements:
                },
             ],
             {
+               runtimeContext,
                output: SeoOptimizationStepOutputSchema.pick({
                   keywords: true,
                   metaDescription: true,

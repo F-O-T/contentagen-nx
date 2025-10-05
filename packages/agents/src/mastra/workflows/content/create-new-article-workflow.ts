@@ -98,7 +98,7 @@ export const strategyStep = createStep({
    description: "Create brand-aligned content strategy",
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: StrategyStepOutputSchema,
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       try {
          const {
             contentId,
@@ -135,7 +135,7 @@ Please develop a strategic brief that:
 Focus on creating a strategy that leverages our brand's unique strengths and differentiates us from competitors.
 `;
 
-         const result = await contentStrategistAgent.generateVNext(
+         const result = await contentStrategistAgent.generate(
             [
                {
                   role: "user",
@@ -143,6 +143,7 @@ Focus on creating a strategy that leverages our brand's unique strengths and dif
                },
             ],
             {
+               runtimeContext,
                output: StrategyStepOutputSchema.pick({
                   strategy: true,
                }),
@@ -214,7 +215,7 @@ export const researchStep = createStep({
    description: "Perform SERP research and competitive analysis",
    inputSchema: CreateNewContentWorkflowInputSchema,
    outputSchema: ResearchStepOutputSchema,
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       try {
          const { contentId, userId, agentId, request } = inputData;
 
@@ -242,7 +243,7 @@ Please conduct SERP analysis to identify:
 Focus on the research findings only and include actual URLs found during your web searches.
 `;
 
-         const result = await researcherAgent.generateVNext(
+         const result = await researcherAgent.generate(
             [
                {
                   role: "user",
@@ -250,6 +251,8 @@ Focus on the research findings only and include actual URLs found during your we
                },
             ],
             {
+               runtimeContext,
+
                output: ResearchStepOutputSchema.omit({
                   agentId: true,
                   contentId: true,
@@ -319,7 +322,7 @@ const articleWritingStep = createStep({
    description: "Write the article based on the content strategy and research",
    inputSchema: ArticleWritingStepInputSchema,
    outputSchema: ContentWritingStepOutputSchema,
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       try {
          const {
             "article-research-step": {
@@ -374,7 +377,7 @@ ${strategyPrompt}
 ${researchPrompt}
 
 `;
-         const result = await articleWriterAgent.generateVNext(
+         const result = await articleWriterAgent.generate(
             [
                {
                   role: "user",
@@ -382,6 +385,8 @@ ${researchPrompt}
                },
             ],
             {
+               runtimeContext,
+
                output: ContentWritingStepOutputSchema.pick({
                   writing: true,
                }),
@@ -446,7 +451,7 @@ const articleEditorStep = createStep({
    description: "Edit the article based on the content research",
    inputSchema: ContentWritingStepOutputSchema,
    outputSchema: ContentEditorStepOutputSchema,
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       try {
          const { userId, contentId, request, agentId, writing, sources } =
             inputData;
@@ -466,7 +471,7 @@ writing: ${writing}
 
 output the edited content in markdown format.
 `;
-         const result = await articleEditorAgent.generateVNext(
+         const result = await articleEditorAgent.generate(
             [
                {
                   role: "user",
@@ -474,6 +479,7 @@ output the edited content in markdown format.
                },
             ],
             {
+               runtimeContext,
                output: ContentEditorStepOutputSchema.pick({
                   editor: true,
                }),
@@ -537,7 +543,7 @@ export const articleReadAndReviewStep = createStep({
    description: "Read and review the article",
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: ContentReviewerStepOutputSchema,
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       try {
          const { contentId, sources, userId, agentId, request, editor } =
             inputData;
@@ -559,7 +565,7 @@ original:${request.description}
 final:${editor}
 
 `;
-         const result = await articleReaderAgent.generateVNext(
+         const result = await articleReaderAgent.generate(
             [
                {
                   role: "user",
@@ -567,6 +573,7 @@ final:${editor}
                },
             ],
             {
+               runtimeContext,
                output: ContentReviewerStepOutputSchema.pick({
                   rating: true,
                   reasonOfTheRating: true,
@@ -640,7 +647,7 @@ export const articleSeoOptimizationStep = createStep({
    description: "Generate SEO keywords and meta description for the article",
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: SeoOptimizationStepOutputSchema,
-   execute: async ({ inputData }) => {
+   execute: async ({ inputData, runtimeContext }) => {
       try {
          const { agentId, userId, contentId, request, editor } = inputData;
 
@@ -666,7 +673,7 @@ Requirements:
 - Follow SEO best practices for character limits and optimization
 `;
 
-         const result = await seoOptimizationAgent.generateVNext(
+         const result = await seoOptimizationAgent.generate(
             [
                {
                   role: "user",
@@ -674,6 +681,7 @@ Requirements:
                },
             ],
             {
+               runtimeContext,
                output: SeoOptimizationStepOutputSchema.pick({
                   keywords: true,
                   metaDescription: true,
