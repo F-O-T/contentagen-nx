@@ -15,6 +15,10 @@ import { preferencesRouter } from "./router/preferences";
 import { competitorRouter } from "./router/competitor";
 import { competitorFileRouter } from "./router/competitor-file";
 import { bugReportRouter } from "./router/bug-report";
+import { organizationRouter } from "./router/organization";
+import { organizationFileRouter } from "./router/organization-file";
+import { brandRouter } from "./router/brand";
+import { brandFileRouter } from "./router/brand-file";
 
 export const appRouter = router({
    agent: agentRouter,
@@ -28,6 +32,10 @@ export const appRouter = router({
    competitor: competitorRouter,
    competitorFile: competitorFileRouter,
    bugReport: bugReportRouter,
+   organization: organizationRouter,
+   organizationFile: organizationFileRouter,
+   brand: brandRouter,
+   brandFile: brandFileRouter,
 });
 export const createApi = ({
    auth,
