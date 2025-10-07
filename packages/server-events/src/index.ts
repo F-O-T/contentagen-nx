@@ -3,12 +3,14 @@ import type { ContentStatus } from "@packages/database/schemas/content";
 import type { IdeiaStatus } from "@packages/database/schemas/ideas";
 import type { KnowledgeCreationStatus } from "@packages/database/schemas/competitor";
 import type { ContentRequest } from "@packages/database/schemas/content";
+import type { BrandKnowledgeStatus } from "@packages/database/schemas/brand";
 // 1. Define event names as constants
 export const EVENTS = {
    agentKnowledgeStatus: "agent.knowledge.status",
    contentStatus: "content.status",
    competitorStatus: "competitor.status",
    ideaStatus: "idea.status",
+   brandStatus: "brand.status",
 } as const;
 
 // 2. Define the payload type for the status change event
@@ -28,6 +30,11 @@ export type IdeaStatusChangedPayload = {
    status: IdeiaStatus;
    message?: string;
 };
+export type BrandStatusChangedPayload = {
+   brandId: string;
+   status: BrandKnowledgeStatus;
+   message?: string;
+};
 // 3. The event emitter instance
 export const eventEmitter = new EventEmitter();
 // 4. Helper to emit a status change event (strongly typed)
@@ -41,4 +48,7 @@ export function emitCompetitorStatusChanged(
 }
 export function emitIdeaStatusChanged(payload: IdeaStatusChangedPayload) {
    eventEmitter.emit(EVENTS.ideaStatus, payload);
+}
+export function emitBrandStatusChanged(payload: BrandStatusChangedPayload) {
+   eventEmitter.emit(EVENTS.brandStatus, payload);
 }
