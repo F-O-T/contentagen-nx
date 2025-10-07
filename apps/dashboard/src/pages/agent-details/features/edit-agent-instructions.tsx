@@ -104,9 +104,9 @@ export function EditAgentInstructions({
       validators: {
          //TODO: Onblur is not working when using the schema from the database
          onBlur: z.object({
-            audienceProfile: z.string().min(1, "This field is required"),
-            writingGuidelines: z.string().min(1, "This field is required"),
-            ragIntegration: z.string().min(1, "This field is required"),
+            audienceProfile: z.string(),
+            writingGuidelines: z.string(),
+            ragIntegration: z.string(),
          }),
       },
       onSubmit: async ({ value }) => {
