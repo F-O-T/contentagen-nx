@@ -16,6 +16,10 @@ import {
    Lightbulb,
    Target,
    FileText,
+   Building2,
+   Users,
+   Settings2,
+   ShieldCheck,
 } from "lucide-react";
 import type * as React from "react";
 import { Link } from "@tanstack/react-router";
@@ -65,6 +69,27 @@ export function AppSidebar({
          title: "Competitors",
          url: "/competitors",
       },
+      {
+         icon: Building2,
+         title: "Organization",
+         subItems: [
+            {
+               url: "/organization",
+               title: "Organization Overview",
+               icon: Building2,
+            },
+            {
+               url: "/organization/members",
+               title: "Members",
+               icon: Users,
+            },
+            {
+               url: "/organization/brand-files",
+               title: "Brand Files",
+               icon: FileText,
+            },
+         ],
+      },
    ];
 
    return (
@@ -92,7 +117,7 @@ export function AppSidebar({
             <NavMain items={navMain} />
          </SidebarContent>
          <SidebarFooter>
-            <NavUser session={session} />{" "}
+            <NavUser session={session} />
          </SidebarFooter>
       </Sidebar>
    );
