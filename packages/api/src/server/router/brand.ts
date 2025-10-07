@@ -101,6 +101,12 @@ export const brandRouter = router({
                ...input,
                organizationId,
             });
+            if (!input.websiteUrl) {
+               throw APIError.validation(
+                  "Website URL is required to create a brand.",
+               );
+            }
+
             await enqueueCreateCompleteKnowledgeWorkflowJob({
                id: created.id,
                target: "brand",
@@ -213,10 +219,7 @@ export const brandRouter = router({
                );
             }
 
-            const brand = await getBrandById(
-               resolvedCtx.db,
-               input.id,
-            );
+            const brand = await getBrandById(resolvedCtx.db, input.id);
 
             // Verify the brand belongs to the organization
             if (brand.organizationId !== organizationId) {
@@ -227,6 +230,11 @@ export const brandRouter = router({
 
             await deleteFeaturesByBrandId(resolvedCtx.db, brand.id);
 
+            if (!brand.websiteUrl) {
+               throw APIError.validation(
+                  "Website URL is required to analyze a brand.",
+               );
+            }
             await enqueueCreateFeaturesKnowledgeJob({
                id: brand.id,
                target: "brand",
@@ -255,10 +263,7 @@ export const brandRouter = router({
                );
             }
 
-            const brand = await getBrandById(
-               resolvedCtx.db,
-               input.id,
-            );
+            const brand = await getBrandById(resolvedCtx.db, input.id);
 
             // Verify the brand belongs to the organization
             if (brand.organizationId !== organizationId) {
@@ -272,6 +277,37 @@ export const brandRouter = router({
             console.error("Error getting brand:", err);
             propagateError(err);
             throw APIError.internal("Failed to get brand.");
+         }
+      }),
+
+   getByOrganization: protectedProcedure
+      .query(async ({ ctx }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId =
+               resolvedCtx.session?.session?.activeOrganizationId;
+
+            if (!organizationId) {
+               throw APIError.unauthorized(
+                  "User must be authenticated and belong to an organization to view brands.",
+               );
+            }
+
+            const brands = await listBrands(resolvedCtx.db, {
+               organizationId,
+               page: 1,
+               limit: 1,
+            });
+
+            if (brands.length === 0) {
+               throw APIError.notFound("No brand found for this organization.");
+            }
+
+            return brands[0];
+         } catch (err) {
+            console.error("Error getting organization brand:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to get organization brand.");
          }
       }),
 
@@ -301,10 +337,7 @@ export const brandRouter = router({
             }
 
             // Verify the brand exists and belongs to the organization
-            const brand = await getBrandById(
-               resolvedCtx.db,
-               input.brandId,
-            );
+            const brand = await getBrandById(resolvedCtx.db, input.brandId);
             if (brand.organizationId !== organizationId) {
                throw APIError.forbidden(
                   "You don't have permission to view this brand's features.",
@@ -318,10 +351,7 @@ export const brandRouter = router({
                   sortBy: input.sortBy,
                   sortOrder: input.sortOrder,
                }),
-               getTotalFeaturesByBrandId(
-                  resolvedCtx.db,
-                  input.brandId,
-               ),
+               getTotalFeaturesByBrandId(resolvedCtx.db, input.brandId),
             ]);
 
             const totalPages = Math.ceil(total / input.limit);
@@ -374,18 +404,11 @@ export const brandRouter = router({
    onStatusChange: publicProcedure
       .input(z.object({ brandId: z.string().optional() }).optional())
       .subscription(async function* (opts) {
-         for await (const [payload] of on(
-            eventEmitter,
-            EVENTS.brandStatus,
-            {
-               signal: opts.signal,
-            },
-         )) {
+         for await (const [payload] of on(eventEmitter, EVENTS.brandStatus, {
+            signal: opts.signal,
+         })) {
             const event = payload as BrandStatusChangedPayload;
-            if (
-               !opts.input?.brandId ||
-               opts.input.brandId === event.brandId
-            ) {
+            if (!opts.input?.brandId || opts.input.brandId === event.brandId) {
                yield event;
             }
          }
