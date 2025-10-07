@@ -1,5 +1,7 @@
 export * from "./schemas/auth";
 export * from "./schemas/agent";
+export * from "./schemas/brand";
+export * from "./schemas/brand-features";
 export * from "./schemas/competitor";
 export * from "./schemas/competitor-feature";
 export * from "./schemas/content";

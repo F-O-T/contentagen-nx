@@ -1,5 +1,7 @@
 import type { DatabaseInstance } from "../client";
+import { eq } from "drizzle-orm";
 import { AppError, propagateError } from "@packages/utils/errors";
+import { organization } from "../schemas/auth";
 
 export async function findMemberByUserId(
    dbClient: DatabaseInstance,
@@ -73,6 +75,31 @@ export async function getOrganizationMembers(
    } catch (err) {
       throw AppError.database(
          `Failed to get organization members: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function updateOrganization(
+   dbClient: DatabaseInstance,
+   organizationId: string,
+   data: { logo?: string },
+) {
+   try {
+      const result = await dbClient
+         .update(organization)
+         .set(data)
+         .where(eq(organization.id, organizationId))
+         .returning();
+
+      if (!result.length) {
+         throw AppError.database("Organization not found");
+      }
+
+      return result[0];
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to update organization: ${(err as Error).message}`,
       );
    }
 }
