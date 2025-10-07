@@ -1,20 +1,13 @@
 import { useMemo } from "react";
 import { StatsCard } from "@packages/ui/components/stats-card";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useTRPC } from "@/integrations/clients";
-import { useParams } from "@tanstack/react-router";
 import { translate } from "@packages/localization";
+import type { BrandSelect } from "@packages/database/schema";
 
-export function BrandStatsCard() {
-   const trpc = useTRPC();
-   const id = useParams({
-      from: "/_dashboard/brands/$id",
-      select: ({ id }) => id,
-   });
+interface BrandStatsCardProps {
+   brand: BrandSelect;
+}
 
-   const { data: brand } = useSuspenseQuery(
-      trpc.brand.get.queryOptions({ id }),
-   );
+export function BrandStatsCard({ brand }: BrandStatsCardProps) {
 
    const items = useMemo(() => {
       const features = brand?.features ?? [];

@@ -1,12 +1,15 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { translate } from "@packages/localization";
 import { useTRPC } from "@/integrations/clients";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
+import {
+   useSuspenseQuery,
+   useQueryClient,
+   useQuery,
+} from "@tanstack/react-query";
 import { BrandDetailsActions } from "./brand-details-actions";
 import { BrandStatsCard } from "./brand-stats-card";
 import { BrandInfoCard } from "./brand-info-card";
-import { CreateEditBrandDialog } from "../../brand-list/features/create-edit-brand-dialog";
+import { CreateEditBrandDialog } from "../features/create-edit-brand-dialog";
 import { BrandFileViewerModal } from "../features/brand-file-viewer-modal";
 import { BrandLogoUploadDialog } from "../features/brand-logo-upload-dialog";
 import { useState, useMemo } from "react";
@@ -23,21 +26,34 @@ import { Markdown } from "@packages/ui/components/markdown";
 import { BrandFeaturesCard } from "./brand-features-card";
 import { BrandDetailsKnowledgeBaseCard } from "./brand-details-knowledge-base-card";
 import { PendingComponent } from "@/default/pending";
+import { useIsomorphicLayoutEffect } from "@packages/ui/hooks/use-isomorphic-layout-effect";
 
 export function BrandDetailsPage() {
    const trpc = useTRPC();
-   const { id } = useParams({ from: "/_dashboard/brands/$id" });
    const [showEditDialog, setShowEditDialog] = useState(false);
    const [showLogoUploadDialog, setShowLogoUploadDialog] = useState(false);
    const queryClient = useQueryClient();
-   const fileViewer = BrandFileViewerModal();
 
-   const { data: brand } = useSuspenseQuery(
-      trpc.brand.get.queryOptions({ id }),
+   const { data: brand, error: brandError } = useQuery(
+      trpc.brand.getByOrganization.queryOptions(),
    );
 
-   const { data: photo } = useSuspenseQuery(
-      trpc.brandFile.getLogo.queryOptions({ brandId: id }),
+   // If no brand exists or there's an error, show create dialog
+   const [showCreateDialog, setShowCreateDialog] = useState(false);
+
+   // Only initialize file viewer when brand exists
+   const fileViewer = brand
+      ? BrandFileViewerModal({ brandId: brand.id })
+      : null;
+
+   // Only fetch logo if brand exists
+   const { data: photo } = useQuery(
+      trpc.brandFile.getLogo.queryOptions(
+         { brandId: brand?.id || "" },
+         {
+            enabled: Boolean(brand),
+         },
+      ),
    );
    // Calculate subscription enabled state using useMemo
 
@@ -49,11 +65,17 @@ export function BrandDetailsPage() {
          ),
       [brand?.status], // updated from brand?.analysisStatus to brand?.status
    );
-
+   useIsomorphicLayoutEffect(() => {
+      if (!brand && !brandError) {
+         setShowCreateDialog(true);
+      } else {
+         setShowCreateDialog(false);
+      }
+   }, [brand, brandError]);
    useSubscription(
       trpc.brand.onStatusChange.subscriptionOptions(
          {
-            brandId: id,
+            brandId: brand?.id || "",
          },
          {
             async onData(data) {
@@ -65,15 +87,44 @@ export function BrandDetailsPage() {
                   ),
                });
                await queryClient.invalidateQueries({
-                  queryKey: trpc.brand.get.queryKey({
-                     id,
-                  }),
+                  queryKey: trpc.brand.getByOrganization.queryKey(),
                });
             },
-            enabled: Boolean(isGenerating),
+            enabled: Boolean(brand && isGenerating),
          },
       ),
    );
+
+   // If no brand exists, show create dialog
+   if (!brand || brandError) {
+      return (
+         <>
+            <main className="h-full w-full flex flex-col gap-4">
+               <TalkingMascot
+                  message={translate(
+                     "pages.brand-details.no-brand.mascot-message",
+                  )}
+               />
+               <Card>
+                  <CardHeader>
+                     <CardTitle>
+                        {translate("pages.brand-details.no-brand.title")}
+                     </CardTitle>
+                     <CardDescription>
+                        {translate("pages.brand-details.no-brand.description")}
+                     </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                     <CreateEditBrandDialog
+                        open={showCreateDialog}
+                        onOpenChange={setShowCreateDialog}
+                     />
+                  </CardContent>
+               </Card>
+            </main>
+         </>
+      );
+   }
 
    return (
       <>
@@ -83,14 +134,12 @@ export function BrandDetailsPage() {
             ) : (
                <>
                   <TalkingMascot
-                     message={translate(
-                        "pages.brand-details.mascot-message",
-                     )}
+                     message={translate("pages.brand-details.mascot-message")}
                   />
 
                   <div className="grid md:grid-cols-3 grid-cols-1 gap-4">
                      <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
-                        <BrandStatsCard />
+                        <BrandStatsCard brand={brand} />
 
                         <BrandFeaturesCard brandId={brand.id} />
                      </div>
@@ -120,9 +169,7 @@ export function BrandDetailsPage() {
                               <Markdown content={brand.description ?? ""} />
                            </CardContent>
                         </Card>
-                        <BrandDetailsKnowledgeBaseCard
-                           brand={brand}
-                        />
+                        <BrandDetailsKnowledgeBaseCard brand={brand} />
                      </div>
                   </div>
                </>
@@ -138,8 +185,10 @@ export function BrandDetailsPage() {
             open={showLogoUploadDialog}
             onOpenChange={setShowLogoUploadDialog}
             currentLogo={photo?.data ?? ""}
+            brandId={brand.id}
          />
-         <fileViewer.Modal />
+         {fileViewer?.Modal && <fileViewer.Modal />}
       </>
    );
 }
+

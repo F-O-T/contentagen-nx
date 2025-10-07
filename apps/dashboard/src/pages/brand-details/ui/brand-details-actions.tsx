@@ -15,9 +15,9 @@ import {
    TooltipTrigger,
    TooltipContent,
 } from "@packages/ui/components/tooltip";
-import { CreateEditBrandDialog } from "../../brand-list/features/create-edit-brand-dialog";
+import { CreateEditBrandDialog } from "../features/create-edit-brand-dialog";
 import { useState } from "react";
-import { DeleteBrandConfirmationDialog } from "../../brand-list/features/delete-brand-confirmation-dialog";
+import { DeleteBrandConfirmationDialog } from "../features/delete-brand-confirmation-dialog";
 import type { RouterOutput } from "@packages/api/client";
 import { translate } from "@packages/localization";
 
@@ -45,7 +45,7 @@ export function BrandDetailsActions({
                ),
             });
             queryClient.invalidateQueries({
-               queryKey: trpc.brand.get.queryKey({ id: brand.id }),
+               queryKey: trpc.brand.getByOrganization.queryKey(),
             });
          },
          onError: (error) => {

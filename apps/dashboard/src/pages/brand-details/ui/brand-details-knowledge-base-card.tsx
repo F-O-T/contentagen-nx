@@ -19,7 +19,6 @@ import { FileText, MoreVertical } from "lucide-react";
 import { BrandFileViewerModal } from "../features/brand-file-viewer-modal";
 import { useCallback, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
 import { useTRPC } from "@/integrations/clients";
 import { createToast } from "@/features/error-modal/lib/create-toast";
 import { AGENT_FILE_UPLOAD_LIMIT } from "@packages/files/text-file-helper";
@@ -51,10 +50,9 @@ export function BrandDetailsKnowledgeBaseCard({
 }: {
    brand: BrandSelect;
 }) {
-   const { id } = useParams({ from: "/_dashboard/brands/$id" });
    const queryClient = useQueryClient();
    const trpc = useTRPC();
-   const { open, Modal } = BrandFileViewerModal();
+   const { open, Modal } = BrandFileViewerModal({ brandId: brand.id });
 
    const deleteFileMutation = useMutation(
       trpc.brandFile.delete.mutationOptions({
@@ -66,7 +64,7 @@ export function BrandDetailsKnowledgeBaseCard({
                ),
             });
             await queryClient.invalidateQueries({
-               queryKey: trpc.brand.get.queryKey({ id }),
+               queryKey: trpc.brand.getByOrganization.queryKey(),
             });
          },
          onError: () => {
@@ -87,12 +85,12 @@ export function BrandDetailsKnowledgeBaseCard({
          );
          if (fileToDelete) {
             await deleteFileMutation.mutateAsync({
-               brandId: id,
+               brandId: brand.id,
                fileName: fileName,
             });
          }
       },
-      [brand, id, deleteFileMutation],
+      [brand, deleteFileMutation],
    );
 
    const handleViewFile = useCallback(

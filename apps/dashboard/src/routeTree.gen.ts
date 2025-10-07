@@ -26,6 +26,7 @@ import { Route as DashboardIdeasIndexRouteImport } from './routes/_dashboard/ide
 import { Route as DashboardContentIndexRouteImport } from './routes/_dashboard/content/index'
 import { Route as DashboardCompetitorsIndexRouteImport } from './routes/_dashboard/competitors/index'
 import { Route as DashboardAgentsIndexRouteImport } from './routes/_dashboard/agents/index'
+import { Route as DashboardOrganizationBrandRouteImport } from './routes/_dashboard/organization/brand'
 import { Route as DashboardIdeasIdRouteImport } from './routes/_dashboard/ideas/$id'
 import { Route as DashboardContentIdRouteImport } from './routes/_dashboard/content/$id'
 import { Route as DashboardCompetitorsIdRouteImport } from './routes/_dashboard/competitors/$id'
@@ -124,6 +125,12 @@ const DashboardAgentsIndexRoute = DashboardAgentsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardAgentsRoute,
 } as any)
+const DashboardOrganizationBrandRoute =
+  DashboardOrganizationBrandRouteImport.update({
+    id: '/organization/brand',
+    path: '/organization/brand',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardIdeasIdRoute = DashboardIdeasIdRouteImport.update({
   id: '/ideas/$id',
   path: '/ideas/$id',
@@ -188,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/competitors/$id': typeof DashboardCompetitorsIdRoute
   '/content/$id': typeof DashboardContentIdRoute
   '/ideas/$id': typeof DashboardIdeasIdRoute
+  '/organization/brand': typeof DashboardOrganizationBrandRoute
   '/agents/': typeof DashboardAgentsIndexRoute
   '/competitors': typeof DashboardCompetitorsIndexRoute
   '/content': typeof DashboardContentIndexRoute
@@ -213,6 +221,7 @@ export interface FileRoutesByTo {
   '/competitors/$id': typeof DashboardCompetitorsIdRoute
   '/content/$id': typeof DashboardContentIdRoute
   '/ideas/$id': typeof DashboardIdeasIdRoute
+  '/organization/brand': typeof DashboardOrganizationBrandRoute
   '/competitors': typeof DashboardCompetitorsIndexRoute
   '/content': typeof DashboardContentIndexRoute
   '/ideas': typeof DashboardIdeasIndexRoute
@@ -241,6 +250,7 @@ export interface FileRoutesById {
   '/_dashboard/competitors/$id': typeof DashboardCompetitorsIdRoute
   '/_dashboard/content/$id': typeof DashboardContentIdRoute
   '/_dashboard/ideas/$id': typeof DashboardIdeasIdRoute
+  '/_dashboard/organization/brand': typeof DashboardOrganizationBrandRoute
   '/_dashboard/agents/': typeof DashboardAgentsIndexRoute
   '/_dashboard/competitors/': typeof DashboardCompetitorsIndexRoute
   '/_dashboard/content/': typeof DashboardContentIndexRoute
@@ -268,6 +278,7 @@ export interface FileRouteTypes {
     | '/competitors/$id'
     | '/content/$id'
     | '/ideas/$id'
+    | '/organization/brand'
     | '/agents/'
     | '/competitors'
     | '/content'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/competitors/$id'
     | '/content/$id'
     | '/ideas/$id'
+    | '/organization/brand'
     | '/competitors'
     | '/content'
     | '/ideas'
@@ -320,6 +332,7 @@ export interface FileRouteTypes {
     | '/_dashboard/competitors/$id'
     | '/_dashboard/content/$id'
     | '/_dashboard/ideas/$id'
+    | '/_dashboard/organization/brand'
     | '/_dashboard/agents/'
     | '/_dashboard/competitors/'
     | '/_dashboard/content/'
@@ -459,6 +472,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAgentsIndexRouteImport
       parentRoute: typeof DashboardAgentsRoute
     }
+    '/_dashboard/organization/brand': {
+      id: '/_dashboard/organization/brand'
+      path: '/organization/brand'
+      fullPath: '/organization/brand'
+      preLoaderRoute: typeof DashboardOrganizationBrandRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/_dashboard/ideas/$id': {
       id: '/_dashboard/ideas/$id'
       path: '/ideas/$id'
@@ -565,6 +585,7 @@ interface DashboardRouteChildren {
   DashboardCompetitorsIdRoute: typeof DashboardCompetitorsIdRoute
   DashboardContentIdRoute: typeof DashboardContentIdRoute
   DashboardIdeasIdRoute: typeof DashboardIdeasIdRoute
+  DashboardOrganizationBrandRoute: typeof DashboardOrganizationBrandRoute
   DashboardCompetitorsIndexRoute: typeof DashboardCompetitorsIndexRoute
   DashboardContentIndexRoute: typeof DashboardContentIndexRoute
   DashboardIdeasIndexRoute: typeof DashboardIdeasIndexRoute
@@ -579,6 +600,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardCompetitorsIdRoute: DashboardCompetitorsIdRoute,
   DashboardContentIdRoute: DashboardContentIdRoute,
   DashboardIdeasIdRoute: DashboardIdeasIdRoute,
+  DashboardOrganizationBrandRoute: DashboardOrganizationBrandRoute,
   DashboardCompetitorsIndexRoute: DashboardCompetitorsIndexRoute,
   DashboardContentIndexRoute: DashboardContentIndexRoute,
   DashboardIdeasIndexRoute: DashboardIdeasIndexRoute,
