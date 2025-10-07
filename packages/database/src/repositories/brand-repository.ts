@@ -1,9 +1,6 @@
 import { brand } from "../schemas/brand";
-import { eq, and, or, sql } from "drizzle-orm";
-import type {
-   BrandSelect,
-   BrandInsert,
-} from "../schemas/brand";
+import { eq, and, sql } from "drizzle-orm";
+import type { BrandSelect, BrandInsert } from "../schemas/brand";
 import type { DatabaseInstance } from "../client";
 import { AppError, propagateError } from "@packages/utils/errors";
 
@@ -39,9 +36,7 @@ export async function getBrandById(
       return result;
    } catch (err) {
       propagateError(err);
-      throw AppError.database(
-         `Failed to get brand: ${(err as Error).message}`,
-      );
+      throw AppError.database(`Failed to get brand: ${(err as Error).message}`);
    }
 }
 
@@ -172,17 +167,11 @@ export async function searchBrands(
          const baseCondition = sql`(${brand.name}::text ILIKE ${searchPattern} OR ${brand.websiteUrl}::text ILIKE ${searchPattern})`;
 
          if (organizationId)
-            return and(
-               baseCondition,
-               eq(brand.organizationId, organizationId),
-            );
+            return and(baseCondition, eq(brand.organizationId, organizationId));
 
          return baseCondition;
       }
-      const whereCondition = buildSearchWhereCondition(
-         query,
-         organizationId,
-      );
+      const whereCondition = buildSearchWhereCondition(query, organizationId);
 
       return await dbClient.query.brand.findMany({
          where: whereCondition,
@@ -204,3 +193,4 @@ export async function searchBrands(
       );
    }
 }
+
