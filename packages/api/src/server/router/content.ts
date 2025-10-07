@@ -444,7 +444,9 @@ export const contentRouter = router({
                input.slug,
                input.agentId,
             );
-            const slugs = result.map((item) => item.slug);
+            const slugs = result
+               .map((item) => item.slug)
+               .filter((slug) => slug !== input.slug);
             return slugs;
          } catch (err) {
             console.log(err);
