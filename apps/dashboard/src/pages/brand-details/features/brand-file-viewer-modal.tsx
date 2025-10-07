@@ -13,15 +13,18 @@ import {
    CredenzaTitle,
 } from "@packages/ui/components/credenza";
 
-export function BrandFileViewerModal() {
+interface BrandFileViewerModalProps {
+   brandId: string;
+}
+
+export function BrandFileViewerModal({ brandId }: BrandFileViewerModalProps) {
    const trpc = useTRPC();
-   const { id } = useParams({ from: "/_dashboard/brands/$id" });
    const [isOpen, setIsOpen] = useState(false);
    const [fileName, setFileName] = useState("");
 
    const { data, isLoading } = useQuery({
       ...trpc.brandFile.getFileContent.queryOptions({
-         brandId: id,
+         brandId,
          fileName,
       }),
       enabled: isOpen && fileName !== "",

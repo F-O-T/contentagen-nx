@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
 import { useTRPC } from "@/integrations/clients";
 import { toast } from "sonner";
 import {
@@ -24,15 +23,16 @@ interface BrandLogoUploadDialogProps {
    open: boolean;
    onOpenChange: (open: boolean) => void;
    currentLogo?: string;
+   brandId: string;
 }
 
 export function BrandLogoUploadDialog({
    open,
    onOpenChange,
    currentLogo,
+   brandId,
 }: BrandLogoUploadDialogProps) {
    const trpc = useTRPC();
-   const { id } = useParams({ from: "/_dashboard/brands/$id" });
    const queryClient = useQueryClient();
    const [selectedFile, setSelectedFile] = useState<File | null>(null);
    const [filePreview, setFilePreview] = useState<string | undefined>();
@@ -45,7 +45,7 @@ export function BrandLogoUploadDialog({
          onSuccess: async () => {
             toast.success("Logo uploaded successfully!");
             await queryClient.invalidateQueries({
-               queryKey: trpc.brand.get.queryKey({ id }),
+               queryKey: trpc.brand.getByOrganization.queryKey(),
             });
             onOpenChange(false);
             setSelectedFile(null);
@@ -107,7 +107,7 @@ export function BrandLogoUploadDialog({
          });
 
          await uploadLogoMutation.mutateAsync({
-            brandId: id,
+            brandId: brandId,
             fileName: selectedFile.name,
             fileBuffer: base64,
             contentType: selectedFile.type,
