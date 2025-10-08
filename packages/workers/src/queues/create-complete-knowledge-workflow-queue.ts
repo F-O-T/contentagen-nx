@@ -100,4 +100,3 @@ export const createCompleteKnowledgeWorkflowWorker = new Worker(
    },
 );
 registerGracefulShutdown(createCompleteKnowledgeWorkflowWorker);
-
