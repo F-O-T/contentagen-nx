@@ -238,10 +238,7 @@ export async function getRecentFeatures(
          const ownerExists = buildOwnerExists(organizationId);
          return and(dateCondition, ownerExists);
       };
-      const whereCondition = buildDateAndOwnerWhere(
-         cutoffDate,
-         organizationId,
-      );
+      const whereCondition = buildDateAndOwnerWhere(cutoffDate, organizationId);
 
       return await dbClient.query.brandFeature.findMany({
          where: whereCondition,
@@ -348,10 +345,7 @@ export async function getFeaturesStats(
          .select({ value: sql<number>`cast(count(*) as int)` })
          .from(brandFeature)
          .where(
-            and(
-               sql`${brandFeature.extractedAt} >= ${cutoffDate}`,
-               ownerExists,
-            ),
+            and(sql`${brandFeature.extractedAt} >= ${cutoffDate}`, ownerExists),
          );
 
       const brandsResult = await dbClient
@@ -360,10 +354,7 @@ export async function getFeaturesStats(
          })
          .from(brandFeature)
          .where(
-            and(
-               sql`${brandFeature.extractedAt} >= ${cutoffDate}`,
-               ownerExists,
-            ),
+            and(sql`${brandFeature.extractedAt} >= ${cutoffDate}`, ownerExists),
          );
 
       const totalFeatures = featuresResult[0]?.value ?? 0;

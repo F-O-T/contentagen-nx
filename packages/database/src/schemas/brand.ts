@@ -22,11 +22,10 @@ export const brand = pgTable(
    "brand",
    {
       id: uuid("id").primaryKey().defaultRandom(),
-      name: text("name").notNull(),
+      name: text("name"),
       websiteUrl: text("website_url"),
-      description: text("description"),
+      summary: text("summary"),
       logoUrl: text("logo_url"),
-      industry: text("industry"),
       status: brandKnowledgeStatusEnum("status").default("analyzing"),
       organizationId: text("organization_id")
          .references(() => organization.id, { onDelete: "cascade" })
@@ -43,8 +42,7 @@ export const brand = pgTable(
    (table) => [index("brand_organization_id_idx").on(table.organizationId)],
 );
 
-export const brandRelations = relations(brand, ({ many, one }) => ({
-   organization: one(organization),
+export const brandRelations = relations(brand, ({ many }) => ({
    features: many(brandFeature),
 }));
 

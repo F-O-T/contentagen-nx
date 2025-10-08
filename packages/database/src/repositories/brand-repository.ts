@@ -21,10 +21,7 @@ export async function createBrand(
    }
 }
 
-export async function getBrandById(
-   dbClient: DatabaseInstance,
-   id: string,
-): Promise<BrandSelect> {
+export async function getBrandById(dbClient: DatabaseInstance, id: string) {
    try {
       const result = await dbClient.query.brand.findFirst({
          where: eq(brand.id, id),
@@ -193,4 +190,3 @@ export async function searchBrands(
       );
    }
 }
-

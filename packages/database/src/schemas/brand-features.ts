@@ -28,10 +28,6 @@ export const BrandFeatureMetaSchema = z.object({
       .array(z.string())
       .optional()
       .describe("Relevant keywords or tags for this feature"),
-   priority: z
-      .enum(["low", "medium", "high"])
-      .optional()
-      .describe("Priority level of this feature"),
 });
 export type BrandFeatureMeta = z.infer<typeof BrandFeatureMetaSchema>;
 
@@ -44,7 +40,7 @@ export const brandFeature = pgTable(
          .references(() => brand.id, { onDelete: "cascade" }),
       featureName: text("feature_name").notNull(),
       summary: text("summary").notNull(),
-      description: text("description").notNull(),
+      rawContent: text("raw_content").notNull(),
       sourceUrl: text("source_url"),
       extractedAt: timestamp("extracted_at").defaultNow().notNull(),
       meta: jsonb("meta").$type<BrandFeatureMeta>().default({}),
@@ -57,15 +53,12 @@ export const brandFeature = pgTable(
    ],
 );
 
-export const brandFeatureRelations = relations(
-   brandFeature,
-   ({ one }) => ({
-      brand: one(brand, {
-         fields: [brandFeature.brandId],
-         references: [brand.id],
-      }),
+export const brandFeatureRelations = relations(brandFeature, ({ one }) => ({
+   brand: one(brand, {
+      fields: [brandFeature.brandId],
+      references: [brand.id],
    }),
-);
+}));
 
 export type BrandFeatureSelect = typeof brandFeature.$inferSelect;
 export type BrandFeatureInsert = typeof brandFeature.$inferInsert;
