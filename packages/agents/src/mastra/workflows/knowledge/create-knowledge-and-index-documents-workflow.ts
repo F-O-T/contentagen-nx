@@ -6,6 +6,7 @@ import { uploadFile, getMinioClient } from "@packages/files/client";
 import { serverEnv } from "@packages/environment/server";
 import { createDb } from "@packages/database/client";
 import { updateCompetitor } from "@packages/database/repositories/competitor-repository";
+import { updateBrand } from "@packages/database/repositories/brand-repository";
 import { z } from "zod";
 import { createPgVector } from "@packages/rag/client";
 import { createCompetitorKnowledgeWithEmbeddingsBulk } from "@packages/rag/repositories/competitor-knowledge-repository";
@@ -204,13 +205,15 @@ ${fullAnalysis}
 
 const saveBrandDocumentsKnowledge = createStep({
    id: "save-brand-documents-knowledge-step",
-   description: "Save brand documents knowledge to vector database",
+   description:
+      "Save brand documents knowledge to database and create embeddings",
    inputSchema: createDocumentsOutputSchema,
    outputSchema: CreateKnowledgeAndIndexDocumentsOutput,
    execute: async ({ inputData }) => {
       const { generatedDocuments, id } = inputData;
 
       try {
+         const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
          const ragClient = createPgVector({
             pgVectorURL: serverEnv.PG_VECTOR_URL,
          });
@@ -219,8 +222,15 @@ const saveBrandDocumentsKnowledge = createStep({
             throw AppError.validation("No documents provided for saving");
          }
 
-         // TODO: implement logic for saving it on the db
-         await uploadDocumentsToStorage(generatedDocuments, id, "brand");
+         // Upload documents to storage
+         const uploadedFiles = await uploadDocumentsToStorage(
+            generatedDocuments,
+            id,
+            "brand",
+         );
+
+         // Update brand with uploaded files and status
+         await updateBrand(db, id, { uploadedFiles, status: "completed" });
 
          const knowledgeData: Parameters<
             typeof createBrandKnowledgeWithEmbeddingsBulk
@@ -253,7 +263,7 @@ const saveBrandDocumentsKnowledge = createStep({
          console.error("failed to save brand documents", err);
          propagateError(err);
          throw AppError.internal(
-            "Failed to save brand documents knowledge to vector database",
+            "Failed to save brand documents knowledge to database and vector store",
          );
       }
    },

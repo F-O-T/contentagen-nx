@@ -3,6 +3,7 @@ import { companyInfoExtractorAgent } from "../../agents/company-info-extractor-a
 import { serverEnv } from "@packages/environment/server";
 import { createDb } from "@packages/database/client";
 import { updateCompetitor } from "@packages/database/repositories/competitor-repository";
+import { updateBrand } from "@packages/database/repositories/brand-repository";
 import { AppError, propagateError } from "@packages/utils/errors";
 import { ingestUsage, type MastraLLMUsage } from "../../helpers";
 import { z } from "zod";
@@ -122,18 +123,30 @@ const saveCompetitorOverview = createStep({
 
 const saveBrandOverview = createStep({
    id: "save-brand-overview-step",
-   description: "Save brand overview information",
+   description: "Save brand overview information to database",
    inputSchema: extractOverviewOutputSchema,
    outputSchema: CreateOverviewOutput,
-   execute: async () => {
+   execute: async ({ inputData }) => {
+      const { companyName, detailedSummary, id, websiteUrl } = inputData;
+
       try {
+         const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
+
+         await updateBrand(db, id, {
+            name: companyName,
+            websiteUrl: websiteUrl,
+            summary: detailedSummary,
+         });
+
          return {
             chunkCount: 0,
          };
       } catch (err) {
          console.error("failed to save brand overview", err);
          propagateError(err);
-         throw AppError.internal("Failed to save brand overview information");
+         throw AppError.internal(
+            "Failed to save brand overview information to database",
+         );
       }
    },
 });

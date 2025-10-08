@@ -3,6 +3,8 @@ import { createCompetitorKnowledgeWithEmbeddingsBulk } from "@packages/rag/repos
 import { createBrandKnowledgeWithEmbeddingsBulk } from "@packages/rag/repositories/brand-knowledge-repository";
 import { createPgVector } from "@packages/rag/client";
 import { bulkCreateFeatures } from "@packages/database/repositories/competitor-feature-repository";
+import { bulkCreateFeatures as bulkCreateBrandFeatures } from "@packages/database/repositories/brand-feature-repository";
+import { updateBrand } from "@packages/database/repositories/brand-repository";
 import { featureExtractionAgent } from "../../agents/feature-extractor-agent";
 import { serverEnv } from "@packages/environment/server";
 import { createDb } from "@packages/database/client";
@@ -189,13 +191,14 @@ const saveCompetitorFeaturesKnowledge = createStep({
 
 const saveBrandFeaturesKnowledge = createStep({
    id: "save-brand-features-knowledge-step",
-   description: "Save brand features knowledge to vector database",
+   description:
+      "Save brand features knowledge to database and create embeddings",
    inputSchema: extractFeaturesKnowledgeOutputSchema,
    outputSchema: CreateFeaturesKnowledgeOutput,
    execute: async ({ inputData }) => {
       const { extractedFeatures, id } = inputData;
-      //TODO: Finish the implementation when the new organizaiton is done
       try {
+         const db = createDb({ databaseUrl: serverEnv.DATABASE_URL });
          const ragClient = createPgVector({
             pgVectorURL: serverEnv.PG_VECTOR_URL,
          });
@@ -204,24 +207,46 @@ const saveBrandFeaturesKnowledge = createStep({
             throw AppError.validation("No features provided for saving");
          }
 
-         // For brand, we directly create embeddings without storing in database
-         const knowledgeData = extractedFeatures.map((feature, index) => ({
+         const featuresForDb = extractedFeatures.map((feature) => ({
+            brandId: id,
+            featureName: feature.name,
+            summary: feature.summary,
+            rawContent: feature.rawContent,
+            sourceUrl: feature.sourceUrl,
+            meta: {
+               confidence: feature.confidence,
+               category: feature.category,
+               tags: feature.tags,
+            },
+         }));
+
+         const features = await bulkCreateBrandFeatures(db, featuresForDb);
+
+         if (features.length === 0) {
+            throw AppError.internal(
+               "No brand features were created in the database",
+            );
+         }
+
+         await updateBrand(db, id, { status: "completed" });
+
+         const knowledgeData = features.map((feature) => ({
             chunk: feature.summary,
             externalId: id,
-            sourceId: `brand-feature-${index}`,
+            sourceId: feature.id,
             type: "feature" as const,
          }));
 
          await createBrandKnowledgeWithEmbeddingsBulk(ragClient, knowledgeData);
 
          return {
-            chunkCount: extractedFeatures.length,
+            chunkCount: features.length,
          };
       } catch (err) {
          console.error("failed to save brand features", err);
          propagateError(err);
          throw AppError.internal(
-            "Failed to save brand features knowledge to vector database",
+            "Failed to save brand features knowledge to database and vector store",
          );
       }
    },
