@@ -1,26 +1,20 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
+import { useIsomorphicLayoutEffect } from "@packages/ui/hooks/use-isomorphic-layout-effect";
 import { SubscriptionReminderCredenza } from "../ui/subscription-reminder-credenza";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouterState } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 export function useSubscriptionReminder() {
    const [showReminder, setShowReminder] = useState(false);
    const trpc = useTRPC();
-   const routerState = useRouterState();
 
-   const { data: customerState } = useSuspenseQuery(
-      trpc.authHelpers.getCustomerState.queryOptions(),
-   );
-   const memoizedHasActiveSubscription = useMemo(
-      () => Boolean(customerState?.activeSubscriptions[0]),
-      [customerState],
+   const { data: shouldShow } = useSuspenseQuery(
+      trpc.authHelpers.subscriptionReminder.queryOptions(),
    );
 
-   // biome-ignore lint/correctness/useExhaustiveDependencies: <mandarotry>
-   useEffect(() => {
-      if (memoizedHasActiveSubscription) {
+   useIsomorphicLayoutEffect(() => {
+      if (!shouldShow) {
          setShowReminder(false);
          return;
       }
@@ -30,7 +24,7 @@ export function useSubscriptionReminder() {
       }, 500);
 
       return () => clearTimeout(timer);
-   }, [routerState.location.pathname, memoizedHasActiveSubscription]);
+   }, [shouldShow]);
 
    const handleClose = () => {
       setShowReminder(false);
