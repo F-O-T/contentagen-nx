@@ -1,3 +1,38 @@
+## 0.20.0 (2025-10-08)
+
+### 🚀 Features
+
+- **agents): chore(agents:** Remove unused lumen.config.json file ([979fa4b](https://github.com/F-O-T/contentagen-nx/commit/979fa4b))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/server-events to 0.6.0
+- Updated @packages/localization to 0.6.0
+- Updated @packages/environment to 0.6.0
+- Updated @packages/database to 0.6.0
+- Updated @packages/payment to 0.6.0
+- Updated @packages/files to 0.6.0
+- Updated @packages/utils to 0.19.0
+- Updated @packages/rag to 0.7.0
+
+### ❤️ Thank You
+
+- Manoel
+
+## 0.7.0 (2025-10-08)
+
+### 🚀 Features
+
+- **dashboard:** add transfer agent to organization ([b016c20](https://github.com/F-O-T/contentagen-nx/commit/b016c20))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/api to 0.6.0
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.19.0 (2025-10-02)
 
 ### 🚀 Features
