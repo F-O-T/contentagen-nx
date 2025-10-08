@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { DeleteConfirmationCredenza } from "@packages/ui/components/delete-confirmation-credenza";
-import { Trash2 } from "lucide-react";
 
 interface DeleteOrganizationFeatureProps {
    onDelete?: () => void;
@@ -31,4 +30,3 @@ export function DeleteOrganizationFeature({
       />
    );
 }
-

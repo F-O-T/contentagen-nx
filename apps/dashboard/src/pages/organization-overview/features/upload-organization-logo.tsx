@@ -18,19 +18,8 @@ import {
    DropzoneEmptyState,
 } from "@packages/ui/components/dropzone";
 import { Button } from "@packages/ui/components/button";
-import { Upload } from "lucide-react";
 
-interface UploadOrganizationLogoFeatureProps {
-   onUpload?: (data: {
-      fileName: string;
-      fileBuffer: string;
-      contentType: string;
-   }) => void;
-}
-
-export function UploadOrganizationLogoFeature({
-   onUpload,
-}: UploadOrganizationLogoFeatureProps) {
+export function UploadOrganizationLogoFeature() {
    const [dialogOpen, setDialogOpen] = useState(false);
    const [selectedFile, setSelectedFile] = useState<File | null>(null);
    const [filePreview, setFilePreview] = useState<string | undefined>();
@@ -48,7 +37,7 @@ export function UploadOrganizationLogoFeature({
 
    const uploadLogoMutation = useMutation(
       trpc.organizationFile.uploadLogo.mutationOptions({
-         onSuccess: async (data) => {
+         onSuccess: async () => {
             toast.success("Organization logo uploaded successfully");
             await queryClient.invalidateQueries({
                queryKey: trpc.organizationFile.getLogo.queryKey(),
@@ -56,7 +45,6 @@ export function UploadOrganizationLogoFeature({
             setDialogOpen(false);
             setSelectedFile(null);
             setFilePreview(undefined);
-            onUpload?.(data);
          },
          onError: (error) => {
             console.error("Upload error:", error);
@@ -185,4 +173,3 @@ export function UploadOrganizationLogoFeature({
       </Credenza>
    );
 }
-

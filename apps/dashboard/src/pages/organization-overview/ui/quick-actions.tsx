@@ -11,9 +11,9 @@ import { EditOrganizationFeature } from "../features/edit-organization";
 import { UploadOrganizationLogoFeature } from "../features/upload-organization-logo";
 
 export function QuickActions() {
-   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-   const [editDialogOpen, setEditDialogOpen] = useState(false);
-   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+   const [_1, setDeleteDialogOpen] = useState(false);
+   const [_2, setEditDialogOpen] = useState(false);
+   const [_3, setUploadDialogOpen] = useState(false);
 
    const handleDelete = () => {
       setDeleteDialogOpen(true);
@@ -71,12 +71,8 @@ export function QuickActions() {
          <DeleteOrganizationFeature
             onDelete={() => setDeleteDialogOpen(false)}
          />
-         <EditOrganizationFeature
-            onEdit={() => setEditDialogOpen(false)}
-         />
-         <UploadOrganizationLogoFeature
-            onUpload={() => setUploadDialogOpen(false)}
-         />
+         <EditOrganizationFeature onEdit={() => setEditDialogOpen(false)} />
+         <UploadOrganizationLogoFeature />
       </>
    );
 }

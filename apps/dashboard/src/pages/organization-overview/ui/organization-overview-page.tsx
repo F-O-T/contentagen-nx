@@ -75,9 +75,9 @@ export function OrganizationOverviewPage() {
                         <UsersIcon /> Members
                      </SquaredIconButton>
                   </Link>
-                  <Link to="/organization/brand-files">
+                  <Link to="/organization/brand">
                      <SquaredIconButton>
-                        <FileArchive /> Brand settings
+                        <FileArchive /> Brand
                      </SquaredIconButton>
                   </Link>
                </div>

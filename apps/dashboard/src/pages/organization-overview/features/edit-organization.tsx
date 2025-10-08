@@ -12,7 +12,6 @@ import {
    CredenzaTitle,
 } from "@packages/ui/components/credenza";
 import { Button } from "@packages/ui/components/button";
-import { Edit } from "lucide-react";
 
 interface EditOrganizationFeatureProps {
    onEdit?: (data: { name: string; slug: string }) => void;
@@ -75,4 +74,3 @@ export function EditOrganizationFeature({
       </Credenza>
    );
 }
-
