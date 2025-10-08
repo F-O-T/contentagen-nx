@@ -1,3 +1,18 @@
+## 0.21.0 (2025-10-08)
+
+### 🚀 Features
+
+- **agents:** enhance brand knowledge workflows to save features and documents to database ([0ad2fcf](https://github.com/F-O-T/contentagen-nx/commit/0ad2fcf))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/server-events to 0.7.0
+- Updated @packages/database to 0.7.0
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.20.0 (2025-10-08)
 
 ### 🚀 Features
