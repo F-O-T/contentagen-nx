@@ -33,5 +33,5 @@
     "start": "./server",
     "typecheck": "bunx --bun tsc  "
   },
-  "version": "0.5.0"
+  "version": "0.6.0"
 }
