@@ -73,15 +73,11 @@ export const brandRouter = router({
             throw APIError.internal("Failed to list brands.");
          }
       }),
-
    create: organizationOwnerProcedure
       .use(hasGenerationCredits)
       .input(
          BrandInsertSchema.pick({
-            name: true,
             websiteUrl: true,
-            description: true,
-            industry: true,
          }),
       )
       .mutation(async ({ ctx, input }) => {
@@ -280,36 +276,35 @@ export const brandRouter = router({
          }
       }),
 
-   getByOrganization: protectedProcedure
-      .query(async ({ ctx }) => {
-         try {
-            const resolvedCtx = await ctx;
-            const organizationId =
-               resolvedCtx.session?.session?.activeOrganizationId;
+   getByOrganization: protectedProcedure.query(async ({ ctx }) => {
+      try {
+         const resolvedCtx = await ctx;
+         const organizationId =
+            resolvedCtx.session?.session?.activeOrganizationId;
 
-            if (!organizationId) {
-               throw APIError.unauthorized(
-                  "User must be authenticated and belong to an organization to view brands.",
-               );
-            }
-
-            const brands = await listBrands(resolvedCtx.db, {
-               organizationId,
-               page: 1,
-               limit: 1,
-            });
-
-            if (brands.length === 0) {
-               throw APIError.notFound("No brand found for this organization.");
-            }
-
-            return brands[0];
-         } catch (err) {
-            console.error("Error getting organization brand:", err);
-            propagateError(err);
-            throw APIError.internal("Failed to get organization brand.");
+         if (!organizationId) {
+            throw APIError.unauthorized(
+               "User must be authenticated and belong to an organization to view brands.",
+            );
          }
-      }),
+
+         const brands = await listBrands(resolvedCtx.db, {
+            organizationId,
+            page: 1,
+            limit: 1,
+         });
+
+         if (brands.length === 0) {
+            throw APIError.notFound("No brand found for this organization.");
+         }
+
+         return brands[0];
+      } catch (err) {
+         console.error("Error getting organization brand:", err);
+         propagateError(err);
+         throw APIError.internal("Failed to get organization brand.");
+      }
+   }),
 
    getFeatures: protectedProcedure
       .input(

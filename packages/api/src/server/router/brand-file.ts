@@ -35,10 +35,7 @@ export const brandFileRouter = router({
             try {
                const bucketName = (await ctx).minioBucket;
                const minioClient = (await ctx).minioClient;
-               await minioClient.removeObject(
-                  bucketName,
-                  currentBrand.logoUrl,
-               );
+               await minioClient.removeObject(bucketName, currentBrand.logoUrl);
             } catch (error) {
                console.error("Error deleting old logo:", error);
                // Continue with upload even if deletion fails
@@ -95,9 +92,7 @@ export const brandFileRouter = router({
       }),
 
    delete: protectedProcedure
-      .input(
-         z.object({ brandId: z.uuid() }).and(BrandFileDeleteInput),
-      )
+      .input(z.object({ brandId: z.uuid() }).and(BrandFileDeleteInput))
       .mutation(async ({ ctx, input }) => {
          const { brandId, fileName } = input;
          const key = `${brandId}/${fileName}`;
@@ -115,14 +110,9 @@ export const brandFileRouter = router({
          );
 
          await resolvedCtx.minioClient.removeObject(bucketName, key);
-         const brand = await getBrandById(
-            resolvedCtx.db,
-            brandId,
-         );
+         const brand = await getBrandById(resolvedCtx.db, brandId);
          const uploadedFiles = (
-            Array.isArray(brand.uploadedFiles)
-               ? brand.uploadedFiles
-               : []
+            Array.isArray(brand.uploadedFiles) ? brand.uploadedFiles : []
          ).filter((f) => f.fileName !== fileName);
          await updateBrand(resolvedCtx.db, brandId, {
             uploadedFiles,
@@ -137,10 +127,7 @@ export const brandFileRouter = router({
          const resolvedCtx = await ctx;
 
          // Get the brand to check current uploaded files
-         const brand = await getBrandById(
-            resolvedCtx.db,
-            brandId,
-         );
+         const brand = await getBrandById(resolvedCtx.db, brandId);
          const uploadedFiles = Array.isArray(brand.uploadedFiles)
             ? brand.uploadedFiles
             : [];
@@ -188,10 +175,7 @@ export const brandFileRouter = router({
       .input(z.object({ brandId: z.uuid() }))
       .query(async ({ ctx, input }) => {
          const resolvedCtx = await ctx;
-         const brand = await getBrandById(
-            resolvedCtx.db,
-            input.brandId,
-         );
+         const brand = await getBrandById(resolvedCtx.db, input.brandId);
          if (!brand?.logoUrl) {
             return null;
          }
