@@ -54,5 +54,5 @@
     "typescript": "catalog:development",
     "vite": "catalog:vite"
   },
-  "version": "0.7.0"
+  "version": "0.8.0"
 }
