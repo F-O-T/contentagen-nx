@@ -4,6 +4,7 @@ import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
 import { StatsCard } from "@packages/ui/components/stats-card";
 import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
 import { AgentWriterCard } from "@/widgets/agent-display-card/ui/agent-writter-card";
+import { Link } from "@tanstack/react-router";
 import {
    Card,
    CardHeader,
@@ -69,12 +70,16 @@ export function OrganizationOverviewPage() {
                   </CardContent>
                </Card>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <SquaredIconButton>
-                     <UsersIcon /> Members
-                  </SquaredIconButton>
-                  <SquaredIconButton>
-                     <FileArchive /> Brand settings
-                  </SquaredIconButton>
+                  <Link to="/organization/members">
+                     <SquaredIconButton>
+                        <UsersIcon /> Members
+                     </SquaredIconButton>
+                  </Link>
+                  <Link to="/organization/brand-files">
+                     <SquaredIconButton>
+                        <FileArchive /> Brand settings
+                     </SquaredIconButton>
+                  </Link>
                </div>
             </div>
          </div>

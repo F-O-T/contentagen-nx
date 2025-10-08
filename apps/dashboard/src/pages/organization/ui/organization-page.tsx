@@ -55,7 +55,7 @@ export function OrganizationPage() {
    return (
       <div className="flex flex-col gap-4">
          <TalkingMascot
-            message={translate("pages.organization.mascot-message")}
+            message={translate("pages.organization.members.mascot-message")}
          />
          {org ? (
             <div className="grid  grid-cols-3 gap-4">

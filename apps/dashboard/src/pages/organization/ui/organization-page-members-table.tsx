@@ -42,7 +42,7 @@ export function OrganizationPageMembersTable({
                   {translate("pages.organization.members.title")}
                </CardTitle>
                <CardDescription>
-                  {translate("pages.organization.details.description")}
+                  {translate("pages.organization.members.description")}
                </CardDescription>
                <CardAction>
                   <DropdownMenu>
