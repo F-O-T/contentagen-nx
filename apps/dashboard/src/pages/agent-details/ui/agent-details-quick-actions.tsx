@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { Button } from "@packages/ui/components/button";
 import { translate } from "@packages/localization";
-import { Edit, Trash, Plus, Camera, FileEdit } from "lucide-react";
+import { Edit, Trash, Plus, Camera, FileEdit, Users } from "lucide-react";
 import {
    Card,
    CardContent,
@@ -18,6 +18,7 @@ import {
 import { DeleteAgentDialog } from "@/features/agent-actions/ui/delete-agent-dialog";
 import { EditAgentAction } from "@/features/agent-actions/ui/edit-agent-action";
 import { ManageAgentPhoto } from "../features/manage-agent-photo";
+import { TransferAgentToOrganizationDialog } from "../features/transfer-agent-to-organization";
 import type { RouterOutput } from "@packages/api/client";
 
 interface AgentDetailsQuickActionsProps {
@@ -32,6 +33,7 @@ export function AgentDetailsQuickActions({
 
    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
    const [managePhotoOpen, setManagePhotoOpen] = useState(false);
+   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
    const { handleEdit } = EditAgentAction({ agentId: agent?.id ?? "" });
 
    const handleCreateContent = () => {
@@ -61,6 +63,12 @@ export function AgentDetailsQuickActions({
          label: translate("pages.agent-details.quick-actions.delete-agent"),
          onClick: () => setDeleteDialogOpen(true),
          disabled: false,
+      },
+      {
+         icon: Users,
+         label: "Transfer to Organization", // TODO: Add translation key
+         onClick: () => setTransferDialogOpen(true),
+         disabled: !!agent?.organizationId,
       },
       {
          icon: Plus,
@@ -119,6 +127,13 @@ export function AgentDetailsQuickActions({
             agent={agent}
             open={managePhotoOpen}
             onOpenChange={setManagePhotoOpen}
+         />
+
+         <TransferAgentToOrganizationDialog
+            agentId={agent?.id ?? ""}
+            agentName={agent?.personaConfig.metadata.name ?? ""}
+            open={transferDialogOpen}
+            onOpenChange={setTransferDialogOpen}
          />
       </>
    );
