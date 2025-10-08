@@ -58,7 +58,6 @@ export const mastra = new Mastra({
 
 export function setRuntimeContext(context: CustomRuntimeContext) {
    const runtimeContext = new RuntimeContext<CustomRuntimeContext>();
-   console.log("Setting runtime context:", context);
    runtimeContext.set("language", context.language);
    runtimeContext.set("userId", context.userId);
    if (context.agentId) {

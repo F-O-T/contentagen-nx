@@ -79,4 +79,3 @@ export const createOverviewWorker = new Worker<CreateOverviewJob>(
    { connection: redis, removeOnComplete: { count: 10 } },
 );
 registerGracefulShutdown(createOverviewWorker);
-

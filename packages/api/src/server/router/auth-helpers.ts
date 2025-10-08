@@ -5,6 +5,8 @@ import {
 } from "@packages/database/repositories/agent-repository";
 import { getContentStatsLast30Days } from "@packages/database/repositories/content-repository";
 import { isOrganizationOwner } from "@packages/database/repositories/auth-repository";
+import { getCustomerState } from "@packages/payment/ingestion";
+import { APIError, propagateError } from "@packages/utils/errors";
 
 export const authHelpersRouter = router({
    getApiKeys: protectedProcedure.query(async ({ ctx }) => {
@@ -68,5 +70,53 @@ export const authHelpersRouter = router({
       }
 
       return await isOrganizationOwner(resolvedCtx.db, userId, organizationId);
+   }),
+   subscriptionReminder: protectedProcedure.query(async ({ ctx }) => {
+      const resolvedCtx = await ctx;
+      const userId = resolvedCtx.session?.user.id;
+      const organizationId = resolvedCtx.session?.session?.activeOrganizationId;
+
+      if (!userId) {
+         throw APIError.unauthorized("User not authenticated");
+      }
+
+      if (!organizationId) {
+         const { activeSubscriptions } = await resolvedCtx.auth.api.state({
+            headers: resolvedCtx.headers,
+         });
+
+         return Boolean(activeSubscriptions[0]);
+      }
+
+      // User is in an organization, check if org owner has active subscription
+      try {
+         // Get all organization members to find the owner
+         const organizationMembers = await resolvedCtx.db.query.member.findMany(
+            {
+               where: (member, { eq }) =>
+                  eq(member.organizationId, organizationId),
+            },
+         );
+
+         const orgOwner = organizationMembers.find(
+            (member) => member.role === "owner",
+         );
+
+         if (!orgOwner) {
+            throw APIError.validation("Organization has no owner");
+         }
+
+         // Check org owner's subscription
+         const ownerState = await getCustomerState(
+            resolvedCtx.polarClient,
+            orgOwner.userId,
+         );
+
+         return !ownerState?.activeSubscriptions?.[0];
+      } catch (error) {
+         console.error("Error checking organization owner subscription", error);
+         propagateError(error);
+         throw APIError.internal("Error checking subscription");
+      }
    }),
 });

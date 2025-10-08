@@ -85,4 +85,3 @@ export const createKnowledgeAndIndexDocumentsWorker =
       { connection: redis, removeOnComplete: { count: 10 } },
    );
 registerGracefulShutdown(createKnowledgeAndIndexDocumentsWorker);
-
