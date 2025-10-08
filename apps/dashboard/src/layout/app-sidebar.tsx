@@ -18,8 +18,6 @@ import {
    FileText,
    Building2,
    Users,
-   Settings2,
-   ShieldCheck,
 } from "lucide-react";
 import type * as React from "react";
 import { Link } from "@tanstack/react-router";
@@ -84,7 +82,7 @@ export function AppSidebar({
                icon: Users,
             },
             {
-               url: "/organization/brand-files",
+               url: "/organization/brand",
                title: "Brand Files",
                icon: FileText,
             },
