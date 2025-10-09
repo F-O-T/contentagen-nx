@@ -1,3 +1,13 @@
+## 0.22.0 (2025-10-09)
+
+### 🚀 Features
+
+- **agents:** adding new assitant agent ([2e78a1f](https://github.com/F-O-T/contentagen-nx/commit/2e78a1f))
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.21.0 (2025-10-08)
 
 ### 🚀 Features
