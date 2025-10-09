@@ -30,6 +30,8 @@ export const queryForCompetitorKnowledge = createTool({
             externalIds,
             {
                type,
+               limit: 20,
+               similarityThreshold: 0,
             },
          );
          // Always return something, even if it's an empty array

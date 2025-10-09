@@ -4,7 +4,19 @@ import { createPgVector } from "@packages/rag/client";
 import { searchBrandKnowledgeByTextAndExternalId } from "@packages/rag/repositories/brand-knowledge-repository";
 import { z } from "zod";
 import { AppError, propagateError } from "@packages/utils/errors";
-
+export function getQueryBrandKnowledgeInstructions(): string {
+   return `
+## QUERY BRAND KNOWLEDGE TOOL
+Searches vector database for brand information and app features.
+**When to use:** User asks about company info or app functionality
+**Parameters:**
+- externalId (string): Brand identifier from context
+- searchTerm (string): Key terms from user's question (2-5 words)
+- type (enum): "document" for company/brand info, "feature" for app functionality
+**Examples:**
+"return policy" (document), "export data" (feature), "brand values" (document)
+`;
+}
 export const queryForBrandKnowledge = createTool({
    id: "query-for-brand-knowledge",
    description: "Query the pg vector database for brand knowledge",
@@ -30,12 +42,11 @@ export const queryForBrandKnowledge = createTool({
             externalId,
             {
                type,
-               limit: 10,
-               similarityThreshold: 0.7,
+               limit: 5,
+               similarityThreshold: 0,
             },
          );
-         // Always return something, even if it's an empty array
-         return { results: results || [] };
+         return { results };
       } catch (error) {
          console.error("Failed to search brand knowledge:", error);
          propagateError(error);
