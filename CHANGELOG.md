@@ -1,3 +1,32 @@
+## 0.23.0 (2025-10-13)
+
+### 🚀 Features
+
+- **agents:** add competitor intelligence agent and summary workflow ([d11bd5c](https://github.com/F-O-T/contentagen-nx/commit/d11bd5c))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/database to 0.8.0
+
+### ❤️ Thank You
+
+- Manoel
+
+## 0.9.0 (2025-10-13)
+
+### 🚀 Features
+
+- **dashboard:** add competitors summary card ([316920f](https://github.com/F-O-T/contentagen-nx/commit/316920f))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/database to 0.8.0
+- Updated @packages/api to 0.8.0
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.22.0 (2025-10-09)
 
 ### 🚀 Features
