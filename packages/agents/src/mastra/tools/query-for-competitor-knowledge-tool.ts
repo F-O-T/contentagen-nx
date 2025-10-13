@@ -4,7 +4,22 @@ import { createPgVector } from "@packages/rag/client";
 import { searchCompetitorKnowledgeByTextAndExternalId } from "@packages/rag/repositories/competitor-knowledge-repository";
 import { z } from "zod";
 import { AppError, propagateError } from "@packages/utils/errors";
-
+export function getQueryCompetitorKnowledgeInstructions(): string {
+   return `
+## COMPETITOR KNOWLEDGE QUERY TOOL
+Searches vector database for competitor intelligence (features, strategies, updates).
+**When to use:** Analyze competitors, gather competitive intelligence, research market positioning
+**Parameters:**
+- externalIds (string[]): Competitor identifiers to search
+- searchTerm (string): Query keywords (e.g., "features", "pricing", "strategy")
+- type (enum): "document" (general info) or "feature" (specific capabilities)
+**Strategy:**
+Make 2-4 targeted searches with varied terms for comprehensive analysis
+**Examples:**
+Good: searchTerm="AI features", type="feature" | searchTerm="recent updates", type="document"
+Bad: searchTerm="competitor" (too vague)
+`;
+}
 export const queryForCompetitorKnowledge = createTool({
    id: "query-for-competitor-knowledge",
    description: "Query the pg vector database for competitor knowledge",
