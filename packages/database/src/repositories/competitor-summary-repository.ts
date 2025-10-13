@@ -1,14 +1,13 @@
-import { eq, and, desc } from "drizzle-orm";
-import { type DB, type DBType } from "../client";
+import { eq, desc } from "drizzle-orm";
+import type { DatabaseInstance } from "../client";
 import {
    competitorSummary,
    type CompetitorSummaryInsert,
    type CompetitorSummarySelect,
-   type CompetitorSummaryStatus,
 } from "../schema";
 
 export async function getCompetitorSummaryByOrganization(
-   db: DB,
+   db: DatabaseInstance,
    organizationId: string,
 ): Promise<CompetitorSummarySelect | null> {
    const result = await db
@@ -22,22 +21,24 @@ export async function getCompetitorSummaryByOrganization(
 }
 
 export async function createCompetitorSummary(
-   db: DB,
+   db: DatabaseInstance,
    data: Omit<CompetitorSummaryInsert, "id" | "createdAt" | "updatedAt">,
-): Promise<CompetitorSummarySelect> {
-   const [result] = await db
-      .insert(competitorSummary)
-      .values(data)
-      .returning();
+) {
+   const [result] = await db.insert(competitorSummary).values(data).returning();
 
    return result;
 }
 
 export async function updateCompetitorSummary(
-   db: DB,
+   db: DatabaseInstance,
    id: string,
-   data: Partial<Pick<CompetitorSummaryInsert, "summary" | "status" | "errorMessage" | "lastGeneratedAt">>,
-): Promise<CompetitorSummarySelect> {
+   data: Partial<
+      Pick<
+         CompetitorSummaryInsert,
+         "summary" | "status" | "errorMessage" | "lastGeneratedAt"
+      >
+   >,
+) {
    const [result] = await db
       .update(competitorSummary)
       .set({ ...data, updatedAt: new Date() })
@@ -48,12 +49,15 @@ export async function updateCompetitorSummary(
 }
 
 export async function getOrCreateCompetitorSummary(
-   db: DB,
+   db: DatabaseInstance,
    organizationId: string,
    userId: string,
-): Promise<CompetitorSummarySelect> {
+) {
    // Try to get existing summary first
-   const existing = await getCompetitorSummaryByOrganization(db, organizationId);
+   const existing = await getCompetitorSummaryByOrganization(
+      db,
+      organizationId,
+   );
    if (existing) {
       return existing;
    }
@@ -65,3 +69,4 @@ export async function getOrCreateCompetitorSummary(
       status: "pending",
    });
 }
+
