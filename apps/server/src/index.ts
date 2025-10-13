@@ -16,6 +16,7 @@ import { createOverviewQueue } from "@packages/workers/queues/create-overview-qu
 import { createFeaturesKnowledgeQueue } from "@packages/workers/queues/create-features-knowledge-queue";
 import { createCompleteKnowledgeWorkflowQueue } from "@packages/workers/queues/create-complete-knowledge-workflow-queue";
 import { createKnowledgeAndIndexDocumentsQueue } from "@packages/workers/queues/create-knowledge-and-index-documents-queue";
+import { createCompetitorSummaryQueue } from "@packages/workers/queues/create-competitor-summary-queue";
 
 import { isProduction } from "@packages/environment/helpers";
 const serverAdapter = new ElysiaAdapter("/ui");
@@ -27,6 +28,7 @@ createBullBoard({
       new BullMQAdapter(createFeaturesKnowledgeQueue),
       new BullMQAdapter(createCompleteKnowledgeWorkflowQueue),
       new BullMQAdapter(createKnowledgeAndIndexDocumentsQueue),
+      new BullMQAdapter(createCompetitorSummaryQueue),
    ],
    serverAdapter,
    options: {
