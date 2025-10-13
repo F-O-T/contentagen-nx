@@ -22,7 +22,6 @@ import {
 } from "@packages/database/repositories/competitor-feature-repository";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
-import { mastra, setRuntimeContext } from "@packages/agents";
 
 import { deleteFeaturesByCompetitorId } from "@packages/database/repositories/competitor-feature-repository";
 import {
@@ -56,8 +55,7 @@ export const competitorRouter = router({
                );
             }
 
-            // Get existing summary for this organization
-            let summaryRecord = await getCompetitorSummaryByOrganization(
+            const summaryRecord = await getCompetitorSummaryByOrganization(
                resolvedCtx.db,
                organizationId,
             );
@@ -87,12 +85,17 @@ export const competitorRouter = router({
                }
 
                // Create summary record and queue generation
-               summaryRecord = await getOrCreateCompetitorSummary(
+               const summaryRecord = await getOrCreateCompetitorSummary(
                   resolvedCtx.db,
                   organizationId,
                   userId,
                );
 
+               if (!summaryRecord) {
+                  throw APIError.internal(
+                     "Failed to create competitor summary record.",
+                  );
+               }
                // Update status to pending
                await updateCompetitorSummary(resolvedCtx.db, summaryRecord.id, {
                   status: "pending",
