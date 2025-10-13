@@ -1,4 +1,12 @@
 import { useMemo } from "react";
+import { Markdown } from "@packages/ui/components/markdown";
+import {
+   CardContent,
+   Card,
+   CardDescription,
+   CardHeader,
+   CardTitle,
+} from "@packages/ui/components/card";
 import { translate } from "@packages/localization";
 import { Bot, FileText } from "lucide-react";
 import { StatsCard } from "@packages/ui/components/stats-card";
@@ -11,6 +19,9 @@ export function DashboardHomePage() {
    const trpc = useTRPC();
    const { data } = useSuspenseQuery(
       trpc.authHelpers.getHomeStats.queryOptions(),
+   );
+   const { data: summaryData } = useSuspenseQuery(
+      trpc.competitor.getSummary.queryOptions(),
    );
 
    const statsCards = useMemo(
@@ -51,6 +62,19 @@ export function DashboardHomePage() {
                   value={card.value}
                />
             ))}
+         </div>
+         <div>
+            <Card>
+               <CardHeader>
+                  <CardTitle>Competitors summary</CardTitle>
+                  <CardDescription>
+                     Overview of competitors and their features.
+                  </CardDescription>
+               </CardHeader>
+               <CardContent>
+                  <Markdown content={summaryData} />
+               </CardContent>
+            </Card>
          </div>
          <div className="grid grid-cols-2 gap-4">
             <Link to="/agents">
