@@ -1,4 +1,4 @@
-import { Agent } from "@mastra/core";
+import { Agent } from "@mastra/core/agent";
 import { dateTool } from "../../tools/date-tool";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { getWritingPersona } from "../../tools/get-writing-persona-tool";
@@ -13,14 +13,13 @@ const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
       en: "English",
       pt: "Portuguese",
    };
-
    return `
 ## OUTPUT LANGUAGE REQUIREMENT
-You MUST provide ALL your article content, responses, storytelling, and journalistic writing in ${languageNames[language]}.
-Your entire article output, including engaging narratives, hooks, conclusions, and all editorial content must be written in ${languageNames[language]}.
-This includes article titles, meta descriptions, headers, and all long-form content elements.
+You MUST provide ALL your article content in ${languageNames[language]}.
+Your entire article output must be written in ${languageNames[language]}.
 `;
 };
+
 export const articleWriterAgent = new Agent({
    name: "Article Writer",
    instructions: ({ runtimeContext }) => {
@@ -72,14 +71,21 @@ ${getLanguageOutputInstruction(locale as "en" | "pt")}
 - Include recent statistics and data when relevant
 - Cross-reference information from multiple sources
 
-## OUTPUT FORMAT
-- Provide article title and meta description
-- Include suggested header tags (H1, H2, H3)
-- Add internal linking suggestions
-- Specify target keywords naturally integrated
-- Include estimated reading time
+## OUTPUT FORMAT - CRITICAL
+Output ONLY the article content itself:
+- Article title as H1
+- Article body with proper headers (H2, H3)
+- Clean, readable formatting
 
-Focus on creating valuable, engaging content that serves the reader's needs while maintaining professional journalism standards.
+DO NOT include:
+- Meta descriptions
+- SEO keyword suggestions
+- Internal linking suggestions
+- Reading time estimates
+- Any metadata or technical SEO suggestions
+- Commentary about the article
+
+Just write the article. Nothing else.
 `;
    },
    model: openrouter("x-ai/grok-4-fast"),

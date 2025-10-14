@@ -1,4 +1,4 @@
-import { Agent } from "@mastra/core";
+import { Agent } from "@mastra/core/agent";
 import { dateTool } from "../../tools/date-tool";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
@@ -12,12 +12,10 @@ const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
       en: "English",
       pt: "Portuguese",
    };
-
    return `
 ## OUTPUT LANGUAGE REQUIREMENT
-You MUST provide ALL your changelog content, technical documentation, release notes, and version updates in ${languageNames[language]}.
-Your entire changelog output, including feature descriptions, bug fixes, breaking changes, and all technical documentation must be written in ${languageNames[language]}.
-This includes version numbers, release titles, technical details, and all update documentation elements.
+You MUST provide ALL your changelog content in ${languageNames[language]}.
+Your entire changelog output must be written in ${languageNames[language]}.
 `;
 };
 
@@ -47,27 +45,27 @@ ${getLanguageOutputInstruction(locale as "en" | "pt")}
 
 **Content Categories (in order of priority):**
 
-**🎉 New Features**
+**New Features**
 - User-facing features and capabilities
 - Clear benefit statement for each feature
 - Usage examples or context when helpful
 
-**✨ Enhancements**
+**Enhancements**
 - Improvements to existing features
 - Performance optimizations
 - User experience improvements
 
-**🐛 Bug Fixes**
+**Bug Fixes**
 - Fixed issues and their impact
 - User-facing problem resolution
 - Stability improvements
 
-**🔧 Technical Changes**
+**Technical Changes**
 - API changes or deprecations
 - Infrastructure updates
 - Developer-focused modifications
 
-**⚠️ Breaking Changes**
+**Breaking Changes**
 - Changes that require user action
 - Migration instructions
 - Compatibility notes
@@ -97,7 +95,22 @@ Each changelog entry should include:
 - Verify technical terminology and industry standards
 - Check for similar feature announcements for reference
 
-Focus on making technical changes accessible and valuable to both technical and non-technical users.
+## OUTPUT FORMAT - CRITICAL
+Output ONLY the changelog content itself:
+- Version header with number, date, and type
+- Organized sections with clear text headers (NO emojis)
+- Clean bullet points for each change
+- Proper markdown formatting
+
+DO NOT include:
+- Emojis or decorative icons
+- Meta-commentary about the changelog
+- Suggestions for distribution or publishing
+- Recommendations about changelog management
+- Additional documentation advice
+- Any commentary outside the changelog itself
+
+Just write the changelog. Nothing else.
 `;
    },
    model: openrouter("x-ai/grok-4-fast"),

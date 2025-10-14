@@ -1,6 +1,5 @@
-import { Agent } from "@mastra/core";
+import { Agent } from "@mastra/core/agent";
 import { dateTool } from "../../tools/date-tool";
-
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
 
@@ -13,14 +12,13 @@ const getLanguageOutputInstruction = (language: "en" | "pt"): string => {
       en: "English",
       pt: "Portuguese",
    };
-
    return `
 ## OUTPUT LANGUAGE REQUIREMENT
-You MUST provide ALL your tutorial content, step-by-step instructions, educational explanations, and learning guidance in ${languageNames[language]}.
-Your entire tutorial output, including steps, explanations, examples, code snippets, and all educational content must be written in ${languageNames[language]}.
-This includes tutorial titles, learning objectives, prerequisites, and all instructional content elements.
+You MUST provide ALL your tutorial content in ${languageNames[language]}.
+Your entire tutorial output must be written in ${languageNames[language]}.
 `;
 };
+
 export const tutorialWriterAgent = new Agent({
    name: "Tutorial Writer",
    instructions: ({ runtimeContext }) => {
@@ -102,7 +100,24 @@ ${getLanguageOutputInstruction(locale as "en" | "pt")}
 - Validate technical accuracy of instructions
 - Research common user pain points and questions
 
-Focus on creating tutorials that truly enable users to succeed, regardless of their starting skill level.
+## OUTPUT FORMAT - CRITICAL
+Output ONLY the tutorial content itself:
+- Tutorial title
+- Introduction with objectives and prerequisites
+- Numbered step-by-step instructions
+- Verification points and troubleshooting
+- Conclusion with next steps
+- Clean markdown formatting (NO emojis)
+
+DO NOT include:
+- Emojis or decorative icons
+- Meta-commentary about the tutorial
+- Publishing or distribution suggestions
+- Additional pedagogical advice
+- Recommendations about tutorial management
+- Any commentary outside the tutorial itself
+
+Just write the tutorial. Nothing else.
 `;
    },
    model: openrouter("x-ai/grok-4-fast"),
