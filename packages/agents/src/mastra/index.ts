@@ -1,7 +1,6 @@
 import { Mastra } from "@mastra/core/mastra";
 import { appAssistantAgent } from "./agents/app-assistant-agent";
 import { createCompleteKnowledgeWorkflow } from "./workflows/create-complete-knowledge-workflow";
-import { seoOptimizationAgent } from "./agents/seo-agent";
 import { researcherAgent } from "./agents/researcher-agent";
 import { PinoLogger } from "@mastra/loggers";
 import { documentSynthesizerAgent } from "./agents/document-syntethizer-agent";
@@ -46,7 +45,6 @@ export const mastra = new Mastra({
       createCompetitorSummaryWorkflow,
    },
    agents: {
-      seoOptimizationAgent,
       appAssistantAgent,
       contentStrategistAgent,
       documentSynthesizerAgent,

@@ -7,7 +7,6 @@ import { articleEditorAgent } from "../../agents/article/article-editor-agent";
 import { articleReaderAgent } from "../../agents/article/artcile-reader-agent";
 import { researcherAgent } from "../../agents/researcher-agent";
 import { contentStrategistAgent } from "../../agents/strategist-agent";
-import { seoOptimizationAgent } from "../../agents/seo-agent";
 import { emitContentStatusChanged } from "@packages/server-events";
 import { createDb } from "@packages/database/client";
 import { updateContent } from "@packages/database/repositories/content-repository";
@@ -17,6 +16,10 @@ import {
    createAiUsageMetadata,
    ingestBilling,
 } from "@packages/payment/ingestion";
+import {
+   getKeywordsFromText,
+   createDescriptionFromText,
+} from "@packages/utils/text";
 
 // Internal helper function to update content status and emit events
 async function updateContentStatus(
@@ -647,7 +650,7 @@ export const articleSeoOptimizationStep = createStep({
    description: "Generate SEO keywords and meta description for the article",
    inputSchema: ContentEditorStepOutputSchema,
    outputSchema: SeoOptimizationStepOutputSchema,
-   execute: async ({ inputData, runtimeContext }) => {
+   execute: async ({ inputData }) => {
       try {
          const { agentId, userId, contentId, request, editor } = inputData;
 
@@ -659,51 +662,14 @@ export const articleSeoOptimizationStep = createStep({
             layout: request.layout,
          });
 
-         const inputPrompt = `
-I need you to perform SEO optimization for this ${request.layout} content.
-
-Content:
-${editor}
-
-Generate SEO-optimized keywords and meta description for this article content.
-
-Requirements:
-- Keywords should be relevant to the article topic and content
-- Meta description should be compelling and include primary keywords
-- Follow SEO best practices for character limits and optimization
-`;
-
-         const result = await seoOptimizationAgent.generate(
-            [
-               {
-                  role: "user",
-                  content: inputPrompt,
-               },
-            ],
-            {
-               runtimeContext,
-               output: SeoOptimizationStepOutputSchema.pick({
-                  keywords: true,
-                  metaDescription: true,
-               }),
-            },
-         );
-
-         if (!result?.object.keywords) {
-            throw AppError.validation(
-               'Agent output is missing "keywords" field',
-            );
-         }
-         if (!result?.object.metaDescription) {
-            throw AppError.validation(
-               'Agent output is missing "metaDescription" field',
-            );
-         }
-
-         // Ingest LLM usage for billing
-         if (result.usage) {
-            await ingestUsage(result.usage as LLMUsage, userId);
-         }
+         const keywords = getKeywordsFromText({
+            text: editor,
+            minLength: 8,
+         });
+         const metaDescription = createDescriptionFromText({
+            text: editor,
+            maxLength: 180,
+         });
 
          // Update content status and emit event when SEO optimization completes
          await updateContentStatus({
@@ -714,8 +680,8 @@ Requirements:
          });
 
          return {
-            keywords: result.object.keywords,
-            metaDescription: result.object.metaDescription,
+            keywords,
+            metaDescription,
             userId,
             contentId,
             request,
