@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "@trpc/server": "catalog:trpc",
-    "slugify": "^1.6.6"
+    "slugify": "^1.6.6",
+    "zod": "catalog:validation"
   },
   "devDependencies": {
     "@tooling/typescript": "workspace:*",
