@@ -2,7 +2,7 @@ import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
 import {
-   queryForCompetitorKnowledge,
+   queryForCompetitorKnowledgeTool,
    getQueryCompetitorKnowledgeInstructions,
 } from "../tools/query-for-competitor-knowledge-tool";
 import { dateTool, getDateToolInstructions } from "../tools/date-tool";
@@ -114,5 +114,8 @@ ${organizationId ? `\n## CONTEXT\n- Current organization: ${organizationId}` : "
 `;
    },
    model: openrouter("x-ai/grok-4-fast"),
-   tools: { queryForCompetitorKnowledge, dateTool },
+   tools: {
+      queryForCompetitorKnowledge: queryForCompetitorKnowledgeTool,
+      dateTool,
+   },
 });

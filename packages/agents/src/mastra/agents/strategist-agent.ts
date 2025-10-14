@@ -1,9 +1,9 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
-import { getRagPersona } from "../tools/get-rag-persona-tool";
-import { queryForCompetitorKnowledge } from "../tools/query-for-competitor-knowledge-tool";
-import { queryForBrandKnowledge } from "../tools/query-for-brand-knowledge-tool";
+import { getRagGuidelinesTool } from "../tools/get-rag-guidelines-tool";
+import { queryForCompetitorKnowledgeTool } from "../tools/query-for-competitor-knowledge-tool";
+import { queryForBrandKnowledgeTool } from "../tools/query-for-brand-knowledge-tool";
 
 const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
@@ -166,8 +166,8 @@ Remember: Your role is to transform user content requests into strategic briefs 
    },
    model: openrouter("x-ai/grok-4-fast"),
    tools: {
-      queryForCompetitorKnowledge,
-      queryForBrandKnowledge,
-      getRagPersona,
+      queryForCompetitorKnowledge: queryForCompetitorKnowledgeTool,
+      queryForBrandKnowledge: queryForBrandKnowledgeTool,
+      getRagPersona: getRagGuidelinesTool,
    },
 });

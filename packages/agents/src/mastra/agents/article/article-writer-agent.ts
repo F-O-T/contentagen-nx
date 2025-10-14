@@ -1,8 +1,12 @@
 import { Agent } from "@mastra/core/agent";
-import { dateTool } from "../../tools/date-tool";
+import { dateTool, getDateToolInstructions } from "../../tools/date-tool";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { getWritingPersona } from "../../tools/get-writing-persona-tool";
+import {
+   getWritingGuidelinesTool,
+   getWritingGuidelinesInstructions,
+} from "../../tools/get-writing-guidelines-tool";
 import { serverEnv } from "@packages/environment/server";
+import { createToolSystemPrompt } from "../../helpers";
 
 const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
@@ -28,6 +32,11 @@ export const articleWriterAgent = new Agent({
 You are a professional article writer specializing in creating engaging, informative, and well-structured articles.
 
 ${getLanguageOutputInstruction(locale as "en" | "pt")}
+
+${createToolSystemPrompt([
+   getDateToolInstructions(),
+   getWritingGuidelinesInstructions(),
+])}
 
 ## YOUR EXPERTISE
 - Long-form content creation (800-2500 words)
@@ -113,5 +122,5 @@ Just write the article with the title as H1, then text, then H2 sections. Nothin
 `;
    },
    model: openrouter("x-ai/grok-4-fast"),
-   tools: { dateTool, getWritingPersona },
+   tools: { dateTool, getWritingGuidelinesTool },
 });

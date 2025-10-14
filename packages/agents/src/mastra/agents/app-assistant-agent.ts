@@ -2,7 +2,7 @@ import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
 import {
-   queryForBrandKnowledge,
+   queryForBrandKnowledgeTool,
    getQueryBrandKnowledgeInstructions,
 } from "../tools/query-for-brand-knowledge-tool";
 import { dateTool, getDateToolInstructions } from "../tools/date-tool";
@@ -80,5 +80,9 @@ If a search fails or returns no results:
 `;
    },
    model: openrouter("x-ai/grok-4-fast"),
-   tools: { queryForBrandKnowledge, tavilySearchTool, dateTool },
+   tools: {
+      queryForBrandKnowledge: queryForBrandKnowledgeTool,
+      tavilySearchTool,
+      dateTool,
+   },
 });
