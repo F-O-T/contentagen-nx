@@ -89,7 +89,7 @@ export async function listBrands(
       page?: number;
       limit?: number;
    },
-): Promise<BrandSelect[]> {
+) {
    try {
       const offset = (page - 1) * limit;
 
@@ -101,7 +101,6 @@ export async function listBrands(
             orderBy: (brand, { desc }) => [desc(brand.createdAt)],
             with: {
                features: {
-                  limit: 5,
                   orderBy: (brandFeature, { desc }) => [
                      desc(brandFeature.extractedAt),
                   ],
