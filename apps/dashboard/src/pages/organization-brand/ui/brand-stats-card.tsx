@@ -3,7 +3,7 @@ import { StatsCard } from "@packages/ui/components/stats-card";
 import type { RouterOutput } from "@packages/api/client";
 
 interface BrandStatsCardProps {
-   brand: RouterOutput["brand"]["get"];
+   brand: RouterOutput["brand"]["getByOrganization"];
 }
 
 export function BrandStatsCard({ brand }: BrandStatsCardProps) {
@@ -55,7 +55,7 @@ export function BrandStatsCard({ brand }: BrandStatsCardProps) {
             details: confidenceDetails,
          },
       ];
-   }, [brand.features]);
+   }, [brand?.features]);
 
    return (
       <div className="w-full gap-4 grid md:grid-cols-2">
