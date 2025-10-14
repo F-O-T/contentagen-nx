@@ -19,7 +19,7 @@
     },
     "apps/blog": {
       "name": "blog",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "dependencies": {
         "@astrojs/check": "catalog:astro",
         "@astrojs/mdx": "catalog:astro",
@@ -48,7 +48,7 @@
     },
     "apps/dashboard": {
       "name": "dashboard",
-      "version": "0.9.0",
+      "version": "0.9.1",
       "dependencies": {
         "@packages/api": "workspace:*",
         "@packages/authentication": "workspace:*",
@@ -93,7 +93,7 @@
     },
     "apps/docs": {
       "name": "docs",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "dependencies": {
         "@astrojs/check": "catalog:astro",
         "@astrojs/mdx": "catalog:astro",
@@ -113,7 +113,7 @@
     },
     "apps/landing-page": {
       "name": "landing-page",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "dependencies": {
         "@astrojs/check": "catalog:astro",
         "@astrojs/node": "catalog:astro",
@@ -140,7 +140,7 @@
     },
     "apps/server": {
       "name": "server",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "dependencies": {
         "@bull-board/api": "6.13.0",
         "@bull-board/elysia": "6.13.0",
@@ -167,7 +167,7 @@
     },
     "packages/agents": {
       "name": "@packages/agents",
-      "version": "0.23.0",
+      "version": "0.24.0",
       "dependencies": {
         "@mastra/core": "^0.20.2",
         "@mastra/libsql": "^0.15.1",
@@ -194,7 +194,7 @@
     },
     "packages/api": {
       "name": "@packages/api",
-      "version": "0.8.0",
+      "version": "0.8.1",
       "dependencies": {
         "@packages/authentication": "workspace:*",
         "@packages/database": "workspace:*",
@@ -426,7 +426,7 @@
     },
     "packages/utils": {
       "name": "@packages/utils",
-      "version": "0.19.0",
+      "version": "0.20.0",
       "dependencies": {
         "@trpc/server": "catalog:trpc",
         "slugify": "^1.6.6",
