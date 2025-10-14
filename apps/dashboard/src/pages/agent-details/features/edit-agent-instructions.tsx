@@ -97,9 +97,9 @@ export function EditAgentInstructions({
 
    const editForm = useAppForm({
       defaultValues: {
-         audienceProfile: "",
-         writingGuidelines: "",
-         ragIntegration: "",
+         audienceProfile: personaConfig.instructions?.audienceProfile ?? "",
+         writingGuidelines: personaConfig.instructions?.writingGuidelines ?? "",
+         ragIntegration: personaConfig.instructions?.ragIntegration ?? "",
       },
       validators: {
          //TODO: Onblur is not working when using the schema from the database
