@@ -1,3 +1,13 @@
+## 0.24.1 (2025-10-14)
+
+### 🩹 Fixes
+
+- **agents:** optimize document chunking strategy and parameters for brand and competitor knowledge ([cd2421cb](https://github.com/F-O-T/contentagen-nx/commit/cd2421cb))
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.8.1 (2025-10-14)
 
 ### 🩹 Fixes
