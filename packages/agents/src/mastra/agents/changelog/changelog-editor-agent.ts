@@ -1,7 +1,8 @@
 import { Agent } from "@mastra/core/agent";
-import { dateTool } from "../../tools/date-tool";
+import { dateTool, getDateToolInstructions } from "../../tools/date-tool";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
+import { createToolSystemPrompt } from "../../helpers";
 
 const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
@@ -23,6 +24,9 @@ export const changelogEditorAgent = new Agent({
 You are a technical documentation editor specializing in changelogs and release notes.
 
 ${getLanguageOutputInstruction(locale as "en" | "pt")}
+
+
+${createToolSystemPrompt([getDateToolInstructions()])}
 
 ## EDITING FOCUS
 - Verify version numbering and dates

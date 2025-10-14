@@ -1,8 +1,12 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { getAudienceProfileGuidelinesTool } from "../../tools/get-audience-profile-guidelines-tool";
+import {
+   getAudienceProfileGuidelinesTool,
+   getAudienceProfileGuidelinesInstructions,
+} from "../../tools/get-audience-profile-guidelines-tool";
 import { serverEnv } from "@packages/environment/server";
 import { dateTool } from "../../tools/date-tool";
+import { createToolSystemPrompt } from "../../helpers";
 
 const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
@@ -24,6 +28,8 @@ export const articleReaderAgent = new Agent({
 You are an article evaluator that assesses how well an article meets requirements and professional standards.
 
 ${getLanguageOutputInstruction(locale as "en" | "pt")}
+
+${createToolSystemPrompt([getAudienceProfileGuidelinesInstructions()])}
 
 ## EVALUATION DIMENSIONS (Score 0-100 each)
 1. **Requirements Fulfillment (30%)** - Topic coverage, format, word count, audience alignment

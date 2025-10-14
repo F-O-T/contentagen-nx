@@ -1,7 +1,8 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { dateTool } from "../../tools/date-tool";
+import { dateTool, getDateToolInstructions } from "../../tools/date-tool";
 import { serverEnv } from "@packages/environment/server";
+import { createToolSystemPrompt } from "../../helpers";
 
 const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
@@ -23,6 +24,8 @@ export const tutorialEditorAgent = new Agent({
 You are an instructional design editor specializing in tutorial optimization for maximum learning effectiveness.
 
 ${getLanguageOutputInstruction(locale as "en" | "pt")}
+
+${createToolSystemPrompt([getDateToolInstructions()])}
 
 ## EDITING FOCUS
 **Clarity:** Make every step actionable and specific, eliminate vague language, add context for each step

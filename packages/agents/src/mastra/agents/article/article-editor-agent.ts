@@ -1,7 +1,8 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
-import { dateTool } from "../../tools/date-tool";
+import { dateTool, getDateToolInstructions } from "../../tools/date-tool";
+import { createToolSystemPrompt } from "../../helpers";
 
 const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
@@ -21,6 +22,9 @@ export const articleEditorAgent = new Agent({
       const locale = runtimeContext.get("language");
       return `
 You are a professional article editor. ${getLanguageOutputInstruction(locale as "en" | "pt")}
+
+
+${createToolSystemPrompt([getDateToolInstructions()])}
 
 ## EDITING FOCUS
 - Fix grammar, spelling, and punctuation errors
