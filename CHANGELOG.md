@@ -1,3 +1,81 @@
+## 0.8.1 (2025-10-14)
+
+### 🩹 Fixes
+
+- **api:** remove unnecessary import statement in agent-file.ts ([3b06332](https://github.com/F-O-T/contentagen-nx/commit/3b06332))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/agents to 0.24.0
+- Updated @packages/utils to 0.20.0
+
+### ❤️ Thank You
+
+- Manoel
+
+## 0.24.0 (2025-10-14)
+
+### 🚀 Features
+
+- **agents:** enhance agents with date tool instructions and system prompts ([f20f177](https://github.com/F-O-T/contentagen-nx/commit/f20f177))
+- **agents:** add new tools ([87db3df](https://github.com/F-O-T/contentagen-nx/commit/87db3df))
+- **agents:** simplify and clarify agent instructions and output formats ([b56898c](https://github.com/F-O-T/contentagen-nx/commit/b56898c))
+
+### 🩹 Fixes
+
+- **agents:** update agents ([6b1fe34](https://github.com/F-O-T/contentagen-nx/commit/6b1fe34))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/utils to 0.20.0
+
+### ❤️ Thank You
+
+- Manoel
+
+## 0.7.1 (2025-10-14)
+
+### 🩹 Fixes
+
+- **deps:** update @bull-board/api and @bull-board/elysia to version 6.13.0 ([af90b04](https://github.com/F-O-T/contentagen-nx/commit/af90b04))
+- **chore:** pin bun version to 1.2.23 in Dockerfiles for consistency ([7d827a0](https://github.com/F-O-T/contentagen-nx/commit/7d827a0))
+- **deps:** update @bull-board/elysia version to 6.12.0 ([ab6428d](https://github.com/F-O-T/contentagen-nx/commit/ab6428d))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/utils to 0.20.0
+- Updated @packages/api to 0.8.1
+
+### ❤️ Thank You
+
+- Manoel
+
+## 0.9.1 (2025-10-14)
+
+### 🩹 Fixes
+
+- **dashboard:** set default values from personaConfig for form fields ([a96bcf8](https://github.com/F-O-T/contentagen-nx/commit/a96bcf8))
+- **chore:** pin bun version to 1.2.23 in Dockerfiles for consistency ([7d827a0](https://github.com/F-O-T/contentagen-nx/commit/7d827a0))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/utils to 0.20.0
+- Updated @packages/api to 0.8.1
+
+### ❤️ Thank You
+
+- Manoel
+
+## 0.6.1 (2025-10-14)
+
+### 🩹 Fixes
+
+- **chore:** pin bun version to 1.2.23 in Dockerfiles for consistency ([2d7e496](https://github.com/F-O-T/contentagen-nx/commit/2d7e496))
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.23.0 (2025-10-13)
 
 ### 🚀 Features
