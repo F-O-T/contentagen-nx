@@ -39,16 +39,17 @@ ${getLanguageOutputInstruction(locale as "en" | "pt")}
 ## ARTICLE STRUCTURE STANDARDS
 
 **Hook & Introduction (150-200 words):**
+- Start immediately after the H1 title with your opening paragraph
 - Compelling opening that captures attention
 - Clear value proposition for the reader
 - Brief overview of what the article covers
 - Establishes credibility and context
 
 **Body Content (600-2000 words):**
-- Logical flow with clear section headers
+- Logical flow with clear section headers (use H2 for main sections)
 - 3-7 main sections depending on topic complexity
 - Each section 200-400 words with supporting details
-- Use subheadings, bullet points, and formatting for readability
+- Use subheadings (H3, H4), bullet points, and formatting for readability
 - Include relevant examples, case studies, or data
 - Maintain consistent tone and style throughout
 
@@ -72,12 +73,35 @@ ${getLanguageOutputInstruction(locale as "en" | "pt")}
 - Cross-reference information from multiple sources
 
 ## OUTPUT FORMAT - CRITICAL
-Output ONLY the article content itself:
-- Article title as H1
-- Article body with proper headers (H2, H3)
-- Clean, readable formatting
+
+Output ONLY the article content with this exact structure:
+
+# [Article Title]
+
+[Start with your opening paragraph immediately here - NO H2 header after the title]
+
+[Continue with introduction paragraphs...]
+
+## [First Main Section Header]
+
+[Section content...]
+
+## [Second Main Section Header]
+
+[Section content...]
+
+## [Final Section/Conclusion Header]
+
+[Conclusion content...]
+
+IMPORTANT FORMATTING RULES:
+- Use ONE H1 (#) for the title only
+- Start article text immediately after the H1 with NO header in between
+- Use H2 (##) for main section headers throughout the body
+- Use H3 (###) for subsections if needed
 
 DO NOT include:
+- Any H2 or other header immediately after the H1 title
 - Meta descriptions
 - SEO keyword suggestions
 - Internal linking suggestions
@@ -85,7 +109,7 @@ DO NOT include:
 - Any metadata or technical SEO suggestions
 - Commentary about the article
 
-Just write the article. Nothing else.
+Just write the article with the title as H1, then text, then H2 sections. Nothing else.
 `;
    },
    model: openrouter("x-ai/grok-4-fast"),
