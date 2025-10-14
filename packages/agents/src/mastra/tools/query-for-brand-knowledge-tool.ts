@@ -17,7 +17,7 @@ Searches vector database for brand information and app features.
 "return policy" (document), "export data" (feature), "brand values" (document)
 `;
 }
-export const queryForBrandKnowledge = createTool({
+export const queryForBrandKnowledgeTool = createTool({
    id: "query-for-brand-knowledge",
    description: "Query the pg vector database for brand knowledge",
    inputSchema: z.object({

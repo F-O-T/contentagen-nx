@@ -2,23 +2,27 @@ import { createTool } from "@mastra/core/tools";
 import { serverEnv } from "@packages/environment/server";
 import { createDb } from "@packages/database/client";
 import { getAgentById } from "@packages/database/repositories/agent-repository";
-import { z } from "zod";
 import { AppError, propagateError } from "@packages/utils/errors";
-
-export const getAudiencePersona = createTool({
+export function getAudienceProfileGuidelinesInstructions(): string {
+   return `
+## AUDIENCE PERSONA RETRIEVAL TOOL
+Retrieves the target audience profile for content personalization.
+**When to use:** Need to understand who you're writing for or tailor content to specific reader
+**Parameters:**
+- agentId (UUID): Agent identifier containing persona configuration
+**Returns:** Audience profile details or "No audience profile specified"
+**Note:** Call once per session to get audience context, then apply throughout conversation
+`;
+}
+export const getAudienceProfileGuidelinesTool = createTool({
    id: "get-audience-persona",
    description:
       "Retrieve the audience profile persona from the database for the reader agent to impersonate",
-   inputSchema: z.object({
-      agentId: z
-         .uuid()
-         .describe(
-            "The UUID of the agent to retrieve the audience profile for",
-         ),
-   }),
-   execute: async ({ context }) => {
-      const { agentId } = context;
-
+   execute: async ({ runtimeContext }) => {
+      if (!runtimeContext.has("agentId")) {
+         throw AppError.internal("Agent ID is required in runtime context");
+      }
+      const agentId = runtimeContext.get("agentId") as string;
       try {
          const dbClient = createDb({
             databaseUrl: serverEnv.DATABASE_URL,

@@ -2,22 +2,27 @@ import { createTool } from "@mastra/core/tools";
 import { serverEnv } from "@packages/environment/server";
 import { createDb } from "@packages/database/client";
 import { getAgentById } from "@packages/database/repositories/agent-repository";
-import { z } from "zod";
 import { AppError, propagateError } from "@packages/utils/errors";
-
-export const getRagPersona = createTool({
+export function getRagGuidelinesInstructions(): string {
+   return `
+## RAG INTEGRATION PERSONA TOOL
+Retrieves RAG integration instructions that define how to query and utilize knowledge bases.
+**When to use:** Before formulating search strategies or when unsure how to approach brand/competitor knowledge queries
+**Parameters:**
+- agentId (UUID): Agent identifier containing RAG integration configuration
+**Returns:** RAG integration instructions or "No RAG integration specified"
+**Strategy:** Call early in workflow to understand knowledge base structure and query patterns, then apply throughout research phase
+`;
+}
+export const getRagGuidelinesTool = createTool({
    id: "get-rag-persona",
    description:
       "Retrieve the RAG integration persona from the database for the strategist agent to use",
-   inputSchema: z.object({
-      agentId: z
-         .uuid()
-         .describe(
-            "The UUID of the agent to retrieve the RAG integration instructions for",
-         ),
-   }),
-   execute: async ({ context }) => {
-      const { agentId } = context;
+   execute: async ({ runtimeContext }) => {
+      if (!runtimeContext.has("agentId")) {
+         throw AppError.internal("Agent ID is required in runtime context");
+      }
+      const agentId = runtimeContext.get("agentId") as string;
 
       try {
          const dbClient = createDb({

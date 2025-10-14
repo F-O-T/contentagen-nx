@@ -20,7 +20,7 @@ Good: searchTerm="AI features", type="feature" | searchTerm="recent updates", ty
 Bad: searchTerm="competitor" (too vague)
 `;
 }
-export const queryForCompetitorKnowledge = createTool({
+export const queryForCompetitorKnowledgeTool = createTool({
    id: "query-for-competitor-knowledge",
    description: "Query the pg vector database for competitor knowledge",
    inputSchema: z.object({
