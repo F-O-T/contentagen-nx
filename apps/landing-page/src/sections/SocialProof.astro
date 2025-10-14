@@ -1,13 +1,22 @@
 ---
 import liciteiLogo from "../assets/teams/licitei-logo.svg";
 import { Image } from "astro:assets";
+import { useTranslations } from "../i18n/utils";
+import type { SupportedLng } from "@packages/localization";
+
+interface Props {
+   lang?: SupportedLng;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 ---
 
 <section class=" relative py-16 md:py-24 ">
   <div class="mx-auto max-w-6xl px-6">
     <div class="mx-auto max-w-2xl text-center">
       <blockquote>
-        <p class="text-lg font-medium sm:text-xl md:text-3xl">Using ContentaGen has been like unlocking a secret content creation superpower. It's the perfect fusion of AI intelligence and human creativity, enabling us to create content that is as engaging as it is effective.</p>
+        <p class="text-lg font-medium sm:text-xl md:text-3xl">{t("pages.landing.socialProof.quote")}</p>
 
         <div class="mt-12 flex items-center justify-center gap-6">
           <Image
@@ -20,8 +29,8 @@ import { Image } from "astro:assets";
           />
 
           <div class="space-y-1 border-l pl-6">
-            <cite class="font-medium">Licitei Team</cite>
-            <span class="text-muted-foreground block text-sm">Content Team, Licitei</span>
+            <cite class="font-medium">{t("pages.landing.socialProof.author")}</cite>
+            <span class="text-muted-foreground block text-sm">{t("pages.landing.socialProof.role")}</span>
           </div>
         </div>
       </blockquote>

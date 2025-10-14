@@ -1,48 +1,75 @@
 ---
 import brandConfig from "@packages/brand/index.json";
 import Logo from "../components/Logo.astro";
+import { useTranslations } from "../i18n/utils";
+import type { SupportedLng } from "@packages/localization";
+
+interface Props {
+   lang?: SupportedLng;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 
 const links = [
    {
-      group: "Product",
+      group: t("pages.landing.footer.product.title"),
       items: [
-         { title: "Brand Intelligence", href: "#brand-learning" },
-         { title: "Competitor Analysis", href: "#competitor-intelligence" },
-         { title: "Content Workflow", href: "#content-workflow" },
-         { title: "Developer SDK", href: "#sdk" },
-         { title: "Pricing", href: "#pricing" },
+         {
+            title: t("pages.landing.footer.product.brandIntelligence"),
+            href: "#brand-learning",
+         },
+         {
+            title: t("pages.landing.footer.product.competitorAnalysis"),
+            href: "#competitor-intelligence",
+         },
+         {
+            title: t("pages.landing.footer.product.contentWorkflow"),
+            href: "#content-workflow",
+         },
+         {
+            title: t("pages.landing.footer.product.developerSDK"),
+            href: "#sdk",
+         },
+         { title: t("pages.landing.footer.product.pricing"), href: "#pricing" },
       ],
    },
    {
-      group: "Resources",
+      group: t("pages.landing.footer.resources.title"),
       items: [
          {
-            title: "Blog",
+            title: t("pages.landing.footer.resources.blog"),
             href: "https://blog.contentagen.com",
             target: "_blank",
          },
          {
-            title: "Documentation",
+            title: t("pages.landing.footer.resources.documentation"),
             href: "https://docs.contentagen.com",
             target: "_blank",
          },
          {
-            title: "Changelog",
+            title: t("pages.landing.footer.resources.changelog"),
             href: "https://github.com/F-O-T/contentagen-nx/blob/main/CHANGELOG.md",
             target: "_blank",
          },
          {
-            title: "Contributing",
+            title: t("pages.landing.footer.resources.contributing"),
             href: "https://github.com/F-O-T/contentagen-nx/blob/main/CONTRIBUTING.md",
             target: "_blank",
          },
       ],
    },
    {
-      group: "Legal",
+      group: t("pages.landing.footer.legal.title"),
       items: [
-         { title: "Privacy Policy", href: "/privacy-policy" },
-         { title: "Terms of Service", href: "/terms-of-service" },
+         {
+            title: t("pages.landing.footer.legal.privacyPolicy"),
+            href: "/privacy-policy",
+         },
+         {
+            title: t("pages.landing.footer.legal.termsOfService"),
+            href: "/terms-of-service",
+         },
       ],
    },
 ];
@@ -50,11 +77,11 @@ const links = [
 const socialLinks = [
    {
       href: "https://github.com/F-O-T/contentagen-nx",
-      label: "GitHub",
+      label: t("pages.landing.footer.socialLinks.github"),
       svg: `<svg class="size-6" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.89 1.52 2.34 1.08 2.91.83c.09-.65.35-1.08.63-1.34c-2.22-.25-4.55-1.11-4.55-4.94c0-1.1.39-1.99 1.03-2.69a3.6 3.6 0 0 1 .1-2.64s.84-.27 2.75 1.02a9.58 9.58 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02a3.6 3.6 0 0 1 .1 2.64c.64.7 1.03 1.59 1.03 2.69c0 3.84-2.34 4.68-4.57 4.93c.36.31.68.92.68 1.85v2.72c0 .27.18.58.69.48A10 10 0 0 0 22 12A10 10 0 0 0 12 2"></path></svg>`,
    },
    {
-      label: "Discord",
+      label: t("pages.landing.footer.socialLinks.discord"),
       href: "https://discord.gg/WsfyJtvF2u",
       svg: `<svg class="size-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
     <path d="M15.0031,4 C15.74742,4 16.532444,4.2597504 17.2533144,4.5466496 L17.7803,4.76328 L17.7803,4.76328 C19.0402,5.29134 19.7484,6.39876 20.2975,7.61613 C21.1882,9.59078 21.8067,12.2238 22.0209,14.2256 C22.1227,15.1766 22.1483,16.1321 21.9647,16.7747 C21.76838,17.46166 21.0975,17.947788 20.4466008,18.3303128 L20.1251058,18.5133917 L20.1251058,18.5133917 L19.7907,18.6986 C19.61865,18.794725 19.442175,18.8900812 19.2660703,18.9830547 L18.7436625,19.2532125 L18.7436625,19.2532125 L18.0271553,19.610458 L18.0271553,19.610458 L17.4503,19.8944 L17.4503,19.8944 C16.9564,20.1414 16.3557,19.9412 16.1087,19.4472 C15.8617,18.9532 16.0619,18.3526 16.5559,18.1056 L17.3469,17.7158 L17.3469,17.7158 L16.7663,17.1071 C15.3765,17.6777 13.7389,18 12.0001,18 C10.2612,18 8.6236,17.6777 7.23378,17.1071 L6.65415,17.7148 L7.44727,18.1056 L7.44727,18.1056 C7.94124,18.3526 8.14147,18.9532 7.89448,19.4472 C7.64749,19.9412 7.04682,20.1414 6.55284,19.8944 L6.00922,19.6247 C5.60650667,19.4255667 5.20386444,19.2265222 4.80574963,19.0185 L3.87804989,18.5133917 L3.87804989,18.5133917 L3.55657432,18.3303128 C2.9057004,17.947788 2.234774,17.46166 2.03851,16.7747 C1.85493,16.1321 1.88051,15.1766 1.98227,14.2256 C2.19645,12.2238 2.81496,9.59078 3.70567,7.61613 C4.25479,6.39877 4.96296,5.29134 6.22289,4.76328 C7.05903,4.41284 8.07171,4 9.00004,4 C9.60303,4 10.0767,4.55523 9.98927,5.14727 C10.6366,5.05075 11.3099,5 12.0001,5 C12.6914,5 13.3657,5.05091 14.014,5.14774 C13.9263,4.55557 14.4,4 15.0031,4 Z M8.75006,10.5 C7.78356,10.5 7.00006,11.2835 7.00006,12.25 C7.00006,13.2165 7.78356,14 8.75006,14 C9.71656,14 10.5001,13.2165 10.5001,12.25 C10.5001,11.2835 9.71656,10.5 8.75006,10.5 Z M15.2501,10.5 C14.2836,10.5 13.5001,11.2835 13.5001,12.25 C13.5001,13.2165 14.2836,14 15.2501,14 C16.2166,14 17.0001,13.2165 17.0001,12.25 C17.0001,11.2835 16.2166,10.5 15.2501,10.5 Z" fill="currentColor"/>
@@ -74,7 +101,7 @@ const year = new Date().getFullYear();
           <span class="text-xl font-bold text-foreground">{brandConfig.name}</span>
         </a>
         <p class="mt-4 text-muted-foreground text-sm">
-          The open-source platform for autonomous, brand-aligned content creation.
+          {t("pages.landing.footer.description")}
         </p>
       </div>
 
@@ -101,7 +128,7 @@ const year = new Date().getFullYear();
       </div>
     </div>
     <div class="mt-12 flex flex-wrap items-center justify-between gap-6 border-t py-6">
-      <span class="text-muted-foreground order-last block text-center text-sm md:order-first">© {year} {brandConfig.name}, Inc. All rights reserved.</span>
+      <span class="text-muted-foreground order-last block text-center text-sm md:order-first">© {year} {brandConfig.name}, Inc. {t("pages.landing.footer.copyright")}</span>
       <div class="order-first flex flex-wrap justify-center gap-4 text-sm md:order-last">
         {socialLinks.map(social => (
           <a

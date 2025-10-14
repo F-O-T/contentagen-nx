@@ -2,9 +2,16 @@
 import "@packages/ui/globals.css";
 import brandConfig from "@packages/brand/index.json";
 import { getAstroPosthogConfig } from "@packages/posthog/client";
+import type { SupportedLng } from "@packages/localization";
+
+interface Props {
+   lang?: SupportedLng;
+}
+
+const { lang = "en" } = Astro.props;
 ---
 <!doctype html>
-<html lang="en" class="scrolsmooth">
+<html lang={lang} class="scrolsmooth">
 	<head>
 		  <link rel="sitemap" href="/sitemap-index.xml" />
 		<meta charset="UTF-8" />

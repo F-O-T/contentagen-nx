@@ -1,18 +1,27 @@
 ---
 import { Button } from "@packages/ui/components/button";
+import { useTranslations } from "../i18n/utils";
+import type { SupportedLng } from "@packages/localization";
+
+interface _Props {
+   lang?: SupportedLng;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 ---
 <section>
   <div class="py-12">
     <div class="mx-auto max-w-6xl px-6">
       <div class="flex flex-wrap items-center justify-between ">
         <div>
-          <h2 class="text-foreground text-balance text-2xl font-semibold md:text-3xl">Ready to Automate Your Content Strategy?</h2>
+          <h2 class="text-foreground text-balance text-2xl font-semibold md:text-3xl">{t("pages.landing.cta.title")}</h2>
         </div>
         <div class="flex justify-end gap-3">
           <Button
             size="lg"
             className="font-semibold">
-            <a href="https://app.contentagen.com/auth/sign-up">Start for Free</a>
+            <a href="https://app.contentagen.com/auth/sign-up">{t("pages.landing.cta.button")}</a>
           </Button>
         </div>
       </div>

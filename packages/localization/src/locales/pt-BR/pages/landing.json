@@ -1,0 +1,282 @@
+{
+   "hero": {
+      "badge": "Geração de Conteúdo Autônoma",
+      "title": "Pare de Escrever. Comece a Crescer.",
+      "subtitle": "A plataforma de IA open-source que aprende sua marca, analisa concorrentes e publica conteúdo de alta qualidade—automaticamente.",
+      "cta": {
+         "primary": "Comece Grátis",
+         "secondary": "Ver Documentação"
+      }
+   },
+   "howItWorks": {
+      "title": "Como Funciona",
+      "subtitle": "Configure seu agente de IA uma vez, gere conteúdo ilimitado para sempre.",
+      "steps": {
+         "create": {
+            "title": "1. Crie Seu Agente de IA",
+            "description": "Defina sua voz de marca, público-alvo e objetivos de conteúdo em minutos."
+         },
+         "train": {
+            "title": "2. Treine em Sua Marca",
+            "description": "Nossa IA analisa seu site e documentos para aprender seu estilo único."
+         },
+         "generate": {
+            "title": "3. Gere Conteúdo",
+            "description": "Publique posts de blog, tutoriais e mais com um único clique."
+         }
+      }
+   },
+   "footer": {
+      "description": "A plataforma open-source para criação de conteúdo autônomo e alinhado à marca.",
+      "product": {
+         "title": "Produto",
+         "brandIntelligence": "Inteligência de Marca",
+         "competitorAnalysis": "Análise de Concorrentes",
+         "contentWorkflow": "Fluxo de Conteúdo",
+         "developerSDK": "SDK para Desenvolvedores",
+         "pricing": "Preços"
+      },
+      "resources": {
+         "title": "Recursos",
+         "blog": "Blog",
+         "documentation": "Documentação",
+         "changelog": "Changelog",
+         "contributing": "Contribuindo"
+      },
+      "legal": {
+         "title": "Legal",
+         "privacyPolicy": "Política de Privacidade",
+         "termsOfService": "Termos de Serviço"
+      },
+      "socialLinks": {
+         "github": "GitHub",
+         "discord": "Discord"
+      },
+      "copyright": "Todos os direitos reservados."
+   },
+   "brandLearning": {
+      "badge": "Inteligência de Marca",
+      "title": "Uma IA que Conhece Sua Marca Melhor que um Estagiário",
+      "description": "ContentaGen realiza uma análise profunda do seu site e documentos da marca para construir um \"Cérebro de Marca\" único. Isso garante que cada conteúdo capture perfeitamente sua voz, estilo e objetivos de negócio—eliminando revisões infinitas.",
+      "benefits": {
+         "website": {
+            "title": "Aprende com Seu Site",
+            "description": "Nosso sistema rastreia todo o seu site para entender seu negócio, produtos e mensagens, formando a base do seu conhecimento."
+         },
+         "voice": {
+            "title": "Captura Sua Voz e Estilo",
+            "description": "Agentes de IA identificam seu tom único, terminologia e padrões estilísticos para criar um perfil de voz da marca que guia toda a criação de conteúdo."
+         },
+         "knowledge": {
+            "title": "Cria um Hub de Conhecimento",
+            "description": "Todo o conhecimento da sua marca é indexado em um repositório central, dando aos seus agentes de IA recuperação instantânea e precisa para conteúdo perfeitamente consistente."
+         }
+      }
+   },
+   "community": {
+      "title": "Construa o Futuro do Conteúdo, Juntos.",
+      "description": "Junte-se à nossa comunidade Discord para conectar com a equipe principal, obter suporte prioritário, compartilhar o que está construindo e ajudar a moldar o futuro do ContentaGen.",
+      "button": "Junte-se ao nosso Discord"
+   },
+   "competitorIntelligence": {
+      "title": "Decodifique Seu Mercado e Domine Seu Nicho",
+      "description": "Vá além do rastreamento simples. ContentaGen analisa o conteúdo dos concorrentes para identificar suas estratégias, encontrar lacunas de mercado e gerar ideias baseadas em dados que superam o desempenho.",
+      "features": {
+         "gaps": {
+            "title": "Descubra Lacunas Estratégicas",
+            "description": "Analise automaticamente o conteúdo dos concorrentes para encontrar tópicos sub-atendidos e oportunidades estratégicas."
+         },
+         "ideas": {
+            "title": "Gere Ideias Vencedoras",
+            "description": "Crie ideias de conteúdo baseadas em dados projetadas para superar os concorrentes em rankings de busca e engajamento."
+         },
+         "tracking": {
+            "title": "Automatize o Rastreamento de Features",
+            "description": "Mantenha um pulso em tempo real nas features dos produtos dos concorrentes para informar seu próprio roadmap e posicionamento."
+         }
+      }
+   },
+   "contentWorkflow": {
+      "title": "Da Ideia ao Artigo Publicado em <span class=\"text-primary\">Minutos, Não Semanas.</span>",
+      "description": "ContentaGen automatiza todo o pipeline de conteúdo enquanto mantém a qualidade e consistência de marca que você exige. Seu workflow, totalmente automatizado.",
+      "steps": {
+         "strategy": {
+            "title": "1. Defina Sua Estratégia Uma Vez",
+            "description": "Configure seu agente de IA com a voz única da sua marca, público e propósito para criar uma base de conteúdo consistente."
+         },
+         "idea": {
+            "title": "2. Comece com uma Ideia Simples",
+            "description": "Forneça ao seu agente um tópico, uma lista de palavras-chave ou aprove uma ideia gerada por IA para iniciar o processo de criação."
+         },
+         "research": {
+            "title": "3. Pesquisa e Análise Automatizadas",
+            "description": "O agente analisa SERPs, artigos de concorrentes e seu Cérebro de Marca interno para reunir as informações mais relevantes."
+         },
+         "draft": {
+            "title": "4. Primeiros Rascunhos na Marca, Instantaneamente",
+            "description": "Um artigo estruturado e completo é escrito do zero, aderindo estritamente às diretrizes e voz da sua marca."
+         },
+         "review": {
+            "title": "5. Revise, Ajuste e Aprove",
+            "description": "Revise o rascunho gerado em seu dashboard, faça ajustes finais com o editor inline e aprove para publicação com um único clique."
+         },
+         "publish": {
+            "title": "6. Publique com o SDK",
+            "description": "Implante seu conteúdo polido diretamente em seu blog ou qualquer aplicativo usando nosso poderoso SDK TypeScript."
+         }
+      }
+   },
+   "cta": {
+      "title": "Pronto para Automatizar Sua Estratégia de Conteúdo?",
+      "button": "Comece Grátis"
+   },
+   "faq": {
+      "title": "FAQs",
+      "subtitle": "Suas perguntas respondidas",
+      "supportText": "Não encontrou o que está procurando? Contate nossa",
+      "supportLink": "equipe de suporte ao cliente",
+      "items": {
+         "brandVoice": {
+            "question": "Como o ContentaGen aprende a voz da minha marca?",
+            "answer": "Nosso sistema realiza uma análise profunda rastreando seu site e quaisquer documentos de marca que você fornecer. Ele identifica seu tom único, terminologia e padrões estilísticos para construir um 'Cérebro de Marca' que guia toda a criação de conteúdo, garantindo que tudo soe autenticamente como você."
+         },
+         "contentTypes": {
+            "question": "Que tipos de conteúdo o ContentaGen pode criar?",
+            "answer": "Atualmente, nossos agentes estão otimizados para criar Artigos estruturados, Tutoriais aprofundados, Q&As estilo entrevista e Changelogs de produto. Estamos continuamente expandindo nossas capacidades de layout de conteúdo."
+         },
+         "competitorIntelligence": {
+            "question": "Como funciona a inteligência de concorrentes?",
+            "answer": "Você fornece a URL do site de um concorrente, e nosso sistema analisa o site deles para extrair suas principais features de produto e informações da marca. Isso permite que você acompanhe a estratégia deles e identifique oportunidades de mercado para seu próprio conteúdo."
+         },
+         "customization": {
+            "question": "Posso personalizar os agentes de IA para minha indústria específica?",
+            "answer": "Sim. O processo de criação de agentes é projetado para personalização profunda. Você define o propósito, público, voz, aderência à marca e mais do agente. Esta persona, combinada com o conhecimento do seu site, adapta o agente à sua indústria."
+         },
+         "usageCredits": {
+            "question": "O que acontece se eu exceder meus créditos de uso?",
+            "answer": "Em nossos planos pagos, você pode habilitar o pagamento por uso para continuar gerando conteúdo além dos créditos incluídos no plano. O plano Gratuito não inclui uso adicional, mas você pode atualizar a qualquer momento."
+         },
+         "openSource": {
+            "question": "Este projeto é open source?",
+            "answer": "Sim, ContentaGen é 100% open source sob a licença Apache-2.0. Você pode visualizar o código, contribuir para seu desenvolvimento ou auto-hospedar toda a plataforma gratuitamente, para sempre. Acreditamos em transparência e colaboração comunitária."
+         }
+      }
+   },
+   "pricing": {
+      "title": "Preços Simples e Transparentes",
+      "subtitle": "Escolha o plano que se encaixa em você. Sem taxas ocultas, cancele a qualquer momento.",
+      "plans": {
+         "free": {
+            "name": "Gratuito",
+            "price": "$0",
+            "period": "/ mês",
+            "description": "Comece com nossa plataforma open-source. Sem necessidade de cartão de crédito.",
+            "features": {
+               "credit": "$1 Crédito de Uso de IA",
+               "organization": "Suporte a Organização",
+               "api": "Chaves de API e Acesso ao SDK",
+               "support": "Suporte da Comunidade",
+               "noCard": "Sem Necessidade de Cartão de Crédito",
+               "coreFeatures": "Todas as Funcionalidades Principais Incluídas"
+            }
+         },
+         "basic": {
+            "name": "Básico",
+            "price": "$5",
+            "period": "/ mês",
+            "description": "Perfeito para criadores e equipes que precisam de mais uso de IA.",
+            "popular": "Mais Popular",
+            "features": {
+               "credit": "$5 Crédito de Uso de IA",
+               "payAsGo": "Pagamento por uso para mais uso",
+               "organization": "Suporte a Organização",
+               "api": "Chaves de API e Acesso ao SDK",
+               "support": "Suporte Prioritário",
+               "coreFeatures": "Todas as Funcionalidades Principais Incluídas"
+            }
+         },
+         "supporter": {
+            "name": "Apoiador",
+            "price": "$25",
+            "period": "/ mês",
+            "description": "Apoie nossa missão open-source com benefícios exclusivos.",
+            "features": {
+               "credit": "$25 Crédito de Uso de IA",
+               "featureRequest": "Prioridade em Solicitação de Funcionalidades",
+               "organization": "Suporte a Organização",
+               "api": "Chaves de API e Acesso ao SDK",
+               "support": "Suporte Dedicado",
+               "coreFeatures": "Todas as Funcionalidades Principais Incluídas"
+            }
+         }
+      },
+      "button": "Começar"
+   },
+   "sdk": {
+      "title": "Integre Conteúdo, Automatize Tudo.",
+      "description": "Nosso SDK TypeScript é mais do que apenas um cliente de API. É um kit completo de ferramentas de conteúdo projetado para desenvolvedores que precisam de acesso confiável e type-safe ao conteúdo gerado por IA.",
+      "benefits": {
+         "typeSafety": {
+            "title": "Type Safety de Ponta a Ponta",
+            "description": "Suporte completo a TypeScript com validação Zod garante que seus dados sejam sempre o que você espera, da API à renderização."
+         },
+         "modern": {
+            "title": "Construído para Frameworks Modernos",
+            "description": "Projetado para geradores de sites estáticos como Astro e Next.js para construir sites de alta performance gerados estaticamente."
+         },
+         "secure": {
+            "title": "Seguro e Confiável",
+            "description": "Autenticação robusta por chave de API e tratamento de erros consistente para construir aplicações de nível de produção."
+         }
+      },
+      "button": "Ler a Documentação"
+   },
+   "openSource": {
+      "title": "Construído Abertamente, Para Todos",
+      "description": "ContentaGen é 100% open-source sob a licença Apache-2.0. Acreditamos em transparência, colaboração comunitária e liberdade para construir sem limites.",
+      "benefits": {
+         "community": {
+            "title": "Impulsionado pela Comunidade",
+            "description": "Junte-se a uma comunidade crescente de desenvolvedores e criadores de conteúdo. Seu feedback molda o futuro do ContentaGen."
+         },
+         "transparency": {
+            "title": "Transparência Total",
+            "description": "Cada linha de código é pública. Veja exatamente como o ContentaGen funciona, desde prompts de IA até schemas de banco de dados."
+         },
+         "free": {
+            "title": "Gratuito Para Sempre",
+            "description": "Auto-hospede o ContentaGen gratuitamente, para sempre. Sem aprisionamento de fornecedor, sem custos ocultos, apenas liberdade open source pura."
+         }
+      },
+      "button": "Favoritar no GitHub"
+   },
+   "navigation": {
+      "product": "Produto",
+      "pricing": "Preços",
+      "docs": "Documentação",
+      "blog": "Blog",
+      "productItems": {
+         "brandLearning": {
+            "name": "Aprendizado de Marca",
+            "description": "IA aprende a voz e estilo únicos da sua marca"
+         },
+         "competitorIntelligence": {
+            "name": "Inteligência de Concorrentes",
+            "description": "Analise e fique à frente da sua concorrência"
+         },
+         "contentWorkflow": {
+            "name": "Fluxo de Conteúdo",
+            "description": "Processo simplificado da ideia à publicação"
+         },
+         "developerSDK": {
+            "name": "SDK para Desenvolvedores",
+            "description": "Construa integrações personalizadas com nossa API"
+         }
+      }
+   },
+   "socialProof": {
+      "quote": "Usar o ContentaGen foi como desbloquear um superpoder secreto de criação de conteúdo. É a fusão perfeita de inteligência de IA e criatividade humana, permitindo-nos criar conteúdo que é tão envolvente quanto eficaz.",
+      "author": "Equipe Licitei",
+      "role": "Equipe de Conteúdo, Licitei"
+   }
+}

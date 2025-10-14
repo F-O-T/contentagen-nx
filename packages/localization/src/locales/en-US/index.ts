@@ -19,6 +19,7 @@ import agentCreationFormEnUs from "./pages/agent-creation-form.json";
 import contentRequestFormEnUs from "./pages/content-request-form.json";
 import agentCreateEnUs from "./pages/agent-create.json";
 import agentEditEnUs from "./pages/agent-edit.json";
+import landingEnUs from "./pages/landing.json";
 import commonEnUs from "./common.json";
 
 const resources = {
@@ -44,6 +45,7 @@ const resources = {
       "pages.content-request-form": contentRequestFormEnUs,
       "pages.agent-create": agentCreateEnUs,
       "pages.agent-edit": agentEditEnUs,
+      "pages.landing": landingEnUs,
       common: commonEnUs,
    },
 };

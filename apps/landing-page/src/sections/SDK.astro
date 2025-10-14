@@ -1,25 +1,31 @@
 ---
 import { Cpu, Lock, Zap, BookOpen, Copy, Check } from "@lucide/astro";
 import { Button } from "@packages/ui/components/button";
+import { useTranslations } from "../i18n/utils";
+import type { SupportedLng } from "@packages/localization";
+
+interface Props {
+   lang?: SupportedLng;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 
 const benefits = [
    {
       icon: Zap,
-      title: "End-to-End Type Safety",
-      description:
-         "Full TypeScript support with Zod validation ensures your data is always what you expect, from API to render.",
+      title: t("pages.landing.sdk.benefits.typeSafety.title"),
+      description: t("pages.landing.sdk.benefits.typeSafety.description"),
    },
    {
       icon: Cpu,
-      title: "Built for Modern Frameworks",
-      description:
-         "Designed for static site generators like Astro and Next.js to build high-performance, statically-generated sites.",
+      title: t("pages.landing.sdk.benefits.modern.title"),
+      description: t("pages.landing.sdk.benefits.modern.description"),
    },
    {
       icon: Lock,
-      title: "Secure & Reliable",
-      description:
-         "Robust API key authentication and consistent error handling for building production-grade applications.",
+      title: t("pages.landing.sdk.benefits.secure.title"),
+      description: t("pages.landing.sdk.benefits.secure.description"),
    },
 ];
 
@@ -51,10 +57,10 @@ posts.forEach(post => {
       <div class="space-y-8">
         <div class="space-y-4">
           <h2 class="text-balance text-4xl font-medium lg:text-5xl">
-            Integrate Content, Automate Everything.
+            {t("pages.landing.sdk.title")}
           </h2>
           <p class="text-muted-foreground text-lg">
-            Our TypeScript SDK is more than just an API client. It's a complete content toolkit designed for developers who need reliable, type-safe access to AI-generated content.
+            {t("pages.landing.sdk.description")}
           </p>
         </div>
 
@@ -75,7 +81,7 @@ posts.forEach(post => {
         <Button size="lg" className="w-full"  variant="outline">
           <a href="https://docs.contentagen.com" class="flex items-center gap-2 " target="_blank" rel="noopener noreferrer">
             <BookOpen class="size-4 mr-2" />
-            Read the Docs
+            {t("pages.landing.sdk.button")}
           </a>
         </Button>
       </div>

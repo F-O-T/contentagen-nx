@@ -7,43 +7,50 @@ import {
    CheckCircle,
    Code,
 } from "@lucide/astro";
+import { useTranslations } from "../i18n/utils";
+import type { SupportedLng } from "@packages/localization";
+
+interface _Props {
+   lang?: SupportedLng;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 
 const steps = [
    {
       icon: Cog,
-      title: "1. Set Your Strategy Once",
-      description:
-         "Configure your AI agent with your brand's unique voice, audience, and purpose to create a consistent content foundation.",
+      title: t("pages.landing.contentWorkflow.steps.strategy.title"),
+      description: t(
+         "pages.landing.contentWorkflow.steps.strategy.description",
+      ),
    },
    {
       icon: Lightbulb,
-      title: "2. Kickstart with a Simple Idea",
-      description:
-         "Provide your agent with a topic, a list of keywords, or approve an AI-generated idea to kickstart the creation process.",
+      title: t("pages.landing.contentWorkflow.steps.idea.title"),
+      description: t("pages.landing.contentWorkflow.steps.idea.description"),
    },
    {
       icon: Search,
-      title: "3. Automated Research & Analysis",
-      description:
-         "The agent analyzes SERPs, competitor articles, and your internal Brand Brain to gather the most relevant information.",
+      title: t("pages.landing.contentWorkflow.steps.research.title"),
+      description: t(
+         "pages.landing.contentWorkflow.steps.research.description",
+      ),
    },
    {
       icon: FileText,
-      title: "4. On-Brand First Drafts, Instantly",
-      description:
-         "A full-length, structured article is written from scratch, adhering strictly to your brand guidelines and voice.",
+      title: t("pages.landing.contentWorkflow.steps.draft.title"),
+      description: t("pages.landing.contentWorkflow.steps.draft.description"),
    },
    {
       icon: CheckCircle,
-      title: "5. Review, Tweak, and Approve",
-      description:
-         "Review the generated draft in your dashboard, make final tweaks with the inline editor, and approve it for publishing with a single click.",
+      title: t("pages.landing.contentWorkflow.steps.review.title"),
+      description: t("pages.landing.contentWorkflow.steps.review.description"),
    },
    {
       icon: Code,
-      title: "6. Publish with the SDK",
-      description:
-         "Deploy your polished content directly to your blog or any application using our powerful TypeScript SDK.",
+      title: t("pages.landing.contentWorkflow.steps.publish.title"),
+      description: t("pages.landing.contentWorkflow.steps.publish.description"),
    },
 ];
 ---
@@ -51,15 +58,10 @@ const steps = [
 <section id="content-workflow" class="bg-muted relative py-16 md:py-24">
   <div class="mx-auto max-w-6xl px-6">
     <div class="mx-auto max-w-3xl text-center">
-      <h2 class="text-balance text-2xl font-bold md:text-3xl lg:text-4xl">
-        From Idea to Published Article in <span class="text-primary"
-          >Minutes, Not Weeks.</span
-        >
+      <h2 class="text-balance text-2xl font-bold md:text-3xl lg:text-4xl" set:html={t("pages.landing.contentWorkflow.title")}>
       </h2>
       <p class="text-muted-foreground mx-auto mt-4 max-w-2xl text-balance">
-        ContentaGen automates the entire content pipeline while maintaining the
-        quality and brand consistency you demand. Your workflow, fully
-        automated.
+        {t("pages.landing.contentWorkflow.description")}
       </p>
     </div>
 

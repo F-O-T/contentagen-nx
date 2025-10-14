@@ -1,24 +1,34 @@
 ---
 import { Brain, Globe, PenTool, Database } from "@lucide/astro";
+import { useTranslations } from "../i18n/utils";
+import type { SupportedLng } from "@packages/localization";
+
+interface _Props {
+   lang?: SupportedLng;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 
 const benefits = [
    {
       icon: Globe,
-      title: "Learns From Your Website",
-      description:
-         "Our system crawls your entire website to understand your business, products, and messaging, forming the foundation of its knowledge.",
+      title: t("pages.landing.brandLearning.benefits.website.title"),
+      description: t(
+         "pages.landing.brandLearning.benefits.website.description",
+      ),
    },
    {
       icon: PenTool,
-      title: "Captures Your Voice & Style",
-      description:
-         "AI agents identify your unique tone, terminology, and stylistic patterns to create a brand voice profile that guides all content creation.",
+      title: t("pages.landing.brandLearning.benefits.voice.title"),
+      description: t("pages.landing.brandLearning.benefits.voice.description"),
    },
    {
       icon: Database,
-      title: "Creates a Knowledge Hub",
-      description:
-         "All your brand knowledge is indexed into a central repository, giving your AI agents instant, accurate recall for perfectly consistent content.",
+      title: t("pages.landing.brandLearning.benefits.knowledge.title"),
+      description: t(
+         "pages.landing.brandLearning.benefits.knowledge.description",
+      ),
    },
 ];
 ---
@@ -26,15 +36,12 @@ const benefits = [
 <section id="brand-learning" class="bg-muted py-24">
   <div class="mx-auto w-full max-w-6xl px-6">
     <div class="mx-auto max-w-3xl text-center">
-      <span class="text-primary font-semibold">Brand Intelligence</span>
+      <span class="text-primary font-semibold">{t("pages.landing.brandLearning.badge")}</span>
       <h2 class="text-foreground mt-4 text-4xl font-bold">
-        An AI That Knows Your Brand Better Than an Intern
+        {t("pages.landing.brandLearning.title")}
       </h2>
       <p class="text-muted-foreground mb-12 mt-4 text-lg">
-        ContentaGen performs a deep analysis of your website and brand documents
-        to build a unique "Brand Brain." This ensures every piece of content
-        perfectly captures your voice, style, and business
-        objectives—eliminating endless revisions.
+        {t("pages.landing.brandLearning.description")}
       </p>
     </div>
 

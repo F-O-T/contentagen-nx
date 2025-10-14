@@ -189,4 +189,3 @@ export const createCompetitorSummaryWorkflow = createWorkflow({
    .then(generateSummary)
    .then(saveSummary)
    .commit();
-

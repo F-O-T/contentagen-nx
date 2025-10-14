@@ -19,6 +19,7 @@ import agentCreationFormPtBr from "./pages/agent-creation-form.json";
 import contentRequestFormPtBr from "./pages/content-request-form.json";
 import agentCreatePtBr from "./pages/agent-create.json";
 import agentEditPtBr from "./pages/agent-edit.json";
+import landingPtBr from "./pages/landing.json";
 import commonPtBr from "./common.json";
 
 const resources = {
@@ -44,6 +45,7 @@ const resources = {
       "pages.content-request-form": contentRequestFormPtBr,
       "pages.agent-create": agentCreatePtBr,
       "pages.agent-edit": agentEditPtBr,
+      "pages.landing": landingPtBr,
       common: commonPtBr,
    },
 };

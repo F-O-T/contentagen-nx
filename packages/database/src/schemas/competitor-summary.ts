@@ -54,4 +54,3 @@ export const CompetitorSummaryInsertSchema =
    createInsertSchema(competitorSummary);
 export const CompetitorSummarySelectSchema =
    createSelectSchema(competitorSummary);
-

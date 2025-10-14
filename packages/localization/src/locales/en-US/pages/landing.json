@@ -1,0 +1,282 @@
+{
+   "hero": {
+      "badge": "Autonomous Content Generation",
+      "title": "Stop Writing. Start Growing.",
+      "subtitle": "The open-source AI platform that learns your brand, analyzes competitors, and publishes high-quality content—automatically.",
+      "cta": {
+         "primary": "Get Started Free",
+         "secondary": "View Documentation"
+      }
+   },
+   "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Set up your AI agent once, generate unlimited content forever.",
+      "steps": {
+         "create": {
+            "title": "1. Create Your AI Agent",
+            "description": "Define your brand voice, target audience, and content goals in minutes."
+         },
+         "train": {
+            "title": "2. Train on Your Brand",
+            "description": "Our AI analyzes your website and documents to learn your unique style."
+         },
+         "generate": {
+            "title": "3. Generate Content",
+            "description": "Publish blog posts, tutorials, and more with a single click."
+         }
+      }
+   },
+   "footer": {
+      "description": "The open-source platform for autonomous, brand-aligned content creation.",
+      "product": {
+         "title": "Product",
+         "brandIntelligence": "Brand Intelligence",
+         "competitorAnalysis": "Competitor Analysis",
+         "contentWorkflow": "Content Workflow",
+         "developerSDK": "Developer SDK",
+         "pricing": "Pricing"
+      },
+      "resources": {
+         "title": "Resources",
+         "blog": "Blog",
+         "documentation": "Documentation",
+         "changelog": "Changelog",
+         "contributing": "Contributing"
+      },
+      "legal": {
+         "title": "Legal",
+         "privacyPolicy": "Privacy Policy",
+         "termsOfService": "Terms of Service"
+      },
+      "socialLinks": {
+         "github": "GitHub",
+         "discord": "Discord"
+      },
+      "copyright": "All rights reserved."
+   },
+   "brandLearning": {
+      "badge": "Brand Intelligence",
+      "title": "An AI That Knows Your Brand Better Than an Intern",
+      "description": "ContentaGen performs a deep analysis of your website and brand documents to build a unique \"Brand Brain.\" This ensures every piece of content perfectly captures your voice, style, and business objectives—eliminating endless revisions.",
+      "benefits": {
+         "website": {
+            "title": "Learns From Your Website",
+            "description": "Our system crawls your entire website to understand your business, products, and messaging, forming the foundation of its knowledge."
+         },
+         "voice": {
+            "title": "Captures Your Voice & Style",
+            "description": "AI agents identify your unique tone, terminology, and stylistic patterns to create a brand voice profile that guides all content creation."
+         },
+         "knowledge": {
+            "title": "Creates a Knowledge Hub",
+            "description": "All your brand knowledge is indexed into a central repository, giving your AI agents instant, accurate recall for perfectly consistent content."
+         }
+      }
+   },
+   "community": {
+      "title": "Build the Future of Content, Together.",
+      "description": "Join our Discord community to connect with the core team, get priority support, share what you're building, and help shape the future of ContentaGen.",
+      "button": "Join our Discord"
+   },
+   "competitorIntelligence": {
+      "title": "Decode Your Market and Dominate Your Niche",
+      "description": "Go beyond simple tracking. ContentaGen analyzes competitor content to identify their strategies, find market gaps, and generate data-driven ideas that outperform.",
+      "features": {
+         "gaps": {
+            "title": "Uncover Strategic Gaps",
+            "description": "Automatically analyze competitor content to find underserved topics and strategic opportunities."
+         },
+         "ideas": {
+            "title": "Generate Winning Ideas",
+            "description": "Create data-driven content ideas designed to outperform competitors in search rankings and engagement."
+         },
+         "tracking": {
+            "title": "Automate Feature Tracking",
+            "description": "Keep a real-time pulse on your competitors' product features to inform your own roadmap and positioning."
+         }
+      }
+   },
+   "contentWorkflow": {
+      "title": "From Idea to Published Article in <span class=\"text-primary\">Minutes, Not Weeks.</span>",
+      "description": "ContentaGen automates the entire content pipeline while maintaining the quality and brand consistency you demand. Your workflow, fully automated.",
+      "steps": {
+         "strategy": {
+            "title": "1. Set Your Strategy Once",
+            "description": "Configure your AI agent with your brand's unique voice, audience, and purpose to create a consistent content foundation."
+         },
+         "idea": {
+            "title": "2. Kickstart with a Simple Idea",
+            "description": "Provide your agent with a topic, a list of keywords, or approve an AI-generated idea to kickstart the creation process."
+         },
+         "research": {
+            "title": "3. Automated Research & Analysis",
+            "description": "The agent analyzes SERPs, competitor articles, and your internal Brand Brain to gather the most relevant information."
+         },
+         "draft": {
+            "title": "4. On-Brand First Drafts, Instantly",
+            "description": "A full-length, structured article is written from scratch, adhering strictly to your brand guidelines and voice."
+         },
+         "review": {
+            "title": "5. Review, Tweak, and Approve",
+            "description": "Review the generated draft in your dashboard, make final tweaks with the inline editor, and approve it for publishing with a single click."
+         },
+         "publish": {
+            "title": "6. Publish with the SDK",
+            "description": "Deploy your polished content directly to your blog or any application using our powerful TypeScript SDK."
+         }
+      }
+   },
+   "cta": {
+      "title": "Ready to Automate Your Content Strategy?",
+      "button": "Start for Free"
+   },
+   "faq": {
+      "title": "FAQs",
+      "subtitle": "Your questions answered",
+      "supportText": "Can't find what you're looking for? Contact our",
+      "supportLink": "customer support team",
+      "items": {
+         "brandVoice": {
+            "question": "How does ContentaGen learn my brand voice?",
+            "answer": "Our system performs a deep analysis by crawling your website and any brand documents you provide. It identifies your unique tone, terminology, and stylistic patterns to build a 'Brand Brain' that guides all content creation, ensuring everything sounds authentically like you."
+         },
+         "contentTypes": {
+            "question": "What types of content can ContentaGen create?",
+            "answer": "Currently, our agents are optimized for creating structured Articles, in-depth Tutorials, interview-style Q&As, and product Changelogs. We are continuously expanding our content layout capabilities."
+         },
+         "competitorIntelligence": {
+            "question": "How does the competitor intelligence work?",
+            "answer": "You provide the website URL of a competitor, and our system analyzes their site to extract their key product features and brand information. This allows you to track their strategy and identify market opportunities for your own content."
+         },
+         "customization": {
+            "question": "Can I customize the AI agents for my specific industry?",
+            "answer": "Yes. The agent creation process is designed for deep customization. You define the agent's purpose, audience, voice, brand adherence, and more. This persona, combined with the knowledge from your website, tailors the agent to your industry."
+         },
+         "usageCredits": {
+            "question": "What happens if I exceed my usage credits?",
+            "answer": "On our paid plans, you can enable pay-as-you-go to continue generating content beyond your plan's included credits. The Free plan does not include additional usage, but you can upgrade at any time."
+         },
+         "openSource": {
+            "question": "Is this project open source?",
+            "answer": "Yes, ContentaGen is 100% open source under the Apache-2.0 license. You can view the code, contribute to its development, or self-host the entire platform for free, forever. We believe in transparency and community collaboration."
+         }
+      }
+   },
+   "pricing": {
+      "title": "Simple, Transparent Pricing",
+      "subtitle": "Choose the plan that fits you. No hidden fees, cancel anytime.",
+      "plans": {
+         "free": {
+            "name": "Free",
+            "price": "$0",
+            "period": "/ mo",
+            "description": "Get started with our open-source platform. No credit card required.",
+            "features": {
+               "credit": "$1 AI Usage Credit",
+               "organization": "Organization Support",
+               "api": "API Keys & SDK Access",
+               "support": "Community Support",
+               "noCard": "No Credit Card Required",
+               "coreFeatures": "All Core Features Included"
+            }
+         },
+         "basic": {
+            "name": "Basic",
+            "price": "$5",
+            "period": "/ mo",
+            "description": "Perfect for creators and teams who need more AI usage.",
+            "popular": "Most Popular",
+            "features": {
+               "credit": "$5 AI Usage Credit",
+               "payAsGo": "Pay-as-you-go for more usage",
+               "organization": "Organization Support",
+               "api": "API Keys & SDK Access",
+               "support": "Priority Support",
+               "coreFeatures": "All Core Features Included"
+            }
+         },
+         "supporter": {
+            "name": "Supporter",
+            "price": "$25",
+            "period": "/ mo",
+            "description": "Support our open-source mission with exclusive benefits.",
+            "features": {
+               "credit": "$25 AI Usage Credit",
+               "featureRequest": "Feature Request Priority",
+               "organization": "Organization Support",
+               "api": "API Keys & SDK Access",
+               "support": "Dedicated Support",
+               "coreFeatures": "All Core Features Included"
+            }
+         }
+      },
+      "button": "Get Started"
+   },
+   "sdk": {
+      "title": "Integrate Content, Automate Everything.",
+      "description": "Our TypeScript SDK is more than just an API client. It's a complete content toolkit designed for developers who need reliable, type-safe access to AI-generated content.",
+      "benefits": {
+         "typeSafety": {
+            "title": "End-to-End Type Safety",
+            "description": "Full TypeScript support with Zod validation ensures your data is always what you expect, from API to render."
+         },
+         "modern": {
+            "title": "Built for Modern Frameworks",
+            "description": "Designed for static site generators like Astro and Next.js to build high-performance, statically-generated sites."
+         },
+         "secure": {
+            "title": "Secure & Reliable",
+            "description": "Robust API key authentication and consistent error handling for building production-grade applications."
+         }
+      },
+      "button": "Read the Docs"
+   },
+   "openSource": {
+      "title": "Built in the Open, For Everyone",
+      "description": "ContentaGen is 100% open-source under the Apache-2.0 license. We believe in transparency, community collaboration, and the freedom to build without limits.",
+      "benefits": {
+         "community": {
+            "title": "Community Driven",
+            "description": "Join a growing community of developers and content creators. Your feedback shapes the future of ContentaGen."
+         },
+         "transparency": {
+            "title": "Full Transparency",
+            "description": "Every line of code is public. See exactly how ContentaGen works, from AI prompts to database schemas."
+         },
+         "free": {
+            "title": "Free Forever",
+            "description": "Self-host ContentaGen for free, forever. No vendor lock-in, no hidden costs, just pure open source freedom."
+         }
+      },
+      "button": "Star on GitHub"
+   },
+   "navigation": {
+      "product": "Product",
+      "pricing": "Pricing",
+      "docs": "Docs",
+      "blog": "Blog",
+      "productItems": {
+         "brandLearning": {
+            "name": "Brand Learning",
+            "description": "AI learns your unique brand voice and style"
+         },
+         "competitorIntelligence": {
+            "name": "Competitor Intelligence",
+            "description": "Analyze and stay ahead of your competition"
+         },
+         "contentWorkflow": {
+            "name": "Content Workflow",
+            "description": "Streamlined process from idea to publication"
+         },
+         "developerSDK": {
+            "name": "Developer SDK",
+            "description": "Build custom integrations with our API"
+         }
+      }
+   },
+   "socialProof": {
+      "quote": "Using ContentaGen has been like unlocking a secret content creation superpower. It's the perfect fusion of AI intelligence and human creativity, enabling us to create content that is as engaging as it is effective.",
+      "author": "Licitei Team",
+      "role": "Content Team, Licitei"
+   }
+}

@@ -110,4 +110,3 @@ export const createCompetitorSummaryWorker = new Worker(
    },
 );
 registerGracefulShutdown(createCompetitorSummaryWorker);
-

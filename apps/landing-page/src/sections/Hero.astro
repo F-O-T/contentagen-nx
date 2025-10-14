@@ -4,6 +4,15 @@ import darkHero from "../assets/dark/dark-hero.webp";
 import { ChevronRight } from "@lucide/astro";
 import { Button } from "@packages/ui/components/button";
 import { Image } from "astro:assets";
+import { useTranslations } from "../i18n/utils";
+import type { SupportedLng } from "@packages/localization";
+
+interface _Props {
+   lang?: SupportedLng;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 ---
 
 <main class="overflow-hidden min-h-screen  grid grid-cols-1">
@@ -11,23 +20,23 @@ import { Image } from "astro:assets";
       <div class="relative z-10 mx-auto w-full max-w-6xl px-6">
         <div class="md:w-3/5">
           <div>
-            <p class="text-primary font-semibold text-sm uppercase tracking-wide mb-3">For B2B SaaS & Content Teams</p>
+            <p class="text-primary font-semibold text-sm uppercase tracking-wide mb-3">{t("pages.landing.hero.badge")}</p>
             <h1 class="max-w-xl text-balance text-5xl font-medium">
-              Generate <span class="text-primary">Ready-to-Publish Content</span> in Minutes, Not Days
+              {t("pages.landing.hero.title")}
             </h1>
             <p class="text-muted-foreground my-8 max-w-lg text-balance text-lg">
-              ContentaGen's AI agents learn your brand voice and create SEO-optimized blog posts that increase organic traffic by 65%+ while cutting content production time by 80%.
+              {t("pages.landing.hero.subtitle")}
             </p>
 
             <div class="flex items-center gap-3">
               <a href="https://app.contentagen.com/auth/sign-in" target="_blank" rel="noopener noreferrer">
                 <Button size="lg" className="pr-4.5">
-                  <span class="text-nowrap">Generate Sample Content</span>
+                  <span class="text-nowrap">{t("pages.landing.hero.cta.primary")}</span>
                   <ChevronRight class="opacity-50" />
                 </Button>
               </a>
               <a href="#social-proof" class="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
-                See results →
+                {t("pages.landing.hero.cta.secondary")} →
               </a>
             </div>
           </div>

@@ -7,6 +7,15 @@ import {
 } from "@packages/ui/components/card";
 import { Button } from "@packages/ui/components/button";
 import { Check } from "@lucide/astro";
+import { useTranslations } from "../i18n/utils";
+import type { SupportedLng } from "@packages/localization";
+
+interface Props {
+   lang?: SupportedLng;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 
 type ButtonVariant =
    | "outline"
@@ -28,50 +37,49 @@ interface PricingPlan {
 
 const pricingPlans: PricingPlan[] = [
    {
-      name: "Free",
-      price: "$0",
-      period: "/ mo",
-      description:
-         "Get started with our open-source platform. No credit card required.",
+      name: t("pages.landing.pricing.plans.free.name"),
+      price: t("pages.landing.pricing.plans.free.price"),
+      period: t("pages.landing.pricing.plans.free.period"),
+      description: t("pages.landing.pricing.plans.free.description"),
       variant: "outline",
       features: [
-         "$1 AI Usage Credit",
-         "Organization Support",
-         "API Keys & SDK Access",
-         "Community Support",
-         "No Credit Card Required",
-         "All Core Features Included",
+         t("pages.landing.pricing.plans.free.features.credit"),
+         t("pages.landing.pricing.plans.free.features.organization"),
+         t("pages.landing.pricing.plans.free.features.api"),
+         t("pages.landing.pricing.plans.free.features.support"),
+         t("pages.landing.pricing.plans.free.features.noCard"),
+         t("pages.landing.pricing.plans.free.features.coreFeatures"),
       ],
    },
    {
-      name: "Basic",
-      price: "$5",
-      period: "/ mo",
-      description: "Perfect for creators and teams who need more AI usage.",
+      name: t("pages.landing.pricing.plans.basic.name"),
+      price: t("pages.landing.pricing.plans.basic.price"),
+      period: t("pages.landing.pricing.plans.basic.period"),
+      description: t("pages.landing.pricing.plans.basic.description"),
       variant: "default",
       popular: true,
       features: [
-         "$5 AI Usage Credit",
-         "Pay-as-you-go for more usage",
-         "Organization Support",
-         "API Keys & SDK Access",
-         "Priority Support",
-         "All Core Features Included",
+         t("pages.landing.pricing.plans.basic.features.credit"),
+         t("pages.landing.pricing.plans.basic.features.payAsGo"),
+         t("pages.landing.pricing.plans.basic.features.organization"),
+         t("pages.landing.pricing.plans.basic.features.api"),
+         t("pages.landing.pricing.plans.basic.features.support"),
+         t("pages.landing.pricing.plans.basic.features.coreFeatures"),
       ],
    },
    {
-      name: "Supporter",
-      price: "$25",
-      period: "/ mo",
-      description: "Support our open-source mission with exclusive benefits.",
+      name: t("pages.landing.pricing.plans.supporter.name"),
+      price: t("pages.landing.pricing.plans.supporter.price"),
+      period: t("pages.landing.pricing.plans.supporter.period"),
+      description: t("pages.landing.pricing.plans.supporter.description"),
       variant: "outline",
       features: [
-         "$25 AI Usage Credit",
-         "Feature Request Priority",
-         "Organization Support",
-         "API Keys & SDK Access",
-         "Dedicated Support",
-         "All Core Features Included",
+         t("pages.landing.pricing.plans.supporter.features.credit"),
+         t("pages.landing.pricing.plans.supporter.features.featureRequest"),
+         t("pages.landing.pricing.plans.supporter.features.organization"),
+         t("pages.landing.pricing.plans.supporter.features.api"),
+         t("pages.landing.pricing.plans.supporter.features.support"),
+         t("pages.landing.pricing.plans.supporter.features.coreFeatures"),
       ],
    },
 ];
@@ -81,10 +89,10 @@ const pricingPlans: PricingPlan[] = [
   <div class="mx-auto max-w-6xl px-6">
     <div class="mx-auto max-w-2xl text-center">
       <h2 class="text-balance text-2xl font-bold md:text-3xl lg:text-4xl">
-        Simple, Transparent Pricing
+        {t("pages.landing.pricing.title")}
       </h2>
       <p class="text-muted-foreground mx-auto mt-4 max-w-xl text-balance">
-        Choose the plan that fits you. No hidden fees, cancel anytime.
+        {t("pages.landing.pricing.subtitle")}
       </p>
     </div>
 
@@ -99,7 +107,7 @@ const pricingPlans: PricingPlan[] = [
                 <CardTitle className="font-medium">{plan.name}</CardTitle>
                 {plan.popular && (
                   <span class="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium">
-                    Most Popular
+                    {t("pages.landing.pricing.plans.basic.popular")}
                   </span>
                 )}
               </div>
@@ -116,7 +124,7 @@ const pricingPlans: PricingPlan[] = [
                   variant={plan.variant}
                   aria-label={`Get started with ${plan.name} plan at ${plan.price} per month`}
                 >
-                  Get Started
+                  {t("pages.landing.pricing.button")}
                 </Button>
               </a>
             </div>

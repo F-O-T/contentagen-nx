@@ -2,27 +2,35 @@
 import { Button } from "@packages/ui/components/button";
 import { Github, Heart, Users, Code, Star, GitFork } from "@lucide/astro";
 import { fetchGitHubRepoStats } from "@/services/github";
+import { useTranslations } from "../i18n/utils";
+import type { SupportedLng } from "@packages/localization";
+
+interface Props {
+   lang?: SupportedLng;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 
 const githubStats = await fetchGitHubRepoStats();
 
 const benefits = [
    {
       icon: Users,
-      title: "Community Driven",
-      description:
-         "Join a growing community of developers and content creators. Your feedback shapes the future of ContentaGen.",
+      title: t("pages.landing.openSource.benefits.community.title"),
+      description: t("pages.landing.openSource.benefits.community.description"),
    },
    {
       icon: Code,
-      title: "Full Transparency",
-      description:
-         "Every line of code is public. See exactly how ContentaGen works, from AI prompts to database schemas.",
+      title: t("pages.landing.openSource.benefits.transparency.title"),
+      description: t(
+         "pages.landing.openSource.benefits.transparency.description",
+      ),
    },
    {
       icon: Heart,
-      title: "Free Forever",
-      description:
-         "Self-host ContentaGen for free, forever. No vendor lock-in, no hidden costs, just pure open source freedom.",
+      title: t("pages.landing.openSource.benefits.free.title"),
+      description: t("pages.landing.openSource.benefits.free.description"),
    },
 ];
 ---
@@ -31,10 +39,10 @@ const benefits = [
   <div class="container mx-auto max-w-6xl px-6">
     <div class="mx-auto max-w-3xl text-center">
       <h2 class="text-balance text-2xl font-bold md:text-3xl lg:text-4xl">
-        Built in the Open, For Everyone
+        {t("pages.landing.openSource.title")}
       </h2>
       <p class="text-muted-foreground mx-auto mt-4 max-w-2xl text-balance">
-        ContentaGen is 100% open-source under the Apache-2.0 license. We believe in transparency, community collaboration, and the freedom to build without limits.
+        {t("pages.landing.openSource.description")}
       </p>
     </div>
 
@@ -81,7 +89,7 @@ const benefits = [
           <Button size="lg" >
             <a href={githubStats.html_url} class="flex items-center gap-2 " target="_blank" rel="noopener noreferrer">
               <Github class="size-4 mr-2" />
-              Star on GitHub
+              {t("pages.landing.openSource.button")}
             </a>
           </Button>
         </div>

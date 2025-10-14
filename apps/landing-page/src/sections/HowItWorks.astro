@@ -1,24 +1,30 @@
 ---
 import { BrainCircuit, BotMessageSquare, Rocket } from "@lucide/astro";
+import { useTranslations } from "../i18n/utils";
+import type { SupportedLng } from "@packages/localization";
+
+interface _Props {
+   lang?: SupportedLng;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 
 const steps = [
    {
       icon: BrainCircuit,
-      title: "1. We Absorb Your Brand DNA",
-      description:
-         "Connect your website and brand documents. Our AI performs a deep analysis to build a unique 'Brand Brain' that understands your voice, style, and offerings.",
+      title: t("pages.landing.howItWorks.steps.create.title"),
+      description: t("pages.landing.howItWorks.steps.create.description"),
    },
    {
       icon: BotMessageSquare,
-      title: "2. Your Agent Creates & Refines",
-      description:
-         "Request content with a simple prompt. Your autonomous agent then researches, writes, and edits a complete, on-brand article, optimized for SEO and engagement.",
+      title: t("pages.landing.howItWorks.steps.train.title"),
+      description: t("pages.landing.howItWorks.steps.train.description"),
    },
    {
       icon: Rocket,
-      title: "3. You Review, Approve & Publish",
-      description:
-         "Receive a ready-to-publish draft in your dashboard. Make final tweaks, approve with one click, and deploy your content anywhere using our developer-friendly SDK.",
+      title: t("pages.landing.howItWorks.steps.generate.title"),
+      description: t("pages.landing.howItWorks.steps.generate.description"),
    },
 ];
 ---
@@ -27,10 +33,10 @@ const steps = [
   <div class="mx-auto max-w-6xl px-6">
     <div class="mx-auto max-w-3xl text-center">
       <h2 class="text-balance text-3xl font-bold md:text-4xl">
-        Your Content Engine in 3 Simple Steps
+        {t("pages.landing.howItWorks.title")}
       </h2>
       <p class="text-muted-foreground mx-auto mt-4 max-w-2xl text-balance">
-        From raw knowledge to published content, our process is designed for maximum quality with minimum effort.
+        {t("pages.landing.howItWorks.subtitle")}
       </p>
     </div>
 

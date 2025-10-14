@@ -1,47 +1,51 @@
 ---
 import { AstroAccordion } from "../components/astro-accordion";
+import { useTranslations } from "../i18n/utils";
+import type { SupportedLng } from "@packages/localization";
+
+interface _Props {
+   lang?: SupportedLng;
+}
+
 interface FAQItem {
    id: string;
    question: string;
    answer: string;
 }
 
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
+
 const faqItems: FAQItem[] = [
    {
       id: "item-1",
-      question: "How does ContentaGen learn my brand voice?",
-      answer:
-         "Our system performs a deep analysis by crawling your website and any brand documents you provide. It identifies your unique tone, terminology, and stylistic patterns to build a 'Brand Brain' that guides all content creation, ensuring everything sounds authentically like you.",
+      question: t("pages.landing.faq.items.brandVoice.question"),
+      answer: t("pages.landing.faq.items.brandVoice.answer"),
    },
    {
       id: "item-2",
-      question: "What types of content can ContentaGen create?",
-      answer:
-         "Currently, our agents are optimized for creating structured Articles, in-depth Tutorials, interview-style Q&As, and product Changelogs. We are continuously expanding our content layout capabilities.",
+      question: t("pages.landing.faq.items.contentTypes.question"),
+      answer: t("pages.landing.faq.items.contentTypes.answer"),
    },
    {
       id: "item-3",
-      question: "How does the competitor intelligence work?",
-      answer:
-         "You provide the website URL of a competitor, and our system analyzes their site to extract their key product features and brand information. This allows you to track their strategy and identify market opportunities for your own content.",
+      question: t("pages.landing.faq.items.competitorIntelligence.question"),
+      answer: t("pages.landing.faq.items.competitorIntelligence.answer"),
    },
    {
       id: "item-4",
-      question: "Can I customize the AI agents for my specific industry?",
-      answer:
-         "Yes. The agent creation process is designed for deep customization. You define the agent's purpose, audience, voice, brand adherence, and more. This persona, combined with the knowledge from your website, tailors the agent to your industry.",
+      question: t("pages.landing.faq.items.customization.question"),
+      answer: t("pages.landing.faq.items.customization.answer"),
    },
    {
       id: "item-5",
-      question: "What happens if I exceed my usage credits?",
-      answer:
-         "On our paid plans, you can enable pay-as-you-go to continue generating content beyond your plan's included credits. The Free plan does not include additional usage, but you can upgrade at any time.",
+      question: t("pages.landing.faq.items.usageCredits.question"),
+      answer: t("pages.landing.faq.items.usageCredits.answer"),
    },
    {
       id: "item-6",
-      question: "Is this project open source?",
-      answer:
-         "Yes, ContentaGen is 100% open source under the Apache-2.0 license. You can view the code, contribute to its development, or self-host the entire platform for free, forever. We believe in transparency and community collaboration.",
+      question: t("pages.landing.faq.items.openSource.question"),
+      answer: t("pages.landing.faq.items.openSource.answer"),
    },
 ];
 ---
@@ -50,15 +54,15 @@ const faqItems: FAQItem[] = [
   <div class="mx-auto max-w-6xl px-6 my-auto">
     <div class="grid gap-8 md:grid-cols-5 md:gap-12">
       <div class="md:col-span-2">
-        <h2 class="text-foreground text-4xl font-semibold">FAQs</h2>
-        <p class="text-muted-foreground mt-4 text-balance text-lg">Your questions answered</p>
+        <h2 class="text-foreground text-4xl font-semibold">{t("pages.landing.faq.title")}</h2>
+        <p class="text-muted-foreground mt-4 text-balance text-lg">{t("pages.landing.faq.subtitle")}</p>
         <p class="text-muted-foreground mt-6 hidden md:block">
-          Can't find what you're looking for? Contact our{' '}
+          {t("pages.landing.faq.supportText")}{' '}
           <a
-            href="mailto:support@contentagen.com"
+            href="mailto:contentagen@tutamail.com"
             class="text-primary font-medium hover:underline"
           >
-            customer support team
+            {t("pages.landing.faq.supportLink")}
           </a>
         </p>
       </div>
@@ -68,12 +72,12 @@ const faqItems: FAQItem[] = [
       </div>
 
       <p class="text-muted-foreground mt-6 md:hidden">
-        Can't find what you're looking for? Contact our{' '}
+        {t("pages.landing.faq.supportText")}{' '}
         <a
           href="mailto:contentagen@tutamail.com"
           class="text-primary font-medium hover:underline"
         >
-          customer support team
+          {t("pages.landing.faq.supportLink")}
         </a>
       </p>
     </div>
