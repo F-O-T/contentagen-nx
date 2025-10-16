@@ -11,7 +11,7 @@ import {
 } from "@packages/ui/components/card";
 import { ScrollArea } from "@packages/ui/components/scroll-area";
 import { translate } from "@packages/localization";
-import { Bot, FileText, Lightbulb, Target } from "lucide-react";
+import { Bot, FileText } from "lucide-react";
 import { StatsCard } from "@packages/ui/components/stats-card";
 import { SquaredIconButton } from "@packages/ui/components/squared-icon-button";
 import { Link } from "@tanstack/react-router";

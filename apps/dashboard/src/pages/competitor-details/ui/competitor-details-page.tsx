@@ -53,6 +53,17 @@ export function CompetitorDetailsPage() {
       [competitor?.status], // updated from competitor?.analysisStatus to competitor?.status
    );
 
+   const findings = useMemo(() => {
+      if (!competitor?.findings?.insights && !competitor?.findings?.priorities) {
+         return { insights: [], priorities: [] };
+      }
+      const { insights, priorities } = competitor?.findings;
+
+      return {
+         insights: insights || [],
+         priorities: priorities || [],
+      };
+   }, [competitor?.findings]); // corrected dependency to use competitor?.findings
    useSubscription(
       trpc.competitor.onStatusChange.subscriptionOptions(
          {
@@ -116,7 +127,7 @@ export function CompetitorDetailsPage() {
                                        <CardAction>
                                           <Badge>
                                              {
-                                                competitor.findings.insights
+                                                findings?.insights
                                                    .length
                                              }
                                           </Badge>
@@ -124,10 +135,10 @@ export function CompetitorDetailsPage() {
                                     </CardHeader>
                                     <CardContent>
                                        <ScrollArea className="h-54">
-                                          {competitor.findings.insights.length >
-                                          0 ? (
+                                          {findings.insights
+                                             .length > 0 ? (
                                              <div className="space-y-3 pr-4">
-                                                {competitor.findings.insights.map(
+                                                {findings?.insights.map(
                                                    (insight, index) => (
                                                       <Card
                                                          key={`insight-${index + 1}`}
@@ -162,18 +173,18 @@ export function CompetitorDetailsPage() {
                                        <CardAction>
                                           <Badge>
                                              {
-                                                competitor.findings.priorities
-                                                   .length
+                                                findings?.priorities
+                                                   ?.length
                                              }
                                           </Badge>
                                        </CardAction>
                                     </CardHeader>
                                     <CardContent>
                                        <ScrollArea className="h-54">
-                                          {competitor?.findings?.priorities
-                                             .length > 0 ? (
+                                          {findings?.priorities
+                                             ?.length > 0 ? (
                                              <div className="space-y-3 pr-4">
-                                                {competitor?.findings?.priorities.map(
+                                                {findings?.priorities.map(
                                                    (priority, index) => (
                                                       <Card
                                                          key={`priority-${index + 1}`}
@@ -199,9 +210,9 @@ export function CompetitorDetailsPage() {
                                  </Card>
                               </div>
 
-                              {competitor.findings.insights.length === 0 &&
-                                 competitor.findings.priorities.length ===
-                                    0 && (
+                              {findings?.insights.length === 0 &&
+                                 findings?.priorities.length ===
+                                 0 && (
                                     <div className="text-center py-8 mt-4">
                                        <p className="text-sm text-muted-foreground">
                                           No insights available. Please add
