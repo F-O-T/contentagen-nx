@@ -188,12 +188,12 @@ export const sdkRoutes = new Elysia({
    .get(
       "/content/:agentId",
       async ({ params, query }) => {
-         const { agentIds } = params;
+         const { agentId } = params;
          const limit = parseInt(query.limit || "10", 10);
          const page = parseInt(query.page || "1", 10);
          const status = query.status;
 
-         const all = await listContents(db, agentIds, status);
+         const all = await listContents(db, [agentId], status);
          const start = (page - 1) * limit;
          const end = start + limit;
          const posts = all.slice(start, end);
@@ -234,7 +234,7 @@ export const sdkRoutes = new Elysia({
          sdkAuth: true,
 
          params: t.Object({
-            agentIds: t.Array(t.String()),
+            agentId: t.String(),
          }),
          query: t.Object({
             limit: t.Optional(t.String()),
