@@ -1,4 +1,6 @@
 import { TalkingMascot } from "@/widgets/talking-mascot/ui/talking-mascot";
+import { Badge } from "@packages/ui/components/badge";
+import { ScrollArea } from "@packages/ui/components/scroll-area";
 import { translate } from "@packages/localization";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,6 +20,7 @@ import {
    CardDescription,
    CardHeader,
    CardTitle,
+   CardAction,
 } from "@packages/ui/components/card";
 import { Markdown } from "@packages/ui/components/markdown";
 import { CompetitorFeaturesCard } from "./competitor-features-card";
@@ -93,6 +96,122 @@ export function CompetitorDetailsPage() {
                         <CompetitorStatsCard />
 
                         <CompetitorFeaturesCard competitorId={competitor.id} />
+                        <Card>
+                           <CardHeader>
+                              <CardTitle>Competitor Insights</CardTitle>
+                              <CardDescription>
+                                 Key insights and priorities from your
+                                 competitor analysis.
+                              </CardDescription>
+                           </CardHeader>
+                           <CardContent>
+                              <div className="grid md:grid-cols-2 gap-4">
+                                 <Card>
+                                    <CardHeader>
+                                       <CardTitle>Key Insights</CardTitle>
+                                       <CardDescription>
+                                          Important discoveries and patterns
+                                          from competitor analysis
+                                       </CardDescription>
+                                       <CardAction>
+                                          <Badge>
+                                             {
+                                                competitor.findings.insights
+                                                   .length
+                                             }
+                                          </Badge>
+                                       </CardAction>
+                                    </CardHeader>
+                                    <CardContent>
+                                       <ScrollArea className="h-54">
+                                          {competitor.findings.insights.length >
+                                          0 ? (
+                                             <div className="space-y-3 pr-4">
+                                                {competitor.findings.insights.map(
+                                                   (insight, index) => (
+                                                      <Card
+                                                         key={`insight-${index + 1}`}
+                                                      >
+                                                         <CardContent>
+                                                            <Markdown
+                                                               content={insight}
+                                                            />
+                                                         </CardContent>
+                                                      </Card>
+                                                   ),
+                                                )}
+                                             </div>
+                                          ) : (
+                                             <p className="text-sm text-gray-500 italic">
+                                                No insights available
+                                             </p>
+                                          )}
+                                       </ScrollArea>
+                                    </CardContent>
+                                 </Card>
+
+                                 <Card>
+                                    <CardHeader>
+                                       <CardTitle>
+                                          Recommended Priorities
+                                       </CardTitle>
+                                       <CardDescription>
+                                          Action items and strategic
+                                          recommendations based on findings
+                                       </CardDescription>
+                                       <CardAction>
+                                          <Badge>
+                                             {
+                                                competitor.findings.priorities
+                                                   .length
+                                             }
+                                          </Badge>
+                                       </CardAction>
+                                    </CardHeader>
+                                    <CardContent>
+                                       <ScrollArea className="h-54">
+                                          {competitor?.findings?.priorities
+                                             .length > 0 ? (
+                                             <div className="space-y-3 pr-4">
+                                                {competitor?.findings?.priorities.map(
+                                                   (priority, index) => (
+                                                      <Card
+                                                         key={`priority-${index + 1}`}
+                                                      >
+                                                         <CardContent>
+                                                            <Markdown
+                                                               content={
+                                                                  priority
+                                                               }
+                                                            />
+                                                         </CardContent>
+                                                      </Card>
+                                                   ),
+                                                )}
+                                             </div>
+                                          ) : (
+                                             <p className="text-sm text-gray-500 italic">
+                                                No priorities available
+                                             </p>
+                                          )}
+                                       </ScrollArea>
+                                    </CardContent>
+                                 </Card>
+                              </div>
+
+                              {competitor.findings.insights.length === 0 &&
+                                 competitor.findings.priorities.length ===
+                                    0 && (
+                                    <div className="text-center py-8 mt-4">
+                                       <p className="text-sm text-muted-foreground">
+                                          No insights available. Please add
+                                          competitors and generate findings to
+                                          get insights.
+                                       </p>
+                                    </div>
+                                 )}
+                           </CardContent>
+                        </Card>
                      </div>
 
                      <div className="col-span-1 gap-4 flex flex-col">
