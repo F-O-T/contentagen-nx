@@ -19,7 +19,7 @@
     },
     "apps/blog": {
       "name": "blog",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@astrojs/check": "catalog:astro",
         "@astrojs/mdx": "catalog:astro",
@@ -28,7 +28,7 @@
         "@astrojs/rss": "catalog:astro",
         "@astrojs/sitemap": "catalog:astro",
         "@astrojs/ts-plugin": "catalog:astro",
-        "@contentagen/sdk": "0.11.0",
+        "@contentagen/sdk": "0.15.6",
         "@lucide/astro": "catalog:astro",
         "@packages/environment": "workspace:*",
         "@packages/posthog": "workspace:*",
@@ -48,7 +48,7 @@
     },
     "apps/dashboard": {
       "name": "dashboard",
-      "version": "0.12.0",
+      "version": "0.13.0",
       "dependencies": {
         "@packages/api": "workspace:*",
         "@packages/authentication": "workspace:*",
@@ -93,7 +93,7 @@
     },
     "apps/docs": {
       "name": "docs",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@astrojs/check": "catalog:astro",
         "@astrojs/mdx": "catalog:astro",
@@ -113,7 +113,7 @@
     },
     "apps/landing-page": {
       "name": "landing-page",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@astrojs/check": "catalog:astro",
         "@astrojs/node": "catalog:astro",
@@ -141,7 +141,7 @@
     },
     "apps/server": {
       "name": "server",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@bull-board/api": "6.13.0",
         "@bull-board/elysia": "6.13.0",
@@ -169,7 +169,7 @@
     },
     "packages/agents": {
       "name": "@packages/agents",
-      "version": "0.25.1",
+      "version": "0.26.0",
       "dependencies": {
         "@mastra/core": "^0.21.0",
         "@mastra/libsql": "^0.15.2",
@@ -198,7 +198,7 @@
     },
     "packages/api": {
       "name": "@packages/api",
-      "version": "0.9.1",
+      "version": "0.10.0",
       "dependencies": {
         "@packages/agents": "workspace:*",
         "@packages/authentication": "workspace:*",
@@ -227,7 +227,7 @@
     },
     "packages/authentication": {
       "name": "@packages/authentication",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@packages/database": "workspace:*",
         "@packages/environment": "workspace:*",
@@ -243,11 +243,11 @@
     },
     "packages/brand": {
       "name": "@packages/brand",
-      "version": "0.6.0",
+      "version": "0.7.0",
     },
     "packages/database": {
       "name": "@packages/database",
-      "version": "0.10.0",
+      "version": "0.11.0",
       "dependencies": {
         "@packages/utils": "workspace:*",
         "drizzle-orm": "catalog:database",
@@ -266,7 +266,7 @@
     },
     "packages/environment": {
       "name": "@packages/environment",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@packages/utils": "workspace:*",
         "zod": "catalog:validation",
@@ -280,7 +280,7 @@
     },
     "packages/files": {
       "name": "@packages/files",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@packages/environment": "workspace:*",
         "fflate": "catalog:files",
@@ -294,7 +294,7 @@
     },
     "packages/localization": {
       "name": "@packages/localization",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "i18next": "^25.5.2",
         "i18next-browser-languagedetector": "^8.2.0",
@@ -308,7 +308,7 @@
     },
     "packages/payment": {
       "name": "@packages/payment",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@packages/environment": "workspace:*",
         "@packages/utils": "workspace:*",
@@ -321,7 +321,7 @@
     },
     "packages/posthog": {
       "name": "@packages/posthog",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@packages/environment": "workspace:*",
         "posthog-js": "^1.259.0",
@@ -334,7 +334,7 @@
     },
     "packages/rag": {
       "name": "@packages/rag",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@packages/environment": "workspace:*",
         "@packages/utils": "workspace:*",
@@ -355,7 +355,7 @@
     },
     "packages/server-events": {
       "name": "@packages/server-events",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "devDependencies": {
         "@tooling/typescript": "workspace:*",
         "typescript": "catalog:development",
@@ -363,7 +363,7 @@
     },
     "packages/transactional": {
       "name": "@packages/transactional",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@packages/brand": "workspace:*",
         "@packages/utils": "workspace:*",
@@ -380,7 +380,7 @@
     },
     "packages/ui": {
       "name": "@packages/ui",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@packages/utils": "workspace:*",
         "@radix-ui/react-accordion": "^1.2.11",
@@ -437,7 +437,7 @@
     },
     "packages/utils": {
       "name": "@packages/utils",
-      "version": "0.22.0",
+      "version": "0.23.0",
       "dependencies": {
         "@trpc/server": "catalog:trpc",
         "slugify": "^1.6.6",
@@ -450,7 +450,7 @@
     },
     "packages/workers": {
       "name": "@packages/workers",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "dependencies": {
         "@packages/agents": "workspace:*",
         "@packages/database": "workspace:*",
@@ -913,7 +913,7 @@
 
     "@commitlint/types": ["@commitlint/types@20.0.0", "", { "dependencies": { "@types/conventional-commits-parser": "^5.0.0", "chalk": "^5.3.0" } }, "sha512-bVUNBqG6aznYcYjTjnc3+Cat/iBgbgpflxbIBTnsHTX0YVpnmINPEkSRWymT2Q8aSH3Y7aKnEbunilkYe8TybA=="],
 
-    "@contentagen/sdk": ["@contentagen/sdk@0.11.0", "", { "dependencies": { "superjson": "2.2.2", "zod": "4.0.14" } }, "sha512-lH8xy1BJJErX9fuNUUoWn4NXW0DhOD4C/18QLms0yYHykbtiQhH9hiXhrIzdhXbdP299Lx0czG3vhePMNaVx2Q=="],
+    "@contentagen/sdk": ["@contentagen/sdk@0.15.6", "", { "dependencies": { "superjson": "2.2.2", "zod": "4.0.14" } }, "sha512-S8A6Gc776rOuk3T1vhzkH+OSdyZpFjk820LA6N1oizoxYORmwE5XM8T1/QWqjrbLmjUL2VLmDF7G+QZUyd2nGA=="],
 
     "@ctrl/tinycolor": ["@ctrl/tinycolor@4.2.0", "", {}, "sha512-kzyuwOAQnXJNLS9PSyrk0CWk35nWJW/zl/6KvnTBMFK65gm7U1/Z5BqjxeapjZCIhQcM/DsrEmcbRwDyXyXK4A=="],
 
