@@ -1,39 +1,39 @@
 {
-   "dependencies": {
-      "@bull-board/api": "6.13.0",
-      "@bull-board/elysia": "6.13.0",
-      "@elysiajs/cors": "catalog:server",
-      "@packages/api": "workspace:*",
-      "@packages/authentication": "workspace:*",
-      "@packages/database": "workspace:*",
-      "@packages/environment": "workspace:*",
-      "@packages/files": "workspace:*",
-      "@packages/payment": "workspace:*",
-      "@packages/agents": "workspace:*",
-      "@packages/posthog": "workspace:*",
-      "@packages/rag": "workspace:*",
-      "@packages/transactional": "workspace:*",
-      "@packages/utils": "workspace:*",
-      "@packages/workers": "workspace:*",
-      "@trpc/server": "catalog:trpc",
-      "elysia": "catalog:server"
-   },
-   "devDependencies": {
-      "@tooling/typescript": "workspace:*",
-      "@types/bun": "latest",
-      "typescript": "catalog:development"
-   },
-   "name": "server",
-   "license": "Apache-2.0",
-   "scripts": {
-      "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile server ./src/index.ts",
-      "check": "bunx --bun biome check --write .",
-      "deploy": "wrangler deploy",
-      "container-start": "podman-compose down && podman-compose up -d",
-      "dev": "bun run container-start && bun run --watch src/index.ts",
-      "format": "biome format",
-      "start": "./server",
-      "typecheck": "bunx --bun tsc  "
-   },
-   "version": "0.6.0"
+  "dependencies": {
+    "@bull-board/api": "6.13.0",
+    "@bull-board/elysia": "6.13.0",
+    "@elysiajs/cors": "catalog:server",
+    "@packages/api": "workspace:*",
+    "@packages/authentication": "workspace:*",
+    "@packages/database": "workspace:*",
+    "@packages/environment": "workspace:*",
+    "@packages/files": "workspace:*",
+    "@packages/payment": "workspace:*",
+    "@packages/agents": "workspace:*",
+    "@packages/posthog": "workspace:*",
+    "@packages/rag": "workspace:*",
+    "@packages/transactional": "workspace:*",
+    "@packages/utils": "workspace:*",
+    "@packages/workers": "workspace:*",
+    "@trpc/server": "catalog:trpc",
+    "elysia": "catalog:server"
+  },
+  "devDependencies": {
+    "@tooling/typescript": "workspace:*",
+    "@types/bun": "latest",
+    "typescript": "catalog:development"
+  },
+  "name": "server",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile server ./src/index.ts",
+    "check": "bunx --bun biome check --write .",
+    "deploy": "wrangler deploy",
+    "container-start": "podman-compose down && podman-compose up -d",
+    "dev": "bun run container-start && bun run --watch src/index.ts",
+    "format": "biome format",
+    "start": "./server",
+    "typecheck": "bunx --bun tsc  "
+  },
+  "version": "0.7.0"
 }

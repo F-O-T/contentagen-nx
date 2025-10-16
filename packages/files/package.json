@@ -1,36 +1,36 @@
 {
-   "devDependencies": {
-      "@tooling/typescript": "workspace:*",
-      "typescript": "catalog:development"
-   },
-   "license": "Apache-2.0",
-   "name": "@packages/files",
-   "scripts": {
-      "build": "tsc",
-      "check": "biome check --write ./src",
-      "typecheck": "bunx --bun tsc  "
-   },
-   "private": true,
-   "type": "module",
-   "exports": {
-      "./client": {
-         "types": "./dist/src/client.d.ts",
-         "default": "./src/client.ts"
-      },
-      "./image-helper": {
-         "types": "./dist/src/image-helpers.d.ts",
-         "default": "./src/image-helpers.ts"
-      },
-      "./text-file-helper": {
-         "types": "./dist/src/text-file-helpers.d.ts",
-         "default": "./src/text-file-helpers.ts"
-      }
-   },
-   "version": "0.6.0",
-   "dependencies": {
-      "@packages/environment": "workspace:*",
-      "fflate": "catalog:files",
-      "minio": "catalog:files",
-      "sharp": "catalog:files"
-   }
+  "devDependencies": {
+    "@tooling/typescript": "workspace:*",
+    "typescript": "catalog:development"
+  },
+  "license": "Apache-2.0",
+  "name": "@packages/files",
+  "scripts": {
+    "build": "tsc",
+    "check": "biome check --write ./src",
+    "typecheck": "bunx --bun tsc  "
+  },
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./client": {
+      "types": "./dist/src/client.d.ts",
+      "default": "./src/client.ts"
+    },
+    "./image-helper": {
+      "types": "./dist/src/image-helpers.d.ts",
+      "default": "./src/image-helpers.ts"
+    },
+    "./text-file-helper": {
+      "types": "./dist/src/text-file-helpers.d.ts",
+      "default": "./src/text-file-helpers.ts"
+    }
+  },
+  "version": "0.7.0",
+  "dependencies": {
+    "@packages/environment": "workspace:*",
+    "fflate": "catalog:files",
+    "minio": "catalog:files",
+    "sharp": "catalog:files"
+  }
 }

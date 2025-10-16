@@ -1,22 +1,22 @@
 {
-   "devDependencies": {
-      "@tooling/typescript": "workspace:*",
-      "typescript": "catalog:development"
-   },
-   "license": "Apache-2.0",
-   "name": "@packages/server-events",
-   "scripts": {
-      "build": "tsc",
-      "check": "biome check --write ./src",
-      "typecheck": "bunx --bun tsc  "
-   },
-   "private": true,
-   "type": "module",
-   "exports": {
-      ".": {
-         "types": "./dist/src/index.d.ts",
-         "default": "./src/index.ts"
-      }
-   },
-   "version": "0.6.0"
+  "devDependencies": {
+    "@tooling/typescript": "workspace:*",
+    "typescript": "catalog:development"
+  },
+  "license": "Apache-2.0",
+  "name": "@packages/server-events",
+  "scripts": {
+    "build": "tsc",
+    "check": "biome check --write ./src",
+    "typecheck": "bunx --bun tsc  "
+  },
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "version": "0.7.0"
 }

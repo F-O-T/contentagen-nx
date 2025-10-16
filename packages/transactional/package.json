@@ -1,31 +1,31 @@
 {
-   "devDependencies": {
-      "@tooling/typescript": "workspace:*",
-      "react-email": "catalog:transactional",
-      "typescript": "catalog:development"
-   },
-   "license": "Apache-2.0",
-   "name": "@packages/transactional",
-   "scripts": {
-      "build": "tsc",
-      "check": "biome check --write ./src",
-      "typecheck": "bunx --bun tsc "
-   },
-   "private": true,
-   "type": "module",
-   "exports": {
-      "./client": {
-         "types": "./dist/src/client.d.ts",
-         "default": "./src/client.tsx"
-      }
-   },
-   "version": "0.6.0",
-   "dependencies": {
-      "react": "catalog:react",
-      "react-dom": "catalog:react",
-      "resend": "catalog:transactional",
-      "@react-email/components": "catalog:transactional",
-      "@packages/brand": "workspace:*",
-      "@packages/utils": "workspace:*"
-   }
+  "devDependencies": {
+    "@tooling/typescript": "workspace:*",
+    "react-email": "catalog:transactional",
+    "typescript": "catalog:development"
+  },
+  "license": "Apache-2.0",
+  "name": "@packages/transactional",
+  "scripts": {
+    "build": "tsc",
+    "check": "biome check --write ./src",
+    "typecheck": "bunx --bun tsc "
+  },
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./client": {
+      "types": "./dist/src/client.d.ts",
+      "default": "./src/client.tsx"
+    }
+  },
+  "version": "0.7.0",
+  "dependencies": {
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "resend": "catalog:transactional",
+    "@react-email/components": "catalog:transactional",
+    "@packages/brand": "workspace:*",
+    "@packages/utils": "workspace:*"
+  }
 }
