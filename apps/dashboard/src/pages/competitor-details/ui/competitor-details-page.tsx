@@ -54,10 +54,13 @@ export function CompetitorDetailsPage() {
    );
 
    const findings = useMemo(() => {
-      if (!competitor?.findings?.insights && !competitor?.findings?.priorities) {
+      if (
+         !competitor?.findings?.insights &&
+         !competitor?.findings?.priorities
+      ) {
          return { insights: [], priorities: [] };
       }
-      const { insights, priorities } = competitor?.findings;
+      const { insights, priorities } = competitor.findings;
 
       return {
          insights: insights || [],
@@ -126,17 +129,13 @@ export function CompetitorDetailsPage() {
                                        </CardDescription>
                                        <CardAction>
                                           <Badge>
-                                             {
-                                                findings?.insights
-                                                   .length
-                                             }
+                                             {findings?.insights.length}
                                           </Badge>
                                        </CardAction>
                                     </CardHeader>
                                     <CardContent>
                                        <ScrollArea className="h-54">
-                                          {findings.insights
-                                             .length > 0 ? (
+                                          {findings.insights.length > 0 ? (
                                              <div className="space-y-3 pr-4">
                                                 {findings?.insights.map(
                                                    (insight, index) => (
@@ -172,17 +171,13 @@ export function CompetitorDetailsPage() {
                                        </CardDescription>
                                        <CardAction>
                                           <Badge>
-                                             {
-                                                findings?.priorities
-                                                   ?.length
-                                             }
+                                             {findings?.priorities?.length}
                                           </Badge>
                                        </CardAction>
                                     </CardHeader>
                                     <CardContent>
                                        <ScrollArea className="h-54">
-                                          {findings?.priorities
-                                             ?.length > 0 ? (
+                                          {findings?.priorities?.length > 0 ? (
                                              <div className="space-y-3 pr-4">
                                                 {findings?.priorities.map(
                                                    (priority, index) => (
@@ -211,8 +206,7 @@ export function CompetitorDetailsPage() {
                               </div>
 
                               {findings?.insights.length === 0 &&
-                                 findings?.priorities.length ===
-                                 0 && (
+                                 findings?.priorities.length === 0 && (
                                     <div className="text-center py-8 mt-4">
                                        <p className="text-sm text-muted-foreground">
                                           No insights available. Please add
