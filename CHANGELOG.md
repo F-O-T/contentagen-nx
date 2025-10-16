@@ -1,3 +1,29 @@
+## 0.26.0 (2025-10-16)
+
+### 🚀 Features
+
+- **agents:** implement competitor insights generation and replace summary workflow ([83c90976](https://github.com/F-O-T/contentagen-nx/commit/83c90976))
+
+### 🩹 Fixes
+
+- **chore:** update package dependencies and versions across multiple packages ([adf01381](https://github.com/F-O-T/contentagen-nx/commit/adf01381))
+- **agents:** update runtime context to use brandId ([13b4749f](https://github.com/F-O-T/contentagen-nx/commit/13b4749f))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/server-events to 0.7.0
+- Updated @packages/localization to 0.7.0
+- Updated @packages/environment to 0.7.0
+- Updated @packages/database to 0.11.0
+- Updated @packages/payment to 0.7.0
+- Updated @packages/files to 0.7.0
+- Updated @packages/utils to 0.23.0
+- Updated @packages/rag to 0.7.0
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.25.1 (2025-10-15)
 
 ### 🩹 Fixes
