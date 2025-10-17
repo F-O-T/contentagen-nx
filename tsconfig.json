@@ -26,9 +26,6 @@
          "path": "./packages/files"
       },
       {
-         "path": "./packages/utils"
-      },
-      {
          "path": "./packages/api"
       },
       {

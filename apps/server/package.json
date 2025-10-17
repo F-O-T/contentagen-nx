@@ -9,6 +9,7 @@
     "@packages/environment": "workspace:*",
     "@packages/files": "workspace:*",
     "@packages/payment": "workspace:*",
+    "@packages/agents": "workspace:*",
     "@packages/posthog": "workspace:*",
     "@packages/rag": "workspace:*",
     "@packages/transactional": "workspace:*",
@@ -34,5 +35,5 @@
     "start": "./server",
     "typecheck": "bunx --bun tsc  "
   },
-  "version": "0.6.0"
+  "version": "0.7.0"
 }

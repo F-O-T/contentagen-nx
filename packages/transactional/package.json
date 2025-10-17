@@ -19,7 +19,7 @@
       "default": "./src/client.tsx"
     }
   },
-  "version": "0.6.0",
+  "version": "0.7.0",
   "dependencies": {
     "react": "catalog:react",
     "react-dom": "catalog:react",

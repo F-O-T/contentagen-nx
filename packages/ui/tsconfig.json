@@ -5,7 +5,6 @@
       "paths": {
          "@packages/ui/*": ["./src/*"]
       },
-      "lib": ["ES2022", "dom", "dom.iterable"],
       "jsx": "preserve"
    },
    "include": ["src"],

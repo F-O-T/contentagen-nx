@@ -1,6 +1,6 @@
 {
   "name": "@packages/api",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "license": "Apache-2.0",
   "private": true,
   "type": "module",
@@ -20,6 +20,7 @@
     "typecheck": "tsc "
   },
   "dependencies": {
+    "@polar-sh/sdk": "catalog:payment",
     "@packages/localization": "workspace:*",
     "@packages/server-events": "workspace:*",
     "@packages/workers": "workspace:*",
@@ -27,6 +28,10 @@
     "@packages/database": "workspace:*",
     "@packages/files": "workspace:*",
     "@packages/rag": "workspace:*",
+    "@packages/posthog": "workspace:*",
+    "@packages/payment": "workspace:*",
+    "@packages/utils": "workspace:*",
+    "@packages/agents": "workspace:*",
     "@trpc/client": "catalog:trpc",
     "@trpc/server": "catalog:trpc",
     "superjson": "catalog:trpc",

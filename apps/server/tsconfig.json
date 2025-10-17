@@ -21,7 +21,13 @@
          "path": "../../packages/transactional"
       },
       {
+         "path": "../../packages/rag"
+      },
+      {
          "path": "../../packages/posthog"
+      },
+      {
+         "path": "../../packages/agents"
       },
       {
          "path": "../../packages/payment"
@@ -31,9 +37,6 @@
       },
       {
          "path": "../../packages/environment"
-      },
-      {
-         "path": "../../packages/rag"
       },
       {
          "path": "../../packages/database"

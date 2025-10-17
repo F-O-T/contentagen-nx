@@ -13,7 +13,7 @@ import { auth } from "@api/integrations/auth";
 import { db, ragClient } from "@api/integrations/database";
 import { serverEnv as env } from "@packages/environment/server";
 import { minioClient } from "@api/integrations/minio";
-import { listBrands } from "@packages/database/repositories/brand-repository";
+import { getBrandByOrgId } from "@packages/database/repositories/brand-repository";
 import type { SupportedLng } from "@packages/localization";
 const minioBucket = env.MINIO_BUCKET;
 
@@ -124,7 +124,7 @@ export const sdkRoutes = new Elysia({
 
    .get(
       "/assistant",
-      async function* ({ query, request }) {
+      async ({ query, request }) => {
          const language = request.headers.get("x-locale");
          if (!language) {
             throw new Error("Language header is required.");
@@ -137,9 +137,23 @@ export const sdkRoutes = new Elysia({
          if (!agent) {
             throw new Error("Agent not found.");
          }
-         const brand = await listBrands(db, {
-            organizationId: agent.organizationId ?? "",
-         }).then((brands) => brands[0]);
+
+         let brand: Awaited<ReturnType<typeof getBrandByOrgId>> | null = null;
+         if (agent.organizationId) {
+            try {
+               brand = await getBrandByOrgId(db, agent.organizationId);
+            } catch (err) {
+               if (
+                  !(
+                     err instanceof Error &&
+                     err.message.includes("Brand not found")
+                  )
+               ) {
+                  throw err;
+               }
+            }
+         }
+
          const runtimeContext = setRuntimeContext({
             userId: agent.userId,
             language: language as SupportedLng,
@@ -173,12 +187,12 @@ export const sdkRoutes = new Elysia({
    .get(
       "/content/:agentId",
       async ({ params, query }) => {
-         const { agentIds } = params;
+         const { agentId } = params;
          const limit = parseInt(query.limit || "10", 10);
          const page = parseInt(query.page || "1", 10);
          const status = query.status;
 
-         const all = await listContents(db, agentIds, status);
+         const all = await listContents(db, [agentId], status);
          const start = (page - 1) * limit;
          const end = start + limit;
          const posts = all.slice(start, end);
@@ -219,7 +233,7 @@ export const sdkRoutes = new Elysia({
          sdkAuth: true,
 
          params: t.Object({
-            agentIds: t.Array(t.String()),
+            agentId: t.String(),
          }),
          query: t.Object({
             limit: t.Optional(t.String()),

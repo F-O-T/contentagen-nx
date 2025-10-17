@@ -4,12 +4,6 @@
    "exclude": ["node_modules"],
    "references": [
       {
-         "path": "../utils"
-      },
-      {
-         "path": "../payment"
-      },
-      {
          "path": "../server-events"
       },
       {
@@ -20,6 +14,9 @@
       },
       {
          "path": "../rag"
+      },
+      {
+         "path": "../payment"
       },
       {
          "path": "../environment"

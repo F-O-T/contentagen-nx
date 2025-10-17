@@ -22,7 +22,7 @@
       "default": "./src/server.ts"
     }
   },
-  "version": "0.6.0",
+  "version": "0.7.0",
   "dependencies": {
     "@packages/environment": "workspace:*",
     "posthog-js": "^1.259.0",

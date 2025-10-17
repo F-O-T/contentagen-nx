@@ -4,6 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./src/index.ts"
+    },
     "./client": {
       "types": "./dist/src/client.d.ts",
       "default": "./src/client.ts"
@@ -41,7 +45,8 @@
     "drizzle-orm": "catalog:database",
     "drizzle-zod": "catalog:database",
     "zod": "catalog:validation",
-    "pg": "catalog:database"
+    "pg": "catalog:database",
+    "@packages/utils": "workspace:*"
   },
   "devDependencies": {
     "@tooling/typescript": "workspace:*",
@@ -51,5 +56,5 @@
     "shx": "catalog:enviroment",
     "typescript": "catalog:development"
   },
-  "version": "0.10.0"
+  "version": "0.11.0"
 }

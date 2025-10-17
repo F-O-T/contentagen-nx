@@ -6,7 +6,7 @@ import {
    type SendEmailOTPOptions,
 } from "@packages/transactional/client";
 import { serverEnv } from "@packages/environment/server";
-import type { Polar } from "@polar-sh/sdk";
+import type { PaymentClient } from "@packages/payment/client";
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 import {
    emailOTP,
@@ -23,7 +23,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { getCustomerState } from "@packages/payment/ingestion";
 export interface AuthOptions {
    db: DatabaseInstance;
-   polarClient: Polar;
+   polarClient: PaymentClient;
    resendClient: ResendClient;
 }
 
@@ -37,7 +37,7 @@ export interface AuthPluginOptions {
 export const getAuthOptions = (
    db: DatabaseInstance,
    resendClient: ResendClient,
-   polarClient: Polar,
+   polarClient: PaymentClient,
 ) =>
    ({
       database: drizzleAdapter(db, {

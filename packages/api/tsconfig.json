@@ -9,10 +9,13 @@
    },
    "references": [
       {
+         "path": "../agents"
+      },
+      {
          "path": "../payment"
       },
       {
-         "path": "../utils"
+         "path": "../posthog"
       },
       {
          "path": "../rag"
