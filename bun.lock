@@ -437,6 +437,7 @@
       "devDependencies": {
         "@tooling/typescript": "workspace:*",
         "typescript": "catalog:development",
+        "vitest": "catalog:testing",
       },
     },
     "packages/workers": {

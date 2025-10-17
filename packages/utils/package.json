@@ -6,14 +6,16 @@
   },
   "devDependencies": {
     "@tooling/typescript": "workspace:*",
-    "typescript": "catalog:development"
+    "typescript": "catalog:development",
+    "vitest": "catalog:testing"
   },
   "license": "Apache-2.0",
   "name": "@packages/utils",
   "scripts": {
     "build": "tsc",
     "check": "biome check --write ./src",
-    "typecheck": "bunx --bun tsc  "
+    "typecheck": "bunx --bun tsc  ",
+    "test": "bun test"
   },
   "private": true,
   "type": "module",
