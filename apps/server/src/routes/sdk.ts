@@ -12,7 +12,6 @@ import { searchRelatedSlugsByText } from "@packages/rag/repositories/related-slu
 import { auth } from "@api/integrations/auth";
 import { db, ragClient } from "@api/integrations/database";
 import { serverEnv as env } from "@packages/environment/server";
-
 import { minioClient } from "@api/integrations/minio";
 import { listBrands } from "@packages/database/repositories/brand-repository";
 import type { SupportedLng } from "@packages/localization";
