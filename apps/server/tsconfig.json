@@ -15,7 +15,13 @@
    "extends": "@tooling/typescript/base.json",
    "references": [
       {
+         "path": "../../packages/localization"
+      },
+      {
          "path": "../../packages/workers"
+      },
+      {
+         "path": "../../packages/utils"
       },
       {
          "path": "../../packages/transactional"
@@ -40,6 +46,9 @@
       },
       {
          "path": "../../packages/database"
+      },
+      {
+         "path": "../../packages/authentication"
       },
       {
          "path": "../../packages/api"
