@@ -71,7 +71,7 @@ export const contentRouter = router({
                userId: agent.userId,
                organizationId,
             });
-           const brand = await getBrandByOrgId(db, organizationId);
+            const brand = await getBrandByOrgId(db, organizationId);
             await updateContent(db, input.id, { status: "pending" });
             await enqueueCreateNewContentWorkflowJob({
                agentId: content.agentId,
