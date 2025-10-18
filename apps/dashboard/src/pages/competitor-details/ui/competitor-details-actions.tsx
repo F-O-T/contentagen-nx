@@ -6,7 +6,14 @@ import {
    CardDescription,
 } from "@packages/ui/components/card";
 import { Button } from "@packages/ui/components/button";
-import { ExternalLink, RefreshCw, Edit, Trash, Upload, Brain } from "lucide-react";
+import {
+   ExternalLink,
+   RefreshCw,
+   Edit,
+   Trash,
+   Upload,
+   Brain,
+} from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/integrations/clients";
 import { createToast } from "@/features/error-modal/lib/create-toast";
