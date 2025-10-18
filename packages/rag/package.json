@@ -1,52 +1,52 @@
 {
-  "name": "@packages/rag",
-  "license": "Apache-2.0",
-  "private": true,
-  "type": "module",
-  "exports": {
-    "./client": {
-      "types": "./dist/src/client.d.ts",
-      "default": "./src/client.ts"
-    },
-    "./schemas/*": {
-      "types": "./dist/src/schemas/*.d.ts",
-      "default": "./src/schemas/*.ts"
-    },
-    "./repositories/*": {
-      "types": "./dist/src/repositories/*.d.ts",
-      "default": "./src/repositories/*.ts"
-    }
-  },
-  "scripts": {
-    "db:studio": "dotenv -e .env.local drizzle-kit studio",
-    "db:push": "dotenv -e .env.local drizzle-kit push",
-    "env:copy-example": "shx -- cp -n .env.example .env",
-    "env:remove": "shx -- rm -f .env",
-    "env:run": "dotenv -e .env.local --",
-    "check": "biome check --write ./src",
-    "push": "bun run env:run drizzle-kit push",
-    "migrate": "bun run env:run drizzle-kit migrate",
-    "generate": "bun run env:run drizzle-kit generate",
-    "studio": "bun run env:run drizzle-kit studio",
-    "typecheck": "tsc ",
-    "build": "tsc"
-  },
-  "dependencies": {
-    "@packages/utils": "workspace:*",
-    "@packages/environment": "workspace:*",
-    "drizzle-orm": "catalog:database",
-    "drizzle-zod": "catalog:database",
-    "openai": "^5.23.0",
-    "pg": "catalog:database",
-    "zod": "catalog:validation"
-  },
-  "devDependencies": {
-    "@tooling/typescript": "workspace:*",
-    "@types/pg": "catalog:database",
-    "dotenv-cli": "catalog:enviroment",
-    "drizzle-kit": "catalog:database",
-    "shx": "catalog:enviroment",
-    "typescript": "catalog:development"
-  },
-  "version": "0.7.0"
+   "name": "@packages/rag",
+   "license": "Apache-2.0",
+   "private": true,
+   "type": "module",
+   "exports": {
+      "./client": {
+         "types": "./dist/src/client.d.ts",
+         "default": "./src/client.ts"
+      },
+      "./schemas/*": {
+         "types": "./dist/src/schemas/*.d.ts",
+         "default": "./src/schemas/*.ts"
+      },
+      "./repositories/*": {
+         "types": "./dist/src/repositories/*.d.ts",
+         "default": "./src/repositories/*.ts"
+      }
+   },
+   "scripts": {
+      "db:studio": "dotenv -e .env.local drizzle-kit studio",
+      "db:push": "dotenv -e .env.local drizzle-kit push",
+      "env:copy-example": "shx -- cp -n .env.example .env",
+      "env:remove": "shx -- rm -f .env",
+      "env:run": "dotenv -e .env.local --",
+      "check": "biome check --write ./src",
+      "push": "bun run env:run drizzle-kit push",
+      "migrate": "bun run env:run drizzle-kit migrate",
+      "generate": "bun run env:run drizzle-kit generate",
+      "studio": "bun run env:run drizzle-kit studio",
+      "typecheck": "tsc ",
+      "build": "tsc --build"
+   },
+   "dependencies": {
+      "@packages/utils": "workspace:*",
+      "@packages/environment": "workspace:*",
+      "drizzle-orm": "catalog:database",
+      "drizzle-zod": "catalog:database",
+      "openai": "^5.23.0",
+      "pg": "catalog:database",
+      "zod": "catalog:validation"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "@types/pg": "catalog:database",
+      "dotenv-cli": "catalog:enviroment",
+      "drizzle-kit": "catalog:database",
+      "shx": "catalog:enviroment",
+      "typescript": "catalog:development"
+   },
+   "version": "0.7.0"
 }
