@@ -7,7 +7,7 @@
       "@astrojs/rss": "catalog:astro",
       "@astrojs/sitemap": "catalog:astro",
       "@astrojs/ts-plugin": "catalog:astro",
-      "@contentagen/sdk": "0.15.6",
+      "@contentagen/sdk": "^0.15.9",
       "@lucide/astro": "catalog:astro",
       "@packages/posthog": "workspace:*",
       "@packages/ui": "workspace:*",
