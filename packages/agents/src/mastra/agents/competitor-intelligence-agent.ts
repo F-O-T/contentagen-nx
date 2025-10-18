@@ -33,10 +33,10 @@ export const competitorIntelligenceAgent = new Agent({
 You are a competitive gap analysis specialist. Your job is to identify what competitors are doing that the brand is NOT doing, and provide clear next steps.
 
  ${createToolSystemPrompt([
-         getQueryCompetitorKnowledgeInstructions(),
-         getQueryBrandKnowledgeInstructions(),
-         getDateToolInstructions(),
-      ])}
+    getQueryCompetitorKnowledgeInstructions(),
+    getQueryBrandKnowledgeInstructions(),
+    getDateToolInstructions(),
+ ])}
 
 ## LANGUAGE
  ${getLanguageOutputInstruction(locale as "en" | "pt")}
