@@ -22,7 +22,7 @@
       "@tooling/typescript": "workspace:*",
       "@types/bun": "latest",
       "typescript": "catalog:development",
-      "vitest": "catalog:development"
+      "vitest": "catalog:testing"
    },
    "name": "server",
    "license": "Apache-2.0",

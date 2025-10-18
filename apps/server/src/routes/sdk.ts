@@ -108,7 +108,7 @@ export const sdkRoutes = new Elysia({
             ragClient,
             query.slug,
             query.agentId,
-            { limit: 5 },
+            { limit: 3 },
          );
 
          return slugs.map((s) => s.slug).filter((s) => s !== query.slug);
@@ -119,6 +119,7 @@ export const sdkRoutes = new Elysia({
             agentId: t.String(),
          }),
          response: t.Array(t.String()),
+         sdkAuth: true,
       },
    )
 
@@ -191,8 +192,7 @@ export const sdkRoutes = new Elysia({
          const limit = parseInt(query.limit || "10", 10);
          const page = parseInt(query.page || "1", 10);
          const status = query.status;
-
-         const all = await listContents(db, [agentId], status);
+         const all = await listContents(db, [agentId], status ?? ["approved"]);
          const start = (page - 1) * limit;
          const end = start + limit;
          const posts = all.slice(start, end);
@@ -238,7 +238,9 @@ export const sdkRoutes = new Elysia({
          query: t.Object({
             limit: t.Optional(t.String()),
             page: t.Optional(t.String()),
-            status: t.Optional(t.Array(t.UnionEnum(["draft", "approved"]))),
+            status: t.Optional(
+               t.Array(t.UnionEnum(["draft", "approved"]).default("approved")),
+            ),
          }),
       },
    )
