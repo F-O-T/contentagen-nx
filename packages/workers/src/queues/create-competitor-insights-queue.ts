@@ -89,4 +89,3 @@ export const createCompetitorInsightsWorker = new Worker(
    },
 );
 registerGracefulShutdown(createCompetitorInsightsWorker);
-
