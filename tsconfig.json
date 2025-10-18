@@ -36,6 +36,15 @@
       },
       {
          "path": "./packages/agents"
+      },
+      {
+         "path": "./packages/localization"
+      },
+      {
+         "path": "./packages/utils"
+      },
+      {
+         "path": "./packages/authentication"
       }
    ]
 }

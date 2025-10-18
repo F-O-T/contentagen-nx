@@ -261,8 +261,13 @@ program
       listEnvironments();
    });
 
-async function checkStatus(env: string, packages: string[] = DATABASE_PACKAGES) {
-   console.log(colors.blue(`🔍 Checking database status for ${env} environment`));
+async function checkStatus(
+   env: string,
+   packages: string[] = DATABASE_PACKAGES,
+) {
+   console.log(
+      colors.blue(`🔍 Checking database status for ${env} environment`),
+   );
    console.log(colors.cyan("─".repeat(50)));
 
    const results: { package: string; success: boolean; error?: string }[] = [];
@@ -300,17 +305,23 @@ async function checkStatus(env: string, packages: string[] = DATABASE_PACKAGES) 
 
          // Check if environment file exists and is readable
          try {
-            fs.readFileSync(envFile, 'utf8');
+            fs.readFileSync(envFile, "utf8");
          } catch {
             throw new Error(`Cannot read environment file: ${envFile}`);
          }
 
          // Try to run a simple drizzle command to check configuration
          console.log(colors.cyan("   🔧 Checking drizzle configuration..."));
-         await runCommand("npm run db:generate -- --dry-run", packageDir, envFile);
+         await runCommand(
+            "npm run db:generate -- --dry-run",
+            packageDir,
+            envFile,
+         );
 
          console.log(
-            colors.green(`✅ ${packageName} status check completed successfully`),
+            colors.green(
+               `✅ ${packageName} status check completed successfully`,
+            ),
          );
          results.push({ package: packageName, success: true });
       } catch (error) {
@@ -344,7 +355,9 @@ async function checkStatus(env: string, packages: string[] = DATABASE_PACKAGES) 
          });
       process.exit(1);
    } else {
-      console.log(colors.green("🎉 All database packages are properly configured!"));
+      console.log(
+         colors.green("🎉 All database packages are properly configured!"),
+      );
    }
 }
 
