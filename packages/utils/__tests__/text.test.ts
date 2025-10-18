@@ -4,13 +4,10 @@ import {
    getKeywordsFromText,
    createSlug,
    countWords,
-   extractTitleFromMarkdown,
-   readTimeMinutes,
-   removeTitleFromMarkdown,
-   formatValueForDisplay,
-   calculateContentStats,
+   calculateReadTimeMinutes,
+   formatStringForDisplay,
+   calculateTextStats,
    calculateReadabilityScore,
-   analyzeContentStructure,
 } from "../src/text";
 
 describe("text utilities", () => {
@@ -22,14 +19,16 @@ describe("text utilities", () => {
       });
 
       it("should truncate text longer than maxLength", () => {
-         const text = "This is a very long text that should be truncated because it exceeds the maximum length.";
+         const text =
+            "This is a very long text that should be truncated because it exceeds the maximum length.";
          const result = createDescriptionFromText({ text, maxLength: 50 });
          expect(result.length).toBeLessThanOrEqual(50);
          expect(result).toContain("...");
       });
 
       it("should remove markdown headers and links", () => {
-         const text = "# Title\n\nThis is a [link](https://example.com) in text.";
+         const text =
+            "# Title\n\nThis is a [link](https://example.com) in text.";
          const result = createDescriptionFromText({ text, maxLength: 100 });
          expect(result).not.toContain("# Title");
          expect(result).not.toContain("[link](https://example.com)");
@@ -64,7 +63,8 @@ describe("text utilities", () => {
       });
 
       it("should limit to top 10 keywords", () => {
-         const text = "word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12";
+         const text =
+            "word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12";
          const result = getKeywordsFromText({ text, minLength: 3 });
          expect(result.length).toBeLessThanOrEqual(10);
       });
@@ -99,57 +99,34 @@ describe("text utilities", () => {
       });
    });
 
-   describe("extractTitleFromMarkdown", () => {
-      it("should extract title from markdown", () => {
-         const markdown = "# My Title\n\nSome content here";
-         const result = extractTitleFromMarkdown(markdown);
-         expect(result).toBe("My Title");
-      });
-
-      it("should return empty string if no title found", () => {
-         const markdown = "Some content without title";
-         const result = extractTitleFromMarkdown(markdown);
-         expect(result).toBe("");
-      });
-   });
-
-   describe("readTimeMinutes", () => {
+   describe("calculateReadTimeMinutes", () => {
       it("should calculate read time", () => {
-         const result = readTimeMinutes(200);
+         const result = calculateReadTimeMinutes(200);
          expect(result).toBe(1);
       });
 
       it("should round up partial minutes", () => {
-         const result = readTimeMinutes(250);
+         const result = calculateReadTimeMinutes(250);
          expect(result).toBe(2);
       });
    });
 
-   describe("removeTitleFromMarkdown", () => {
-      it("should remove title from markdown", () => {
-         const markdown = "# My Title\n\nSome content here";
-         const result = removeTitleFromMarkdown(markdown);
-         expect(result).not.toContain("# My Title");
-         expect(result).toContain("Some content here");
-      });
-   });
-
-   describe("formatValueForDisplay", () => {
+   describe("formatStringForDisplay", () => {
       it("should format value for display", () => {
-         const result = formatValueForDisplay("test_value");
+         const result = formatStringForDisplay("test_value");
          expect(result).toBe("Test Value");
       });
 
       it("should return default for empty value", () => {
-         const result = formatValueForDisplay("");
+         const result = formatStringForDisplay("");
          expect(result).toBe("Not specified");
       });
    });
 
-   describe("calculateContentStats", () => {
+   describe("calculateTextStats", () => {
       it("should calculate content statistics", () => {
          const content = "This is a test content with ten words in total";
-         const result = calculateContentStats(content);
+         const result = calculateTextStats(content);
          expect(result.wordsCount).toBe("10");
          expect(result.readTimeMinutes).toBe("1");
       });
@@ -157,22 +134,13 @@ describe("text utilities", () => {
 
    describe("calculateReadabilityScore", () => {
       it("should calculate readability score", () => {
-         const text = "This is a simple text for testing readability score calculation.";
+         const text =
+            "This is a simple text for testing readability score calculation.";
          const result = calculateReadabilityScore({ text });
          expect(result).toHaveProperty("score");
          expect(result).toHaveProperty("level");
          expect(typeof result.score).toBe("number");
          expect(typeof result.level).toBe("string");
-      });
-   });
-
-   describe("analyzeContentStructure", () => {
-      it("should analyze content structure", () => {
-         const text = "# Title\n\nSome content.\n\n* List item 1\n* List item 2\n\n`code block`";
-         const result = analyzeContentStructure({ text });
-         expect(result).toHaveProperty("structure");
-         expect(result.structure.headings).toBeGreaterThanOrEqual(1);
-         expect(result.structure.paragraphs).toBeGreaterThanOrEqual(1);
       });
    });
 });
