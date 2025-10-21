@@ -136,7 +136,7 @@ export const sdkRoutes = new Elysia({
          if (!language) {
             throw new Error("Language header is required.");
          }
-         const userId = session?.user?.id;
+         const userId = session?.session.userId;
          if (!userId) {
             throw new Error("Unauthorized");
          }
@@ -149,7 +149,6 @@ export const sdkRoutes = new Elysia({
             throw new Error("Organization not found for user.");
          }
          const brand = await getBrandByOrgId(db, member?.organizationId);
-
 
          const runtimeContext = setRuntimeContext({
             userId: userId,
