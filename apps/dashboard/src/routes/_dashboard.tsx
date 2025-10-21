@@ -1,3 +1,7 @@
+import { ContentaChat } from '@contentagen/assistant-widget';
+import { MessageCircle } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@packages/ui/components/popover";
+import { Button } from "@packages/ui/components/button";
 import {
    createFileRoute,
    useLocation,
@@ -61,7 +65,20 @@ function RouteComponent() {
             className="duration-700 animate-in slide-in-from-bottom-4 fade-in h-full w-full"
             key={location.pathname}
          >
+            <Popover>
+               <PopoverTrigger asChild>
+                  <Button size="icon" variant={'outline'} className="fixed bottom-4 right-4 z-50">
+                     <MessageCircle className="h-6 w-6" />
+                  </Button>
+               </PopoverTrigger>
+               <PopoverContent align="end" className="w-full p-0">
+                  <ContentaChat agentId='a' sendMessage={() => { console.log("Message sent!"); }} />
+               </PopoverContent>
+            </Popover>
+
+
             <Outlet />
+
          </div>
       </DashboardLayout>
    );
