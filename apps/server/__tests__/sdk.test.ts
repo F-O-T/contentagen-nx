@@ -63,7 +63,26 @@ vi.mock("@api/integrations/minio", () => ({
 
 vi.mock("@packages/environment/server", () => ({
    serverEnv: {
+      DATABASE_URL: "postgresql://localhost:5432/test",
+      BETTER_AUTH_GOOGLE_CLIENT_ID: "test-google-client-id",
+      BETTER_AUTH_GOOGLE_CLIENT_SECRET: "test-google-client-secret",
+      POLAR_ACCESS_TOKEN: "test-polar-token",
+      POLAR_FREE_PLAN_ID: "test-free-plan-id",
+      POLAR_PAID_PLAN_ID: "test-paid-plan-id",
+      RESEND_API_KEY: "test-resend-key",
+      BETTER_AUTH_SECRET: "test-better-auth-secret",
+      BETTER_AUTH_TRUSTED_ORIGINS: "http://localhost:3000",
+      REDIS_URL: "redis://localhost:6379",
+      OPENROUTER_API_KEY: "test-openrouter-key",
+      OPENAI_API_KEY: "test-openai-key",
+      AP_QUEUE_UI_PASSWORD: "test-password",
+      AP_QUEUE_UI_USERNAME: "test-username",
+      MINIO_ENDPOINT: "http://localhost:9000",
+      MINIO_ACCESS_KEY: "test-access-key",
+      MINIO_SECRET_KEY: "test-secret-key",
       MINIO_BUCKET: "content-writer",
+      TAVILY_API_KEY: "test-tavily-key",
+      PG_VECTOR_URL: "postgresql://localhost:5432/test-vector",
    },
 }));
 
@@ -274,7 +293,6 @@ const buildMember = (overrides: Partial<MemberRecord> = {}): MemberRecord => {
       organizationId: "test-org-id",
       role: "member" as const,
       createdAt: new Date(),
-      updatedAt: new Date(),
    } satisfies MemberRecord;
    return {
       ...base,
@@ -733,19 +751,19 @@ describe("sdkRoutes", () => {
          setRuntimeContextMock.mockReturnValue("assistant-context");
 
          const response = await sdkRoutes.handle(
-            createRequest(
-               "http://localhost/sdk/assistant?message=Hello",
-               {
-                  "sdk-api-key": "test-api-key",
-                  "x-locale": "en",
-               },
-            ),
+            createRequest("http://localhost/sdk/assistant?message=Hello", {
+               "sdk-api-key": "test-api-key",
+               "x-locale": "en",
+            }),
          );
          const text = await response.text();
 
          expect(response.status).toBe(200);
          expect(text).toBe("Assistant response");
-         expect(findMemberByUserIdMock).toHaveBeenCalledWith(mockDb, "test-user-id");
+         expect(findMemberByUserIdMock).toHaveBeenCalledWith(
+            mockDb,
+            "test-user-id",
+         );
          expect(getBrandByOrgIdMock).toHaveBeenCalledWith(
             mockDb,
             "test-org-id",
@@ -764,12 +782,9 @@ describe("sdkRoutes", () => {
 
       it("returns 500 when language header is missing", async () => {
          const response = await sdkRoutes.handle(
-            createRequest(
-               "http://localhost/sdk/assistant?message=Hello",
-               {
-                  "sdk-api-key": "test-api-key",
-               },
-            ),
+            createRequest("http://localhost/sdk/assistant?message=Hello", {
+               "sdk-api-key": "test-api-key",
+            }),
          );
 
          expect(response.status).toBe(500);
@@ -778,16 +793,15 @@ describe("sdkRoutes", () => {
       });
 
       it("returns 500 when member fetch fails", async () => {
-         findMemberByUserIdMock.mockRejectedValue(new Error("Member not found"));
+         findMemberByUserIdMock.mockRejectedValue(
+            new Error("Member not found"),
+         );
 
          const response = await sdkRoutes.handle(
-            createRequest(
-               "http://localhost/sdk/assistant?message=Hello",
-               {
-                  "sdk-api-key": "test-api-key",
-                  "x-locale": "en",
-               },
-            ),
+            createRequest("http://localhost/sdk/assistant?message=Hello", {
+               "sdk-api-key": "test-api-key",
+               "x-locale": "en",
+            }),
          );
 
          expect(response.status).toBe(500);
@@ -798,18 +812,15 @@ describe("sdkRoutes", () => {
       it("returns 500 when member has no organization", async () => {
          const member = buildMember({
             userId: "test-user-id",
-            organizationId: null,
+            organizationId: undefined,
          });
          findMemberByUserIdMock.mockResolvedValue(member);
 
          const response = await sdkRoutes.handle(
-            createRequest(
-               "http://localhost/sdk/assistant?message=Hello",
-               {
-                  "sdk-api-key": "test-api-key",
-                  "x-locale": "en",
-               },
-            ),
+            createRequest("http://localhost/sdk/assistant?message=Hello", {
+               "sdk-api-key": "test-api-key",
+               "x-locale": "en",
+            }),
          );
 
          expect(response.status).toBe(500);
@@ -826,13 +837,10 @@ describe("sdkRoutes", () => {
          getBrandByOrgIdMock.mockRejectedValue(new Error("Brand not found"));
 
          const response = await sdkRoutes.handle(
-            createRequest(
-               "http://localhost/sdk/assistant?message=Hello",
-               {
-                  "sdk-api-key": "test-api-key",
-                  "x-locale": "en",
-               },
-            ),
+            createRequest("http://localhost/sdk/assistant?message=Hello", {
+               "sdk-api-key": "test-api-key",
+               "x-locale": "en",
+            }),
          );
 
          expect(response.status).toBe(500);
@@ -852,13 +860,10 @@ describe("sdkRoutes", () => {
          agentInstance.stream.mockRejectedValue(new Error("Stream error"));
 
          const response = await sdkRoutes.handle(
-            createRequest(
-               "http://localhost/sdk/assistant?message=Hello",
-               {
-                  "sdk-api-key": "test-api-key",
-                  "x-locale": "en",
-               },
-            ),
+            createRequest("http://localhost/sdk/assistant?message=Hello", {
+               "sdk-api-key": "test-api-key",
+               "x-locale": "en",
+            }),
          );
 
          expect(response.status).toBe(500);
