@@ -1,6 +1,10 @@
-import { ContentaChat } from '@contentagen/assistant-widget';
+import { ContentaChat } from "@contentagen/assistant-widget";
 import { MessageCircle } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@packages/ui/components/popover";
+import {
+   Popover,
+   PopoverContent,
+   PopoverTrigger,
+} from "@packages/ui/components/popover";
 import { Button } from "@packages/ui/components/button";
 import {
    createFileRoute,
@@ -10,11 +14,12 @@ import {
 import { Outlet } from "@tanstack/react-router";
 import { DashboardLayout } from "@/layout/dashboard-layout";
 import { useTRPC } from "@/integrations/clients";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useMutation } from "@tanstack/react-query";
 import { useIsomorphicLayoutEffect } from "@packages/ui/hooks/use-isomorphic-layout-effect";
 import { toast } from "sonner";
 import { PendingComponent } from "@/default/pending";
 import { ErrorComponent } from "@/default/error";
+import { useCallback } from "react";
 export const Route = createFileRoute("/_dashboard")({
    component: RouteComponent,
    wrapInSuspense: true,
@@ -59,6 +64,14 @@ function RouteComponent() {
       }
    }, [session, location]);
 
+   const mutation = useMutation(trpc.assistant.sendMessage.mutationOptions());
+   const sendMessage = useCallback(
+      async (message: string) => {
+         const response = await mutation.mutateAsync({ message });
+         return response;
+      },
+      [mutation],
+   );
    return (
       <DashboardLayout session={session}>
          <div
@@ -67,18 +80,20 @@ function RouteComponent() {
          >
             <Popover>
                <PopoverTrigger asChild>
-                  <Button size="icon" variant={'outline'} className="fixed bottom-4 right-4 z-50">
+                  <Button
+                     size="icon"
+                     variant={"outline"}
+                     className="fixed bottom-4 right-4 z-50"
+                  >
                      <MessageCircle className="h-6 w-6" />
                   </Button>
                </PopoverTrigger>
                <PopoverContent align="end" className="w-full p-0">
-                  <ContentaChat agentId='a' sendMessage={() => { console.log("Message sent!"); }} />
+                  <ContentaChat sendMessage={sendMessage} />
                </PopoverContent>
             </Popover>
 
-
             <Outlet />
-
          </div>
       </DashboardLayout>
    );
