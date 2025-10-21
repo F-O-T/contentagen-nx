@@ -34,8 +34,8 @@
     "dev": "bun run container-start && bun run --watch src/index.ts",
     "format": "biome format",
     "start": "./server",
-    "test": "bun test",
+    "test": "bun run test",
     "typecheck": "bunx --bun tsc  "
   },
-  "version": "0.8.0"
+  "version": "0.9.0"
 }

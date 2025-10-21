@@ -1,4 +1,5 @@
 import { Elysia, t } from "elysia";
+import { findMemberByUserId } from "@packages/database/repositories/auth-repository";
 import { mastra, setRuntimeContext } from "@packages/agents";
 import { AppError, propagateError } from "@packages/utils/errors";
 import { getAgentById } from "@packages/database/repositories/agent-repository";
@@ -57,10 +58,15 @@ export const sdkRoutes = new Elysia({
    })
    .get(
       "/author/:agentId",
-      async ({ params }) => {
+      async ({ params, session }) => {
          const agent = await getAgentById(db, params.agentId);
+
          if (!agent) {
             throw new Error("Agent not found");
+         }
+
+         if (agent.userId !== session?.user?.id) {
+            throw new Error("Unauthorized access to agent information.");
          }
 
          let profilePhoto = null;
@@ -125,38 +131,28 @@ export const sdkRoutes = new Elysia({
 
    .get(
       "/assistant",
-      async ({ query, request }) => {
+      async ({ query, request, session }) => {
          const language = request.headers.get("x-locale");
          if (!language) {
             throw new Error("Language header is required.");
          }
-         if (!query.agentId) {
-            throw new Error("Agent ID is required.");
+         const userId = session?.user?.id;
+         if (!userId) {
+            throw new Error("Unauthorized");
+         }
+         const member = await findMemberByUserId(db, userId);
+         if (!member) {
+            throw new Error("Member not found.");
          }
 
-         const agent = await getAgentById(db, query.agentId);
-         if (!agent) {
-            throw new Error("Agent not found.");
+         if (!member.organizationId) {
+            throw new Error("Organization not found for user.");
          }
+         const brand = await getBrandByOrgId(db, member?.organizationId);
 
-         let brand: Awaited<ReturnType<typeof getBrandByOrgId>> | null = null;
-         if (agent.organizationId) {
-            try {
-               brand = await getBrandByOrgId(db, agent.organizationId);
-            } catch (err) {
-               if (
-                  !(
-                     err instanceof Error &&
-                     err.message.includes("Brand not found")
-                  )
-               ) {
-                  throw err;
-               }
-            }
-         }
 
          const runtimeContext = setRuntimeContext({
-            userId: agent.userId,
+            userId: userId,
             language: language as SupportedLng,
             brandId: brand?.id || "",
          });
@@ -179,7 +175,6 @@ export const sdkRoutes = new Elysia({
 
          query: t.Object({
             message: t.String(),
-            agentId: t.String(),
          }),
       },
    )
