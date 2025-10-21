@@ -61,31 +61,6 @@ vi.mock("@api/integrations/minio", () => ({
    minioClient: mockMinioClient,
 }));
 
-vi.mock("@packages/environment/server", () => ({
-   serverEnv: {
-      DATABASE_URL: "postgresql://localhost:5432/test",
-      BETTER_AUTH_GOOGLE_CLIENT_ID: "test-google-client-id",
-      BETTER_AUTH_GOOGLE_CLIENT_SECRET: "test-google-client-secret",
-      POLAR_ACCESS_TOKEN: "test-polar-token",
-      POLAR_FREE_PLAN_ID: "test-free-plan-id",
-      POLAR_PAID_PLAN_ID: "test-paid-plan-id",
-      RESEND_API_KEY: "test-resend-key",
-      BETTER_AUTH_SECRET: "test-better-auth-secret",
-      BETTER_AUTH_TRUSTED_ORIGINS: "http://localhost:3000",
-      REDIS_URL: "redis://localhost:6379",
-      OPENROUTER_API_KEY: "test-openrouter-key",
-      OPENAI_API_KEY: "test-openai-key",
-      AP_QUEUE_UI_PASSWORD: "test-password",
-      AP_QUEUE_UI_USERNAME: "test-username",
-      MINIO_ENDPOINT: "http://localhost:9000",
-      MINIO_ACCESS_KEY: "test-access-key",
-      MINIO_SECRET_KEY: "test-secret-key",
-      MINIO_BUCKET: "content-writer",
-      TAVILY_API_KEY: "test-tavily-key",
-      PG_VECTOR_URL: "postgresql://localhost:5432/test-vector",
-   },
-}));
-
 import { sdkRoutes } from "../src/routes/sdk";
 import { mastra, setRuntimeContext } from "@packages/agents";
 import { getAgentById } from "@packages/database/repositories/agent-repository";
@@ -510,7 +485,6 @@ const defaultImageBase64 = defaultImageBuffer.toString("base64");
 
 let agentInstance: MockMastraAgent;
 let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
-
 describe("sdkRoutes", () => {
    beforeEach(() => {
       vi.clearAllMocks();
