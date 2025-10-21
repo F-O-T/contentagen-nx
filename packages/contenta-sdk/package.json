@@ -1,6 +1,6 @@
 {
    "dependencies": {
-      "@contentagen/sdk": "^0.15.10",
+      "@contentagen/sdk": "0.16.0",
       "@packages/environment": "workspace:*"
    },
    "devDependencies": {
