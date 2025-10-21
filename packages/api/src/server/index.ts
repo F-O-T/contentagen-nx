@@ -18,8 +18,10 @@ import { organizationRouter } from "./router/organization";
 import { organizationFileRouter } from "./router/organization-file";
 import { brandRouter } from "./router/brand";
 import { brandFileRouter } from "./router/brand-file";
+import { assistantRouter } from "./router/assistant";
 
 export const appRouter = router({
+   assistant: assistantRouter,
    agent: agentRouter,
    agentFile: agentFileRouter,
    content: contentRouter,

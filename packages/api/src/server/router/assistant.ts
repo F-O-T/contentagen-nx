@@ -1,5 +1,4 @@
 import { organizationProcedure, hasGenerationCredits, router } from "../trpc";
-import { contentaSdk } from "@packages/contenta-sdk";
 import { z } from "zod";
 
 export const assistantRouter = router({
@@ -8,14 +7,13 @@ export const assistantRouter = router({
       .input(
          z.object({
             message: z.string(),
-            agentId: z.string(),
          }),
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
          try {
+            const contentaSdk = (await ctx).contentaSdk;
             const stream = contentaSdk.streamAssistantResponse({
                message: input.message,
-               agentId: input.agentId,
             });
 
             const response = [];
