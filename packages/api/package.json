@@ -22,6 +22,7 @@
   "dependencies": {
     "@polar-sh/sdk": "catalog:payment",
     "@packages/localization": "workspace:*",
+    "@packages/contenta-sdk": "workspace:*",
     "@packages/server-events": "workspace:*",
     "@packages/workers": "workspace:*",
     "@packages/authentication": "workspace:*",
