@@ -139,6 +139,7 @@ export const getAuthOptions = (
                timeWindow: 1000 * 60 * 60, // 1 hour
                maxRequests: 500, // 500 requests per hour
             },
+            enableSessionForAPIKeys: true,
             enableMetadata: true,
             apiKeyHeaders: "sdk-api-key",
          }),
