@@ -21,6 +21,10 @@ vi.mock("@packages/database/repositories/agent-repository", () => ({
    getAgentById: vi.fn(),
 }));
 
+vi.mock("@packages/database/repositories/auth-repository", () => ({
+   findMemberByUserId: vi.fn(),
+}));
+
 vi.mock("@packages/database/repositories/content-repository", () => ({
    getContentById: vi.fn(),
    getContentBySlug: vi.fn(),
@@ -66,6 +70,7 @@ vi.mock("@packages/environment/server", () => ({
 import { sdkRoutes } from "../src/routes/sdk";
 import { mastra, setRuntimeContext } from "@packages/agents";
 import { getAgentById } from "@packages/database/repositories/agent-repository";
+import { findMemberByUserId } from "@packages/database/repositories/auth-repository";
 import {
    getContentById,
    getContentBySlug,
@@ -83,6 +88,7 @@ type ContentListRecord = Awaited<ReturnType<typeof listContents>>;
 type ContentListItem = ContentListRecord[number];
 type BrandRecord = Awaited<ReturnType<typeof getBrandByOrgId>>;
 type RelatedSlugsRecords = Awaited<ReturnType<typeof searchRelatedSlugsByText>>;
+type MemberRecord = Awaited<ReturnType<typeof findMemberByUserId>>;
 
 type AgentMessage = { role: "user" | "assistant" | "system"; content: string };
 type StreamOptions = { runtimeContext: unknown; format: string };
@@ -261,6 +267,21 @@ const buildBrand = (overrides: Partial<BrandRecord> = {}): BrandRecord => {
    };
 };
 
+const buildMember = (overrides: Partial<MemberRecord> = {}): MemberRecord => {
+   const base = {
+      id: "member-id",
+      userId: "test-user-id",
+      organizationId: "test-org-id",
+      role: "member" as const,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+   } satisfies MemberRecord;
+   return {
+      ...base,
+      ...overrides,
+   };
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
    typeof value === "object" && value !== null;
 
@@ -434,6 +455,12 @@ const getBrandByOrgIdMock = getBrandByOrgId as unknown as Mock<
       organizationId: string,
    ) => Promise<BrandRecord | null>
 >;
+const findMemberByUserIdMock = findMemberByUserId as unknown as Mock<
+   (
+      dbInstance: DatabaseInstance,
+      userId: string,
+   ) => Promise<MemberRecord | null>
+>;
 const streamFileForProxyMock = streamFileForProxy as unknown as Mock<
    (
       fileName: string,
@@ -476,6 +503,7 @@ describe("sdkRoutes", () => {
       authGetSessionMock.mockResolvedValue({
          user: { id: "test-user-id" },
       });
+      findMemberByUserIdMock.mockResolvedValue(buildMember());
       agentInstance = createAgentInstance();
       mastraGetAgentMock.mockReturnValue(agentInstance);
       setRuntimeContextMock.mockReturnValue("runtime-context");
@@ -493,6 +521,7 @@ describe("sdkRoutes", () => {
       it("returns author information with profile photo", async () => {
          const agent = buildAgent({
             id: "test-agent-id",
+            userId: "test-user-id",
             personaConfig: {
                metadata: {
                   name: "Test Author",
@@ -531,6 +560,7 @@ describe("sdkRoutes", () => {
       it("returns author information without profile photo", async () => {
          const agent = buildAgent({
             id: "test-agent-id",
+            userId: "test-user-id",
             personaConfig: {
                metadata: {
                   name: "Test Author",
@@ -573,6 +603,7 @@ describe("sdkRoutes", () => {
       it("returns profile photo as null when file retrieval fails", async () => {
          const agent = buildAgent({
             id: "test-agent-id",
+            userId: "test-user-id",
             personaConfig: {
                metadata: {
                   name: "Test Author",
@@ -617,6 +648,24 @@ describe("sdkRoutes", () => {
 
          expect(response.status).toBe(500);
       });
+
+      it("returns 500 when user is not authorized to access agent", async () => {
+         const agent = buildAgent({
+            id: "test-agent-id",
+            userId: "different-user-id", // Different from session user ID
+         });
+         getAgentByIdMock.mockResolvedValue(agent);
+
+         const response = await sdkRoutes.handle(
+            createRequest("http://localhost/sdk/author/test-agent-id", {
+               "sdk-api-key": "test-api-key",
+            }),
+         );
+
+         expect(response.status).toBe(500);
+         const text = await response.text();
+         expect(text).toContain("Unauthorized access to agent information");
+      });
    });
 
    describe("GET /sdk/related-slugs", () => {
@@ -631,6 +680,9 @@ describe("sdkRoutes", () => {
          const response = await sdkRoutes.handle(
             createRequest(
                "http://localhost/sdk/related-slugs?slug=original-slug&agentId=test-agent-id",
+               {
+                  "sdk-api-key": "test-api-key",
+               },
             ),
          );
          const body = await parseJson(response, assertStringArray);
@@ -641,13 +693,15 @@ describe("sdkRoutes", () => {
             mockRagClient,
             "original-slug",
             "test-agent-id",
-            { limit: 5 },
+            { limit: 3 },
          );
       });
 
       it("returns 422 when slug query parameter is missing", async () => {
          const response = await sdkRoutes.handle(
-            createRequest("http://localhost/sdk/related-slugs?agentId=test"),
+            createRequest("http://localhost/sdk/related-slugs?agentId=test", {
+               "sdk-api-key": "test-api-key",
+            }),
          );
 
          expect(response.status).toBe(422);
@@ -655,7 +709,9 @@ describe("sdkRoutes", () => {
 
       it("returns 422 when agentId query parameter is missing", async () => {
          const response = await sdkRoutes.handle(
-            createRequest("http://localhost/sdk/related-slugs?slug=test"),
+            createRequest("http://localhost/sdk/related-slugs?slug=test", {
+               "sdk-api-key": "test-api-key",
+            }),
          );
 
          expect(response.status).toBe(422);
@@ -664,8 +720,7 @@ describe("sdkRoutes", () => {
 
    describe("GET /sdk/assistant", () => {
       it("streams assistant response", async () => {
-         const agent = buildAgent({
-            id: "test-agent-id",
+         const member = buildMember({
             userId: "test-user-id",
             organizationId: "test-org-id",
          });
@@ -673,13 +728,13 @@ describe("sdkRoutes", () => {
             id: "test-brand-id",
             organizationId: "test-org-id",
          });
-         getAgentByIdMock.mockResolvedValue(agent);
+         findMemberByUserIdMock.mockResolvedValue(member);
          getBrandByOrgIdMock.mockResolvedValue(brand);
          setRuntimeContextMock.mockReturnValue("assistant-context");
 
          const response = await sdkRoutes.handle(
             createRequest(
-               "http://localhost/sdk/assistant?message=Hello&agentId=test-agent-id",
+               "http://localhost/sdk/assistant?message=Hello",
                {
                   "sdk-api-key": "test-api-key",
                   "x-locale": "en",
@@ -690,7 +745,7 @@ describe("sdkRoutes", () => {
 
          expect(response.status).toBe(200);
          expect(text).toBe("Assistant response");
-         expect(getAgentByIdMock).toHaveBeenCalledWith(mockDb, "test-agent-id");
+         expect(findMemberByUserIdMock).toHaveBeenCalledWith(mockDb, "test-user-id");
          expect(getBrandByOrgIdMock).toHaveBeenCalledWith(
             mockDb,
             "test-org-id",
@@ -710,7 +765,7 @@ describe("sdkRoutes", () => {
       it("returns 500 when language header is missing", async () => {
          const response = await sdkRoutes.handle(
             createRequest(
-               "http://localhost/sdk/assistant?message=Hello&agentId=test-agent-id",
+               "http://localhost/sdk/assistant?message=Hello",
                {
                   "sdk-api-key": "test-api-key",
                },
@@ -722,23 +777,12 @@ describe("sdkRoutes", () => {
          expect(text).toContain("Language header is required");
       });
 
-      it("returns 422 when agentId is missing", async () => {
-         const response = await sdkRoutes.handle(
-            createRequest("http://localhost/sdk/assistant?message=Hello", {
-               "sdk-api-key": "test-api-key",
-               "x-locale": "en",
-            }),
-         );
-
-         expect(response.status).toBe(422);
-      });
-
-      it("returns 500 when agent fetch fails", async () => {
-         getAgentByIdMock.mockRejectedValue(new Error("Agent not found"));
+      it("returns 500 when member fetch fails", async () => {
+         findMemberByUserIdMock.mockRejectedValue(new Error("Member not found"));
 
          const response = await sdkRoutes.handle(
             createRequest(
-               "http://localhost/sdk/assistant?message=Hello&agentId=missing",
+               "http://localhost/sdk/assistant?message=Hello",
                {
                   "sdk-api-key": "test-api-key",
                   "x-locale": "en",
@@ -748,45 +792,60 @@ describe("sdkRoutes", () => {
 
          expect(response.status).toBe(500);
          const text = await response.text();
-         expect(text).toContain("Agent not found");
+         expect(text).toContain("Member not found");
       });
 
-      it("continues when brand lookup fails", async () => {
-         const agent = buildAgent({
-            id: "test-agent-id",
+      it("returns 500 when member has no organization", async () => {
+         const member = buildMember({
             userId: "test-user-id",
-            organizationId: "test-org-id",
+            organizationId: null,
          });
-         getAgentByIdMock.mockResolvedValue(agent);
-         getBrandByOrgIdMock.mockRejectedValue(new Error("Brand not found"));
+         findMemberByUserIdMock.mockResolvedValue(member);
 
          const response = await sdkRoutes.handle(
             createRequest(
-               "http://localhost/sdk/assistant?message=Hello&agentId=test-agent-id",
+               "http://localhost/sdk/assistant?message=Hello",
                {
                   "sdk-api-key": "test-api-key",
                   "x-locale": "en",
                },
             ),
          );
-         const text = await response.text();
 
-         expect(response.status).toBe(200);
-         expect(text).toBe("Assistant response");
-         expect(setRuntimeContextMock).toHaveBeenCalledWith({
-            userId: "test-user-id",
-            language: "en",
-            brandId: "",
-         });
+         expect(response.status).toBe(500);
+         const text = await response.text();
+         expect(text).toContain("Organization not found for user");
       });
 
-      it("returns 500 when streaming fails", async () => {
-         const agent = buildAgent({
-            id: "test-agent-id",
+      it("returns 500 when brand lookup fails", async () => {
+         const member = buildMember({
             userId: "test-user-id",
             organizationId: "test-org-id",
          });
-         getAgentByIdMock.mockResolvedValue(agent);
+         findMemberByUserIdMock.mockResolvedValue(member);
+         getBrandByOrgIdMock.mockRejectedValue(new Error("Brand not found"));
+
+         const response = await sdkRoutes.handle(
+            createRequest(
+               "http://localhost/sdk/assistant?message=Hello",
+               {
+                  "sdk-api-key": "test-api-key",
+                  "x-locale": "en",
+               },
+            ),
+         );
+
+         expect(response.status).toBe(500);
+         const text = await response.text();
+         expect(text).toContain("Brand not found");
+      });
+
+      it("returns 500 when streaming fails", async () => {
+         const member = buildMember({
+            userId: "test-user-id",
+            organizationId: "test-org-id",
+         });
+         findMemberByUserIdMock.mockResolvedValue(member);
          getBrandByOrgIdMock.mockResolvedValue(
             buildBrand({ organizationId: "test-org-id" }),
          );
@@ -794,7 +853,7 @@ describe("sdkRoutes", () => {
 
          const response = await sdkRoutes.handle(
             createRequest(
-               "http://localhost/sdk/assistant?message=Hello&agentId=test-agent-id",
+               "http://localhost/sdk/assistant?message=Hello",
                {
                   "sdk-api-key": "test-api-key",
                   "x-locale": "en",
