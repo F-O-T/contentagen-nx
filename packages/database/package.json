@@ -56,5 +56,5 @@
     "shx": "catalog:enviroment",
     "typescript": "catalog:development"
   },
-  "version": "0.12.0"
+  "version": "0.13.0"
 }
