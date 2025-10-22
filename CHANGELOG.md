@@ -1,3 +1,25 @@
+## 0.1.0 (2025-10-21)
+
+This was a version bump only for @packages/contenta-sdk to align it with other projects, there were no code changes.
+
+## 0.14.1 (2025-10-21)
+
+### 🩹 Fixes
+
+- **dashboard:** add missing contenta-sdk package.json to Dockerfile ([f5a6e02a](https://github.com/F-O-T/contentagen-nx/commit/f5a6e02a))
+
+### 🧱 Updated Dependencies
+
+- Updated @packages/brand to 0.10.0
+- Updated @packages/files to 0.10.0
+- Updated @packages/utils to 0.26.0
+- Updated @packages/api to 0.9.1
+- Updated @packages/ui to 0.10.0
+
+### ❤️ Thank You
+
+- Manoel
+
 ## 0.14.0 (2025-10-18)
 
 ### 🚀 Features
