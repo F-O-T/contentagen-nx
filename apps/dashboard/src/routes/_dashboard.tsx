@@ -16,11 +16,10 @@ import { Outlet } from "@tanstack/react-router";
 import { DashboardLayout } from "@/layout/dashboard-layout";
 import { useTRPC } from "@/integrations/clients";
 import { useSuspenseQuery, useMutation } from "@tanstack/react-query";
-import { useIsomorphicLayoutEffect } from "@packages/ui/hooks/use-isomorphic-layout-effect";
 import { toast } from "sonner";
 import { PendingComponent } from "@/default/pending";
 import { ErrorComponent } from "@/default/error";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 export const Route = createFileRoute("/_dashboard")({
    component: RouteComponent,
    wrapInSuspense: true,
@@ -45,7 +44,7 @@ function RouteComponent() {
       trpc.authHelpers.getSession.queryOptions(),
    );
 
-   useIsomorphicLayoutEffect(() => {
+   useEffect(() => {
       if (error) {
          toast.error("Failed to fetch session data.");
          router.navigate({
@@ -63,7 +62,7 @@ function RouteComponent() {
             replace: true,
          });
       }
-   }, [session, location]);
+   }, [session, location, router, error]);
 
    const mutation = useMutation(trpc.assistant.sendMessage.mutationOptions());
    const sendMessage = useCallback(
