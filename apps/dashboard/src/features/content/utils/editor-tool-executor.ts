@@ -4,7 +4,6 @@ import {
 	$getSelection,
 	$isRangeSelection,
 	$createTextNode,
-	$createParagraphNode,
 } from "lexical";
 import { $createHeadingNode, type HeadingTagType } from "@lexical/rich-text";
 import {
@@ -20,6 +19,11 @@ import {
 	TableCellHeaderStates,
 } from "@lexical/table";
 import { $createLinkNode } from "@lexical/link";
+import {
+	$convertFromMarkdownString,
+	$convertToMarkdownString,
+} from "@lexical/markdown";
+import { EXTENDED_TRANSFORMERS } from "../ui/content-editor";
 
 /**
  * Tool call received from the Mastra agent
@@ -127,7 +131,13 @@ export async function executeEditorTool(
 }
 
 /**
- * Insert text at a specific position
+ * Insert markdown text at a specific position
+ * Uses $convertFromMarkdownString to properly parse markdown including:
+ * - Paragraph breaks (\n\n)
+ * - Headings (##, ###)
+ * - Bold (**text**)
+ * - Lists (- item)
+ * - And other markdown syntax
  */
 function executeInsertText(
 	editor: LexicalEditor,
@@ -141,38 +151,30 @@ function executeInsertText(
 
 		switch (position) {
 			case "cursor": {
-				// Insert at current cursor position
-				const selection = $getSelection();
-				if ($isRangeSelection(selection)) {
-					selection.insertText(text);
-				} else {
-					// If no selection, append to end
-					const paragraph = $createParagraphNode();
-					paragraph.append($createTextNode(text));
-					root.append(paragraph);
-				}
+				// For cursor position, append markdown at end (simplified)
+				const existingMarkdown = $convertToMarkdownString(EXTENDED_TRANSFORMERS);
+				root.clear();
+				const newMarkdown = existingMarkdown + (existingMarkdown ? "\n\n" : "") + text;
+				$convertFromMarkdownString(newMarkdown, EXTENDED_TRANSFORMERS);
 				break;
 			}
 
 			case "start": {
 				// Insert at the beginning of the document
-				const paragraph = $createParagraphNode();
-				paragraph.append($createTextNode(text));
-				const firstChild = root.getFirstChild();
-				if (firstChild) {
-					firstChild.insertBefore(paragraph);
-				} else {
-					root.append(paragraph);
-				}
+				const existingMarkdown = $convertToMarkdownString(EXTENDED_TRANSFORMERS);
+				root.clear();
+				const newMarkdown = text + (existingMarkdown ? "\n\n" : "") + existingMarkdown;
+				$convertFromMarkdownString(newMarkdown, EXTENDED_TRANSFORMERS);
 				break;
 			}
 
 			case "end":
 			default: {
 				// Insert at the end of the document
-				const paragraph = $createParagraphNode();
-				paragraph.append($createTextNode(text));
-				root.append(paragraph);
+				const existingMarkdown = $convertToMarkdownString(EXTENDED_TRANSFORMERS);
+				root.clear();
+				const newMarkdown = existingMarkdown + (existingMarkdown ? "\n\n" : "") + text;
+				$convertFromMarkdownString(newMarkdown, EXTENDED_TRANSFORMERS);
 				break;
 			}
 		}
@@ -180,7 +182,7 @@ function executeInsertText(
 
 	return {
 		success: true,
-		message: `Inserted text at ${position}`,
+		message: `Inserted markdown at ${position}`,
 	};
 }
 

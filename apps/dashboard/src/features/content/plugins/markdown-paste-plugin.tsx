@@ -24,6 +24,8 @@ const MARKDOWN_PATTERNS = [
 	/^\d+\.\s/m, // 1. ordered list
 	/^>\s/m, // > blockquote
 	/\[.+?\]\(.+?\)/, // [links](url)
+	/!\[.*?\]\(.+?\)/, // ![images](url)
+	/\|.*\|.*\|/m, // | tables |
 ];
 
 function containsMarkdown(text: string): boolean {
@@ -63,6 +65,9 @@ function markdownToHtml(markdown: string): string {
 	// Process horizontal rules
 	html = html.replace(/^(---|\*\*\*|___)$/gm, "<hr>");
 
+	// Process images (before links to avoid conflicts)
+	html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+
 	// Process bold (before italic to handle **text** vs *text*)
 	html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
 	html = html.replace(/__([^_]+)__/g, "<strong>$1</strong>");
@@ -76,6 +81,58 @@ function markdownToHtml(markdown: string): string {
 
 	// Process links
 	html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+	// Process tables
+	html = html.replace(
+		/((?:^\|.+\|$\n?)+)/gm,
+		(tableMatch) => {
+			const lines = tableMatch.trim().split("\n").filter((line) => line.trim());
+			if (lines.length < 2) return tableMatch; // Need at least header + separator
+			
+			// Check if second line is separator (contains dashes)
+			const headerLine = lines[0];
+			const separatorLine = lines[1];
+			if (!headerLine || !separatorLine) return tableMatch;
+			if (!/^\|[\s\-:|]+\|$/.test(separatorLine)) return tableMatch;
+			
+			const parseRow = (row: string): string[] => {
+				return row
+					.replace(/^\||\|$/g, "") // Remove leading/trailing pipes
+					.split("|")
+					.map((cell) => cell.trim());
+			};
+			
+			// Parse header
+			const headerCells = parseRow(headerLine);
+			const headerHtml = `<thead><tr>${headerCells.map((cell) => `<th>${cell}</th>`).join("")}</tr></thead>`;
+			
+			// Parse body rows (skip header and separator)
+			const bodyRows = lines.slice(2).map((row) => {
+				const cells = parseRow(row);
+				return `<tr>${cells.map((cell) => `<td>${cell}</td>`).join("")}</tr>`;
+			}).join("");
+			const bodyHtml = bodyRows ? `<tbody>${bodyRows}</tbody>` : "";
+			
+			return `<table>${headerHtml}${bodyHtml}</table>`;
+		},
+	);
+
+	// Process task lists (before regular lists)
+	html = html.replace(
+		/((?:^[-*+] \[[x ]\] .+$\n?)+)/gm,
+		(match) => {
+			const items = match
+				.split("\n")
+				.filter((line) => line.trim())
+				.map((line) => {
+					const checked = /\[x\]/i.test(line);
+					const content = line.replace(/^[-*+] \[[x ]\] /i, "");
+					return `<li><input type="checkbox" ${checked ? "checked" : ""} disabled>${content}</li>`;
+				})
+				.join("");
+			return `<ul class="task-list">${items}</ul>`;
+		},
+	);
 
 	// Process unordered lists (group consecutive items)
 	html = html.replace(
@@ -118,7 +175,14 @@ function markdownToHtml(markdown: string): string {
 				trimmed.startsWith("<li") ||
 				trimmed.startsWith("<blockquote") ||
 				trimmed.startsWith("<pre") ||
-				trimmed.startsWith("<hr")
+				trimmed.startsWith("<hr") ||
+				trimmed.startsWith("<table") ||
+				trimmed.startsWith("<thead") ||
+				trimmed.startsWith("<tbody") ||
+				trimmed.startsWith("<tr") ||
+				trimmed.startsWith("<th") ||
+				trimmed.startsWith("<td") ||
+				trimmed.startsWith("<img")
 			) {
 				return line;
 			}

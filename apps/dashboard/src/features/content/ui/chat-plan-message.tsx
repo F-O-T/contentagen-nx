@@ -9,16 +9,18 @@ import {
 	ChevronUp,
 } from "lucide-react";
 import { useState } from "react";
-import type { ChatMessage, PlanStep } from "../context/chat-context";
+import type { ChatMessage, PlanStep, ActivePlan } from "../context/chat-context";
 import {
 	updatePlanStep,
 	approveAllSteps,
 	setChatMode,
+	setActivePlan,
+	clearChat,
 } from "../context/chat-context";
 
 interface ChatPlanMessageProps {
 	message: ChatMessage;
-	onExecutePlan?: (approvedSteps: PlanStep[], executionPrompt: string) => void;
+	onExecutePlan?: (approvedSteps: PlanStep[], executionPrompt: string, planContext: ActivePlan) => void;
 }
 
 function PlanStepItem({
@@ -226,10 +228,30 @@ export function ChatPlanMessage({ message, onExecutePlan }: ChatPlanMessageProps
 
 		const executionPrompt = `Execute these approved plan steps in order:\n\n${stepDescriptions}\n\nExecute each step using the appropriate tools, showing progress as you go.`;
 
-		// Switch to writer mode and execute
+		// Build the structured plan context for the writer agent
+		const planContext: ActivePlan = {
+			summary: message.content || "Execute the approved content plan",
+			steps: approvedSteps.map((s) => ({
+				id: s.id,
+				title: s.step,
+				description: s.description || "",
+				toolsToUse: s.toolsToUse,
+				rationale: s.rationale,
+			})),
+		};
+
+		// Clear plan mode messages so writer starts fresh
+		clearChat();
+
+		// Store the active plan in context
+		setActivePlan(planContext);
+
+		// Switch to writer mode
 		setChatMode("writer");
+
+		// Execute via callback
 		if (onExecutePlan) {
-			onExecutePlan(approvedSteps, executionPrompt);
+			onExecutePlan(approvedSteps, executionPrompt, planContext);
 		}
 	};
 

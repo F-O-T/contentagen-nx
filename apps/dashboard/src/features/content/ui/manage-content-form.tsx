@@ -2,7 +2,6 @@ import { translate } from "@packages/localization";
 import { Alert, AlertDescription } from "@packages/ui/components/alert";
 import { Button } from "@packages/ui/components/button";
 import { Field, FieldError, FieldLabel } from "@packages/ui/components/field";
-import { Input } from "@packages/ui/components/input";
 import {
 	Select,
 	SelectContent,
@@ -17,32 +16,20 @@ import {
 	SheetTitle,
 } from "@packages/ui/components/sheet";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { Textarea } from "@packages/ui/components/textarea";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { AlertTriangle } from "lucide-react";
 import type { FC, FormEvent } from "react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useSheet } from "@/hooks/use-sheet";
 import { useTRPC } from "@/integrations/clients";
 
-type Content = {
-	id: string;
-	agentId: string;
-	meta: {
-		title: string;
-		description: string;
-		slug: string;
-		keywords?: string[];
-		sources?: string[];
-	};
-};
-
 type ManageContentFormProps = {
-	content?: Content;
 	agentId?: string;
 };
 
@@ -74,11 +61,12 @@ function ManageContentSkeleton() {
 	);
 }
 
-function ManageContentFormContent({ content, agentId }: ManageContentFormProps) {
+function ManageContentFormContent({ agentId }: ManageContentFormProps) {
 	const { closeSheet } = useSheet();
+	const navigate = useNavigate();
+	const { activeOrganization } = useActiveOrganization();
 	const trpc = useTRPC();
 	const queryClient = useQueryClient();
-	const isEditMode = !!content;
 
 	const { data: writersData } = useSuspenseQuery(
 		trpc.agent.list.queryOptions({ limit: 100, page: 1 }),
@@ -88,32 +76,22 @@ function ManageContentFormContent({ content, agentId }: ManageContentFormProps) 
 
 	const createMutation = useMutation(
 		trpc.content.create.mutationOptions({
-			onSuccess: () => {
+			onSuccess: (data) => {
 				toast.success(translate("dashboard.routes.content.form.create-success"));
 				queryClient.invalidateQueries({
 					queryKey: trpc.content.listAllContent.queryKey(),
 				});
 				closeSheet();
-			},
-			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
-			},
-		}),
-	);
-
-	const updateMutation = useMutation(
-		trpc.content.update.mutationOptions({
-			onSuccess: () => {
-				toast.success(translate("dashboard.routes.content.form.update-success"));
-				queryClient.invalidateQueries({
-					queryKey: trpc.content.listAllContent.queryKey(),
-				});
-				if (content?.id) {
-					queryClient.invalidateQueries({
-						queryKey: trpc.content.getById.queryKey({ id: content.id }),
+				// Redirect to the content detail page
+				if (data?.id) {
+					navigate({
+						to: "/$slug/content/$contentId",
+						params: { 
+							slug: activeOrganization.slug,
+							contentId: data.id,
+						},
 					});
 				}
-				closeSheet();
 			},
 			onError: (error) => {
 				toast.error(error.message || translate("common.errors.default"));
@@ -121,49 +99,20 @@ function ManageContentFormContent({ content, agentId }: ManageContentFormProps) 
 		}),
 	);
 
-	const isPending = createMutation.isPending || updateMutation.isPending;
+	const isPending = createMutation.isPending;
 
 	const schema = z.object({
 		agentId: z.string().uuid(translate("dashboard.routes.content.form.writer-required")),
-		title: z
-			.string()
-			.min(1, translate("dashboard.routes.content.form.title-required"))
-			.max(200, translate("dashboard.routes.content.form.title-max")),
-		description: z
-			.string()
-			.min(1, translate("dashboard.routes.content.form.description-required"))
-			.max(500, translate("dashboard.routes.content.form.description-max")),
-		slug: z
-			.string()
-			.min(1, translate("dashboard.routes.content.form.slug-required"))
-			.regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, translate("dashboard.routes.content.form.slug-invalid")),
 	});
 
 	const form = useForm({
 		defaultValues: {
-			agentId: content?.agentId ?? agentId ?? "",
-			title: content?.meta.title ?? "",
-			description: content?.meta.description ?? "",
-			slug: content?.meta.slug ?? "",
+			agentId: agentId ?? "",
 		},
 		onSubmit: async ({ value }) => {
-			const meta = {
-				title: value.title,
-				description: value.description,
-				slug: value.slug,
-			};
-
-			if (isEditMode && content) {
-				updateMutation.mutate({
-					id: content.id,
-					data: { meta },
-				});
-			} else {
-				createMutation.mutate({
-					agentId: value.agentId,
-					meta,
-				});
-			}
+			createMutation.mutate({
+				agentId: value.agentId,
+			});
 		},
 		validators: {
 			onBlur: schema as unknown as undefined,
@@ -176,61 +125,10 @@ function ManageContentFormContent({ content, agentId }: ManageContentFormProps) 
 		form.handleSubmit();
 	};
 
-	// Auto-generate slug from title
-	const handleTitleChange = (title: string) => {
-		const slugValue = form.getFieldValue("slug");
-		// Only auto-generate if slug is empty or was auto-generated
-		if (!slugValue || slugValue === generateSlug(form.getFieldValue("title") ?? "")) {
-			form.setFieldValue("slug", generateSlug(title));
-		}
-	};
-
-	const generateSlug = (text: string) => {
-		return text
-			.toLowerCase()
-			.replace(/[^a-z0-9]+/g, "-")
-			.replace(/^-|-$/g, "");
-	};
-
 	return (
 		<>
 			<form className="grid gap-4 px-4 overflow-y-auto" onSubmit={handleSubmit}>
-				{!isEditMode && (
-					<form.Field name="agentId">
-						{(field) => {
-							const isInvalid =
-								field.state.meta.isTouched && !field.state.meta.isValid;
-
-							return (
-								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor={field.name}>
-										{translate("dashboard.routes.content.form.writer")}
-									</FieldLabel>
-									<Select
-										value={field.state.value}
-										onValueChange={field.handleChange}
-									>
-										<SelectTrigger>
-											<SelectValue
-												placeholder={translate("dashboard.routes.content.form.writer-placeholder")}
-											/>
-										</SelectTrigger>
-										<SelectContent>
-											{writers.map((writer) => (
-												<SelectItem key={writer.id} value={writer.id}>
-													{writer.personaConfig.metadata.name}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									{isInvalid && <FieldError errors={field.state.meta.errors} />}
-								</Field>
-							);
-						}}
-					</form.Field>
-				)}
-
-				<form.Field name="title">
+				<form.Field name="agentId">
 					{(field) => {
 						const isInvalid =
 							field.state.meta.isTouched && !field.state.meta.isValid;
@@ -238,78 +136,34 @@ function ManageContentFormContent({ content, agentId }: ManageContentFormProps) 
 						return (
 							<Field data-invalid={isInvalid}>
 								<FieldLabel htmlFor={field.name}>
-									{translate("dashboard.routes.content.form.title")}
+									{translate("dashboard.routes.content.form.writer")}
 								</FieldLabel>
-								<Input
-									aria-invalid={isInvalid}
-									id={field.name}
-									name={field.name}
-									onBlur={field.handleBlur}
-									onChange={(e) => {
-										field.handleChange(e.target.value);
-										handleTitleChange(e.target.value);
-									}}
-									placeholder={translate("dashboard.routes.content.form.title-placeholder")}
-									type="text"
+								<Select
 									value={field.state.value}
-								/>
+									onValueChange={field.handleChange}
+								>
+									<SelectTrigger>
+										<SelectValue
+											placeholder={translate("dashboard.routes.content.form.writer-placeholder")}
+										/>
+									</SelectTrigger>
+									<SelectContent>
+										{writers.map((writer) => (
+											<SelectItem key={writer.id} value={writer.id}>
+												{writer.personaConfig.metadata.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
 								{isInvalid && <FieldError errors={field.state.meta.errors} />}
 							</Field>
 						);
 					}}
 				</form.Field>
 
-				<form.Field name="slug">
-					{(field) => {
-						const isInvalid =
-							field.state.meta.isTouched && !field.state.meta.isValid;
-
-						return (
-							<Field data-invalid={isInvalid}>
-								<FieldLabel htmlFor={field.name}>
-									{translate("dashboard.routes.content.form.slug")}
-								</FieldLabel>
-								<Input
-									aria-invalid={isInvalid}
-									id={field.name}
-									name={field.name}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder={translate("dashboard.routes.content.form.slug-placeholder")}
-									type="text"
-									value={field.state.value}
-								/>
-								{isInvalid && <FieldError errors={field.state.meta.errors} />}
-							</Field>
-						);
-					}}
-				</form.Field>
-
-				<form.Field name="description">
-					{(field) => {
-						const isInvalid =
-							field.state.meta.isTouched && !field.state.meta.isValid;
-
-						return (
-							<Field data-invalid={isInvalid}>
-								<FieldLabel htmlFor={field.name}>
-									{translate("dashboard.routes.content.form.description")}
-								</FieldLabel>
-								<Textarea
-									aria-invalid={isInvalid}
-									id={field.name}
-									name={field.name}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder={translate("dashboard.routes.content.form.description-placeholder")}
-									rows={3}
-									value={field.state.value}
-								/>
-								{isInvalid && <FieldError errors={field.state.meta.errors} />}
-							</Field>
-						);
-					}}
-				</form.Field>
+				<p className="text-sm text-muted-foreground">
+					{translate("dashboard.routes.content.form.ai-assisted-description")}
+				</p>
 			</form>
 
 			<SheetFooter>
@@ -324,12 +178,8 @@ function ManageContentFormContent({ content, agentId }: ManageContentFormProps) 
 							type="submit"
 						>
 							{isPending
-								? isEditMode
-									? translate("dashboard.routes.content.form.saving")
-									: translate("dashboard.routes.content.form.creating")
-								: isEditMode
-									? translate("dashboard.routes.content.form.save")
-									: translate("dashboard.routes.content.form.create")}
+								? translate("dashboard.routes.content.form.creating")
+								: translate("dashboard.routes.content.form.start-creating")}
 						</Button>
 					)}
 				</form.Subscribe>
@@ -338,26 +188,20 @@ function ManageContentFormContent({ content, agentId }: ManageContentFormProps) 
 	);
 }
 
-export const ManageContentForm: FC<ManageContentFormProps> = ({ content, agentId }) => {
-	const isEditMode = !!content;
-
+export const ManageContentForm: FC<ManageContentFormProps> = ({ agentId }) => {
 	return (
 		<>
 			<SheetHeader>
 				<SheetTitle>
-					{isEditMode
-						? translate("dashboard.routes.content.form.edit-title")
-						: translate("dashboard.routes.content.form.create-title")}
+					{translate("dashboard.routes.content.form.create-title")}
 				</SheetTitle>
 				<SheetDescription>
-					{isEditMode
-						? translate("dashboard.routes.content.form.edit-description")
-						: translate("dashboard.routes.content.form.create-description")}
+					{translate("dashboard.routes.content.form.ai-create-description")}
 				</SheetDescription>
 			</SheetHeader>
 			<ErrorBoundary FallbackComponent={ManageContentErrorFallback}>
 				<Suspense fallback={<ManageContentSkeleton />}>
-					<ManageContentFormContent content={content} agentId={agentId} />
+					<ManageContentFormContent agentId={agentId} />
 				</Suspense>
 			</ErrorBoundary>
 		</>

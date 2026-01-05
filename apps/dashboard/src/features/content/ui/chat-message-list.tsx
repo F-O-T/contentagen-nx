@@ -1,6 +1,6 @@
 import { LogoIcon } from "@packages/ui/blocks/logo";
 import { useEffect, useRef } from "react";
-import type { ChatMessage as ChatMessageType, ToolCall, StreamingStep, PlanStep } from "../context/chat-context";
+import type { ChatMessage as ChatMessageType, ToolCall, StreamingStep, PlanStep, ActivePlan } from "../context/chat-context";
 import { ChatMessage } from "./chat-message";
 import { ChatPlanMessage } from "./chat-plan-message";
 import { ChatEditSuggestion } from "./chat-edit-suggestion";
@@ -13,7 +13,7 @@ interface ChatMessageListProps {
 	activeToolCalls?: ToolCall[];
 	streamingSteps?: StreamingStep[];
 	onAcceptEdit?: (suggestion: NonNullable<ChatMessageType["editSuggestion"]>) => void;
-	onExecutePlan?: (approvedSteps: PlanStep[], executionPrompt: string) => void;
+	onExecutePlan?: (approvedSteps: PlanStep[], executionPrompt: string, planContext: ActivePlan) => void;
 }
 
 function ChatMessageItem({
@@ -23,7 +23,7 @@ function ChatMessageItem({
 }: {
 	message: ChatMessageType;
 	onAcceptEdit?: (suggestion: NonNullable<ChatMessageType["editSuggestion"]>) => void;
-	onExecutePlan?: (approvedSteps: PlanStep[], executionPrompt: string) => void;
+	onExecutePlan?: (approvedSteps: PlanStep[], executionPrompt: string, planContext: ActivePlan) => void;
 }) {
 	if (message.type === "plan") {
 		return <ChatPlanMessage message={message} onExecutePlan={onExecutePlan} />;
@@ -80,7 +80,7 @@ export function ChatMessageList({
 	}
 
 	return (
-		<div ref={scrollRef} className="flex flex-col px-3">
+		<div ref={scrollRef} className="flex flex-col px-3 overflow-x-hidden">
 			{messages.map((message) => (
 				<ChatMessageItem
 					key={message.id}

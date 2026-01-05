@@ -15,12 +15,11 @@ import {
 } from "@packages/ui/components/selection-action-bar";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import type { RowSelectionState } from "@tanstack/react-table";
+import { useNavigate } from "@tanstack/react-router";
 import { FileText, Trash2 } from "lucide-react";
 import { Fragment, useState } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
-import { useSheet } from "@/hooks/use-sheet";
-import { ManageContentForm } from "./manage-content-form";
 import { ContentFilterBar } from "./content-filter-bar";
 import { ContentMobileCard } from "./content-mobile-card";
 import { createContentColumns, type ContentItem } from "./content-table-columns";
@@ -80,7 +79,7 @@ export function ContentDataTable({
 }: ContentDataTableProps) {
 	const { activeOrganization } = useActiveOrganization();
 	const { openAlertDialog } = useAlertDialog();
-	const { openSheet } = useSheet();
+	const navigate = useNavigate();
 	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
 	const hasSearchTerm = filters.searchTerm.length > 0;
@@ -95,8 +94,12 @@ export function ContentDataTable({
 	};
 
 	const handleEditContent = (content: ContentItem) => {
-		openSheet({
-			children: <ManageContentForm content={content} />,
+		navigate({
+			to: "/$slug/content/$contentId",
+			params: {
+				slug: activeOrganization.slug,
+				contentId: content.id,
+			},
 		});
 	};
 

@@ -25,6 +25,27 @@ export interface AgentChatRequest {
 	model?: string;
 	maxTokens?: number;
 	temperature?: number;
+	planContext?: {
+		summary: string;
+		steps: Array<{
+			id: string;
+			title: string;
+			description: string;
+			toolsToUse?: string[];
+			rationale?: string;
+		}>;
+		researchInsights?: {
+			serpIntent?: string;
+			topRankingTopics?: string[];
+			competitorStrengths?: string[];
+			contentGaps?: string[];
+			suggestedKeywords?: string[];
+		};
+		estimatedWordCount?: number;
+		targetKeywords?: string[];
+		suggestedTitle?: string;
+		suggestedDescription?: string;
+	};
 }
 
 /**

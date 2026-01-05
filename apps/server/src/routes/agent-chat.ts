@@ -5,6 +5,7 @@ import {
 	createRequestContext,
 	type ChatMode,
 	type ModelId,
+	type ContentPlan,
 } from "@packages/agents";
 import {
 	addChatMessage,
@@ -49,6 +50,7 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 				documentContext,
 				mode,
 				model,
+				planContext,
 			} = body;
 
 			// Save user message to database
@@ -94,16 +96,18 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 				content: m.content,
 			}));
 
-			// Create request context with mode and model
+			// Create request context with mode, model, and optional plan
 			const requestContext = createRequestContext({
 				userId: session.user.id,
 				brandId: organizationId,
 				mode: (mode as ChatMode) || "plan",
 				model: (model as ModelId) || "x-ai/grok-4.1-fast",
+				activePlan: mode === "writer" ? (planContext as ContentPlan) : undefined,
 			});
 
-			// Get the blog editor agent
-			const agent = mastra.getAgent("blogEditorAgent");
+			// Select agent based on mode
+			const agentId = mode === "plan" ? "planAgent" : "writerAgent";
+			const agent = mastra.getAgent(agentId);
 
 			// Initialize step state for tracking agent execution
 			let currentStep: StepState = {
@@ -273,6 +277,33 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 				model: t.Optional(t.String()),
 				maxTokens: t.Optional(t.Number()),
 				temperature: t.Optional(t.Number()),
+				planContext: t.Optional(
+					t.Object({
+						summary: t.String(),
+						steps: t.Array(
+							t.Object({
+								id: t.String(),
+								title: t.String(),
+								description: t.String(),
+								toolsToUse: t.Optional(t.Array(t.String())),
+								rationale: t.Optional(t.String()),
+							}),
+						),
+						researchInsights: t.Optional(
+							t.Object({
+								serpIntent: t.Optional(t.String()),
+								topRankingTopics: t.Optional(t.Array(t.String())),
+								competitorStrengths: t.Optional(t.Array(t.String())),
+								contentGaps: t.Optional(t.Array(t.String())),
+								suggestedKeywords: t.Optional(t.Array(t.String())),
+							}),
+						),
+						estimatedWordCount: t.Optional(t.Number()),
+						targetKeywords: t.Optional(t.Array(t.String())),
+						suggestedTitle: t.Optional(t.String()),
+						suggestedDescription: t.Optional(t.String()),
+					}),
+				),
 			}),
 		},
 	)

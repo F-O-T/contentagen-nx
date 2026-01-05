@@ -25,7 +25,7 @@ import {
 	Sparkles,
 	Wand2,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { KeywordsInput } from "./keywords-input";
@@ -64,7 +64,7 @@ const metaSchema = z.object({
 });
 
 export function ContentFrontmatterPanel({
-	contentId,
+	contentId: _contentId,
 	meta,
 	body,
 	onMetaChange,
@@ -73,6 +73,16 @@ export function ContentFrontmatterPanel({
 	className,
 }: ContentFrontmatterPanelProps) {
 	const [isOpen, setIsOpen] = useState(true);
+	// Track if we're currently updating from external props to avoid loops
+	const isExternalUpdate = useRef(false);
+	// Track the last external meta values to detect external changes
+	const lastExternalMeta = useRef({
+		title: meta.title,
+		description: meta.description,
+		slug: meta.slug,
+		keywords: meta.keywords,
+	});
+
 	const {
 		generateDescription,
 		generateKeywords,
@@ -99,18 +109,54 @@ export function ContentFrontmatterPanel({
 		},
 	});
 
-	// Sync form with external meta changes
-	useEffect(() => {
-		form.setFieldValue("title", meta.title ?? "");
-		form.setFieldValue("description", meta.description ?? "");
-		form.setFieldValue("slug", meta.slug ?? "");
-		form.setFieldValue("keywords", meta.keywords ?? []);
-	}, [contentId]);
+	// Stable reference for keywords comparison
+	const keywordsKey = JSON.stringify(meta.keywords ?? []);
 
-	// Debounced save callback
-	const debouncedSave = useDebouncedCallback(
+	// Sync form with external meta changes (e.g., from agent tool calls)
+	useEffect(() => {
+		// Check if any external values have changed
+		const titleChanged = meta.title !== lastExternalMeta.current.title;
+		const descriptionChanged = meta.description !== lastExternalMeta.current.description;
+		const slugChanged = meta.slug !== lastExternalMeta.current.slug;
+		const keywordsChanged = keywordsKey !== JSON.stringify(lastExternalMeta.current.keywords ?? []);
+
+		if (titleChanged || descriptionChanged || slugChanged || keywordsChanged) {
+			// Mark as external update to prevent save loop
+			isExternalUpdate.current = true;
+
+			// Update form values
+			if (titleChanged) form.setFieldValue("title", meta.title ?? "");
+			if (descriptionChanged) form.setFieldValue("description", meta.description ?? "");
+			if (slugChanged) form.setFieldValue("slug", meta.slug ?? "");
+			if (keywordsChanged) form.setFieldValue("keywords", [...(meta.keywords ?? [])]);
+
+			// Update the ref to track new external values
+			lastExternalMeta.current = {
+				title: meta.title,
+				description: meta.description,
+				slug: meta.slug,
+				keywords: meta.keywords,
+			};
+
+			// Reset external update flag after a short delay
+			setTimeout(() => {
+				isExternalUpdate.current = false;
+			}, 100);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [meta.title, meta.description, meta.slug, keywordsKey]);
+
+	// Debounced save callback - skip if it's an external update
+	const { call: debouncedSave } = useDebouncedCallback(
 		(updates: Partial<ContentMeta>) => {
-			onMetaChange(updates);
+			if (!isExternalUpdate.current) {
+				// Update our ref to the new values we're saving
+				lastExternalMeta.current = {
+					...lastExternalMeta.current,
+					...updates,
+				};
+				onMetaChange(updates);
+			}
 		},
 		1000,
 	);

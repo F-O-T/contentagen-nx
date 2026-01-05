@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import { clientEnv } from "@packages/environment/client";
 import {
 	useChatContext,
+	getChatState,
 	initializeChatSession,
 	addUserMessage,
 	setChatError,
@@ -10,6 +11,7 @@ import {
 	addPlanMessage,
 	type ChatMessage,
 	type ToolCallStatus,
+	type ActivePlan,
 	// Step actions
 	startStreamingWithSteps,
 	startNewStep,
@@ -47,10 +49,15 @@ interface ChatSessionResponse {
 	}>;
 }
 
-export function useChatSession(contentId: string) {
+interface UseChatSessionOptions {
+	onAgentComplete?: () => void;
+}
+
+export function useChatSession(contentId: string, options?: UseChatSessionOptions) {
+	const { onAgentComplete } = options ?? {};
+
 	const {
 		phase,
-		mode,
 		model,
 		isOpen,
 		sessionId,
@@ -77,6 +84,8 @@ export function useChatSession(contentId: string) {
 		},
 		onComplete: () => {
 			finalizeStreaming();
+			// Notify parent that agent completed - triggers content save flush
+			onAgentComplete?.();
 		},
 		onError: (error) => {
 			setChatError(error);
@@ -151,8 +160,13 @@ export function useChatSession(contentId: string) {
 
 	// Send a message
 	const sendMessage = useCallback(
-		async (content: string, documentContext?: string) => {
+		async (content: string, documentContext?: string, planContext?: ActivePlan) => {
 			if (!sessionId || !content.trim()) return;
+
+			// Read current state from store (not from stale closure)
+			const currentState = getChatState();
+			const currentMode = currentState.mode;
+			const currentActivePlan = currentState.activePlan;
 
 			// Add user message to state
 			addUserMessage(content);
@@ -166,21 +180,24 @@ export function useChatSession(contentId: string) {
 				{ role: "user" as const, content },
 			];
 
-			// Build request with model from context
+			// Build request with fresh mode from store
+			const effectivePlanContext = planContext || (currentMode === "writer" ? currentActivePlan : undefined);
+
 			const request: AgentChatRequest = {
 				sessionId,
 				contentId,
 				messages: allMessages,
 				selectionContext: selectionContext || undefined,
 				documentContext,
-				mode,
+				mode: currentMode,
 				model: model === "glm-4.7" ? "z-ai/glm-4.7" : "x-ai/grok-4.1-fast",
+				planContext: effectivePlanContext || undefined,
 			};
 
 			// Send to API with full context
 			await sendAgentMessage(request);
 		},
-		[sessionId, contentId, messages, selectionContext, mode, model, sendAgentMessage],
+		[sessionId, contentId, messages, selectionContext, model, sendAgentMessage],
 	);
 
 	// Clear the conversation

@@ -15,7 +15,9 @@ import {
 	ContentMetaSchema,
 	ContentRequestSchema,
 } from "@packages/database/schema";
+import { content } from "@packages/database/schemas/content";
 import { APIError, propagateError } from "@packages/utils/errors";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 
@@ -195,7 +197,7 @@ export const contentRouter = router({
 			z.object({
 				agentId: z.string().uuid(),
 				body: z.string().optional().default(""),
-				meta: ContentMetaSchema,
+				meta: ContentMetaSchema.optional(),
 				request: ContentRequestSchema.optional(),
 			}),
 		)
@@ -222,11 +224,18 @@ export const contentRouter = router({
 					);
 				}
 
+				// Provide default meta if not supplied
+				const meta = input.meta ?? {
+					title: "Untitled",
+					description: "",
+					slug: `untitled-${Date.now()}`,
+				};
+
 				const created = await createContent(resolvedCtx.db, {
 					agentId: input.agentId,
 					body: input.body,
 					createdByMemberId: memberId,
-					meta: input.meta,
+					meta,
 					request: input.request,
 				});
 
@@ -270,22 +279,26 @@ export const contentRouter = router({
 					);
 				}
 
-				const updateData: Parameters<typeof updateContent>[2] = {};
+				// Handle body update using the repository function
 				if (input.data.body !== undefined) {
-					updateData.body = input.data.body;
-				}
-				if (input.data.meta) {
-					updateData.meta = {
-						...existing.meta,
-						...input.data.meta,
-					};
+					await updateContent(resolvedCtx.db, input.id, {
+						body: input.data.body,
+					});
 				}
 
-				const updated = await updateContent(
-					resolvedCtx.db,
-					input.id,
-					updateData,
-				);
+				// Handle meta update using atomic JSONB merge to prevent race conditions
+				// This uses PostgreSQL's || operator which merges JSONB objects atomically
+				if (input.data.meta) {
+					await resolvedCtx.db
+						.update(content)
+						.set({
+							meta: sql`COALESCE(${content.meta}, '{}'::jsonb) || ${JSON.stringify(input.data.meta)}::jsonb`,
+						})
+						.where(eq(content.id, input.id));
+				}
+
+				// Fetch and return the updated content
+				const updated = await getContentById(resolvedCtx.db, input.id);
 				return updated;
 			} catch (err) {
 				console.error("Error updating content:", err);

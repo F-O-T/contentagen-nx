@@ -2,9 +2,11 @@ import { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
 import { PinoLogger } from "@mastra/loggers";
 import type { SupportedLng } from "@packages/localization";
-import { blogEditorAgent } from "./agents/blog-editor-agent";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
+import { planAgent } from "./agents/plan-agent";
+import { writerAgent } from "./agents/writer-agent";
+import type { ContentPlan } from "./schemas/plan-schema";
 
 // Chat modes for blog editor
 export type ChatMode = "plan" | "writer";
@@ -20,14 +22,16 @@ export type CustomRequestContext = {
 	language?: SupportedLng;
 	userId: string;
 	agentId?: string;
-	// New fields for blog editor
+	// Fields for blog editor
 	mode?: ChatMode;
 	model?: ModelId;
+	activePlan?: ContentPlan;
 };
 
 export const mastra = new Mastra({
 	agents: {
-		blogEditorAgent,
+		planAgent,
+		writerAgent,
 		fimAgent,
 		inlineEditAgent,
 	},
@@ -68,11 +72,15 @@ export function createRequestContext(context: CustomRequestContext) {
    if (context.model) {
       requestContext.set("model", context.model);
    }
+   if (context.activePlan) {
+      requestContext.set("activePlan", context.activePlan);
+   }
    return requestContext;
 }
 
 // Export agents for direct access
-export { blogEditorAgent } from "./agents/blog-editor-agent";
+export { planAgent } from "./agents/plan-agent";
+export { writerAgent } from "./agents/writer-agent";
 export { fimAgent } from "./agents/fim-agent";
 export { inlineEditAgent } from "./agents/inline-edit-agent";
 

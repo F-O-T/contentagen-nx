@@ -32,6 +32,8 @@
       "status": "Status"
    },
    "form": {
+      "ai-assisted-description": "A IA vai te ajudar a planejar e escrever seu conteúdo. Você poderá revisar e editar tudo depois.",
+      "ai-create-description": "Selecione um escritor para começar a criar seu conteúdo com ajuda da IA.",
       "create": "Criar Conteúdo",
       "create-description": "Crie um novo conteúdo",
       "create-success": "Conteúdo criado com sucesso",
@@ -49,6 +51,7 @@
       "slug-invalid": "O slug deve conter apenas letras minúsculas, números e hífens",
       "slug-placeholder": "url-do-conteudo",
       "slug-required": "O slug é obrigatório",
+      "start-creating": "Começar",
       "title": "Título",
       "title-max": "O título deve ter no máximo 200 caracteres",
       "title-placeholder": "Título do conteúdo",

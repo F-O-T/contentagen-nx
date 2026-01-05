@@ -2,6 +2,31 @@ import { Store, useStore } from "@tanstack/react-store";
 import type { LexicalEditor } from "lexical";
 
 export type ChatPhase = "idle" | "loading" | "streaming" | "error";
+
+/**
+ * Active plan context passed to writer agent
+ */
+export interface ActivePlan {
+	summary: string;
+	steps: Array<{
+		id: string;
+		title: string;
+		description: string;
+		toolsToUse?: string[];
+		rationale?: string;
+	}>;
+	researchInsights?: {
+		serpIntent?: string;
+		topRankingTopics?: string[];
+		competitorStrengths?: string[];
+		contentGaps?: string[];
+		suggestedKeywords?: string[];
+	};
+	estimatedWordCount?: number;
+	targetKeywords?: string[];
+	suggestedTitle?: string;
+	suggestedDescription?: string;
+}
 export type ChatMode = "plan" | "writer";
 export type ChatModel = "grok-4.1-fast" | "glm-4.7" | "mistral-small-creative";
 export type ToolCallStatus = "pending" | "executing" | "completed" | "error";
@@ -100,6 +125,8 @@ interface ChatState {
 	currentStepIndex: number;
 	// Editor reference for tool execution
 	editor: LexicalEditor | null;
+	// Active plan for writer agent execution
+	activePlan: ActivePlan | null;
 }
 
 const initialState: ChatState = {
@@ -120,6 +147,7 @@ const initialState: ChatState = {
 	streamingSteps: [],
 	currentStepIndex: 0,
 	editor: null,
+	activePlan: null,
 };
 
 const chatStore = new Store<ChatState>(initialState);
@@ -505,6 +533,24 @@ export const setEditor = (editor: LexicalEditor | null) =>
 		editor,
 	}));
 
+/**
+ * Set the active plan for writer agent execution
+ */
+export const setActivePlan = (plan: ActivePlan | null) =>
+	chatStore.setState((state) => ({
+		...state,
+		activePlan: plan,
+	}));
+
+/**
+ * Clear the active plan
+ */
+export const clearActivePlan = () =>
+	chatStore.setState((state) => ({
+		...state,
+		activePlan: null,
+	}));
+
 // =====================
 // Streaming Step Actions
 // =====================
@@ -683,6 +729,9 @@ export const useChatContext = () => {
 		setExecutingStep,
 		approveAllSteps,
 		setEditor,
+		// Active plan actions
+		setActivePlan,
+		clearActivePlan,
 		// Streaming step actions
 		startNewStep,
 		appendToCurrentStep,
