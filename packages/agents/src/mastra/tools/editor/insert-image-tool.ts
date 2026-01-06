@@ -45,23 +45,33 @@ export const insertImageTool = createTool({
 export function getInsertImageInstructions(): string {
 	return `
 ## INSERT IMAGE TOOL
-Adds an image to the blog post.
+Inserts an image into the blog post using a URL from searchImage results.
 
-**When to use:** Adding visual content, screenshots, diagrams, illustrations
+**IMPORTANT WORKFLOW:**
+1. FIRST call searchImage to find relevant images
+2. Review the returned URLs and pick the best one
+3. THEN call insertImage with the URL and a descriptive alt text
+
+**DO NOT:**
+- Use placeholder URLs or made-up URLs
+- Write markdown syntax like ![alt](url) in text - use this tool instead
+- Skip the searchImage step - always search first
 
 **Parameters:**
-- url (string): Full URL to the image
-- alt (string): Descriptive alt text (important for SEO and accessibility)
+- url (string): Full URL from searchImage results (REQUIRED)
+- alt (string): Descriptive alt text for accessibility and SEO (REQUIRED)
 - caption (string, optional): Caption below the image
-- position (enum): Where to insert
-- paragraphIndex (number, optional): For paragraph-relative positioning
-- width (enum, optional): Display size - small, medium, large, full
+- position (enum): Where to insert - "cursor", "afterParagraph", "end"
+- width (enum, optional): "small", "medium", "large", "full"
 
-**Example:**
-url: "https://example.com/screenshot.png"
-alt: "Dashboard showing the analytics overview with key metrics highlighted"
-caption: "The new analytics dashboard"
-position: "afterParagraph"
-paragraphIndex: 2
+**Example workflow:**
+1. searchImage({ query: "team collaboration office", count: 3 })
+2. Review results, pick best URL
+3. insertImage({ 
+     url: "https://images.unsplash.com/photo-xxx", 
+     alt: "Team collaborating around a whiteboard in a modern office",
+     caption: "Effective collaboration leads to better outcomes",
+     position: "end"
+   })
 `;
 }

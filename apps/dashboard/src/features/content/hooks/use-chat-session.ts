@@ -34,6 +34,7 @@ interface ChatSessionResponse {
 		role: "user" | "assistant";
 		content: string;
 		createdAt: string;
+		messageType?: "text" | "plan" | "tool-use";
 		selectionContext?: {
 			text: string;
 			contextBefore: string;
@@ -45,6 +46,14 @@ interface ChatSessionResponse {
 			args: Record<string, unknown>;
 			result?: unknown;
 			status: string;
+		}>;
+		planSteps?: Array<{
+			id: string;
+			title: string;
+			description?: string;
+			toolsToUse?: string[];
+			rationale?: string;
+			status: "pending" | "approved" | "skipped" | "completed";
 		}>;
 	}>;
 }
@@ -103,10 +112,10 @@ export function useChatSession(contentId: string, options?: UseChatSessionOption
 			);
 		},
 		onPlanCreated: (plan) => {
+			// Finalize streaming first to add tool call messages in order
+			finalizeStreaming();
 			// Add plan message to chat - this triggers the ChatPlanMessage UI
 			addPlanMessage(plan.summary, plan.steps);
-			// Finalize streaming since the plan is the final output
-			finalizeStreaming();
 		},
 	});
 
@@ -130,22 +139,41 @@ export function useChatSession(contentId: string, options?: UseChatSessionOption
 
 				const data: ChatSessionResponse = await response.json();
 
-				// Transform messages to our format (including tool calls from history)
-				const transformedMessages: ChatMessage[] = data.messages.map((m) => ({
-					id: m.id,
-					role: m.role,
-					content: m.content,
-					timestamp: new Date(m.createdAt).getTime(),
-					selectionContext: m.selectionContext,
-					type: m.toolCalls && m.toolCalls.length > 0 ? "tool-use" : "text",
-					toolCalls: m.toolCalls?.map((tc) => ({
-						id: tc.id,
-						name: tc.name,
-						args: tc.args,
-						result: tc.result,
-						status: tc.status as "pending" | "executing" | "completed" | "error",
-					})),
-				}));
+				// Transform messages to our format (including tool calls and plan steps from history)
+				const transformedMessages: ChatMessage[] = data.messages.map((m) => {
+					// Determine message type
+					let type: "text" | "plan" | "tool-use" | "edit-suggestion" = "text";
+					if (m.messageType === "plan" || (m.planSteps && m.planSteps.length > 0)) {
+						type = "plan";
+					} else if (m.toolCalls && m.toolCalls.length > 0) {
+						type = "tool-use";
+					}
+
+					return {
+						id: m.id,
+						role: m.role,
+						content: m.content,
+						timestamp: new Date(m.createdAt).getTime(),
+						selectionContext: m.selectionContext,
+						type,
+						toolCalls: m.toolCalls?.map((tc) => ({
+							id: tc.id,
+							name: tc.name,
+							args: tc.args,
+							result: tc.result,
+							status: tc.status as "pending" | "executing" | "completed" | "error",
+						})),
+						// Convert plan steps to the format expected by ChatPlanMessage
+						planSteps: m.planSteps?.map((step) => ({
+							id: step.id,
+							step: step.title,
+							description: step.description,
+							toolsToUse: step.toolsToUse,
+							rationale: step.rationale,
+							status: step.status,
+						})),
+					};
+				});
 
 				initializeChatSession(data.session.id, contentId, transformedMessages);
 			} catch (err) {

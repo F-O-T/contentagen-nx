@@ -24,6 +24,7 @@ import {
 	$convertToMarkdownString,
 } from "@lexical/markdown";
 import { EXTENDED_TRANSFORMERS } from "../ui/content-editor";
+import { $createImageNode, type ImageWidth } from "../nodes/image-node";
 
 /**
  * Tool call received from the Mastra agent
@@ -385,22 +386,55 @@ function executeInsertTable(
 }
 
 /**
- * Insert an image (placeholder - requires image handling infrastructure)
+ * Insert an image into the editor
  */
 function executeInsertImage(
-	_editor: LexicalEditor,
+	editor: LexicalEditor,
 	args: Record<string, unknown>,
 ): ToolExecutionResult {
-	const src = args.src as string;
-	const altText = args.altText as string;
+	// Support both 'url' and 'src' parameter names
+	const url = (args.url as string) || (args.src as string);
+	const alt = (args.alt as string) || (args.altText as string) || "";
+	const caption = args.caption as string | undefined;
+	const position = (args.position as string) || "end";
+	const width = (args.width as ImageWidth) || "full";
 
-	// Note: Actual image insertion requires an ImageNode to be implemented
-	// and registered with the editor. This is a placeholder that returns
-	// the image data for the UI to handle.
+	if (!url) {
+		return {
+			success: false,
+			message: "Image URL is required",
+		};
+	}
+
+	editor.update(() => {
+		const root = $getRoot();
+		const imageNode = $createImageNode(url, alt, caption, width);
+
+		if (position === "start") {
+			const firstChild = root.getFirstChild();
+			if (firstChild) {
+				firstChild.insertBefore(imageNode);
+			} else {
+				root.append(imageNode);
+			}
+		} else if (position === "cursor") {
+			const selection = $getSelection();
+			if ($isRangeSelection(selection)) {
+				const anchor = selection.anchor.getNode();
+				anchor.getTopLevelElement()?.insertAfter(imageNode);
+			} else {
+				root.append(imageNode);
+			}
+		} else {
+			// Default: end
+			root.append(imageNode);
+		}
+	});
+
 	return {
 		success: true,
-		message: "Image data prepared for insertion",
-		data: { src, altText, caption: args.caption },
+		message: `Inserted image: ${alt || "image"}`,
+		data: { url, alt, caption, width },
 	};
 }
 

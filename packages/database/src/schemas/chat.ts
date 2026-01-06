@@ -40,6 +40,25 @@ export const StoredToolCallSchema = z.object({
 
 export type StoredToolCall = z.infer<typeof StoredToolCallSchema>;
 
+// Plan step schema for JSONB (for plan-type messages)
+export const StoredPlanStepSchema = z.object({
+	id: z.string(),
+	title: z.string(),
+	description: z.string().optional(),
+	toolsToUse: z.array(z.string()).optional(),
+	rationale: z.string().optional(),
+	status: z.enum(["pending", "approved", "skipped", "completed"]),
+});
+
+export type StoredPlanStep = z.infer<typeof StoredPlanStepSchema>;
+
+// Chat message type enum
+export const chatMessageTypeEnum = pgEnum("chat_message_type", [
+	"text",
+	"plan",
+	"tool-use",
+]);
+
 // Chat session - one per content document
 export const chatSession = pgTable(
 	"chat_session",
@@ -89,8 +108,10 @@ export const chatMessage = pgTable(
 			.references(() => chatSession.id, { onDelete: "cascade" }),
 		role: chatMessageRoleEnum("role").notNull(),
 		content: text("content").notNull(),
+		messageType: chatMessageTypeEnum("message_type").default("text"),
 		selectionContext: jsonb("selection_context").$type<SelectionContext>(),
 		toolCalls: jsonb("tool_calls").$type<StoredToolCall[]>(),
+		planSteps: jsonb("plan_steps").$type<StoredPlanStep[]>(),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 	},
 	(table) => [
@@ -112,6 +133,7 @@ export type ChatSessionInsert = typeof chatSession.$inferInsert;
 export type ChatMessage = typeof chatMessage.$inferSelect;
 export type ChatMessageInsert = typeof chatMessage.$inferInsert;
 export type ChatMessageRole = (typeof chatMessageRoleEnum.enumValues)[number];
+export type ChatMessageType = (typeof chatMessageTypeEnum.enumValues)[number];
 
 // Zod schemas for validation
 export const ChatSessionInsertSchema = createInsertSchema(chatSession);

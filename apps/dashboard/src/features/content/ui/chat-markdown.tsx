@@ -10,7 +10,7 @@ interface ChatMarkdownProps {
 
 export function ChatMarkdown({ content, className }: ChatMarkdownProps) {
 	return (
-		<div className={cn("prose prose-sm dark:prose-invert max-w-none", className)}>
+		<div className={cn("prose prose-sm dark:prose-invert max-w-full break-words overflow-hidden", className)}>
 			<ReactMarkdown
 				remarkPlugins={[remarkGfm]}
 				rehypePlugins={[rehypeHighlight]}

@@ -6,6 +6,8 @@ import {
 	chatMessage,
 	type SelectionContext,
 	type StoredToolCall,
+	type StoredPlanStep,
+	type ChatMessageType,
 } from "../schemas/chat";
 
 /**
@@ -123,6 +125,8 @@ export async function addChatMessage(
 	content: string,
 	selectionContext?: SelectionContext,
 	toolCalls?: StoredToolCall[],
+	messageType?: ChatMessageType,
+	planSteps?: StoredPlanStep[],
 ) {
 	try {
 		const result = await dbClient
@@ -131,8 +135,10 @@ export async function addChatMessage(
 				sessionId,
 				role,
 				content,
+				messageType: messageType ?? "text",
 				selectionContext,
 				toolCalls: toolCalls && toolCalls.length > 0 ? toolCalls : undefined,
+				planSteps: planSteps && planSteps.length > 0 ? planSteps : undefined,
 			})
 			.returning();
 

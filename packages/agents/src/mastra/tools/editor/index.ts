@@ -28,6 +28,10 @@ import {
 	getReplaceTextInstructions,
 	replaceTextTool,
 } from "./replace-text-tool";
+import {
+	getSearchImageInstructions,
+	searchImageTool,
+} from "./search-image-tool";
 
 // Re-export tools
 export { deleteTextTool, getDeleteTextInstructions } from "./delete-text-tool";
@@ -60,6 +64,10 @@ export {
 	getReplaceTextInstructions,
 	replaceTextTool,
 } from "./replace-text-tool";
+export {
+	getSearchImageInstructions,
+	searchImageTool,
+} from "./search-image-tool";
 
 // Combined instructions for all editor tools
 export function getAllEditorToolInstructions(): string {
@@ -75,6 +83,7 @@ ${getInsertHeadingInstructions()}
 ${getInsertListInstructions()}
 ${getInsertCodeBlockInstructions()}
 ${getInsertTableInstructions()}
+${getSearchImageInstructions()}
 ${getInsertImageInstructions()}
 `;
 }
@@ -89,5 +98,6 @@ export const editorTools = {
 	insertList: insertListTool,
 	insertCodeBlock: insertCodeBlockTool,
 	insertTable: insertTableTool,
+	searchImage: searchImageTool,
 	insertImage: insertImageTool,
 };

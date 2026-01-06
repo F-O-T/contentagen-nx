@@ -136,7 +136,7 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 				// Stream using fullStream for real-time tool events
 				const stream = await agent.stream(mastraMessages, {
 					requestContext,
-					maxSteps: 10,
+					maxSteps: 20,
 				});
 
 				// Emit initial step start
@@ -222,6 +222,46 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 								status: "completed",
 								executedAt: Date.now(),
 							});
+
+							// Special handling for createPlan tool - save as plan message
+							if (pendingTool?.name === "createPlan") {
+								const planResult = chunk.payload.result as {
+									summary: string;
+									steps: Array<{
+										id: string;
+										title: string;
+										description: string;
+										toolsToUse?: string[];
+										rationale?: string;
+									}>;
+								};
+
+								// Save plan message to database
+								await addChatMessage(
+									db,
+									sessionId,
+									"assistant",
+									planResult.summary,
+									undefined,
+									undefined,
+									"plan",
+									planResult.steps.map((step) => ({
+										id: step.id,
+										title: step.title,
+										description: step.description,
+										toolsToUse: step.toolsToUse,
+										rationale: step.rationale,
+										status: "pending" as const,
+									})),
+								);
+
+								// Emit plan_created event for frontend
+								yield JSON.stringify({
+									type: "plan_created",
+									plan: planResult,
+									stepIndex: currentStep.stepIndex,
+								}) + "\n";
+							}
 
 							// Emit tool call complete
 							yield JSON.stringify({

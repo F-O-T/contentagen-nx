@@ -112,7 +112,6 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 	const { openAlertDialog } = useAlertDialog();
 	const [isSaving, setIsSaving] = useState(false);
 	const [isSavingMeta, setIsSavingMeta] = useState(false);
-	const [hasStartedEditing, setHasStartedEditing] = useState(false);
 
 	// Get chat mode from context
 	const { mode: chatMode } = useChatState();
@@ -122,17 +121,10 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 	);
 
 	// Determine if we're in planning mode (full-page chat) or editing mode (split view)
-	// Planning mode: content body is empty/untitled AND chat is in plan mode AND user hasn't started editing
-	const isPlanning = !hasStartedEditing && 
-		(!content.body || content.body.trim() === "") && 
-		chatMode === "plan";
-
-	// Switch to editing mode when chat mode changes to writer
-	useEffect(() => {
-		if (chatMode === "writer" && !hasStartedEditing) {
-			setHasStartedEditing(true);
-		}
-	}, [chatMode, hasStartedEditing]);
+	// Planning mode: content body is empty AND chat mode is still "plan"
+	// - When content exists: show editor (handles refresh case)
+	// - When chatMode becomes "writer": show editor (handles Execute Plan click)
+	const isPlanning = (!content.body || content.body.trim() === "") && chatMode === "plan";
 
 	const updateMutation = useMutation(
 		trpc.content.update.mutationOptions({

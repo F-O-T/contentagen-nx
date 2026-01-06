@@ -44,6 +44,7 @@ import { ChatPlugin } from "../plugins/chat-plugin";
 import { FloatingToolbarPlugin } from "../plugins/floating-toolbar-plugin";
 import { MarkdownPastePlugin } from "../plugins/markdown-paste-plugin";
 import { GhostTextNode } from "../nodes/ghost-text-node";
+import { ImageNode, $createImageNode, $isImageNode } from "../nodes/image-node";
 import { TooltipProvider } from "@packages/ui/components/tooltip";
 
 type ContentEditorProps = {
@@ -69,8 +70,27 @@ const HR_TRANSFORMER: ElementTransformer = {
 	type: "element",
 };
 
+// Custom transformer for images
+const IMAGE_TRANSFORMER: ElementTransformer = {
+	dependencies: [ImageNode],
+	export: (node) => {
+		if (!$isImageNode(node)) return null;
+		const alt = node.getAlt() || "";
+		const src = node.getSrc();
+		return `![${alt}](${src})`;
+	},
+	regExp: /^!\[([^\]]*)\]\(([^)]+)\)$/,
+	replace: (parentNode, _children, match) => {
+		const [, alt, src] = match;
+		const imageNode = $createImageNode(src || "", alt || "");
+		parentNode.replace(imageNode);
+	},
+	type: "element",
+};
+
 export const EXTENDED_TRANSFORMERS = [
 	HR_TRANSFORMER,
+	IMAGE_TRANSFORMER,
 	CHECK_LIST,
 	...ELEMENT_TRANSFORMERS,
 	...MULTILINE_ELEMENT_TRANSFORMERS,
@@ -346,6 +366,7 @@ export function ContentEditor({
 			TableCellNode,
 			TableRowNode,
 			GhostTextNode,
+			ImageNode,
 		],
 		editable: !disabled,
 		// Don't set editorState here - we'll initialize via plugin for complex content
@@ -520,6 +541,24 @@ export function ContentEditor({
 							padding: 0.5rem;
 						}
 						.editor-table-row {
+						}
+						.editor-image {
+							display: block;
+							margin: 1rem 0;
+						}
+						.editor-image-wrapper {
+							display: block;
+						}
+						.editor-image-wrapper img {
+							max-width: 100%;
+							height: auto;
+							border-radius: 0.5rem;
+						}
+						.editor-image-wrapper figcaption {
+							font-size: 0.875rem;
+							color: var(--muted-foreground);
+							text-align: center;
+							margin-top: 0.5rem;
 						}
 					`}</style>
 					<RichTextPlugin

@@ -80,7 +80,7 @@ export function ChatMessageList({
 	}
 
 	return (
-		<div ref={scrollRef} className="flex flex-col px-3 overflow-x-hidden">
+		<div ref={scrollRef} className="flex flex-col px-3 overflow-x-hidden min-h-full">
 			{messages.map((message) => (
 				<ChatMessageItem
 					key={message.id}

@@ -12,7 +12,9 @@
       "@tooling/typescript": "workspace:*",
       "husky": "9.1.7",
       "nx": "22.3.1",
-      "typescript": "catalog:development"
+      "pexels": "^1.4.0",
+      "typescript": "catalog:development",
+      "unsplash-js": "^7.0.20"
    },
    "engines": {
       "node": ">=20"
