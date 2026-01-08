@@ -1,6 +1,3 @@
-import { auth } from "../integrations/auth";
-import { db, ragClient } from "../integrations/database";
-import { minioClient } from "../integrations/minio";
 import { getAgentById } from "@packages/database/repositories/agent-repository";
 import {
    getContentById,
@@ -11,6 +8,9 @@ import { serverEnv as env } from "@packages/environment/server";
 import { streamFileForProxy } from "@packages/files/client";
 import { searchRelatedSlugsByText } from "@packages/rag/repositories/related-slugs-repository";
 import { Elysia, t } from "elysia";
+import { auth } from "../integrations/auth";
+import { db, ragClient } from "../integrations/database";
+import { minioClient } from "../integrations/minio";
 
 const minioBucket = env.MINIO_BUCKET;
 
@@ -175,7 +175,9 @@ export const sdkRoutes = new Elysia({
          query: t.Object({
             limit: t.Optional(t.String()),
             page: t.Optional(t.String()),
-            status: t.Optional(t.Array(t.UnionEnum(["draft", "published", "archived"]))),
+            status: t.Optional(
+               t.Array(t.UnionEnum(["draft", "published", "archived"])),
+            ),
          }),
          sdkAuth: true,
       },

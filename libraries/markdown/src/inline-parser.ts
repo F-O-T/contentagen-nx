@@ -13,8 +13,8 @@ import type {
 import type { Bracket, Delimiter, InlineToken } from "./types.ts";
 import {
    AUTOLINK_REGEX,
-   EMAIL_AUTOLINK_REGEX,
    decodeHtmlEntities,
+   EMAIL_AUTOLINK_REGEX,
    normalizeLabel,
    unescapeMarkdown,
 } from "./utils.ts";
@@ -131,7 +131,7 @@ function tokenize(text: string): InlineToken[] {
                const lastToken = tokens[tokens.length - 1] as InlineToken & {
                   type: "text";
                };
-               lastToken.value = lastToken.value.replace(/  +$/, "");
+               lastToken.value = lastToken.value.replace(/ {2,}$/, "");
             }
             tokens.push({ type: "hardBreak", start: i, end: i + 1 });
          } else {
@@ -250,8 +250,7 @@ function parseCodeSpan(
       // Make sure it's exactly the right number of backticks
       const afterClosing = closingIndex + backticks;
       if (
-         (closingIndex === searchStart ||
-            text[closingIndex - 1] !== "`") &&
+         (closingIndex === searchStart || text[closingIndex - 1] !== "`") &&
          (afterClosing >= text.length || text[afterClosing] !== "`")
       ) {
          // Extract content and normalize
@@ -433,7 +432,9 @@ function parseDelimiterRun(
 
    const beforeWhitespace = /\s/.test(before ?? " ");
    const afterWhitespace = /\s/.test(after ?? " ");
-   const beforePunct = /[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/.test(before ?? "");
+   const beforePunct = /[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/.test(
+      before ?? "",
+   );
    const afterPunct = /[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/.test(after ?? "");
 
    // Left-flanking: not followed by whitespace, and either not followed by punctuation
@@ -539,7 +540,10 @@ function parseLinkDestination(
    }
 
    // Check for title
-   if (i < text.length && (text[i] === '"' || text[i] === "'" || text[i] === "(")) {
+   if (
+      i < text.length &&
+      (text[i] === '"' || text[i] === "'" || text[i] === "(")
+   ) {
       const titleChar = text[i] === "(" ? ")" : text[i];
       const titleStart = i + 1;
       i++;
@@ -750,7 +754,9 @@ function tokensToNodes(
                result.push({
                   type: "link",
                   url: token.url,
-                  children: [{ type: "text", value: token.url.replace(/^mailto:/, "") }],
+                  children: [
+                     { type: "text", value: token.url.replace(/^mailto:/, "") },
+                  ],
                });
                break;
 
@@ -765,41 +771,65 @@ function tokensToNodes(
                // Check if this delimiter is part of a match
                const delimIdx = delimiters.findIndex((d) => d.tokenIndex === i);
                const delim = delimiters[delimIdx];
-               
+
                if (delim) {
                   // Check for opening emphasis
                   let remaining = token.count;
-                  
+
                   for (const match of matches) {
-                     if (match.openerIdx === delimIdx && remaining >= match.count) {
+                     if (
+                        match.openerIdx === delimIdx &&
+                        remaining >= match.count
+                     ) {
                         // This is an opener - find the closer and wrap content
                         const closerDelim = delimiters[match.closerIdx];
                         if (closerDelim) {
                            const closerTokenIdx = closerDelim.tokenIndex;
-                           
+
                            // Recursively process content between opener and closer
-                           const innerNodes = processTokenRange(i + 1, closerTokenIdx, []);
-                           
-                           const emphNode = match.count === 2
-                              ? { type: "strong" as const, children: innerNodes, marker: (token.char + token.char) as "**" | "__" }
-                              : { type: "emphasis" as const, children: innerNodes, marker: token.char as "*" | "_" };
-                           
+                           const innerNodes = processTokenRange(
+                              i + 1,
+                              closerTokenIdx,
+                              [],
+                           );
+
+                           const emphNode =
+                              match.count === 2
+                                 ? {
+                                      type: "strong" as const,
+                                      children: innerNodes,
+                                      marker: (token.char + token.char) as
+                                         | "**"
+                                         | "__",
+                                   }
+                                 : {
+                                      type: "emphasis" as const,
+                                      children: innerNodes,
+                                      marker: token.char as "*" | "_",
+                                   };
+
                            result.push(emphNode);
                            remaining -= match.count;
-                           
+
                            // Skip to after closer
                            i = closerTokenIdx;
                         }
                      }
                   }
-                  
+
                   // Output any remaining delimiters as text
                   if (remaining > 0) {
-                     result.push({ type: "text", value: token.char.repeat(remaining) });
+                     result.push({
+                        type: "text",
+                        value: token.char.repeat(remaining),
+                     });
                   }
                } else {
                   // Not in delimiter list, output as text
-                  result.push({ type: "text", value: token.char.repeat(token.count) });
+                  result.push({
+                     type: "text",
+                     value: token.char.repeat(token.count),
+                  });
                }
                break;
             }

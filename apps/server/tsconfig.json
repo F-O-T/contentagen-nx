@@ -12,10 +12,10 @@
       "strict": true,
       "target": "ES2021",
       "types": ["bun-types"]
-  },
-  "references": [
-    {
-      "path": "../../packages/rag"
-    }
-  ]
+   },
+   "references": [
+      {
+         "path": "../../packages/rag"
+      }
+   ]
 }

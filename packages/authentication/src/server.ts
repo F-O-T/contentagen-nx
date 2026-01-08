@@ -211,7 +211,7 @@ export const getAuthOptions = (
          }),
          emailOTP({
             expiresIn: 60 * 10,
-            otpLength: 6,
+            otpLength: 8,
             sendVerificationOnSignUp: true,
             async sendVerificationOTP({
                email,

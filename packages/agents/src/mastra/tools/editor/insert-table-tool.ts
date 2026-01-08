@@ -2,47 +2,41 @@ import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
 export const insertTableTool = createTool({
-	id: "insert-table",
-	description:
-		"Inserts a table into the blog post. Great for comparing features, showing data, or organizing structured information.",
-	inputSchema: z.object({
-		headers: z
-			.array(z.string())
-			.min(1)
-			.describe("Array of column headers"),
-		rows: z
-			.array(z.array(z.string()))
-			.min(1)
-			.describe("Array of rows, where each row is an array of cell values"),
-		position: z
-			.enum(["cursor", "afterParagraph", "end"])
-			.default("cursor")
-			.describe("Where to insert the table"),
-		paragraphIndex: z
-			.number()
-			.optional()
-			.describe("Paragraph index for afterParagraph position"),
-		caption: z
-			.string()
-			.optional()
-			.describe("Optional table caption"),
-	}),
-	outputSchema: z.object({
-		success: z.boolean(),
-		columnCount: z.number(),
-		rowCount: z.number(),
-	}),
-	execute: async (inputData) => {
-		return {
-			success: true,
-			columnCount: inputData.headers.length,
-			rowCount: inputData.rows.length,
-		};
-	},
+   id: "insert-table",
+   description:
+      "Inserts a table into the blog post. Great for comparing features, showing data, or organizing structured information.",
+   inputSchema: z.object({
+      headers: z.array(z.string()).min(1).describe("Array of column headers"),
+      rows: z
+         .array(z.array(z.string()))
+         .min(1)
+         .describe("Array of rows, where each row is an array of cell values"),
+      position: z
+         .enum(["cursor", "afterParagraph", "end"])
+         .default("cursor")
+         .describe("Where to insert the table"),
+      paragraphIndex: z
+         .number()
+         .optional()
+         .describe("Paragraph index for afterParagraph position"),
+      caption: z.string().optional().describe("Optional table caption"),
+   }),
+   outputSchema: z.object({
+      success: z.boolean(),
+      columnCount: z.number(),
+      rowCount: z.number(),
+   }),
+   execute: async (inputData) => {
+      return {
+         success: true,
+         columnCount: inputData.headers.length,
+         rowCount: inputData.rows.length,
+      };
+   },
 });
 
 export function getInsertTableInstructions(): string {
-	return `
+   return `
 ## INSERT TABLE TOOL
 Adds a table to the blog post.
 

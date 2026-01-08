@@ -416,7 +416,9 @@ const hasOrganizationOwnerAccess = t.middleware(async ({ ctx, next }) => {
    );
 
    if (!isOwner) {
-      throw APIError.forbidden("Only organization owners can perform this action.");
+      throw APIError.forbidden(
+         "Only organization owners can perform this action.",
+      );
    }
 
    return next({

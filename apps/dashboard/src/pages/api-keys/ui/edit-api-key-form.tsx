@@ -55,7 +55,9 @@ export function EditApiKeyForm({ keyId, currentName }: EditApiKeyFormProps) {
                },
                onError: (ctx) => {
                   setIsPending(false);
-                  toast.error(ctx.error.message || "Falha ao atualizar chave de API");
+                  toast.error(
+                     ctx.error.message || "Falha ao atualizar chave de API",
+                  );
                },
             },
          );

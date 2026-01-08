@@ -1,22 +1,22 @@
 import { relations, sql } from "drizzle-orm";
 import {
-	index,
-	jsonb,
-	pgEnum,
-	pgTable,
-	text,
-	timestamp,
-	uuid,
+   index,
+   jsonb,
+   pgEnum,
+   pgTable,
+   text,
+   timestamp,
+   uuid,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { content } from "./content";
 import { organization } from "./auth";
+import { content } from "./content";
 
 // Chat message role enum
 export const chatMessageRoleEnum = pgEnum("chat_message_role", [
-	"user",
-	"assistant",
+   "user",
+   "assistant",
 ]);
 
 // Chat mode enum
@@ -24,113 +24,109 @@ export const chatModeEnum = pgEnum("chat_mode", ["plan", "writer"]);
 
 // Selection context schema for JSONB
 export const SelectionContextSchema = z.object({
-	text: z.string(),
-	contextBefore: z.string().default(""),
-	contextAfter: z.string().default(""),
+   text: z.string(),
+   contextBefore: z.string().default(""),
+   contextAfter: z.string().default(""),
 });
 
 export type SelectionContext = z.infer<typeof SelectionContextSchema>;
 
 // Stored tool call schema for JSONB
 export const StoredToolCallSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	args: z.record(z.string(), z.unknown()),
-	result: z.unknown().optional(),
-	status: z.enum(["completed", "error"]),
-	executedAt: z.number().optional(),
+   id: z.string(),
+   name: z.string(),
+   args: z.record(z.string(), z.unknown()),
+   result: z.unknown().optional(),
+   status: z.enum(["completed", "error"]),
+   executedAt: z.number().optional(),
 });
 
 export type StoredToolCall = z.infer<typeof StoredToolCallSchema>;
 
 // Plan step schema for JSONB (for plan-type messages)
 export const StoredPlanStepSchema = z.object({
-	id: z.string(),
-	title: z.string(),
-	description: z.string().optional(),
-	toolsToUse: z.array(z.string()).optional(),
-	rationale: z.string().optional(),
-	status: z.enum(["pending", "approved", "skipped", "completed"]),
+   id: z.string(),
+   title: z.string(),
+   description: z.string().optional(),
+   toolsToUse: z.array(z.string()).optional(),
+   rationale: z.string().optional(),
+   status: z.enum(["pending", "approved", "skipped", "completed"]),
 });
 
 export type StoredPlanStep = z.infer<typeof StoredPlanStepSchema>;
 
 // Chat message type enum
 export const chatMessageTypeEnum = pgEnum("chat_message_type", [
-	"text",
-	"plan",
-	"tool-use",
-	"execution-separator",
+   "text",
+   "plan",
+   "tool-use",
+   "execution-separator",
 ]);
 
 // Chat session - one per content document
 export const chatSession = pgTable(
-	"chat_session",
-	{
-		id: uuid("id")
-			.default(sql`pg_catalog.gen_random_uuid()`)
-			.primaryKey(),
-		contentId: uuid("content_id")
-			.notNull()
-			.references(() => content.id, { onDelete: "cascade" }),
-		organizationId: uuid("organization_id")
-			.notNull()
-			.references(() => organization.id, { onDelete: "cascade" }),
-		mode: chatModeEnum("mode").default("plan"),
-		createdAt: timestamp("created_at").defaultNow().notNull(),
-		updatedAt: timestamp("updated_at")
-			.defaultNow()
-			.$onUpdate(() => new Date())
-			.notNull(),
-	},
-	(table) => [
-		index("chat_session_content_id_idx").on(table.contentId),
-		index("chat_session_organization_id_idx").on(table.organizationId),
-	],
+   "chat_session",
+   {
+      id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+      contentId: uuid("content_id")
+         .notNull()
+         .references(() => content.id, { onDelete: "cascade" }),
+      organizationId: uuid("organization_id")
+         .notNull()
+         .references(() => organization.id, { onDelete: "cascade" }),
+      mode: chatModeEnum("mode").default("plan"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at")
+         .defaultNow()
+         .$onUpdate(() => new Date())
+         .notNull(),
+   },
+   (table) => [
+      index("chat_session_content_id_idx").on(table.contentId),
+      index("chat_session_organization_id_idx").on(table.organizationId),
+   ],
 );
 
 export const chatSessionRelations = relations(chatSession, ({ one, many }) => ({
-	content: one(content, {
-		fields: [chatSession.contentId],
-		references: [content.id],
-	}),
-	organization: one(organization, {
-		fields: [chatSession.organizationId],
-		references: [organization.id],
-	}),
-	messages: many(chatMessage),
+   content: one(content, {
+      fields: [chatSession.contentId],
+      references: [content.id],
+   }),
+   organization: one(organization, {
+      fields: [chatSession.organizationId],
+      references: [organization.id],
+   }),
+   messages: many(chatMessage),
 }));
 
 // Individual chat messages
 export const chatMessage = pgTable(
-	"chat_message",
-	{
-		id: uuid("id")
-			.default(sql`pg_catalog.gen_random_uuid()`)
-			.primaryKey(),
-		sessionId: uuid("session_id")
-			.notNull()
-			.references(() => chatSession.id, { onDelete: "cascade" }),
-		role: chatMessageRoleEnum("role").notNull(),
-		content: text("content").notNull(),
-		messageType: chatMessageTypeEnum("message_type").default("text"),
-		sourceMode: chatModeEnum("source_mode"),
-		selectionContext: jsonb("selection_context").$type<SelectionContext>(),
-		toolCalls: jsonb("tool_calls").$type<StoredToolCall[]>(),
-		planSteps: jsonb("plan_steps").$type<StoredPlanStep[]>(),
-		createdAt: timestamp("created_at").defaultNow().notNull(),
-	},
-	(table) => [
-		index("chat_message_session_id_idx").on(table.sessionId),
-		index("chat_message_created_at_idx").on(table.createdAt),
-	],
+   "chat_message",
+   {
+      id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+      sessionId: uuid("session_id")
+         .notNull()
+         .references(() => chatSession.id, { onDelete: "cascade" }),
+      role: chatMessageRoleEnum("role").notNull(),
+      content: text("content").notNull(),
+      messageType: chatMessageTypeEnum("message_type").default("text"),
+      sourceMode: chatModeEnum("source_mode"),
+      selectionContext: jsonb("selection_context").$type<SelectionContext>(),
+      toolCalls: jsonb("tool_calls").$type<StoredToolCall[]>(),
+      planSteps: jsonb("plan_steps").$type<StoredPlanStep[]>(),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+   },
+   (table) => [
+      index("chat_message_session_id_idx").on(table.sessionId),
+      index("chat_message_created_at_idx").on(table.createdAt),
+   ],
 );
 
 export const chatMessageRelations = relations(chatMessage, ({ one }) => ({
-	session: one(chatSession, {
-		fields: [chatMessage.sessionId],
-		references: [chatSession.id],
-	}),
+   session: one(chatSession, {
+      fields: [chatMessage.sessionId],
+      references: [chatSession.id],
+   }),
 }));
 
 // Types

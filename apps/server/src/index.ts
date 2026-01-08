@@ -7,14 +7,14 @@ import { sql } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { auth, resendClient, stripeClient } from "./integrations/auth";
 import { db, ragClient } from "./integrations/database";
-import { registryRoutes } from "./routes/registry";
-import { sdkRoutes } from "./routes/sdk";
-import { agentChatRoutes } from "./routes/agent-chat";
-import { agentFIMRoutes } from "./routes/agent-fim";
-import { agentEditRoutes } from "./routes/agent-edit";
 import { logger } from "./integrations/logging";
 import { minioClient } from "./integrations/minio";
 import { posthog, posthogPlugin } from "./integrations/posthog";
+import { agentChatRoutes } from "./routes/agent-chat";
+import { agentEditRoutes } from "./routes/agent-edit";
+import { agentFIMRoutes } from "./routes/agent-fim";
+import { registryRoutes } from "./routes/registry";
+import { sdkRoutes } from "./routes/sdk";
 
 const redisConnection = createRedisConnection(env.REDIS_URL);
 

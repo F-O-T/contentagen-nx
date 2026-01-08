@@ -1,15 +1,15 @@
 import {
-	TextNode,
-	type EditorConfig,
-	type LexicalEditor,
-	type LexicalNode,
-	type NodeKey,
-	type SerializedTextNode,
-	type DOMExportOutput,
+   type DOMExportOutput,
+   type EditorConfig,
+   type LexicalEditor,
+   type LexicalNode,
+   type NodeKey,
+   type SerializedTextNode,
+   TextNode,
 } from "lexical";
 
 export type SerializedGhostTextNode = SerializedTextNode & {
-	uuid: string;
+   uuid: string;
 };
 
 /**
@@ -24,84 +24,84 @@ export type SerializedGhostTextNode = SerializedTextNode & {
  * - UUID tracking to prevent stale suggestions
  */
 export class GhostTextNode extends TextNode {
-	__uuid: string;
+   __uuid: string;
 
-	static getType(): string {
-		return "ghost-text";
-	}
+   static getType(): string {
+      return "ghost-text";
+   }
 
-	static clone(node: GhostTextNode): GhostTextNode {
-		// Don't set mode here - let Lexical handle it via $cloneWithProperties
-		const cloned = new GhostTextNode(node.__text, node.__uuid, node.__key);
-		return cloned;
-	}
+   static clone(node: GhostTextNode): GhostTextNode {
+      // Don't set mode here - let Lexical handle it via $cloneWithProperties
+      const cloned = new GhostTextNode(node.__text, node.__uuid, node.__key);
+      return cloned;
+   }
 
-	constructor(text: string, uuid: string, key?: NodeKey) {
-		super(text, key);
-		this.__uuid = uuid;
-		// Note: Don't call setMode() here - it causes infinite recursion
-		// Mode will be set via $createGhostTextNode after construction
-	}
+   constructor(text: string, uuid: string, key?: NodeKey) {
+      super(text, key);
+      this.__uuid = uuid;
+      // Note: Don't call setMode() here - it causes infinite recursion
+      // Mode will be set via $createGhostTextNode after construction
+   }
 
-	getUUID(): string {
-		return this.__uuid;
-	}
+   getUUID(): string {
+      return this.__uuid;
+   }
 
-	createDOM(config: EditorConfig): HTMLElement {
-		const dom = super.createDOM(config);
-		dom.classList.add("ghost-text");
-		dom.style.opacity = "0.5";
-		dom.style.color = "var(--muted-foreground)";
-		dom.style.pointerEvents = "none";
-		dom.style.userSelect = "none";
-		// Prevent editing
-		dom.contentEditable = "false";
-		return dom;
-	}
+   createDOM(config: EditorConfig): HTMLElement {
+      const dom = super.createDOM(config);
+      dom.classList.add("ghost-text");
+      dom.style.opacity = "0.5";
+      dom.style.color = "var(--muted-foreground)";
+      dom.style.pointerEvents = "none";
+      dom.style.userSelect = "none";
+      // Prevent editing
+      dom.contentEditable = "false";
+      return dom;
+   }
 
-	updateDOM(
-		_prevNode: GhostTextNode,
-		_dom: HTMLElement,
-		_config: EditorConfig,
-	): boolean {
-		// Return false to indicate that the DOM doesn't need to be recreated
-		// The text content is updated automatically by Lexical
-		return false;
-	}
+   updateDOM(
+      _prevNode: GhostTextNode,
+      _dom: HTMLElement,
+      _config: EditorConfig,
+   ): boolean {
+      // Return false to indicate that the DOM doesn't need to be recreated
+      // The text content is updated automatically by Lexical
+      return false;
+   }
 
-	// Prevent copying ghost text
-	excludeFromCopy(): boolean {
-		return true;
-	}
+   // Prevent copying ghost text
+   excludeFromCopy(): boolean {
+      return true;
+   }
 
-	// Prevent exporting ghost text to HTML (returns empty span)
-	exportDOM(_editor: LexicalEditor): DOMExportOutput {
-		const element = document.createElement("span");
-		return { element };
-	}
+   // Prevent exporting ghost text to HTML (returns empty span)
+   exportDOM(_editor: LexicalEditor): DOMExportOutput {
+      const element = document.createElement("span");
+      return { element };
+   }
 
-	static importJSON(serializedNode: SerializedGhostTextNode): GhostTextNode {
-		const node = new GhostTextNode(serializedNode.text, serializedNode.uuid);
-		node.setMode("token");
-		return node;
-	}
+   static importJSON(serializedNode: SerializedGhostTextNode): GhostTextNode {
+      const node = new GhostTextNode(serializedNode.text, serializedNode.uuid);
+      node.setMode("token");
+      return node;
+   }
 
-	exportJSON(): SerializedGhostTextNode {
-		return {
-			...super.exportJSON(),
-			type: "ghost-text",
-			uuid: this.__uuid,
-		};
-	}
+   exportJSON(): SerializedGhostTextNode {
+      return {
+         ...super.exportJSON(),
+         type: "ghost-text",
+         uuid: this.__uuid,
+      };
+   }
 
-	// Prevent splitting this node
-	canInsertTextBefore(): boolean {
-		return false;
-	}
+   // Prevent splitting this node
+   canInsertTextBefore(): boolean {
+      return false;
+   }
 
-	canInsertTextAfter(): boolean {
-		return false;
-	}
+   canInsertTextAfter(): boolean {
+      return false;
+   }
 }
 
 /**
@@ -109,14 +109,14 @@ export class GhostTextNode extends TextNode {
  * Sets token mode after construction to avoid infinite recursion.
  */
 export function $createGhostTextNode(
-	text: string,
-	uuid?: string,
+   text: string,
+   uuid?: string,
 ): GhostTextNode {
-	const node = new GhostTextNode(text, uuid ?? crypto.randomUUID());
-	// Set mode AFTER construction - this is safe because setMode only recurses
-	// when called during clone, which happens when the node is in the editor
-	node.setMode("token");
-	return node;
+   const node = new GhostTextNode(text, uuid ?? crypto.randomUUID());
+   // Set mode AFTER construction - this is safe because setMode only recurses
+   // when called during clone, which happens when the node is in the editor
+   node.setMode("token");
+   return node;
 }
 
 /**
@@ -124,7 +124,7 @@ export function $createGhostTextNode(
  * Uses getType() instead of instanceof to avoid issues with module bundling.
  */
 export function $isGhostTextNode(
-	node: LexicalNode | null | undefined,
+   node: LexicalNode | null | undefined,
 ): node is GhostTextNode {
-	return node?.getType() === "ghost-text";
+   return node?.getType() === "ghost-text";
 }

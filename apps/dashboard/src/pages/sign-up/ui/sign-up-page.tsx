@@ -33,13 +33,19 @@ export function SignUpPage() {
             .string()
             .min(
                2,
-               "O campo deve ter no mínimo {min} caracteres.".replace("{min}", "2"),
+               "O campo deve ter no mínimo {min} caracteres.".replace(
+                  "{min}",
+                  "2",
+               ),
             ),
          password: z
             .string()
             .min(
                8,
-               "O campo deve ter no mínimo {min} caracteres.".replace("{min}", "8"),
+               "O campo deve ter no mínimo {min} caracteres.".replace(
+                  "{min}",
+                  "8",
+               ),
             ),
       })
       .refine((data) => data.password === data.confirmPassword, {
@@ -60,14 +66,10 @@ export function SignUpPage() {
                   toast.error(error.message);
                },
                onRequest: () => {
-                  toast.loading(
-                     "Criando sua conta...",
-                  );
+                  toast.loading("Criando sua conta...");
                },
                onSuccess: () => {
-                  toast.success(
-                     "Conta criada com sucesso!",
-                  );
+                  toast.success("Conta criada com sucesso!");
                   router.navigate({
                      search: { email },
                      to: "/auth/email-verification",
@@ -241,7 +243,10 @@ export function SignUpPage() {
       );
    }
    const TermsAndPrivacyText = () => {
-      const text = "Ao continuar, você concorda com nossos {split} e {split}.".split("{split}");
+      const text =
+         "Ao continuar, você concorda com nossos {split} e {split}.".split(
+            "{split}",
+         );
 
       return (
          <>
@@ -346,9 +351,7 @@ export function SignUpPage() {
                {/* Footer */}
                <div className="text-sm text-center space-y-4">
                   <div className="flex gap-1 justify-center items-center">
-                     <span>
-                        {"Já tem uma conta?"}
-                     </span>
+                     <span>{"Já tem uma conta?"}</span>
                      <Link
                         className="text-primary font-medium hover:underline"
                         to="/auth/sign-in"

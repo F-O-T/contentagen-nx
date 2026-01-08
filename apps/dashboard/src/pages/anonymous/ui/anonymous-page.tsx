@@ -21,9 +21,7 @@ export function AnonymousPage() {
                toast.error(error.message);
             },
             onSuccess: () => {
-               toast.success(
-                  "Pronto! Sua conta foi criada.",
-               );
+               toast.success("Pronto! Sua conta foi criada.");
                router.navigate({ params: { slug: "" }, to: "/$slug/home" });
             },
          },
@@ -46,7 +44,9 @@ export function AnonymousPage() {
                {"Acesso rápido"}
             </h1>
             <p className="text-muted-foreground text-sm">
-               {"Experimente o Montte agora mesmo. Você pode criar uma conta completa depois."}
+               {
+                  "Experimente o Montte agora mesmo. Você pode criar uma conta completa depois."
+               }
             </p>
          </div>
 
@@ -57,25 +57,19 @@ export function AnonymousPage() {
                   <div className="flex items-center justify-center size-6 rounded-full bg-primary/10 shrink-0">
                      <Check className="size-3.5 text-primary" />
                   </div>
-                  <p className="text-sm">
-                     {"Sem precisar de e-mail ou senha"}
-                  </p>
+                  <p className="text-sm">{"Sem precisar de e-mail ou senha"}</p>
                </div>
                <div className="flex items-start gap-3">
                   <div className="flex items-center justify-center size-6 rounded-full bg-primary/10 shrink-0">
                      <Zap className="size-3.5 text-primary" />
                   </div>
-                  <p className="text-sm">
-                     {"Acesso imediato, sem cadastro"}
-                  </p>
+                  <p className="text-sm">{"Acesso imediato, sem cadastro"}</p>
                </div>
                <div className="flex items-start gap-3">
                   <div className="flex items-center justify-center size-6 rounded-full bg-primary/10 shrink-0">
                      <Sparkles className="size-3.5 text-primary" />
                   </div>
-                  <p className="text-sm">
-                     {"Convert Later"}
-                  </p>
+                  <p className="text-sm">{"Convert Later"}</p>
                </div>
             </div>
 
@@ -85,25 +79,21 @@ export function AnonymousPage() {
                disabled={isLoading}
                onClick={handleAnonymousSignIn}
             >
-               {isLoading ? (
-                  <Spinner />
-               ) : (
-                  "Começar agora"
-               )}
+               {isLoading ? <Spinner /> : "Começar agora"}
             </Button>
 
             {/* Note */}
             <FieldDescription className="text-center">
-               {"Seus dados ficam salvos. Você pode adicionar um e-mail a qualquer momento nas configurações."}
+               {
+                  "Seus dados ficam salvos. Você pode adicionar um e-mail a qualquer momento nas configurações."
+               }
             </FieldDescription>
          </div>
 
          {/* Footer */}
          <div className="text-sm text-center">
             <div className="flex gap-1 justify-center items-center">
-               <span>
-                  {"Primeira vez aqui? "}
-               </span>
+               <span>{"Primeira vez aqui? "}</span>
                <Link
                   className="text-primary font-medium hover:underline"
                   to="/auth/sign-up"

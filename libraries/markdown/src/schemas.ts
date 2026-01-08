@@ -206,7 +206,13 @@ export interface DocumentNode {
    children: BlockNode[];
    references?: Record<
       string,
-      { type: "linkReferenceDefinition"; label: string; url: string; title?: string; position?: Position }
+      {
+         type: "linkReferenceDefinition";
+         label: string;
+         url: string;
+         title?: string;
+         position?: Position;
+      }
    >;
    position?: Position;
 }
@@ -486,7 +492,10 @@ export interface ErrorStreamEvent {
    error: string;
 }
 
-export type StreamEvent = BlockStreamEvent | CompleteStreamEvent | ErrorStreamEvent;
+export type StreamEvent =
+   | BlockStreamEvent
+   | CompleteStreamEvent
+   | ErrorStreamEvent;
 
 // =============================================================================
 // Batch Processing Types
@@ -556,7 +565,21 @@ export type BatchParsedMarkdownFile = BatchMarkdownFileResult;
 export type Node = InlineNode | BlockNode | DocumentNode;
 
 /** Nodes that contain a value property */
-export type LiteralNode = TextNode | CodeSpanNode | HtmlInlineNode | CodeBlockNode | HtmlBlockNode;
+export type LiteralNode =
+   | TextNode
+   | CodeSpanNode
+   | HtmlInlineNode
+   | CodeBlockNode
+   | HtmlBlockNode;
 
 /** Nodes that contain children */
-export type ParentNode = EmphasisNode | StrongNode | LinkNode | HeadingNode | ParagraphNode | BlockquoteNode | ListItemNode | ListNode | DocumentNode;
+export type ParentNode =
+   | EmphasisNode
+   | StrongNode
+   | LinkNode
+   | HeadingNode
+   | ParagraphNode
+   | BlockquoteNode
+   | ListItemNode
+   | ListNode
+   | DocumentNode;

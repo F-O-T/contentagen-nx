@@ -92,8 +92,16 @@ export const organizationInvitesRouter = router({
                   organizationId,
                },
             });
-            if (!allInvitations) {
-               throw APIError.validation("no invites found");
+
+            // Return empty result if no invitations found
+            if (!allInvitations || allInvitations.length === 0) {
+               return {
+                  hasMore: false,
+                  invitations: [],
+                  limit: input.limit,
+                  offset: input.offset,
+                  total: 0,
+               };
             }
 
             // Sort invitations by expiration date (newest first) for consistent pagination

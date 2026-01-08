@@ -45,9 +45,7 @@ function MemberActionsCell({
                      </Button>
                   </DropdownMenuTrigger>
                </TooltipTrigger>
-               <TooltipContent>
-                  {"Actions"}
-               </TooltipContent>
+               <TooltipContent>{"Actions"}</TooltipContent>
             </Tooltip>
             <DropdownMenuContent align="end">
                <DropdownMenuItem disabled>

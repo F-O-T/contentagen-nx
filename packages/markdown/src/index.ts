@@ -5,14 +5,14 @@
  */
 
 export {
-	// Parsing
-	parse,
-	parseToAst,
-	parseOrThrow,
-	extractText,
-	getHeadings,
-	countWords,
-	// Generation
-	generate,
-	generateHeadingString,
+   countWords,
+   extractText,
+   // Generation
+   generate,
+   generateHeadingString,
+   getHeadings,
+   // Parsing
+   parse,
+   parseOrThrow,
+   parseToAst,
 } from "@f-o-t/markdown";

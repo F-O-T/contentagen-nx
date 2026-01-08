@@ -28,7 +28,10 @@ export function EmailVerificationPage() {
          .string()
          .min(
             6,
-            "O campo deve ter no mínimo {min} caracteres.".replace("{min}", "6"),
+            "O campo deve ter no mínimo {min} caracteres.".replace(
+               "{min}",
+               "6",
+            ),
          )
          .max(6),
    });
@@ -46,14 +49,10 @@ export function EmailVerificationPage() {
                toast.error(error.message);
             },
             onRequest: () => {
-               toast.loading(
-                  "Processando...",
-               );
+               toast.loading("Processando...");
             },
             onSuccess: () => {
-               toast.success(
-                  "E-mail reenviado!",
-               );
+               toast.success("E-mail reenviado!");
             },
          },
       );
@@ -71,14 +70,10 @@ export function EmailVerificationPage() {
                   toast.error(error.message);
                },
                onRequest: () => {
-                  toast.loading(
-                     "Verificando...",
-                  );
+                  toast.loading("Verificando...");
                },
                onSuccess: () => {
-                  toast.success(
-                     "E-mail verificado!",
-                  );
+                  toast.success("E-mail verificado!");
                   router.navigate({
                      params: { slug: "" },
                      to: "/$slug/home",
@@ -141,9 +136,7 @@ export function EmailVerificationPage() {
                               className="flex flex-col items-center"
                               data-invalid={isInvalid}
                            >
-                              <FieldLabel>
-                                 {"Código OTP"}
-                              </FieldLabel>
+                              <FieldLabel>{"Código OTP"}</FieldLabel>
                               <InputOTP
                                  aria-invalid={isInvalid}
                                  autoComplete="one-time-code"

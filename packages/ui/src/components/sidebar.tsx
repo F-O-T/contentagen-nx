@@ -272,10 +272,7 @@ function SidebarTrigger({
 }: React.ComponentProps<typeof Button>) {
    const { toggleSidebar, state, isMobile } = useSidebar();
 
-   const tooltipText =
-      state === "expanded"
-         ? "Ocultar"
-         : "Abrir";
+   const tooltipText = state === "expanded" ? "Ocultar" : "Abrir";
 
    const button = (
       <Button

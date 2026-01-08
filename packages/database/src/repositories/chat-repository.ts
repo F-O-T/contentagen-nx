@@ -2,13 +2,13 @@ import { AppError, propagateError } from "@packages/utils/errors";
 import { and, eq } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
 import {
-	chatSession,
-	chatMessage,
-	type SelectionContext,
-	type StoredToolCall,
-	type StoredPlanStep,
-	type ChatMessageType,
-	type ChatMode,
+   type ChatMessageType,
+   type ChatMode,
+   chatMessage,
+   chatSession,
+   type SelectionContext,
+   type StoredPlanStep,
+   type StoredToolCall,
 } from "../schemas/chat";
 
 /**
@@ -16,211 +16,234 @@ import {
  * Returns existing session if one exists, otherwise creates new.
  */
 export async function getOrCreateChatSession(
-	dbClient: DatabaseInstance,
-	contentId: string,
-	organizationId: string,
+   dbClient: DatabaseInstance,
+   contentId: string,
+   organizationId: string,
 ) {
-	try {
-		// Try to find existing session
-		const existing = await dbClient.query.chatSession.findFirst({
-			where: and(
-				eq(chatSession.contentId, contentId),
-				eq(chatSession.organizationId, organizationId),
-			),
-		});
+   try {
+      // Try to find existing session
+      const existing = await dbClient.query.chatSession.findFirst({
+         where: and(
+            eq(chatSession.contentId, contentId),
+            eq(chatSession.organizationId, organizationId),
+         ),
+      });
 
-		if (existing) {
-			return existing;
-		}
+      if (existing) {
+         return existing;
+      }
 
-		// Create new session
-		const result = await dbClient
-			.insert(chatSession)
-			.values({
-				contentId,
-				organizationId,
-			})
-			.returning();
+      // Create new session
+      const result = await dbClient
+         .insert(chatSession)
+         .values({
+            contentId,
+            organizationId,
+         })
+         .returning();
 
-		return result[0];
-	} catch (err) {
-		propagateError(err);
-		throw AppError.database(
-			`Failed to get or create chat session: ${(err as Error).message}`,
-		);
-	}
+      return result[0];
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to get or create chat session: ${(err as Error).message}`,
+      );
+   }
 }
 
 /**
  * Get chat session by ID.
  */
 export async function getChatSessionById(
-	dbClient: DatabaseInstance,
-	sessionId: string,
+   dbClient: DatabaseInstance,
+   sessionId: string,
 ) {
-	try {
-		const result = await dbClient.query.chatSession.findFirst({
-			where: eq(chatSession.id, sessionId),
-		});
-		return result;
-	} catch (err) {
-		propagateError(err);
-		throw AppError.database(
-			`Failed to get chat session: ${(err as Error).message}`,
-		);
-	}
+   try {
+      const result = await dbClient.query.chatSession.findFirst({
+         where: eq(chatSession.id, sessionId),
+      });
+      return result;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to get chat session: ${(err as Error).message}`,
+      );
+   }
 }
 
 /**
  * Get chat session by content ID.
  */
 export async function getChatSessionByContentId(
-	dbClient: DatabaseInstance,
-	contentId: string,
-	organizationId: string,
+   dbClient: DatabaseInstance,
+   contentId: string,
+   organizationId: string,
 ) {
-	try {
-		const result = await dbClient.query.chatSession.findFirst({
-			where: and(
-				eq(chatSession.contentId, contentId),
-				eq(chatSession.organizationId, organizationId),
-			),
-		});
-		return result;
-	} catch (err) {
-		propagateError(err);
-		throw AppError.database(
-			`Failed to get chat session by content: ${(err as Error).message}`,
-		);
-	}
+   try {
+      const result = await dbClient.query.chatSession.findFirst({
+         where: and(
+            eq(chatSession.contentId, contentId),
+            eq(chatSession.organizationId, organizationId),
+         ),
+      });
+      return result;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to get chat session by content: ${(err as Error).message}`,
+      );
+   }
 }
 
 /**
  * Get all messages for a chat session, ordered by creation time.
  */
 export async function getChatSessionMessages(
-	dbClient: DatabaseInstance,
-	sessionId: string,
+   dbClient: DatabaseInstance,
+   sessionId: string,
 ) {
-	try {
-		const result = await dbClient.query.chatMessage.findMany({
-			where: eq(chatMessage.sessionId, sessionId),
-			orderBy: (message, { asc }) => asc(message.createdAt),
-		});
-		return result;
-	} catch (err) {
-		propagateError(err);
-		throw AppError.database(
-			`Failed to get chat messages: ${(err as Error).message}`,
-		);
-	}
+   try {
+      const result = await dbClient.query.chatMessage.findMany({
+         where: eq(chatMessage.sessionId, sessionId),
+         orderBy: (message, { asc }) => asc(message.createdAt),
+      });
+      return result;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to get chat messages: ${(err as Error).message}`,
+      );
+   }
 }
 
 /**
  * Add a message to a chat session.
  */
 export async function addChatMessage(
-	dbClient: DatabaseInstance,
-	sessionId: string,
-	role: "user" | "assistant",
-	content: string,
-	selectionContext?: SelectionContext,
-	toolCalls?: StoredToolCall[],
-	messageType?: ChatMessageType,
-	planSteps?: StoredPlanStep[],
-	sourceMode?: ChatMode,
+   dbClient: DatabaseInstance,
+   sessionId: string,
+   role: "user" | "assistant",
+   content: string,
+   selectionContext?: SelectionContext,
+   toolCalls?: StoredToolCall[],
+   messageType?: ChatMessageType,
+   planSteps?: StoredPlanStep[],
+   sourceMode?: ChatMode,
 ) {
-	try {
-		const result = await dbClient
-			.insert(chatMessage)
-			.values({
-				sessionId,
-				role,
-				content,
-				messageType: messageType ?? "text",
-				sourceMode,
-				selectionContext,
-				toolCalls: toolCalls && toolCalls.length > 0 ? toolCalls : undefined,
-				planSteps: planSteps && planSteps.length > 0 ? planSteps : undefined,
-			})
-			.returning();
+   try {
+      const result = await dbClient
+         .insert(chatMessage)
+         .values({
+            sessionId,
+            role,
+            content,
+            messageType: messageType ?? "text",
+            sourceMode,
+            selectionContext,
+            toolCalls:
+               toolCalls && toolCalls.length > 0 ? toolCalls : undefined,
+            planSteps:
+               planSteps && planSteps.length > 0 ? planSteps : undefined,
+         })
+         .returning();
 
-		// Update session's updatedAt timestamp
-		await dbClient
-			.update(chatSession)
-			.set({ updatedAt: new Date() })
-			.where(eq(chatSession.id, sessionId));
+      // Update session's updatedAt timestamp
+      await dbClient
+         .update(chatSession)
+         .set({ updatedAt: new Date() })
+         .where(eq(chatSession.id, sessionId));
 
-		return result[0];
-	} catch (err) {
-		propagateError(err);
-		throw AppError.database(
-			`Failed to add chat message: ${(err as Error).message}`,
-		);
-	}
+      return result[0];
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to add chat message: ${(err as Error).message}`,
+      );
+   }
 }
 
 /**
  * Update chat session mode.
+ * Returns the updated session or throws if not found.
  */
 export async function updateChatSessionMode(
-	dbClient: DatabaseInstance,
-	sessionId: string,
-	mode: ChatMode,
+   dbClient: DatabaseInstance,
+   sessionId: string,
+   mode: ChatMode,
 ) {
-	try {
-		await dbClient
-			.update(chatSession)
-			.set({ mode, updatedAt: new Date() })
-			.where(eq(chatSession.id, sessionId));
-	} catch (err) {
-		propagateError(err);
-		throw AppError.database(
-			`Failed to update chat session mode: ${(err as Error).message}`,
-		);
-	}
+   try {
+      const result = await dbClient
+         .update(chatSession)
+         .set({ mode, updatedAt: new Date() })
+         .where(eq(chatSession.id, sessionId))
+         .returning();
+
+      if (!result.length) {
+         throw AppError.database("Chat session not found");
+      }
+
+      return result[0];
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to update chat session mode: ${(err as Error).message}`,
+      );
+   }
 }
 
 /**
  * Clear all messages in a chat session.
  */
 export async function clearChatSession(
-	dbClient: DatabaseInstance,
-	sessionId: string,
+   dbClient: DatabaseInstance,
+   sessionId: string,
 ) {
-	try {
-		await dbClient
-			.delete(chatMessage)
-			.where(eq(chatMessage.sessionId, sessionId));
+   try {
+      await dbClient
+         .delete(chatMessage)
+         .where(eq(chatMessage.sessionId, sessionId));
 
-		// Update session's updatedAt timestamp
-		await dbClient
-			.update(chatSession)
-			.set({ updatedAt: new Date() })
-			.where(eq(chatSession.id, sessionId));
-	} catch (err) {
-		propagateError(err);
-		throw AppError.database(
-			`Failed to clear chat session: ${(err as Error).message}`,
-		);
-	}
+      // Update session's updatedAt timestamp
+      const result = await dbClient
+         .update(chatSession)
+         .set({ updatedAt: new Date() })
+         .where(eq(chatSession.id, sessionId))
+         .returning();
+
+      if (!result.length) {
+         throw AppError.database("Chat session not found");
+      }
+
+      return result[0];
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to clear chat session: ${(err as Error).message}`,
+      );
+   }
 }
 
 /**
  * Delete a chat session and all its messages.
+ * Returns true if deleted, false if not found.
  */
 export async function deleteChatSession(
-	dbClient: DatabaseInstance,
-	sessionId: string,
-) {
-	try {
-		await dbClient.delete(chatSession).where(eq(chatSession.id, sessionId));
-	} catch (err) {
-		propagateError(err);
-		throw AppError.database(
-			`Failed to delete chat session: ${(err as Error).message}`,
-		);
-	}
+   dbClient: DatabaseInstance,
+   sessionId: string,
+): Promise<boolean> {
+   try {
+      const result = await dbClient
+         .delete(chatSession)
+         .where(eq(chatSession.id, sessionId))
+         .returning({ id: chatSession.id });
+
+      return result.length > 0;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to delete chat session: ${(err as Error).message}`,
+      );
+   }
 }
 
 /**
@@ -228,27 +251,27 @@ export async function deleteChatSession(
  * Returns null if no session exists.
  */
 export async function getChatSessionWithMessages(
-	dbClient: DatabaseInstance,
-	contentId: string,
-	organizationId: string,
+   dbClient: DatabaseInstance,
+   contentId: string,
+   organizationId: string,
 ) {
-	try {
-		const session = await dbClient.query.chatSession.findFirst({
-			where: and(
-				eq(chatSession.contentId, contentId),
-				eq(chatSession.organizationId, organizationId),
-			),
-			with: {
-				messages: {
-					orderBy: (message, { asc }) => asc(message.createdAt),
-				},
-			},
-		});
-		return session;
-	} catch (err) {
-		propagateError(err);
-		throw AppError.database(
-			`Failed to get chat session with messages: ${(err as Error).message}`,
-		);
-	}
+   try {
+      const session = await dbClient.query.chatSession.findFirst({
+         where: and(
+            eq(chatSession.contentId, contentId),
+            eq(chatSession.organizationId, organizationId),
+         ),
+         with: {
+            messages: {
+               orderBy: (message, { asc }) => asc(message.createdAt),
+            },
+         },
+      });
+      return session;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to get chat session with messages: ${(err as Error).message}`,
+      );
+   }
 }

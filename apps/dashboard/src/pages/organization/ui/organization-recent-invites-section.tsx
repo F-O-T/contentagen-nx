@@ -28,12 +28,8 @@ import { useTRPC } from "@/integrations/clients";
 function RecentInvitesCardHeader() {
    return (
       <CardHeader className="">
-         <CardTitle className="">
-            {"Title"}
-         </CardTitle>
-         <CardDescription>
-            {"Description"}
-         </CardDescription>
+         <CardTitle className="">{"Title"}</CardTitle>
+         <CardDescription>{"Description"}</CardDescription>
       </CardHeader>
    );
 }

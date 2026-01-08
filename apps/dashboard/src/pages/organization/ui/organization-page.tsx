@@ -80,12 +80,8 @@ function OrganizationContent() {
                      <EmptyMedia variant="icon">
                         <Building className="size-12 text-muted-foreground" />
                      </EmptyMedia>
-                     <EmptyTitle>
-                        {"Title"}
-                     </EmptyTitle>
-                     <EmptyDescription>
-                        {"Description"}
-                     </EmptyDescription>
+                     <EmptyTitle>{"Title"}</EmptyTitle>
+                     <EmptyDescription>{"Description"}</EmptyDescription>
                   </EmptyHeader>
                   <EmptyContent>
                      <Tooltip>
@@ -106,9 +102,7 @@ function OrganizationContent() {
                         </TooltipTrigger>
                         {hasReachedLimit && (
                            <TooltipContent>
-                              <p>
-                                 {"Limit Reached"}
-                              </p>
+                              <p>{"Limit Reached"}</p>
                            </TooltipContent>
                         )}
                      </Tooltip>

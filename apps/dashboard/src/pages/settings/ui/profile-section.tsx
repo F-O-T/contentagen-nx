@@ -129,9 +129,7 @@ function ChangeNameSheetContent({
          return betterAuthClient.updateUser({ name });
       },
       onSuccess: () => {
-         toast.success(
-            "Nome atualizado com sucesso!",
-         );
+         toast.success("Nome atualizado com sucesso!");
          onClose();
       },
       onError: () => {
@@ -144,9 +142,7 @@ function ChangeNameSheetContent({
    return (
       <div className="flex flex-col h-full">
          <SheetHeader>
-            <SheetTitle>
-               {"Alterar Nome"}
-            </SheetTitle>
+            <SheetTitle>{"Alterar Nome"}</SheetTitle>
             <SheetDescription>
                {"Atualize seu nome de exibição"}
             </SheetDescription>
@@ -155,18 +151,12 @@ function ChangeNameSheetContent({
          <div className="flex-1 p-4 space-y-4 overflow-y-auto">
             <Alert>
                <Info className="size-4" />
-               <AlertTitle>
-                  {"Display Name"}
-               </AlertTitle>
-               <AlertDescription>
-                  {"Display Name Info"}
-               </AlertDescription>
+               <AlertTitle>{"Display Name"}</AlertTitle>
+               <AlertDescription>{"Display Name Info"}</AlertDescription>
             </Alert>
 
             <div className="space-y-2">
-               <Label htmlFor="new-name">
-                  {"Nome"}
-               </Label>
+               <Label htmlFor="new-name">{"Nome"}</Label>
                <Input
                   id="new-name"
                   onChange={(e) => setName(e.target.value)}
@@ -178,9 +168,7 @@ function ChangeNameSheetContent({
 
          <SheetFooter>
             <SheetClose asChild>
-               <Button variant="outline">
-                  {"Cancelar"}
-               </Button>
+               <Button variant="outline">{"Cancelar"}</Button>
             </SheetClose>
             <Button
                disabled={!isValid || updateMutation.isPending}
@@ -218,16 +206,12 @@ function ChangeEmailSheetContent({
          });
       },
       onSuccess: () => {
-         toast.success(
-            "Email de verificação enviado para o novo endereço!",
-         );
+         toast.success("Email de verificação enviado para o novo endereço!");
          onClose();
       },
       onError: (error) => {
          const errorMessage =
-            error instanceof Error
-               ? error.message
-               : "Erro ao alterar email";
+            error instanceof Error ? error.message : "Erro ao alterar email";
          toast.error(errorMessage);
       },
    });
@@ -252,23 +236,15 @@ function ChangeEmailSheetContent({
    return (
       <div className="flex flex-col h-full">
          <SheetHeader>
-            <SheetTitle>
-               {"Alterar Email"}
-            </SheetTitle>
-            <SheetDescription>
-               {"Seu e-mail"}
-            </SheetDescription>
+            <SheetTitle>{"Alterar Email"}</SheetTitle>
+            <SheetDescription>{"Seu e-mail"}</SheetDescription>
          </SheetHeader>
 
          <div className="flex-1 p-4 space-y-4 overflow-y-auto">
             <Alert>
                <Info className="size-4" />
-               <AlertTitle>
-                  {"Verification Required"}
-               </AlertTitle>
-               <AlertDescription>
-                  {"Verification Info"}
-               </AlertDescription>
+               <AlertTitle>{"Verification Required"}</AlertTitle>
+               <AlertDescription>{"Verification Info"}</AlertDescription>
             </Alert>
 
             <div className="p-4 bg-secondary/50 rounded-lg">
@@ -279,9 +255,7 @@ function ChangeEmailSheetContent({
             </div>
 
             <div className="space-y-2">
-               <Label htmlFor="new-email">
-                  {"New Email"}
-               </Label>
+               <Label htmlFor="new-email">{"New Email"}</Label>
                <Input
                   id="new-email"
                   onChange={(e) => setEmail(e.target.value)}
@@ -290,18 +264,14 @@ function ChangeEmailSheetContent({
                   value={email}
                />
                {email && !isValidEmail && (
-                  <p className="text-sm text-destructive">
-                     {"Invalid Email"}
-                  </p>
+                  <p className="text-sm text-destructive">{"Invalid Email"}</p>
                )}
             </div>
          </div>
 
          <SheetFooter>
             <SheetClose asChild>
-               <Button variant="outline">
-                  {"Cancelar"}
-               </Button>
+               <Button variant="outline">{"Cancelar"}</Button>
             </SheetClose>
             <Button
                disabled={!isValid || changeMutation.isPending}
@@ -340,15 +310,11 @@ function ChangeAvatarCredenzaContent({
    const confirmUploadMutation = useMutation(
       trpc.account.confirmAvatarUpload.mutationOptions({
          onSuccess: () => {
-            toast.success(
-               "Avatar atualizado com sucesso!",
-            );
+            toast.success("Avatar atualizado com sucesso!");
             onClose();
          },
          onError: () => {
-            toast.error(
-               "Erro ao atualizar avatar",
-            );
+            toast.error("Erro ao atualizar avatar");
          },
       }),
    );
@@ -403,9 +369,7 @@ function ChangeAvatarCredenzaContent({
          if (storageKey) {
             await cancelUploadMutation.mutateAsync({ storageKey });
          }
-         toast.error(
-            "Erro ao fazer upload do avatar",
-         );
+         toast.error("Erro ao fazer upload do avatar");
       } finally {
          fileUpload.setUploading(false);
       }
@@ -420,12 +384,8 @@ function ChangeAvatarCredenzaContent({
    return (
       <>
          <CredenzaHeader>
-            <CredenzaTitle>
-               {"Alterar Avatar"}
-            </CredenzaTitle>
-            <CredenzaDescription>
-               {"Sua foto de perfil"}
-            </CredenzaDescription>
+            <CredenzaTitle>{"Alterar Avatar"}</CredenzaTitle>
+            <CredenzaDescription>{"Sua foto de perfil"}</CredenzaDescription>
          </CredenzaHeader>
 
          <CredenzaBody className="space-y-4">
@@ -471,9 +431,7 @@ function ChangeAvatarCredenzaContent({
 
          <CredenzaFooter>
             <CredenzaClose asChild>
-               <Button variant="outline">
-                  {"Cancelar"}
-               </Button>
+               <Button variant="outline">{"Cancelar"}</Button>
             </CredenzaClose>
             <Button
                disabled={!fileUpload.selectedFile || isUploading}
@@ -550,16 +508,12 @@ function ChangePasswordStepperContent({
          });
       },
       onSuccess: () => {
-         toast.success(
-            "Senha alterada com sucesso!",
-         );
+         toast.success("Senha alterada com sucesso!");
          onClose();
       },
       onError: (error) => {
          const errorMessage =
-            error instanceof Error
-               ? error.message
-               : "Erro ao alterar senha";
+            error instanceof Error ? error.message : "Erro ao alterar senha";
          toast.error(errorMessage);
       },
    });
@@ -596,13 +550,9 @@ function ChangePasswordStepperContent({
    return (
       <div className="flex flex-col h-full">
          <SheetHeader>
-            <SheetTitle>
-               {"Alterar Senha"}
-            </SheetTitle>
+            <SheetTitle>{"Alterar Senha"}</SheetTitle>
             <SheetDescription>
-               {isVerifyStep
-                  ? "Step Verify"
-                  : "Step Change"}
+               {isVerifyStep ? "Step Verify" : "Step Change"}
             </SheetDescription>
          </SheetHeader>
 
@@ -621,9 +571,7 @@ function ChangePasswordStepperContent({
                   <>
                      <Alert>
                         <Info className="size-4" />
-                        <AlertTitle>
-                           {"Identity Verification"}
-                        </AlertTitle>
+                        <AlertTitle>{"Identity Verification"}</AlertTitle>
                         <AlertDescription>
                            {"Identity Verification Info"}
                         </AlertDescription>
@@ -648,9 +596,7 @@ function ChangePasswordStepperContent({
                      {passwordError && (
                         <Alert variant="destructive">
                            <AlertTriangle className="size-4" />
-                           <AlertTitle>
-                              {"Incorrect Password"}
-                           </AlertTitle>
+                           <AlertTitle>{"Incorrect Password"}</AlertTitle>
                            <AlertDescription>
                               {"Incorrect Password Info"}
                            </AlertDescription>
@@ -662,18 +608,14 @@ function ChangePasswordStepperContent({
                   <>
                      <Alert>
                         <Info className="size-4" />
-                        <AlertTitle>
-                           {"Account Security"}
-                        </AlertTitle>
+                        <AlertTitle>{"Account Security"}</AlertTitle>
                         <AlertDescription>
                            {"Account Security Info"}
                         </AlertDescription>
                      </Alert>
 
                      <div className="space-y-2">
-                        <Label htmlFor="new-password">
-                           {"New Password"}
-                        </Label>
+                        <Label htmlFor="new-password">{"New Password"}</Label>
                         <Input
                            id="new-password"
                            onChange={(e) => setNewPassword(e.target.value)}
@@ -716,9 +658,7 @@ function ChangePasswordStepperContent({
             {isVerifyStep ? (
                <>
                   <SheetClose asChild>
-                     <Button variant="outline">
-                        {"Cancelar"}
-                     </Button>
+                     <Button variant="outline">{"Cancelar"}</Button>
                   </SheetClose>
                   <Button
                      disabled={!currentPassword || verifyMutation.isPending}
@@ -752,12 +692,8 @@ function ProfileSectionErrorFallback(props: FallbackProps) {
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Perfil"}
-            </CardTitle>
-            <CardDescription>
-               {"Suas informações pessoais."}
-            </CardDescription>
+            <CardTitle>{"Perfil"}</CardTitle>
+            <CardDescription>{"Suas informações pessoais."}</CardDescription>
          </CardHeader>
          <CardContent>
             {createErrorFallback({
@@ -918,9 +854,7 @@ function ProfileCard({
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Perfil"}
-            </CardTitle>
+            <CardTitle>{"Perfil"}</CardTitle>
             <CardDescription>
                {"Visualize e gerencie as informações do seu perfil pessoal"}
             </CardDescription>
@@ -958,9 +892,7 @@ function ProfileCard({
                      <User className="size-4" />
                   </ItemMedia>
                   <ItemContent>
-                     <ItemTitle>
-                        {"Name"}
-                     </ItemTitle>
+                     <ItemTitle>{"Name"}</ItemTitle>
                      <ItemDescription>
                         {session?.user?.name || "-"}
                      </ItemDescription>
@@ -976,9 +908,7 @@ function ProfileCard({
                               <Pencil className="size-4" />
                            </Button>
                         </TooltipTrigger>
-                        <TooltipContent>
-                           {"Edit Tooltip"}
-                        </TooltipContent>
+                        <TooltipContent>{"Edit Tooltip"}</TooltipContent>
                      </Tooltip>
                   </ItemActions>
                </Item>
@@ -990,9 +920,7 @@ function ProfileCard({
                      <Mail className="size-4" />
                   </ItemMedia>
                   <ItemContent>
-                     <ItemTitle>
-                        {"Email"}
-                     </ItemTitle>
+                     <ItemTitle>{"Email"}</ItemTitle>
                      <ItemDescription>
                         {session?.user?.email || "-"}
                      </ItemDescription>
@@ -1008,9 +936,7 @@ function ProfileCard({
                               <Pencil className="size-4" />
                            </Button>
                         </TooltipTrigger>
-                        <TooltipContent>
-                           {"Edit Tooltip"}
-                        </TooltipContent>
+                        <TooltipContent>{"Edit Tooltip"}</TooltipContent>
                      </Tooltip>
                   </ItemActions>
                </Item>
@@ -1022,9 +948,7 @@ function ProfileCard({
                      <Lock className="size-4" />
                   </ItemMedia>
                   <ItemContent>
-                     <ItemTitle>
-                        {"Label"}
-                     </ItemTitle>
+                     <ItemTitle>{"Label"}</ItemTitle>
                      <ItemDescription>
                         {hasPassword
                            ? "Description Has Password"
@@ -1077,12 +1001,8 @@ function AccountSummaryCard({
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Title"}
-            </CardTitle>
-            <CardDescription>
-               {"Description"}
-            </CardDescription>
+            <CardTitle>{"Title"}</CardTitle>
+            <CardDescription>{"Description"}</CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
             <ItemGroup>
@@ -1091,9 +1011,7 @@ function AccountSummaryCard({
                      <Calendar className="size-4" />
                   </ItemMedia>
                   <ItemContent>
-                     <ItemTitle>
-                        {"Member Since"}
-                     </ItemTitle>
+                     <ItemTitle>{"Member Since"}</ItemTitle>
                      <ItemDescription>
                         {formatDate(createdAt ?? null)}
                      </ItemDescription>
@@ -1159,9 +1077,7 @@ function TwoFactorSetupCredenzaContent({ onClose }: { onClose: () => void }) {
          }
       },
       onError: () => {
-         toast.error(
-            "Incorrect Password",
-         );
+         toast.error("Incorrect Password");
       },
    });
 
@@ -1182,39 +1098,27 @@ function TwoFactorSetupCredenzaContent({ onClose }: { onClose: () => void }) {
             setBackupCodes(codesResult.data.backupCodes);
             setStep("backup");
          }
-         toast.success(
-            "Success",
-         );
+         toast.success("Success");
       },
       onError: () => {
-         toast.error(
-            "Invalid Code",
-         );
+         toast.error("Invalid Code");
       },
    });
 
    const copyBackupCodes = () => {
       navigator.clipboard.writeText(backupCodes.join("\n"));
-      toast.success(
-         "Codes Copied",
-      );
+      toast.success("Codes Copied");
    };
 
    return (
       <>
          <CredenzaHeader>
-            <CredenzaTitle>
-               {"Title"}
-            </CredenzaTitle>
+            <CredenzaTitle>{"Title"}</CredenzaTitle>
             <CredenzaDescription>
-               {step === "password" &&
-                  "Step Password"}
-               {step === "qrcode" &&
-                  "Step Qrcode"}
-               {step === "verify" &&
-                  "Step Verify"}
-               {step === "backup" &&
-                  "Step Backup"}
+               {step === "password" && "Step Password"}
+               {step === "qrcode" && "Step Qrcode"}
+               {step === "verify" && "Step Verify"}
+               {step === "backup" && "Step Backup"}
             </CredenzaDescription>
          </CredenzaHeader>
 
@@ -1222,9 +1126,7 @@ function TwoFactorSetupCredenzaContent({ onClose }: { onClose: () => void }) {
             {step === "password" && (
                <div className="space-y-4">
                   <div className="space-y-2">
-                     <Label htmlFor="2fa-password">
-                        {"Password Label"}
-                     </Label>
+                     <Label htmlFor="2fa-password">{"Password Label"}</Label>
                      <Input
                         id="2fa-password"
                         onChange={(e) => setPassword(e.target.value)}
@@ -1313,9 +1215,7 @@ function TwoFactorSetupCredenzaContent({ onClose }: { onClose: () => void }) {
             {step === "password" && (
                <>
                   <CredenzaClose asChild>
-                     <Button variant="outline">
-                        {"Cancelar"}
-                     </Button>
+                     <Button variant="outline">{"Cancelar"}</Button>
                   </CredenzaClose>
                   <Button
                      disabled={!password || enableMutation.isPending}
@@ -1370,15 +1270,11 @@ function SetPasswordCredenzaContent({ onSuccess }: { onSuccess: () => void }) {
    const setPasswordMutation = useMutation(
       trpc.account.setPassword.mutationOptions({
          onSuccess: () => {
-            toast.success(
-               "Success",
-            );
+            toast.success("Success");
             onSuccess();
          },
          onError: () => {
-            toast.error(
-               "Error",
-            );
+            toast.error("Error");
          },
       }),
    );
@@ -1388,25 +1284,17 @@ function SetPasswordCredenzaContent({ onSuccess }: { onSuccess: () => void }) {
    return (
       <>
          <CredenzaHeader>
-            <CredenzaTitle>
-               {"Title"}
-            </CredenzaTitle>
-            <CredenzaDescription>
-               {"Description"}
-            </CredenzaDescription>
+            <CredenzaTitle>{"Title"}</CredenzaTitle>
+            <CredenzaDescription>{"Description"}</CredenzaDescription>
          </CredenzaHeader>
 
          <CredenzaBody className="space-y-4">
             <div className="p-4 bg-secondary/50 rounded-lg">
-               <p className="text-sm text-muted-foreground">
-                  {"Oauth Info"}
-               </p>
+               <p className="text-sm text-muted-foreground">{"Oauth Info"}</p>
             </div>
 
             <div className="space-y-2">
-               <Label htmlFor="new-password">
-                  {"New Password"}
-               </Label>
+               <Label htmlFor="new-password">{"New Password"}</Label>
                <Input
                   id="new-password"
                   onChange={(e) => setPassword(e.target.value)}
@@ -1417,9 +1305,7 @@ function SetPasswordCredenzaContent({ onSuccess }: { onSuccess: () => void }) {
             </div>
 
             <div className="space-y-2">
-               <Label htmlFor="confirm-password">
-                  {"Confirm Password"}
-               </Label>
+               <Label htmlFor="confirm-password">{"Confirm Password"}</Label>
                <Input
                   id="confirm-password"
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -1438,9 +1324,7 @@ function SetPasswordCredenzaContent({ onSuccess }: { onSuccess: () => void }) {
 
          <CredenzaFooter>
             <CredenzaClose asChild>
-               <Button variant="outline">
-                  {"Cancelar"}
-               </Button>
+               <Button variant="outline">{"Cancelar"}</Button>
             </CredenzaClose>
             <Button
                disabled={!isValid || setPasswordMutation.isPending}
@@ -1483,15 +1367,11 @@ function TwoFactorCard({
          return betterAuthClient.twoFactor.disable({ password });
       },
       onSuccess: () => {
-         toast.success(
-            "Success",
-         );
+         toast.success("Success");
          closeCredenza();
       },
       onError: () => {
-         toast.error(
-            "Error",
-         );
+         toast.error("Error");
       },
    });
 
@@ -1534,12 +1414,8 @@ function TwoFactorCard({
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Autenticação em Duas Etapas"}
-            </CardTitle>
-            <CardDescription>
-               {"Description"}
-            </CardDescription>
+            <CardTitle>{"Autenticação em Duas Etapas"}</CardTitle>
+            <CardDescription>{"Description"}</CardDescription>
          </CardHeader>
          <CardContent>
             <ItemGroup>
@@ -1552,9 +1428,7 @@ function TwoFactorCard({
                      )}
                   </ItemMedia>
                   <ItemContent>
-                     <ItemTitle>
-                        {"Status"}
-                     </ItemTitle>
+                     <ItemTitle>{"Status"}</ItemTitle>
                      <ItemDescription>
                         {isTwoFactorEnabled
                            ? "Enabled Description"
@@ -1565,9 +1439,7 @@ function TwoFactorCard({
                      <Badge
                         variant={isTwoFactorEnabled ? "default" : "secondary"}
                      >
-                        {isTwoFactorEnabled
-                           ? "Active"
-                           : "Inactive"}
+                        {isTwoFactorEnabled ? "Active" : "Inactive"}
                      </Badge>
                   </ItemActions>
                </Item>
@@ -1610,12 +1482,8 @@ function TwoFactorCard({
                            <Key className="size-4" />
                         </ItemMedia>
                         <ItemContent>
-                           <ItemTitle>
-                              {"Title"}
-                           </ItemTitle>
-                           <ItemDescription>
-                              {"Description"}
-                           </ItemDescription>
+                           <ItemTitle>{"Title"}</ItemTitle>
+                           <ItemDescription>{"Description"}</ItemDescription>
                         </ItemContent>
                         <ItemActions>
                            <ChevronRight className="size-4 text-muted-foreground" />
@@ -1656,9 +1524,7 @@ function TwoFactorCard({
                            <Smartphone className="size-4" />
                         </ItemMedia>
                         <ItemContent>
-                           <ItemTitle>
-                              {"Configure"}
-                           </ItemTitle>
+                           <ItemTitle>{"Configure"}</ItemTitle>
                            <ItemDescription>
                               {"Configure Description"}
                            </ItemDescription>
@@ -1698,38 +1564,28 @@ function ViewBackupCodesCredenzaContent({ onClose }: { onClose: () => void }) {
          }
       },
       onError: () => {
-         toast.error(
-            "Incorrect Password",
-         );
+         toast.error("Incorrect Password");
       },
    });
 
    const copyBackupCodes = () => {
       navigator.clipboard.writeText(codes.join("\n"));
-      toast.success(
-         "Codes Copied",
-      );
+      toast.success("Codes Copied");
    };
 
    return (
       <>
          <CredenzaHeader>
-            <CredenzaTitle>
-               {"Title"}
-            </CredenzaTitle>
+            <CredenzaTitle>{"Title"}</CredenzaTitle>
             <CredenzaDescription>
-               {step === "password"
-                  ? "Step Password"
-                  : "Step Codes"}
+               {step === "password" ? "Step Password" : "Step Codes"}
             </CredenzaDescription>
          </CredenzaHeader>
 
          <CredenzaBody className="space-y-4">
             {step === "password" && (
                <div className="space-y-2">
-                  <Label htmlFor="backup-password">
-                     {"Password Label"}
-                  </Label>
+                  <Label htmlFor="backup-password">{"Password Label"}</Label>
                   <Input
                      id="backup-password"
                      onChange={(e) => setPassword(e.target.value)}
@@ -1773,9 +1629,7 @@ function ViewBackupCodesCredenzaContent({ onClose }: { onClose: () => void }) {
             {step === "password" && (
                <>
                   <CredenzaClose asChild>
-                     <Button variant="outline">
-                        {"Cancelar"}
-                     </Button>
+                     <Button variant="outline">{"Cancelar"}</Button>
                   </CredenzaClose>
                   <Button
                      disabled={!password || viewMutation.isPending}
@@ -1815,25 +1669,17 @@ function DisableTwoFactorCredenzaContent({
    return (
       <>
          <CredenzaHeader>
-            <CredenzaTitle>
-               {"Title"}
-            </CredenzaTitle>
-            <CredenzaDescription>
-               {"Description"}
-            </CredenzaDescription>
+            <CredenzaTitle>{"Title"}</CredenzaTitle>
+            <CredenzaDescription>{"Description"}</CredenzaDescription>
          </CredenzaHeader>
 
          <CredenzaBody className="space-y-4">
             <div className="p-4 bg-destructive/10 rounded-lg flex items-start gap-3">
                <AlertTriangle className="size-5 text-destructive shrink-0 mt-0.5" />
-               <p className="text-sm text-destructive">
-                  {"Warning"}
-               </p>
+               <p className="text-sm text-destructive">{"Warning"}</p>
             </div>
             <div className="space-y-2">
-               <Label htmlFor="disable-password">
-                  {"Password Label"}
-               </Label>
+               <Label htmlFor="disable-password">{"Password Label"}</Label>
                <Input
                   id="disable-password"
                   onChange={(e) => setPassword(e.target.value)}
@@ -1846,9 +1692,7 @@ function DisableTwoFactorCredenzaContent({
 
          <CredenzaFooter>
             <CredenzaClose asChild>
-               <Button variant="outline">
-                  {"Cancelar"}
-               </Button>
+               <Button variant="outline">{"Cancelar"}</Button>
             </CredenzaClose>
             <Button
                disabled={!password || isPending}
@@ -1889,13 +1733,9 @@ function DataAccountCard() {
          a.click();
          document.body.removeChild(a);
          URL.revokeObjectURL(url);
-         toast.success(
-            "Export Success",
-         );
+         toast.success("Export Success");
       } catch {
-         toast.error(
-            "Export Error",
-         );
+         toast.error("Export Error");
       }
    };
 
@@ -1908,12 +1748,8 @@ function DataAccountCard() {
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Title"}
-            </CardTitle>
-            <CardDescription>
-               {"Description"}
-            </CardDescription>
+            <CardTitle>{"Title"}</CardTitle>
+            <CardDescription>{"Description"}</CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
             <Button
@@ -1958,9 +1794,7 @@ function DeleteAccountCredenzaContent({ onClose }: { onClose: () => void }) {
       trpc.accountDeletion.requestDeletion.mutationOptions({
          onSuccess: (data) => {
             if (data.type === "immediate") {
-               toast.success(
-                  "Success Immediate",
-               );
+               toast.success("Success Immediate");
                window.location.href = "/auth/sign-in";
             } else if (data.scheduledDeletionAt) {
                const scheduledDate = new Date(data.scheduledDeletionAt);
@@ -1972,13 +1806,9 @@ function DeleteAccountCredenzaContent({ onClose }: { onClose: () => void }) {
          },
          onError: (error) => {
             if (error.message === "Invalid password") {
-               toast.error(
-                  "Error Invalid Password",
-               );
+               toast.error("Error Invalid Password");
             } else {
-               toast.error(
-                  "Error Generic",
-               );
+               toast.error("Error Generic");
             }
          },
       }),
@@ -1987,9 +1817,7 @@ function DeleteAccountCredenzaContent({ onClose }: { onClose: () => void }) {
    return (
       <>
          <CredenzaHeader>
-            <CredenzaTitle>
-               {"Title"}
-            </CredenzaTitle>
+            <CredenzaTitle>{"Title"}</CredenzaTitle>
             <CredenzaDescription>
                {step === "options"
                   ? "Options Description"
@@ -2002,9 +1830,7 @@ function DeleteAccountCredenzaContent({ onClose }: { onClose: () => void }) {
                <>
                   <div className="p-4 bg-destructive/10 rounded-lg flex items-start gap-3">
                      <AlertTriangle className="size-5 text-destructive shrink-0 mt-0.5" />
-                     <p className="text-sm text-destructive">
-                        {"Warning"}
-                     </p>
+                     <p className="text-sm text-destructive">{"Warning"}</p>
                   </div>
 
                   <RadioGroup
@@ -2053,9 +1879,7 @@ function DeleteAccountCredenzaContent({ onClose }: { onClose: () => void }) {
                         : "Password Prompt Grace"}
                   </p>
                   <div className="space-y-2">
-                     <Label htmlFor="delete-password">
-                        {"Password Label"}
-                     </Label>
+                     <Label htmlFor="delete-password">{"Password Label"}</Label>
                      <Input
                         id="delete-password"
                         onChange={(e) => setPassword(e.target.value)}
@@ -2072,9 +1896,7 @@ function DeleteAccountCredenzaContent({ onClose }: { onClose: () => void }) {
             {step === "options" && (
                <>
                   <CredenzaClose asChild>
-                     <Button variant="outline">
-                        {"Cancelar"}
-                     </Button>
+                     <Button variant="outline">{"Cancelar"}</Button>
                   </CredenzaClose>
                   <Button
                      onClick={() => setStep("confirm")}
@@ -2136,15 +1958,11 @@ function LinkedAccountsCard({
          return betterAuthClient.unlinkAccount({ providerId });
       },
       onSuccess: () => {
-         toast.success(
-            "Unlink Success",
-         );
+         toast.success("Unlink Success");
          onRefetch();
       },
       onError: () => {
-         toast.error(
-            "Unlink Error",
-         );
+         toast.error("Unlink Error");
       },
    });
 
@@ -2155,9 +1973,7 @@ function LinkedAccountsCard({
             callbackURL: window.location.href,
          });
       } catch {
-         toast.error(
-            "Link Google Error",
-         );
+         toast.error("Link Google Error");
       }
    };
 
@@ -2180,12 +1996,8 @@ function LinkedAccountsCard({
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Title"}
-            </CardTitle>
-            <CardDescription>
-               {"Description"}
-            </CardDescription>
+            <CardTitle>{"Title"}</CardTitle>
+            <CardDescription>{"Description"}</CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
             <ItemGroup>
@@ -2195,9 +2007,7 @@ function LinkedAccountsCard({
                      <Key className="size-4" />
                   </ItemMedia>
                   <ItemContent>
-                     <ItemTitle>
-                        {"Label"}
-                     </ItemTitle>
+                     <ItemTitle>{"Label"}</ItemTitle>
                      <ItemDescription>
                         {hasPassword
                            ? "Password Configured"
@@ -2206,9 +2016,7 @@ function LinkedAccountsCard({
                   </ItemContent>
                   <ItemActions>
                      {hasPassword ? (
-                        <Badge variant="default">
-                           {"Active"}
-                        </Badge>
+                        <Badge variant="default">{"Active"}</Badge>
                      ) : (
                         <Button
                            onClick={handleSetPassword}
@@ -2239,9 +2047,7 @@ function LinkedAccountsCard({
                   <ItemActions>
                      {hasGoogleLinked ? (
                         <div className="flex items-center gap-2">
-                           <Badge variant="default">
-                              {"Active"}
-                           </Badge>
+                           <Badge variant="default">{"Active"}</Badge>
                            {canUnlink && (
                               <Tooltip>
                                  <TooltipTrigger asChild>

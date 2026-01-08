@@ -4,12 +4,12 @@ import { ManageWriterForm } from "@/features/writers/ui/manage-writer-form";
 import { useSheet } from "@/hooks/use-sheet";
 
 export function WritersQuickActionsToolbar() {
-	const { openSheet } = useSheet();
+   const { openSheet } = useSheet();
 
-	return (
-		<Button onClick={() => openSheet({ children: <ManageWriterForm /> })}>
-			<Plus className="size-4" />
-			{"Novo Escritor"}
-		</Button>
-	);
+   return (
+      <Button onClick={() => openSheet({ children: <ManageWriterForm /> })}>
+         <Plus className="size-4" />
+         {"Novo Escritor"}
+      </Button>
+   );
 }

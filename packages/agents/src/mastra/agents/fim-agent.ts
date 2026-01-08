@@ -3,13 +3,13 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
 
 const openrouter = createOpenRouter({
-	apiKey: serverEnv.OPENROUTER_API_KEY,
+   apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 
 // Available models for FIM
 const FIM_MODELS = {
-	"x-ai/grok-4.1-fast": "x-ai/grok-4.1-fast",
-	"mistralai/mistral-small-creative": "mistralai/mistral-small-creative",
+   "x-ai/grok-4.1-fast": "x-ai/grok-4.1-fast",
+   "mistralai/mistral-small-creative": "mistralai/mistral-small-creative",
 } as const;
 
 type FIMModelId = keyof typeof FIM_MODELS;
@@ -22,17 +22,18 @@ type FIMModelId = keyof typeof FIM_MODELS;
  * No tools - pure text generation.
  */
 export const fimAgent = new Agent({
-	id: "fim-agent",
-	name: "FIM Completion Agent",
+   id: "fim-agent",
+   name: "FIM Completion Agent",
 
-	// Dynamic model selection from requestContext
-	model: ({ requestContext }) => {
-		const modelId = (requestContext?.get("model") as FIMModelId) || "x-ai/grok-4.1-fast";
-		const model = FIM_MODELS[modelId] || FIM_MODELS["x-ai/grok-4.1-fast"];
-		return openrouter(model);
-	},
+   // Dynamic model selection from requestContext
+   model: ({ requestContext }) => {
+      const modelId =
+         (requestContext?.get("model") as FIMModelId) || "x-ai/grok-4.1-fast";
+      const model = FIM_MODELS[modelId] || FIM_MODELS["x-ai/grok-4.1-fast"];
+      return openrouter(model);
+   },
 
-	instructions: () => `
+   instructions: () => `
 You are an expert writing assistant. Your ONLY job is to continue text naturally and seamlessly.
 
 ## CRITICAL RULES
@@ -87,6 +88,6 @@ Output:  your mind goes completely blank, like someone hit the reset button on y
 Remember: You are invisible. The reader should never notice where the author stopped and you continued.
 `,
 
-	// No tools for FIM
-	tools: {},
+   // No tools for FIM
+   tools: {},
 });

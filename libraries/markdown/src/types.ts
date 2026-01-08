@@ -7,52 +7,46 @@
 
 // Re-export all types from schemas (these are Zod-inferred)
 export type {
-   // Document types
-   MarkdownDocument,
-   DocumentNode,
-   Position,
-
-   // Block node types
-   BlockNode,
-   BlockquoteNode,
-   CodeBlockNode,
-   HeadingNode,
-   HtmlBlockNode,
-   LinkReferenceDefinition,
-   ListItemNode,
-   ListNode,
-   ParagraphNode,
-   ThematicBreakNode,
-
-   // Inline node types
-   InlineNode,
-   CodeSpanNode,
-   EmphasisNode,
-   HardBreakNode,
-   HtmlInlineNode,
-   ImageNode,
-   LinkNode,
-   SoftBreakNode,
-   StrongNode,
-   TextNode,
-
-   // Union types
-   LiteralNode,
-   Node,
-   ParentNode,
-
-   // Options
-   GenerateOptions,
-   ParseOptions,
-   StreamOptions,
-
-   // Streaming
-   StreamEvent,
-
    // Batch processing
    BatchMarkdownFileInput,
    BatchMarkdownStreamEvent,
    BatchParsedMarkdownFile,
+   // Block node types
+   BlockNode,
+   BlockquoteNode,
+   CodeBlockNode,
+   CodeSpanNode,
+   DocumentNode,
+   EmphasisNode,
+   // Options
+   GenerateOptions,
+   HardBreakNode,
+   HeadingNode,
+   HtmlBlockNode,
+   HtmlInlineNode,
+   ImageNode,
+   // Inline node types
+   InlineNode,
+   LinkNode,
+   LinkReferenceDefinition,
+   ListItemNode,
+   ListNode,
+   // Union types
+   LiteralNode,
+   // Document types
+   MarkdownDocument,
+   Node,
+   ParagraphNode,
+   ParentNode,
+   ParseOptions,
+   Position,
+   SoftBreakNode,
+   // Streaming
+   StreamEvent,
+   StreamOptions,
+   StrongNode,
+   TextNode,
+   ThematicBreakNode,
 } from "./schemas.ts";
 
 /**
@@ -133,14 +127,34 @@ export interface Bracket {
 export type InlineToken =
    | { type: "text"; value: string; start: number; end: number }
    | { type: "code"; value: string; start: number; end: number }
-   | { type: "autolink"; url: string; isEmail: boolean; start: number; end: number }
+   | {
+        type: "autolink";
+        url: string;
+        isEmail: boolean;
+        start: number;
+        end: number;
+     }
    | { type: "htmlInline"; value: string; start: number; end: number }
    | { type: "hardBreak"; start: number; end: number }
    | { type: "softBreak"; start: number; end: number }
-   | { type: "delimiterRun"; char: "*" | "_"; count: number; start: number; end: number; canOpen: boolean; canClose: boolean }
+   | {
+        type: "delimiterRun";
+        char: "*" | "_";
+        count: number;
+        start: number;
+        end: number;
+        canOpen: boolean;
+        canClose: boolean;
+     }
    | { type: "openBracket"; isImage: boolean; start: number; end: number }
    | { type: "closeBracket"; start: number; end: number }
-   | { type: "linkInfo"; url: string; title?: string; start: number; end: number };
+   | {
+        type: "linkInfo";
+        url: string;
+        title?: string;
+        start: number;
+        end: number;
+     };
 
 /**
  * Context for block parsing.

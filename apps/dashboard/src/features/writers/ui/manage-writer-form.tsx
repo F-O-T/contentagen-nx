@@ -1,17 +1,17 @@
 import { Alert, AlertDescription } from "@packages/ui/components/alert";
 import { Button } from "@packages/ui/components/button";
 import {
-	Field,
-	FieldDescription,
-	FieldError,
-	FieldLabel,
+   Field,
+   FieldDescription,
+   FieldError,
+   FieldLabel,
 } from "@packages/ui/components/field";
 import { Input } from "@packages/ui/components/input";
 import {
-	SheetDescription,
-	SheetFooter,
-	SheetHeader,
-	SheetTitle,
+   SheetDescription,
+   SheetFooter,
+   SheetHeader,
+   SheetTitle,
 } from "@packages/ui/components/sheet";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { Textarea } from "@packages/ui/components/textarea";
@@ -28,270 +28,287 @@ import { useTRPC } from "@/integrations/clients";
 import { WriterPhotoUpload } from "./writer-photo-upload";
 
 type Writer = {
-	id: string;
-	personaConfig: {
-		metadata: {
-			name: string;
-			description?: string;
-		};
-		instructions?: {
-			writingGuidelines?: string;
-			audienceProfile?: string;
-			tone?: string;
-			style?: string;
-		};
-	};
-	profilePhotoUrl?: string | null;
+   id: string;
+   personaConfig: {
+      metadata: {
+         name: string;
+         description?: string;
+      };
+      instructions?: {
+         writingGuidelines?: string;
+         audienceProfile?: string;
+         tone?: string;
+         style?: string;
+      };
+   };
+   profilePhotoUrl?: string | null;
 };
 
 type ManageWriterFormProps = {
-	writer?: Writer;
+   writer?: Writer;
 };
 
 function ManageWriterErrorFallback() {
-	return (
-		<Alert variant="destructive">
-			<AlertTriangle className="h-4 w-4" />
-			<AlertDescription>
-				{"Ocorreu um erro. Por favor, tente novamente."}
-			</AlertDescription>
-		</Alert>
-	);
+   return (
+      <Alert variant="destructive">
+         <AlertTriangle className="h-4 w-4" />
+         <AlertDescription>
+            {"Ocorreu um erro. Por favor, tente novamente."}
+         </AlertDescription>
+      </Alert>
+   );
 }
 
 function ManageWriterSkeleton() {
-	return (
-		<div className="grid gap-4 px-4">
-			<div className="flex justify-center">
-				<Skeleton className="size-16 rounded-full" />
-			</div>
-			<Skeleton className="h-4 w-20" />
-			<Skeleton className="h-10 w-full" />
-			<Skeleton className="h-4 w-24" />
-			<Skeleton className="h-20 w-full" />
-			<div className="flex gap-2 pt-4">
-				<Skeleton className="h-10 w-24" />
-				<Skeleton className="h-10 w-32" />
-			</div>
-		</div>
-	);
+   return (
+      <div className="grid gap-4 px-4">
+         <div className="flex justify-center">
+            <Skeleton className="size-16 rounded-full" />
+         </div>
+         <Skeleton className="h-4 w-20" />
+         <Skeleton className="h-10 w-full" />
+         <Skeleton className="h-4 w-24" />
+         <Skeleton className="h-20 w-full" />
+         <div className="flex gap-2 pt-4">
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-32" />
+         </div>
+      </div>
+   );
 }
 
 function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
-	const { closeSheet } = useSheet();
-	const trpc = useTRPC();
-	const queryClient = useQueryClient();
-	const isEditMode = !!writer;
+   const { closeSheet } = useSheet();
+   const trpc = useTRPC();
+   const queryClient = useQueryClient();
+   const isEditMode = !!writer;
 
-	const createMutation = useMutation(
-		trpc.agent.create.mutationOptions({
-			onSuccess: () => {
-				toast.success("Escritor criado com sucesso");
-				queryClient.invalidateQueries({ queryKey: trpc.agent.list.queryKey() });
-				queryClient.invalidateQueries({ queryKey: trpc.agent.getStats.queryKey() });
-				closeSheet();
-			},
-			onError: (error) => {
-				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
-			},
-		}),
-	);
+   const createMutation = useMutation(
+      trpc.agent.create.mutationOptions({
+         onSuccess: () => {
+            toast.success("Escritor criado com sucesso");
+            queryClient.invalidateQueries({
+               queryKey: trpc.agent.list.queryKey(),
+            });
+            queryClient.invalidateQueries({
+               queryKey: trpc.agent.getStats.queryKey(),
+            });
+            closeSheet();
+         },
+         onError: (error) => {
+            toast.error(
+               error.message || "Ocorreu um erro. Por favor, tente novamente.",
+            );
+         },
+      }),
+   );
 
-	const updateMutation = useMutation(
-		trpc.agent.update.mutationOptions({
-			onSuccess: () => {
-				toast.success("Escritor atualizado com sucesso");
-				queryClient.invalidateQueries({ queryKey: trpc.agent.list.queryKey() });
-				if (writer?.id) {
-					queryClient.invalidateQueries({
-						queryKey: trpc.agent.getById.queryKey({ id: writer.id }),
-					});
-				}
-				closeSheet();
-			},
-			onError: (error) => {
-				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
-			},
-		}),
-	);
+   const updateMutation = useMutation(
+      trpc.agent.update.mutationOptions({
+         onSuccess: () => {
+            toast.success("Escritor atualizado com sucesso");
+            queryClient.invalidateQueries({
+               queryKey: trpc.agent.list.queryKey(),
+            });
+            if (writer?.id) {
+               queryClient.invalidateQueries({
+                  queryKey: trpc.agent.getById.queryKey({ id: writer.id }),
+               });
+            }
+            closeSheet();
+         },
+         onError: (error) => {
+            toast.error(
+               error.message || "Ocorreu um erro. Por favor, tente novamente.",
+            );
+         },
+      }),
+   );
 
-	const isPending = createMutation.isPending || updateMutation.isPending;
+   const isPending = createMutation.isPending || updateMutation.isPending;
 
-	const schema = z.object({
-		name: z
-			.string()
-			.min(1, "O nome é obrigatório")
-			.max(50, "O nome deve ter no máximo 50 caracteres"),
-		description: z
-			.string()
-			.max(200, "A descrição deve ter no máximo 200 caracteres")
-			.optional(),
-	});
+   const schema = z.object({
+      name: z
+         .string()
+         .min(1, "O nome é obrigatório")
+         .max(50, "O nome deve ter no máximo 50 caracteres"),
+      description: z
+         .string()
+         .max(200, "A descrição deve ter no máximo 200 caracteres")
+         .optional(),
+   });
 
-	const form = useForm({
-		defaultValues: {
-			name: writer?.personaConfig.metadata.name ?? "",
-			description: writer?.personaConfig.metadata.description ?? "",
-		},
-		onSubmit: async ({ value }) => {
-			const existingInstructions = writer?.personaConfig.instructions || {};
-			const personaConfig = {
-				metadata: {
-					name: value.name,
-					description: value.description || undefined,
-				},
-				instructions: {
-					...existingInstructions,
-					tone: (existingInstructions as any).tone as
-						| "formal"
-						| "conversational"
-						| "professional"
-						| "casual"
-						| "academic"
-						| undefined,
-					ragIntegration: true,
-				},
-			} as const;
+   const form = useForm({
+      defaultValues: {
+         name: writer?.personaConfig.metadata.name ?? "",
+         description: writer?.personaConfig.metadata.description ?? "",
+      },
+      onSubmit: async ({ value }) => {
+         const existingInstructions = writer?.personaConfig.instructions || {};
+         const personaConfig = {
+            metadata: {
+               name: value.name,
+               description: value.description || undefined,
+            },
+            instructions: {
+               ...existingInstructions,
+               tone: (existingInstructions as any).tone as
+                  | "formal"
+                  | "conversational"
+                  | "professional"
+                  | "casual"
+                  | "academic"
+                  | undefined,
+               ragIntegration: true,
+            },
+         } as const;
 
-			if (isEditMode && writer) {
-				updateMutation.mutate({
-					id: writer.id,
-					data: { personaConfig },
-				});
-			} else {
-				createMutation.mutate({ personaConfig });
-			}
-		},
-		validators: {
-			onBlur: schema as unknown as undefined,
-		},
-	});
+         if (isEditMode && writer) {
+            updateMutation.mutate({
+               id: writer.id,
+               data: { personaConfig },
+            });
+         } else {
+            createMutation.mutate({ personaConfig });
+         }
+      },
+      validators: {
+         onBlur: schema as unknown as undefined,
+      },
+   });
 
-	const handleSubmit = (e: FormEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-		form.handleSubmit();
-	};
+   const handleSubmit = (e: FormEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      form.handleSubmit();
+   };
 
-	return (
-		<>
-			<form className="grid gap-6 px-4 overflow-y-auto" onSubmit={handleSubmit}>
-				{/* Photo Upload - only show for edit mode */}
-				{isEditMode && writer && (
-					<div className="flex justify-center">
-						<WriterPhotoUpload
-							agentId={writer.id}
-							currentPhotoUrl={writer.profilePhotoUrl}
-							name={writer.personaConfig.metadata.name}
-							size="lg"
-						/>
-					</div>
-				)}
+   return (
+      <>
+         <form
+            className="grid gap-6 px-4 overflow-y-auto"
+            onSubmit={handleSubmit}
+         >
+            {/* Photo Upload - only show for edit mode */}
+            {isEditMode && writer && (
+               <div className="flex justify-center">
+                  <WriterPhotoUpload
+                     agentId={writer.id}
+                     currentPhotoUrl={writer.profilePhotoUrl}
+                     name={writer.personaConfig.metadata.name}
+                     size="lg"
+                  />
+               </div>
+            )}
 
-				<form.Field name="name">
-					{(field) => {
-						const isInvalid =
-							field.state.meta.isTouched && !field.state.meta.isValid;
+            <form.Field name="name">
+               {(field) => {
+                  const isInvalid =
+                     field.state.meta.isTouched && !field.state.meta.isValid;
 
-						return (
-							<Field data-invalid={isInvalid}>
-								<FieldLabel htmlFor={field.name}>
-									{"Nome"}
-								</FieldLabel>
-								<Input
-									aria-invalid={isInvalid}
-									id={field.name}
-									name={field.name}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder={"Nome do escritor"}
-									type="text"
-									value={field.state.value}
-								/>
-								{isInvalid && <FieldError errors={field.state.meta.errors} />}
-							</Field>
-						);
-					}}
-				</form.Field>
+                  return (
+                     <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>{"Nome"}</FieldLabel>
+                        <Input
+                           aria-invalid={isInvalid}
+                           id={field.name}
+                           name={field.name}
+                           onBlur={field.handleBlur}
+                           onChange={(e) => field.handleChange(e.target.value)}
+                           placeholder={"Nome do escritor"}
+                           type="text"
+                           value={field.state.value}
+                        />
+                        {isInvalid && (
+                           <FieldError errors={field.state.meta.errors} />
+                        )}
+                     </Field>
+                  );
+               }}
+            </form.Field>
 
-				<form.Field name="description">
-					{(field) => {
-						const isInvalid =
-							field.state.meta.isTouched && !field.state.meta.isValid;
+            <form.Field name="description">
+               {(field) => {
+                  const isInvalid =
+                     field.state.meta.isTouched && !field.state.meta.isValid;
 
-						return (
-							<Field data-invalid={isInvalid}>
-								<FieldLabel htmlFor={field.name}>
-									{"Descrição"}
-								</FieldLabel>
-								<Textarea
-									aria-invalid={isInvalid}
-									id={field.name}
-									name={field.name}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder={"Uma breve descrição do escritor"}
-									rows={3}
-									value={field.state.value}
-								/>
-								<FieldDescription>
-									{"Uma breve descrição sobre seu escritor"}
-								</FieldDescription>
-								{isInvalid && <FieldError errors={field.state.meta.errors} />}
-							</Field>
-						);
-					}}
-				</form.Field>
-			</form>
+                  return (
+                     <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>
+                           {"Descrição"}
+                        </FieldLabel>
+                        <Textarea
+                           aria-invalid={isInvalid}
+                           id={field.name}
+                           name={field.name}
+                           onBlur={field.handleBlur}
+                           onChange={(e) => field.handleChange(e.target.value)}
+                           placeholder={"Uma breve descrição do escritor"}
+                           rows={3}
+                           value={field.state.value}
+                        />
+                        <FieldDescription>
+                           {"Uma breve descrição sobre seu escritor"}
+                        </FieldDescription>
+                        {isInvalid && (
+                           <FieldError errors={field.state.meta.errors} />
+                        )}
+                     </Field>
+                  );
+               }}
+            </form.Field>
+         </form>
 
-			<SheetFooter>
-				<Button onClick={closeSheet} type="button" variant="outline">
-					{"Cancelar"}
-				</Button>
-				<form.Subscribe>
-					{(formState) => (
-						<Button
-							disabled={!formState.canSubmit || formState.isSubmitting || isPending}
-							onClick={() => form.handleSubmit()}
-							type="submit"
-						>
-							{isPending
-								? isEditMode
-									? "Salvando..."
-									: "Criando..."
-								: isEditMode
-									? "Salvar Alterações"
-									: "Criar Escritor"}
-						</Button>
-					)}
-				</form.Subscribe>
-			</SheetFooter>
-		</>
-	);
+         <SheetFooter>
+            <Button onClick={closeSheet} type="button" variant="outline">
+               {"Cancelar"}
+            </Button>
+            <form.Subscribe>
+               {(formState) => (
+                  <Button
+                     disabled={
+                        !formState.canSubmit ||
+                        formState.isSubmitting ||
+                        isPending
+                     }
+                     onClick={() => form.handleSubmit()}
+                     type="submit"
+                  >
+                     {isPending
+                        ? isEditMode
+                           ? "Salvando..."
+                           : "Criando..."
+                        : isEditMode
+                          ? "Salvar Alterações"
+                          : "Criar Escritor"}
+                  </Button>
+               )}
+            </form.Subscribe>
+         </SheetFooter>
+      </>
+   );
 }
 
 export const ManageWriterForm: FC<ManageWriterFormProps> = ({ writer }) => {
-	const isEditMode = !!writer;
+   const isEditMode = !!writer;
 
-	return (
-		<>
-			<SheetHeader>
-				<SheetTitle>
-					{isEditMode
-						? "Editar Escritor"
-						: "Novo Escritor"}
-				</SheetTitle>
-				<SheetDescription>
-					{isEditMode
-						? "Atualize as configurações do escritor"
-						: "Adicione um novo escritor IA à sua equipe"}
-				</SheetDescription>
-			</SheetHeader>
-			<ErrorBoundary FallbackComponent={ManageWriterErrorFallback}>
-				<Suspense fallback={<ManageWriterSkeleton />}>
-					<ManageWriterFormContent writer={writer} />
-				</Suspense>
-			</ErrorBoundary>
-		</>
-	);
+   return (
+      <>
+         <SheetHeader>
+            <SheetTitle>
+               {isEditMode ? "Editar Escritor" : "Novo Escritor"}
+            </SheetTitle>
+            <SheetDescription>
+               {isEditMode
+                  ? "Atualize as configurações do escritor"
+                  : "Adicione um novo escritor IA à sua equipe"}
+            </SheetDescription>
+         </SheetHeader>
+         <ErrorBoundary FallbackComponent={ManageWriterErrorFallback}>
+            <Suspense fallback={<ManageWriterSkeleton />}>
+               <ManageWriterFormContent writer={writer} />
+            </Suspense>
+         </ErrorBoundary>
+      </>
+   );
 };

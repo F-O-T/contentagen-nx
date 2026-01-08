@@ -68,9 +68,7 @@ export function ErrorReportCredenza({ error }: ErrorReportCredenzaProps) {
    if (submitted) {
       return (
          <CredenzaHeader>
-            <CredenzaTitle>
-               {"Relatorio enviado"}
-            </CredenzaTitle>
+            <CredenzaTitle>{"Relatorio enviado"}</CredenzaTitle>
             <CredenzaDescription>
                {"Obrigado por nos ajudar a melhorar!"}
             </CredenzaDescription>
@@ -81,11 +79,11 @@ export function ErrorReportCredenza({ error }: ErrorReportCredenzaProps) {
    return (
       <>
          <CredenzaHeader>
-            <CredenzaTitle>
-               {"Relatar erro"}
-            </CredenzaTitle>
+            <CredenzaTitle>{"Relatar erro"}</CredenzaTitle>
             <CredenzaDescription>
-               {"Ajude-nos a melhorar relatando este erro. Suas informacoes serao enviadas anonimamente."}
+               {
+                  "Ajude-nos a melhorar relatando este erro. Suas informacoes serao enviadas anonimamente."
+               }
             </CredenzaDescription>
          </CredenzaHeader>
 
@@ -104,9 +102,7 @@ export function ErrorReportCredenza({ error }: ErrorReportCredenzaProps) {
                   {(field) => (
                      <FieldGroup>
                         <Field>
-                           <FieldLabel>
-                              {"Additional Details"}
-                           </FieldLabel>
+                           <FieldLabel>{"Additional Details"}</FieldLabel>
                            <Textarea
                               id={field.name}
                               name={field.name}

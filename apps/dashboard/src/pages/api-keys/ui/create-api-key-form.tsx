@@ -21,8 +21,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { useSheet } from "@/hooks/use-sheet";
 import { betterAuthClient } from "@/integrations/clients";
-import { invalidateApiKeys } from "./api-key-list";
 import { openApiKeyCreatedDialog } from "./api-key-created-dialog";
+import { invalidateApiKeys } from "./api-key-list";
 
 const EXPIRATION_OPTIONS = [
    { label: "Nunca", value: "" },
@@ -72,7 +72,9 @@ export function CreateApiKeyForm() {
                },
                onError: (ctx) => {
                   setIsPending(false);
-                  toast.error(ctx.error.message || "Falha ao criar chave de API");
+                  toast.error(
+                     ctx.error.message || "Falha ao criar chave de API",
+                  );
                },
             },
          );

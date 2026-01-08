@@ -6,51 +6,50 @@ import { formatWriterConfig } from "../helpers";
 
 // Import tools for plan mode
 import {
-	analysisTools,
-	getAllAnalysisToolInstructions,
+   analysisTools,
+   getAllAnalysisToolInstructions,
 } from "../tools/analysis";
-import {
-	getAllResearchToolInstructions,
-	researchTools,
-} from "../tools/research";
 import { getAllPlanToolInstructions, planTools } from "../tools/plan";
 import { getAllRagToolInstructions, ragTools } from "../tools/rag";
-
-// Import new research tools directly (no barrel exports)
 import {
-	relatedKeywordsTool,
-	getRelatedKeywordsInstructions,
-} from "../tools/research/related-keywords-tool";
+   getAllResearchToolInstructions,
+   researchTools,
+} from "../tools/research";
 import {
-	contentGapTool,
-	getContentGapInstructions,
+   contentGapTool,
+   getContentGapInstructions,
 } from "../tools/research/content-gap-tool";
 import {
-	factFinderTool,
-	getFactFinderInstructions,
+   factFinderTool,
+   getFactFinderInstructions,
 } from "../tools/research/fact-finder-tool";
+// Import new research tools directly (no barrel exports)
 import {
-	researchCompletenessTool,
-	getResearchCompletenessInstructions,
+   getRelatedKeywordsInstructions,
+   relatedKeywordsTool,
+} from "../tools/research/related-keywords-tool";
+import {
+   getResearchCompletenessInstructions,
+   researchCompletenessTool,
 } from "../tools/research/research-completeness-tool";
 
 // Available models
 const MODELS = {
-	"x-ai/grok-4.1-fast": "x-ai/grok-4.1-fast",
-	"z-ai/glm-4.7": "z-ai/glm-4.7",
-	"mistralai/mistral-small-creative": "mistralai/mistral-small-creative",
+   "x-ai/grok-4.1-fast": "x-ai/grok-4.1-fast",
+   "z-ai/glm-4.7": "z-ai/glm-4.7",
+   "mistralai/mistral-small-creative": "mistralai/mistral-small-creative",
 } as const;
 
 type ModelId = keyof typeof MODELS;
 
 const openrouter = createOpenRouter({
-	apiKey: serverEnv.OPENROUTER_API_KEY,
+   apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 
 // Get language-specific instruction
 const getLanguageInstruction = (language: "en" | "pt"): string => {
-	const languageNames = { en: "English", pt: "Portuguese" };
-	return `
+   const languageNames = { en: "English", pt: "Portuguese" };
+   return `
 ## OUTPUT LANGUAGE
 Respond and write content in ${languageNames[language]}.
 `;
@@ -58,10 +57,10 @@ Respond and write content in ${languageNames[language]}.
 
 // Plan agent instructions
 const getPlanAgentInstructions = (
-	language: "en" | "pt",
-	writerConfig?: WriterConfig,
+   language: "en" | "pt",
+   writerConfig?: WriterConfig,
 ): string => {
-	return `
+   return `
 You are an expert content strategist and research assistant. Your job is to thoroughly research topics and create detailed, actionable content plans.
 
 ${getLanguageInstruction(language)}
@@ -276,36 +275,36 @@ ${getAllRagToolInstructions()}
  * - Planning (structured content plan creation)
  */
 export const planAgent = new Agent({
-	id: "plan-agent",
-	name: "Plan Agent",
+   id: "plan-agent",
+   name: "Plan Agent",
 
-	// Dynamic model selection from requestContext
-	model: ({ requestContext }) => {
-		const modelId =
-			(requestContext?.get("model") as ModelId) || "x-ai/grok-4.1-fast";
-		const model = MODELS[modelId] || MODELS["x-ai/grok-4.1-fast"];
-		return openrouter(model);
-	},
+   // Dynamic model selection from requestContext
+   model: ({ requestContext }) => {
+      const modelId =
+         (requestContext?.get("model") as ModelId) || "x-ai/grok-4.1-fast";
+      const model = MODELS[modelId] || MODELS["x-ai/grok-4.1-fast"];
+      return openrouter(model);
+   },
 
-	// Dynamic instructions based on language and writer config
-	instructions: ({ requestContext }) => {
-		const language = (requestContext?.get("language") as "en" | "pt") || "en";
-		const writerConfig = requestContext?.get("writerConfig") as
-			| WriterConfig
-			| undefined;
-		return getPlanAgentInstructions(language, writerConfig);
-	},
+   // Dynamic instructions based on language and writer config
+   instructions: ({ requestContext }) => {
+      const language = (requestContext?.get("language") as "en" | "pt") || "en";
+      const writerConfig = requestContext?.get("writerConfig") as
+         | WriterConfig
+         | undefined;
+      return getPlanAgentInstructions(language, writerConfig);
+   },
 
-	// Research + Analysis + Validation + Plan + RAG tools
-	tools: {
-		...analysisTools,
-		...researchTools,
-		...planTools,
-		...ragTools,
-		// New research tools (imported directly)
-		relatedKeywords: relatedKeywordsTool,
-		contentGapFinder: contentGapTool,
-		factFinder: factFinderTool,
-		researchCompleteness: researchCompletenessTool,
-	},
+   // Research + Analysis + Validation + Plan + RAG tools
+   tools: {
+      ...analysisTools,
+      ...researchTools,
+      ...planTools,
+      ...ragTools,
+      // New research tools (imported directly)
+      relatedKeywords: relatedKeywordsTool,
+      contentGapFinder: contentGapTool,
+      factFinder: factFinderTool,
+      researchCompleteness: researchCompletenessTool,
+   },
 });

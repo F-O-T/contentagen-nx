@@ -1,77 +1,71 @@
 import { deleteTextTool, getDeleteTextInstructions } from "./delete-text-tool";
 import { formatTextTool, getFormatTextInstructions } from "./format-text-tool";
 import {
-	getInsertCodeBlockInstructions,
-	insertCodeBlockTool,
+   getInsertCodeBlockInstructions,
+   insertCodeBlockTool,
 } from "./insert-code-block-tool";
 import {
-	getInsertHeadingInstructions,
-	insertHeadingTool,
+   getInsertHeadingInstructions,
+   insertHeadingTool,
 } from "./insert-heading-tool";
 import {
-	getInsertImageInstructions,
-	insertImageTool,
+   getInsertImageInstructions,
+   insertImageTool,
 } from "./insert-image-tool";
+import { getInsertListInstructions, insertListTool } from "./insert-list-tool";
 import {
-	getInsertListInstructions,
-	insertListTool,
-} from "./insert-list-tool";
-import {
-	getInsertTableInstructions,
-	insertTableTool,
+   getInsertTableInstructions,
+   insertTableTool,
 } from "./insert-table-tool";
+import { getInsertTextInstructions, insertTextTool } from "./insert-text-tool";
 import {
-	getInsertTextInstructions,
-	insertTextTool,
-} from "./insert-text-tool";
-import {
-	getReplaceTextInstructions,
-	replaceTextTool,
+   getReplaceTextInstructions,
+   replaceTextTool,
 } from "./replace-text-tool";
 import {
-	getSearchImageInstructions,
-	searchImageTool,
+   getSearchImageInstructions,
+   searchImageTool,
 } from "./search-image-tool";
 
 // Re-export tools
 export { deleteTextTool, getDeleteTextInstructions } from "./delete-text-tool";
 export { formatTextTool, getFormatTextInstructions } from "./format-text-tool";
 export {
-	getInsertCodeBlockInstructions,
-	insertCodeBlockTool,
+   getInsertCodeBlockInstructions,
+   insertCodeBlockTool,
 } from "./insert-code-block-tool";
 export {
-	getInsertHeadingInstructions,
-	insertHeadingTool,
+   getInsertHeadingInstructions,
+   insertHeadingTool,
 } from "./insert-heading-tool";
 export {
-	getInsertImageInstructions,
-	insertImageTool,
+   getInsertImageInstructions,
+   insertImageTool,
 } from "./insert-image-tool";
 export {
-	getInsertListInstructions,
-	insertListTool,
+   getInsertListInstructions,
+   insertListTool,
 } from "./insert-list-tool";
 export {
-	getInsertTableInstructions,
-	insertTableTool,
+   getInsertTableInstructions,
+   insertTableTool,
 } from "./insert-table-tool";
 export {
-	getInsertTextInstructions,
-	insertTextTool,
+   getInsertTextInstructions,
+   insertTextTool,
 } from "./insert-text-tool";
 export {
-	getReplaceTextInstructions,
-	replaceTextTool,
+   getReplaceTextInstructions,
+   replaceTextTool,
 } from "./replace-text-tool";
 export {
-	getSearchImageInstructions,
-	searchImageTool,
+   getSearchImageInstructions,
+   searchImageTool,
 } from "./search-image-tool";
 
 // Combined instructions for all editor tools
 export function getAllEditorToolInstructions(): string {
-	return `
+   return `
 # EDITOR TOOLS
 These tools allow you to manipulate the blog post content directly.
 
@@ -90,14 +84,14 @@ ${getInsertImageInstructions()}
 
 // All editor tools as an object for agent registration
 export const editorTools = {
-	insertText: insertTextTool,
-	replaceText: replaceTextTool,
-	deleteText: deleteTextTool,
-	formatText: formatTextTool,
-	insertHeading: insertHeadingTool,
-	insertList: insertListTool,
-	insertCodeBlock: insertCodeBlockTool,
-	insertTable: insertTableTool,
-	searchImage: searchImageTool,
-	insertImage: insertImageTool,
+   insertText: insertTextTool,
+   replaceText: replaceTextTool,
+   deleteText: deleteTextTool,
+   formatText: formatTextTool,
+   insertHeading: insertHeadingTool,
+   insertList: insertListTool,
+   insertCodeBlock: insertCodeBlockTool,
+   insertTable: insertTableTool,
+   searchImage: searchImageTool,
+   insertImage: insertImageTool,
 };

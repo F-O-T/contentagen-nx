@@ -3,5 +3,10 @@
    "include": ["src/**/*.ts"],
    "compilerOptions": {
       "jsx": "react-jsx"
-   }
+  },
+  "references": [
+    {
+      "path": "../queue"
+    }
+  ]
 }

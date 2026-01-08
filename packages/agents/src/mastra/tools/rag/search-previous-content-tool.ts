@@ -2,14 +2,14 @@ import { createTool } from "@mastra/core/tools";
 import { serverEnv } from "@packages/environment/server";
 import { createPgVector } from "@packages/rag/client";
 import {
-	type SearchMode,
-	searchRelatedContent,
+   type SearchMode,
+   searchRelatedContent,
 } from "@packages/rag/repositories/content-rag-repository";
 import { AppError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
 
 export function getSearchPreviousContentInstructions(): string {
-	return `
+   return `
 ## SEARCH PREVIOUS CONTENT TOOL
 Searches your previously published content to find related posts and context.
 
@@ -44,81 +44,81 @@ Searches your previously published content to find related posts and context.
 }
 
 export const searchPreviousContentTool = createTool({
-	id: "search-previous-content",
-	description:
-		"Search previously published content for internal linking suggestions and context reference",
-	inputSchema: z.object({
-		query: z
-			.string()
-			.describe("Search query describing what content you're looking for"),
-		mode: z
-			.enum(["links", "context", "both"])
-			.default("both")
-			.describe(
-				"Search mode: 'links' for post suggestions, 'context' for content chunks, 'both' for comprehensive search",
-			),
-		limit: z
-			.number()
-			.min(1)
-			.max(20)
-			.optional()
-			.describe("Maximum number of results to return"),
-	}),
-	execute: async (inputData, context) => {
-		const { query, mode, limit } = inputData;
-		const requestContext = context?.requestContext;
+   id: "search-previous-content",
+   description:
+      "Search previously published content for internal linking suggestions and context reference",
+   inputSchema: z.object({
+      query: z
+         .string()
+         .describe("Search query describing what content you're looking for"),
+      mode: z
+         .enum(["links", "context", "both"])
+         .default("both")
+         .describe(
+            "Search mode: 'links' for post suggestions, 'context' for content chunks, 'both' for comprehensive search",
+         ),
+      limit: z
+         .number()
+         .min(1)
+         .max(20)
+         .optional()
+         .describe("Maximum number of results to return"),
+   }),
+   execute: async (inputData, context) => {
+      const { query, mode, limit } = inputData;
+      const requestContext = context?.requestContext;
 
-		if (!requestContext?.has("agentId")) {
-			throw AppError.validation("Missing agentId in request context");
-		}
+      if (!requestContext?.has("agentId")) {
+         throw AppError.validation("Missing agentId in request context");
+      }
 
-		const agentId = requestContext.get("agentId") as string;
+      const agentId = requestContext.get("agentId") as string;
 
-		if (!serverEnv.PG_VECTOR_URL) {
-			return {
-				relatedPosts: [],
-				relevantChunks: [],
-				message: "RAG search not available - PG_VECTOR_URL not configured",
-			};
-		}
+      if (!serverEnv.PG_VECTOR_URL) {
+         return {
+            relatedPosts: [],
+            relevantChunks: [],
+            message: "RAG search not available - PG_VECTOR_URL not configured",
+         };
+      }
 
-		try {
-			const ragClient = createPgVector({
-				pgVectorURL: serverEnv.PG_VECTOR_URL,
-			});
+      try {
+         const ragClient = createPgVector({
+            pgVectorURL: serverEnv.PG_VECTOR_URL,
+         });
 
-			const results = await searchRelatedContent(
-				ragClient,
-				query,
-				agentId,
-				mode as SearchMode,
-				{
-					limit: limit || (mode === "context" ? 10 : 5),
-					similarityThreshold: 0.4, // Lower threshold for better recall
-				},
-			);
+         const results = await searchRelatedContent(
+            ragClient,
+            query,
+            agentId,
+            mode as SearchMode,
+            {
+               limit: limit || (mode === "context" ? 10 : 5),
+               similarityThreshold: 0.4, // Lower threshold for better recall
+            },
+         );
 
-			// Format for agent consumption
-			return {
-				relatedPosts: results.relatedPosts.map((post) => ({
-					slug: post.slug,
-					title: post.title,
-					description: post.description,
-					relevance: Math.round(post.similarity * 100) + "%",
-				})),
-				relevantChunks: results.relevantChunks.map((chunk) => ({
-					content: chunk.chunk,
-					relevance: Math.round(chunk.similarity * 100) + "%",
-				})),
-				searchQuery: query,
-				mode,
-			};
-		} catch (error) {
-			console.error("Failed to search previous content:", error);
-			propagateError(error);
-			throw AppError.internal(
-				`Failed to search previous content: ${(error as Error).message}`,
-			);
-		}
-	},
+         // Format for agent consumption
+         return {
+            relatedPosts: results.relatedPosts.map((post) => ({
+               slug: post.slug,
+               title: post.title,
+               description: post.description,
+               relevance: Math.round(post.similarity * 100) + "%",
+            })),
+            relevantChunks: results.relevantChunks.map((chunk) => ({
+               content: chunk.chunk,
+               relevance: Math.round(chunk.similarity * 100) + "%",
+            })),
+            searchQuery: query,
+            mode,
+         };
+      } catch (error) {
+         console.error("Failed to search previous content:", error);
+         propagateError(error);
+         throw AppError.internal(
+            `Failed to search previous content: ${(error as Error).message}`,
+         );
+      }
+   },
 });

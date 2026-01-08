@@ -244,7 +244,9 @@ function generateHeading(
    node: HeadingNode,
    opts: Required<GenerateOptions>,
 ): string {
-   const text = node.children.map((child) => generateInline(child, opts)).join("");
+   const text = node.children
+      .map((child) => generateInline(child, opts))
+      .join("");
 
    // Use setext style for levels 1-2 if enabled and style matches
    if (opts.setext && (node.level === 1 || node.level === 2)) {
@@ -327,7 +329,9 @@ function generateList(
 
       // Subsequent lines get indentation
       const indent = repeat(" ", marker.length + 1);
-      const restLines = lines.slice(1).map((line) => (line ? indent + line : ""));
+      const restLines = lines
+         .slice(1)
+         .map((line) => (line ? indent + line : ""));
 
       items.push([firstLine, ...restLines].join(opts.lineEnding));
       counter++;
@@ -473,7 +477,9 @@ function generateLink(
    node: { type: "link"; children: InlineNode[]; url: string; title?: string },
    opts: Required<GenerateOptions>,
 ): string {
-   const text = node.children.map((child) => generateInline(child, opts)).join("");
+   const text = node.children
+      .map((child) => generateInline(child, opts))
+      .join("");
    const url = encodeUrl(node.url);
 
    if (node.title) {

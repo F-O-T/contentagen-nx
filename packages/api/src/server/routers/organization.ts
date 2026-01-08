@@ -186,6 +186,24 @@ export const organizationRouter = router({
       .input(z.object({ organizationId: z.string() }))
       .query(async ({ ctx, input }) => {
          const resolvedCtx = await ctx;
+
+         // Validate that user has access to the requested organization
+         const userOrganizations = await resolvedCtx.auth.api.listOrganizations(
+            {
+               headers: resolvedCtx.headers,
+            },
+         );
+
+         const hasAccess = userOrganizations?.some(
+            (org) => org.id === input.organizationId,
+         );
+
+         if (!hasAccess) {
+            throw APIError.forbidden(
+               "You don't have access to this organization.",
+            );
+         }
+
          try {
             const teams = await resolvedCtx.auth.api.listOrganizationTeams({
                headers: resolvedCtx.headers,

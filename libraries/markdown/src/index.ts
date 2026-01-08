@@ -3,11 +3,6 @@
 // =============================================================================
 
 export {
-   // Main parser functions
-   parse,
-   parseBuffer,
-   parseBufferOrThrow,
-   parseOrThrow,
    // Convenience functions
    countWords,
    extractText,
@@ -16,6 +11,11 @@ export {
    getImages,
    getLinks,
    isValidMarkdown,
+   // Main parser functions
+   parse,
+   parseBuffer,
+   parseBufferOrThrow,
+   parseOrThrow,
    parseToAst,
 } from "./parser.ts";
 
@@ -27,7 +27,6 @@ export {
    // Main generator functions
    createGenerator,
    generate,
-   generateNode,
    // Convenience string generators
    generateBlockquoteString,
    generateCodeBlockString,
@@ -37,6 +36,7 @@ export {
    generateInlineCodeString,
    generateLinkString,
    generateListString,
+   generateNode,
    generateStrongString,
 } from "./generator.ts";
 
@@ -57,19 +57,17 @@ export {
 // =============================================================================
 
 export {
-   // Constants
-   DEFAULT_MAX_BUFFER_SIZE,
-   // Option schemas
-   generateOptionsSchema,
-   parseOptionsSchema,
-   streamOptionsSchema,
    // Node schemas
    blockNodeSchema,
    blockquoteNodeSchema,
    codeBlockNodeSchema,
    codeSpanNodeSchema,
+   // Constants
+   DEFAULT_MAX_BUFFER_SIZE,
    documentNodeSchema,
    emphasisNodeSchema,
+   // Option schemas
+   generateOptionsSchema,
    hardBreakNodeSchema,
    headingNodeSchema,
    htmlBlockNodeSchema,
@@ -82,8 +80,10 @@ export {
    listNodeSchema,
    markdownDocumentSchema,
    paragraphNodeSchema,
+   parseOptionsSchema,
    positionSchema,
    softBreakNodeSchema,
+   streamOptionsSchema,
    strongNodeSchema,
    textNodeSchema,
    thematicBreakNodeSchema,
@@ -94,46 +94,46 @@ export {
 // =============================================================================
 
 export type {
-   // Document types
-   DocumentNode,
-   MarkdownDocument,
-   Position,
-   // Block node types
-   BlockNode,
-   BlockquoteNode,
-   CodeBlockNode,
-   HeadingNode,
-   HtmlBlockNode,
-   LinkReferenceDefinition,
-   ListItemNode,
-   ListNode,
-   ParagraphNode,
-   ThematicBreakNode,
-   // Inline node types
-   CodeSpanNode,
-   EmphasisNode,
-   HardBreakNode,
-   HtmlInlineNode,
-   ImageNode,
-   InlineNode,
-   LinkNode,
-   SoftBreakNode,
-   StrongNode,
-   TextNode,
-   // Union types
-   LiteralNode,
-   Node,
-   ParentNode,
-   // Options
-   GenerateOptions,
-   ParseOptions,
-   StreamOptions,
-   // Streaming
-   StreamEvent,
    // Batch processing
    BatchMarkdownFileInput,
    BatchMarkdownStreamEvent,
    BatchParsedMarkdownFile,
+   // Block node types
+   BlockNode,
+   BlockquoteNode,
+   CodeBlockNode,
+   // Inline node types
+   CodeSpanNode,
+   // Document types
+   DocumentNode,
+   EmphasisNode,
+   // Options
+   GenerateOptions,
+   HardBreakNode,
+   HeadingNode,
+   HtmlBlockNode,
+   HtmlInlineNode,
+   ImageNode,
+   InlineNode,
+   LinkNode,
+   LinkReferenceDefinition,
+   ListItemNode,
+   ListNode,
+   // Union types
+   LiteralNode,
+   MarkdownDocument,
+   Node,
+   ParagraphNode,
+   ParentNode,
+   ParseOptions,
+   Position,
+   SoftBreakNode,
+   // Streaming
+   StreamEvent,
+   StreamOptions,
+   StrongNode,
+   TextNode,
+   ThematicBreakNode,
 } from "./schemas.ts";
 
 export type {
@@ -156,47 +156,27 @@ export type {
 // =============================================================================
 
 export {
-   // Encoding utilities
-   decodeBuffer,
-   detectEncoding,
-   detectLineEnding,
-   normalizeLineEndings,
-   // Line utilities
-   countIndent,
-   isBlankLine,
-   removeIndent,
-   splitLines,
-   // Escaping utilities
-   decodeHtmlEntities,
-   decodeUrl,
-   encodeHtmlEntities,
-   encodeUrl,
-   escapeMarkdown,
-   normalizeLabel,
-   unescapeMarkdown,
-   // String utilities
-   padEnd,
-   repeat,
-   // Validation utilities
-   isValidEmail,
-   isValidUrl,
    // Pattern matching
    ATX_HEADING_REGEX,
    AUTOLINK_REGEX,
    BLOCKQUOTE_REGEX,
    COLLAPSED_LINK_REGEX,
-   EMAIL_AUTOLINK_REGEX,
-   FENCED_CODE_OPEN_REGEX,
-   INLINE_LINK_REGEX,
-   LINK_REFERENCE_REGEX,
-   ORDERED_LIST_REGEX,
-   REFERENCE_LINK_REGEX,
-   SETEXT_HEADING_REGEX,
-   SHORTCUT_LINK_REGEX,
-   THEMATIC_BREAK_REGEX,
-   UNORDERED_LIST_REGEX,
    // HTML block detection
    closesHtmlBlock,
+   // Line utilities
+   countIndent,
+   // Encoding utilities
+   decodeBuffer,
+   // Escaping utilities
+   decodeHtmlEntities,
+   decodeUrl,
+   detectEncoding,
+   detectLineEnding,
+   EMAIL_AUTOLINK_REGEX,
+   encodeHtmlEntities,
+   encodeUrl,
+   escapeMarkdown,
+   FENCED_CODE_OPEN_REGEX,
    getHtmlBlockType,
    HTML_BLOCK_1_CLOSE,
    HTML_BLOCK_1_OPEN,
@@ -210,6 +190,26 @@ export {
    HTML_BLOCK_5_OPEN,
    HTML_BLOCK_6_OPEN,
    HTML_BLOCK_7_OPEN,
+   INLINE_LINK_REGEX,
+   isBlankLine,
+   // Validation utilities
+   isValidEmail,
+   isValidUrl,
+   LINK_REFERENCE_REGEX,
+   normalizeLabel,
+   normalizeLineEndings,
+   ORDERED_LIST_REGEX,
+   // String utilities
+   padEnd,
+   REFERENCE_LINK_REGEX,
+   removeIndent,
+   repeat,
+   SETEXT_HEADING_REGEX,
+   SHORTCUT_LINK_REGEX,
+   splitLines,
+   THEMATIC_BREAK_REGEX,
+   UNORDERED_LIST_REGEX,
+   unescapeMarkdown,
 } from "./utils.ts";
 
 // =============================================================================

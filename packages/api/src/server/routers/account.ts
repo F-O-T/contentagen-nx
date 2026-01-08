@@ -16,6 +16,10 @@ const ALLOWED_AVATAR_TYPES = [
 ];
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
 
+// Password verification rate limiting constants
+const PASSWORD_VERIFY_MAX_ATTEMPTS = 5;
+const PASSWORD_VERIFY_WINDOW_SECONDS = 15 * 60; // 15 minutes
+
 const RequestAvatarUploadUrlInput = z.object({
    contentType: z.string().refine((val) => ALLOWED_AVATAR_TYPES.includes(val), {
       message: "File type must be JPEG, PNG, WebP, or AVIF",
@@ -36,6 +40,7 @@ export const accountRouter = router({
    /**
     * Verify user's current password
     * Uses Better Auth's signInCredential internally to validate
+    * Rate limited to prevent brute force attacks
     */
    verifyPassword: protectedProcedure
       .input(z.object({ password: z.string() }))
@@ -45,6 +50,29 @@ export const accountRouter = router({
 
          if (!user?.email) {
             throw APIError.notFound("User not found");
+         }
+
+         const userId = user.id;
+
+         // Check rate limit using Redis via database connection
+         // We use the db client to access redis through the cache
+         const rateLimitKey = `password_verify:${userId}`;
+
+         // Import Redis connection dynamically to check rate limit
+         const { getRedisConnection } = await import(
+            "@packages/cache/connection"
+         );
+         const redis = getRedisConnection();
+
+         if (redis) {
+            const attempts = await redis.get(rateLimitKey);
+            const attemptCount = attempts ? parseInt(attempts, 10) : 0;
+
+            if (attemptCount >= PASSWORD_VERIFY_MAX_ATTEMPTS) {
+               throw APIError.tooManyRequests(
+                  "Too many password verification attempts. Please try again later.",
+               );
+            }
          }
 
          try {
@@ -57,10 +85,25 @@ export const accountRouter = router({
                },
             });
 
-            // If we get here without throwing, password is valid
+            // Password is valid - reset the rate limit counter
+            if (redis) {
+               await redis.del(rateLimitKey);
+            }
+
             return { valid: true };
          } catch {
-            // Password is incorrect
+            // Password is incorrect - increment rate limit counter
+            if (redis) {
+               const newCount = await redis.incr(rateLimitKey);
+               if (newCount === 1) {
+                  // Set expiry only on first attempt
+                  await redis.expire(
+                     rateLimitKey,
+                     PASSWORD_VERIFY_WINDOW_SECONDS,
+                  );
+               }
+            }
+
             return { valid: false };
          }
       }),

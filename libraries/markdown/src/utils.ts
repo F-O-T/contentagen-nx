@@ -482,8 +482,7 @@ export const SHORTCUT_LINK_REGEX = /^\[([^\]]*)\]/;
 /**
  * HTML block type 1 - Script, pre, style, textarea.
  */
-export const HTML_BLOCK_1_OPEN =
-   /^<(?:script|pre|style|textarea)(?:\s|>|$)/i;
+export const HTML_BLOCK_1_OPEN = /^<(?:script|pre|style|textarea)(?:\s|>|$)/i;
 export const HTML_BLOCK_1_CLOSE = /<\/(?:script|pre|style|textarea)>/i;
 
 /**

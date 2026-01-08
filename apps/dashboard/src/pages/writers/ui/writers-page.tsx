@@ -5,47 +5,50 @@ import { DefaultHeader } from "@/default/default-header";
 import { WritersListProvider } from "@/features/writers/lib/writers-list-context";
 import { ManageWriterForm } from "@/features/writers/ui/manage-writer-form";
 import { useSheet } from "@/hooks/use-sheet";
-import { WritersFilterBar, WritersFilterBarSkeleton } from "./writers-filter-bar";
+import {
+   WritersFilterBar,
+   WritersFilterBarSkeleton,
+} from "./writers-filter-bar";
 import { WritersListSection } from "./writers-list-section";
 import { WritersStats } from "./writers-stats";
 
 function WritersPageContent() {
-	const { openSheet } = useSheet();
+   const { openSheet } = useSheet();
 
-	const handleCreateWriter = () => {
-		openSheet({
-			children: <ManageWriterForm />,
-		});
-	};
+   const handleCreateWriter = () => {
+      openSheet({
+         children: <ManageWriterForm />,
+      });
+   };
 
-	return (
-		<main className="space-y-6">
-			<DefaultHeader
-				actions={
-					<Button onClick={handleCreateWriter}>
-						<Plus className="size-4" />
-						{"Novo Escritor"}
-					</Button>
-				}
-				description={"Gerencie seus escritores IA"}
-				title={"Escritores"}
-			/>
+   return (
+      <main className="space-y-6">
+         <DefaultHeader
+            actions={
+               <Button onClick={handleCreateWriter}>
+                  <Plus className="size-4" />
+                  {"Novo Escritor"}
+               </Button>
+            }
+            description={"Gerencie seus escritores IA"}
+            title={"Escritores"}
+         />
 
-			<WritersStats />
+         <WritersStats />
 
-			<Suspense fallback={<WritersFilterBarSkeleton />}>
-				<WritersFilterBar />
-			</Suspense>
+         <Suspense fallback={<WritersFilterBarSkeleton />}>
+            <WritersFilterBar />
+         </Suspense>
 
-			<WritersListSection />
-		</main>
-	);
+         <WritersListSection />
+      </main>
+   );
 }
 
 export function WritersPage() {
-	return (
-		<WritersListProvider>
-			<WritersPageContent />
-		</WritersListProvider>
-	);
+   return (
+      <WritersListProvider>
+         <WritersPageContent />
+      </WritersListProvider>
+   );
 }

@@ -69,9 +69,7 @@ export function SessionDetailsForm({
             isCurrent: session.id === currentSessionId,
             showIcon: false,
             title: "Dispositivo",
-            value:
-               session.userAgent ||
-               "Dispositivo desconhecido",
+            value: session.userAgent || "Dispositivo desconhecido",
          },
          {
             isCurrent: false,
@@ -97,9 +95,7 @@ export function SessionDetailsForm({
    return (
       <>
          <SheetHeader>
-            <SheetTitle>
-               {"Detalhes da Sessão"}
-            </SheetTitle>
+            <SheetTitle>{"Detalhes da Sessão"}</SheetTitle>
             <SheetDescription>
                {"Informações sobre esta sessão"}
             </SheetDescription>
@@ -129,12 +125,8 @@ export function SessionDetailsForm({
          </ItemGroup>
          <Separator />
          <SheetHeader>
-            <SheetTitle>
-               {"Ações"}
-            </SheetTitle>
-            <SheetDescription>
-               {"Gerencie esta sessão"}
-            </SheetDescription>
+            <SheetTitle>{"Ações"}</SheetTitle>
+            <SheetDescription>{"Gerencie esta sessão"}</SheetDescription>
          </SheetHeader>
          <ItemGroup className="px-4">
             <Item

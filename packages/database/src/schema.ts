@@ -1,18 +1,16 @@
 export * from "./schemas/account-deletion";
+export * from "./schemas/agent";
 export * from "./schemas/auth";
+// CMS schemas
+export * from "./schemas/brand";
+export * from "./schemas/brand-document";
+// Chat schemas
+export * from "./schemas/chat";
+export * from "./schemas/content";
+export * from "./schemas/content-version";
 export * from "./schemas/encryption";
+export * from "./schemas/export-log";
 export * from "./schemas/notification-preferences";
 export * from "./schemas/notifications";
 export * from "./schemas/push-subscriptions";
 export * from "./schemas/resource-permissions";
-
-// CMS schemas
-export * from "./schemas/brand";
-export * from "./schemas/brand-document";
-export * from "./schemas/agent";
-export * from "./schemas/content";
-export * from "./schemas/content-version";
-export * from "./schemas/export-log";
-
-// Chat schemas
-export * from "./schemas/chat";

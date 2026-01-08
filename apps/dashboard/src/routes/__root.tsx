@@ -1,7 +1,4 @@
 import { clientEnv } from "@packages/environment/client";
-import { NotFoundComponent } from "@/default/not-found";
-import { QueryProvider, useTRPC } from "@/integrations/clients";
-import { ThemeProvider } from "@/layout/theme-provider";
 import { PostHogWrapper, PosthogRouterTracker } from "@packages/posthog/client";
 import { Toaster } from "@packages/ui/components/sonner";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -13,9 +10,12 @@ import {
    useLocation,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { NotFoundComponent } from "@/default/not-found";
 import { GlobalAlertDialog } from "@/hooks/use-alert-dialog";
 import { GlobalCredenza } from "@/hooks/use-credenza";
 import { GlobalSheet } from "@/hooks/use-sheet";
+import { QueryProvider, useTRPC } from "@/integrations/clients";
+import { ThemeProvider } from "@/layout/theme-provider";
 
 declare module "@tanstack/react-router" {
    interface StaticDataRouteOption {

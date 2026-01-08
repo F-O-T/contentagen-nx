@@ -7,11 +7,8 @@
       "src"
    ],
    "references": [
-      {
-         "path": "../queue"
-      },
-      {
-         "path": "../rag"
-      }
-   ]
+    {
+      "path": "../rag"
+    }
+  ]
 }

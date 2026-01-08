@@ -32,11 +32,19 @@ export type DeletionWorkerConfig = {
       job: Job<DeletionJobData, DeletionJobResult> | undefined,
       error: Error,
    ) => void | Promise<void>;
+   onError?: (error: Error) => void | Promise<void>;
 };
 
 export type DeletionWorker = {
    worker: Worker<DeletionJobData, DeletionJobResult>;
    close: () => Promise<void>;
+};
+
+type DeletionProcessResult = {
+   processedCount: number;
+   emailsSent: number;
+   failedDeletions: string[];
+   failedEmails: string[];
 };
 
 /**
@@ -45,10 +53,12 @@ export type DeletionWorker = {
 async function processScheduledDeletions(
    db: DatabaseInstance,
    resendClient?: Resend,
-): Promise<{ processedCount: number; emailsSent: number }> {
+): Promise<DeletionProcessResult> {
    const now = new Date();
    let processedCount = 0;
    let emailsSent = 0;
+   const failedDeletions: string[] = [];
+   const failedEmails: string[] = [];
 
    // Find all pending requests where scheduledDeletionAt <= now
    const pendingDeletions = await db.query.accountDeletionRequest.findMany({
@@ -97,18 +107,20 @@ async function processScheduledDeletions(
                   userName: userRecord.name || "Usuário",
                });
                emailsSent++;
-            } catch (error) {
-               console.error("Failed to send deletion completed email:", error);
+            } catch (emailError) {
+               console.error("Failed to send deletion completed email:", emailError);
+               failedEmails.push(userRecord.email);
             }
          }
 
          processedCount++;
       } catch (error) {
          console.error(`Failed to process deletion for user ${deletion.userId}:`, error);
+         failedDeletions.push(deletion.userId);
       }
    }
 
-   return { processedCount, emailsSent };
+   return { processedCount, emailsSent, failedDeletions, failedEmails };
 }
 
 /**
@@ -244,6 +256,7 @@ export function createDeletionWorker(
       concurrency = 1,
       onCompleted,
       onFailed,
+      onError,
    } = config;
 
    const workerOptions: WorkerOptions = {
@@ -257,47 +270,38 @@ export function createDeletionWorker(
          const { type } = job.data;
 
          if (type === "process-deletions") {
-            try {
-               const result = await processScheduledDeletions(db, resendClient);
-               return {
-                  ...result,
-                  success: true,
-               };
-            } catch (error) {
-               const message = error instanceof Error ? error.message : "Unknown error";
-               return {
-                  processedCount: 0,
-                  emailsSent: 0,
-                  error: message,
-                  success: false,
-               };
+            const result = await processScheduledDeletions(db, resendClient);
+
+            // If all deletions failed, throw to trigger retry
+            if (result.failedDeletions.length > 0 && result.processedCount === 0) {
+               throw new Error(
+                  `All deletions failed: ${result.failedDeletions.join(", ")}`,
+               );
             }
+
+            return {
+               processedCount: result.processedCount,
+               emailsSent: result.emailsSent,
+               failedDeletions: result.failedDeletions,
+               failedEmails: result.failedEmails,
+               success: result.failedDeletions.length === 0,
+               error:
+                  result.failedDeletions.length > 0
+                     ? `${result.failedDeletions.length} deletions failed`
+                     : undefined,
+            };
          }
 
          if (type === "send-reminders") {
-            try {
-               const result = await sendDeletionReminders(db, resendClient, appUrl);
-               return {
-                  ...result,
-                  success: true,
-               };
-            } catch (error) {
-               const message = error instanceof Error ? error.message : "Unknown error";
-               return {
-                  processedCount: 0,
-                  emailsSent: 0,
-                  error: message,
-                  success: false,
-               };
-            }
+            const result = await sendDeletionReminders(db, resendClient, appUrl);
+            return {
+               processedCount: result.processedCount,
+               emailsSent: result.emailsSent,
+               success: true,
+            };
          }
 
-         return {
-            processedCount: 0,
-            emailsSent: 0,
-            error: `Unknown deletion job type: ${type}`,
-            success: false,
-         };
+         throw new Error(`Unknown deletion job type: ${type}`);
       },
       workerOptions,
    );
@@ -308,6 +312,15 @@ export function createDeletionWorker(
 
    if (onFailed) {
       worker.on("failed", onFailed);
+   }
+
+   // Handle worker-level errors (Redis connection issues, etc.)
+   if (onError) {
+      worker.on("error", onError);
+   } else {
+      worker.on("error", (error) => {
+         console.error("[DeletionWorker] Worker error:", error);
+      });
    }
 
    return {

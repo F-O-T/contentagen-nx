@@ -8,11 +8,7 @@ export const STRIPE_PLANS = [
       annualPrice: null,
       description: "Para começar a criar conteúdo",
       displayName: "Free",
-      features: [
-         "1 usuário",
-         "Funcionalidades básicas",
-         "Suporte por email",
-      ],
+      features: ["1 usuário", "Funcionalidades básicas", "Suporte por email"],
       name: PlanName.FREE,
       price: "R$ 0",
    },

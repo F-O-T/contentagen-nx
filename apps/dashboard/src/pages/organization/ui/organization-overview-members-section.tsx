@@ -35,12 +35,8 @@ import { useTRPC } from "@/integrations/clients";
 function MembersSectionCardHeader() {
    return (
       <CardHeader>
-         <CardTitle>
-            {"Membros Recentes"}
-         </CardTitle>
-         <CardDescription>
-            {"Description"}
-         </CardDescription>
+         <CardTitle>{"Membros Recentes"}</CardTitle>
+         <CardDescription>{"Description"}</CardDescription>
       </CardHeader>
    );
 }
@@ -118,12 +114,8 @@ function OrganizationMembersSectionContent() {
                      <EmptyMedia variant="icon">
                         <Users className="size-8" />
                      </EmptyMedia>
-                     <EmptyTitle>
-                        {"Title"}
-                     </EmptyTitle>
-                     <EmptyDescription>
-                        {"Description"}
-                     </EmptyDescription>
+                     <EmptyTitle>{"Title"}</EmptyTitle>
+                     <EmptyDescription>{"Description"}</EmptyDescription>
                   </EmptyContent>
                </Empty>
             ) : (

@@ -10,7 +10,8 @@
    "include": ["src"],
    "exclude": ["**/*.test.ts", "**/__tests__/**", "node_modules"],
    "references": [
-      { "path": "../localization/tsconfig.lib.json" },
-      { "path": "../utils/tsconfig.lib.json" }
-   ]
+    {
+      "path": "../utils/tsconfig.lib.json"
+    }
+  ]
 }

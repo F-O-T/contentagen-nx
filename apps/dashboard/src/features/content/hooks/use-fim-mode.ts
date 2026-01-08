@@ -1,12 +1,12 @@
 import type { FIMMode } from "../context/fim-context";
 
 interface ModeDetectionContext {
-	isManualTrigger: boolean;
+   isManualTrigger: boolean;
 }
 
 interface ModeDetectionResult {
-	mode: Exclude<FIMMode, "idle">;
-	reason: "manual-trigger" | "default";
+   mode: Exclude<FIMMode, "idle">;
+   reason: "manual-trigger" | "default";
 }
 
 /**
@@ -20,38 +20,38 @@ interface ModeDetectionResult {
  * Automatic completions always use inline ghost text.
  */
 export function detectFIMMode(
-	_completion: string,
-	context: ModeDetectionContext,
+   _completion: string,
+   context: ModeDetectionContext,
 ): ModeDetectionResult {
-	// Manual trigger uses cursor-tab mode (floating panel)
-	if (context.isManualTrigger) {
-		return { mode: "cursor-tab", reason: "manual-trigger" };
-	}
+   // Manual trigger uses cursor-tab mode (floating panel)
+   if (context.isManualTrigger) {
+      return { mode: "cursor-tab", reason: "manual-trigger" };
+   }
 
-	// All automatic triggers use copilot mode (inline ghost text only)
-	return { mode: "copilot", reason: "default" };
+   // All automatic triggers use copilot mode (inline ghost text only)
+   return { mode: "copilot", reason: "default" };
 }
 
 /**
  * Detect context information from prefix text for mode switching.
  */
 export function detectCompletionContext(prefix: string): {
-	isEndOfParagraph: boolean;
-	isEndOfSentence: boolean;
+   isEndOfParagraph: boolean;
+   isEndOfSentence: boolean;
 } {
-	const trimmedPrefix = prefix.trimEnd();
+   const trimmedPrefix = prefix.trimEnd();
 
-	// End of paragraph: ends with double newline or single newline at end
-	const isEndOfParagraph =
-		trimmedPrefix.endsWith("\n\n") || trimmedPrefix.endsWith("\n");
+   // End of paragraph: ends with double newline or single newline at end
+   const isEndOfParagraph =
+      trimmedPrefix.endsWith("\n\n") || trimmedPrefix.endsWith("\n");
 
-	// End of sentence: ends with sentence-ending punctuation
-	const isEndOfSentence = /[.!?]\s*$/.test(trimmedPrefix);
+   // End of sentence: ends with sentence-ending punctuation
+   const isEndOfSentence = /[.!?]\s*$/.test(trimmedPrefix);
 
-	return {
-		isEndOfParagraph,
-		isEndOfSentence,
-	};
+   return {
+      isEndOfParagraph,
+      isEndOfSentence,
+   };
 }
 
 /**
@@ -59,8 +59,8 @@ export function detectCompletionContext(prefix: string): {
  * Can be used to detect mode during streaming or after completion.
  */
 export function useFIMMode() {
-	return {
-		detectMode: detectFIMMode,
-		detectContext: detectCompletionContext,
-	};
+   return {
+      detectMode: detectFIMMode,
+      detectContext: detectCompletionContext,
+   };
 }

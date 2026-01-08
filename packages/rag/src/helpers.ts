@@ -3,13 +3,13 @@ import { AppError, propagateError } from "@packages/utils/errors";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-	apiKey: serverEnv.OPENAI_API_KEY,
+   apiKey: serverEnv.OPENAI_API_KEY,
 });
 
 export interface ChunkOptions {
-	chunkSize?: number; // Target characters per chunk (default: 1500 ~400 tokens)
-	overlap?: number; // Overlap characters between chunks (default: 200)
-	separator?: string; // Preferred split point (default: paragraph break)
+   chunkSize?: number; // Target characters per chunk (default: 1500 ~400 tokens)
+   overlap?: number; // Overlap characters between chunks (default: 200)
+   separator?: string; // Preferred split point (default: paragraph break)
 }
 
 /**
@@ -20,56 +20,56 @@ export interface ChunkOptions {
  * @returns Array of text chunks
  */
 export function chunkText(text: string, options: ChunkOptions = {}): string[] {
-	const { chunkSize = 1500, overlap = 200, separator = "\n\n" } = options;
+   const { chunkSize = 1500, overlap = 200, separator = "\n\n" } = options;
 
-	if (!text || text.trim().length === 0) {
-		return [];
-	}
+   if (!text || text.trim().length === 0) {
+      return [];
+   }
 
-	// If text is smaller than chunk size, return as single chunk
-	if (text.length <= chunkSize) {
-		return [text.trim()];
-	}
+   // If text is smaller than chunk size, return as single chunk
+   if (text.length <= chunkSize) {
+      return [text.trim()];
+   }
 
-	const chunks: string[] = [];
-	const paragraphs = text.split(separator);
+   const chunks: string[] = [];
+   const paragraphs = text.split(separator);
 
-	let currentChunk = "";
+   let currentChunk = "";
 
-	for (const paragraph of paragraphs) {
-		const trimmedParagraph = paragraph.trim();
-		if (!trimmedParagraph) continue;
+   for (const paragraph of paragraphs) {
+      const trimmedParagraph = paragraph.trim();
+      if (!trimmedParagraph) continue;
 
-		// If adding this paragraph exceeds chunk size
-		if (currentChunk.length + trimmedParagraph.length + 2 > chunkSize) {
-			// Save current chunk if it has content
-			if (currentChunk.trim()) {
-				chunks.push(currentChunk.trim());
-			}
+      // If adding this paragraph exceeds chunk size
+      if (currentChunk.length + trimmedParagraph.length + 2 > chunkSize) {
+         // Save current chunk if it has content
+         if (currentChunk.trim()) {
+            chunks.push(currentChunk.trim());
+         }
 
-			// Start new chunk with overlap from previous
-			if (currentChunk.length > overlap) {
-				// Take last `overlap` characters as context
-				const overlapStart = currentChunk.length - overlap;
-				const overlapText = currentChunk.slice(overlapStart).trim();
-				currentChunk = overlapText + separator + trimmedParagraph;
-			} else {
-				currentChunk = trimmedParagraph;
-			}
-		} else {
-			// Add paragraph to current chunk
-			currentChunk = currentChunk
-				? `${currentChunk}${separator}${trimmedParagraph}`
-				: trimmedParagraph;
-		}
-	}
+         // Start new chunk with overlap from previous
+         if (currentChunk.length > overlap) {
+            // Take last `overlap` characters as context
+            const overlapStart = currentChunk.length - overlap;
+            const overlapText = currentChunk.slice(overlapStart).trim();
+            currentChunk = overlapText + separator + trimmedParagraph;
+         } else {
+            currentChunk = trimmedParagraph;
+         }
+      } else {
+         // Add paragraph to current chunk
+         currentChunk = currentChunk
+            ? `${currentChunk}${separator}${trimmedParagraph}`
+            : trimmedParagraph;
+      }
+   }
 
-	// Don't forget the last chunk
-	if (currentChunk.trim()) {
-		chunks.push(currentChunk.trim());
-	}
+   // Don't forget the last chunk
+   if (currentChunk.trim()) {
+      chunks.push(currentChunk.trim());
+   }
 
-	return chunks;
+   return chunks;
 }
 
 export const createEmbedding = async (text: string) => {

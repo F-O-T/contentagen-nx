@@ -92,7 +92,9 @@ function generateSimpleMarkdown(lineCount: number): string {
       // Add a heading every 10 lines
       if (currentLine % 10 === 0) {
          const level = (Math.floor(currentLine / 100) % 6) + 1;
-         lines.push(`${"#".repeat(level)} Section ${Math.floor(currentLine / 10) + 1}`);
+         lines.push(
+            `${"#".repeat(level)} Section ${Math.floor(currentLine / 10) + 1}`,
+         );
          lines.push("");
          currentLine += 2;
       } else {
@@ -100,7 +102,7 @@ function generateSimpleMarkdown(lineCount: number): string {
          const paragraphIndex = currentLine;
          lines.push(
             `This is paragraph ${paragraphIndex} with **bold** and *italic* text. ` +
-            `It contains a [link](https://example.com/${paragraphIndex}) and \`inline code\`.`,
+               `It contains a [link](https://example.com/${paragraphIndex}) and \`inline code\`.`,
          );
          lines.push("");
          currentLine += 2;
@@ -125,7 +127,7 @@ function generateComplexMarkdown(sectionCount: number): string {
       // Paragraph with inline elements
       lines.push(
          `This section contains **strong text**, *emphasized text*, ` +
-         `\`inline code\`, and [a link](https://example.com/section-${i}).`,
+            `\`inline code\`, and [a link](https://example.com/section-${i}).`,
       );
       lines.push("");
 
@@ -190,8 +192,8 @@ function generateWorstCaseMarkdown(blockCount: number): string {
       // Long paragraph with many inline elements
       lines.push(
          `Paragraph ${i} with **bold ${i}** and *italic ${i}* and \`code ${i}\` ` +
-         `and [link ${i}](https://example.com/${i}) and another **bold** and ` +
-         `*italic* and \`more code\` and [another link](https://test.com/${i}).`,
+            `and [link ${i}](https://example.com/${i}) and another **bold** and ` +
+            `*italic* and \`more code\` and [another link](https://test.com/${i}).`,
       );
       lines.push("");
 
@@ -311,7 +313,11 @@ test("performance: round-trip parse and generate (1000 lines)", () => {
 test("performance: extractText (10000 lines)", () => {
    const markdown = generateSimpleMarkdown(10000);
 
-   const result = benchmark("extractText-10000", () => extractText(markdown), 20);
+   const result = benchmark(
+      "extractText-10000",
+      () => extractText(markdown),
+      20,
+   );
    console.log(formatResult(result));
    expect(result.avgMs).toBeLessThan(2500);
 });
@@ -329,7 +335,11 @@ test("performance: getHeadings extraction (1000 sections)", () => {
    const headings = getHeadings(markdown);
 
    // Now benchmark just the extraction on pre-parsed content
-   const result = benchmark("getHeadings-1000", () => getHeadings(markdown), 10);
+   const result = benchmark(
+      "getHeadings-1000",
+      () => getHeadings(markdown),
+      10,
+   );
    console.log(formatResult(result));
    expect(headings.length).toBeGreaterThan(0);
    expect(result.avgMs).toBeLessThan(2000);
@@ -354,7 +364,11 @@ test("performance: getImages extraction (1000 sections)", () => {
 test("performance: getCodeBlocks extraction (1000 sections)", () => {
    const markdown = generateComplexMarkdown(1000);
 
-   const result = benchmark("getCodeBlocks-1000", () => getCodeBlocks(markdown), 10);
+   const result = benchmark(
+      "getCodeBlocks-1000",
+      () => getCodeBlocks(markdown),
+      10,
+   );
    console.log(formatResult(result));
    expect(result.avgMs).toBeLessThan(2000);
 });
@@ -533,7 +547,11 @@ test("performance: worst case - deep nesting and complexity", () => {
 test("performance: reference links resolution (1000 links)", () => {
    const markdown = generateReferenceLinksMarkdown(1000);
 
-   const result = benchmark("parse-reference-links-1000", () => parse(markdown), 20);
+   const result = benchmark(
+      "parse-reference-links-1000",
+      () => parse(markdown),
+      20,
+   );
    console.log(formatResult(result));
 
    const parseResult = parse(markdown);

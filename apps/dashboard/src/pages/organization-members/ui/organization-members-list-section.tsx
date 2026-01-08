@@ -85,7 +85,7 @@ function MembersListSkeleton() {
          <CardContent>
             <ItemGroup>
                {[1, 2, 3, 4, 5].map((index) => (
-                  <Fragment key={index}>
+                  <Fragment key={`member-skeleton-${index}`}>
                      <Item>
                         <ItemMedia className="size-10">
                            <Skeleton className="size-10 rounded-full" />

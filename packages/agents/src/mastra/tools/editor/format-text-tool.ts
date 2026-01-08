@@ -2,47 +2,47 @@ import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
 export const formatTextTool = createTool({
-	id: "format-text",
-	description:
-		"Applies formatting to text in the editor. Can make text bold, italic, add links, or apply code formatting.",
-	inputSchema: z.object({
-		format: z
-			.enum(["bold", "italic", "underline", "strikethrough", "code", "link"])
-			.describe("The formatting style to apply"),
-		scope: z
-			.enum(["selection", "word", "paragraph"])
-			.default("selection")
-			.describe(
-				"What to format. 'selection' = selected text, 'word' = word at cursor, 'paragraph' = entire paragraph",
-			),
-		linkUrl: z
-			.string()
-			.url()
-			.optional()
-			.describe("URL for link formatting (required when format is 'link')"),
-		searchText: z
-			.string()
-			.optional()
-			.describe(
-				"Specific text to format (if not using selection). Will find and format this text.",
-			),
-	}),
-	outputSchema: z.object({
-		success: z.boolean(),
-		format: z.string(),
-		scope: z.string(),
-	}),
-	execute: async (inputData) => {
-		return {
-			success: true,
-			format: inputData.format,
-			scope: inputData.scope,
-		};
-	},
+   id: "format-text",
+   description:
+      "Applies formatting to text in the editor. Can make text bold, italic, add links, or apply code formatting.",
+   inputSchema: z.object({
+      format: z
+         .enum(["bold", "italic", "underline", "strikethrough", "code", "link"])
+         .describe("The formatting style to apply"),
+      scope: z
+         .enum(["selection", "word", "paragraph"])
+         .default("selection")
+         .describe(
+            "What to format. 'selection' = selected text, 'word' = word at cursor, 'paragraph' = entire paragraph",
+         ),
+      linkUrl: z
+         .string()
+         .url()
+         .optional()
+         .describe("URL for link formatting (required when format is 'link')"),
+      searchText: z
+         .string()
+         .optional()
+         .describe(
+            "Specific text to format (if not using selection). Will find and format this text.",
+         ),
+   }),
+   outputSchema: z.object({
+      success: z.boolean(),
+      format: z.string(),
+      scope: z.string(),
+   }),
+   execute: async (inputData) => {
+      return {
+         success: true,
+         format: inputData.format,
+         scope: inputData.scope,
+      };
+   },
 });
 
 export function getFormatTextInstructions(): string {
-	return `
+   return `
 ## FORMAT TEXT TOOL
 Applies text formatting to the blog post content.
 

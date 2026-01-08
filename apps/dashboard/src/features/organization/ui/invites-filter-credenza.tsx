@@ -34,15 +34,11 @@ export function InvitesFilterCredenza({
    return (
       <>
          <CredenzaHeader>
-            <CredenzaTitle>
-               {"Status"}
-            </CredenzaTitle>
+            <CredenzaTitle>{"Status"}</CredenzaTitle>
          </CredenzaHeader>
          <CredenzaBody className="space-y-4">
             <div className="space-y-2">
-               <p className="text-sm font-medium">
-                  {"Status"}
-               </p>
+               <p className="text-sm font-medium">{"Status"}</p>
                <ToggleGroup
                   className="flex-wrap justify-start"
                   onValueChange={(value) =>
@@ -71,9 +67,7 @@ export function InvitesFilterCredenza({
             </div>
 
             <div className="space-y-2">
-               <p className="text-sm font-medium">
-                  {"Role"}
-               </p>
+               <p className="text-sm font-medium">{"Role"}</p>
                <ToggleGroup
                   className="flex-wrap justify-start"
                   onValueChange={(value) => onRoleFilterChange(value || "all")}

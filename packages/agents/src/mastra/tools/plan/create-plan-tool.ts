@@ -5,26 +5,33 @@ import { z } from "zod";
  * Schema for a single plan step
  */
 const PlanStepSchema = z.object({
-	id: z.string().describe("Unique identifier for the step (e.g., 'step-1')"),
-	title: z.string().describe("Short action title (e.g., 'Write introduction')"),
-	description: z.string().describe("Detailed description of what this step will do"),
-	toolsToUse: z
-		.array(z.string())
-		.optional()
-		.describe("List of tool names to use for this step"),
-	rationale: z.string().optional().describe("Why this step matters based on research"),
+   id: z.string().describe("Unique identifier for the step (e.g., 'step-1')"),
+   title: z
+      .string()
+      .describe("Short action title (e.g., 'Write introduction')"),
+   description: z
+      .string()
+      .describe("Detailed description of what this step will do"),
+   toolsToUse: z
+      .array(z.string())
+      .optional()
+      .describe("List of tool names to use for this step"),
+   rationale: z
+      .string()
+      .optional()
+      .describe("Why this step matters based on research"),
 });
 
 /**
  * Schema for the createPlan tool input/output
  */
 const CreatePlanInputSchema = z.object({
-	summary: z.string().describe("Brief 1-2 sentence summary of the plan"),
-	steps: z
-		.array(PlanStepSchema)
-		.min(1)
-		.max(10)
-		.describe("Array of plan steps (1-10 steps)"),
+   summary: z.string().describe("Brief 1-2 sentence summary of the plan"),
+   steps: z
+      .array(PlanStepSchema)
+      .min(1)
+      .max(10)
+      .describe("Array of plan steps (1-10 steps)"),
 });
 
 export type CreatePlanInput = z.infer<typeof CreatePlanInputSchema>;
@@ -35,20 +42,20 @@ export type PlanStepInput = z.infer<typeof PlanStepSchema>;
  * The plan will be displayed in a special UI where users can approve/skip individual steps.
  */
 export const createPlanTool = createTool({
-	id: "createPlan",
-	description:
-		"Creates a structured content plan for user approval. MUST be called after completing research to present the plan. The user will see a UI where they can approve or skip individual steps before execution.",
-	inputSchema: CreatePlanInputSchema,
-	outputSchema: CreatePlanInputSchema,
-	execute: async (input) => {
-		// Simply return the input - the frontend will handle display
-		// The tool acts as a structured way to pass plan data to the UI
-		return input;
-	},
+   id: "createPlan",
+   description:
+      "Creates a structured content plan for user approval. MUST be called after completing research to present the plan. The user will see a UI where they can approve or skip individual steps before execution.",
+   inputSchema: CreatePlanInputSchema,
+   outputSchema: CreatePlanInputSchema,
+   execute: async (input) => {
+      // Simply return the input - the frontend will handle display
+      // The tool acts as a structured way to pass plan data to the UI
+      return input;
+   },
 });
 
 export function getCreatePlanInstructions(): string {
-	return `
+   return `
 ## CREATE PLAN TOOL
 Creates a structured content plan that the user can review and approve.
 

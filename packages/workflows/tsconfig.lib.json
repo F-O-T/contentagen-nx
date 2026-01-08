@@ -11,12 +11,6 @@
       "path": "../transactional/tsconfig.lib.json"
     },
     {
-      "path": "../utils/tsconfig.lib.json"
-    },
-    {
-      "path": "../notifications/tsconfig.lib.json"
-    },
-    {
       "path": "../queue/tsconfig.lib.json"
     },
     {

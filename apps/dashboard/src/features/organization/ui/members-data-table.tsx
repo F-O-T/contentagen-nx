@@ -144,12 +144,8 @@ export function MembersDataTable({
                      <EmptyMedia variant="icon">
                         <Users className="size-12 text-muted-foreground" />
                      </EmptyMedia>
-                     <EmptyTitle>
-                        {"Empty"}
-                     </EmptyTitle>
-                     <EmptyDescription>
-                        {"Description"}
-                     </EmptyDescription>
+                     <EmptyTitle>{"Empty"}</EmptyTitle>
+                     <EmptyDescription>{"Description"}</EmptyDescription>
                   </EmptyContent>
                </Empty>
             </CardContent>

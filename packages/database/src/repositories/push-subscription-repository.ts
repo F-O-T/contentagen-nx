@@ -17,34 +17,25 @@ export async function createPushSubscription(
    data: NewPushSubscription,
 ): Promise<PushSubscription> {
    try {
-      const existing = await dbClient.query.pushSubscription.findFirst({
-         where: (sub, { eq }) => eq(sub.endpoint, data.endpoint),
-      });
-
-      if (existing) {
-         const result = await dbClient
-            .update(pushSubscription)
-            .set({
+      // Use onConflictDoUpdate to avoid race condition
+      // This is atomic and uses the unique constraint on endpoint
+      const result = await dbClient
+         .insert(pushSubscription)
+         .values(data)
+         .onConflictDoUpdate({
+            target: pushSubscription.endpoint,
+            set: {
                auth: data.auth,
                p256dh: data.p256dh,
                updatedAt: new Date(),
                userAgent: data.userAgent,
                userId: data.userId,
-            })
-            .where(eq(pushSubscription.endpoint, data.endpoint))
-            .returning();
-         if (!result[0]) {
-            throw AppError.database("Failed to update push subscription");
-         }
-         return result[0];
-      }
-
-      const result = await dbClient
-         .insert(pushSubscription)
-         .values(data)
+            },
+         })
          .returning();
+
       if (!result[0]) {
-         throw AppError.database("Failed to insert push subscription");
+         throw AppError.database("Failed to upsert push subscription");
       }
       return result[0];
    } catch (err) {

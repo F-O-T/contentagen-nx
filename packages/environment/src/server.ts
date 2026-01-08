@@ -32,13 +32,13 @@ const EnvSchema = z.object({
    STRIPE_SECRET_KEY: z.string(),
    STRIPE_WEBHOOK_SECRET: z.string(),
    // Search providers (comma-separated for multiple keys)
-	TAVILY_API_KEY: z.string(), // Legacy single key (for backward compat)
-	TAVILY_API_KEYS: z.string().optional(), // Multiple keys: key1,key2,key3
-	EXA_API_KEYS: z.string().optional(),
-	FIRECRAWL_API_KEYS: z.string().optional(),
-	// Image search providers
-	UNSPLASH_ACCESS_KEY: z.string().optional(),
-	PEXELS_API_KEY: z.string().optional(),
+   TAVILY_API_KEY: z.string(), // Legacy single key (for backward compat)
+   TAVILY_API_KEYS: z.string().optional(), // Multiple keys: key1,key2,key3
+   EXA_API_KEYS: z.string().optional(),
+   FIRECRAWL_API_KEYS: z.string().optional(),
+   // Image search providers
+   UNSPLASH_ACCESS_KEY: z.string().optional(),
+   PEXELS_API_KEY: z.string().optional(),
    VAPID_PRIVATE_KEY: z.string().optional(),
    VAPID_PUBLIC_KEY: z.string().optional(),
    VAPID_SUBJECT: z.string().optional().default("mailto:contato@contentta.com"),

@@ -77,6 +77,7 @@ export async function isOrganizationOwner(
       });
       return !!result;
    } catch (err) {
+      propagateError(err);
       throw AppError.database(
          `Failed to check organization ownership: ${(err as Error).message}`,
       );
@@ -96,6 +97,7 @@ export async function getOrganizationMembers(
       });
       return result;
    } catch (err) {
+      propagateError(err);
       throw AppError.database(
          `Failed to get organization members: ${(err as Error).message}`,
       );

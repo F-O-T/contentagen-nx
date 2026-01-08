@@ -23,9 +23,7 @@ function AccountConfigurationErrorFallback(props: FallbackProps) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>
-               {"Configurações da Conta"}
-            </CardTitle>
+            <CardTitle>{"Configurações da Conta"}</CardTitle>
             <CardDescription>
                {"Configure suas preferências de conta"}
             </CardDescription>
@@ -75,9 +73,7 @@ function AccountConfigurationContent() {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>
-               {"Configurações da Conta"}
-            </CardTitle>
+            <CardTitle>{"Configurações da Conta"}</CardTitle>
             <CardDescription>
                {"Configure suas preferências de conta"}
             </CardDescription>
@@ -89,9 +85,7 @@ function AccountConfigurationContent() {
                   <DollarSign className="size-4" />
                </ItemMedia>
                <ItemContent>
-                  <ItemTitle>
-                     {"Moeda"}
-                  </ItemTitle>
+                  <ItemTitle>{"Moeda"}</ItemTitle>
                   <ItemDescription>
                      {"Moeda padrão para exibição de valores"}
                   </ItemDescription>

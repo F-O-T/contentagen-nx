@@ -60,9 +60,7 @@ function NavUserCredenza({
    return (
       <>
          <CredenzaHeader>
-            <CredenzaTitle>
-               {"Olá, {{name}}"}
-            </CredenzaTitle>
+            <CredenzaTitle>{"Olá, {{name}}"}</CredenzaTitle>
             <CredenzaDescription className="truncate">
                {session.user.email}
             </CredenzaDescription>
@@ -136,15 +134,11 @@ function NavUserCredenza({
                   {"Preferencias"}
                </span>
                <div className="flex items-center justify-between">
-                  <span className="text-sm">
-                     {"Tema"}
-                  </span>
+                  <span className="text-sm">{"Tema"}</span>
                   <ThemeSwitcher />
                </div>
                <div className="flex items-center justify-between gap-8">
-                  <span className="text-sm">
-                     {"Language"}
-                  </span>
+                  <span className="text-sm">{"Language"}</span>
                   <LanguageCommand />
                </div>
             </div>
@@ -214,10 +208,7 @@ function NavUserContent() {
                toast.error(error.message, { id: "logout" });
             },
             onRequest: () => {
-               toast.loading(
-                  "Saindo...",
-                  { id: "logout" },
-               );
+               toast.loading("Saindo...", { id: "logout" });
             },
             onSuccess: async () => {
                await queryClient.invalidateQueries({
@@ -226,10 +217,7 @@ function NavUserContent() {
                router.navigate({
                   to: "/auth/sign-in",
                });
-               toast.success(
-                  "Logout Success",
-                  { id: "logout" },
-               );
+               toast.success("Logout Success", { id: "logout" });
             },
          },
       });
@@ -395,20 +383,14 @@ function NavUserContent() {
                   <DropdownMenuSeparator />
 
                   {/* Preferences */}
-                  <DropdownMenuLabel>
-                     {"Preferencias"}
-                  </DropdownMenuLabel>
+                  <DropdownMenuLabel>{"Preferencias"}</DropdownMenuLabel>
                   <div className="px-2 py-1.5 space-y-2">
                      <div className="flex items-center justify-between">
-                        <span className="text-sm">
-                           {"Theme"}
-                        </span>
+                        <span className="text-sm">{"Theme"}</span>
                         <ThemeSwitcher />
                      </div>
                      <div className="flex items-center justify-between">
-                        <span className="text-sm">
-                           {"Language"}
-                        </span>
+                        <span className="text-sm">{"Language"}</span>
                         <LanguageCommand />
                      </div>
                   </div>

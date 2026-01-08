@@ -81,9 +81,7 @@ function ProfilePageBillingErrorFallback(props: FallbackProps) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>
-               {"Assinatura"}
-            </CardTitle>
+            <CardTitle>{"Assinatura"}</CardTitle>
             <CardDescription>
                {"Gerencie sua assinatura e informações de cobrança."}
             </CardDescription>
@@ -199,12 +197,8 @@ function NoSubscriptionContent() {
             <EmptyMedia variant="icon">
                <CreditCard className="size-6" />
             </EmptyMedia>
-            <EmptyTitle>
-               {"Title"}
-            </EmptyTitle>
-            <EmptyDescription>
-               {"Description"}
-            </EmptyDescription>
+            <EmptyTitle>{"Title"}</EmptyTitle>
+            <EmptyDescription>{"Description"}</EmptyDescription>
          </EmptyHeader>
          <EmptyContent>
             <Button asChild>
@@ -250,9 +244,7 @@ function ProfilePageBillingContent() {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>
-               {"Assinatura"}
-            </CardTitle>
+            <CardTitle>{"Assinatura"}</CardTitle>
             <CardDescription>
                {"Gerencie sua assinatura e informações de cobrança."}
             </CardDescription>

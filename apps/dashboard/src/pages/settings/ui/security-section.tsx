@@ -77,8 +77,7 @@ function formatLastActive(date: Date | string | null): string {
    const days = Math.floor(diff / 86400000);
 
    if (minutes < 1) return "Agora";
-   if (minutes < 60)
-      return "{{count}} min atrás";
+   if (minutes < 60) return "{{count}} min atrás";
    if (hours < 24) return "{{count}}h atrás";
    if (days < 7) return "{{count}}d atrás";
    return d.toLocaleDateString("pt-BR", {
@@ -128,9 +127,7 @@ function SecuritySectionErrorFallback(props: FallbackProps) {
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Segurança"}
-            </CardTitle>
+            <CardTitle>{"Segurança"}</CardTitle>
             <CardDescription>
                {"Gerencie suas sessões e configurações de segurança."}
             </CardDescription>
@@ -215,12 +212,8 @@ function SessionsCard({
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Segurança"}
-            </CardTitle>
-            <CardDescription>
-               {"Sessions Description"}
-            </CardDescription>
+            <CardTitle>{"Segurança"}</CardTitle>
+            <CardDescription>{"Sessions Description"}</CardDescription>
          </CardHeader>
          <CardContent>
             {sessions.length === 0 ? (
@@ -229,12 +222,8 @@ function SessionsCard({
                      <EmptyMedia variant="icon">
                         <Globe className="size-6" />
                      </EmptyMedia>
-                     <EmptyTitle>
-                        {"Empty Title"}
-                     </EmptyTitle>
-                     <EmptyDescription>
-                        {"Empty Description"}
-                     </EmptyDescription>
+                     <EmptyTitle>{"Empty Title"}</EmptyTitle>
+                     <EmptyDescription>{"Empty Description"}</EmptyDescription>
                   </EmptyHeader>
                </Empty>
             ) : (
@@ -272,8 +261,7 @@ function SessionsCard({
                                  </div>
                                  <ItemDescription className="flex items-center gap-2 flex-wrap">
                                     <span>
-                                       {session.ipAddress ||
-                                          "Unknown Ip"}
+                                       {session.ipAddress || "Unknown Ip"}
                                     </span>
                                     {loginMethod && (
                                        <>
@@ -355,12 +343,8 @@ function SecurityOverviewCard({
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Visão Geral"}
-            </CardTitle>
-            <CardDescription>
-               {"Description"}
-            </CardDescription>
+            <CardTitle>{"Visão Geral"}</CardTitle>
+            <CardDescription>{"Description"}</CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
             <div className="rounded-lg bg-secondary/50 p-4 text-center">
@@ -370,9 +354,7 @@ function SecurityOverviewCard({
                <p className="text-3xl md:text-4xl font-bold">{sessionsCount}</p>
                <Badge className="mt-2" variant="secondary">
                   <Shield className="size-3 mr-1" />
-                  {sessionsCount === 1
-                     ? "Device"
-                     : "Devices"}
+                  {sessionsCount === 1 ? "Device" : "Devices"}
                </Badge>
             </div>
 

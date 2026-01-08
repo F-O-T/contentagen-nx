@@ -83,12 +83,8 @@ export function OrganizationTeamsPage() {
       <main className="flex flex-col gap-4">
          <div className="flex items-center justify-between">
             <div>
-               <h1 className="text-2xl font-bold">
-                  {"Equipes"}
-               </h1>
-               <p className="text-muted-foreground">
-                  {"Description"}
-               </p>
+               <h1 className="text-2xl font-bold">{"Equipes"}</h1>
+               <p className="text-muted-foreground">{"Description"}</p>
             </div>
             <TeamsQuickActionsToolbar />
          </div>

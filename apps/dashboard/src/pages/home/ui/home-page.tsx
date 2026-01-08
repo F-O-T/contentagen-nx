@@ -8,58 +8,58 @@ import { HomeQuickActions } from "./home-quick-actions";
 import { HomeRecentContentSection } from "./home-recent-content-section";
 
 function HomePageErrorFallback(props: FallbackProps) {
-	return createErrorFallback({
-		errorDescription: "Description",
-		errorTitle: "Erro ao carregar painel",
-		retryText: "Tentar novamente",
-	})(props);
+   return createErrorFallback({
+      errorDescription: "Description",
+      errorTitle: "Erro ao carregar painel",
+      retryText: "Tentar novamente",
+   })(props);
 }
 
 function HomePageSkeleton() {
-	return (
-		<main className="flex flex-col gap-6">
-			<div className="flex items-center justify-between">
-				<Skeleton className="h-9 w-48" />
-			</div>
+   return (
+      <main className="flex flex-col gap-6">
+         <div className="flex items-center justify-between">
+            <Skeleton className="h-9 w-48" />
+         </div>
 
-			<Skeleton className="h-40 w-full" />
+         <Skeleton className="h-40 w-full" />
 
-			<div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-				{Array.from({ length: 4 }).map((_, i) => (
-					<Skeleton className="h-32" key={`skeleton-${i + 1}`} />
-				))}
-			</div>
+         <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+               <Skeleton className="h-32" key={`skeleton-${i + 1}`} />
+            ))}
+         </div>
 
-			<Skeleton className="h-48 w-full" />
+         <Skeleton className="h-48 w-full" />
 
-			<Skeleton className="h-[300px] w-full" />
-		</main>
-	);
+         <Skeleton className="h-[300px] w-full" />
+      </main>
+   );
 }
 
 function HomePageContent() {
-	return (
-		<main className="flex flex-col gap-6">
-			<DefaultHeader
-				description={"Seu espaço de criação de conteúdo com IA"}
-				title={"Painel"}
-			/>
+   return (
+      <main className="flex flex-col gap-6">
+         <DefaultHeader
+            description={"Seu espaço de criação de conteúdo com IA"}
+            title={"Painel"}
+         />
 
-			<HomeContentStatsCard />
+         <HomeContentStatsCard />
 
-			<HomeQuickActions />
+         <HomeQuickActions />
 
-			<HomeRecentContentSection />
-		</main>
-	);
+         <HomeRecentContentSection />
+      </main>
+   );
 }
 
 export function HomePage() {
-	return (
-		<ErrorBoundary FallbackComponent={HomePageErrorFallback}>
-			<Suspense fallback={<HomePageSkeleton />}>
-				<HomePageContent />
-			</Suspense>
-		</ErrorBoundary>
-	);
+   return (
+      <ErrorBoundary FallbackComponent={HomePageErrorFallback}>
+         <Suspense fallback={<HomePageSkeleton />}>
+            <HomePageContent />
+         </Suspense>
+      </ErrorBoundary>
+   );
 }

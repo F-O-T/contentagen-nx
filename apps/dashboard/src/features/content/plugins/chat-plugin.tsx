@@ -2,19 +2,19 @@
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
-	$getRoot,
-	$getSelection,
-	$isRangeSelection,
-	$isTextNode,
-	type LexicalNode,
+   $getRoot,
+   $getSelection,
+   $isRangeSelection,
+   $isTextNode,
+   type LexicalNode,
 } from "lexical";
 import { useCallback, useEffect } from "react";
 import {
-	useChatState,
-	openChatSidebar,
-	setSelectionContext,
-	setDocumentContent,
-	setEditor,
+   openChatSidebar,
+   setDocumentContent,
+   setEditor,
+   setSelectionContext,
+   useChatState,
 } from "../context/chat-context";
 import { $isGhostTextNode } from "../nodes/ghost-text-node";
 
@@ -30,137 +30,137 @@ import { $isGhostTextNode } from "../nodes/ghost-text-node";
  * - Ctrl+L: Toggle chat sidebar / send selection to chat
  */
 export function ChatPlugin() {
-	const [editor] = useLexicalComposerContext();
-	const { isOpen } = useChatState();
+   const [editor] = useLexicalComposerContext();
+   const { isOpen } = useChatState();
 
-	// Register editor reference for tool execution
-	useEffect(() => {
-		setEditor(editor);
-		return () => setEditor(null);
-	}, [editor]);
+   // Register editor reference for tool execution
+   useEffect(() => {
+      setEditor(editor);
+      return () => setEditor(null);
+   }, [editor]);
 
-	// Get text content without ghost nodes
-	const getTextWithoutGhost = useCallback((node: LexicalNode): string => {
-		if ($isGhostTextNode(node)) return "";
-		if ($isTextNode(node)) return node.getTextContent();
-		if ("getChildren" in node) {
-			const children = (
-				node as { getChildren: () => LexicalNode[] }
-			).getChildren();
-			return children.map(getTextWithoutGhost).join("");
-		}
-		return "";
-	}, []);
+   // Get text content without ghost nodes
+   const getTextWithoutGhost = useCallback((node: LexicalNode): string => {
+      if ($isGhostTextNode(node)) return "";
+      if ($isTextNode(node)) return node.getTextContent();
+      if ("getChildren" in node) {
+         const children = (
+            node as { getChildren: () => LexicalNode[] }
+         ).getChildren();
+         return children.map(getTextWithoutGhost).join("");
+      }
+      return "";
+   }, []);
 
-	// Sync document content to chat state on every change
-	useEffect(() => {
-		return editor.registerUpdateListener(({ editorState }) => {
-			editorState.read(() => {
-				const root = $getRoot();
-				const fullText = getTextWithoutGhost(root);
-				setDocumentContent(fullText);
-			});
-		});
-	}, [editor, getTextWithoutGhost]);
+   // Sync document content to chat state on every change
+   useEffect(() => {
+      return editor.registerUpdateListener(({ editorState }) => {
+         editorState.read(() => {
+            const root = $getRoot();
+            const fullText = getTextWithoutGhost(root);
+            setDocumentContent(fullText);
+         });
+      });
+   }, [editor, getTextWithoutGhost]);
 
-	// Get document text and selection context
-	const getDocumentContext = useCallback(() => {
-		let fullText = "";
-		let selectionStart = 0;
-		let selectionEnd = 0;
-		let selectedText = "";
+   // Get document text and selection context
+   const getDocumentContext = useCallback(() => {
+      let fullText = "";
+      let selectionStart = 0;
+      let selectionEnd = 0;
+      let selectedText = "";
 
-		editor.getEditorState().read(() => {
-			const root = $getRoot();
-			const selection = $getSelection();
+      editor.getEditorState().read(() => {
+         const root = $getRoot();
+         const selection = $getSelection();
 
-			fullText = getTextWithoutGhost(root);
+         fullText = getTextWithoutGhost(root);
 
-			// Get selected text if any
-			if ($isRangeSelection(selection) && !selection.isCollapsed()) {
-				selectedText = selection.getTextContent();
+         // Get selected text if any
+         if ($isRangeSelection(selection) && !selection.isCollapsed()) {
+            selectedText = selection.getTextContent();
 
-				// Calculate offsets for context
-				let currentOffset = 0;
-				let foundStart = false;
-				let foundEnd = false;
+            // Calculate offsets for context
+            let currentOffset = 0;
+            let foundStart = false;
+            let foundEnd = false;
 
-				const walkNode = (node: LexicalNode) => {
-					if (foundStart && foundEnd) return;
-					if ($isGhostTextNode(node)) return;
+            const walkNode = (node: LexicalNode) => {
+               if (foundStart && foundEnd) return;
+               if ($isGhostTextNode(node)) return;
 
-					if ($isTextNode(node)) {
-						const nodeKey = node.getKey();
-						const textLength = node.getTextContentSize();
+               if ($isTextNode(node)) {
+                  const nodeKey = node.getKey();
+                  const textLength = node.getTextContentSize();
 
-						if (nodeKey === selection.anchor.key && !foundStart) {
-							selectionStart = currentOffset + selection.anchor.offset;
-							foundStart = true;
-						}
-						if (nodeKey === selection.focus.key && !foundEnd) {
-							selectionEnd = currentOffset + selection.focus.offset;
-							foundEnd = true;
-						}
+                  if (nodeKey === selection.anchor.key && !foundStart) {
+                     selectionStart = currentOffset + selection.anchor.offset;
+                     foundStart = true;
+                  }
+                  if (nodeKey === selection.focus.key && !foundEnd) {
+                     selectionEnd = currentOffset + selection.focus.offset;
+                     foundEnd = true;
+                  }
 
-						currentOffset += textLength;
-					}
+                  currentOffset += textLength;
+               }
 
-					if ("getChildren" in node) {
-						const children = (
-							node as { getChildren: () => LexicalNode[] }
-						).getChildren();
-						for (const child of children) {
-							walkNode(child);
-						}
-					}
-				};
+               if ("getChildren" in node) {
+                  const children = (
+                     node as { getChildren: () => LexicalNode[] }
+                  ).getChildren();
+                  for (const child of children) {
+                     walkNode(child);
+                  }
+               }
+            };
 
-				walkNode(root);
+            walkNode(root);
 
-				// Ensure start < end
-				if (selectionStart > selectionEnd) {
-					[selectionStart, selectionEnd] = [selectionEnd, selectionStart];
-				}
-			}
-		});
+            // Ensure start < end
+            if (selectionStart > selectionEnd) {
+               [selectionStart, selectionEnd] = [selectionEnd, selectionStart];
+            }
+         }
+      });
 
-		return {
-			fullText,
-			selectedText,
-			contextBefore: fullText.slice(0, selectionStart),
-			contextAfter: fullText.slice(selectionEnd),
-		};
-	}, [editor, getTextWithoutGhost]);
+      return {
+         fullText,
+         selectedText,
+         contextBefore: fullText.slice(0, selectionStart),
+         contextAfter: fullText.slice(selectionEnd),
+      };
+   }, [editor, getTextWithoutGhost]);
 
-	// Ctrl+L handler - toggle sidebar and send selection to chat
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.ctrlKey && e.key === "l") {
-				e.preventDefault();
+   // Ctrl+L handler - toggle sidebar and send selection to chat
+   useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+         if (e.ctrlKey && e.key === "l") {
+            e.preventDefault();
 
-				const { selectedText, contextBefore, contextAfter } =
-					getDocumentContext();
+            const { selectedText, contextBefore, contextAfter } =
+               getDocumentContext();
 
-				// If there's selected text, set it as context
-				if (selectedText.trim()) {
-					setSelectionContext({
-						text: selectedText,
-						contextBefore: contextBefore.slice(-500), // Limit context size
-						contextAfter: contextAfter.slice(0, 500),
-					});
-				}
+            // If there's selected text, set it as context
+            if (selectedText.trim()) {
+               setSelectionContext({
+                  text: selectedText,
+                  contextBefore: contextBefore.slice(-500), // Limit context size
+                  contextAfter: contextAfter.slice(0, 500),
+               });
+            }
 
-				// Open sidebar if not open, or just add the selection if already open
-				if (!isOpen) {
-					openChatSidebar();
-				}
-			}
-		};
+            // Open sidebar if not open, or just add the selection if already open
+            if (!isOpen) {
+               openChatSidebar();
+            }
+         }
+      };
 
-		document.addEventListener("keydown", handleKeyDown);
-		return () => document.removeEventListener("keydown", handleKeyDown);
-	}, [isOpen, getDocumentContext]);
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
+   }, [isOpen, getDocumentContext]);
 
-	// Plugin only handles keyboard events, renders nothing
-	return null;
+   // Plugin only handles keyboard events, renders nothing
+   return null;
 }

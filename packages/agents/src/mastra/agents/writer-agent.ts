@@ -7,33 +7,33 @@ import type { ContentPlan } from "../schemas/plan-schema";
 
 // Import tools for writer mode
 import {
-	analysisTools,
-	getAllAnalysisToolInstructions,
+   analysisTools,
+   getAllAnalysisToolInstructions,
 } from "../tools/analysis";
 import { editorTools, getAllEditorToolInstructions } from "../tools/editor";
 import {
-	frontmatterTools,
-	getAllFrontmatterToolInstructions,
+   frontmatterTools,
+   getAllFrontmatterToolInstructions,
 } from "../tools/frontmatter";
 import { getAllRagToolInstructions, ragTools } from "../tools/rag";
 
 // Available models
 const MODELS = {
-	"x-ai/grok-4.1-fast": "x-ai/grok-4.1-fast",
-	"z-ai/glm-4.7": "z-ai/glm-4.7",
-	"mistralai/mistral-small-creative": "mistralai/mistral-small-creative",
+   "x-ai/grok-4.1-fast": "x-ai/grok-4.1-fast",
+   "z-ai/glm-4.7": "z-ai/glm-4.7",
+   "mistralai/mistral-small-creative": "mistralai/mistral-small-creative",
 } as const;
 
 type ModelId = keyof typeof MODELS;
 
 const openrouter = createOpenRouter({
-	apiKey: serverEnv.OPENROUTER_API_KEY,
+   apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 
 // Get language-specific instruction
 const getLanguageInstruction = (language: "en" | "pt"): string => {
-	const languageNames = { en: "English", pt: "Portuguese" };
-	return `
+   const languageNames = { en: "English", pt: "Portuguese" };
+   return `
 ## OUTPUT LANGUAGE
 Respond and write content in ${languageNames[language]}.
 `;
@@ -41,9 +41,9 @@ Respond and write content in ${languageNames[language]}.
 
 // Format active plan for instructions
 const formatActivePlan = (plan: ContentPlan | undefined): string => {
-	if (!plan) return "";
+   if (!plan) return "";
 
-	return `
+   return `
 ## ACTIVE PLAN TO EXECUTE
 You have an approved plan to follow. Execute each step in order.
 
@@ -52,26 +52,26 @@ ${plan.summary}
 
 ### Steps to Execute
 ${plan.steps
-	.map(
-		(step, index) => `
+   .map(
+      (step, index) => `
 ${index + 1}. **${step.title}**
    ${step.description}
    ${step.toolsToUse?.length ? `Tools: ${step.toolsToUse.join(", ")}` : ""}
    ${step.rationale ? `Rationale: ${step.rationale}` : ""}
 `,
-	)
-	.join("")}
+   )
+   .join("")}
 
 ### Research Insights
 ${
-	plan.researchInsights
-		? `
+   plan.researchInsights
+      ? `
 - SERP Intent: ${plan.researchInsights.serpIntent}
 - Top Topics: ${plan.researchInsights.topRankingTopics?.join(", ") || "N/A"}
 - Content Gaps: ${plan.researchInsights.contentGaps?.join(", ") || "N/A"}
 - Suggested Keywords: ${plan.researchInsights.suggestedKeywords?.join(", ") || "N/A"}
 `
-		: "No research insights available"
+      : "No research insights available"
 }
 
 ### Target
@@ -86,11 +86,11 @@ ${plan.suggestedDescription ? `- Suggested Description: ${plan.suggestedDescript
 
 // Writer agent instructions
 const getWriterAgentInstructions = (
-	language: "en" | "pt",
-	activePlan?: ContentPlan,
-	writerConfig?: WriterConfig,
+   language: "en" | "pt",
+   activePlan?: ContentPlan,
+   writerConfig?: WriterConfig,
 ): string => {
-	return `
+   return `
 You are an expert blog post writer and editor. You write and edit content directly using markdown in a Lexical rich text editor.
 
 ${getLanguageInstruction(language)}
@@ -389,34 +389,34 @@ ${getAllRagToolInstructions()}
  * - Analysis (SEO, readability, keyword density)
  */
 export const writerAgent = new Agent({
-	id: "writer-agent",
-	name: "Writer Agent",
+   id: "writer-agent",
+   name: "Writer Agent",
 
-	// Dynamic model selection from requestContext
-	model: ({ requestContext }) => {
-		const modelId =
-			(requestContext?.get("model") as ModelId) || "x-ai/grok-4.1-fast";
-		const model = MODELS[modelId] || MODELS["x-ai/grok-4.1-fast"];
-		return openrouter(model);
-	},
+   // Dynamic model selection from requestContext
+   model: ({ requestContext }) => {
+      const modelId =
+         (requestContext?.get("model") as ModelId) || "x-ai/grok-4.1-fast";
+      const model = MODELS[modelId] || MODELS["x-ai/grok-4.1-fast"];
+      return openrouter(model);
+   },
 
-	// Dynamic instructions based on language, active plan, and writer config
-	instructions: ({ requestContext }) => {
-		const language = (requestContext?.get("language") as "en" | "pt") || "en";
-		const activePlan = requestContext?.get("activePlan") as
-			| ContentPlan
-			| undefined;
-		const writerConfig = requestContext?.get("writerConfig") as
-			| WriterConfig
-			| undefined;
-		return getWriterAgentInstructions(language, activePlan, writerConfig);
-	},
+   // Dynamic instructions based on language, active plan, and writer config
+   instructions: ({ requestContext }) => {
+      const language = (requestContext?.get("language") as "en" | "pt") || "en";
+      const activePlan = requestContext?.get("activePlan") as
+         | ContentPlan
+         | undefined;
+      const writerConfig = requestContext?.get("writerConfig") as
+         | WriterConfig
+         | undefined;
+      return getWriterAgentInstructions(language, activePlan, writerConfig);
+   },
 
-	// Editor + Frontmatter + Analysis + RAG tools
-	tools: {
-		...editorTools,
-		...frontmatterTools,
-		...analysisTools,
-		...ragTools,
-	},
+   // Editor + Frontmatter + Analysis + RAG tools
+   tools: {
+      ...editorTools,
+      ...frontmatterTools,
+      ...analysisTools,
+      ...ragTools,
+   },
 });

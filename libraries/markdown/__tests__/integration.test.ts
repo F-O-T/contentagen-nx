@@ -50,7 +50,9 @@ For more info, see [our docs](https://example.com).
          const lists = children.filter((c) => c.type === "list");
          const codeBlocks = children.filter((c) => c.type === "codeBlock");
          const blockquotes = children.filter((c) => c.type === "blockquote");
-         const thematicBreaks = children.filter((c) => c.type === "thematicBreak");
+         const thematicBreaks = children.filter(
+            (c) => c.type === "thematicBreak",
+         );
 
          expect(headings.length).toBe(3); // h1, h2, h3
          expect(paragraphs.length).toBeGreaterThan(0);
@@ -78,7 +80,9 @@ For more info, see [our docs](https://example.com).
          if (blockquote?.type === "blockquote") {
             expect(blockquote.children.length).toBeGreaterThan(0);
 
-            const heading = blockquote.children.find((c) => c.type === "heading");
+            const heading = blockquote.children.find(
+               (c) => c.type === "heading",
+            );
             const list = blockquote.children.find((c) => c.type === "list");
 
             expect(heading).toBeDefined();
@@ -253,7 +257,9 @@ Content here
 
          const para = doc.root.children[0];
          if (para?.type === "paragraph") {
-            const htmlInline = para.children.find((c) => c.type === "htmlInline");
+            const htmlInline = para.children.find(
+               (c) => c.type === "htmlInline",
+            );
             expect(htmlInline).toBeDefined();
          }
       });

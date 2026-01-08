@@ -40,13 +40,19 @@ export function ForgotPasswordPage() {
             .string()
             .min(
                6,
-               "O campo deve ter no mínimo {min} caracteres.".replace("{min}", "6"),
+               "O campo deve ter no mínimo {min} caracteres.".replace(
+                  "{min}",
+                  "6",
+               ),
             ),
          password: z
             .string()
             .min(
                8,
-               "O campo deve ter no mínimo {min} caracteres.".replace("{min}", "8"),
+               "O campo deve ter no mínimo {min} caracteres.".replace(
+                  "{min}",
+                  "8",
+               ),
             ),
       })
       .refine((data) => data.password === data.confirmPassword, {
@@ -65,14 +71,10 @@ export function ForgotPasswordPage() {
                toast.error(error.message);
             },
             onRequest: () => {
-               toast.loading(
-                  "Processando...",
-               );
+               toast.loading("Processando...");
             },
             onSuccess: () => {
-               toast.success(
-                  "Código enviado!",
-               );
+               toast.success("Código enviado!");
             },
          },
       );
@@ -91,14 +93,10 @@ export function ForgotPasswordPage() {
                   toast.error(error.message);
                },
                onRequest: () => {
-                  toast.loading(
-                     "Redefinindo...",
-                  );
+                  toast.loading("Redefinindo...");
                },
                onSuccess: () => {
-                  toast.success(
-                     "Senha redefinida!",
-                  );
+                  toast.success("Senha redefinida!");
                   router.navigate({
                      to: "/auth/sign-in",
                   });
@@ -142,9 +140,7 @@ export function ForgotPasswordPage() {
                      field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>
-                           {"Email"}
-                        </FieldLabel>
+                        <FieldLabel htmlFor={field.name}>{"Email"}</FieldLabel>
                         <Input
                            aria-invalid={isInvalid}
                            autoComplete="email"
@@ -377,9 +373,7 @@ export function ForgotPasswordPage() {
 
                <div className="text-sm text-center">
                   <div className="flex gap-1 justify-center items-center">
-                     <span>
-                        {"Lembrou sua senha?"}
-                     </span>
+                     <span>{"Lembrou sua senha?"}</span>
                      <Link
                         className="text-primary hover:underline"
                         to="/auth/sign-in"

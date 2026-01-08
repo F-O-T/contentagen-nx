@@ -1,10 +1,10 @@
-import { parseBlocks, createBlockContext } from "./block-parser.ts";
+import { createBlockContext, parseBlocks } from "./block-parser.ts";
 import {
-   DEFAULT_MAX_BUFFER_SIZE,
    type BatchMarkdownFileInput,
    type BatchMarkdownStreamEvent,
    type BatchParsedMarkdownFile,
    type BlockNode,
+   DEFAULT_MAX_BUFFER_SIZE,
    type MarkdownDocument,
    type StreamEvent,
    type StreamOptions,
@@ -298,7 +298,12 @@ function buildDocument(state: StreamingParserState): MarkdownDocument {
    // Convert references map to object
    const referencesObj: Record<
       string,
-      { type: "linkReferenceDefinition"; label: string; url: string; title?: string }
+      {
+         type: "linkReferenceDefinition";
+         label: string;
+         url: string;
+         title?: string;
+      }
    > = {};
 
    for (const [label, ref] of state.references) {

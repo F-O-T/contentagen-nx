@@ -89,8 +89,28 @@ export const organizationTeamsRouter = router({
       )
       .query(async ({ ctx, input }) => {
          const resolvedCtx = await ctx;
+         const organizationId =
+            resolvedCtx.session?.session?.activeOrganizationId;
+
+         if (!organizationId) {
+            throw APIError.notFound("No active organization found");
+         }
 
          try {
+            // First verify the team belongs to the user's organization
+            const teams = await resolvedCtx.auth.api.listOrganizationTeams({
+               headers: resolvedCtx.headers,
+               query: { organizationId },
+            });
+
+            const teamBelongsToOrg = teams?.some((t) => t.id === input.teamId);
+
+            if (!teamBelongsToOrg) {
+               throw APIError.forbidden(
+                  "You don't have permission to view this team's members.",
+               );
+            }
+
             const members = await resolvedCtx.auth.api.listTeamMembers({
                headers: resolvedCtx.headers,
                query: {

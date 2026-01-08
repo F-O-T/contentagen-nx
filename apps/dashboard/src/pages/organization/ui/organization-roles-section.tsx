@@ -48,11 +48,15 @@ export function OrganizationRoles() {
    ];
 
    type RoleId = "owner" | "admin" | "member";
-   
-   const roleData: Record<RoleId, { title: string; description: string; permissions: string[] }> = {
+
+   const roleData: Record<
+      RoleId,
+      { title: string; description: string; permissions: string[] }
+   > = {
       owner: {
          title: "Proprietário",
-         description: "Acesso total à organização, incluindo configurações de faturamento e exclusão.",
+         description:
+            "Acesso total à organização, incluindo configurações de faturamento e exclusão.",
          permissions: [
             "Gerenciar membros e funções",
             "Acessar configurações de faturamento",
@@ -110,9 +114,7 @@ export function OrganizationRoles() {
                   {localizedRole.description}
                </p>
                <div>
-                  <p className="text-sm font-medium mb-3">
-                     Permissões:
-                  </p>
+                  <p className="text-sm font-medium mb-3">Permissões:</p>
                   <ul className="text-sm space-y-2">
                      {localizedRole.permissions.map((permission, index) => (
                         <li
@@ -132,9 +134,7 @@ export function OrganizationRoles() {
    return (
       <Card className="w-full">
          <CardHeader>
-            <CardTitle>
-               Cargos da Organização
-            </CardTitle>
+            <CardTitle>Cargos da Organização</CardTitle>
             <CardDescription>
                Entenda as funções e permissões disponíveis
             </CardDescription>

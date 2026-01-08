@@ -72,12 +72,8 @@ function LogoErrorFallback() {
 function ContentErrorFallback() {
    return (
       <ItemContent>
-         <ItemTitle>
-            {"Title"}
-         </ItemTitle>
-         <ItemDescription>
-            {"Description"}
-         </ItemDescription>
+         <ItemTitle>{"Title"}</ItemTitle>
+         <ItemDescription>{"Description"}</ItemDescription>
       </ItemContent>
    );
 }

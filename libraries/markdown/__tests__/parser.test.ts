@@ -57,7 +57,9 @@ describe("parse", () => {
 
    describe("headings", () => {
       it("parses ATX headings", () => {
-         const doc = parseOrThrow("# Heading 1\n## Heading 2\n###### Heading 6");
+         const doc = parseOrThrow(
+            "# Heading 1\n## Heading 2\n###### Heading 6",
+         );
          expect(doc.root.children).toHaveLength(3);
 
          const h1 = doc.root.children[0];
@@ -85,7 +87,9 @@ describe("parse", () => {
       });
 
       it("parses setext headings", () => {
-         const doc = parseOrThrow("Heading 1\n=========\n\nHeading 2\n---------");
+         const doc = parseOrThrow(
+            "Heading 1\n=========\n\nHeading 2\n---------",
+         );
          expect(doc.root.children).toHaveLength(2);
 
          const h1 = doc.root.children[0];
@@ -144,7 +148,9 @@ describe("parse", () => {
       });
 
       it("parses indented code blocks", () => {
-         const doc = parseOrThrow("    function foo() {\n        return 1;\n    }");
+         const doc = parseOrThrow(
+            "    function foo() {\n        return 1;\n    }",
+         );
          const codeBlock = doc.root.children[0];
          expect(codeBlock?.type).toBe("codeBlock");
          if (codeBlock?.type === "codeBlock") {

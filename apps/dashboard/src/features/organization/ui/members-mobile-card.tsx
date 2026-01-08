@@ -57,8 +57,8 @@ export function MembersMobileCard({
                   />
                </CardTitle>
                <CardDescription className="mt-1">
-                  {"Joined"}
-                  : {formatDate(new Date(member.createdAt), "DD MMM YYYY")}
+                  {"Joined"}:{" "}
+                  {formatDate(new Date(member.createdAt), "DD MMM YYYY")}
                </CardDescription>
             </div>
             <CardAction>

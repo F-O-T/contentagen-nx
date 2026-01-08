@@ -76,9 +76,7 @@ function OrganizationStatsCardContent() {
    return (
       <Card>
          <CardHeader className="text-center pb-2">
-            <CardDescription>
-               {"Estatísticas da Organização"}
-            </CardDescription>
+            <CardDescription>{"Estatísticas da Organização"}</CardDescription>
             <CardTitle className="text-2xl font-bold">
                {activeOrganization.name}
             </CardTitle>
@@ -91,9 +89,7 @@ function OrganizationStatsCardContent() {
                         <div className="rounded-full bg-blue-500/10 p-2">
                            <Users className="size-4 text-blue-500" />
                         </div>
-                        <CardDescription>
-                           {"Members"}
-                        </CardDescription>
+                        <CardDescription>{"Members"}</CardDescription>
                      </div>
                      <CardTitle className="text-xl">{members.length}</CardTitle>
                   </CardHeader>
@@ -105,9 +101,7 @@ function OrganizationStatsCardContent() {
                         <div className="rounded-full bg-purple-500/10 p-2">
                            <Shield className="size-4 text-purple-500" />
                         </div>
-                        <CardDescription>
-                           {"Admins"}
-                        </CardDescription>
+                        <CardDescription>{"Admins"}</CardDescription>
                      </div>
                      <CardTitle className="text-xl">{adminCount}</CardTitle>
                   </CardHeader>
@@ -119,9 +113,7 @@ function OrganizationStatsCardContent() {
                         <div className="rounded-full bg-green-500/10 p-2">
                            <Users className="size-4 text-green-500" />
                         </div>
-                        <CardDescription>
-                           {"Teams"}
-                        </CardDescription>
+                        <CardDescription>{"Teams"}</CardDescription>
                      </div>
                      <CardTitle className="text-xl">{teams.length}</CardTitle>
                   </CardHeader>
@@ -133,9 +125,7 @@ function OrganizationStatsCardContent() {
                         <div className="rounded-full bg-amber-500/10 p-2">
                            <Mail className="size-4 text-amber-500" />
                         </div>
-                        <CardDescription>
-                           {"Pending Invites"}
-                        </CardDescription>
+                        <CardDescription>{"Pending Invites"}</CardDescription>
                      </div>
                      <CardTitle className="text-xl">
                         {pendingInvites.length}

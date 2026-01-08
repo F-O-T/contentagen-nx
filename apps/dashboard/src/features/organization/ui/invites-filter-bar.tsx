@@ -91,8 +91,7 @@ export function InvitesFilterBar({
                onClick={() => onRoleFilterChange("all")}
                variant="secondary"
             >
-               {"Role"}
-               : {roleFilter}
+               {"Role"}: {roleFilter}
                <X className="size-3 ml-1" />
             </Badge>
          )}

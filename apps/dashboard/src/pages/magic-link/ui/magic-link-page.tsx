@@ -34,15 +34,11 @@ export function MagicLinkPage() {
                toast.error(error.message);
             },
             onRequest: () => {
-               toast.loading(
-                  "Enviando link de acesso...",
-               );
+               toast.loading("Enviando link de acesso...");
             },
             onSuccess: () => {
                setIsSent(true);
-               toast.success(
-                  "Link enviado! Verifique seu e-mail.",
-               );
+               toast.success("Link enviado! Verifique seu e-mail.");
             },
          },
       );
@@ -86,7 +82,9 @@ export function MagicLinkPage() {
                      {"Verifique seu e-mail"}
                   </h1>
                   <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-                     {"Enviamos um link para seu e-mail. Clique nele para acessar sua conta instantaneamente."}
+                     {
+                        "Enviamos um link para seu e-mail. Clique nele para acessar sua conta instantaneamente."
+                     }
                   </p>
                </div>
 
@@ -127,7 +125,9 @@ export function MagicLinkPage() {
                {"Acesso sem senha"}
             </h1>
             <p className="text-muted-foreground text-sm">
-               {"Receba um link no seu e-mail para acessar sua conta sem precisar de senha."}
+               {
+                  "Receba um link no seu e-mail para acessar sua conta sem precisar de senha."
+               }
             </p>
          </div>
 
@@ -170,11 +170,7 @@ export function MagicLinkPage() {
                      disabled={!formState.canSubmit || formState.isSubmitting}
                      type="submit"
                   >
-                     {formState.isSubmitting ? (
-                        <Spinner />
-                     ) : (
-                        "Send Link"
-                     )}
+                     {formState.isSubmitting ? <Spinner /> : "Send Link"}
                   </Button>
                )}
             </form.Subscribe>
@@ -182,15 +178,15 @@ export function MagicLinkPage() {
 
          {/* Note */}
          <FieldDescription className="text-center">
-            {"O link expira em 15 minutos. Verifique sua caixa de spam se não encontrar o e-mail."}
+            {
+               "O link expira em 15 minutos. Verifique sua caixa de spam se não encontrar o e-mail."
+            }
          </FieldDescription>
 
          {/* Footer */}
          <div className="text-sm text-center">
             <div className="flex gap-1 justify-center items-center">
-               <span>
-                  {"Primeira vez aqui? "}
-               </span>
+               <span>{"Primeira vez aqui? "}</span>
                <Link
                   className="text-primary font-medium hover:underline"
                   to="/auth/sign-up"

@@ -1,11 +1,11 @@
 import { relations, sql } from "drizzle-orm";
 import {
-	index,
-	jsonb,
-	pgTable,
-	text,
-	timestamp,
-	uuid,
+   index,
+   jsonb,
+   pgTable,
+   text,
+   timestamp,
+   uuid,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -13,63 +13,63 @@ import { organization } from "./auth";
 
 // Zod schema for persona configuration
 export const PersonaMetadataSchema = z.object({
-	name: z.string(),
-	description: z.string().optional(),
-	avatar: z.string().optional(),
+   name: z.string(),
+   description: z.string().optional(),
+   avatar: z.string().optional(),
 });
 
 // Brand term usage rules
 export const BrandTermSchema = z.object({
-	term: z.string(),
-	usage: z.enum(["always_use", "never_use", "preferred"]),
-	alternative: z.string().optional(), // Suggested alternative if "never_use"
+   term: z.string(),
+   usage: z.enum(["always_use", "never_use", "preferred"]),
+   alternative: z.string().optional(), // Suggested alternative if "never_use"
 });
 
 export type BrandTerm = z.infer<typeof BrandTermSchema>;
 
 // Structured writer configuration
 export const WriterConfigSchema = z.object({
-	// === Writing Style (structured) ===
-	tone: z
-		.enum(["formal", "conversational", "professional", "casual", "academic"])
-		.optional(),
-	voice: z.enum(["first_person", "second_person", "third_person"]).optional(),
-	complexity: z.enum(["simple", "moderate", "advanced"]).optional(), // vocabulary level
+   // === Writing Style (structured) ===
+   tone: z
+      .enum(["formal", "conversational", "professional", "casual", "academic"])
+      .optional(),
+   voice: z.enum(["first_person", "second_person", "third_person"]).optional(),
+   complexity: z.enum(["simple", "moderate", "advanced"]).optional(), // vocabulary level
 
-	// === Content Rules (structured) ===
-	targetWordCount: z
-		.object({
-			min: z.number().optional(),
-			max: z.number().optional(),
-		})
-		.optional(),
-	headingStructure: z
-		.object({
-			maxDepth: z.number().min(2).max(6).default(3), // h2-h6
-			requireH2Every: z.number().optional(), // words between h2s
-		})
-		.optional(),
-	seoRules: z
-		.object({
-			minKeywordDensity: z.number().optional(), // e.g., 0.5%
-			maxKeywordDensity: z.number().optional(), // e.g., 2.5%
-			requireMetaDescription: z.boolean().default(true),
-			maxTitleLength: z.number().default(60),
-		})
-		.optional(),
+   // === Content Rules (structured) ===
+   targetWordCount: z
+      .object({
+         min: z.number().optional(),
+         max: z.number().optional(),
+      })
+      .optional(),
+   headingStructure: z
+      .object({
+         maxDepth: z.number().min(2).max(6).default(3), // h2-h6
+         requireH2Every: z.number().optional(), // words between h2s
+      })
+      .optional(),
+   seoRules: z
+      .object({
+         minKeywordDensity: z.number().optional(), // e.g., 0.5%
+         maxKeywordDensity: z.number().optional(), // e.g., 2.5%
+         requireMetaDescription: z.boolean().default(true),
+         maxTitleLength: z.number().default(60),
+      })
+      .optional(),
 
-	// === Brand Guidelines (structured) ===
-	brandTerms: z.array(BrandTermSchema).optional(),
+   // === Brand Guidelines (structured) ===
+   brandTerms: z.array(BrandTermSchema).optional(),
 
-	// === Free-form Custom Rules (for backward compatibility and flexibility) ===
-	writingGuidelines: z.string().optional(), // Detailed prose instructions
-	audienceProfile: z.string().optional(), // Who we're writing for
-	customRules: z.string().optional(), // Additional free-form rules
+   // === Free-form Custom Rules (for backward compatibility and flexibility) ===
+   writingGuidelines: z.string().optional(), // Detailed prose instructions
+   audienceProfile: z.string().optional(), // Who we're writing for
+   customRules: z.string().optional(), // Additional free-form rules
 
-	// === Feature Flags ===
-	ragIntegration: z.boolean().default(true),
-	enableInternalLinking: z.boolean().default(true),
-	enableFactChecking: z.boolean().default(false),
+   // === Feature Flags ===
+   ragIntegration: z.boolean().default(true),
+   enableInternalLinking: z.boolean().default(true),
+   enableFactChecking: z.boolean().default(false),
 });
 
 export type WriterConfig = z.infer<typeof WriterConfigSchema>;
@@ -79,40 +79,36 @@ export type WriterConfig = z.infer<typeof WriterConfigSchema>;
 export const PersonaInstructionsSchema = WriterConfigSchema;
 
 export const PersonaConfigSchema = z.object({
-	metadata: PersonaMetadataSchema,
-	instructions: PersonaInstructionsSchema.optional(),
+   metadata: PersonaMetadataSchema,
+   instructions: PersonaInstructionsSchema.optional(),
 });
 
 export type PersonaConfig = z.infer<typeof PersonaConfigSchema>;
 
 export const agent = pgTable(
-	"agent",
-	{
-		id: uuid("id")
-			.default(sql`pg_catalog.gen_random_uuid()`)
-			.primaryKey(),
-		organizationId: uuid("organization_id")
-			.notNull()
-			.references(() => organization.id, { onDelete: "cascade" }),
-		personaConfig: jsonb("persona_config").$type<PersonaConfig>().notNull(),
-		profilePhotoUrl: text("profile_photo_url"),
-		lastGeneratedAt: timestamp("last_generated_at"),
-		createdAt: timestamp("created_at").defaultNow().notNull(),
-		updatedAt: timestamp("updated_at")
-			.defaultNow()
-			.$onUpdate(() => new Date())
-			.notNull(),
-	},
-	(table) => [
-		index("agent_organization_id_idx").on(table.organizationId),
-	],
+   "agent",
+   {
+      id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
+      organizationId: uuid("organization_id")
+         .notNull()
+         .references(() => organization.id, { onDelete: "cascade" }),
+      personaConfig: jsonb("persona_config").$type<PersonaConfig>().notNull(),
+      profilePhotoUrl: text("profile_photo_url"),
+      lastGeneratedAt: timestamp("last_generated_at"),
+      createdAt: timestamp("created_at").defaultNow().notNull(),
+      updatedAt: timestamp("updated_at")
+         .defaultNow()
+         .$onUpdate(() => new Date())
+         .notNull(),
+   },
+   (table) => [index("agent_organization_id_idx").on(table.organizationId)],
 );
 
 export const agentRelations = relations(agent, ({ one }) => ({
-	organization: one(organization, {
-		fields: [agent.organizationId],
-		references: [organization.id],
-	}),
+   organization: one(organization, {
+      fields: [agent.organizationId],
+      references: [organization.id],
+   }),
 }));
 
 export type Agent = typeof agent.$inferSelect;

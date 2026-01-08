@@ -34,16 +34,17 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
             },
             onRequest: () => {
                setIsGoogleLoading(true);
-               toast.loading(
-                  "Conectando com Google...",
-               );
+               toast.loading("Conectando com Google...");
             },
          },
       );
    }, [callbackURL]);
 
    const TermsAndPrivacyText = () => {
-      const text = "Ao continuar, você concorda com nossos {split} e {split}.".split("{split}");
+      const text =
+         "Ao continuar, você concorda com nossos {split} e {split}.".split(
+            "{split}",
+         );
 
       return (
          <>
@@ -74,9 +75,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
       <section className="space-y-8 w-full">
          {/* Header */}
          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-semibold font-serif">
-               {"Entrar"}
-            </h1>
+            <h1 className="text-3xl font-semibold font-serif">{"Entrar"}</h1>
             <p className="text-muted-foreground text-sm">
                {"Bom te ver de novo! Entre na sua conta para continuar."}
             </p>
@@ -106,9 +105,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
                      />
                   </svg>
                )}
-               <span>
-                  {"Continuar com Google"}
-               </span>
+               <span>{"Continuar com Google"}</span>
                {lastMethod === "google" && (
                   <Badge className="absolute -top-2 -right-2" variant="default">
                      {"Último usado"}
@@ -124,9 +121,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
             >
                <Link to="/auth/anonymous">
                   <User className="size-5" />
-                  <span>
-                     {"Experimentar sem conta"}
-                  </span>
+                  <span>{"Experimentar sem conta"}</span>
                   {lastMethod === "anonymous" && (
                      <Badge
                         className="absolute -top-2 -right-2"
@@ -167,9 +162,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
                   <KeyRound className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
                </div>
                <div className="text-center">
-                  <p className="text-sm font-medium">
-                     {"Email e Senha"}
-                  </p>
+                  <p className="text-sm font-medium">{"Email e Senha"}</p>
                   <p className="text-xs text-muted-foreground">
                      {"Faça login com seu e-mail e senha"}
                   </p>
@@ -190,9 +183,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
                   <Sparkles className="size-5 text-muted-foreground group-hover:text-primary transition-colors" />
                </div>
                <div className="text-center">
-                  <p className="text-sm font-medium">
-                     {"Link Mágico"}
-                  </p>
+                  <p className="text-sm font-medium">{"Link Mágico"}</p>
                   <p className="text-xs text-muted-foreground">
                      {"Receba um link de acesso no seu e-mail"}
                   </p>
@@ -203,9 +194,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
          {/* Footer */}
          <div className="text-sm text-center space-y-4">
             <div className="flex gap-1 justify-center items-center">
-               <span>
-                  {"Primeira vez aqui? "}
-               </span>
+               <span>{"Primeira vez aqui? "}</span>
                <Link
                   className="text-primary font-medium hover:underline"
                   to="/auth/sign-up"

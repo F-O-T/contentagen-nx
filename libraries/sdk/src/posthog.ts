@@ -197,16 +197,16 @@ export class PostHogHelper {
 		const clickPayload = this.escapeJson(JSON.stringify(clickEvent));
 		const impressionPayload = this.escapeJson(JSON.stringify(impressionEvent));
 		const escapedCtaId = ctaData.ctaId
-			.replace(/\\/g, '\\\\')
+			.replace(/\\/g, "\\\\")
 			.replace(/"/g, '\\"')
 			.replace(/'/g, "\\'")
-			.replace(/</g, '\\x3c')
-			.replace(/>/g, '\\x3e')
-			.replace(/&/g, '\\x26')
-			.replace(/\n/g, '\\n')
-			.replace(/\r/g, '\\r')
-			.replace(/\u2028/g, '\\u2028')
-			.replace(/\u2029/g, '\\u2029');
+			.replace(/</g, "\\x3c")
+			.replace(/>/g, "\\x3e")
+			.replace(/&/g, "\\x26")
+			.replace(/\n/g, "\\n")
+			.replace(/\r/g, "\\r")
+			.replace(/\u2028/g, "\\u2028")
+			.replace(/\u2029/g, "\\u2029");
 
 		return `<script>
 // CTA Tracking for ${escapedCtaId}

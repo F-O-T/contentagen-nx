@@ -30,12 +30,8 @@ import { useTRPC } from "@/integrations/clients";
 function InvitesSectionCardHeader() {
    return (
       <CardHeader>
-         <CardTitle>
-            {"Convites Recentes"}
-         </CardTitle>
-         <CardDescription>
-            {"Últimos convites enviados"}
-         </CardDescription>
+         <CardTitle>{"Convites Recentes"}</CardTitle>
+         <CardDescription>{"Últimos convites enviados"}</CardDescription>
       </CardHeader>
    );
 }
@@ -111,12 +107,8 @@ function OrganizationInvitesSectionContent() {
                      <EmptyMedia variant="icon">
                         <Mail className="size-8" />
                      </EmptyMedia>
-                     <EmptyTitle>
-                        {"Title"}
-                     </EmptyTitle>
-                     <EmptyDescription>
-                        {"Description"}
-                     </EmptyDescription>
+                     <EmptyTitle>{"Title"}</EmptyTitle>
+                     <EmptyDescription>{"Description"}</EmptyDescription>
                   </EmptyContent>
                </Empty>
             ) : (
@@ -130,8 +122,7 @@ function OrganizationInvitesSectionContent() {
                                     {invite.email}
                                  </p>
                                  <p className="text-sm text-muted-foreground">
-                                    {"Expires"}
-                                    :{" "}
+                                    {"Expires"}:{" "}
                                     {formatDate(
                                        new Date(invite.expiresAt),
                                        "DD MMM YYYY",

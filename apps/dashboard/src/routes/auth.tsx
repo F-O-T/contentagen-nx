@@ -65,7 +65,7 @@ function AuthLayout() {
                      xmlns="http://www.w3.org/2000/svg"
                   >
                      <title>AI-powered content creation illustration</title>
-                     
+
                      {/* Main editor window */}
                      <rect
                         height="180"
@@ -76,7 +76,7 @@ function AuthLayout() {
                         x="80"
                         y="60"
                      />
-                     
+
                      {/* Editor title bar */}
                      <rect
                         fill="rgba(255,255,255,0.1)"
@@ -86,73 +86,239 @@ function AuthLayout() {
                         x="80"
                         y="60"
                      />
-                     <circle cx="95" cy="72" fill="rgba(255,255,255,0.3)" r="4" />
-                     <circle cx="108" cy="72" fill="rgba(255,255,255,0.2)" r="4" />
-                     <circle cx="121" cy="72" fill="rgba(255,255,255,0.15)" r="4" />
-                     
+                     <circle
+                        cx="95"
+                        cy="72"
+                        fill="rgba(255,255,255,0.3)"
+                        r="4"
+                     />
+                     <circle
+                        cx="108"
+                        cy="72"
+                        fill="rgba(255,255,255,0.2)"
+                        r="4"
+                     />
+                     <circle
+                        cx="121"
+                        cy="72"
+                        fill="rgba(255,255,255,0.15)"
+                        r="4"
+                     />
+
                      {/* Text lines representing blog content */}
-                     <rect fill="rgba(255,255,255,0.4)" height="6" rx="3" width="140" x="95" y="100" />
-                     <rect fill="rgba(255,255,255,0.25)" height="4" rx="2" width="180" x="95" y="116" />
-                     <rect fill="rgba(255,255,255,0.25)" height="4" rx="2" width="160" x="95" y="126" />
-                     <rect fill="rgba(255,255,255,0.25)" height="4" rx="2" width="170" x="95" y="136" />
-                     <rect fill="rgba(255,255,255,0.2)" height="4" rx="2" width="120" x="95" y="146" />
-                     
+                     <rect
+                        fill="rgba(255,255,255,0.4)"
+                        height="6"
+                        rx="3"
+                        width="140"
+                        x="95"
+                        y="100"
+                     />
+                     <rect
+                        fill="rgba(255,255,255,0.25)"
+                        height="4"
+                        rx="2"
+                        width="180"
+                        x="95"
+                        y="116"
+                     />
+                     <rect
+                        fill="rgba(255,255,255,0.25)"
+                        height="4"
+                        rx="2"
+                        width="160"
+                        x="95"
+                        y="126"
+                     />
+                     <rect
+                        fill="rgba(255,255,255,0.25)"
+                        height="4"
+                        rx="2"
+                        width="170"
+                        x="95"
+                        y="136"
+                     />
+                     <rect
+                        fill="rgba(255,255,255,0.2)"
+                        height="4"
+                        rx="2"
+                        width="120"
+                        x="95"
+                        y="146"
+                     />
+
                      {/* Paragraph break */}
-                     <rect fill="rgba(255,255,255,0.25)" height="4" rx="2" width="175" x="95" y="162" />
-                     <rect fill="rgba(255,255,255,0.25)" height="4" rx="2" width="155" x="95" y="172" />
-                     <rect fill="rgba(255,255,255,0.2)" height="4" rx="2" width="90" x="95" y="182" />
-                     
+                     <rect
+                        fill="rgba(255,255,255,0.25)"
+                        height="4"
+                        rx="2"
+                        width="175"
+                        x="95"
+                        y="162"
+                     />
+                     <rect
+                        fill="rgba(255,255,255,0.25)"
+                        height="4"
+                        rx="2"
+                        width="155"
+                        x="95"
+                        y="172"
+                     />
+                     <rect
+                        fill="rgba(255,255,255,0.2)"
+                        height="4"
+                        rx="2"
+                        width="90"
+                        x="95"
+                        y="182"
+                     />
+
                      {/* AI suggestion cursor/highlight */}
-                     <rect fill="rgba(255,255,255,0.15)" height="16" rx="2" width="85" x="185" y="178" />
-                     
+                     <rect
+                        fill="rgba(255,255,255,0.15)"
+                        height="16"
+                        rx="2"
+                        width="85"
+                        x="185"
+                        y="178"
+                     />
+
                      {/* AI sparkle icon floating near editor */}
                      <g transform="translate(335, 100)">
-                        <circle cx="0" cy="0" fill="rgba(255,255,255,0.25)" r="22" />
+                        <circle
+                           cx="0"
+                           cy="0"
+                           fill="rgba(255,255,255,0.25)"
+                           r="22"
+                        />
                         {/* Sparkle/AI star shape */}
                         <path
                            d="M0 -12 L2 -2 L12 0 L2 2 L0 12 L-2 2 L-12 0 L-2 -2 Z"
                            fill="rgba(255,255,255,0.7)"
                         />
                      </g>
-                     
+
                      {/* Secondary AI sparkle */}
                      <g transform="translate(355, 180)">
-                        <circle cx="0" cy="0" fill="rgba(255,255,255,0.15)" r="14" />
+                        <circle
+                           cx="0"
+                           cy="0"
+                           fill="rgba(255,255,255,0.15)"
+                           r="14"
+                        />
                         <path
                            d="M0 -7 L1.2 -1.2 L7 0 L1.2 1.2 L0 7 L-1.2 1.2 L-7 0 L-1.2 -1.2 Z"
                            fill="rgba(255,255,255,0.5)"
                         />
                      </g>
-                     
+
                      {/* Floating document/post cards */}
                      <g transform="translate(30, 90)">
-                        <rect fill="rgba(255,255,255,0.12)" height="60" rx="6" width="45" x="0" y="0" />
-                        <rect fill="rgba(255,255,255,0.25)" height="3" rx="1.5" width="30" x="7" y="12" />
-                        <rect fill="rgba(255,255,255,0.15)" height="2" rx="1" width="35" x="7" y="22" />
-                        <rect fill="rgba(255,255,255,0.15)" height="2" rx="1" width="28" x="7" y="28" />
-                        <rect fill="rgba(255,255,255,0.1)" height="2" rx="1" width="32" x="7" y="34" />
+                        <rect
+                           fill="rgba(255,255,255,0.12)"
+                           height="60"
+                           rx="6"
+                           width="45"
+                           x="0"
+                           y="0"
+                        />
+                        <rect
+                           fill="rgba(255,255,255,0.25)"
+                           height="3"
+                           rx="1.5"
+                           width="30"
+                           x="7"
+                           y="12"
+                        />
+                        <rect
+                           fill="rgba(255,255,255,0.15)"
+                           height="2"
+                           rx="1"
+                           width="35"
+                           x="7"
+                           y="22"
+                        />
+                        <rect
+                           fill="rgba(255,255,255,0.15)"
+                           height="2"
+                           rx="1"
+                           width="28"
+                           x="7"
+                           y="28"
+                        />
+                        <rect
+                           fill="rgba(255,255,255,0.1)"
+                           height="2"
+                           rx="1"
+                           width="32"
+                           x="7"
+                           y="34"
+                        />
                      </g>
-                     
+
                      <g transform="translate(40, 170)">
-                        <rect fill="rgba(255,255,255,0.1)" height="55" rx="6" width="40" x="0" y="0" />
-                        <rect fill="rgba(255,255,255,0.2)" height="3" rx="1.5" width="26" x="7" y="10" />
-                        <rect fill="rgba(255,255,255,0.12)" height="2" rx="1" width="30" x="7" y="20" />
-                        <rect fill="rgba(255,255,255,0.12)" height="2" rx="1" width="24" x="7" y="26" />
+                        <rect
+                           fill="rgba(255,255,255,0.1)"
+                           height="55"
+                           rx="6"
+                           width="40"
+                           x="0"
+                           y="0"
+                        />
+                        <rect
+                           fill="rgba(255,255,255,0.2)"
+                           height="3"
+                           rx="1.5"
+                           width="26"
+                           x="7"
+                           y="10"
+                        />
+                        <rect
+                           fill="rgba(255,255,255,0.12)"
+                           height="2"
+                           rx="1"
+                           width="30"
+                           x="7"
+                           y="20"
+                        />
+                        <rect
+                           fill="rgba(255,255,255,0.12)"
+                           height="2"
+                           rx="1"
+                           width="24"
+                           x="7"
+                           y="26"
+                        />
                      </g>
-                     
+
                      {/* Connection lines from AI to editor */}
                      <path
                         d="M335 122 Q 340 150, 320 170"
+                        fill="none"
                         stroke="rgba(255,255,255,0.2)"
                         strokeDasharray="4 4"
                         strokeWidth="1.5"
-                        fill="none"
                      />
-                     
+
                      {/* Small floating sparkles */}
-                     <circle cx="60" cy="260" fill="rgba(255,255,255,0.2)" r="8" />
-                     <circle cx="350" cy="260" fill="rgba(255,255,255,0.15)" r="10" />
-                     <circle cx="180" cy="260" fill="rgba(255,255,255,0.1)" r="6" />
+                     <circle
+                        cx="60"
+                        cy="260"
+                        fill="rgba(255,255,255,0.2)"
+                        r="8"
+                     />
+                     <circle
+                        cx="350"
+                        cy="260"
+                        fill="rgba(255,255,255,0.15)"
+                        r="10"
+                     />
+                     <circle
+                        cx="180"
+                        cy="260"
+                        fill="rgba(255,255,255,0.1)"
+                        r="6"
+                     />
                   </svg>
                </div>
 
@@ -161,7 +327,9 @@ function AuthLayout() {
                      {"Seu CMS com superpoderes de IA"}
                   </h2>
                   <p className="text-white/70 text-sm xl:text-base max-w-sm mx-auto">
-                     {"Crie conteúdos incríveis com inteligência artificial. Blog posts, artigos e muito mais em minutos."}
+                     {
+                        "Crie conteúdos incríveis com inteligência artificial. Blog posts, artigos e muito mais em minutos."
+                     }
                   </p>
                </div>
             </div>

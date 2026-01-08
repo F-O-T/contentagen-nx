@@ -12,10 +12,17 @@ export function StripeDataDisclosure() {
          <AlertTitle>{"Pagamentos Seguros com Stripe"}</AlertTitle>
          <AlertDescription className="space-y-2 mt-2">
             <p className="text-sm">
-               {"Seus dados de pagamento são processados com segurança pela Stripe, nossa provedora de pagamentos."}
+               {
+                  "Seus dados de pagamento são processados com segurança pela Stripe, nossa provedora de pagamentos."
+               }
             </p>
             <div className="text-xs text-muted-foreground space-y-1">
-               <p>• {"Certificado PCI-DSS Nível 1 (mais alto padrão de segurança)"}</p>
+               <p>
+                  •{" "}
+                  {
+                     "Certificado PCI-DSS Nível 1 (mais alto padrão de segurança)"
+                  }
+               </p>
                <p>• {"Montte não armazena números de cartão de crédito"}</p>
                <p>• {"Todos os dados de pagamento são criptografados"}</p>
                <p>

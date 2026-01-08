@@ -15,7 +15,7 @@ export const arcjetInstance = ARCJET_KEY
         characteristics: ["ip.src"],
         rules: [
            shield({
-              mode: "DRY_RUN",
+              mode: "LIVE",
            }),
         ],
      })
@@ -23,55 +23,55 @@ export const arcjetInstance = ARCJET_KEY
 
 export const AUTH_RATE_LIMITS = {
    SIGNUP: tokenBucket({
-      mode: "DRY_RUN",
+      mode: "LIVE",
       refillRate: 5,
       interval: 3600,
       capacity: 5,
    }),
    LOGIN: tokenBucket({
-      mode: "DRY_RUN",
+      mode: "LIVE",
       refillRate: 10,
       interval: 900,
       capacity: 10,
    }),
    PASSWORD_RESET: tokenBucket({
-      mode: "DRY_RUN",
+      mode: "LIVE",
       refillRate: 3,
       interval: 3600,
       capacity: 3,
    }),
    GENERAL: tokenBucket({
-      mode: "DRY_RUN",
+      mode: "LIVE",
       refillRate: 100,
       interval: 60,
       capacity: 100,
    }),
    OAUTH: fixedWindow({
-      mode: "DRY_RUN",
+      mode: "LIVE",
       max: 30,
       window: "1m",
    }),
 };
 
 export const BOT_DETECTION = detectBot({
-   mode: "DRY_RUN",
+   mode: "LIVE",
    allow: ["CATEGORY:SEARCH_ENGINE", "CATEGORY:MONITOR", "CATEGORY:PREVIEW"],
 });
 
 export const EMAIL_VALIDATION = validateEmail({
-   mode: "DRY_RUN",
+   mode: "LIVE",
    block: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
 });
 
 export const TRPC_RATE_LIMITS = {
    PUBLIC: tokenBucket({
-      mode: "DRY_RUN",
+      mode: "LIVE",
       refillRate: 60,
       interval: 60,
       capacity: 200,
    }),
    PROTECTED: tokenBucket({
-      mode: "DRY_RUN",
+      mode: "LIVE",
       refillRate: 100,
       interval: 60,
       capacity: 300,

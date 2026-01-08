@@ -1,26 +1,26 @@
 import {
-	getAgentById,
-	getAgentsByOrganizationId,
+   getAgentById,
+   getAgentsByOrganizationId,
 } from "@packages/database/repositories/agent-repository";
 import {
-	archiveContent,
-	createContent,
-	deleteContent,
-	getContentById,
-	getContentsByAgentId,
-	publishContent,
-	updateContent,
+   archiveContent,
+   createContent,
+   deleteContent,
+   getContentById,
+   getContentsByAgentId,
+   publishContent,
+   updateContent,
 } from "@packages/database/repositories/content-repository";
 import {
-	ContentMetaSchema,
-	ContentRequestSchema,
+   ContentMetaSchema,
+   ContentRequestSchema,
 } from "@packages/database/schema";
 import { content } from "@packages/database/schemas/content";
 import { serverEnv } from "@packages/environment/server";
 import { createPgVector } from "@packages/rag/client";
 import {
-	indexPublishedContent,
-	removeContentFromIndex,
+   indexPublishedContent,
+   removeContentFromIndex,
 } from "@packages/rag/services/content-indexing-service";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { eq, sql } from "drizzle-orm";
@@ -28,431 +28,450 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 
 export const contentRouter = router({
-	listAllContent: protectedProcedure
-		.input(
-			z.object({
-				limit: z.number().min(1).max(100).optional().default(20),
-				page: z.number().min(1).optional().default(1),
-				status: z
-					.array(z.enum(["draft", "published", "archived"]))
-					.optional(),
-			}),
-		)
-		.query(async ({ ctx, input }) => {
-			const resolvedCtx = await ctx;
-			const organizationId = resolvedCtx.organizationId;
+   listAllContent: protectedProcedure
+      .input(
+         z.object({
+            limit: z.number().min(1).max(100).optional().default(20),
+            page: z.number().min(1).optional().default(1),
+            status: z
+               .array(z.enum(["draft", "published", "archived"]))
+               .optional(),
+         }),
+      )
+      .query(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
+         const organizationId = resolvedCtx.organizationId;
 
-			if (!organizationId) {
-				throw APIError.unauthorized("Organization must be specified.");
-			}
+         if (!organizationId) {
+            throw APIError.unauthorized("Organization must be specified.");
+         }
 
-			// Get all agents for this organization
-			const agents = await getAgentsByOrganizationId(
-				resolvedCtx.db,
-				organizationId,
-			);
+         // Get all agents for this organization
+         const agents = await getAgentsByOrganizationId(
+            resolvedCtx.db,
+            organizationId,
+         );
 
-			if (!agents.length) {
-				return {
-					items: [],
-					limit: input.limit,
-					page: input.page,
-					total: 0,
-					totalPages: 0,
-				};
-			}
+         if (!agents.length) {
+            return {
+               items: [],
+               limit: input.limit,
+               page: input.page,
+               total: 0,
+               totalPages: 0,
+            };
+         }
 
-			// Get content from all agents
-			const allContent = await Promise.all(
-				agents.map((agent) =>
-					getContentsByAgentId(resolvedCtx.db, agent.id),
-				),
-			);
+         // Get content from all agents
+         const allContent = await Promise.all(
+            agents.map((agent) =>
+               getContentsByAgentId(resolvedCtx.db, agent.id),
+            ),
+         );
 
-			// Flatten and filter by status
-			let items = allContent.flat();
+         // Flatten and filter by status
+         let items = allContent.flat();
 
-			if (input.status && input.status.length > 0) {
-				items = items.filter((item) =>
-					input.status!.includes(item.status as "draft" | "published" | "archived"),
-				);
-			}
+         if (input.status && input.status.length > 0) {
+            items = items.filter((item) =>
+               input.status!.includes(
+                  item.status as "draft" | "published" | "archived",
+               ),
+            );
+         }
 
-			// Sort by createdAt descending
-			items.sort(
-				(a, b) =>
-					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-			);
+         // Sort by createdAt descending
+         items.sort(
+            (a, b) =>
+               new Date(b.createdAt).getTime() -
+               new Date(a.createdAt).getTime(),
+         );
 
-			// Paginate
-			const total = items.length;
-			const totalPages = Math.ceil(total / input.limit);
-			const start = (input.page - 1) * input.limit;
-			const end = start + input.limit;
-			const paginatedItems = items.slice(start, end);
+         // Paginate
+         const total = items.length;
+         const totalPages = Math.ceil(total / input.limit);
+         const start = (input.page - 1) * input.limit;
+         const end = start + input.limit;
+         const paginatedItems = items.slice(start, end);
 
-			return {
-				items: paginatedItems,
-				limit: input.limit,
-				page: input.page,
-				total,
-				totalPages,
-			};
-		}),
+         return {
+            items: paginatedItems,
+            limit: input.limit,
+            page: input.page,
+            total,
+            totalPages,
+         };
+      }),
 
-	getById: protectedProcedure
-		.input(z.object({ id: z.string().uuid() }))
-		.query(async ({ ctx, input }) => {
-			const resolvedCtx = await ctx;
-			const organizationId = resolvedCtx.organizationId;
+   getById: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .query(async ({ ctx, input }) => {
+         const resolvedCtx = await ctx;
+         const organizationId = resolvedCtx.organizationId;
 
-			if (!organizationId) {
-				throw APIError.unauthorized("Organization must be specified.");
-			}
+         if (!organizationId) {
+            throw APIError.unauthorized("Organization must be specified.");
+         }
 
-			const content = await getContentById(resolvedCtx.db, input.id);
+         const content = await getContentById(resolvedCtx.db, input.id);
 
-			if (!content) {
-				throw APIError.notFound("Content not found.");
-			}
+         if (!content) {
+            throw APIError.notFound("Content not found.");
+         }
 
-			// Get agent info for this content
-			const agent = await getAgentById(resolvedCtx.db, content.agentId);
+         // Get agent info for this content and verify ownership
+         const agent = await getAgentById(resolvedCtx.db, content.agentId);
 
-			return {
-				...content,
-				agent: agent
-					? {
-							id: agent.id,
-							name: agent.personaConfig.metadata.name,
-							profilePhotoUrl: agent.profilePhotoUrl,
-						}
-					: null,
-			};
-		}),
+         // Verify agent belongs to the requesting organization
+         if (!agent || agent.organizationId !== organizationId) {
+            throw APIError.forbidden(
+               "You don't have permission to view this content.",
+            );
+         }
 
-	getByAgentId: protectedProcedure
-		.input(
-			z.object({
-				agentId: z.string().uuid(),
-				limit: z.number().min(1).max(100).optional().default(20),
-				page: z.number().min(1).optional().default(1),
-				status: z
-					.array(z.enum(["draft", "published", "archived"]))
-					.optional(),
-			}),
-		)
-		.query(async ({ ctx, input }) => {
-			try {
-				const resolvedCtx = await ctx;
-				const organizationId = resolvedCtx.organizationId;
+         return {
+            ...content,
+            agent: {
+               id: agent.id,
+               name: agent.personaConfig.metadata.name,
+               profilePhotoUrl: agent.profilePhotoUrl,
+            },
+         };
+      }),
 
-				if (!organizationId) {
-					throw APIError.unauthorized("Organization must be specified.");
-				}
+   getByAgentId: protectedProcedure
+      .input(
+         z.object({
+            agentId: z.string().uuid(),
+            limit: z.number().min(1).max(100).optional().default(20),
+            page: z.number().min(1).optional().default(1),
+            status: z
+               .array(z.enum(["draft", "published", "archived"]))
+               .optional(),
+         }),
+      )
+      .query(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
 
-				// Verify agent belongs to organization
-				const agent = await getAgentById(resolvedCtx.db, input.agentId);
-				if (!agent) {
-					throw APIError.notFound("Writer not found.");
-				}
-				if (agent.organizationId !== organizationId) {
-					throw APIError.forbidden(
-						"You don't have permission to view this writer's content.",
-					);
-				}
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
 
-				const contents = await getContentsByAgentId(
-					resolvedCtx.db,
-					input.agentId,
-				);
+            // Verify agent belongs to organization
+            const agent = await getAgentById(resolvedCtx.db, input.agentId);
+            if (!agent) {
+               throw APIError.notFound("Writer not found.");
+            }
+            if (agent.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to view this writer's content.",
+               );
+            }
 
-				// Filter by status
-				let filteredContents = contents;
-				if (input.status && input.status.length > 0) {
-					filteredContents = contents.filter((item) =>
-						input.status!.includes(
-							item.status as "draft" | "published" | "archived",
-						),
-					);
-				}
+            const contents = await getContentsByAgentId(
+               resolvedCtx.db,
+               input.agentId,
+            );
 
-				// Paginate
-				const total = filteredContents.length;
-				const totalPages = Math.ceil(total / input.limit);
-				const start = (input.page - 1) * input.limit;
-				const end = start + input.limit;
-				const paginatedItems = filteredContents.slice(start, end);
+            // Filter by status
+            let filteredContents = contents;
+            if (input.status && input.status.length > 0) {
+               filteredContents = contents.filter((item) =>
+                  input.status!.includes(
+                     item.status as "draft" | "published" | "archived",
+                  ),
+               );
+            }
 
-				return {
-					items: paginatedItems,
-					limit: input.limit,
-					page: input.page,
-					total,
-					totalPages,
-				};
-			} catch (err) {
-				console.error("Error getting content by agent:", err);
-				propagateError(err);
-				throw APIError.internal("Failed to get content.");
-			}
-		}),
+            // Paginate
+            const total = filteredContents.length;
+            const totalPages = Math.ceil(total / input.limit);
+            const start = (input.page - 1) * input.limit;
+            const end = start + input.limit;
+            const paginatedItems = filteredContents.slice(start, end);
 
-	create: protectedProcedure
-		.input(
-			z.object({
-				agentId: z.string().uuid(),
-				body: z.string().optional().default(""),
-				meta: ContentMetaSchema.optional(),
-				request: ContentRequestSchema.optional(),
-			}),
-		)
-		.mutation(async ({ ctx, input }) => {
-			try {
-				const resolvedCtx = await ctx;
-				const organizationId = resolvedCtx.organizationId;
-				const memberId = resolvedCtx.memberId;
+            return {
+               items: paginatedItems,
+               limit: input.limit,
+               page: input.page,
+               total,
+               totalPages,
+            };
+         } catch (err) {
+            console.error("Error getting content by agent:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to get content.");
+         }
+      }),
 
-				if (!organizationId || !memberId) {
-					throw APIError.unauthorized(
-						"User must be authenticated and belong to an organization.",
-					);
-				}
+   create: protectedProcedure
+      .input(
+         z.object({
+            agentId: z.string().uuid(),
+            body: z.string().optional().default(""),
+            meta: ContentMetaSchema.optional(),
+            request: ContentRequestSchema.optional(),
+         }),
+      )
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
+            const memberId = resolvedCtx.memberId;
 
-				// Verify agent belongs to organization
-				const agent = await getAgentById(resolvedCtx.db, input.agentId);
-				if (!agent) {
-					throw APIError.notFound("Writer not found.");
-				}
-				if (agent.organizationId !== organizationId) {
-					throw APIError.forbidden(
-						"You don't have permission to create content for this writer.",
-					);
-				}
+            if (!organizationId || !memberId) {
+               throw APIError.unauthorized(
+                  "User must be authenticated and belong to an organization.",
+               );
+            }
 
-				// Provide default meta if not supplied
-				const meta = input.meta ?? {
-					title: "Untitled",
-					description: "",
-					slug: `untitled-${Date.now()}`,
-				};
+            // Verify agent belongs to organization
+            const agent = await getAgentById(resolvedCtx.db, input.agentId);
+            if (!agent) {
+               throw APIError.notFound("Writer not found.");
+            }
+            if (agent.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to create content for this writer.",
+               );
+            }
 
-				const created = await createContent(resolvedCtx.db, {
-					agentId: input.agentId,
-					body: input.body,
-					createdByMemberId: memberId,
-					meta,
-					request: input.request,
-				});
+            // Provide default meta if not supplied
+            const meta = input.meta ?? {
+               title: "Untitled",
+               description: "",
+               slug: `untitled-${Date.now()}`,
+            };
 
-				return created;
-			} catch (err) {
-				console.error("Error creating content:", err);
-				propagateError(err);
-				throw APIError.internal("Failed to create content.");
-			}
-		}),
+            const created = await createContent(resolvedCtx.db, {
+               agentId: input.agentId,
+               body: input.body,
+               createdByMemberId: memberId,
+               meta,
+               request: input.request,
+            });
 
-	update: protectedProcedure
-		.input(
-			z.object({
-				data: z.object({
-					body: z.string().optional(),
-					meta: ContentMetaSchema.partial().optional(),
-				}),
-				id: z.string().uuid(),
-			}),
-		)
-		.mutation(async ({ ctx, input }) => {
-			try {
-				const resolvedCtx = await ctx;
-				const organizationId = resolvedCtx.organizationId;
+            return created;
+         } catch (err) {
+            console.error("Error creating content:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to create content.");
+         }
+      }),
 
-				if (!organizationId) {
-					throw APIError.unauthorized("Organization must be specified.");
-				}
+   update: protectedProcedure
+      .input(
+         z.object({
+            data: z.object({
+               body: z.string().optional(),
+               meta: ContentMetaSchema.partial().optional(),
+            }),
+            id: z.string().uuid(),
+         }),
+      )
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
 
-				const existing = await getContentById(resolvedCtx.db, input.id);
-				if (!existing) {
-					throw APIError.notFound("Content not found.");
-				}
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
 
-				// Verify agent belongs to organization
-				const agent = await getAgentById(resolvedCtx.db, existing.agentId);
-				if (!agent || agent.organizationId !== organizationId) {
-					throw APIError.forbidden(
-						"You don't have permission to update this content.",
-					);
-				}
+            const existing = await getContentById(resolvedCtx.db, input.id);
+            if (!existing) {
+               throw APIError.notFound("Content not found.");
+            }
 
-				// Handle body update using the repository function
-				if (input.data.body !== undefined) {
-					await updateContent(resolvedCtx.db, input.id, {
-						body: input.data.body,
-					});
-				}
+            // Verify agent belongs to organization
+            const agent = await getAgentById(resolvedCtx.db, existing.agentId);
+            if (!agent || agent.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to update this content.",
+               );
+            }
 
-				// Handle meta update using atomic JSONB merge to prevent race conditions
-				// This uses PostgreSQL's || operator which merges JSONB objects atomically
-				if (input.data.meta) {
-					await resolvedCtx.db
-						.update(content)
-						.set({
-							meta: sql`COALESCE(${content.meta}, '{}'::jsonb) || ${JSON.stringify(input.data.meta)}::jsonb`,
-						})
-						.where(eq(content.id, input.id));
-				}
+            // Handle body update using the repository function
+            if (input.data.body !== undefined) {
+               await updateContent(resolvedCtx.db, input.id, {
+                  body: input.data.body,
+               });
+            }
 
-				// Fetch and return the updated content
-				const updated = await getContentById(resolvedCtx.db, input.id);
-				return updated;
-			} catch (err) {
-				console.error("Error updating content:", err);
-				propagateError(err);
-				throw APIError.internal("Failed to update content.");
-			}
-		}),
+            // Handle meta update using atomic JSONB merge to prevent race conditions
+            // This uses PostgreSQL's || operator which merges JSONB objects atomically
+            if (input.data.meta) {
+               await resolvedCtx.db
+                  .update(content)
+                  .set({
+                     meta: sql`COALESCE(${content.meta}, '{}'::jsonb) || ${JSON.stringify(input.data.meta)}::jsonb`,
+                  })
+                  .where(eq(content.id, input.id));
+            }
 
-	delete: protectedProcedure
-		.input(z.object({ id: z.string().uuid() }))
-		.mutation(async ({ ctx, input }) => {
-			try {
-				const resolvedCtx = await ctx;
-				const organizationId = resolvedCtx.organizationId;
+            // Fetch and return the updated content
+            const updated = await getContentById(resolvedCtx.db, input.id);
+            return updated;
+         } catch (err) {
+            console.error("Error updating content:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to update content.");
+         }
+      }),
 
-				if (!organizationId) {
-					throw APIError.unauthorized("Organization must be specified.");
-				}
+   delete: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
 
-				const existing = await getContentById(resolvedCtx.db, input.id);
-				if (!existing) {
-					throw APIError.notFound("Content not found.");
-				}
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
 
-				// Verify agent belongs to organization
-				const agent = await getAgentById(resolvedCtx.db, existing.agentId);
-				if (!agent || agent.organizationId !== organizationId) {
-					throw APIError.forbidden(
-						"You don't have permission to delete this content.",
-					);
-				}
+            const existing = await getContentById(resolvedCtx.db, input.id);
+            if (!existing) {
+               throw APIError.notFound("Content not found.");
+            }
 
-				// Remove from RAG index before deleting
-				if (serverEnv.PG_VECTOR_URL) {
-					const ragClient = createPgVector({
-						pgVectorURL: serverEnv.PG_VECTOR_URL,
-					});
-					await removeContentFromIndex(ragClient, input.id).catch((err) => {
-						console.error("Failed to remove deleted content from RAG:", err);
-					});
-				}
+            // Verify agent belongs to organization
+            const agent = await getAgentById(resolvedCtx.db, existing.agentId);
+            if (!agent || agent.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to delete this content.",
+               );
+            }
 
-				await deleteContent(resolvedCtx.db, input.id);
-				return { success: true };
-			} catch (err) {
-				console.error("Error deleting content:", err);
-				propagateError(err);
-				throw APIError.internal("Failed to delete content.");
-			}
-		}),
+            // Remove from RAG index before deleting
+            if (serverEnv.PG_VECTOR_URL) {
+               const ragClient = createPgVector({
+                  pgVectorURL: serverEnv.PG_VECTOR_URL,
+               });
+               await removeContentFromIndex(ragClient, input.id).catch(
+                  (err) => {
+                     console.error(
+                        "Failed to remove deleted content from RAG:",
+                        err,
+                     );
+                  },
+               );
+            }
 
-	publish: protectedProcedure
-		.input(z.object({ id: z.string().uuid() }))
-		.mutation(async ({ ctx, input }) => {
-			try {
-				const resolvedCtx = await ctx;
-				const organizationId = resolvedCtx.organizationId;
+            await deleteContent(resolvedCtx.db, input.id);
+            return { success: true };
+         } catch (err) {
+            console.error("Error deleting content:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to delete content.");
+         }
+      }),
 
-				if (!organizationId) {
-					throw APIError.unauthorized("Organization must be specified.");
-				}
+   publish: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
 
-				const existing = await getContentById(resolvedCtx.db, input.id);
-				if (!existing) {
-					throw APIError.notFound("Content not found.");
-				}
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
 
-				// Verify agent belongs to organization
-				const agent = await getAgentById(resolvedCtx.db, existing.agentId);
-				if (!agent || agent.organizationId !== organizationId) {
-					throw APIError.forbidden(
-						"You don't have permission to publish this content.",
-					);
-				}
+            const existing = await getContentById(resolvedCtx.db, input.id);
+            if (!existing) {
+               throw APIError.notFound("Content not found.");
+            }
 
-				const published = await publishContent(resolvedCtx.db, input.id);
+            // Verify agent belongs to organization
+            const agent = await getAgentById(resolvedCtx.db, existing.agentId);
+            if (!agent || agent.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to publish this content.",
+               );
+            }
 
-				if (!published) {
-					throw APIError.internal("Failed to publish content.");
-				}
+            const published = await publishContent(resolvedCtx.db, input.id);
 
-				// Index content for RAG (async, don't block publish)
-				if (serverEnv.PG_VECTOR_URL) {
-					const ragClient = createPgVector({
-						pgVectorURL: serverEnv.PG_VECTOR_URL,
-					});
-					indexPublishedContent(ragClient, {
-						id: published.id,
-						agentId: published.agentId,
-						slug: published.meta.slug,
-						title: published.meta.title,
-						description: published.meta.description,
-						keywords: published.meta.keywords,
-						body: published.body || "",
-					}).catch((err) => {
-						console.error("Failed to index published content for RAG:", err);
-					});
-				}
+            if (!published) {
+               throw APIError.internal("Failed to publish content.");
+            }
 
-				return published;
-			} catch (err) {
-				console.error("Error publishing content:", err);
-				propagateError(err);
-				throw APIError.internal("Failed to publish content.");
-			}
-		}),
+            // Index content for RAG (async, don't block publish)
+            if (serverEnv.PG_VECTOR_URL) {
+               const ragClient = createPgVector({
+                  pgVectorURL: serverEnv.PG_VECTOR_URL,
+               });
+               indexPublishedContent(ragClient, {
+                  id: published.id,
+                  agentId: published.agentId,
+                  slug: published.meta.slug,
+                  title: published.meta.title,
+                  description: published.meta.description,
+                  keywords: published.meta.keywords,
+                  body: published.body || "",
+               }).catch((err) => {
+                  console.error(
+                     "Failed to index published content for RAG:",
+                     err,
+                  );
+               });
+            }
 
-	archive: protectedProcedure
-		.input(z.object({ id: z.string().uuid() }))
-		.mutation(async ({ ctx, input }) => {
-			try {
-				const resolvedCtx = await ctx;
-				const organizationId = resolvedCtx.organizationId;
+            return published;
+         } catch (err) {
+            console.error("Error publishing content:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to publish content.");
+         }
+      }),
 
-				if (!organizationId) {
-					throw APIError.unauthorized("Organization must be specified.");
-				}
+   archive: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
 
-				const existing = await getContentById(resolvedCtx.db, input.id);
-				if (!existing) {
-					throw APIError.notFound("Content not found.");
-				}
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
 
-				// Verify agent belongs to organization
-				const agent = await getAgentById(resolvedCtx.db, existing.agentId);
-				if (!agent || agent.organizationId !== organizationId) {
-					throw APIError.forbidden(
-						"You don't have permission to archive this content.",
-					);
-				}
+            const existing = await getContentById(resolvedCtx.db, input.id);
+            if (!existing) {
+               throw APIError.notFound("Content not found.");
+            }
 
-				const archived = await archiveContent(resolvedCtx.db, input.id);
+            // Verify agent belongs to organization
+            const agent = await getAgentById(resolvedCtx.db, existing.agentId);
+            if (!agent || agent.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to archive this content.",
+               );
+            }
 
-				// Remove from RAG index (async, don't block archive)
-				if (serverEnv.PG_VECTOR_URL) {
-					const ragClient = createPgVector({
-						pgVectorURL: serverEnv.PG_VECTOR_URL,
-					});
-					removeContentFromIndex(ragClient, input.id).catch((err) => {
-						console.error("Failed to remove archived content from RAG:", err);
-					});
-				}
+            const archived = await archiveContent(resolvedCtx.db, input.id);
 
-				return archived;
-			} catch (err) {
-				console.error("Error archiving content:", err);
-				propagateError(err);
-				throw APIError.internal("Failed to archive content.");
-			}
-		}),
+            // Remove from RAG index (async, don't block archive)
+            if (serverEnv.PG_VECTOR_URL) {
+               const ragClient = createPgVector({
+                  pgVectorURL: serverEnv.PG_VECTOR_URL,
+               });
+               removeContentFromIndex(ragClient, input.id).catch((err) => {
+                  console.error(
+                     "Failed to remove archived content from RAG:",
+                     err,
+                  );
+               });
+            }
+
+            return archived;
+         } catch (err) {
+            console.error("Error archiving content:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to archive content.");
+         }
+      }),
 });

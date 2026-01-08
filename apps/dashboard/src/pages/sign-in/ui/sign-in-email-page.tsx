@@ -22,7 +22,10 @@ export function SignInEmailPage() {
          .string()
          .min(
             8,
-            "O campo deve ter no mínimo {min} caracteres.".replace("{min}", "8"),
+            "O campo deve ter no mínimo {min} caracteres.".replace(
+               "{min}",
+               "8",
+            ),
          ),
    });
    const router = useRouter();
@@ -39,14 +42,10 @@ export function SignInEmailPage() {
                   toast.error(error.message);
                },
                onRequest: () => {
-                  toast.loading(
-                     "Entrando na sua conta...",
-                  );
+                  toast.loading("Entrando na sua conta...");
                },
                onSuccess: () => {
-                  toast.success(
-                     "Bem-vindo de volta!",
-                  );
+                  toast.success("Bem-vindo de volta!");
                   router.navigate({ params: { slug: "" }, to: "/$slug/home" });
                },
             },
@@ -184,9 +183,7 @@ export function SignInEmailPage() {
          {/* Footer */}
          <div className="text-sm text-center">
             <div className="flex gap-1 justify-center items-center">
-               <span>
-                  {"Primeira vez aqui? "}
-               </span>
+               <span>{"Primeira vez aqui? "}</span>
                <Link
                   className="text-primary font-medium hover:underline"
                   to="/auth/sign-up"

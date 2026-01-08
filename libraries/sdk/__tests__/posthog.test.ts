@@ -426,7 +426,9 @@ describe("PostHogHelper", () => {
 
 			// Extract sessionIds from both click and impression events
 			const scriptContent = script.replace(/<script>|<\/script>/g, "");
-			const sessionMatches = scriptContent.match(/"sessionId":"(session_[^"]+)"/g);
+			const sessionMatches = scriptContent.match(
+				/"sessionId":"(session_[^"]+)"/g,
+			);
 
 			expect(sessionMatches).toHaveLength(2);
 			expect(sessionMatches?.[0]).toBe(sessionMatches?.[1]);
@@ -465,26 +467,26 @@ describe("PostHogHelper", () => {
 			expect(script).toMatch(/<\/script>$/);
 
 			// Verify no premature script tag injection (before the end of the script)
-			const scriptContent = script.replace(/^<script>|<\/script>$/g, '');
-			expect(scriptContent).not.toContain('</script>');
-			expect(scriptContent).not.toContain('<script');
+			const scriptContent = script.replace(/^<script>|<\/script>$/g, "");
+			expect(scriptContent).not.toContain("</script>");
+			expect(scriptContent).not.toContain("<script");
 
 			// Verify the CTA ID appears in a safely escaped form
-			expect(script).toContain('\\x3cdiv'); // Escaped <div in comment
-			expect(script).toContain('hero-primary');
+			expect(script).toContain("\\x3cdiv"); // Escaped <div in comment
+			expect(script).toContain("hero-primary");
 
 			// Verify the JSON string literal is properly quoted and escaped
 			expect(script).toContain('const ctaId = "<div>&\\"\\n/hero-primary";');
 
 			// Verify the escaped selector is generated safely
-			expect(script).toContain('escapedSelector');
-			expect(script).toContain('CSS.escape');
+			expect(script).toContain("escapedSelector");
+			expect(script).toContain("CSS.escape");
 
 			// Verify the script structure is intact and no injection occurred
 			expect(script).toMatch(/^<script>/);
 			expect(script).toMatch(/<\/script>$/);
-			expect(scriptContent).not.toContain('</script>');
-			expect(scriptContent).not.toContain('<script');
+			expect(scriptContent).not.toContain("</script>");
+			expect(scriptContent).not.toContain("<script");
 		});
 	});
 

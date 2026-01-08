@@ -9,29 +9,29 @@ import { getContentById } from "./content-repository";
  * Access is granted if the user belongs to the same organization as the agent.
  */
 export async function canModifyContent(
-	dbClient: DatabaseInstance,
-	contentId: string,
-	organizationId: string,
+   dbClient: DatabaseInstance,
+   contentId: string,
+   organizationId: string,
 ): Promise<boolean> {
-	try {
-		const content = await getContentById(dbClient, contentId);
-		if (!content) {
-			return false;
-		}
+   try {
+      const content = await getContentById(dbClient, contentId);
+      if (!content) {
+         return false;
+      }
 
-		const agent = await getAgentById(dbClient, content.agentId);
-		if (!agent) {
-			return false;
-		}
+      const agent = await getAgentById(dbClient, content.agentId);
+      if (!agent) {
+         return false;
+      }
 
-		// User can modify if they belong to the same organization as the agent
-		return agent.organizationId === organizationId;
-	} catch (err) {
-		propagateError(err);
-		throw AppError.database(
-			`Failed to check content modification access: ${(err as Error).message}`,
-		);
-	}
+      // User can modify if they belong to the same organization as the agent
+      return agent.organizationId === organizationId;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to check content modification access: ${(err as Error).message}`,
+      );
+   }
 }
 
 /**
@@ -39,37 +39,37 @@ export async function canModifyContent(
  * Throws an error if the user doesn't have access.
  */
 export async function getContentWithAccessControl(
-	dbClient: DatabaseInstance,
-	contentId: string,
-	organizationId: string,
+   dbClient: DatabaseInstance,
+   contentId: string,
+   organizationId: string,
 ) {
-	try {
-		const content = await getContentById(dbClient, contentId);
-		if (!content) {
-			throw AppError.database("Content not found");
-		}
+   try {
+      const content = await getContentById(dbClient, contentId);
+      if (!content) {
+         throw AppError.database("Content not found");
+      }
 
-		const agent = await getAgentById(dbClient, content.agentId);
-		if (!agent) {
-			throw AppError.database("Agent not found for content");
-		}
+      const agent = await getAgentById(dbClient, content.agentId);
+      if (!agent) {
+         throw AppError.database("Agent not found for content");
+      }
 
-		// Check access: belongs to the same organization OR content is shared
-		const hasAccess =
-			agent.organizationId === organizationId ||
-			content.shareStatus === "shared";
+      // Check access: belongs to the same organization OR content is shared
+      const hasAccess =
+         agent.organizationId === organizationId ||
+         content.shareStatus === "shared";
 
-		if (!hasAccess) {
-			throw AppError.database("Access denied to content");
-		}
+      if (!hasAccess) {
+         throw AppError.database("Access denied to content");
+      }
 
-		return content;
-	} catch (err) {
-		propagateError(err);
-		throw AppError.database(
-			`Failed to get content with access control: ${(err as Error).message}`,
-		);
-	}
+      return content;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to get content with access control: ${(err as Error).message}`,
+      );
+   }
 }
 
 /**
@@ -78,31 +78,31 @@ export async function getContentWithAccessControl(
  * - Write access: same organization only
  */
 export async function hasContentAccess(
-	dbClient: DatabaseInstance,
-	content: ContentSelect,
-	organizationId: string,
+   dbClient: DatabaseInstance,
+   content: ContentSelect,
+   organizationId: string,
 ): Promise<{ canRead: boolean; canWrite: boolean }> {
-	try {
-		const agent = await getAgentById(dbClient, content.agentId);
-		if (!agent) {
-			return { canRead: false, canWrite: false };
-		}
+   try {
+      const agent = await getAgentById(dbClient, content.agentId);
+      if (!agent) {
+         return { canRead: false, canWrite: false };
+      }
 
-		// User belongs to the same organization as the agent
-		if (agent.organizationId === organizationId) {
-			return { canRead: true, canWrite: true };
-		}
+      // User belongs to the same organization as the agent
+      if (agent.organizationId === organizationId) {
+         return { canRead: true, canWrite: true };
+      }
 
-		// Content is shared (public read access)
-		if (content.shareStatus === "shared") {
-			return { canRead: true, canWrite: false };
-		}
+      // Content is shared (public read access)
+      if (content.shareStatus === "shared") {
+         return { canRead: true, canWrite: false };
+      }
 
-		return { canRead: false, canWrite: false };
-	} catch (err) {
-		propagateError(err);
-		throw AppError.database(
-			`Failed to check content access: ${(err as Error).message}`,
-		);
-	}
+      return { canRead: false, canWrite: false };
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to check content access: ${(err as Error).message}`,
+      );
+   }
 }

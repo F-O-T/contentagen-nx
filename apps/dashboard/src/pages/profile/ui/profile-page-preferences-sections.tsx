@@ -41,9 +41,7 @@ export function PreferencesSection() {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>
-               {"Preferências"}
-            </CardTitle>
+            <CardTitle>{"Preferências"}</CardTitle>
             <CardDescription>
                {"Gerencie suas preferências de conta."}
             </CardDescription>
@@ -56,9 +54,7 @@ export function PreferencesSection() {
                      <Moon className="size-4" />
                   </ItemMedia>
                   <ItemContent className="truncate">
-                     <ItemTitle>
-                        {"Tema"}
-                     </ItemTitle>
+                     <ItemTitle>{"Tema"}</ItemTitle>
                      <ItemDescription>
                         {"Escolha o tema da interface"}
                      </ItemDescription>
@@ -76,9 +72,7 @@ export function PreferencesSection() {
                      <Globe className="size-4" />
                   </ItemMedia>
                   <ItemContent className="truncate">
-                     <ItemTitle>
-                        {"Idioma"}
-                     </ItemTitle>
+                     <ItemTitle>{"Idioma"}</ItemTitle>
                      <ItemDescription>
                         {"Escolha o idioma da interface"}
                      </ItemDescription>
@@ -96,12 +90,8 @@ export function PreferencesSection() {
                      <Activity className="size-4" />
                   </ItemMedia>
                   <ItemContent className="truncate">
-                     <ItemTitle>
-                        {"Title"}
-                     </ItemTitle>
-                     <ItemDescription>
-                        {"Description"}
-                     </ItemDescription>
+                     <ItemTitle>{"Title"}</ItemTitle>
+                     <ItemDescription>{"Description"}</ItemDescription>
                   </ItemContent>
                   <ItemActions>
                      <Switch

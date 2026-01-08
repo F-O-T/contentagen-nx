@@ -57,9 +57,7 @@ export function QuickActionsToolbar() {
    return (
       <Item variant="outline">
          <ItemContent>
-            <ItemTitle>
-               {"Barra de ações"}
-            </ItemTitle>
+            <ItemTitle>{"Barra de ações"}</ItemTitle>
             <ItemDescription>
                {"A barra de ações fornece acesso rápido às ações mais comuns."}
             </ItemDescription>

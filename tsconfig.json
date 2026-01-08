@@ -4,6 +4,9 @@
    "references": [
     {
       "path": "./packages/rag"
+    },
+    {
+      "path": "./packages/queue"
     }
   ]
 }

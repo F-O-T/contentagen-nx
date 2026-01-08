@@ -70,11 +70,20 @@ const { worker: deletionWorker, close: closeDeletionWorker } =
          job: Job<DeletionJobData, DeletionJobResult>,
          result: DeletionJobResult,
       ) => {
+         // Calculate job duration
+         const durationMs =
+            job.finishedOn && job.processedOn
+               ? job.finishedOn - job.processedOn
+               : undefined;
+
          logger.info(
             {
                jobName: job.name,
                processedCount: result.processedCount,
                emailsSent: result.emailsSent,
+               durationMs,
+               failedDeletions: result.failedDeletions?.length || 0,
+               failedEmails: result.failedEmails?.length || 0,
             },
             "Deletion job completed",
          );

@@ -7,13 +7,14 @@ import {
    parseOptionsSchema,
 } from "./schemas.ts";
 import type { ParseResult } from "./types.ts";
-import { decodeBuffer, detectLineEnding, normalizeLineEndings } from "./utils.ts";
+import {
+   decodeBuffer,
+   detectLineEnding,
+   normalizeLineEndings,
+} from "./utils.ts";
 
 // Union type for any node in the AST
-type AnyNode =
-   | MarkdownDocument["root"]
-   | BlockNodeType
-   | InlineNodeType;
+type AnyNode = MarkdownDocument["root"] | BlockNodeType | InlineNodeType;
 
 // =============================================================================
 // Public API
@@ -103,7 +104,12 @@ export function parseOrThrow(
    // Convert references map to object
    const referencesObj: Record<
       string,
-      { type: "linkReferenceDefinition"; label: string; url: string; title?: string }
+      {
+         type: "linkReferenceDefinition";
+         label: string;
+         url: string;
+         title?: string;
+      }
    > = {};
 
    for (const [label, ref] of references) {
@@ -119,7 +125,8 @@ export function parseOrThrow(
       root: {
          type: "document",
          children: blocks,
-         references: Object.keys(referencesObj).length > 0 ? referencesObj : undefined,
+         references:
+            Object.keys(referencesObj).length > 0 ? referencesObj : undefined,
       },
       lineEnding,
    };
@@ -303,7 +310,9 @@ export function getHeadings(
 
    function visit(node: AnyNode): void {
       if (node.type === "heading") {
-         const text = (node.children as AnyNode[]).map(extractTextFromNode).join("");
+         const text = (node.children as AnyNode[])
+            .map(extractTextFromNode)
+            .join("");
          headings.push({ level: node.level, text });
       }
 
@@ -338,7 +347,9 @@ export function getLinks(
 
    function visit(node: AnyNode): void {
       if (node.type === "link") {
-         const text = (node.children as AnyNode[]).map(extractTextFromNode).join("");
+         const text = (node.children as AnyNode[])
+            .map(extractTextFromNode)
+            .join("");
          links.push({ text, url: node.url, title: node.title });
       }
 

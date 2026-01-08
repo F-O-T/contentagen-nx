@@ -4,16 +4,22 @@ import { ManageContentForm } from "@/features/content/ui/manage-content-form";
 import { useSheet } from "@/hooks/use-sheet";
 
 type ContentQuickActionsToolbarProps = {
-	agentId?: string;
+   agentId?: string;
 };
 
-export function ContentQuickActionsToolbar({ agentId }: ContentQuickActionsToolbarProps) {
-	const { openSheet } = useSheet();
+export function ContentQuickActionsToolbar({
+   agentId,
+}: ContentQuickActionsToolbarProps) {
+   const { openSheet } = useSheet();
 
-	return (
-		<Button onClick={() => openSheet({ children: <ManageContentForm agentId={agentId} /> })}>
-			<Plus className="size-4" />
-			{"Novo Conteúdo"}
-		</Button>
-	);
+   return (
+      <Button
+         onClick={() =>
+            openSheet({ children: <ManageContentForm agentId={agentId} /> })
+         }
+      >
+         <Plus className="size-4" />
+         {"Novo Conteúdo"}
+      </Button>
+   );
 }

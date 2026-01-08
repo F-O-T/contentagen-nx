@@ -34,6 +34,27 @@ export const notificationRouter = router({
       .input(z.object({ id: z.string() }))
       .mutation(async ({ ctx, input }) => {
          const resolvedCtx = await ctx;
+         const userId = resolvedCtx.session?.user.id;
+
+         if (!userId) {
+            throw APIError.unauthorized("Unauthorized");
+         }
+
+         // Get all notifications for this user to verify ownership
+         const userNotifications = await findNotificationsByUserId(
+            resolvedCtx.db,
+            userId,
+         );
+
+         const notificationBelongsToUser = userNotifications.some(
+            (n) => n.id === input.id,
+         );
+
+         if (!notificationBelongsToUser) {
+            throw APIError.forbidden(
+               "You don't have permission to modify this notification.",
+            );
+         }
 
          return markNotificationAsRead(resolvedCtx.db, input.id);
       }),

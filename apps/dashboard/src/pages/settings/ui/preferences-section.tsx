@@ -70,9 +70,7 @@ function PreferencesSectionErrorFallback(props: FallbackProps) {
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Preferências"}
-            </CardTitle>
+            <CardTitle>{"Preferências"}</CardTitle>
             <CardDescription>
                {"Personalize sua experiência no aplicativo."}
             </CardDescription>
@@ -96,12 +94,8 @@ function AppearanceCard() {
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Preferências"}
-            </CardTitle>
-            <CardDescription>
-               {"Description"}
-            </CardDescription>
+            <CardTitle>{"Preferências"}</CardTitle>
+            <CardDescription>{"Description"}</CardDescription>
          </CardHeader>
          <CardContent>
             <ItemGroup>
@@ -110,9 +104,7 @@ function AppearanceCard() {
                      <Moon className="size-4" />
                   </ItemMedia>
                   <ItemContent className="min-w-0">
-                     <ItemTitle>
-                        {"Tema"}
-                     </ItemTitle>
+                     <ItemTitle>{"Tema"}</ItemTitle>
                      <ItemDescription className="line-clamp-2">
                         {"Escolha o tema da interface"}
                      </ItemDescription>
@@ -129,9 +121,7 @@ function AppearanceCard() {
                      <Globe className="size-4" />
                   </ItemMedia>
                   <ItemContent className="min-w-0">
-                     <ItemTitle>
-                        {"Idioma"}
-                     </ItemTitle>
+                     <ItemTitle>{"Idioma"}</ItemTitle>
                      <ItemDescription className="line-clamp-2">
                         {"Escolha o idioma da interface"}
                      </ItemDescription>
@@ -162,12 +152,8 @@ function PrivacyCard({
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Title"}
-            </CardTitle>
-            <CardDescription>
-               {"Description"}
-            </CardDescription>
+            <CardTitle>{"Title"}</CardTitle>
+            <CardDescription>{"Description"}</CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
             <div className="rounded-lg bg-secondary/50 p-4 text-center">
@@ -192,9 +178,7 @@ function PrivacyCard({
                   )}
                </div>
                <Badge className="mt-2" variant="secondary">
-                  {hasConsent
-                     ? "Sharing Data"
-                     : "Private Data"}
+                  {hasConsent ? "Sharing Data" : "Private Data"}
                </Badge>
             </div>
 
@@ -204,9 +188,7 @@ function PrivacyCard({
                      <Activity className="size-4" />
                   </ItemMedia>
                   <ItemContent className="min-w-0">
-                     <ItemTitle>
-                        {"Title"}
-                     </ItemTitle>
+                     <ItemTitle>{"Title"}</ItemTitle>
                      <ItemDescription className="line-clamp-2">
                         {"Description"}
                      </ItemDescription>

@@ -70,7 +70,9 @@ export const apiKeysQueryOptions = queryOptions({
    queryFn: async () => {
       const result = await betterAuthClient.apiKey.list();
       if (result.error) {
-         throw new Error(result.error.message || "Falha ao buscar chaves de API");
+         throw new Error(
+            result.error.message || "Falha ao buscar chaves de API",
+         );
       }
       return result.data ?? [];
    },

@@ -22,9 +22,7 @@ function ProfileInformationErrorFallback(props: FallbackProps) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>
-               {"Informações do perfil"}
-            </CardTitle>
+            <CardTitle>{"Informações do perfil"}</CardTitle>
             <CardDescription>
                {"Atualize suas informações pessoais e de conta."}
             </CardDescription>
@@ -71,9 +69,7 @@ function ProfileInformationContent() {
    return (
       <Card className="w-full h-full">
          <CardHeader>
-            <CardTitle>
-               {"Informações do perfil"}
-            </CardTitle>
+            <CardTitle>{"Informações do perfil"}</CardTitle>
             <CardDescription>
                {"Atualize suas informações pessoais e de conta."}
             </CardDescription>

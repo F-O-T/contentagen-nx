@@ -16,6 +16,9 @@
       "path": "../logging"
     },
     {
+      "path": "../rag"
+    },
+    {
       "path": "../environment/tsconfig.lib.json"
     },
     {
@@ -37,9 +40,6 @@
       "path": "../notifications/tsconfig.lib.json"
     },
     {
-      "path": "../localization/tsconfig.lib.json"
-    },
-    {
       "path": "../files/tsconfig.lib.json"
     },
     {
@@ -53,6 +53,9 @@
     },
     {
       "path": "../arcjet/tsconfig.lib.json"
+    },
+    {
+      "path": "../agents"
     }
   ]
 }

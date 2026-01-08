@@ -50,9 +50,7 @@ function SessionsSectionErrorFallback(props: FallbackProps) {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>
-               {"Sessões ativas"}
-            </CardTitle>
+            <CardTitle>{"Sessões ativas"}</CardTitle>
             <CardDescription>
                {"Visualize e gerencie suas sessões de login ativas."}
             </CardDescription>
@@ -126,9 +124,7 @@ function SessionsSectionContent() {
       <TooltipProvider>
          <Card>
             <CardHeader>
-               <CardTitle>
-                  {"Sessões ativas"}
-               </CardTitle>
+               <CardTitle>{"Sessões ativas"}</CardTitle>
                <CardDescription>
                   {"Visualize e gerencie suas sessões de login ativas."}
                </CardDescription>
@@ -146,14 +142,10 @@ function SessionsSectionContent() {
                               </Button>
                            </DropdownMenuTrigger>
                         </TooltipTrigger>
-                        <TooltipContent>
-                           {"Ações"}
-                        </TooltipContent>
+                        <TooltipContent>{"Ações"}</TooltipContent>
                      </Tooltip>
                      <DropdownMenuContent align="end" className="w-56">
-                        <DropdownMenuLabel>
-                           {"Ações"}
-                        </DropdownMenuLabel>
+                        <DropdownMenuLabel>{"Ações"}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
                            <DropdownMenuItem
@@ -191,9 +183,7 @@ function SessionsSectionContent() {
                                     "Dispositivo desconhecido"}
                               </ItemTitle>
                               <ItemDescription>
-                                 <span>
-                                    {"Endereço IP"}
-                                 </span>
+                                 <span>{"Endereço IP"}</span>
                                  <span>:</span>
                                  <span> {session.ipAddress || "-"}</span>
                               </ItemDescription>

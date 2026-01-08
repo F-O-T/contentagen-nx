@@ -6,7 +6,11 @@ interface CreateToastOptions {
    description?: string;
 }
 
-export function createToast({ message, type, description }: CreateToastOptions) {
+export function createToast({
+   message,
+   type,
+   description,
+}: CreateToastOptions) {
    switch (type) {
       case "success":
          toast.success(message, { description });

@@ -4,10 +4,10 @@
  */
 
 export {
-	parse,
-	parseToAst,
-	extractText,
-	getHeadings,
-	countWords,
-	generate,
+   countWords,
+   extractText,
+   generate,
+   getHeadings,
+   parse,
+   parseToAst,
 } from "@packages/markdown";

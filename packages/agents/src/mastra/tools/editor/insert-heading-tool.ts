@@ -2,39 +2,43 @@ import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
 export const insertHeadingTool = createTool({
-	id: "insert-heading",
-	description:
-		"Inserts a heading (h1-h4) into the blog post. Useful for creating document structure and sections.",
-	inputSchema: z.object({
-		level: z
-			.enum(["h1", "h2", "h3", "h4"])
-			.describe("Heading level. Use h1 sparingly (title), h2 for main sections, h3-h4 for subsections"),
-		text: z.string().describe("The heading text"),
-		position: z
-			.enum(["cursor", "afterParagraph", "beforeParagraph", "end"])
-			.default("cursor")
-			.describe("Where to insert the heading"),
-		paragraphIndex: z
-			.number()
-			.optional()
-			.describe("Paragraph index for afterParagraph/beforeParagraph positions"),
-	}),
-	outputSchema: z.object({
-		success: z.boolean(),
-		level: z.string(),
-		text: z.string(),
-	}),
-	execute: async (inputData) => {
-		return {
-			success: true,
-			level: inputData.level,
-			text: inputData.text,
-		};
-	},
+   id: "insert-heading",
+   description:
+      "Inserts a heading (h1-h4) into the blog post. Useful for creating document structure and sections.",
+   inputSchema: z.object({
+      level: z
+         .enum(["h1", "h2", "h3", "h4"])
+         .describe(
+            "Heading level. Use h1 sparingly (title), h2 for main sections, h3-h4 for subsections",
+         ),
+      text: z.string().describe("The heading text"),
+      position: z
+         .enum(["cursor", "afterParagraph", "beforeParagraph", "end"])
+         .default("cursor")
+         .describe("Where to insert the heading"),
+      paragraphIndex: z
+         .number()
+         .optional()
+         .describe(
+            "Paragraph index for afterParagraph/beforeParagraph positions",
+         ),
+   }),
+   outputSchema: z.object({
+      success: z.boolean(),
+      level: z.string(),
+      text: z.string(),
+   }),
+   execute: async (inputData) => {
+      return {
+         success: true,
+         level: inputData.level,
+         text: inputData.text,
+      };
+   },
 });
 
 export function getInsertHeadingInstructions(): string {
-	return `
+   return `
 ## INSERT HEADING TOOL
 Adds a heading to structure the blog post.
 

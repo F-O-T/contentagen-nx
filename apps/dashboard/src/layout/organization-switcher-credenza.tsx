@@ -108,9 +108,7 @@ function OrganizationTeamsList({
                variant="ghost"
             >
                <Plus className="size-4" />
-               <span>
-                  {"Create Team"}
-               </span>
+               <span>{"Create Team"}</span>
             </Button>
          </div>
       );
@@ -147,9 +145,7 @@ function OrganizationTeamsList({
             variant="ghost"
          >
             <Plus className="size-4" />
-            <span>
-               {"Criar equipe"}
-            </span>
+            <span>{"Criar equipe"}</span>
          </Button>
       </div>
    );
@@ -325,17 +321,11 @@ function OrganizationSwitcherContent() {
                   className="w-full gap-2"
                   disabled={hasReachedLimit}
                   onClick={handleCreateOrganization}
-                  title={
-                     hasReachedLimit
-                        ? "Limit Reached"
-                        : undefined
-                  }
+                  title={hasReachedLimit ? "Limit Reached" : undefined}
                   variant="outline"
                >
                   <Building2 className="size-4" />
-                  <span>
-                     {"Add Organization"}
-                  </span>
+                  <span>{"Add Organization"}</span>
                </Button>
             </div>
          </CredenzaBody>

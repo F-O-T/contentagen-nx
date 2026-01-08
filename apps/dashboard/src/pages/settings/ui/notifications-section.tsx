@@ -96,9 +96,7 @@ function NotificationsSectionErrorFallback(props: FallbackProps) {
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Notificações Push"}
-            </CardTitle>
+            <CardTitle>{"Notificações Push"}</CardTitle>
             <CardDescription>
                {"Configure suas preferências de notificação"}
             </CardDescription>
@@ -134,9 +132,7 @@ function NotificationsEmptyState({
             <div className="md:col-span-2 lg:col-span-2">
                <Card className="h-full">
                   <CardHeader>
-                     <CardTitle>
-                        {"Notificações"}
-                     </CardTitle>
+                     <CardTitle>{"Notificações"}</CardTitle>
                      <CardDescription>
                         Configure como você deseja receber alertas e lembretes
                      </CardDescription>
@@ -203,9 +199,7 @@ function NotificationTypesCard({
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>
-               {"Notificações Push"}
-            </CardTitle>
+            <CardTitle>{"Notificações Push"}</CardTitle>
             <CardDescription>
                Configure como você deseja receber alertas e lembretes
                importantes
@@ -219,9 +213,7 @@ function NotificationTypesCard({
                      <Wallet className="size-4" />
                   </ItemMedia>
                   <ItemContent className="min-w-0">
-                     <ItemTitle>
-                        {"Title"}
-                     </ItemTitle>
+                     <ItemTitle>{"Title"}</ItemTitle>
                      <ItemDescription className="line-clamp-2">
                         {"Description"}
                      </ItemDescription>
@@ -249,9 +241,7 @@ function NotificationTypesCard({
                      <Receipt className="size-4" />
                   </ItemMedia>
                   <ItemContent className="min-w-0">
-                     <ItemTitle>
-                        {"Title"}
-                     </ItemTitle>
+                     <ItemTitle>{"Title"}</ItemTitle>
                      <ItemDescription className="line-clamp-2">
                         {"Description"}
                      </ItemDescription>
@@ -279,9 +269,7 @@ function NotificationTypesCard({
                      <AlertTriangle className="size-4" />
                   </ItemMedia>
                   <ItemContent className="min-w-0">
-                     <ItemTitle>
-                        {"Title"}
-                     </ItemTitle>
+                     <ItemTitle>{"Title"}</ItemTitle>
                      <ItemDescription className="line-clamp-2">
                         {"Description"}
                      </ItemDescription>
@@ -309,9 +297,7 @@ function NotificationTypesCard({
                      <CreditCard className="size-4" />
                   </ItemMedia>
                   <ItemContent className="min-w-0">
-                     <ItemTitle>
-                        {"Title"}
-                     </ItemTitle>
+                     <ItemTitle>{"Title"}</ItemTitle>
                      <ItemDescription className="line-clamp-2">
                         {"Description"}
                      </ItemDescription>
@@ -383,13 +369,9 @@ function NotificationOverviewCard({
                      )}
                   </ItemMedia>
                   <ItemContent className="min-w-0">
-                     <ItemTitle>
-                        {"Title"}
-                     </ItemTitle>
+                     <ItemTitle>{"Title"}</ItemTitle>
                      <ItemDescription className="line-clamp-2">
-                        {isEnabled
-                           ? "Enabled"
-                           : "Disabled"}
+                        {isEnabled ? "Enabled" : "Disabled"}
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>

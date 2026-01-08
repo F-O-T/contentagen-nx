@@ -223,7 +223,10 @@ describe("convenience generators", () => {
       });
 
       it("encodes special URL characters", () => {
-         const result = generateLinkString("Link", "https://example.com/path with spaces");
+         const result = generateLinkString(
+            "Link",
+            "https://example.com/path with spaces",
+         );
          expect(result).toContain("%20");
       });
    });
@@ -254,9 +257,9 @@ describe("convenience generators", () => {
       });
 
       it("generates indented code block", () => {
-         expect(generateCodeBlockString("line1\nline2", undefined, "indented")).toBe(
-            "    line1\n    line2",
-         );
+         expect(
+            generateCodeBlockString("line1\nline2", undefined, "indented"),
+         ).toBe("    line1\n    line2");
       });
    });
 

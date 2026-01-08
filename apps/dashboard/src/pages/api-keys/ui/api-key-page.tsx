@@ -72,7 +72,7 @@ function ApiKeyPageContent() {
 
    const handleEditKey = (key: { id: string; name: string | null }) => {
       openSheet({
-         children: <EditApiKeyForm keyId={key.id} currentName={key.name} />,
+         children: <EditApiKeyForm currentName={key.name} keyId={key.id} />,
       });
    };
 

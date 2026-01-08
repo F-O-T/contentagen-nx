@@ -51,7 +51,9 @@ export function CookieConsentBanner() {
                         {"Cookies e Privacidade"}
                      </h3>
                      <p className="text-xs text-muted-foreground">
-                        {"Usamos cookies essenciais para funcionamento e telemetria opcional para melhorar sua experiência."}
+                        {
+                           "Usamos cookies essenciais para funcionamento e telemetria opcional para melhorar sua experiência."
+                        }
                      </p>
                   </div>
                   <div className="flex gap-2 flex-wrap">

@@ -1,13 +1,13 @@
 import {
-	Avatar,
-	AvatarFallback,
-	AvatarImage,
+   Avatar,
+   AvatarFallback,
+   AvatarImage,
 } from "@packages/ui/components/avatar";
 import {
-	Card,
-	CardDescription,
-	CardHeader,
-	CardTitle,
+   Card,
+   CardDescription,
+   CardHeader,
+   CardTitle,
 } from "@packages/ui/components/card";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { getInitials } from "@packages/utils/text";
@@ -18,130 +18,133 @@ import { ErrorBoundary } from "react-error-boundary";
 import { useTRPC } from "@/integrations/clients";
 
 function StatCard({
-	icon: Icon,
-	title,
-	value,
-	description,
+   icon: Icon,
+   title,
+   value,
+   description,
 }: {
-	icon: React.ComponentType<{ className?: string }>;
-	title: string;
-	value: number | string;
-	description: string;
+   icon: React.ComponentType<{ className?: string }>;
+   title: string;
+   value: number | string;
+   description: string;
 }) {
-	return (
-		<Card className="col-span-1">
-			<CardHeader>
-				<div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-					<Icon className="size-4" />
-					{title}
-				</div>
-				<CardTitle className="text-2xl">{value}</CardTitle>
-				<CardDescription>{description}</CardDescription>
-			</CardHeader>
-		</Card>
-	);
+   return (
+      <Card className="col-span-1">
+         <CardHeader>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+               <Icon className="size-4" />
+               {title}
+            </div>
+            <CardTitle className="text-2xl">{value}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+         </CardHeader>
+      </Card>
+   );
 }
 
 function StatCardSkeleton() {
-	return (
-		<Card className="col-span-1">
-			<CardHeader>
-				<Skeleton className="h-4 w-24 mb-1" />
-				<Skeleton className="h-8 w-16 mb-1" />
-				<Skeleton className="h-4 w-32" />
-			</CardHeader>
-		</Card>
-	);
+   return (
+      <Card className="col-span-1">
+         <CardHeader>
+            <Skeleton className="h-4 w-24 mb-1" />
+            <Skeleton className="h-8 w-16 mb-1" />
+            <Skeleton className="h-4 w-32" />
+         </CardHeader>
+      </Card>
+   );
 }
 
 function WritersStatsContent() {
-	const trpc = useTRPC();
-	const { data } = useSuspenseQuery(trpc.agent.getStats.queryOptions());
+   const trpc = useTRPC();
+   const { data } = useSuspenseQuery(trpc.agent.getStats.queryOptions());
 
-	return (
-		<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			<StatCard
-				description={"Escritores na equipe"}
-				icon={Users}
-				title={"Total de Escritores"}
-				value={data.totalAgents}
-			/>
-			<StatCard
-				description={"Total de conteúdos criados"}
-				icon={FileText}
-				title={"Conteúdos Gerados"}
-				value={data.totalContent}
-			/>
-			{data.mostActiveAgent ? (
-				<Card className="col-span-1">
-					<CardHeader>
-						<div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-							<TrendingUp className="size-4" />
-							{"Mais Ativo"}
-						</div>
-						<div className="flex items-center gap-3">
-							<Avatar className="size-10">
-								<AvatarImage
-									alt={data.mostActiveAgent.name}
-									src={data.mostActiveAgent.profilePhotoUrl || undefined}
-								/>
-								<AvatarFallback>
-									{getInitials(data.mostActiveAgent.name)}
-								</AvatarFallback>
-							</Avatar>
-							<div className="min-w-0 flex-1">
-								<p className="font-medium truncate">{data.mostActiveAgent.name}</p>
-								<p className="text-sm text-muted-foreground">
-									{data.mostActiveAgent.contentCount}{" "}
-									{"conteúdos"}
-								</p>
-							</div>
-						</div>
-					</CardHeader>
-				</Card>
-			) : (
-				<StatCard
-					description={"Nenhum escritor ativo"}
-					icon={TrendingUp}
-					title={"Mais Ativo"}
-					value="-"
-				/>
-			)}
-		</div>
-	);
+   return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+         <StatCard
+            description={"Escritores na equipe"}
+            icon={Users}
+            title={"Total de Escritores"}
+            value={data.totalAgents}
+         />
+         <StatCard
+            description={"Total de conteúdos criados"}
+            icon={FileText}
+            title={"Conteúdos Gerados"}
+            value={data.totalContent}
+         />
+         {data.mostActiveAgent ? (
+            <Card className="col-span-1">
+               <CardHeader>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                     <TrendingUp className="size-4" />
+                     {"Mais Ativo"}
+                  </div>
+                  <div className="flex items-center gap-3">
+                     <Avatar className="size-10">
+                        <AvatarImage
+                           alt={data.mostActiveAgent.name}
+                           src={
+                              data.mostActiveAgent.profilePhotoUrl || undefined
+                           }
+                        />
+                        <AvatarFallback>
+                           {getInitials(data.mostActiveAgent.name)}
+                        </AvatarFallback>
+                     </Avatar>
+                     <div className="min-w-0 flex-1">
+                        <p className="font-medium truncate">
+                           {data.mostActiveAgent.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                           {data.mostActiveAgent.contentCount} {"conteúdos"}
+                        </p>
+                     </div>
+                  </div>
+               </CardHeader>
+            </Card>
+         ) : (
+            <StatCard
+               description={"Nenhum escritor ativo"}
+               icon={TrendingUp}
+               title={"Mais Ativo"}
+               value="-"
+            />
+         )}
+      </div>
+   );
 }
 
 function WritersStatsSkeleton() {
-	return (
-		<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			<StatCardSkeleton />
-			<StatCardSkeleton />
-			<Card className="col-span-1">
-				<CardHeader>
-					<Skeleton className="h-4 w-24 mb-2" />
-					<div className="flex items-center gap-3">
-						<Skeleton className="size-10 rounded-full" />
-						<div className="flex-1">
-							<Skeleton className="h-5 w-32 mb-1" />
-							<Skeleton className="h-4 w-20" />
-						</div>
-					</div>
-				</CardHeader>
-			</Card>
-		</div>
-	);
+   return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+         <StatCardSkeleton />
+         <StatCardSkeleton />
+         <Card className="col-span-1">
+            <CardHeader>
+               <Skeleton className="h-4 w-24 mb-2" />
+               <div className="flex items-center gap-3">
+                  <Skeleton className="size-10 rounded-full" />
+                  <div className="flex-1">
+                     <Skeleton className="h-5 w-32 mb-1" />
+                     <Skeleton className="h-4 w-20" />
+                  </div>
+               </div>
+            </CardHeader>
+         </Card>
+      </div>
+   );
 }
 
 function WritersStatsError() {
-	return null;
+   return null;
 }
 
 export function WritersStats() {
-	return (
-		<ErrorBoundary FallbackComponent={WritersStatsError}>
-			<Suspense fallback={<WritersStatsSkeleton />}>
-				<WritersStatsContent />
-			</Suspense>
-		</ErrorBoundary>
-	);
+   return (
+      <ErrorBoundary FallbackComponent={WritersStatsError}>
+         <Suspense fallback={<WritersStatsSkeleton />}>
+            <WritersStatsContent />
+         </Suspense>
+      </ErrorBoundary>
+   );
 }

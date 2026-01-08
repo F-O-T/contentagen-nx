@@ -45,9 +45,7 @@ function OrganizationDropdownErrorFallback() {
          <DropdownMenuLabel className="text-muted-foreground text-xs">
             {"Organizações"}
          </DropdownMenuLabel>
-         <DropdownMenuItem disabled>
-            {"Failed To Load Teams"}
-         </DropdownMenuItem>
+         <DropdownMenuItem disabled>{"Failed To Load Teams"}</DropdownMenuItem>
       </>
    );
 }
@@ -250,9 +248,7 @@ function OrganizationTeamsList({
                <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                   <Plus className="size-4" />
                </div>
-               <span className="truncate">
-                  {"Create Team"}
-               </span>
+               <span className="truncate">{"Create Team"}</span>
             </DropdownMenuItem>
          </>
       );
@@ -292,9 +288,7 @@ function OrganizationTeamsList({
             <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                <Plus className="size-4" />
             </div>
-            <span className="truncate">
-               {"Criar equipe"}
-            </span>
+            <span className="truncate">{"Criar equipe"}</span>
          </DropdownMenuItem>
       </>
    );
@@ -379,11 +373,7 @@ function OrganizationSwitcherContent() {
                      onClick={() =>
                         openSheet({ children: <ManageOrganizationForm /> })
                      }
-                     title={
-                        hasReachedLimit
-                           ? "Limit Reached"
-                           : undefined
-                     }
+                     title={hasReachedLimit ? "Limit Reached" : undefined}
                   >
                      <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                         <Plus className="size-4" />

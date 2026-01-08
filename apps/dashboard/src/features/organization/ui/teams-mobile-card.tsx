@@ -61,8 +61,8 @@ export function TeamsMobileCard({
          </CardHeader>
          <CardContent>
             <p className="text-xs text-muted-foreground">
-               {"Created"}
-               : {formatDate(new Date(team.createdAt), "DD MMM YYYY")}
+               {"Created"}:{" "}
+               {formatDate(new Date(team.createdAt), "DD MMM YYYY")}
             </p>
          </CardContent>
          <CardFooter className="flex gap-2">

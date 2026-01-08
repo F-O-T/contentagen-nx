@@ -29,7 +29,8 @@ export const getAudienceProfileGuidelinesTool = createTool({
          });
 
          const agent = await getAgentById(dbClient, agentId);
-         const audienceProfile = agent?.personaConfig?.instructions?.audienceProfile;
+         const audienceProfile =
+            agent?.personaConfig?.instructions?.audienceProfile;
 
          return {
             audienceProfile: audienceProfile || "No audience profile specified",

@@ -1,3 +1,4 @@
+import { parseInline } from "./inline-parser.ts";
 import type {
    BlockNode,
    BlockquoteNode,
@@ -15,20 +16,19 @@ import type { BlockContext, LineInfo } from "./types.ts";
 import {
    ATX_HEADING_REGEX,
    BLOCKQUOTE_REGEX,
-   FENCED_CODE_OPEN_REGEX,
-   LINK_REFERENCE_REGEX,
-   ORDERED_LIST_REGEX,
-   SETEXT_HEADING_REGEX,
-   THEMATIC_BREAK_REGEX,
-   UNORDERED_LIST_REGEX,
    closesHtmlBlock,
    countIndent,
+   FENCED_CODE_OPEN_REGEX,
    getHtmlBlockType,
    isBlankLine,
+   LINK_REFERENCE_REGEX,
+   ORDERED_LIST_REGEX,
    removeIndent,
+   SETEXT_HEADING_REGEX,
    splitLines,
+   THEMATIC_BREAK_REGEX,
+   UNORDERED_LIST_REGEX,
 } from "./utils.ts";
-import { parseInline } from "./inline-parser.ts";
 
 // =============================================================================
 // Block Context
@@ -189,16 +189,15 @@ export function isLinkReferenceDefinition(
  * Pre-scans content to collect all link reference definitions.
  * This allows forward references to work correctly.
  */
-function collectReferences(
-   lines: LineInfo[],
-   context: BlockContext,
-): void {
+function collectReferences(lines: LineInfo[], context: BlockContext): void {
    for (const line of lines) {
       if (isBlankLine(line.raw)) continue;
 
       const refMatch = isLinkReferenceDefinition(line.raw);
       if (refMatch) {
-         const normalizedLabel = refMatch.label.toLowerCase().replace(/\s+/g, " ");
+         const normalizedLabel = refMatch.label
+            .toLowerCase()
+            .replace(/\s+/g, " ");
          context.references.set(normalizedLabel, {
             url: refMatch.url,
             title: refMatch.title,
@@ -214,7 +213,10 @@ export function parseBlocks(
    content: string,
    context?: BlockContext,
    includePositions = true,
-): { blocks: BlockNode[]; references: Map<string, { url: string; title?: string }> } {
+): {
+   blocks: BlockNode[];
+   references: Map<string, { url: string; title?: string }>;
+} {
    const ctx = context ?? createBlockContext();
    const lines = splitLines(content);
 
@@ -284,23 +286,47 @@ function parseBlock(
    // Check for HTML block
    const htmlType = getHtmlBlockType(content);
    if (htmlType > 0 && line.indent < 4) {
-      return parseHtmlBlock(lines, startIndex, htmlType, includePositions, source);
+      return parseHtmlBlock(
+         lines,
+         startIndex,
+         htmlType,
+         includePositions,
+         source,
+      );
    }
 
    // Check for blockquote
    if (isBlockquoteStart(line.raw)) {
-      return parseBlockquote(lines, startIndex, context, includePositions, source);
+      return parseBlockquote(
+         lines,
+         startIndex,
+         context,
+         includePositions,
+         source,
+      );
    }
 
    // Check for list item
    const listMatch = isListItemStart(line.raw);
    if (listMatch) {
-      return parseList(lines, startIndex, listMatch, context, includePositions, source);
+      return parseList(
+         lines,
+         startIndex,
+         listMatch,
+         context,
+         includePositions,
+         source,
+      );
    }
 
    // Check for indented code block (must come after list check)
    if (line.indent >= 4 && !context.inBlockquote) {
-      return parseIndentedCodeBlock(lines, startIndex, includePositions, source);
+      return parseIndentedCodeBlock(
+         lines,
+         startIndex,
+         includePositions,
+         source,
+      );
    }
 
    // Check for link reference definition
@@ -364,7 +390,10 @@ function parseAtxHeading(
    let text = match[2] ?? "";
 
    // Remove trailing # sequence
-   text = text.replace(/[ \t]+#+[ \t]*$/, "").replace(/#+[ \t]*$/, "").trim();
+   text = text
+      .replace(/[ \t]+#+[ \t]*$/, "")
+      .replace(/#+[ \t]*$/, "")
+      .trim();
 
    const node: HeadingNode = {
       type: "heading",
@@ -526,7 +555,8 @@ function parseIndentedCodeBlock(
 
    if (includePositions) {
       const startLine = lines[startIndex];
-      const endLine = lines[Math.max(startIndex, lastNonBlank + startIndex - 1)];
+      const endLine =
+         lines[Math.max(startIndex, lastNonBlank + startIndex - 1)];
       if (startLine) {
          node.position = createPosition(
             startLine.lineNumber,
@@ -684,7 +714,12 @@ function parseBlockquote(
 function parseList(
    lines: LineInfo[],
    startIndex: number,
-   firstItem: { ordered: boolean; marker: string; start?: number; indent: number },
+   firstItem: {
+      ordered: boolean;
+      marker: string;
+      start?: number;
+      indent: number;
+   },
    context: BlockContext,
    includePositions: boolean,
    source: string,
