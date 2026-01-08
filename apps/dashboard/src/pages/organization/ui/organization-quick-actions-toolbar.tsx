@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Item,
@@ -29,9 +28,7 @@ export function QuickActionsToolbar() {
    const quickActions = [
       {
          icon: <Edit className="size-4" />,
-         label: translate(
-            "dashboard.routes.organization.toolbar-section.actions.edit-organization",
-         ),
+         label: "Edit Organization",
          onClick: () =>
             openSheet({
                children: (
@@ -42,9 +39,7 @@ export function QuickActionsToolbar() {
       },
       {
          icon: <UserPlus className="size-4" />,
-         label: translate(
-            "dashboard.routes.organization.toolbar-section.actions.invite-new-member",
-         ),
+         label: "Invite New Member",
          onClick: () =>
             openSheet({
                children: <SendInvitationForm />,
@@ -53,9 +48,7 @@ export function QuickActionsToolbar() {
       },
       {
          icon: <Trash2 className="size-4" />,
-         label: translate(
-            "dashboard.routes.organization.toolbar-section.actions.delete-organization",
-         ),
+         label: "Delete Organization",
          onClick: deleteOrganization,
          variant: "destructive" as const,
       },
@@ -65,10 +58,10 @@ export function QuickActionsToolbar() {
       <Item variant="outline">
          <ItemContent>
             <ItemTitle>
-               {translate("common.headers.actions-toolbar.title")}
+               {"Barra de ações"}
             </ItemTitle>
             <ItemDescription>
-               {translate("common.headers.actions-toolbar.description")}
+               {"A barra de ações fornece acesso rápido às ações mais comuns."}
             </ItemDescription>
          </ItemContent>
          <ItemActions>

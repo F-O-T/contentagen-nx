@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Card, CardContent } from "@packages/ui/components/card";
 import { DataTable } from "@packages/ui/components/data-table";
 import {
@@ -88,13 +87,11 @@ export function TeamsDataTable({
       if (!onDelete) return;
 
       openAlertDialog({
-         actionLabel: translate(
-            "dashboard.routes.organization.teams-table.actions.delete",
-         ),
-         cancelLabel: translate("common.actions.cancel"),
-         description: `${translate("common.headers.delete-confirmation.description")} ${team.name}?`,
+         actionLabel: "Delete",
+         cancelLabel: "Cancelar",
+         description: `${"Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."} ${team.name}?`,
          onAction: () => onDelete(team.id),
-         title: translate("common.headers.delete-confirmation.title"),
+         title: "Confirmar Exclusão",
          variant: "destructive",
       });
    };
@@ -103,19 +100,14 @@ export function TeamsDataTable({
       if (!onBulkDelete || selectedIds.length === 0) return;
 
       openAlertDialog({
-         actionLabel: translate(
-            "dashboard.routes.organization.teams-table.bulk-actions.delete",
-         ),
-         cancelLabel: translate("common.actions.cancel"),
-         description: translate(
-            "common.headers.delete-confirmation.description-bulk",
-            { count: selectedIds.length },
-         ),
+         actionLabel: "Delete",
+         cancelLabel: "Cancelar",
+         description: "Description Bulk",
          onAction: () => {
             onBulkDelete(selectedIds);
             setRowSelection({});
          },
-         title: translate("common.headers.delete-confirmation.title"),
+         title: "Confirmar Exclusão",
          variant: "destructive",
       });
    };
@@ -142,14 +134,10 @@ export function TeamsDataTable({
                         <Users className="size-12 text-muted-foreground" />
                      </EmptyMedia>
                      <EmptyTitle>
-                        {translate(
-                           "dashboard.routes.organization.teams-table.empty",
-                        )}
+                        {"Empty"}
                      </EmptyTitle>
                      <EmptyDescription>
-                        {translate(
-                           "dashboard.routes.organization.teams-table.description",
-                        )}
+                        {"Description"}
                      </EmptyDescription>
                   </EmptyContent>
                </Empty>
@@ -171,9 +159,7 @@ export function TeamsDataTable({
 
                {filteredTeams.length === 0 ? (
                   <div className="py-8 text-center text-muted-foreground">
-                     {translate(
-                        "dashboard.routes.organization.teams-table.empty",
-                     )}
+                     {"Empty"}
                   </div>
                ) : (
                   <DataTable
@@ -210,9 +196,7 @@ export function TeamsDataTable({
                   onClick={handleBulkDelete}
                   variant="destructive"
                >
-                  {translate(
-                     "dashboard.routes.organization.teams-table.bulk-actions.delete",
-                  )}
+                  {"Delete"}
                </SelectionActionButton>
             )}
          </SelectionActionBar>

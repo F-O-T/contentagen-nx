@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -43,7 +42,7 @@ function MembersPageError({ error }: { error: Error }) {
    return (
       <div className="text-center py-8">
          <p className="text-muted-foreground">
-            {translate("common.errors.default")}
+            {"Ocorreu um erro. Por favor, tente novamente."}
          </p>
          <p className="text-xs text-muted-foreground mt-1">{error.message}</p>
       </div>
@@ -56,14 +55,10 @@ export function OrganizationMembersPage() {
          <div className="flex items-center justify-between">
             <div>
                <h1 className="text-2xl font-bold">
-                  {translate(
-                     "dashboard.routes.organization.members-table.title",
-                  )}
+                  {"Title"}
                </h1>
                <p className="text-muted-foreground">
-                  {translate(
-                     "dashboard.routes.organization.members-table.description",
-                  )}
+                  {"Description"}
                </p>
             </div>
             <MembersQuickActionsToolbar />

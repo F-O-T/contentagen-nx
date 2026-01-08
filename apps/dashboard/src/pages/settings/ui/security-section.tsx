@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -69,7 +68,7 @@ function getDeviceIcon(userAgent: string | null | undefined) {
 }
 
 function formatLastActive(date: Date | string | null): string {
-   if (!date) return translate("common.time.now");
+   if (!date) return "Agora";
    const d = new Date(date);
    const now = new Date();
    const diff = now.getTime() - d.getTime();
@@ -77,11 +76,11 @@ function formatLastActive(date: Date | string | null): string {
    const hours = Math.floor(diff / 3600000);
    const days = Math.floor(diff / 86400000);
 
-   if (minutes < 1) return translate("common.time.now");
+   if (minutes < 1) return "Agora";
    if (minutes < 60)
-      return translate("common.time.minutes-ago", { count: minutes });
-   if (hours < 24) return translate("common.time.hours-ago", { count: hours });
-   if (days < 7) return translate("common.time.days-ago", { count: days });
+      return "{{count}} min atrás";
+   if (hours < 24) return "{{count}}h atrás";
+   if (days < 7) return "{{count}}d atrás";
    return d.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
@@ -97,37 +96,27 @@ function getLoginMethodDisplay(method: string | null | undefined): {
    switch (method) {
       case "email":
          return {
-            label: translate(
-               "dashboard.routes.settings.security.login-methods.email",
-            ),
+            label: "Email",
             Icon: Mail,
          };
       case "google":
          return {
-            label: translate(
-               "dashboard.routes.settings.security.login-methods.google",
-            ),
+            label: "Google",
             Icon: Globe,
          };
       case "otp":
          return {
-            label: translate(
-               "dashboard.routes.settings.security.login-methods.otp",
-            ),
+            label: "Otp",
             Icon: Shield,
          };
       case "magic-link":
          return {
-            label: translate(
-               "dashboard.routes.settings.security.login-methods.magic-link",
-            ),
+            label: "Magic Link",
             Icon: Link2,
          };
       case "anonymous":
          return {
-            label: translate(
-               "dashboard.routes.settings.security.login-methods.anonymous",
-            ),
+            label: "Anonymous",
             Icon: User,
          };
       default:
@@ -140,21 +129,17 @@ function SecuritySectionErrorFallback(props: FallbackProps) {
       <Card className="h-full">
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.settings.security.title")}
+               {"Segurança"}
             </CardTitle>
             <CardDescription>
-               {translate("dashboard.routes.settings.security.description")}
+               {"Gerencie suas sessões e configurações de segurança."}
             </CardDescription>
          </CardHeader>
          <CardContent>
             {createErrorFallback({
-               errorDescription: translate(
-                  "dashboard.routes.profile.sessions.state.error.description",
-               ),
-               errorTitle: translate(
-                  "dashboard.routes.profile.sessions.state.error.title",
-               ),
-               retryText: translate("common.actions.retry"),
+               errorDescription: "Erro ao carregar sessões",
+               errorTitle: "Erro",
+               retryText: "Tentar novamente",
             })(props)}
          </CardContent>
       </Card>
@@ -231,12 +216,10 @@ function SessionsCard({
       <Card className="h-full">
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.settings.security.title")}
+               {"Segurança"}
             </CardTitle>
             <CardDescription>
-               {translate(
-                  "dashboard.routes.settings.security.sessions-description",
-               )}
+               {"Sessions Description"}
             </CardDescription>
          </CardHeader>
          <CardContent>
@@ -247,14 +230,10 @@ function SessionsCard({
                         <Globe className="size-6" />
                      </EmptyMedia>
                      <EmptyTitle>
-                        {translate(
-                           "dashboard.routes.settings.security.sessions.empty-title",
-                        )}
+                        {"Empty Title"}
                      </EmptyTitle>
                      <EmptyDescription>
-                        {translate(
-                           "dashboard.routes.settings.security.sessions.empty-description",
-                        )}
+                        {"Empty Description"}
                      </EmptyDescription>
                   </EmptyHeader>
                </Empty>
@@ -280,27 +259,21 @@ function SessionsCard({
                                  <div className="flex items-center gap-2 flex-wrap">
                                     <ItemTitle className="truncate">
                                        {session.userAgent ||
-                                          translate(
-                                             "dashboard.routes.profile.sessions.item.unknown-device",
-                                          )}
+                                          "Dispositivo desconhecido"}
                                     </ItemTitle>
                                     {isCurrentSession && (
                                        <Badge
                                           className="bg-green-500 hover:bg-green-500/90 shrink-0"
                                           variant="default"
                                        >
-                                          {translate(
-                                             "dashboard.routes.settings.security.sessions.current-device",
-                                          )}
+                                          {"Current Device"}
                                        </Badge>
                                     )}
                                  </div>
                                  <ItemDescription className="flex items-center gap-2 flex-wrap">
                                     <span>
                                        {session.ipAddress ||
-                                          translate(
-                                             "dashboard.routes.settings.security.sessions.unknown-ip",
-                                          )}
+                                          "Unknown Ip"}
                                     </span>
                                     {loginMethod && (
                                        <>
@@ -344,9 +317,7 @@ function SessionsCard({
                                        </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                       {translate(
-                                          "dashboard.routes.settings.security.sessions.view-details",
-                                       )}
+                                       {"View Details"}
                                     </TooltipContent>
                                  </Tooltip>
                               </ItemActions>
@@ -385,31 +356,23 @@ function SecurityOverviewCard({
       <Card className="h-full">
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.settings.security.overview.title")}
+               {"Visão Geral"}
             </CardTitle>
             <CardDescription>
-               {translate(
-                  "dashboard.routes.settings.security.overview.description",
-               )}
+               {"Description"}
             </CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
             <div className="rounded-lg bg-secondary/50 p-4 text-center">
                <p className="text-xs md:text-sm text-muted-foreground mb-1">
-                  {translate(
-                     "dashboard.routes.settings.security.overview.active-sessions",
-                  )}
+                  {"Active Sessions"}
                </p>
                <p className="text-3xl md:text-4xl font-bold">{sessionsCount}</p>
                <Badge className="mt-2" variant="secondary">
                   <Shield className="size-3 mr-1" />
                   {sessionsCount === 1
-                     ? translate(
-                          "dashboard.routes.settings.security.overview.device",
-                       )
-                     : translate(
-                          "dashboard.routes.settings.security.overview.devices",
-                       )}
+                     ? "Device"
+                     : "Devices"}
                </Badge>
             </div>
 
@@ -421,9 +384,7 @@ function SecurityOverviewCard({
                   variant="outline"
                >
                   <Trash2 className="size-4 mr-2" />
-                  {translate(
-                     "dashboard.routes.profile.sessions.actions.revoke-others",
-                  )}
+                  {"Encerrar outras sessões"}
                </Button>
                <Button
                   className="w-full"
@@ -432,9 +393,7 @@ function SecurityOverviewCard({
                   variant="destructive"
                >
                   <Trash2 className="size-4 mr-2" />
-                  {translate(
-                     "dashboard.routes.profile.sessions.actions.revoke-all",
-                  )}
+                  {"Encerrar todas as sessões"}
                </Button>
             </div>
          </CardContent>

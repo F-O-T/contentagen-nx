@@ -32,9 +32,6 @@ export const user = pgTable("user", {
   telemetryConsent: boolean("telemetry_consent").default(true).notNull(),
   deletionScheduledAt: timestamp("deletion_scheduled_at"),
   deletionType: text("deletion_type"),
-  encryptionEnabled: boolean("encryption_enabled").default(false),
-  encryptionSalt: text("encryption_salt"),
-  encryptionKeyHash: text("encryption_key_hash"),
 });
 
 export const session = pgTable(

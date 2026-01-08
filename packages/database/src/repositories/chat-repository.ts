@@ -8,6 +8,7 @@ import {
 	type StoredToolCall,
 	type StoredPlanStep,
 	type ChatMessageType,
+	type ChatMode,
 } from "../schemas/chat";
 
 /**
@@ -127,6 +128,7 @@ export async function addChatMessage(
 	toolCalls?: StoredToolCall[],
 	messageType?: ChatMessageType,
 	planSteps?: StoredPlanStep[],
+	sourceMode?: ChatMode,
 ) {
 	try {
 		const result = await dbClient
@@ -136,6 +138,7 @@ export async function addChatMessage(
 				role,
 				content,
 				messageType: messageType ?? "text",
+				sourceMode,
 				selectionContext,
 				toolCalls: toolCalls && toolCalls.length > 0 ? toolCalls : undefined,
 				planSteps: planSteps && planSteps.length > 0 ? planSteps : undefined,
@@ -153,6 +156,27 @@ export async function addChatMessage(
 		propagateError(err);
 		throw AppError.database(
 			`Failed to add chat message: ${(err as Error).message}`,
+		);
+	}
+}
+
+/**
+ * Update chat session mode.
+ */
+export async function updateChatSessionMode(
+	dbClient: DatabaseInstance,
+	sessionId: string,
+	mode: ChatMode,
+) {
+	try {
+		await dbClient
+			.update(chatSession)
+			.set({ mode, updatedAt: new Date() })
+			.where(eq(chatSession.id, sessionId));
+	} catch (err) {
+		propagateError(err);
+		throw AppError.database(
+			`Failed to update chat session mode: ${(err as Error).message}`,
 		);
 	}
 }

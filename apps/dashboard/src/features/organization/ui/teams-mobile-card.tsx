@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
@@ -62,9 +61,7 @@ export function TeamsMobileCard({
          </CardHeader>
          <CardContent>
             <p className="text-xs text-muted-foreground">
-               {translate(
-                  "dashboard.routes.organization.teams-table.columns.created",
-               )}
+               {"Created"}
                : {formatDate(new Date(team.createdAt), "DD MMM YYYY")}
             </p>
          </CardContent>
@@ -75,9 +72,7 @@ export function TeamsMobileCard({
                   to="/$slug/organization/teams/$teamId"
                >
                   <Eye className="size-4 mr-2" />
-                  {translate(
-                     "dashboard.routes.organization.teams-table.actions.view",
-                  )}
+                  {"View"}
                </Link>
             </Button>
             {(onEdit || onDelete) && (
@@ -91,9 +86,7 @@ export function TeamsMobileCard({
                      {onEdit && (
                         <DropdownMenuItem onClick={() => onEdit(team)}>
                            <Edit className="size-4 mr-2" />
-                           {translate(
-                              "dashboard.routes.organization.teams-table.actions.edit",
-                           )}
+                           {"Edit"}
                         </DropdownMenuItem>
                      )}
                      {onDelete && (
@@ -104,9 +97,7 @@ export function TeamsMobileCard({
                               onClick={() => onDelete(team)}
                            >
                               <Trash2 className="size-4 mr-2" />
-                              {translate(
-                                 "dashboard.routes.organization.teams-table.actions.delete",
-                              )}
+                              {"Delete"}
                            </DropdownMenuItem>
                         </>
                      )}

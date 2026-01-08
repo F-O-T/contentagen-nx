@@ -18,13 +18,65 @@ export const PersonaMetadataSchema = z.object({
 	avatar: z.string().optional(),
 });
 
-export const PersonaInstructionsSchema = z.object({
-	writingGuidelines: z.string().optional(),
-	audienceProfile: z.string().optional(),
-	ragIntegration: z.boolean().default(true),
-	tone: z.string().optional(),
-	style: z.string().optional(),
+// Brand term usage rules
+export const BrandTermSchema = z.object({
+	term: z.string(),
+	usage: z.enum(["always_use", "never_use", "preferred"]),
+	alternative: z.string().optional(), // Suggested alternative if "never_use"
 });
+
+export type BrandTerm = z.infer<typeof BrandTermSchema>;
+
+// Structured writer configuration
+export const WriterConfigSchema = z.object({
+	// === Writing Style (structured) ===
+	tone: z
+		.enum(["formal", "conversational", "professional", "casual", "academic"])
+		.optional(),
+	voice: z.enum(["first_person", "second_person", "third_person"]).optional(),
+	complexity: z.enum(["simple", "moderate", "advanced"]).optional(), // vocabulary level
+
+	// === Content Rules (structured) ===
+	targetWordCount: z
+		.object({
+			min: z.number().optional(),
+			max: z.number().optional(),
+		})
+		.optional(),
+	headingStructure: z
+		.object({
+			maxDepth: z.number().min(2).max(6).default(3), // h2-h6
+			requireH2Every: z.number().optional(), // words between h2s
+		})
+		.optional(),
+	seoRules: z
+		.object({
+			minKeywordDensity: z.number().optional(), // e.g., 0.5%
+			maxKeywordDensity: z.number().optional(), // e.g., 2.5%
+			requireMetaDescription: z.boolean().default(true),
+			maxTitleLength: z.number().default(60),
+		})
+		.optional(),
+
+	// === Brand Guidelines (structured) ===
+	brandTerms: z.array(BrandTermSchema).optional(),
+
+	// === Free-form Custom Rules (for backward compatibility and flexibility) ===
+	writingGuidelines: z.string().optional(), // Detailed prose instructions
+	audienceProfile: z.string().optional(), // Who we're writing for
+	customRules: z.string().optional(), // Additional free-form rules
+
+	// === Feature Flags ===
+	ragIntegration: z.boolean().default(true),
+	enableInternalLinking: z.boolean().default(true),
+	enableFactChecking: z.boolean().default(false),
+});
+
+export type WriterConfig = z.infer<typeof WriterConfigSchema>;
+
+// Legacy PersonaInstructionsSchema - kept for backward compatibility
+// Maps to WriterConfig internally
+export const PersonaInstructionsSchema = WriterConfigSchema;
 
 export const PersonaConfigSchema = z.object({
 	metadata: PersonaMetadataSchema,

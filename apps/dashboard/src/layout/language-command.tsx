@@ -1,11 +1,5 @@
-import type { SupportedLng } from "@packages/localization";
-import {
-   changeLanguage,
-   getCurrentLanguage,
-   translate,
-} from "@packages/localization";
 import { Combobox } from "@packages/ui/components/combobox";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
 interface LanguageCommandProps {
    compact?: boolean;
@@ -16,14 +10,12 @@ export function LanguageCommand({ compact = false }: LanguageCommandProps) {
       () => [
          {
             flag: "🇧🇷",
-            name: translate("common.languages.portuguese"),
+            name: "Português",
             value: "pt-BR",
          },
       ],
       [],
    );
-
-   const currentLanguage = useMemo(() => getCurrentLanguage(), []);
 
    const comboboxOptions = useMemo(
       () =>
@@ -34,33 +26,16 @@ export function LanguageCommand({ compact = false }: LanguageCommandProps) {
       [languageOptions, compact],
    );
 
-   const handleLanguageChange = useCallback(
-      async (value: string) => {
-         try {
-            const language = languageOptions.find(
-               (option) => option.value === value,
-            );
-            if (language) {
-               changeLanguage(language.value as SupportedLng);
-               window.location.reload();
-            }
-         } catch (error) {
-            console.error("Failed to change language:", error);
-         }
-      },
-      [languageOptions],
-   );
-
    return (
       <Combobox
          className="gap-2 flex items-center justify-center"
-         emptyMessage={translate("dashboard.layout.language-command.empty")}
-         onValueChange={handleLanguageChange}
+         emptyMessage="Nenhum idioma encontrado."
+         onValueChange={() => {
+            // Only Portuguese supported
+         }}
          options={comboboxOptions}
-         searchPlaceholder={translate(
-            "dashboard.layout.language-command.search",
-         )}
-         value={currentLanguage}
+         searchPlaceholder="Pesquisar idiomas..."
+         value="pt-BR"
       />
    );
 }

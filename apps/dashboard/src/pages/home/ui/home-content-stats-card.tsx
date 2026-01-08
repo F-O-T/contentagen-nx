@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
 	Card,
 	CardContent,
@@ -19,13 +18,9 @@ function HomeContentStatsCardErrorFallback(props: FallbackProps) {
 		<Card>
 			<CardContent className="pt-6">
 				{createErrorFallback({
-					errorDescription: translate(
-						"dashboard.routes.home.stats-card.state.error.description",
-					),
-					errorTitle: translate(
-						"dashboard.routes.home.stats-card.state.error.title",
-					),
-					retryText: translate("common.actions.retry"),
+					errorDescription: "Description",
+					errorTitle: "Title",
+					retryText: "Tentar novamente",
 				})(props)}
 			</CardContent>
 		</Card>
@@ -93,7 +88,7 @@ function HomeContentStatsCardContent() {
 		<Card>
 			<CardHeader className="text-center pb-2">
 				<CardDescription>
-					{translate("dashboard.routes.home.stats-card.title")}
+					{"Visão Geral do Conteúdo"}
 				</CardDescription>
 				<CardTitle className="text-4xl font-bold">{stats.total}</CardTitle>
 			</CardHeader>
@@ -102,19 +97,19 @@ function HomeContentStatsCardContent() {
 					<StatCard
 						colorClass="bg-amber-500/10"
 						icon={<PenLine className="size-4 text-amber-500" />}
-						label={translate("dashboard.routes.home.stats-card.drafts")}
+						label={"Rascunhos"}
 						value={stats.draft}
 					/>
 					<StatCard
 						colorClass="bg-green-500/10"
 						icon={<CheckCircle className="size-4 text-green-500" />}
-						label={translate("dashboard.routes.home.stats-card.published")}
+						label={"Publicados"}
 						value={stats.published}
 					/>
 					<StatCard
 						colorClass="bg-slate-500/10"
 						icon={<Archive className="size-4 text-slate-500" />}
-						label={translate("dashboard.routes.home.stats-card.archived")}
+						label={"Arquivados"}
 						value={stats.archived}
 					/>
 				</div>

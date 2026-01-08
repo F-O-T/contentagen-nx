@@ -98,10 +98,23 @@ export interface ChatMessage {
 	timestamp: number;
 	selectionContext?: SelectionContext;
 	// Mode-specific data
-	type?: "text" | "plan" | "edit-suggestion" | "tool-use";
+	type?: "text" | "plan" | "edit-suggestion" | "tool-use" | "execution-separator";
+	// Track which mode generated this message
+	sourceMode?: ChatMode;
 	planSteps?: PlanStep[];
 	editSuggestion?: EditSuggestion;
 	toolCalls?: ToolCall[];
+}
+
+/**
+ * Execution state for tracking plan execution progress
+ */
+export interface ExecutionState {
+	isExecuting: boolean;
+	startTime: number | null;
+	currentStepIndex: number | null;
+	totalSteps: number;
+	completedSteps: number;
 }
 
 interface ChatState {
@@ -127,6 +140,8 @@ interface ChatState {
 	editor: LexicalEditor | null;
 	// Active plan for writer agent execution
 	activePlan: ActivePlan | null;
+	// Execution tracking for UI feedback
+	executionState: ExecutionState;
 }
 
 const initialState: ChatState = {
@@ -148,6 +163,13 @@ const initialState: ChatState = {
 	currentStepIndex: 0,
 	editor: null,
 	activePlan: null,
+	executionState: {
+		isExecuting: false,
+		startTime: null,
+		currentStepIndex: null,
+		totalSteps: 0,
+		completedSteps: 0,
+	},
 };
 
 const chatStore = new Store<ChatState>(initialState);
@@ -552,6 +574,108 @@ export const clearActivePlan = () =>
 	}));
 
 // =====================
+// Execution State Actions
+// =====================
+
+/**
+ * Start plan execution
+ */
+export const startPlanExecution = (totalSteps: number) =>
+	chatStore.setState((state) => ({
+		...state,
+		executionState: {
+			isExecuting: true,
+			startTime: Date.now(),
+			currentStepIndex: 0,
+			totalSteps,
+			completedSteps: 0,
+		},
+	}));
+
+/**
+ * Update execution progress
+ */
+export const updateExecutionProgress = (currentStepIndex: number) =>
+	chatStore.setState((state) => ({
+		...state,
+		executionState: {
+			...state.executionState,
+			currentStepIndex,
+		},
+	}));
+
+/**
+ * Complete a step in execution
+ */
+export const completeExecutionStep = () =>
+	chatStore.setState((state) => ({
+		...state,
+		executionState: {
+			...state.executionState,
+			completedSteps: state.executionState.completedSteps + 1,
+		},
+	}));
+
+/**
+ * End plan execution
+ */
+export const endPlanExecution = () =>
+	chatStore.setState((state) => ({
+		...state,
+		executionState: {
+			isExecuting: false,
+			startTime: null,
+			currentStepIndex: null,
+			totalSteps: 0,
+			completedSteps: 0,
+		},
+	}));
+
+/**
+ * Start a new plan - clears chat and switches to plan mode
+ */
+export const startNewPlan = () =>
+	chatStore.setState((state) => ({
+		...state,
+		mode: "plan",
+		messages: [],
+		currentStreamingMessage: "",
+		selectionContext: null,
+		activePlan: null,
+		phase: "idle",
+		error: null,
+		streamingSteps: [],
+		activeToolCalls: [],
+		executionState: {
+			isExecuting: false,
+			startTime: null,
+			currentStepIndex: null,
+			totalSteps: 0,
+			completedSteps: 0,
+		},
+	}));
+
+/**
+ * Add execution separator message
+ */
+export const addExecutionSeparator = (planSummary: string, _totalSteps: number) =>
+	chatStore.setState((state) => {
+		const separator: ChatMessage = {
+			id: `execution-${Date.now()}`,
+			role: "assistant",
+			content: planSummary,
+			timestamp: Date.now(),
+			type: "execution-separator",
+			sourceMode: "plan",
+		};
+
+		return {
+			...state,
+			messages: [...state.messages, separator],
+		};
+	});
+
+// =====================
 // Streaming Step Actions
 // =====================
 
@@ -664,6 +788,7 @@ export const finalizeStreaming = () =>
 				timestamp: Date.now(),
 				type: step.toolCalls.length > 0 ? ("tool-use" as const) : ("text" as const),
 				toolCalls: step.toolCalls.length > 0 ? step.toolCalls : undefined,
+				sourceMode: state.mode,
 			}));
 
 		return {
@@ -732,6 +857,13 @@ export const useChatContext = () => {
 		// Active plan actions
 		setActivePlan,
 		clearActivePlan,
+		// Execution state actions
+		startPlanExecution,
+		updateExecutionProgress,
+		completeExecutionStep,
+		endPlanExecution,
+		startNewPlan,
+		addExecutionSeparator,
 		// Streaming step actions
 		startNewStep,
 		appendToCurrentStep,

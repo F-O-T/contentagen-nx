@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Sidebar,
@@ -39,9 +38,7 @@ export function OrganizationLayout({ children }: OrganizationLayoutProps) {
                   to="/$slug/organization"
                >
                   <ChevronLeft className="size-4 mr-1" />
-                  {translate(
-                     "dashboard.routes.organization.nav.back-to-organization",
-                  )}
+                  {"Back To Organization"}
                </Link>
             </Button>
             <div className="flex-1">{children}</div>
@@ -60,10 +57,10 @@ export function OrganizationLayout({ children }: OrganizationLayoutProps) {
             >
                <SidebarHeader className="px-4 pt-4">
                   <h1 className="text-lg font-semibold font-serif">
-                     {translate("dashboard.routes.organization.title")}
+                     {"Organização"}
                   </h1>
                   <p className="text-xs text-muted-foreground">
-                     {translate("dashboard.routes.organization.description")}
+                     {"Gerencie sua organização"}
                   </p>
                </SidebarHeader>
                <SidebarContent>

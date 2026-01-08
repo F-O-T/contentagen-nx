@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PenLineIcon } from "lucide-react";
@@ -18,7 +17,7 @@ function RouteComponent() {
 	const completeOnboarding = useMutation(
 		trpc.onboarding.completeOnboarding.mutationOptions({
 			onError: () => {
-				toast.error(translate("common.errors.default"));
+				toast.error("Ocorreu um erro. Por favor, tente novamente.");
 			},
 			onSuccess: () => {
 				navigate({ params: { slug }, to: "/$slug/home" });
@@ -40,10 +39,10 @@ function RouteComponent() {
 
 					<div className="space-y-2">
 						<h1 className="text-3xl font-semibold font-serif">
-							{translate("dashboard.routes.onboarding.writer.title")}
+							{"Crie seu primeiro escritor"}
 						</h1>
 						<p className="text-muted-foreground">
-							{translate("dashboard.routes.onboarding.writer.description")}
+							{"Escritores são personas de IA que geram conteúdo com seu tom e estilo preferidos."}
 						</p>
 					</div>
 				</div>

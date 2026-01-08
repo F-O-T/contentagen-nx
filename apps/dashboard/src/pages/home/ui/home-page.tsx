@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { Suspense } from "react";
@@ -10,11 +9,9 @@ import { HomeRecentContentSection } from "./home-recent-content-section";
 
 function HomePageErrorFallback(props: FallbackProps) {
 	return createErrorFallback({
-		errorDescription: translate(
-			"dashboard.routes.home.state.error.description",
-		),
-		errorTitle: translate("dashboard.routes.home.state.error.title"),
-		retryText: translate("common.actions.retry"),
+		errorDescription: "Description",
+		errorTitle: "Erro ao carregar painel",
+		retryText: "Tentar novamente",
 	})(props);
 }
 
@@ -44,8 +41,8 @@ function HomePageContent() {
 	return (
 		<main className="flex flex-col gap-6">
 			<DefaultHeader
-				description={translate("dashboard.routes.home.description")}
-				title={translate("dashboard.routes.home.title")}
+				description={"Seu espaço de criação de conteúdo com IA"}
+				title={"Painel"}
 			/>
 
 			<HomeContentStatsCard />

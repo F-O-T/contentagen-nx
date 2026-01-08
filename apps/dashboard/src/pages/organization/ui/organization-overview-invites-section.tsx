@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
@@ -32,12 +31,10 @@ function InvitesSectionCardHeader() {
    return (
       <CardHeader>
          <CardTitle>
-            {translate("dashboard.routes.organization.recent-invites.title")}
+            {"Convites Recentes"}
          </CardTitle>
          <CardDescription>
-            {translate(
-               "dashboard.routes.organization.recent-invites.description",
-            )}
+            {"Últimos convites enviados"}
          </CardDescription>
       </CardHeader>
    );
@@ -49,13 +46,9 @@ function OrganizationInvitesSectionErrorFallback(props: FallbackProps) {
          <InvitesSectionCardHeader />
          <CardContent>
             {createErrorFallback({
-               errorDescription: translate(
-                  "dashboard.routes.organization.recent-invites.state.error.description",
-               ),
-               errorTitle: translate(
-                  "dashboard.routes.organization.recent-invites.state.error.title",
-               ),
-               retryText: translate("common.actions.retry"),
+               errorDescription: "Description",
+               errorTitle: "Title",
+               retryText: "Tentar novamente",
             })(props)}
          </CardContent>
       </Card>
@@ -119,14 +112,10 @@ function OrganizationInvitesSectionContent() {
                         <Mail className="size-8" />
                      </EmptyMedia>
                      <EmptyTitle>
-                        {translate(
-                           "dashboard.routes.organization.recent-invites.state.empty.title",
-                        )}
+                        {"Title"}
                      </EmptyTitle>
                      <EmptyDescription>
-                        {translate(
-                           "dashboard.routes.organization.recent-invites.state.empty.description",
-                        )}
+                        {"Description"}
                      </EmptyDescription>
                   </EmptyContent>
                </Empty>
@@ -141,9 +130,7 @@ function OrganizationInvitesSectionContent() {
                                     {invite.email}
                                  </p>
                                  <p className="text-sm text-muted-foreground">
-                                    {translate(
-                                       "dashboard.routes.organization.invites-table.columns.expires",
-                                    )}
+                                    {"Expires"}
                                     :{" "}
                                     {formatDate(
                                        new Date(invite.expiresAt),
@@ -167,9 +154,7 @@ function OrganizationInvitesSectionContent() {
                         onClick={handleViewAll}
                         variant="outline"
                      >
-                        {translate(
-                           "dashboard.routes.organization.recent-invites.view-all",
-                        )}
+                        {"View All"}
                         <ArrowRight className="size-4 ml-2" />
                      </Button>
                   )}

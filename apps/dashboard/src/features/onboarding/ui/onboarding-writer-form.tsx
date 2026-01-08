@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
 	Field,
@@ -27,13 +26,13 @@ export function OnboardingWriterForm({ onSuccess }: OnboardingWriterFormProps) {
 	const createMutation = useMutation(
 		trpc.agent.create.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.writers.form.create-success"));
+				toast.success("Escritor criado com sucesso");
 				queryClient.invalidateQueries({ queryKey: trpc.agent.list.queryKey() });
 				queryClient.invalidateQueries({ queryKey: trpc.agent.getStats.queryKey() });
 				onSuccess();
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -41,11 +40,11 @@ export function OnboardingWriterForm({ onSuccess }: OnboardingWriterFormProps) {
 	const schema = z.object({
 		name: z
 			.string()
-			.min(1, translate("dashboard.routes.writers.form.name-required"))
-			.max(50, translate("dashboard.routes.writers.form.name-max")),
+			.min(1, "O nome é obrigatório")
+			.max(50, "O nome deve ter no máximo 50 caracteres"),
 		description: z
 			.string()
-			.max(200, translate("dashboard.routes.writers.form.description-max"))
+			.max(200, "A descrição deve ter no máximo 200 caracteres")
 			.optional(),
 	});
 
@@ -88,7 +87,7 @@ export function OnboardingWriterForm({ onSuccess }: OnboardingWriterFormProps) {
 					return (
 						<Field data-invalid={isInvalid}>
 							<FieldLabel htmlFor={field.name}>
-								{translate("dashboard.routes.writers.form.name")}
+								{"Nome"}
 							</FieldLabel>
 							<Input
 								aria-invalid={isInvalid}
@@ -96,7 +95,7 @@ export function OnboardingWriterForm({ onSuccess }: OnboardingWriterFormProps) {
 								name={field.name}
 								onBlur={field.handleBlur}
 								onChange={(e) => field.handleChange(e.target.value)}
-								placeholder={translate("dashboard.routes.writers.form.name-placeholder")}
+								placeholder={"Nome do escritor"}
 								type="text"
 								value={field.state.value}
 							/>
@@ -114,7 +113,7 @@ export function OnboardingWriterForm({ onSuccess }: OnboardingWriterFormProps) {
 					return (
 						<Field data-invalid={isInvalid}>
 							<FieldLabel htmlFor={field.name}>
-								{translate("dashboard.routes.writers.form.description")}
+								{"Descrição"}
 							</FieldLabel>
 							<Textarea
 								aria-invalid={isInvalid}
@@ -122,12 +121,12 @@ export function OnboardingWriterForm({ onSuccess }: OnboardingWriterFormProps) {
 								name={field.name}
 								onBlur={field.handleBlur}
 								onChange={(e) => field.handleChange(e.target.value)}
-								placeholder={translate("dashboard.routes.writers.form.description-placeholder")}
+								placeholder={"Uma breve descrição do escritor"}
 								rows={3}
 								value={field.state.value}
 							/>
 							<FieldDescription>
-								{translate("dashboard.routes.writers.form.description-hint")}
+								{"Uma breve descrição sobre seu escritor"}
 							</FieldDescription>
 							{isInvalid && <FieldError errors={field.state.meta.errors} />}
 						</Field>
@@ -146,11 +145,11 @@ export function OnboardingWriterForm({ onSuccess }: OnboardingWriterFormProps) {
 						{createMutation.isPending ? (
 							<>
 								<Loader2Icon className="size-4 animate-spin" />
-								{translate("dashboard.routes.writers.form.creating")}
+								{"Criando..."}
 							</>
 						) : (
 							<>
-								{translate("dashboard.routes.onboarding.writer.action")}
+								{"Criar e continuar"}
 								<ChevronRightIcon className="size-4" />
 							</>
 						)}

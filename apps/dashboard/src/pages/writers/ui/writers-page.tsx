@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import { Plus } from "lucide-react";
 import { Suspense } from "react";
@@ -25,11 +24,11 @@ function WritersPageContent() {
 				actions={
 					<Button onClick={handleCreateWriter}>
 						<Plus className="size-4" />
-						{translate("dashboard.routes.writers.actions.create")}
+						{"Novo Escritor"}
 					</Button>
 				}
-				description={translate("dashboard.routes.writers.description")}
-				title={translate("dashboard.routes.writers.title")}
+				description={"Gerencie seus escritores IA"}
+				title={"Escritores"}
 			/>
 
 			<WritersStats />

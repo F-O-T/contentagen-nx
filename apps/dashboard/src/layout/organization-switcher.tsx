@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
    DropdownMenu,
    DropdownMenuContent,
@@ -35,9 +34,7 @@ import { useTRPC } from "@/integrations/clients";
 function OrganizationSwitcherErrorFallback() {
    return (
       <div className=" text-center text-destructive">
-         {translate(
-            "dashboard.layout.organization-switcher.error.failed-to-load-active",
-         )}
+         {"Failed To Load Active"}
       </div>
    );
 }
@@ -46,12 +43,10 @@ function OrganizationDropdownErrorFallback() {
    return (
       <>
          <DropdownMenuLabel className="text-muted-foreground text-xs">
-            {translate("dashboard.layout.organization-switcher.label")}
+            {"Organizações"}
          </DropdownMenuLabel>
          <DropdownMenuItem disabled>
-            {translate(
-               "dashboard.layout.organization-switcher.error.failed-to-load-teams",
-            )}
+            {"Failed To Load Teams"}
          </DropdownMenuItem>
       </>
    );
@@ -77,7 +72,7 @@ function OrganizationDropdownSkeleton() {
    return (
       <>
          <DropdownMenuLabel className="text-muted-foreground text-xs">
-            {translate("dashboard.layout.organization-switcher.label")}
+            {"Organizações"}
          </DropdownMenuLabel>
          <DropdownMenuItem disabled>
             <div className="gap-2 p-2 w-full flex items-center">
@@ -145,7 +140,7 @@ function OrganizationDropdownContent({
    return (
       <>
          <DropdownMenuLabel className="text-muted-foreground text-xs">
-            {translate("dashboard.layout.organization-switcher.label")}
+            {"Organizações"}
          </DropdownMenuLabel>
          {organizations?.map((organization) => (
             <DropdownMenuSub key={organization.name}>
@@ -246,9 +241,7 @@ function OrganizationTeamsList({
                <div className="gap-2 p-2 w-full flex items-center">
                   <Users className="size-4" />
                   <span className="text-xs text-muted-foreground">
-                     {translate(
-                        "dashboard.layout.organization-switcher.no-teams",
-                     )}
+                     {"No Teams"}
                   </span>
                </div>
             </DropdownMenuItem>
@@ -258,9 +251,7 @@ function OrganizationTeamsList({
                   <Plus className="size-4" />
                </div>
                <span className="truncate">
-                  {translate(
-                     "dashboard.layout.organization-switcher.create-team",
-                  )}
+                  {"Create Team"}
                </span>
             </DropdownMenuItem>
          </>
@@ -302,7 +293,7 @@ function OrganizationTeamsList({
                <Plus className="size-4" />
             </div>
             <span className="truncate">
-               {translate("dashboard.layout.organization-switcher.create-team")}
+               {"Criar equipe"}
             </span>
          </DropdownMenuItem>
       </>
@@ -390,9 +381,7 @@ function OrganizationSwitcherContent() {
                      }
                      title={
                         hasReachedLimit
-                           ? translate(
-                                "dashboard.layout.organization-switcher.limit-reached",
-                             )
+                           ? "Limit Reached"
                            : undefined
                      }
                   >
@@ -400,9 +389,7 @@ function OrganizationSwitcherContent() {
                         <Plus className="size-4" />
                      </div>
                      <div className="text-muted-foreground font-medium">
-                        {translate(
-                           "dashboard.layout.organization-switcher.add-organization",
-                        )}
+                        {"Add Organization"}
                      </div>
                   </DropdownMenuItem>
                </DropdownMenuContent>

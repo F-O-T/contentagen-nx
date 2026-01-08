@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Badge } from "@packages/ui/components/badge";
 import {
 	Card,
@@ -35,10 +34,10 @@ function RecentContentCardHeader() {
 		<CardHeader>
 			<CardTitle className="flex items-center gap-2">
 				<FileText className="size-5" />
-				{translate("dashboard.routes.home.recent-content.title")}
+				{"Conteúdos Recentes"}
 			</CardTitle>
 			<CardDescription>
-				{translate("dashboard.routes.home.recent-content.description")}
+				{"Sua atividade recente de conteúdo"}
 			</CardDescription>
 		</CardHeader>
 	);
@@ -50,13 +49,9 @@ function HomeRecentContentSectionErrorFallback(props: FallbackProps) {
 			<RecentContentCardHeader />
 			<CardContent>
 				{createErrorFallback({
-					errorDescription: translate(
-						"dashboard.routes.home.recent-content.state.error.description",
-					),
-					errorTitle: translate(
-						"dashboard.routes.home.recent-content.state.error.title",
-					),
-					retryText: translate("common.actions.retry"),
+					errorDescription: "Description",
+					errorTitle: "Title",
+					retryText: "Tentar novamente",
 				})(props)}
 			</CardContent>
 		</Card>
@@ -107,10 +102,10 @@ function HomeRecentContentSectionContent() {
 				<div>
 					<CardTitle className="flex items-center gap-2">
 						<FileText className="size-5" />
-						{translate("dashboard.routes.home.recent-content.title")}
+						{"Conteúdos Recentes"}
 					</CardTitle>
 					<CardDescription>
-						{translate("dashboard.routes.home.recent-content.description")}
+						{"Sua atividade recente de conteúdo"}
 					</CardDescription>
 				</div>
 				</CardHeader>
@@ -123,7 +118,7 @@ function HomeRecentContentSectionContent() {
 									<div className="min-w-0 flex-1">
 										<p className="truncate font-medium">
 											{content.meta?.title ||
-												translate("common.labels.untitled")}
+												"Sem título"}
 										</p>
 										<p className="truncate text-sm text-muted-foreground">
 											{new Date(content.createdAt).toLocaleDateString()}
@@ -147,14 +142,10 @@ function HomeRecentContentSectionContent() {
 								<Sparkles className="size-6" />
 							</EmptyMedia>
 							<EmptyTitle>
-								{translate(
-									"dashboard.routes.home.recent-content.state.empty.title",
-								)}
+								{"Title"}
 							</EmptyTitle>
 							<EmptyDescription>
-								{translate(
-									"dashboard.routes.home.recent-content.state.empty.description",
-								)}
+								{"Description"}
 							</EmptyDescription>
 						</EmptyContent>
 					</Empty>

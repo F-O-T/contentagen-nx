@@ -3,8 +3,74 @@ import { AppError, propagateError } from "@packages/utils/errors";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-   apiKey: serverEnv.OPENAI_API_KEY,
+	apiKey: serverEnv.OPENAI_API_KEY,
 });
+
+export interface ChunkOptions {
+	chunkSize?: number; // Target characters per chunk (default: 1500 ~400 tokens)
+	overlap?: number; // Overlap characters between chunks (default: 200)
+	separator?: string; // Preferred split point (default: paragraph break)
+}
+
+/**
+ * Splits text into overlapping chunks for RAG embedding
+ *
+ * @param text - The text to split into chunks
+ * @param options - Chunking configuration
+ * @returns Array of text chunks
+ */
+export function chunkText(text: string, options: ChunkOptions = {}): string[] {
+	const { chunkSize = 1500, overlap = 200, separator = "\n\n" } = options;
+
+	if (!text || text.trim().length === 0) {
+		return [];
+	}
+
+	// If text is smaller than chunk size, return as single chunk
+	if (text.length <= chunkSize) {
+		return [text.trim()];
+	}
+
+	const chunks: string[] = [];
+	const paragraphs = text.split(separator);
+
+	let currentChunk = "";
+
+	for (const paragraph of paragraphs) {
+		const trimmedParagraph = paragraph.trim();
+		if (!trimmedParagraph) continue;
+
+		// If adding this paragraph exceeds chunk size
+		if (currentChunk.length + trimmedParagraph.length + 2 > chunkSize) {
+			// Save current chunk if it has content
+			if (currentChunk.trim()) {
+				chunks.push(currentChunk.trim());
+			}
+
+			// Start new chunk with overlap from previous
+			if (currentChunk.length > overlap) {
+				// Take last `overlap` characters as context
+				const overlapStart = currentChunk.length - overlap;
+				const overlapText = currentChunk.slice(overlapStart).trim();
+				currentChunk = overlapText + separator + trimmedParagraph;
+			} else {
+				currentChunk = trimmedParagraph;
+			}
+		} else {
+			// Add paragraph to current chunk
+			currentChunk = currentChunk
+				? `${currentChunk}${separator}${trimmedParagraph}`
+				: trimmedParagraph;
+		}
+	}
+
+	// Don't forget the last chunk
+	if (currentChunk.trim()) {
+		chunks.push(currentChunk.trim());
+	}
+
+	return chunks;
+}
 
 export const createEmbedding = async (text: string) => {
    try {

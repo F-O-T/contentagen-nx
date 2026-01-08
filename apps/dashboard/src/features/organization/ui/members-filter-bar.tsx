@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    ToggleGroup,
@@ -45,9 +44,7 @@ export function MembersFilterBar({
                variant="outline"
             >
                <Filter className="size-4 mr-2" />
-               {translate(
-                  "dashboard.routes.organization.members-table.filters.role",
-               )}
+               {"Role"}
                {hasActiveFilters && (
                   <span className="ml-2 size-2 rounded-full bg-primary" />
                )}
@@ -65,15 +62,15 @@ export function MembersFilterBar({
          >
             <ToggleGroupItem aria-label="Owner" value="owner">
                <Crown className="size-4 mr-1" />
-               {translate("dashboard.routes.organization.roles.owner")}
+               {"Dono"}
             </ToggleGroupItem>
             <ToggleGroupItem aria-label="Admin" value="admin">
                <Shield className="size-4 mr-1" />
-               {translate("dashboard.routes.organization.roles.admin")}
+               {"Administrador"}
             </ToggleGroupItem>
             <ToggleGroupItem aria-label="Member" value="member">
                <User className="size-4 mr-1" />
-               {translate("dashboard.routes.organization.roles.member")}
+               {"Membro"}
             </ToggleGroupItem>
          </ToggleGroup>
 
@@ -85,9 +82,7 @@ export function MembersFilterBar({
                variant="ghost"
             >
                <X className="size-4 mr-1" />
-               {translate(
-                  "dashboard.routes.organization.members-table.filters.clear",
-               )}
+               {"Clear"}
             </Button>
          )}
       </div>

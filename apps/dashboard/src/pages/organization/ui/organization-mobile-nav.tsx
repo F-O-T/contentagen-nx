@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { QuickAccessCard } from "@packages/ui/components/quick-access-card";
 import { useNavigate } from "@tanstack/react-router";
 import { Building, Mail, Users, Users2 } from "lucide-react";
@@ -6,40 +5,32 @@ import { useActiveOrganization } from "@/hooks/use-active-organization";
 
 const organizationNavItems = [
    {
-      description: translate(
-         "dashboard.routes.organization.nav.overview.description",
-      ),
+      description: "Description",
       href: "/$slug/organization",
       icon: Building,
       id: "overview",
-      title: translate("dashboard.routes.organization.nav.overview"),
+      title: "Visão Geral",
    },
    {
-      description: translate(
-         "dashboard.routes.organization.nav.members.description",
-      ),
+      description: "Description",
       href: "/$slug/organization/members",
       icon: Users,
       id: "members",
-      title: translate("dashboard.routes.organization.nav.members"),
+      title: "Membros",
    },
    {
-      description: translate(
-         "dashboard.routes.organization.nav.teams.description",
-      ),
+      description: "Description",
       href: "/$slug/organization/teams",
       icon: Users2,
       id: "teams",
-      title: translate("dashboard.routes.organization.nav.teams"),
+      title: "Equipes",
    },
    {
-      description: translate(
-         "dashboard.routes.organization.nav.invites.description",
-      ),
+      description: "Description",
       href: "/$slug/organization/invites",
       icon: Mail,
       id: "invites",
-      title: translate("dashboard.routes.organization.nav.invites"),
+      title: "Convites",
    },
 ];
 

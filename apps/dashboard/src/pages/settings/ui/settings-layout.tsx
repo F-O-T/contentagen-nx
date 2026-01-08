@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Sidebar,
@@ -39,7 +38,7 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
                   to="/$slug/settings"
                >
                   <ChevronLeft className="size-4 mr-1" />
-                  {translate("dashboard.routes.settings.nav.back-to-settings")}
+                  {"Configurações"}
                </Link>
             </Button>
             <div className="flex-1">{children}</div>
@@ -58,10 +57,10 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
             >
                <SidebarHeader className="px-4 pt-4">
                   <h1 className="text-lg font-semibold font-serif">
-                     {translate("dashboard.routes.settings.title")}
+                     {"Configurações"}
                   </h1>
                   <p className="text-xs text-muted-foreground">
-                     {translate("dashboard.routes.settings.description")}
+                     {"Gerencie suas configurações e preferências."}
                   </p>
                </SidebarHeader>
                <SidebarContent>

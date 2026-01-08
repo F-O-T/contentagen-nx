@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
    Card,
    CardContent,
@@ -20,13 +19,9 @@ function OrganizationStatsCardErrorFallback(props: FallbackProps) {
       <Card>
          <CardContent className="pt-6">
             {createErrorFallback({
-               errorDescription: translate(
-                  "dashboard.routes.organization.stats-card.state.error.description",
-               ),
-               errorTitle: translate(
-                  "dashboard.routes.organization.stats-card.state.error.title",
-               ),
-               retryText: translate("common.actions.retry"),
+               errorDescription: "Description",
+               errorTitle: "Title",
+               retryText: "Tentar novamente",
             })(props)}
          </CardContent>
       </Card>
@@ -82,7 +77,7 @@ function OrganizationStatsCardContent() {
       <Card>
          <CardHeader className="text-center pb-2">
             <CardDescription>
-               {translate("dashboard.routes.organization.stats-card.title")}
+               {"Estatísticas da Organização"}
             </CardDescription>
             <CardTitle className="text-2xl font-bold">
                {activeOrganization.name}
@@ -97,9 +92,7 @@ function OrganizationStatsCardContent() {
                            <Users className="size-4 text-blue-500" />
                         </div>
                         <CardDescription>
-                           {translate(
-                              "dashboard.routes.organization.stats-card.members",
-                           )}
+                           {"Members"}
                         </CardDescription>
                      </div>
                      <CardTitle className="text-xl">{members.length}</CardTitle>
@@ -113,9 +106,7 @@ function OrganizationStatsCardContent() {
                            <Shield className="size-4 text-purple-500" />
                         </div>
                         <CardDescription>
-                           {translate(
-                              "dashboard.routes.organization.stats-card.admins",
-                           )}
+                           {"Admins"}
                         </CardDescription>
                      </div>
                      <CardTitle className="text-xl">{adminCount}</CardTitle>
@@ -129,9 +120,7 @@ function OrganizationStatsCardContent() {
                            <Users className="size-4 text-green-500" />
                         </div>
                         <CardDescription>
-                           {translate(
-                              "dashboard.routes.organization.stats-card.teams",
-                           )}
+                           {"Teams"}
                         </CardDescription>
                      </div>
                      <CardTitle className="text-xl">{teams.length}</CardTitle>
@@ -145,9 +134,7 @@ function OrganizationStatsCardContent() {
                            <Mail className="size-4 text-amber-500" />
                         </div>
                         <CardDescription>
-                           {translate(
-                              "dashboard.routes.organization.stats-card.pending-invites",
-                           )}
+                           {"Pending Invites"}
                         </CardDescription>
                      </div>
                      <CardTitle className="text-xl">

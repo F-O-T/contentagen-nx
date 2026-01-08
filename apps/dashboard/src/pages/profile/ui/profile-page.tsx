@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
    Card,
    CardAction,
@@ -22,26 +21,18 @@ import { ProfilePageSessionsSection } from "./profile-page-sessions-section";
 function QuickAccessCardsErrorFallback() {
    const errorCards = [
       {
-         description: translate(
-            "dashboard.routes.profile.quick-access.state.error.description",
-         ),
+         description: "Description",
          disabled: true,
          icon: <AlertCircle className="w-4 h-4" />,
          onClick: () => {},
-         title: translate(
-            "dashboard.routes.profile.quick-access.state.error.title",
-         ),
+         title: "Title",
       },
       {
-         description: translate(
-            "dashboard.routes.profile.quick-access.state.error.description",
-         ),
+         description: "Description",
          disabled: true,
          icon: <AlertCircle className="w-4 h-4" />,
          onClick: () => {},
-         title: translate(
-            "dashboard.routes.profile.quick-access.state.error.title",
-         ),
+         title: "Title",
       },
    ];
 
@@ -90,9 +81,7 @@ function QuickAccessCards() {
 
    const quickAccessCards = [
       {
-         description: translate(
-            "dashboard.routes.profile.quick-access.organization.description",
-         ),
+         description: "Description",
          disabled: false,
          icon: <Building2 className="size-4 text-primary" />,
          onClick: () =>
@@ -100,9 +89,7 @@ function QuickAccessCards() {
                params: { slug: activeOrganization.slug },
                to: "/$slug/organization",
             }),
-         title: translate(
-            "dashboard.routes.profile.quick-access.organization.title",
-         ),
+         title: "Title",
       },
    ];
 

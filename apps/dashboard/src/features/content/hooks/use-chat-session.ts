@@ -9,6 +9,7 @@ import {
 	clearChat,
 	setLoading,
 	addPlanMessage,
+	setChatMode,
 	type ChatMessage,
 	type ToolCallStatus,
 	type ActivePlan,
@@ -20,6 +21,8 @@ import {
 	updateToolCallInStep,
 	completeCurrentStep,
 	finalizeStreaming,
+	// Execution state actions
+	endPlanExecution,
 } from "../context/chat-context";
 import { useAgentChat, type AgentChatRequest } from "./use-agent-chat";
 
@@ -34,7 +37,8 @@ interface ChatSessionResponse {
 		role: "user" | "assistant";
 		content: string;
 		createdAt: string;
-		messageType?: "text" | "plan" | "tool-use";
+		messageType?: "text" | "plan" | "tool-use" | "execution-separator";
+		sourceMode?: "plan" | "writer";
 		selectionContext?: {
 			text: string;
 			contextBefore: string;
@@ -56,6 +60,7 @@ interface ChatSessionResponse {
 			status: "pending" | "approved" | "skipped" | "completed";
 		}>;
 	}>;
+	mode: "plan" | "writer";
 }
 
 interface UseChatSessionOptions {
@@ -93,11 +98,15 @@ export function useChatSession(contentId: string, options?: UseChatSessionOption
 		},
 		onComplete: () => {
 			finalizeStreaming();
+			// End plan execution tracking
+			endPlanExecution();
 			// Notify parent that agent completed - triggers content save flush
 			onAgentComplete?.();
 		},
 		onError: (error) => {
 			setChatError(error);
+			// Also end execution on error
+			endPlanExecution();
 		},
 		onToolCallStart: (toolCall, _stepIndex) => {
 			addToolCallToCurrentStep(toolCall);
@@ -142,8 +151,10 @@ export function useChatSession(contentId: string, options?: UseChatSessionOption
 				// Transform messages to our format (including tool calls and plan steps from history)
 				const transformedMessages: ChatMessage[] = data.messages.map((m) => {
 					// Determine message type
-					let type: "text" | "plan" | "tool-use" | "edit-suggestion" = "text";
-					if (m.messageType === "plan" || (m.planSteps && m.planSteps.length > 0)) {
+					let type: "text" | "plan" | "tool-use" | "edit-suggestion" | "execution-separator" = "text";
+					if (m.messageType === "execution-separator") {
+						type = "execution-separator";
+					} else if (m.messageType === "plan" || (m.planSteps && m.planSteps.length > 0)) {
 						type = "plan";
 					} else if (m.toolCalls && m.toolCalls.length > 0) {
 						type = "tool-use";
@@ -156,6 +167,7 @@ export function useChatSession(contentId: string, options?: UseChatSessionOption
 						timestamp: new Date(m.createdAt).getTime(),
 						selectionContext: m.selectionContext,
 						type,
+						sourceMode: m.sourceMode,
 						toolCalls: m.toolCalls?.map((tc) => ({
 							id: tc.id,
 							name: tc.name,
@@ -176,6 +188,11 @@ export function useChatSession(contentId: string, options?: UseChatSessionOption
 				});
 
 				initializeChatSession(data.session.id, contentId, transformedMessages);
+
+				// Restore chat mode from server
+				if (data.mode) {
+					setChatMode(data.mode);
+				}
 			} catch (err) {
 				setChatError(
 					err instanceof Error ? err : new Error("Failed to load session"),
@@ -266,6 +283,7 @@ export function useChatSession(contentId: string, options?: UseChatSessionOption
 		error,
 		isLoading,
 		isStreaming: phase === "streaming",
+		isSessionLoading: phase === "loading" && !sessionId,
 
 		// Actions
 		sendMessage,

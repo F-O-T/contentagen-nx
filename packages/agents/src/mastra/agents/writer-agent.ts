@@ -1,6 +1,8 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import type { WriterConfig } from "@packages/database/schemas/agent";
 import { serverEnv } from "@packages/environment/server";
+import { formatWriterConfig } from "../helpers";
 import type { ContentPlan } from "../schemas/plan-schema";
 
 // Import tools for writer mode
@@ -13,6 +15,7 @@ import {
 	frontmatterTools,
 	getAllFrontmatterToolInstructions,
 } from "../tools/frontmatter";
+import { getAllRagToolInstructions, ragTools } from "../tools/rag";
 
 // Available models
 const MODELS = {
@@ -85,11 +88,14 @@ ${plan.suggestedDescription ? `- Suggested Description: ${plan.suggestedDescript
 const getWriterAgentInstructions = (
 	language: "en" | "pt",
 	activePlan?: ContentPlan,
+	writerConfig?: WriterConfig,
 ): string => {
 	return `
 You are an expert blog post writer and editor. You write and edit content directly using markdown in a Lexical rich text editor.
 
 ${getLanguageInstruction(language)}
+
+${formatWriterConfig(writerConfig)}
 
 ${formatActivePlan(activePlan)}
 
@@ -347,11 +353,29 @@ When the plan or user requests images in your content:
 - **readability**: Check readability metrics (Flesch-Kincaid)
 - **keywordDensity**: Analyze keyword usage
 
+### Content Reference (RAG)
+- **searchPreviousContent**: Find related posts for internal linking and consistency
+
+## INTERNAL LINKING - CONNECT YOUR CONTENT
+
+When writing, actively look for opportunities to link to related content:
+
+1. **Search for related posts**: Use searchPreviousContent({ query: "topic", mode: "links" })
+2. **Add contextual links**: "For more details, see our [Title](/blog/slug)"
+3. **Reference past content**: Keep terminology and facts consistent with previous posts
+
+**When to search:**
+- When introducing a topic you've likely covered before
+- When making claims that might be supported by previous content
+- Before writing sections on common topics
+
 ${getAllEditorToolInstructions()}
 
 ${getAllFrontmatterToolInstructions()}
 
 ${getAllAnalysisToolInstructions()}
+
+${getAllRagToolInstructions()}
 `;
 };
 
@@ -376,19 +400,23 @@ export const writerAgent = new Agent({
 		return openrouter(model);
 	},
 
-	// Dynamic instructions based on language and active plan
+	// Dynamic instructions based on language, active plan, and writer config
 	instructions: ({ requestContext }) => {
 		const language = (requestContext?.get("language") as "en" | "pt") || "en";
 		const activePlan = requestContext?.get("activePlan") as
 			| ContentPlan
 			| undefined;
-		return getWriterAgentInstructions(language, activePlan);
+		const writerConfig = requestContext?.get("writerConfig") as
+			| WriterConfig
+			| undefined;
+		return getWriterAgentInstructions(language, activePlan, writerConfig);
 	},
 
-	// Editor + Frontmatter + Analysis tools only
+	// Editor + Frontmatter + Analysis + RAG tools
 	tools: {
 		...editorTools,
 		...frontmatterTools,
 		...analysisTools,
+		...ragTools,
 	},
 });

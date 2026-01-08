@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { QuickAccessCard } from "@packages/ui/components/quick-access-card";
 import { useNavigate } from "@tanstack/react-router";
 import { Bell, CreditCard, Settings2, Shield, User } from "lucide-react";
@@ -6,49 +5,39 @@ import { useActiveOrganization } from "@/hooks/use-active-organization";
 
 const settingsNavItems = [
    {
-      description: translate(
-         "dashboard.routes.settings.nav.profile.description",
-      ),
+      description: "Description",
       href: "/$slug/settings/profile",
       icon: User,
       id: "profile",
-      title: translate("dashboard.routes.settings.nav.profile"),
+      title: "Perfil",
    },
    {
-      description: translate(
-         "dashboard.routes.settings.nav.security.description",
-      ),
+      description: "Description",
       href: "/$slug/settings/security",
       icon: Shield,
       id: "security",
-      title: translate("dashboard.routes.settings.nav.security"),
+      title: "Segurança",
    },
    {
-      description: translate(
-         "dashboard.routes.settings.nav.preferences.description",
-      ),
+      description: "Description",
       href: "/$slug/settings/preferences",
       icon: Settings2,
       id: "preferences",
-      title: translate("dashboard.routes.settings.nav.preferences"),
+      title: "Preferências",
    },
    {
-      description: translate(
-         "dashboard.routes.settings.nav.notifications.description",
-      ),
+      description: "Description",
       href: "/$slug/settings/notifications",
       icon: Bell,
       id: "notifications",
-      title: translate("dashboard.routes.settings.nav.notifications"),
+      title: "Notificações",
    },
    {
-      description: translate(
-         "dashboard.routes.settings.nav.billing.description",
-      ),
+      description: "Description",
       href: "/$slug/settings/billing",
       icon: CreditCard,
       id: "billing",
-      title: translate("dashboard.routes.settings.nav.billing"),
+      title: "Assinatura",
    },
 ];
 

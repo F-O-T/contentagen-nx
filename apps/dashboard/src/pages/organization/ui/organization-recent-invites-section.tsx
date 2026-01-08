@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Badge } from "@packages/ui/components/badge";
 import {
    Card,
@@ -30,14 +29,10 @@ function RecentInvitesCardHeader() {
    return (
       <CardHeader className="">
          <CardTitle className="">
-            {translate(
-               "dashboard.routes.organization.recent-invites-section.title",
-            )}
+            {"Title"}
          </CardTitle>
          <CardDescription>
-            {translate(
-               "dashboard.routes.organization.recent-invites-section.description",
-            )}
+            {"Description"}
          </CardDescription>
       </CardHeader>
    );
@@ -116,13 +111,9 @@ function RecentInvitesSkeleton() {
 
 function RecentInvitesErrorFallback({ error }: { error: Error }) {
    const ErrorFallbackComponent = createErrorFallback({
-      errorDescription: translate(
-         "dashboard.routes.organization.recent-invites-section.state.error.description",
-      ),
-      errorTitle: translate(
-         "dashboard.routes.organization.recent-invites-section.state.error.title",
-      ),
-      retryText: translate("common.actions.retry"),
+      errorDescription: "Description",
+      errorTitle: "Title",
+      retryText: "Tentar novamente",
    });
 
    return (

@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Avatar, AvatarFallback, AvatarImage } from "@packages/ui/components/avatar";
 import { Badge } from "@packages/ui/components/badge";
 import {
@@ -53,14 +52,14 @@ export function ContentInfoCard({ content, slug }: ContentInfoCardProps) {
 				<div className="flex items-start justify-between gap-4">
 					<div className="flex-1 min-w-0">
 						<CardTitle className="text-xl truncate">
-							{content.meta.title || translate("common.labels.untitled")}
+							{content.meta.title || "Sem título"}
 						</CardTitle>
 						<CardDescription className="mt-1">
 							{content.meta.description}
 						</CardDescription>
 					</div>
 					<Badge className={STATUS_COLORS[content.status]} variant="outline">
-						{translate(`common.status.${content.status}` as "common.status.draft" | "common.status.published" | "common.status.archived")}
+						{"Status}"}
 					</Badge>
 				</div>
 			</CardHeader>
@@ -86,7 +85,7 @@ export function ContentInfoCard({ content, slug }: ContentInfoCardProps) {
 					<Hash className="size-4 text-muted-foreground mt-0.5" />
 					<div>
 						<p className="text-sm font-medium">
-							{translate("dashboard.routes.content.details.slug")}
+							{"Slug"}
 						</p>
 						<p className="text-sm text-muted-foreground font-mono">
 							/{content.meta.slug}
@@ -99,7 +98,7 @@ export function ContentInfoCard({ content, slug }: ContentInfoCardProps) {
 						<Tag className="size-4 text-muted-foreground mt-0.5" />
 						<div>
 							<p className="text-sm font-medium">
-								{translate("dashboard.routes.content.details.keywords")}
+								{"Palavras-chave"}
 							</p>
 							<div className="flex flex-wrap gap-1 mt-1">
 								{content.meta.keywords.map((keyword) => (
@@ -117,7 +116,7 @@ export function ContentInfoCard({ content, slug }: ContentInfoCardProps) {
 						<LinkIcon className="size-4 text-muted-foreground mt-0.5" />
 						<div>
 							<p className="text-sm font-medium">
-								{translate("dashboard.routes.content.details.sources")}
+								{"Fontes"}
 							</p>
 							<ul className="text-sm text-muted-foreground mt-1 space-y-1">
 								{content.meta.sources.map((source, index) => (
@@ -141,7 +140,7 @@ export function ContentInfoCard({ content, slug }: ContentInfoCardProps) {
 					<Calendar className="size-4 text-muted-foreground mt-0.5" />
 					<div>
 						<p className="text-sm font-medium">
-							{translate("dashboard.routes.content.details.created")}
+							{"Criado em"}
 						</p>
 						<p className="text-sm text-muted-foreground">
 							{new Date(content.createdAt).toLocaleDateString()}

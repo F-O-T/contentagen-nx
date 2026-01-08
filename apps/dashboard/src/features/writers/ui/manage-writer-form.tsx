@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Alert, AlertDescription } from "@packages/ui/components/alert";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -54,7 +53,7 @@ function ManageWriterErrorFallback() {
 		<Alert variant="destructive">
 			<AlertTriangle className="h-4 w-4" />
 			<AlertDescription>
-				{translate("common.errors.default")}
+				{"Ocorreu um erro. Por favor, tente novamente."}
 			</AlertDescription>
 		</Alert>
 	);
@@ -87,13 +86,13 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
 	const createMutation = useMutation(
 		trpc.agent.create.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.writers.form.create-success"));
+				toast.success("Escritor criado com sucesso");
 				queryClient.invalidateQueries({ queryKey: trpc.agent.list.queryKey() });
 				queryClient.invalidateQueries({ queryKey: trpc.agent.getStats.queryKey() });
 				closeSheet();
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -101,7 +100,7 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
 	const updateMutation = useMutation(
 		trpc.agent.update.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.writers.form.update-success"));
+				toast.success("Escritor atualizado com sucesso");
 				queryClient.invalidateQueries({ queryKey: trpc.agent.list.queryKey() });
 				if (writer?.id) {
 					queryClient.invalidateQueries({
@@ -111,7 +110,7 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
 				closeSheet();
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -121,11 +120,11 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
 	const schema = z.object({
 		name: z
 			.string()
-			.min(1, translate("dashboard.routes.writers.form.name-required"))
-			.max(50, translate("dashboard.routes.writers.form.name-max")),
+			.min(1, "O nome é obrigatório")
+			.max(50, "O nome deve ter no máximo 50 caracteres"),
 		description: z
 			.string()
-			.max(200, translate("dashboard.routes.writers.form.description-max"))
+			.max(200, "A descrição deve ter no máximo 200 caracteres")
 			.optional(),
 	});
 
@@ -135,17 +134,24 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
 			description: writer?.personaConfig.metadata.description ?? "",
 		},
 		onSubmit: async ({ value }) => {
+			const existingInstructions = writer?.personaConfig.instructions || {};
 			const personaConfig = {
 				metadata: {
 					name: value.name,
 					description: value.description || undefined,
 				},
 				instructions: {
-					// Preserve existing instructions in edit mode
-					...(writer?.personaConfig.instructions || {}),
+					...existingInstructions,
+					tone: (existingInstructions as any).tone as
+						| "formal"
+						| "conversational"
+						| "professional"
+						| "casual"
+						| "academic"
+						| undefined,
 					ragIntegration: true,
 				},
-			};
+			} as const;
 
 			if (isEditMode && writer) {
 				updateMutation.mutate({
@@ -190,7 +196,7 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
 						return (
 							<Field data-invalid={isInvalid}>
 								<FieldLabel htmlFor={field.name}>
-									{translate("dashboard.routes.writers.form.name")}
+									{"Nome"}
 								</FieldLabel>
 								<Input
 									aria-invalid={isInvalid}
@@ -198,7 +204,7 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
 									name={field.name}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder={translate("dashboard.routes.writers.form.name-placeholder")}
+									placeholder={"Nome do escritor"}
 									type="text"
 									value={field.state.value}
 								/>
@@ -216,7 +222,7 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
 						return (
 							<Field data-invalid={isInvalid}>
 								<FieldLabel htmlFor={field.name}>
-									{translate("dashboard.routes.writers.form.description")}
+									{"Descrição"}
 								</FieldLabel>
 								<Textarea
 									aria-invalid={isInvalid}
@@ -224,12 +230,12 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
 									name={field.name}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder={translate("dashboard.routes.writers.form.description-placeholder")}
+									placeholder={"Uma breve descrição do escritor"}
 									rows={3}
 									value={field.state.value}
 								/>
 								<FieldDescription>
-									{translate("dashboard.routes.writers.form.description-hint")}
+									{"Uma breve descrição sobre seu escritor"}
 								</FieldDescription>
 								{isInvalid && <FieldError errors={field.state.meta.errors} />}
 							</Field>
@@ -240,7 +246,7 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
 
 			<SheetFooter>
 				<Button onClick={closeSheet} type="button" variant="outline">
-					{translate("common.actions.cancel")}
+					{"Cancelar"}
 				</Button>
 				<form.Subscribe>
 					{(formState) => (
@@ -251,11 +257,11 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
 						>
 							{isPending
 								? isEditMode
-									? translate("dashboard.routes.writers.form.saving")
-									: translate("dashboard.routes.writers.form.creating")
+									? "Salvando..."
+									: "Criando..."
 								: isEditMode
-									? translate("dashboard.routes.writers.form.save")
-									: translate("dashboard.routes.writers.form.create")}
+									? "Salvar Alterações"
+									: "Criar Escritor"}
 						</Button>
 					)}
 				</form.Subscribe>
@@ -272,13 +278,13 @@ export const ManageWriterForm: FC<ManageWriterFormProps> = ({ writer }) => {
 			<SheetHeader>
 				<SheetTitle>
 					{isEditMode
-						? translate("dashboard.routes.writers.form.edit-title")
-						: translate("dashboard.routes.writers.form.create-title")}
+						? "Editar Escritor"
+						: "Novo Escritor"}
 				</SheetTitle>
 				<SheetDescription>
 					{isEditMode
-						? translate("dashboard.routes.writers.form.edit-description")
-						: translate("dashboard.routes.writers.form.create-description")}
+						? "Atualize as configurações do escritor"
+						: "Adicione um novo escritor IA à sua equipe"}
 				</SheetDescription>
 			</SheetHeader>
 			<ErrorBoundary FallbackComponent={ManageWriterErrorFallback}>

@@ -1,5 +1,5 @@
 import { cn } from "@packages/ui/lib/utils";
-import { Bot, User } from "lucide-react";
+import { Bot, User, ListChecks, Pencil } from "lucide-react";
 import type { ChatMessage as ChatMessageType } from "../context/chat-context";
 import { ChatToolCallList } from "./chat-tool-call";
 import { ChatMarkdown } from "./chat-markdown";
@@ -83,10 +83,29 @@ export function ChatMessage({
 					</div>
 				)}
 
-				{/* Timestamp */}
-				<span className="text-[10px] text-muted-foreground">
-					{formatTime(message.timestamp)}
-				</span>
+				{/* Footer: Mode badge + Timestamp */}
+				<div className="flex items-center gap-2">
+					{/* Mode badge for assistant messages */}
+					{!isUser && message.sourceMode && (
+						<div className={cn(
+							"flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium",
+							message.sourceMode === "plan" 
+								? "bg-blue-500/10 text-blue-600" 
+								: "bg-green-500/10 text-green-600"
+						)}>
+							{message.sourceMode === "plan" ? (
+								<ListChecks className="size-2.5" />
+							) : (
+								<Pencil className="size-2.5" />
+							)}
+							<span>{message.sourceMode === "plan" ? "Plan" : "Writer"}</span>
+						</div>
+					)}
+					{/* Timestamp */}
+					<span className="text-[10px] text-muted-foreground">
+						{formatTime(message.timestamp)}
+					</span>
+				</div>
 			</div>
 		</div>
 	);

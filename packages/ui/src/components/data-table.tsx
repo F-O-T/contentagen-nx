@@ -1,6 +1,5 @@
 "use client";
 
-import { translate } from "@packages/localization";
 import {
    type ColumnDef,
    type ColumnFiltersState,
@@ -86,16 +85,12 @@ const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 30, 50, 100];
 function DataTablePagination({
    currentPage,
    totalPages,
-   totalCount,
+   totalCount: _totalCount,
    pageSize,
    onPageChange,
    onPageSizeChange,
    pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
 }: DataTablePaginationProps) {
-   const showingCount = Math.min(
-      pageSize,
-      totalCount - (currentPage - 1) * pageSize,
-   );
    const isFirstPage = currentPage === 1;
    const isLastPage = currentPage === totalPages || totalPages === 0;
    const hasSinglePage = totalPages <= 1;
@@ -117,28 +112,17 @@ function DataTablePagination({
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
          <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground hidden md:block">
-               {translate(
-                  "dashboard.routes.transactions.list-section.showing",
-                  {
-                     count: showingCount,
-                     total: totalCount,
-                  },
-               )}
+               {"Showing"}
             </div>
             <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-               {translate("dashboard.routes.transactions.list-section.page", {
-                  current: currentPage,
-                  total: Math.max(1, totalPages),
-               })}
+               {"Página {{current}} de {{total}}"}
             </div>
          </div>
          <div className="flex items-center gap-4">
             {onPageSizeChange && (
                <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground hidden sm:inline">
-                     {translate(
-                        "dashboard.routes.transactions.list-section.rows-per-page",
-                     )}
+                     {"Rows Per Page"}
                   </span>
                   <Select
                      onValueChange={(value) => onPageSizeChange(Number(value))}

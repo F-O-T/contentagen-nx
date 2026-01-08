@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    InputGroup,
@@ -25,9 +24,7 @@ export function TeamsFilterBar({
          <InputGroup className="sm:max-w-md flex-1">
             <InputGroupInput
                onChange={(e) => onSearchChange(e.target.value)}
-               placeholder={translate(
-                  "dashboard.routes.organization.teams-table.filters.search",
-               )}
+               placeholder={"Search"}
                value={searchTerm}
             />
             <InputGroupAddon>
@@ -43,9 +40,7 @@ export function TeamsFilterBar({
                variant="ghost"
             >
                <X className="size-4 mr-1" />
-               {translate(
-                  "dashboard.routes.organization.teams-table.filters.clear",
-               )}
+               {"Clear"}
             </Button>
          )}
       </div>

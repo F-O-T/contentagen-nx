@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
    Tooltip,
    TooltipContent,
@@ -180,17 +179,17 @@ export const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
       {
          icon: Monitor,
          key: "system",
-         label: translate("common.themes.system"),
+         label: "Tema do sistema",
       },
       {
          icon: Sun,
          key: "light",
-         label: translate("common.themes.light"),
+         label: "Tema claro",
       },
       {
          icon: Moon,
          key: "dark",
-         label: translate("common.themes.dark"),
+         label: "Tema escuro",
       },
    ];
 

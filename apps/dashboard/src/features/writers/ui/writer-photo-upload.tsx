@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
 	Avatar,
 	AvatarFallback,
@@ -64,7 +63,7 @@ export function WriterPhotoUpload({
 	const confirmUploadMutation = useMutation(
 		trpc.agent.confirmPhotoUpload.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.writers.form.photo-success"));
+				toast.success("Foto atualizada com sucesso");
 				if (agentId) {
 					queryClient.invalidateQueries({
 						queryKey: trpc.agent.getById.queryKey({ id: agentId }),
@@ -75,7 +74,7 @@ export function WriterPhotoUpload({
 				}
 			},
 			onError: () => {
-				toast.error(translate("dashboard.routes.writers.form.photo-error"));
+				toast.error("Erro ao enviar foto");
 			},
 		}),
 	);
@@ -135,7 +134,7 @@ export function WriterPhotoUpload({
 			if (storageKey) {
 				await cancelUploadMutation.mutateAsync({ storageKey });
 			}
-			toast.error(translate("dashboard.routes.writers.form.photo-error"));
+			toast.error("Erro ao enviar foto");
 		} finally {
 			fileUpload.setUploading(false);
 		}
@@ -175,7 +174,7 @@ export function WriterPhotoUpload({
 					type="file"
 				/>
 				<p className="text-xs text-muted-foreground">
-					{translate("dashboard.routes.writers.form.photo-hint")}
+					{"Clique para alterar a foto"}
 				</p>
 			</div>
 		);
@@ -226,14 +225,14 @@ export function WriterPhotoUpload({
 						) : (
 							<Upload className="size-3" />
 						)}
-						{translate("common.actions.upload")}
+						{"Enviar"}
 					</Button>
 				</div>
 			)}
 
 			{!fileUpload.selectedFile && (
 				<p className="text-xs text-muted-foreground">
-					{translate("dashboard.routes.writers.form.photo-hint")}
+					{"Clique para alterar a foto"}
 				</p>
 			)}
 		</div>

@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Avatar, AvatarFallback, AvatarImage } from "@packages/ui/components/avatar";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
@@ -69,7 +68,7 @@ export function createContentColumns(
 		},
 		{
 			accessorKey: "title",
-			header: translate("dashboard.routes.content.table.title"),
+			header: "Título",
 			cell: ({ row }) => {
 				const content = row.original;
 
@@ -80,7 +79,7 @@ export function createContentColumns(
 							to="/$slug/content/$contentId"
 							params={{ slug, contentId: content.id }}
 						>
-							{content.meta.title || translate("common.labels.untitled")}
+							{content.meta.title || "Sem título"}
 						</Link>
 						<p className="text-xs text-muted-foreground truncate max-w-[250px]">
 							{content.meta.description}
@@ -91,7 +90,7 @@ export function createContentColumns(
 		},
 		{
 			accessorKey: "agent",
-			header: translate("dashboard.routes.content.table.writer"),
+			header: "Escritor",
 			cell: ({ row }) => {
 				const agent = row.original.agent;
 				if (!agent) return <span className="text-muted-foreground">-</span>;
@@ -122,19 +121,19 @@ export function createContentColumns(
 		},
 		{
 			accessorKey: "status",
-			header: translate("dashboard.routes.content.table.status"),
+			header: "Status",
 			cell: ({ row }) => (
 				<Badge
 					className={STATUS_COLORS[row.original.status]}
 					variant="outline"
 				>
-					{translate(`common.status.${row.original.status}`)}
+					{"Status}"}
 				</Badge>
 			),
 		},
 		{
 			accessorKey: "createdAt",
-			header: translate("dashboard.routes.content.table.created"),
+			header: "Criado em",
 			cell: ({ row }) => (
 				<span className="text-muted-foreground">
 					{new Date(row.original.createdAt).toLocaleDateString()}
@@ -151,7 +150,7 @@ export function createContentColumns(
 						<DropdownMenuTrigger asChild>
 							<Button className="size-8 p-0" variant="ghost">
 								<span className="sr-only">
-									{translate("common.actions.open-menu")}
+									{"Abrir menu"}
 								</span>
 								<MoreHorizontal className="size-4" />
 							</Button>
@@ -163,25 +162,25 @@ export function createContentColumns(
 									params={{ slug, contentId: content.id }}
 								>
 									<Eye className="mr-2 size-4" />
-									{translate("common.actions.view")}
+									{"Ver"}
 								</Link>
 							</DropdownMenuItem>
 							{onEdit && (
 								<DropdownMenuItem onClick={() => onEdit(content)}>
 									<Edit className="mr-2 size-4" />
-									{translate("common.actions.edit")}
+									{"Editar"}
 								</DropdownMenuItem>
 							)}
 							{onPublish && content.status === "draft" && (
 								<DropdownMenuItem onClick={() => onPublish(content)}>
 									<Send className="mr-2 size-4" />
-									{translate("common.actions.publish")}
+									{"Publicar"}
 								</DropdownMenuItem>
 							)}
 							{onArchive && content.status !== "archived" && (
 								<DropdownMenuItem onClick={() => onArchive(content)}>
 									<Archive className="mr-2 size-4" />
-									{translate("common.actions.archive")}
+									{"Arquivar"}
 								</DropdownMenuItem>
 							)}
 							{onDelete && (
@@ -192,7 +191,7 @@ export function createContentColumns(
 										onClick={() => onDelete(content)}
 									>
 										<Trash2 className="mr-2 size-4" />
-										{translate("common.actions.delete")}
+										{"Excluir"}
 									</DropdownMenuItem>
 								</>
 							)}

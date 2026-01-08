@@ -6,7 +6,7 @@ import {
 	updateAgent,
 } from "@packages/database/repositories/agent-repository";
 import { getContentsByAgentId } from "@packages/database/repositories/content-repository";
-import { PersonaConfigSchema } from "@packages/database/schema";
+import { PersonaConfigSchema, WriterConfigSchema } from "@packages/database/schema";
 import {
 	deleteFile,
 	generatePresignedPutUrl,
@@ -519,6 +519,91 @@ export const agentRouter = router({
 				console.error("Error updating writer:", err);
 				propagateError(err);
 				throw APIError.internal("Failed to update writer.");
+			}
+		}),
+
+	getWriterConfig: protectedProcedure
+		.input(z.object({ id: z.string().uuid() }))
+		.query(async ({ ctx, input }) => {
+			try {
+				const resolvedCtx = await ctx;
+				const organizationId = resolvedCtx.organizationId;
+
+				if (!organizationId) {
+					throw APIError.unauthorized(
+						"User must be authenticated and belong to an organization to view writer config.",
+					);
+				}
+
+				const agent = await getAgentById(resolvedCtx.db, input.id);
+				if (!agent) {
+					throw APIError.notFound("Writer not found.");
+				}
+				if (agent.organizationId !== organizationId) {
+					throw APIError.forbidden(
+						"You don't have permission to view this writer's config.",
+					);
+				}
+
+				// Return the writer config (instructions field in personaConfig)
+				return agent.personaConfig.instructions ?? {};
+			} catch (err) {
+				console.error("Error getting writer config:", err);
+				propagateError(err);
+				throw APIError.internal("Failed to get writer config.");
+			}
+		}),
+
+	updateWriterConfig: protectedProcedure
+		.input(
+			z.object({
+				id: z.string().uuid(),
+				config: WriterConfigSchema.partial(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			try {
+				const resolvedCtx = await ctx;
+				const organizationId = resolvedCtx.organizationId;
+
+				if (!organizationId) {
+					throw APIError.unauthorized(
+						"User must be authenticated and belong to an organization to update writer config.",
+					);
+				}
+
+				const existing = await getAgentById(resolvedCtx.db, input.id);
+				if (!existing) {
+					throw APIError.notFound("Writer not found.");
+				}
+				if (existing.organizationId !== organizationId) {
+					throw APIError.forbidden(
+						"You don't have permission to update this writer's config.",
+					);
+				}
+
+				// Merge new config with existing config and parse to apply defaults
+				const currentConfig = existing.personaConfig.instructions ?? {};
+				const mergedConfig = WriterConfigSchema.parse({
+					...currentConfig,
+					...input.config,
+				});
+
+				// Update the personaConfig with merged instructions
+				const updatedPersonaConfig = {
+					...existing.personaConfig,
+					instructions: mergedConfig,
+				};
+
+				const updated = await updateAgent(resolvedCtx.db, input.id, {
+					personaConfig: updatedPersonaConfig,
+				});
+
+				return updated?.personaConfig.instructions ?? {};
+			} catch (err) {
+				console.error("Error updating writer config:", err);
+				propagateError(err);
+				throw APIError.internal("Failed to update writer config.");
 			}
 		}),
 });

@@ -16,6 +16,12 @@ import {
 	ContentRequestSchema,
 } from "@packages/database/schema";
 import { content } from "@packages/database/schemas/content";
+import { serverEnv } from "@packages/environment/server";
+import { createPgVector } from "@packages/rag/client";
+import {
+	indexPublishedContent,
+	removeContentFromIndex,
+} from "@packages/rag/services/content-indexing-service";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -331,6 +337,16 @@ export const contentRouter = router({
 					);
 				}
 
+				// Remove from RAG index before deleting
+				if (serverEnv.PG_VECTOR_URL) {
+					const ragClient = createPgVector({
+						pgVectorURL: serverEnv.PG_VECTOR_URL,
+					});
+					await removeContentFromIndex(ragClient, input.id).catch((err) => {
+						console.error("Failed to remove deleted content from RAG:", err);
+					});
+				}
+
 				await deleteContent(resolvedCtx.db, input.id);
 				return { success: true };
 			} catch (err) {
@@ -365,6 +381,29 @@ export const contentRouter = router({
 				}
 
 				const published = await publishContent(resolvedCtx.db, input.id);
+
+				if (!published) {
+					throw APIError.internal("Failed to publish content.");
+				}
+
+				// Index content for RAG (async, don't block publish)
+				if (serverEnv.PG_VECTOR_URL) {
+					const ragClient = createPgVector({
+						pgVectorURL: serverEnv.PG_VECTOR_URL,
+					});
+					indexPublishedContent(ragClient, {
+						id: published.id,
+						agentId: published.agentId,
+						slug: published.meta.slug,
+						title: published.meta.title,
+						description: published.meta.description,
+						keywords: published.meta.keywords,
+						body: published.body || "",
+					}).catch((err) => {
+						console.error("Failed to index published content for RAG:", err);
+					});
+				}
+
 				return published;
 			} catch (err) {
 				console.error("Error publishing content:", err);
@@ -398,6 +437,17 @@ export const contentRouter = router({
 				}
 
 				const archived = await archiveContent(resolvedCtx.db, input.id);
+
+				// Remove from RAG index (async, don't block archive)
+				if (serverEnv.PG_VECTOR_URL) {
+					const ragClient = createPgVector({
+						pgVectorURL: serverEnv.PG_VECTOR_URL,
+					});
+					removeContentFromIndex(ragClient, input.id).catch((err) => {
+						console.error("Failed to remove archived content from RAG:", err);
+					});
+				}
+
 				return archived;
 			} catch (err) {
 				console.error("Error archiving content:", err);

@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { FieldDescription } from "@packages/ui/components/field";
@@ -36,9 +35,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
             onRequest: () => {
                setIsGoogleLoading(true);
                toast.loading(
-                  translate(
-                     "dashboard.routes.sign-in.messages.google-requesting",
-                  ),
+                  "Conectando com Google...",
                );
             },
          },
@@ -46,9 +43,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
    }, [callbackURL]);
 
    const TermsAndPrivacyText = () => {
-      const text = translate(
-         "dashboard.routes.sign-in.texts.terms-and-privacy",
-      ).split("{split}");
+      const text = "Ao continuar, você concorda com nossos {split} e {split}.".split("{split}");
 
       return (
          <>
@@ -59,7 +54,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
                rel="noopener noreferrer"
                target="_blank"
             >
-               {translate("dashboard.routes.sign-in.texts.terms-of-service")}
+               {"Termos de Serviço"}
             </a>
             <span>{text[1]}</span>
             <a
@@ -68,7 +63,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
                rel="noopener noreferrer"
                target="_blank"
             >
-               {translate("dashboard.routes.sign-in.texts.privacy-policy")}
+               {"Política de Privacidade"}
             </a>
             <span>{text[2]}</span>
          </>
@@ -80,10 +75,10 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
          {/* Header */}
          <div className="text-center space-y-2">
             <h1 className="text-3xl font-semibold font-serif">
-               {translate("dashboard.routes.sign-in.title")}
+               {"Entrar"}
             </h1>
             <p className="text-muted-foreground text-sm">
-               {translate("dashboard.routes.sign-in.description")}
+               {"Bom te ver de novo! Entre na sua conta para continuar."}
             </p>
          </div>
 
@@ -112,11 +107,11 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
                   </svg>
                )}
                <span>
-                  {translate("dashboard.routes.sign-in.actions.google-sign-in")}
+                  {"Continuar com Google"}
                </span>
                {lastMethod === "google" && (
                   <Badge className="absolute -top-2 -right-2" variant="default">
-                     {translate("dashboard.routes.sign-in.last-used")}
+                     {"Último usado"}
                   </Badge>
                )}
             </Button>
@@ -130,16 +125,14 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
                <Link to="/auth/anonymous">
                   <User className="size-5" />
                   <span>
-                     {translate(
-                        "dashboard.routes.sign-in.actions.try-without-account",
-                     )}
+                     {"Experimentar sem conta"}
                   </span>
                   {lastMethod === "anonymous" && (
                      <Badge
                         className="absolute -top-2 -right-2"
                         variant="default"
                      >
-                        {translate("dashboard.routes.sign-in.last-used")}
+                        {"Último usado"}
                      </Badge>
                   )}
                </Link>
@@ -153,7 +146,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
                <span className="bg-background px-2 text-muted-foreground">
-                  {translate("dashboard.routes.sign-in.texts.or-continue-with")}
+                  {"ou continue com"}
                </span>
             </div>
          </div>
@@ -167,7 +160,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
             >
                {lastMethod === "email" && (
                   <Badge className="absolute -top-2 -right-2" variant="default">
-                     {translate("dashboard.routes.sign-in.last-used")}
+                     {"Último usado"}
                   </Badge>
                )}
                <div className="flex items-center justify-center size-10 rounded-full bg-muted group-hover:bg-primary/10 transition-colors">
@@ -175,12 +168,10 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
                </div>
                <div className="text-center">
                   <p className="text-sm font-medium">
-                     {translate("dashboard.routes.sign-in.methods.email")}
+                     {"Email e Senha"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                     {translate(
-                        "dashboard.routes.sign-in.methods.email-description",
-                     )}
+                     {"Faça login com seu e-mail e senha"}
                   </p>
                </div>
             </Link>
@@ -192,7 +183,7 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
             >
                {lastMethod === "magicLink" && (
                   <Badge className="absolute -top-2 -right-2" variant="default">
-                     {translate("dashboard.routes.sign-in.last-used")}
+                     {"Último usado"}
                   </Badge>
                )}
                <div className="flex items-center justify-center size-10 rounded-full bg-muted group-hover:bg-primary/10 transition-colors">
@@ -200,12 +191,10 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
                </div>
                <div className="text-center">
                   <p className="text-sm font-medium">
-                     {translate("dashboard.routes.sign-in.methods.magic-link")}
+                     {"Link Mágico"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                     {translate(
-                        "dashboard.routes.sign-in.methods.magic-link-description",
-                     )}
+                     {"Receba um link de acesso no seu e-mail"}
                   </p>
                </div>
             </Link>
@@ -215,13 +204,13 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
          <div className="text-sm text-center space-y-4">
             <div className="flex gap-1 justify-center items-center">
                <span>
-                  {translate("dashboard.routes.sign-in.texts.no-account")}
+                  {"Primeira vez aqui? "}
                </span>
                <Link
                   className="text-primary font-medium hover:underline"
                   to="/auth/sign-up"
                >
-                  {translate("dashboard.routes.sign-in.actions.sign-up")}
+                  {"Criar conta"}
                </Link>
             </div>
             <FieldDescription className="text-center">

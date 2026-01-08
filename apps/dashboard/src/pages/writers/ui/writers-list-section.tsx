@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -29,12 +28,12 @@ function WritersListContent() {
 	const deleteMutation = useMutation(
 		trpc.agent.delete.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.writers.delete-success"));
+				toast.success("Escritor excluído com sucesso");
 				queryClient.invalidateQueries({ queryKey: trpc.agent.list.queryKey() });
 				queryClient.invalidateQueries({ queryKey: trpc.agent.getStats.queryKey() });
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -78,7 +77,7 @@ function WritersListError({ error }: { error: Error }) {
 	return (
 		<div className="text-center py-8">
 			<p className="text-muted-foreground">
-				{translate("common.errors.default")}
+				{"Ocorreu um erro. Por favor, tente novamente."}
 			</p>
 			<p className="text-xs text-muted-foreground mt-1">{error.message}</p>
 		</div>

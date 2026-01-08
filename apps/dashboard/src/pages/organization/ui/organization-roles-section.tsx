@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
    Card,
    CardContent,
@@ -48,33 +47,45 @@ export function OrganizationRoles() {
       },
    ];
 
-   function getLocalizedRoleData(roleId: string) {
-      const roleKey = `dashboard.routes.organization.roles-section.roles.${roleId}`;
-      return {
-         description: translate(
-            `${roleKey}.description` as Parameters<typeof translate>[0],
-         ),
+   type RoleId = "owner" | "admin" | "member";
+   
+   const roleData: Record<RoleId, { title: string; description: string; permissions: string[] }> = {
+      owner: {
+         title: "Proprietário",
+         description: "Acesso total à organização, incluindo configurações de faturamento e exclusão.",
          permissions: [
-            translate(
-               `${roleKey}.permissions.0` as Parameters<typeof translate>[0],
-            ),
-            translate(
-               `${roleKey}.permissions.1` as Parameters<typeof translate>[0],
-            ),
-            translate(
-               `${roleKey}.permissions.2` as Parameters<typeof translate>[0],
-            ),
-            translate(
-               `${roleKey}.permissions.3` as Parameters<typeof translate>[0],
-            ),
-            translate(
-               `${roleKey}.permissions.4` as Parameters<typeof translate>[0],
-            ),
-         ].filter(Boolean),
-         title: translate(
-            `${roleKey}.title` as Parameters<typeof translate>[0],
-         ),
-      };
+            "Gerenciar membros e funções",
+            "Acessar configurações de faturamento",
+            "Excluir organização",
+            "Todas as permissões de administrador",
+         ],
+      },
+      admin: {
+         title: "Administrador",
+         description: "Pode gerenciar membros e configurações da organização.",
+         permissions: [
+            "Convidar e remover membros",
+            "Gerenciar configurações da organização",
+            "Acessar todos os projetos",
+            "Criar e excluir projetos",
+         ],
+      },
+      member: {
+         title: "Membro",
+         description: "Acesso padrão aos recursos da organização.",
+         permissions: [
+            "Visualizar projetos atribuídos",
+            "Criar conteúdo",
+            "Colaborar com a equipe",
+         ],
+      },
+   };
+
+   function getLocalizedRoleData(roleId: string) {
+      if (roleId === "owner" || roleId === "admin" || roleId === "member") {
+         return roleData[roleId];
+      }
+      return roleData.member;
    }
 
    function RolePermissionsDialog({
@@ -88,14 +99,10 @@ export function OrganizationRoles() {
          <DialogContent>
             <DialogHeader>
                <DialogTitle className="flex items-center gap-3">
-                  {translate(
-                     "dashboard.routes.organization.roles-section.dialog.permissions-title",
-                  )}
+                  {localizedRole.title}
                </DialogTitle>
                <DialogDescription>
-                  {translate(
-                     "dashboard.routes.organization.roles-section.dialog.permissions-description",
-                  )}
+                  Permissões e capacidades desta função
                </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -104,10 +111,7 @@ export function OrganizationRoles() {
                </p>
                <div>
                   <p className="text-sm font-medium mb-3">
-                     {translate(
-                        "dashboard.routes.organization.roles-section.dialog.permissions-title",
-                     )}
-                     :
+                     Permissões:
                   </p>
                   <ul className="text-sm space-y-2">
                      {localizedRole.permissions.map((permission, index) => (
@@ -129,12 +133,10 @@ export function OrganizationRoles() {
       <Card className="w-full">
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.organization.roles-section.title")}
+               Cargos da Organização
             </CardTitle>
             <CardDescription>
-               {translate(
-                  "dashboard.routes.organization.roles-section.description",
-               )}
+               Entenda as funções e permissões disponíveis
             </CardDescription>
          </CardHeader>
          <CardContent className="w-full">

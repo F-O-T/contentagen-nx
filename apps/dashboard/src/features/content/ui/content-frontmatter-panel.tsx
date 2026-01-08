@@ -1,6 +1,5 @@
 "use client";
 
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
 	Collapsible,
@@ -93,7 +92,7 @@ export function ContentFrontmatterPanel({
 		isGeneratingAll,
 	} = useMetaGeneration({
 		onError: (error) => {
-			toast.error(error.message || translate("common.errors.default"));
+			toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 		},
 	});
 
@@ -266,7 +265,7 @@ export function ContentFrontmatterPanel({
 						{isSaving && (
 							<span className="text-xs text-amber-600 flex items-center gap-1">
 								<Loader2 className="size-3 animate-spin" />
-								{translate("dashboard.routes.content.details.saving")}
+								{"Salvando..."}
 							</span>
 						)}
 					</div>
@@ -288,7 +287,7 @@ export function ContentFrontmatterPanel({
 						return (
 							<Field data-invalid={isInvalid}>
 								<FieldLabel htmlFor={field.name}>
-									{translate("dashboard.routes.content.form.title")}
+									{"Título"}
 								</FieldLabel>
 								<Input
 									aria-invalid={isInvalid}
@@ -296,9 +295,7 @@ export function ContentFrontmatterPanel({
 									name={field.name}
 									onBlur={field.handleBlur}
 									onChange={(e) => handleTitleChange(e.target.value)}
-									placeholder={translate(
-										"dashboard.routes.content.form.title-placeholder",
-									)}
+									placeholder={"Title Placeholder"}
 									type="text"
 									value={field.state.value}
 									disabled={disabled}
@@ -318,7 +315,7 @@ export function ContentFrontmatterPanel({
 						return (
 							<Field data-invalid={isInvalid}>
 								<FieldLabel htmlFor={field.name}>
-									{translate("dashboard.routes.content.form.slug")}
+									{"Slug"}
 								</FieldLabel>
 								<div className="flex gap-2">
 									<Input
@@ -329,9 +326,7 @@ export function ContentFrontmatterPanel({
 										onChange={(e) =>
 											handleFieldChange("slug", e.target.value)
 										}
-										placeholder={translate(
-											"dashboard.routes.content.form.slug-placeholder",
-										)}
+										placeholder={"Slug Placeholder"}
 										type="text"
 										value={field.state.value}
 										disabled={disabled}
@@ -368,7 +363,7 @@ export function ContentFrontmatterPanel({
 							<Field data-invalid={isInvalid}>
 								<div className="flex items-center justify-between">
 									<FieldLabel htmlFor={field.name}>
-										{translate("dashboard.routes.content.form.description")}
+										{"Descrição"}
 									</FieldLabel>
 									<Tooltip>
 										<TooltipTrigger asChild>
@@ -401,9 +396,7 @@ export function ContentFrontmatterPanel({
 									onChange={(e) =>
 										handleFieldChange("description", e.target.value)
 									}
-									placeholder={translate(
-										"dashboard.routes.content.form.description-placeholder",
-									)}
+									placeholder={"Description Placeholder"}
 									rows={2}
 									value={field.state.value}
 									disabled={disabled}

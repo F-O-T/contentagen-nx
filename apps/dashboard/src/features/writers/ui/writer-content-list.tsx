@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -68,12 +67,12 @@ function WriterContentListError() {
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
 					<FileText className="size-5" />
-					{translate("dashboard.routes.writers.details.content-title")}
+					{"Conteúdos"}
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
 				<p className="text-sm text-muted-foreground">
-					{translate("common.errors.default")}
+					{"Ocorreu um erro. Por favor, tente novamente."}
 				</p>
 			</CardContent>
 		</Card>
@@ -101,10 +100,10 @@ function WriterContentListContent({ agentId }: WriterContentListProps) {
 				<div>
 					<CardTitle className="flex items-center gap-2">
 						<FileText className="size-5" />
-						{translate("dashboard.routes.writers.details.content-title")}
+						{"Conteúdos"}
 					</CardTitle>
 					<CardDescription>
-						{translate("dashboard.routes.writers.details.content-description")}
+						{"Conteúdos gerados por este escritor"}
 					</CardDescription>
 				</div>
 				<Button asChild size="sm" variant="outline">
@@ -114,7 +113,7 @@ function WriterContentListContent({ agentId }: WriterContentListProps) {
 						search={{ agentId }}
 					>
 						<Plus className="size-4 mr-1" />
-						{translate("dashboard.routes.writers.details.create-content")}
+						{"Criar Conteúdo"}
 					</Link>
 				</Button>
 			</CardHeader>
@@ -134,7 +133,7 @@ function WriterContentListContent({ agentId }: WriterContentListProps) {
 									<div className="min-w-0 flex-1">
 										<p className="truncate font-medium">
 											{content.meta?.title ||
-												translate("common.labels.untitled")}
+												"Sem título"}
 										</p>
 										<p className="truncate text-sm text-muted-foreground">
 											{new Date(content.createdAt).toLocaleDateString()}
@@ -144,7 +143,7 @@ function WriterContentListContent({ agentId }: WriterContentListProps) {
 										className={STATUS_COLORS[content.status || "draft"]}
 										variant="outline"
 									>
-										{translate(`common.status.${content.status || "draft"}`)}
+										{"Status || "}
 									</Badge>
 								</Link>
 								{index !== contents.length - 1 && <ItemSeparator />}
@@ -158,10 +157,10 @@ function WriterContentListContent({ agentId }: WriterContentListProps) {
 								<Sparkles className="size-6" />
 							</EmptyMedia>
 							<EmptyTitle>
-								{translate("dashboard.routes.writers.details.no-content")}
+								{"Nenhum conteúdo ainda"}
 							</EmptyTitle>
 							<EmptyDescription>
-								{translate("dashboard.routes.writers.details.no-content-description")}
+								{"Comece criando um conteúdo com este escritor"}
 							</EmptyDescription>
 						</EmptyContent>
 					</Empty>

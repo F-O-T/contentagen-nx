@@ -1,5 +1,6 @@
 import { LogoIcon } from "@packages/ui/blocks/logo";
 import { useEffect, useRef } from "react";
+import { Play } from "lucide-react";
 import type { ChatMessage as ChatMessageType, ToolCall, StreamingStep, PlanStep, ActivePlan } from "../context/chat-context";
 import { ChatMessage } from "./chat-message";
 import { ChatPlanMessage } from "./chat-plan-message";
@@ -16,6 +17,31 @@ interface ChatMessageListProps {
 	onExecutePlan?: (approvedSteps: PlanStep[], executionPrompt: string, planContext: ActivePlan) => void;
 }
 
+/**
+ * Execution separator - visual divider when plan execution starts
+ */
+function ExecutionSeparator({ message }: { message: ChatMessageType }) {
+	return (
+		<div className="py-4">
+			<div className="flex items-center gap-3">
+				<div className="flex-1 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+				<div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+					<Play className="size-3.5 text-primary" />
+					<span className="text-xs font-medium text-primary">
+						Executing Plan
+					</span>
+				</div>
+				<div className="flex-1 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+			</div>
+			{message.content && (
+				<p className="text-center text-xs text-muted-foreground mt-2">
+					{message.content}
+				</p>
+			)}
+		</div>
+	);
+}
+
 function ChatMessageItem({
 	message,
 	onAcceptEdit,
@@ -25,6 +51,9 @@ function ChatMessageItem({
 	onAcceptEdit?: (suggestion: NonNullable<ChatMessageType["editSuggestion"]>) => void;
 	onExecutePlan?: (approvedSteps: PlanStep[], executionPrompt: string, planContext: ActivePlan) => void;
 }) {
+	if (message.type === "execution-separator") {
+		return <ExecutionSeparator message={message} />;
+	}
 	if (message.type === "plan") {
 		return <ChatPlanMessage message={message} onExecutePlan={onExecutePlan} />;
 	}

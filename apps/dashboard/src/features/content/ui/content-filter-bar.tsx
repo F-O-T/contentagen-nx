@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
@@ -35,7 +34,7 @@ export function ContentFilterBar({
 				<Input
 					className="pl-9"
 					onChange={(e) => onSearchChange(e.target.value)}
-					placeholder={translate("dashboard.routes.content.filter.search")}
+					placeholder={"Buscar conteúdos..."}
 					type="search"
 					value={searchTerm}
 				/>
@@ -43,25 +42,25 @@ export function ContentFilterBar({
 
 			<Select value={statusFilter} onValueChange={onStatusFilterChange}>
 				<SelectTrigger className="w-full sm:w-[150px]">
-					<SelectValue placeholder={translate("dashboard.routes.content.filter.status")} />
+					<SelectValue placeholder={"Status"} />
 				</SelectTrigger>
 				<SelectContent>
 					<SelectItem value="all">
-						{translate("dashboard.routes.content.filter.all-status")}
+						{"Todos os status"}
 					</SelectItem>
 					<SelectItem value="draft">
 						<Badge className="bg-amber-500/10 text-amber-600 border-amber-200" variant="outline">
-							{translate("common.status.draft")}
+							{"Rascunho"}
 						</Badge>
 					</SelectItem>
 					<SelectItem value="published">
 						<Badge className="bg-green-500/10 text-green-600 border-green-200" variant="outline">
-							{translate("common.status.published")}
+							{"Publicado"}
 						</Badge>
 					</SelectItem>
 					<SelectItem value="archived">
 						<Badge className="bg-slate-500/10 text-slate-600 border-slate-200" variant="outline">
-							{translate("common.status.archived")}
+							{"Arquivado"}
 						</Badge>
 					</SelectItem>
 				</SelectContent>
@@ -75,7 +74,7 @@ export function ContentFilterBar({
 					variant="ghost"
 				>
 					<X className="mr-1 size-4" />
-					{translate("common.actions.clear-filters")}
+					{"Limpar filtros"}
 				</Button>
 			)}
 		</div>

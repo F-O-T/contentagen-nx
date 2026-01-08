@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
    Card,
    CardContent,
@@ -52,12 +51,8 @@ function MembersStat() {
 
    return (
       <StatsCard
-         description={translate(
-            "dashboard.routes.organization.stats-section.members-count.description",
-         )}
-         title={translate(
-            "dashboard.routes.organization.stats-section.members-count.title",
-         )}
+         description={"Description"}
+         title={"Title"}
          value={String(members?.length || 0)}
       />
    );
@@ -72,12 +67,8 @@ function TeamsStat() {
 
    return (
       <StatsCard
-         description={translate(
-            "dashboard.routes.organization.stats-section.teams-count.description",
-         )}
-         title={translate(
-            "dashboard.routes.organization.stats-section.teams-count.title",
-         )}
+         description={"Description"}
+         title={"Title"}
          value={String(teams?.length || 0)}
       />
    );

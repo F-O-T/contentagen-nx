@@ -5,6 +5,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@packages/ui/components/select";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@packages/ui/components/tooltip";
 import { ListChecks, Pencil } from "lucide-react";
 import {
 	type ChatMode,
@@ -30,20 +35,28 @@ const modes = [
 const defaultMode = modes[0];
 
 export function ChatModeSelect() {
-	const { mode } = useChatState();
+	const { mode, phase, executionState } = useChatState();
 	const currentMode = modes.find((m) => m.value === mode) ?? defaultMode;
 	const CurrentIcon = currentMode.icon;
 
-	return (
+	// Disable during streaming or execution
+	const isDisabled = phase === "streaming" || executionState.isExecuting;
+
+	const handleValueChange = (value: string) => {
+		if (!value || isDisabled) return;
+		setChatMode(value as ChatMode);
+	};
+
+	const selectContent = (
 		<Select
 			value={mode}
-			onValueChange={(value) => {
-				if (value) {
-					setChatMode(value as ChatMode);
-				}
-			}}
+			onValueChange={handleValueChange}
+			disabled={isDisabled}
 		>
-			<SelectTrigger size="sm" className="h-7 gap-1.5 text-xs">
+			<SelectTrigger 
+				size="sm" 
+				className="h-7 gap-1.5 text-xs"
+			>
 				<SelectValue>
 					<CurrentIcon className="size-3.5" />
 					{currentMode.label}
@@ -64,4 +77,24 @@ export function ChatModeSelect() {
 			</SelectContent>
 		</Select>
 	);
+
+	// Wrap in tooltip when disabled to explain why
+	if (isDisabled) {
+		return (
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<div>{selectContent}</div>
+				</TooltipTrigger>
+				<TooltipContent side="bottom">
+					<p>
+						{executionState.isExecuting 
+							? "Cannot switch modes during plan execution" 
+							: "Cannot switch modes while agent is responding"}
+					</p>
+				</TooltipContent>
+			</Tooltip>
+		);
+	}
+
+	return selectContent;
 }

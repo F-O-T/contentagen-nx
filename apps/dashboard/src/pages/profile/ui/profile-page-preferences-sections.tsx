@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
    Card,
    CardContent,
@@ -43,10 +42,10 @@ export function PreferencesSection() {
       <Card>
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.profile.preferences.title")}
+               {"Preferências"}
             </CardTitle>
             <CardDescription>
-               {translate("dashboard.routes.profile.preferences.description")}
+               {"Gerencie suas preferências de conta."}
             </CardDescription>
          </CardHeader>
          <CardContent className="flex-1 overflow-y-auto">
@@ -58,14 +57,10 @@ export function PreferencesSection() {
                   </ItemMedia>
                   <ItemContent className="truncate">
                      <ItemTitle>
-                        {translate(
-                           "dashboard.routes.profile.preferences.items.theme.title",
-                        )}
+                        {"Tema"}
                      </ItemTitle>
                      <ItemDescription>
-                        {translate(
-                           "dashboard.routes.profile.preferences.items.theme.description",
-                        )}
+                        {"Escolha o tema da interface"}
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>
@@ -82,14 +77,10 @@ export function PreferencesSection() {
                   </ItemMedia>
                   <ItemContent className="truncate">
                      <ItemTitle>
-                        {translate(
-                           "dashboard.routes.profile.preferences.items.language.title",
-                        )}
+                        {"Idioma"}
                      </ItemTitle>
                      <ItemDescription>
-                        {translate(
-                           "dashboard.routes.profile.preferences.items.language.description",
-                        )}
+                        {"Escolha o idioma da interface"}
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>
@@ -106,14 +97,10 @@ export function PreferencesSection() {
                   </ItemMedia>
                   <ItemContent className="truncate">
                      <ItemTitle>
-                        {translate(
-                           "dashboard.routes.profile.preferences.items.telemetry.title",
-                        )}
+                        {"Title"}
                      </ItemTitle>
                      <ItemDescription>
-                        {translate(
-                           "dashboard.routes.profile.preferences.items.telemetry.description",
-                        )}
+                        {"Description"}
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>

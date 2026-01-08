@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -63,13 +62,13 @@ function WriterDetailsPageError({ error }: { error: Error }) {
 				</Button>
 				<div className="flex-1">
 					<h1 className="text-2xl font-bold">
-						{translate("dashboard.routes.writers.details.error-title")}
+						{"Escritor não encontrado"}
 					</h1>
 				</div>
 			</div>
 			<div className="text-center py-8">
 				<p className="text-muted-foreground">
-					{translate("common.errors.default")}
+					{"Ocorreu um erro. Por favor, tente novamente."}
 				</p>
 				<p className="text-xs text-muted-foreground mt-1">{error.message}</p>
 			</div>
@@ -106,7 +105,7 @@ function WriterDetailsPageContent({ writerId }: WriterDetailsPageProps) {
 					</Link>
 				</Button>
 				<DefaultHeader
-					description={translate("dashboard.routes.writers.details.subtitle")}
+					description={"Detalhes do escritor"}
 					title={writer.personaConfig.metadata.name}
 				/>
 			</div>

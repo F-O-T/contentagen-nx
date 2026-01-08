@@ -13,7 +13,6 @@ import {
 } from "@packages/database/repositories/auth-repository";
 import { serverEnv } from "@packages/environment/server";
 import type { MinioClient } from "@packages/files/client";
-import { changeLanguage, type SupportedLng } from "@packages/localization";
 import { getServerLogger } from "@packages/logging/server";
 import { captureError, identifyUser, setGroup } from "@packages/posthog/server";
 import type { StripeClient } from "@packages/stripe";
@@ -78,11 +77,8 @@ export const createTRPCContext = async ({
       );
    }
 
-   const language = headers.get("x-locale") as SupportedLng;
+   const language = headers.get("x-locale") || "pt-BR";
 
-   if (language) {
-      changeLanguage(language);
-   }
    const userId = session?.user?.id || "";
 
    const organizationId = session?.session?.activeOrganizationId || "";

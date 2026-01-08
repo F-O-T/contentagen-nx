@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
    Avatar,
    AvatarFallback,
@@ -37,12 +36,10 @@ function MembersSectionCardHeader() {
    return (
       <CardHeader>
          <CardTitle>
-            {translate("dashboard.routes.organization.recent-members.title")}
+            {"Membros Recentes"}
          </CardTitle>
          <CardDescription>
-            {translate(
-               "dashboard.routes.organization.recent-members.description",
-            )}
+            {"Description"}
          </CardDescription>
       </CardHeader>
    );
@@ -54,13 +51,9 @@ function OrganizationMembersSectionErrorFallback(props: FallbackProps) {
          <MembersSectionCardHeader />
          <CardContent>
             {createErrorFallback({
-               errorDescription: translate(
-                  "dashboard.routes.organization.recent-members.state.error.description",
-               ),
-               errorTitle: translate(
-                  "dashboard.routes.organization.recent-members.state.error.title",
-               ),
-               retryText: translate("common.actions.retry"),
+               errorDescription: "Description",
+               errorTitle: "Title",
+               retryText: "Tentar novamente",
             })(props)}
          </CardContent>
       </Card>
@@ -126,14 +119,10 @@ function OrganizationMembersSectionContent() {
                         <Users className="size-8" />
                      </EmptyMedia>
                      <EmptyTitle>
-                        {translate(
-                           "dashboard.routes.organization.recent-members.state.empty.title",
-                        )}
+                        {"Title"}
                      </EmptyTitle>
                      <EmptyDescription>
-                        {translate(
-                           "dashboard.routes.organization.recent-members.state.empty.description",
-                        )}
+                        {"Description"}
                      </EmptyDescription>
                   </EmptyContent>
                </Empty>
@@ -156,9 +145,7 @@ function OrganizationMembersSectionContent() {
                                     {member.user.name}
                                  </p>
                                  <p className="text-sm text-muted-foreground truncate">
-                                    {translate(
-                                       "dashboard.routes.organization.recent-members.joined",
-                                    )}{" "}
+                                    {"Joined"}{" "}
                                     {formatDate(
                                        new Date(member.createdAt),
                                        "DD MMM YYYY",
@@ -180,9 +167,7 @@ function OrganizationMembersSectionContent() {
                         onClick={handleViewAll}
                         variant="outline"
                      >
-                        {translate(
-                           "dashboard.routes.organization.recent-members.view-all",
-                        )}
+                        {"View All"}
                         <ArrowRight className="size-4 ml-2" />
                      </Button>
                   )}

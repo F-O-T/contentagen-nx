@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Command,
@@ -73,7 +72,7 @@ export function IconSelector({
                   </>
                ) : (
                   <span className="text-muted-foreground">
-                     {translate("common.form.icon.placeholder")}
+                     {"Selecione um ícone"}
                   </span>
                )}
             </Button>

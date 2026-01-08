@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
    Avatar,
    AvatarFallback,
@@ -62,9 +61,7 @@ function NavUserCredenza({
       <>
          <CredenzaHeader>
             <CredenzaTitle>
-               {translate("dashboard.layout.nav-user.greeting", {
-                  name: session.user.name,
-               })}
+               {"Olá, {{name}}"}
             </CredenzaTitle>
             <CredenzaDescription className="truncate">
                {session.user.email}
@@ -84,7 +81,7 @@ function NavUserCredenza({
                      to="/$slug/settings/billing"
                   >
                      <Sparkles className="size-4" />
-                     {translate("dashboard.layout.nav-user.main.upgrade")}
+                     {"Atualizar para Pro"}
                   </Link>
                </Button>
             )}
@@ -101,7 +98,7 @@ function NavUserCredenza({
                      to="/$slug/settings/profile"
                   >
                      <BadgeCheck className="size-4" />
-                     {translate("dashboard.layout.nav-user.main.account")}
+                     {"Conta"}
                   </Link>
                </Button>
                <Button
@@ -115,7 +112,7 @@ function NavUserCredenza({
                      to="/$slug/settings/billing"
                   >
                      <CreditCard className="size-4" />
-                     {translate("dashboard.layout.nav-user.main.billing")}
+                     {"Cobrança"}
                   </Link>
                </Button>
                <Button
@@ -129,26 +126,24 @@ function NavUserCredenza({
                      to="/$slug/settings/notifications"
                   >
                      <Bell className="size-4" />
-                     {translate("dashboard.layout.nav-user.main.notifications")}
+                     {"Notificações"}
                   </Link>
                </Button>
             </div>
 
             <div className="space-y-3">
                <span className="text-sm font-medium text-muted-foreground">
-                  {translate("dashboard.layout.nav-user.preferences.label")}
+                  {"Preferencias"}
                </span>
                <div className="flex items-center justify-between">
                   <span className="text-sm">
-                     {translate("dashboard.layout.nav-user.preferences.theme")}
+                     {"Tema"}
                   </span>
                   <ThemeSwitcher />
                </div>
                <div className="flex items-center justify-between gap-8">
                   <span className="text-sm">
-                     {translate(
-                        "dashboard.layout.nav-user.preferences.language",
-                     )}
+                     {"Language"}
                   </span>
                   <LanguageCommand />
                </div>
@@ -162,7 +157,7 @@ function NavUserCredenza({
                variant="destructive"
             >
                <LogOut className="size-4" />
-               {translate("dashboard.layout.nav-user.actions.logout")}
+               {"Sair"}
             </Button>
          </CredenzaFooter>
       </>
@@ -220,7 +215,7 @@ function NavUserContent() {
             },
             onRequest: () => {
                toast.loading(
-                  translate("dashboard.layout.nav-user.messages.logging-out"),
+                  "Saindo...",
                   { id: "logout" },
                );
             },
@@ -232,9 +227,7 @@ function NavUserContent() {
                   to: "/auth/sign-in",
                });
                toast.success(
-                  translate(
-                     "dashboard.layout.nav-user.messages.logout-success",
-                  ),
+                  "Logout Success",
                   { id: "logout" },
                );
             },
@@ -246,15 +239,11 @@ function NavUserContent() {
    const handleLogoutClick = useCallback(() => {
       closeCredenza();
       openAlertDialog({
-         actionLabel: translate("dashboard.layout.nav-user.actions.logout"),
-         cancelLabel: translate("common.actions.cancel"),
-         description: translate(
-            "dashboard.layout.nav-user.logout-confirmation.description",
-         ),
+         actionLabel: "Sair",
+         cancelLabel: "Cancelar",
+         description: "Description",
          onAction: handleLogout,
-         title: translate(
-            "dashboard.layout.nav-user.logout-confirmation.title",
-         ),
+         title: "Title",
          variant: "destructive",
       });
    }, [closeCredenza, openAlertDialog, handleLogout]);
@@ -365,9 +354,7 @@ function NavUserContent() {
                                  to="/$slug/settings/billing"
                               >
                                  <Sparkles />
-                                 {translate(
-                                    "dashboard.layout.nav-user.main.upgrade",
-                                 )}
+                                 {"Upgrade"}
                               </Link>
                            </DropdownMenuItem>
                         </DropdownMenuGroup>
@@ -383,7 +370,7 @@ function NavUserContent() {
                            to="/$slug/settings/profile"
                         >
                            <BadgeCheck />
-                           {translate("dashboard.layout.nav-user.main.account")}
+                           {"Conta"}
                         </Link>
                      </DropdownMenuItem>
                      <DropdownMenuItem asChild>
@@ -392,7 +379,7 @@ function NavUserContent() {
                            to="/$slug/settings/billing"
                         >
                            <CreditCard />
-                           {translate("dashboard.layout.nav-user.main.billing")}
+                           {"Cobrança"}
                         </Link>
                      </DropdownMenuItem>
                      <DropdownMenuItem asChild>
@@ -401,9 +388,7 @@ function NavUserContent() {
                            to="/$slug/settings/notifications"
                         >
                            <Bell />
-                           {translate(
-                              "dashboard.layout.nav-user.main.notifications",
-                           )}
+                           {"Notifications"}
                         </Link>
                      </DropdownMenuItem>
                   </DropdownMenuGroup>
@@ -411,22 +396,18 @@ function NavUserContent() {
 
                   {/* Preferences */}
                   <DropdownMenuLabel>
-                     {translate("dashboard.layout.nav-user.preferences.label")}
+                     {"Preferencias"}
                   </DropdownMenuLabel>
                   <div className="px-2 py-1.5 space-y-2">
                      <div className="flex items-center justify-between">
                         <span className="text-sm">
-                           {translate(
-                              "dashboard.layout.nav-user.preferences.theme",
-                           )}
+                           {"Theme"}
                         </span>
                         <ThemeSwitcher />
                      </div>
                      <div className="flex items-center justify-between">
                         <span className="text-sm">
-                           {translate(
-                              "dashboard.layout.nav-user.preferences.language",
-                           )}
+                           {"Language"}
                         </span>
                         <LanguageCommand />
                      </div>
@@ -436,7 +417,7 @@ function NavUserContent() {
                   {/* Logout */}
                   <DropdownMenuItem onClick={handleLogoutClick}>
                      <LogOut />
-                     {translate("dashboard.layout.nav-user.actions.logout")}
+                     {"Sair"}
                   </DropdownMenuItem>
                </DropdownMenuContent>
             </DropdownMenu>

@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Field,
@@ -21,7 +20,7 @@ export function MagicLinkPage() {
    const [isSent, setIsSent] = useState(false);
 
    const schema = z.object({
-      email: z.email(translate("common.validation.email")),
+      email: z.email("Insira um endereço de email válido."),
    });
 
    const handleMagicLinkSignIn = useCallback(async (email: string) => {
@@ -36,13 +35,13 @@ export function MagicLinkPage() {
             },
             onRequest: () => {
                toast.loading(
-                  translate("dashboard.routes.magic-link.messages.sending"),
+                  "Enviando link de acesso...",
                );
             },
             onSuccess: () => {
                setIsSent(true);
                toast.success(
-                  translate("dashboard.routes.magic-link.messages.sent"),
+                  "Link enviado! Verifique seu e-mail.",
                );
             },
          },
@@ -84,10 +83,10 @@ export function MagicLinkPage() {
                {/* Header */}
                <div className="space-y-2">
                   <h1 className="text-3xl font-semibold font-serif">
-                     {translate("dashboard.routes.magic-link.sent-title")}
+                     {"Verifique seu e-mail"}
                   </h1>
                   <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-                     {translate("dashboard.routes.magic-link.sent-description")}
+                     {"Enviamos um link para seu e-mail. Clique nele para acessar sua conta instantaneamente."}
                   </p>
                </div>
 
@@ -98,16 +97,12 @@ export function MagicLinkPage() {
                      onClick={() => setIsSent(false)}
                      variant="outline"
                   >
-                     {translate(
-                        "dashboard.routes.magic-link.actions.try-different-email",
-                     )}
+                     {"Try Different Email"}
                   </Button>
                   <Button asChild variant="ghost">
                      <Link to="/auth/sign-in">
                         <ArrowLeft className="size-4" />
-                        {translate(
-                           "dashboard.routes.magic-link.actions.back-to-sign-in",
-                        )}
+                        {"Back To Sign In"}
                      </Link>
                   </Button>
                </div>
@@ -122,19 +117,17 @@ export function MagicLinkPage() {
          <Button asChild className="gap-2 px-0" variant="link">
             <Link to="/auth/sign-in">
                <ArrowLeft className="size-4" />
-               {translate(
-                  "dashboard.routes.magic-link.actions.back-to-sign-in",
-               )}
+               {"Back To Sign In"}
             </Link>
          </Button>
 
          {/* Header */}
          <div className="text-center space-y-2">
             <h1 className="text-3xl font-semibold font-serif">
-               {translate("dashboard.routes.magic-link.title")}
+               {"Acesso sem senha"}
             </h1>
             <p className="text-muted-foreground text-sm">
-               {translate("dashboard.routes.magic-link.description")}
+               {"Receba um link no seu e-mail para acessar sua conta sem precisar de senha."}
             </p>
          </div>
 
@@ -148,7 +141,7 @@ export function MagicLinkPage() {
                      return (
                         <Field data-invalid={isInvalid}>
                            <FieldLabel htmlFor={field.name}>
-                              {translate("common.form.email.label")}
+                              {"Email"}
                            </FieldLabel>
                            <Input
                               aria-invalid={isInvalid}
@@ -158,9 +151,7 @@ export function MagicLinkPage() {
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder={translate(
-                                 "common.form.email.placeholder",
-                              )}
+                              placeholder={"Placeholder"}
                               type="email"
                               value={field.state.value}
                            />
@@ -182,9 +173,7 @@ export function MagicLinkPage() {
                      {formState.isSubmitting ? (
                         <Spinner />
                      ) : (
-                        translate(
-                           "dashboard.routes.magic-link.actions.send-link",
-                        )
+                        "Send Link"
                      )}
                   </Button>
                )}
@@ -193,20 +182,20 @@ export function MagicLinkPage() {
 
          {/* Note */}
          <FieldDescription className="text-center">
-            {translate("dashboard.routes.magic-link.note")}
+            {"O link expira em 15 minutos. Verifique sua caixa de spam se não encontrar o e-mail."}
          </FieldDescription>
 
          {/* Footer */}
          <div className="text-sm text-center">
             <div className="flex gap-1 justify-center items-center">
                <span>
-                  {translate("dashboard.routes.sign-in.texts.no-account")}
+                  {"Primeira vez aqui? "}
                </span>
                <Link
                   className="text-primary font-medium hover:underline"
                   to="/auth/sign-up"
                >
-                  {translate("dashboard.routes.sign-in.actions.sign-up")}
+                  {"Criar conta"}
                </Link>
             </div>
          </div>

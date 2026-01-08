@@ -1,10 +1,18 @@
+import { Button } from "@packages/ui/components/button";
 import { ScrollArea } from "@packages/ui/components/scroll-area";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
+import { ListChecks, Pencil, RotateCcw } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useChatSession } from "../hooks/use-chat-session";
 import {
 	useChatState,
 	setContentMetadata,
+	startNewPlan,
 	type ContentMetadata,
 	type PlanStep,
 	type ActivePlan,
@@ -12,6 +20,7 @@ import {
 import { ChatInput } from "./chat-input";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSelectionContext } from "./chat-selection-context";
+import { ChatModeSelect } from "./chat-mode-select";
 
 interface ChatSidebarProps {
 	contentId: string;
@@ -28,7 +37,7 @@ export function ChatSidebar({
 	fullPage = false,
 	onAgentComplete,
 }: ChatSidebarProps) {
-	const { selectionContext, documentContent, activeToolCalls, mode } =
+	const { selectionContext, documentContent, activeToolCalls, mode, executionState } =
 		useChatState();
 	
 	// Track last metadata to prevent unnecessary updates
@@ -39,8 +48,10 @@ export function ChatSidebar({
 		currentStreamingMessage,
 		streamingSteps,
 		isStreaming,
+		isSessionLoading,
 		sendMessage,
 		cancelChat,
+		sessionId,
 	} = useChatSession(contentId, { onAgentComplete });
 
 	// Update content metadata when prop changes (using stable comparison)
@@ -64,6 +75,10 @@ export function ChatSidebar({
 		sendMessage(executionPrompt, documentContent, planContext);
 	};
 
+	const handleNewPlan = () => {
+		startNewPlan();
+	};
+
 	return (
 		<div
 			className={cn(
@@ -82,6 +97,77 @@ export function ChatSidebar({
 						<p className="text-sm text-muted-foreground mt-1">
 							Describe what you want to write and the AI will help you plan it
 						</p>
+					</div>
+				</div>
+			)}
+
+			{/* Header for sidebar mode - shows mode indicator and actions */}
+			{!fullPage && (
+				<div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30">
+					<div className="flex items-center gap-2">
+						{/* Mode indicator */}
+						<div className={cn(
+							"flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium",
+							mode === "plan" 
+								? "bg-blue-500/10 text-blue-600" 
+								: "bg-green-500/10 text-green-600"
+						)}>
+							{mode === "plan" ? (
+								<>
+									<ListChecks className="size-3.5" />
+									<span>Plan Mode</span>
+								</>
+							) : (
+								<>
+									<Pencil className="size-3.5" />
+									<span>Writer Mode</span>
+								</>
+							)}
+						</div>
+						<ChatModeSelect />
+					</div>
+
+					{/* New Plan button - shows in writer mode */}
+					{mode === "writer" && (
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="h-7 text-xs gap-1.5"
+									onClick={handleNewPlan}
+									disabled={isStreaming}
+								>
+									<RotateCcw className="size-3.5" />
+									New Plan
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent side="bottom">
+								<p>Start a new content plan</p>
+							</TooltipContent>
+						</Tooltip>
+					)}
+				</div>
+			)}
+
+			{/* Execution progress bar */}
+			{executionState.isExecuting && (
+				<div className="px-3 py-2 border-b bg-primary/5">
+					<div className="flex items-center justify-between text-xs mb-1">
+						<span className="text-primary font-medium">Executing plan...</span>
+						<span className="text-muted-foreground">
+							{executionState.completedSteps}/{executionState.totalSteps} steps
+						</span>
+					</div>
+					<div className="h-1.5 bg-primary/20 rounded-full overflow-hidden">
+						<div 
+							className="h-full bg-primary rounded-full transition-all duration-300"
+							style={{ 
+								width: `${executionState.totalSteps > 0 
+									? (executionState.completedSteps / executionState.totalSteps) * 100 
+									: 0}%` 
+							}}
+						/>
 					</div>
 				</div>
 			)}
@@ -112,10 +198,15 @@ export function ChatSidebar({
 					onSend={handleSend}
 					onCancel={cancelChat}
 					isLoading={isStreaming}
+					disabled={!sessionId || isSessionLoading}
 					placeholder={
-						mode === "plan"
-							? "What would you like to plan?"
-							: "What should I write or edit?"
+						isSessionLoading
+							? "Loading chat session..."
+							: !sessionId
+								? "Unable to load chat session"
+								: mode === "plan"
+									? "What would you like to plan?"
+									: "What should I write or edit?"
 					}
 				/>
 			</div>

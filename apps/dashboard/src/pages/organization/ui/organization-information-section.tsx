@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
    Avatar,
    AvatarFallback,
@@ -74,14 +73,10 @@ function ContentErrorFallback() {
    return (
       <ItemContent>
          <ItemTitle>
-            {translate(
-               "dashboard.routes.organization.information-section.state.error.title",
-            )}
+            {"Title"}
          </ItemTitle>
          <ItemDescription>
-            {translate(
-               "dashboard.routes.organization.information-section.state.error.description",
-            )}
+            {"Description"}
          </ItemDescription>
       </ItemContent>
    );

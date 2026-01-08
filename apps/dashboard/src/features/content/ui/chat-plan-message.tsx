@@ -15,7 +15,8 @@ import {
 	approveAllSteps,
 	setChatMode,
 	setActivePlan,
-	clearChat,
+	addExecutionSeparator,
+	startPlanExecution,
 } from "../context/chat-context";
 
 interface ChatPlanMessageProps {
@@ -240,8 +241,14 @@ export function ChatPlanMessage({ message, onExecutePlan }: ChatPlanMessageProps
 			})),
 		};
 
-		// Clear plan mode messages so writer starts fresh
-		clearChat();
+		// Add execution separator to maintain history context
+		addExecutionSeparator(
+			`Executing plan: ${planContext.summary}`,
+			approvedSteps.length
+		);
+
+		// Start execution tracking
+		startPlanExecution(approvedSteps.length);
 
 		// Store the active plan in context
 		setActivePlan(planContext);

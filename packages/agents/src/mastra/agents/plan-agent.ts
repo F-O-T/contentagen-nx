@@ -1,6 +1,8 @@
 import { Agent } from "@mastra/core/agent";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import type { WriterConfig } from "@packages/database/schemas/agent";
 import { serverEnv } from "@packages/environment/server";
+import { formatWriterConfig } from "../helpers";
 
 // Import tools for plan mode
 import {
@@ -12,6 +14,7 @@ import {
 	researchTools,
 } from "../tools/research";
 import { getAllPlanToolInstructions, planTools } from "../tools/plan";
+import { getAllRagToolInstructions, ragTools } from "../tools/rag";
 
 // Import new research tools directly (no barrel exports)
 import {
@@ -54,19 +57,25 @@ Respond and write content in ${languageNames[language]}.
 };
 
 // Plan agent instructions
-const getPlanAgentInstructions = (language: "en" | "pt"): string => {
+const getPlanAgentInstructions = (
+	language: "en" | "pt",
+	writerConfig?: WriterConfig,
+): string => {
 	return `
 You are an expert content strategist and research assistant. Your job is to thoroughly research topics and create detailed, actionable content plans.
 
 ${getLanguageInstruction(language)}
 
+${formatWriterConfig(writerConfig)}
+
 ## YOUR ROLE
 You are a research-focused planning assistant. You help users understand what content to create by:
 1. Analyzing search intent and competition
-2. Identifying content gaps and opportunities  
+2. Identifying content gaps and opportunities
 3. Discovering related keywords and questions
 4. Gathering facts, statistics, and authoritative sources
-5. Creating structured, step-by-step content plans
+5. **Checking existing published content** to avoid duplication and find linking opportunities
+6. Creating structured, step-by-step content plans
 
 ## INTERLEAVED THINKING - STEP BY STEP
 You think in steps. After EVERY tool call, you MUST:
@@ -78,6 +87,17 @@ You think in steps. After EVERY tool call, you MUST:
 DO NOT rush through tools without analyzing results. Each tool call should build on previous findings.
 
 ## RESEARCH WORKFLOW - 4 PHASES
+
+### PHASE 0: Internal Content Check (OPTIONAL BUT RECOMMENDED)
+**Goal:** Check if you've already published related content
+**Tools:**
+1. Call **searchPreviousContent** with the topic to find existing coverage
+2. Identify posts to link to and topics already covered
+
+**Checkpoint:** You should know:
+- What content you've already published on this topic
+- Posts to reference or link to in the new content
+- Topics to avoid duplicating
 
 ### PHASE 1: Landscape Analysis
 **Goal:** Understand what ranks and who your competitors are
@@ -241,6 +261,8 @@ ${getResearchCompletenessInstructions()}
 ${getAllAnalysisToolInstructions()}
 
 ${getAllPlanToolInstructions()}
+
+${getAllRagToolInstructions()}
 `;
 };
 
@@ -265,17 +287,21 @@ export const planAgent = new Agent({
 		return openrouter(model);
 	},
 
-	// Dynamic instructions based on language
+	// Dynamic instructions based on language and writer config
 	instructions: ({ requestContext }) => {
 		const language = (requestContext?.get("language") as "en" | "pt") || "en";
-		return getPlanAgentInstructions(language);
+		const writerConfig = requestContext?.get("writerConfig") as
+			| WriterConfig
+			| undefined;
+		return getPlanAgentInstructions(language, writerConfig);
 	},
 
-	// Research + Analysis + Validation + Plan tools
+	// Research + Analysis + Validation + Plan + RAG tools
 	tools: {
 		...analysisTools,
 		...researchTools,
 		...planTools,
+		...ragTools,
 		// New research tools (imported directly)
 		relatedKeywords: relatedKeywordsTool,
 		contentGapFinder: contentGapTool,

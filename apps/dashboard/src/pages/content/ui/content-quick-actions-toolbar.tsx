@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import { Plus } from "lucide-react";
 import { ManageContentForm } from "@/features/content/ui/manage-content-form";
@@ -14,7 +13,7 @@ export function ContentQuickActionsToolbar({ agentId }: ContentQuickActionsToolb
 	return (
 		<Button onClick={() => openSheet({ children: <ManageContentForm agentId={agentId} /> })}>
 			<Plus className="size-4" />
-			{translate("dashboard.routes.content.actions.create")}
+			{"Novo Conteúdo"}
 		</Button>
 	);
 }

@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
@@ -52,21 +51,17 @@ function SessionsSectionErrorFallback(props: FallbackProps) {
       <Card>
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.profile.sessions.title")}
+               {"Sessões ativas"}
             </CardTitle>
             <CardDescription>
-               {translate("dashboard.routes.profile.sessions.description")}
+               {"Visualize e gerencie suas sessões de login ativas."}
             </CardDescription>
          </CardHeader>
          <CardContent>
             {createErrorFallback({
-               errorDescription: translate(
-                  "dashboard.routes.profile.sessions.state.error.description",
-               ),
-               errorTitle: translate(
-                  "dashboard.routes.profile.sessions.state.error.title",
-               ),
-               retryText: translate("common.actions.retry"),
+               errorDescription: "Erro ao carregar sessões",
+               errorTitle: "Erro",
+               retryText: "Tentar novamente",
             })(props)}
          </CardContent>
       </Card>
@@ -132,10 +127,10 @@ function SessionsSectionContent() {
          <Card>
             <CardHeader>
                <CardTitle>
-                  {translate("dashboard.routes.profile.sessions.title")}
+                  {"Sessões ativas"}
                </CardTitle>
                <CardDescription>
-                  {translate("dashboard.routes.profile.sessions.description")}
+                  {"Visualize e gerencie suas sessões de login ativas."}
                </CardDescription>
                <CardAction>
                   <DropdownMenu>
@@ -143,9 +138,7 @@ function SessionsSectionContent() {
                         <TooltipTrigger asChild>
                            <DropdownMenuTrigger asChild>
                               <Button
-                                 aria-label={translate(
-                                    "dashboard.routes.profile.sessions.actions.title",
-                                 )}
+                                 aria-label={"Ações"}
                                  size="icon"
                                  variant="ghost"
                               >
@@ -154,16 +147,12 @@ function SessionsSectionContent() {
                            </DropdownMenuTrigger>
                         </TooltipTrigger>
                         <TooltipContent>
-                           {translate(
-                              "dashboard.routes.profile.sessions.actions.title",
-                           )}
+                           {"Ações"}
                         </TooltipContent>
                      </Tooltip>
                      <DropdownMenuContent align="end" className="w-56">
                         <DropdownMenuLabel>
-                           {translate(
-                              "dashboard.routes.profile.sessions.actions.title",
-                           )}
+                           {"Ações"}
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
@@ -173,9 +162,7 @@ function SessionsSectionContent() {
                               variant="destructive"
                            >
                               <Trash2 className="w-4 h-4 mr-2" />
-                              {translate(
-                                 "dashboard.routes.profile.sessions.actions.revoke-others",
-                              )}
+                              {"Encerrar outras sessões"}
                            </DropdownMenuItem>
                            <DropdownMenuItem
                               disabled={isRevokingAll}
@@ -183,9 +170,7 @@ function SessionsSectionContent() {
                               variant="destructive"
                            >
                               <Trash2 className="w-4 h-4 mr-2 text-destructive" />
-                              {translate(
-                                 "dashboard.routes.profile.sessions.actions.revoke-all",
-                              )}
+                              {"Encerrar todas as sessões"}
                            </DropdownMenuItem>
                         </DropdownMenuGroup>
                      </DropdownMenuContent>
@@ -203,15 +188,11 @@ function SessionsSectionContent() {
                            <ItemContent className="truncate">
                               <ItemTitle>
                                  {session.userAgent ||
-                                    translate(
-                                       "dashboard.routes.profile.sessions.item.unknown-device",
-                                    )}
+                                    "Dispositivo desconhecido"}
                               </ItemTitle>
                               <ItemDescription>
                                  <span>
-                                    {translate(
-                                       "dashboard.routes.profile.sessions.item.ip-address",
-                                    )}
+                                    {"Endereço IP"}
                                  </span>
                                  <span>:</span>
                                  <span> {session.ipAddress || "-"}</span>

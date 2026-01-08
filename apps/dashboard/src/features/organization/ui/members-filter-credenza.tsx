@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    CredenzaBody,
@@ -32,17 +31,13 @@ export function MembersFilterCredenza({
       <>
          <CredenzaHeader>
             <CredenzaTitle>
-               {translate(
-                  "dashboard.routes.organization.members-table.filters.role",
-               )}
+               {"Role"}
             </CredenzaTitle>
          </CredenzaHeader>
          <CredenzaBody className="space-y-4">
             <div className="space-y-2">
                <p className="text-sm font-medium">
-                  {translate(
-                     "dashboard.routes.organization.members-table.filters.role",
-                  )}
+                  {"Role"}
                </p>
                <ToggleGroup
                   className="flex-wrap justify-start"
@@ -52,15 +47,15 @@ export function MembersFilterCredenza({
                >
                   <ToggleGroupItem aria-label="Owner" value="owner">
                      <Crown className="size-4 mr-1" />
-                     {translate("dashboard.routes.organization.roles.owner")}
+                     {"Dono"}
                   </ToggleGroupItem>
                   <ToggleGroupItem aria-label="Admin" value="admin">
                      <Shield className="size-4 mr-1" />
-                     {translate("dashboard.routes.organization.roles.admin")}
+                     {"Administrador"}
                   </ToggleGroupItem>
                   <ToggleGroupItem aria-label="Member" value="member">
                      <User className="size-4 mr-1" />
-                     {translate("dashboard.routes.organization.roles.member")}
+                     {"Membro"}
                   </ToggleGroupItem>
                </ToggleGroup>
             </div>
@@ -72,15 +67,13 @@ export function MembersFilterCredenza({
                   variant="outline"
                >
                   <X className="size-4 mr-2" />
-                  {translate(
-                     "dashboard.routes.organization.members-table.filters.clear",
-                  )}
+                  {"Clear"}
                </Button>
             )}
          </CredenzaBody>
          <CredenzaFooter>
             <Button className="w-full" onClick={closeCredenza}>
-               {translate("common.actions.close")}
+               {"Fechar"}
             </Button>
          </CredenzaFooter>
       </>

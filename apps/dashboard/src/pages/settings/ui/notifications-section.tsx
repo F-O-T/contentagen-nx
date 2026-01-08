@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Badge } from "@packages/ui/components/badge";
 import {
    Card,
@@ -98,12 +97,10 @@ function NotificationsSectionErrorFallback(props: FallbackProps) {
       <Card className="h-full">
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.settings.notifications.title")}
+               {"Notificações Push"}
             </CardTitle>
             <CardDescription>
-               {translate(
-                  "dashboard.routes.settings.notifications.description",
-               )}
+               {"Configure suas preferências de notificação"}
             </CardDescription>
          </CardHeader>
          <CardContent>
@@ -111,7 +108,7 @@ function NotificationsSectionErrorFallback(props: FallbackProps) {
                errorDescription:
                   "Não foi possível carregar as configurações de notificações. Tente novamente.",
                errorTitle: "Erro ao carregar notificações",
-               retryText: translate("common.actions.retry"),
+               retryText: "Tentar novamente",
             })(props)}
          </CardContent>
       </Card>
@@ -138,9 +135,7 @@ function NotificationsEmptyState({
                <Card className="h-full">
                   <CardHeader>
                      <CardTitle>
-                        {translate(
-                           "dashboard.routes.settings.notifications.title",
-                        )}
+                        {"Notificações"}
                      </CardTitle>
                      <CardDescription>
                         Configure como você deseja receber alertas e lembretes
@@ -209,7 +204,7 @@ function NotificationTypesCard({
       <Card className="h-full">
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.settings.notifications.title")}
+               {"Notificações Push"}
             </CardTitle>
             <CardDescription>
                Configure como você deseja receber alertas e lembretes
@@ -225,14 +220,10 @@ function NotificationTypesCard({
                   </ItemMedia>
                   <ItemContent className="min-w-0">
                      <ItemTitle>
-                        {translate(
-                           "dashboard.routes.settings.notifications.items.budget.title",
-                        )}
+                        {"Title"}
                      </ItemTitle>
                      <ItemDescription className="line-clamp-2">
-                        {translate(
-                           "dashboard.routes.settings.notifications.items.budget.description",
-                        )}
+                        {"Description"}
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>
@@ -240,9 +231,7 @@ function NotificationTypesCard({
                         <Loader2 className="size-4 animate-spin text-muted-foreground" />
                      ) : (
                         <Switch
-                           aria-label={translate(
-                              "dashboard.routes.settings.notifications.items.budget.title",
-                           )}
+                           aria-label={"Title"}
                            checked={preferences.budgetAlerts}
                            onCheckedChange={(v) =>
                               updatePreference("budgetAlerts", v)
@@ -261,14 +250,10 @@ function NotificationTypesCard({
                   </ItemMedia>
                   <ItemContent className="min-w-0">
                      <ItemTitle>
-                        {translate(
-                           "dashboard.routes.settings.notifications.items.bills.title",
-                        )}
+                        {"Title"}
                      </ItemTitle>
                      <ItemDescription className="line-clamp-2">
-                        {translate(
-                           "dashboard.routes.settings.notifications.items.bills.description",
-                        )}
+                        {"Description"}
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>
@@ -276,9 +261,7 @@ function NotificationTypesCard({
                         <Loader2 className="size-4 animate-spin text-muted-foreground" />
                      ) : (
                         <Switch
-                           aria-label={translate(
-                              "dashboard.routes.settings.notifications.items.bills.title",
-                           )}
+                           aria-label={"Title"}
                            checked={preferences.billReminders}
                            onCheckedChange={(v) =>
                               updatePreference("billReminders", v)
@@ -297,14 +280,10 @@ function NotificationTypesCard({
                   </ItemMedia>
                   <ItemContent className="min-w-0">
                      <ItemTitle>
-                        {translate(
-                           "dashboard.routes.settings.notifications.items.overdue.title",
-                        )}
+                        {"Title"}
                      </ItemTitle>
                      <ItemDescription className="line-clamp-2">
-                        {translate(
-                           "dashboard.routes.settings.notifications.items.overdue.description",
-                        )}
+                        {"Description"}
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>
@@ -312,9 +291,7 @@ function NotificationTypesCard({
                         <Loader2 className="size-4 animate-spin text-muted-foreground" />
                      ) : (
                         <Switch
-                           aria-label={translate(
-                              "dashboard.routes.settings.notifications.items.overdue.title",
-                           )}
+                           aria-label={"Title"}
                            checked={preferences.overdueAlerts}
                            onCheckedChange={(v) =>
                               updatePreference("overdueAlerts", v)
@@ -333,14 +310,10 @@ function NotificationTypesCard({
                   </ItemMedia>
                   <ItemContent className="min-w-0">
                      <ItemTitle>
-                        {translate(
-                           "dashboard.routes.settings.notifications.items.transactions.title",
-                        )}
+                        {"Title"}
                      </ItemTitle>
                      <ItemDescription className="line-clamp-2">
-                        {translate(
-                           "dashboard.routes.settings.notifications.items.transactions.description",
-                        )}
+                        {"Description"}
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>
@@ -348,9 +321,7 @@ function NotificationTypesCard({
                         <Loader2 className="size-4 animate-spin text-muted-foreground" />
                      ) : (
                         <Switch
-                           aria-label={translate(
-                              "dashboard.routes.settings.notifications.items.transactions.title",
-                           )}
+                           aria-label={"Title"}
                            checked={preferences.transactionAlerts}
                            onCheckedChange={(v) =>
                               updatePreference("transactionAlerts", v)
@@ -413,18 +384,12 @@ function NotificationOverviewCard({
                   </ItemMedia>
                   <ItemContent className="min-w-0">
                      <ItemTitle>
-                        {translate(
-                           "dashboard.routes.settings.notifications.items.enable.title",
-                        )}
+                        {"Title"}
                      </ItemTitle>
                      <ItemDescription className="line-clamp-2">
                         {isEnabled
-                           ? translate(
-                                "dashboard.routes.settings.notifications.items.enable.enabled",
-                             )
-                           : translate(
-                                "dashboard.routes.settings.notifications.items.enable.disabled",
-                             )}
+                           ? "Enabled"
+                           : "Disabled"}
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>
@@ -432,9 +397,7 @@ function NotificationOverviewCard({
                         <Loader2 className="size-4 animate-spin text-muted-foreground" />
                      ) : (
                         <Switch
-                           aria-label={translate(
-                              "dashboard.routes.settings.notifications.items.enable.title",
-                           )}
+                           aria-label={"Title"}
                            checked={isEnabled}
                            onCheckedChange={toggle}
                         />
@@ -471,9 +434,7 @@ function NotificationsSectionContent() {
    if (!isSupported) {
       return (
          <NotificationsEmptyState
-            description={translate(
-               "dashboard.routes.settings.notifications.not-supported",
-            )}
+            description={"Not Supported"}
             icon={Smartphone}
             title="Navegador não suportado"
          />
@@ -483,9 +444,7 @@ function NotificationsSectionContent() {
    if (!isPushEnabled) {
       return (
          <NotificationsEmptyState
-            description={translate(
-               "dashboard.routes.settings.notifications.not-configured",
-            )}
+            description={"Not Configured"}
             icon={BellOff}
             title="Notificações não configuradas"
          />
@@ -495,9 +454,7 @@ function NotificationsSectionContent() {
    if (permission === "denied") {
       return (
          <NotificationsEmptyState
-            description={translate(
-               "dashboard.routes.settings.notifications.blocked",
-            )}
+            description={"Blocked"}
             icon={ShieldOff}
             title="Notificações bloqueadas"
          />

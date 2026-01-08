@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Avatar, AvatarFallback, AvatarImage } from "@packages/ui/components/avatar";
 import { Button } from "@packages/ui/components/button";
 import { Checkbox } from "@packages/ui/components/checkbox";
@@ -63,7 +62,7 @@ export function createWriterColumns(
 		},
 		{
 			accessorKey: "name",
-			header: translate("dashboard.routes.writers.table.name"),
+			header: "Nome",
 			cell: ({ row }) => {
 				const writer = row.original;
 				const name = writer.personaConfig.metadata.name;
@@ -103,7 +102,7 @@ export function createWriterColumns(
 		},
 		{
 			accessorKey: "contentCount",
-			header: translate("dashboard.routes.writers.table.content-count"),
+			header: "Conteúdos",
 			cell: ({ row }) => (
 				<span className="text-muted-foreground">
 					{row.original.contentCount}
@@ -112,7 +111,7 @@ export function createWriterColumns(
 		},
 		{
 			accessorKey: "tone",
-			header: translate("dashboard.routes.writers.table.tone"),
+			header: "Tom",
 			cell: ({ row }) => (
 				<span className="text-muted-foreground truncate max-w-[150px] block">
 					{row.original.personaConfig.instructions?.tone || "-"}
@@ -121,7 +120,7 @@ export function createWriterColumns(
 		},
 		{
 			accessorKey: "createdAt",
-			header: translate("dashboard.routes.writers.table.created"),
+			header: "Criado em",
 			cell: ({ row }) => {
 				const date = row.original.createdAt instanceof Date ? row.original.createdAt : new Date(row.original.createdAt);
 				return (
@@ -141,7 +140,7 @@ export function createWriterColumns(
 						<DropdownMenuTrigger asChild>
 							<Button className="size-8 p-0" variant="ghost">
 								<span className="sr-only">
-									{translate("common.actions.open-menu")}
+									{"Abrir menu"}
 								</span>
 								<MoreHorizontal className="size-4" />
 							</Button>
@@ -153,13 +152,13 @@ export function createWriterColumns(
 									params={{ slug, writerId: writer.id }}
 								>
 									<Eye className="mr-2 size-4" />
-									{translate("common.actions.view")}
+									{"Ver"}
 								</Link>
 							</DropdownMenuItem>
 							{onEdit && (
 								<DropdownMenuItem onClick={() => onEdit(writer)}>
 									<Edit className="mr-2 size-4" />
-									{translate("common.actions.edit")}
+									{"Editar"}
 								</DropdownMenuItem>
 							)}
 							{onDelete && (
@@ -170,7 +169,7 @@ export function createWriterColumns(
 										onClick={() => onDelete(writer)}
 									>
 										<Trash2 className="mr-2 size-4" />
-										{translate("common.actions.delete")}
+										{"Excluir"}
 									</DropdownMenuItem>
 								</>
 							)}

@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import { Card } from "@packages/ui/components/card";
 import { useMutation } from "@tanstack/react-query";
@@ -15,7 +14,7 @@ export function CookieConsentBanner() {
          return betterAuthClient.updateUser({ telemetryConsent });
       },
       onError: () => {
-         toast.error(translate("common.errors.default"));
+         toast.error("Ocorreu um erro. Por favor, tente novamente.");
       },
    });
 
@@ -25,7 +24,7 @@ export function CookieConsentBanner() {
       try {
          await updateTelemetry.mutateAsync(true);
          accept();
-         toast.success(translate("common.cookies.banner.accepted"));
+         toast.success("Preferências de cookies salvas");
       } catch {
          // Error already handled by mutation onError
       }
@@ -35,7 +34,7 @@ export function CookieConsentBanner() {
       try {
          await updateTelemetry.mutateAsync(false);
          decline();
-         toast.success(translate("common.cookies.banner.declined"));
+         toast.success("Apenas cookies essenciais ativados");
       } catch {
          // Error already handled by mutation onError
       }
@@ -49,10 +48,10 @@ export function CookieConsentBanner() {
                <div className="space-y-3 flex-1 min-w-0">
                   <div className="space-y-1">
                      <h3 className="font-semibold text-sm">
-                        {translate("common.cookies.banner.title")}
+                        {"Cookies e Privacidade"}
                      </h3>
                      <p className="text-xs text-muted-foreground">
-                        {translate("common.cookies.banner.description")}
+                        {"Usamos cookies essenciais para funcionamento e telemetria opcional para melhorar sua experiência."}
                      </p>
                   </div>
                   <div className="flex gap-2 flex-wrap">
@@ -65,7 +64,7 @@ export function CookieConsentBanner() {
                         {updateTelemetry.isPending && (
                            <Loader2 className="size-4 mr-2 animate-spin" />
                         )}
-                        {translate("common.cookies.banner.accept")}
+                        {"Aceitar todos"}
                      </Button>
                      <Button
                         className="flex-1 min-w-fit"
@@ -77,7 +76,7 @@ export function CookieConsentBanner() {
                         {updateTelemetry.isPending && (
                            <Loader2 className="size-4 mr-2 animate-spin" />
                         )}
-                        {translate("common.cookies.banner.decline")}
+                        {"Apenas essenciais"}
                      </Button>
                   </div>
                   <a
@@ -86,7 +85,7 @@ export function CookieConsentBanner() {
                      rel="noopener noreferrer"
                      target="_blank"
                   >
-                     {translate("common.cookies.banner.privacy-policy")}
+                     {"Política de Privacidade"}
                   </a>
                </div>
             </div>

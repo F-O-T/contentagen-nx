@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
 import { Suspense, useState } from "react";
@@ -47,13 +46,13 @@ function ContentPageContent() {
 	const deleteMutation = useMutation(
 		trpc.content.delete.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.content.delete-success"));
+				toast.success("Conteúdo excluído com sucesso");
 				queryClient.invalidateQueries({
 					queryKey: trpc.content.listAllContent.queryKey(),
 				});
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -61,13 +60,13 @@ function ContentPageContent() {
 	const publishMutation = useMutation(
 		trpc.content.publish.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.content.publish-success"));
+				toast.success("Conteúdo publicado com sucesso");
 				queryClient.invalidateQueries({
 					queryKey: trpc.content.listAllContent.queryKey(),
 				});
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -75,13 +74,13 @@ function ContentPageContent() {
 	const archiveMutation = useMutation(
 		trpc.content.archive.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.content.archive-success"));
+				toast.success("Conteúdo arquivado com sucesso");
 				queryClient.invalidateQueries({
 					queryKey: trpc.content.listAllContent.queryKey(),
 				});
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -134,7 +133,7 @@ function ContentPageError({ error }: { error: Error }) {
 	return (
 		<div className="text-center py-8">
 			<p className="text-muted-foreground">
-				{translate("common.errors.default")}
+				{"Ocorreu um erro. Por favor, tente novamente."}
 			</p>
 			<p className="text-xs text-muted-foreground mt-1">{error.message}</p>
 		</div>
@@ -150,10 +149,10 @@ export function ContentPage() {
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-2xl font-bold">
-						{translate("dashboard.routes.content.title")}
+						{"Conteúdos"}
 					</h1>
 					<p className="text-muted-foreground">
-						{translate("dashboard.routes.content.description")}
+						{"Gerencie seus conteúdos"}
 					</p>
 				</div>
 				<ContentQuickActionsToolbar agentId={agentId} />

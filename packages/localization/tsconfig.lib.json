@@ -1,8 +1,0 @@
-{
-   "extends": "@tooling/typescript/internal-package.json",
-   "compilerOptions": {
-      "lib": ["dom", "ES2022"]
-   },
-   "include": ["src"],
-   "exclude": ["**/*.test.ts", "**/__tests__/**", "node_modules"]
-}

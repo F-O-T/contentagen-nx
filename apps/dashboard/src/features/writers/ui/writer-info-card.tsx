@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Avatar, AvatarFallback, AvatarImage } from "@packages/ui/components/avatar";
 import { Badge } from "@packages/ui/components/badge";
 import {
@@ -59,7 +58,7 @@ export function WriterInfoCard({ writer }: WriterInfoCardProps) {
 						)}
 						<div className="flex items-center gap-2 mt-2">
 							<Badge variant="secondary">
-								{writer.contentCount} {translate("dashboard.routes.writers.table.contents")}
+								{writer.contentCount} {"conteúdos"}
 							</Badge>
 						</div>
 					</div>
@@ -71,7 +70,7 @@ export function WriterInfoCard({ writer }: WriterInfoCardProps) {
 						<MessageSquare className="size-4 text-muted-foreground mt-0.5" />
 						<div>
 							<p className="text-sm font-medium">
-								{translate("dashboard.routes.writers.details.tone")}
+								{"Tom"}
 							</p>
 							<p className="text-sm text-muted-foreground">
 								{writer.personaConfig.instructions.tone}
@@ -85,7 +84,7 @@ export function WriterInfoCard({ writer }: WriterInfoCardProps) {
 						<Palette className="size-4 text-muted-foreground mt-0.5" />
 						<div>
 							<p className="text-sm font-medium">
-								{translate("dashboard.routes.writers.details.style")}
+								{"Estilo"}
 							</p>
 							<p className="text-sm text-muted-foreground">
 								{writer.personaConfig.instructions.style}
@@ -99,7 +98,7 @@ export function WriterInfoCard({ writer }: WriterInfoCardProps) {
 						<Target className="size-4 text-muted-foreground mt-0.5" />
 						<div>
 							<p className="text-sm font-medium">
-								{translate("dashboard.routes.writers.details.audience")}
+								{"Público-alvo"}
 							</p>
 							<p className="text-sm text-muted-foreground">
 								{writer.personaConfig.instructions.audienceProfile}
@@ -113,7 +112,7 @@ export function WriterInfoCard({ writer }: WriterInfoCardProps) {
 						<Users className="size-4 text-muted-foreground mt-0.5" />
 						<div>
 							<p className="text-sm font-medium">
-								{translate("dashboard.routes.writers.details.guidelines")}
+								{"Diretrizes de Escrita"}
 							</p>
 							<p className="text-sm text-muted-foreground whitespace-pre-wrap">
 								{writer.personaConfig.instructions.writingGuidelines}
@@ -126,7 +125,7 @@ export function WriterInfoCard({ writer }: WriterInfoCardProps) {
 					<Calendar className="size-4 text-muted-foreground mt-0.5" />
 					<div>
 						<p className="text-sm font-medium">
-							{translate("dashboard.routes.writers.details.created")}
+							{"Criado em"}
 						</p>
 						<p className="text-sm text-muted-foreground">
 							{new Date(writer.createdAt).toLocaleDateString()}

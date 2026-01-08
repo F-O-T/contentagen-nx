@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
 	Card,
@@ -80,15 +79,15 @@ export function WriterInstructionsCard({
 		<Card>
 			<CardHeader>
 				<CardTitle>
-					{translate("dashboard.routes.writers.form.instructions-title")}
+					{"Instruções do Escritor"}
 				</CardTitle>
 				<CardDescription>
-					{translate("dashboard.routes.writers.form.instructions-description")}
+					{"Configure o tom, estilo e diretrizes do escritor"}
 				</CardDescription>
 				<CardAction>
 					<Button onClick={handleEditInstructions} size="sm" variant="outline">
 						<Pencil className="size-4" />
-						{translate("common.actions.edit")}
+						{"Editar"}
 					</Button>
 				</CardAction>
 			</CardHeader>
@@ -96,27 +95,27 @@ export function WriterInstructionsCard({
 				{hasAnyInstructions ? (
 					<div className="grid gap-6 sm:grid-cols-2">
 						<InstructionItem
-							emptyText={translate("common.labels.not-set")}
+							emptyText={"Não configurado"}
 							icon={MessageSquare}
-							label={translate("dashboard.routes.writers.form.tone")}
+							label={"Tom"}
 							value={instructions?.tone}
 						/>
 						<InstructionItem
-							emptyText={translate("common.labels.not-set")}
+							emptyText={"Não configurado"}
 							icon={Palette}
-							label={translate("dashboard.routes.writers.form.style")}
+							label={"Estilo"}
 							value={instructions?.style}
 						/>
 						<InstructionItem
-							emptyText={translate("common.labels.not-set")}
+							emptyText={"Não configurado"}
 							icon={Users}
-							label={translate("dashboard.routes.writers.form.audience")}
+							label={"Público-alvo"}
 							value={instructions?.audienceProfile}
 						/>
 						<InstructionItem
-							emptyText={translate("common.labels.not-set")}
+							emptyText={"Não configurado"}
 							icon={BookOpen}
-							label={translate("dashboard.routes.writers.form.guidelines")}
+							label={"Diretrizes de Escrita"}
 							value={instructions?.writingGuidelines}
 						/>
 					</div>
@@ -126,11 +125,11 @@ export function WriterInstructionsCard({
 							<BookOpen className="size-6 text-muted-foreground" />
 						</div>
 						<p className="text-sm text-muted-foreground mb-3">
-							{translate("dashboard.routes.writers.details.no-instructions")}
+							{"Nenhuma instrução configurada"}
 						</p>
 						<Button onClick={handleEditInstructions} size="sm" variant="outline">
 							<Pencil className="size-4" />
-							{translate("common.actions.add")}
+							{"Adicionar"}
 						</Button>
 					</div>
 				)}

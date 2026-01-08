@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
 	Avatar,
 	AvatarFallback,
@@ -62,15 +61,15 @@ function WritersStatsContent() {
 	return (
 		<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			<StatCard
-				description={translate("dashboard.routes.writers.stats.writers-description")}
+				description={"Escritores na equipe"}
 				icon={Users}
-				title={translate("dashboard.routes.writers.stats.writers")}
+				title={"Total de Escritores"}
 				value={data.totalAgents}
 			/>
 			<StatCard
-				description={translate("dashboard.routes.writers.stats.content-description")}
+				description={"Total de conteúdos criados"}
 				icon={FileText}
-				title={translate("dashboard.routes.writers.stats.content")}
+				title={"Conteúdos Gerados"}
 				value={data.totalContent}
 			/>
 			{data.mostActiveAgent ? (
@@ -78,7 +77,7 @@ function WritersStatsContent() {
 					<CardHeader>
 						<div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
 							<TrendingUp className="size-4" />
-							{translate("dashboard.routes.writers.stats.most-active")}
+							{"Mais Ativo"}
 						</div>
 						<div className="flex items-center gap-3">
 							<Avatar className="size-10">
@@ -94,7 +93,7 @@ function WritersStatsContent() {
 								<p className="font-medium truncate">{data.mostActiveAgent.name}</p>
 								<p className="text-sm text-muted-foreground">
 									{data.mostActiveAgent.contentCount}{" "}
-									{translate("dashboard.routes.writers.table.contents")}
+									{"conteúdos"}
 								</p>
 							</div>
 						</div>
@@ -102,9 +101,9 @@ function WritersStatsContent() {
 				</Card>
 			) : (
 				<StatCard
-					description={translate("dashboard.routes.writers.stats.most-active-empty")}
+					description={"Nenhum escritor ativo"}
 					icon={TrendingUp}
-					title={translate("dashboard.routes.writers.stats.most-active")}
+					title={"Mais Ativo"}
 					value="-"
 				/>
 			)}

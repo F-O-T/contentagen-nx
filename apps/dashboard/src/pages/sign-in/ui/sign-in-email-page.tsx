@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Field,
@@ -18,12 +17,12 @@ import { betterAuthClient } from "@/integrations/clients";
 
 export function SignInEmailPage() {
    const schema = z.object({
-      email: z.email(translate("common.validation.email")),
+      email: z.email("Insira um endereço de email válido."),
       password: z
          .string()
          .min(
             8,
-            translate("common.validation.min-length").replace("{min}", "8"),
+            "O campo deve ter no mínimo {min} caracteres.".replace("{min}", "8"),
          ),
    });
    const router = useRouter();
@@ -41,12 +40,12 @@ export function SignInEmailPage() {
                },
                onRequest: () => {
                   toast.loading(
-                     translate("dashboard.routes.sign-in.messages.requesting"),
+                     "Entrando na sua conta...",
                   );
                },
                onSuccess: () => {
                   toast.success(
-                     translate("dashboard.routes.sign-in.messages.success"),
+                     "Bem-vindo de volta!",
                   );
                   router.navigate({ params: { slug: "" }, to: "/$slug/home" });
                },
@@ -86,17 +85,17 @@ export function SignInEmailPage() {
          <Button asChild className="gap-2 px-0" variant="link">
             <Link to="/auth/sign-in">
                <ArrowLeft className="size-4" />
-               {translate("dashboard.routes.sign-in.actions.back-to-options")}
+               {"Voltar para opções de login"}
             </Link>
          </Button>
 
          {/* Header */}
          <div className="text-center space-y-2">
             <h1 className="text-3xl font-semibold font-serif">
-               {translate("dashboard.routes.sign-in.email.title")}
+               {"Entrar com Email"}
             </h1>
             <p className="text-muted-foreground text-sm">
-               {translate("dashboard.routes.sign-in.email.description")}
+               {"Use seu email e senha para acessar sua conta."}
             </p>
          </div>
 
@@ -110,7 +109,7 @@ export function SignInEmailPage() {
                      return (
                         <Field data-invalid={isInvalid}>
                            <FieldLabel htmlFor={field.name}>
-                              {translate("common.form.email.label")}
+                              {"Email"}
                            </FieldLabel>
                            <Input
                               aria-invalid={isInvalid}
@@ -120,9 +119,7 @@ export function SignInEmailPage() {
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder={translate(
-                                 "common.form.email.placeholder",
-                              )}
+                              placeholder={"Placeholder"}
                               type="email"
                               value={field.state.value}
                            />
@@ -143,15 +140,13 @@ export function SignInEmailPage() {
                         <Field aria-required data-invalid={isInvalid}>
                            <div className="flex justify-between items-center">
                               <FieldLabel htmlFor={field.name}>
-                                 {translate("common.form.password.label")}
+                                 {"Senha"}
                               </FieldLabel>
                               <Link
                                  className="underline text-sm text-muted-foreground hover:text-primary"
                                  to="/auth/forgot-password"
                               >
-                                 {translate(
-                                    "dashboard.routes.sign-in.actions.forgot-password",
-                                 )}
+                                 {"Esqueci minha senha"}
                               </Link>
                            </div>
                            <PasswordInput
@@ -162,9 +157,7 @@ export function SignInEmailPage() {
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder={translate(
-                                 "common.form.password.placeholder",
-                              )}
+                              placeholder={"Placeholder"}
                               value={field.state.value}
                            />
                            {isInvalid && (
@@ -182,7 +175,7 @@ export function SignInEmailPage() {
                      disabled={!formState.canSubmit || formState.isSubmitting}
                      type="submit"
                   >
-                     {translate("dashboard.routes.sign-in.actions.sign-in")}
+                     {"Entrar"}
                   </Button>
                )}
             </form.Subscribe>
@@ -192,13 +185,13 @@ export function SignInEmailPage() {
          <div className="text-sm text-center">
             <div className="flex gap-1 justify-center items-center">
                <span>
-                  {translate("dashboard.routes.sign-in.texts.no-account")}
+                  {"Primeira vez aqui? "}
                </span>
                <Link
                   className="text-primary font-medium hover:underline"
                   to="/auth/sign-up"
                >
-                  {translate("dashboard.routes.sign-in.actions.sign-up")}
+                  {"Criar conta"}
                </Link>
             </div>
          </div>

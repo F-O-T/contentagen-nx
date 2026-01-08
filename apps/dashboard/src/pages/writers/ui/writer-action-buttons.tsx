@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -52,7 +51,7 @@ export function WriterActionButtons({
 	const deleteMutation = useMutation(
 		trpc.agent.delete.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.writers.delete-success"));
+				toast.success("Escritor excluído com sucesso");
 				queryClient.invalidateQueries({ queryKey: trpc.agent.list.queryKey() });
 				queryClient.invalidateQueries({ queryKey: trpc.agent.getStats.queryKey() });
 				if (onDeleteSuccess) {
@@ -65,7 +64,7 @@ export function WriterActionButtons({
 				}
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -73,7 +72,7 @@ export function WriterActionButtons({
 	const duplicateMutation = useMutation(
 		trpc.agent.duplicate.mutationOptions({
 			onSuccess: (duplicated) => {
-				toast.success(translate("dashboard.routes.writers.actions.duplicate-success"));
+				toast.success("Escritor duplicado com sucesso");
 				queryClient.invalidateQueries({ queryKey: trpc.agent.list.queryKey() });
 				queryClient.invalidateQueries({ queryKey: trpc.agent.getStats.queryKey() });
 				navigate({
@@ -82,7 +81,7 @@ export function WriterActionButtons({
 				});
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -95,11 +94,11 @@ export function WriterActionButtons({
 
 	const handleDelete = () => {
 		openAlertDialog({
-			actionLabel: translate("common.actions.delete"),
-			cancelLabel: translate("common.actions.cancel"),
-			description: `${translate("common.headers.delete-confirmation.description")} ${writer.personaConfig.metadata.name}?`,
+			actionLabel: "Excluir",
+			cancelLabel: "Cancelar",
+			description: `${"Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."} ${writer.personaConfig.metadata.name}?`,
 			onAction: () => deleteMutation.mutate({ id: writer.id }),
-			title: translate("common.headers.delete-confirmation.title"),
+			title: "Confirmar Exclusão",
 			variant: "destructive",
 		});
 	};
@@ -127,7 +126,7 @@ export function WriterActionButtons({
 				variant="outline"
 			>
 				<FileText className="size-4" />
-				{translate("dashboard.routes.writers.actions.generate-content")}
+				{"Gerar Conteúdo"}
 			</Button>
 			<Button
 				disabled={isPending}
@@ -138,7 +137,7 @@ export function WriterActionButtons({
 				variant="outline"
 			>
 				<BarChart3 className="size-4" />
-				{translate("dashboard.routes.writers.actions.view-analytics")}
+				{"Ver Análises"}
 			</Button>
 
 			{/* Separator */}
@@ -151,7 +150,7 @@ export function WriterActionButtons({
 				variant="outline"
 			>
 				<Pencil className="size-4" />
-				{translate("common.actions.edit")}
+				{"Editar"}
 			</Button>
 			<Button
 				disabled={isPending}
@@ -159,7 +158,7 @@ export function WriterActionButtons({
 				variant="outline"
 			>
 				<Copy className="size-4" />
-				{translate("dashboard.routes.writers.actions.duplicate")}
+				{"Duplicar"}
 			</Button>
 
 			{/* Separator */}
@@ -173,7 +172,7 @@ export function WriterActionButtons({
 				variant="outline"
 			>
 				<Trash2 className="size-4" />
-				{translate("common.actions.delete")}
+				{"Excluir"}
 			</Button>
 		</div>
 	);

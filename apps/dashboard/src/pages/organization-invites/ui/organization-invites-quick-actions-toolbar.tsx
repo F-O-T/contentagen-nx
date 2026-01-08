@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import { MailPlus } from "lucide-react";
 import { SendInvitationForm } from "@/features/organization/ui/send-invitation-form";
@@ -16,7 +15,7 @@ export function InvitesQuickActionsToolbar() {
          }
       >
          <MailPlus className="size-4" />
-         {translate("dashboard.routes.organization.invites-table.actions.send")}
+         {"Enviar Convite"}
       </Button>
    );
 }

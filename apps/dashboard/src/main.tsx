@@ -1,10 +1,8 @@
 import { registerSW } from "virtual:pwa-register";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
-import React, { useEffect } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import { routeTree } from "./routeTree.gen";
-import "@packages/localization";
-import i18n from "@packages/localization";
 import "@packages/ui/globals.css";
 
 const intervalMS = 60 * 60 * 1000;
@@ -62,9 +60,6 @@ declare module "@tanstack/react-router" {
 }
 
 function App() {
-   useEffect(() => {
-      document.documentElement.lang = i18n.language;
-   }, []);
    return <RouterProvider router={router} />;
 }
 

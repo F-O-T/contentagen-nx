@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    CredenzaBody,
@@ -27,9 +26,7 @@ import { useTRPC } from "@/integrations/clients";
 function OrganizationSwitcherErrorFallback() {
    return (
       <div className="p-4 text-center text-destructive text-sm">
-         {translate(
-            "dashboard.layout.organization-switcher.error.failed-to-load-active",
-         )}
+         {"Failed To Load Active"}
       </div>
    );
 }
@@ -112,9 +109,7 @@ function OrganizationTeamsList({
             >
                <Plus className="size-4" />
                <span>
-                  {translate(
-                     "dashboard.layout.organization-switcher.create-team",
-                  )}
+                  {"Create Team"}
                </span>
             </Button>
          </div>
@@ -153,7 +148,7 @@ function OrganizationTeamsList({
          >
             <Plus className="size-4" />
             <span>
-               {translate("dashboard.layout.organization-switcher.create-team")}
+               {"Criar equipe"}
             </span>
          </Button>
       </div>
@@ -332,18 +327,14 @@ function OrganizationSwitcherContent() {
                   onClick={handleCreateOrganization}
                   title={
                      hasReachedLimit
-                        ? translate(
-                             "dashboard.layout.organization-switcher.limit-reached",
-                          )
+                        ? "Limit Reached"
                         : undefined
                   }
                   variant="outline"
                >
                   <Building2 className="size-4" />
                   <span>
-                     {translate(
-                        "dashboard.layout.organization-switcher.add-organization",
-                     )}
+                     {"Add Organization"}
                   </span>
                </Button>
             </div>

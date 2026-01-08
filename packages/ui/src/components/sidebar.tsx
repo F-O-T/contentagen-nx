@@ -1,6 +1,5 @@
 "use client";
 
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
 import { Separator } from "@packages/ui/components/separator";
@@ -275,8 +274,8 @@ function SidebarTrigger({
 
    const tooltipText =
       state === "expanded"
-         ? translate("dashboard.layout.sidebar.collapse")
-         : translate("dashboard.layout.sidebar.expand");
+         ? "Ocultar"
+         : "Abrir";
 
    const button = (
       <Button

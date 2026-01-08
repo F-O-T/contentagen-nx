@@ -5,7 +5,6 @@ import {
    createAuthClient,
 } from "@packages/authentication/client";
 import { clientEnv } from "@packages/environment/client";
-import { getCurrentLanguage } from "@packages/localization";
 import { captureClientEvent } from "@packages/posthog/client";
 import {
    MutationCache,
@@ -43,7 +42,7 @@ export function makeTrpcClient(headers?: Headers) {
    return createTrpcClient({
       getOrganizationSlug: getOrganizationSlugFromUrl,
       headers,
-      language: getCurrentLanguage(),
+      language: "pt-BR",
       serverUrl: clientEnv.VITE_SERVER_URL,
    });
 }

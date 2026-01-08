@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import { Card, CardContent } from "@packages/ui/components/card";
 import { DataTable } from "@packages/ui/components/data-table";
@@ -102,11 +101,11 @@ export function WritersDataTable({
 		if (!onDelete) return;
 
 		openAlertDialog({
-			actionLabel: translate("common.actions.delete"),
-			cancelLabel: translate("common.actions.cancel"),
-			description: `${translate("common.headers.delete-confirmation.description")} ${writer.personaConfig.metadata.name}?`,
+			actionLabel: "Excluir",
+			cancelLabel: "Cancelar",
+			description: `${"Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."} ${writer.personaConfig.metadata.name}?`,
 			onAction: () => onDelete(writer.id),
-			title: translate("common.headers.delete-confirmation.title"),
+			title: "Confirmar Exclusão",
 			variant: "destructive",
 		});
 	};
@@ -115,17 +114,14 @@ export function WritersDataTable({
 		if (!onBulkDelete || selectedIds.length === 0) return;
 
 		openAlertDialog({
-			actionLabel: translate("common.actions.delete"),
-			cancelLabel: translate("common.actions.cancel"),
-			description: translate(
-				"common.headers.delete-confirmation.description-bulk",
-				{ count: selectedIds.length },
-			),
+			actionLabel: "Excluir",
+			cancelLabel: "Cancelar",
+			description: "Description Bulk",
 			onAction: () => {
 				onBulkDelete(selectedIds);
 				setRowSelection({});
 			},
-			title: translate("common.headers.delete-confirmation.title"),
+			title: "Confirmar Exclusão",
 			variant: "destructive",
 		});
 	};
@@ -140,10 +136,10 @@ export function WritersDataTable({
 								<PenTool className="size-12 text-muted-foreground" />
 							</EmptyMedia>
 							<EmptyTitle>
-								{translate("dashboard.routes.writers.empty.title")}
+								{"Nenhum escritor ainda"}
 							</EmptyTitle>
 							<EmptyDescription>
-								{translate("dashboard.routes.writers.empty.description")}
+								{"Crie seu primeiro escritor IA para começar a gerar conteúdo"}
 							</EmptyDescription>
 						</EmptyContent>
 					</Empty>
@@ -158,7 +154,7 @@ export function WritersDataTable({
 				<CardContent className="space-y-4 pt-6">
 					{writers.length === 0 ? (
 						<div className="py-8 text-center text-muted-foreground">
-							{translate("dashboard.routes.writers.no-results")}
+							{"Nenhum escritor encontrado"}
 						</div>
 					) : (
 						<>
@@ -186,10 +182,7 @@ export function WritersDataTable({
 							{pagination && pagination.totalPages > 1 && (
 								<div className="flex items-center justify-between border-t pt-4">
 									<p className="text-sm text-muted-foreground">
-										{translate("common.form.pagination.page", {
-											current: pagination.currentPage,
-											total: pagination.totalPages,
-										})}
+										{"Página {{current}} de {{total}}"}
 									</p>
 									<div className="flex items-center gap-2">
 										<Button
@@ -199,7 +192,7 @@ export function WritersDataTable({
 											variant="outline"
 										>
 											<ChevronLeft className="size-4" />
-											{translate("common.actions.previous")}
+											{"Voltar"}
 										</Button>
 										<Button
 											disabled={pagination.currentPage >= pagination.totalPages}
@@ -207,7 +200,7 @@ export function WritersDataTable({
 											size="sm"
 											variant="outline"
 										>
-											{translate("common.actions.next")}
+											{"Próximo"}
 											<ChevronRight className="size-4" />
 										</Button>
 									</div>
@@ -228,7 +221,7 @@ export function WritersDataTable({
 						onClick={handleBulkDelete}
 						variant="destructive"
 					>
-						{translate("common.actions.delete")}
+						{"Excluir"}
 					</SelectionActionButton>
 				)}
 			</SelectionActionBar>

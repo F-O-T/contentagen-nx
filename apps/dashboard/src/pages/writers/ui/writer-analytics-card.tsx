@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Badge } from "@packages/ui/components/badge";
 import {
 	Card,
@@ -62,29 +61,29 @@ function WriterAnalyticsContent({ writerId }: WriterAnalyticsCardProps) {
 				month: "short",
 				year: "numeric",
 			})
-		: translate("common.labels.not-set");
+		: "Não configurado";
 
 	return (
 		<Card>
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
 					<BarChart3 className="size-5" />
-					{translate("dashboard.routes.writers.details.analytics-title")}
+					{"Análises"}
 				</CardTitle>
 				<CardDescription>
-					{translate("dashboard.routes.writers.details.analytics-description")}
+					{"Métricas de desempenho do escritor"}
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 					<AnalyticsStat
 						icon={FileText}
-						label={translate("dashboard.routes.writers.details.total-content")}
+						label={"Total de Conteúdos"}
 						value={contentCount}
 					/>
 					<AnalyticsStat
 						icon={Clock}
-						label={translate("dashboard.routes.writers.details.last-activity")}
+						label={"Última Atividade"}
 						value={lastGeneratedAt}
 					/>
 					<div className="flex items-center gap-3 sm:col-span-2 lg:col-span-1">
@@ -93,12 +92,12 @@ function WriterAnalyticsContent({ writerId }: WriterAnalyticsCardProps) {
 						</div>
 						<div>
 							<p className="text-sm text-muted-foreground mb-1">
-								{translate("dashboard.routes.writers.details.status")}
+								{"Status"}
 							</p>
 							<Badge variant={contentCount > 0 ? "default" : "secondary"}>
 								{contentCount > 0
-									? translate("common.status.active")
-									: translate("common.status.inactive")}
+									? "Ativo"
+									: "Inativo"}
 							</Badge>
 						</div>
 					</div>

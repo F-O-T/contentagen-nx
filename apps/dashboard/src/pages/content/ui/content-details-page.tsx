@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Skeleton } from "@packages/ui/components/skeleton";
@@ -90,13 +89,13 @@ function ContentDetailsPageError({ error }: { error: Error }) {
 				</Button>
 				<div className="flex-1">
 					<h1 className="text-2xl font-bold">
-						{translate("dashboard.routes.content.details.error-title")}
+						{"Conteúdo não encontrado"}
 					</h1>
 				</div>
 			</div>
 			<div className="text-center py-8">
 				<p className="text-muted-foreground">
-					{translate("common.errors.default")}
+					{"Ocorreu um erro. Por favor, tente novamente."}
 				</p>
 				<p className="text-xs text-muted-foreground mt-1">{error.message}</p>
 			</div>
@@ -136,7 +135,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 			},
 			onError: (error) => {
 				setIsSaving(false);
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -151,7 +150,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 			},
 			onError: (error) => {
 				setIsSavingMeta(false);
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -159,7 +158,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 	const deleteMutation = useMutation(
 		trpc.content.delete.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.content.delete-success"));
+				toast.success("Conteúdo excluído com sucesso");
 				queryClient.invalidateQueries({
 					queryKey: trpc.content.listAllContent.queryKey(),
 				});
@@ -169,7 +168,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 				});
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -177,7 +176,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 	const publishMutation = useMutation(
 		trpc.content.publish.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.content.publish-success"));
+				toast.success("Conteúdo publicado com sucesso");
 				queryClient.invalidateQueries({
 					queryKey: trpc.content.getById.queryKey({ id: contentId }),
 				});
@@ -186,7 +185,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 				});
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -194,7 +193,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 	const archiveMutation = useMutation(
 		trpc.content.archive.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.content.archive-success"));
+				toast.success("Conteúdo arquivado com sucesso");
 				queryClient.invalidateQueries({
 					queryKey: trpc.content.getById.queryKey({ id: contentId }),
 				});
@@ -203,7 +202,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 				});
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -278,11 +277,11 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 
 	const handleDelete = () => {
 		openAlertDialog({
-			actionLabel: translate("common.actions.delete"),
-			cancelLabel: translate("common.actions.cancel"),
-			description: `${translate("common.headers.delete-confirmation.description")} "${content.meta.title}"?`,
+			actionLabel: "Excluir",
+			cancelLabel: "Cancelar",
+			description: `${"Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."} "${content.meta.title}"?`,
 			onAction: () => deleteMutation.mutate({ id: contentId }),
-			title: translate("common.headers.delete-confirmation.title"),
+			title: "Confirmar Exclusão",
 			variant: "destructive",
 		});
 	};
@@ -355,13 +354,13 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 							</Button>
 							<div>
 								<h1 className="text-2xl font-bold">
-									{content.meta.title || translate("common.labels.untitled")}
+									{content.meta.title || "Sem título"}
 								</h1>
 								<p className="text-muted-foreground text-sm flex items-center gap-2">
-									{content.meta.description || translate("dashboard.routes.content.details.subtitle")}
+									{content.meta.description || "Detalhes do conteúdo"}
 									{isSaving && (
 										<span className="text-xs text-amber-600">
-											{translate("dashboard.routes.content.details.saving")}
+											{"Salvando..."}
 										</span>
 									)}
 								</p>
@@ -381,7 +380,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 							className="text-destructive hover:text-destructive"
 						>
 							<Trash2 className="size-4 mr-2" />
-							{translate("common.actions.delete")}
+							{"Excluir"}
 						</Button>
 						{content.status === "draft" && (
 							<Button
@@ -391,7 +390,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 								disabled={publishMutation.isPending}
 							>
 								<Send className="size-4 mr-2" />
-								{translate("common.actions.publish")}
+								{"Publicar"}
 							</Button>
 						)}
 						{content.status !== "archived" && (
@@ -402,7 +401,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 								disabled={archiveMutation.isPending}
 							>
 								<Archive className="size-4 mr-2" />
-								{translate("common.actions.archive")}
+								{"Arquivar"}
 							</Button>
 						)}
 					</div>
@@ -431,7 +430,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 							key={contentId}
 							initialContent={content.body || ""}
 							onChange={handleContentChange}
-							placeholder={translate("dashboard.routes.content.details.editor-placeholder")}
+							placeholder={"Comece a escrever..."}
 							disabled={content.status === "archived"}
 							className="h-full"
 						/>

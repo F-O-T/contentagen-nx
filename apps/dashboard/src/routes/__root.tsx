@@ -2,8 +2,6 @@ import { clientEnv } from "@packages/environment/client";
 import { NotFoundComponent } from "@/default/not-found";
 import { QueryProvider, useTRPC } from "@/integrations/clients";
 import { ThemeProvider } from "@/layout/theme-provider";
-import "@packages/localization";
-import { translate } from "@packages/localization";
 import { PostHogWrapper, PosthogRouterTracker } from "@packages/posthog/client";
 import { Toaster } from "@packages/ui/components/sonner";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -35,11 +33,11 @@ export const Route = createRootRoute({
       ],
       meta: [
          {
-            content: translate("common.brand.description"),
+            content: "O seu cms ",
             name: "description",
          },
          {
-            title: translate("common.brand.name"),
+            title: "Contentta",
          },
       ],
    }),

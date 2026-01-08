@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { PlanName, STRIPE_PLANS } from "@packages/stripe/constants";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
@@ -83,21 +82,17 @@ function ProfilePageBillingErrorFallback(props: FallbackProps) {
       <Card>
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.profile.billing.title")}
+               {"Assinatura"}
             </CardTitle>
             <CardDescription>
-               {translate("dashboard.routes.profile.billing.description")}
+               {"Gerencie sua assinatura e informações de cobrança."}
             </CardDescription>
          </CardHeader>
          <CardContent>
             {createErrorFallback({
-               errorDescription: translate(
-                  "dashboard.routes.profile.billing.state.error.description",
-               ),
-               errorTitle: translate(
-                  "dashboard.routes.profile.billing.state.error.title",
-               ),
-               retryText: translate("common.actions.retry"),
+               errorDescription: "Erro ao carregar informações de cobrança",
+               errorTitle: "Erro",
+               retryText: "Tentar novamente",
             })(props)}
          </CardContent>
       </Card>
@@ -205,14 +200,10 @@ function NoSubscriptionContent() {
                <CreditCard className="size-6" />
             </EmptyMedia>
             <EmptyTitle>
-               {translate(
-                  "dashboard.routes.profile.billing.state.not-active.title",
-               )}
+               {"Title"}
             </EmptyTitle>
             <EmptyDescription>
-               {translate(
-                  "dashboard.routes.profile.billing.state.not-active.description",
-               )}
+               {"Description"}
             </EmptyDescription>
          </EmptyHeader>
          <EmptyContent>
@@ -248,12 +239,10 @@ function ProfilePageBillingContent() {
                   subscription={activeSubscription as Subscription}
                />
             }
-            description={translate(
-               "dashboard.routes.profile.billing.description",
-            )}
+            description={"Gerencie sua assinatura e pagamentos"}
             icon={<CreditCard className="size-4" />}
             onClick={handleNavigateToManagePlan}
-            title={translate("dashboard.routes.profile.billing.title")}
+            title={"Assinatura"}
          />
       );
    }
@@ -262,10 +251,10 @@ function ProfilePageBillingContent() {
       <Card>
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.profile.billing.title")}
+               {"Assinatura"}
             </CardTitle>
             <CardDescription>
-               {translate("dashboard.routes.profile.billing.description")}
+               {"Gerencie sua assinatura e informações de cobrança."}
             </CardDescription>
          </CardHeader>
          <CardContent>

@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -52,9 +51,7 @@ export function InvitesFilterBar({
                variant="outline"
             >
                <Filter className="size-4 mr-2" />
-               {translate(
-                  "dashboard.routes.organization.invites-table.filters.status",
-               )}
+               {"Status"}
                {hasActiveFilters && (
                   <span className="ml-2 size-2 rounded-full bg-primary" />
                )}
@@ -72,27 +69,19 @@ export function InvitesFilterBar({
          >
             <ToggleGroupItem aria-label="Pending" value="pending">
                <Clock className="size-4 mr-1" />
-               {translate(
-                  "dashboard.routes.organization.invites-table.status.pending",
-               )}
+               {"Pending"}
             </ToggleGroupItem>
             <ToggleGroupItem aria-label="Accepted" value="accepted">
                <Check className="size-4 mr-1" />
-               {translate(
-                  "dashboard.routes.organization.invites-table.status.accepted",
-               )}
+               {"Accepted"}
             </ToggleGroupItem>
             <ToggleGroupItem aria-label="Expired" value="expired">
                <X className="size-4 mr-1" />
-               {translate(
-                  "dashboard.routes.organization.invites-table.status.expired",
-               )}
+               {"Expired"}
             </ToggleGroupItem>
             <ToggleGroupItem aria-label="Canceled" value="canceled">
                <XCircle className="size-4 mr-1" />
-               {translate(
-                  "dashboard.routes.organization.invites-table.status.canceled",
-               )}
+               {"Canceled"}
             </ToggleGroupItem>
          </ToggleGroup>
 
@@ -102,9 +91,7 @@ export function InvitesFilterBar({
                onClick={() => onRoleFilterChange("all")}
                variant="secondary"
             >
-               {translate(
-                  "dashboard.routes.organization.invites-table.filters.role",
-               )}
+               {"Role"}
                : {roleFilter}
                <X className="size-3 ml-1" />
             </Badge>
@@ -118,9 +105,7 @@ export function InvitesFilterBar({
                variant="ghost"
             >
                <X className="size-4 mr-1" />
-               {translate(
-                  "dashboard.routes.organization.invites-table.filters.clear",
-               )}
+               {"Clear"}
             </Button>
          )}
       </div>

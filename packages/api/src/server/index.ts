@@ -9,7 +9,6 @@ import { accountDeletionRouter } from "./routers/account-deletion";
 import { agentRouter } from "./routers/agent";
 import { billingRouter } from "./routers/billing";
 import { contentRouter } from "./routers/content";
-import { encryptionRouter } from "./routers/encryption";
 import { notificationRouter } from "./routers/notifications";
 import { onboardingRouter } from "./routers/onboarding";
 import { organizationRouter } from "./routers/organization";
@@ -26,7 +25,6 @@ export const appRouter = router({
    agent: agentRouter,
    billing: billingRouter,
    content: contentRouter,
-   encryption: encryptionRouter,
    notifications: notificationRouter,
    onboarding: onboardingRouter,
    organization: organizationRouter,

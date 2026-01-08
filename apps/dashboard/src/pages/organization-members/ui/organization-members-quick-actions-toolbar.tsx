@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import { Plus } from "lucide-react";
 import { useSheet } from "@/hooks/use-sheet";
@@ -16,9 +15,7 @@ export function MembersQuickActionsToolbar() {
          }
       >
          <Plus className="size-4" />
-         {translate(
-            "dashboard.routes.organization.members-table.actions.invite",
-         )}
+         {"Invite"}
       </Button>
    );
 }

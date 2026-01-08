@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
 	Card,
 	CardContent,
@@ -58,7 +57,7 @@ export function WriterMetadataCard({ writer }: WriterMetadataCardProps) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>{translate("dashboard.routes.writers.details.metadata-title")}</CardTitle>
+				<CardTitle>{"Informações"}</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-6">
 				{/* Photo and Name Section */}
@@ -85,12 +84,12 @@ export function WriterMetadataCard({ writer }: WriterMetadataCardProps) {
 				<div>
 					<MetadataItem
 						icon={FileText}
-						label={translate("dashboard.routes.writers.table.content-count")}
+						label={"Conteúdos"}
 						value={writer.contentCount ?? 0}
 					/>
 					<MetadataItem
 						icon={Calendar}
-						label={translate("dashboard.routes.writers.details.created")}
+						label={"Criado em"}
 						value={createdDate}
 					/>
 				</div>

@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/auth")({
@@ -159,10 +158,10 @@ function AuthLayout() {
 
                <div className="text-center space-y-4">
                   <h2 className="text-2xl xl:text-3xl font-serif font-semibold text-white">
-                     {translate("dashboard.routes.auth.brand.tagline")}
+                     {"Seu CMS com superpoderes de IA"}
                   </h2>
                   <p className="text-white/70 text-sm xl:text-base max-w-sm mx-auto">
-                     {translate("dashboard.routes.auth.brand.description")}
+                     {"Crie conteúdos incríveis com inteligência artificial. Blog posts, artigos e muito mais em minutos."}
                   </p>
                </div>
             </div>
@@ -170,7 +169,7 @@ function AuthLayout() {
             {/* Footer */}
             <div className="relative z-10 text-white/50 text-xs">
                © {new Date().getFullYear()} Montte.{" "}
-               {translate("common.actions.all-rights-reserved")}
+               {"Todos os direitos reservados"}
             </div>
          </aside>
       </div>

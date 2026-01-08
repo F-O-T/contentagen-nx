@@ -1,7 +1,7 @@
 import { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
 import { PinoLogger } from "@mastra/loggers";
-import type { SupportedLng } from "@packages/localization";
+import type { WriterConfig } from "@packages/database/schemas/agent";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
 import { planAgent } from "./agents/plan-agent";
@@ -19,13 +19,14 @@ export type ModelId =
 
 export type CustomRequestContext = {
 	brandId?: string;
-	language?: SupportedLng;
+	language?: string;
 	userId: string;
 	agentId?: string;
 	// Fields for blog editor
 	mode?: ChatMode;
 	model?: ModelId;
 	activePlan?: ContentPlan;
+	writerConfig?: WriterConfig;
 };
 
 export const mastra = new Mastra({
@@ -54,28 +55,31 @@ export const mastra = new Mastra({
 });
 
 export function createRequestContext(context: CustomRequestContext) {
-   const requestContext = new RequestContext<CustomRequestContext>();
-   requestContext.set("userId", context.userId);
-   if (context.language) {
-      requestContext.set("language", context.language);
-   }
+	const requestContext = new RequestContext<CustomRequestContext>();
+	requestContext.set("userId", context.userId);
+	if (context.language) {
+		requestContext.set("language", context.language);
+	}
 
-   if (context.brandId) {
-      requestContext.set("brandId", context.brandId);
-   }
-   if (context.agentId) {
-      requestContext.set("agentId", context.agentId);
-   }
-   if (context.mode) {
-      requestContext.set("mode", context.mode);
-   }
-   if (context.model) {
-      requestContext.set("model", context.model);
-   }
-   if (context.activePlan) {
-      requestContext.set("activePlan", context.activePlan);
-   }
-   return requestContext;
+	if (context.brandId) {
+		requestContext.set("brandId", context.brandId);
+	}
+	if (context.agentId) {
+		requestContext.set("agentId", context.agentId);
+	}
+	if (context.mode) {
+		requestContext.set("mode", context.mode);
+	}
+	if (context.model) {
+		requestContext.set("model", context.model);
+	}
+	if (context.activePlan) {
+		requestContext.set("activePlan", context.activePlan);
+	}
+	if (context.writerConfig) {
+		requestContext.set("writerConfig", context.writerConfig);
+	}
+	return requestContext;
 }
 
 // Export agents for direct access

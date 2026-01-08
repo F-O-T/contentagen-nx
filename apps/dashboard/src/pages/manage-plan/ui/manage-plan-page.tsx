@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { PlanName, STRIPE_PLANS } from "@packages/stripe/constants";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
@@ -97,7 +96,7 @@ function ManagePlanPageErrorFallback(props: FallbackProps) {
    return createErrorFallback({
       errorDescription: "Falha ao carregar o plano. Tente novamente.",
       errorTitle: "Erro ao carregar plano",
-      retryText: translate("common.actions.retry"),
+      retryText: "Tentar novamente",
    })(props);
 }
 

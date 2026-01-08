@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Empty,
@@ -30,11 +29,9 @@ import { OrganizationOverviewStatsCard } from "./organization-overview-stats-car
 
 function OrganizationPageErrorFallback(props: FallbackProps) {
    return createErrorFallback({
-      errorDescription: translate(
-         "dashboard.routes.organization.state.error.description",
-      ),
-      errorTitle: translate("dashboard.routes.organization.state.error.title"),
-      retryText: translate("common.actions.retry"),
+      errorDescription: "Description",
+      errorTitle: "Erro ao Carregar Organização",
+      retryText: "Tentar novamente",
    })(props);
 }
 
@@ -84,14 +81,10 @@ function OrganizationContent() {
                         <Building className="size-12 text-muted-foreground" />
                      </EmptyMedia>
                      <EmptyTitle>
-                        {translate(
-                           "dashboard.routes.organization.state.empty.title",
-                        )}
+                        {"Title"}
                      </EmptyTitle>
                      <EmptyDescription>
-                        {translate(
-                           "dashboard.routes.organization.state.empty.description",
-                        )}
+                        {"Description"}
                      </EmptyDescription>
                   </EmptyHeader>
                   <EmptyContent>
@@ -108,17 +101,13 @@ function OrganizationContent() {
                               variant="default"
                            >
                               <Plus className="size-4" />
-                              {translate(
-                                 "dashboard.routes.organization.state.empty.action",
-                              )}
+                              {"Action"}
                            </Button>
                         </TooltipTrigger>
                         {hasReachedLimit && (
                            <TooltipContent>
                               <p>
-                                 {translate(
-                                    "dashboard.routes.organization.state.limit-reached",
-                                 )}
+                                 {"Limit Reached"}
                               </p>
                            </TooltipContent>
                         )}
@@ -133,8 +122,8 @@ function OrganizationContent() {
    return (
       <main className="flex flex-col gap-6">
          <DefaultHeader
-            description={translate("dashboard.routes.organization.description")}
-            title={translate("dashboard.routes.organization.title")}
+            description={"Gerencie sua organização"}
+            title={"Organização"}
          />
 
          <OrganizationOverviewStatsCard />

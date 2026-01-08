@@ -17,12 +17,6 @@ const EnvSchema = z.object({
    BETTER_AUTH_TRUSTED_ORIGINS: z.string(),
    DATABASE_URL: z.string(),
    PG_VECTOR_URL: z.string(),
-   // Server-side encryption key (64-character hex string = 32 bytes)
-   ENCRYPTION_KEY: z
-      .string()
-      .length(64, "ENCRYPTION_KEY must be a 64-character hex string")
-      .regex(/^[0-9a-fA-F]+$/, "ENCRYPTION_KEY must be a valid hex string")
-      .optional(),
    OPENAI_API_KEY: z.string(),
    OPENROUTER_API_KEY: z.string(),
    MINIO_ACCESS_KEY: z.string(),

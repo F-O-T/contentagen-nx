@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
 	SidebarGroup,
 	SidebarGroupContent,
@@ -32,19 +31,19 @@ export function NavMain() {
 		{
 			icon: Home,
 			id: "home",
-			title: translate("dashboard.layout.nav-main.main.home"),
+			title: "Início",
 			url: "/$slug/home",
 		},
 		{
 			icon: PenTool,
 			id: "writers",
-			title: translate("dashboard.layout.nav-main.main.writers"),
+			title: "Escritores",
 			url: "/$slug/writers",
 		},
 		{
 			icon: FileText,
 			id: "content",
-			title: translate("dashboard.layout.nav-main.main.content"),
+			title: "Conteúdos",
 			url: "/$slug/content",
 		},
 	];
@@ -80,7 +79,7 @@ export function NavMain() {
 			<SidebarGroupContent className="flex flex-col gap-2">
 				{state === "expanded" && (
 					<SidebarGroupLabel>
-						{translate("dashboard.layout.nav-main.main.title")}
+						{"Principal"}
 					</SidebarGroupLabel>
 				)}
 				<SidebarMenu>

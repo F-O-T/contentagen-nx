@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
 import { InputGroup, InputGroupText } from "@packages/ui/components/input-group";
@@ -20,7 +19,7 @@ export function WritersFilterBar() {
 					<Input
 						className="pl-9"
 						onChange={(e) => setSearchTerm(e.target.value)}
-						placeholder={translate("dashboard.routes.writers.filter.search")}
+						placeholder={"Buscar escritores..."}
 						type="search"
 						value={searchTerm}
 					/>
@@ -33,7 +32,7 @@ export function WritersFilterBar() {
 						variant="ghost"
 					>
 						<X className="size-4" />
-						{translate("common.actions.clear-filters")}
+						{"Limpar filtros"}
 					</Button>
 				)}
 			</div>

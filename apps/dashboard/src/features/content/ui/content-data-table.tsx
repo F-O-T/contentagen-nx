@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Card, CardContent } from "@packages/ui/components/card";
 import { DataTable } from "@packages/ui/components/data-table";
 import {
@@ -107,11 +106,11 @@ export function ContentDataTable({
 		if (!onDelete) return;
 
 		openAlertDialog({
-			actionLabel: translate("common.actions.delete"),
-			cancelLabel: translate("common.actions.cancel"),
-			description: `${translate("common.headers.delete-confirmation.description")} "${content.meta.title}"?`,
+			actionLabel: "Excluir",
+			cancelLabel: "Cancelar",
+			description: `${"Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."} "${content.meta.title}"?`,
 			onAction: () => onDelete(content.id),
-			title: translate("common.headers.delete-confirmation.title"),
+			title: "Confirmar Exclusão",
 			variant: "destructive",
 		});
 	};
@@ -130,17 +129,14 @@ export function ContentDataTable({
 		if (!onBulkDelete || selectedIds.length === 0) return;
 
 		openAlertDialog({
-			actionLabel: translate("common.actions.delete"),
-			cancelLabel: translate("common.actions.cancel"),
-			description: translate(
-				"common.headers.delete-confirmation.description-bulk",
-				{ count: selectedIds.length },
-			),
+			actionLabel: "Excluir",
+			cancelLabel: "Cancelar",
+			description: "Description Bulk",
 			onAction: () => {
 				onBulkDelete(selectedIds);
 				setRowSelection({});
 			},
-			title: translate("common.headers.delete-confirmation.title"),
+			title: "Confirmar Exclusão",
 			variant: "destructive",
 		});
 	};
@@ -173,10 +169,10 @@ export function ContentDataTable({
 								<FileText className="size-12 text-muted-foreground" />
 							</EmptyMedia>
 							<EmptyTitle>
-								{translate("dashboard.routes.content.empty.title")}
+								{"Nenhum conteúdo ainda"}
 							</EmptyTitle>
 							<EmptyDescription>
-								{translate("dashboard.routes.content.empty.description")}
+								{"Crie seu primeiro conteúdo para começar"}
 							</EmptyDescription>
 						</EmptyContent>
 					</Empty>
@@ -200,7 +196,7 @@ export function ContentDataTable({
 
 					{filteredContents.length === 0 ? (
 						<div className="py-8 text-center text-muted-foreground">
-							{translate("dashboard.routes.content.no-results")}
+							{"Nenhum conteúdo encontrado"}
 						</div>
 					) : (
 						<DataTable
@@ -241,7 +237,7 @@ export function ContentDataTable({
 						onClick={handleBulkDelete}
 						variant="destructive"
 					>
-						{translate("common.actions.delete")}
+						{"Excluir"}
 					</SelectionActionButton>
 				)}
 			</SelectionActionBar>

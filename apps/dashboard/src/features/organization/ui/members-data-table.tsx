@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Card, CardContent } from "@packages/ui/components/card";
 import { DataTable } from "@packages/ui/components/data-table";
 import {
@@ -93,13 +92,11 @@ export function MembersDataTable({
       if (!onRemove) return;
 
       openAlertDialog({
-         actionLabel: translate(
-            "dashboard.routes.organization.members-table.actions.remove",
-         ),
-         cancelLabel: translate("common.actions.cancel"),
-         description: `${translate("common.headers.delete-confirmation.description")} ${member.user.name}?`,
+         actionLabel: "Remove",
+         cancelLabel: "Cancelar",
+         description: `${"Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."} ${member.user.name}?`,
          onAction: () => onRemove(member.id),
-         title: translate("common.headers.delete-confirmation.title"),
+         title: "Confirmar Exclusão",
          variant: "destructive",
       });
    };
@@ -108,19 +105,14 @@ export function MembersDataTable({
       if (!onBulkRemove || selectedIds.length === 0) return;
 
       openAlertDialog({
-         actionLabel: translate(
-            "dashboard.routes.organization.members-table.bulk-actions.remove",
-         ),
-         cancelLabel: translate("common.actions.cancel"),
-         description: translate(
-            "common.headers.delete-confirmation.description-bulk",
-            { count: selectedIds.length },
-         ),
+         actionLabel: "Remove",
+         cancelLabel: "Cancelar",
+         description: "Description Bulk",
          onAction: () => {
             onBulkRemove(selectedIds);
             setRowSelection({});
          },
-         title: translate("common.headers.delete-confirmation.title"),
+         title: "Confirmar Exclusão",
          variant: "destructive",
       });
    };
@@ -153,14 +145,10 @@ export function MembersDataTable({
                         <Users className="size-12 text-muted-foreground" />
                      </EmptyMedia>
                      <EmptyTitle>
-                        {translate(
-                           "dashboard.routes.organization.members-table.empty",
-                        )}
+                        {"Empty"}
                      </EmptyTitle>
                      <EmptyDescription>
-                        {translate(
-                           "dashboard.routes.organization.members-table.description",
-                        )}
+                        {"Description"}
                      </EmptyDescription>
                   </EmptyContent>
                </Empty>
@@ -177,9 +165,7 @@ export function MembersDataTable({
                   <InputGroup className="sm:max-w-md">
                      <InputGroupInput
                         onChange={(e) => filters.onSearchChange(e.target.value)}
-                        placeholder={translate(
-                           "dashboard.routes.organization.members-table.filters.search",
-                        )}
+                        placeholder={"Search"}
                         value={filters.searchTerm}
                      />
                      <InputGroupAddon>
@@ -197,9 +183,7 @@ export function MembersDataTable({
 
                {filteredMembers.length === 0 ? (
                   <div className="py-8 text-center text-muted-foreground">
-                     {translate(
-                        "dashboard.routes.organization.members-table.empty",
-                     )}
+                     {"Empty"}
                   </div>
                ) : (
                   <DataTable
@@ -232,9 +216,7 @@ export function MembersDataTable({
                disabled
                icon={<Shield className="size-3.5" />}
             >
-               {translate(
-                  "dashboard.routes.organization.members-table.bulk-actions.change-role",
-               )}
+               {"Change Role"}
             </SelectionActionButton>
             {onBulkRemove && (
                <SelectionActionButton
@@ -242,9 +224,7 @@ export function MembersDataTable({
                   onClick={handleBulkRemove}
                   variant="destructive"
                >
-                  {translate(
-                     "dashboard.routes.organization.members-table.bulk-actions.remove",
-                  )}
+                  {"Remove"}
                </SelectionActionButton>
             )}
          </SelectionActionBar>

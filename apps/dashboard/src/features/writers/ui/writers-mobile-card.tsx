@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Avatar, AvatarFallback, AvatarImage } from "@packages/ui/components/avatar";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
@@ -80,13 +79,13 @@ export function WritersMobileCard({
 									params={{ slug, writerId: writer.id }}
 								>
 									<Eye className="mr-2 size-4" />
-									{translate("common.actions.view")}
+									{"Ver"}
 								</Link>
 							</DropdownMenuItem>
 							{onEdit && (
 								<DropdownMenuItem onClick={() => onEdit(writer)}>
 									<Edit className="mr-2 size-4" />
-									{translate("common.actions.edit")}
+									{"Editar"}
 								</DropdownMenuItem>
 							)}
 							{onDelete && (
@@ -97,7 +96,7 @@ export function WritersMobileCard({
 										onClick={() => onDelete(writer)}
 									>
 										<Trash2 className="mr-2 size-4" />
-										{translate("common.actions.delete")}
+										{"Excluir"}
 									</DropdownMenuItem>
 								</>
 							)}
@@ -108,7 +107,7 @@ export function WritersMobileCard({
 				<div className="flex items-center gap-2 mt-2">
 					<Badge className="gap-1" variant="secondary">
 						<FileText className="size-3" />
-						{writer.contentCount} {translate("dashboard.routes.writers.table.contents")}
+						{writer.contentCount} {"conteúdos"}
 					</Badge>
 					{writer.personaConfig.instructions?.tone && (
 						<Badge variant="outline">
@@ -118,7 +117,7 @@ export function WritersMobileCard({
 				</div>
 
 				<p className="text-xs text-muted-foreground mt-2">
-					{translate("dashboard.routes.writers.table.created")}:{" "}
+					{"Criado em"}:{" "}
 					{new Date(writer.createdAt).toLocaleDateString()}
 				</p>
 			</div>

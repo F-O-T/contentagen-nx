@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    CredenzaBody,
@@ -36,17 +35,13 @@ export function InvitesFilterCredenza({
       <>
          <CredenzaHeader>
             <CredenzaTitle>
-               {translate(
-                  "dashboard.routes.organization.invites-table.filters.status",
-               )}
+               {"Status"}
             </CredenzaTitle>
          </CredenzaHeader>
          <CredenzaBody className="space-y-4">
             <div className="space-y-2">
                <p className="text-sm font-medium">
-                  {translate(
-                     "dashboard.routes.organization.invites-table.filters.status",
-                  )}
+                  {"Status"}
                </p>
                <ToggleGroup
                   className="flex-wrap justify-start"
@@ -58,36 +53,26 @@ export function InvitesFilterCredenza({
                >
                   <ToggleGroupItem aria-label="Pending" value="pending">
                      <Clock className="size-4 mr-1" />
-                     {translate(
-                        "dashboard.routes.organization.invites-table.status.pending",
-                     )}
+                     {"Pending"}
                   </ToggleGroupItem>
                   <ToggleGroupItem aria-label="Accepted" value="accepted">
                      <Check className="size-4 mr-1" />
-                     {translate(
-                        "dashboard.routes.organization.invites-table.status.accepted",
-                     )}
+                     {"Accepted"}
                   </ToggleGroupItem>
                   <ToggleGroupItem aria-label="Expired" value="expired">
                      <X className="size-4 mr-1" />
-                     {translate(
-                        "dashboard.routes.organization.invites-table.status.expired",
-                     )}
+                     {"Expired"}
                   </ToggleGroupItem>
                   <ToggleGroupItem aria-label="Canceled" value="canceled">
                      <XCircle className="size-4 mr-1" />
-                     {translate(
-                        "dashboard.routes.organization.invites-table.status.canceled",
-                     )}
+                     {"Canceled"}
                   </ToggleGroupItem>
                </ToggleGroup>
             </div>
 
             <div className="space-y-2">
                <p className="text-sm font-medium">
-                  {translate(
-                     "dashboard.routes.organization.invites-table.filters.role",
-                  )}
+                  {"Role"}
                </p>
                <ToggleGroup
                   className="flex-wrap justify-start"
@@ -97,15 +82,15 @@ export function InvitesFilterCredenza({
                >
                   <ToggleGroupItem aria-label="Owner" value="owner">
                      <Crown className="size-4 mr-1" />
-                     {translate("dashboard.routes.organization.roles.owner")}
+                     {"Dono"}
                   </ToggleGroupItem>
                   <ToggleGroupItem aria-label="Admin" value="admin">
                      <Shield className="size-4 mr-1" />
-                     {translate("dashboard.routes.organization.roles.admin")}
+                     {"Administrador"}
                   </ToggleGroupItem>
                   <ToggleGroupItem aria-label="Member" value="member">
                      <User className="size-4 mr-1" />
-                     {translate("dashboard.routes.organization.roles.member")}
+                     {"Membro"}
                   </ToggleGroupItem>
                </ToggleGroup>
             </div>
@@ -117,15 +102,13 @@ export function InvitesFilterCredenza({
                   variant="outline"
                >
                   <X className="size-4 mr-2" />
-                  {translate(
-                     "dashboard.routes.organization.invites-table.filters.clear",
-                  )}
+                  {"Clear"}
                </Button>
             )}
          </CredenzaBody>
          <CredenzaFooter>
             <Button className="w-full" onClick={closeCredenza}>
-               {translate("common.actions.close")}
+               {"Fechar"}
             </Button>
          </CredenzaFooter>
       </>

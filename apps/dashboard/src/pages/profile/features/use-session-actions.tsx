@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { toast } from "@packages/ui/components/sonner";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback } from "react";
@@ -22,17 +21,13 @@ export function useRevokeOtherSessions() {
 
    const revokeOtherSessions = useCallback(() => {
       openAlertDialog({
-         actionLabel: translate(
-            "dashboard.routes.profile.sessions.actions.revoke-others",
-         ),
-         cancelLabel: translate("common.actions.cancel"),
-         description: translate(
-            "common.headers.delete-confirmation.description",
-         ),
+         actionLabel: "Encerrar outras sessões",
+         cancelLabel: "Cancelar",
+         description: "Esta ação não pode ser desfeita.",
          onAction: async () => {
             await revokeOtherSessionsMutation.mutateAsync();
          },
-         title: translate("common.headers.delete-confirmation.title"),
+         title: "Confirmar Exclusão",
          variant: "destructive",
       });
    }, [openAlertDialog, revokeOtherSessionsMutation]);
@@ -60,17 +55,13 @@ export function useRevokeAllSessions() {
 
    const revokeAllSessions = useCallback(() => {
       openAlertDialog({
-         actionLabel: translate(
-            "dashboard.routes.profile.sessions.actions.revoke-all",
-         ),
-         cancelLabel: translate("common.actions.cancel"),
-         description: translate(
-            "common.headers.delete-confirmation.description",
-         ),
+         actionLabel: "Encerrar todas as sessões",
+         cancelLabel: "Cancelar",
+         description: "Esta ação não pode ser desfeita.",
          onAction: async () => {
             await revokeAllSessionsMutation.mutateAsync();
          },
-         title: translate("common.headers.delete-confirmation.title"),
+         title: "Confirmar Exclusão",
          variant: "destructive",
       });
    }, [openAlertDialog, revokeAllSessionsMutation]);

@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Alert, AlertDescription } from "@packages/ui/components/alert";
 import { Button } from "@packages/ui/components/button";
 import { Field, FieldError, FieldLabel } from "@packages/ui/components/field";
@@ -38,7 +37,7 @@ function ManageContentErrorFallback() {
 		<Alert variant="destructive">
 			<AlertTriangle className="h-4 w-4" />
 			<AlertDescription>
-				{translate("common.errors.default")}
+				{"Ocorreu um erro. Por favor, tente novamente."}
 			</AlertDescription>
 		</Alert>
 	);
@@ -77,7 +76,7 @@ function ManageContentFormContent({ agentId }: ManageContentFormProps) {
 	const createMutation = useMutation(
 		trpc.content.create.mutationOptions({
 			onSuccess: (data) => {
-				toast.success(translate("dashboard.routes.content.form.create-success"));
+				toast.success("Conteúdo criado com sucesso");
 				queryClient.invalidateQueries({
 					queryKey: trpc.content.listAllContent.queryKey(),
 				});
@@ -94,7 +93,7 @@ function ManageContentFormContent({ agentId }: ManageContentFormProps) {
 				}
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -102,7 +101,7 @@ function ManageContentFormContent({ agentId }: ManageContentFormProps) {
 	const isPending = createMutation.isPending;
 
 	const schema = z.object({
-		agentId: z.string().uuid(translate("dashboard.routes.content.form.writer-required")),
+		agentId: z.string().uuid("O escritor é obrigatório"),
 	});
 
 	const form = useForm({
@@ -136,7 +135,7 @@ function ManageContentFormContent({ agentId }: ManageContentFormProps) {
 						return (
 							<Field data-invalid={isInvalid}>
 								<FieldLabel htmlFor={field.name}>
-									{translate("dashboard.routes.content.form.writer")}
+									{"Escritor"}
 								</FieldLabel>
 								<Select
 									value={field.state.value}
@@ -144,7 +143,7 @@ function ManageContentFormContent({ agentId }: ManageContentFormProps) {
 								>
 									<SelectTrigger>
 										<SelectValue
-											placeholder={translate("dashboard.routes.content.form.writer-placeholder")}
+											placeholder={"Selecione um escritor"}
 										/>
 									</SelectTrigger>
 									<SelectContent>
@@ -162,13 +161,13 @@ function ManageContentFormContent({ agentId }: ManageContentFormProps) {
 				</form.Field>
 
 				<p className="text-sm text-muted-foreground">
-					{translate("dashboard.routes.content.form.ai-assisted-description")}
+					{"A IA vai te ajudar a planejar e escrever seu conteúdo. Você poderá revisar e editar tudo depois."}
 				</p>
 			</form>
 
 			<SheetFooter>
 				<Button onClick={closeSheet} type="button" variant="outline">
-					{translate("common.actions.cancel")}
+					{"Cancelar"}
 				</Button>
 				<form.Subscribe>
 					{(formState) => (
@@ -178,8 +177,8 @@ function ManageContentFormContent({ agentId }: ManageContentFormProps) {
 							type="submit"
 						>
 							{isPending
-								? translate("dashboard.routes.content.form.creating")
-								: translate("dashboard.routes.content.form.start-creating")}
+								? "Criando..."
+								: "Começar"}
 						</Button>
 					)}
 				</form.Subscribe>
@@ -193,10 +192,10 @@ export const ManageContentForm: FC<ManageContentFormProps> = ({ agentId }) => {
 		<>
 			<SheetHeader>
 				<SheetTitle>
-					{translate("dashboard.routes.content.form.create-title")}
+					{"Novo Conteúdo"}
 				</SheetTitle>
 				<SheetDescription>
-					{translate("dashboard.routes.content.form.ai-create-description")}
+					{"Selecione um escritor para começar a criar seu conteúdo com ajuda da IA."}
 				</SheetDescription>
 			</SheetHeader>
 			<ErrorBoundary FallbackComponent={ManageContentErrorFallback}>

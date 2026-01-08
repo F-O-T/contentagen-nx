@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import {
    Field,
@@ -29,22 +28,22 @@ export function SignUpPage() {
    const schema = z
       .object({
          confirmPassword: z.string(),
-         email: z.email(translate("common.validation.email")),
+         email: z.email("Insira um endereço de email válido."),
          name: z
             .string()
             .min(
                2,
-               translate("common.validation.min-length").replace("{min}", "2"),
+               "O campo deve ter no mínimo {min} caracteres.".replace("{min}", "2"),
             ),
          password: z
             .string()
             .min(
                8,
-               translate("common.validation.min-length").replace("{min}", "8"),
+               "O campo deve ter no mínimo {min} caracteres.".replace("{min}", "8"),
             ),
       })
       .refine((data) => data.password === data.confirmPassword, {
-         message: translate("common.validation.password-mismatch"),
+         message: "As senhas não coincidem.",
          path: ["confirmPassword"],
       });
 
@@ -62,12 +61,12 @@ export function SignUpPage() {
                },
                onRequest: () => {
                   toast.loading(
-                     translate("dashboard.routes.sign-up.messages.requesting"),
+                     "Criando sua conta...",
                   );
                },
                onSuccess: () => {
                   toast.success(
-                     translate("dashboard.routes.sign-up.messages.success"),
+                     "Conta criada com sucesso!",
                   );
                   router.navigate({
                      search: { email },
@@ -117,7 +116,7 @@ export function SignUpPage() {
                      return (
                         <Field data-invalid={isInvalid}>
                            <FieldLabel htmlFor={field.name}>
-                              {translate("common.form.name.label")}
+                              {"Nome"}
                            </FieldLabel>
                            <Input
                               aria-invalid={isInvalid}
@@ -128,9 +127,7 @@ export function SignUpPage() {
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder={translate(
-                                 "common.form.name.placeholder",
-                              )}
+                              placeholder={"Placeholder"}
                               value={field.state.value}
                            />
                            {isInvalid && (
@@ -149,7 +146,7 @@ export function SignUpPage() {
                      return (
                         <Field data-invalid={isInvalid}>
                            <FieldLabel htmlFor={field.name}>
-                              {translate("common.form.email.label")}
+                              {"Email"}
                            </FieldLabel>
                            <Input
                               aria-invalid={isInvalid}
@@ -160,9 +157,7 @@ export function SignUpPage() {
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder={translate(
-                                 "common.form.email.placeholder",
-                              )}
+                              placeholder={"Placeholder"}
                               type="email"
                               value={field.state.value}
                            />
@@ -190,7 +185,7 @@ export function SignUpPage() {
                      return (
                         <Field data-invalid={isInvalid}>
                            <FieldLabel htmlFor={field.name}>
-                              {translate("common.form.password.label")}
+                              {"Senha"}
                            </FieldLabel>
                            <PasswordInput
                               aria-invalid={isInvalid}
@@ -201,9 +196,7 @@ export function SignUpPage() {
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder={translate(
-                                 "common.form.password.placeholder",
-                              )}
+                              placeholder={"Placeholder"}
                               value={field.state.value}
                            />
                            {isInvalid && (
@@ -222,7 +215,7 @@ export function SignUpPage() {
                      return (
                         <Field data-invalid={isInvalid}>
                            <FieldLabel htmlFor={field.name}>
-                              {translate("common.form.confirm-password.label")}
+                              {"Confirmar Senha"}
                            </FieldLabel>
                            <PasswordInput
                               aria-invalid={isInvalid}
@@ -233,9 +226,7 @@ export function SignUpPage() {
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder={translate(
-                                 "common.form.confirm-password.placeholder",
-                              )}
+                              placeholder={"Placeholder"}
                               value={field.state.value}
                            />
                            {isInvalid && (
@@ -250,9 +241,7 @@ export function SignUpPage() {
       );
    }
    const TermsAndPrivacyText = () => {
-      const text = translate(
-         "dashboard.routes.sign-in.texts.terms-and-privacy",
-      ).split("{split}");
+      const text = "Ao continuar, você concorda com nossos {split} e {split}.".split("{split}");
 
       return (
          <>
@@ -263,7 +252,7 @@ export function SignUpPage() {
                rel="noopener noreferrer"
                target="_blank"
             >
-               {translate("dashboard.routes.sign-in.texts.terms-of-service")}
+               {"Termos de Serviço"}
             </a>
             <span>{text[1]}</span>
             <a
@@ -272,7 +261,7 @@ export function SignUpPage() {
                rel="noopener noreferrer"
                target="_blank"
             >
-               {translate("dashboard.routes.sign-in.texts.privacy-policy")}
+               {"Política de Privacidade"}
             </a>
             <span>{text[2]}</span>
          </>
@@ -286,10 +275,10 @@ export function SignUpPage() {
                {/* Header */}
                <div className="text-center space-y-2">
                   <h1 className="text-3xl font-semibold font-serif">
-                     {translate("dashboard.routes.sign-up.title")}
+                     {"Cadastrar"}
                   </h1>
                   <p className="text-muted-foreground text-sm">
-                     {translate("dashboard.routes.sign-up.description")}
+                     {"Crie sua conta para começar a usar o aplicativo."}
                   </p>
                </div>
 
@@ -313,7 +302,7 @@ export function SignUpPage() {
                            type="button"
                            variant="outline"
                         >
-                           {translate("common.actions.previous")}
+                           {"Voltar"}
                         </Button>
                         {methods.isLast ? (
                            <form.Subscribe>
@@ -327,7 +316,7 @@ export function SignUpPage() {
                                     type="submit"
                                     variant="default"
                                  >
-                                    {translate("common.actions.submit")}
+                                    {"Enviar"}
                                  </Button>
                               )}
                            </form.Subscribe>
@@ -345,7 +334,7 @@ export function SignUpPage() {
                                     onClick={methods.next}
                                     type="button"
                                  >
-                                    {translate("common.actions.next")}
+                                    {"Próximo"}
                                  </Button>
                               )}
                            </form.Subscribe>
@@ -358,15 +347,13 @@ export function SignUpPage() {
                <div className="text-sm text-center space-y-4">
                   <div className="flex gap-1 justify-center items-center">
                      <span>
-                        {translate(
-                           "dashboard.routes.sign-up.texts.have-account",
-                        )}
+                        {"Já tem uma conta?"}
                      </span>
                      <Link
                         className="text-primary font-medium hover:underline"
                         to="/auth/sign-in"
                      >
-                        {translate("dashboard.routes.sign-up.actions.sign-in")}
+                        {"Entre aqui"}
                      </Link>
                   </div>
                   <FieldDescription className="text-center">

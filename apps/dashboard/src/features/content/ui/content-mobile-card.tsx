@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Avatar, AvatarFallback, AvatarImage } from "@packages/ui/components/avatar";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
@@ -64,7 +63,7 @@ export function ContentMobileCard({
 							to="/$slug/content/$contentId"
 							params={{ slug, contentId: content.id }}
 						>
-							{content.meta.title || translate("common.labels.untitled")}
+							{content.meta.title || "Sem título"}
 						</Link>
 						<p className="text-sm text-muted-foreground truncate">
 							{content.meta.description}
@@ -84,25 +83,25 @@ export function ContentMobileCard({
 									params={{ slug, contentId: content.id }}
 								>
 									<Eye className="mr-2 size-4" />
-									{translate("common.actions.view")}
+									{"Ver"}
 								</Link>
 							</DropdownMenuItem>
 							{onEdit && (
 								<DropdownMenuItem onClick={() => onEdit(content)}>
 									<Edit className="mr-2 size-4" />
-									{translate("common.actions.edit")}
+									{"Editar"}
 								</DropdownMenuItem>
 							)}
 							{onPublish && content.status === "draft" && (
 								<DropdownMenuItem onClick={() => onPublish(content)}>
 									<Send className="mr-2 size-4" />
-									{translate("common.actions.publish")}
+									{"Publicar"}
 								</DropdownMenuItem>
 							)}
 							{onArchive && content.status !== "archived" && (
 								<DropdownMenuItem onClick={() => onArchive(content)}>
 									<Archive className="mr-2 size-4" />
-									{translate("common.actions.archive")}
+									{"Arquivar"}
 								</DropdownMenuItem>
 							)}
 							{onDelete && (
@@ -113,7 +112,7 @@ export function ContentMobileCard({
 										onClick={() => onDelete(content)}
 									>
 										<Trash2 className="mr-2 size-4" />
-										{translate("common.actions.delete")}
+										{"Excluir"}
 									</DropdownMenuItem>
 								</>
 							)}
@@ -123,7 +122,7 @@ export function ContentMobileCard({
 
 				<div className="flex items-center gap-2 mt-2">
 					<Badge className={STATUS_COLORS[content.status]} variant="outline">
-						{translate(`common.status.${content.status}`)}
+						{"Status}"}
 					</Badge>
 					{agent && (
 						<div className="flex items-center gap-1">

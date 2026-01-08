@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
    SidebarGroup,
    SidebarGroupContent,
@@ -15,25 +14,25 @@ const organizationNavItems = [
       href: "/$slug/organization",
       icon: Building,
       id: "overview",
-      title: translate("dashboard.routes.organization.nav.overview"),
+      title: "Visão Geral",
    },
    {
       href: "/$slug/organization/members",
       icon: Users,
       id: "members",
-      title: translate("dashboard.routes.organization.nav.members"),
+      title: "Membros",
    },
    {
       href: "/$slug/organization/teams",
       icon: Users2,
       id: "teams",
-      title: translate("dashboard.routes.organization.nav.teams"),
+      title: "Equipes",
    },
    {
       href: "/$slug/organization/invites",
       icon: Mail,
       id: "invites",
-      title: translate("dashboard.routes.organization.nav.invites"),
+      title: "Convites",
    },
 ];
 

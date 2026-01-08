@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Badge } from "@packages/ui/components/badge";
 import {
    Card,
@@ -72,21 +71,17 @@ function PreferencesSectionErrorFallback(props: FallbackProps) {
       <Card className="h-full">
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.settings.preferences.title")}
+               {"Preferências"}
             </CardTitle>
             <CardDescription>
-               {translate("dashboard.routes.settings.preferences.description")}
+               {"Personalize sua experiência no aplicativo."}
             </CardDescription>
          </CardHeader>
          <CardContent>
             {createErrorFallback({
-               errorDescription: translate(
-                  "dashboard.routes.settings.preferences.state.error.description",
-               ),
-               errorTitle: translate(
-                  "dashboard.routes.settings.preferences.state.error.title",
-               ),
-               retryText: translate("common.actions.retry"),
+               errorDescription: "Description",
+               errorTitle: "Title",
+               retryText: "Tentar novamente",
             })(props)}
          </CardContent>
       </Card>
@@ -102,12 +97,10 @@ function AppearanceCard() {
       <Card className="h-full">
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.settings.preferences.title")}
+               {"Preferências"}
             </CardTitle>
             <CardDescription>
-               {translate(
-                  "dashboard.routes.settings.preferences.appearance.description",
-               )}
+               {"Description"}
             </CardDescription>
          </CardHeader>
          <CardContent>
@@ -118,14 +111,10 @@ function AppearanceCard() {
                   </ItemMedia>
                   <ItemContent className="min-w-0">
                      <ItemTitle>
-                        {translate(
-                           "dashboard.routes.profile.preferences.items.theme.title",
-                        )}
+                        {"Tema"}
                      </ItemTitle>
                      <ItemDescription className="line-clamp-2">
-                        {translate(
-                           "dashboard.routes.profile.preferences.items.theme.description",
-                        )}
+                        {"Escolha o tema da interface"}
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>
@@ -141,14 +130,10 @@ function AppearanceCard() {
                   </ItemMedia>
                   <ItemContent className="min-w-0">
                      <ItemTitle>
-                        {translate(
-                           "dashboard.routes.profile.preferences.items.language.title",
-                        )}
+                        {"Idioma"}
                      </ItemTitle>
                      <ItemDescription className="line-clamp-2">
-                        {translate(
-                           "dashboard.routes.profile.preferences.items.language.description",
-                        )}
+                        {"Escolha o idioma da interface"}
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>
@@ -178,52 +163,38 @@ function PrivacyCard({
       <Card className="h-full">
          <CardHeader>
             <CardTitle>
-               {translate(
-                  "dashboard.routes.settings.preferences.privacy.title",
-               )}
+               {"Title"}
             </CardTitle>
             <CardDescription>
-               {translate(
-                  "dashboard.routes.settings.preferences.privacy.description",
-               )}
+               {"Description"}
             </CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
             <div className="rounded-lg bg-secondary/50 p-4 text-center">
                <p className="text-xs md:text-sm text-muted-foreground mb-1">
-                  {translate(
-                     "dashboard.routes.settings.preferences.privacy.telemetry-status",
-                  )}
+                  {"Telemetry Status"}
                </p>
                <div className="flex items-center justify-center gap-2">
                   {hasConsent ? (
                      <>
                         <Shield className="size-5 text-green-500" />
                         <span className="text-lg font-semibold text-green-500">
-                           {translate(
-                              "dashboard.routes.settings.preferences.privacy.enabled",
-                           )}
+                           {"Enabled"}
                         </span>
                      </>
                   ) : (
                      <>
                         <Shield className="size-5 text-muted-foreground" />
                         <span className="text-lg font-semibold text-muted-foreground">
-                           {translate(
-                              "dashboard.routes.settings.preferences.privacy.disabled",
-                           )}
+                           {"Disabled"}
                         </span>
                      </>
                   )}
                </div>
                <Badge className="mt-2" variant="secondary">
                   {hasConsent
-                     ? translate(
-                          "dashboard.routes.settings.preferences.privacy.sharing-data",
-                       )
-                     : translate(
-                          "dashboard.routes.settings.preferences.privacy.private-data",
-                       )}
+                     ? "Sharing Data"
+                     : "Private Data"}
                </Badge>
             </div>
 
@@ -234,21 +205,15 @@ function PrivacyCard({
                   </ItemMedia>
                   <ItemContent className="min-w-0">
                      <ItemTitle>
-                        {translate(
-                           "dashboard.routes.profile.preferences.items.telemetry.title",
-                        )}
+                        {"Title"}
                      </ItemTitle>
                      <ItemDescription className="line-clamp-2">
-                        {translate(
-                           "dashboard.routes.profile.preferences.items.telemetry.description",
-                        )}
+                        {"Description"}
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>
                      <Switch
-                        aria-label={translate(
-                           "dashboard.routes.profile.preferences.items.telemetry.title",
-                        )}
+                        aria-label={"Title"}
                         checked={hasConsent}
                         disabled={isPending}
                         onCheckedChange={onConsentChange}

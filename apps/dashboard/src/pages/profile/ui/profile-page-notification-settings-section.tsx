@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
    Card,
    CardContent,
@@ -25,25 +24,17 @@ function AccountConfigurationErrorFallback(props: FallbackProps) {
       <Card>
          <CardHeader>
             <CardTitle>
-               {translate(
-                  "dashboard.routes.profile.account-configuration.title",
-               )}
+               {"Configurações da Conta"}
             </CardTitle>
             <CardDescription>
-               {translate(
-                  "dashboard.routes.profile.account-configuration.description",
-               )}
+               {"Configure suas preferências de conta"}
             </CardDescription>
          </CardHeader>
          <CardContent>
             {createErrorFallback({
-               errorDescription: translate(
-                  "dashboard.routes.profile.account-configuration.state.error.description",
-               ),
-               errorTitle: translate(
-                  "dashboard.routes.profile.account-configuration.state.error.title",
-               ),
-               retryText: translate("common.actions.retry"),
+               errorDescription: "Erro ao carregar configurações",
+               errorTitle: "Erro",
+               retryText: "Tentar novamente",
             })(props)}
          </CardContent>
       </Card>
@@ -85,14 +76,10 @@ function AccountConfigurationContent() {
       <Card>
          <CardHeader>
             <CardTitle>
-               {translate(
-                  "dashboard.routes.profile.account-configuration.title",
-               )}
+               {"Configurações da Conta"}
             </CardTitle>
             <CardDescription>
-               {translate(
-                  "dashboard.routes.profile.account-configuration.description",
-               )}
+               {"Configure suas preferências de conta"}
             </CardDescription>
          </CardHeader>
 
@@ -103,14 +90,10 @@ function AccountConfigurationContent() {
                </ItemMedia>
                <ItemContent>
                   <ItemTitle>
-                     {translate(
-                        "dashboard.routes.profile.account-configuration.items.currency.title",
-                     )}
+                     {"Moeda"}
                   </ItemTitle>
                   <ItemDescription>
-                     {translate(
-                        "dashboard.routes.profile.account-configuration.items.currency.description",
-                     )}
+                     {"Moeda padrão para exibição de valores"}
                   </ItemDescription>
                </ItemContent>
                <CurrencyCommand />

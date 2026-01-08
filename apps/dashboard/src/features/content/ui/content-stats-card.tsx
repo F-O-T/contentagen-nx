@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import {
 	Card,
 	CardContent,
@@ -32,10 +31,10 @@ export function ContentStatsCard({ stats, body }: ContentStatsCardProps) {
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
 					<BarChart3 className="size-5" />
-					{translate("dashboard.routes.content.details.stats-title")}
+					{"Estatísticas"}
 				</CardTitle>
 				<CardDescription>
-					{translate("dashboard.routes.content.details.stats-description")}
+					{"Métricas do conteúdo"}
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -45,7 +44,7 @@ export function ContentStatsCard({ stats, body }: ContentStatsCardProps) {
 						<div>
 							<p className="text-2xl font-bold">{wordCount.toLocaleString()}</p>
 							<p className="text-xs text-muted-foreground">
-								{translate("dashboard.routes.content.details.words")}
+								{"palavras"}
 							</p>
 						</div>
 					</div>
@@ -55,7 +54,7 @@ export function ContentStatsCard({ stats, body }: ContentStatsCardProps) {
 						<div>
 							<p className="text-2xl font-bold">{readTime}</p>
 							<p className="text-xs text-muted-foreground">
-								{translate("dashboard.routes.content.details.read-time")}
+								{"min de leitura"}
 							</p>
 						</div>
 					</div>

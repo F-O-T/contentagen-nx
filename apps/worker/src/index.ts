@@ -7,21 +7,12 @@ import {
    createRedisConnection,
 } from "@packages/queue/connection";
 import { getResendClient } from "@packages/transactional/utils";
-import { createWorkflowWorker } from "@packages/workflows/queue/consumer";
 import { createDeletionWorker } from "@packages/workflows/queue/deletion-consumer";
-import { createMaintenanceWorker } from "@packages/workflows/queue/maintenance-consumer";
-import { initializeWorkflowQueue } from "@packages/workflows/queue/producer";
 import {
    closeDeletionQueue,
-   closeMaintenanceQueue,
    createDeletionQueue,
-   createMaintenanceQueue,
    type DeletionJobData,
    type DeletionJobResult,
-   type MaintenanceJobData,
-   type MaintenanceJobResult,
-   type WorkflowJobData,
-   type WorkflowJobResult,
 } from "@packages/workflows/queue/queues";
 
 const logger = getWorkerLogger(env);
@@ -37,60 +28,9 @@ const resendClient = env.RESEND_API_KEY
    ? getResendClient(env.RESEND_API_KEY)
    : undefined;
 
-const vapidConfig =
-   env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY
-      ? {
-           privateKey: env.VAPID_PRIVATE_KEY,
-           publicKey: env.VAPID_PUBLIC_KEY,
-           subject: env.VAPID_SUBJECT ?? "mailto:contato@montte.co",
-        }
-      : undefined;
-
-logger.info("Starting workflow worker");
+logger.info("Starting deletion worker");
 
 let isShuttingDown = false;
-
-initializeWorkflowQueue(redisConnection);
-
-const maintenanceQueue = createMaintenanceQueue(redisConnection);
-
-await maintenanceQueue.add(
-   "cleanup-automation-logs",
-   { type: "cleanup-automation-logs", retentionDays: 7 },
-   {
-      jobId: "cleanup-automation-logs-daily",
-      repeat: { pattern: "0 0 * * *" },
-   },
-);
-
-logger.info({ retentionDays: 7 }, "Scheduled daily automation log cleanup job");
-
-const { worker: maintenanceWorker, close: closeMaintenanceWorker } =
-   createMaintenanceWorker({
-      concurrency: 1,
-      connection: redisConnection,
-      db,
-      onCompleted: async (
-         job: Job<MaintenanceJobData, MaintenanceJobResult>,
-         result: MaintenanceJobResult,
-      ) => {
-         logger.info(
-            { jobName: job.name, deletedCount: result.deletedCount },
-            "Maintenance job completed",
-         );
-      },
-      onFailed: async (
-         job: Job<MaintenanceJobData, MaintenanceJobResult> | undefined,
-         error: Error,
-      ) => {
-         logger.error(
-            { jobName: job?.name, err: error },
-            "Maintenance job failed",
-         );
-      },
-   });
-
-logger.info("Maintenance worker started");
 
 // Deletion queue and worker
 const deletionQueue = createDeletionQueue(redisConnection);
@@ -152,57 +92,6 @@ const { worker: deletionWorker, close: closeDeletionWorker } =
 
 logger.info("Deletion worker started");
 
-const { worker, close } = createWorkflowWorker({
-   concurrency: env.WORKER_CONCURRENCY || 5,
-   connection: redisConnection,
-   db,
-   resendClient,
-   vapidConfig,
-   onCompleted: async (
-      job: Job<WorkflowJobData, WorkflowJobResult>,
-      result: WorkflowJobResult,
-   ) => {
-      logger.info(
-         {
-            jobId: job.id,
-            rulesMatched: result.rulesMatched,
-            rulesEvaluated: result.rulesEvaluated,
-         },
-         "Workflow job completed",
-      );
-
-      if (global.gc) {
-         global.gc();
-      }
-   },
-   onFailed: async (
-      job: Job<WorkflowJobData, WorkflowJobResult> | undefined,
-      error: Error,
-   ) => {
-      logger.error({ jobId: job?.id, err: error }, "Workflow job failed");
-   },
-});
-
-logger.info(
-   { concurrency: env.WORKER_CONCURRENCY || 5 },
-   "Workflow worker started",
-);
-
-worker.on("active", (job: Job<WorkflowJobData, WorkflowJobResult>) => {
-   logger.debug(
-      { jobId: job.id, eventType: job.data.event.type },
-      "Job active",
-   );
-});
-
-worker.on("stalled", (jobId: string) => {
-   logger.warn({ jobId }, "Job stalled");
-});
-
-worker.on("error", (error: Error) => {
-   logger.error({ err: error }, "Worker error");
-});
-
 async function gracefulShutdown(signal: string) {
    if (isShuttingDown) {
       logger.info("Shutdown already in progress");
@@ -221,18 +110,13 @@ async function gracefulShutdown(signal: string) {
    }, 30000);
 
    try {
-      logger.info("Pausing workers to stop accepting new jobs");
-      await worker.pause();
-      await maintenanceWorker.pause();
+      logger.info("Pausing worker to stop accepting new jobs");
       await deletionWorker.pause();
 
       logger.info("Waiting for active jobs to complete");
-      await close();
-      await closeMaintenanceWorker();
       await closeDeletionWorker();
 
       logger.info("Closing queues");
-      await closeMaintenanceQueue();
       await closeDeletionQueue();
 
       logger.info("Closing Redis connection");

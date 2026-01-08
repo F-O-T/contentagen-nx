@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { PlanName, STRIPE_PLANS } from "@packages/stripe/constants";
 import { Badge } from "@packages/ui/components/badge";
 import {
@@ -242,21 +241,17 @@ function BillingSectionErrorFallback(props: FallbackProps) {
       <Card>
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.settings.billing.title")}
+               {"Assinatura"}
             </CardTitle>
             <CardDescription>
-               {translate("dashboard.routes.settings.billing.description")}
+               {"Gerencie sua assinatura e informações de cobrança."}
             </CardDescription>
          </CardHeader>
          <CardContent>
             {createErrorFallback({
-               errorDescription: translate(
-                  "dashboard.routes.profile.billing.state.error.description",
-               ),
-               errorTitle: translate(
-                  "dashboard.routes.profile.billing.state.error.title",
-               ),
-               retryText: translate("common.actions.retry"),
+               errorDescription: "Erro ao carregar informações de cobrança",
+               errorTitle: "Erro",
+               retryText: "Tentar novamente",
             })(props)}
          </CardContent>
       </Card>
@@ -436,7 +431,7 @@ function BillingPlanCard({ subscription }: { subscription: Subscription }) {
                onClick={handleNavigateToManagePlan}
                variant="outline"
             >
-               {translate("dashboard.routes.settings.billing.manage-plan")}
+               {"Gerenciar plano"}
             </Button>
          </CardContent>
       </Card>
@@ -873,10 +868,10 @@ function NoSubscriptionContent() {
       <Card>
          <CardHeader>
             <CardTitle>
-               {translate("dashboard.routes.settings.billing.title")}
+               {"Assinatura"}
             </CardTitle>
             <CardDescription>
-               {translate("dashboard.routes.settings.billing.description")}
+               {"Gerencie sua assinatura e informações de cobrança."}
             </CardDescription>
          </CardHeader>
          <CardContent>
@@ -886,14 +881,10 @@ function NoSubscriptionContent() {
                      <CreditCard className="size-6" />
                   </EmptyMedia>
                   <EmptyTitle>
-                     {translate(
-                        "dashboard.routes.profile.billing.state.not-active.title",
-                     )}
+                     {"Title"}
                   </EmptyTitle>
                   <EmptyDescription>
-                     {translate(
-                        "dashboard.routes.profile.billing.state.not-active.description",
-                     )}
+                     {"Description"}
                   </EmptyDescription>
                </EmptyHeader>
                <EmptyContent>
@@ -903,7 +894,7 @@ function NoSubscriptionContent() {
                         search={{ success: undefined }}
                         to="/$slug/plans"
                      >
-                        {translate("dashboard.routes.settings.billing.upgrade")}
+                        {"Fazer upgrade"}
                         <ArrowRight className="ml-2 size-4" />
                      </Link>
                   </Button>

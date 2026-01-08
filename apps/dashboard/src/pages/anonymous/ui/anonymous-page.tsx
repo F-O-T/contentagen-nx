@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import { FieldDescription } from "@packages/ui/components/field";
 import { Spinner } from "@packages/ui/components/spinner";
@@ -23,7 +22,7 @@ export function AnonymousPage() {
             },
             onSuccess: () => {
                toast.success(
-                  translate("dashboard.routes.anonymous.messages.success"),
+                  "Pronto! Sua conta foi criada.",
                );
                router.navigate({ params: { slug: "" }, to: "/$slug/home" });
             },
@@ -37,17 +36,17 @@ export function AnonymousPage() {
          <Button asChild className="gap-2 px-0" variant="link">
             <Link to="/auth/sign-in">
                <ArrowLeft className="size-4" />
-               {translate("dashboard.routes.anonymous.actions.back-to-sign-in")}
+               {"Voltar para o login"}
             </Link>
          </Button>
 
          {/* Header */}
          <div className="text-center space-y-2">
             <h1 className="text-3xl font-semibold font-serif">
-               {translate("dashboard.routes.anonymous.title")}
+               {"Acesso rápido"}
             </h1>
             <p className="text-muted-foreground text-sm">
-               {translate("dashboard.routes.anonymous.description")}
+               {"Experimente o Montte agora mesmo. Você pode criar uma conta completa depois."}
             </p>
          </div>
 
@@ -59,7 +58,7 @@ export function AnonymousPage() {
                      <Check className="size-3.5 text-primary" />
                   </div>
                   <p className="text-sm">
-                     {translate("dashboard.routes.anonymous.benefits.no-email")}
+                     {"Sem precisar de e-mail ou senha"}
                   </p>
                </div>
                <div className="flex items-start gap-3">
@@ -67,7 +66,7 @@ export function AnonymousPage() {
                      <Zap className="size-3.5 text-primary" />
                   </div>
                   <p className="text-sm">
-                     {translate("dashboard.routes.anonymous.benefits.instant")}
+                     {"Acesso imediato, sem cadastro"}
                   </p>
                </div>
                <div className="flex items-start gap-3">
@@ -75,9 +74,7 @@ export function AnonymousPage() {
                      <Sparkles className="size-3.5 text-primary" />
                   </div>
                   <p className="text-sm">
-                     {translate(
-                        "dashboard.routes.anonymous.benefits.convert-later",
-                     )}
+                     {"Convert Later"}
                   </p>
                </div>
             </div>
@@ -91,13 +88,13 @@ export function AnonymousPage() {
                {isLoading ? (
                   <Spinner />
                ) : (
-                  translate("dashboard.routes.anonymous.actions.sign-in")
+                  "Começar agora"
                )}
             </Button>
 
             {/* Note */}
             <FieldDescription className="text-center">
-               {translate("dashboard.routes.anonymous.note")}
+               {"Seus dados ficam salvos. Você pode adicionar um e-mail a qualquer momento nas configurações."}
             </FieldDescription>
          </div>
 
@@ -105,13 +102,13 @@ export function AnonymousPage() {
          <div className="text-sm text-center">
             <div className="flex gap-1 justify-center items-center">
                <span>
-                  {translate("dashboard.routes.sign-in.texts.no-account")}
+                  {"Primeira vez aqui? "}
                </span>
                <Link
                   className="text-primary font-medium hover:underline"
                   to="/auth/sign-up"
                >
-                  {translate("dashboard.routes.sign-in.actions.sign-up")}
+                  {"Criar conta"}
                </Link>
             </div>
          </div>

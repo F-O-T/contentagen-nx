@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Avatar, AvatarFallback, AvatarImage } from "@packages/ui/components/avatar";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
@@ -63,7 +62,7 @@ export function ContentMetadataBar({
 			toast.success("Copied to clipboard");
 			setTimeout(() => setCopied(false), 2000);
 		} catch {
-			toast.error(translate("common.errors.default"));
+			toast.error("Ocorreu um erro. Por favor, tente novamente.");
 		}
 	};
 

@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { Alert, AlertDescription } from "@packages/ui/components/alert";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -45,7 +44,7 @@ function WriterInstructionsErrorFallback() {
 		<Alert variant="destructive">
 			<AlertTriangle className="h-4 w-4" />
 			<AlertDescription>
-				{translate("common.errors.default")}
+				{"Ocorreu um erro. Por favor, tente novamente."}
 			</AlertDescription>
 		</Alert>
 	);
@@ -82,7 +81,7 @@ function WriterInstructionsFormContent({
 	const updateMutation = useMutation(
 		trpc.agent.update.mutationOptions({
 			onSuccess: () => {
-				toast.success(translate("dashboard.routes.writers.form.instructions-success"));
+				toast.success("Instruções atualizadas com sucesso");
 				queryClient.invalidateQueries({
 					queryKey: trpc.agent.getById.queryKey({ id: writerId }),
 				});
@@ -92,7 +91,7 @@ function WriterInstructionsFormContent({
 				closeSheet();
 			},
 			onError: (error) => {
-				toast.error(error.message || translate("common.errors.default"));
+				toast.error(error.message || "Ocorreu um erro. Por favor, tente novamente.");
 			},
 		}),
 	);
@@ -107,7 +106,6 @@ function WriterInstructionsFormContent({
 	const form = useForm({
 		defaultValues: {
 			tone: instructions?.tone ?? "",
-			style: instructions?.style ?? "",
 			audienceProfile: instructions?.audienceProfile ?? "",
 			writingGuidelines: instructions?.writingGuidelines ?? "",
 		},
@@ -120,8 +118,13 @@ function WriterInstructionsFormContent({
 							name: writerName,
 						},
 						instructions: {
-							tone: value.tone || undefined,
-							style: value.style || undefined,
+							tone: (value.tone || undefined) as
+								| "formal"
+								| "conversational"
+								| "professional"
+								| "casual"
+								| "academic"
+								| undefined,
 							audienceProfile: value.audienceProfile || undefined,
 							writingGuidelines: value.writingGuidelines || undefined,
 							ragIntegration: true,
@@ -154,7 +157,7 @@ function WriterInstructionsFormContent({
 						return (
 							<Field data-invalid={isInvalid}>
 								<FieldLabel htmlFor={field.name}>
-									{translate("dashboard.routes.writers.form.tone")}
+									{"Tom"}
 								</FieldLabel>
 								<Input
 									aria-invalid={isInvalid}
@@ -162,41 +165,12 @@ function WriterInstructionsFormContent({
 									name={field.name}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder={translate("dashboard.routes.writers.form.tone-placeholder")}
+									placeholder={"Ex: amigável, profissional, educativo"}
 									type="text"
 									value={field.state.value}
 								/>
 								<FieldDescription>
-									{translate("dashboard.routes.writers.form.tone-hint")}
-								</FieldDescription>
-								{isInvalid && <FieldError errors={field.state.meta.errors} />}
-							</Field>
-						);
-					}}
-				</form.Field>
-
-				<form.Field name="style">
-					{(field) => {
-						const isInvalid =
-							field.state.meta.isTouched && !field.state.meta.isValid;
-
-						return (
-							<Field data-invalid={isInvalid}>
-								<FieldLabel htmlFor={field.name}>
-									{translate("dashboard.routes.writers.form.style")}
-								</FieldLabel>
-								<Input
-									aria-invalid={isInvalid}
-									id={field.name}
-									name={field.name}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder={translate("dashboard.routes.writers.form.style-placeholder")}
-									type="text"
-									value={field.state.value}
-								/>
-								<FieldDescription>
-									{translate("dashboard.routes.writers.form.style-hint")}
+									{"A personalidade e voz do escritor"}
 								</FieldDescription>
 								{isInvalid && <FieldError errors={field.state.meta.errors} />}
 							</Field>
@@ -212,7 +186,7 @@ function WriterInstructionsFormContent({
 						return (
 							<Field data-invalid={isInvalid}>
 								<FieldLabel htmlFor={field.name}>
-									{translate("dashboard.routes.writers.form.audience")}
+									{"Público-alvo"}
 								</FieldLabel>
 								<Textarea
 									aria-invalid={isInvalid}
@@ -220,12 +194,12 @@ function WriterInstructionsFormContent({
 									name={field.name}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder={translate("dashboard.routes.writers.form.audience-placeholder")}
+									placeholder={"Descreva o público-alvo ideal"}
 									rows={3}
 									value={field.state.value}
 								/>
 								<FieldDescription>
-									{translate("dashboard.routes.writers.form.audience-hint")}
+									{"Para quem seu escritor deve direcionar o conteúdo"}
 								</FieldDescription>
 								{isInvalid && <FieldError errors={field.state.meta.errors} />}
 							</Field>
@@ -241,7 +215,7 @@ function WriterInstructionsFormContent({
 						return (
 							<Field data-invalid={isInvalid}>
 								<FieldLabel htmlFor={field.name}>
-									{translate("dashboard.routes.writers.form.guidelines")}
+									{"Diretrizes de Escrita"}
 								</FieldLabel>
 								<Textarea
 									aria-invalid={isInvalid}
@@ -249,12 +223,12 @@ function WriterInstructionsFormContent({
 									name={field.name}
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder={translate("dashboard.routes.writers.form.guidelines-placeholder")}
+									placeholder={"Instruções específicas para o estilo de escrita"}
 									rows={5}
 									value={field.state.value}
 								/>
 								<FieldDescription>
-									{translate("dashboard.routes.writers.form.guidelines-hint")}
+									{"Regras e instruções específicas para a escrita"}
 								</FieldDescription>
 								{isInvalid && <FieldError errors={field.state.meta.errors} />}
 							</Field>
@@ -265,7 +239,7 @@ function WriterInstructionsFormContent({
 
 			<SheetFooter>
 				<Button onClick={closeSheet} type="button" variant="outline">
-					{translate("common.actions.cancel")}
+					{"Cancelar"}
 				</Button>
 				<form.Subscribe>
 					{(formState) => (
@@ -275,8 +249,8 @@ function WriterInstructionsFormContent({
 							type="submit"
 						>
 							{isPending
-								? translate("dashboard.routes.writers.form.saving")
-								: translate("dashboard.routes.writers.form.save")}
+								? "Salvando..."
+								: "Salvar Alterações"}
 						</Button>
 					)}
 				</form.Subscribe>
@@ -294,10 +268,10 @@ export const WriterInstructionsForm: FC<WriterInstructionsFormProps> = ({
 		<>
 			<SheetHeader>
 				<SheetTitle>
-					{translate("dashboard.routes.writers.form.instructions-title")}
+					{"Instruções do Escritor"}
 				</SheetTitle>
 				<SheetDescription>
-					{translate("dashboard.routes.writers.form.instructions-description")}
+					{"Configure o tom, estilo e diretrizes do escritor"}
 				</SheetDescription>
 			</SheetHeader>
 			<ErrorBoundary FallbackComponent={WriterInstructionsErrorFallback}>

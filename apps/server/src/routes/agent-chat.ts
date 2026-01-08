@@ -13,7 +13,9 @@ import {
 	getOrCreateChatSession,
 	clearChatSession,
 	getChatSessionById,
+	updateChatSessionMode,
 } from "@packages/database/repositories/chat-repository";
+import { getContentById } from "@packages/database/repositories/content-repository";
 import type { StoredToolCall } from "@packages/database/schemas/chat";
 import { Elysia, t } from "elysia";
 import type { CoreMessage } from "@mastra/core/llm";
@@ -51,7 +53,20 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 				mode,
 				model,
 				planContext,
+				contentId,
 			} = body;
+
+			// Get the content to retrieve the agentId for tool context
+			const contentRecord = await getContentById(db, contentId);
+			if (!contentRecord) {
+				throw new Error("Content not found");
+			}
+			const contentAgentId = contentRecord.agentId;
+
+			// Update session mode when it changes
+			if (mode) {
+				await updateChatSessionMode(db, sessionId, mode as "plan" | "writer");
+			}
 
 			// Save user message to database
 			const userMessage = messages[messages.length - 1];
@@ -71,6 +86,10 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 					"user",
 					userMessage.content,
 					dbSelectionContext,
+					undefined,
+					undefined,
+					undefined,
+					mode as "plan" | "writer" | undefined,
 				);
 			}
 
@@ -100,14 +119,15 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 			const requestContext = createRequestContext({
 				userId: session.user.id,
 				brandId: organizationId,
+				agentId: contentAgentId,
 				mode: (mode as ChatMode) || "plan",
 				model: (model as ModelId) || "x-ai/grok-4.1-fast",
 				activePlan: mode === "writer" ? (planContext as ContentPlan) : undefined,
 			});
 
 			// Select agent based on mode
-			const agentId = mode === "plan" ? "planAgent" : "writerAgent";
-			const agent = mastra.getAgent(agentId);
+			const mastraAgentId = mode === "plan" ? "planAgent" : "writerAgent";
+			const agent = mastra.getAgent(mastraAgentId);
 
 			// Initialize step state for tracking agent execution
 			let currentStep: StepState = {
@@ -128,6 +148,9 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 						currentStep.text,
 						undefined,
 						currentStep.toolCalls.length > 0 ? currentStep.toolCalls : undefined,
+						undefined,
+						undefined,
+						mode as "plan" | "writer" | undefined,
 					);
 				}
 			};
@@ -253,6 +276,7 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 										rationale: step.rationale,
 										status: "pending" as const,
 									})),
+									mode as "plan" | "writer" | undefined,
 								);
 
 								// Emit plan_created event for frontend
@@ -368,6 +392,10 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 				organizationId,
 			);
 
+			if (!chatSession) {
+				throw new Error("Failed to get or create chat session");
+			}
+
 			const sessionWithMessages = await getChatSessionWithMessages(
 				db,
 				params.contentId,
@@ -377,6 +405,7 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 			return {
 				session: chatSession,
 				messages: sessionWithMessages?.messages ?? [],
+				mode: chatSession.mode ?? "plan",
 			};
 		},
 		{

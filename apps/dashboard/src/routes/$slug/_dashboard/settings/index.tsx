@@ -1,4 +1,3 @@
-import { translate } from "@packages/localization";
 import { useIsMobile } from "@packages/ui/hooks/use-mobile";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -7,7 +6,7 @@ import { SettingsMobileNav } from "@/pages/settings/ui/settings-mobile-nav";
 export const Route = createFileRoute("/$slug/_dashboard/settings/")({
    component: SettingsIndexRoute,
    staticData: {
-      breadcrumb: translate("dashboard.routes.settings.title"),
+      breadcrumb: "Configurações",
    },
 });
 

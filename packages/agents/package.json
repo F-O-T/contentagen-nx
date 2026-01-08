@@ -10,7 +10,6 @@
     "@packages/database": "workspace:*",
     "@packages/environment": "workspace:*",
     "@packages/files": "workspace:*",
-    "@packages/localization": "workspace:*",
     "@packages/rag": "workspace:*",
     "@packages/search": "workspace:*",
     "@packages/server-events": "workspace:*",
