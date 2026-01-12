@@ -7,9 +7,9 @@
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### ✍️ AI-Powered Content Editor
+### AI-Powered Content Editor
 
 Built on Lexical with deeply integrated AI assistance at multiple levels:
 
@@ -33,7 +33,7 @@ Built on Lexical with deeply integrated AI assistance at multiple levels:
     -   Real-time streaming responses
 
 
-### 📝 Rich Content Management
+### Rich Content Management
 
 -   **Block-Based Editor**:
     -   Tables, code blocks, horizontal rules, links, and checklists
@@ -50,12 +50,13 @@ Built on Lexical with deeply integrated AI assistance at multiple levels:
     -   Title, description, slug, and keyword management
     -   SEO optimization built into the workflow
 
-### 🤖 AI Writers & Agents
+### AI Writers & Agents
 
 -   **Writer Personas**:
     -   Create custom AI writing personas with profile photos
     -   Define writing guidelines, audience profiles, tone, and style preferences
     -   Associate writers with content for consistent voice
+    -   Custom instruction memories per writer
 
 -   **Multi-Agent Orchestration** (Mastra-powered):
     -   **Content Agents**: Editor, Writer, and Reader agents
@@ -63,13 +64,13 @@ Built on Lexical with deeply integrated AI assistance at multiple levels:
     -   **Workflows**: Automated article and changelog creation pipelines
     -   **Knowledge Base**: Brand knowledge, competitor analysis, writing guidelines
 
-### 📊 Dashboard & Analytics
+### Dashboard & Analytics
 
 -   **Home Dashboard**: Content statistics, quick actions, recent content
 -   **Content List**: Data table with search, filtering, sorting, and bulk operations
 -   **Writer Management**: Statistics, analytics, and detailed writer pages
 
-### 🔐 Administration & Security
+### Administration & Security
 
 -   **Authentication**:
     -   Email/password and Google OAuth via Better Auth
@@ -92,13 +93,13 @@ Built on Lexical with deeply integrated AI assistance at multiple levels:
 
 ---
 
-## 🚀 Tech Stack
+## Tech Stack
 
 Contentta is a full-stack application built within an **Nx** monorepo using **Bun**.
 
 | Category       | Technology                                                                                                      |
 | :------------- | :-------------------------------------------------------------------------------------------------------------- |
-| **Frontend**   | **React**, **Vite**, **TypeScript**, **TanStack Router**, **TanStack Query**, **shadcn/ui**, **Tailwind CSS**   |
+| **Frontend**   | **React 19**, **Vite**, **TypeScript**, **TanStack Router**, **TanStack Query**, **shadcn/ui**, **Tailwind CSS**|
 | **Editor**     | **Lexical** (Rich text editor framework)                                                                        |
 | **AI**         | **Vercel AI SDK**, **Mastra** (Agent orchestration)                                                             |
 | **Backend**    | **ElysiaJS**, **Bun**, **tRPC**, **Drizzle ORM**, **PostgreSQL**                                                |
@@ -108,31 +109,38 @@ Contentta is a full-stack application built within an **Nx** monorepo using **Bu
 | **Security**   | **Arcjet** (Rate limiting & DDoS protection)                                                                    |
 | **Analytics**  | **PostHog**                                                                                                     |
 | **Email**      | **Resend** (Transactional emails)                                                                               |
-| **Landing**    | **Astro** (Static marketing site)                                                                               |
 | **Tooling**    | **Nx**, **Biome**, **Docker**, **Husky**                                                                        |
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 This project is a monorepo managed by Nx.
 
 ### Apps (`apps/`)
 
-The deployable applications and websites.
+The deployable applications.
 
 ```
 apps/
 ├── dashboard/     # React/Vite SPA - main content editor interface
 ├── server/        # Elysia backend API server
-├── worker/        # BullMQ background job processor
-└── landing-page/  # Astro marketing website
+└── worker/        # BullMQ background job processor
 ```
 
 -   **`dashboard`**: The core CMS single-page application (SPA) built with React, featuring the AI-powered content editor with file-based routing via TanStack Router.
 -   **`server`**: The ElysiaJS backend server providing the tRPC API, authentication endpoints, AI integrations, and file storage.
 -   **`worker`**: Background job processor using BullMQ for handling async tasks like AI processing, email delivery, and content scheduling.
--   **`landing-page`**: Astro-based static marketing site with i18n support (Portuguese/English).
+
+### Libraries (`libraries/`)
+
+Publishable libraries for external consumption.
+
+| Library            | Purpose                                           |
+| ------------------ | ------------------------------------------------- |
+| `sdk`              | Official TypeScript SDK (`@f-o-t/contentta-sdk`) for interacting with the Contentta API |
+| `content-analysis` | Content analysis utilities                        |
+| `markdown`         | Markdown processing utilities                     |
 
 ### Packages (`packages/`)
 
@@ -182,12 +190,52 @@ Shared internal libraries organized by concern. All packages use explicit export
 
 ---
 
-## 🤝 Contributing
+## SDK
+
+Contentta provides an official TypeScript SDK for integrating with the API from external applications.
+
+```bash
+npm install @f-o-t/contentta-sdk
+```
+
+```typescript
+import { createSdk } from "@f-o-t/contentta-sdk";
+
+const sdk = createSdk({
+  apiKey: "YOUR_API_KEY",
+  locale: "en-US",
+});
+
+// List content by agent
+const list = await sdk.listContentByAgent({
+  agentId: "agent-uuid",
+  status: "approved",
+  limit: 10,
+});
+
+// Get content by slug
+const post = await sdk.getContentBySlug({
+  slug: "my-post-slug",
+  agentId: "agent-uuid",
+});
+
+// Stream AI assistant responses
+const stream = sdk.streamAssistantResponse({
+  message: "Help me write an introduction",
+  agentId: "agent-uuid",
+});
+```
+
+See the [SDK README](./libraries/sdk/README.md) for full documentation.
+
+---
+
+## Contributing
 
 Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated.
 
 Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
-## 📜 License
+## License
 
 This project is licensed under the Apache-2.0 License. See the [LICENSE.md](LICENSE.md) file for details.
