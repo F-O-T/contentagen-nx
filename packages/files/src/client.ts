@@ -141,6 +141,15 @@ export async function generatePresignedPutUrl(
    return minioClient.presignedPutObject(bucketName, fileName, expirySeconds);
 }
 
+export async function generatePresignedGetUrl(
+   fileName: string,
+   bucketName: string,
+   minioClient: MinioClient,
+   expirySeconds = 3600, // 1 hour default
+): Promise<string> {
+   return minioClient.presignedGetObject(bucketName, fileName, expirySeconds);
+}
+
 export async function verifyFileExists(
    fileName: string,
    bucketName: string,

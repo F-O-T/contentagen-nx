@@ -5,7 +5,7 @@ import {
    listContents,
 } from "@packages/database/repositories/content-repository";
 import { serverEnv as env } from "@packages/environment/server";
-import { streamFileForProxy } from "@packages/files/client";
+import { generatePresignedGetUrl } from "@packages/files/client";
 import { Elysia, t } from "elysia";
 import { auth } from "../integrations/auth";
 import { db } from "../integrations/database";
@@ -13,6 +13,19 @@ import { minioClient } from "../integrations/minio";
 import { Feature, requireFeatureAccess } from "../utils/feature-gate";
 
 const minioBucket = env.MINIO_BUCKET;
+
+// Helper to resolve storage key to presigned URL
+async function resolveStorageKeyToUrl(
+   storageKey: string | null | undefined,
+): Promise<string | null> {
+   if (!storageKey) return null;
+   try {
+      return await generatePresignedGetUrl(storageKey, minioBucket, minioClient);
+   } catch (error) {
+      console.error("Error generating presigned URL:", error);
+      return null;
+   }
+}
 
 const ImageSchema = t.Object(
    {
@@ -74,15 +87,8 @@ export const sdkRoutes = new Elysia({
          let profilePhoto = null;
          if (agent.profilePhotoUrl) {
             try {
-               const { buffer, contentType } = await streamFileForProxy(
-                  agent.profilePhotoUrl,
-                  minioBucket,
-                  minioClient,
-               );
-               profilePhoto = {
-                  contentType,
-                  data: buffer.toString("base64"),
-               };
+               const url = await resolveStorageKeyToUrl(agent.profilePhotoUrl);
+               profilePhoto = url ? { contentType: "image/jpeg", data: url } : null;
             } catch (err) {
                console.error("Error fetching profile photo:", err);
                profilePhoto = null;
@@ -125,15 +131,8 @@ export const sdkRoutes = new Elysia({
                let image = null;
                if (post.imageUrl) {
                   try {
-                     const { buffer, contentType } = await streamFileForProxy(
-                        post.imageUrl,
-                        minioBucket,
-                        minioClient,
-                     );
-                     image = {
-                        contentType,
-                        data: buffer.toString("base64"),
-                     };
+                     const url = await resolveStorageKeyToUrl(post.imageUrl);
+                     image = url ? { contentType: "image/jpeg", data: url } : null;
                   } catch (error) {
                      console.error(
                         "Error fetching image for post:",
@@ -184,15 +183,8 @@ export const sdkRoutes = new Elysia({
             let image = null;
             if (content.imageUrl) {
                try {
-                  const { buffer, contentType } = await streamFileForProxy(
-                     content.imageUrl,
-                     minioBucket,
-                     minioClient,
-                  );
-                  image = {
-                     contentType,
-                     data: buffer.toString("base64"),
-                  };
+                  const url = await resolveStorageKeyToUrl(content.imageUrl);
+                  image = url ? { contentType: "image/jpeg", data: url } : null;
                } catch (error) {
                   console.error(
                      "Error fetching image for content:",
@@ -233,16 +225,8 @@ export const sdkRoutes = new Elysia({
                return null;
             }
 
-            const { buffer, contentType } = await streamFileForProxy(
-               content.imageUrl,
-               minioBucket,
-               minioClient,
-            );
-
-            return {
-               contentType,
-               data: buffer.toString("base64"),
-            };
+            const url = await resolveStorageKeyToUrl(content.imageUrl);
+            return url ? { contentType: "image/jpeg", data: url } : null;
          } catch (error) {
             console.error("Error fetching content image:", error);
             return null;

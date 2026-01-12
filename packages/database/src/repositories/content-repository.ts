@@ -167,30 +167,6 @@ export async function updateContent(
    }
 }
 
-export async function updateContentCurrentVersion(
-   dbClient: DatabaseInstance,
-   contentId: string,
-   version: number,
-) {
-   try {
-      const result = await dbClient
-         .update(content)
-         .set({ currentVersion: version })
-         .where(eq(content.id, contentId))
-         .returning();
-
-      if (!result.length) {
-         throw AppError.database("Content not found");
-      }
-      return result[0];
-   } catch (err) {
-      propagateError(err);
-      throw AppError.database(
-         `Failed to update content version: ${(err as Error).message}`,
-      );
-   }
-}
-
 export async function deleteContent(
    dbClient: DatabaseInstance,
    contentId: string,
@@ -342,53 +318,6 @@ export async function getSharedContentById(
       propagateError(err);
       throw AppError.database(
          `Failed to get shared content: ${(err as Error).message}`,
-      );
-   }
-}
-
-export async function updateAIAssistantStats(
-   dbClient: DatabaseInstance,
-   contentId: string,
-   statsUpdate: { completions?: number; edits?: number; suggestions?: number },
-) {
-   try {
-      // Use atomic SQL update to avoid race condition
-      // This uses PostgreSQL JSONB operators to increment values atomically
-      const result = await dbClient
-         .update(content)
-         .set({
-            aiAssistantStats: sql`
-					jsonb_set(
-						jsonb_set(
-							jsonb_set(
-								jsonb_set(
-									COALESCE(${content.aiAssistantStats}, '{"completions": 0, "edits": 0, "suggestions": 0}'::jsonb),
-									'{completions}',
-									to_jsonb(COALESCE((${content.aiAssistantStats}->>'completions')::int, 0) + ${statsUpdate.completions || 0})
-								),
-								'{edits}',
-								to_jsonb(COALESCE((${content.aiAssistantStats}->>'edits')::int, 0) + ${statsUpdate.edits || 0})
-							),
-							'{suggestions}',
-							to_jsonb(COALESCE((${content.aiAssistantStats}->>'suggestions')::int, 0) + ${statsUpdate.suggestions || 0})
-						),
-						'{lastUsedAt}',
-						to_jsonb(${new Date().toISOString()})
-					)
-				`,
-         })
-         .where(eq(content.id, contentId))
-         .returning();
-
-      if (!result.length) {
-         throw AppError.database("Content not found");
-      }
-
-      return result[0];
-   } catch (err) {
-      propagateError(err);
-      throw AppError.database(
-         `Failed to update AI assistant stats: ${(err as Error).message}`,
       );
    }
 }

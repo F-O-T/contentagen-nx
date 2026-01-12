@@ -25,6 +25,7 @@ import {
 } from "@packages/database/schema";
 import {
    deleteFile,
+   generatePresignedGetUrl,
    generatePresignedPutUrl,
    verifyFileExists,
 } from "@packages/files/client";
@@ -41,6 +42,21 @@ const ALLOWED_PHOTO_TYPES = [
    "image/avif",
 ];
 const MAX_PHOTO_SIZE = 5 * 1024 * 1024; // 5MB
+
+// Helper to convert storage key to presigned URL
+async function resolveProfilePhotoUrl(
+   storageKey: string | null | undefined,
+   bucketName: string,
+   minioClient: Parameters<typeof generatePresignedGetUrl>[2],
+): Promise<string | null> {
+   if (!storageKey) return null;
+   try {
+      return await generatePresignedGetUrl(storageKey, bucketName, minioClient);
+   } catch (error) {
+      console.error("Error generating presigned URL for profile photo:", error);
+      return null;
+   }
+}
 
 export const agentRouter = router({
    create: protectedProcedure
@@ -191,8 +207,16 @@ export const agentRouter = router({
             );
             const contentCount = contents.length;
 
+            // Resolve profile photo URL
+            const profilePhotoUrl = await resolveProfilePhotoUrl(
+               agent.profilePhotoUrl,
+               resolvedCtx.minioBucket,
+               resolvedCtx.minioClient,
+            );
+
             return {
                ...agent,
+               profilePhotoUrl,
                contentCount,
             };
          } catch (err) {
@@ -242,13 +266,22 @@ export const agentRouter = router({
                  )
                : null;
 
+         // Resolve profile photo URL for most active agent
+         const mostActiveAgentPhotoUrl = mostActiveAgent
+            ? await resolveProfilePhotoUrl(
+                 mostActiveAgent.agent.profilePhotoUrl,
+                 resolvedCtx.minioBucket,
+                 resolvedCtx.minioClient,
+              )
+            : null;
+
          return {
             mostActiveAgent: mostActiveAgent
                ? {
                     contentCount: mostActiveAgent.contentCount,
                     id: mostActiveAgent.agent.id,
                     name: mostActiveAgent.agent.personaConfig.metadata.name,
-                    profilePhotoUrl: mostActiveAgent.agent.profilePhotoUrl,
+                    profilePhotoUrl: mostActiveAgentPhotoUrl,
                  }
                : null,
             totalAgents,
@@ -480,10 +513,18 @@ export const agentRouter = router({
                paginatedIds,
             );
 
-            const agentsWithCounts = paginatedAgents.map((agent) => ({
-               ...agent,
-               contentCount: contentCounts.get(agent.id) || 0,
-            }));
+            // Resolve profile photo URLs for all paginated agents
+            const agentsWithCounts = await Promise.all(
+               paginatedAgents.map(async (agent) => ({
+                  ...agent,
+                  profilePhotoUrl: await resolveProfilePhotoUrl(
+                     agent.profilePhotoUrl,
+                     resolvedCtx.minioBucket,
+                     resolvedCtx.minioClient,
+                  ),
+                  contentCount: contentCounts.get(agent.id) || 0,
+               })),
+            );
 
             return {
                items: agentsWithCounts,

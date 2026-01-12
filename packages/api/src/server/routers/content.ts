@@ -35,11 +35,40 @@ import {
    ContentRequestSchema,
 } from "@packages/database/schema";
 import { content } from "@packages/database/schemas/content";
+import {
+   deleteFile,
+   generatePresignedGetUrl,
+   generatePresignedPutUrl,
+   verifyFileExists,
+} from "@packages/files/client";
 import { normalizeEscapedNewlines } from "@f-o-t/markdown";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
+
+const ALLOWED_IMAGE_TYPES = [
+   "image/jpeg",
+   "image/png",
+   "image/webp",
+   "image/avif",
+];
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB for content images
+
+// Helper to convert storage key to presigned URL
+async function resolveImageUrl(
+   storageKey: string | null | undefined,
+   bucketName: string,
+   minioClient: Parameters<typeof generatePresignedGetUrl>[2],
+): Promise<string | null> {
+   if (!storageKey) return null;
+   try {
+      return await generatePresignedGetUrl(storageKey, bucketName, minioClient);
+   } catch (error) {
+      console.error("Error generating presigned URL for content image:", error);
+      return null;
+   }
+}
 
 export const contentRouter = router({
    listAllContent: protectedProcedure
@@ -114,11 +143,30 @@ export const contentRouter = router({
 
          const totalPages = Math.ceil(total / input.limit);
 
-         // Add agent info to each item (null for manual content)
-         const itemsWithAgent = items.map((item) => ({
-            ...item,
-            agent: item.agentId ? (agentMap.get(item.agentId) ?? null) : null,
-         }));
+         // Add agent info and resolve image URLs
+         const itemsWithAgent = await Promise.all(
+            items.map(async (item) => {
+               const agent = item.agentId ? agentMap.get(item.agentId) : null;
+               return {
+                  ...item,
+                  imageUrl: await resolveImageUrl(
+                     item.imageUrl,
+                     resolvedCtx.minioBucket,
+                     resolvedCtx.minioClient,
+                  ),
+                  agent: agent
+                     ? {
+                          ...agent,
+                          profilePhotoUrl: await resolveImageUrl(
+                             agent.profilePhotoUrl,
+                             resolvedCtx.minioBucket,
+                             resolvedCtx.minioClient,
+                          ),
+                       }
+                     : null,
+               };
+            }),
+         );
 
          return {
             items: itemsWithAgent,
@@ -163,13 +211,25 @@ export const contentRouter = router({
                agentInfo = {
                   id: agent.id,
                   name: agent.personaConfig.metadata.name,
-                  profilePhotoUrl: agent.profilePhotoUrl,
+                  profilePhotoUrl: await resolveImageUrl(
+                     agent.profilePhotoUrl,
+                     resolvedCtx.minioBucket,
+                     resolvedCtx.minioClient,
+                  ),
                };
             }
          }
 
+         // Resolve content image URL
+         const imageUrl = await resolveImageUrl(
+            contentItem.imageUrl,
+            resolvedCtx.minioBucket,
+            resolvedCtx.minioClient,
+         );
+
          return {
             ...contentItem,
+            imageUrl,
             agent: agentInfo,
          };
       }),
@@ -227,8 +287,20 @@ export const contentRouter = router({
             const end = start + input.limit;
             const paginatedItems = filteredContents.slice(start, end);
 
+            // Resolve image URLs for all items
+            const itemsWithResolvedUrls = await Promise.all(
+               paginatedItems.map(async (item) => ({
+                  ...item,
+                  imageUrl: await resolveImageUrl(
+                     item.imageUrl,
+                     resolvedCtx.minioBucket,
+                     resolvedCtx.minioClient,
+                  ),
+               })),
+            );
+
             return {
-               items: paginatedItems,
+               items: itemsWithResolvedUrls,
                limit: input.limit,
                page: input.page,
                total,
@@ -643,11 +715,40 @@ export const contentRouter = router({
                input.id,
             );
 
+            // Resolve image URLs
+            const contentImageUrl = await resolveImageUrl(
+               sharedContent.imageUrl,
+               resolvedCtx.minioBucket,
+               resolvedCtx.minioClient,
+            );
+
+            const agentProfilePhotoUrl = sharedContent.agent
+               ? await resolveImageUrl(
+                    sharedContent.agent.profilePhotoUrl,
+                    resolvedCtx.minioBucket,
+                    resolvedCtx.minioClient,
+                 )
+               : null;
+
+            const resolvedRelatedPosts = await Promise.all(
+               relatedPosts.map(async (p) => ({
+                  id: p.id,
+                  title: p.meta.title,
+                  description: p.meta.description,
+                  slug: p.meta.slug,
+                  imageUrl: await resolveImageUrl(
+                     p.imageUrl,
+                     resolvedCtx.minioBucket,
+                     resolvedCtx.minioClient,
+                  ),
+               })),
+            );
+
             // Return only public-safe fields
             return {
                id: sharedContent.id,
                body: sharedContent.body,
-               imageUrl: sharedContent.imageUrl,
+               imageUrl: contentImageUrl,
                meta: sharedContent.meta,
                stats: sharedContent.stats,
                status: sharedContent.status,
@@ -660,16 +761,10 @@ export const contentRouter = router({
                            ?.description,
                      avatar:
                         sharedContent.agent.personaConfig?.metadata?.avatar,
-                     profilePhotoUrl: sharedContent.agent.profilePhotoUrl,
+                     profilePhotoUrl: agentProfilePhotoUrl,
                   }
                   : null,
-               relatedPosts: relatedPosts.map((p) => ({
-                  id: p.id,
-                  title: p.meta.title,
-                  description: p.meta.description,
-                  slug: p.meta.slug,
-                  imageUrl: p.imageUrl,
-               })),
+               relatedPosts: resolvedRelatedPosts,
             };
          } catch (err) {
             console.error("Error getting shared content:", err);
@@ -924,6 +1019,175 @@ export const contentRouter = router({
             console.error("Error getting related content suggestions:", err);
             propagateError(err);
             throw APIError.internal("Failed to get suggestions.");
+         }
+      }),
+
+   // Image upload procedures
+   requestImageUploadUrl: protectedProcedure
+      .input(
+         z.object({
+            contentId: z.string().uuid(),
+            contentType: z
+               .string()
+               .refine((val) => ALLOWED_IMAGE_TYPES.includes(val), {
+                  message: "File type must be JPEG, PNG, WebP, or AVIF",
+               }),
+            fileName: z.string(),
+            fileSize: z
+               .number()
+               .max(MAX_IMAGE_SIZE, "File size must be less than 10MB"),
+         }),
+      )
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
+
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
+
+            // Verify the content exists and belongs to this organization
+            const existing = await getContentById(resolvedCtx.db, input.contentId);
+            if (!existing) {
+               throw APIError.notFound("Content not found.");
+            }
+            if (existing.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to update this content.",
+               );
+            }
+
+            const timestamp = Date.now();
+            const storageKey = `organizations/${organizationId}/content/${input.contentId}/image/${timestamp}-${input.fileName}`;
+
+            const presignedUrl = await generatePresignedPutUrl(
+               storageKey,
+               resolvedCtx.minioBucket,
+               resolvedCtx.minioClient,
+               300, // 5 minutes
+            );
+
+            return {
+               contentType: input.contentType,
+               fileSize: input.fileSize,
+               presignedUrl,
+               storageKey,
+            };
+         } catch (err) {
+            console.error("Error requesting image upload URL:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to request image upload URL.");
+         }
+      }),
+
+   confirmImageUpload: protectedProcedure
+      .input(
+         z.object({
+            contentId: z.string().uuid(),
+            storageKey: z.string(),
+         }),
+      )
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
+
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
+
+            // Verify the storage key belongs to this organization
+            if (
+               !input.storageKey.startsWith(`organizations/${organizationId}/`)
+            ) {
+               throw APIError.forbidden(
+                  "Invalid storage key for this organization",
+               );
+            }
+
+            // Verify the content exists and belongs to this organization
+            const existing = await getContentById(resolvedCtx.db, input.contentId);
+            if (!existing) {
+               throw APIError.notFound("Content not found.");
+            }
+            if (existing.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to update this content.",
+               );
+            }
+
+            // Verify the file was uploaded
+            const fileInfo = await verifyFileExists(
+               input.storageKey,
+               resolvedCtx.minioBucket,
+               resolvedCtx.minioClient,
+            );
+
+            if (!fileInfo) {
+               throw APIError.validation("File was not uploaded successfully");
+            }
+
+            // Delete old image if it exists
+            if (
+               existing.imageUrl &&
+               existing.imageUrl !== input.storageKey
+            ) {
+               try {
+                  await deleteFile(
+                     existing.imageUrl,
+                     resolvedCtx.minioBucket,
+                     resolvedCtx.minioClient,
+                  );
+               } catch (error) {
+                  console.error("Error deleting old image:", error);
+               }
+            }
+
+            // Update content with new image
+            const updated = await updateContent(resolvedCtx.db, input.contentId, {
+               imageUrl: input.storageKey,
+            });
+
+            return updated;
+         } catch (err) {
+            console.error("Error confirming image upload:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to confirm image upload.");
+         }
+      }),
+
+   cancelImageUpload: protectedProcedure
+      .input(z.object({ storageKey: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
+
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
+
+            // Verify the storage key belongs to this organization
+            if (
+               !input.storageKey.startsWith(`organizations/${organizationId}/`)
+            ) {
+               throw APIError.forbidden(
+                  "Invalid storage key for this organization",
+               );
+            }
+
+            await deleteFile(
+               input.storageKey,
+               resolvedCtx.minioBucket,
+               resolvedCtx.minioClient,
+            );
+
+            return { success: true };
+         } catch (err) {
+            console.error("Error canceling image upload:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to cancel image upload.");
          }
       }),
 });

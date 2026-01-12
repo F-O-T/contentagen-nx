@@ -1,7 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
    index,
-   integer,
    jsonb,
    pgEnum,
    pgTable,
@@ -34,13 +33,6 @@ export const draftOriginEnum = pgEnum("draft_origin", [
    "ai_generated",
 ]);
 
-// Content layout enum (for AI full generation)
-export const contentLayoutEnum = pgEnum("content_layout", [
-   "tutorial",
-   "article",
-   "changelog",
-]);
-
 // Zod schema for content meta
 export const ContentMetaSchema = z.object({
    title: z.string(),
@@ -70,16 +62,6 @@ export const ContentStatsSchema = z.object({
 
 export type ContentStats = z.infer<typeof ContentStatsSchema>;
 
-// Zod schema for AI assistant stats (optional - tracks inline AI help usage)
-export const AIAssistantStatsSchema = z.object({
-   completions: z.number().default(0),
-   edits: z.number().default(0),
-   suggestions: z.number().default(0),
-   lastUsedAt: z.string().datetime().optional(),
-});
-
-export type AIAssistantStats = z.infer<typeof AIAssistantStatsSchema>;
-
 export const content = pgTable(
    "content",
    {
@@ -95,7 +77,6 @@ export const content = pgTable(
          .references(() => member.id, { onDelete: "cascade" }),
       body: text("body").default(""),
       imageUrl: text("image_url"),
-      currentVersion: integer("current_version").default(1).notNull(),
       status: contentStatusEnum("status").default("draft").notNull(),
       shareStatus: contentShareStatusEnum("share_status")
          .default("private")
@@ -104,7 +85,6 @@ export const content = pgTable(
       meta: jsonb("meta").$type<ContentMeta>().notNull(),
       request: jsonb("request").$type<ContentRequest>(),
       stats: jsonb("stats").$type<ContentStats>(),
-      aiAssistantStats: jsonb("ai_assistant_stats").$type<AIAssistantStats>(),
       createdAt: timestamp("created_at").defaultNow().notNull(),
       updatedAt: timestamp("updated_at")
          .defaultNow()
@@ -145,7 +125,6 @@ export type ContentStatus = (typeof contentStatusEnum.enumValues)[number];
 export type ContentShareStatus =
    (typeof contentShareStatusEnum.enumValues)[number];
 export type DraftOrigin = (typeof draftOriginEnum.enumValues)[number];
-export type ContentLayout = (typeof contentLayoutEnum.enumValues)[number];
 
 export const ContentInsertSchema = createInsertSchema(content);
 export const ContentSelectSchema = createSelectSchema(content);
