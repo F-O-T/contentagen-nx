@@ -13,7 +13,7 @@ import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { NavMain } from "./nav-main";
 import { OrganizationSwitcher } from "./organization-switcher";
 
-function MontteBranding() {
+function ContenttaBranding() {
    const { slug } = useParams({ strict: false }) as { slug: string };
 
    return (
@@ -31,7 +31,7 @@ function MontteBranding() {
                         fill="none"
                         viewBox="0 0 1987 1278"
                      >
-                        <title>Montte Logo</title>
+                        <title>Contentta Logo</title>
                         <path
                            d="M455.313 377.152L0.812988 1275.15L904.813 1276.15L455.313 377.152Z"
                            fill="#0C5343"
@@ -47,7 +47,7 @@ function MontteBranding() {
                      </svg>
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                     <span className="truncate font-semibold">Montte</span>
+                     <span className="truncate font-semibold">Contentta</span>
                   </div>
                </Link>
             </SidebarMenuButton>
@@ -67,7 +67,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
    return (
       <Sidebar collapsible="icon" {...props}>
          <SidebarHeader>
-            {hasProSubscription ? <OrganizationSwitcher /> : <MontteBranding />}
+            {hasProSubscription ? <OrganizationSwitcher /> : <ContenttaBranding />}
          </SidebarHeader>
          <SidebarContent>
             <Separator />

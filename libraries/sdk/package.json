@@ -36,7 +36,7 @@
 	"files": [
 		"dist"
 	],
-	"homepage": "https://github.com/F-O-T/montte-nx/blob/master/libraries/sdk",
+	"homepage": "https://github.com/F-O-T/contentta-nx/blob/master/libraries/sdk",
 	"license": "Apache-2.0",
 	"module": "./dist/index.js",
 	"name": "@f-o-t/contentta-sdk",
@@ -54,7 +54,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/F-O-T/montte-nx.git"
+		"url": "https://github.com/F-O-T/contentta-nx.git"
 	},
 	"scripts": {
 		"build": "bunup",

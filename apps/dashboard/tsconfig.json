@@ -20,9 +20,5 @@
          "@f-o-t/markdown/*": ["../../libraries/markdown/src/*"]
       }
   },
-  "references": [
-    {
-      "path": "../../packages/markdown"
-    }
-  ]
+  "references": []
 }

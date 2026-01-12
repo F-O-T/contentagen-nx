@@ -8,9 +8,9 @@ export function SplashScreen({ children }: { children: React.ReactNode }) {
    const [fadeOut, setFadeOut] = useState(false);
 
    useEffect(() => {
-      if (isStandalone && !sessionStorage.getItem("montte:splash-shown")) {
+      if (isStandalone && !sessionStorage.getItem("contentta:splash-shown")) {
          setShowSplash(true);
-         sessionStorage.setItem("montte:splash-shown", "true");
+         sessionStorage.setItem("contentta:splash-shown", "true");
 
          const fadeTimer = setTimeout(() => setFadeOut(true), 1000);
          const hideTimer = setTimeout(() => setShowSplash(false), 1400);
@@ -45,7 +45,7 @@ export function SplashScreen({ children }: { children: React.ReactNode }) {
                      fill="none"
                      viewBox="0 0 1987 1278"
                   >
-                     <title>Montte Logo</title>
+                     <title>Contentta Logo</title>
                      <path
                         className="animate-in fade-in slide-in-from-left-4 duration-500 delay-100"
                         d="M455.313 377.152L0.812988 1275.15L904.813 1276.15L455.313 377.152Z"
@@ -76,7 +76,7 @@ export function SplashScreen({ children }: { children: React.ReactNode }) {
                      "animate-in fade-in duration-500 delay-500",
                   )}
                >
-                  Montte
+                  Contentta
                </span>
             </div>
          </div>

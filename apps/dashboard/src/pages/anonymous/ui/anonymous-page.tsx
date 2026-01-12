@@ -45,7 +45,7 @@ export function AnonymousPage() {
             </h1>
             <p className="text-muted-foreground text-sm">
                {
-                  "Experimente o Montte agora mesmo. Você pode criar uma conta completa depois."
+                  "Experimente o Contentta agora mesmo. Você pode criar uma conta completa depois."
                }
             </p>
          </div>

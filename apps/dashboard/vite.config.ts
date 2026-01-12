@@ -28,8 +28,8 @@ export default defineConfig({
          manifest: {
             id: "/",
             scope: "/",
-            name: "Montte - Gestão Financeira",
-            short_name: "Montte",
+            name: "Contentta - Gestão Financeira",
+            short_name: "Contentta",
             description:
                "Gestão financeira completa para você e seus negócios. Simples, transparente e Open Source.",
             lang: "pt-BR",

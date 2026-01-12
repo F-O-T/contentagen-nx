@@ -217,7 +217,7 @@ self.addEventListener("push", (event: PushEvent) => {
       payload = { body: event.data.text() };
    }
 
-   const title = payload.title || "Montte";
+   const title = payload.title || "Contentta";
    const options: NotificationOptions & { vibrate?: number[] } = {
       badge: payload.badge || "/android/android-launchericon-96-96.png",
       body: payload.body || "Você tem uma nova notificação",
@@ -225,7 +225,7 @@ self.addEventListener("push", (event: PushEvent) => {
       icon: payload.icon || "/android/android-launchericon-192-192.png",
       requireInteraction: payload.requireInteraction ?? false,
       silent: payload.silent ?? false,
-      tag: payload.tag || `montte-${Date.now()}`,
+      tag: payload.tag || `contentta-${Date.now()}`,
       vibrate: payload.vibrate || [100, 50, 100],
    };
 

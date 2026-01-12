@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const STORAGE_KEY = "montte-cookie-consent";
+const STORAGE_KEY = "contentta-cookie-consent";
 
 export type ConsentStatus = "accepted" | "declined" | null;
 

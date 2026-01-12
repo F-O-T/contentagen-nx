@@ -135,7 +135,7 @@ export function createNotificationPayload(
       icon: "/android/android-launchericon-192-192.png",
       requireInteraction: type === "overdue_alert",
       silent: false,
-      tag: `montte-${type}-${Date.now()}`,
+      tag: `contentta-${type}-${Date.now()}`,
       title: data.title,
    };
 }

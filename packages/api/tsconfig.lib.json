@@ -19,7 +19,7 @@
       "path": "../environment/tsconfig.lib.json"
     },
     {
-      "path": "../markdown"
+      "path": "../../libraries/markdown"
     },
     {
       "path": "../transactional/tsconfig.lib.json"
@@ -29,9 +29,6 @@
     },
     {
       "path": "../utils/tsconfig.lib.json"
-    },
-    {
-      "path": "../server-events"
     },
     {
       "path": "../posthog/tsconfig.lib.json"

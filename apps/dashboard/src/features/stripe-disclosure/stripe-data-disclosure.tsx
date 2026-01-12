@@ -23,7 +23,7 @@ export function StripeDataDisclosure() {
                      "Certificado PCI-DSS Nível 1 (mais alto padrão de segurança)"
                   }
                </p>
-               <p>• {"Montte não armazena números de cartão de crédito"}</p>
+               <p>• {"Contentta não armazena números de cartão de crédito"}</p>
                <p>• {"Todos os dados de pagamento são criptografados"}</p>
                <p>
                   {"Consulte a"}{" "}

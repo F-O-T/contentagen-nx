@@ -20,10 +20,10 @@ export const DefaultFooter = () => {
          >
             Enviado por{" "}
             <Link
-               href="https://montte.co"
+               href="https://contentta.co"
                style={{ color: "#42B46E", textDecoration: "none" }}
             >
-               Montte
+               Contentta
             </Link>{" "}
             - Gestão Financeira
          </Text>
@@ -42,7 +42,7 @@ export const DefaultFooter = () => {
                margin: 0,
             }}
          >
-            {new Date().getFullYear()} Montte. Todos os direitos reservados.
+            {new Date().getFullYear()} Contentta. Todos os direitos reservados.
          </Text>
       </Section>
    );

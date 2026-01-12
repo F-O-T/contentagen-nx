@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-const STORAGE_KEY = "montte:last-organization-slug";
+const STORAGE_KEY = "contentta:last-organization-slug";
 
 export function useLastOrganization() {
    const getLastSlug = useCallback((): string | null => {

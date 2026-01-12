@@ -83,7 +83,7 @@ export function CookieConsentBanner() {
                   </div>
                   <a
                      className="text-xs text-muted-foreground hover:underline inline-block"
-                     href="https://montte.co/privacy-policy"
+                     href="https://contentta.co/privacy-policy"
                      rel="noopener noreferrer"
                      target="_blank"
                   >

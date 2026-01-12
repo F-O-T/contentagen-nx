@@ -1,8 +1,8 @@
-# Contributing to Montte
+# Contributing to Contentta
 
 ## Quick Start
 
-1. **Clone & install:** `git clone https://github.com/F-O-T/montte-nx.git && cd montte-nx && bun install`
+1. **Clone & install:** `git clone https://github.com/F-O-T/contentta-nx.git && cd contentta-nx && bun install`
 2. **Set up env:** Run `bun run scripts/env-setup setup` to configure your environment files
 3. **Database:** Run `bun run scripts/db-push push` to set up the database schema
 4. **Start dev:** `bun run dev:all` (or `bun run dev:dashboard`, `bun run dev:blog`)

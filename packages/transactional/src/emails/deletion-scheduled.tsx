@@ -116,5 +116,5 @@ export default function DeletionScheduledEmail({
 DeletionScheduledEmail.PreviewProps = {
    userName: "João",
    scheduledDate: "15 de Janeiro de 2025",
-   cancelUrl: "https://app.montte.co/settings/profile",
+   cancelUrl: "https://app.contentta.co/settings/profile",
 } satisfies DeletionScheduledEmailProps;

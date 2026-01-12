@@ -165,7 +165,7 @@ describe("environment helpers", () => {
       it("should return production URL in production", () => {
          if (isProduction) {
             const domain = getDomain();
-            expect(domain).toBe("https://app.montte.co");
+            expect(domain).toBe("https://app.contentta.co");
          }
       });
    });

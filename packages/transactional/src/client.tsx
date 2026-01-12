@@ -24,7 +24,7 @@ export interface SendOrganizationInvitationOptions {
    teamName: string;
    inviteLink: string;
 }
-const name = "Montte";
+const name = "Contentta";
 export const sendOrganizationInvitation = async (
    client: Resend,
    {
@@ -37,7 +37,7 @@ export const sendOrganizationInvitation = async (
 ) => {
    const subject = `Convite para se juntar à equipe ${teamName} no ContentaGen`;
    await client.emails.send({
-      from: `${name} <suporte@mail.montte.co>`,
+      from: `${name} <suporte@mail.contentta.co>`,
       react: (
          <OrganizationInvitationEmail
             invitedByEmail={invitedByEmail}
@@ -68,7 +68,7 @@ export const sendEmailOTP = async (
       }
    };
    await client.emails.send({
-      from: `${name} <suporte@mail.montte.co>`,
+      from: `${name} <suporte@mail.contentta.co>`,
       react: <OTPEmail otp={otp} type={type} />,
       subject: getSubject(),
       to: email,
@@ -80,7 +80,7 @@ export const sendWorkflowEmail = async (
    { to, subject, body }: SendWorkflowEmailOptions,
 ) => {
    await client.emails.send({
-      from: `${name} <suporte@mail.montte.co>`,
+      from: `${name} <suporte@mail.contentta.co>`,
       react: <WorkflowNotificationEmail body={body} />,
       subject,
       to,
@@ -96,9 +96,9 @@ export const sendMagicLinkEmail = async (
    client: Resend,
    { email, magicLinkUrl }: SendMagicLinkEmailOptions,
 ) => {
-   const subject = "Acesse sua conta Montte";
+   const subject = "Acesse sua conta Contentta";
    await client.emails.send({
-      from: `${name} <suporte@mail.montte.co>`,
+      from: `${name} <suporte@mail.contentta.co>`,
       react: <MagicLinkEmail magicLinkUrl={magicLinkUrl} />,
       subject,
       to: email,
@@ -125,7 +125,7 @@ export const sendDeletionScheduledEmail = async (
 ) => {
    const subject = "Sua conta foi agendada para exclusão";
    await client.emails.send({
-      from: `${name} <suporte@mail.montte.co>`,
+      from: `${name} <suporte@mail.contentta.co>`,
       react: (
          <DeletionScheduledEmail
             cancelUrl={cancelUrl}
@@ -159,7 +159,7 @@ export const sendDeletionReminderEmail = async (
          ? "Última chance: sua conta será excluída amanhã"
          : `Lembrete: sua conta será excluída em ${daysRemaining} dias`;
    await client.emails.send({
-      from: `${name} <suporte@mail.montte.co>`,
+      from: `${name} <suporte@mail.contentta.co>`,
       react: (
          <DeletionReminderEmail
             cancelUrl={cancelUrl}
@@ -183,7 +183,7 @@ export const sendDeletionCompletedEmail = async (
 ) => {
    const subject = "Sua conta foi excluída";
    await client.emails.send({
-      from: `${name} <suporte@mail.montte.co>`,
+      from: `${name} <suporte@mail.contentta.co>`,
       react: <DeletionCompletedEmail userName={userName} />,
       subject,
       to: email,

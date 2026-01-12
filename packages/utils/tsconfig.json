@@ -1,9 +1,5 @@
 {
    "extends": "@tooling/typescript/typecheck.json",
    "include": ["src"],
-   "references": [
-    {
-      "path": "../markdown"
-    }
-  ]
+   "references": []
 }

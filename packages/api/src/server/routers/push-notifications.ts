@@ -106,7 +106,7 @@ export const pushNotificationRouter = router({
       const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
       const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
       const vapidSubject =
-         process.env.VAPID_SUBJECT || "mailto:admin@montte.co";
+         process.env.VAPID_SUBJECT || "mailto:admin@contentta.co";
 
       if (!vapidPublicKey || !vapidPrivateKey) {
          throw APIError.internal("Push notifications not configured");

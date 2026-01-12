@@ -22,7 +22,7 @@ export const Route = createFileRoute("/pwa-redirect")({
             throw redirect({ to: "/auth/sign-in" });
          }
 
-         const lastSlug = localStorage.getItem("montte:last-organization-slug");
+         const lastSlug = localStorage.getItem("contentta:last-organization-slug");
          const org = lastSlug
             ? organizations.find((o) => o.slug === lastSlug) || organizations[0]
             : organizations[0];

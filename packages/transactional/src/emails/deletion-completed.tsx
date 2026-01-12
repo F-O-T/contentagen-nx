@@ -80,7 +80,7 @@ export default function DeletionCompletedEmail({
                   margin: "0 0 16px 0",
                }}
             >
-               Agradecemos por ter usado o Montte. Se você mudar de ideia no
+               Agradecemos por ter usado o Contentta. Se você mudar de ideia no
                futuro, você é sempre bem-vindo para criar uma nova conta.
             </Text>
             <Text

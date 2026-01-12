@@ -23,7 +23,7 @@
    "name": "finance-nx",
    "repository": {
       "type": "git",
-      "url": "https://github.com/F-O-T/montte-nx.git"
+      "url": "https://github.com/F-O-T/contentta-nx.git"
    },
    "scripts": {
       "auth:generate": "nx run authentication:auth-schema-generate",

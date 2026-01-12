@@ -53,7 +53,7 @@ function FileHandlerComponent() {
             trpc.organization.getOrganizations.queryOptions(),
          );
 
-         const lastSlug = localStorage.getItem("montte:last-organization-slug");
+         const lastSlug = localStorage.getItem("contentta:last-organization-slug");
          const foundOrg = lastSlug
             ? organizations.find((o) => o.slug === lastSlug)
             : null;
@@ -94,7 +94,7 @@ function FileHandlerComponent() {
                   const fileType = ext === "csv" ? "csv" : "ofx";
 
                   sessionStorage.setItem(
-                     "montte:pending-import",
+                     "contentta:pending-import",
                      JSON.stringify({
                         fileType,
                         content: base64Content,

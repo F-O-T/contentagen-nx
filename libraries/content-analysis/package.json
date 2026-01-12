@@ -55,11 +55,11 @@
    "license": "MIT",
    "repository": {
       "type": "git",
-      "url": "https://github.com/F-O-T/montte-nx.git"
+      "url": "https://github.com/F-O-T/contentta-nx.git"
    },
-   "homepage": "https://github.com/F-O-T/montte-nx/blob/master/libraries/content-analysis",
+   "homepage": "https://github.com/F-O-T/contentta-nx/blob/master/libraries/content-analysis",
    "bugs": {
-      "url": "https://github.com/F-O-T/montte-nx/issues"
+      "url": "https://github.com/F-O-T/contentta-nx/issues"
    },
    "publishConfig": {
       "access": "public"

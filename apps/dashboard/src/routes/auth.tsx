@@ -17,7 +17,7 @@ function AuthLayout() {
             {/* Mobile Logo */}
             <div className="lg:hidden mb-8">
                <div className="flex items-center gap-2">
-                  <img alt="Montte" className="w-10 h-10" src="/favicon.svg" />
+                  <img alt="Contentta" className="w-10 h-10" src="/favicon.svg" />
                   <span className="text-xl font-semibold">Contentta</span>
                </div>
             </div>
@@ -44,7 +44,7 @@ function AuthLayout() {
             <div className="relative z-10">
                <div className="flex items-center gap-3">
                   <img
-                     alt="Montte"
+                     alt="Contentta"
                      className="w-10 h-10 brightness-0 invert"
                      src="/favicon.svg"
                   />
@@ -336,7 +336,7 @@ function AuthLayout() {
 
             {/* Footer */}
             <div className="relative z-10 text-white/50 text-xs">
-               © {new Date().getFullYear()} Montte.{" "}
+               © {new Date().getFullYear()} Contentta.{" "}
                {"Todos os direitos reservados"}
             </div>
          </aside>

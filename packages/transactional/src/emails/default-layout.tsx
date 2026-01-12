@@ -50,7 +50,7 @@ export const DefaultEmailLayout = ({
                   fontStyle="normal"
                   fontWeight={400}
                   webFont={{
-                     url: "https://app.montte.co/email/montserrat-regular.woff2",
+                     url: "https://app.contentta.co/email/montserrat-regular.woff2",
                      format: "woff2",
                   }}
                />

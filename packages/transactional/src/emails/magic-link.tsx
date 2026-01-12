@@ -10,7 +10,7 @@ interface MagicLinkEmailProps {
 
 export default function MagicLinkEmail({ magicLinkUrl }: MagicLinkEmailProps) {
    return (
-      <DefaultEmailLayout preview="Seu link de acesso Montte">
+      <DefaultEmailLayout preview="Seu link de acesso Contentta">
          <DefaultHeading />
          <Section style={{ padding: "32px 24px", textAlign: "center" }}>
             <Text
@@ -67,5 +67,5 @@ export default function MagicLinkEmail({ magicLinkUrl }: MagicLinkEmailProps) {
 }
 
 MagicLinkEmail.PreviewProps = {
-   magicLinkUrl: "https://app.montte.co/auth/sign-in?token=abc123",
+   magicLinkUrl: "https://app.contentta.co/auth/sign-in?token=abc123",
 } satisfies MagicLinkEmailProps;

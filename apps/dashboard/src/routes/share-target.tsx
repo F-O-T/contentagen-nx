@@ -65,7 +65,7 @@ function ShareTargetComponent() {
             trpc.organization.getOrganizations.queryOptions(),
          );
 
-         const lastSlug = localStorage.getItem("montte:last-organization-slug");
+         const lastSlug = localStorage.getItem("contentta:last-organization-slug");
          const foundOrg = lastSlug
             ? organizations.find((o) => o.slug === lastSlug)
             : null;
@@ -100,14 +100,14 @@ function ShareTargetComponent() {
 
          if (cacheData) {
             sessionStorage.setItem(
-               "montte:pending-import",
+               "contentta:pending-import",
                JSON.stringify(
                   createPendingImport(cacheData.content, cacheData.filename),
                ),
             );
          } else {
             const pendingShare = sessionStorage.getItem(
-               "montte:pending-share-target",
+               "contentta:pending-share-target",
             );
 
             if (pendingShare) {
@@ -117,9 +117,9 @@ function ShareTargetComponent() {
                      filename: string;
                   };
 
-                  sessionStorage.removeItem("montte:pending-share-target");
+                  sessionStorage.removeItem("contentta:pending-share-target");
                   sessionStorage.setItem(
-                     "montte:pending-import",
+                     "contentta:pending-import",
                      JSON.stringify(
                         createPendingImport(data.content, data.filename),
                      ),

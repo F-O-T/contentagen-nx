@@ -144,7 +144,7 @@ export const accountDeletionRouter = router({
                      email: userEmail,
                      userName,
                      scheduledDate: formattedDate,
-                     cancelUrl: `${resolvedCtx.request.headers.get("origin") || "https://app.montte.co"}/settings/profile`,
+                     cancelUrl: `${resolvedCtx.request.headers.get("origin") || "https://app.contentta.co"}/settings/profile`,
                   });
                } catch (error) {
                   console.error(

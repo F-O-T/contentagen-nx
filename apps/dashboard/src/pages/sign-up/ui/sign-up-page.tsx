@@ -253,7 +253,7 @@ export function SignUpPage() {
             <span>{text[0]}</span>
             <a
                className="underline text-muted-foreground hover:text-primary"
-               href="https://montte.co/terms-of-service"
+               href="https://contentta.co/terms-of-service"
                rel="noopener noreferrer"
                target="_blank"
             >
@@ -262,7 +262,7 @@ export function SignUpPage() {
             <span>{text[1]}</span>
             <a
                className="underline text-muted-foreground hover:text-primary"
-               href="https://montte.co/privacy-policy"
+               href="https://contentta.co/privacy-policy"
                rel="noopener noreferrer"
                target="_blank"
             >

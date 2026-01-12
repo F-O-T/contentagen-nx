@@ -45,7 +45,7 @@ export default function OrganizationInvitationEmail({
                <strong style={{ color: "#1a1a2e" }}>{invitedByUsername}</strong>{" "}
                está convidando você para colaborar na organização{" "}
                <strong style={{ color: "#1a1a2e" }}>{teamName}</strong> no
-               Montte.
+               Contentta.
             </Text>
 
             <Section
@@ -129,6 +129,6 @@ export default function OrganizationInvitationEmail({
 OrganizationInvitationEmail.PreviewProps = {
    invitedByEmail: "maria@exemplo.com",
    invitedByUsername: "Maria Silva",
-   inviteLink: "https://app.montte.co/callback/organization/invitation/abc123",
+   inviteLink: "https://app.contentta.co/callback/organization/invitation/abc123",
    teamName: "Empresa ABC",
 } satisfies OrganizationInvitationEmailProps;

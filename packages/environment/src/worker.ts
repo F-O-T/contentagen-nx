@@ -2,7 +2,7 @@ import { z } from "zod";
 import { parseEnv } from "./helpers";
 
 const EnvSchema = z.object({
-   APP_URL: z.string().optional().default("https://app.montte.co"),
+   APP_URL: z.string().optional().default("https://app.contentta.co"),
    BETTER_STACK_HEARTBEAT_URL: z.string().url().optional(),
    DATABASE_URL: z.string(),
    LOG_LEVEL: z
@@ -24,7 +24,7 @@ const EnvSchema = z.object({
    TAVILY_API_KEY: z.string().optional(),
    VAPID_PRIVATE_KEY: z.string(),
    VAPID_PUBLIC_KEY: z.string(),
-   VAPID_SUBJECT: z.string().optional().default("mailto:contato@montte.co"),
+   VAPID_SUBJECT: z.string().optional().default("mailto:contato@contentta.co"),
    WORKER_CONCURRENCY: z.coerce.number().optional().default(5),
 });
 export type WorkerEnv = z.infer<typeof EnvSchema>;

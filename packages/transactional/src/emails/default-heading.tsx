@@ -1,6 +1,6 @@
 import { Img, Section, Text } from "@react-email/components";
 
-const logoUrl = "https://app.montte.co/email/logo.png";
+const logoUrl = "https://app.contentta.co/email/logo.png";
 
 export const DefaultHeading = () => {
    return (
@@ -15,7 +15,7 @@ export const DefaultHeading = () => {
             <tr>
                <td style={{ verticalAlign: "middle", paddingRight: "12px" }}>
                   <Img
-                     alt="Montte"
+                     alt="Contentta"
                      height="32"
                      src={logoUrl}
                      style={{ display: "block" }}
@@ -32,7 +32,7 @@ export const DefaultHeading = () => {
                         margin: 0,
                      }}
                   >
-                     Montte
+                     Contentta
                   </Text>
                </td>
             </tr>
