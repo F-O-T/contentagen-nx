@@ -1,7 +1,7 @@
-import { ModelRouterEmbeddingModel } from "@mastra/core/llm";
 import { PgVector } from "@mastra/pg";
 import { serverEnv } from "@packages/environment/server";
 import { embed } from "ai";
+import { embeddingModel } from "../agents/shared";
 import type { ContentMetadata } from "./types";
 
 // Index names (must follow PgVector naming: letters, numbers, underscores only)
@@ -11,10 +11,8 @@ export const CONTENT_CHUNKS_INDEX = "content_chunks";
 // Embedding dimensions (text-embedding-3-small)
 export const EMBEDDING_DIMENSION = 1536;
 
-// Embedding model for search
-const embeddingModel = new ModelRouterEmbeddingModel(
-   "openai/text-embedding-3-small",
-);
+// Re-export embedding model for convenience
+export { embeddingModel };
 
 /**
  * RAG Service - Manages PgVector connection and provides core operations

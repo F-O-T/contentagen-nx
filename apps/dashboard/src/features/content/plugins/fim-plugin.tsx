@@ -2,6 +2,10 @@
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
+   $convertFromMarkdownString,
+   $convertToMarkdownString,
+} from "@lexical/markdown";
+import {
    $createTextNode,
    $getRoot,
    $getSelection,
@@ -47,6 +51,7 @@ import {
 import { FIMDiffPanel } from "../ui/fim-diff-panel";
 import { FIMFloatingPanel } from "../ui/fim-floating-panel";
 import { FIMStatusLine } from "../ui/fim-status-line";
+import { EXTENDED_TRANSFORMERS } from "../ui/content-editor";
 
 // Max chain depth to prevent infinite loops
 const MAX_CHAIN_DEPTH = 5;
@@ -291,6 +296,17 @@ export function FIMPlugin({ containerRef }: FIMPluginProps) {
       }
 
       if (accepted) {
+         // Re-parse the document to convert markdown to rich text nodes
+         editor.update(
+            () => {
+               const root = $getRoot();
+               const markdown = $convertToMarkdownString(EXTENDED_TRANSFORMERS);
+               root.clear();
+               $convertFromMarkdownString(markdown, EXTENDED_TRANSFORMERS);
+            },
+            { tag: "fim-markdown-parse" },
+         );
+
          cursorPosition = getCursorOffset();
 
          // Track chain depth

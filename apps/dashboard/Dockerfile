@@ -15,7 +15,6 @@ COPY packages/ui/package.json ./packages/ui/
 COPY packages/ofx/package.json ./packages/ofx/
 COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/posthog/package.json ./packages/posthog/
-COPY packages/encryption/package.json ./packages/encryption/
 COPY packages/api/package.json ./packages/api/
 COPY packages/authentication/package.json ./packages/authentication/
 COPY packages/environment/package.json ./packages/environment/

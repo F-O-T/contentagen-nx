@@ -35,7 +35,7 @@ import {
    ContentRequestSchema,
 } from "@packages/database/schema";
 import { content } from "@packages/database/schemas/content";
-import { normalizeEscapedNewlines } from "@packages/markdown";
+import { normalizeEscapedNewlines } from "@f-o-t/markdown";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -654,14 +654,14 @@ export const contentRouter = router({
                createdAt: sharedContent.createdAt,
                agent: sharedContent.agent
                   ? {
-                       name: sharedContent.agent.personaConfig?.metadata?.name,
-                       description:
-                          sharedContent.agent.personaConfig?.metadata
-                             ?.description,
-                       avatar:
-                          sharedContent.agent.personaConfig?.metadata?.avatar,
-                       profilePhotoUrl: sharedContent.agent.profilePhotoUrl,
-                    }
+                     name: sharedContent.agent.personaConfig?.metadata?.name,
+                     description:
+                        sharedContent.agent.personaConfig?.metadata
+                           ?.description,
+                     avatar:
+                        sharedContent.agent.personaConfig?.metadata?.avatar,
+                     profilePhotoUrl: sharedContent.agent.profilePhotoUrl,
+                  }
                   : null,
                relatedPosts: relatedPosts.map((p) => ({
                   id: p.id,

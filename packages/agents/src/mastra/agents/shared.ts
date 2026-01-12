@@ -1,5 +1,6 @@
 import { Memory } from "@mastra/memory";
 import { PgVector } from "@mastra/pg";
+import { ModelRouterEmbeddingModel } from "@mastra/core/llm";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { serverEnv } from "@packages/environment/server";
 
@@ -20,6 +21,14 @@ export type ModelId = keyof typeof MODELS;
 
 // OpenRouter client
 export const openrouter = createOpenRouter({
+   apiKey: serverEnv.OPENROUTER_API_KEY,
+});
+
+// Embedding model via OpenRouter (centralized billing)
+export const embeddingModel = new ModelRouterEmbeddingModel({
+   providerId: "openrouter",
+   modelId: "openai/text-embedding-3-small",
+   url: "https://openrouter.ai/api/v1",
    apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 

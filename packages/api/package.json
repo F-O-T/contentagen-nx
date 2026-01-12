@@ -8,9 +8,7 @@
       "@packages/files": "workspace:*",
       "@packages/notifications": "workspace:*",
       "@packages/posthog": "workspace:*",
-      "@packages/server-events": "workspace:*",
       "@packages/utils": "workspace:*",
-
       "@trpc/client": "catalog:trpc",
       "@trpc/server": "catalog:trpc",
       "superjson": "catalog:trpc",

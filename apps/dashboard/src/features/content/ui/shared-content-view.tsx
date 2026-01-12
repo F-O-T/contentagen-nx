@@ -1,4 +1,4 @@
-import { parse, renderToHtml } from "@packages/markdown";
+import { parse, renderToHtml } from "@f-o-t/markdown";
 import {
    Avatar,
    AvatarFallback,

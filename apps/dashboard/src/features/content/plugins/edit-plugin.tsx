@@ -2,6 +2,10 @@
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
+   $convertFromMarkdownString,
+   $convertToMarkdownString,
+} from "@lexical/markdown";
+import {
    $createTextNode,
    $getNodeByKey,
    $getRoot,
@@ -25,6 +29,7 @@ import {
 } from "../context/edit-context";
 import { useEditCompletion } from "../hooks/use-edit-completion";
 import { $isGhostTextNode } from "../nodes/ghost-text-node";
+import { EXTENDED_TRANSFORMERS } from "../ui/content-editor";
 import { EditPromptPanel } from "../ui/edit-prompt-panel";
 
 interface EditPluginProps {
@@ -197,7 +202,7 @@ export function EditPlugin({ containerRef }: EditPluginProps) {
    // Handle streaming complete
    const handleComplete = useCallback(
       (_fullText: string) => {
-         // Remove the muted styling from the placeholder
+         // First, remove the muted styling from the placeholder
          editor.update(
             () => {
                const nodeKey = placeholderNodeKey;
@@ -206,13 +211,21 @@ export function EditPlugin({ containerRef }: EditPluginProps) {
                   if ($isTextNode(node)) {
                      // Remove the muted color styling
                      node.setStyle("");
-                     // Position cursor at end of inserted text
-                     const textLength = node.getTextContentSize();
-                     node.select(textLength, textLength);
                   }
                }
             },
             { tag: "edit-streaming" },
+         );
+
+         // Then re-parse the document to convert markdown to rich text nodes
+         editor.update(
+            () => {
+               const root = $getRoot();
+               const markdown = $convertToMarkdownString(EXTENDED_TRANSFORMERS);
+               root.clear();
+               $convertFromMarkdownString(markdown, EXTENDED_TRANSFORMERS);
+            },
+            { tag: "edit-markdown-parse" },
          );
 
          completeEdit();

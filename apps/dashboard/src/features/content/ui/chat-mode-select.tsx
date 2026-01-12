@@ -21,15 +21,15 @@ import {
 const modes = [
    {
       value: "plan" as const,
-      label: "Plan",
+      label: "Planejar",
       icon: ListChecks,
-      description: "Research & create plans",
+      description: "Pesquisa e criação de planos",
    },
    {
       value: "writer" as const,
-      label: "Writer",
+      label: "Escritor",
       icon: Pencil,
-      description: "Direct editing mode",
+      description: "Modo de edição direta",
    },
 ] as const;
 
@@ -103,8 +103,8 @@ export function ChatModeSelect() {
             <TooltipContent side="bottom">
                <p>
                   {executionState.isExecuting
-                     ? "Cannot switch modes during plan execution"
-                     : "Cannot switch modes while agent is responding"}
+                     ? "Não é possível alternar modos durante execução do plano"
+                     : "Não é possível alternar modos enquanto o agente está respondendo"}
                </p>
             </TooltipContent>
          </Tooltip>

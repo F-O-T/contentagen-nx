@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A personal finance management application built as an **Nx monorepo** with Bun as the package manager. The system provides transaction tracking, bill management, budgeting, and financial reporting with end-to-end encryption support.
+A personal finance management application built as an **Nx monorepo** with Bun as the package manager. The system provides transaction tracking, bill management, budgeting, and financial reporting.
 
 ---
 
@@ -67,7 +67,6 @@ finance-tracker/
 │   ├── authentication/  # Better Auth setup
 │   ├── cache/           # Redis caching layer
 │   ├── database/        # Drizzle ORM schemas & repositories
-│   ├── encryption/      # NaCl-based encryption
 │   ├── environment/     # Zod-validated env vars
 │   ├── files/           # MinIO & file utilities
 │   ├── localization/    # i18next translations (en-US, pt-BR)
@@ -111,12 +110,6 @@ Single file exports for specific functionality:
       }
    }
 }
-```
-
-**Usage:**
-```typescript
-import { createClient } from "@packages/encryption/client";
-import { encryptionService } from "@packages/encryption/server";
 ```
 
 #### 2. Wildcard Entry Points
@@ -171,7 +164,7 @@ import { createTransaction } from "@packages/database/repositories/transaction-r
 | UI Components | `./components/*`, `./hooks/*`, `./lib/*` | `@packages/ui` |
 | Database | `.`, `./client`, `./schema`, `./schemas/*`, `./repositories/*` | `@packages/database` |
 | API | `./client`, `./server`, `./schemas/*` | `@packages/api` |
-| Utils/Services | `.`, `./client`, `./server` | `@packages/encryption` |
+| Utils/Services | `.`, `./client`, `./server` | `@packages/utils` |
 | Environment | `./server`, `./worker`, `./client` | `@packages/environment` |
 
 ### Import Rules
@@ -206,15 +199,15 @@ Do NOT use barrel files (index.ts/index.tsx) to re-export components or modules.
 
 **Bad:**
 ```typescript
-// features/encryption/index.ts
+// features/billing/index.ts
 export * from "./hooks";
 export * from "./ui";
 ```
 
 **Good:** Import directly from the source file:
 ```typescript
-import { useEncryption } from "@/features/encryption/hooks/use-encryption";
-import { EncryptionSetupCredenza } from "@/features/encryption/ui/encryption-setup-credenza";
+import { useBilling } from "@/features/billing/hooks/use-billing";
+import { BillingSection } from "@/features/billing/ui/billing-section";
 ```
 
 **Why:**
@@ -315,8 +308,8 @@ Always include a brief reason explaining why the suppression is necessary.
 
 Use **kebab-case** for all files:
 ```
-encryption-setup-credenza.tsx
-use-encryption-context.tsx
+billing-section.tsx
+use-billing-context.tsx
 account-deletion.ts
 transaction-repository.ts
 ```
@@ -326,7 +319,7 @@ transaction-repository.ts
 Use **PascalCase** for components, following `[Feature][Action][Type]` pattern:
 ```typescript
 // Component names
-EncryptionSetupCredenza    // feature: encryption, action: setup, type: credenza
+BillingSection             // feature: billing, type: section
 CookieConsentBanner        // feature: cookie, action: consent, type: banner
 ProfileSection             // feature: profile, type: section
 BillFilterCredenza         // feature: bill, action: filter, type: credenza
@@ -336,11 +329,11 @@ BillFilterCredenza         // feature: bill, action: filter, type: credenza
 
 Use **use[Feature][Action]** pattern:
 ```typescript
-useEncryptionContext()
 useActiveOrganization()
 useCookieConsent()
 useDeleteCategory()
 usePendingOfxImport()
+useBillingContext()
 ```
 
 ### Type/Interface Naming
@@ -348,7 +341,7 @@ usePendingOfxImport()
 Use **PascalCase** with descriptive suffixes:
 ```typescript
 // Props interfaces
-interface EncryptionSetupCredenzaProps { ... }
+interface BillingSettingsProps { ... }
 interface BillFilterCredenzaProps { ... }
 
 // Database types (use Drizzle inference)
@@ -356,8 +349,8 @@ type Transaction = typeof transactionTable.$inferSelect;
 type NewTransaction = typeof transactionTable.$inferInsert;
 
 // General types
-type Step = "intro" | "passphrase" | "confirm" | "success";
 type ConsentStatus = "accepted" | "declined" | null;
+type BillingPlan = "free" | "pro" | "enterprise";
 ```
 
 ---
@@ -377,16 +370,15 @@ Organize features with consistent subfolder patterns:
 └── utils/ (when needed)
 ```
 
-**Example - Encryption Feature:**
+**Example - Billing Feature:**
 ```
-/features/encryption/
+/features/billing/
 ├── hooks/
-│   ├── use-encryption-context.tsx
-│   ├── use-encryption.ts
-│   └── use-encryption-key-storage.ts
+│   ├── use-billing-context.tsx
+│   └── use-billing.ts
 └── ui/
-    ├── encryption-setup-credenza.tsx
-    └── encryption-unlock-dialog.tsx
+    ├── billing-section.tsx
+    └── billing-plan-card.tsx
 ```
 
 ---
@@ -415,7 +407,7 @@ File-based routing with these conventions:
         └── settings/
             ├── profile.tsx
             ├── security.tsx
-            └── encryption.tsx
+            └── billing.tsx
 ```
 
 ---
@@ -454,12 +446,11 @@ export async function createTransaction(
    data: NewTransaction,
 ) {
    try {
-      const encryptedData = encryptTransactionFields(data);
       const result = await dbClient
          .insert(transaction)
-         .values(encryptedData)
+         .values(data)
          .returning();
-      return decryptTransactionFields(result[0]);
+      return result[0];
    } catch (err) {
       propagateError(err);
       throw AppError.database("Failed to create transaction");
@@ -678,10 +669,10 @@ import { serverEnv } from "@packages/environment/server";
 Never use index.ts re-exports within apps. Always import from the exact source file:
 ```typescript
 // Good
-import { useEncryption } from "@/features/encryption/hooks/use-encryption";
+import { useBilling } from "@/features/billing/hooks/use-billing";
 
 // Bad
-import { useEncryption } from "@/features/encryption";
+import { useBilling } from "@/features/billing";
 ```
 
 ---
@@ -692,7 +683,6 @@ import { useEncryption } from "@/features/encryption";
 Use **SCREAMING_SNAKE_CASE** for all environment variables:
 ```
 DATABASE_URL
-ENCRYPTION_KEY
 REDIS_URL
 STRIPE_SECRET_KEY
 BETTER_AUTH_SECRET
@@ -703,7 +693,6 @@ BETTER_AUTH_SECRET
 // packages/environment/src/server.ts
 const EnvSchema = z.object({
    DATABASE_URL: z.string(),
-   ENCRYPTION_KEY: z.string().length(64).regex(/^[0-9a-fA-F]+$/),
    REDIS_URL: z.string().optional().default("redis://localhost:6379"),
    NODE_ENV: z.enum(["development", "production", "test"]),
 });
@@ -892,20 +881,3 @@ const organizationId = resolvedCtx.organizationId;
 - Email OTP
 - Two-Factor Authentication (2FA)
 
----
-
-## Encryption
-
-### Server-Side
-Transparent encryption at repository level using the `ENCRYPTION_KEY` env var.
-
-### End-to-End (E2E)
-Optional user-controlled encryption with NaCl (TweetNaCl):
-```typescript
-// Check E2E status
-const { e2eEnabled, isUnlocked, encrypt, decrypt } = useEncryptionContext();
-
-// Encrypt/decrypt
-const encrypted = encrypt(plaintext);
-const decrypted = decrypt(encryptedData);
-```

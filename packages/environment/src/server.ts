@@ -17,7 +17,6 @@ const EnvSchema = z.object({
    BETTER_AUTH_TRUSTED_ORIGINS: z.string(),
    DATABASE_URL: z.string(),
    PG_VECTOR_URL: z.string(),
-   OPENAI_API_KEY: z.string(),
    OPENROUTER_API_KEY: z.string(),
    MINIO_ACCESS_KEY: z.string(),
    MINIO_BUCKET: z.string().default("content-writer"),

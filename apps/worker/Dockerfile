@@ -17,7 +17,6 @@ COPY packages/queue/package.json ./packages/queue/
 COPY packages/workflows/package.json ./packages/workflows/
 COPY packages/transactional/package.json ./packages/transactional/
 COPY packages/notifications/package.json ./packages/notifications/
-COPY packages/encryption/package.json ./packages/encryption/
 COPY packages/utils/package.json ./packages/utils/
 COPY packages/logging/package.json ./packages/logging/
 COPY packages/money/package.json ./packages/money/

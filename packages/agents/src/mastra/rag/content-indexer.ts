@@ -1,10 +1,10 @@
-import { ModelRouterEmbeddingModel } from "@mastra/core/llm";
 import { MDocument } from "@mastra/rag";
 import { AppError, propagateError } from "@packages/utils/errors";
 import { embed, embedMany } from "ai";
 import {
    CONTENT_CHUNKS_INDEX,
    CONTENT_METADATA_INDEX,
+   embeddingModel,
    ragService,
 } from "./rag-service";
 import type {
@@ -13,11 +13,6 @@ import type {
    ContentToIndex,
    IndexingResult,
 } from "./types";
-
-// Embedding model using Mastra's ModelRouter
-const embeddingModel = new ModelRouterEmbeddingModel(
-   "openai/text-embedding-3-small",
-);
 
 // Chunk configuration
 const CHUNK_SIZE = 512; // Characters per chunk

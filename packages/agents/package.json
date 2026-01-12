@@ -14,7 +14,6 @@
     "@packages/environment": "workspace:*",
     "@packages/files": "workspace:*",
     "@packages/search": "workspace:*",
-    "@packages/server-events": "workspace:*",
     "@packages/utils": "workspace:*",
     "ai": "catalog:openrouter",
     "zod": "catalog:validation"

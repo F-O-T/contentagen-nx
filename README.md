@@ -164,7 +164,6 @@ Shared internal libraries organized by concern. All packages use explicit export
 
 | Package        | Purpose                                |
 | -------------- | -------------------------------------- |
-| `encryption`   | E2E encryption with NaCl (TweetNaCl)   |
 | `notifications`| Push notifications and alerts          |
 | `workflows`    | Content workflow automation            |
 

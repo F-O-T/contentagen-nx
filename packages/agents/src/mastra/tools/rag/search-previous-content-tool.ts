@@ -1,4 +1,3 @@
-import { ModelRouterEmbeddingModel } from "@mastra/core/llm";
 import { createTool } from "@mastra/core/tools";
 import { AppError, propagateError } from "@packages/utils/errors";
 import { embed } from "ai";
@@ -12,15 +11,11 @@ import type {
 import {
    CONTENT_CHUNKS_INDEX,
    CONTENT_METADATA_INDEX,
+   embeddingModel,
    initializeRagService,
    isRagAvailable,
    ragService,
 } from "../../rag";
-
-// Embedding model using Mastra's ModelRouter
-const embeddingModel = new ModelRouterEmbeddingModel(
-   "openai/text-embedding-3-small",
-);
 
 export function getSearchPreviousContentInstructions(): string {
    return `

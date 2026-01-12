@@ -84,17 +84,17 @@ export const ChatCommandSuggestions = forwardRef<
       return (
          <div className="absolute bottom-full left-0 right-0 mb-1 rounded-md border bg-popover p-2 shadow-md">
             <p className="text-sm text-muted-foreground text-center py-2">
-               No commands found
+               Nenhum comando encontrado
             </p>
          </div>
       );
    }
 
    const categoryLabels: Record<string, string> = {
-      mode: "Modes",
-      action: "Actions",
-      context: "Context",
-      workflow: "Workflows",
+      mode: "Modos",
+      action: "Ações",
+      context: "Contexto",
+      workflow: "Fluxos de trabalho",
    };
 
    let currentIndex = 0;
@@ -103,7 +103,7 @@ export const ChatCommandSuggestions = forwardRef<
       <div className="absolute bottom-full left-0 right-0 mb-1 rounded-md border bg-popover shadow-md overflow-hidden max-h-64 overflow-y-auto">
          <Command className="rounded-none border-0">
             <CommandList>
-               <CommandEmpty>No commands found</CommandEmpty>
+               <CommandEmpty>Nenhum comando encontrado</CommandEmpty>
 
                {Object.entries(groupedCommands).map(([category, cmds]) => (
                   <CommandGroup

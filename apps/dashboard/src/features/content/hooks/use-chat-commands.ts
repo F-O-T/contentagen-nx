@@ -64,16 +64,16 @@ export function useChatCommands(
          // Mode commands
          {
             id: "plan",
-            label: "plan",
-            description: "Switch to plan mode (research & planning)",
+            label: "planejar",
+            description: "Alternar para modo planejamento (pesquisa e planejamento)",
             icon: ListChecks,
             category: "mode",
             handler: () => setChatMode("plan"),
          },
          {
             id: "writer",
-            label: "writer",
-            description: "Switch to writer mode (direct editing)",
+            label: "escritor",
+            description: "Alternar para modo escritor (edição direta)",
             icon: Pencil,
             category: "mode",
             handler: () => setChatMode("writer"),
@@ -81,75 +81,75 @@ export function useChatCommands(
          // Action commands
          {
             id: "improve",
-            label: "improve",
-            description: "Improve the writing quality",
+            label: "melhorar",
+            description: "Melhorar a qualidade da escrita",
             icon: Wand2,
             category: "action",
             handler: () => {
-               const text = selectionContext?.text || "the content";
-               onSendMessage?.(`Improve ${text}`);
+               const text = selectionContext?.text || "o conteúdo";
+               onSendMessage?.(`Melhore ${text}`);
             },
          },
          {
             id: "expand",
-            label: "expand",
-            description: "Expand and add more detail",
+            label: "expandir",
+            description: "Expandir e adicionar mais detalhes",
             icon: Expand,
             category: "action",
             handler: () => {
-               const text = selectionContext?.text || "the content";
-               onSendMessage?.(`Expand and add more detail to ${text}`);
+               const text = selectionContext?.text || "o conteúdo";
+               onSendMessage?.(`Expanda e adicione mais detalhes a ${text}`);
             },
          },
          {
             id: "summarize",
-            label: "summarize",
-            description: "Create a summary",
+            label: "resumir",
+            description: "Criar um resumo",
             icon: FileText,
             category: "action",
             handler: () => {
-               onSendMessage?.("Summarize this content");
+               onSendMessage?.("Resuma este conteúdo");
             },
          },
          {
             id: "fix",
-            label: "fix",
-            description: "Fix grammar and spelling",
+            label: "corrigir",
+            description: "Corrigir gramática e ortografia",
             icon: SpellCheck,
             category: "action",
             handler: () => {
-               const text = selectionContext?.text || "the content";
-               onSendMessage?.(`Fix grammar and spelling in ${text}`);
+               const text = selectionContext?.text || "o conteúdo";
+               onSendMessage?.(`Corrija gramática e ortografia em ${text}`);
             },
          },
          {
             id: "analyze",
-            label: "analyze",
-            description: "Run SEO and readability analysis",
+            label: "analisar",
+            description: "Executar análise de SEO e legibilidade",
             icon: BarChart3,
             category: "action",
             handler: () => {
                onSendMessage?.(
-                  "Analyze this content for SEO score, readability, and keyword density. Show me the results.",
+                  "Analise este conteúdo para pontuação SEO, legibilidade e densidade de palavras-chave. Mostre-me os resultados.",
                );
             },
          },
          {
             id: "optimize",
-            label: "optimize",
-            description: "Optimize SEO with keyword and link fixes",
+            label: "otimizar",
+            description: "Otimizar SEO com correções de palavras-chave e links",
             icon: Zap,
             category: "action",
             handler: () => {
                onSendMessage?.(
-                  "Optimize this content for SEO: fix keyword density, add internal links, and improve the meta description.",
+                  "Otimize este conteúdo para SEO: corrija a densidade de palavras-chave, adicione links internos e melhore a meta descrição.",
                );
             },
          },
          {
             id: "clear",
-            label: "clear",
-            description: "Clear the conversation",
+            label: "limpar",
+            description: "Limpar a conversa",
             icon: Trash2,
             category: "action",
             handler: () => clearChat(),
@@ -163,84 +163,84 @@ export function useChatCommands(
          // Context references
          {
             id: "document",
-            label: "document",
-            description: "Reference the full document",
+            label: "documento",
+            description: "Referenciar o documento completo",
             icon: FileCode,
             category: "context",
             getValue: () => {
-               if (!documentContent) return "[No document content]";
+               if (!documentContent) return "[Sem conteúdo do documento]";
                const preview =
                   documentContent.length > 100
                      ? `${documentContent.slice(0, 100)}...`
                      : documentContent;
-               return `[Document: ${preview}]`;
+               return `[Documento: ${preview}]`;
             },
          },
          {
             id: "selection",
-            label: "selection",
-            description: "Reference current selection",
+            label: "selecao",
+            description: "Referenciar a seleção atual",
             icon: TextSelect,
             category: "context",
             getValue: () => {
-               if (!selectionContext?.text) return "[No selection]";
-               return `[Selection: ${selectionContext.text}]`;
+               if (!selectionContext?.text) return "[Sem seleção]";
+               return `[Seleção: ${selectionContext.text}]`;
             },
          },
          {
             id: "title",
-            label: "title",
-            description: "Reference content title",
+            label: "titulo",
+            description: "Referenciar o título do conteúdo",
             icon: Type,
             category: "context",
             getValue: () => {
-               if (!contentMetadata?.title) return "[No title]";
-               return `[Title: ${contentMetadata.title}]`;
+               if (!contentMetadata?.title) return "[Sem título]";
+               return `[Título: ${contentMetadata.title}]`;
             },
          },
          {
             id: "keywords",
-            label: "keywords",
-            description: "Reference content keywords",
+            label: "palavras-chave",
+            description: "Referenciar as palavras-chave do conteúdo",
             icon: Tags,
             category: "context",
             getValue: () => {
-               if (!contentMetadata?.keywords?.length) return "[No keywords]";
-               return `[Keywords: ${contentMetadata.keywords.join(", ")}]`;
+               if (!contentMetadata?.keywords?.length) return "[Sem palavras-chave]";
+               return `[Palavras-chave: ${contentMetadata.keywords.join(", ")}]`;
             },
          },
          // Workflow mentions
          {
             id: "seo-analysis",
-            label: "seo-analysis",
-            description: "Run full SEO analysis on content",
+            label: "analise-seo",
+            description: "Executar análise SEO completa no conteúdo",
             icon: Search,
             category: "workflow",
-            getValue: () => "@workflow:seo-analysis",
+            getValue: () => "@workflow:analise-seo",
          },
          {
             id: "improve-readability",
-            label: "improve-readability",
-            description: "Analyze and improve content readability",
+            label: "melhorar-legibilidade",
+            description: "Analisar e melhorar a legibilidade do conteúdo",
             icon: BookOpen,
             category: "workflow",
-            getValue: () => "@workflow:improve-readability",
+            getValue: () => "@workflow:melhorar-legibilidade",
          },
          {
             id: "keyword-optimization",
-            label: "keyword-optimization",
-            description: "Optimize keyword density and placement",
+            label: "otimizar-palavras-chave",
+            description: "Otimizar densidade e posicionamento de palavras-chave",
             icon: Target,
             category: "workflow",
-            getValue: () => "@workflow:keyword-optimization",
+            getValue: () => "@workflow:otimizar-palavras-chave",
          },
          {
             id: "add-links",
-            label: "add-links",
-            description: "Find and add relevant internal links",
+            label: "adicionar-links",
+            description: "Encontrar e adicionar links internos relevantes",
             icon: Link2,
             category: "workflow",
-            getValue: () => "@workflow:add-links",
+            getValue: () => "@workflow:adicionar-links",
          },
       ],
       [documentContent, selectionContext, contentMetadata],

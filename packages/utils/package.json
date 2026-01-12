@@ -1,6 +1,5 @@
 {
    "dependencies": {
-      "@packages/markdown": "workspace:*",
       "@trpc/server": "catalog:trpc",
       "slugify": "^1.6.6",
       "zod": "catalog:validation"
@@ -41,10 +40,6 @@
       "./interest": {
          "default": "./src/interest.ts",
          "types": "./dist/src/interest.d.ts"
-      },
-      "./markdown": {
-         "default": "./src/markdown.ts",
-         "types": "./dist/src/markdown.d.ts"
       },
       "./number": {
          "default": "./src/numbers.ts",

@@ -10,6 +10,7 @@ export {
    CONTENT_CHUNKS_INDEX,
    CONTENT_METADATA_INDEX,
    EMBEDDING_DIMENSION,
+   embeddingModel,
    initializeRagService,
    isRagAvailable,
    ragService,
