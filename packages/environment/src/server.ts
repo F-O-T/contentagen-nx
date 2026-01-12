@@ -25,6 +25,7 @@ const EnvSchema = z.object({
    MINIO_SECRET_KEY: z.string(),
    POSTHOG_HOST: z.string(),
    POSTHOG_KEY: z.string(),
+   POSTHOG_PROJECT_ID: z.string(),
    REDIS_URL: z.string().optional().default("redis://localhost:6379"),
    RESEND_API_KEY: z.string(),
    STRIPE_PRO_ANNUAL_PRICE_ID: z.string(),

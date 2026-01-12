@@ -30,6 +30,14 @@ function isApiKeyCreationEndpoint(pathname: string): boolean {
 }
 
 /**
+ * Check if the request is a Stripe webhook endpoint.
+ * Stripe webhooks are legitimate automated requests and should bypass bot detection.
+ */
+function isStripeWebhookEndpoint(pathname: string): boolean {
+   return pathname === "/api/auth/stripe/webhook";
+}
+
+/**
  * Get the user's plan from their subscription.
  */
 async function getUserPlanFromAuth(
@@ -92,6 +100,12 @@ export async function wrapAuthHandler(
                },
             );
          }
+      }
+
+      // Skip Arcjet protection for Stripe webhooks - they're legitimate automated requests
+      // verified via signature, not IP-based detection
+      if (isStripeWebhookEndpoint(pathname)) {
+         return authInstance.handler(request);
       }
 
       if (!arcjetInstance) {

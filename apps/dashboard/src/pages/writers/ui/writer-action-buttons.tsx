@@ -1,7 +1,7 @@
 import { Button } from "@packages/ui/components/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { BarChart3, Copy, FileText, Pencil, Trash2 } from "lucide-react";
+import { Copy, FileText, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ManageWriterForm } from "@/features/writers/ui/manage-writer-form";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
@@ -27,13 +27,13 @@ type Writer = {
 };
 
 type WriterActionButtonsProps = {
-   writer: Writer;
-   onDeleteSuccess?: () => void;
+	writer: Writer;
+	onDeleteSuccess?: () => void;
 };
 
 export function WriterActionButtons({
-   writer,
-   onDeleteSuccess,
+	writer,
+	onDeleteSuccess,
 }: WriterActionButtonsProps) {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
@@ -136,17 +136,6 @@ export function WriterActionButtons({
          >
             <FileText className="size-4" />
             {"Gerar Conteúdo"}
-         </Button>
-         <Button
-            disabled={isPending}
-            onClick={() => {
-               // TODO: Navigate to analytics page when available
-               toast.info("Analytics coming soon");
-            }}
-            variant="outline"
-         >
-            <BarChart3 className="size-4" />
-            {"Ver Análises"}
          </Button>
 
          {/* Separator */}
