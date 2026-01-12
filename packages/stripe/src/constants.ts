@@ -1,5 +1,6 @@
 export enum PlanName {
    FREE = "free",
+   LITE = "lite",
    PRO = "pro",
 }
 
@@ -8,20 +9,43 @@ export const STRIPE_PLANS = [
       annualPrice: null,
       description: "Para começar a criar conteúdo",
       displayName: "Free",
-      features: ["1 usuário", "Funcionalidades básicas", "Suporte por email"],
+      features: [
+         "1 usuário",
+         "Editor completo",
+         "Análise de SEO",
+         "Suporte por email",
+      ],
       name: PlanName.FREE,
       price: "R$ 0",
+   },
+   {
+      annualPrice: "R$ 790",
+      description: "Assistência de IA para acelerar a escrita",
+      displayName: "Lite",
+      features: [
+         "Tudo do Free",
+         "3 usuários",
+         "Autocompletar com IA (FIM)",
+         "Edição rápida com IA",
+         "Sugestões de conteúdo",
+         "Suporte prioritário",
+      ],
+      name: PlanName.LITE,
+      price: "R$ 79",
    },
    {
       annualPrice: "R$ 1500",
       description: "Para criadores de conteúdo profissionais",
       displayName: "Pro",
       features: [
+         "Tudo do Lite",
          "Membros ilimitados",
-         "Todas as funcionalidades",
+         "Chat com IA (planejamento)",
+         "Escritor IA completo",
+         "Instruções personalizadas",
+         "Memória do agente",
          "Automações",
          "Relatórios avançados",
-         "Suporte prioritário",
          "API access",
          "14 dias de teste grátis",
       ],
@@ -45,7 +69,7 @@ export const STRIPE_ADDONS = [
       price: "R$ 8",
       annualPrice: "R$ 84",
       perUnit: "/usuário/mês",
-      availableFor: [PlanName.PRO],
+      availableFor: [PlanName.LITE, PlanName.PRO],
    },
    {
       name: AddOnType.EXTRA_STORAGE,
@@ -54,7 +78,7 @@ export const STRIPE_ADDONS = [
       price: "R$ 3",
       annualPrice: "R$ 24",
       perUnit: "/5GB/mês",
-      availableFor: [PlanName.PRO],
+      availableFor: [PlanName.LITE, PlanName.PRO],
    },
    {
       name: AddOnType.AUTOMATION_PACK,

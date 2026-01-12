@@ -6,7 +6,7 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { sql } from "drizzle-orm";
 import { Elysia } from "elysia";
 import { auth, resendClient, stripeClient } from "./integrations/auth";
-import { db, ragClient } from "./integrations/database";
+import { db } from "./integrations/database";
 import { logger } from "./integrations/logging";
 import { minioClient } from "./integrations/minio";
 import { posthog, posthogPlugin } from "./integrations/posthog";
@@ -37,7 +37,6 @@ const app = new Elysia({
       db,
       minioBucket: env.MINIO_BUCKET,
       minioClient,
-      ragClient,
    }))
    .use(
       cors({

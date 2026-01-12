@@ -1,0 +1,48 @@
+import { Memory } from "@mastra/memory";
+import { PgVector } from "@mastra/pg";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { serverEnv } from "@packages/environment/server";
+
+// Language instruction for Brazilian Portuguese
+export const LANGUAGE_INSTRUCTION = `
+## IDIOMA DE SAIDA
+Sempre responda e escreva conteudo em Portugues Brasileiro (pt-BR).
+`;
+
+// Available models (unified from both agents)
+export const MODELS = {
+   "anthropic/claude-haiku-4.5": "anthropic/claude-3-5-haiku-20241022",
+   "mistralai/mistral-small-creative":
+      "mistralai/mistral-small-3.1-24b-instruct",
+} as const;
+
+export type ModelId = keyof typeof MODELS;
+
+// OpenRouter client
+export const openrouter = createOpenRouter({
+   apiKey: serverEnv.OPENROUTER_API_KEY,
+});
+
+// Create PgVector store if configured
+const createPgVectorStore = (): PgVector | null => {
+   if (!serverEnv.PG_VECTOR_URL) return null;
+
+   return new PgVector({
+      id: "mastra-rag",
+      connectionString: serverEnv.PG_VECTOR_URL,
+   });
+};
+
+// PgVector store for RAG and memory
+export const pgVectorStore = createPgVectorStore();
+
+// Shared memory instance for agents (uses PgVector for semantic recall)
+const createSharedMemory = (): Memory | undefined => {
+   if (!pgVectorStore) return undefined;
+
+   return new Memory({
+      vector: pgVectorStore,
+   });
+};
+
+export const sharedMemory = createSharedMemory();

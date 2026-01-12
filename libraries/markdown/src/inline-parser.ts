@@ -1,15 +1,4 @@
-import type {
-   CodeSpanNode,
-   EmphasisNode,
-   HardBreakNode,
-   HtmlInlineNode,
-   ImageNode,
-   InlineNode,
-   LinkNode,
-   SoftBreakNode,
-   StrongNode,
-   TextNode,
-} from "./schemas.ts";
+import type { InlineNode } from "./schemas.ts";
 import type { Bracket, Delimiter, InlineToken } from "./types.ts";
 import {
    AUTOLINK_REGEX,
@@ -690,8 +679,7 @@ function tokensToNodes(
    // Sort matches by opener position (process inner matches first)
    matches.sort((a, b) => b.openerIdx - a.openerIdx);
 
-   // Convert tokens to nodes, applying emphasis matches
-   const nodes: InlineNode[] = [];
+   // Track bracket stack for links/images
    const bracketStack: Bracket[] = [];
 
    // Track which delimiter tokens have been used
@@ -715,7 +703,11 @@ function tokensToNodes(
    function processTokenRange(
       start: number,
       end: number,
-      emphasisStack: { char: "*" | "_"; count: number; startNodeIdx: number }[],
+      _emphasisStack: {
+         char: "*" | "_";
+         count: number;
+         startNodeIdx: number;
+      }[],
    ): InlineNode[] {
       const result: InlineNode[] = [];
       let i = start;

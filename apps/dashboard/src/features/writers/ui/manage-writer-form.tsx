@@ -34,12 +34,6 @@ type Writer = {
          name: string;
          description?: string;
       };
-      instructions?: {
-         writingGuidelines?: string;
-         audienceProfile?: string;
-         tone?: string;
-         style?: string;
-      };
    };
    profilePhotoUrl?: string | null;
 };
@@ -144,24 +138,12 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
          description: writer?.personaConfig.metadata.description ?? "",
       },
       onSubmit: async ({ value }) => {
-         const existingInstructions = writer?.personaConfig.instructions || {};
          const personaConfig = {
             metadata: {
                name: value.name,
                description: value.description || undefined,
             },
-            instructions: {
-               ...existingInstructions,
-               tone: (existingInstructions as any).tone as
-                  | "formal"
-                  | "conversational"
-                  | "professional"
-                  | "casual"
-                  | "academic"
-                  | undefined,
-               ragIntegration: true,
-            },
-         } as const;
+         };
 
          if (isEditMode && writer) {
             updateMutation.mutate({

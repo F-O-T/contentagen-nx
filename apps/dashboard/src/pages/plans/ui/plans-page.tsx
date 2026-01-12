@@ -78,16 +78,18 @@ function UpgradeBanner({
 }: {
    subscription: Subscription | null;
 }) {
-   // Don't show if already on ERP and active (not trialing)
-   const isErpActive =
-      subscription?.plan?.toLowerCase() === "erp" &&
+   // Don't show if already on PRO and active (not trialing)
+   const isProActive =
+      subscription?.plan?.toLowerCase() === PlanName.PRO &&
       subscription?.status === "active";
 
-   if (isErpActive) {
+   if (isProActive) {
       return null;
    }
 
-   const isOnBasic = subscription?.plan?.toLowerCase() === "basic";
+   const currentPlan = subscription?.plan?.toLowerCase();
+   const isOnFree = !subscription || currentPlan === PlanName.FREE;
+   const isOnLite = currentPlan === PlanName.LITE;
    const isTrialing = subscription?.status === "trialing";
    const trialDays = isTrialing
       ? getDaysRemaining(subscription?.trialEnd ?? null)
@@ -103,29 +105,38 @@ function UpgradeBanner({
          };
       }
 
-      if (isOnBasic) {
+      if (isOnLite) {
          return {
             buttonText: "Fazer upgrade",
             icon: Rocket,
             message:
-               "Desbloqueie mais recursos! Faça upgrade para o ERP e tenha acesso a automações, centros de custo e mais.",
+               "Desbloqueie o máximo potencial! Faça upgrade para o Pro e tenha acesso ao chat IA, escritor completo e automações.",
+         };
+      }
+
+      if (isOnFree) {
+         return {
+            buttonText: "Ver planos",
+            icon: Rocket,
+            message:
+               "Turbine sua criação de conteúdo! Experimente o Lite com IA ou vá direto para o Pro completo.",
          };
       }
 
       // No subscription - new user
       return {
-         buttonText: "Começar teste gratis",
+         buttonText: "Começar agora",
          icon: Gift,
          message:
-            "Comece agora! Teste o plano Basic gratis por 14 dias, sem compromisso.",
+            "Comece a criar conteúdo! O plano Free já inclui editor completo e LP Builder.",
       };
    };
 
    const { icon, message, buttonText } = getBannerContent();
 
-   const scrollToErpPlan = () => {
-      const erpCard = document.querySelector('[data-plan="erp"]');
-      erpCard?.scrollIntoView({ behavior: "smooth", block: "center" });
+   const scrollToProPlan = () => {
+      const proCard = document.querySelector(`[data-plan="${PlanName.PRO}"]`);
+      proCard?.scrollIntoView({ behavior: "smooth", block: "center" });
    };
 
    return (
@@ -137,7 +148,7 @@ function UpgradeBanner({
             </BannerTitle>
          </div>
          <div className="flex items-center gap-2 shrink-0">
-            <BannerAction onClick={scrollToErpPlan}>{buttonText}</BannerAction>
+            <BannerAction onClick={scrollToProPlan}>{buttonText}</BannerAction>
             <BannerClose />
          </div>
       </Banner>
@@ -148,10 +159,12 @@ const getIconForPlan = (planName: string) => {
    switch (planName) {
       case PlanName.FREE:
          return <User className="size-6" />;
+      case PlanName.LITE:
+         return <Zap className="size-6" />;
       case PlanName.PRO:
          return <Crown className="size-6" />;
       default:
-         return <Zap className="size-6" />;
+         return <User className="size-6" />;
    }
 };
 
@@ -188,8 +201,7 @@ function PlansPageSkeleton() {
          <div className="flex items-center justify-between">
             <Skeleton className="h-9 w-48" />
          </div>
-         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto w-full">
-            <Skeleton className="h-[450px]" />
+         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto w-full">
             <Skeleton className="h-[450px]" />
             <Skeleton className="h-[450px]" />
             <Skeleton className="h-[450px]" />
@@ -387,7 +399,7 @@ function PlansPageContent() {
             </ToggleGroup>
          </div>
 
-         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto w-full">
+         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto w-full">
             {plans.map((plan) => (
                <PlanCard
                   isAnnual={isAnnual}

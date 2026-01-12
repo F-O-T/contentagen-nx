@@ -12,10 +12,13 @@ import type {
    MarkdownDocument,
    Node,
    ParagraphNode,
+   TableCellNode,
+   TableNode,
+   TableRowNode,
    ThematicBreakNode,
 } from "./schemas.ts";
 import { generateOptionsSchema } from "./schemas.ts";
-import { encodeUrl, escapeMarkdown, repeat } from "./utils.ts";
+import { encodeUrl, repeat } from "./utils.ts";
 
 // =============================================================================
 // Default Options
@@ -184,6 +187,7 @@ function isBlockNode(node: Node): node is BlockNode {
       "blockquote",
       "list",
       "listItem",
+      "table",
    ].includes(node.type);
 }
 
@@ -225,6 +229,8 @@ function generateBlock(
          return generateList(node, opts, depth);
       case "listItem":
          return generateListItem(node, opts, depth);
+      case "table":
+         return generateTable(node, opts);
       case "linkReferenceDefinition":
          return generateLinkReferenceDefinition(node);
       default:
@@ -374,6 +380,55 @@ function generateLinkReferenceDefinition(node: {
       result += ` "${node.title}"`;
    }
    return result;
+}
+
+// =============================================================================
+// Table Generation (GFM Extension)
+// =============================================================================
+
+function generateTable(
+   node: TableNode,
+   opts: Required<GenerateOptions>,
+): string {
+   const rows: string[] = [];
+   const headerRow = node.children.find((r) => r.isHeader);
+   const bodyRows = node.children.filter((r) => !r.isHeader);
+
+   // Generate header row
+   if (headerRow) {
+      rows.push(generateTableRow(headerRow, opts));
+
+      // Generate delimiter row
+      const delimiterCells = node.align.map((align) => {
+         if (align === "left") return ":---";
+         if (align === "center") return ":---:";
+         if (align === "right") return "---:";
+         return "---";
+      });
+      rows.push("| " + delimiterCells.join(" | ") + " |");
+   }
+
+   // Generate body rows
+   for (const row of bodyRows) {
+      rows.push(generateTableRow(row, opts));
+   }
+
+   return rows.join(opts.lineEnding);
+}
+
+function generateTableRow(
+   node: TableRowNode,
+   opts: Required<GenerateOptions>,
+): string {
+   const cells = node.children.map((cell) => generateTableCell(cell, opts));
+   return "| " + cells.join(" | ") + " |";
+}
+
+function generateTableCell(
+   node: TableCellNode,
+   opts: Required<GenerateOptions>,
+): string {
+   return node.children.map((child) => generateInline(child, opts)).join("");
 }
 
 // =============================================================================
@@ -713,4 +768,104 @@ export function generateStrongString(
  */
 export function generateInlineCodeString(text: string): string {
    return generateCodeSpan(text);
+}
+
+/**
+ * Generates a GFM table string from headers, rows, and optional alignment.
+ *
+ * @param headers - Array of column header strings
+ * @param rows - 2D array of cell values
+ * @param alignments - Optional array of alignment values ('left' | 'center' | 'right')
+ * @returns The generated table markdown
+ *
+ * @example
+ * ```typescript
+ * generateTableString(
+ *   ["Name", "Age"],
+ *   [["Alice", "30"], ["Bob", "25"]]
+ * );
+ * // "| Name | Age |\n| --- | --- |\n| Alice | 30 |\n| Bob | 25 |"
+ * ```
+ */
+export function generateTableString(
+   headers: string[],
+   rows: string[][],
+   alignments?: ("left" | "center" | "right" | null)[],
+): string {
+   if (headers.length === 0) {
+      return "";
+   }
+
+   const columnCount = headers.length;
+
+   // Escape pipe characters in cell content
+   const escapeCell = (cell: string): string => {
+      return cell.replace(/\|/g, "\\|");
+   };
+
+   // Generate header row
+   const headerRow =
+      "| " + headers.map((h) => escapeCell(h)).join(" | ") + " |";
+
+   // Generate delimiter row with alignment
+   const delimiterCells = headers.map((_, i) => {
+      const align = alignments?.[i];
+      if (align === "left") return ":---";
+      if (align === "center") return ":---:";
+      if (align === "right") return "---:";
+      return "---";
+   });
+   const delimiterRow = "| " + delimiterCells.join(" | ") + " |";
+
+   // Generate body rows, padding/truncating to match column count
+   const bodyRows = rows.map((row) => {
+      const paddedRow = [...row];
+      // Pad with empty strings if row is shorter than headers
+      while (paddedRow.length < columnCount) {
+         paddedRow.push("");
+      }
+      // Truncate if row is longer than headers
+      const cells = paddedRow.slice(0, columnCount).map((c) => escapeCell(c));
+      return "| " + cells.join(" | ") + " |";
+   });
+
+   return [headerRow, delimiterRow, ...bodyRows].join("\n");
+}
+
+/**
+ * Generates a task list (checklist) string.
+ *
+ * @param items - Array of items with text and optional checked state
+ * @returns The generated task list markdown
+ *
+ * @example
+ * ```typescript
+ * generateTaskListString([
+ *   { text: "Buy groceries", checked: true },
+ *   { text: "Walk the dog", checked: false },
+ * ]);
+ * // "- [x] Buy groceries\n- [ ] Walk the dog"
+ * ```
+ */
+export function generateTaskListString(
+   items: Array<{ text: string; checked?: boolean }>,
+): string {
+   return items
+      .map((item) => `- [${item.checked ? "x" : " "}] ${item.text}`)
+      .join("\n");
+}
+
+/**
+ * Wraps text with strikethrough markers (GFM extension).
+ *
+ * @param text - The text to strike through
+ * @returns The strikethrough text
+ *
+ * @example
+ * ```typescript
+ * generateStrikethroughString("deleted"); // "~~deleted~~"
+ * ```
+ */
+export function generateStrikethroughString(text: string): string {
+   return `~~${text}~~`;
 }

@@ -4,8 +4,18 @@ import {
    calculateConfidence,
    type FIMStopReason,
 } from "@packages/agents/mastra/utils/fim-confidence";
+import {
+   captureFIMGenerated,
+   type LLMCaptureContext,
+} from "@packages/posthog/llm/server";
+import type {
+   FIMArticleContext,
+   FIMTriggerType,
+} from "@packages/posthog/llm/types";
 import { Elysia, t } from "elysia";
 import { auth } from "../integrations/auth";
+import { posthog } from "../integrations/posthog";
+import { Feature, requireFeatureAccess } from "../utils/feature-gate";
 
 /**
  * Detect article context based on cursor position
@@ -81,6 +91,10 @@ export const agentFIMRoutes = new Elysia({ prefix: "/api/agent/fim" }).post(
       if (!session) {
          throw new Error("Unauthorized");
       }
+
+      // Check feature access (FIM requires LITE plan or higher)
+      const organizationId = session.session.activeOrganizationId;
+      await requireFeatureAccess(Feature.FIM, organizationId, request.headers);
 
       const {
          prefix,
@@ -162,6 +176,27 @@ export const agentFIMRoutes = new Elysia({ prefix: "/api/agent/fim" }).post(
             latencyMs: Date.now() - startTime,
             stopReason,
             triggerType,
+         });
+
+         // Capture LLM analytics event
+         const captureCtx: LLMCaptureContext = {
+            posthog,
+            userId: session.user.id,
+            organizationId: organizationId ?? undefined,
+            hasConsent: session.user.telemetryConsent ?? true,
+         };
+
+         captureFIMGenerated(captureCtx, {
+            triggerType: triggerType as FIMTriggerType,
+            articleContext: articleContext as FIMArticleContext,
+            prefixLength: prefix.length,
+            suffixLength: suffix?.length ?? 0,
+            completionLength: completion.length,
+            latencyMs: Date.now() - startTime,
+            confidence: confidence.score,
+            shouldShow: confidence.shouldShow,
+            factors: confidence.factors,
+            stopReason,
          });
 
          // Final completion message with confidence scoring

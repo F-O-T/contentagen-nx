@@ -11,6 +11,8 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { Plus } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import { UpgradePrompt } from "@/features/upgrade/ui/upgrade-prompt";
+import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 import { useSheet } from "@/hooks/use-sheet";
 import { ApiKeyList } from "./api-key-list";
 import { CreateApiKeyForm } from "./create-api-key-form";
@@ -63,6 +65,7 @@ function ApiKeyPageSkeleton() {
 
 function ApiKeyPageContent() {
    const { openSheet } = useSheet();
+   const { hasFeature } = useFeatureAccess();
 
    const handleCreateKey = () => {
       openSheet({
@@ -75,6 +78,17 @@ function ApiKeyPageContent() {
          children: <EditApiKeyForm currentName={key.name} keyId={key.id} />,
       });
    };
+
+   // Show upgrade prompt if user doesn't have API access
+   if (!hasFeature(Feature.API_ACCESS)) {
+      return (
+         <UpgradePrompt
+            description="Crie e gerencie chaves de API para integrar o Contentta com seus sistemas e aplicações."
+            feature={Feature.API_ACCESS}
+            title="Acesso à API"
+         />
+      );
+   }
 
    return (
       <Card>

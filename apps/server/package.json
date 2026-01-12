@@ -10,7 +10,6 @@
       "@packages/environment": "workspace:*",
       "@packages/files": "workspace:*",
       "@packages/posthog": "workspace:*",
-      "@packages/rag": "workspace:*",
       "@packages/transactional": "workspace:*",
       "@packages/utils": "workspace:*",
       "@trpc/server": "catalog:trpc",

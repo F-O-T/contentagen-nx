@@ -6,33 +6,11 @@ const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 
-// Available models for FIM
-const FIM_MODELS = {
-   "x-ai/grok-4.1-fast": "x-ai/grok-4.1-fast",
-   "mistralai/mistral-small-creative": "mistralai/mistral-small-creative",
-} as const;
-
-type FIMModelId = keyof typeof FIM_MODELS;
-
-/**
- * FIM (Fill-In-Middle) Agent
- *
- * A lightweight, fast agent for text completion optimized for prose writing.
- * Supports model selection via requestContext.
- * No tools - pure text generation.
- */
 export const fimAgent = new Agent({
    id: "fim-agent",
    name: "FIM Completion Agent",
 
-   // Dynamic model selection from requestContext
-   model: ({ requestContext }) => {
-      const modelId =
-         (requestContext?.get("model") as FIMModelId) || "x-ai/grok-4.1-fast";
-      const model = FIM_MODELS[modelId] || FIM_MODELS["x-ai/grok-4.1-fast"];
-      return openrouter(model);
-   },
-
+   model: openrouter("mistralai/mistral-small-creative"),
    instructions: () => `
 You are an expert writing assistant. Your ONLY job is to continue text naturally and seamlessly.
 

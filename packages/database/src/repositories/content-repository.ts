@@ -42,15 +42,25 @@ export async function getContentById(
 export async function getContentBySlug(
    dbClient: DatabaseInstance,
    slug: string,
-   agentId: string,
+   organizationId: string,
+   agentId?: string,
 ) {
    try {
       const result = await dbClient.query.content.findFirst({
-         where: (content, { eq, and }) =>
-            and(
-               eq(content.agentId, agentId),
-               sql`${content.meta}->>'slug' = ${slug}`,
-            ),
+         where: (content, { eq, and, isNull }) => {
+            const slugCondition = sql`${content.meta}->>'slug' = ${slug}`;
+            const orgCondition = eq(content.organizationId, organizationId);
+
+            if (agentId) {
+               return and(
+                  orgCondition,
+                  eq(content.agentId, agentId),
+                  slugCondition,
+               );
+            }
+            // For manual content (no agent)
+            return and(orgCondition, isNull(content.agentId), slugCondition);
+         },
       });
       return result;
    } catch (err) {
@@ -112,7 +122,9 @@ export async function getContentCountsByAgentIds(
 
       const countMap = new Map<string, number>();
       for (const row of result) {
-         countMap.set(row.agentId, Number(row.count));
+         if (row.agentId) {
+            countMap.set(row.agentId, Number(row.count));
+         }
       }
 
       // Fill in zeros for agents with no content
@@ -227,7 +239,7 @@ export async function publishContent(
    try {
       const result = await dbClient
          .update(content)
-         .set({ status: "published" })
+         .set({ status: "published", shareStatus: "shared" })
          .where(eq(content.id, contentId))
          .returning();
 
@@ -262,6 +274,74 @@ export async function archiveContent(
       propagateError(err);
       throw AppError.database(
          `Failed to archive content: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function markContentAsDraft(
+   dbClient: DatabaseInstance,
+   contentId: string,
+) {
+   try {
+      const result = await dbClient
+         .update(content)
+         .set({ status: "draft" })
+         .where(eq(content.id, contentId))
+         .returning();
+
+      if (!result.length) {
+         throw AppError.database("Content not found");
+      }
+      return result[0];
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to mark content as draft: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function toggleContentShare(
+   dbClient: DatabaseInstance,
+   contentId: string,
+   shared: boolean,
+) {
+   try {
+      const result = await dbClient
+         .update(content)
+         .set({ shareStatus: shared ? "shared" : "private" })
+         .where(eq(content.id, contentId))
+         .returning();
+
+      if (!result.length) {
+         throw AppError.database("Content not found");
+      }
+      return result[0];
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to toggle content share: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function getSharedContentById(
+   dbClient: DatabaseInstance,
+   contentId: string,
+) {
+   try {
+      const result = await dbClient.query.content.findFirst({
+         where: (content, { eq, and }) =>
+            and(eq(content.id, contentId), eq(content.shareStatus, "shared")),
+         with: {
+            agent: true,
+         },
+      });
+      return result;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to get shared content: ${(err as Error).message}`,
       );
    }
 }
@@ -336,6 +416,81 @@ export async function listContents(
       propagateError(err);
       throw AppError.database(
          `Failed to list contents: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function listContentsByOrganization(
+   dbClient: DatabaseInstance,
+   organizationId: string,
+   options?: {
+      statuses?: ContentStatus[];
+      agentId?: string | null; // null = manual content only, undefined = all
+      limit?: number;
+      offset?: number;
+   },
+) {
+   try {
+      const conditions = [eq(content.organizationId, organizationId)];
+
+      if (options?.statuses && options.statuses.length > 0) {
+         conditions.push(inArray(content.status, options.statuses));
+      }
+
+      if (options?.agentId === null) {
+         // Manual content only (no agent)
+         conditions.push(sql`${content.agentId} IS NULL`);
+      } else if (options?.agentId) {
+         // Specific agent
+         conditions.push(eq(content.agentId, options.agentId));
+      }
+      // If agentId is undefined, get all content (both manual and agent-based)
+
+      const query = dbClient
+         .select()
+         .from(content)
+         .where(and(...conditions))
+         .orderBy(desc(content.createdAt));
+
+      if (options?.limit) {
+         query.limit(options.limit);
+      }
+      if (options?.offset) {
+         query.offset(options.offset);
+      }
+
+      const result = await query;
+      return result;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to list contents by organization: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function countContentsByOrganization(
+   dbClient: DatabaseInstance,
+   organizationId: string,
+   statuses?: ContentStatus[],
+) {
+   try {
+      const conditions = [eq(content.organizationId, organizationId)];
+
+      if (statuses && statuses.length > 0) {
+         conditions.push(inArray(content.status, statuses));
+      }
+
+      const result = await dbClient
+         .select({ count: count() })
+         .from(content)
+         .where(and(...conditions));
+
+      return result[0]?.count ?? 0;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to count contents: ${(err as Error).message}`,
       );
    }
 }

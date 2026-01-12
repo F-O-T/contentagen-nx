@@ -1,5 +1,4 @@
-import { LogoIcon } from "@packages/ui/blocks/logo";
-import { Play } from "lucide-react";
+import { MessageCircle, Play } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type {
    ActivePlan,
@@ -56,10 +55,12 @@ function ExecutionSeparator({ message }: { message: ChatMessageType }) {
 
 function ChatMessageItem({
    message,
+   isStreaming = false,
    onAcceptEdit,
    onExecutePlan,
 }: {
    message: ChatMessageType;
+   isStreaming?: boolean;
    onAcceptEdit?: (
       suggestion: NonNullable<ChatMessageType["editSuggestion"]>,
    ) => void;
@@ -83,8 +84,9 @@ function ChatMessageItem({
    return (
       <>
          <ChatMessage message={message} />
-         {/* Show tool calls below the message if present (from history) */}
-         {message.toolCalls && message.toolCalls.length > 0 && (
+         {/* Only show tool calls from messages when NOT streaming */}
+         {/* During streaming, tool calls are shown from streamingSteps instead */}
+         {!isStreaming && message.toolCalls && message.toolCalls.length > 0 && (
             <div className="py-2 ml-10">
                <ChatToolCallList toolCalls={message.toolCalls} />
             </div>
@@ -116,7 +118,7 @@ export function ChatMessageList({
       return (
          <div className="flex h-full flex-col items-center justify-center px-6 text-center">
             <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
-               <LogoIcon className="size-6" />
+               <MessageCircle className="size-6" />
             </div>
             <p className="text-sm font-medium text-foreground">
                Start a conversation
@@ -136,6 +138,7 @@ export function ChatMessageList({
       >
          {messages.map((message) => (
             <ChatMessageItem
+               isStreaming={isStreaming}
                key={message.id}
                message={message}
                onAcceptEdit={onAcceptEdit}

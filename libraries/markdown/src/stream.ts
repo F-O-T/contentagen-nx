@@ -10,12 +10,7 @@ import {
    type StreamOptions,
    streamOptionsSchema,
 } from "./schemas.ts";
-import {
-   decodeBuffer,
-   detectLineEnding,
-   normalizeLineEndings,
-   splitLines,
-} from "./utils.ts";
+import { decodeBuffer, normalizeLineEndings } from "./utils.ts";
 
 // =============================================================================
 // Streaming Parser State
@@ -183,27 +178,29 @@ function extractNextBlock(state: StreamingParserState): {
    let inFencedCode = false;
    let fenceChar = "";
    let fenceLength = 0;
+   let closingFenceRegex: RegExp | null = null;
 
    for (let i = 0; i < state.lineBuffer.length; i++) {
       const line = state.lineBuffer[i] ?? "";
+      const trimmedLine = line.trimStart();
 
       // Track fenced code blocks
-      const fenceMatch = /^(`{3,}|~{3,})/.exec(line.trimStart());
+      const fenceMatch = /^(`{3,}|~{3,})/.exec(trimmedLine);
       if (fenceMatch) {
          if (!inFencedCode) {
             inFencedCode = true;
             fenceChar = fenceMatch[1]?.[0] ?? "`";
             fenceLength = fenceMatch[1]?.length ?? 3;
-         } else {
-            // Check for closing fence
-            const closingMatch = new RegExp(
+            // Pre-compile the closing fence regex once
+            closingFenceRegex = new RegExp(
                `^${fenceChar}{${fenceLength},}\\s*$`,
-            ).test(line.trimStart());
-            if (closingMatch) {
-               inFencedCode = false;
-               endIndex = i + 1;
-               break;
-            }
+            );
+         } else if (closingFenceRegex?.test(trimmedLine)) {
+            // Check for closing fence
+            inFencedCode = false;
+            closingFenceRegex = null;
+            endIndex = i + 1;
+            break;
          }
          continue;
       }
@@ -211,7 +208,7 @@ function extractNextBlock(state: StreamingParserState): {
       if (inFencedCode) continue;
 
       // Blank line detection
-      if (line.trim() === "") {
+      if (trimmedLine === "") {
          blankCount++;
          if (blankCount >= 2 && i > 0) {
             endIndex = i;

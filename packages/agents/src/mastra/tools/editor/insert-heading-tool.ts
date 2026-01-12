@@ -1,3 +1,7 @@
+import {
+   generateHeadingString,
+   normalizeMarkdownEmphasis,
+} from "@f-o-t/markdown";
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
@@ -25,14 +29,28 @@ export const insertHeadingTool = createTool({
    }),
    outputSchema: z.object({
       success: z.boolean(),
+      markdown: z.string(),
       level: z.string(),
       text: z.string(),
    }),
    execute: async (inputData) => {
+      // Normalize markdown to fix LLM escaping issues (e.g., \*\* → **)
+      const normalizedText = normalizeMarkdownEmphasis(inputData.text);
+
+      const levelNum = Number.parseInt(inputData.level.replace("h", "")) as
+         | 1
+         | 2
+         | 3
+         | 4
+         | 5
+         | 6;
+      const markdown = generateHeadingString(levelNum, normalizedText);
+
       return {
          success: true,
+         markdown,
          level: inputData.level,
-         text: inputData.text,
+         text: normalizedText,
       };
    },
 });

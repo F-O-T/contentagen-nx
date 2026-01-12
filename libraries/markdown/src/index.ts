@@ -3,15 +3,7 @@
 // =============================================================================
 
 export {
-   // Convenience functions
-   countWords,
-   extractText,
-   getCodeBlocks,
-   getHeadings,
-   getImages,
-   getLinks,
    isValidMarkdown,
-   // Main parser functions
    parse,
    parseBuffer,
    parseBufferOrThrow,
@@ -24,10 +16,8 @@ export {
 // =============================================================================
 
 export {
-   // Main generator functions
    createGenerator,
    generate,
-   // Convenience string generators
    generateBlockquoteString,
    generateCodeBlockString,
    generateEmphasisString,
@@ -37,8 +27,29 @@ export {
    generateLinkString,
    generateListString,
    generateNode,
+   generateStrikethroughString,
    generateStrongString,
+   generateTableString,
+   generateTaskListString,
 } from "./generator.ts";
+
+// =============================================================================
+// HTML Renderer Exports
+// =============================================================================
+
+export type { HtmlRenderOptions } from "./html-renderer.ts";
+export { renderNodeToHtml, renderToHtml } from "./html-renderer.ts";
+
+// =============================================================================
+// HTML to Markdown Parser Exports
+// =============================================================================
+
+export type { HtmlToMarkdownOptions } from "./html-parser.ts";
+export {
+   htmlAstToMarkdownAst,
+   htmlToMarkdown,
+   parseHtml,
+} from "./html-parser.ts";
 
 // =============================================================================
 // Streaming Exports
@@ -57,16 +68,13 @@ export {
 // =============================================================================
 
 export {
-   // Node schemas
    blockNodeSchema,
    blockquoteNodeSchema,
    codeBlockNodeSchema,
    codeSpanNodeSchema,
-   // Constants
    DEFAULT_MAX_BUFFER_SIZE,
    documentNodeSchema,
    emphasisNodeSchema,
-   // Option schemas
    generateOptionsSchema,
    hardBreakNodeSchema,
    headingNodeSchema,
@@ -85,6 +93,9 @@ export {
    softBreakNodeSchema,
    streamOptionsSchema,
    strongNodeSchema,
+   tableCellNodeSchema,
+   tableNodeSchema,
+   tableRowNodeSchema,
    textNodeSchema,
    thematicBreakNodeSchema,
 } from "./schemas.ts";
@@ -94,20 +105,15 @@ export {
 // =============================================================================
 
 export type {
-   // Batch processing
    BatchMarkdownFileInput,
    BatchMarkdownStreamEvent,
    BatchParsedMarkdownFile,
-   // Block node types
    BlockNode,
    BlockquoteNode,
    CodeBlockNode,
-   // Inline node types
    CodeSpanNode,
-   // Document types
    DocumentNode,
    EmphasisNode,
-   // Options
    GenerateOptions,
    HardBreakNode,
    HeadingNode,
@@ -119,7 +125,6 @@ export type {
    LinkReferenceDefinition,
    ListItemNode,
    ListNode,
-   // Union types
    LiteralNode,
    MarkdownDocument,
    Node,
@@ -128,109 +133,24 @@ export type {
    ParseOptions,
    Position,
    SoftBreakNode,
-   // Streaming
    StreamEvent,
    StreamOptions,
    StrongNode,
+   TableCellNode,
+   TableNode,
+   TableRowNode,
    TextNode,
    ThematicBreakNode,
 } from "./schemas.ts";
 
-export type {
-   // Internal types (useful for custom parsers)
-   BlockContext,
-   BlockParseResult,
-   BlockParserState,
-   Bracket,
-   Delimiter,
-   EncodingInfo,
-   InlineParserState,
-   InlineToken,
-   LineInfo,
-   OpenBlock,
-   ParseResult,
-} from "./types.ts";
+export type { ParseResult } from "./types.ts";
 
 // =============================================================================
 // Utility Exports
 // =============================================================================
 
 export {
-   // Pattern matching
-   ATX_HEADING_REGEX,
-   AUTOLINK_REGEX,
-   BLOCKQUOTE_REGEX,
-   COLLAPSED_LINK_REGEX,
-   // HTML block detection
-   closesHtmlBlock,
-   // Line utilities
-   countIndent,
-   // Encoding utilities
-   decodeBuffer,
-   // Escaping utilities
-   decodeHtmlEntities,
-   decodeUrl,
-   detectEncoding,
-   detectLineEnding,
-   EMAIL_AUTOLINK_REGEX,
-   encodeHtmlEntities,
-   encodeUrl,
-   escapeMarkdown,
-   FENCED_CODE_OPEN_REGEX,
-   getHtmlBlockType,
-   HTML_BLOCK_1_CLOSE,
-   HTML_BLOCK_1_OPEN,
-   HTML_BLOCK_2_CLOSE,
-   HTML_BLOCK_2_OPEN,
-   HTML_BLOCK_3_CLOSE,
-   HTML_BLOCK_3_OPEN,
-   HTML_BLOCK_4_CLOSE,
-   HTML_BLOCK_4_OPEN,
-   HTML_BLOCK_5_CLOSE,
-   HTML_BLOCK_5_OPEN,
-   HTML_BLOCK_6_OPEN,
-   HTML_BLOCK_7_OPEN,
-   INLINE_LINK_REGEX,
-   isBlankLine,
-   // Validation utilities
-   isValidEmail,
-   isValidUrl,
-   LINK_REFERENCE_REGEX,
-   normalizeLabel,
+   normalizeEscapedNewlines,
    normalizeLineEndings,
-   ORDERED_LIST_REGEX,
-   // String utilities
-   padEnd,
-   REFERENCE_LINK_REGEX,
-   removeIndent,
-   repeat,
-   SETEXT_HEADING_REGEX,
-   SHORTCUT_LINK_REGEX,
-   splitLines,
-   THEMATIC_BREAK_REGEX,
-   UNORDERED_LIST_REGEX,
-   unescapeMarkdown,
+   normalizeMarkdownEmphasis,
 } from "./utils.ts";
-
-// =============================================================================
-// Block Parser Exports (for advanced use)
-// =============================================================================
-
-export {
-   createBlockContext,
-   isAtxHeading,
-   isBlockquoteStart,
-   isFencedCodeStart,
-   isIndentedCode,
-   isLinkReferenceDefinition,
-   isListItemStart,
-   isSetextUnderline,
-   isThematicBreak,
-   parseBlocks,
-} from "./block-parser.ts";
-
-// =============================================================================
-// Inline Parser Exports (for advanced use)
-// =============================================================================
-
-export { parseInline } from "./inline-parser.ts";

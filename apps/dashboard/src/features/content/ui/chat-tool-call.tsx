@@ -1,6 +1,7 @@
 import { cn } from "@packages/ui/lib/utils";
 import {
    BarChart,
+   BookOpen,
    CheckCircle2,
    ChevronDown,
    ChevronUp,
@@ -20,6 +21,7 @@ import {
    Search,
    Table,
    Tag,
+   Target,
    Trash2,
    Type,
    Wrench,
@@ -27,6 +29,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import type { ToolCall, ToolCallStatus } from "../context/chat-context";
+import { SeoScoreDisplay } from "./seo-score-display";
 
 interface ChatToolCallProps {
    toolCall: ToolCall;
@@ -48,6 +51,10 @@ function getToolIcon(toolName: string) {
       replaceText: <Replace className="size-3.5" />,
       deleteText: <Trash2 className="size-3.5" />,
       formatText: <Paintbrush className="size-3.5" />,
+      // SEO optimization tools
+      injectKeywords: <Target className="size-3.5" />,
+      addInternalLinks: <Link2 className="size-3.5" />,
+      improveReadability: <BookOpen className="size-3.5" />,
       // Frontmatter tools
       editTitle: <FileEdit className="size-3.5" />,
       editDescription: <FileText className="size-3.5" />,
@@ -82,6 +89,10 @@ function getToolLabel(toolName: string): string {
       replaceText: "Replace Text",
       deleteText: "Delete Text",
       formatText: "Format Text",
+      // SEO optimization tools
+      injectKeywords: "Inject Keywords",
+      addInternalLinks: "Add Internal Links",
+      improveReadability: "Improve Readability",
       // Frontmatter tools
       editTitle: "Edit Title",
       editDescription: "Edit Description",
@@ -195,6 +206,216 @@ function formatResult(result: unknown): string {
    return String(result);
 }
 
+/**
+ * Render specialized result display for certain tools
+ */
+function renderToolResult(
+   toolName: string,
+   result: unknown,
+): React.ReactNode | null {
+   if (!result || typeof result !== "object") return null;
+
+   // SEO Score tool - use specialized display
+   if (toolName === "seoScore") {
+      const seoResult = result as {
+         score?: number;
+         issues?: Array<{
+            type: string;
+            severity: "error" | "warning" | "info";
+            message: string;
+            suggestion: string;
+         }>;
+         recommendations?: string[];
+         metrics?: {
+            wordCount: number;
+            headingCount: number;
+            paragraphCount: number;
+            linkCount: number;
+            imageCount: number;
+            hasQuickAnswer: boolean;
+            keywordInFirstParagraph: boolean;
+            keywordDensity?: Record<string, number>;
+         };
+      };
+
+      if (seoResult.score !== undefined && seoResult.metrics) {
+         return (
+            <SeoScoreDisplay
+               className="mt-2"
+               issues={seoResult.issues || []}
+               metrics={seoResult.metrics}
+               recommendations={seoResult.recommendations || []}
+               score={seoResult.score}
+            />
+         );
+      }
+   }
+
+   // Inject Keywords tool - show injection summary
+   if (toolName === "injectKeywords") {
+      const injectResult = result as {
+         success?: boolean;
+         keywordsInjected?: Array<{
+            keyword: string;
+            previousCount: number;
+            newCount: number;
+            locations: string[];
+         }>;
+         densityBefore?: number;
+         densityAfter?: number;
+      };
+
+      if (injectResult.keywordsInjected) {
+         return (
+            <div className="mt-2 space-y-2">
+               <div className="flex items-center gap-2 text-xs">
+                  <span className="font-medium">Keyword Injection Results</span>
+                  {injectResult.success && (
+                     <span className="text-green-500 flex items-center gap-1">
+                        <CheckCircle2 className="size-3" />
+                        Success
+                     </span>
+                  )}
+               </div>
+               <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="p-2 rounded bg-muted/50">
+                     <p className="text-muted-foreground">Density Before</p>
+                     <p className="font-medium">
+                        {injectResult.densityBefore?.toFixed(2)}%
+                     </p>
+                  </div>
+                  <div className="p-2 rounded bg-green-500/10">
+                     <p className="text-muted-foreground">Density After</p>
+                     <p className="font-medium text-green-600">
+                        {injectResult.densityAfter?.toFixed(2)}%
+                     </p>
+                  </div>
+               </div>
+               <div className="space-y-1">
+                  {injectResult.keywordsInjected.map((kw, i) => (
+                     <div
+                        className="flex items-center justify-between text-xs p-1.5 rounded bg-muted/30"
+                        key={`kw-${i + 1}`}
+                     >
+                        <span className="font-medium">{kw.keyword}</span>
+                        <span className="text-muted-foreground">
+                           {kw.previousCount} → {kw.newCount}
+                        </span>
+                     </div>
+                  ))}
+               </div>
+            </div>
+         );
+      }
+   }
+
+   // Add Internal Links tool - show links added
+   if (toolName === "addInternalLinks") {
+      const linkResult = result as {
+         success?: boolean;
+         linksAdded?: Array<{
+            title: string;
+            slug: string;
+            insertedAt: string;
+         }>;
+         message?: string;
+      };
+
+      if (linkResult.linksAdded) {
+         return (
+            <div className="mt-2 space-y-2">
+               <div className="flex items-center gap-2 text-xs">
+                  <span className="font-medium">
+                     Links Added ({linkResult.linksAdded.length})
+                  </span>
+               </div>
+               <div className="space-y-1">
+                  {linkResult.linksAdded.map((link, i) => (
+                     <div
+                        className="flex items-start gap-2 text-xs p-1.5 rounded bg-muted/30"
+                        key={`link-${i + 1}`}
+                     >
+                        <Link2 className="size-3 shrink-0 mt-0.5 text-primary" />
+                        <div>
+                           <p className="font-medium">{link.title}</p>
+                           <p className="text-muted-foreground text-[10px]">
+                              {link.insertedAt}
+                           </p>
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            </div>
+         );
+      }
+   }
+
+   // Improve Readability tool - show changes
+   if (toolName === "improveReadability") {
+      const readResult = result as {
+         success?: boolean;
+         originalScore?: number;
+         improvedScore?: number;
+         changesApplied?: string[];
+         stats?: {
+            sentencesSplit: number;
+            wordsSimplified: number;
+            paragraphsSplit: number;
+         };
+      };
+
+      if (readResult.stats) {
+         return (
+            <div className="mt-2 space-y-2">
+               <div className="flex items-center gap-2 text-xs">
+                  <span className="font-medium">Readability Improvements</span>
+               </div>
+               <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="p-2 rounded bg-muted/50">
+                     <p className="text-muted-foreground">Original Score</p>
+                     <p className="font-medium">{readResult.originalScore}</p>
+                  </div>
+                  <div className="p-2 rounded bg-green-500/10">
+                     <p className="text-muted-foreground">Improved Score</p>
+                     <p className="font-medium text-green-600">
+                        {readResult.improvedScore}
+                     </p>
+                  </div>
+               </div>
+               <div className="grid grid-cols-3 gap-2 text-xs text-center">
+                  <div className="p-1.5 rounded bg-muted/30">
+                     <p className="font-medium">
+                        {readResult.stats.sentencesSplit}
+                     </p>
+                     <p className="text-[10px] text-muted-foreground">
+                        Sentences Split
+                     </p>
+                  </div>
+                  <div className="p-1.5 rounded bg-muted/30">
+                     <p className="font-medium">
+                        {readResult.stats.wordsSimplified}
+                     </p>
+                     <p className="text-[10px] text-muted-foreground">
+                        Words Simplified
+                     </p>
+                  </div>
+                  <div className="p-1.5 rounded bg-muted/30">
+                     <p className="font-medium">
+                        {readResult.stats.paragraphsSplit}
+                     </p>
+                     <p className="text-[10px] text-muted-foreground">
+                        Paragraphs Split
+                     </p>
+                  </div>
+               </div>
+            </div>
+         );
+      }
+   }
+
+   return null;
+}
+
 export function ChatToolCall({
    toolCall,
    defaultExpanded = false,
@@ -297,9 +518,12 @@ export function ChatToolCall({
                      <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
                         Result
                      </div>
-                     <pre className="bg-green-500/5 border border-green-500/20 rounded p-2 text-[11px] overflow-x-auto whitespace-pre-wrap max-h-32">
-                        {formatResult(toolCall.result)}
-                     </pre>
+                     {/* Check for specialized rendering first */}
+                     {renderToolResult(toolCall.name, toolCall.result) || (
+                        <pre className="bg-green-500/5 border border-green-500/20 rounded p-2 text-[11px] overflow-x-auto whitespace-pre-wrap max-h-32">
+                           {formatResult(toolCall.result)}
+                        </pre>
+                     )}
                   </div>
                ) : null}
 

@@ -5,7 +5,7 @@ import {
    SelectTrigger,
    SelectValue,
 } from "@packages/ui/components/select";
-import { Cpu, Sparkles, Zap } from "lucide-react";
+import { Cpu, Sparkles } from "lucide-react";
 import {
    type ChatModel,
    setChatModel,
@@ -14,19 +14,13 @@ import {
 
 const models = [
    {
-      value: "grok-4.1-fast" as const,
-      label: "Grok 4.1 Fast",
-      icon: Zap,
+      value: "anthropic/claude-haiku-4.5" as const,
+      label: "Claude Haiku 4.5",
+      icon: Cpu,
       description: "Fast & capable",
    },
    {
-      value: "glm-4.7" as const,
-      label: "GLM 4.7",
-      icon: Cpu,
-      description: "Balanced performance",
-   },
-   {
-      value: "mistral-small-creative" as const,
+      value: "mistralai/mistral-small-creative" as const,
       label: "Mistral Small",
       icon: Sparkles,
       description: "Creative writing",

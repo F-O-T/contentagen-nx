@@ -5,11 +5,13 @@ import type {
    CodeBlockNode,
    HeadingNode,
    HtmlBlockNode,
-   LinkReferenceDefinition,
    ListItemNode,
    ListNode,
    ParagraphNode,
    Position,
+   TableCellNode,
+   TableNode,
+   TableRowNode,
    ThematicBreakNode,
 } from "./schemas.ts";
 import type { BlockContext, LineInfo } from "./types.ts";
@@ -56,32 +58,16 @@ export function createBlockContext(): BlockContext {
 
 /**
  * Creates a position object from line info.
+ * Uses pre-calculated line offsets for O(1) lookup instead of O(n) recalculation.
  */
-function createPosition(
-   startLine: number,
-   startColumn: number,
-   endLine: number,
-   endColumn: number,
-   source: string,
-   startOffset: number,
-): Position {
-   // Calculate end offset based on lines
-   let endOffset = startOffset;
-   const lines = source.split("\n");
-   for (let i = startLine - 1; i < endLine - 1 && i < lines.length; i++) {
-      endOffset += (lines[i]?.length ?? 0) + 1; // +1 for newline
-   }
-   if (endLine - 1 < lines.length) {
-      endOffset += endColumn - 1;
-   }
-
+function createPosition(startLine: LineInfo, endLine: LineInfo): Position {
    return {
-      startLine,
-      startColumn,
-      endLine,
-      endColumn,
-      startOffset,
-      endOffset,
+      startLine: startLine.lineNumber,
+      startColumn: 1,
+      endLine: endLine.lineNumber,
+      endColumn: endLine.raw.length + 1,
+      startOffset: startLine.offset,
+      endOffset: endLine.offset + endLine.raw.length,
    };
 }
 
@@ -182,8 +168,84 @@ export function isLinkReferenceDefinition(
 }
 
 // =============================================================================
+// Table Detection (GFM Extension)
+// =============================================================================
+
+/**
+ * Regex for table delimiter row: | --- | :---: | ---: |
+ */
+const TABLE_DELIMITER_REGEX = /^\|?\s*:?-+:?\s*(?:\|\s*:?-+:?\s*)*\|?\s*$/;
+
+/**
+ * Checks if a line looks like a table row (contains pipes).
+ */
+export function isTableRow(line: string): boolean {
+   const trimmed = line.trim();
+   return trimmed.includes("|");
+}
+
+/**
+ * Checks if a line is a table delimiter row.
+ */
+export function isTableDelimiter(line: string): boolean {
+   return TABLE_DELIMITER_REGEX.test(line.trim());
+}
+
+/**
+ * Parses alignment from a delimiter cell.
+ */
+function parseAlignment(cell: string): "left" | "center" | "right" | null {
+   const trimmed = cell.trim();
+   const hasLeft = trimmed.startsWith(":");
+   const hasRight = trimmed.endsWith(":");
+
+   if (hasLeft && hasRight) return "center";
+   if (hasRight) return "right";
+   if (hasLeft) return "left";
+   return null;
+}
+
+/**
+ * Splits a table row into cells.
+ */
+function splitTableRow(line: string): string[] {
+   // Remove leading/trailing pipes if present
+   let content = line.trim();
+   if (content.startsWith("|")) content = content.slice(1);
+   if (content.endsWith("|")) content = content.slice(0, -1);
+
+   // Split by pipe, handling escaped pipes
+   const cells: string[] = [];
+   let current = "";
+   let escaped = false;
+
+   for (const char of content) {
+      if (escaped) {
+         current += char;
+         escaped = false;
+      } else if (char === "\\") {
+         escaped = true;
+         current += char;
+      } else if (char === "|") {
+         cells.push(current.trim());
+         current = "";
+      } else {
+         current += char;
+      }
+   }
+   cells.push(current.trim());
+
+   return cells;
+}
+
+// =============================================================================
 // Block Parsing Functions
 // =============================================================================
+
+/**
+ * Maximum nesting depth to prevent stack overflow on pathological input.
+ */
+const MAX_NESTING_DEPTH = 100;
 
 /**
  * Pre-scans content to collect all link reference definitions.
@@ -213,10 +275,16 @@ export function parseBlocks(
    content: string,
    context?: BlockContext,
    includePositions = true,
+   depth = 0,
 ): {
    blocks: BlockNode[];
    references: Map<string, { url: string; title?: string }>;
 } {
+   // Prevent stack overflow on deeply nested content
+   if (depth > MAX_NESTING_DEPTH) {
+      return { blocks: [], references: context?.references ?? new Map() };
+   }
+
    const ctx = context ?? createBlockContext();
    const lines = splitLines(content);
 
@@ -228,7 +296,7 @@ export function parseBlocks(
    let i = 0;
 
    while (i < lines.length) {
-      const result = parseBlock(lines, i, ctx, content, includePositions);
+      const result = parseBlock(lines, i, ctx, includePositions, depth);
       if (result.block) {
          blocks.push(result.block);
       }
@@ -245,8 +313,8 @@ function parseBlock(
    lines: LineInfo[],
    startIndex: number,
    context: BlockContext,
-   source: string,
    includePositions: boolean,
+   depth: number,
 ): { block: BlockNode | null; consumed: number } {
    const line = lines[startIndex];
    if (!line) {
@@ -262,13 +330,13 @@ function parseBlock(
 
    // Check for thematic break
    if (isThematicBreak(content)) {
-      return parseThematicBreak(line, includePositions, source);
+      return parseThematicBreak(line, includePositions);
    }
 
    // Check for ATX heading
    const atxMatch = isAtxHeading(content);
    if (atxMatch) {
-      return parseAtxHeading(line, atxMatch, context, includePositions, source);
+      return parseAtxHeading(line, atxMatch, context, includePositions);
    }
 
    // Check for fenced code block
@@ -279,20 +347,13 @@ function parseBlock(
          startIndex,
          fenceMatch,
          includePositions,
-         source,
       );
    }
 
    // Check for HTML block
    const htmlType = getHtmlBlockType(content);
    if (htmlType > 0 && line.indent < 4) {
-      return parseHtmlBlock(
-         lines,
-         startIndex,
-         htmlType,
-         includePositions,
-         source,
-      );
+      return parseHtmlBlock(lines, startIndex, htmlType, includePositions);
    }
 
    // Check for blockquote
@@ -302,7 +363,7 @@ function parseBlock(
          startIndex,
          context,
          includePositions,
-         source,
+         depth,
       );
    }
 
@@ -315,18 +376,26 @@ function parseBlock(
          listMatch,
          context,
          includePositions,
-         source,
+         depth,
       );
    }
 
    // Check for indented code block (must come after list check)
    if (line.indent >= 4 && !context.inBlockquote) {
-      return parseIndentedCodeBlock(
+      return parseIndentedCodeBlock(lines, startIndex, includePositions);
+   }
+
+   // Check for GFM table (before link reference and paragraph)
+   if (isTableRow(line.content)) {
+      const tableResult = parseTable(
          lines,
          startIndex,
+         context,
          includePositions,
-         source,
       );
+      if (tableResult.block) {
+         return tableResult;
+      }
    }
 
    // Check for link reference definition
@@ -341,7 +410,7 @@ function parseBlock(
    }
 
    // Default to paragraph (may be setext heading)
-   return parseParagraph(lines, startIndex, context, includePositions, source);
+   return parseParagraph(lines, startIndex, context, includePositions);
 }
 
 /**
@@ -350,7 +419,6 @@ function parseBlock(
 function parseThematicBreak(
    line: LineInfo,
    includePositions: boolean,
-   source: string,
 ): { block: ThematicBreakNode; consumed: number } {
    const content = line.content.trim();
    let marker: "-" | "*" | "_" = "-";
@@ -363,14 +431,7 @@ function parseThematicBreak(
    };
 
    if (includePositions) {
-      node.position = createPosition(
-         line.lineNumber,
-         1,
-         line.lineNumber,
-         line.raw.length + 1,
-         source,
-         0,
-      );
+      node.position = createPosition(line, line);
    }
 
    return { block: node, consumed: 1 };
@@ -384,7 +445,6 @@ function parseAtxHeading(
    match: RegExpExecArray,
    context: BlockContext,
    includePositions: boolean,
-   source: string,
 ): { block: HeadingNode; consumed: number } {
    const level = (match[1]?.length ?? 1) as 1 | 2 | 3 | 4 | 5 | 6;
    let text = match[2] ?? "";
@@ -403,14 +463,7 @@ function parseAtxHeading(
    };
 
    if (includePositions) {
-      node.position = createPosition(
-         line.lineNumber,
-         1,
-         line.lineNumber,
-         line.raw.length + 1,
-         source,
-         0,
-      );
+      node.position = createPosition(line, line);
    }
 
    return { block: node, consumed: 1 };
@@ -424,7 +477,6 @@ function parseFencedCodeBlock(
    startIndex: number,
    match: RegExpExecArray,
    includePositions: boolean,
-   source: string,
 ): { block: CodeBlockNode; consumed: number } {
    const startLine = lines[startIndex];
    if (!startLine) {
@@ -462,6 +514,9 @@ function parseFencedCodeBlock(
    const contentLines: string[] = [];
    let i = startIndex + 1;
 
+   // Pre-compile the closing fence regex once
+   const closingFenceRegex = new RegExp(`^${fence}{${fenceLength},}[ \\t]*$`);
+
    // Find closing fence
    while (i < lines.length) {
       const line = lines[i];
@@ -471,11 +526,7 @@ function parseFencedCodeBlock(
       const trimmed = line.raw.trimStart();
 
       // Check for closing fence
-      const closingMatch = new RegExp(`^${fence}{${fenceLength},}[ \t]*$`).test(
-         trimmed,
-      );
-
-      if (closingMatch && lineIndent < 4) {
+      if (closingFenceRegex.test(trimmed) && lineIndent < 4) {
          i++;
          break;
       }
@@ -498,15 +549,8 @@ function parseFencedCodeBlock(
    if (meta) node.meta = meta;
 
    if (includePositions) {
-      const endLine = lines[i - 1];
-      node.position = createPosition(
-         startLine.lineNumber,
-         1,
-         endLine?.lineNumber ?? startLine.lineNumber,
-         (endLine?.raw.length ?? 0) + 1,
-         source,
-         0,
-      );
+      const endLine = lines[i - 1] ?? startLine;
+      node.position = createPosition(startLine, endLine);
    }
 
    return { block: node, consumed: i - startIndex };
@@ -519,11 +563,10 @@ function parseIndentedCodeBlock(
    lines: LineInfo[],
    startIndex: number,
    includePositions: boolean,
-   source: string,
 ): { block: CodeBlockNode; consumed: number } {
    const contentLines: string[] = [];
    let i = startIndex;
-   let lastNonBlank = startIndex;
+   let lastNonBlankIndex = startIndex;
 
    while (i < lines.length) {
       const line = lines[i];
@@ -540,12 +583,15 @@ function parseIndentedCodeBlock(
       }
 
       contentLines.push(removeIndent(line.raw, 4));
-      lastNonBlank = contentLines.length;
+      lastNonBlankIndex = i;
       i++;
    }
 
    // Trim trailing blank lines
-   const trimmedContent = contentLines.slice(0, lastNonBlank);
+   const trimmedContent = contentLines.slice(
+      0,
+      lastNonBlankIndex - startIndex + 1,
+   );
 
    const node: CodeBlockNode = {
       type: "codeBlock",
@@ -555,18 +601,142 @@ function parseIndentedCodeBlock(
 
    if (includePositions) {
       const startLine = lines[startIndex];
-      const endLine =
-         lines[Math.max(startIndex, lastNonBlank + startIndex - 1)];
-      if (startLine) {
-         node.position = createPosition(
-            startLine.lineNumber,
-            1,
-            endLine?.lineNumber ?? startLine.lineNumber,
-            (endLine?.raw.length ?? 0) + 1,
-            source,
-            0,
-         );
+      const endLine = lines[lastNonBlankIndex] ?? startLine;
+      if (startLine && endLine) {
+         node.position = createPosition(startLine, endLine);
       }
+   }
+
+   return { block: node, consumed: i - startIndex };
+}
+
+/**
+ * Parses a GFM table.
+ */
+function parseTable(
+   lines: LineInfo[],
+   startIndex: number,
+   context: BlockContext,
+   includePositions: boolean,
+): { block: TableNode | null; consumed: number } {
+   // Need at least 2 lines for a valid table (header + delimiter)
+   if (startIndex + 1 >= lines.length) {
+      return { block: null, consumed: 0 };
+   }
+
+   const headerLine = lines[startIndex];
+   const delimiterLine = lines[startIndex + 1];
+
+   if (!headerLine || !delimiterLine) {
+      return { block: null, consumed: 0 };
+   }
+
+   // Check if first line looks like a table row and second is delimiter
+   if (
+      !isTableRow(headerLine.content) ||
+      !isTableDelimiter(delimiterLine.content)
+   ) {
+      return { block: null, consumed: 0 };
+   }
+
+   // Parse header cells
+   const headerCells = splitTableRow(headerLine.content);
+
+   // Parse delimiter to get alignments
+   const delimiterCells = splitTableRow(delimiterLine.content);
+
+   // Number of columns must match
+   if (
+      headerCells.length !== delimiterCells.length ||
+      headerCells.length === 0
+   ) {
+      return { block: null, consumed: 0 };
+   }
+
+   // Validate delimiter cells (must contain at least one dash)
+   for (const cell of delimiterCells) {
+      if (!/^:?-+:?$/.test(cell.trim())) {
+         return { block: null, consumed: 0 };
+      }
+   }
+
+   // Get alignments from delimiter row
+   const alignments: Array<"left" | "center" | "right" | null> =
+      delimiterCells.map(parseAlignment);
+
+   // Create header row
+   const headerRowCells: TableCellNode[] = headerCells.map((cell, idx) => ({
+      type: "tableCell" as const,
+      children: parseInline(cell, context.references),
+      align: alignments[idx] ?? undefined,
+      isHeader: true,
+   }));
+
+   const headerRow: TableRowNode = {
+      type: "tableRow",
+      children: headerRowCells,
+      isHeader: true,
+   };
+
+   if (includePositions && headerLine) {
+      headerRow.position = createPosition(headerLine, headerLine);
+   }
+
+   const rows: TableRowNode[] = [headerRow];
+   let i = startIndex + 2; // Start after header and delimiter
+
+   // Parse body rows
+   while (i < lines.length) {
+      const line = lines[i];
+      if (!line) break;
+
+      // Stop on blank line or non-table row
+      if (line.isBlank || !isTableRow(line.content)) {
+         break;
+      }
+
+      // Also stop if it looks like a new block element
+      if (isThematicBreak(line.content) || isAtxHeading(line.content)) {
+         break;
+      }
+
+      const cells = splitTableRow(line.content);
+
+      // Create cells, padding or truncating to match header length
+      const rowCells: TableCellNode[] = [];
+      for (let j = 0; j < headerCells.length; j++) {
+         const cellContent = cells[j] ?? "";
+         rowCells.push({
+            type: "tableCell",
+            children: parseInline(cellContent, context.references),
+            align: alignments[j] ?? undefined,
+            isHeader: false,
+         });
+      }
+
+      const bodyRow: TableRowNode = {
+         type: "tableRow",
+         children: rowCells,
+         isHeader: false,
+      };
+
+      if (includePositions) {
+         bodyRow.position = createPosition(line, line);
+      }
+
+      rows.push(bodyRow);
+      i++;
+   }
+
+   const node: TableNode = {
+      type: "table",
+      children: rows,
+      align: alignments,
+   };
+
+   if (includePositions) {
+      const endLine = lines[i - 1] ?? headerLine;
+      node.position = createPosition(headerLine, endLine);
    }
 
    return { block: node, consumed: i - startIndex };
@@ -580,7 +750,6 @@ function parseHtmlBlock(
    startIndex: number,
    htmlType: number,
    includePositions: boolean,
-   source: string,
 ): { block: HtmlBlockNode; consumed: number } {
    const contentLines: string[] = [];
    let i = startIndex;
@@ -612,16 +781,9 @@ function parseHtmlBlock(
 
    if (includePositions) {
       const startLine = lines[startIndex];
-      const endLine = lines[i - 1];
-      if (startLine) {
-         node.position = createPosition(
-            startLine.lineNumber,
-            1,
-            endLine?.lineNumber ?? startLine.lineNumber,
-            (endLine?.raw.length ?? 0) + 1,
-            source,
-            0,
-         );
+      const endLine = lines[i - 1] ?? startLine;
+      if (startLine && endLine) {
+         node.position = createPosition(startLine, endLine);
       }
    }
 
@@ -636,7 +798,7 @@ function parseBlockquote(
    startIndex: number,
    context: BlockContext,
    includePositions: boolean,
-   source: string,
+   depth: number,
 ): { block: BlockquoteNode; consumed: number } {
    const quoteLines: string[] = [];
    let i = startIndex;
@@ -683,7 +845,12 @@ function parseBlockquote(
       inBlockquote: true,
       blockquoteDepth: context.blockquoteDepth + 1,
    };
-   const { blocks } = parseBlocks(innerContent, innerContext, includePositions);
+   const { blocks } = parseBlocks(
+      innerContent,
+      innerContext,
+      includePositions,
+      depth + 1,
+   );
 
    const node: BlockquoteNode = {
       type: "blockquote",
@@ -693,15 +860,8 @@ function parseBlockquote(
    if (includePositions) {
       const startLine = lines[startIndex];
       const endLine = lines[i - 1];
-      if (startLine) {
-         node.position = createPosition(
-            startLine.lineNumber,
-            1,
-            endLine?.lineNumber ?? startLine.lineNumber,
-            (endLine?.raw.length ?? 0) + 1,
-            source,
-            0,
-         );
+      if (startLine && endLine) {
+         node.position = createPosition(startLine, endLine);
       }
    }
 
@@ -722,7 +882,7 @@ function parseList(
    },
    context: BlockContext,
    includePositions: boolean,
-   source: string,
+   depth: number,
 ): { block: ListNode; consumed: number } {
    const items: ListItemNode[] = [];
    let i = startIndex;
@@ -763,7 +923,7 @@ function parseList(
             itemMatch.marker as "-" | "*" | "+" | ")" | ".",
             context,
             includePositions,
-            source,
+            depth,
          );
 
          if (hadBlankBetweenItems && items.length > 0) {
@@ -800,15 +960,8 @@ function parseList(
    if (includePositions) {
       const startLine = lines[startIndex];
       const endLine = lines[i - 1];
-      if (startLine) {
-         node.position = createPosition(
-            startLine.lineNumber,
-            1,
-            endLine?.lineNumber ?? startLine.lineNumber,
-            (endLine?.raw.length ?? 0) + 1,
-            source,
-            0,
-         );
+      if (startLine && endLine) {
+         node.position = createPosition(startLine, endLine);
       }
    }
 
@@ -825,7 +978,7 @@ function parseListItem(
    marker: "-" | "*" | "+" | ")" | ".",
    context: BlockContext,
    includePositions: boolean,
-   source: string,
+   depth: number,
 ): { item: ListItemNode; consumed: number } {
    const itemLines: string[] = [];
    let i = startIndex;
@@ -899,7 +1052,12 @@ function parseListItem(
       ...context,
       listDepth: context.listDepth + 1,
    };
-   const { blocks } = parseBlocks(innerContent, innerContext, includePositions);
+   const { blocks } = parseBlocks(
+      innerContent,
+      innerContext,
+      includePositions,
+      depth + 1,
+   );
 
    const node: ListItemNode = {
       type: "listItem",
@@ -911,15 +1069,8 @@ function parseListItem(
    if (includePositions) {
       const startLine = lines[startIndex];
       const endLine = lines[i - 1];
-      if (startLine) {
-         node.position = createPosition(
-            startLine.lineNumber,
-            1,
-            endLine?.lineNumber ?? startLine.lineNumber,
-            (endLine?.raw.length ?? 0) + 1,
-            source,
-            0,
-         );
+      if (startLine && endLine) {
+         node.position = createPosition(startLine, endLine);
       }
    }
 
@@ -934,7 +1085,6 @@ function parseParagraph(
    startIndex: number,
    context: BlockContext,
    includePositions: boolean,
-   source: string,
 ): { block: HeadingNode | ParagraphNode; consumed: number } {
    const paragraphLines: string[] = [];
    let i = startIndex;
@@ -964,14 +1114,7 @@ function parseParagraph(
             if (includePositions) {
                const startLine = lines[startIndex];
                if (startLine) {
-                  node.position = createPosition(
-                     startLine.lineNumber,
-                     1,
-                     line.lineNumber,
-                     line.raw.length + 1,
-                     source,
-                     0,
-                  );
+                  node.position = createPosition(startLine, line);
                }
             }
 
@@ -1015,16 +1158,9 @@ function parseParagraph(
 
    if (includePositions) {
       const startLine = lines[startIndex];
-      const endLine = lines[i - 1];
-      if (startLine) {
-         node.position = createPosition(
-            startLine.lineNumber,
-            1,
-            endLine?.lineNumber ?? startLine.lineNumber,
-            (endLine?.raw.length ?? 0) + 1,
-            source,
-            0,
-         );
+      const endLine = lines[i - 1] ?? startLine;
+      if (startLine && endLine) {
+         node.position = createPosition(startLine, endLine);
       }
    }
 

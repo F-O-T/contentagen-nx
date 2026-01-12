@@ -1,5 +1,6 @@
 "use client";
 
+import { $convertToMarkdownString } from "@lexical/markdown";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
    $getRoot,
@@ -9,6 +10,7 @@ import {
    type LexicalNode,
 } from "lexical";
 import { useCallback, useEffect } from "react";
+import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 import {
    openChatSidebar,
    setDocumentContent,
@@ -17,6 +19,7 @@ import {
    useChatState,
 } from "../context/chat-context";
 import { $isGhostTextNode } from "../nodes/ghost-text-node";
+import { EXTENDED_TRANSFORMERS } from "../ui/content-editor";
 
 /**
  * Chat Plugin for Ctrl+L sidebar chat.
@@ -32,6 +35,8 @@ import { $isGhostTextNode } from "../nodes/ghost-text-node";
 export function ChatPlugin() {
    const [editor] = useLexicalComposerContext();
    const { isOpen } = useChatState();
+   const { hasFeature } = useFeatureAccess();
+   const hasChatFeature = hasFeature(Feature.CHAT);
 
    // Register editor reference for tool execution
    useEffect(() => {
@@ -39,7 +44,7 @@ export function ChatPlugin() {
       return () => setEditor(null);
    }, [editor]);
 
-   // Get text content without ghost nodes
+   // Get text content without ghost nodes (for selection context)
    const getTextWithoutGhost = useCallback((node: LexicalNode): string => {
       if ($isGhostTextNode(node)) return "";
       if ($isTextNode(node)) return node.getTextContent();
@@ -52,16 +57,15 @@ export function ChatPlugin() {
       return "";
    }, []);
 
-   // Sync document content to chat state on every change
+   // Sync document content to chat state on every change (as markdown for analysis)
    useEffect(() => {
       return editor.registerUpdateListener(({ editorState }) => {
          editorState.read(() => {
-            const root = $getRoot();
-            const fullText = getTextWithoutGhost(root);
-            setDocumentContent(fullText);
+            const markdown = $convertToMarkdownString(EXTENDED_TRANSFORMERS);
+            setDocumentContent(markdown);
          });
       });
-   }, [editor, getTextWithoutGhost]);
+   }, [editor]);
 
    // Get document text and selection context
    const getDocumentContext = useCallback(() => {
@@ -133,7 +137,10 @@ export function ChatPlugin() {
    }, [editor, getTextWithoutGhost]);
 
    // Ctrl+L handler - toggle sidebar and send selection to chat
+   // Only enabled if user has CHAT feature
    useEffect(() => {
+      if (!hasChatFeature) return;
+
       const handleKeyDown = (e: KeyboardEvent) => {
          if (e.ctrlKey && e.key === "l") {
             e.preventDefault();
@@ -159,7 +166,7 @@ export function ChatPlugin() {
 
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
-   }, [isOpen, getDocumentContext]);
+   }, [isOpen, getDocumentContext, hasChatFeature]);
 
    // Plugin only handles keyboard events, renders nothing
    return null;

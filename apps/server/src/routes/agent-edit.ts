@@ -1,7 +1,14 @@
 import type { CoreMessage } from "@mastra/core/llm";
 import { createRequestContext, mastra } from "@packages/agents";
+import {
+   captureEditGenerated,
+   inferInstructionType,
+   type LLMCaptureContext,
+} from "@packages/posthog/llm/server";
 import { Elysia, t } from "elysia";
 import { auth } from "../integrations/auth";
+import { posthog } from "../integrations/posthog";
+import { Feature, requireFeatureAccess } from "../utils/feature-gate";
 
 export const agentEditRoutes = new Elysia({ prefix: "/api/agent/edit" }).post(
    "/stream",
@@ -11,6 +18,14 @@ export const agentEditRoutes = new Elysia({ prefix: "/api/agent/edit" }).post(
       if (!session) {
          throw new Error("Unauthorized");
       }
+
+      // Check feature access (Quick Edit requires LITE plan or higher)
+      const organizationId = session.session.activeOrganizationId;
+      await requireFeatureAccess(
+         Feature.QUICK_EDIT,
+         organizationId,
+         request.headers,
+      );
 
       const { selectedText, instruction, contextBefore, contextAfter } = body;
 
@@ -62,6 +77,21 @@ export const agentEditRoutes = new Elysia({ prefix: "/api/agent/edit" }).post(
                },
             }) + "\n";
          }
+
+         // Capture edit generation analytics
+         const captureCtx: LLMCaptureContext = {
+            posthog,
+            userId: session.user.id,
+            organizationId: organizationId ?? undefined,
+            hasConsent: session.user.telemetryConsent ?? true,
+         };
+
+         captureEditGenerated(captureCtx, {
+            latencyMs: Date.now() - startTime,
+            originalLength: selectedText.length,
+            newLength: transformedText.length,
+            instructionType: inferInstructionType(instruction),
+         });
 
          // Final completion message
          yield JSON.stringify({

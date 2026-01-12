@@ -94,6 +94,7 @@ export const ChatCommandSuggestions = forwardRef<
       mode: "Modes",
       action: "Actions",
       context: "Context",
+      workflow: "Workflows",
    };
 
    let currentIndex = 0;

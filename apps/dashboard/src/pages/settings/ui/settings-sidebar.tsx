@@ -7,7 +7,9 @@ import {
 } from "@packages/ui/components/sidebar";
 import { Link, useLocation } from "@tanstack/react-router";
 import { Bell, CreditCard, Key, Settings2, Shield, User } from "lucide-react";
+import { useMemo } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
+import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 
 const settingsNavItems = [
    {
@@ -53,17 +55,29 @@ export { settingsNavItems };
 export function SettingsSidebar() {
    const { activeOrganization } = useActiveOrganization();
    const { pathname } = useLocation();
+   const { hasFeature } = useFeatureAccess();
 
    const isActive = (href: string) => {
       const resolvedHref = href.replace("$slug", activeOrganization.slug);
       return pathname === resolvedHref;
    };
 
+   // Filter nav items based on feature access
+   const visibleNavItems = useMemo(() => {
+      return settingsNavItems.filter((item) => {
+         // Hide API Keys for users without API_ACCESS feature
+         if (item.id === "api-keys" && !hasFeature(Feature.API_ACCESS)) {
+            return false;
+         }
+         return true;
+      });
+   }, [hasFeature]);
+
    return (
       <SidebarGroup>
          <SidebarGroupContent>
             <SidebarMenu>
-               {settingsNavItems.map((item) => (
+               {visibleNavItems.map((item) => (
                   <SidebarMenuItem key={item.id}>
                      <SidebarMenuButton
                         asChild

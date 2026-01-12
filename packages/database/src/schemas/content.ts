@@ -12,7 +12,8 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { agent } from "./agent";
-import { member } from "./auth";
+import { member, organization } from "./auth";
+import { relatedContent } from "./related-content";
 
 // Content status enum (traditional CMS flow)
 export const contentStatusEnum = pgEnum("content_status", [
@@ -83,9 +84,12 @@ export const content = pgTable(
    "content",
    {
       id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
-      agentId: uuid("agent_id")
+      agentId: uuid("agent_id").references(() => agent.id, {
+         onDelete: "cascade",
+      }),
+      organizationId: uuid("organization_id")
          .notNull()
-         .references(() => agent.id, { onDelete: "cascade" }),
+         .references(() => organization.id, { onDelete: "cascade" }),
       createdByMemberId: uuid("created_by_member_id")
          .notNull()
          .references(() => member.id, { onDelete: "cascade" }),
@@ -109,22 +113,29 @@ export const content = pgTable(
    },
    (table) => [
       index("content_agent_id_idx").on(table.agentId),
+      index("content_organization_id_idx").on(table.organizationId),
       index("content_created_by_member_id_idx").on(table.createdByMemberId),
       index("content_status_idx").on(table.status),
       index("content_draft_origin_idx").on(table.draftOrigin),
-      index("content_slug_idx").on(table.agentId), // For slug lookups within an agent
+      index("content_slug_idx").on(table.organizationId), // For slug lookups within organization
    ],
 );
 
-export const contentRelations = relations(content, ({ one }) => ({
+export const contentRelations = relations(content, ({ one, many }) => ({
    agent: one(agent, {
       fields: [content.agentId],
       references: [agent.id],
+   }),
+   organization: one(organization, {
+      fields: [content.organizationId],
+      references: [organization.id],
    }),
    createdByMember: one(member, {
       fields: [content.createdByMemberId],
       references: [member.id],
    }),
+   relatedFrom: many(relatedContent, { relationName: "relatedFrom" }),
+   relatedTo: many(relatedContent, { relationName: "relatedTo" }),
 }));
 
 export type Content = typeof content.$inferSelect;

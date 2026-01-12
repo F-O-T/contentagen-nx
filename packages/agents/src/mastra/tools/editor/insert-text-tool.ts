@@ -1,3 +1,7 @@
+import {
+   generateBlockquoteString,
+   normalizeMarkdownEmphasis,
+} from "@f-o-t/markdown";
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
@@ -18,18 +22,31 @@ export const insertTextTool = createTool({
          .describe(
             "Target index for afterHeading or beforeParagraph positions (0-based)",
          ),
+      isBlockquote: z
+         .boolean()
+         .optional()
+         .default(false)
+         .describe("If true, wraps the text as a blockquote"),
    }),
    outputSchema: z.object({
       success: z.boolean(),
+      markdown: z.string(),
       insertedText: z.string(),
       position: z.string(),
    }),
    execute: async (inputData) => {
-      // This tool returns instructions for the frontend to execute
-      // The actual DOM manipulation happens in the editor-tool-executor.ts
+      // Normalize markdown to fix LLM escaping issues (e.g., \*\* → **)
+      const normalizedText = normalizeMarkdownEmphasis(inputData.text);
+
+      // Use blockquote generator if requested
+      const markdown = inputData.isBlockquote
+         ? generateBlockquoteString(normalizedText)
+         : normalizedText;
+
       return {
          success: true,
-         insertedText: inputData.text,
+         markdown,
+         insertedText: normalizedText,
          position: inputData.position,
       };
    },

@@ -1,3 +1,4 @@
+import { generateTableString } from "@f-o-t/markdown";
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
@@ -11,6 +12,10 @@ export const insertTableTool = createTool({
          .array(z.array(z.string()))
          .min(1)
          .describe("Array of rows, where each row is an array of cell values"),
+      alignments: z
+         .array(z.enum(["left", "center", "right"]).nullable())
+         .optional()
+         .describe("Optional array of column alignments (left, center, right)"),
       position: z
          .enum(["cursor", "afterParagraph", "end"])
          .default("cursor")
@@ -23,12 +28,20 @@ export const insertTableTool = createTool({
    }),
    outputSchema: z.object({
       success: z.boolean(),
+      markdown: z.string(),
       columnCount: z.number(),
       rowCount: z.number(),
    }),
    execute: async (inputData) => {
+      const markdown = generateTableString(
+         inputData.headers,
+         inputData.rows,
+         inputData.alignments,
+      );
+
       return {
          success: true,
+         markdown,
          columnCount: inputData.headers.length,
          rowCount: inputData.rows.length,
       };

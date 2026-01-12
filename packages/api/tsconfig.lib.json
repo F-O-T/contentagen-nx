@@ -16,10 +16,10 @@
       "path": "../logging"
     },
     {
-      "path": "../rag"
+      "path": "../environment/tsconfig.lib.json"
     },
     {
-      "path": "../environment/tsconfig.lib.json"
+      "path": "../markdown"
     },
     {
       "path": "../transactional/tsconfig.lib.json"

@@ -6,7 +6,9 @@ import { getContentById } from "./content-repository";
 
 /**
  * Check if a user can modify content based on organization membership.
- * Access is granted if the user belongs to the same organization as the agent.
+ * Access is granted if:
+ * - Content has an agentId and user belongs to the same organization as the agent
+ * - Content has no agentId and user belongs to the content's organization
  */
 export async function canModifyContent(
    dbClient: DatabaseInstance,
@@ -19,6 +21,12 @@ export async function canModifyContent(
          return false;
       }
 
+      // Content without agent - check organizationId directly
+      if (!content.agentId) {
+         return content.organizationId === organizationId;
+      }
+
+      // Content with agent - check agent's organization
       const agent = await getAgentById(dbClient, content.agentId);
       if (!agent) {
          return false;
@@ -49,6 +57,19 @@ export async function getContentWithAccessControl(
          throw AppError.database("Content not found");
       }
 
+      // Content without agent - check organizationId directly or shared status
+      if (!content.agentId) {
+         const hasAccess =
+            content.organizationId === organizationId ||
+            content.shareStatus === "shared";
+
+         if (!hasAccess) {
+            throw AppError.database("Access denied to content");
+         }
+         return content;
+      }
+
+      // Content with agent - check agent's organization
       const agent = await getAgentById(dbClient, content.agentId);
       if (!agent) {
          throw AppError.database("Agent not found for content");
@@ -83,6 +104,22 @@ export async function hasContentAccess(
    organizationId: string,
 ): Promise<{ canRead: boolean; canWrite: boolean }> {
    try {
+      // Content without agent - check organizationId directly
+      if (!content.agentId) {
+         // User belongs to the content's organization
+         if (content.organizationId === organizationId) {
+            return { canRead: true, canWrite: true };
+         }
+
+         // Content is shared (public read access)
+         if (content.shareStatus === "shared") {
+            return { canRead: true, canWrite: false };
+         }
+
+         return { canRead: false, canWrite: false };
+      }
+
+      // Content with agent - check agent's organization
       const agent = await getAgentById(dbClient, content.agentId);
       if (!agent) {
          return { canRead: false, canWrite: false };

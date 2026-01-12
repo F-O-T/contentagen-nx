@@ -1,5 +1,11 @@
 import { clientEnv } from "@packages/environment/client";
+import {
+   captureFIMAccepted,
+   captureFIMRejected,
+   captureFIMShown,
+} from "@packages/posthog/llm/client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 
 export interface AgentFIMRequest {
    prefix: string;
@@ -38,9 +44,19 @@ export function useAgentFIM({
    onComplete,
    onError,
 }: UseAgentFIMOptions) {
+   const { hasFeature } = useFeatureAccess();
+   const hasFIMFeature = hasFeature(Feature.FIM);
+
    const [isLoading, setIsLoading] = useState(false);
    const [error, setError] = useState<Error | null>(null);
    const abortControllerRef = useRef<AbortController | null>(null);
+
+   // Analytics tracking refs
+   const suggestionShownTimeRef = useRef<number | null>(null);
+   const lastSuggestionRef = useRef<{
+      text: string;
+      completionLength: number;
+   } | null>(null);
 
    // Use refs for callbacks to avoid recreating requestCompletion
    const onChunkRef = useRef(onChunk);
@@ -64,6 +80,11 @@ export function useAgentFIM({
 
    const requestCompletion = useCallback(
       async (request: AgentFIMRequest) => {
+         // Feature gate: silently skip if FIM is not available
+         if (!hasFIMFeature) {
+            return;
+         }
+
          cancelCompletion();
          abortControllerRef.current = new AbortController();
          const signal = abortControllerRef.current.signal;
@@ -141,6 +162,17 @@ export function useAgentFIM({
             }
 
             if (!signal.aborted) {
+               // Track suggestion shown for analytics
+               if (finalMetadata?.shouldShow && fullText) {
+                  suggestionShownTimeRef.current = Date.now();
+                  lastSuggestionRef.current = {
+                     text: fullText,
+                     completionLength: fullText.length,
+                  };
+                  captureFIMShown({
+                     completionLength: fullText.length,
+                  });
+               }
                onCompleteRef.current(fullText, finalMetadata);
             }
          } catch (err) {
@@ -155,8 +187,42 @@ export function useAgentFIM({
             abortControllerRef.current = null;
          }
       },
-      [cancelCompletion],
+      [cancelCompletion, hasFIMFeature],
    );
 
-   return { requestCompletion, cancelCompletion, isLoading, error };
+   // Analytics: Track when user accepts a suggestion
+   const handleAccept = useCallback(() => {
+      if (lastSuggestionRef.current && suggestionShownTimeRef.current) {
+         captureFIMAccepted({
+            completionLength: lastSuggestionRef.current.completionLength,
+            displayDurationMs: Date.now() - suggestionShownTimeRef.current,
+         });
+         // Reset tracking
+         lastSuggestionRef.current = null;
+         suggestionShownTimeRef.current = null;
+      }
+   }, []);
+
+   // Analytics: Track when user rejects a suggestion
+   const handleReject = useCallback(() => {
+      if (lastSuggestionRef.current && suggestionShownTimeRef.current) {
+         captureFIMRejected({
+            completionLength: lastSuggestionRef.current.completionLength,
+            displayDurationMs: Date.now() - suggestionShownTimeRef.current,
+         });
+         // Reset tracking
+         lastSuggestionRef.current = null;
+         suggestionShownTimeRef.current = null;
+      }
+   }, []);
+
+   return {
+      requestCompletion,
+      cancelCompletion,
+      handleAccept,
+      handleReject,
+      isLoading,
+      error,
+      isEnabled: hasFIMFeature,
+   };
 }

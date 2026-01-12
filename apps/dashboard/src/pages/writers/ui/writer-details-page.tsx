@@ -1,13 +1,11 @@
-import { Button } from "@packages/ui/components/button";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { DefaultHeader } from "@/default/default-header";
+import { AgentMemoriesCard } from "@/features/writers/ui/agent-memories-card";
 import { WriterContentList } from "@/features/writers/ui/writer-content-list";
-import { WriterInstructionsCard } from "@/features/writers/ui/writer-instructions-card";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useTRPC } from "@/integrations/clients";
 import { WriterActionButtons } from "./writer-action-buttons";
@@ -53,19 +51,9 @@ function WriterDetailsPageSkeleton() {
 }
 
 function WriterDetailsPageError({ error }: { error: Error }) {
-   const { activeOrganization } = useActiveOrganization();
-
    return (
       <main className="space-y-6">
          <div className="flex items-center gap-4">
-            <Button asChild size="icon" variant="ghost">
-               <Link
-                  params={{ slug: activeOrganization.slug }}
-                  to="/$slug/writers"
-               >
-                  <ArrowLeft className="size-4" />
-               </Link>
-            </Button>
             <div className="flex-1">
                <h1 className="text-2xl font-bold">
                   {"Escritor não encontrado"}
@@ -102,21 +90,11 @@ function WriterDetailsPageContent({ writerId }: WriterDetailsPageProps) {
 
    return (
       <main className="space-y-6">
-         {/* Header with back button */}
-         <div className="flex items-start gap-4">
-            <Button asChild className="mt-1" size="icon" variant="ghost">
-               <Link
-                  params={{ slug: activeOrganization.slug }}
-                  to="/$slug/writers"
-               >
-                  <ArrowLeft className="size-4" />
-               </Link>
-            </Button>
-            <DefaultHeader
-               description={"Detalhes do escritor"}
-               title={writer.personaConfig.metadata.name}
-            />
-         </div>
+         {/* Header */}
+         <DefaultHeader
+            description={"Detalhes do escritor"}
+            title={writer.personaConfig.metadata.name}
+         />
 
          {/* Action Buttons */}
          <WriterActionButtons
@@ -131,13 +109,9 @@ function WriterDetailsPageContent({ writerId }: WriterDetailsPageProps) {
                <WriterMetadataCard writer={writer} />
             </div>
 
-            {/* Right Column - Instructions & Content */}
+            {/* Right Column - Memories & Content */}
             <div className="lg:col-span-2 space-y-6">
-               <WriterInstructionsCard
-                  instructions={writer.personaConfig.instructions}
-                  writerId={writerId}
-                  writerName={writer.personaConfig.metadata.name}
-               />
+               <AgentMemoriesCard agentId={writerId} />
                <WriterContentList agentId={writerId} />
             </div>
 

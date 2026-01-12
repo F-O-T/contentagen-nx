@@ -28,7 +28,9 @@ export interface ActivePlan {
    suggestedDescription?: string;
 }
 export type ChatMode = "plan" | "writer";
-export type ChatModel = "grok-4.1-fast" | "glm-4.7" | "mistral-small-creative";
+export type ChatModel =
+   | "anthropic/claude-haiku-4.5"
+   | "mistralai/mistral-small-creative";
 export type ToolCallStatus = "pending" | "executing" | "completed" | "error";
 
 export interface SelectionContext {
@@ -151,8 +153,8 @@ interface ChatState {
 
 const initialState: ChatState = {
    phase: "idle",
-   mode: "plan",
-   model: "grok-4.1-fast",
+   mode: "writer", // Default to writer mode (safer for all tiers, page can override for Pro)
+   model: "anthropic/claude-haiku-4.5",
    isOpen: false,
    sessionId: null,
    contentId: null,
@@ -725,30 +727,37 @@ export const appendToCurrentStep = (text: string) =>
 
 /**
  * Add a tool call to current streaming step
+ * Only stores in one location to prevent duplicate display
  */
 export const addToolCallToCurrentStep = (toolCall: Omit<ToolCall, "status">) =>
-   chatStore.setState((state) => ({
-      ...state,
-      streamingSteps: state.streamingSteps.map((step, idx) =>
-         idx === state.streamingSteps.length - 1
-            ? {
-                 ...step,
-                 toolCalls: [
-                    ...step.toolCalls,
-                    { ...toolCall, status: "pending" as ToolCallStatus },
-                 ],
-              }
-            : step,
-      ),
-      // Also add to activeToolCalls for backward compatibility
-      activeToolCalls: [
-         ...state.activeToolCalls,
-         { ...toolCall, status: "pending" as ToolCallStatus },
-      ],
-   }));
+   chatStore.setState((state) => {
+      const newToolCall = { ...toolCall, status: "pending" as ToolCallStatus };
+
+      // If we have streaming steps, add to the current step only
+      if (state.streamingSteps.length > 0) {
+         return {
+            ...state,
+            streamingSteps: state.streamingSteps.map((step, idx) =>
+               idx === state.streamingSteps.length - 1
+                  ? {
+                       ...step,
+                       toolCalls: [...step.toolCalls, newToolCall],
+                    }
+                  : step,
+            ),
+         };
+      }
+
+      // Fallback: use activeToolCalls only when no streaming steps
+      return {
+         ...state,
+         activeToolCalls: [...state.activeToolCalls, newToolCall],
+      };
+   });
 
 /**
  * Update a tool call status in the streaming steps
+ * Updates in the location where the tool call was stored
  */
 export const updateToolCallInStep = (
    toolCallId: string,
@@ -756,19 +765,32 @@ export const updateToolCallInStep = (
    result?: unknown,
    error?: string,
 ) =>
-   chatStore.setState((state) => ({
-      ...state,
-      streamingSteps: state.streamingSteps.map((step) => ({
-         ...step,
-         toolCalls: step.toolCalls.map((tc) =>
+   chatStore.setState((state) => {
+      // Check if tool call exists in streaming steps
+      const inStreamingSteps = state.streamingSteps.some((step) =>
+         step.toolCalls.some((tc) => tc.id === toolCallId),
+      );
+
+      if (inStreamingSteps) {
+         return {
+            ...state,
+            streamingSteps: state.streamingSteps.map((step) => ({
+               ...step,
+               toolCalls: step.toolCalls.map((tc) =>
+                  tc.id === toolCallId ? { ...tc, status, result, error } : tc,
+               ),
+            })),
+         };
+      }
+
+      // Fallback: update in activeToolCalls
+      return {
+         ...state,
+         activeToolCalls: state.activeToolCalls.map((tc) =>
             tc.id === toolCallId ? { ...tc, status, result, error } : tc,
          ),
-      })),
-      // Also update activeToolCalls for backward compatibility
-      activeToolCalls: state.activeToolCalls.map((tc) =>
-         tc.id === toolCallId ? { ...tc, status, result, error } : tc,
-      ),
-   }));
+      };
+   });
 
 /**
  * Mark current step as complete

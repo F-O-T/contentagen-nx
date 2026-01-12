@@ -16,6 +16,18 @@
       "./server": {
          "default": "./src/server.ts",
          "types": "./dist/src/server.d.ts"
+      },
+      "./llm/types": {
+         "default": "./src/llm/types.ts",
+         "types": "./dist/src/llm/types.d.ts"
+      },
+      "./llm/client": {
+         "default": "./src/llm/client.ts",
+         "types": "./dist/src/llm/client.d.ts"
+      },
+      "./llm/server": {
+         "default": "./src/llm/server.ts",
+         "types": "./dist/src/llm/server.d.ts"
       }
    },
    "files": [

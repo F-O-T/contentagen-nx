@@ -192,6 +192,8 @@ export interface LineInfo {
    lineNumber: number;
    /** Whether this is a blank line */
    isBlank: boolean;
+   /** Character offset from start of document */
+   offset: number;
 }
 
 /**

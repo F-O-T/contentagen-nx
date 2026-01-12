@@ -1,10 +1,12 @@
 import { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
 import { PinoLogger } from "@mastra/loggers";
-import type { WriterConfig } from "@packages/database/schemas/agent";
+import type { PgVector } from "@mastra/pg";
+import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
 import { planAgent } from "./agents/plan-agent";
+import { pgVectorStore } from "./agents/shared";
 import { writerAgent } from "./agents/writer-agent";
 import type { ContentPlan } from "./schemas/plan-schema";
 
@@ -19,15 +21,20 @@ export type ModelId =
 
 export type CustomRequestContext = {
    brandId?: string;
-   language?: string;
    userId: string;
    agentId?: string;
    // Fields for blog editor
    mode?: ChatMode;
    model?: ModelId;
    activePlan?: ContentPlan;
-   writerConfig?: WriterConfig;
+   // Instruction memories (compiled into agent prompts)
+   agentInstructions?: InstructionMemoryItem[];
 };
+
+// Only include vectors config if PgVector is available
+const vectorsConfig: Record<string, PgVector> = pgVectorStore
+   ? { pgVector: pgVectorStore }
+   : {};
 
 export const mastra = new Mastra({
    agents: {
@@ -36,6 +43,7 @@ export const mastra = new Mastra({
       fimAgent,
       inlineEditAgent,
    },
+   vectors: vectorsConfig,
    bundler: {
       transpilePackages: [
          "@packages/files/client",
@@ -43,7 +51,6 @@ export const mastra = new Mastra({
          "@packages/environment/server",
          "@packages/database/client",
          "@packages/database/schema",
-         "@packages/rag/client",
          "@packages/utils/errors",
          "@packages/utils/text",
       ],
@@ -57,9 +64,6 @@ export const mastra = new Mastra({
 export function createRequestContext(context: CustomRequestContext) {
    const requestContext = new RequestContext<CustomRequestContext>();
    requestContext.set("userId", context.userId);
-   if (context.language) {
-      requestContext.set("language", context.language);
-   }
 
    if (context.brandId) {
       requestContext.set("brandId", context.brandId);
@@ -76,8 +80,8 @@ export function createRequestContext(context: CustomRequestContext) {
    if (context.activePlan) {
       requestContext.set("activePlan", context.activePlan);
    }
-   if (context.writerConfig) {
-      requestContext.set("writerConfig", context.writerConfig);
+   if (context.agentInstructions) {
+      requestContext.set("agentInstructions", context.agentInstructions);
    }
    return requestContext;
 }

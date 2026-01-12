@@ -10,7 +10,7 @@ import {
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "@tanstack/react-router";
-import { ArrowLeft, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
@@ -54,20 +54,6 @@ function TeamDetailsContent() {
       <main className="space-y-6">
          <div className="space-y-4">
             <div className="flex items-center gap-3">
-               <Button asChild className="size-8" size="icon" variant="outline">
-                  <a
-                     href={`/${activeOrganization.slug}/organization/teams`}
-                     onClick={(e) => {
-                        e.preventDefault();
-                        router.navigate({
-                           params: { slug: activeOrganization.slug },
-                           to: "/$slug/organization/teams",
-                        });
-                     }}
-                  >
-                     <ArrowLeft className="size-4" />
-                  </a>
-               </Button>
                <div className="flex-1">
                   <div className="flex items-center gap-3">
                      <h1 className="text-2xl font-bold tracking-tight">
@@ -136,10 +122,7 @@ function TeamDetailsPageSkeleton() {
    );
 }
 
-function TeamDetailsPageError({ error, resetErrorBoundary }: FallbackProps) {
-   const { activeOrganization } = useActiveOrganization();
-   const router = useRouter();
-
+function TeamDetailsPageError({ resetErrorBoundary }: FallbackProps) {
    return (
       <main className="flex flex-col h-full w-full">
          <div className="flex-1 flex items-center justify-center">
@@ -149,21 +132,8 @@ function TeamDetailsPageError({ error, resetErrorBoundary }: FallbackProps) {
                      <Users className="size-12 text-destructive" />
                   </EmptyMedia>
                   <EmptyTitle>Failed to load team</EmptyTitle>
-                  <EmptyDescription>{error?.message}</EmptyDescription>
+                  <EmptyDescription />
                   <div className="mt-6 flex gap-2 justify-center">
-                     <Button
-                        onClick={() =>
-                           router.navigate({
-                              params: { slug: activeOrganization.slug },
-                              to: "/$slug/organization/teams",
-                           })
-                        }
-                        size="default"
-                        variant="outline"
-                     >
-                        <ArrowLeft className="size-4 mr-2" />
-                        Back to teams
-                     </Button>
                      <Button
                         onClick={resetErrorBoundary}
                         size="default"

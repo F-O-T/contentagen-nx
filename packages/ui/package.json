@@ -71,6 +71,10 @@
       "typescript": "catalog:development"
    },
    "exports": {
+      "./blocks/*": {
+         "default": "./src/blocks/*.tsx",
+         "types": "./dist/src/blocks/*.d.ts"
+      },
       "./components/*": {
          "default": "./src/components/*.{ts,tsx}",
          "types": "./dist/src/components/*.d.ts"

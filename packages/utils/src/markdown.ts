@@ -3,11 +3,4 @@
  * @deprecated Import from @packages/markdown directly
  */
 
-export {
-   countWords,
-   extractText,
-   generate,
-   getHeadings,
-   parse,
-   parseToAst,
-} from "@packages/markdown";
+export { generate, parse, parseToAst } from "@packages/markdown";

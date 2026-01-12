@@ -3,6 +3,7 @@ import type { LexicalEditor } from "lexical";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
    executeEditorTool,
+   type ServerToolResult,
    type ToolCall,
    type ToolExecutionResult,
 } from "../utils/editor-tool-executor";
@@ -322,10 +323,11 @@ export function useAgentChat({
                                  editorRef.current &&
                                  isEditorTool(toolCall.name)
                               ) {
-                                 // Execute editor tool
+                                 // Execute editor tool with server result
                                  result = await executeEditorTool(
                                     editorRef.current,
                                     toolCall,
+                                    chunk.result as ServerToolResult,
                                  );
                               }
 

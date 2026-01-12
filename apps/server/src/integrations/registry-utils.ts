@@ -17,6 +17,20 @@ export interface BlockMetadata {
 const BLOCKS_PATH = join(process.cwd(), "../..", "packages/ui/src/blocks");
 
 const blockDependencies: Record<string, BlockMetadata> = {
+   header: {
+      category: "navigation",
+      dependencies: {
+         npm: {
+            "lucide-react": "^0.548.0",
+         },
+         shadcn: ["button"],
+      },
+      files: {
+         component: "",
+      },
+      id: "header",
+      name: "Header",
+   },
    "features-one": {
       category: "features",
       dependencies: {
@@ -95,6 +109,66 @@ const blockDependencies: Record<string, BlockMetadata> = {
       },
       id: "pricing-table",
       name: "Pricing Table",
+   },
+   "cta-one": {
+      category: "cta",
+      dependencies: {
+         npm: {},
+         shadcn: ["button"],
+      },
+      files: {
+         component: "",
+      },
+      id: "cta-one",
+      name: "CTA One",
+   },
+   "testimonials-one": {
+      category: "testimonials",
+      dependencies: {
+         npm: {},
+         shadcn: ["card"],
+      },
+      files: {
+         component: "",
+      },
+      id: "testimonials-one",
+      name: "Testimonials One",
+   },
+   "faq-one": {
+      category: "faq",
+      dependencies: {
+         npm: {},
+         shadcn: ["accordion"],
+      },
+      files: {
+         component: "",
+      },
+      id: "faq-one",
+      name: "FAQ One",
+   },
+   "stats-one": {
+      category: "stats",
+      dependencies: {
+         npm: {},
+         shadcn: [],
+      },
+      files: {
+         component: "",
+      },
+      id: "stats-one",
+      name: "Stats One",
+   },
+   "newsletter-one": {
+      category: "newsletter",
+      dependencies: {
+         npm: {},
+         shadcn: ["button"],
+      },
+      files: {
+         component: "",
+      },
+      id: "newsletter-one",
+      name: "Newsletter One",
    },
 };
 

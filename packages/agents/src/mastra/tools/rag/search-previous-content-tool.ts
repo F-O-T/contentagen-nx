@@ -1,12 +1,26 @@
+import { ModelRouterEmbeddingModel } from "@mastra/core/llm";
 import { createTool } from "@mastra/core/tools";
-import { serverEnv } from "@packages/environment/server";
-import { createPgVector } from "@packages/rag/client";
-import {
-   type SearchMode,
-   searchRelatedContent,
-} from "@packages/rag/repositories/content-rag-repository";
 import { AppError, propagateError } from "@packages/utils/errors";
+import { embed } from "ai";
 import { z } from "zod";
+import type {
+   ContentChunkMetadata,
+   ContentMetadata,
+   RelatedPost,
+   RelevantChunk,
+} from "../../rag";
+import {
+   CONTENT_CHUNKS_INDEX,
+   CONTENT_METADATA_INDEX,
+   initializeRagService,
+   isRagAvailable,
+   ragService,
+} from "../../rag";
+
+// Embedding model using Mastra's ModelRouter
+const embeddingModel = new ModelRouterEmbeddingModel(
+   "openai/text-embedding-3-small",
+);
 
 export function getSearchPreviousContentInstructions(): string {
    return `
@@ -32,14 +46,14 @@ Searches your previously published content to find related posts and context.
 - Comprehensive search: searchPreviousContent({ query: "React performance", mode: "both" })
 
 **Output format:**
-- relatedPosts: Array of { slug, title, description, similarity }
-- relevantChunks: Array of { chunk, similarity }
+- relatedPosts: Array of { slug, title, description, relevance }
+- relevantChunks: Array of { content, relevance }
 
 **Best practices:**
 1. Use "links" mode when you want to add internal links to your content
 2. Use "context" mode to maintain consistency with previously written content
 3. Use "both" mode during planning to understand existing content coverage
-4. Higher similarity scores (>0.7) indicate stronger relevance
+4. Higher similarity scores (>70%) indicate stronger relevance
 `;
 }
 
@@ -74,7 +88,7 @@ export const searchPreviousContentTool = createTool({
 
       const agentId = requestContext.get("agentId") as string;
 
-      if (!serverEnv.PG_VECTOR_URL) {
+      if (!isRagAvailable()) {
          return {
             relatedPosts: [],
             relevantChunks: [],
@@ -83,33 +97,63 @@ export const searchPreviousContentTool = createTool({
       }
 
       try {
-         const ragClient = createPgVector({
-            pgVectorURL: serverEnv.PG_VECTOR_URL,
+         // Initialize RAG service (lazy, only on first use)
+         await initializeRagService();
+         const store = ragService.getStore();
+
+         // Create embedding for the query
+         const { embedding } = await embed({
+            model: embeddingModel,
+            value: query,
          });
 
-         const results = await searchRelatedContent(
-            ragClient,
-            query,
-            agentId,
-            mode as SearchMode,
-            {
-               limit: limit || (mode === "context" ? 10 : 5),
-               similarityThreshold: 0.4, // Lower threshold for better recall
-            },
-         );
+         const relatedPosts: RelatedPost[] = [];
+         const relevantChunks: RelevantChunk[] = [];
 
-         // Format for agent consumption
+         // Search metadata for links
+         if (mode === "links" || mode === "both") {
+            const metadataResults = await store.query({
+               indexName: CONTENT_METADATA_INDEX,
+               queryVector: embedding,
+               topK: limit || 5,
+               filter: { agentId: { $eq: agentId } },
+               minScore: 0.4,
+            });
+
+            for (const result of metadataResults) {
+               const metadata = result.metadata as unknown as ContentMetadata;
+               relatedPosts.push({
+                  slug: metadata.slug,
+                  title: metadata.title,
+                  description: metadata.description,
+                  relevance: `${Math.round(result.score * 100)}%`,
+               });
+            }
+         }
+
+         // Search chunks for context
+         if (mode === "context" || mode === "both") {
+            const chunkResults = await store.query({
+               indexName: CONTENT_CHUNKS_INDEX,
+               queryVector: embedding,
+               topK: limit || 10,
+               filter: { agentId: { $eq: agentId } },
+               minScore: 0.4,
+            });
+
+            for (const result of chunkResults) {
+               const metadata =
+                  result.metadata as unknown as ContentChunkMetadata;
+               relevantChunks.push({
+                  content: metadata.text,
+                  relevance: `${Math.round(result.score * 100)}%`,
+               });
+            }
+         }
+
          return {
-            relatedPosts: results.relatedPosts.map((post) => ({
-               slug: post.slug,
-               title: post.title,
-               description: post.description,
-               relevance: Math.round(post.similarity * 100) + "%",
-            })),
-            relevantChunks: results.relevantChunks.map((chunk) => ({
-               content: chunk.chunk,
-               relevance: Math.round(chunk.similarity * 100) + "%",
-            })),
+            relatedPosts,
+            relevantChunks,
             searchQuery: query,
             mode,
          };

@@ -14,8 +14,6 @@ import {
    ChatCommandSuggestions,
    type ChatCommandSuggestionsRef,
 } from "./chat-command-suggestions";
-import { ChatModeSelect } from "./chat-mode-select";
-import { ChatModelSelect } from "./chat-model-select";
 
 interface ChatInputProps {
    onSend: (message: string) => void;
@@ -179,8 +177,7 @@ export function ChatInput({
 
             <div className="flex items-center justify-between">
                <div className="flex items-center gap-2">
-                  <ChatModeSelect />
-                  <ChatModelSelect />
+                  {/* Mode and model selectors removed - mode shown in tab header */}
                </div>
 
                {isLoading ? (

@@ -1,16 +1,22 @@
 import type { LucideIcon } from "lucide-react";
 import {
+   BarChart3,
+   BookOpen,
    Expand,
    FileCode,
    FileText,
+   Link2,
    ListChecks,
    Pencil,
+   Search,
    SpellCheck,
    Tags,
+   Target,
    TextSelect,
    Trash2,
    Type,
    Wand2,
+   Zap,
 } from "lucide-react";
 import { useMemo } from "react";
 import { clearChat, setChatMode, useChatState } from "../context/chat-context";
@@ -21,7 +27,7 @@ export interface ChatCommand {
    description: string;
    icon: LucideIcon;
    shortcut?: string;
-   category: "mode" | "action" | "context";
+   category: "mode" | "action" | "context" | "workflow";
 }
 
 export interface SlashCommand extends ChatCommand {
@@ -117,6 +123,30 @@ export function useChatCommands(
             },
          },
          {
+            id: "analyze",
+            label: "analyze",
+            description: "Run SEO and readability analysis",
+            icon: BarChart3,
+            category: "action",
+            handler: () => {
+               onSendMessage?.(
+                  "Analyze this content for SEO score, readability, and keyword density. Show me the results.",
+               );
+            },
+         },
+         {
+            id: "optimize",
+            label: "optimize",
+            description: "Optimize SEO with keyword and link fixes",
+            icon: Zap,
+            category: "action",
+            handler: () => {
+               onSendMessage?.(
+                  "Optimize this content for SEO: fix keyword density, add internal links, and improve the meta description.",
+               );
+            },
+         },
+         {
             id: "clear",
             label: "clear",
             description: "Clear the conversation",
@@ -130,6 +160,7 @@ export function useChatCommands(
 
    const mentionCommands = useMemo<MentionCommand[]>(
       () => [
+         // Context references
          {
             id: "document",
             label: "document",
@@ -177,6 +208,39 @@ export function useChatCommands(
                if (!contentMetadata?.keywords?.length) return "[No keywords]";
                return `[Keywords: ${contentMetadata.keywords.join(", ")}]`;
             },
+         },
+         // Workflow mentions
+         {
+            id: "seo-analysis",
+            label: "seo-analysis",
+            description: "Run full SEO analysis on content",
+            icon: Search,
+            category: "workflow",
+            getValue: () => "@workflow:seo-analysis",
+         },
+         {
+            id: "improve-readability",
+            label: "improve-readability",
+            description: "Analyze and improve content readability",
+            icon: BookOpen,
+            category: "workflow",
+            getValue: () => "@workflow:improve-readability",
+         },
+         {
+            id: "keyword-optimization",
+            label: "keyword-optimization",
+            description: "Optimize keyword density and placement",
+            icon: Target,
+            category: "workflow",
+            getValue: () => "@workflow:keyword-optimization",
+         },
+         {
+            id: "add-links",
+            label: "add-links",
+            description: "Find and add relevant internal links",
+            icon: Link2,
+            category: "workflow",
+            getValue: () => "@workflow:add-links",
          },
       ],
       [documentContent, selectionContext, contentMetadata],

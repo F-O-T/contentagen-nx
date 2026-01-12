@@ -82,6 +82,22 @@ export function normalizeLineEndings(content: string): string {
    return content.replace(/\r\n?/g, "\n");
 }
 
+/**
+ * Normalizes escaped newline sequences to actual newlines.
+ * Handles AI-generated content that may contain literal \n strings
+ * instead of actual newline characters.
+ *
+ * @param content - The content to normalize
+ * @returns The content with escaped newlines converted to actual newlines
+ */
+export function normalizeEscapedNewlines(content: string): string {
+   // Replace literal \n sequences with actual newlines
+   // Process double-escaped first, then single-escaped
+   return content
+      .replace(/\\\\n/g, "\n") // Double-escaped \\n -> newline
+      .replace(/\\n/g, "\n"); // Single-escaped \n -> newline
+}
+
 // =============================================================================
 // Line Parsing
 // =============================================================================
@@ -96,16 +112,22 @@ export function splitLines(content: string): LineInfo[] {
    const normalized = normalizeLineEndings(content);
    const rawLines = normalized.split("\n");
 
+   let offset = 0;
    return rawLines.map((raw, index) => {
       const indent = countIndent(raw);
-      const content = raw.slice(indent);
+      const lineContent = raw.slice(indent);
+      const lineOffset = offset;
+
+      // Update offset for next line (+1 for newline character)
+      offset += raw.length + 1;
 
       return {
          raw,
-         content,
+         content: lineContent,
          indent,
          lineNumber: index + 1,
-         isBlank: content.length === 0,
+         isBlank: lineContent.length === 0,
+         offset: lineOffset,
       };
    });
 }
@@ -173,7 +195,7 @@ export function removeIndent(line: string, amount: number): string {
  * @returns True if the line is blank
  */
 export function isBlankLine(line: string): boolean {
-   return /^[ \t]*$/.test(line);
+   return line.trim().length === 0;
 }
 
 // =============================================================================
@@ -207,23 +229,42 @@ const ESCAPABLE = "\\!\"#$%&'()*+,-./:;<=>?@[]^_`{|}~";
  * @returns The unescaped text
  */
 export function unescapeMarkdown(text: string): string {
-   let result = "";
+   const parts: string[] = [];
    let i = 0;
 
    while (i < text.length) {
       if (text[i] === "\\" && i + 1 < text.length) {
          const nextChar = text[i + 1];
          if (nextChar && ESCAPABLE.includes(nextChar)) {
-            result += nextChar;
+            parts.push(nextChar);
             i += 2;
             continue;
          }
       }
-      result += text[i];
+      parts.push(text[i] as string);
       i++;
    }
 
-   return result;
+   return parts.join("");
+}
+
+/**
+ * Normalizes markdown by unescaping incorrectly escaped emphasis markers.
+ * LLMs sometimes escape ** or * markers that shouldn't be escaped.
+ *
+ * @param text - The markdown text to normalize
+ * @returns The normalized text with unescaped emphasis markers
+ *
+ * @example
+ * ```typescript
+ * normalizeMarkdownEmphasis("\\*\\*bold\\*\\*"); // "**bold**"
+ * normalizeMarkdownEmphasis("\\*italic\\*");     // "*italic*"
+ * ```
+ */
+export function normalizeMarkdownEmphasis(text: string): string {
+   // Unescape bold markers: \*\* → **
+   // Unescape italic markers: \* → *
+   return text.replace(/\\(\*{1,2})/g, "$1");
 }
 
 // =============================================================================
@@ -234,23 +275,28 @@ export function unescapeMarkdown(text: string): string {
  * HTML entity map for decoding.
  */
 const HTML_ENTITIES: Record<string, string> = {
-   "&amp;": "&",
-   "&lt;": "<",
-   "&gt;": ">",
-   "&quot;": '"',
-   "&apos;": "'",
-   "&nbsp;": "\u00A0",
-   "&copy;": "\u00A9",
-   "&reg;": "\u00AE",
-   "&trade;": "\u2122",
-   "&mdash;": "\u2014",
-   "&ndash;": "\u2013",
-   "&hellip;": "\u2026",
-   "&lsquo;": "\u2018",
-   "&rsquo;": "\u2019",
-   "&ldquo;": "\u201C",
-   "&rdquo;": "\u201D",
+   amp: "&",
+   lt: "<",
+   gt: ">",
+   quot: '"',
+   apos: "'",
+   nbsp: "\u00A0",
+   copy: "\u00A9",
+   reg: "\u00AE",
+   trade: "\u2122",
+   mdash: "\u2014",
+   ndash: "\u2013",
+   hellip: "\u2026",
+   lsquo: "\u2018",
+   rsquo: "\u2019",
+   ldquo: "\u201C",
+   rdquo: "\u201D",
 };
+
+/**
+ * Single regex for all HTML entity types.
+ */
+const HTML_ENTITY_REGEX = /&(?:#(\d+)|#[xX]([0-9a-fA-F]+)|([a-zA-Z]+));/g;
 
 /**
  * Decodes HTML entities in text.
@@ -259,24 +305,20 @@ const HTML_ENTITIES: Record<string, string> = {
  * @returns The decoded text
  */
 export function decodeHtmlEntities(text: string): string {
-   // Named entities
-   let result = text.replace(/&[a-zA-Z]+;/g, (match) => {
-      return HTML_ENTITIES[match] ?? match;
+   return text.replace(HTML_ENTITY_REGEX, (match, decimal, hex, named) => {
+      if (decimal) {
+         const num = Number.parseInt(decimal, 10);
+         return num > 0 && num < 0x10ffff ? String.fromCodePoint(num) : match;
+      }
+      if (hex) {
+         const num = Number.parseInt(hex, 16);
+         return num > 0 && num < 0x10ffff ? String.fromCodePoint(num) : match;
+      }
+      if (named) {
+         return HTML_ENTITIES[named] ?? match;
+      }
+      return match;
    });
-
-   // Numeric entities (decimal)
-   result = result.replace(/&#(\d+);/g, (_, code) => {
-      const num = Number.parseInt(code, 10);
-      return num > 0 && num < 0x10ffff ? String.fromCodePoint(num) : _;
-   });
-
-   // Numeric entities (hex)
-   result = result.replace(/&#[xX]([0-9a-fA-F]+);/g, (_, code) => {
-      const num = Number.parseInt(code, 16);
-      return num > 0 && num < 0x10ffff ? String.fromCodePoint(num) : _;
-   });
-
-   return result;
 }
 
 /**

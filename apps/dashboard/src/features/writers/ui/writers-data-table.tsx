@@ -1,5 +1,3 @@
-import { Button } from "@packages/ui/components/button";
-import { Card, CardContent } from "@packages/ui/components/card";
 import { DataTable } from "@packages/ui/components/data-table";
 import {
    Empty,
@@ -9,14 +7,19 @@ import {
    EmptyTitle,
 } from "@packages/ui/components/empty";
 import { ItemGroup, ItemSeparator } from "@packages/ui/components/item";
-import {
-   SelectionActionBar,
-   SelectionActionButton,
-} from "@packages/ui/components/selection-action-bar";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import type { RowSelectionState } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, PenTool, Trash2 } from "lucide-react";
-import { Fragment, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { Edit, Eye, PenTool, Trash2 } from "lucide-react";
+import { Fragment, useCallback, useMemo } from "react";
+import { useDataTableSelection } from "@/features/data-table/hooks/use-data-table-selection";
+import type {
+   DataTableAction,
+   DataTableBulkAction,
+} from "@/features/data-table/types";
+import { DataTableBulkBar } from "@/features/data-table/ui/data-table-bulk-bar";
+import { DataTableContainer } from "@/features/data-table/ui/data-table-container";
+import { DataTableExpandedActions } from "@/features/data-table/ui/data-table-expanded-actions";
+import { DataTableSearchBar } from "@/features/data-table/ui/data-table-search-bar";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { useSheet } from "@/hooks/use-sheet";
@@ -32,210 +35,215 @@ type WritersDataTableProps = {
       hasActiveFilters: boolean;
       onClearFilters: () => void;
    };
-   pagination?: {
-      currentPage: number;
-      totalPages: number;
-      onPageChange: (page: number) => void;
-   };
    onDelete?: (writerId: string) => void;
    onBulkDelete?: (writerIds: string[]) => void;
 };
 
 export function WritersDataTableSkeleton() {
    return (
-      <Card>
-         <CardContent className="pt-6 grid gap-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-               <Skeleton className="h-9 flex-1 sm:max-w-md" />
-            </div>
-            <ItemGroup>
-               {Array.from({ length: 5 }).map((_, index) => (
-                  <Fragment key={`writer-skeleton-${index + 1}`}>
-                     <div className="flex items-center p-4 gap-4">
-                        <Skeleton className="size-10 rounded-full" />
-                        <div className="space-y-2 flex-1">
-                           <Skeleton className="h-4 w-32" />
-                           <Skeleton className="h-3 w-48" />
-                        </div>
-                        <Skeleton className="h-4 w-12" />
-                        <Skeleton className="h-4 w-20" />
+      <DataTableContainer
+         searchBar={<Skeleton className="h-9 flex-1 sm:max-w-md" />}
+      >
+         <ItemGroup>
+            {Array.from({ length: 5 }).map((_, index) => (
+               <Fragment key={`writer-skeleton-${index + 1}`}>
+                  <div className="flex items-center p-4 gap-4">
+                     <Skeleton className="size-10 rounded-full" />
+                     <div className="space-y-2 flex-1">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-48" />
                      </div>
-                     {index !== 4 && <ItemSeparator />}
-                  </Fragment>
-               ))}
-            </ItemGroup>
-         </CardContent>
-      </Card>
+                     <Skeleton className="h-4 w-12" />
+                     <Skeleton className="h-4 w-20" />
+                  </div>
+                  {index !== 4 && <ItemSeparator />}
+               </Fragment>
+            ))}
+         </ItemGroup>
+      </DataTableContainer>
    );
 }
 
 export function WritersDataTable({
    writers,
    filters,
-   pagination,
    onDelete,
    onBulkDelete,
 }: WritersDataTableProps) {
    const { activeOrganization } = useActiveOrganization();
    const { openAlertDialog } = useAlertDialog();
    const { openSheet } = useSheet();
-   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+   const navigate = useNavigate();
+   const { rowSelection, setRowSelection, selectionState, clearSelection } =
+      useDataTableSelection<Writer>();
 
    const hasSearchTerm = filters.searchTerm.length > 0;
 
-   const selectedIds = Object.keys(rowSelection).filter(
-      (id) => rowSelection[id],
+   const handleViewWriter = useCallback(
+      (writer: Writer) => {
+         navigate({
+            to: "/$slug/writers/$writerId",
+            params: {
+               slug: activeOrganization.slug,
+               writerId: writer.id,
+            },
+         });
+      },
+      [navigate, activeOrganization.slug],
    );
 
-   const handleClearSelection = () => {
-      setRowSelection({});
-   };
+   const handleEditWriter = useCallback(
+      (writer: Writer) => {
+         openSheet({
+            children: <ManageWriterForm writer={writer} />,
+         });
+      },
+      [openSheet],
+   );
 
-   const handleEditWriter = (writer: Writer) => {
-      openSheet({
-         children: <ManageWriterForm writer={writer} />,
-      });
-   };
+   const handleDeleteWriter = useCallback(
+      (writer: Writer) => {
+         if (!onDelete) return;
 
-   const handleDeleteWriter = (writer: Writer) => {
-      if (!onDelete) return;
+         openAlertDialog({
+            actionLabel: "Excluir",
+            cancelLabel: "Cancelar",
+            description: `Tem certeza que deseja excluir "${writer.personaConfig.metadata.name}"? Esta ação não pode ser desfeita.`,
+            onAction: () => onDelete(writer.id),
+            title: "Confirmar Exclusão",
+            variant: "destructive",
+         });
+      },
+      [onDelete, openAlertDialog],
+   );
 
-      openAlertDialog({
-         actionLabel: "Excluir",
-         cancelLabel: "Cancelar",
-         description: `${"Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita."} ${writer.personaConfig.metadata.name}?`,
-         onAction: () => onDelete(writer.id),
-         title: "Confirmar Exclusão",
-         variant: "destructive",
-      });
-   };
-
-   const handleBulkDelete = () => {
-      if (!onBulkDelete || selectedIds.length === 0) return;
-
-      openAlertDialog({
-         actionLabel: "Excluir",
-         cancelLabel: "Cancelar",
-         description: "Description Bulk",
-         onAction: () => {
-            onBulkDelete(selectedIds);
-            setRowSelection({});
+   // Expanded row actions
+   const expandedActions: DataTableAction<Writer>[] = useMemo(
+      () => [
+         {
+            id: "view",
+            label: "Ver Detalhes",
+            icon: <Eye className="size-4" />,
+            onClick: handleViewWriter,
          },
-         title: "Confirmar Exclusão",
-         variant: "destructive",
-      });
-   };
+         {
+            id: "edit",
+            label: "Editar",
+            icon: <Edit className="size-4" />,
+            onClick: handleEditWriter,
+         },
+         {
+            id: "delete",
+            label: "Excluir",
+            icon: <Trash2 className="size-4" />,
+            onClick: handleDeleteWriter,
+            variant: "destructive",
+            isVisible: () => onDelete !== undefined,
+         },
+      ],
+      [handleViewWriter, handleEditWriter, handleDeleteWriter, onDelete],
+   );
+
+   // Bulk actions
+   const bulkActions: DataTableBulkAction[] = useMemo(
+      () =>
+         onBulkDelete
+            ? [
+                 {
+                    id: "delete",
+                    label: "Excluir",
+                    icon: <Trash2 className="size-3.5" />,
+                    onClick: onBulkDelete,
+                    variant: "destructive",
+                    requiresConfirmation: true,
+                    confirmationConfig: {
+                       title: "Confirmar Exclusão",
+                       description: `Tem certeza que deseja excluir ${selectionState.selectedCount} escritor(es)? Esta ação não pode ser desfeita.`,
+                       actionLabel: "Excluir",
+                    },
+                 },
+              ]
+            : [],
+      [onBulkDelete, selectionState.selectedCount],
+   );
+
+   // Filter writers based on search
+   const filteredWriters = writers.filter((writer) => {
+      if (filters.searchTerm === "") return true;
+
+      const searchLower = filters.searchTerm.toLowerCase();
+      const name = writer.personaConfig.metadata.name.toLowerCase();
+      const description =
+         writer.personaConfig.metadata.description?.toLowerCase() || "";
+
+      return name.includes(searchLower) || description.includes(searchLower);
+   });
 
    if (writers.length === 0 && !hasSearchTerm) {
       return (
-         <Card>
-            <CardContent className="pt-6">
-               <Empty>
-                  <EmptyContent>
-                     <EmptyMedia variant="icon">
-                        <PenTool className="size-12 text-muted-foreground" />
-                     </EmptyMedia>
-                     <EmptyTitle>{"Nenhum escritor ainda"}</EmptyTitle>
-                     <EmptyDescription>
-                        {
-                           "Crie seu primeiro escritor IA para começar a gerar conteúdo"
-                        }
-                     </EmptyDescription>
-                  </EmptyContent>
-               </Empty>
-            </CardContent>
-         </Card>
+         <DataTableContainer>
+            <Empty>
+               <EmptyContent>
+                  <EmptyMedia variant="icon">
+                     <PenTool className="size-12 text-muted-foreground" />
+                  </EmptyMedia>
+                  <EmptyTitle>{"Nenhum escritor ainda"}</EmptyTitle>
+                  <EmptyDescription>
+                     {"Crie seu primeiro escritor IA para começar a gerar conteúdo"}
+                  </EmptyDescription>
+               </EmptyContent>
+            </Empty>
+         </DataTableContainer>
       );
    }
 
    return (
       <>
-         <Card>
-            <CardContent className="space-y-4 pt-6">
-               {writers.length === 0 ? (
-                  <div className="py-8 text-center text-muted-foreground">
-                     {"Nenhum escritor encontrado"}
-                  </div>
-               ) : (
-                  <>
-                     <DataTable
-                        columns={createWriterColumns(
-                           activeOrganization.slug,
-                           handleEditWriter,
-                           handleDeleteWriter,
-                        )}
-                        data={writers}
-                        enableRowSelection
-                        getRowId={(row) => row.id}
-                        onRowSelectionChange={setRowSelection}
-                        renderMobileCard={(props) => (
-                           <WritersMobileCard
-                              {...props}
-                              onDelete={handleDeleteWriter}
-                              onEdit={handleEditWriter}
-                              slug={activeOrganization.slug}
-                           />
-                        )}
-                        rowSelection={rowSelection}
-                     />
-
-                     {pagination && pagination.totalPages > 1 && (
-                        <div className="flex items-center justify-between border-t pt-4">
-                           <p className="text-sm text-muted-foreground">
-                              {"Página {{current}} de {{total}}"}
-                           </p>
-                           <div className="flex items-center gap-2">
-                              <Button
-                                 disabled={pagination.currentPage <= 1}
-                                 onClick={() =>
-                                    pagination.onPageChange(
-                                       pagination.currentPage - 1,
-                                    )
-                                 }
-                                 size="sm"
-                                 variant="outline"
-                              >
-                                 <ChevronLeft className="size-4" />
-                                 {"Voltar"}
-                              </Button>
-                              <Button
-                                 disabled={
-                                    pagination.currentPage >=
-                                    pagination.totalPages
-                                 }
-                                 onClick={() =>
-                                    pagination.onPageChange(
-                                       pagination.currentPage + 1,
-                                    )
-                                 }
-                                 size="sm"
-                                 variant="outline"
-                              >
-                                 {"Próximo"}
-                                 <ChevronRight className="size-4" />
-                              </Button>
-                           </div>
-                        </div>
-                     )}
-                  </>
-               )}
-            </CardContent>
-         </Card>
-
-         <SelectionActionBar
-            onClear={handleClearSelection}
-            selectedCount={selectedIds.length}
+         <DataTableContainer
+            searchBar={
+               <DataTableSearchBar
+                  hasActiveFilters={filters.hasActiveFilters}
+                  onChange={filters.onSearchChange}
+                  onClearFilters={filters.onClearFilters}
+                  placeholder="Buscar escritores..."
+                  value={filters.searchTerm}
+               />
+            }
          >
-            {onBulkDelete && (
-               <SelectionActionButton
-                  icon={<Trash2 className="size-3.5" />}
-                  onClick={handleBulkDelete}
-                  variant="destructive"
-               >
-                  {"Excluir"}
-               </SelectionActionButton>
+            {filteredWriters.length === 0 ? (
+               <div className="py-8 text-center text-muted-foreground">
+                  {"Nenhum escritor encontrado"}
+               </div>
+            ) : (
+               <DataTable
+                  columns={createWriterColumns(activeOrganization.slug)}
+                  data={filteredWriters}
+                  enableRowSelection
+                  getRowId={(row) => row.id}
+                  onRowSelectionChange={setRowSelection}
+                  renderMobileCard={(props) => (
+                     <WritersMobileCard
+                        {...props}
+                        actions={expandedActions}
+                        slug={activeOrganization.slug}
+                     />
+                  )}
+                  renderSubComponent={({ row }) => (
+                     <DataTableExpandedActions
+                        actions={expandedActions}
+                        row={row.original}
+                     />
+                  )}
+                  rowSelection={rowSelection}
+               />
             )}
-         </SelectionActionBar>
+         </DataTableContainer>
+
+         <DataTableBulkBar
+            actions={bulkActions}
+            onClearSelection={clearSelection}
+            selectedIds={selectionState.selectedIds}
+         />
       </>
    );
 }

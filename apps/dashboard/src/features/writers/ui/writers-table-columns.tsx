@@ -4,17 +4,14 @@ import {
    AvatarImage,
 } from "@packages/ui/components/avatar";
 import { Button } from "@packages/ui/components/button";
-import { Checkbox } from "@packages/ui/components/checkbox";
 import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuItem,
-   DropdownMenuSeparator,
-   DropdownMenuTrigger,
-} from "@packages/ui/components/dropdown-menu";
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from "@packages/ui/components/tooltip";
 import { Link } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Edit, Eye, MoreHorizontal, Trash2 } from "lucide-react";
+import { Eye } from "lucide-react";
 
 export type Writer = {
    id: string;
@@ -23,12 +20,6 @@ export type Writer = {
          name: string;
          description?: string;
       };
-      instructions?: {
-         writingGuidelines?: string;
-         audienceProfile?: string;
-         tone?: string;
-         style?: string;
-      };
    };
    profilePhotoUrl?: string | null;
    contentCount: number;
@@ -36,36 +27,8 @@ export type Writer = {
    createdAt: Date | string;
 };
 
-export function createWriterColumns(
-   slug: string,
-   onEdit?: (writer: Writer) => void,
-   onDelete?: (writer: Writer) => void,
-): ColumnDef<Writer>[] {
+export function createWriterColumns(slug: string): ColumnDef<Writer>[] {
    return [
-      {
-         id: "select",
-         header: ({ table }) => (
-            <Checkbox
-               aria-label="Select all"
-               checked={
-                  table.getIsAllPageRowsSelected() ||
-                  (table.getIsSomePageRowsSelected() && "indeterminate")
-               }
-               onCheckedChange={(value) =>
-                  table.toggleAllPageRowsSelected(!!value)
-               }
-            />
-         ),
-         cell: ({ row }) => (
-            <Checkbox
-               aria-label="Select row"
-               checked={row.getIsSelected()}
-               onCheckedChange={(value) => row.toggleSelected(!!value)}
-            />
-         ),
-         enableSorting: false,
-         enableHiding: false,
-      },
       {
          accessorKey: "name",
          header: "Nome",
@@ -91,13 +54,7 @@ export function createWriterColumns(
                      </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                     <Link
-                        className="font-medium hover:underline truncate block"
-                        params={{ slug, writerId: writer.id }}
-                        to="/$slug/writers/$writerId"
-                     >
-                        {name}
-                     </Link>
+                     <p className="font-medium truncate max-w-[200px]">{name}</p>
                      {writer.personaConfig.metadata.description && (
                         <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                            {writer.personaConfig.metadata.description}
@@ -118,15 +75,6 @@ export function createWriterColumns(
          ),
       },
       {
-         accessorKey: "tone",
-         header: "Tom",
-         cell: ({ row }) => (
-            <span className="text-muted-foreground truncate max-w-[150px] block">
-               {row.original.personaConfig.instructions?.tone || "-"}
-            </span>
-         ),
-      },
-      {
          accessorKey: "createdAt",
          header: "Criado em",
          cell: ({ row }) => {
@@ -135,55 +83,41 @@ export function createWriterColumns(
                   ? row.original.createdAt
                   : new Date(row.original.createdAt);
             return (
-               <span className="text-muted-foreground">
-                  {date.toLocaleDateString()}
+               <span className="text-muted-foreground text-sm">
+                  {date.toLocaleDateString("pt-BR", {
+                     day: "2-digit",
+                     month: "short",
+                     year: "numeric",
+                  })}
                </span>
             );
          },
       },
       {
          id: "actions",
+         header: "",
          cell: ({ row }) => {
             const writer = row.original;
 
             return (
-               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                     <Button className="size-8 p-0" variant="ghost">
-                        <span className="sr-only">{"Abrir menu"}</span>
-                        <MoreHorizontal className="size-4" />
-                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                     <DropdownMenuItem asChild>
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button
+                        asChild
+                        className="size-8"
+                        size="icon"
+                        variant="ghost"
+                     >
                         <Link
                            params={{ slug, writerId: writer.id }}
                            to="/$slug/writers/$writerId"
                         >
-                           <Eye className="mr-2 size-4" />
-                           {"Ver"}
+                           <Eye className="size-4" />
                         </Link>
-                     </DropdownMenuItem>
-                     {onEdit && (
-                        <DropdownMenuItem onClick={() => onEdit(writer)}>
-                           <Edit className="mr-2 size-4" />
-                           {"Editar"}
-                        </DropdownMenuItem>
-                     )}
-                     {onDelete && (
-                        <>
-                           <DropdownMenuSeparator />
-                           <DropdownMenuItem
-                              className="text-destructive focus:text-destructive"
-                              onClick={() => onDelete(writer)}
-                           >
-                              <Trash2 className="mr-2 size-4" />
-                              {"Excluir"}
-                           </DropdownMenuItem>
-                        </>
-                     )}
-                  </DropdownMenuContent>
-               </DropdownMenu>
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Ver detalhes</TooltipContent>
+               </Tooltip>
             );
          },
       },

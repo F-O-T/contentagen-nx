@@ -36,6 +36,19 @@ export interface ToolCall {
 }
 
 /**
+ * Result from the server after executing a tool
+ */
+export interface ServerToolResult {
+   success: boolean;
+   markdown?: string;
+   insertedText?: string;
+   position?: string;
+   level?: string;
+   text?: string;
+   [key: string]: unknown;
+}
+
+/**
  * Result of executing an editor tool
  */
 export interface ToolExecutionResult {
@@ -63,37 +76,38 @@ export interface ToolExecutionResult {
 export async function executeEditorTool(
    editor: LexicalEditor,
    toolCall: ToolCall,
+   serverResult?: ServerToolResult,
 ): Promise<ToolExecutionResult> {
    const { name, args } = toolCall;
 
    try {
       switch (name) {
          case "insertText":
-            return executeInsertText(editor, args);
+            return executeInsertText(editor, args, serverResult);
 
          case "insertHeading":
-            return executeInsertHeading(editor, args);
+            return executeInsertHeading(editor, args, serverResult);
 
          case "insertList":
-            return executeInsertList(editor, args);
+            return executeInsertList(editor, args, serverResult);
 
          case "insertCodeBlock":
-            return executeInsertCodeBlock(editor, args);
+            return executeInsertCodeBlock(editor, args, serverResult);
 
          case "insertTable":
-            return executeInsertTable(editor, args);
+            return executeInsertTable(editor, args, serverResult);
 
          case "insertImage":
-            return executeInsertImage(editor, args);
+            return executeInsertImage(editor, args, serverResult);
 
          case "replaceText":
-            return executeReplaceText(editor, args);
+            return executeReplaceText(editor, args, serverResult);
 
          case "deleteText":
-            return executeDeleteText(editor, args);
+            return executeDeleteText(editor, args, serverResult);
 
          case "formatText":
-            return executeFormatText(editor, args);
+            return executeFormatText(editor, args, serverResult);
 
          // Analysis tools return data without modifying editor
          case "seoScore":
@@ -143,9 +157,11 @@ export async function executeEditorTool(
 function executeInsertText(
    editor: LexicalEditor,
    args: Record<string, unknown>,
+   serverResult?: ServerToolResult,
 ): ToolExecutionResult {
-   const text = args.text as string;
-   const position = args.position as string;
+   // Use markdown from server result if available, otherwise fall back to args.text
+   const text = serverResult?.markdown || (args.text as string);
+   const position = serverResult?.position || (args.position as string);
 
    editor.update(() => {
       const root = $getRoot();
@@ -196,14 +212,48 @@ function executeInsertText(
 
 /**
  * Insert a heading
+ * If serverResult contains markdown, insert that directly via markdown conversion.
+ * Otherwise, create a heading node manually.
  */
 function executeInsertHeading(
    editor: LexicalEditor,
    args: Record<string, unknown>,
+   serverResult?: ServerToolResult,
 ): ToolExecutionResult {
    const text = args.text as string;
    const level = args.level as number;
    const position = (args.position as string) || "end";
+
+   // If server provided markdown, use insertText logic with markdown
+   if (serverResult?.markdown) {
+      editor.update(() => {
+         const root = $getRoot();
+         const existingMarkdown = $convertToMarkdownString(
+            EXTENDED_TRANSFORMERS,
+         );
+
+         let newMarkdown: string;
+         if (position === "start") {
+            newMarkdown =
+               serverResult.markdown +
+               (existingMarkdown ? "\n\n" : "") +
+               existingMarkdown;
+         } else {
+            newMarkdown =
+               existingMarkdown +
+               (existingMarkdown ? "\n\n" : "") +
+               serverResult.markdown;
+         }
+
+         root.clear();
+         $convertFromMarkdownString(newMarkdown, EXTENDED_TRANSFORMERS);
+      });
+
+      return {
+         success: true,
+         message: `Inserted h${level} heading`,
+      };
+   }
 
    const headingTag = `h${Math.min(Math.max(level, 1), 6)}` as HeadingTagType;
 
@@ -244,6 +294,7 @@ function executeInsertHeading(
 function executeInsertList(
    editor: LexicalEditor,
    args: Record<string, unknown>,
+   _serverResult?: ServerToolResult,
 ): ToolExecutionResult {
    const items = args.items as string[];
    const listType = args.listType as ListType;
@@ -291,6 +342,7 @@ function executeInsertList(
 function executeInsertCodeBlock(
    editor: LexicalEditor,
    args: Record<string, unknown>,
+   _serverResult?: ServerToolResult,
 ): ToolExecutionResult {
    const code = args.code as string;
    const language = (args.language as string) || "plaintext";
@@ -333,6 +385,7 @@ function executeInsertCodeBlock(
 function executeInsertTable(
    editor: LexicalEditor,
    args: Record<string, unknown>,
+   _serverResult?: ServerToolResult,
 ): ToolExecutionResult {
    const rows = args.rows as number;
    const columns = args.columns as number;
@@ -398,6 +451,7 @@ function executeInsertTable(
 function executeInsertImage(
    editor: LexicalEditor,
    args: Record<string, unknown>,
+   _serverResult?: ServerToolResult,
 ): ToolExecutionResult {
    // Support both 'url' and 'src' parameter names
    const url = (args.url as string) || (args.src as string);
@@ -451,6 +505,7 @@ function executeInsertImage(
 function executeReplaceText(
    editor: LexicalEditor,
    args: Record<string, unknown>,
+   _serverResult?: ServerToolResult,
 ): ToolExecutionResult {
    const searchText = args.searchText as string;
    const replaceWith = args.replaceWith as string;
@@ -519,6 +574,7 @@ function executeReplaceText(
 function executeDeleteText(
    editor: LexicalEditor,
    args: Record<string, unknown>,
+   _serverResult?: ServerToolResult,
 ): ToolExecutionResult {
    const searchText = args.searchText as string | undefined;
    const deleteAll = (args.deleteAll as boolean) ?? false;
@@ -582,6 +638,7 @@ function executeDeleteText(
 function executeFormatText(
    editor: LexicalEditor,
    args: Record<string, unknown>,
+   _serverResult?: ServerToolResult,
 ): ToolExecutionResult {
    const format = args.format as string;
    const text = args.text as string | undefined;

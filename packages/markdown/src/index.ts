@@ -4,15 +4,19 @@
  * This package wraps the public @f-o-t/markdown library for internal use.
  */
 
+export type { HtmlRenderOptions } from "@f-o-t/markdown";
 export {
-   countWords,
-   extractText,
    // Generation
    generate,
    generateHeadingString,
-   getHeadings,
+   // Utilities
+   normalizeEscapedNewlines,
+   normalizeLineEndings,
    // Parsing
    parse,
    parseOrThrow,
    parseToAst,
+   // HTML Rendering
+   renderNodeToHtml,
+   renderToHtml,
 } from "@f-o-t/markdown";

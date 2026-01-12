@@ -30,6 +30,7 @@ export const user = pgTable("user", {
    telemetryConsent: boolean("telemetry_consent").default(true).notNull(),
    deletionScheduledAt: timestamp("deletion_scheduled_at"),
    deletionType: text("deletion_type"),
+   contentCreationMode: text("content_creation_mode").default("plan"),
 });
 
 export const session = pgTable(

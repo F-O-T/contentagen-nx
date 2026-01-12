@@ -21,6 +21,7 @@ import {
    setChatMode,
    startPlanExecution,
    updatePlanStep,
+   useChatState,
 } from "../context/chat-context";
 
 interface ChatPlanMessageProps {
@@ -215,6 +216,8 @@ export function ChatPlanMessage({
    message,
    onExecutePlan,
 }: ChatPlanMessageProps) {
+   const { executionState } = useChatState();
+
    if (!message.planSteps || message.planSteps.length === 0) {
       return null;
    }
@@ -231,6 +234,22 @@ export function ChatPlanMessage({
    const totalCount = message.planSteps.filter(
       (s) => s.status !== "skipped",
    ).length;
+
+   // Helper to determine if a step is currently executing
+   const isStepExecuting = (stepIndex: number): boolean => {
+      if (!executionState.isExecuting) return false;
+      // Map the step index to the approved step index being executed
+      const approvedStepIndices =
+         message.planSteps
+            ?.map((s, i) =>
+               s.status === "approved" || s.status === "completed" ? i : -1,
+            )
+            .filter((i) => i !== -1) || [];
+      return (
+         executionState.currentStepIndex !== null &&
+         approvedStepIndices[executionState.currentStepIndex] === stepIndex
+      );
+   };
 
    const hasApprovedSteps = approvedSteps.length > 0;
 
@@ -326,6 +345,7 @@ export function ChatPlanMessage({
             {message.planSteps.map((step, index) => (
                <PlanStepItem
                   index={index}
+                  isExecuting={isStepExecuting(index)}
                   isLast={index === (message.planSteps?.length ?? 0) - 1}
                   key={step.id}
                   messageId={message.id}

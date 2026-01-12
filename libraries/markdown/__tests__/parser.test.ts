@@ -1,11 +1,5 @@
 import { describe, expect, it } from "bun:test";
 import {
-   countWords,
-   extractText,
-   getCodeBlocks,
-   getHeadings,
-   getImages,
-   getLinks,
    isValidMarkdown,
    parse,
    parseBuffer,
@@ -340,58 +334,6 @@ describe("convenience functions", () => {
          expect(isValidMarkdown("# Hello")).toBe(true);
          expect(isValidMarkdown("Just text")).toBe(true);
          expect(isValidMarkdown("")).toBe(true);
-      });
-   });
-
-   describe("extractText", () => {
-      it("extracts plain text from markdown", () => {
-         expect(extractText("**Hello** *world*")).toBe("Hello world");
-         expect(extractText("# Heading")).toBe("Heading");
-         expect(extractText("[Link](url)")).toBe("Link");
-      });
-   });
-
-   describe("countWords", () => {
-      it("counts words correctly", () => {
-         expect(countWords("Hello world")).toBe(2);
-         expect(countWords("**One** two *three*")).toBe(3);
-         expect(countWords("")).toBe(0);
-      });
-   });
-
-   describe("getHeadings", () => {
-      it("extracts all headings", () => {
-         const headings = getHeadings("# Title\n## Section\n### Subsection");
-         expect(headings).toHaveLength(3);
-         expect(headings[0]).toEqual({ level: 1, text: "Title" });
-         expect(headings[1]).toEqual({ level: 2, text: "Section" });
-      });
-   });
-
-   describe("getLinks", () => {
-      it("extracts all links", () => {
-         const links = getLinks("[A](a.com) and [B](b.com)");
-         expect(links).toHaveLength(2);
-         expect(links[0]?.url).toBe("a.com");
-         expect(links[1]?.url).toBe("b.com");
-      });
-   });
-
-   describe("getImages", () => {
-      it("extracts all images", () => {
-         const images = getImages("![A](a.png) ![B](b.png)");
-         expect(images).toHaveLength(2);
-         expect(images[0]?.alt).toBe("A");
-         expect(images[1]?.alt).toBe("B");
-      });
-   });
-
-   describe("getCodeBlocks", () => {
-      it("extracts all code blocks", () => {
-         const blocks = getCodeBlocks("```js\ncode1\n```\n\n```py\ncode2\n```");
-         expect(blocks).toHaveLength(2);
-         expect(blocks[0]?.lang).toBe("js");
-         expect(blocks[1]?.lang).toBe("py");
       });
    });
 });

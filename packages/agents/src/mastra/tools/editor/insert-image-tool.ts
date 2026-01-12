@@ -47,33 +47,29 @@ export const insertImageTool = createTool({
 export function getInsertImageInstructions(): string {
    return `
 ## INSERT IMAGE TOOL
-Inserts an image into the blog post using a URL from searchImage results.
+Inserts an image into the blog post using a URL provided by the user.
 
-**IMPORTANT WORKFLOW:**
-1. FIRST call searchImage to find relevant images
-2. Review the returned URLs and pick the best one
-3. THEN call insertImage with the URL and a descriptive alt text
-
-**DO NOT:**
-- Use placeholder URLs or made-up URLs
-- Write markdown syntax like ![alt](url) in text - use this tool instead
-- Skip the searchImage step - always search first
+**When to use:** When the user provides an image URL to add to the content.
 
 **Parameters:**
-- url (string): Full URL from searchImage results (REQUIRED)
+- url (string): Full image URL provided by the user (REQUIRED)
 - alt (string): Descriptive alt text for accessibility and SEO (REQUIRED)
 - caption (string, optional): Caption below the image
 - position (enum): Where to insert - "cursor", "afterParagraph", "end"
 - width (enum, optional): "small", "medium", "large", "full"
 
-**Example workflow:**
-1. searchImage({ query: "team collaboration office", count: 3 })
-2. Review results, pick best URL
-3. insertImage({ 
-     url: "https://images.unsplash.com/photo-xxx", 
-     alt: "Team collaborating around a whiteboard in a modern office",
-     caption: "Effective collaboration leads to better outcomes",
-     position: "end"
-   })
+**Example:**
+If the user says "Add this image: https://example.com/photo.jpg"
+
+insertImage({
+  url: "https://example.com/photo.jpg",
+  alt: "Descriptive text for the image",
+  position: "end"
+})
+
+**DO NOT:**
+- Search for images automatically - wait for the user to provide a URL
+- Use placeholder URLs or made-up URLs
+- Write markdown syntax like ![alt](url) in text - use this tool instead
 `;
 }

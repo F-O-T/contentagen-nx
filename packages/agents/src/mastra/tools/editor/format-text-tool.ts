@@ -1,3 +1,10 @@
+import {
+   generateEmphasisString,
+   generateInlineCodeString,
+   generateLinkString,
+   generateStrikethroughString,
+   generateStrongString,
+} from "@f-o-t/markdown";
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
@@ -29,12 +36,41 @@ export const formatTextTool = createTool({
    }),
    outputSchema: z.object({
       success: z.boolean(),
+      markdown: z.string(),
       format: z.string(),
       scope: z.string(),
    }),
    execute: async (inputData) => {
+      const text = inputData.searchText || "";
+      let markdown = "";
+
+      switch (inputData.format) {
+         case "bold":
+            markdown = generateStrongString(text);
+            break;
+         case "italic":
+            markdown = generateEmphasisString(text);
+            break;
+         case "code":
+            markdown = generateInlineCodeString(text);
+            break;
+         case "link":
+            markdown = generateLinkString(text, inputData.linkUrl || "");
+            break;
+         case "strikethrough":
+            markdown = generateStrikethroughString(text);
+            break;
+         case "underline":
+            // Underline is not standard markdown, use HTML fallback
+            markdown = `<u>${text}</u>`;
+            break;
+         default:
+            markdown = text;
+      }
+
       return {
          success: true,
+         markdown,
          format: inputData.format,
          scope: inputData.scope,
       };

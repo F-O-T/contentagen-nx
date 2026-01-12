@@ -1,14 +1,5 @@
 {
-   "exclude": [
-      "node_modules"
-   ],
-   "extends": "@tooling/typescript/typecheck.json",
-   "include": [
-      "src"
-   ],
-   "references": [
-    {
-      "path": "../rag"
-    }
-  ]
+	"exclude": ["node_modules"],
+	"extends": "@tooling/typescript/typecheck.json",
+	"include": ["src"]
 }

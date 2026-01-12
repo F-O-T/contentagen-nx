@@ -1,4 +1,12 @@
 import {
+   addAgentInstruction,
+   deleteAgentInstruction,
+   getAgentInstructions,
+   reorderAgentInstructions,
+   toggleAgentInstructionEnabled,
+   updateAgentInstruction,
+} from "@packages/database/repositories/agent-instructions-repository";
+import {
    createAgent,
    deleteAgent,
    getAgentById,
@@ -10,7 +18,9 @@ import {
    getContentsByAgentId,
 } from "@packages/database/repositories/content-repository";
 import {
+   CreateInstructionMemorySchema,
    PersonaConfigSchema,
+   UpdateInstructionMemorySchema,
    WriterConfigSchema,
 } from "@packages/database/schema";
 import {
@@ -20,6 +30,8 @@ import {
 } from "@packages/files/client";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
+import { Feature } from "../features";
+import { requireFeature } from "../middleware/feature-gate";
 import { protectedProcedure, router } from "../trpc";
 
 const ALLOWED_PHOTO_TYPES = [
@@ -622,6 +634,274 @@ export const agentRouter = router({
             console.error("Error updating writer config:", err);
             propagateError(err);
             throw APIError.internal("Failed to update writer config.");
+         }
+      }),
+
+   // ===== INSTRUCTION MEMORIES =====
+
+   /**
+    * List all instruction memories for an agent.
+    */
+   listInstructions: protectedProcedure
+      .use(requireFeature(Feature.AGENT_INSTRUCTIONS))
+      .input(z.object({ agentId: z.string().uuid() }))
+      .query(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
+
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
+
+            // Verify agent belongs to organization
+            const agent = await getAgentById(resolvedCtx.db, input.agentId);
+            if (!agent) {
+               throw APIError.notFound("Writer not found.");
+            }
+            if (agent.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to view this writer's instructions.",
+               );
+            }
+
+            const instructions = await getAgentInstructions(
+               resolvedCtx.db,
+               input.agentId,
+            );
+
+            return instructions;
+         } catch (err) {
+            console.error("Error listing agent instructions:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to list agent instructions.");
+         }
+      }),
+
+   /**
+    * Create a new instruction memory for an agent.
+    */
+   createInstruction: protectedProcedure
+      .use(requireFeature(Feature.AGENT_INSTRUCTIONS))
+      .input(
+         z.object({
+            agentId: z.string().uuid(),
+            data: CreateInstructionMemorySchema,
+         }),
+      )
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
+
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
+
+            // Verify agent belongs to organization
+            const agent = await getAgentById(resolvedCtx.db, input.agentId);
+            if (!agent) {
+               throw APIError.notFound("Writer not found.");
+            }
+            if (agent.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to add instructions to this writer.",
+               );
+            }
+
+            const instruction = await addAgentInstruction(
+               resolvedCtx.db,
+               input.agentId,
+               input.data,
+            );
+
+            return instruction;
+         } catch (err) {
+            console.error("Error creating agent instruction:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to create agent instruction.");
+         }
+      }),
+
+   /**
+    * Update an existing instruction memory.
+    */
+   updateInstruction: protectedProcedure
+      .use(requireFeature(Feature.AGENT_INSTRUCTIONS))
+      .input(
+         z.object({
+            agentId: z.string().uuid(),
+            instructionId: z.string().uuid(),
+            data: UpdateInstructionMemorySchema,
+         }),
+      )
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
+
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
+
+            // Verify agent belongs to organization
+            const agent = await getAgentById(resolvedCtx.db, input.agentId);
+            if (!agent) {
+               throw APIError.notFound("Writer not found.");
+            }
+            if (agent.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to update this writer's instructions.",
+               );
+            }
+
+            const instruction = await updateAgentInstruction(
+               resolvedCtx.db,
+               input.agentId,
+               input.instructionId,
+               input.data,
+            );
+
+            return instruction;
+         } catch (err) {
+            console.error("Error updating agent instruction:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to update agent instruction.");
+         }
+      }),
+
+   /**
+    * Delete an instruction memory.
+    */
+   deleteInstruction: protectedProcedure
+      .use(requireFeature(Feature.AGENT_INSTRUCTIONS))
+      .input(
+         z.object({
+            agentId: z.string().uuid(),
+            instructionId: z.string().uuid(),
+         }),
+      )
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
+
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
+
+            // Verify agent belongs to organization
+            const agent = await getAgentById(resolvedCtx.db, input.agentId);
+            if (!agent) {
+               throw APIError.notFound("Writer not found.");
+            }
+            if (agent.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to delete this writer's instructions.",
+               );
+            }
+
+            await deleteAgentInstruction(
+               resolvedCtx.db,
+               input.agentId,
+               input.instructionId,
+            );
+
+            return { success: true };
+         } catch (err) {
+            console.error("Error deleting agent instruction:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to delete agent instruction.");
+         }
+      }),
+
+   /**
+    * Reorder instruction memories.
+    */
+   reorderInstructions: protectedProcedure
+      .use(requireFeature(Feature.AGENT_INSTRUCTIONS))
+      .input(
+         z.object({
+            agentId: z.string().uuid(),
+            orderedIds: z.array(z.string().uuid()),
+         }),
+      )
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
+
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
+
+            // Verify agent belongs to organization
+            const agent = await getAgentById(resolvedCtx.db, input.agentId);
+            if (!agent) {
+               throw APIError.notFound("Writer not found.");
+            }
+            if (agent.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to reorder this writer's instructions.",
+               );
+            }
+
+            const instructions = await reorderAgentInstructions(
+               resolvedCtx.db,
+               input.agentId,
+               input.orderedIds,
+            );
+
+            return instructions;
+         } catch (err) {
+            console.error("Error reordering agent instructions:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to reorder agent instructions.");
+         }
+      }),
+
+   /**
+    * Toggle the enabled status of an instruction memory.
+    */
+   toggleInstructionEnabled: protectedProcedure
+      .use(requireFeature(Feature.AGENT_INSTRUCTIONS))
+      .input(
+         z.object({
+            agentId: z.string().uuid(),
+            instructionId: z.string().uuid(),
+         }),
+      )
+      .mutation(async ({ ctx, input }) => {
+         try {
+            const resolvedCtx = await ctx;
+            const organizationId = resolvedCtx.organizationId;
+
+            if (!organizationId) {
+               throw APIError.unauthorized("Organization must be specified.");
+            }
+
+            // Verify agent belongs to organization
+            const agent = await getAgentById(resolvedCtx.db, input.agentId);
+            if (!agent) {
+               throw APIError.notFound("Writer not found.");
+            }
+            if (agent.organizationId !== organizationId) {
+               throw APIError.forbidden(
+                  "You don't have permission to toggle this writer's instructions.",
+               );
+            }
+
+            const instruction = await toggleAgentInstructionEnabled(
+               resolvedCtx.db,
+               input.agentId,
+               input.instructionId,
+            );
+
+            return instruction;
+         } catch (err) {
+            console.error("Error toggling agent instruction:", err);
+            propagateError(err);
+            throw APIError.internal("Failed to toggle agent instruction.");
          }
       }),
 });

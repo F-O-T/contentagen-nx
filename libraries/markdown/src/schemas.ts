@@ -187,6 +187,32 @@ export interface ListNode {
    position?: Position;
 }
 
+// =============================================================================
+// Table Node Types (GFM Extension)
+// =============================================================================
+
+export interface TableCellNode {
+   type: "tableCell";
+   children: InlineNode[];
+   align?: "left" | "center" | "right";
+   isHeader: boolean;
+   position?: Position;
+}
+
+export interface TableRowNode {
+   type: "tableRow";
+   children: TableCellNode[];
+   isHeader: boolean;
+   position?: Position;
+}
+
+export interface TableNode {
+   type: "table";
+   children: TableRowNode[];
+   align: Array<"left" | "center" | "right" | null>;
+   position?: Position;
+}
+
 export type BlockNode =
    | ThematicBreakNode
    | HeadingNode
@@ -196,7 +222,8 @@ export type BlockNode =
    | LinkReferenceDefinitionNode
    | BlockquoteNode
    | ListItemNode
-   | ListNode;
+   | ListNode
+   | TableNode;
 
 // Alias for backward compatibility
 export type BlockNodeType = BlockNode;
@@ -366,6 +393,26 @@ export const listNodeSchema = blockNodeBase.extend({
    children: z.array(z.unknown()),
 });
 
+// Table node schemas (GFM Extension)
+export const tableCellNodeSchema = blockNodeBase.extend({
+   type: z.literal("tableCell"),
+   children: z.array(z.unknown()),
+   align: z.enum(["left", "center", "right"]).optional(),
+   isHeader: z.boolean(),
+});
+
+export const tableRowNodeSchema = blockNodeBase.extend({
+   type: z.literal("tableRow"),
+   children: z.array(z.unknown()),
+   isHeader: z.boolean(),
+});
+
+export const tableNodeSchema = blockNodeBase.extend({
+   type: z.literal("table"),
+   children: z.array(z.unknown()),
+   align: z.array(z.enum(["left", "center", "right"]).nullable()),
+});
+
 // Union of all block node schemas
 export const blockNodeSchema = z.union([
    thematicBreakNodeSchema,
@@ -377,6 +424,7 @@ export const blockNodeSchema = z.union([
    blockquoteNodeSchema,
    listItemNodeSchema,
    listNodeSchema,
+   tableNodeSchema,
 ]);
 
 // =============================================================================
@@ -582,4 +630,7 @@ export type ParentNode =
    | BlockquoteNode
    | ListItemNode
    | ListNode
+   | TableNode
+   | TableRowNode
+   | TableCellNode
    | DocumentNode;

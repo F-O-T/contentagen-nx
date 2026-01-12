@@ -1,4 +1,8 @@
 import { clientEnv } from "@packages/environment/client";
+import {
+   captureChatMessageSent,
+   captureChatSessionStarted,
+} from "@packages/posthog/llm/client";
 import { useCallback, useEffect } from "react";
 import {
    type ActivePlan,
@@ -218,6 +222,14 @@ export function useChatSession(
                transformedMessages,
             );
 
+            // Track new session started (only if no messages)
+            if (data.messages.length === 0) {
+               captureChatSessionStarted({
+                  contentId,
+                  sessionId: data.session.id,
+               });
+            }
+
             // Restore chat mode from server
             if (data.mode) {
                setChatMode(data.mode);
@@ -246,6 +258,16 @@ export function useChatSession(
          const currentMode = currentState.mode;
          const currentActivePlan = currentState.activePlan;
 
+         // Track message sent analytics
+         captureChatMessageSent({
+            contentId,
+            sessionId,
+            mode: currentMode,
+            messageLength: content.length,
+            hasSelectionContext: !!selectionContext,
+            hasDocumentContext: !!documentContext,
+         });
+
          // Add user message to state
          addUserMessage(content);
 
@@ -270,7 +292,10 @@ export function useChatSession(
             selectionContext: selectionContext || undefined,
             documentContext,
             mode: currentMode,
-            model: model === "glm-4.7" ? "z-ai/glm-4.7" : "x-ai/grok-4.1-fast",
+            model:
+               model === "mistralai/mistral-small-creative"
+                  ? "mistralai/mistral-small-creative"
+                  : "x-ai/grok-4.1-fast",
             planContext: effectivePlanContext || undefined,
          };
 

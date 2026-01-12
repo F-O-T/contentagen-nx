@@ -6,6 +6,7 @@ import {
    type ModelId,
    mastra,
 } from "@packages/agents";
+import { getAgentInstructions } from "@packages/database/repositories/agent-instructions-repository";
 import {
    addChatMessage,
    clearChatSession,
@@ -16,9 +17,17 @@ import {
 } from "@packages/database/repositories/chat-repository";
 import { getContentById } from "@packages/database/repositories/content-repository";
 import type { StoredToolCall } from "@packages/database/schemas/chat";
+import {
+   captureChatResponseComplete,
+   captureChatToolExecuted,
+   capturePlanCreated,
+   type LLMCaptureContext,
+} from "@packages/posthog/llm/server";
 import { Elysia, t } from "elysia";
 import { auth } from "../integrations/auth";
 import { db } from "../integrations/database";
+import { posthog } from "../integrations/posthog";
+import { Feature, requireFeatureAccess } from "../utils/feature-gate";
 
 // Step state for tracking agent execution
 interface StepState {
@@ -50,6 +59,22 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
             throw new Error("No active organization");
          }
 
+         // Check feature access (Chat requires LITE+ plan)
+         await requireFeatureAccess(
+            Feature.CHAT,
+            organizationId,
+            request.headers,
+         );
+
+         // Check if plan mode is requested - requires PRO plan
+         if (body.mode === "plan") {
+            await requireFeatureAccess(
+               Feature.CHAT_PLAN_MODE,
+               organizationId,
+               request.headers,
+            );
+         }
+
          const {
             sessionId,
             messages,
@@ -67,6 +92,11 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
             throw new Error("Content not found");
          }
          const contentAgentId = contentRecord.agentId;
+
+         // Fetch instruction memories for agent (if agent exists)
+         const agentInstructions = contentAgentId
+            ? await getAgentInstructions(db, contentAgentId)
+            : [];
 
          // Update session mode when it changes
          if (mode) {
@@ -128,11 +158,12 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
          const requestContext = createRequestContext({
             userId: session.user.id,
             brandId: organizationId,
-            agentId: contentAgentId,
+            agentId: contentAgentId ?? undefined,
             mode: (mode as ChatMode) || "plan",
             model: (model as ModelId) || "x-ai/grok-4.1-fast",
             activePlan:
                mode === "writer" ? (planContext as ContentPlan) : undefined,
+            agentInstructions,
          });
 
          // Select agent based on mode
@@ -146,6 +177,17 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
             toolCalls: [],
             pendingToolCalls: new Map(),
             hasToolResult: false,
+         };
+
+         // Analytics tracking
+         const streamStartTime = Date.now();
+         const toolsUsed: string[] = [];
+         const toolStartTimes = new Map<string, number>();
+         const captureCtx: LLMCaptureContext = {
+            posthog,
+            userId: session.user.id,
+            organizationId,
+            hasConsent: session.user.telemetryConsent ?? true,
          };
 
          // Helper to save current step to database
@@ -172,6 +214,19 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
             const stream = await agent.stream(mastraMessages, {
                requestContext,
                maxSteps: 20,
+               // Memory configuration for conversation persistence
+               memory: {
+                  thread: sessionId,
+                  resource: contentAgentId ?? contentId,
+                  options: {
+                     lastMessages: 10,
+                     semanticRecall: true,
+                     workingMemory: {
+                        enabled: true,
+                        scope: "resource", // Persist across all threads for this writer/content
+                     },
+                  },
+               },
             });
 
             // Emit initial step start
@@ -230,6 +285,10 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
                         },
                      );
 
+                     // Track tool start time for analytics
+                     toolStartTimes.set(chunk.payload.toolCallId, Date.now());
+                     toolsUsed.push(chunk.payload.toolName);
+
                      // Emit tool call start for real-time UI
                      yield JSON.stringify({
                         type: "tool_call_start",
@@ -260,6 +319,43 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
                         status: "completed",
                         executedAt: Date.now(),
                      });
+
+                     // Capture tool execution analytics
+                     const toolStartTime = toolStartTimes.get(
+                        chunk.payload.toolCallId,
+                     );
+                     const toolResult = chunk.payload.result as Record<
+                        string,
+                        unknown
+                     > | null;
+                     captureChatToolExecuted(captureCtx, {
+                        contentId,
+                        sessionId,
+                        toolName: pendingTool?.name ?? "unknown",
+                        durationMs: toolStartTime
+                           ? Date.now() - toolStartTime
+                           : 0,
+                        success: toolResult?.status !== "error",
+                        model,
+                     });
+
+                     // Check for workflow suspension
+                     const result = chunk.payload.result as Record<
+                        string,
+                        unknown
+                     >;
+                     if (result?.status === "suspended" && result?.runId) {
+                        // Emit workflow_suspended event for frontend
+                        yield JSON.stringify({
+                           type: "workflow_suspended",
+                           workflowTool: pendingTool?.name,
+                           runId: result.runId,
+                           suspendedAt: result.suspendedAt,
+                           suspendData: result.suspendData,
+                           message: result.message,
+                           stepIndex: currentStep.stepIndex,
+                        }) + "\n";
+                     }
 
                      // Special handling for createPlan tool - save as plan message
                      if (pendingTool?.name === "createPlan") {
@@ -294,6 +390,26 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
                            mode as "plan" | "writer" | undefined,
                         );
 
+                        // Capture plan creation analytics
+                        capturePlanCreated(captureCtx, {
+                           contentId,
+                           sessionId,
+                           stepCount: planResult.steps.length,
+                           researchToolsUsed: toolsUsed.filter((t) =>
+                              [
+                                 "webSearch",
+                                 "webCrawl",
+                                 "serpAnalysis",
+                                 "competitorContent",
+                                 "relatedKeywords",
+                                 "contentGapFinder",
+                                 "factFinder",
+                              ].includes(t),
+                           ),
+                           hasResearchInsights: false, // Will be added when we have the data
+                           model,
+                        });
+
                         // Emit plan_created event for frontend
                         yield JSON.stringify({
                            type: "plan_created",
@@ -316,6 +432,18 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 
             // Save final step if it has content
             await saveCurrentStep();
+
+            // Capture response completion analytics
+            captureChatResponseComplete(captureCtx, {
+               contentId,
+               sessionId,
+               mode: (mode as "plan" | "writer") ?? "plan",
+               durationMs: Date.now() - streamStartTime,
+               stepCount: currentStep.stepIndex + 1,
+               toolsUsed: [...new Set(toolsUsed)], // Deduplicate
+               messageLength: currentStep.text.length,
+               model,
+            });
 
             // Final step complete and done signal
             yield JSON.stringify({
@@ -401,6 +529,13 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
             throw new Error("No active organization");
          }
 
+         // Check feature access (Chat requires PRO plan)
+         await requireFeatureAccess(
+            Feature.CHAT,
+            organizationId,
+            request.headers,
+         );
+
          const chatSession = await getOrCreateChatSession(
             db,
             params.contentId,
@@ -445,6 +580,13 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
          if (!organizationId) {
             throw new Error("No active organization");
          }
+
+         // Check feature access (Chat requires PRO plan)
+         await requireFeatureAccess(
+            Feature.CHAT,
+            organizationId,
+            request.headers,
+         );
 
          const chatSession = await getChatSessionById(db, params.sessionId);
          if (!chatSession || chatSession.organizationId !== organizationId) {

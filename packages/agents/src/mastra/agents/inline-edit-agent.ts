@@ -6,32 +6,11 @@ const openrouter = createOpenRouter({
    apiKey: serverEnv.OPENROUTER_API_KEY,
 });
 
-// Available models for inline edit
-const EDIT_MODELS = {
-   "x-ai/grok-4.1-fast": "x-ai/grok-4.1-fast",
-   "mistralai/mistral-small-creative": "mistralai/mistral-small-creative",
-} as const;
-
-type EditModelId = keyof typeof EDIT_MODELS;
-
-/**
- * Inline Edit Agent
- *
- * A focused agent for transforming selected text based on user instructions.
- * Supports model selection via requestContext.
- * No tools - direct text transformation.
- */
 export const inlineEditAgent = new Agent({
    id: "inline-edit-agent",
    name: "Inline Edit Agent",
 
-   // Dynamic model selection from requestContext
-   model: ({ requestContext }) => {
-      const modelId =
-         (requestContext?.get("model") as EditModelId) || "x-ai/grok-4.1-fast";
-      const model = EDIT_MODELS[modelId] || EDIT_MODELS["x-ai/grok-4.1-fast"];
-      return openrouter(model);
-   },
+   model: openrouter("mistralai/mistral-small-creative"),
 
    instructions: () => `
 You are a precise text editor. Transform the selected text according to the user's instruction.

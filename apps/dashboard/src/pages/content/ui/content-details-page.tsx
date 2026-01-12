@@ -1,29 +1,49 @@
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { TooltipProvider } from "@packages/ui/components/tooltip";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@packages/ui/components/tooltip";
 import {
    useMutation,
    useQueryClient,
    useSuspenseQuery,
 } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { Archive, ArrowLeft, Send, Trash2 } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import {
+   Archive,
+   FileText,
+   Lightbulb,
+   Send,
+   Trash2,
+   UserPen,
+} from "lucide-react";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
-import { useChatState } from "@/features/content/context/chat-context";
+import {
+   setChatMode,
+   startNewPlan,
+   useChatState,
+} from "@/features/content/context/chat-context";
 import { ChatSidebar } from "@/features/content/ui/chat-sidebar";
 import { ContentEditor } from "@/features/content/ui/content-editor";
 import { ContentFrontmatterPanel } from "@/features/content/ui/content-frontmatter-panel";
-import { ContentMetadataBar } from "@/features/content/ui/content-metadata-bar";
+import { RelatedPostsPanel } from "@/features/content/ui/related-posts-panel";
+import { WriterAssignmentCredenza } from "@/features/content/ui/writer-assignment-credenza";
 import {
    registerFrontmatterHandlers,
    unregisterFrontmatterHandlers,
 } from "@/features/content/utils/frontmatter-tool-executor";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
+import { useContentCreationPreference } from "@/hooks/use-content-creation-preference";
+import { useCredenza } from "@/hooks/use-credenza";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
+import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 import { useTRPC } from "@/integrations/clients";
 
 type ContentDetailsPageProps = {
@@ -78,19 +98,9 @@ function ContentDetailsPageSkeleton() {
 }
 
 function ContentDetailsPageError({ error }: { error: Error }) {
-   const { activeOrganization } = useActiveOrganization();
-
    return (
       <main className="flex flex-col gap-6">
          <div className="flex items-center gap-4">
-            <Button asChild size="icon" variant="ghost">
-               <Link
-                  params={{ slug: activeOrganization.slug }}
-                  to="/$slug/content"
-               >
-                  <ArrowLeft className="size-4" />
-               </Link>
-            </Button>
             <div className="flex-1">
                <h1 className="text-2xl font-bold">
                   {"Conteúdo não encontrado"}
@@ -115,8 +125,17 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
    const navigate = useNavigate();
    const { activeOrganization } = useActiveOrganization();
    const { openAlertDialog } = useAlertDialog();
+   const { openCredenza, closeCredenza } = useCredenza();
    const [isSaving, setIsSaving] = useState(false);
    const [isSavingMeta, setIsSavingMeta] = useState(false);
+
+   // Feature access for tier-based routing
+   const { hasFeature } = useFeatureAccess();
+   const hasPlanMode = hasFeature(Feature.CHAT_PLAN_MODE);
+   const hasChat = hasFeature(Feature.CHAT);
+
+   // Pro user's preferred creation mode
+   const { preference: creationPreference } = useContentCreationPreference();
 
    // Get chat mode from context
    const { mode: chatMode } = useChatState();
@@ -125,11 +144,75 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
       trpc.content.getById.queryOptions({ id: contentId }),
    );
 
+   // Writer assignment mutation
+   const assignWriterMutation = useMutation(
+      trpc.content.update.mutationOptions({
+         onSuccess: () => {
+            closeCredenza();
+            queryClient.invalidateQueries({
+               queryKey: trpc.content.getById.queryKey({ id: contentId }),
+            });
+            toast.success("Escritor atualizado");
+         },
+         onError: (error) => {
+            toast.error(error.message || "Erro ao atualizar escritor");
+         },
+      }),
+   );
+
+   // Initialize chat mode based on tier on first render
+   useEffect(() => {
+      // FREE users: no chat access, so mode doesn't matter
+      // LITE users: force writer mode (no plan mode access)
+      // PRO users: use their preference for new content, otherwise respect existing mode
+      if (hasChat && !hasPlanMode) {
+         // LITE tier - force writer mode
+         setChatMode("writer");
+      } else if (hasPlanMode) {
+         // PRO tier - if content is new (no body), use preference
+         if (!content.body?.trim()) {
+            setChatMode(creationPreference);
+         }
+         // If content has body, keep current mode (could be plan or writer)
+      }
+   }, [hasChat, hasPlanMode, content.body, creationPreference]);
+
    // Determine if we're in planning mode (full-page chat) or editing mode (split view)
-   // Planning mode: content body is empty AND chat mode is still "plan"
-   // - When content exists: show editor (handles refresh case)
-   // - When chatMode becomes "writer": show editor (handles Execute Plan click)
-   const isPlanning = !content.body?.trim() && chatMode === "plan";
+   // Tier-aware logic:
+   // - FREE: never show planning (no chat access)
+   // - LITE: never show planning (only writer mode)
+   // - PRO: show planning if content is new AND chatMode is "plan"
+   const canShowPlanning = hasPlanMode && !content.body?.trim();
+   const isPlanning = canShowPlanning && chatMode === "plan";
+
+   // Handler to open writer assignment credenza
+   const handleOpenWriterAssignment = () => {
+      openCredenza({
+         children: (
+            <WriterAssignmentCredenza
+               contentId={contentId}
+               currentWriterId={content.agentId}
+               isPending={assignWriterMutation.isPending}
+               onSelect={(writerId) => {
+                  assignWriterMutation.mutate({
+                     id: contentId,
+                     data: { agentId: writerId },
+                  });
+               }}
+            />
+         ),
+      });
+   };
+
+   // Handler to start a new plan (Pro only)
+   const handleStartNewPlan = () => {
+      startNewPlan();
+   };
+
+   // Handler to skip planning (Pro only)
+   const handleSkipPlanning = () => {
+      setChatMode("writer");
+   };
 
    const updateMutation = useMutation(
       trpc.content.update.mutationOptions({
@@ -317,21 +400,28 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
       published: "bg-green-500/10 text-green-600 border-green-200",
    };
 
-   // Full-page chat layout (planning mode)
+   // Full-page chat layout (planning mode - Pro only)
    if (isPlanning) {
       return (
          <TooltipProvider>
             <div className="flex h-[calc(100vh-4rem)] -m-4">
-               {/* Minimal header */}
-               <div className="absolute top-4 left-4 z-10">
-                  <Button asChild size="icon" variant="ghost">
-                     <Link
-                        params={{ slug: activeOrganization.slug }}
-                        to="/$slug/content"
-                     >
-                        <ArrowLeft className="size-4" />
-                     </Link>
-                  </Button>
+               {/* Header with skip planning option */}
+               <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <Button
+                           onClick={handleSkipPlanning}
+                           size="sm"
+                           variant="outline"
+                        >
+                           <FileText className="size-4 mr-2" />
+                           Pular planejamento
+                        </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>
+                        <p>Ir direto para o editor</p>
+                     </TooltipContent>
+                  </Tooltip>
                </div>
 
                {/* Full-page Chat */}
@@ -361,14 +451,6 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
                {/* Header */}
                <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
-                     <Button asChild size="icon" variant="ghost">
-                        <Link
-                           params={{ slug: activeOrganization.slug }}
-                           to="/$slug/content"
-                        >
-                           <ArrowLeft className="size-4" />
-                        </Link>
-                     </Button>
                      <div>
                         <h1 className="text-2xl font-bold">
                            {content.meta.title || "Sem título"}
@@ -424,6 +506,49 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
                         {"Arquivar"}
                      </Button>
                   )}
+
+                  {/* Spacer */}
+                  <div className="flex-1" />
+
+                  {/* Writer assignment button (LITE & PRO) */}
+                  {hasChat && (
+                     <Tooltip>
+                        <TooltipTrigger asChild>
+                           <Button
+                              onClick={handleOpenWriterAssignment}
+                              size="sm"
+                              variant="outline"
+                           >
+                              <UserPen className="size-4 mr-2" />
+                              {content.agentId
+                                 ? "Trocar escritor"
+                                 : "Atribuir escritor"}
+                           </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                           <p>Selecione um escritor IA para ajudar</p>
+                        </TooltipContent>
+                     </Tooltip>
+                  )}
+
+                  {/* New Plan button (PRO only) */}
+                  {hasPlanMode && (
+                     <Tooltip>
+                        <TooltipTrigger asChild>
+                           <Button
+                              onClick={handleStartNewPlan}
+                              size="sm"
+                              variant="outline"
+                           >
+                              <Lightbulb className="size-4 mr-2" />
+                              Novo Plano
+                           </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                           <p>Iniciar nova sessão de planejamento</p>
+                        </TooltipContent>
+                     </Tooltip>
+                  )}
                </div>
 
                {/* Frontmatter Panel */}
@@ -437,11 +562,11 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
                   onMetaChange={handleMetaChange}
                />
 
-               {/* Metadata Bar */}
-               <ContentMetadataBar
+               {/* Related Posts Panel */}
+               <RelatedPostsPanel
                   className="mb-4"
-                  content={content}
-                  slug={activeOrganization.slug}
+                  contentId={contentId}
+                  disabled={content.status === "archived"}
                />
 
                {/* Editor - fills remaining space */}
@@ -457,7 +582,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
                </div>
             </main>
 
-            {/* Chat Sidebar */}
+            {/* Chat Sidebar - always shown, upgrade prompt in Chat tab for FREE users */}
             <ChatSidebar
                contentId={contentId}
                contentMeta={{

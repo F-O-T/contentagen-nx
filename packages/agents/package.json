@@ -1,16 +1,18 @@
 {
   "dependencies": {
+    "@ai-sdk/openai": "catalog:openrouter",
+    "@f-o-t/markdown": "workspace:*",
     "@mastra/core": "^1.0.0-beta.18",
     "@mastra/evals": "^1.0.0-beta.3",
     "@mastra/libsql": "^1.0.0-beta.10",
     "@mastra/loggers": "^1.0.0-beta.3",
     "@mastra/memory": "^1.0.0-beta.9",
     "@mastra/observability": "^1.0.0-beta.9",
+    "@mastra/pg": "^1.0.0-beta.10",
     "@openrouter/ai-sdk-provider": "catalog:openrouter",
     "@packages/database": "workspace:*",
     "@packages/environment": "workspace:*",
     "@packages/files": "workspace:*",
-    "@packages/rag": "workspace:*",
     "@packages/search": "workspace:*",
     "@packages/server-events": "workspace:*",
     "@packages/utils": "workspace:*",
@@ -28,6 +30,14 @@
       "default": "./src/mastra/index.ts",
       "types": "./dist/src/mastra/index.d.ts"
     },
+    "./mastra/rag": {
+      "default": "./src/mastra/rag/index.ts",
+      "types": "./dist/src/mastra/rag/index.d.ts"
+    },
+    "./mastra/tools/analysis": {
+      "default": "./src/mastra/tools/analysis/index.ts",
+      "types": "./dist/src/mastra/tools/analysis/index.d.ts"
+    },
     "./mastra/utils/fim-confidence": {
       "default": "./src/mastra/utils/fim-confidence.ts",
       "types": "./dist/src/mastra/utils/fim-confidence.d.ts"
@@ -44,7 +54,6 @@
   "name": "@packages/agents",
   "private": true,
   "scripts": {
-    "test": "bun test",
     "build": "tsc --build",
     "check": "biome check --write ./src",
     "dev": "dotenv -e .env -- bunx mastra dev",

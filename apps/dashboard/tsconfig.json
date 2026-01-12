@@ -13,7 +13,16 @@
       "paths": {
          "@/*": ["./src/*"],
          "@packages/ui/*": ["../../packages/ui/src/*"],
-         "@server/*": ["../server/src/*"]
+         "@server/*": ["../server/src/*"],
+         "@f-o-t/content-analysis": ["../../libraries/content-analysis/src/index.ts"],
+         "@f-o-t/content-analysis/*": ["../../libraries/content-analysis/src/*"],
+         "@f-o-t/markdown": ["../../libraries/markdown/src/index.ts"],
+         "@f-o-t/markdown/*": ["../../libraries/markdown/src/*"]
       }
-   }
+  },
+  "references": [
+    {
+      "path": "../../packages/markdown"
+    }
+  ]
 }

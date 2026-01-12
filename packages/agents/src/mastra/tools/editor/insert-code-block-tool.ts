@@ -1,3 +1,4 @@
+import { generateCodeBlockString } from "@f-o-t/markdown";
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
@@ -28,12 +29,20 @@ export const insertCodeBlockTool = createTool({
    }),
    outputSchema: z.object({
       success: z.boolean(),
+      markdown: z.string(),
       language: z.string().optional(),
       lineCount: z.number(),
    }),
    execute: async (inputData) => {
+      const markdown = generateCodeBlockString(
+         inputData.code,
+         inputData.language,
+         "fenced",
+      );
+
       return {
          success: true,
+         markdown,
          language: inputData.language,
          lineCount: inputData.code.split("\n").length,
       };

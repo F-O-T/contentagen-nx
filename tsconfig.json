@@ -3,10 +3,10 @@
    "files": [],
    "references": [
     {
-      "path": "./packages/rag"
+      "path": "./packages/queue"
     },
     {
-      "path": "./packages/queue"
+      "path": "./packages/markdown"
     }
   ]
 }

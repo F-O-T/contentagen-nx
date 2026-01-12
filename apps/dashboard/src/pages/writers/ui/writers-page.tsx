@@ -1,18 +1,12 @@
 import { Button } from "@packages/ui/components/button";
 import { Plus } from "lucide-react";
-import { Suspense } from "react";
 import { DefaultHeader } from "@/default/default-header";
-import { WritersListProvider } from "@/features/writers/lib/writers-list-context";
 import { ManageWriterForm } from "@/features/writers/ui/manage-writer-form";
 import { useSheet } from "@/hooks/use-sheet";
-import {
-   WritersFilterBar,
-   WritersFilterBarSkeleton,
-} from "./writers-filter-bar";
 import { WritersListSection } from "./writers-list-section";
 import { WritersStats } from "./writers-stats";
 
-function WritersPageContent() {
+export function WritersPage() {
    const { openSheet } = useSheet();
 
    const handleCreateWriter = () => {
@@ -36,19 +30,7 @@ function WritersPageContent() {
 
          <WritersStats />
 
-         <Suspense fallback={<WritersFilterBarSkeleton />}>
-            <WritersFilterBar />
-         </Suspense>
-
          <WritersListSection />
       </main>
-   );
-}
-
-export function WritersPage() {
-   return (
-      <WritersListProvider>
-         <WritersPageContent />
-      </WritersListProvider>
    );
 }

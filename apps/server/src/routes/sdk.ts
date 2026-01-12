@@ -6,11 +6,11 @@ import {
 } from "@packages/database/repositories/content-repository";
 import { serverEnv as env } from "@packages/environment/server";
 import { streamFileForProxy } from "@packages/files/client";
-import { searchRelatedSlugsByText } from "@packages/rag/repositories/related-slugs-repository";
 import { Elysia, t } from "elysia";
 import { auth } from "../integrations/auth";
-import { db, ragClient } from "../integrations/database";
+import { db } from "../integrations/database";
 import { minioClient } from "../integrations/minio";
+import { Feature, requireFeatureAccess } from "../utils/feature-gate";
 
 const minioBucket = env.MINIO_BUCKET;
 
@@ -43,6 +43,14 @@ export const sdkRoutes = new Elysia({
             if (!session) {
                throw new Error("Invalid session.");
             }
+
+            // Check if the organization has API_ACCESS feature
+            const organizationId = session.session?.activeOrganizationId;
+            await requireFeatureAccess(
+               Feature.API_ACCESS,
+               organizationId,
+               request.headers,
+            );
 
             return { session };
          },
@@ -97,31 +105,7 @@ export const sdkRoutes = new Elysia({
          sdkAuth: true,
       },
    )
-   .get(
-      "/related-slugs",
-      async ({ query }) => {
-         if (!query.slug || !query.agentId) {
-            throw new Error("Slug and Agent ID are required.");
-         }
-
-         const slugs = await searchRelatedSlugsByText(
-            ragClient,
-            query.slug,
-            query.agentId,
-            { limit: 3 },
-         );
-
-         return slugs.map((s) => s.slug).filter((s) => s !== query.slug);
-      },
-      {
-         query: t.Object({
-            agentId: t.String(),
-            slug: t.String(),
-         }),
-         response: t.Array(t.String()),
-         sdkAuth: true,
-      },
-   )
+   // Removed /related-slugs endpoint - use new RAG system in @packages/agents/mastra/rag
 
    // listContentByAgent
    .get(

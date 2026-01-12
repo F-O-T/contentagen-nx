@@ -4,23 +4,59 @@ import {
    useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useSearch } from "@tanstack/react-router";
+import { Archive, Check, PenLine } from "lucide-react";
 import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
+import { DefaultHeader } from "@/default/default-header";
 import {
    ContentDataTable,
    ContentDataTableSkeleton,
 } from "@/features/content/ui/content-data-table";
 import type { ContentItem } from "@/features/content/ui/content-table-columns";
+import type { DataTableFilterChip } from "@/features/data-table/types";
+import { DataTableHeaderFilters } from "@/features/data-table/ui/data-table-header-filters";
+import { DataTableTypeFilterChips } from "@/features/data-table/ui/data-table-type-filter-chips";
 import { useTRPC } from "@/integrations/clients";
 import { ContentQuickActionsToolbar } from "./content-quick-actions-toolbar";
 
-function ContentPageContent() {
+const STATUS_FILTER_CHIPS: DataTableFilterChip<string>[] = [
+   {
+      id: "draft",
+      label: "Rascunho",
+      shortLabel: "Rascunho",
+      value: "draft",
+      icon: <PenLine className="size-3.5" />,
+   },
+   {
+      id: "published",
+      label: "Publicado",
+      shortLabel: "Publicado",
+      value: "published",
+      icon: <Check className="size-3.5" />,
+   },
+   {
+      id: "archived",
+      label: "Arquivado",
+      shortLabel: "Arquivado",
+      value: "archived",
+      icon: <Archive className="size-3.5" />,
+   },
+];
+
+interface ContentPageContentProps {
+   statusFilter: string | null;
+   onStatusFilterChange: (value: string | null) => void;
+}
+
+function ContentPageContent({
+   statusFilter,
+   onStatusFilterChange,
+}: ContentPageContentProps) {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
    const search = useSearch({ from: "/$slug/_dashboard/content/" });
    const [searchTerm, setSearchTerm] = useState("");
-   const [statusFilter, setStatusFilter] = useState("all");
 
    const agentId = (search as { agentId?: string }).agentId;
 
@@ -37,14 +73,15 @@ function ContentPageContent() {
       ? data.items.filter((item) => item.agentId === agentId)
       : data.items;
 
-   // Transform items to include agent info
+   // Transform items to include agent info from API response
    const contents: ContentItem[] = filteredByAgent.map((item) => ({
       id: item.id,
       agentId: item.agentId,
       meta: item.meta,
       status: item.status as "draft" | "published" | "archived",
+      shareStatus: (item.shareStatus as "private" | "shared") || "private",
       createdAt: item.createdAt,
-      agent: undefined, // We don't have agent info in listAllContent
+      agent: item.agent ?? undefined,
    }));
 
    const deleteMutation = useMutation(
@@ -95,6 +132,42 @@ function ContentPageContent() {
       }),
    );
 
+   const markAsDraftMutation = useMutation(
+      trpc.content.markAsDraft.mutationOptions({
+         onSuccess: () => {
+            toast.success("Conteúdo marcado como rascunho");
+            queryClient.invalidateQueries({
+               queryKey: trpc.content.listAllContent.queryKey(),
+            });
+         },
+         onError: (error) => {
+            toast.error(
+               error.message || "Ocorreu um erro. Por favor, tente novamente.",
+            );
+         },
+      }),
+   );
+
+   const toggleShareMutation = useMutation(
+      trpc.content.toggleShare.mutationOptions({
+         onSuccess: (_, { shared }) => {
+            toast.success(
+               shared
+                  ? "Conteúdo compartilhado publicamente"
+                  : "Conteúdo tornado privado",
+            );
+            queryClient.invalidateQueries({
+               queryKey: trpc.content.listAllContent.queryKey(),
+            });
+         },
+         onError: (error) => {
+            toast.error(
+               error.message || "Ocorreu um erro. Por favor, tente novamente.",
+            );
+         },
+      }),
+   );
+
    const handleDelete = (contentId: string) => {
       deleteMutation.mutate({ id: contentId });
    };
@@ -113,11 +186,20 @@ function ContentPageContent() {
       archiveMutation.mutate({ id: contentId });
    };
 
-   const hasActiveFilters = searchTerm.length > 0 || statusFilter !== "all";
+   const handleMarkAsDraft = (contentId: string) => {
+      markAsDraftMutation.mutate({ id: contentId });
+   };
+
+   const handleToggleShare = (contentId: string, shared: boolean) => {
+      toggleShareMutation.mutate({ id: contentId, shared });
+   };
+
+   const statusFilterValue = statusFilter || "all";
+   const hasActiveFilters = searchTerm.length > 0 || statusFilter !== null;
 
    const handleClearFilters = () => {
       setSearchTerm("");
-      setStatusFilter("all");
+      onStatusFilterChange(null);
    };
 
    return (
@@ -127,14 +209,17 @@ function ContentPageContent() {
             hasActiveFilters,
             onClearFilters: handleClearFilters,
             onSearchChange: setSearchTerm,
-            onStatusFilterChange: setStatusFilter,
+            onStatusFilterChange: (value) =>
+               onStatusFilterChange(value === "all" ? null : value),
             searchTerm,
-            statusFilter,
+            statusFilter: statusFilterValue,
          }}
          onArchive={handleArchive}
          onBulkDelete={handleBulkDelete}
          onDelete={handleDelete}
+         onMarkAsDraft={handleMarkAsDraft}
          onPublish={handlePublish}
+         onToggleShare={handleToggleShare}
       />
    );
 }
@@ -151,24 +236,38 @@ function ContentPageError({ error }: { error: Error }) {
 }
 
 export function ContentPage() {
-   const search = useSearch({ from: "/$slug/_dashboard/content/" });
-   const agentId = (search as { agentId?: string }).agentId;
+   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+
+   const hasActiveFilters = statusFilter !== null;
+   const handleClearFilters = () => setStatusFilter(null);
 
    return (
-      <main className="flex flex-col gap-4">
-         <div className="flex items-center justify-between">
-            <div>
-               <h1 className="text-2xl font-bold">{"Conteúdos"}</h1>
-               <p className="text-muted-foreground">
-                  {"Gerencie seus conteúdos"}
-               </p>
-            </div>
-            <ContentQuickActionsToolbar agentId={agentId} />
-         </div>
+      <main className="flex flex-col gap-6">
+         <DefaultHeader
+            actions={<ContentQuickActionsToolbar />}
+            description={"Gerencie seus conteúdos criados pelos escritores IA."}
+            secondaryActions={
+               <DataTableHeaderFilters
+                  additionalFilters={
+                     <DataTableTypeFilterChips
+                        chips={STATUS_FILTER_CHIPS}
+                        onValueChange={setStatusFilter}
+                        value={statusFilter}
+                     />
+                  }
+                  hasActiveFilters={hasActiveFilters}
+                  onClearFilters={handleClearFilters}
+               />
+            }
+            title={"Conteúdos"}
+         />
 
          <ErrorBoundary FallbackComponent={ContentPageError}>
             <Suspense fallback={<ContentDataTableSkeleton />}>
-               <ContentPageContent />
+               <ContentPageContent
+                  onStatusFilterChange={setStatusFilter}
+                  statusFilter={statusFilter}
+               />
             </Suspense>
          </ErrorBoundary>
       </main>

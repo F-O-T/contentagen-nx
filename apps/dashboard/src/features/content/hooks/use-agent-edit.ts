@@ -1,5 +1,11 @@
 import { clientEnv } from "@packages/environment/client";
+import {
+   captureEditAccepted,
+   captureEditRejected,
+   captureEditRequested,
+} from "@packages/posthog/llm/client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 
 export interface AgentEditRequest {
    selectedText: string;
@@ -39,9 +45,18 @@ export function useAgentEdit({
    onComplete,
    onError,
 }: UseAgentEditOptions) {
+   const { hasFeature } = useFeatureAccess();
+   const hasQuickEditFeature = hasFeature(Feature.QUICK_EDIT);
+
    const [isLoading, setIsLoading] = useState(false);
    const [error, setError] = useState<Error | null>(null);
    const abortControllerRef = useRef<AbortController | null>(null);
+
+   // Analytics tracking ref
+   const lastRequestRef = useRef<{
+      instructionLength: number;
+      selectedTextLength: number;
+   } | null>(null);
 
    // Use refs for callbacks to avoid recreating requestEdit
    const onChunkRef = useRef(onChunk);
@@ -65,6 +80,23 @@ export function useAgentEdit({
 
    const requestEdit = useCallback(
       async (request: AgentEditRequest) => {
+         // Feature gate: silently skip if Quick Edit is not available
+         if (!hasQuickEditFeature) {
+            return;
+         }
+
+         // Track edit requested analytics
+         captureEditRequested({
+            instructionLength: request.instruction.length,
+            selectedTextLength: request.selectedText.length,
+         });
+
+         // Store request info for accept/reject tracking
+         lastRequestRef.current = {
+            instructionLength: request.instruction.length,
+            selectedTextLength: request.selectedText.length,
+         };
+
          cancelEdit();
          abortControllerRef.current = new AbortController();
          const signal = abortControllerRef.current.signal;
@@ -157,8 +189,38 @@ export function useAgentEdit({
             abortControllerRef.current = null;
          }
       },
-      [cancelEdit],
+      [cancelEdit, hasQuickEditFeature],
    );
 
-   return { requestEdit, cancelEdit, isLoading, error };
+   // Analytics: Track when user accepts an edit
+   const handleAccept = useCallback(() => {
+      if (lastRequestRef.current) {
+         captureEditAccepted({
+            instructionLength: lastRequestRef.current.instructionLength,
+            selectedTextLength: lastRequestRef.current.selectedTextLength,
+         });
+         lastRequestRef.current = null;
+      }
+   }, []);
+
+   // Analytics: Track when user rejects an edit
+   const handleReject = useCallback(() => {
+      if (lastRequestRef.current) {
+         captureEditRejected({
+            instructionLength: lastRequestRef.current.instructionLength,
+            selectedTextLength: lastRequestRef.current.selectedTextLength,
+         });
+         lastRequestRef.current = null;
+      }
+   }, []);
+
+   return {
+      requestEdit,
+      cancelEdit,
+      handleAccept,
+      handleReject,
+      isLoading,
+      error,
+      isEnabled: hasQuickEditFeature,
+   };
 }

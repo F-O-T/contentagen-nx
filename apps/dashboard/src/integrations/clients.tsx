@@ -209,3 +209,7 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
 export type Session = typeof betterAuthClient.$Infer.Session;
 export type TrpcClient = ReturnType<typeof createTRPCOptionsProxy<AppRouter>>;
 export type InternalTrpcClient = ReturnType<typeof makeTrpcClient>;
+
+// Type helper to infer router outputs
+import type { inferRouterOutputs } from "@trpc/server";
+export type RouterOutputs = inferRouterOutputs<AppRouter>;

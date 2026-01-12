@@ -1,26 +1,28 @@
-import { Button } from "@packages/ui/components/button";
 import { ScrollArea } from "@packages/ui/components/scroll-area";
 import {
-   Tooltip,
-   TooltipContent,
-   TooltipTrigger,
-} from "@packages/ui/components/tooltip";
+   Tabs,
+   TabsContent,
+   TabsList,
+   TabsTrigger,
+} from "@packages/ui/components/tabs";
 import { cn } from "@packages/ui/lib/utils";
-import { ListChecks, Pencil, RotateCcw } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { BarChart3, MessageSquare } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { UpgradePrompt } from "@/features/upgrade/ui/upgrade-prompt";
+import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 import {
    type ActivePlan,
    type ContentMetadata,
    type PlanStep,
+   setChatMode,
    setContentMetadata,
-   startNewPlan,
    useChatState,
 } from "../context/chat-context";
 import { useChatSession } from "../hooks/use-chat-session";
 import { ChatInput } from "./chat-input";
 import { ChatMessageList } from "./chat-message-list";
-import { ChatModeSelect } from "./chat-mode-select";
 import { ChatSelectionContext } from "./chat-selection-context";
+import { MetadataPanel } from "./metadata-panel";
 
 interface ChatSidebarProps {
    contentId: string;
@@ -37,6 +39,11 @@ export function ChatSidebar({
    fullPage = false,
    onAgentComplete,
 }: ChatSidebarProps) {
+   const [activeTab, setActiveTab] = useState<"chat" | "metadata">("chat");
+   const { hasFeature } = useFeatureAccess();
+   const hasChatFeature = hasFeature(Feature.CHAT);
+   const hasPlanModeFeature = hasFeature(Feature.CHAT_PLAN_MODE);
+
    const {
       selectionContext,
       documentContent,
@@ -59,6 +66,13 @@ export function ChatSidebar({
       sessionId,
    } = useChatSession(contentId, { onAgentComplete });
 
+   // Force writer mode for users without plan mode feature
+   useEffect(() => {
+      if (hasChatFeature && !hasPlanModeFeature && mode === "plan") {
+         setChatMode("writer");
+      }
+   }, [hasChatFeature, hasPlanModeFeature, mode]);
+
    // Update content metadata when prop changes (using stable comparison)
    useEffect(() => {
       if (contentMeta) {
@@ -69,6 +83,11 @@ export function ChatSidebar({
          }
       }
    }, [contentMeta]);
+
+   // If in full-page mode without feature, return null (user shouldn't reach this)
+   if (!hasChatFeature && fullPage) {
+      return null;
+   }
 
    const handleSend = (content: string) => {
       // Pass document content with the message
@@ -82,10 +101,6 @@ export function ChatSidebar({
    ) => {
       // Send the execution prompt to the agent in writer mode with plan context
       sendMessage(executionPrompt, documentContent, planContext);
-   };
-
-   const handleNewPlan = () => {
-      startNewPlan();
    };
 
    return (
@@ -109,122 +124,218 @@ export function ChatSidebar({
             </div>
          )}
 
-         {/* Header for sidebar mode - shows mode indicator and actions */}
-         {!fullPage && (
-            <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30">
-               <div className="flex items-center gap-2">
-                  {/* Mode indicator */}
-                  <div
-                     className={cn(
-                        "flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium",
-                        mode === "plan"
-                           ? "bg-blue-500/10 text-blue-600"
-                           : "bg-green-500/10 text-green-600",
-                     )}
-                  >
-                     {mode === "plan" ? (
-                        <>
-                           <ListChecks className="size-3.5" />
-                           <span>Plan Mode</span>
-                        </>
-                     ) : (
-                        <>
-                           <Pencil className="size-3.5" />
-                           <span>Writer Mode</span>
-                        </>
-                     )}
+         {/* Full-page mode content (no tabs) */}
+         {fullPage && (
+            <>
+               {/* Execution progress bar */}
+               {executionState.isExecuting && (
+                  <div className="px-3 py-2 border-b bg-primary/5">
+                     <div className="flex items-center justify-between text-xs mb-1">
+                        <span className="text-primary font-medium">
+                           Executing plan...
+                        </span>
+                        <span className="text-muted-foreground">
+                           {executionState.completedSteps}/
+                           {executionState.totalSteps} steps
+                        </span>
+                     </div>
+                     <div className="h-1.5 bg-primary/20 rounded-full overflow-hidden">
+                        <div
+                           className="h-full bg-primary rounded-full transition-all duration-300"
+                           style={{
+                              width: `${
+                                 executionState.totalSteps > 0
+                                    ? (
+                                         executionState.completedSteps /
+                                            executionState.totalSteps
+                                      ) * 100
+                                    : 0
+                              }%`,
+                           }}
+                        />
+                     </div>
                   </div>
-                  <ChatModeSelect />
-               </div>
-
-               {/* New Plan button - shows in writer mode */}
-               {mode === "writer" && (
-                  <Tooltip>
-                     <TooltipTrigger asChild>
-                        <Button
-                           className="h-7 text-xs gap-1.5"
-                           disabled={isStreaming}
-                           onClick={handleNewPlan}
-                           size="sm"
-                           variant="ghost"
-                        >
-                           <RotateCcw className="size-3.5" />
-                           New Plan
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent side="bottom">
-                        <p>Start a new content plan</p>
-                     </TooltipContent>
-                  </Tooltip>
                )}
-            </div>
-         )}
 
-         {/* Execution progress bar */}
-         {executionState.isExecuting && (
-            <div className="px-3 py-2 border-b bg-primary/5">
-               <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-primary font-medium">
-                     Executing plan...
-                  </span>
-                  <span className="text-muted-foreground">
-                     {executionState.completedSteps}/{executionState.totalSteps}{" "}
-                     steps
-                  </span>
-               </div>
-               <div className="h-1.5 bg-primary/20 rounded-full overflow-hidden">
-                  <div
-                     className="h-full bg-primary rounded-full transition-all duration-300"
-                     style={{
-                        width: `${
-                           executionState.totalSteps > 0
-                              ? (
-                                   executionState.completedSteps /
-                                      executionState.totalSteps
-                                ) * 100
-                              : 0
-                        }%`,
-                     }}
+               {/* Messages */}
+               <ScrollArea className="flex-1 min-h-0">
+                  <ChatMessageList
+                     activeToolCalls={activeToolCalls}
+                     isStreaming={isStreaming}
+                     messages={messages}
+                     onExecutePlan={handleExecutePlan}
+                     streamingContent={currentStreamingMessage}
+                     streamingSteps={streamingSteps}
+                  />
+               </ScrollArea>
+
+               {/* Selection Context */}
+               {selectionContext && (
+                  <ChatSelectionContext context={selectionContext} />
+               )}
+
+               {/* Input Area */}
+               <div className="shrink-0 border-t p-6">
+                  <ChatInput
+                     disabled={!sessionId || isSessionLoading}
+                     isLoading={isStreaming}
+                     onCancel={cancelChat}
+                     onSend={handleSend}
+                     placeholder={
+                        isSessionLoading
+                           ? "Loading chat session..."
+                           : !sessionId
+                             ? "Unable to load chat session"
+                             : mode === "plan"
+                               ? "What would you like to plan?"
+                               : "What should I write or edit?"
+                     }
                   />
                </div>
-            </div>
+            </>
          )}
 
-         {/* Messages */}
-         <ScrollArea className="flex-1 min-h-0">
-            <ChatMessageList
-               activeToolCalls={activeToolCalls}
-               isStreaming={isStreaming}
-               messages={messages}
-               onExecutePlan={handleExecutePlan}
-               streamingContent={currentStreamingMessage}
-               streamingSteps={streamingSteps}
-            />
-         </ScrollArea>
-
-         {/* Selection Context */}
-         {selectionContext && (
-            <ChatSelectionContext context={selectionContext} />
-         )}
-
-         {/* Input Area */}
-         <div className={cn("shrink-0 border-t", fullPage ? "p-6" : "p-3")}>
-            <ChatInput
-               disabled={!sessionId || isSessionLoading}
-               isLoading={isStreaming}
-               onCancel={cancelChat}
-               onSend={handleSend}
-               placeholder={
-                  isSessionLoading
-                     ? "Loading chat session..."
-                     : !sessionId
-                       ? "Unable to load chat session"
-                       : mode === "plan"
-                         ? "What would you like to plan?"
-                         : "What should I write or edit?"
+         {/* Sidebar mode with tabs */}
+         {!fullPage && (
+            <Tabs
+               className="flex flex-col h-full"
+               onValueChange={(value) =>
+                  setActiveTab(value as "chat" | "metadata")
                }
-            />
-         </div>
+               value={activeTab}
+            >
+               {/* Tab header */}
+               <div className="shrink-0 border-b">
+                  <TabsList className="w-full h-10 rounded-none bg-transparent p-0">
+                     <TabsTrigger
+                        className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+                        value="chat"
+                     >
+                        <MessageSquare className="size-3.5 mr-1.5" />
+                        Chat
+                        {/* Compact mode indicator - only show for users with chat access */}
+                        {hasChatFeature && (
+                           <span
+                              className={cn(
+                                 "ml-2 px-1.5 py-0.5 rounded text-[10px] font-medium",
+                                 mode === "plan"
+                                    ? "bg-blue-500/10 text-blue-600"
+                                    : "bg-green-500/10 text-green-600",
+                              )}
+                           >
+                              {mode === "plan" ? "Plan" : "Writer"}
+                           </span>
+                        )}
+                     </TabsTrigger>
+                     <TabsTrigger
+                        className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+                        value="metadata"
+                     >
+                        <BarChart3 className="size-3.5 mr-1.5" />
+                        Metadata
+                     </TabsTrigger>
+                  </TabsList>
+               </div>
+
+               {/* Chat tab content */}
+               <TabsContent
+                  className="flex-1 flex flex-col m-0 min-h-0 data-[state=inactive]:hidden"
+                  value="chat"
+               >
+                  {/* Show upgrade prompt for FREE users */}
+                  {!hasChatFeature ? (
+                     <div className="flex-1 flex items-center justify-center p-4">
+                        <UpgradePrompt
+                           description="Use o chat para planejar e escrever conteúdo com ajuda da IA."
+                           feature={Feature.CHAT}
+                           title="Chat com IA"
+                        />
+                     </div>
+                  ) : (
+                     <>
+                        {/* Execution progress bar */}
+                        {executionState.isExecuting && (
+                           <div className="px-3 py-2 border-b bg-primary/5">
+                              <div className="flex items-center justify-between text-xs mb-1">
+                                 <span className="text-primary font-medium">
+                                    Executing plan...
+                                 </span>
+                                 <span className="text-muted-foreground">
+                                    {executionState.completedSteps}/
+                                    {executionState.totalSteps} steps
+                                 </span>
+                              </div>
+                              <div className="h-1.5 bg-primary/20 rounded-full overflow-hidden">
+                                 <div
+                                    className="h-full bg-primary rounded-full transition-all duration-300"
+                                    style={{
+                                       width: `${
+                                          executionState.totalSteps > 0
+                                             ? (
+                                                  executionState.completedSteps /
+                                                     executionState.totalSteps
+                                               ) * 100
+                                             : 0
+                                       }%`,
+                                    }}
+                                 />
+                              </div>
+                           </div>
+                        )}
+
+                        {/* Messages */}
+                        <ScrollArea className="flex-1 min-h-0">
+                           <ChatMessageList
+                              activeToolCalls={activeToolCalls}
+                              isStreaming={isStreaming}
+                              messages={messages}
+                              onExecutePlan={handleExecutePlan}
+                              streamingContent={currentStreamingMessage}
+                              streamingSteps={streamingSteps}
+                           />
+                        </ScrollArea>
+
+                        {/* Selection Context */}
+                        {selectionContext && (
+                           <ChatSelectionContext context={selectionContext} />
+                        )}
+
+                        {/* Input Area */}
+                        <div className="shrink-0 border-t p-3">
+                           <ChatInput
+                              disabled={!sessionId || isSessionLoading}
+                              isLoading={isStreaming}
+                              onCancel={cancelChat}
+                              onSend={handleSend}
+                              placeholder={
+                                 isSessionLoading
+                                    ? "Loading chat session..."
+                                    : !sessionId
+                                      ? "Unable to load chat session"
+                                      : mode === "plan"
+                                        ? "What would you like to plan?"
+                                        : "What should I write or edit?"
+                              }
+                           />
+                        </div>
+                     </>
+                  )}
+               </TabsContent>
+
+               {/* Metadata tab content */}
+               <TabsContent
+                  className="flex-1 m-0 min-h-0 data-[state=inactive]:hidden"
+                  value="metadata"
+               >
+                  <MetadataPanel
+                     className="h-full"
+                     contentMeta={contentMeta}
+                     documentContent={documentContent}
+                     isActive={activeTab === "metadata"}
+                  />
+               </TabsContent>
+            </Tabs>
+         )}
       </div>
    );
 }

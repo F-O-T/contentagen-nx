@@ -16,19 +16,10 @@ import {
 } from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
 import { useForm } from "@tanstack/react-form";
-import {
-   ChevronDown,
-   ChevronUp,
-   Loader2,
-   RefreshCw,
-   Sparkles,
-   Wand2,
-} from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import { z } from "zod";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
-import { useMetaGeneration } from "../hooks/use-meta-generation";
 import { KeywordsInput } from "./keywords-input";
 
 type ContentMeta = {
@@ -62,10 +53,21 @@ const metaSchema = z.object({
    keywords: z.array(z.string()).max(10, "Maximum 10 keywords allowed"),
 });
 
+function generateSlugFromTitle(title: string): string {
+   return title
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+      .replace(/[^a-z0-9\s-]/g, "") // Remove non-alphanumeric
+      .trim()
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .replace(/-+/g, "-"); // Collapse multiple hyphens
+}
+
 export function ContentFrontmatterPanel({
    contentId: _contentId,
    meta,
-   body,
+   body: _body,
    onMetaChange,
    isSaving = false,
    disabled = false,
@@ -80,22 +82,6 @@ export function ContentFrontmatterPanel({
       description: meta.description,
       slug: meta.slug,
       keywords: meta.keywords,
-   });
-
-   const {
-      generateDescription,
-      generateKeywords,
-      generateAll,
-      generateSlugFromTitle,
-      isGeneratingDescription,
-      isGeneratingKeywords,
-      isGeneratingAll,
-   } = useMetaGeneration({
-      onError: (error) => {
-         toast.error(
-            error.message || "Ocorreu um erro. Por favor, tente novamente.",
-         );
-      },
    });
 
    const form = useForm({
@@ -218,7 +204,7 @@ export function ContentFrontmatterPanel({
             debouncedSave({ title });
          }
       },
-      [form, generateSlugFromTitle, debouncedSave],
+      [form, debouncedSave],
    );
 
    // Regenerate slug from current title
@@ -227,58 +213,7 @@ export function ContentFrontmatterPanel({
       const newSlug = generateSlugFromTitle(title);
       form.setFieldValue("slug", newSlug);
       debouncedSave({ slug: newSlug });
-   }, [form, generateSlugFromTitle, debouncedSave]);
-
-   // AI generation handlers
-   const handleGenerateDescription = useCallback(async () => {
-      const title = form.getFieldValue("title") ?? "";
-      if (!title || !body) {
-         toast.error("Title and content are required to generate description");
-         return;
-      }
-      const description = await generateDescription(title, body);
-      if (description) {
-         form.setFieldValue("description", description);
-         debouncedSave({ description });
-         toast.success("Description generated");
-      }
-   }, [form, body, generateDescription, debouncedSave]);
-
-   const handleGenerateKeywords = useCallback(async () => {
-      const title = form.getFieldValue("title") ?? "";
-      if (!title || !body) {
-         toast.error("Title and content are required to generate keywords");
-         return;
-      }
-      const keywords = await generateKeywords(title, body);
-      if (keywords) {
-         form.setFieldValue("keywords", keywords);
-         debouncedSave({ keywords });
-         toast.success("Keywords generated");
-      }
-   }, [form, body, generateKeywords, debouncedSave]);
-
-   const handleGenerateAll = useCallback(async () => {
-      const title = form.getFieldValue("title") ?? "";
-      if (!title || !body) {
-         toast.error("Title and content are required to generate metadata");
-         return;
-      }
-      const result = await generateAll(title, body);
-      if (result) {
-         if (result.description) {
-            form.setFieldValue("description", result.description);
-         }
-         if (result.keywords) {
-            form.setFieldValue("keywords", result.keywords);
-         }
-         debouncedSave({
-            description: result.description,
-            keywords: result.keywords,
-         });
-         toast.success("Metadata generated");
-      }
-   }, [form, body, generateAll, debouncedSave]);
+   }, [form, debouncedSave]);
 
    return (
       <Collapsible
@@ -394,35 +329,9 @@ export function ContentFrontmatterPanel({
 
                   return (
                      <Field data-invalid={isInvalid}>
-                        <div className="flex items-center justify-between">
-                           <FieldLabel htmlFor={field.name}>
-                              {"Descrição"}
-                           </FieldLabel>
-                           <Tooltip>
-                              <TooltipTrigger asChild>
-                                 <Button
-                                    className="h-6 text-xs gap-1"
-                                    disabled={
-                                       disabled || isGeneratingDescription
-                                    }
-                                    onClick={handleGenerateDescription}
-                                    size="sm"
-                                    type="button"
-                                    variant="ghost"
-                                 >
-                                    {isGeneratingDescription ? (
-                                       <Loader2 className="size-3 animate-spin" />
-                                    ) : (
-                                       <Sparkles className="size-3" />
-                                    )}
-                                    Generate
-                                 </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                 Generate description with AI
-                              </TooltipContent>
-                           </Tooltip>
-                        </div>
+                        <FieldLabel htmlFor={field.name}>
+                           {"Descrição"}
+                        </FieldLabel>
                         <Textarea
                            aria-invalid={isInvalid}
                            disabled={disabled}
@@ -456,31 +365,7 @@ export function ContentFrontmatterPanel({
 
                   return (
                      <Field data-invalid={isInvalid}>
-                        <div className="flex items-center justify-between">
-                           <FieldLabel>Keywords</FieldLabel>
-                           <Tooltip>
-                              <TooltipTrigger asChild>
-                                 <Button
-                                    className="h-6 text-xs gap-1"
-                                    disabled={disabled || isGeneratingKeywords}
-                                    onClick={handleGenerateKeywords}
-                                    size="sm"
-                                    type="button"
-                                    variant="ghost"
-                                 >
-                                    {isGeneratingKeywords ? (
-                                       <Loader2 className="size-3 animate-spin" />
-                                    ) : (
-                                       <Sparkles className="size-3" />
-                                    )}
-                                    Generate
-                                 </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                 Generate keywords with AI
-                              </TooltipContent>
-                           </Tooltip>
-                        </div>
+                        <FieldLabel>Keywords</FieldLabel>
                         <KeywordsInput
                            disabled={disabled}
                            onChange={(keywords) =>
@@ -496,25 +381,6 @@ export function ContentFrontmatterPanel({
                   );
                }}
             </form.Field>
-
-            {/* Generate All Button */}
-            <div className="pt-2 border-t">
-               <Button
-                  className="w-full gap-2"
-                  disabled={disabled || isGeneratingAll}
-                  onClick={handleGenerateAll}
-                  size="sm"
-                  type="button"
-                  variant="outline"
-               >
-                  {isGeneratingAll ? (
-                     <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                     <Wand2 className="size-4" />
-                  )}
-                  Generate All Metadata with AI
-               </Button>
-            </div>
          </CollapsibleContent>
       </Collapsible>
    );

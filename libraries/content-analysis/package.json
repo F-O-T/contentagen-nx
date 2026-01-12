@@ -1,0 +1,67 @@
+{
+   "name": "@f-o-t/content-analysis",
+   "version": "1.0.0",
+   "description": "Content analysis library for SEO, readability, structure, and pattern detection",
+   "type": "module",
+   "private": false,
+   "module": "./dist/index.js",
+   "types": "./dist/index.d.ts",
+   "exports": {
+      ".": {
+         "bun": "./src/index.ts",
+         "import": {
+            "default": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+         },
+         "types": "./src/index.ts"
+      },
+      "./types": {
+         "bun": "./src/types.ts",
+         "import": {
+            "default": "./dist/types.js",
+            "types": "./dist/types.d.ts"
+         },
+         "types": "./src/types.ts"
+      },
+      "./package.json": "./package.json"
+   },
+   "files": [
+      "dist"
+   ],
+   "scripts": {
+      "build": "bunup",
+      "check": "biome check --write .",
+      "dev": "bunup --watch",
+      "test": "bun test",
+      "test:coverage": "bun test --coverage",
+      "test:watch": "bun test --watch",
+      "typecheck": "tsc"
+   },
+   "devDependencies": {
+      "@biomejs/biome": "2.3.10",
+      "@types/bun": "1.3.5",
+      "bumpp": "10.3.2",
+      "bunup": "0.16.11",
+      "typescript": "5.9.3"
+   },
+   "peerDependencies": {
+      "typescript": ">=4.5.0"
+   },
+   "peerDependenciesMeta": {
+      "typescript": {
+         "optional": true
+      }
+   },
+   "license": "MIT",
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/F-O-T/montte-nx.git"
+   },
+   "homepage": "https://github.com/F-O-T/montte-nx/blob/master/libraries/content-analysis",
+   "bugs": {
+      "url": "https://github.com/F-O-T/montte-nx/issues"
+   },
+   "publishConfig": {
+      "access": "public"
+   }
+}

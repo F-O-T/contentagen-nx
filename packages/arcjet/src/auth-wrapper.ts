@@ -1,5 +1,7 @@
 import type { ArcjetDecision } from "@arcjet/bun";
+import { Feature, planHasFeature } from "@packages/api/server/features";
 import type { AuthInstance } from "@packages/authentication/server";
+import { PlanName } from "@packages/stripe/constants";
 import {
    arcjetInstance,
    BOT_DETECTION,
@@ -20,18 +22,83 @@ async function extractEmailFromRequest(
    }
 }
 
+/**
+ * Check if the request is an API key creation endpoint.
+ */
+function isApiKeyCreationEndpoint(pathname: string): boolean {
+   return pathname === "/api/auth/api-key/create";
+}
+
+/**
+ * Get the user's plan from their subscription.
+ */
+async function getUserPlanFromAuth(
+   authInstance: AuthInstance,
+   request: Request,
+): Promise<PlanName> {
+   try {
+      const session = await authInstance.api.getSession({
+         headers: request.headers,
+      });
+
+      if (!session?.session?.activeOrganizationId) {
+         return PlanName.FREE;
+      }
+
+      const subscriptions = await authInstance.api.listActiveSubscriptions({
+         headers: request.headers,
+         query: { referenceId: session.session.activeOrganizationId },
+      });
+
+      const activeSubscription = subscriptions.find(
+         (sub) => sub.status === "active" || sub.status === "trialing",
+      );
+
+      if (!activeSubscription) {
+         return PlanName.FREE;
+      }
+
+      const planName = activeSubscription.plan?.toLowerCase();
+      if (planName === PlanName.LITE) return PlanName.LITE;
+      if (planName === PlanName.PRO) return PlanName.PRO;
+
+      return PlanName.FREE;
+   } catch {
+      return PlanName.FREE;
+   }
+}
+
 export async function wrapAuthHandler(
    authInstance: AuthInstance,
 ): Promise<(request: Request) => Promise<Response>> {
    return async (request: Request): Promise<Response> => {
+      const url = new URL(request.url);
+      const pathname = url.pathname;
+
+      // Check feature access for API key creation (before any other checks)
+      if (isApiKeyCreationEndpoint(pathname) && request.method === "POST") {
+         const plan = await getUserPlanFromAuth(authInstance, request);
+         if (!planHasFeature(plan, Feature.API_ACCESS)) {
+            return new Response(
+               JSON.stringify({
+                  error: "Acesso à API não está disponível no seu plano atual. Faça upgrade para o plano Lite ou superior.",
+                  code: "FEATURE_NOT_AVAILABLE",
+               }),
+               {
+                  status: 403,
+                  headers: {
+                     "Content-Type": "application/json",
+                  },
+               },
+            );
+         }
+      }
+
       if (!arcjetInstance) {
          return authInstance.handler(request);
       }
 
       try {
-         const url = new URL(request.url);
-         const pathname = url.pathname;
-
          const rateLimitRule = getAuthEndpointRateLimit(pathname);
          const isSignup = isSignupEndpoint(pathname);
 

@@ -10,6 +10,7 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import { organization } from "./auth";
+import type { InstructionMemoryItem } from "./instruction-memory";
 
 // Zod schema for persona configuration
 export const PersonaMetadataSchema = z.object({
@@ -94,6 +95,9 @@ export const agent = pgTable(
          .references(() => organization.id, { onDelete: "cascade" }),
       personaConfig: jsonb("persona_config").$type<PersonaConfig>().notNull(),
       profilePhotoUrl: text("profile_photo_url"),
+      instructionMemories: jsonb("instruction_memories")
+         .$type<InstructionMemoryItem[]>()
+         .default([]),
       lastGeneratedAt: timestamp("last_generated_at"),
       createdAt: timestamp("created_at").defaultNow().notNull(),
       updatedAt: timestamp("updated_at")

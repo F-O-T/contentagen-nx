@@ -3,10 +3,9 @@ import {
    useQueryClient,
    useSuspenseQuery,
 } from "@tanstack/react-query";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
-import { useWritersList } from "@/features/writers/lib/writers-list-context";
 import {
    WritersDataTable,
    WritersDataTableSkeleton,
@@ -16,15 +15,18 @@ import { useTRPC } from "@/integrations/clients";
 function WritersListContent() {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
-   const { searchTerm, hasActiveFilters, clearFilters, setSearchTerm } =
-      useWritersList();
-   const [page, setPage] = useState(1);
-   const limit = 20;
+   const [searchTerm, setSearchTerm] = useState("");
+
+   const hasActiveFilters = searchTerm.length > 0;
+
+   const clearFilters = () => {
+      setSearchTerm("");
+   };
 
    const { data } = useSuspenseQuery(
       trpc.agent.list.queryOptions({
-         limit,
-         page,
+         limit: 100,
+         page: 1,
          search: searchTerm || undefined,
       }),
    );
@@ -58,15 +60,6 @@ function WritersListContent() {
       }
    };
 
-   const pagination = useMemo(
-      () => ({
-         currentPage: data.page,
-         onPageChange: setPage,
-         totalPages: data.totalPages,
-      }),
-      [data.page, data.totalPages],
-   );
-
    return (
       <WritersDataTable
          filters={{
@@ -77,7 +70,6 @@ function WritersListContent() {
          }}
          onBulkDelete={handleBulkDelete}
          onDelete={handleDelete}
-         pagination={pagination}
          writers={data.items}
       />
    );

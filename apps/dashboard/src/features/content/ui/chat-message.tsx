@@ -67,7 +67,7 @@ export function ChatMessage({
                         {message.content}
                      </div>
                   ) : (
-                     <div className="overflow-x-auto">
+                     <div className="break-words overflow-wrap-anywhere">
                         <ChatMarkdown
                            content={
                               message.content || (isStreaming ? "..." : "")

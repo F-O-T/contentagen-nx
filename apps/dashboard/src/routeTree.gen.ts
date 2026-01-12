@@ -14,6 +14,7 @@ import { Route as PwaRedirectRouteImport } from './routes/pwa-redirect'
 import { Route as FileHandlerRouteImport } from './routes/file-handler'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as SlugRouteImport } from './routes/$slug'
+import { Route as ShareContentIdRouteImport } from './routes/share/$contentId'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthMagicLinkRouteImport } from './routes/auth/magic-link'
@@ -21,7 +22,6 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-pas
 import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-verification'
 import { Route as AuthAnonymousRouteImport } from './routes/auth/anonymous'
 import { Route as SlugOnboardingRouteImport } from './routes/$slug/onboarding'
-import { Route as SlugLpBuilderRouteImport } from './routes/$slug/lp-builder'
 import { Route as SlugDashboardRouteImport } from './routes/$slug/_dashboard'
 import { Route as AuthSignInIndexRouteImport } from './routes/auth/sign-in/index'
 import { Route as AuthSignInEmailRouteImport } from './routes/auth/sign-in/email'
@@ -74,6 +74,11 @@ const SlugRoute = SlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShareContentIdRoute = ShareContentIdRouteImport.update({
+  id: '/share/$contentId',
+  path: '/share/$contentId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
@@ -107,11 +112,6 @@ const AuthAnonymousRoute = AuthAnonymousRouteImport.update({
 const SlugOnboardingRoute = SlugOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
-  getParentRoute: () => SlugRoute,
-} as any)
-const SlugLpBuilderRoute = SlugLpBuilderRouteImport.update({
-  id: '/lp-builder',
-  path: '/lp-builder',
   getParentRoute: () => SlugRoute,
 } as any)
 const SlugDashboardRoute = SlugDashboardRouteImport.update({
@@ -268,7 +268,6 @@ export interface FileRoutesByFullPath {
   '/file-handler': typeof FileHandlerRoute
   '/pwa-redirect': typeof PwaRedirectRoute
   '/share-target': typeof ShareTargetRoute
-  '/$slug/lp-builder': typeof SlugLpBuilderRoute
   '/$slug/onboarding': typeof SlugOnboardingRoute
   '/auth/anonymous': typeof AuthAnonymousRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
@@ -276,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/auth/magic-link': typeof AuthMagicLinkRoute
   '/auth/sign-in': typeof AuthSignInRouteWithChildren
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/share/$contentId': typeof ShareContentIdRoute
   '/$slug/home': typeof SlugDashboardHomeRoute
   '/$slug/manage-plan': typeof SlugDashboardManagePlanRoute
   '/$slug/organization': typeof SlugDashboardOrganizationRouteWithChildren
@@ -308,13 +308,13 @@ export interface FileRoutesByTo {
   '/file-handler': typeof FileHandlerRoute
   '/pwa-redirect': typeof PwaRedirectRoute
   '/share-target': typeof ShareTargetRoute
-  '/$slug/lp-builder': typeof SlugLpBuilderRoute
   '/$slug/onboarding': typeof SlugOnboardingRoute
   '/auth/anonymous': typeof AuthAnonymousRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/magic-link': typeof AuthMagicLinkRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/share/$contentId': typeof ShareContentIdRoute
   '/$slug/home': typeof SlugDashboardHomeRoute
   '/$slug/manage-plan': typeof SlugDashboardManagePlanRoute
   '/$slug/plans': typeof SlugDashboardPlansRoute
@@ -347,7 +347,6 @@ export interface FileRoutesById {
   '/pwa-redirect': typeof PwaRedirectRoute
   '/share-target': typeof ShareTargetRoute
   '/$slug/_dashboard': typeof SlugDashboardRouteWithChildren
-  '/$slug/lp-builder': typeof SlugLpBuilderRoute
   '/$slug/onboarding': typeof SlugOnboardingRoute
   '/auth/anonymous': typeof AuthAnonymousRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
@@ -355,6 +354,7 @@ export interface FileRoutesById {
   '/auth/magic-link': typeof AuthMagicLinkRoute
   '/auth/sign-in': typeof AuthSignInRouteWithChildren
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/share/$contentId': typeof ShareContentIdRoute
   '/$slug/_dashboard/home': typeof SlugDashboardHomeRoute
   '/$slug/_dashboard/manage-plan': typeof SlugDashboardManagePlanRoute
   '/$slug/_dashboard/organization': typeof SlugDashboardOrganizationRouteWithChildren
@@ -389,7 +389,6 @@ export interface FileRouteTypes {
     | '/file-handler'
     | '/pwa-redirect'
     | '/share-target'
-    | '/$slug/lp-builder'
     | '/$slug/onboarding'
     | '/auth/anonymous'
     | '/auth/email-verification'
@@ -397,6 +396,7 @@ export interface FileRouteTypes {
     | '/auth/magic-link'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/share/$contentId'
     | '/$slug/home'
     | '/$slug/manage-plan'
     | '/$slug/organization'
@@ -429,13 +429,13 @@ export interface FileRouteTypes {
     | '/file-handler'
     | '/pwa-redirect'
     | '/share-target'
-    | '/$slug/lp-builder'
     | '/$slug/onboarding'
     | '/auth/anonymous'
     | '/auth/email-verification'
     | '/auth/forgot-password'
     | '/auth/magic-link'
     | '/auth/sign-up'
+    | '/share/$contentId'
     | '/$slug/home'
     | '/$slug/manage-plan'
     | '/$slug/plans'
@@ -467,7 +467,6 @@ export interface FileRouteTypes {
     | '/pwa-redirect'
     | '/share-target'
     | '/$slug/_dashboard'
-    | '/$slug/lp-builder'
     | '/$slug/onboarding'
     | '/auth/anonymous'
     | '/auth/email-verification'
@@ -475,6 +474,7 @@ export interface FileRouteTypes {
     | '/auth/magic-link'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/share/$contentId'
     | '/$slug/_dashboard/home'
     | '/$slug/_dashboard/manage-plan'
     | '/$slug/_dashboard/organization'
@@ -508,6 +508,7 @@ export interface RootRouteChildren {
   FileHandlerRoute: typeof FileHandlerRoute
   PwaRedirectRoute: typeof PwaRedirectRoute
   ShareTargetRoute: typeof ShareTargetRoute
+  ShareContentIdRoute: typeof ShareContentIdRoute
   CallbackOrganizationInvitationInvitationIdRoute: typeof CallbackOrganizationInvitationInvitationIdRoute
 }
 
@@ -546,6 +547,13 @@ declare module '@tanstack/react-router' {
       path: '/$slug'
       fullPath: '/$slug'
       preLoaderRoute: typeof SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/share/$contentId': {
+      id: '/share/$contentId'
+      path: '/share/$contentId'
+      fullPath: '/share/$contentId'
+      preLoaderRoute: typeof ShareContentIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/sign-up': {
@@ -595,13 +603,6 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/$slug/onboarding'
       preLoaderRoute: typeof SlugOnboardingRouteImport
-      parentRoute: typeof SlugRoute
-    }
-    '/$slug/lp-builder': {
-      id: '/$slug/lp-builder'
-      path: '/lp-builder'
-      fullPath: '/$slug/lp-builder'
-      preLoaderRoute: typeof SlugLpBuilderRouteImport
       parentRoute: typeof SlugRoute
     }
     '/$slug/_dashboard': {
@@ -885,13 +886,11 @@ const SlugDashboardRouteWithChildren = SlugDashboardRoute._addFileChildren(
 
 interface SlugRouteChildren {
   SlugDashboardRoute: typeof SlugDashboardRouteWithChildren
-  SlugLpBuilderRoute: typeof SlugLpBuilderRoute
   SlugOnboardingRoute: typeof SlugOnboardingRoute
 }
 
 const SlugRouteChildren: SlugRouteChildren = {
   SlugDashboardRoute: SlugDashboardRouteWithChildren,
-  SlugLpBuilderRoute: SlugLpBuilderRoute,
   SlugOnboardingRoute: SlugOnboardingRoute,
 }
 
@@ -937,6 +936,7 @@ const rootRouteChildren: RootRouteChildren = {
   FileHandlerRoute: FileHandlerRoute,
   PwaRedirectRoute: PwaRedirectRoute,
   ShareTargetRoute: ShareTargetRoute,
+  ShareContentIdRoute: ShareContentIdRoute,
   CallbackOrganizationInvitationInvitationIdRoute:
     CallbackOrganizationInvitationInvitationIdRoute,
 }

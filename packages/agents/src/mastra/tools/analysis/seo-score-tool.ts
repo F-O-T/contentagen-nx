@@ -11,6 +11,10 @@ const SeoIssueSchema = z.object({
       "readability",
       "links",
       "images",
+      "quick_answer",
+      "first_paragraph",
+      "heading_keywords",
+      "structure",
    ]),
    severity: z.enum(["error", "warning", "info"]),
    message: z.string(),
@@ -44,6 +48,8 @@ export const seoScoreTool = createTool({
          paragraphCount: z.number(),
          linkCount: z.number(),
          imageCount: z.number(),
+         hasQuickAnswer: z.boolean(),
+         keywordInFirstParagraph: z.boolean(),
          keywordDensity: z.record(z.string(), z.number()).optional(),
       }),
    }),
@@ -58,12 +64,20 @@ export const seoScoreTool = createTool({
       const wordCount = content.split(/\s+/).filter(Boolean).length;
       const paragraphs = content.split(/\n\n+/).filter(Boolean);
       const headings = content.match(/^#{1,6}\s.+$/gm) || [];
+      const h2Headings = content.match(/^##\s.+$/gm) || [];
       const links = content.match(/\[.+?\]\(.+?\)/g) || [];
       const images = content.match(/!\[.+?\]\(.+?\)/g) || [];
 
+      // Get first paragraph (before first heading or first 100 words)
+      const firstH2Index = content.search(/^##\s/m);
+      const firstParagraphText =
+         firstH2Index > 0
+            ? content.slice(0, firstH2Index)
+            : content.split(/\s+/).slice(0, 100).join(" ");
+
       let score = 100;
 
-      // Title checks
+      // Title checks (15 points max)
       if (focusArea === "all" || focusArea === "title") {
          if (!title) {
             issues.push({
@@ -80,7 +94,7 @@ export const seoScoreTool = createTool({
                message: "Title is too short",
                suggestion: "Expand title to 50-60 characters for better SEO",
             });
-            score -= 5;
+            score -= 8;
          } else if (title.length > 60) {
             issues.push({
                type: "title",
@@ -91,9 +105,27 @@ export const seoScoreTool = createTool({
             });
             score -= 5;
          }
+
+         // Check for keyword in title
+         if (title && targetKeywords && targetKeywords.length > 0) {
+            const titleLower = title.toLowerCase();
+            const hasKeywordInTitle = targetKeywords.some((kw) =>
+               titleLower.includes(kw.toLowerCase()),
+            );
+            if (!hasKeywordInTitle) {
+               issues.push({
+                  type: "title",
+                  severity: "warning",
+                  message: "Primary keyword not found in title",
+                  suggestion:
+                     "Include your primary keyword naturally in the title",
+               });
+               score -= 5;
+            }
+         }
       }
 
-      // Meta description checks
+      // Meta description checks (10 points max)
       if (focusArea === "all" || focusArea === "meta") {
          if (!metaDescription) {
             issues.push({
@@ -122,7 +154,7 @@ export const seoScoreTool = createTool({
          }
       }
 
-      // Headings checks
+      // Headings checks (15 points max)
       if (focusArea === "all" || focusArea === "headings") {
          if (headings.length === 0) {
             issues.push({
@@ -132,18 +164,53 @@ export const seoScoreTool = createTool({
                suggestion: "Add H2 and H3 headings to structure your content",
             });
             score -= 15;
-         } else if (headings.length < 3 && wordCount > 500) {
+         } else if (h2Headings.length < 3 && wordCount > 500) {
             issues.push({
                type: "headings",
                severity: "warning",
-               message: "Too few headings for content length",
-               suggestion: "Add more subheadings (one every 200-300 words)",
+               message: "Too few H2 headings for content length",
+               suggestion: "Add more H2 subheadings (one every 200-300 words)",
             });
             score -= 5;
          }
+
+         // Check heading hierarchy - no H1 in content
+         const h1Headings = content.match(/^#\s.+$/gm) || [];
+         if (h1Headings.length > 0) {
+            issues.push({
+               type: "headings",
+               severity: "error",
+               message: "H1 heading found in content body",
+               suggestion:
+                  "Remove H1 from content. The title is in frontmatter. Start with H2.",
+            });
+            score -= 10;
+         }
+
+         // Check for keywords in H2 headings
+         if (
+            targetKeywords &&
+            targetKeywords.length > 0 &&
+            h2Headings.length > 0
+         ) {
+            const h2Text = h2Headings.join(" ").toLowerCase();
+            const hasKeywordInH2 = targetKeywords.some((kw) =>
+               h2Text.includes(kw.toLowerCase()),
+            );
+            if (!hasKeywordInH2) {
+               issues.push({
+                  type: "heading_keywords",
+                  severity: "info",
+                  message: "Target keywords not found in any H2 headings",
+                  suggestion:
+                     "Include keywords naturally in at least one H2 heading",
+               });
+               score -= 3;
+            }
+         }
       }
 
-      // Content length checks
+      // Content length checks (10 points max)
       if (focusArea === "all" || focusArea === "body") {
          if (wordCount < 300) {
             issues.push({
@@ -152,7 +219,7 @@ export const seoScoreTool = createTool({
                message: "Content is too short",
                suggestion: "Aim for at least 600-1000 words for blog posts",
             });
-            score -= 20;
+            score -= 10;
          } else if (wordCount < 600) {
             issues.push({
                type: "content_length",
@@ -161,10 +228,10 @@ export const seoScoreTool = createTool({
                suggestion:
                   "Consider expanding to 1000+ words for better ranking",
             });
-            score -= 10;
+            score -= 5;
          }
 
-         // Link checks
+         // Link checks (10 points max)
          if (links.length === 0 && wordCount > 500) {
             issues.push({
                type: "links",
@@ -172,7 +239,16 @@ export const seoScoreTool = createTool({
                message: "No links found",
                suggestion: "Add internal and external links to improve SEO",
             });
-            score -= 5;
+            score -= 10;
+         } else if (links.length < 3 && wordCount > 1000) {
+            issues.push({
+               type: "links",
+               severity: "info",
+               message: "Few links for content length",
+               suggestion:
+                  "Add more internal links to related content and external links to authoritative sources",
+            });
+            score -= 3;
          }
 
          // Image checks
@@ -185,9 +261,51 @@ export const seoScoreTool = createTool({
             });
             score -= 3;
          }
+
+         // Quick Answer check (10 points max)
+         const hasQuickAnswer =
+            /\*\*quick\s*answer\*\*|>\s*\*\*.*\*\*|tl;?dr|em\s+resumo/i.test(
+               firstParagraphText,
+            ) ||
+            // Definition lead pattern
+            /^\*\*[^*]+\*\*\s+(?:é|is|are|significa)/im.test(
+               firstParagraphText,
+            ) ||
+            // Comparison table early
+            /^\|.*\|.*\|$/m.test(firstParagraphText);
+
+         if (!hasQuickAnswer && wordCount > 300) {
+            issues.push({
+               type: "quick_answer",
+               severity: "warning",
+               message: "No quick answer detected in first 100 words",
+               suggestion:
+                  "Add a TL;DR, definition lead, or comparison table early to answer the reader's question immediately",
+            });
+            score -= 10;
+         }
+
+         // First paragraph keyword check (part of keyword usage - 15 points)
+         let keywordInFirstParagraph = false;
+         if (targetKeywords && targetKeywords.length > 0) {
+            const firstParaLower = firstParagraphText.toLowerCase();
+            keywordInFirstParagraph = targetKeywords.some((kw) =>
+               firstParaLower.includes(kw.toLowerCase()),
+            );
+            if (!keywordInFirstParagraph) {
+               issues.push({
+                  type: "first_paragraph",
+                  severity: "warning",
+                  message: "Primary keyword not found in first paragraph",
+                  suggestion:
+                     "Include your primary keyword in the first 100 words for better SEO",
+               });
+               score -= 5;
+            }
+         }
       }
 
-      // Keyword density
+      // Keyword density (15 points max)
       const keywordDensity: Record<string, number> = {};
       if (targetKeywords && targetKeywords.length > 0) {
          const contentLower = content.toLowerCase();
@@ -218,6 +336,22 @@ export const seoScoreTool = createTool({
          }
       }
 
+      // Structure quality check (5 points max)
+      const hasConclusion =
+         /##\s*(?:conclus|conclusion|resumo|takeaway|key\s*takeaway|final)/i.test(
+            content,
+         );
+      if (!hasConclusion && wordCount > 500) {
+         issues.push({
+            type: "structure",
+            severity: "info",
+            message: "No conclusion section detected",
+            suggestion:
+               "Add a conclusion with key takeaways and a call-to-action",
+         });
+         score -= 5;
+      }
+
       // Generate recommendations based on issues
       if (issues.filter((i) => i.type === "content_length").length > 0) {
          recommendations.push(
@@ -234,9 +368,36 @@ export const seoScoreTool = createTool({
             "Add relevant internal links to other blog posts and external links to authoritative sources",
          );
       }
+      if (issues.filter((i) => i.type === "quick_answer").length > 0) {
+         recommendations.push(
+            "Start with a quick answer - readers want the answer immediately, not after scrolling",
+         );
+      }
+      if (issues.filter((i) => i.type === "first_paragraph").length > 0) {
+         recommendations.push(
+            "Include your primary keyword in the first paragraph for better search visibility",
+         );
+      }
+
+      // Determine if keyword is in first paragraph
+      let keywordInFirstParagraph = false;
+      if (targetKeywords && targetKeywords.length > 0) {
+         const firstParaLower = firstParagraphText.toLowerCase();
+         keywordInFirstParagraph = targetKeywords.some((kw) =>
+            firstParaLower.includes(kw.toLowerCase()),
+         );
+      }
+
+      // Determine if has quick answer
+      const hasQuickAnswerMetric =
+         /\*\*quick\s*answer\*\*|>\s*\*\*.*\*\*|tl;?dr|em\s+resumo/i.test(
+            firstParagraphText,
+         ) ||
+         /^\*\*[^*]+\*\*\s+(?:é|is|are|significa)/im.test(firstParagraphText) ||
+         /^\|.*\|.*\|$/m.test(firstParagraphText);
 
       return {
-         score: Math.max(0, score),
+         score: Math.max(0, Math.min(100, score)),
          issues,
          recommendations,
          metrics: {
@@ -245,6 +406,8 @@ export const seoScoreTool = createTool({
             paragraphCount: paragraphs.length,
             linkCount: links.length,
             imageCount: images.length,
+            hasQuickAnswer: hasQuickAnswerMetric,
+            keywordInFirstParagraph,
             keywordDensity:
                Object.keys(keywordDensity).length > 0
                   ? keywordDensity
@@ -272,6 +435,16 @@ Analyzes the blog post for SEO best practices.
 - score: 0-100 SEO score
 - issues: Array of problems with severity and suggestions
 - recommendations: General improvement tips
-- metrics: Word count, headings, links, images, keyword density
+- metrics: Word count, headings, links, images, quick answer, keyword placement
+
+**Scoring Weights:**
+- Title optimization: 15 points
+- Meta description: 10 points
+- Heading structure: 15 points
+- Content length: 10 points
+- Keyword usage: 15 points
+- Links: 10 points
+- Quick answer format: 10 points
+- Structure quality: 5 points
 `;
 }

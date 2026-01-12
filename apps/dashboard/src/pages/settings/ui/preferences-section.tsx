@@ -17,12 +17,26 @@ import {
    ItemSeparator,
    ItemTitle,
 } from "@packages/ui/components/item";
+import { Label } from "@packages/ui/components/label";
+import {
+   RadioGroup,
+   RadioGroupItem,
+} from "@packages/ui/components/radio-group";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { Switch } from "@packages/ui/components/switch";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { Activity, Globe, Moon, Shield } from "lucide-react";
+import {
+   Activity,
+   Globe,
+   Lightbulb,
+   Moon,
+   PenLine,
+   Shield,
+} from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import { useContentCreationPreference } from "@/hooks/use-content-creation-preference";
+import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 import { betterAuthClient, useTRPC } from "@/integrations/clients";
 import { LanguageCommand } from "@/layout/language-command";
 import { ThemeSwitcher } from "@/layout/theme-provider";
@@ -81,6 +95,80 @@ function PreferencesSectionErrorFallback(props: FallbackProps) {
                errorTitle: "Title",
                retryText: "Tentar novamente",
             })(props)}
+         </CardContent>
+      </Card>
+   );
+}
+
+// ============================================
+// Content Creation Card Component (Pro only)
+// ============================================
+
+function ContentCreationCard() {
+   const { preference, updatePreference, isPending } =
+      useContentCreationPreference();
+
+   return (
+      <Card className="h-full">
+         <CardHeader>
+            <CardTitle>Criação de Conteúdo</CardTitle>
+            <CardDescription>
+               Escolha como novos conteúdos são iniciados
+            </CardDescription>
+         </CardHeader>
+         <CardContent>
+            <RadioGroup
+               defaultValue={preference}
+               disabled={isPending}
+               onValueChange={(value) =>
+                  updatePreference(value as "plan" | "writer")
+               }
+               value={preference}
+            >
+               <div className="space-y-3">
+                  <Label
+                     className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5"
+                     htmlFor="plan"
+                  >
+                     <RadioGroupItem
+                        className="mt-0.5"
+                        id="plan"
+                        value="plan"
+                     />
+                     <div className="flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                           <Lightbulb className="size-4 text-amber-500" />
+                           <span className="font-medium">Com Planejamento</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                           Comece com pesquisa e planejamento assistido por IA
+                           antes de escrever
+                        </p>
+                     </div>
+                  </Label>
+
+                  <Label
+                     className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5"
+                     htmlFor="writer"
+                  >
+                     <RadioGroupItem
+                        className="mt-0.5"
+                        id="writer"
+                        value="writer"
+                     />
+                     <div className="flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                           <PenLine className="size-4 text-blue-500" />
+                           <span className="font-medium">Direto ao Editor</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                           Abra o editor imediatamente e escreva com assistência
+                           do chat
+                        </p>
+                     </div>
+                  </Label>
+               </div>
+            </RadioGroup>
          </CardContent>
       </Card>
    );
@@ -218,6 +306,10 @@ function PreferencesSectionContent() {
       trpc.session.getSession.queryOptions(),
    );
 
+   // Check if user has Pro features (plan mode access)
+   const { hasFeature } = useFeatureAccess();
+   const hasPlanMode = hasFeature(Feature.CHAT_PLAN_MODE);
+
    const updateConsentMutation = useMutation({
       mutationFn: async (consent: boolean) => {
          return betterAuthClient.updateUser({
@@ -242,6 +334,13 @@ function PreferencesSectionContent() {
                }}
             />
          </div>
+
+         {/* Content Creation Preference - Pro only */}
+         {hasPlanMode && (
+            <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
+               <ContentCreationCard />
+            </div>
+         )}
       </div>
    );
 }

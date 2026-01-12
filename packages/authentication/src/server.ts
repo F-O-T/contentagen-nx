@@ -338,6 +338,12 @@ export const getAuthOptions = (
                required: false,
                type: "string",
             },
+            contentCreationMode: {
+               defaultValue: "plan",
+               input: true,
+               required: false,
+               type: "string",
+            },
          },
       },
    }) satisfies BetterAuthOptions;

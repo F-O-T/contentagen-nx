@@ -6,7 +6,6 @@
    "license": "Apache-2.0",
    "scripts": {
       "build": "tsc --build",
-      "test": "bun test",
       "typecheck": "tsc"
    },
    "dependencies": {
