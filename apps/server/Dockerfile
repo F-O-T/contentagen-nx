@@ -114,6 +114,7 @@ RUN bun build \
     --minify-whitespace \
     --minify-syntax \
     --target bun \
+    --external react-dom \
     --outfile ./dist/index.js \
     ./apps/server/src/index.ts
 

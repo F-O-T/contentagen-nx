@@ -101,6 +101,8 @@
         "@packages/utils": "workspace:*",
         "@trpc/server": "catalog:trpc",
         "elysia": "catalog:server",
+        "react": "catalog:react",
+        "react-dom": "catalog:react",
       },
       "devDependencies": {
         "@tooling/typescript": "workspace:*",
