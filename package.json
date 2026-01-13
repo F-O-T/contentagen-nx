@@ -18,7 +18,7 @@
       "node": ">=20"
    },
    "license": "Apache-2.0",
-   "name": "finance-nx",
+   "name": "contentta-nx",
    "repository": {
       "type": "git",
       "url": "https://github.com/F-O-T/contentta-nx.git"
