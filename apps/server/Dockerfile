@@ -88,7 +88,6 @@ COPY packages/workflows/package.json ./packages/workflows/
 # Libraries (These must be built before server can be bundled)
 COPY libraries/markdown/package.json ./libraries/markdown/
 COPY libraries/content-analysis/package.json ./libraries/content-analysis/
-COPY libraries/sdk/package.json ./libraries/sdk/
 
 
 RUN bun install
@@ -106,9 +105,6 @@ WORKDIR /app/libraries/content-analysis
 RUN bun run build
 WORKDIR /app
 
-WORKDIR /app/libraries/sdk
-RUN bun run build
-WORKDIR /app
 
 RUN bun build \
     --minify-whitespace \

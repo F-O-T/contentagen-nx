@@ -36,7 +36,6 @@ COPY packages/workflows/package.json ./packages/workflows/
 # Libraries
 COPY libraries/markdown/package.json ./libraries/markdown/
 COPY libraries/content-analysis/package.json ./libraries/content-analysis/
-COPY libraries/sdk/package.json ./libraries/sdk/
 
 
 # Install dependencies
@@ -52,10 +51,6 @@ RUN bun run build
 WORKDIR /app
 
 WORKDIR /app/libraries/content-analysis
-RUN bun run build
-WORKDIR /app
-
-WORKDIR /app/libraries/sdk
 RUN bun run build
 WORKDIR /app
 
