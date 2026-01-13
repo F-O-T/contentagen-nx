@@ -39,13 +39,12 @@ COPY packages/logging/package.json ./packages/logging/
 COPY packages/posthog/package.json ./packages/posthog/
 COPY packages/queue/package.json ./packages/queue/
 COPY packages/search/package.json ./packages/search/
-COPY packages/agents/package.json ./packages/agents/
 COPY packages/stripe/package.json ./packages/stripe/
 COPY packages/transactional/package.json ./packages/transactional/
 COPY packages/utils/package.json ./packages/utils/
 COPY packages/workflows/package.json ./packages/workflows/
 
-# Libraries
+# Libraries (These must be built before server can be bundled)
 COPY libraries/markdown/package.json ./libraries/markdown/
 COPY libraries/content-analysis/package.json ./libraries/content-analysis/
 COPY libraries/sdk/package.json ./libraries/sdk/
