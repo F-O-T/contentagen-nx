@@ -22,7 +22,6 @@ COPY packages/database/package.json ./packages/database/
 COPY packages/environment/package.json ./packages/environment/
 COPY packages/files/package.json ./packages/files/
 COPY packages/logging/package.json ./packages/logging/
-COPY packages/notifications/package.json ./packages/notifications/
 COPY packages/posthog/package.json ./packages/posthog/
 COPY packages/queue/package.json ./packages/queue/
 COPY packages/search/package.json ./packages/search/
