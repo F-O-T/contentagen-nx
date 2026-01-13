@@ -69,6 +69,47 @@ WORKDIR /app/libraries/sdk
 RUN bun run build
 WORKDIR /app
 
+# Build packages in dependency order
+# Tier 1 - no workspace dependencies
+WORKDIR /app/packages/utils
+RUN bun run build
+WORKDIR /app/packages/logging
+RUN bun run build
+
+# Tier 2 - depends on tier 1
+WORKDIR /app/packages/environment
+RUN bun run build
+WORKDIR /app/packages/database
+RUN bun run build
+WORKDIR /app/packages/transactional
+RUN bun run build
+
+# Tier 3 - depends on tier 2
+WORKDIR /app/packages/stripe
+RUN bun run build
+WORKDIR /app/packages/cache
+RUN bun run build
+WORKDIR /app/packages/posthog
+RUN bun run build
+WORKDIR /app/packages/files
+RUN bun run build
+WORKDIR /app/packages/arcjet
+RUN bun run build
+WORKDIR /app/packages/search
+RUN bun run build
+
+# Tier 4 - depends on tier 3
+WORKDIR /app/packages/authentication
+RUN bun run build
+WORKDIR /app/packages/agents
+RUN bun run build
+
+# Tier 5 - depends on tier 4
+WORKDIR /app/packages/api
+RUN bun run build
+
+WORKDIR /app
+
 RUN bun build \
     --minify-whitespace \
     --minify-syntax \
