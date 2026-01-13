@@ -18,21 +18,10 @@ import type {
 } from "../types";
 
 /**
- * Get all Tavily API keys (from TAVILY_API_KEYS or fallback to TAVILY_API_KEY)
+ * Get all Tavily API keys
  */
 function getTavilyKeys(): string[] {
-	// Try multiple keys first
-	const multipleKeys = parseApiKeys(serverEnv.TAVILY_API_KEYS);
-	if (multipleKeys.length > 0) {
-		return multipleKeys;
-	}
-
-	// Fallback to single key
-	if (serverEnv.TAVILY_API_KEY) {
-		return [serverEnv.TAVILY_API_KEY];
-	}
-
-	return [];
+	return parseApiKeys(serverEnv.TAVILY_API_KEYS);
 }
 
 class TavilyProvider implements SearchProvider {

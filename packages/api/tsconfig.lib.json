@@ -34,9 +34,6 @@
       "path": "../posthog/tsconfig.lib.json"
     },
     {
-      "path": "../notifications/tsconfig.lib.json"
-    },
-    {
       "path": "../files/tsconfig.lib.json"
     },
     {
