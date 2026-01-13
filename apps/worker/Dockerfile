@@ -21,6 +21,7 @@ COPY packages/logging/package.json ./packages/logging/
 COPY packages/posthog/package.json ./packages/posthog/
 COPY packages/queue/package.json ./packages/queue/
 COPY packages/search/package.json ./packages/search/
+COPY packages/transactional/package.json ./packages/transactional/
 COPY packages/utils/package.json ./packages/utils/
 COPY packages/workflows/package.json ./packages/workflows/
 

@@ -3,7 +3,9 @@
       "@packages/agents": "workspace:*",
       "@packages/database": "workspace:*",
       "@packages/environment": "workspace:*",
+      "@packages/logging": "workspace:*",
       "@packages/queue": "workspace:*",
+      "@packages/transactional": "workspace:*",
       "@packages/workflows": "workspace:*",
       "@packages/utils": "workspace:*"
    },
