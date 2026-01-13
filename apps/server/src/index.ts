@@ -3,7 +3,7 @@ import { createApi } from "@packages/api/server";
 import { createRedisConnection } from "@packages/cache/connection";
 import { serverEnv as env } from "@packages/environment/server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { sql } from "drizzle-orm";
+import { sql } from "@packages/database";
 import { Elysia } from "elysia";
 import { auth, resendClient, stripeClient } from "./integrations/auth";
 import { db } from "./integrations/database";
