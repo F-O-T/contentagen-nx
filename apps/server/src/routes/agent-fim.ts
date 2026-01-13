@@ -14,8 +14,10 @@ import type {
 } from "@packages/posthog/llm/types";
 import { Elysia, t } from "elysia";
 import { auth } from "../integrations/auth";
+import { db } from "../integrations/database";
 import { posthog } from "../integrations/posthog";
 import { Feature, requireFeatureAccess } from "../utils/feature-gate";
+import { resolveOrganizationId } from "../utils/resolve-organization";
 
 /**
  * Detect article context based on cursor position
@@ -93,7 +95,13 @@ export const agentFIMRoutes = new Elysia({ prefix: "/api/agent/fim" }).post(
       }
 
       // Check feature access (FIM requires LITE plan or higher)
-      const organizationId = session.session.activeOrganizationId;
+      // Resolve organization from headers (same as tRPC isAuthed middleware)
+      const organizationId = await resolveOrganizationId(
+         db,
+         session.user.id,
+         request.headers,
+         session.session.activeOrganizationId,
+      );
       await requireFeatureAccess(Feature.FIM, organizationId, request.headers);
 
       const {

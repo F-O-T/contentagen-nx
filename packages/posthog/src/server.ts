@@ -69,10 +69,10 @@ export function captureError(posthog: PostHog, props: CaptureErrorProps) {
          input,
          message,
          path,
-         ...(organizationId
-            ? { $groups: { organization: organizationId } }
-            : {}),
       },
+      groups: organizationId
+         ? { organization: organizationId }
+         : undefined,
    });
 }
 
@@ -159,10 +159,8 @@ export function captureServerEvent(
    posthog.capture({
       distinctId: userId,
       event,
-      properties: {
-         ...properties,
-         ...(groups ? { $groups: groups } : {}),
-      },
+      properties,
+      groups,
       timestamp,
    });
 }

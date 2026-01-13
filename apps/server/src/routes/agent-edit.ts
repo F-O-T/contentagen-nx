@@ -7,8 +7,10 @@ import {
 } from "@packages/posthog/llm/server";
 import { Elysia, t } from "elysia";
 import { auth } from "../integrations/auth";
+import { db } from "../integrations/database";
 import { posthog } from "../integrations/posthog";
 import { Feature, requireFeatureAccess } from "../utils/feature-gate";
+import { resolveOrganizationId } from "../utils/resolve-organization";
 
 export const agentEditRoutes = new Elysia({ prefix: "/api/agent/edit" }).post(
    "/stream",
@@ -20,7 +22,13 @@ export const agentEditRoutes = new Elysia({ prefix: "/api/agent/edit" }).post(
       }
 
       // Check feature access (Quick Edit requires LITE plan or higher)
-      const organizationId = session.session.activeOrganizationId;
+      // Resolve organization from headers (same as tRPC isAuthed middleware)
+      const organizationId = await resolveOrganizationId(
+         db,
+         session.user.id,
+         request.headers,
+         session.session.activeOrganizationId,
+      );
       await requireFeatureAccess(
          Feature.QUICK_EDIT,
          organizationId,
