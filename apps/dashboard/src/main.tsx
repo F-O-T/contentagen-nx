@@ -1,4 +1,5 @@
 import { registerSW } from "virtual:pwa-register";
+
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import React from "react";
 import ReactDOM from "react-dom/client";
