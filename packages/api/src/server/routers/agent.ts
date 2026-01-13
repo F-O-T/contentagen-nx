@@ -31,7 +31,7 @@ import {
 } from "@packages/files/client";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
-import { Feature } from "../features";
+import { Feature } from "@packages/stripe/features";
 import { requireFeature } from "../middleware/feature-gate";
 import { protectedProcedure, router } from "../trpc";
 

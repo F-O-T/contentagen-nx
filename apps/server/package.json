@@ -6,6 +6,7 @@
       "@packages/api": "workspace:*",
       "@packages/arcjet": "workspace:*",
       "@packages/authentication": "workspace:*",
+      "@packages/cache": "workspace:*",
       "@packages/database": "workspace:*",
       "@packages/environment": "workspace:*",
       "@packages/files": "workspace:*",
@@ -13,6 +14,7 @@
       "@packages/transactional": "workspace:*",
       "@packages/utils": "workspace:*",
       "@trpc/server": "catalog:trpc",
+      "drizzle-orm": "catalog:database",
       "elysia": "catalog:server",
       "web-push": "^3.6.7"
    },

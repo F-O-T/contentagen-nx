@@ -1,10 +1,10 @@
 import { PlanName } from "@packages/stripe/constants";
-import { APIError } from "@packages/utils/errors";
 import {
    FEATURE_DISPLAY_NAMES,
    type Feature,
    PLAN_FEATURES,
-} from "../features";
+} from "@packages/stripe/features";
+import { APIError } from "@packages/utils/errors";
 import { t } from "../trpc";
 
 /**
