@@ -1,9 +1,6 @@
 {
    "dependencies": {
-      "react": "catalog:react",
-      "react-dom": "catalog:react",
       "@elysiajs/cors": "catalog:server",
-      "@elysiajs/openapi": "^1.4.11",
       "@packages/agents": "workspace:*",
       "@packages/api": "workspace:*",
       "@packages/arcjet": "workspace:*",
@@ -23,7 +20,6 @@
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
       "@types/bun": "latest",
-      "@types/web-push": "^3.6.4",
       "typescript": "catalog:development"
    },
    "license": "Apache-2.0",

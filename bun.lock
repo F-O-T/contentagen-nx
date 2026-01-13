@@ -85,7 +85,6 @@
       "version": "0.8.1",
       "dependencies": {
         "@elysiajs/cors": "catalog:server",
-        "@elysiajs/openapi": "^1.4.11",
         "@packages/agents": "workspace:*",
         "@packages/api": "workspace:*",
         "@packages/arcjet": "workspace:*",
@@ -101,13 +100,10 @@
         "@packages/utils": "workspace:*",
         "@trpc/server": "catalog:trpc",
         "elysia": "catalog:server",
-        "react": "catalog:react",
-        "react-dom": "catalog:react",
       },
       "devDependencies": {
         "@tooling/typescript": "workspace:*",
         "@types/bun": "latest",
-        "@types/web-push": "^3.6.4",
         "typescript": "catalog:development",
       },
     },
@@ -983,8 +979,6 @@
     "@elysiajs/cors": ["@elysiajs/cors@1.4.0", "", { "peerDependencies": { "elysia": ">= 1.4.0" } }, "sha512-pb0SCzBfFbFSYA/U40HHO7R+YrcXBJXOWgL20eSViK33ol1e20ru2/KUaZYo5IMUn63yaTJI/bQERuQ+77ND8g=="],
 
     "@elysiajs/eden": ["@elysiajs/eden@1.4.6", "", { "peerDependencies": { "elysia": ">=1.4.19" } }, "sha512-Tsa4NwXEWg/u73vWiYZQ3L5/ecgZSxqiEjYwpS+4qBKXeTZqZKl2hcgHJSVBL+InEDMi35Xugct7qyAXE5oM4Q=="],
-
-    "@elysiajs/openapi": ["@elysiajs/openapi@1.4.13", "", { "peerDependencies": { "elysia": ">= 1.4.0" } }, "sha512-5BNI7yuFo8zjacTWA8a/wYE0tNZ4ecD7PAkeUDEU7lj6Iep0t2i5Rml6q4/+roM5oZFdtvvzoX4DH8zGKFEo0w=="],
 
     "@emnapi/core": ["@emnapi/core@1.7.1", "", { "dependencies": { "@emnapi/wasi-threads": "1.1.0", "tslib": "^2.4.0" } }, "sha512-o1uhUASyo921r2XtHYOHy7gdkGLge8ghBEQHMWmyJFoXlpU58kIrhhN3w26lpQb6dspetweapMn2CSNwQ8I4wg=="],
 
@@ -1931,8 +1925,6 @@
     "@types/unist": ["@types/unist@3.0.3", "", {}, "sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q=="],
 
     "@types/use-sync-external-store": ["@types/use-sync-external-store@0.0.6", "", {}, "sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg=="],
-
-    "@types/web-push": ["@types/web-push@3.6.4", "", { "dependencies": { "@types/node": "*" } }, "sha512-GnJmSr40H3RAnj0s34FNTcJi1hmWFV5KXugE0mYWnYhgTAHLJ/dJKAwDmvPJYMke0RplY2XE9LnM4hqSqKIjhQ=="],
 
     "@types/ws": ["@types/ws@8.18.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg=="],
 
