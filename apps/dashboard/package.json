@@ -16,6 +16,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@lexical/code": "^0.39.0",
+    "@lexical/html": "^0.39.0",
     "@lexical/link": "^0.39.0",
     "@lexical/list": "^0.39.0",
     "@lexical/markdown": "^0.39.0",
@@ -37,10 +38,13 @@
     "@tanstack/react-query-devtools": "catalog:tanstack",
     "@tanstack/react-router": "catalog:tanstack",
     "@tanstack/react-store": "^0.8.0",
+    "@trpc/client": "catalog:trpc",
     "@trpc/tanstack-react-query": "catalog:trpc",
     "@xyflow/react": "^12.10.0",
     "framer-motion": "catalog:ui",
     "lexical": "^0.39.0",
+    "lucide-react": "^0.556.0",
+    "motion": "^12.23.24",
     "react": "catalog:react",
     "react-dom": "catalog:react",
     "react-error-boundary": "catalog:react",
@@ -61,8 +65,7 @@
     "@types/react-dom": "catalog:react",
     "@vitejs/plugin-react": "catalog:vite",
     "typescript": "catalog:development",
-    "vite": "catalog:vite",
-    "vite-plugin-pwa": "catalog:vite"
+    "vite": "catalog:vite"
   },
   "version": "0.15.0"
 }

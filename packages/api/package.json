@@ -1,5 +1,6 @@
 {
    "dependencies": {
+      "posthog-node": "^5.5.0",
       "@packages/agents": "workspace:*",
       "@packages/arcjet": "workspace:*",
       "@packages/authentication": "workspace:*",
@@ -21,6 +22,7 @@
       "zod": "catalog:validation"
    },
    "devDependencies": {
+      "bun-types": "latest",
       "@tooling/typescript": "workspace:*",
       "typescript": "catalog:development",
       "vite": "catalog:vite"

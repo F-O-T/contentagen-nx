@@ -8,6 +8,8 @@
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
+      "@types/react": "catalog:react",
+      "@types/react-dom": "catalog:react",
       "react-email": "catalog:transactional",
       "typescript": "catalog:development"
    },

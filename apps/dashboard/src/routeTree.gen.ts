@@ -9,9 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ShareTargetRouteImport } from './routes/share-target'
-import { Route as PwaRedirectRouteImport } from './routes/pwa-redirect'
-import { Route as FileHandlerRouteImport } from './routes/file-handler'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as SlugRouteImport } from './routes/$slug'
 import { Route as ShareContentIdRouteImport } from './routes/share/$contentId'
@@ -49,21 +46,6 @@ import { Route as SlugDashboardOrganizationInvitesRouteImport } from './routes/$
 import { Route as SlugDashboardContentContentIdRouteImport } from './routes/$slug/_dashboard/content/$contentId'
 import { Route as SlugDashboardOrganizationTeamsTeamIdRouteImport } from './routes/$slug/_dashboard/organization/teams/$teamId'
 
-const ShareTargetRoute = ShareTargetRouteImport.update({
-  id: '/share-target',
-  path: '/share-target',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PwaRedirectRoute = PwaRedirectRouteImport.update({
-  id: '/pwa-redirect',
-  path: '/pwa-redirect',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FileHandlerRoute = FileHandlerRouteImport.update({
-  id: '/file-handler',
-  path: '/file-handler',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -265,9 +247,6 @@ const SlugDashboardOrganizationTeamsTeamIdRoute =
 export interface FileRoutesByFullPath {
   '/$slug': typeof SlugDashboardRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/file-handler': typeof FileHandlerRoute
-  '/pwa-redirect': typeof PwaRedirectRoute
-  '/share-target': typeof ShareTargetRoute
   '/$slug/onboarding': typeof SlugOnboardingRoute
   '/auth/anonymous': typeof AuthAnonymousRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
@@ -305,9 +284,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/$slug': typeof SlugDashboardRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/file-handler': typeof FileHandlerRoute
-  '/pwa-redirect': typeof PwaRedirectRoute
-  '/share-target': typeof ShareTargetRoute
   '/$slug/onboarding': typeof SlugOnboardingRoute
   '/auth/anonymous': typeof AuthAnonymousRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
@@ -343,9 +319,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/$slug': typeof SlugRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/file-handler': typeof FileHandlerRoute
-  '/pwa-redirect': typeof PwaRedirectRoute
-  '/share-target': typeof ShareTargetRoute
   '/$slug/_dashboard': typeof SlugDashboardRouteWithChildren
   '/$slug/onboarding': typeof SlugOnboardingRoute
   '/auth/anonymous': typeof AuthAnonymousRoute
@@ -386,9 +359,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/$slug'
     | '/auth'
-    | '/file-handler'
-    | '/pwa-redirect'
-    | '/share-target'
     | '/$slug/onboarding'
     | '/auth/anonymous'
     | '/auth/email-verification'
@@ -426,9 +396,6 @@ export interface FileRouteTypes {
   to:
     | '/$slug'
     | '/auth'
-    | '/file-handler'
-    | '/pwa-redirect'
-    | '/share-target'
     | '/$slug/onboarding'
     | '/auth/anonymous'
     | '/auth/email-verification'
@@ -463,9 +430,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/$slug'
     | '/auth'
-    | '/file-handler'
-    | '/pwa-redirect'
-    | '/share-target'
     | '/$slug/_dashboard'
     | '/$slug/onboarding'
     | '/auth/anonymous'
@@ -505,36 +469,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   SlugRoute: typeof SlugRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
-  FileHandlerRoute: typeof FileHandlerRoute
-  PwaRedirectRoute: typeof PwaRedirectRoute
-  ShareTargetRoute: typeof ShareTargetRoute
   ShareContentIdRoute: typeof ShareContentIdRoute
   CallbackOrganizationInvitationInvitationIdRoute: typeof CallbackOrganizationInvitationInvitationIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/share-target': {
-      id: '/share-target'
-      path: '/share-target'
-      fullPath: '/share-target'
-      preLoaderRoute: typeof ShareTargetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pwa-redirect': {
-      id: '/pwa-redirect'
-      path: '/pwa-redirect'
-      fullPath: '/pwa-redirect'
-      preLoaderRoute: typeof PwaRedirectRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/file-handler': {
-      id: '/file-handler'
-      path: '/file-handler'
-      fullPath: '/file-handler'
-      preLoaderRoute: typeof FileHandlerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -932,9 +872,6 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   SlugRoute: SlugRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
-  FileHandlerRoute: FileHandlerRoute,
-  PwaRedirectRoute: PwaRedirectRoute,
-  ShareTargetRoute: ShareTargetRoute,
   ShareContentIdRoute: ShareContentIdRoute,
   CallbackOrganizationInvitationInvitationIdRoute:
     CallbackOrganizationInvitationInvitationIdRoute,

@@ -3,7 +3,8 @@
    "compilerOptions": {
       "jsx": "react-jsx",
       "lib": ["dom", "ES2022"],
-      "types": ["vite/client"]
+      "typeRoots": ["./node_modules", "./node_modules/@types"],
+      "types": ["bun-types", "vite/client"]
    },
    "include": ["src"],
   "exclude": [

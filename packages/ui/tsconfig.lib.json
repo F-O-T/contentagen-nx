@@ -3,6 +3,7 @@
    "compilerOptions": {
       "baseUrl": ".",
       "jsx": "preserve",
+      "typeRoots": ["./node_modules", "./node_modules/@types"],
       "paths": {
          "@packages/ui/*": ["./src/*"]
       }

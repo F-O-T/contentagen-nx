@@ -48,6 +48,7 @@
       "react": "catalog:react",
       "react-day-picker": "^9.11.1",
       "react-dom": "catalog:react",
+      "react-error-boundary": "catalog:react",
       "react-dropzone": "^14.3.8",
       "react-markdown": "^10.1.0",
       "recharts": "2.15.4",
@@ -59,6 +60,7 @@
       "zod": "catalog:validation"
    },
    "devDependencies": {
+      "bun-types": "latest",
       "@number-flow/react": "^0.5.10",
       "@tailwindcss/postcss": "^4.0.8",
       "@tailwindcss/typography": "^0.5.16",

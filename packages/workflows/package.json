@@ -10,7 +10,9 @@
    },
    "dependencies": {
       "@packages/database": "workspace:*",
-      "@packages/queue": "workspace:*"
+      "@packages/queue": "workspace:*",
+      "@packages/transactional": "workspace:*",
+      "drizzle-orm": "catalog:database"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
