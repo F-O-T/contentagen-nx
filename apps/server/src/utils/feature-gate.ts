@@ -1,9 +1,9 @@
+import { PlanName } from "@packages/stripe/constants";
 import {
    FEATURE_DISPLAY_NAMES,
    Feature,
    planHasFeature,
-} from "@packages/api/server/features";
-import { PlanName } from "@packages/stripe/constants";
+} from "@packages/stripe/features";
 import { auth } from "../integrations/auth";
 
 /**

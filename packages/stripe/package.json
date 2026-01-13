@@ -15,6 +15,10 @@
       "./constants": {
          "default": "./src/constants.ts",
          "types": "./dist/src/constants.d.ts"
+      },
+      "./features": {
+         "default": "./src/features.ts",
+         "types": "./dist/src/features.d.ts"
       }
    },
    "files": [

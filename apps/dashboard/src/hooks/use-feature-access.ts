@@ -1,14 +1,14 @@
+import { PlanName, STRIPE_PLANS } from "@packages/stripe/constants";
 import {
    FEATURE_DISPLAY_NAMES,
    type Feature,
    getMinimumPlanForFeature,
    PLAN_FEATURES,
-} from "@packages/api/server/features";
-import { PlanName, STRIPE_PLANS } from "@packages/stripe/constants";
+} from "@packages/stripe/features";
 import { useMemo } from "react";
 import { useActiveOrganization } from "./use-active-organization";
 
-export { Feature } from "@packages/api/server/features";
+export { Feature } from "@packages/stripe/features";
 
 type FeatureAccessResult = {
    /** Current plan for the active organization */

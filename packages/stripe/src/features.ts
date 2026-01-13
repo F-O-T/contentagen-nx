@@ -1,4 +1,4 @@
-import { PlanName } from "@packages/stripe/constants";
+import { PlanName } from "./constants";
 
 /**
  * Feature flags for plan-based access control.
