@@ -1,5 +1,7 @@
 {
    "dependencies": {
+      "react": "catalog:react",
+      "react-dom": "catalog:react",
       "@elysiajs/cors": "catalog:server",
       "@elysiajs/openapi": "^1.4.11",
       "@packages/agents": "workspace:*",
