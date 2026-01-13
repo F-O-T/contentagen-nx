@@ -43,7 +43,7 @@ import {
 } from "@packages/files/client";
 import { normalizeEscapedNewlines } from "@f-o-t/markdown";
 import { APIError, propagateError } from "@packages/utils/errors";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql } from "@packages/database";
 import { z } from "zod";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 

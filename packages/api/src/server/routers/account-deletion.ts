@@ -2,7 +2,7 @@ import { deleteAllUserData } from "@packages/database/repositories/user-deletion
 import { accountDeletionRequest } from "@packages/database/schema";
 import { sendDeletionScheduledEmail } from "@packages/transactional/client";
 import { APIError } from "@packages/utils/errors";
-import { eq } from "drizzle-orm";
+import { eq } from "@packages/database";
 import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
 

@@ -30,7 +30,6 @@ import {
    organization,
    twoFactor,
 } from "better-auth/plugins";
-import { type BuiltInLocales, localization } from "better-auth-localization";
 
 // Initialize Redis connection for session caching
 const redis = createRedisConnection(serverEnv.REDIS_URL);
@@ -173,22 +172,6 @@ export const getAuthOptions = (
                      priceId: serverEnv.STRIPE_PRO_PRICE_ID,
                   },
                ],
-            },
-         }),
-         localization({
-            defaultLocale: "pt-BR", // Use built-in Portuguese translations
-            fallbackLocale: "default", // Fallback to English,
-            getLocale: async (request) => {
-               try {
-                  const userLocale = request?.headers.get(
-                     "x-user-locale",
-                  ) as BuiltInLocales;
-
-                  return userLocale || "pt-BR";
-               } catch (error) {
-                  console.warn("Error detecting locale:", error);
-                  return "default"; // Safe fallback
-               }
             },
          }),
          admin(),

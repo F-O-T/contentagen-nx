@@ -1,6 +1,5 @@
 {
    "dependencies": {
-      "posthog-node": "^5.5.0",
       "@packages/agents": "workspace:*",
       "@packages/arcjet": "workspace:*",
       "@packages/authentication": "workspace:*",
@@ -16,7 +15,6 @@
       "@trpc/client": "catalog:trpc",
       "@f-o-t/markdown": "workspace:*",
       "@trpc/server": "catalog:trpc",
-      "drizzle-orm": "catalog:database",
       "superjson": "catalog:trpc",
       "url-join": "catalog:trpc",
       "zod": "catalog:validation"
