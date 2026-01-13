@@ -25,32 +25,30 @@ COPY bun.lock ./
 COPY package.json ./
 COPY apps/server/package.json ./apps/server/
 COPY tooling/typescript/package.json ./tooling/typescript/
+
+# Packages
+COPY packages/agents/package.json ./packages/agents/
 COPY packages/api/package.json ./packages/api/
-COPY libraries/ofx/package.json ./libraries/ofx/
+COPY packages/arcjet/package.json ./packages/arcjet/
 COPY packages/authentication/package.json ./packages/authentication/
-COPY packages/localization/package.json ./packages/localization/
-COPY packages/utils/package.json ./packages/utils/
+COPY packages/cache/package.json ./packages/cache/
 COPY packages/database/package.json ./packages/database/
 COPY packages/environment/package.json ./packages/environment/
 COPY packages/files/package.json ./packages/files/
-COPY packages/posthog/package.json ./packages/posthog/
-COPY packages/ofx/package.json ./packages/ofx/
-COPY packages/notifications/package.json ./packages/notifications/
-COPY packages/pdf/package.json ./packages/pdf/
-COPY packages/transactional/package.json ./packages/transactional/
-COPY packages/brasil-api/package.json ./packages/brasil-api/
-COPY packages/cache/package.json ./packages/cache/
-COPY packages/workflows/package.json ./packages/workflows/
-COPY packages/queue/package.json ./packages/queue/
-COPY packages/stripe/package.json ./packages/stripe/
-COPY packages/arcjet/package.json ./packages/arcjet/
 COPY packages/logging/package.json ./packages/logging/
-COPY packages/csv/package.json ./packages/csv/
-COPY packages/money/package.json ./packages/money/
-COPY libraries/money/package.json ./libraries/money/
-COPY libraries/condition-evaluator/package.json ./libraries/condition-evaluator/
-COPY libraries/csv/package.json ./libraries/csv/
-COPY libraries/rules-engine/package.json ./libraries/rules-engine/
+COPY packages/notifications/package.json ./packages/notifications/
+COPY packages/posthog/package.json ./packages/posthog/
+COPY packages/queue/package.json ./packages/queue/
+COPY packages/search/package.json ./packages/search/
+COPY packages/stripe/package.json ./packages/stripe/
+COPY packages/transactional/package.json ./packages/transactional/
+COPY packages/utils/package.json ./packages/utils/
+COPY packages/workflows/package.json ./packages/workflows/
+
+# Libraries
+COPY libraries/markdown/package.json ./libraries/markdown/
+COPY libraries/content-analysis/package.json ./libraries/content-analysis/
+COPY libraries/sdk/package.json ./libraries/sdk/
 
 
 RUN bun install
@@ -59,23 +57,16 @@ COPY . .
 
 ENV NODE_ENV=production
 
-WORKDIR /app/libraries/ofx
+# Build libraries
+WORKDIR /app/libraries/markdown
 RUN bun run build
 WORKDIR /app
 
-WORKDIR /app/libraries/condition-evaluator
+WORKDIR /app/libraries/content-analysis
 RUN bun run build
 WORKDIR /app
 
-WORKDIR /app/libraries/csv
-RUN bun run build
-WORKDIR /app
-
-WORKDIR /app/libraries/money
-RUN bun run build
-WORKDIR /app
-
-WORKDIR /app/libraries/rules-engine
+WORKDIR /app/libraries/sdk
 RUN bun run build
 WORKDIR /app
 

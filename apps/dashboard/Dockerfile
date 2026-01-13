@@ -10,33 +10,32 @@ ENV NODE_ENV=production
 COPY bun.lock ./
 COPY package.json ./
 COPY apps/dashboard/package.json ./apps/dashboard/
-COPY packages/localization/package.json ./packages/localization/
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/ofx/package.json ./packages/ofx/
 COPY tooling/typescript/package.json ./tooling/typescript/
-COPY packages/posthog/package.json ./packages/posthog/
+
+# Packages
 COPY packages/api/package.json ./packages/api/
-COPY packages/authentication/package.json ./packages/authentication/
-COPY packages/environment/package.json ./packages/environment/
-COPY packages/database/package.json ./packages/database/
-COPY packages/files/package.json ./packages/files/
-COPY packages/transactional/package.json ./packages/transactional/
-COPY packages/utils/package.json ./packages/utils/
-COPY packages/brasil-api/package.json ./packages/brasil-api/
-COPY packages/cache/package.json ./packages/cache/
-COPY packages/pdf/package.json ./packages/pdf/
-COPY packages/notifications/package.json ./packages/notifications/
-COPY packages/workflows/package.json ./packages/workflows/
-COPY packages/queue/package.json ./packages/queue/
-COPY libraries/ofx/package.json ./libraries/ofx/
-COPY libraries/condition-evaluator/package.json ./libraries/condition-evaluator/
-COPY packages/stripe/package.json ./packages/stripe/
+COPY packages/agents/package.json ./packages/agents/
 COPY packages/arcjet/package.json ./packages/arcjet/
-COPY packages/csv/package.json ./packages/csv/
-COPY packages/money/package.json ./packages/money/
-COPY libraries/money/package.json ./libraries/money/
-COPY libraries/csv/package.json ./libraries/csv/
-COPY libraries/rules-engine/package.json ./libraries/rules-engine/
+COPY packages/authentication/package.json ./packages/authentication/
+COPY packages/cache/package.json ./packages/cache/
+COPY packages/database/package.json ./packages/database/
+COPY packages/environment/package.json ./packages/environment/
+COPY packages/files/package.json ./packages/files/
+COPY packages/logging/package.json ./packages/logging/
+COPY packages/notifications/package.json ./packages/notifications/
+COPY packages/posthog/package.json ./packages/posthog/
+COPY packages/queue/package.json ./packages/queue/
+COPY packages/search/package.json ./packages/search/
+COPY packages/stripe/package.json ./packages/stripe/
+COPY packages/transactional/package.json ./packages/transactional/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/utils/package.json ./packages/utils/
+COPY packages/workflows/package.json ./packages/workflows/
+
+# Libraries
+COPY libraries/markdown/package.json ./libraries/markdown/
+COPY libraries/content-analysis/package.json ./libraries/content-analysis/
+COPY libraries/sdk/package.json ./libraries/sdk/
 
 
 # Install dependencies
@@ -46,25 +45,16 @@ RUN bun install
 # Copy source code
 COPY . .
 
-# Build the condition-evaluator library
-WORKDIR /app/libraries/ofx
+# Build libraries
+WORKDIR /app/libraries/markdown
 RUN bun run build
 WORKDIR /app
 
-WORKDIR /app/libraries/condition-evaluator
+WORKDIR /app/libraries/content-analysis
 RUN bun run build
 WORKDIR /app
 
-WORKDIR /app/libraries/csv
-RUN bun run build
-WORKDIR /app
-
-WORKDIR /app/libraries/money
-RUN bun run build
-WORKDIR /app
-
-
-WORKDIR /app/libraries/rules-engine
+WORKDIR /app/libraries/sdk
 RUN bun run build
 WORKDIR /app
 
