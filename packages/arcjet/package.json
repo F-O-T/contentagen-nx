@@ -22,7 +22,8 @@
    },
    "dependencies": {
       "@arcjet/bun": "^1.0.0-beta.15",
-      "@packages/environment": "workspace:*"
+      "@packages/environment": "workspace:*",
+      "@packages/stripe": "workspace:*"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
