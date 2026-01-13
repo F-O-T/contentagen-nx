@@ -15,7 +15,6 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import {
    Archive,
-   FileText,
    Lightbulb,
    Send,
    Trash2,
@@ -27,7 +26,7 @@ import { toast } from "sonner";
 import {
    setChatMode,
    startNewPlan,
-   useChatState,
+   useChatMode,
 } from "@/features/content/context/chat-context";
 import { ChatSidebar } from "@/features/content/ui/chat-sidebar";
 import { ContentEditor } from "@/features/content/ui/content-editor";
@@ -137,8 +136,8 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
    // Pro user's preferred creation mode
    const { preference: creationPreference } = useContentCreationPreference();
 
-   // Get chat mode from context
-   const { mode: chatMode } = useChatState();
+   // Get chat mode from context (useChatMode uses selector for proper reactivity)
+   const chatMode = useChatMode();
 
    const { data: content } = useSuspenseQuery(
       trpc.content.getById.queryOptions({ id: contentId }),
@@ -204,6 +203,35 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
       });
    };
 
+   // Handler when plan agent detects no writer assigned
+   const handleWriterSelectionNeeded = () => {
+      openCredenza({
+         children: (
+            <WriterAssignmentCredenza
+               contentId={contentId}
+               currentWriterId={content.agentId}
+               isPending={assignWriterMutation.isPending}
+               onSelect={(writerId) => {
+                  assignWriterMutation.mutate(
+                     {
+                        id: contentId,
+                        data: { agentId: writerId },
+                     },
+                     {
+                        onSuccess: () => {
+                           closeCredenza();
+                           toast.success(
+                              "Escritor selecionado! Agora diga o que você gostaria de escrever.",
+                           );
+                        },
+                     },
+                  );
+               }}
+            />
+         ),
+      });
+   };
+
    // Handler to start a new plan (Pro only)
    const handleStartNewPlan = () => {
       startNewPlan();
@@ -213,6 +241,13 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
    const handleSkipPlanning = () => {
       setChatMode("writer");
    };
+
+   // Auto-open writer selection if in planning mode without a writer
+   useEffect(() => {
+      if (isPlanning && !content.agentId) {
+         handleWriterSelectionNeeded();
+      }
+   }, [isPlanning, content.agentId]);
 
    const updateMutation = useMutation(
       trpc.content.update.mutationOptions({
@@ -405,25 +440,6 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
       return (
          <TooltipProvider>
             <div className="flex h-[calc(100vh-4rem)] -m-4">
-               {/* Header with skip planning option */}
-               <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
-                  <Tooltip>
-                     <TooltipTrigger asChild>
-                        <Button
-                           onClick={handleSkipPlanning}
-                           size="sm"
-                           variant="outline"
-                        >
-                           <FileText className="size-4 mr-2" />
-                           Pular planejamento
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>
-                        <p>Ir direto para o editor</p>
-                     </TooltipContent>
-                  </Tooltip>
-               </div>
-
                {/* Full-page Chat */}
                <ChatSidebar
                   contentId={contentId}
@@ -436,6 +452,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
                   }}
                   fullPage
                   onAgentComplete={handleAgentComplete}
+                  onSkipPlan={handleSkipPlanning}
                />
             </div>
          </TooltipProvider>

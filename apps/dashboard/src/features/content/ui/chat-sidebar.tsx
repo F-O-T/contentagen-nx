@@ -30,6 +30,7 @@ interface ChatSidebarProps {
    className?: string;
    fullPage?: boolean;
    onAgentComplete?: () => void;
+   onSkipPlan?: () => void;
 }
 
 export function ChatSidebar({
@@ -38,6 +39,7 @@ export function ChatSidebar({
    className,
    fullPage = false,
    onAgentComplete,
+   onSkipPlan,
 }: ChatSidebarProps) {
    const [activeTab, setActiveTab] = useState<"chat" | "metadata">("chat");
    const { hasFeature } = useFeatureAccess();
@@ -181,6 +183,7 @@ export function ChatSidebar({
                      isLoading={isStreaming}
                      onCancel={cancelChat}
                      onSend={handleSend}
+                     onSkipPlan={fullPage ? onSkipPlan : undefined}
                      placeholder={
                         isSessionLoading
                            ? "Loading chat session..."

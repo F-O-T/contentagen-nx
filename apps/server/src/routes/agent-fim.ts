@@ -178,6 +178,9 @@ export const agentFIMRoutes = new Elysia({ prefix: "/api/agent/fim" }).post(
             triggerType,
          });
 
+         // Get token usage from the stream
+         const usage = await stream.usage;
+
          // Capture LLM analytics event
          const captureCtx: LLMCaptureContext = {
             posthog,
@@ -197,6 +200,9 @@ export const agentFIMRoutes = new Elysia({ prefix: "/api/agent/fim" }).post(
             shouldShow: confidence.shouldShow,
             factors: confidence.factors,
             stopReason,
+            inputTokens: usage?.inputTokens ?? 0,
+            outputTokens: usage?.outputTokens ?? 0,
+            totalTokens: usage?.totalTokens ?? 0,
          });
 
          // Final completion message with confidence scoring

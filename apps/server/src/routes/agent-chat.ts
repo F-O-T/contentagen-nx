@@ -214,19 +214,6 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
             const stream = await agent.stream(mastraMessages, {
                requestContext,
                maxSteps: 20,
-               // Memory configuration for conversation persistence
-               memory: {
-                  thread: sessionId,
-                  resource: contentAgentId ?? contentId,
-                  options: {
-                     lastMessages: 10,
-                     semanticRecall: true,
-                     workingMemory: {
-                        enabled: true,
-                        scope: "resource", // Persist across all threads for this writer/content
-                     },
-                  },
-               },
             });
 
             // Emit initial step start
@@ -433,6 +420,9 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
             // Save final step if it has content
             await saveCurrentStep();
 
+            // Get token usage from the stream
+            const usage = await stream.usage;
+
             // Capture response completion analytics
             captureChatResponseComplete(captureCtx, {
                contentId,
@@ -443,6 +433,9 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
                toolsUsed: [...new Set(toolsUsed)], // Deduplicate
                messageLength: currentStep.text.length,
                model,
+               inputTokens: usage?.inputTokens ?? 0,
+               outputTokens: usage?.outputTokens ?? 0,
+               totalTokens: usage?.totalTokens ?? 0,
             });
 
             // Final step complete and done signal

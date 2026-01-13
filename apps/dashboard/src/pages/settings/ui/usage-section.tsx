@@ -1,0 +1,360 @@
+import { Badge } from "@packages/ui/components/badge";
+import {
+   Card,
+   CardContent,
+   CardDescription,
+   CardHeader,
+   CardTitle,
+} from "@packages/ui/components/card";
+import { createErrorFallback } from "@packages/ui/components/error-fallback";
+import {
+   Item,
+   ItemContent,
+   ItemDescription,
+   ItemMedia,
+   ItemTitle,
+} from "@packages/ui/components/item";
+import { Progress } from "@packages/ui/components/progress";
+import { Skeleton } from "@packages/ui/components/skeleton";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+   Bot,
+   FileText,
+   MessageSquare,
+   Pencil,
+   Sparkles,
+   Zap,
+} from "lucide-react";
+import { Suspense } from "react";
+import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import {
+   Feature,
+   useFeatureAccess,
+} from "@/hooks/use-feature-access";
+import { trpc } from "@/integrations/clients";
+
+// ============================================
+// Helper Functions
+// ============================================
+
+function formatNumber(num: number): string {
+   if (num >= 1_000_000) {
+      return `${(num / 1_000_000).toFixed(1)}M`;
+   }
+   if (num >= 1_000) {
+      return `${(num / 1_000).toFixed(1)}K`;
+   }
+   return num.toLocaleString("pt-BR");
+}
+
+function formatTokens(tokens: number): string {
+   if (tokens >= 1_000_000) {
+      return `${(tokens / 1_000_000).toFixed(2)}M`;
+   }
+   if (tokens >= 1_000) {
+      return `${(tokens / 1_000).toFixed(1)}K`;
+   }
+   return tokens.toLocaleString("pt-BR");
+}
+
+// ============================================
+// Skeleton Components
+// ============================================
+
+function UsageSectionSkeleton() {
+   return (
+      <div className="space-y-6">
+         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+               <Card key={`skeleton-card-${i + 1}`}>
+                  <CardHeader className="pb-2">
+                     <Skeleton className="h-4 w-24" />
+                  </CardHeader>
+                  <CardContent>
+                     <Skeleton className="h-8 w-32" />
+                     <Skeleton className="mt-2 h-3 w-16" />
+                  </CardContent>
+               </Card>
+            ))}
+         </div>
+         <Card>
+            <CardHeader>
+               <Skeleton className="h-6 w-32" />
+               <Skeleton className="h-4 w-48" />
+            </CardHeader>
+            <CardContent>
+               <div className="space-y-4">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                     <Skeleton
+                        className="h-16 w-full"
+                        key={`skeleton-row-${i + 1}`}
+                     />
+                  ))}
+               </div>
+            </CardContent>
+         </Card>
+      </div>
+   );
+}
+
+// ============================================
+// Error Fallback
+// ============================================
+
+function UsageSectionErrorFallback(props: FallbackProps) {
+   return (
+      <Card>
+         <CardHeader>
+            <CardTitle>Uso de IA</CardTitle>
+            <CardDescription>
+               Visualize o consumo de recursos de IA da sua organização.
+            </CardDescription>
+         </CardHeader>
+         <CardContent>
+            {createErrorFallback({
+               errorDescription: "Erro ao carregar estatísticas de uso",
+               errorTitle: "Erro",
+               retryText: "Tentar novamente",
+            })(props)}
+         </CardContent>
+      </Card>
+   );
+}
+
+// ============================================
+// Usage Card Component
+// ============================================
+
+interface UsageCardProps {
+   icon: React.ElementType;
+   title: string;
+   value: string;
+   subtitle: string;
+}
+
+function UsageCard({ icon: Icon, title, value, subtitle }: UsageCardProps) {
+   return (
+      <Card>
+         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            <Icon className="size-4 text-muted-foreground" />
+         </CardHeader>
+         <CardContent>
+            <div className="text-2xl font-bold">{value}</div>
+            <p className="text-xs text-muted-foreground">{subtitle}</p>
+         </CardContent>
+      </Card>
+   );
+}
+
+// ============================================
+// Feature Usage Row Component
+// ============================================
+
+interface FeatureUsageRowProps {
+   icon: React.ElementType;
+   name: string;
+   requests: number;
+   inputTokens: number;
+   outputTokens: number;
+   totalTokens: number;
+   totalRequests: number;
+}
+
+function FeatureUsageRow({
+   icon: Icon,
+   name,
+   requests,
+   inputTokens,
+   outputTokens,
+   totalTokens,
+   totalRequests,
+}: FeatureUsageRowProps) {
+   const percentage = totalRequests > 0 ? (requests / totalRequests) * 100 : 0;
+
+   return (
+      <Item variant="muted" className="py-4">
+         <ItemMedia variant="icon">
+            <Icon className="size-4" />
+         </ItemMedia>
+         <ItemContent className="flex-1">
+            <div className="flex items-center justify-between">
+               <ItemTitle>{name}</ItemTitle>
+               <Badge variant="secondary">{formatNumber(requests)} req</Badge>
+            </div>
+            <ItemDescription className="mt-1">
+               {formatTokens(inputTokens)} entrada / {formatTokens(outputTokens)}{" "}
+               saída
+            </ItemDescription>
+            <Progress className="mt-2 h-1.5" value={percentage} />
+         </ItemContent>
+         <div className="text-right">
+            <span className="text-sm font-medium">
+               {formatTokens(totalTokens)}
+            </span>
+            <p className="text-xs text-muted-foreground">tokens</p>
+         </div>
+      </Item>
+   );
+}
+
+// ============================================
+// No AI Access Component
+// ============================================
+
+function NoAIAccessContent() {
+   return (
+      <Card>
+         <CardHeader>
+            <CardTitle>Uso de IA</CardTitle>
+            <CardDescription>
+               Visualize o consumo de recursos de IA da sua organização.
+            </CardDescription>
+         </CardHeader>
+         <CardContent className="py-8 text-center">
+            <Sparkles className="mx-auto size-12 text-muted-foreground/50" />
+            <h3 className="mt-4 text-lg font-semibold">
+               Recursos de IA não disponíveis
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+               Faça upgrade para o plano Lite ou Pro para acessar os recursos de
+               IA e visualizar estatísticas de uso.
+            </p>
+         </CardContent>
+      </Card>
+   );
+}
+
+// ============================================
+// Main Content Component
+// ============================================
+
+function UsageSectionContent() {
+   const { data: usage } = useSuspenseQuery(
+      trpc.usage.getCurrentMonthUsage.queryOptions(),
+   );
+   const { hasFeature } = useFeatureAccess();
+
+   // Check if user has any AI features
+   const hasAnyAIFeature =
+      hasFeature(Feature.FIM) ||
+      hasFeature(Feature.QUICK_EDIT) ||
+      hasFeature(Feature.CHAT);
+
+   if (!hasAnyAIFeature) {
+      return <NoAIAccessContent />;
+   }
+
+   // Filter features based on plan access
+   const showFIM = hasFeature(Feature.FIM);
+   const showEdit = hasFeature(Feature.QUICK_EDIT);
+   const showChat = hasFeature(Feature.CHAT);
+   const showPlanMode = hasFeature(Feature.CHAT_PLAN_MODE);
+
+   return (
+      <div className="space-y-6">
+         {/* Summary Cards */}
+         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <UsageCard
+               icon={Zap}
+               subtitle="este mês"
+               title="Total de Requisições"
+               value={formatNumber(usage.totalRequests)}
+            />
+            <UsageCard
+               icon={FileText}
+               subtitle="consumidos"
+               title="Tokens de Entrada"
+               value={formatTokens(usage.totalInputTokens)}
+            />
+            <UsageCard
+               icon={FileText}
+               subtitle="gerados"
+               title="Tokens de Saída"
+               value={formatTokens(usage.totalOutputTokens)}
+            />
+            <UsageCard
+               icon={Sparkles}
+               subtitle="total"
+               title="Total de Tokens"
+               value={formatTokens(usage.totalTokens)}
+            />
+         </div>
+
+         {/* Feature Breakdown */}
+         <Card>
+            <CardHeader>
+               <CardTitle>Uso por Recurso</CardTitle>
+               <CardDescription>
+                  Distribuição do consumo de IA entre os diferentes recursos
+               </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+               {showFIM && (
+                  <FeatureUsageRow
+                     icon={Bot}
+                     inputTokens={usage.byFeature.fim.inputTokens}
+                     name="Autocompletar (FIM)"
+                     outputTokens={usage.byFeature.fim.outputTokens}
+                     requests={usage.byFeature.fim.requests}
+                     totalRequests={usage.totalRequests}
+                     totalTokens={usage.byFeature.fim.totalTokens}
+                  />
+               )}
+               {showEdit && (
+                  <FeatureUsageRow
+                     icon={Pencil}
+                     inputTokens={usage.byFeature.edit.inputTokens}
+                     name="Edição Rápida"
+                     outputTokens={usage.byFeature.edit.outputTokens}
+                     requests={usage.byFeature.edit.requests}
+                     totalRequests={usage.totalRequests}
+                     totalTokens={usage.byFeature.edit.totalTokens}
+                  />
+               )}
+               {showChat && (
+                  <FeatureUsageRow
+                     icon={MessageSquare}
+                     inputTokens={usage.byFeature.chat.inputTokens}
+                     name="Chat IA (Escritor)"
+                     outputTokens={usage.byFeature.chat.outputTokens}
+                     requests={usage.byFeature.chat.requests}
+                     totalRequests={usage.totalRequests}
+                     totalTokens={usage.byFeature.chat.totalTokens}
+                  />
+               )}
+               {showPlanMode && (
+                  <FeatureUsageRow
+                     icon={FileText}
+                     inputTokens={usage.byFeature.plan.inputTokens}
+                     name="Planejamento"
+                     outputTokens={usage.byFeature.plan.outputTokens}
+                     requests={usage.byFeature.plan.requests}
+                     totalRequests={usage.totalRequests}
+                     totalTokens={usage.byFeature.plan.totalTokens}
+                  />
+               )}
+            </CardContent>
+         </Card>
+
+         {/* Period Info */}
+         <p className="text-center text-xs text-muted-foreground">
+            Período: {usage.period}
+         </p>
+      </div>
+   );
+}
+
+// ============================================
+// Exported Component
+// ============================================
+
+export function UsageSection() {
+   return (
+      <ErrorBoundary FallbackComponent={UsageSectionErrorFallback}>
+         <Suspense fallback={<UsageSectionSkeleton />}>
+            <UsageSectionContent />
+         </Suspense>
+      </ErrorBoundary>
+   );
+}

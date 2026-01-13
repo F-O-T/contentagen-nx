@@ -6,7 +6,7 @@ import {
    SidebarMenuItem,
 } from "@packages/ui/components/sidebar";
 import { Link, useLocation } from "@tanstack/react-router";
-import { Bell, CreditCard, Key, Settings2, Shield, User } from "lucide-react";
+import { Bell, BarChart3, CreditCard, Key, Settings2, Shield, User } from "lucide-react";
 import { useMemo } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
@@ -43,6 +43,12 @@ const settingsNavItems = [
       title: "Notificações",
    },
    {
+      href: "/$slug/settings/usage",
+      icon: BarChart3,
+      id: "usage",
+      title: "Uso de IA",
+   },
+   {
       href: "/$slug/settings/billing",
       icon: CreditCard,
       id: "billing",
@@ -67,6 +73,10 @@ export function SettingsSidebar() {
       return settingsNavItems.filter((item) => {
          // Hide API Keys for users without API_ACCESS feature
          if (item.id === "api-keys" && !hasFeature(Feature.API_ACCESS)) {
+            return false;
+         }
+         // Hide Usage for users without any AI features
+         if (item.id === "usage" && !hasFeature(Feature.FIM)) {
             return false;
          }
          return true;

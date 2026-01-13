@@ -921,6 +921,11 @@ export const useChatState = () => {
 };
 
 /**
+ * Hook to subscribe to just the chat mode (for reactive mode switching)
+ */
+export const useChatMode = () => useStore(chatStore, (state) => state.mode);
+
+/**
  * Get current chat state synchronously (for use outside React)
  */
 export const getChatState = () => chatStore.state;

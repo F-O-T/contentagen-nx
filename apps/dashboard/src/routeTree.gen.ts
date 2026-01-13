@@ -37,6 +37,7 @@ import { Route as SlugDashboardOrganizationIndexRouteImport } from './routes/$sl
 import { Route as SlugDashboardContentIndexRouteImport } from './routes/$slug/_dashboard/content/index'
 import { Route as CallbackOrganizationInvitationInvitationIdRouteImport } from './routes/callback/organization/invitation.$invitationId'
 import { Route as SlugDashboardWritersWriterIdRouteImport } from './routes/$slug/_dashboard/writers/$writerId'
+import { Route as SlugDashboardSettingsUsageRouteImport } from './routes/$slug/_dashboard/settings/usage'
 import { Route as SlugDashboardSettingsSecurityRouteImport } from './routes/$slug/_dashboard/settings/security'
 import { Route as SlugDashboardSettingsProfileRouteImport } from './routes/$slug/_dashboard/settings/profile'
 import { Route as SlugDashboardSettingsPreferencesRouteImport } from './routes/$slug/_dashboard/settings/preferences'
@@ -195,6 +196,12 @@ const SlugDashboardWritersWriterIdRoute =
     path: '/writers/$writerId',
     getParentRoute: () => SlugDashboardRoute,
   } as any)
+const SlugDashboardSettingsUsageRoute =
+  SlugDashboardSettingsUsageRouteImport.update({
+    id: '/usage',
+    path: '/usage',
+    getParentRoute: () => SlugDashboardSettingsRoute,
+  } as any)
 const SlugDashboardSettingsSecurityRoute =
   SlugDashboardSettingsSecurityRouteImport.update({
     id: '/security',
@@ -294,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/$slug/settings/preferences': typeof SlugDashboardSettingsPreferencesRoute
   '/$slug/settings/profile': typeof SlugDashboardSettingsProfileRoute
   '/$slug/settings/security': typeof SlugDashboardSettingsSecurityRoute
+  '/$slug/settings/usage': typeof SlugDashboardSettingsUsageRoute
   '/$slug/writers/$writerId': typeof SlugDashboardWritersWriterIdRoute
   '/callback/organization/invitation/$invitationId': typeof CallbackOrganizationInvitationInvitationIdRoute
   '/$slug/content': typeof SlugDashboardContentIndexRoute
@@ -331,6 +339,7 @@ export interface FileRoutesByTo {
   '/$slug/settings/preferences': typeof SlugDashboardSettingsPreferencesRoute
   '/$slug/settings/profile': typeof SlugDashboardSettingsProfileRoute
   '/$slug/settings/security': typeof SlugDashboardSettingsSecurityRoute
+  '/$slug/settings/usage': typeof SlugDashboardSettingsUsageRoute
   '/$slug/writers/$writerId': typeof SlugDashboardWritersWriterIdRoute
   '/callback/organization/invitation/$invitationId': typeof CallbackOrganizationInvitationInvitationIdRoute
   '/$slug/content': typeof SlugDashboardContentIndexRoute
@@ -373,6 +382,7 @@ export interface FileRoutesById {
   '/$slug/_dashboard/settings/preferences': typeof SlugDashboardSettingsPreferencesRoute
   '/$slug/_dashboard/settings/profile': typeof SlugDashboardSettingsProfileRoute
   '/$slug/_dashboard/settings/security': typeof SlugDashboardSettingsSecurityRoute
+  '/$slug/_dashboard/settings/usage': typeof SlugDashboardSettingsUsageRoute
   '/$slug/_dashboard/writers/$writerId': typeof SlugDashboardWritersWriterIdRoute
   '/callback/organization/invitation/$invitationId': typeof CallbackOrganizationInvitationInvitationIdRoute
   '/$slug/_dashboard/content/': typeof SlugDashboardContentIndexRoute
@@ -415,6 +425,7 @@ export interface FileRouteTypes {
     | '/$slug/settings/preferences'
     | '/$slug/settings/profile'
     | '/$slug/settings/security'
+    | '/$slug/settings/usage'
     | '/$slug/writers/$writerId'
     | '/callback/organization/invitation/$invitationId'
     | '/$slug/content'
@@ -452,6 +463,7 @@ export interface FileRouteTypes {
     | '/$slug/settings/preferences'
     | '/$slug/settings/profile'
     | '/$slug/settings/security'
+    | '/$slug/settings/usage'
     | '/$slug/writers/$writerId'
     | '/callback/organization/invitation/$invitationId'
     | '/$slug/content'
@@ -493,6 +505,7 @@ export interface FileRouteTypes {
     | '/$slug/_dashboard/settings/preferences'
     | '/$slug/_dashboard/settings/profile'
     | '/$slug/_dashboard/settings/security'
+    | '/$slug/_dashboard/settings/usage'
     | '/$slug/_dashboard/writers/$writerId'
     | '/callback/organization/invitation/$invitationId'
     | '/$slug/_dashboard/content/'
@@ -710,6 +723,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SlugDashboardWritersWriterIdRouteImport
       parentRoute: typeof SlugDashboardRoute
     }
+    '/$slug/_dashboard/settings/usage': {
+      id: '/$slug/_dashboard/settings/usage'
+      path: '/usage'
+      fullPath: '/$slug/settings/usage'
+      preLoaderRoute: typeof SlugDashboardSettingsUsageRouteImport
+      parentRoute: typeof SlugDashboardSettingsRoute
+    }
     '/$slug/_dashboard/settings/security': {
       id: '/$slug/_dashboard/settings/security'
       path: '/security'
@@ -835,6 +855,7 @@ interface SlugDashboardSettingsRouteChildren {
   SlugDashboardSettingsPreferencesRoute: typeof SlugDashboardSettingsPreferencesRoute
   SlugDashboardSettingsProfileRoute: typeof SlugDashboardSettingsProfileRoute
   SlugDashboardSettingsSecurityRoute: typeof SlugDashboardSettingsSecurityRoute
+  SlugDashboardSettingsUsageRoute: typeof SlugDashboardSettingsUsageRoute
   SlugDashboardSettingsIndexRoute: typeof SlugDashboardSettingsIndexRoute
 }
 
@@ -846,6 +867,7 @@ const SlugDashboardSettingsRouteChildren: SlugDashboardSettingsRouteChildren = {
   SlugDashboardSettingsPreferencesRoute: SlugDashboardSettingsPreferencesRoute,
   SlugDashboardSettingsProfileRoute: SlugDashboardSettingsProfileRoute,
   SlugDashboardSettingsSecurityRoute: SlugDashboardSettingsSecurityRoute,
+  SlugDashboardSettingsUsageRoute: SlugDashboardSettingsUsageRoute,
   SlugDashboardSettingsIndexRoute: SlugDashboardSettingsIndexRoute,
 }
 

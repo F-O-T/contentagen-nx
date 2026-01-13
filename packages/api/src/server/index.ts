@@ -17,6 +17,7 @@ import { organizationTeamsRouter } from "./routers/organization-teams";
 import { permissionsRouter } from "./routers/permissions";
 import { pushNotificationRouter } from "./routers/push-notifications";
 import { sessionRouter } from "./routers/session";
+import { usageRouter } from "./routers/usage";
 import { createTRPCContext as createTRPCContextInternal, router } from "./trpc";
 
 export const appRouter = router({
@@ -33,6 +34,7 @@ export const appRouter = router({
    permissions: permissionsRouter,
    pushNotifications: pushNotificationRouter,
    session: sessionRouter,
+   usage: usageRouter,
 });
 
 export const createApi = ({

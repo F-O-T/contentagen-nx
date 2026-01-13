@@ -4,6 +4,7 @@ import { compileInstructionMemories } from "../helpers";
 
 // Import tools for plan mode
 import { analysisTools } from "../tools/analysis";
+import { memoryTools } from "../tools/memory";
 import { getAllPlanToolInstructions, planTools } from "../tools/plan";
 import { getAllRagToolInstructions, ragTools } from "../tools/rag";
 import { researchTools } from "../tools/research";
@@ -13,7 +14,7 @@ import { relatedKeywordsTool } from "../tools/research/related-keywords-tool";
 import { researchCompletenessTool } from "../tools/research/research-completeness-tool";
 
 // Shared constants
-import { LANGUAGE_INSTRUCTION, openrouter, sharedMemory } from "./shared";
+import { LANGUAGE_INSTRUCTION, openrouter } from "./shared";
 
 // Plan agent instructions
 const getPlanAgentInstructions = (
@@ -147,10 +148,7 @@ export const planAgent = new Agent({
    id: "plan-agent",
    name: "Plan Agent",
 
-   model: openrouter("z-ai/glm-4.7"),
-
-   // Enable Mastra memory for conversation persistence and semantic recall
-   memory: sharedMemory,
+   model: openrouter("minimax/minimax-m2.1"),
 
    instructions: ({ requestContext }) => {
       const agentInstructions = requestContext?.get("agentInstructions") as
@@ -164,6 +162,7 @@ export const planAgent = new Agent({
       ...researchTools,
       ...planTools,
       ...ragTools,
+      ...memoryTools,
       relatedKeywords: relatedKeywordsTool,
       contentGapFinder: contentGapTool,
       factFinder: factFinderTool,

@@ -1,7 +1,7 @@
 import { Button } from "@packages/ui/components/button";
 import { Textarea } from "@packages/ui/components/textarea";
 import { cn } from "@packages/ui/lib/utils";
-import { Send, Square } from "lucide-react";
+import { FileText, Send, Square } from "lucide-react";
 import { type KeyboardEvent, useCallback, useRef, useState } from "react";
 import {
    type ChatCommand,
@@ -18,6 +18,7 @@ import {
 interface ChatInputProps {
    onSend: (message: string) => void;
    onCancel?: () => void;
+   onSkipPlan?: () => void;
    isLoading?: boolean;
    disabled?: boolean;
    placeholder?: string;
@@ -26,6 +27,7 @@ interface ChatInputProps {
 export function ChatInput({
    onSend,
    onCancel,
+   onSkipPlan,
    isLoading = false,
    disabled = false,
    placeholder = "Type a message...",
@@ -177,7 +179,17 @@ export function ChatInput({
 
             <div className="flex items-center justify-between">
                <div className="flex items-center gap-2">
-                  {/* Mode and model selectors removed - mode shown in tab header */}
+                  {onSkipPlan && (
+                     <Button
+                        className="h-7 gap-1.5 text-xs text-muted-foreground"
+                        onClick={onSkipPlan}
+                        size="sm"
+                        variant="ghost"
+                     >
+                        <FileText className="size-3" />
+                        Pular planejamento
+                     </Button>
+                  )}
                </div>
 
                {isLoading ? (

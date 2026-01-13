@@ -15,6 +15,12 @@ export interface LLMBaseEvent {
    sessionId?: string;
    /** AI model used */
    model?: string;
+   /** Number of input tokens consumed */
+   inputTokens?: number;
+   /** Number of output tokens generated */
+   outputTokens?: number;
+   /** Total tokens (input + output) */
+   totalTokens?: number;
 }
 
 // ============================================================================

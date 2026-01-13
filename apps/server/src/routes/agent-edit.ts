@@ -78,6 +78,9 @@ export const agentEditRoutes = new Elysia({ prefix: "/api/agent/edit" }).post(
             }) + "\n";
          }
 
+         // Get token usage from the stream
+         const usage = await stream.usage;
+
          // Capture edit generation analytics
          const captureCtx: LLMCaptureContext = {
             posthog,
@@ -91,6 +94,9 @@ export const agentEditRoutes = new Elysia({ prefix: "/api/agent/edit" }).post(
             originalLength: selectedText.length,
             newLength: transformedText.length,
             instructionType: inferInstructionType(instruction),
+            inputTokens: usage?.inputTokens ?? 0,
+            outputTokens: usage?.outputTokens ?? 0,
+            totalTokens: usage?.totalTokens ?? 0,
          });
 
          // Final completion message

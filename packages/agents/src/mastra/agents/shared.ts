@@ -1,4 +1,3 @@
-import { Memory } from "@mastra/memory";
 import { PgVector } from "@mastra/pg";
 import { ModelRouterEmbeddingModel } from "@mastra/core/llm";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
@@ -44,14 +43,3 @@ const createPgVectorStore = (): PgVector | null => {
 
 // PgVector store for RAG and memory
 export const pgVectorStore = createPgVectorStore();
-
-// Shared memory instance for agents (uses PgVector for semantic recall)
-const createSharedMemory = (): Memory | undefined => {
-   if (!pgVectorStore) return undefined;
-
-   return new Memory({
-      vector: pgVectorStore,
-   });
-};
-
-export const sharedMemory = createSharedMemory();
