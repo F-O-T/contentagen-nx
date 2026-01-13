@@ -6,7 +6,6 @@
       "@packages/cache": "workspace:*",
       "@packages/database": "workspace:*",
       "@packages/files": "workspace:*",
-      "@packages/notifications": "workspace:*",
       "@packages/posthog": "workspace:*",
       "@packages/utils": "workspace:*",
       "@trpc/client": "catalog:trpc",

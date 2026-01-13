@@ -29,7 +29,7 @@ import {
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useRouter } from "@tanstack/react-router";
-import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from "lucide-react";
+import { BadgeCheck, CreditCard, LogOut, Sparkles } from "lucide-react";
 import { Suspense, useCallback } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
@@ -111,20 +111,6 @@ function NavUserCredenza({
                   >
                      <CreditCard className="size-4" />
                      {"Cobrança"}
-                  </Link>
-               </Button>
-               <Button
-                  asChild
-                  className="w-full justify-start gap-2"
-                  onClick={onNavigate}
-                  variant="outline"
-               >
-                  <Link
-                     params={{ slug: activeOrganization.slug }}
-                     to="/$slug/settings/notifications"
-                  >
-                     <Bell className="size-4" />
-                     {"Notificações"}
                   </Link>
                </Button>
             </div>
@@ -368,15 +354,6 @@ function NavUserContent() {
                         >
                            <CreditCard />
                            {"Cobrança"}
-                        </Link>
-                     </DropdownMenuItem>
-                     <DropdownMenuItem asChild>
-                        <Link
-                           params={{ slug: activeOrganization.slug }}
-                           to="/$slug/settings/notifications"
-                        >
-                           <Bell />
-                           {"Notifications"}
                         </Link>
                      </DropdownMenuItem>
                   </DropdownMenuGroup>

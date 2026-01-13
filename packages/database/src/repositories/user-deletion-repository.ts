@@ -4,10 +4,7 @@ import {
    agent,
    brand,
    member,
-   notification,
-   notificationPreference,
    organization,
-   pushSubscription,
 } from "../schema";
 
 /**
@@ -46,13 +43,7 @@ export async function deleteAllUserData(db: DatabaseInstance, userId: string) {
       }
 
       // Delete user-scoped data (once for the user)
-      await Promise.all([
-         tx
-            .delete(notificationPreference)
-            .where(eq(notificationPreference.userId, userId)),
-         tx.delete(notification).where(eq(notification.userId, userId)),
-         tx.delete(pushSubscription).where(eq(pushSubscription.userId, userId)),
-      ]);
+      // Note: notification-related tables have been removed
 
       // Delete all memberships for this user
       await tx.delete(member).where(eq(member.userId, userId));

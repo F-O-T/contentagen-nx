@@ -38,9 +38,6 @@ const EnvSchema = z.object({
    TAVILY_API_KEYS: z.string().optional(), // Multiple keys: key1,key2,key3
    EXA_API_KEYS: z.string().optional(),
    FIRECRAWL_API_KEYS: z.string().optional(),
-   VAPID_PRIVATE_KEY: z.string().optional(),
-   VAPID_PUBLIC_KEY: z.string().optional(),
-   VAPID_SUBJECT: z.string().optional().default("mailto:contato@contentta.com"),
    WORKER_CONCURRENCY: z.coerce.number().optional().default(5),
 });
 export type ServerEnv = z.infer<typeof EnvSchema>;

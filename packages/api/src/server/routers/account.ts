@@ -172,7 +172,7 @@ export const accountRouter = router({
 
    /**
     * Export all user data as JSON
-    * Includes: profile, agents, brands, content, and notification preferences
+    * Includes: profile, agents, brands, and content
     */
    exportUserData: protectedProcedure.mutation(async ({ ctx }) => {
       const resolvedCtx = await ctx;
@@ -186,53 +186,45 @@ export const accountRouter = router({
       const db = resolvedCtx.db;
 
       // Fetch all user data in parallel
-      const [userProfile, agents, brands, content, notificationPreferences] =
-         await Promise.all([
-            // User profile
-            db.query.user.findFirst({
-               where: (user, { eq }) => eq(user.id, userId),
-               columns: {
-                  id: true,
-                  name: true,
-                  email: true,
-                  emailVerified: true,
-                  image: true,
-                  createdAt: true,
-                  updatedAt: true,
-               },
-            }),
+      const [userProfile, agents, brands, content] = await Promise.all([
+         // User profile
+         db.query.user.findFirst({
+            where: (user, { eq }) => eq(user.id, userId),
+            columns: {
+               id: true,
+               name: true,
+               email: true,
+               emailVerified: true,
+               image: true,
+               createdAt: true,
+               updatedAt: true,
+            },
+         }),
 
-            // Agents
-            db.query.agent.findMany({
+         // Agents
+         db.query.agent.findMany({
+            where: (agent, { eq }) => eq(agent.organizationId, organizationId),
+         }),
+
+         // Brands
+         db.query.brand.findMany({
+            where: (brand, { eq }) => eq(brand.organizationId, organizationId),
+         }),
+
+         // Content (via agents)
+         (async () => {
+            const orgAgents = await db.query.agent.findMany({
                where: (agent, { eq }) =>
                   eq(agent.organizationId, organizationId),
-            }),
-
-            // Brands
-            db.query.brand.findMany({
-               where: (brand, { eq }) =>
-                  eq(brand.organizationId, organizationId),
-            }),
-
-            // Content (via agents)
-            (async () => {
-               const orgAgents = await db.query.agent.findMany({
-                  where: (agent, { eq }) =>
-                     eq(agent.organizationId, organizationId),
-               });
-               const agentIds = orgAgents.map((a) => a.id);
-               if (agentIds.length === 0) return [];
-               return db.query.content.findMany({
-                  where: (content, { inArray }) =>
-                     inArray(content.agentId, agentIds),
-               });
-            })(),
-
-            // Notification preferences
-            db.query.notificationPreference.findFirst({
-               where: (prefs, { eq }) => eq(prefs.userId, userId),
-            }),
-         ]);
+            });
+            const agentIds = orgAgents.map((a) => a.id);
+            if (agentIds.length === 0) return [];
+            return db.query.content.findMany({
+               where: (content, { inArray }) =>
+                  inArray(content.agentId, agentIds),
+            });
+         })(),
+      ]);
 
       return {
          exportedAt: new Date().toISOString(),
@@ -242,7 +234,6 @@ export const accountRouter = router({
             agents,
             brands,
             content,
-            notificationPreferences,
          },
       };
    }),

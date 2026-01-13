@@ -219,7 +219,6 @@
         "@packages/cache": "workspace:*",
         "@packages/database": "workspace:*",
         "@packages/files": "workspace:*",
-        "@packages/notifications": "workspace:*",
         "@packages/posthog": "workspace:*",
         "@packages/utils": "workspace:*",
         "@trpc/client": "catalog:trpc",
@@ -332,20 +331,6 @@
         "@tooling/typescript": "workspace:*",
         "@types/node": "^20",
         "pino-pretty": "^13.0.0",
-        "typescript": "catalog:development",
-      },
-    },
-    "packages/notifications": {
-      "name": "@packages/notifications",
-      "version": "0.1.0",
-      "dependencies": {
-        "@packages/database": "workspace:*",
-        "@packages/utils": "workspace:*",
-        "web-push": "^3.6.7",
-      },
-      "devDependencies": {
-        "@tooling/typescript": "workspace:*",
-        "@types/web-push": "^3.6.4",
         "typescript": "catalog:development",
       },
     },
@@ -1382,8 +1367,6 @@
     "@packages/files": ["@packages/files@workspace:packages/files"],
 
     "@packages/logging": ["@packages/logging@workspace:packages/logging"],
-
-    "@packages/notifications": ["@packages/notifications@workspace:packages/notifications"],
 
     "@packages/posthog": ["@packages/posthog@workspace:packages/posthog"],
 

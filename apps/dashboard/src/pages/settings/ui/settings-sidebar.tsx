@@ -6,7 +6,7 @@ import {
    SidebarMenuItem,
 } from "@packages/ui/components/sidebar";
 import { Link, useLocation } from "@tanstack/react-router";
-import { Bell, BarChart3, CreditCard, Key, Settings2, Shield, User } from "lucide-react";
+import { BarChart3, CreditCard, Key, Settings2, Shield, User } from "lucide-react";
 import { useMemo } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
@@ -35,12 +35,6 @@ const settingsNavItems = [
       icon: Key,
       id: "api-keys",
       title: "API Keys",
-   },
-   {
-      href: "/$slug/settings/notifications",
-      icon: Bell,
-      id: "notifications",
-      title: "Notificações",
    },
    {
       href: "/$slug/settings/usage",

@@ -1,6 +1,6 @@
 import { QuickAccessCard } from "@packages/ui/components/quick-access-card";
 import { useNavigate } from "@tanstack/react-router";
-import { Bell, CreditCard, Settings2, Shield, User } from "lucide-react";
+import { CreditCard, Settings2, Shield, User } from "lucide-react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 
 const settingsNavItems = [
@@ -24,13 +24,6 @@ const settingsNavItems = [
       icon: Settings2,
       id: "preferences",
       title: "Preferências",
-   },
-   {
-      description: "Description",
-      href: "/$slug/settings/notifications",
-      icon: Bell,
-      id: "notifications",
-      title: "Notificações",
    },
    {
       description: "Description",

@@ -9,13 +9,11 @@ import { accountDeletionRouter } from "./routers/account-deletion";
 import { agentRouter } from "./routers/agent";
 import { billingRouter } from "./routers/billing";
 import { contentRouter } from "./routers/content";
-import { notificationRouter } from "./routers/notifications";
 import { onboardingRouter } from "./routers/onboarding";
 import { organizationRouter } from "./routers/organization";
 import { organizationInvitesRouter } from "./routers/organization-invites";
 import { organizationTeamsRouter } from "./routers/organization-teams";
 import { permissionsRouter } from "./routers/permissions";
-import { pushNotificationRouter } from "./routers/push-notifications";
 import { sessionRouter } from "./routers/session";
 import { usageRouter } from "./routers/usage";
 import { createTRPCContext as createTRPCContextInternal, router } from "./trpc";
@@ -26,13 +24,11 @@ export const appRouter = router({
    agent: agentRouter,
    billing: billingRouter,
    content: contentRouter,
-   notifications: notificationRouter,
    onboarding: onboardingRouter,
    organization: organizationRouter,
    organizationInvites: organizationInvitesRouter,
    organizationTeams: organizationTeamsRouter,
    permissions: permissionsRouter,
-   pushNotifications: pushNotificationRouter,
    session: sessionRouter,
    usage: usageRouter,
 });

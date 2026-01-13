@@ -11,7 +11,6 @@ import { useRouter } from "@tanstack/react-router";
 import { AlertCircle, Building2 } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { NotificationSettingsCard } from "@/features/notifications/ui/notification-settings-card";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { ProfilePageBilling } from "./profile-page-billing";
 import { ProfileInformation } from "./profile-page-informations-section";
@@ -131,8 +130,7 @@ export function ProfilePage() {
                <QuickAccessCardsWithErrorBoundary />
             </div>
 
-            <div className="md:col-span-3 grid md:grid-cols-2 gap-4">
-               <NotificationSettingsCard />
+            <div className="md:col-span-3">
                <PreferencesSection />
             </div>
          </div>

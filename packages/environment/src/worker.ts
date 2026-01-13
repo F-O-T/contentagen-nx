@@ -22,9 +22,6 @@ const EnvSchema = z.object({
    REDIS_URL: z.string().optional().default("redis://localhost:6379"),
    RESEND_API_KEY: z.string(),
    TAVILY_API_KEY: z.string().optional(),
-   VAPID_PRIVATE_KEY: z.string(),
-   VAPID_PUBLIC_KEY: z.string(),
-   VAPID_SUBJECT: z.string().optional().default("mailto:contato@contentta.co"),
    WORKER_CONCURRENCY: z.coerce.number().optional().default(5),
 });
 export type WorkerEnv = z.infer<typeof EnvSchema>;

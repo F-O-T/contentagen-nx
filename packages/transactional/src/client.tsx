@@ -35,7 +35,7 @@ export const sendOrganizationInvitation = async (
       inviteLink,
    }: SendOrganizationInvitationOptions,
 ) => {
-   const subject = `Convite para se juntar à equipe ${teamName} no ContentaGen`;
+   const subject = `Convite para se juntar à equipe ${teamName} no Contentta`;
    await client.emails.send({
       from: `${name} <suporte@mail.contentta.co>`,
       react: (
