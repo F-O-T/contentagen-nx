@@ -27,6 +27,7 @@
     "@packages/environment": "workspace:*",
     "@packages/posthog": "workspace:*",
     "@packages/stripe": "workspace:*",
+    "@f-o-t/markdown": "workspace:*",
     "@packages/transactional": "workspace:*",
     "@packages/ui": "workspace:*",
     "@packages/utils": "workspace:*",

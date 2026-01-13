@@ -9,6 +9,7 @@
       "@packages/posthog": "workspace:*",
       "@packages/utils": "workspace:*",
       "@trpc/client": "catalog:trpc",
+      "@f-o-t/markdown": "workspace:*",
       "@trpc/server": "catalog:trpc",
       "superjson": "catalog:trpc",
       "url-join": "catalog:trpc",

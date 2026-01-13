@@ -29,6 +29,7 @@
         "@dnd-kit/core": "^6.3.1",
         "@dnd-kit/sortable": "^10.0.0",
         "@dnd-kit/utilities": "^3.2.2",
+        "@f-o-t/markdown": "workspace:*",
         "@lexical/code": "^0.39.0",
         "@lexical/link": "^0.39.0",
         "@lexical/list": "^0.39.0",
@@ -215,6 +216,7 @@
       "name": "@packages/api",
       "version": "0.9.1",
       "dependencies": {
+        "@f-o-t/markdown": "workspace:*",
         "@packages/agents": "workspace:*",
         "@packages/arcjet": "workspace:*",
         "@packages/authentication": "workspace:*",
