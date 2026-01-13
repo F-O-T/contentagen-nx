@@ -101,7 +101,10 @@ export function ContentImageUpload({
          await uploadToPresignedUrl(presignedUrl, compressed, "image/webp");
 
          // Confirm upload
-         await confirmUploadMutation.mutateAsync({ contentId, storageKey: key });
+         await confirmUploadMutation.mutateAsync({
+            contentId,
+            storageKey: key,
+         });
 
          onImageChange?.(key);
          fileUpload.clearFile();
@@ -118,7 +121,7 @@ export function ContentImageUpload({
 
    const handleRemoveImage = async () => {
       try {
-         await confirmUploadMutation.mutateAsync({ contentId, storageKey: null });
+         await confirmUploadMutation.mutateAsync({ contentId, storageKey: "" });
          onImageChange?.(null);
       } catch (error) {
          console.error("Error removing image:", error);
@@ -139,7 +142,7 @@ export function ContentImageUpload({
          {previewUrl ? (
             <div className="relative group">
                <img
-                  alt="Header image"
+                  alt="Uploaded content preview"
                   className="w-full aspect-[1200/630] object-cover rounded-lg border"
                   src={previewUrl}
                />
@@ -198,11 +201,7 @@ export function ContentImageUpload({
                <p className="text-sm text-muted-foreground truncate flex-1">
                   {fileUpload.selectedFile.name}
                </p>
-               <Button
-                  disabled={isUploading}
-                  onClick={handleUpload}
-                  size="sm"
-               >
+               <Button disabled={isUploading} onClick={handleUpload} size="sm">
                   {isUploading ? (
                      <Loader2 className="size-4 animate-spin mr-1" />
                   ) : (
