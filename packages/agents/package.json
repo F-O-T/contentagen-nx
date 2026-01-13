@@ -2,6 +2,7 @@
   "dependencies": {
     "@ai-sdk/openai": "catalog:openrouter",
     "@f-o-t/markdown": "workspace:*",
+    "@mastra/rag": "^1.0.0-beta.18",
     "@mastra/core": "^1.0.0-beta.18",
     "@mastra/evals": "^1.0.0-beta.3",
     "@mastra/libsql": "^1.0.0-beta.10",
