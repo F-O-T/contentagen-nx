@@ -1,7 +1,12 @@
 import { createRequestContext, mastra } from "@packages/agents";
+import {
+   captureAIGeneration,
+   generateTraceId,
+} from "@packages/posthog/llm/ai-generation";
 import { Elysia, t } from "elysia";
 import { auth } from "../integrations/auth";
 import { db } from "../integrations/database";
+import { posthog } from "../integrations/posthog";
 import { Feature, requireFeatureAccess } from "../utils/feature-gate";
 import { resolveOrganizationId } from "../utils/resolve-organization";
 
@@ -47,6 +52,7 @@ export const agentSpellingRoutes = new Elysia({
       const agent = mastra.getAgent("spellingGrammarAgent");
 
       const startTime = Date.now();
+      const traceId = generateTraceId(); // For PostHog LLM Analytics
 
       try {
          // Generate (non-streaming) for complete JSON response
@@ -119,6 +125,22 @@ export const agentSpellingRoutes = new Elysia({
                     }),
                  )
             : [];
+
+         // Capture $ai_generation for PostHog LLM Analytics (developer debugging)
+         captureAIGeneration({
+            posthog,
+            distinctId: session.user.id,
+            traceId,
+            model: "openrouter/mistralai/mistral-small-creative",
+            input: [{ role: "user", content: text }],
+            outputChoices: [{ role: "assistant", content: result.text }],
+            inputTokens: result.usage?.inputTokens ?? 0,
+            outputTokens: result.usage?.outputTokens ?? 0,
+            latencySeconds: (Date.now() - startTime) / 1000,
+            mode: "spelling",
+            // Custom properties for spelling debugging
+            errorCount: errors.length,
+         });
 
          return {
             errors,

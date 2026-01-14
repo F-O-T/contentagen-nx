@@ -1,5 +1,9 @@
 import { createRequestContext, mastra } from "@packages/agents";
 import {
+   captureAIGeneration,
+   generateTraceId,
+} from "@packages/posthog/llm/ai-generation";
+import {
    captureEditGenerated,
    inferInstructionType,
    type LLMCaptureContext,
@@ -63,6 +67,7 @@ export const agentEditRoutes = new Elysia({ prefix: "/api/agent/edit" }).post(
       const agent = mastra.getAgent("inlineEditAgent");
 
       const startTime = Date.now();
+      const traceId = generateTraceId(); // For PostHog LLM Analytics
       let transformedText = "";
 
       try {
@@ -104,6 +109,24 @@ export const agentEditRoutes = new Elysia({ prefix: "/api/agent/edit" }).post(
             inputTokens: usage?.inputTokens ?? 0,
             outputTokens: usage?.outputTokens ?? 0,
             totalTokens: usage?.totalTokens ?? 0,
+         });
+
+         // Capture $ai_generation for PostHog LLM Analytics (developer debugging)
+         captureAIGeneration({
+            posthog,
+            distinctId: session.user.id,
+            traceId,
+            model: "openrouter/mistralai/mistral-small-creative",
+            input: [{ role: "user", content: prompt }],
+            outputChoices: [{ role: "assistant", content: transformedText }],
+            inputTokens: usage?.inputTokens ?? 0,
+            outputTokens: usage?.outputTokens ?? 0,
+            latencySeconds: (Date.now() - startTime) / 1000,
+            mode: "edit",
+            // Custom properties for edit debugging
+            instructionType: inferInstructionType(instruction),
+            originalLength: selectedText.length,
+            newLength: transformedText.length,
          });
 
          // Final completion message

@@ -4,6 +4,10 @@ import {
    type FIMStopReason,
 } from "@packages/agents/mastra/utils/fim-confidence";
 import {
+   captureAIGeneration,
+   generateTraceId,
+} from "@packages/posthog/llm/ai-generation";
+import {
    captureFIMGenerated,
    type LLMCaptureContext,
 } from "@packages/posthog/llm/server";
@@ -138,6 +142,7 @@ export const agentFIMRoutes = new Elysia({ prefix: "/api/agent/fim" }).post(
       const agent = mastra.getAgent("fimAgent");
 
       const startTime = Date.now();
+      const traceId = generateTraceId(); // For PostHog LLM Analytics
       let completion = "";
       let stopReason: FIMStopReason = "natural";
 
@@ -210,6 +215,24 @@ export const agentFIMRoutes = new Elysia({ prefix: "/api/agent/fim" }).post(
             inputTokens: usage?.inputTokens ?? 0,
             outputTokens: usage?.outputTokens ?? 0,
             totalTokens: usage?.totalTokens ?? 0,
+         });
+
+         // Capture $ai_generation for PostHog LLM Analytics (developer debugging)
+         captureAIGeneration({
+            posthog,
+            distinctId: session.user.id,
+            traceId,
+            model: "openrouter/mistralai/mistral-small-creative",
+            input: [{ role: "user", content: prompt }],
+            outputChoices: [{ role: "assistant", content: completion }],
+            inputTokens: usage?.inputTokens ?? 0,
+            outputTokens: usage?.outputTokens ?? 0,
+            latencySeconds: (Date.now() - startTime) / 1000,
+            mode: "fim",
+            // Custom properties for FIM debugging
+            confidence: confidence.score,
+            articleContext,
+            triggerType,
          });
 
          // Final completion message with confidence scoring

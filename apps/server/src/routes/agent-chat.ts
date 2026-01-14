@@ -17,6 +17,11 @@ import {
 import { getContentById } from "@packages/database/repositories/content-repository";
 import type { StoredToolCall } from "@packages/database/schemas/chat";
 import {
+   captureAIGeneration,
+   generateTraceId,
+} from "@packages/posthog/llm/ai-generation";
+import { captureAISpan } from "@packages/posthog/llm/ai-span";
+import {
    captureChatResponseComplete,
    captureChatToolExecuted,
    capturePlanCreated,
@@ -187,6 +192,7 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
 
          // Analytics tracking
          const streamStartTime = Date.now();
+         const traceId = generateTraceId(); // For PostHog LLM Analytics
          const toolsUsed: string[] = [];
          const toolStartTimes = new Map<string, number>();
          const captureCtx: LLMCaptureContext = {
@@ -332,6 +338,24 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
                         model,
                      });
 
+                     // Capture tool span for PostHog LLM Analytics (developer debugging)
+                     captureAISpan({
+                        posthog,
+                        distinctId: session.user.id,
+                        traceId,
+                        spanName: pendingTool?.name ?? "unknown",
+                        input: pendingTool?.args,
+                        output: chunk.payload.result,
+                        durationSeconds: toolStartTime
+                           ? (Date.now() - toolStartTime) / 1000
+                           : 0,
+                        isError: toolResult?.status === "error",
+                        errorMessage:
+                           toolResult?.status === "error"
+                              ? String(toolResult?.message ?? "Unknown error")
+                              : undefined,
+                     });
+
                      // Check for workflow suspension
                      const result = chunk.payload.result as Record<
                         string,
@@ -429,7 +453,7 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
             // Get token usage from the stream
             const usage = await stream.usage;
 
-            // Capture response completion analytics
+            // Capture response completion analytics (user-facing)
             captureChatResponseComplete(captureCtx, {
                contentId,
                sessionId,
@@ -442,6 +466,26 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
                inputTokens: usage?.inputTokens ?? 0,
                outputTokens: usage?.outputTokens ?? 0,
                totalTokens: usage?.totalTokens ?? 0,
+            });
+
+            // Capture $ai_generation for PostHog LLM Analytics (developer debugging)
+            captureAIGeneration({
+               posthog,
+               distinctId: session.user.id,
+               traceId,
+               model: model ?? "openrouter/minimax/minimax-m2.1",
+               input: mastraMessages.map((m) => ({
+                  role: m.role,
+                  content: m.content,
+               })),
+               outputChoices: [{ role: "assistant", content: currentStep.text }],
+               inputTokens: usage?.inputTokens ?? 0,
+               outputTokens: usage?.outputTokens ?? 0,
+               latencySeconds: (Date.now() - streamStartTime) / 1000,
+               contentId,
+               sessionId,
+               agentId: contentAgentId ?? undefined,
+               mode: (mode as "plan" | "writer") ?? "plan",
             });
 
             // Final step complete and done signal
