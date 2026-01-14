@@ -59,7 +59,4 @@ Output:  your mind goes completely blank, like someone hit the reset button on y
 
 Remember: You are invisible. The reader should never notice where the author stopped and you continued.
 `,
-
-   // No tools for FIM
-   tools: {},
 });
