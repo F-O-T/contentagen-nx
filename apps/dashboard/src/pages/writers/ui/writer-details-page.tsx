@@ -77,7 +77,7 @@ function WriterDetailsPageContent({ writerId }: WriterDetailsPageProps) {
 	const { activeOrganization } = useActiveOrganization();
 
 	const { data: writer } = useSuspenseQuery(
-		trpc.agent.getById.queryOptions({ id: writerId }),
+		trpc.writer.getById.queryOptions({ id: writerId }),
 	);
 
 	const handleDeleteSuccess = () => {
@@ -110,8 +110,8 @@ function WriterDetailsPageContent({ writerId }: WriterDetailsPageProps) {
 
 				{/* Right Column - Memories & Content */}
 				<div className="lg:col-span-2 space-y-6">
-					<AgentMemoriesCard agentId={writerId} />
-					<WriterContentList agentId={writerId} />
+					<AgentMemoriesCard writerId={writerId} />
+					<WriterContentList writerId={writerId} />
 				</div>
 			</div>
 		</main>

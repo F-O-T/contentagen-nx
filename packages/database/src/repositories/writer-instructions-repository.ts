@@ -1,7 +1,7 @@
 import { AppError, propagateError } from "@packages/utils/errors";
 import { eq } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
-import { agent } from "../schemas/agent";
+import { writer } from "../schemas/writer";
 import type {
    CreateInstructionMemory,
    InstructionMemoryItem,
@@ -9,36 +9,36 @@ import type {
 } from "../schemas/instruction-memory";
 
 /**
- * Get all instruction memories for an agent.
+ * Get all instruction memories for a writer.
  */
-export async function getAgentInstructions(
+export async function getWriterInstructions(
    dbClient: DatabaseInstance,
-   agentId: string,
+   writerId: string,
 ): Promise<InstructionMemoryItem[]> {
    try {
-      const result = await dbClient.query.agent.findFirst({
-         where: (a, { eq }) => eq(a.id, agentId),
+      const result = await dbClient.query.writer.findFirst({
+         where: (w, { eq }) => eq(w.id, writerId),
          columns: { instructionMemories: true },
       });
       return (result?.instructionMemories ?? []) as InstructionMemoryItem[];
    } catch (err) {
       propagateError(err);
       throw AppError.database(
-         `Failed to get agent instructions: ${(err as Error).message}`,
+         `Failed to get writer instructions: ${(err as Error).message}`,
       );
    }
 }
 
 /**
- * Add a new instruction memory to an agent.
+ * Add a new instruction memory to a writer.
  */
-export async function addAgentInstruction(
+export async function addWriterInstruction(
    dbClient: DatabaseInstance,
-   agentId: string,
+   writerId: string,
    data: CreateInstructionMemory,
 ): Promise<InstructionMemoryItem> {
    try {
-      const existing = await getAgentInstructions(dbClient, agentId);
+      const existing = await getWriterInstructions(dbClient, writerId);
 
       const now = new Date().toISOString();
       const newInstruction: InstructionMemoryItem = {
@@ -54,30 +54,30 @@ export async function addAgentInstruction(
       const updated = [...existing, newInstruction];
 
       await dbClient
-         .update(agent)
+         .update(writer)
          .set({ instructionMemories: updated })
-         .where(eq(agent.id, agentId));
+         .where(eq(writer.id, writerId));
 
       return newInstruction;
    } catch (err) {
       propagateError(err);
       throw AppError.database(
-         `Failed to add agent instruction: ${(err as Error).message}`,
+         `Failed to add writer instruction: ${(err as Error).message}`,
       );
    }
 }
 
 /**
- * Update an existing instruction memory in an agent.
+ * Update an existing instruction memory in a writer.
  */
-export async function updateAgentInstruction(
+export async function updateWriterInstruction(
    dbClient: DatabaseInstance,
-   agentId: string,
+   writerId: string,
    instructionId: string,
    data: UpdateInstructionMemory,
 ): Promise<InstructionMemoryItem> {
    try {
-      const existing = await getAgentInstructions(dbClient, agentId);
+      const existing = await getWriterInstructions(dbClient, writerId);
 
       const index = existing.findIndex((i) => i.id === instructionId);
       if (index === -1) {
@@ -103,29 +103,29 @@ export async function updateAgentInstruction(
       newArray[index] = updated;
 
       await dbClient
-         .update(agent)
+         .update(writer)
          .set({ instructionMemories: newArray })
-         .where(eq(agent.id, agentId));
+         .where(eq(writer.id, writerId));
 
       return updated;
    } catch (err) {
       propagateError(err);
       throw AppError.database(
-         `Failed to update agent instruction: ${(err as Error).message}`,
+         `Failed to update writer instruction: ${(err as Error).message}`,
       );
    }
 }
 
 /**
- * Delete an instruction memory from an agent.
+ * Delete an instruction memory from a writer.
  */
-export async function deleteAgentInstruction(
+export async function deleteWriterInstruction(
    dbClient: DatabaseInstance,
-   agentId: string,
+   writerId: string,
    instructionId: string,
 ): Promise<void> {
    try {
-      const existing = await getAgentInstructions(dbClient, agentId);
+      const existing = await getWriterInstructions(dbClient, writerId);
 
       const filtered = existing.filter((i) => i.id !== instructionId);
 
@@ -140,28 +140,28 @@ export async function deleteAgentInstruction(
       }));
 
       await dbClient
-         .update(agent)
+         .update(writer)
          .set({ instructionMemories: normalized })
-         .where(eq(agent.id, agentId));
+         .where(eq(writer.id, writerId));
    } catch (err) {
       propagateError(err);
       throw AppError.database(
-         `Failed to delete agent instruction: ${(err as Error).message}`,
+         `Failed to delete writer instruction: ${(err as Error).message}`,
       );
    }
 }
 
 /**
- * Reorder instruction memories for an agent.
+ * Reorder instruction memories for a writer.
  * @param orderedIds Array of instruction IDs in the desired order
  */
-export async function reorderAgentInstructions(
+export async function reorderWriterInstructions(
    dbClient: DatabaseInstance,
-   agentId: string,
+   writerId: string,
    orderedIds: string[],
 ): Promise<InstructionMemoryItem[]> {
    try {
-      const existing = await getAgentInstructions(dbClient, agentId);
+      const existing = await getWriterInstructions(dbClient, writerId);
 
       // Build a map for quick lookup
       const byId = new Map(existing.map((i) => [i.id, i]));
@@ -202,15 +202,15 @@ export async function reorderAgentInstructions(
       }
 
       await dbClient
-         .update(agent)
+         .update(writer)
          .set({ instructionMemories: reordered })
-         .where(eq(agent.id, agentId));
+         .where(eq(writer.id, writerId));
 
       return reordered;
    } catch (err) {
       propagateError(err);
       throw AppError.database(
-         `Failed to reorder agent instructions: ${(err as Error).message}`,
+         `Failed to reorder writer instructions: ${(err as Error).message}`,
       );
    }
 }
@@ -218,13 +218,13 @@ export async function reorderAgentInstructions(
 /**
  * Toggle the enabled status of an instruction memory.
  */
-export async function toggleAgentInstructionEnabled(
+export async function toggleWriterInstructionEnabled(
    dbClient: DatabaseInstance,
-   agentId: string,
+   writerId: string,
    instructionId: string,
 ): Promise<InstructionMemoryItem> {
    try {
-      const existing = await getAgentInstructions(dbClient, agentId);
+      const existing = await getWriterInstructions(dbClient, writerId);
 
       const index = existing.findIndex((i) => i.id === instructionId);
       if (index === -1) {
@@ -250,15 +250,15 @@ export async function toggleAgentInstructionEnabled(
       newArray[index] = updated;
 
       await dbClient
-         .update(agent)
+         .update(writer)
          .set({ instructionMemories: newArray })
-         .where(eq(agent.id, agentId));
+         .where(eq(writer.id, writerId));
 
       return updated;
    } catch (err) {
       propagateError(err);
       throw AppError.database(
-         `Failed to toggle agent instruction: ${(err as Error).message}`,
+         `Failed to toggle writer instruction: ${(err as Error).message}`,
       );
    }
 }

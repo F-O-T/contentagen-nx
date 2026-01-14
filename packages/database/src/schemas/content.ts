@@ -10,7 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { agent } from "./agent";
+import { writer } from "./writer";
 import { member, organization } from "./auth";
 import { relatedContent } from "./related-content";
 
@@ -66,7 +66,7 @@ export const content = pgTable(
    "content",
    {
       id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
-      agentId: uuid("agent_id").references(() => agent.id, {
+      writerId: uuid("writer_id").references(() => writer.id, {
          onDelete: "cascade",
       }),
       organizationId: uuid("organization_id")
@@ -92,7 +92,7 @@ export const content = pgTable(
          .notNull(),
    },
    (table) => [
-      index("content_agent_id_idx").on(table.agentId),
+      index("content_writer_id_idx").on(table.writerId),
       index("content_organization_id_idx").on(table.organizationId),
       index("content_created_by_member_id_idx").on(table.createdByMemberId),
       index("content_status_idx").on(table.status),
@@ -102,9 +102,9 @@ export const content = pgTable(
 );
 
 export const contentRelations = relations(content, ({ one, many }) => ({
-   agent: one(agent, {
-      fields: [content.agentId],
-      references: [agent.id],
+   writer: one(writer, {
+      fields: [content.writerId],
+      references: [writer.id],
    }),
    organization: one(organization, {
       fields: [content.organizationId],
@@ -119,7 +119,6 @@ export const contentRelations = relations(content, ({ one, many }) => ({
 }));
 
 export type Content = typeof content.$inferSelect;
-export type ContentSelect = typeof content.$inferSelect; // Alias for backward compatibility
 export type ContentInsert = typeof content.$inferInsert;
 export type ContentStatus = (typeof contentStatusEnum.enumValues)[number];
 export type ContentShareStatus =

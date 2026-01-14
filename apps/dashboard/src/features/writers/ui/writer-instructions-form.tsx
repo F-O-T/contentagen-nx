@@ -79,14 +79,14 @@ function WriterInstructionsFormContent({
    const queryClient = useQueryClient();
 
    const updateMutation = useMutation(
-      trpc.agent.update.mutationOptions({
+      trpc.writer.update.mutationOptions({
          onSuccess: () => {
             toast.success("Instruções atualizadas com sucesso");
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.getById.queryKey({ id: writerId }),
+               queryKey: trpc.writer.getById.queryKey({ id: writerId }),
             });
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.list.queryKey(),
+               queryKey: trpc.writer.list.queryKey(),
             });
             closeSheet();
          },

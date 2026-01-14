@@ -6,16 +6,16 @@ import {
    searchSimilarContent,
 } from "@packages/agents/mastra/rag";
 import {
-   getAgentById,
-   getAgentsByOrganizationId,
-} from "@packages/database/repositories/agent-repository";
+   getWriterById,
+   getWritersByOrganizationId,
+} from "@packages/database/repositories/writer-repository";
 import {
    archiveContent,
    countContentsByOrganization,
    createContent,
    deleteContent,
    getContentById,
-   getContentsByAgentId,
+   getContentsByWriterId,
    getSharedContentById,
    listContentsByOrganization,
    markContentAsDraft,
@@ -79,7 +79,7 @@ export const contentRouter = router({
             status: z
                .array(z.enum(["draft", "published", "archived"]))
                .optional(),
-            agentId: z.string().uuid().optional(), // Filter by specific agent
+            writerId: z.string().uuid().optional(), // Filter by specific agent
             manualOnly: z.boolean().optional(), // Filter for manual content only
          }),
       )
@@ -109,13 +109,13 @@ export const contentRouter = router({
          }
 
          // Get all agents for this organization (for displaying agent info)
-         const agents = await getAgentsByOrganizationId(
+         const agents = await getWritersByOrganizationId(
             resolvedCtx.db,
             organizationId,
          );
 
          // Create a map of agent IDs to agent info for quick lookup
-         const agentMap = new Map(
+         const writerMap = new Map(
             agents.map((agent) => [
                agent.id,
                {
@@ -135,7 +135,7 @@ export const contentRouter = router({
                statuses: input.status as
                   | ("draft" | "published" | "archived")[]
                   | undefined,
-               agentId: input.manualOnly ? null : input.agentId,
+               writerId: input.manualOnly ? null : input.writerId,
                limit: input.limit,
                offset,
             },
@@ -143,10 +143,10 @@ export const contentRouter = router({
 
          const totalPages = Math.ceil(total / input.limit);
 
-         // Add agent info and resolve image URLs
-         const itemsWithAgent = await Promise.all(
+         // Add writer info and resolve image URLs
+         const itemsWithWriter = await Promise.all(
             items.map(async (item) => {
-               const agent = item.agentId ? agentMap.get(item.agentId) : null;
+               const writer = item.writerId ? writerMap.get(item.writerId) : null;
                return {
                   ...item,
                   imageUrl: await resolveImageUrl(
@@ -154,11 +154,11 @@ export const contentRouter = router({
                      resolvedCtx.minioBucket,
                      resolvedCtx.minioClient,
                   ),
-                  agent: agent
+                  writer: writer
                      ? {
-                          ...agent,
+                          ...writer,
                           profilePhotoUrl: await resolveImageUrl(
-                             agent.profilePhotoUrl,
+                             writer.profilePhotoUrl,
                              resolvedCtx.minioBucket,
                              resolvedCtx.minioClient,
                           ),
@@ -169,7 +169,7 @@ export const contentRouter = router({
          );
 
          return {
-            items: itemsWithAgent,
+            items: itemsWithWriter,
             limit: input.limit,
             page: input.page,
             total,
@@ -200,19 +200,19 @@ export const contentRouter = router({
             );
          }
 
-         // Get agent info if content has an agent
-         let agentInfo = null;
-         if (contentItem.agentId) {
-            const agent = await getAgentById(
+         // Get writer info if content has a writer
+         let writerInfo = null;
+         if (contentItem.writerId) {
+            const writer = await getWriterById(
                resolvedCtx.db,
-               contentItem.agentId,
+               contentItem.writerId,
             );
-            if (agent) {
-               agentInfo = {
-                  id: agent.id,
-                  name: agent.personaConfig.metadata.name,
+            if (writer) {
+               writerInfo = {
+                  id: writer.id,
+                  name: writer.personaConfig.metadata.name,
                   profilePhotoUrl: await resolveImageUrl(
-                     agent.profilePhotoUrl,
+                     writer.profilePhotoUrl,
                      resolvedCtx.minioBucket,
                      resolvedCtx.minioClient,
                   ),
@@ -230,14 +230,14 @@ export const contentRouter = router({
          return {
             ...contentItem,
             imageUrl,
-            agent: agentInfo,
+            writer: writerInfo,
          };
       }),
 
-   getByAgentId: protectedProcedure
+   getByWriterId: protectedProcedure
       .input(
          z.object({
-            agentId: z.string().uuid(),
+            writerId: z.string().uuid(),
             limit: z.number().min(1).max(100).optional().default(20),
             page: z.number().min(1).optional().default(1),
             status: z
@@ -255,7 +255,7 @@ export const contentRouter = router({
             }
 
             // Verify agent belongs to organization
-            const agent = await getAgentById(resolvedCtx.db, input.agentId);
+            const agent = await getWriterById(resolvedCtx.db, input.writerId);
             if (!agent) {
                throw APIError.notFound("Writer not found.");
             }
@@ -265,9 +265,9 @@ export const contentRouter = router({
                );
             }
 
-            const contents = await getContentsByAgentId(
+            const contents = await getContentsByWriterId(
                resolvedCtx.db,
-               input.agentId,
+               input.writerId,
             );
 
             // Filter by status
@@ -316,7 +316,7 @@ export const contentRouter = router({
    create: protectedProcedure
       .input(
          z.object({
-            agentId: z.string().uuid().optional(), // Optional for manual content
+            writerId: z.string().uuid().optional(), // Optional for manual content
             body: z.string().optional().default(""),
             meta: ContentMetaSchema.optional(),
             request: ContentRequestSchema.optional(),
@@ -334,9 +334,9 @@ export const contentRouter = router({
                );
             }
 
-            // If agentId is provided, verify it belongs to organization
-            if (input.agentId) {
-               const agent = await getAgentById(resolvedCtx.db, input.agentId);
+            // If writerId is provided, verify it belongs to organization
+            if (input.writerId) {
+               const agent = await getWriterById(resolvedCtx.db, input.writerId);
                if (!agent) {
                   throw APIError.notFound("Writer not found.");
                }
@@ -358,13 +358,13 @@ export const contentRouter = router({
             const normalizedBody = normalizeEscapedNewlines(input.body);
 
             const created = await createContent(resolvedCtx.db, {
-               agentId: input.agentId ?? null,
+               writerId: input.writerId ?? null,
                organizationId,
                body: normalizedBody,
                createdByMemberId: memberId,
                meta,
                request: input.request,
-               draftOrigin: input.agentId ? "ai_generated" : "manual",
+               draftOrigin: input.writerId ? "ai_generated" : "manual",
             });
 
             return created;
@@ -381,7 +381,7 @@ export const contentRouter = router({
             data: z.object({
                body: z.string().optional(),
                meta: ContentMetaSchema.partial().optional(),
-               agentId: z.string().uuid().nullable().optional(),
+               writerId: z.string().uuid().nullable().optional(),
             }),
             id: z.string().uuid(),
          }),
@@ -407,21 +407,21 @@ export const contentRouter = router({
                );
             }
 
-            // Handle agentId update (writer assignment)
-            if (input.data.agentId !== undefined) {
+            // Handle writerId update (writer assignment)
+            if (input.data.writerId !== undefined) {
                // If assigning a writer, verify it belongs to the organization
-               if (input.data.agentId !== null) {
-                  const agent = await getAgentById(
+               if (input.data.writerId !== null) {
+                  const agent = await getWriterById(
                      resolvedCtx.db,
-                     input.data.agentId,
+                     input.data.writerId,
                   );
                   if (!agent || agent.organizationId !== organizationId) {
                      throw APIError.forbidden("Invalid writer.");
                   }
                }
                await updateContent(resolvedCtx.db, input.id, {
-                  agentId: input.data.agentId,
-                  draftOrigin: input.data.agentId ? "ai_generated" : "manual",
+                  writerId: input.data.writerId,
+                  draftOrigin: input.data.writerId ? "ai_generated" : "manual",
                });
             }
 
@@ -530,14 +530,14 @@ export const contentRouter = router({
             }
 
             // Index content for RAG (async, don't block publish)
-            // Only index if content has an agent (RAG is per-agent)
-            const publishedAgentId = published.agentId;
-            if (isRagAvailable() && publishedAgentId) {
+            // Only index if content has a writer (RAG is per-writer)
+            const publishedWriterId = published.writerId;
+            if (isRagAvailable() && publishedWriterId) {
                initializeRagService()
                   .then(() =>
                      indexContent({
                         id: published.id,
-                        agentId: publishedAgentId,
+                        writerId: publishedWriterId,
                         slug: published.meta.slug,
                         title: published.meta.title,
                         description: published.meta.description,
@@ -723,9 +723,9 @@ export const contentRouter = router({
                resolvedCtx.minioClient,
             );
 
-            const agentProfilePhotoUrl = sharedContent.agent
+            const writerProfilePhotoUrl = sharedContent.writer
                ? await resolveImageUrl(
-                    sharedContent.agent.profilePhotoUrl,
+                    sharedContent.writer.profilePhotoUrl,
                     resolvedCtx.minioBucket,
                     resolvedCtx.minioClient,
                  )
@@ -754,15 +754,15 @@ export const contentRouter = router({
                stats: sharedContent.stats,
                status: sharedContent.status,
                createdAt: sharedContent.createdAt,
-               agent: sharedContent.agent
+               writer: sharedContent.writer
                   ? {
-                       name: sharedContent.agent.personaConfig?.metadata?.name,
+                       name: sharedContent.writer.personaConfig?.metadata?.name,
                        description:
-                          sharedContent.agent.personaConfig?.metadata
+                          sharedContent.writer.personaConfig?.metadata
                              ?.description,
                        avatar:
-                          sharedContent.agent.personaConfig?.metadata?.avatar,
-                       profilePhotoUrl: agentProfilePhotoUrl,
+                          sharedContent.writer.personaConfig?.metadata?.avatar,
+                       profilePhotoUrl: writerProfilePhotoUrl,
                     }
                   : null,
                relatedPosts: resolvedRelatedPosts,
@@ -972,7 +972,7 @@ export const contentRouter = router({
             }
 
             // 2. Check if RAG is available (only works for agent-based content)
-            if (!isRagAvailable() || !contentItem.agentId) {
+            if (!isRagAvailable() || !contentItem.writerId) {
                return { suggestions: [], available: false };
             }
 
@@ -989,7 +989,7 @@ export const contentRouter = router({
 
             const results = await searchSimilarContent({
                query,
-               agentId: contentItem.agentId,
+               writerId: contentItem.writerId,
                limit: 10,
                minScore: 0.4,
             });

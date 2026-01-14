@@ -3,7 +3,7 @@ import { z } from "zod";
 import { ContentPage } from "@/pages/content/ui/content-page";
 
 const searchSchema = z.object({
-   agentId: z.string().uuid().optional(),
+   writerId: z.string().uuid().optional(),
 });
 
 export const Route = createFileRoute("/$slug/_dashboard/content/")({

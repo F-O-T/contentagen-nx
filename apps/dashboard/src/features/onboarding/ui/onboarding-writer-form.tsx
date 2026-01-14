@@ -24,14 +24,14 @@ export function OnboardingWriterForm({ onSuccess }: OnboardingWriterFormProps) {
    const queryClient = useQueryClient();
 
    const createMutation = useMutation(
-      trpc.agent.create.mutationOptions({
+      trpc.writer.create.mutationOptions({
          onSuccess: () => {
             toast.success("Escritor criado com sucesso");
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.list.queryKey(),
+               queryKey: trpc.writer.list.queryKey(),
             });
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.getStats.queryKey(),
+               queryKey: trpc.writer.getStats.queryKey(),
             });
             onSuccess();
          },

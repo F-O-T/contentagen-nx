@@ -37,7 +37,7 @@ export function WriterAssignmentCredenza({
 
    // Fetch all writers
    const { data: writersData, isLoading } = useQuery(
-      trpc.agent.list.queryOptions({ limit: 100, page: 1 }),
+      trpc.writer.list.queryOptions({ limit: 100, page: 1 }),
    );
 
    const writers = writersData?.items ?? [];

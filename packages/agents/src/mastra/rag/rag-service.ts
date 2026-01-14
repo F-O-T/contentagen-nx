@@ -123,7 +123,7 @@ export interface SimilarContentResult {
  */
 export async function searchSimilarContent(params: {
    query: string;
-   agentId: string;
+   writerId: string;
    limit?: number;
    minScore?: number;
 }): Promise<SimilarContentResult[]> {
@@ -145,7 +145,7 @@ export async function searchSimilarContent(params: {
       indexName: CONTENT_METADATA_INDEX,
       queryVector: embedding,
       topK: params.limit || 5,
-      filter: { agentId: { $eq: params.agentId } },
+      filter: { writerId: { $eq: params.writerId } },
       minScore: params.minScore || 0.5,
    });
 

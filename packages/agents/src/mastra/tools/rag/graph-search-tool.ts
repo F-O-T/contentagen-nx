@@ -82,11 +82,11 @@ export const graphSearchTool = createTool({
       const { query, depth = 2, limit = 10 } = inputData;
       const requestContext = context?.requestContext;
 
-      if (!requestContext?.has("agentId")) {
-         throw AppError.validation("Missing agentId in request context");
+      if (!requestContext?.has("writerId")) {
+         throw AppError.validation("Missing writerId in request context");
       }
 
-      const agentId = requestContext.get("agentId") as string;
+      const writerId = requestContext.get("writerId") as string;
 
       if (!isRagAvailable()) {
          return {
@@ -123,7 +123,7 @@ export const graphSearchTool = createTool({
                   indexName: CONTENT_METADATA_INDEX,
                   queryVector: embedding,
                   topK: Math.min(5, limit - results.length),
-                  filter: { agentId: { $eq: agentId } },
+                  filter: { writerId: { $eq: writerId } },
                   minScore:
                      currentDepth === 0 ? 0.4 : GRAPH_SIMILARITY_THRESHOLD,
                });

@@ -20,7 +20,7 @@ type ContentMetadataBarProps = {
       };
       body?: string | null;
       createdAt: Date;
-      agent?: {
+      writer?: {
          id: string;
          name: string;
          profilePhotoUrl?: string | null;
@@ -42,8 +42,8 @@ export function ContentMetadataBar({
 }: ContentMetadataBarProps) {
    const [copied, setCopied] = useState(false);
 
-   const agent = content.agent;
-   const initials = agent?.name
+   const writer = content.writer;
+   const initials = writer?.name
       .split(" ")
       .map((n) => n[0])
       .join("")
@@ -88,24 +88,24 @@ export function ContentMetadataBar({
             className,
          )}
       >
-         {/* Agent */}
-         {agent && (
+         {/* Writer */}
+         {writer && (
             <>
                <Link
                   className="flex items-center gap-2 hover:underline"
-                  params={{ slug, writerId: agent.id }}
+                  params={{ slug, writerId: writer.id }}
                   to="/$slug/writers/$writerId"
                >
                   <Avatar className="size-5">
                      <AvatarImage
-                        alt={agent.name}
-                        src={agent.profilePhotoUrl ?? undefined}
+                        alt={writer.name}
+                        src={writer.profilePhotoUrl ?? undefined}
                      />
                      <AvatarFallback className="text-[10px]">
                         {initials}
                      </AvatarFallback>
                   </Avatar>
-                  <span className="text-muted-foreground">{agent.name}</span>
+                  <span className="text-muted-foreground">{writer.name}</span>
                </Link>
                <Separator className="h-4" orientation="vertical" />
             </>

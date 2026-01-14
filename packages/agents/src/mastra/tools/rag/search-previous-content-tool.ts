@@ -77,11 +77,11 @@ export const searchPreviousContentTool = createTool({
       const { query, mode, limit } = inputData;
       const requestContext = context?.requestContext;
 
-      if (!requestContext?.has("agentId")) {
-         throw AppError.validation("Missing agentId in request context");
+      if (!requestContext?.has("writerId")) {
+         throw AppError.validation("Missing writerId in request context");
       }
 
-      const agentId = requestContext.get("agentId") as string;
+      const writerId = requestContext.get("writerId") as string;
 
       if (!isRagAvailable()) {
          return {
@@ -111,7 +111,7 @@ export const searchPreviousContentTool = createTool({
                indexName: CONTENT_METADATA_INDEX,
                queryVector: embedding,
                topK: limit || 5,
-               filter: { agentId: { $eq: agentId } },
+               filter: { writerId: { $eq: writerId } },
                minScore: 0.4,
             });
 
@@ -132,7 +132,7 @@ export const searchPreviousContentTool = createTool({
                indexName: CONTENT_CHUNKS_INDEX,
                queryVector: embedding,
                topK: limit || 10,
-               filter: { agentId: { $eq: agentId } },
+               filter: { writerId: { $eq: writerId } },
                minScore: 0.4,
             });
 

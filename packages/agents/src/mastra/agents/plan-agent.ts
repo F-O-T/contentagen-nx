@@ -18,9 +18,9 @@ import { LANGUAGE_INSTRUCTION } from "./shared";
 
 // Plan agent instructions
 const getPlanAgentInstructions = (
-   agentInstructions?: InstructionMemoryItem[],
+   writerInstructions?: InstructionMemoryItem[],
 ): string => {
-   const compiledMemories = compileInstructionMemories(agentInstructions ?? []);
+   const compiledMemories = compileInstructionMemories(writerInstructions ?? []);
 
    return `
 You are an expert content strategist and research assistant. Your job is to thoroughly research topics and create detailed, actionable content plans.
@@ -151,10 +151,10 @@ export const planAgent = new Agent({
    model: "openrouter/minimax/minimax-m2.1",
 
    instructions: ({ requestContext }) => {
-      const agentInstructions = requestContext?.get("agentInstructions") as
+      const writerInstructions = requestContext?.get("writerInstructions") as
          | InstructionMemoryItem[]
          | undefined;
-      return getPlanAgentInstructions(agentInstructions);
+      return getPlanAgentInstructions(writerInstructions);
    },
 
    tools: {

@@ -54,7 +54,7 @@ export function ContentMobileCard({
    actions = [],
 }: ContentMobileCardProps) {
    const content = row.original;
-   const agent = content.agent;
+   const agent = content.writer;
 
    const initials = agent?.name
       .split(" ")

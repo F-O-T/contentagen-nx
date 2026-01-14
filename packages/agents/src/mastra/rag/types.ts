@@ -3,7 +3,7 @@
  */
 export interface ContentToIndex {
    id: string; // content.id (externalId for vectors)
-   agentId: string; // For filtering by agent
+   writerId: string; // For filtering by agent
    slug: string;
    title: string;
    description: string;
@@ -25,7 +25,7 @@ export interface IndexingResult {
  */
 export interface ContentMetadata {
    externalId: string;
-   agentId: string;
+   writerId: string;
    slug: string;
    title: string;
    description: string;
@@ -39,7 +39,7 @@ export interface ContentMetadata {
  */
 export interface ContentChunkMetadata {
    externalId: string;
-   agentId: string;
+   writerId: string;
    chunkIndex: number;
    text: string;
    type: "chunk";

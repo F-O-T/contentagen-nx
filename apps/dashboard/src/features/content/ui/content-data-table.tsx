@@ -382,7 +382,7 @@ export function ContentDataTable({
                   )}
                   renderSubComponent={({ row }) => {
                      const content = row.original;
-                     const agent = content.agent;
+                     const agent = content.writer;
 
                      return (
                         <DataTableExpandedActions

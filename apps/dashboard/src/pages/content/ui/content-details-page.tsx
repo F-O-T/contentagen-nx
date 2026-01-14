@@ -184,12 +184,12 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
          children: (
             <WriterAssignmentCredenza
                contentId={contentId}
-               currentWriterId={content.agentId}
+               currentWriterId={content.writerId}
                isPending={assignWriterMutation.isPending}
                onSelect={(writerId) => {
                   assignWriterMutation.mutate({
                      id: contentId,
-                     data: { agentId: writerId },
+                     data: { writerId },
                   });
                }}
             />
@@ -203,13 +203,13 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
          children: (
             <WriterAssignmentCredenza
                contentId={contentId}
-               currentWriterId={content.agentId}
+               currentWriterId={content.writerId}
                isPending={assignWriterMutation.isPending}
                onSelect={(writerId) => {
                   assignWriterMutation.mutate(
                      {
                         id: contentId,
-                        data: { agentId: writerId },
+                        data: { writerId },
                      },
                      {
                         onSuccess: () => {
@@ -227,7 +227,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
    }, [
       openCredenza,
       contentId,
-      content.agentId,
+      content.writerId,
       assignWriterMutation,
       closeCredenza,
    ]);
@@ -244,10 +244,10 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
 
    // Auto-open writer selection if in planning mode without a writer
    useEffect(() => {
-      if (isPlanning && !content.agentId) {
+      if (isPlanning && !content.writerId) {
          handleWriterSelectionNeeded();
       }
-   }, [isPlanning, content.agentId, handleWriterSelectionNeeded]);
+   }, [isPlanning, content.writerId, handleWriterSelectionNeeded]);
 
    const updateMutation = useMutation(
       trpc.content.update.mutationOptions({
@@ -537,7 +537,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
                               variant="outline"
                            >
                               <UserPen className="size-4 mr-2" />
-                              {content.agentId
+                              {content.writerId
                                  ? "Trocar escritor"
                                  : "Atribuir escritor"}
                            </Button>

@@ -86,8 +86,8 @@ export const PersonaConfigSchema = z.object({
 
 export type PersonaConfig = z.infer<typeof PersonaConfigSchema>;
 
-export const agent = pgTable(
-   "agent",
+export const writer = pgTable(
+   "writer",
    {
       id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
       organizationId: uuid("organization_id")
@@ -105,18 +105,18 @@ export const agent = pgTable(
          .$onUpdate(() => new Date())
          .notNull(),
    },
-   (table) => [index("agent_organization_id_idx").on(table.organizationId)],
+   (table) => [index("writer_organization_id_idx").on(table.organizationId)],
 );
 
-export const agentRelations = relations(agent, ({ one }) => ({
+export const writerRelations = relations(writer, ({ one }) => ({
    organization: one(organization, {
-      fields: [agent.organizationId],
+      fields: [writer.organizationId],
       references: [organization.id],
    }),
 }));
 
-export type Agent = typeof agent.$inferSelect;
-export type AgentInsert = typeof agent.$inferInsert;
+export type Writer = typeof writer.$inferSelect;
+export type WriterInsert = typeof writer.$inferInsert;
 
-export const AgentInsertSchema = createInsertSchema(agent);
-export const AgentSelectSchema = createSelectSchema(agent);
+export const WriterInsertSchema = createInsertSchema(writer);
+export const WriterSelectSchema = createSelectSchema(writer);

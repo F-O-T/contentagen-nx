@@ -58,7 +58,7 @@ function ContentPageContent({
    const search = useSearch({ from: "/$slug/_dashboard/content/" });
    const [searchTerm, setSearchTerm] = useState("");
 
-   const agentId = (search as { agentId?: string }).agentId;
+   const writerId = (search as { writerId?: string }).writerId;
 
    const { data } = useSuspenseQuery(
       trpc.content.listAllContent.queryOptions({
@@ -68,20 +68,20 @@ function ContentPageContent({
       }),
    );
 
-   // Filter by agentId if provided in search params
-   const filteredByAgent = agentId
-      ? data.items.filter((item) => item.agentId === agentId)
+   // Filter by writerId if provided in search params
+   const filteredByAgent = writerId
+      ? data.items.filter((item) => item.writerId === writerId)
       : data.items;
 
-   // Transform items to include agent info from API response
+   // Transform items to include writer info from API response
    const contents: ContentItem[] = filteredByAgent.map((item) => ({
       id: item.id,
-      agentId: item.agentId,
+      writerId: item.writerId,
       meta: item.meta,
       status: item.status as "draft" | "published" | "archived",
       shareStatus: (item.shareStatus as "private" | "shared") || "private",
       createdAt: item.createdAt,
-      agent: item.agent ?? undefined,
+      writer: item.writer ?? undefined,
    }));
 
    const deleteMutation = useMutation(

@@ -16,7 +16,7 @@ import type { ReactNode } from "react";
 
 export type ContentItem = {
    id: string;
-   agentId: string | null;
+   writerId: string | null;
    meta: {
       title: string;
       description: string;
@@ -26,7 +26,7 @@ export type ContentItem = {
    shareStatus: "private" | "shared";
    draftOrigin?: "manual" | "ai_generated";
    createdAt: Date | string;
-   agent?: {
+   writer?: {
       id: string;
       name: string;
       profilePhotoUrl?: string | null;

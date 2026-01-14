@@ -5,7 +5,7 @@ import {
    type ModelId,
    mastra,
 } from "@packages/agents";
-import { getAgentInstructions } from "@packages/database/repositories/agent-instructions-repository";
+import { getWriterInstructions } from "@packages/database/repositories/writer-instructions-repository";
 import {
    addChatMessage,
    clearChatSession,
@@ -97,16 +97,16 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
             contentId,
          } = body;
 
-         // Get the content to retrieve the agentId for tool context
+         // Get the content to retrieve the writerId for tool context
          const contentRecord = await getContentById(db, contentId);
          if (!contentRecord) {
             throw new Error("Content not found");
          }
-         const contentAgentId = contentRecord.agentId;
+         const contentWriterId = contentRecord.writerId;
 
-         // Fetch instruction memories for agent (if agent exists)
-         const agentInstructions = contentAgentId
-            ? await getAgentInstructions(db, contentAgentId)
+         // Fetch instruction memories for writer (if writer exists)
+         const writerInstructions = contentWriterId
+            ? await getWriterInstructions(db, contentWriterId)
             : [];
 
          // Update session mode when it changes
@@ -169,12 +169,12 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
          const requestContext = createRequestContext({
             userId: session.user.id,
             brandId: organizationId,
-            agentId: contentAgentId ?? undefined,
+            writerId: contentWriterId ?? undefined,
             mode: (mode as ChatMode) || "plan",
             model: (model as ModelId) || "x-ai/grok-4.1-fast",
             activePlan:
                mode === "writer" ? (planContext as ContentPlan) : undefined,
-            agentInstructions,
+            writerInstructions,
          });
 
          // Select agent based on mode
@@ -484,7 +484,7 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
                latencySeconds: (Date.now() - streamStartTime) / 1000,
                contentId,
                sessionId,
-               agentId: contentAgentId ?? undefined,
+               agentId: contentWriterId ?? undefined,
                mode: (mode as "plan" | "writer") ?? "plan",
             });
 

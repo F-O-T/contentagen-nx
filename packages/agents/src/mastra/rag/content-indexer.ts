@@ -50,7 +50,7 @@ export async function indexContent(
 
       const metadataRecord: ContentMetadata = {
          externalId: content.id,
-         agentId: content.agentId,
+         writerId: content.writerId,
          slug: content.slug,
          title: content.title,
          description: content.description,
@@ -86,7 +86,7 @@ export async function indexContent(
             const chunkMetadata: ContentChunkMetadata[] = chunks.map(
                (chunk, i) => ({
                   externalId: content.id,
-                  agentId: content.agentId,
+                  writerId: content.writerId,
                   chunkIndex: i,
                   text: chunk.text,
                   type: "chunk" as const,

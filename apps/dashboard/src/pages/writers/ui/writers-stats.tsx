@@ -56,7 +56,7 @@ function StatCardSkeleton() {
 
 function WritersStatsContent() {
    const trpc = useTRPC();
-   const { data } = useSuspenseQuery(trpc.agent.getStats.queryOptions());
+   const { data } = useSuspenseQuery(trpc.writer.getStats.queryOptions());
 
    return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -64,7 +64,7 @@ function WritersStatsContent() {
             description={"Escritores na equipe"}
             icon={Users}
             title={"Total de Escritores"}
-            value={data.totalAgents}
+            value={data.totalWriters}
          />
          <StatCard
             description={"Total de conteúdos criados"}
@@ -72,7 +72,7 @@ function WritersStatsContent() {
             title={"Conteúdos Gerados"}
             value={data.totalContent}
          />
-         {data.mostActiveAgent ? (
+         {data.mostActiveWriter ? (
             <Card className="col-span-1">
                <CardHeader>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
@@ -82,21 +82,21 @@ function WritersStatsContent() {
                   <div className="flex items-center gap-3">
                      <Avatar className="size-10">
                         <AvatarImage
-                           alt={data.mostActiveAgent.name}
+                           alt={data.mostActiveWriter.name}
                            src={
-                              data.mostActiveAgent.profilePhotoUrl || undefined
+                              data.mostActiveWriter.profilePhotoUrl || undefined
                            }
                         />
                         <AvatarFallback>
-                           {getInitials(data.mostActiveAgent.name)}
+                           {getInitials(data.mostActiveWriter.name)}
                         </AvatarFallback>
                      </Avatar>
                      <div className="min-w-0 flex-1">
                         <p className="font-medium truncate">
-                           {data.mostActiveAgent.name}
+                           {data.mostActiveWriter.name}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                           {data.mostActiveAgent.contentCount} {"conteúdos"}
+                           {data.mostActiveWriter.contentCount} {"conteúdos"}
                         </p>
                      </div>
                   </div>

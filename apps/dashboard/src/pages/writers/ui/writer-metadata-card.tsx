@@ -66,7 +66,7 @@ export function WriterMetadataCard({ writer }: WriterMetadataCardProps) {
             {/* Photo and Name Section */}
             <div className="flex flex-col items-center text-center gap-4">
                <WriterPhotoUpload
-                  agentId={writer.id}
+                  writerId={writer.id}
                   currentPhotoUrl={writer.profilePhotoUrl}
                   name={writer.personaConfig.metadata.name}
                   size="lg"

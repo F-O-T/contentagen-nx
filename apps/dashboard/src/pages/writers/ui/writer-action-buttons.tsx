@@ -43,14 +43,14 @@ export function WriterActionButtons({
    const { openSheet } = useSheet();
 
    const deleteMutation = useMutation(
-      trpc.agent.delete.mutationOptions({
+      trpc.writer.delete.mutationOptions({
          onSuccess: () => {
             toast.success("Escritor excluído com sucesso");
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.list.queryKey(),
+               queryKey: trpc.writer.list.queryKey(),
             });
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.getStats.queryKey(),
+               queryKey: trpc.writer.getStats.queryKey(),
             });
             if (onDeleteSuccess) {
                onDeleteSuccess();
@@ -70,14 +70,14 @@ export function WriterActionButtons({
    );
 
    const duplicateMutation = useMutation(
-      trpc.agent.duplicate.mutationOptions({
+      trpc.writer.duplicate.mutationOptions({
          onSuccess: (duplicated) => {
             toast.success("Escritor duplicado com sucesso");
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.list.queryKey(),
+               queryKey: trpc.writer.list.queryKey(),
             });
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.getStats.queryKey(),
+               queryKey: trpc.writer.getStats.queryKey(),
             });
             navigate({
                to: "/$slug/writers/$writerId",

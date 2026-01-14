@@ -72,51 +72,6 @@ export async function getChatSessionById(
 }
 
 /**
- * Get chat session by content ID.
- */
-export async function getChatSessionByContentId(
-   dbClient: DatabaseInstance,
-   contentId: string,
-   organizationId: string,
-) {
-   try {
-      const result = await dbClient.query.chatSession.findFirst({
-         where: and(
-            eq(chatSession.contentId, contentId),
-            eq(chatSession.organizationId, organizationId),
-         ),
-      });
-      return result;
-   } catch (err) {
-      propagateError(err);
-      throw AppError.database(
-         `Failed to get chat session by content: ${(err as Error).message}`,
-      );
-   }
-}
-
-/**
- * Get all messages for a chat session, ordered by creation time.
- */
-export async function getChatSessionMessages(
-   dbClient: DatabaseInstance,
-   sessionId: string,
-) {
-   try {
-      const result = await dbClient.query.chatMessage.findMany({
-         where: eq(chatMessage.sessionId, sessionId),
-         orderBy: (message, { asc }) => asc(message.createdAt),
-      });
-      return result;
-   } catch (err) {
-      propagateError(err);
-      throw AppError.database(
-         `Failed to get chat messages: ${(err as Error).message}`,
-      );
-   }
-}
-
-/**
  * Add a message to a chat session.
  */
 export async function addChatMessage(
@@ -219,29 +174,6 @@ export async function clearChatSession(
       propagateError(err);
       throw AppError.database(
          `Failed to clear chat session: ${(err as Error).message}`,
-      );
-   }
-}
-
-/**
- * Delete a chat session and all its messages.
- * Returns true if deleted, false if not found.
- */
-export async function deleteChatSession(
-   dbClient: DatabaseInstance,
-   sessionId: string,
-): Promise<boolean> {
-   try {
-      const result = await dbClient
-         .delete(chatSession)
-         .where(eq(chatSession.id, sessionId))
-         .returning({ id: chatSession.id });
-
-      return result.length > 0;
-   } catch (err) {
-      propagateError(err);
-      throw AppError.database(
-         `Failed to delete chat session: ${(err as Error).message}`,
       );
    }
 }

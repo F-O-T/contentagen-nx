@@ -1,21 +1,21 @@
 import {
-   addAgentInstruction,
-   deleteAgentInstruction,
-   getAgentInstructions,
-   reorderAgentInstructions,
-   toggleAgentInstructionEnabled,
-   updateAgentInstruction,
-} from "@packages/database/repositories/agent-instructions-repository";
+   addWriterInstruction,
+   deleteWriterInstruction,
+   getWriterInstructions,
+   reorderWriterInstructions,
+   toggleWriterInstructionEnabled,
+   updateWriterInstruction,
+} from "@packages/database/repositories/writer-instructions-repository";
 import {
-   createAgent,
-   deleteAgent,
-   getAgentById,
-   getAgentsByOrganizationId,
-   updateAgent,
-} from "@packages/database/repositories/agent-repository";
+   createWriter,
+   deleteWriter,
+   getWriterById,
+   getWritersByOrganizationId,
+   updateWriter,
+} from "@packages/database/repositories/writer-repository";
 import {
-   getContentCountsByAgentIds,
-   getContentsByAgentId,
+   getContentCountsByWriterIds,
+   getContentsByWriterId,
 } from "@packages/database/repositories/content-repository";
 import {
    CreateInstructionMemorySchema,
@@ -58,7 +58,7 @@ async function resolveProfilePhotoUrl(
    }
 }
 
-export const agentRouter = router({
+export const writerRouter = router({
    create: protectedProcedure
       .input(
          z.object({
@@ -77,7 +77,7 @@ export const agentRouter = router({
                );
             }
 
-            const created = await createAgent(resolvedCtx.db, {
+            const created = await createWriter(resolvedCtx.db, {
                organizationId,
                personaConfig: input.personaConfig,
                profilePhotoUrl: input.profilePhotoUrl,
@@ -108,7 +108,7 @@ export const agentRouter = router({
                );
             }
 
-            const existing = await getAgentById(resolvedCtx.db, input.id);
+            const existing = await getWriterById(resolvedCtx.db, input.id);
             if (!existing) {
                throw APIError.notFound("Writer not found.");
             }
@@ -118,7 +118,7 @@ export const agentRouter = router({
                );
             }
 
-            await deleteAgent(resolvedCtx.db, input.id);
+            await deleteWriter(resolvedCtx.db, input.id);
             return { success: true };
          } catch (err) {
             console.error("Error deleting writer:", err);
@@ -140,7 +140,7 @@ export const agentRouter = router({
                );
             }
 
-            const existing = await getAgentById(resolvedCtx.db, input.id);
+            const existing = await getWriterById(resolvedCtx.db, input.id);
             if (!existing) {
                throw APIError.notFound("Writer not found.");
             }
@@ -158,7 +158,7 @@ export const agentRouter = router({
                },
             };
 
-            const created = await createAgent(resolvedCtx.db, {
+            const created = await createWriter(resolvedCtx.db, {
                organizationId,
                personaConfig: duplicatedConfig,
                profilePhotoUrl: existing.profilePhotoUrl ?? undefined,
@@ -189,19 +189,19 @@ export const agentRouter = router({
                );
             }
 
-            const agent = await getAgentById(resolvedCtx.db, input.id);
-            if (!agent) {
+            const writer = await getWriterById(resolvedCtx.db, input.id);
+            if (!writer) {
                throw APIError.notFound("Writer not found.");
             }
 
-            if (agent.organizationId !== organizationId) {
+            if (writer.organizationId !== organizationId) {
                throw APIError.forbidden(
                   "You don't have permission to view this writer.",
                );
             }
 
-            // Get content count for this agent
-            const contents = await getContentsByAgentId(
+            // Get content count for this writer
+            const contents = await getContentsByWriterId(
                resolvedCtx.db,
                input.id,
             );
@@ -209,13 +209,13 @@ export const agentRouter = router({
 
             // Resolve profile photo URL
             const profilePhotoUrl = await resolveProfilePhotoUrl(
-               agent.profilePhotoUrl,
+               writer.profilePhotoUrl,
                resolvedCtx.minioBucket,
                resolvedCtx.minioClient,
             );
 
             return {
-               ...agent,
+               ...writer,
                profilePhotoUrl,
                contentCount,
             };
@@ -235,56 +235,56 @@ export const agentRouter = router({
             throw APIError.unauthorized("Organization must be specified.");
          }
 
-         const agents = await getAgentsByOrganizationId(
+         const writers = await getWritersByOrganizationId(
             resolvedCtx.db,
             organizationId,
          );
 
-         // Get content counts for all agents in a single batch query
-         const agentIds = agents.map((agent) => agent.id);
-         const contentCounts = await getContentCountsByAgentIds(
+         // Get content counts for all writers in a single batch query
+         const writerIds = writers.map((writer) => writer.id);
+         const contentCounts = await getContentCountsByWriterIds(
             resolvedCtx.db,
-            agentIds,
+            writerIds,
          );
 
-         const agentsWithCounts = agents.map((agent) => ({
-            agent,
-            contentCount: contentCounts.get(agent.id) || 0,
+         const writersWithCounts = writers.map((writer) => ({
+            writer,
+            contentCount: contentCounts.get(writer.id) || 0,
          }));
 
-         const totalAgents = agents.length;
-         const totalContent = agentsWithCounts.reduce(
+         const totalWriters = writers.length;
+         const totalContent = writersWithCounts.reduce(
             (sum, item) => sum + item.contentCount,
             0,
          );
 
-         // Find the most active agent (most content)
-         const mostActiveAgent =
-            agentsWithCounts.length > 0
-               ? agentsWithCounts.reduce((max, item) =>
+         // Find the most active writer (most content)
+         const mostActiveWriter =
+            writersWithCounts.length > 0
+               ? writersWithCounts.reduce((max, item) =>
                     item.contentCount > max.contentCount ? item : max,
                  )
                : null;
 
-         // Resolve profile photo URL for most active agent
-         const mostActiveAgentPhotoUrl = mostActiveAgent
+         // Resolve profile photo URL for most active writer
+         const mostActiveWriterPhotoUrl = mostActiveWriter
             ? await resolveProfilePhotoUrl(
-                 mostActiveAgent.agent.profilePhotoUrl,
+                 mostActiveWriter.writer.profilePhotoUrl,
                  resolvedCtx.minioBucket,
                  resolvedCtx.minioClient,
               )
             : null;
 
          return {
-            mostActiveAgent: mostActiveAgent
+            mostActiveWriter: mostActiveWriter
                ? {
-                    contentCount: mostActiveAgent.contentCount,
-                    id: mostActiveAgent.agent.id,
-                    name: mostActiveAgent.agent.personaConfig.metadata.name,
-                    profilePhotoUrl: mostActiveAgentPhotoUrl,
+                    contentCount: mostActiveWriter.contentCount,
+                    id: mostActiveWriter.writer.id,
+                    name: mostActiveWriter.writer.personaConfig.metadata.name,
+                    profilePhotoUrl: mostActiveWriterPhotoUrl,
                  }
                : null,
-            totalAgents,
+            totalWriters,
             totalContent,
          };
       } catch (err) {
@@ -297,7 +297,7 @@ export const agentRouter = router({
    requestPhotoUploadUrl: protectedProcedure
       .input(
          z.object({
-            agentId: z.string().uuid(),
+            writerId: z.string().uuid(),
             contentType: z
                .string()
                .refine((val) => ALLOWED_PHOTO_TYPES.includes(val), {
@@ -318,8 +318,8 @@ export const agentRouter = router({
                throw APIError.unauthorized("Organization must be specified.");
             }
 
-            // Verify the agent exists and belongs to this organization
-            const existing = await getAgentById(resolvedCtx.db, input.agentId);
+            // Verify the writer exists and belongs to this organization
+            const existing = await getWriterById(resolvedCtx.db, input.writerId);
             if (!existing) {
                throw APIError.notFound("Writer not found.");
             }
@@ -330,7 +330,7 @@ export const agentRouter = router({
             }
 
             const timestamp = Date.now();
-            const storageKey = `organizations/${organizationId}/agents/${input.agentId}/photo/${timestamp}-${input.fileName}`;
+            const storageKey = `organizations/${organizationId}/writers/${input.writerId}/photo/${timestamp}-${input.fileName}`;
 
             const presignedUrl = await generatePresignedPutUrl(
                storageKey,
@@ -389,7 +389,7 @@ export const agentRouter = router({
    confirmPhotoUpload: protectedProcedure
       .input(
          z.object({
-            agentId: z.string().uuid(),
+            writerId: z.string().uuid(),
             storageKey: z.string(),
          }),
       )
@@ -411,8 +411,8 @@ export const agentRouter = router({
                );
             }
 
-            // Verify the agent exists and belongs to this organization
-            const existing = await getAgentById(resolvedCtx.db, input.agentId);
+            // Verify the writer exists and belongs to this organization
+            const existing = await getWriterById(resolvedCtx.db, input.writerId);
             if (!existing) {
                throw APIError.notFound("Writer not found.");
             }
@@ -449,8 +449,8 @@ export const agentRouter = router({
                }
             }
 
-            // Update agent with new photo
-            const updated = await updateAgent(resolvedCtx.db, input.agentId, {
+            // Update writer with new photo
+            const updated = await updateWriter(resolvedCtx.db, input.writerId, {
                profilePhotoUrl: input.storageKey,
             });
 
@@ -479,55 +479,55 @@ export const agentRouter = router({
                throw APIError.unauthorized("Organization must be specified.");
             }
 
-            const agents = await getAgentsByOrganizationId(
+            const writers = await getWritersByOrganizationId(
                resolvedCtx.db,
                organizationId,
             );
 
             // Filter by search if provided
-            let filteredAgents = agents;
+            let filteredWriters = writers;
             if (input.search) {
                const searchLower = input.search.toLowerCase();
-               filteredAgents = agents.filter(
-                  (agent) =>
-                     agent.personaConfig.metadata.name
+               filteredWriters = writers.filter(
+                  (writer) =>
+                     writer.personaConfig.metadata.name
                         .toLowerCase()
                         .includes(searchLower) ||
-                     agent.personaConfig.metadata.description
+                     writer.personaConfig.metadata.description
                         ?.toLowerCase()
                         .includes(searchLower),
                );
             }
 
             // Paginate
-            const total = filteredAgents.length;
+            const total = filteredWriters.length;
             const totalPages = Math.ceil(total / input.limit);
             const start = (input.page - 1) * input.limit;
             const end = start + input.limit;
-            const paginatedAgents = filteredAgents.slice(start, end);
+            const paginatedWriters = filteredWriters.slice(start, end);
 
-            // Get content counts for paginated agents in a single batch query
-            const paginatedIds = paginatedAgents.map((agent) => agent.id);
-            const contentCounts = await getContentCountsByAgentIds(
+            // Get content counts for paginated writers in a single batch query
+            const paginatedIds = paginatedWriters.map((writer) => writer.id);
+            const contentCounts = await getContentCountsByWriterIds(
                resolvedCtx.db,
                paginatedIds,
             );
 
-            // Resolve profile photo URLs for all paginated agents
-            const agentsWithCounts = await Promise.all(
-               paginatedAgents.map(async (agent) => ({
-                  ...agent,
+            // Resolve profile photo URLs for all paginated writers
+            const writersWithCounts = await Promise.all(
+               paginatedWriters.map(async (writer) => ({
+                  ...writer,
                   profilePhotoUrl: await resolveProfilePhotoUrl(
-                     agent.profilePhotoUrl,
+                     writer.profilePhotoUrl,
                      resolvedCtx.minioBucket,
                      resolvedCtx.minioClient,
                   ),
-                  contentCount: contentCounts.get(agent.id) || 0,
+                  contentCount: contentCounts.get(writer.id) || 0,
                })),
             );
 
             return {
-               items: agentsWithCounts,
+               items: writersWithCounts,
                limit: input.limit,
                page: input.page,
                total,
@@ -561,7 +561,7 @@ export const agentRouter = router({
                );
             }
 
-            const existing = await getAgentById(resolvedCtx.db, input.id);
+            const existing = await getWriterById(resolvedCtx.db, input.id);
             if (!existing) {
                throw APIError.notFound("Writer not found.");
             }
@@ -571,7 +571,7 @@ export const agentRouter = router({
                );
             }
 
-            const updateData: Parameters<typeof updateAgent>[2] = {};
+            const updateData: Parameters<typeof updateWriter>[2] = {};
             if (input.data.personaConfig) {
                updateData.personaConfig = input.data.personaConfig;
             }
@@ -580,7 +580,7 @@ export const agentRouter = router({
                   input.data.profilePhotoUrl ?? undefined;
             }
 
-            const updated = await updateAgent(
+            const updated = await updateWriter(
                resolvedCtx.db,
                input.id,
                updateData,
@@ -606,18 +606,18 @@ export const agentRouter = router({
                );
             }
 
-            const agent = await getAgentById(resolvedCtx.db, input.id);
-            if (!agent) {
+            const writer = await getWriterById(resolvedCtx.db, input.id);
+            if (!writer) {
                throw APIError.notFound("Writer not found.");
             }
-            if (agent.organizationId !== organizationId) {
+            if (writer.organizationId !== organizationId) {
                throw APIError.forbidden(
                   "You don't have permission to view this writer's config.",
                );
             }
 
             // Return the writer config (instructions field in personaConfig)
-            return agent.personaConfig.instructions ?? {};
+            return writer.personaConfig.instructions ?? {};
          } catch (err) {
             console.error("Error getting writer config:", err);
             propagateError(err);
@@ -643,7 +643,7 @@ export const agentRouter = router({
                );
             }
 
-            const existing = await getAgentById(resolvedCtx.db, input.id);
+            const existing = await getWriterById(resolvedCtx.db, input.id);
             if (!existing) {
                throw APIError.notFound("Writer not found.");
             }
@@ -666,7 +666,7 @@ export const agentRouter = router({
                instructions: mergedConfig,
             };
 
-            const updated = await updateAgent(resolvedCtx.db, input.id, {
+            const updated = await updateWriter(resolvedCtx.db, input.id, {
                personaConfig: updatedPersonaConfig,
             });
 
@@ -681,11 +681,11 @@ export const agentRouter = router({
    // ===== INSTRUCTION MEMORIES =====
 
    /**
-    * List all instruction memories for an agent.
+    * List all instruction memories for a writer.
     */
    listInstructions: protectedProcedure
       .use(requireFeature(Feature.AGENT_INSTRUCTIONS))
-      .input(z.object({ agentId: z.string().uuid() }))
+      .input(z.object({ writerId: z.string().uuid() }))
       .query(async ({ ctx, input }) => {
          try {
             const resolvedCtx = await ctx;
@@ -695,38 +695,38 @@ export const agentRouter = router({
                throw APIError.unauthorized("Organization must be specified.");
             }
 
-            // Verify agent belongs to organization
-            const agent = await getAgentById(resolvedCtx.db, input.agentId);
-            if (!agent) {
+            // Verify writer belongs to organization
+            const writer = await getWriterById(resolvedCtx.db, input.writerId);
+            if (!writer) {
                throw APIError.notFound("Writer not found.");
             }
-            if (agent.organizationId !== organizationId) {
+            if (writer.organizationId !== organizationId) {
                throw APIError.forbidden(
                   "You don't have permission to view this writer's instructions.",
                );
             }
 
-            const instructions = await getAgentInstructions(
+            const instructions = await getWriterInstructions(
                resolvedCtx.db,
-               input.agentId,
+               input.writerId,
             );
 
             return instructions;
          } catch (err) {
-            console.error("Error listing agent instructions:", err);
+            console.error("Error listing writer instructions:", err);
             propagateError(err);
-            throw APIError.internal("Failed to list agent instructions.");
+            throw APIError.internal("Failed to list writer instructions.");
          }
       }),
 
    /**
-    * Create a new instruction memory for an agent.
+    * Create a new instruction memory for a writer.
     */
    createInstruction: protectedProcedure
       .use(requireFeature(Feature.AGENT_INSTRUCTIONS))
       .input(
          z.object({
-            agentId: z.string().uuid(),
+            writerId: z.string().uuid(),
             data: CreateInstructionMemorySchema,
          }),
       )
@@ -739,28 +739,28 @@ export const agentRouter = router({
                throw APIError.unauthorized("Organization must be specified.");
             }
 
-            // Verify agent belongs to organization
-            const agent = await getAgentById(resolvedCtx.db, input.agentId);
-            if (!agent) {
+            // Verify writer belongs to organization
+            const writer = await getWriterById(resolvedCtx.db, input.writerId);
+            if (!writer) {
                throw APIError.notFound("Writer not found.");
             }
-            if (agent.organizationId !== organizationId) {
+            if (writer.organizationId !== organizationId) {
                throw APIError.forbidden(
                   "You don't have permission to add instructions to this writer.",
                );
             }
 
-            const instruction = await addAgentInstruction(
+            const instruction = await addWriterInstruction(
                resolvedCtx.db,
-               input.agentId,
+               input.writerId,
                input.data,
             );
 
             return instruction;
          } catch (err) {
-            console.error("Error creating agent instruction:", err);
+            console.error("Error creating writer instruction:", err);
             propagateError(err);
-            throw APIError.internal("Failed to create agent instruction.");
+            throw APIError.internal("Failed to create writer instruction.");
          }
       }),
 
@@ -771,7 +771,7 @@ export const agentRouter = router({
       .use(requireFeature(Feature.AGENT_INSTRUCTIONS))
       .input(
          z.object({
-            agentId: z.string().uuid(),
+            writerId: z.string().uuid(),
             instructionId: z.string().uuid(),
             data: UpdateInstructionMemorySchema,
          }),
@@ -785,29 +785,29 @@ export const agentRouter = router({
                throw APIError.unauthorized("Organization must be specified.");
             }
 
-            // Verify agent belongs to organization
-            const agent = await getAgentById(resolvedCtx.db, input.agentId);
-            if (!agent) {
+            // Verify writer belongs to organization
+            const writer = await getWriterById(resolvedCtx.db, input.writerId);
+            if (!writer) {
                throw APIError.notFound("Writer not found.");
             }
-            if (agent.organizationId !== organizationId) {
+            if (writer.organizationId !== organizationId) {
                throw APIError.forbidden(
                   "You don't have permission to update this writer's instructions.",
                );
             }
 
-            const instruction = await updateAgentInstruction(
+            const instruction = await updateWriterInstruction(
                resolvedCtx.db,
-               input.agentId,
+               input.writerId,
                input.instructionId,
                input.data,
             );
 
             return instruction;
          } catch (err) {
-            console.error("Error updating agent instruction:", err);
+            console.error("Error updating writer instruction:", err);
             propagateError(err);
-            throw APIError.internal("Failed to update agent instruction.");
+            throw APIError.internal("Failed to update writer instruction.");
          }
       }),
 
@@ -818,7 +818,7 @@ export const agentRouter = router({
       .use(requireFeature(Feature.AGENT_INSTRUCTIONS))
       .input(
          z.object({
-            agentId: z.string().uuid(),
+            writerId: z.string().uuid(),
             instructionId: z.string().uuid(),
          }),
       )
@@ -831,28 +831,28 @@ export const agentRouter = router({
                throw APIError.unauthorized("Organization must be specified.");
             }
 
-            // Verify agent belongs to organization
-            const agent = await getAgentById(resolvedCtx.db, input.agentId);
-            if (!agent) {
+            // Verify writer belongs to organization
+            const writer = await getWriterById(resolvedCtx.db, input.writerId);
+            if (!writer) {
                throw APIError.notFound("Writer not found.");
             }
-            if (agent.organizationId !== organizationId) {
+            if (writer.organizationId !== organizationId) {
                throw APIError.forbidden(
                   "You don't have permission to delete this writer's instructions.",
                );
             }
 
-            await deleteAgentInstruction(
+            await deleteWriterInstruction(
                resolvedCtx.db,
-               input.agentId,
+               input.writerId,
                input.instructionId,
             );
 
             return { success: true };
          } catch (err) {
-            console.error("Error deleting agent instruction:", err);
+            console.error("Error deleting writer instruction:", err);
             propagateError(err);
-            throw APIError.internal("Failed to delete agent instruction.");
+            throw APIError.internal("Failed to delete writer instruction.");
          }
       }),
 
@@ -863,7 +863,7 @@ export const agentRouter = router({
       .use(requireFeature(Feature.AGENT_INSTRUCTIONS))
       .input(
          z.object({
-            agentId: z.string().uuid(),
+            writerId: z.string().uuid(),
             orderedIds: z.array(z.string().uuid()),
          }),
       )
@@ -876,28 +876,28 @@ export const agentRouter = router({
                throw APIError.unauthorized("Organization must be specified.");
             }
 
-            // Verify agent belongs to organization
-            const agent = await getAgentById(resolvedCtx.db, input.agentId);
-            if (!agent) {
+            // Verify writer belongs to organization
+            const writer = await getWriterById(resolvedCtx.db, input.writerId);
+            if (!writer) {
                throw APIError.notFound("Writer not found.");
             }
-            if (agent.organizationId !== organizationId) {
+            if (writer.organizationId !== organizationId) {
                throw APIError.forbidden(
                   "You don't have permission to reorder this writer's instructions.",
                );
             }
 
-            const instructions = await reorderAgentInstructions(
+            const instructions = await reorderWriterInstructions(
                resolvedCtx.db,
-               input.agentId,
+               input.writerId,
                input.orderedIds,
             );
 
             return instructions;
          } catch (err) {
-            console.error("Error reordering agent instructions:", err);
+            console.error("Error reordering writer instructions:", err);
             propagateError(err);
-            throw APIError.internal("Failed to reorder agent instructions.");
+            throw APIError.internal("Failed to reorder writer instructions.");
          }
       }),
 
@@ -908,7 +908,7 @@ export const agentRouter = router({
       .use(requireFeature(Feature.AGENT_INSTRUCTIONS))
       .input(
          z.object({
-            agentId: z.string().uuid(),
+            writerId: z.string().uuid(),
             instructionId: z.string().uuid(),
          }),
       )
@@ -921,28 +921,28 @@ export const agentRouter = router({
                throw APIError.unauthorized("Organization must be specified.");
             }
 
-            // Verify agent belongs to organization
-            const agent = await getAgentById(resolvedCtx.db, input.agentId);
-            if (!agent) {
+            // Verify writer belongs to organization
+            const writer = await getWriterById(resolvedCtx.db, input.writerId);
+            if (!writer) {
                throw APIError.notFound("Writer not found.");
             }
-            if (agent.organizationId !== organizationId) {
+            if (writer.organizationId !== organizationId) {
                throw APIError.forbidden(
                   "You don't have permission to toggle this writer's instructions.",
                );
             }
 
-            const instruction = await toggleAgentInstructionEnabled(
+            const instruction = await toggleWriterInstructionEnabled(
                resolvedCtx.db,
-               input.agentId,
+               input.writerId,
                input.instructionId,
             );
 
             return instruction;
          } catch (err) {
-            console.error("Error toggling agent instruction:", err);
+            console.error("Error toggling writer instruction:", err);
             propagateError(err);
-            throw APIError.internal("Failed to toggle agent instruction.");
+            throw APIError.internal("Failed to toggle writer instruction.");
          }
       }),
 });

@@ -18,7 +18,7 @@ import { usePresignedUpload } from "@/features/file-upload/lib/use-presigned-upl
 import { useTRPC } from "@/integrations/clients";
 
 type WriterPhotoUploadProps = {
-   agentId?: string;
+   writerId?: string;
    currentPhotoUrl?: string | null;
    name: string;
    onPhotoChange?: (storageKey: string | null) => void;
@@ -38,7 +38,7 @@ const iconSizeClasses = {
 };
 
 export function WriterPhotoUpload({
-   agentId,
+   writerId,
    currentPhotoUrl,
    name,
    onPhotoChange,
@@ -57,19 +57,19 @@ export function WriterPhotoUpload({
       usePresignedUpload();
 
    const requestUploadUrlMutation = useMutation(
-      trpc.agent.requestPhotoUploadUrl.mutationOptions(),
+      trpc.writer.requestPhotoUploadUrl.mutationOptions(),
    );
 
    const confirmUploadMutation = useMutation(
-      trpc.agent.confirmPhotoUpload.mutationOptions({
+      trpc.writer.confirmPhotoUpload.mutationOptions({
          onSuccess: () => {
             toast.success("Foto atualizada com sucesso");
-            if (agentId) {
+            if (writerId) {
                queryClient.invalidateQueries({
-                  queryKey: trpc.agent.getById.queryKey({ id: agentId }),
+                  queryKey: trpc.writer.getById.queryKey({ id: writerId }),
                });
                queryClient.invalidateQueries({
-                  queryKey: trpc.agent.list.queryKey(),
+                  queryKey: trpc.writer.list.queryKey(),
                });
             }
          },
@@ -80,7 +80,7 @@ export function WriterPhotoUpload({
    );
 
    const cancelUploadMutation = useMutation(
-      trpc.agent.cancelPhotoUpload.mutationOptions(),
+      trpc.writer.cancelPhotoUpload.mutationOptions(),
    );
 
    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +91,7 @@ export function WriterPhotoUpload({
    };
 
    const handleUpload = async () => {
-      if (!fileUpload.selectedFile || !agentId) return;
+      if (!fileUpload.selectedFile || !writerId) return;
 
       fileUpload.setUploading(true);
       let storageKey: string | null = null;
@@ -113,7 +113,7 @@ export function WriterPhotoUpload({
          // Request presigned URL
          const { presignedUrl, storageKey: key } =
             await requestUploadUrlMutation.mutateAsync({
-               agentId,
+               writerId,
                contentType: "image/webp",
                fileName: compressedFileName,
                fileSize: compressed.size,
@@ -125,7 +125,7 @@ export function WriterPhotoUpload({
          await uploadToPresignedUrl(presignedUrl, compressed, "image/webp");
 
          // Confirm upload
-         await confirmUploadMutation.mutateAsync({ agentId, storageKey: key });
+         await confirmUploadMutation.mutateAsync({ writerId, storageKey: key });
 
          onPhotoChange?.(key);
          fileUpload.clearFile();
@@ -149,8 +149,8 @@ export function WriterPhotoUpload({
    const initials = getInitials(name || "Writer");
    const previewUrl = fileUpload.filePreview || currentPhotoUrl;
 
-   // For create mode (no agentId), just show preview without upload
-   if (!agentId) {
+   // For create mode (no writerId), just show preview without upload
+   if (!writerId) {
       return (
          <div className="flex flex-col items-center gap-3">
             <div className="relative group">

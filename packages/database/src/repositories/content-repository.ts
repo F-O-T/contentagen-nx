@@ -43,7 +43,7 @@ export async function getContentBySlug(
    dbClient: DatabaseInstance,
    slug: string,
    organizationId: string,
-   agentId?: string,
+   writerId?: string,
 ) {
    try {
       const result = await dbClient.query.content.findFirst({
@@ -51,15 +51,15 @@ export async function getContentBySlug(
             const slugCondition = sql`${content.meta}->>'slug' = ${slug}`;
             const orgCondition = eq(content.organizationId, organizationId);
 
-            if (agentId) {
+            if (writerId) {
                return and(
                   orgCondition,
-                  eq(content.agentId, agentId),
+                  eq(content.writerId, writerId),
                   slugCondition,
                );
             }
             // For manual content (no agent)
-            return and(orgCondition, isNull(content.agentId), slugCondition);
+            return and(orgCondition, isNull(content.writerId), slugCondition);
          },
       });
       return result;
@@ -71,9 +71,9 @@ export async function getContentBySlug(
    }
 }
 
-export async function getContentsByAgentId(
+export async function getContentsByWriterId(
    dbClient: DatabaseInstance,
-   agentId: string,
+   writerId: string,
    status?: string,
 ) {
    try {
@@ -81,11 +81,11 @@ export async function getContentsByAgentId(
          where: (content, { eq, and }) => {
             if (status) {
                return and(
-                  eq(content.agentId, agentId),
+                  eq(content.writerId, writerId),
                   sql`${content.status} = ${status}`,
                );
             }
-            return eq(content.agentId, agentId);
+            return eq(content.writerId, writerId);
          },
          orderBy: (content, { desc }) => desc(content.createdAt),
       });
@@ -102,35 +102,35 @@ export async function getContentsByAgentId(
  * Batch query to get content counts by multiple agent IDs
  * This avoids N+1 queries when listing agents with content counts
  */
-export async function getContentCountsByAgentIds(
+export async function getContentCountsByWriterIds(
    dbClient: DatabaseInstance,
-   agentIds: string[],
+   writerIds: string[],
 ): Promise<Map<string, number>> {
-   if (agentIds.length === 0) {
+   if (writerIds.length === 0) {
       return new Map();
    }
 
    try {
       const result = await dbClient
          .select({
-            agentId: content.agentId,
+            writerId: content.writerId,
             count: count(),
          })
          .from(content)
-         .where(inArray(content.agentId, agentIds))
-         .groupBy(content.agentId);
+         .where(inArray(content.writerId, writerIds))
+         .groupBy(content.writerId);
 
       const countMap = new Map<string, number>();
       for (const row of result) {
-         if (row.agentId) {
-            countMap.set(row.agentId, Number(row.count));
+         if (row.writerId) {
+            countMap.set(row.writerId, Number(row.count));
          }
       }
 
       // Fill in zeros for agents with no content
-      for (const agentId of agentIds) {
-         if (!countMap.has(agentId)) {
-            countMap.set(agentId, 0);
+      for (const writerId of writerIds) {
+         if (!countMap.has(writerId)) {
+            countMap.set(writerId, 0);
          }
       }
 
@@ -310,7 +310,7 @@ export async function getSharedContentById(
          where: (content, { eq, and }) =>
             and(eq(content.id, contentId), eq(content.shareStatus, "shared")),
          with: {
-            agent: true,
+            writer: true,
          },
       });
       return result;
@@ -324,11 +324,11 @@ export async function getSharedContentById(
 
 export async function listContents(
    dbClient: DatabaseInstance,
-   agentIds: string[],
+   writerIds: string[],
    statuses?: string[],
 ) {
    try {
-      const conditions = [inArray(content.agentId, agentIds)];
+      const conditions = [inArray(content.writerId, writerIds)];
 
       if (statuses && statuses.length > 0) {
          conditions.push(inArray(content.status, statuses as ContentStatus[]));
@@ -354,7 +354,7 @@ export async function listContentsByOrganization(
    organizationId: string,
    options?: {
       statuses?: ContentStatus[];
-      agentId?: string | null; // null = manual content only, undefined = all
+      writerId?: string | null; // null = manual content only, undefined = all
       limit?: number;
       offset?: number;
    },
@@ -366,14 +366,14 @@ export async function listContentsByOrganization(
          conditions.push(inArray(content.status, options.statuses));
       }
 
-      if (options?.agentId === null) {
+      if (options?.writerId === null) {
          // Manual content only (no agent)
-         conditions.push(sql`${content.agentId} IS NULL`);
-      } else if (options?.agentId) {
+         conditions.push(sql`${content.writerId} IS NULL`);
+      } else if (options?.writerId) {
          // Specific agent
-         conditions.push(eq(content.agentId, options.agentId));
+         conditions.push(eq(content.writerId, options.writerId));
       }
-      // If agentId is undefined, get all content (both manual and agent-based)
+      // If writerId is undefined, get all content (both manual and agent-based)
 
       const query = dbClient
          .select()

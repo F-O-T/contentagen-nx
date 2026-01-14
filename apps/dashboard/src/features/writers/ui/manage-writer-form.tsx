@@ -78,14 +78,14 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
    const isEditMode = !!writer;
 
    const createMutation = useMutation(
-      trpc.agent.create.mutationOptions({
+      trpc.writer.create.mutationOptions({
          onSuccess: () => {
             toast.success("Escritor criado com sucesso");
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.list.queryKey(),
+               queryKey: trpc.writer.list.queryKey(),
             });
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.getStats.queryKey(),
+               queryKey: trpc.writer.getStats.queryKey(),
             });
             closeSheet();
          },
@@ -98,15 +98,15 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
    );
 
    const updateMutation = useMutation(
-      trpc.agent.update.mutationOptions({
+      trpc.writer.update.mutationOptions({
          onSuccess: () => {
             toast.success("Escritor atualizado com sucesso");
             queryClient.invalidateQueries({
-               queryKey: trpc.agent.list.queryKey(),
+               queryKey: trpc.writer.list.queryKey(),
             });
             if (writer?.id) {
                queryClient.invalidateQueries({
-                  queryKey: trpc.agent.getById.queryKey({ id: writer.id }),
+                  queryKey: trpc.writer.getById.queryKey({ id: writer.id }),
                });
             }
             closeSheet();
@@ -175,7 +175,7 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
             {isEditMode && writer && (
                <div className="flex justify-center">
                   <WriterPhotoUpload
-                     agentId={writer.id}
+                     writerId={writer.id}
                      currentPhotoUrl={writer.profilePhotoUrl}
                      name={writer.personaConfig.metadata.name}
                      size="lg"

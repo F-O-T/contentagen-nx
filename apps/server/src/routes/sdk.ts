@@ -1,4 +1,4 @@
-import { getAgentById } from "@packages/database/repositories/agent-repository";
+import { getWriterById } from "@packages/database/repositories/writer-repository";
 import {
    getContentById,
    getContentBySlug,
@@ -72,7 +72,7 @@ export const sdkRoutes = new Elysia({
    .get(
       "/author/:agentId",
       async ({ params, session }) => {
-         const agent = await getAgentById(db, params.agentId);
+         const agent = await getWriterById(db, params.agentId);
 
          if (!agent) {
             throw new Error("Agent not found");

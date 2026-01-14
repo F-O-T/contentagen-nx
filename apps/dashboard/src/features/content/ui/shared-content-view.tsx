@@ -91,7 +91,7 @@ function SharedContentViewContent({ contentId }: SharedContentViewProps) {
       trpc.content.getSharedContent.queryOptions({ id: contentId }),
    );
 
-   const authorInitials = content.agent?.name
+   const authorInitials = content.writer?.name
       ?.split(" ")
       .map((n) => n[0])
       .join("")
@@ -156,14 +156,14 @@ function SharedContentViewContent({ contentId }: SharedContentViewProps) {
 
                      {/* Author and meta - horizontal layout */}
                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        {content.agent && (
+                        {content.writer && (
                            <>
                               <Avatar className="size-8">
                                  <AvatarImage
-                                    alt={content.agent.name}
+                                    alt={content.writer.name}
                                     src={
-                                       content.agent.avatar ??
-                                       content.agent.profilePhotoUrl ??
+                                       content.writer.avatar ??
+                                       content.writer.profilePhotoUrl ??
                                        undefined
                                     }
                                  />
@@ -172,7 +172,7 @@ function SharedContentViewContent({ contentId }: SharedContentViewProps) {
                                  </AvatarFallback>
                               </Avatar>
                               <span className="font-medium text-foreground">
-                                 {content.agent.name}
+                                 {content.writer.name}
                               </span>
                               <span className="text-muted-foreground/50">
                                  ·
@@ -225,14 +225,14 @@ function SharedContentViewContent({ contentId }: SharedContentViewProps) {
                   {/* Footer */}
                   <footer className="mt-16 pt-8 border-t">
                      {/* Author card */}
-                     {content.agent && (
+                     {content.writer && (
                         <div className="flex items-start gap-4 mb-8">
                            <Avatar className="size-14">
                               <AvatarImage
-                                 alt={content.agent.name}
+                                 alt={content.writer.name}
                                  src={
-                                    content.agent.avatar ??
-                                    content.agent.profilePhotoUrl ??
+                                    content.writer.avatar ??
+                                    content.writer.profilePhotoUrl ??
                                     undefined
                                  }
                               />
@@ -242,10 +242,10 @@ function SharedContentViewContent({ contentId }: SharedContentViewProps) {
                            </Avatar>
                            <div>
                               <p className="font-semibold text-lg">
-                                 {content.agent.name}
+                                 {content.writer.name}
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                 {content.agent.description ||
+                                 {content.writer.description ||
                                     "Assistente de Escrita IA"}
                               </p>
                            </div>

@@ -1,6 +1,6 @@
 import { createTool } from "@mastra/core/tools";
 import { createDb } from "@packages/database/client";
-import { getAgentById } from "@packages/database/repositories/agent-repository";
+import { getWriterById } from "@packages/database/repositories/writer-repository";
 import { serverEnv } from "@packages/environment/server";
 import { AppError, propagateError } from "@packages/utils/errors";
 export function getRagGuidelinesInstructions(): string {
@@ -9,29 +9,29 @@ export function getRagGuidelinesInstructions(): string {
 Retrieves RAG integration instructions that define how to query and utilize knowledge bases.
 **When to use:** Before formulating search strategies or when unsure how to approach brand/competitor knowledge queries
 **Parameters:**
-- agentId (UUID): Agent identifier containing RAG integration configuration
+- writerId (UUID): Writer identifier containing RAG integration configuration
 **Returns:** RAG integration instructions or "No RAG integration specified"
 **Strategy:** Call early in workflow to understand knowledge base structure and query patterns, then apply throughout research phase
 `;
 }
 export const getRagGuidelinesTool = createTool({
    description:
-      "Retrieve the RAG integration persona from the database for the strategist agent to use",
+      "Retrieve the RAG integration persona from the database for the strategist writer to use",
    execute: async (_inputData, context) => {
       const requestContext = context?.requestContext;
-      if (!requestContext?.has("agentId")) {
-         throw AppError.internal("Agent ID is required in request context");
+      if (!requestContext?.has("writerId")) {
+         throw AppError.internal("Writer ID is required in request context");
       }
-      const agentId = requestContext.get("agentId") as string;
+      const writerId = requestContext.get("writerId") as string;
 
       try {
          const dbClient = createDb({
             databaseUrl: serverEnv.DATABASE_URL,
          });
 
-         const agent = await getAgentById(dbClient, agentId);
+         const writer = await getWriterById(dbClient, writerId);
          const ragIntegration =
-            agent?.personaConfig?.instructions?.ragIntegration;
+            writer?.personaConfig?.instructions?.ragIntegration;
 
          return {
             ragIntegration: ragIntegration || "No RAG integration specified",

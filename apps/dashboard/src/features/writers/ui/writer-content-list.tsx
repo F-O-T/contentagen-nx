@@ -31,7 +31,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 type WriterContentListProps = {
-   agentId: string;
+   writerId: string;
 };
 
 function WriterContentListSkeleton() {
@@ -79,13 +79,13 @@ function WriterContentListError() {
    );
 }
 
-function WriterContentListContent({ agentId }: WriterContentListProps) {
+function WriterContentListContent({ writerId }: WriterContentListProps) {
    const trpc = useTRPC();
    const { activeOrganization } = useActiveOrganization();
 
    const { data } = useSuspenseQuery(
-      trpc.content.getByAgentId.queryOptions({
-         agentId,
+      trpc.content.getByWriterId.queryOptions({
+         writerId,
          limit: 10,
          page: 1,
       }),
@@ -109,7 +109,7 @@ function WriterContentListContent({ agentId }: WriterContentListProps) {
             <Button asChild size="sm" variant="outline">
                <Link
                   params={{ slug: activeOrganization.slug }}
-                  search={{ agentId }}
+                  search={{ writerId }}
                   to="/$slug/content"
                >
                   <Plus className="size-4 mr-1" />
@@ -171,11 +171,11 @@ function WriterContentListContent({ agentId }: WriterContentListProps) {
    );
 }
 
-export function WriterContentList({ agentId }: WriterContentListProps) {
+export function WriterContentList({ writerId }: WriterContentListProps) {
    return (
       <ErrorBoundary FallbackComponent={WriterContentListError}>
          <Suspense fallback={<WriterContentListSkeleton />}>
-            <WriterContentListContent agentId={agentId} />
+            <WriterContentListContent writerId={writerId} />
          </Suspense>
       </ErrorBoundary>
    );

@@ -157,9 +157,9 @@ export function RelatedPostsSearchCredenza({
                                        ? "Publicado"
                                        : "Rascunho"}
                                  </Badge>
-                                 {item.agent && (
+                                 {item.writer && (
                                     <span className="text-xs text-muted-foreground">
-                                       por {item.agent.name}
+                                       por {item.writer.name}
                                     </span>
                                  )}
                               </div>

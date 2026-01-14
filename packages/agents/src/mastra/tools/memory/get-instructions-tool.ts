@@ -48,11 +48,11 @@ export const getInstructionsTool = createTool({
    }),
    execute: async (input, context) => {
       const requestContext = context?.requestContext;
-      const agentInstructions = requestContext?.get("agentInstructions") as
+      const writerInstructions = requestContext?.get("writerInstructions") as
          | InstructionMemoryItem[]
          | undefined;
 
-      if (!agentInstructions || agentInstructions.length === 0) {
+      if (!writerInstructions || writerInstructions.length === 0) {
          return {
             instructions: [],
             count: 0,
@@ -61,7 +61,7 @@ export const getInstructionsTool = createTool({
       }
 
       // Filter and sort instructions
-      let filtered = [...agentInstructions].sort((a, b) => a.order - b.order);
+      let filtered = [...writerInstructions].sort((a, b) => a.order - b.order);
 
       if (input.enabledOnly) {
          filtered = filtered.filter((i) => i.enabled);

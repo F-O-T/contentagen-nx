@@ -1,11 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
-import {
-   agent,
-   brand,
-   member,
-   organization,
-} from "../schema";
+import { writer, member, organization } from "../schema";
 
 /**
  * Delete organization-scoped data for a specific organization.
@@ -15,16 +10,13 @@ async function deleteOrganizationScopedData(
    tx: Parameters<Parameters<DatabaseInstance["transaction"]>[0]>[0],
    organizationId: string,
 ) {
-   // Content is deleted via cascade when agent is deleted
-   await Promise.all([
-      tx.delete(agent).where(eq(agent.organizationId, organizationId)),
-      tx.delete(brand).where(eq(brand.organizationId, organizationId)),
-   ]);
+   // Content is deleted via cascade when writer is deleted
+   await tx.delete(writer).where(eq(writer.organizationId, organizationId));
 }
 
 /**
  * Delete all user data from the database across all organizations they belong to.
- * This includes: content, agents, brands, notifications, and memberships.
+ * This includes: content, writers, and memberships.
  *
  * User-specific auth data (sessions, accounts, etc) will cascade via onDelete: "cascade".
  */

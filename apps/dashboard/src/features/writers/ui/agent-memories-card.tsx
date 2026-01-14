@@ -20,7 +20,7 @@ import { ManageMemoryForm } from "./manage-memory-form";
 import { MemoryItem } from "./memory-item";
 
 type AgentMemoriesCardProps = {
-   agentId: string;
+   writerId: string;
 };
 
 function AgentMemoriesCardSkeleton() {
@@ -50,7 +50,7 @@ function AgentMemoriesCardSkeleton() {
    );
 }
 
-export function AgentMemoriesCard({ agentId }: AgentMemoriesCardProps) {
+export function AgentMemoriesCard({ writerId }: AgentMemoriesCardProps) {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
    const { openSheet } = useSheet();
@@ -62,31 +62,31 @@ export function AgentMemoriesCard({ agentId }: AgentMemoriesCardProps) {
       isLoading,
       isError,
    } = useQuery({
-      ...trpc.agent.listInstructions.queryOptions({ agentId }),
+      ...trpc.writer.listInstructions.queryOptions({ writerId }),
       enabled: hasAgentMemoriesFeature,
    });
 
    const toggleMutation = useMutation({
-      ...trpc.agent.toggleInstructionEnabled.mutationOptions(),
+      ...trpc.writer.toggleInstructionEnabled.mutationOptions(),
       onSuccess: () => {
          queryClient.invalidateQueries({
-            queryKey: trpc.agent.listInstructions.queryKey({ agentId }),
+            queryKey: trpc.writer.listInstructions.queryKey({ writerId }),
          });
       },
    });
 
    const deleteMutation = useMutation({
-      ...trpc.agent.deleteInstruction.mutationOptions(),
+      ...trpc.writer.deleteInstruction.mutationOptions(),
       onSuccess: () => {
          queryClient.invalidateQueries({
-            queryKey: trpc.agent.listInstructions.queryKey({ agentId }),
+            queryKey: trpc.writer.listInstructions.queryKey({ writerId }),
          });
       },
    });
 
    const handleAddMemory = () => {
       openSheet({
-         children: <ManageMemoryForm agentId={agentId} />,
+         children: <ManageMemoryForm writerId={writerId} />,
       });
    };
 
@@ -94,21 +94,21 @@ export function AgentMemoriesCard({ agentId }: AgentMemoriesCardProps) {
       const memory = memories?.find((m) => m.id === memoryId);
       if (memory) {
          openSheet({
-            children: <ManageMemoryForm agentId={agentId} memory={memory} />,
+            children: <ManageMemoryForm writerId={writerId} memory={memory} />,
          });
       }
    };
 
    const handleToggleMemory = (memoryId: string) => {
       toggleMutation.mutate({
-         agentId,
+         writerId,
          instructionId: memoryId,
       });
    };
 
    const handleDeleteMemory = (memoryId: string) => {
       deleteMutation.mutate({
-         agentId,
+         writerId,
          instructionId: memoryId,
       });
    };

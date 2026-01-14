@@ -1,6 +1,6 @@
 import { createTool } from "@mastra/core/tools";
 import { createDb } from "@packages/database/client";
-import { getAgentById } from "@packages/database/repositories/agent-repository";
+import { getWriterById } from "@packages/database/repositories/writer-repository";
 import { serverEnv } from "@packages/environment/server";
 import { AppError, propagateError } from "@packages/utils/errors";
 export function getWritingGuidelinesInstructions(): string {
@@ -9,7 +9,7 @@ export function getWritingGuidelinesInstructions(): string {
 Retrieves specific writing rules, style preferences, and formatting requirements for content creation.
 **When to use:** Before drafting content to understand style rules, tone preferences, and structural requirements
 **Parameters:**
-- agentId (UUID): Agent identifier containing writing guidelines configuration
+- writerId (UUID): Writer identifier containing writing guidelines configuration
 **Returns:** Writing guidelines or "No writing guidelines specified"
 **Strategy:** Call early in writing process to ensure content adheres to brand voice, formatting standards, and stylistic preferences throughout composition
 `;
@@ -18,19 +18,19 @@ export const getWritingGuidelinesTool = createTool({
    description: "Retrieve the writing guidelines for content creation",
    execute: async (_inputData, context) => {
       const requestContext = context?.requestContext;
-      if (!requestContext?.has("agentId")) {
-         throw AppError.internal("Agent ID is required in request context");
+      if (!requestContext?.has("writerId")) {
+         throw AppError.internal("Writer ID is required in request context");
       }
-      const agentId = requestContext.get("agentId") as string;
+      const writerId = requestContext.get("writerId") as string;
 
       try {
          const dbClient = createDb({
             databaseUrl: serverEnv.DATABASE_URL,
          });
 
-         const agent = await getAgentById(dbClient, agentId);
+         const writer = await getWriterById(dbClient, writerId);
          const writingGuidelines =
-            agent?.personaConfig?.instructions?.writingGuidelines;
+            writer?.personaConfig?.instructions?.writingGuidelines;
 
          return {
             writingGuidelines:

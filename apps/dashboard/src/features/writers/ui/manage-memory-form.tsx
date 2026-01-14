@@ -27,31 +27,31 @@ const memorySchema = z.object({
 });
 
 type ManageMemoryFormProps = {
-   agentId: string;
+   writerId: string;
    memory?: InstructionMemoryItem;
 };
 
-export function ManageMemoryForm({ agentId, memory }: ManageMemoryFormProps) {
+export function ManageMemoryForm({ writerId, memory }: ManageMemoryFormProps) {
    const trpc = useTRPC();
    const queryClient = useQueryClient();
    const { closeSheet } = useSheet();
    const isEditMode = !!memory;
 
    const createMutation = useMutation({
-      ...trpc.agent.createInstruction.mutationOptions(),
+      ...trpc.writer.createInstruction.mutationOptions(),
       onSuccess: () => {
          queryClient.invalidateQueries({
-            queryKey: trpc.agent.listInstructions.queryKey({ agentId }),
+            queryKey: trpc.writer.listInstructions.queryKey({ writerId }),
          });
          closeSheet();
       },
    });
 
    const updateMutation = useMutation({
-      ...trpc.agent.updateInstruction.mutationOptions(),
+      ...trpc.writer.updateInstruction.mutationOptions(),
       onSuccess: () => {
          queryClient.invalidateQueries({
-            queryKey: trpc.agent.listInstructions.queryKey({ agentId }),
+            queryKey: trpc.writer.listInstructions.queryKey({ writerId }),
          });
          closeSheet();
       },
@@ -66,7 +66,7 @@ export function ManageMemoryForm({ agentId, memory }: ManageMemoryFormProps) {
       onSubmit: async ({ value }) => {
          if (isEditMode && memory) {
             updateMutation.mutate({
-               agentId,
+               writerId,
                instructionId: memory.id,
                data: {
                   title: value.title,
@@ -76,7 +76,7 @@ export function ManageMemoryForm({ agentId, memory }: ManageMemoryFormProps) {
             });
          } else {
             createMutation.mutate({
-               agentId,
+               writerId,
                data: {
                   title: value.title,
                   content: value.content,

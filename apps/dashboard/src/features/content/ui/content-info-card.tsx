@@ -32,7 +32,7 @@ type ContentInfoCardProps = {
       };
       status: string;
       createdAt: string;
-      agent?: {
+      writer?: {
          id: string;
          name: string;
          profilePhotoUrl?: string | null;
@@ -42,8 +42,8 @@ type ContentInfoCardProps = {
 };
 
 export function ContentInfoCard({ content, slug }: ContentInfoCardProps) {
-   const agent = content.agent;
-   const initials = agent?.name
+   const writer = content.writer;
+   const initials = writer?.name
       .split(" ")
       .map((n) => n[0])
       .join("")
@@ -71,24 +71,24 @@ export function ContentInfoCard({ content, slug }: ContentInfoCardProps) {
             </div>
          </CardHeader>
          <CardContent className="grid gap-4">
-            {agent && (
+            {writer && (
                <div className="flex items-center gap-3">
                   <User className="size-4 text-muted-foreground" />
                   <Link
                      className="flex items-center gap-2 hover:underline"
-                     params={{ slug, writerId: agent.id }}
+                     params={{ slug, writerId: writer.id }}
                      to="/$slug/writers/$writerId"
                   >
                      <Avatar className="size-6">
                         <AvatarImage
-                           alt={agent.name}
-                           src={agent.profilePhotoUrl ?? undefined}
+                           alt={writer.name}
+                           src={writer.profilePhotoUrl ?? undefined}
                         />
                         <AvatarFallback className="text-xs">
                            {initials}
                         </AvatarFallback>
                      </Avatar>
-                     <span className="text-sm">{agent.name}</span>
+                     <span className="text-sm">{writer.name}</span>
                   </Link>
                </div>
             )}

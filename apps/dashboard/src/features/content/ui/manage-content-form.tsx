@@ -37,7 +37,7 @@ import { useSheet } from "@/hooks/use-sheet";
 import { useTRPC } from "@/integrations/clients";
 
 type ManageContentFormProps = {
-   agentId?: string;
+   writerId?: string;
    forceManual?: boolean;
 };
 
@@ -70,7 +70,7 @@ function ManageContentSkeleton() {
 }
 
 function ManageContentFormContent({
-   agentId,
+   writerId,
    forceManual,
 }: ManageContentFormProps) {
    const { closeSheet } = useSheet();
@@ -80,11 +80,11 @@ function ManageContentFormContent({
    const queryClient = useQueryClient();
 
    const [creationType, setCreationType] = useState<"manual" | "with-writer">(
-      forceManual ? "manual" : agentId ? "with-writer" : "manual",
+      forceManual ? "manual" : writerId ? "with-writer" : "manual",
    );
 
    const { data: writersData } = useSuspenseQuery(
-      trpc.agent.list.queryOptions({ limit: 100, page: 1 }),
+      trpc.writer.list.queryOptions({ limit: 100, page: 1 }),
    );
 
    const writers = writersData.items;
@@ -120,14 +120,14 @@ function ManageContentFormContent({
 
    const form = useForm({
       defaultValues: {
-         agentId: agentId ?? "",
+         writerId: writerId ?? "",
       },
       onSubmit: async ({ value }) => {
          if (creationType === "manual") {
             createMutation.mutate({});
          } else {
             createMutation.mutate({
-               agentId: value.agentId,
+               writerId: value.writerId,
             });
          }
       },
@@ -141,7 +141,7 @@ function ManageContentFormContent({
 
    const canSubmit =
       creationType === "manual" ||
-      (creationType === "with-writer" && form.state.values.agentId);
+      (creationType === "with-writer" && form.state.values.writerId);
 
    return (
       <>
@@ -203,7 +203,7 @@ function ManageContentFormContent({
             )}
 
             {creationType === "with-writer" && writers.length > 0 && (
-               <form.Field name="agentId">
+               <form.Field name="writerId">
                   {(field) => (
                      <Field>
                         <FieldLabel htmlFor={field.name}>
@@ -263,7 +263,7 @@ function ManageContentFormContent({
 }
 
 export const ManageContentForm: FC<ManageContentFormProps> = ({
-   agentId,
+   writerId,
    forceManual,
 }) => {
    return (
@@ -277,7 +277,7 @@ export const ManageContentForm: FC<ManageContentFormProps> = ({
          <ErrorBoundary FallbackComponent={ManageContentErrorFallback}>
             <Suspense fallback={<ManageContentSkeleton />}>
                <ManageContentFormContent
-                  agentId={agentId}
+                  writerId={writerId}
                   forceManual={forceManual}
                />
             </Suspense>

@@ -6,7 +6,7 @@ import type { ResendClient } from "@packages/transactional/client";
 import type { PostHog } from "@packages/posthog/server";
 import { accountRouter } from "./routers/account";
 import { accountDeletionRouter } from "./routers/account-deletion";
-import { agentRouter } from "./routers/agent";
+import { writerRouter } from "./routers/writer";
 import { billingRouter } from "./routers/billing";
 import { contentRouter } from "./routers/content";
 import { onboardingRouter } from "./routers/onboarding";
@@ -21,7 +21,7 @@ import { createTRPCContext as createTRPCContextInternal, router } from "./trpc";
 export const appRouter = router({
    account: accountRouter,
    accountDeletion: accountDeletionRouter,
-   agent: agentRouter,
+   writer: writerRouter,
    billing: billingRouter,
    content: contentRouter,
    onboarding: onboardingRouter,

@@ -22,13 +22,13 @@ export type ModelId =
 export type CustomRequestContext = {
    brandId?: string;
    userId: string;
-   agentId?: string;
+   writerId?: string;
    // Fields for blog editor
    mode?: ChatMode;
    model?: ModelId;
    activePlan?: ContentPlan;
    // Instruction memories (compiled into agent prompts)
-   agentInstructions?: InstructionMemoryItem[];
+   writerInstructions?: InstructionMemoryItem[];
 };
 
 // Only include vectors config if PgVector is available
@@ -66,8 +66,8 @@ export function createRequestContext(context: CustomRequestContext) {
    if (context.brandId) {
       requestContext.set("brandId", context.brandId);
    }
-   if (context.agentId) {
-      requestContext.set("agentId", context.agentId);
+   if (context.writerId) {
+      requestContext.set("writerId", context.writerId);
    }
    if (context.mode) {
       requestContext.set("mode", context.mode);
@@ -78,8 +78,8 @@ export function createRequestContext(context: CustomRequestContext) {
    if (context.activePlan) {
       requestContext.set("activePlan", context.activePlan);
    }
-   if (context.agentInstructions) {
-      requestContext.set("agentInstructions", context.agentInstructions);
+   if (context.writerInstructions) {
+      requestContext.set("writerInstructions", context.writerInstructions);
    }
    return requestContext;
 }

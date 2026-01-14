@@ -172,7 +172,7 @@ export const accountRouter = router({
 
    /**
     * Export all user data as JSON
-    * Includes: profile, agents, brands, and content
+    * Includes: profile, writers, and content
     */
    exportUserData: protectedProcedure.mutation(async ({ ctx }) => {
       const resolvedCtx = await ctx;
@@ -186,7 +186,7 @@ export const accountRouter = router({
       const db = resolvedCtx.db;
 
       // Fetch all user data in parallel
-      const [userProfile, agents, brands, content] = await Promise.all([
+      const [userProfile, writers, content] = await Promise.all([
          // User profile
          db.query.user.findFirst({
             where: (user, { eq }) => eq(user.id, userId),
@@ -201,27 +201,22 @@ export const accountRouter = router({
             },
          }),
 
-         // Agents
-         db.query.agent.findMany({
-            where: (agent, { eq }) => eq(agent.organizationId, organizationId),
+         // Writers
+         db.query.writer.findMany({
+            where: (writer, { eq }) => eq(writer.organizationId, organizationId),
          }),
 
-         // Brands
-         db.query.brand.findMany({
-            where: (brand, { eq }) => eq(brand.organizationId, organizationId),
-         }),
-
-         // Content (via agents)
+         // Content (via writers)
          (async () => {
-            const orgAgents = await db.query.agent.findMany({
-               where: (agent, { eq }) =>
-                  eq(agent.organizationId, organizationId),
+            const orgWriters = await db.query.writer.findMany({
+               where: (writer, { eq }) =>
+                  eq(writer.organizationId, organizationId),
             });
-            const agentIds = orgAgents.map((a) => a.id);
-            if (agentIds.length === 0) return [];
+            const writerIds = orgWriters.map((w) => w.id);
+            if (writerIds.length === 0) return [];
             return db.query.content.findMany({
                where: (content, { inArray }) =>
-                  inArray(content.agentId, agentIds),
+                  inArray(content.writerId, writerIds),
             });
          })(),
       ]);
@@ -231,8 +226,7 @@ export const accountRouter = router({
          version: "1.0",
          user: userProfile,
          data: {
-            agents,
-            brands,
+            writers,
             content,
          },
       };

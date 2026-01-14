@@ -28,9 +28,9 @@ import { LANGUAGE_INSTRUCTION } from "./shared";
 
 // Dynamic writer agent instructions
 const getWriterAgentInstructions = (
-   agentInstructions?: InstructionMemoryItem[],
+   writerInstructions?: InstructionMemoryItem[],
 ): string => {
-   const compiledMemories = compileInstructionMemories(agentInstructions ?? []);
+   const compiledMemories = compileInstructionMemories(writerInstructions ?? []);
 
    return `
 You are an expert blog post writer and editor. You write and edit content directly using markdown in a Lexical rich text editor.
@@ -256,10 +256,10 @@ export const writerAgent = new Agent({
    model: "openrouter/minimax/minimax-m2.1",
 
    instructions: ({ requestContext }) => {
-      const agentInstructions = requestContext?.get("agentInstructions") as
+      const writerInstructions = requestContext?.get("writerInstructions") as
          | InstructionMemoryItem[]
          | undefined;
-      return getWriterAgentInstructions(agentInstructions);
+      return getWriterAgentInstructions(writerInstructions);
    },
 
    tools: {

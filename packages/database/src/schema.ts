@@ -1,9 +1,6 @@
 export * from "./schemas/account-deletion";
-export * from "./schemas/agent";
+export * from "./schemas/writer";
 export * from "./schemas/auth";
-// CMS schemas
-export * from "./schemas/brand";
-export * from "./schemas/brand-document";
 // Chat schemas
 export * from "./schemas/chat";
 export * from "./schemas/content";

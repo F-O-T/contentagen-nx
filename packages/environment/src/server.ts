@@ -19,7 +19,7 @@ const EnvSchema = z.object({
    PG_VECTOR_URL: z.string(),
    OPENROUTER_API_KEY: z.string(),
    MINIO_ACCESS_KEY: z.string(),
-   MINIO_BUCKET: z.string().default("content-writer"),
+   MINIO_BUCKET: z.string().default("contentta"),
    MINIO_ENDPOINT: z.string(),
    MINIO_SECRET_KEY: z.string(),
    POSTHOG_HOST: z.string(),

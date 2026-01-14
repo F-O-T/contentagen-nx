@@ -15,10 +15,10 @@ export type MastraLLMUsage = {
  * Only enabled instructions are included, sorted by their order value.
  */
 export function compileInstructionMemories(
-   agentInstructions: InstructionMemoryItem[],
+   writerInstructions: InstructionMemoryItem[],
 ): string {
    // Filter enabled instructions and sort by order
-   const enabledInstructions = agentInstructions
+   const enabledInstructions = writerInstructions
       .filter((i) => i.enabled)
       .sort((a, b) => a.order - b.order);
 
