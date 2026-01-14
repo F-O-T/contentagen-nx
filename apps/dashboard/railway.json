@@ -3,7 +3,8 @@
   "build": {
     "builder": "DOCKERFILE",
     "watchPatterns": [
-      "/apps/dashboard/**"
+      "/apps/dashboard/**",
+      "/packages**"
     ],
     "dockerfilePath": "apps/dashboard/Dockerfile"
   },
