@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { createDb } from "../../database/src/client";
 import { serverEnv } from "../../environment/src/server";
+import { getElysiaPosthogConfig } from "../../posthog/src/server";
 import { getStripeClient } from "../../stripe/src/index";
 import { getResendClient } from "../../transactional/src/client";
 import { getAuthOptions } from "./server";
@@ -18,6 +19,10 @@ import { getAuthOptions } from "./server";
 export const auth = betterAuth({
    ...getAuthOptions(
       createDb(),
+      getElysiaPosthogConfig({
+         POSTHOG_HOST: serverEnv.POSTHOG_HOST,
+         POSTHOG_KEY: serverEnv.POSTHOG_KEY,
+      }),
       getResendClient(serverEnv.RESEND_API_KEY),
       getStripeClient(serverEnv.STRIPE_SECRET_KEY),
       serverEnv.STRIPE_WEBHOOK_SECRET,

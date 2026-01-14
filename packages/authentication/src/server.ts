@@ -8,8 +8,10 @@ import {
 } from "@packages/database/repositories/auth-repository";
 import { getDomain, isProduction } from "@packages/environment/helpers";
 import { serverEnv } from "@packages/environment/server";
+import type { PostHog } from "@packages/posthog/server";
 import type { StripeClient } from "@packages/stripe";
 import { PlanName } from "@packages/stripe/constants";
+import type Stripe from "stripe";
 import {
    type ResendClient,
    type SendEmailOTPOptions,
@@ -37,6 +39,7 @@ export const ORGANIZATION_LIMIT = 3;
 
 export interface AuthOptions {
    db: DatabaseInstance;
+   posthogClient: PostHog;
    resendClient: ResendClient;
    stripeClient: StripeClient;
    STRIPE_WEBHOOK_SECRET: string;
@@ -53,6 +56,7 @@ const getCrossSubDomainCookiesConfig = () => {
 
 export const getAuthOptions = (
    db: AuthOptions["db"],
+   posthogClient: AuthOptions["posthogClient"],
    resendClient: AuthOptions["resendClient"],
    stripeClient: AuthOptions["stripeClient"],
    STRIPE_WEBHOOK_SECRET: AuthOptions["STRIPE_WEBHOOK_SECRET"],
@@ -200,6 +204,107 @@ export const getAuthOptions = (
                      priceId: serverEnv.STRIPE_PRO_PRICE_ID,
                   },
                ],
+            },
+
+            // PostHog Revenue Analytics - Track subscription lifecycle events
+            onSubscriptionComplete: async ({
+               subscription,
+               stripeSubscription,
+            }: {
+               subscription: { id: string; plan: string; referenceId: string };
+               stripeSubscription: Stripe.Subscription;
+            }) => {
+               try {
+                  const invoice = await stripeClient.invoices.retrieve(
+                     stripeSubscription.latest_invoice as string,
+                  );
+
+                  posthogClient.capture({
+                     distinctId: subscription.referenceId,
+                     event: "subscription_started",
+                     groups: { organization: subscription.referenceId },
+                     properties: {
+                        $currency: invoice.currency.toUpperCase(),
+                        $revenue: invoice.amount_paid / 100,
+                        interval: stripeSubscription.items.data[0]?.plan.interval,
+                        organization_id: subscription.referenceId,
+                        plan_name: subscription.plan,
+                        subscription_id: subscription.id,
+                     },
+                  });
+               } catch (error) {
+                  console.error(
+                     "PostHog: Failed to capture subscription_started event:",
+                     error,
+                  );
+               }
+            },
+
+            onSubscriptionCancel: async ({
+               subscription,
+            }: {
+               subscription: { id: string; plan: string; referenceId: string };
+            }) => {
+               try {
+                  posthogClient.capture({
+                     distinctId: subscription.referenceId,
+                     event: "subscription_canceled",
+                     groups: { organization: subscription.referenceId },
+                     properties: {
+                        organization_id: subscription.referenceId,
+                        plan_name: subscription.plan,
+                        subscription_id: subscription.id,
+                     },
+                  });
+               } catch (error) {
+                  console.error(
+                     "PostHog: Failed to capture subscription_canceled event:",
+                     error,
+                  );
+               }
+            },
+
+            onEvent: async (event: Stripe.Event) => {
+               // Track recurring subscription payments (renewals)
+               if (event.type === "invoice.paid") {
+                  const invoice = event.data.object as Stripe.Invoice;
+
+                  // Only track recurring payments, not initial subscription
+                  if (invoice.billing_reason === "subscription_cycle") {
+                     try {
+                        // Get subscription to find the organization (referenceId)
+                        const subscriptionId =
+                           invoice.parent?.subscription_details?.subscription;
+                        if (typeof subscriptionId !== "string") return;
+
+                        const stripeSubscription =
+                           await stripeClient.subscriptions.retrieve(
+                              subscriptionId,
+                           );
+                        const referenceId =
+                           stripeSubscription.metadata?.referenceId;
+
+                        if (referenceId) {
+                           posthogClient.capture({
+                              distinctId: referenceId,
+                              event: "subscription_renewed",
+                              groups: { organization: referenceId },
+                              properties: {
+                                 $currency: invoice.currency?.toUpperCase(),
+                                 $revenue: invoice.amount_paid / 100,
+                                 organization_id: referenceId,
+                                 subscription_id: subscriptionId,
+                              },
+                           });
+                        }
+                     } catch (error) {
+                        console.error(
+                           "PostHog: Failed to capture subscription_renewed event:",
+                           error,
+                        );
+                     }
+                  }
+               }
             },
          }),
          admin(),
@@ -362,6 +467,7 @@ export const getAuthOptions = (
 export const createAuth = (options: AuthOptions) => {
    const authOptions = getAuthOptions(
       options.db,
+      options.posthogClient,
       options.resendClient,
       options.stripeClient,
       options.STRIPE_WEBHOOK_SECRET,
