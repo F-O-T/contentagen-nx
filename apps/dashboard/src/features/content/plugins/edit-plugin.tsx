@@ -16,6 +16,7 @@ import {
    type RangeSelection,
 } from "lexical";
 import { useCallback, useEffect, useRef } from "react";
+import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 import {
    appendEditStreamedText,
    cancelEdit,
@@ -56,6 +57,8 @@ export function EditPlugin({ containerRef }: EditPluginProps) {
    const [editor] = useLexicalComposerContext();
    const { phase, position, selectedText, originalSelection } =
       useEditContext();
+   const { hasFeature } = useFeatureAccess();
+   const hasQuickEdit = hasFeature(Feature.QUICK_EDIT);
 
    const fullTextRef = useRef("");
    const selectionRef = useRef<RangeSelection | null>(null);
@@ -274,6 +277,9 @@ export function EditPlugin({ containerRef }: EditPluginProps) {
          if (e.ctrlKey && e.key === "k") {
             e.preventDefault();
 
+            // Don't process if user doesn't have Quick Edit feature
+            if (!hasQuickEdit) return;
+
             // Don't open if already in edit mode
             if (phase !== "idle") return;
 
@@ -320,7 +326,7 @@ export function EditPlugin({ containerRef }: EditPluginProps) {
 
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
-   }, [editor, phase, getSelectionPosition]);
+   }, [editor, phase, getSelectionPosition, hasQuickEdit]);
 
    // Escape handler
    useEffect(() => {

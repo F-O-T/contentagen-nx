@@ -168,13 +168,8 @@ const getIconForPlan = (planName: string) => {
    }
 };
 
-const getTrialDaysForPlan = (planName: string) => {
-   switch (planName) {
-      case PlanName.PRO:
-         return 14;
-      default:
-         return 0;
-   }
+const getTrialDaysForPlan = (_planName: string) => {
+   return 0;
 };
 
 const plans: Plan[] = STRIPE_PLANS.map((plan) => {

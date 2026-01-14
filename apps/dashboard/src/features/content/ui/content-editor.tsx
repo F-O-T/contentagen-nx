@@ -51,6 +51,7 @@ import { MarkdownPastePlugin } from "../plugins/markdown-paste-plugin";
 import { SeoPlugin } from "../plugins/seo-plugin";
 import { SpellingPlugin } from "../plugins/spelling-plugin";
 import { EditorStatusline } from "./editor-statusline";
+import { SpellingErrorDecorator } from "./spelling-error-decorator";
 
 type ContentEditorMeta = {
    /** Content title for SEO analysis */
@@ -612,6 +613,7 @@ export function ContentEditor({
                      <ContentEditable
                         className="flex-1 p-4 outline-none max-w-none overflow-y-auto"
                         onBlur={onBlur}
+                        spellCheck={false}
                      />
                   }
                   ErrorBoundary={LexicalErrorBoundary}
@@ -639,6 +641,7 @@ export function ContentEditor({
                <ChatPlugin />
                <DiagnosticsPlugin />
                <SpellingPlugin />
+               <SpellingErrorDecorator containerRef={containerRef} />
                <SeoPlugin
                   description={meta?.description}
                   onAnalysisComplete={handleSeoAnalysis}

@@ -18,6 +18,7 @@ import {
    Target,
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
+import { useSeoScore, useReadabilityInfo } from "../context/diagnostics-context";
 import { analyzeContent } from "../lib/content-analysis";
 import { ContentStatsDisplay } from "./content-stats-display";
 import { KeywordAnalysisDisplay } from "./keyword-analysis-display";
@@ -145,6 +146,10 @@ export function MetadataPanel({
    const [isPending, startTransition] = useTransition();
    const [_analysisKey, setAnalysisKey] = useState(0);
 
+   // Read SEO score from shared diagnostics context (synced with statusline)
+   const diagnosticsSeoScore = useSeoScore();
+   const diagnosticsReadability = useReadabilityInfo();
+
    // Client-side analysis using useMemo
    const analysis = useMemo(() => {
       if (!isActive || documentContent.length === 0) {
@@ -212,12 +217,12 @@ export function MetadataPanel({
                </Button>
             </div>
 
-            {/* SEO Score - always visible */}
+            {/* SEO Score - always visible, uses diagnostics context score for sync with statusline */}
             <SeoScoreDisplay
                issues={analysis.seo.issues}
                metrics={analysis.seo.metrics}
                recommendations={analysis.seo.recommendations}
-               score={analysis.seo.score}
+               score={diagnosticsSeoScore ?? analysis.seo.score}
             />
 
             {/* Accordion sections */}
@@ -279,10 +284,10 @@ export function MetadataPanel({
                   </AccordionTrigger>
                   <AccordionContent>
                      <ContentStatsDisplay
-                        readabilityLevel={analysis.readability.readabilityLevel}
+                        readabilityLevel={diagnosticsReadability.level ?? analysis.readability.readabilityLevel}
                         readabilityMetrics={analysis.readability.metrics}
                         readabilityScore={
-                           analysis.readability.fleschKincaidReadingEase
+                           diagnosticsReadability.score ?? analysis.readability.fleschKincaidReadingEase
                         }
                         seoMetrics={analysis.seo.metrics}
                      />

@@ -1,6 +1,6 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $getRoot } from "lexical";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, startTransition } from "react";
 import {
    analyzeContent,
    type ContentAnalysisResult,
@@ -21,6 +21,7 @@ type SeoPluginProps = {
 /**
  * Plugin that runs SEO and readability analysis on editor content.
  * Updates the diagnostics context with results.
+ * Uses startTransition to avoid blocking the UI during analysis.
  */
 export function SeoPlugin({
    title,
@@ -31,20 +32,24 @@ export function SeoPlugin({
    const [editor] = useLexicalComposerContext();
    const lastTextRef = useRef<string>("");
    const lastMetaRef = useRef({ title, description, targetKeywords });
+   const isFirstRender = useRef(true);
 
    const runAnalysis = useCallback(
       (content: string) => {
          // Don't analyze very short content
          if (content.length < 50) return;
 
-         const result = analyzeContent({
-            content,
-            title,
-            description,
-            targetKeywords,
-         });
+         // Use startTransition to prevent blocking UI
+         startTransition(() => {
+            const result = analyzeContent({
+               content,
+               title,
+               description,
+               targetKeywords,
+            });
 
-         onAnalysisComplete?.(result);
+            onAnalysisComplete?.(result);
+         });
       },
       [title, description, targetKeywords, onAnalysisComplete],
    );
@@ -72,7 +77,14 @@ export function SeoPlugin({
                // Only analyze if text has meaningfully changed
                if (text !== lastTextRef.current) {
                   lastTextRef.current = text;
-                  debouncedAnalysis(text);
+                  
+                  // Defer initial analysis to allow UI to render first
+                  if (isFirstRender.current) {
+                     isFirstRender.current = false;
+                     setTimeout(() => debouncedAnalysis(text), 500);
+                  } else {
+                     debouncedAnalysis(text);
+                  }
                }
             });
          },

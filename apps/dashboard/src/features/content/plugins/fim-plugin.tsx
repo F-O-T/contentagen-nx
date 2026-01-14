@@ -37,6 +37,7 @@ import { useFIMCompletion } from "../hooks/use-fim-completion";
 import { detectDiffType } from "../hooks/use-fim-diff";
 import { detectFIMMode } from "../hooks/use-fim-mode";
 import { type TriggerContext, useFIMTriggers } from "../hooks/use-fim-triggers";
+import { checkCompletionSpelling } from "../lib/spell-checker";
 import {
    $createGhostTextNode,
    $isGhostTextNode,
@@ -420,6 +421,20 @@ export function FIMPlugin({ containerRef }: FIMPluginProps) {
             handleClearFIM();
             return;
          }
+
+         // Check spelling quality asynchronously
+         checkCompletionSpelling(fullText).then((spellingResult) => {
+            if (!spellingResult.shouldShow) {
+               console.log(
+                  "[FIM] Hiding suggestion due to poor spelling:",
+                  spellingResult.errorCount,
+                  "errors in",
+                  spellingResult.wordCount,
+                  "words",
+               );
+               handleClearFIM();
+            }
+         });
 
          // Store confidence metrics
          if (metadata) {

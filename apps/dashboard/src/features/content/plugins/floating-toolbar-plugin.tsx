@@ -10,6 +10,7 @@ import {
    SELECTION_CHANGE_COMMAND,
 } from "lexical";
 import { useCallback, useEffect, useState } from "react";
+import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 import { openEditPrompt, useEditContext } from "../context/edit-context";
 import {
    FloatingTextFormatToolbar,
@@ -29,6 +30,8 @@ export function FloatingToolbarPlugin({
 }: FloatingToolbarPluginProps) {
    const [editor] = useLexicalComposerContext();
    const { phase } = useEditContext();
+   const { hasFeature } = useFeatureAccess();
+   const hasQuickEdit = hasFeature(Feature.QUICK_EDIT);
 
    const [toolbarState, setToolbarState] = useState<{
       isVisible: boolean;
@@ -241,6 +244,7 @@ export function FloatingToolbarPlugin({
             onFormat={handleFormat}
             onToggleLink={handleToggleLink}
             position={toolbarState.position}
+            showAIEdit={hasQuickEdit}
          />
       </div>
    );

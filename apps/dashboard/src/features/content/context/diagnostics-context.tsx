@@ -179,6 +179,18 @@ export const useCharCount = () =>
 export const useIsChecking = () =>
    useStore(diagnosticsStore, (state) => state.isChecking);
 
+export const useSpellingErrors = () =>
+   useStore(diagnosticsStore, (state) => state.spelling);
+
+/**
+ * Ignore a spelling error by id
+ */
+export const ignoreSpellingError = (errorId: string) =>
+   diagnosticsStore.setState((state) => ({
+      ...state,
+      spelling: state.spelling.filter((e) => e.id !== errorId),
+   }));
+
 /**
  * Get current diagnostics state synchronously (for use outside React)
  */

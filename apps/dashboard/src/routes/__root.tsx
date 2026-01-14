@@ -1,6 +1,7 @@
 import { clientEnv } from "@packages/environment/client";
 import { PostHogWrapper, PosthogRouterTracker } from "@packages/posthog/client";
 import { Toaster } from "@packages/ui/components/sonner";
+import { TooltipProvider } from "@packages/ui/components/tooltip";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
    createRootRoute,
@@ -85,15 +86,17 @@ function RootComponent() {
          <HeadContent />
          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <QueryProvider>
-               <TelemetryAwarePostHogWrapper>
-                  <GlobalAlertDialog />
-                  <GlobalCredenza />
-                  <GlobalSheet />
-                  <DiffView />
-                  <Toaster />
-                  <Outlet />
-                  <TanStackRouterDevtools position="bottom-left" />
-               </TelemetryAwarePostHogWrapper>
+               <TooltipProvider delayDuration={300}>
+                  <TelemetryAwarePostHogWrapper>
+                     <GlobalAlertDialog />
+                     <GlobalCredenza />
+                     <GlobalSheet />
+                     <DiffView />
+                     <Toaster />
+                     <Outlet />
+                     <TanStackRouterDevtools position="bottom-left" />
+                  </TelemetryAwarePostHogWrapper>
+               </TooltipProvider>
             </QueryProvider>
          </ThemeProvider>
       </>

@@ -7,9 +7,13 @@ export const Route = createFileRoute("/$slug/_dashboard")({
    beforeLoad: async ({ location, params }) => {
       const queryClient = getQueryClient();
       try {
-         const session = await queryClient.fetchQuery(
-            trpc.session.getSession.queryOptions(),
-         );
+         // Parallelize session and onboarding queries for faster navigation
+         const [session, status] = await Promise.all([
+            queryClient.ensureQueryData(trpc.session.getSession.queryOptions()),
+            queryClient.ensureQueryData(
+               trpc.onboarding.getOnboardingStatus.queryOptions(),
+            ),
+         ]);
 
          if (!session) {
             throw redirect({
@@ -23,11 +27,6 @@ export const Route = createFileRoute("/$slug/_dashboard")({
          if (isOnboardingPage) {
             return;
          }
-
-         const status = await queryClient.fetchQuery({
-            ...trpc.onboarding.getOnboardingStatus.queryOptions(),
-            staleTime: 0,
-         });
 
          if (status.needsOnboarding) {
             throw redirect({

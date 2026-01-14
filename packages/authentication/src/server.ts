@@ -197,9 +197,6 @@ export const getAuthOptions = (
                   {
                      annualDiscountPriceId:
                         serverEnv.STRIPE_PRO_ANNUAL_PRICE_ID,
-                     freeTrial: {
-                        days: 14,
-                     },
                      name: PlanName.PRO,
                      priceId: serverEnv.STRIPE_PRO_PRICE_ID,
                   },

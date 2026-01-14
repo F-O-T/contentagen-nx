@@ -78,7 +78,7 @@ export function EditPromptPanel({
             disabled={isStreaming}
             onChange={(e) => setInstruction(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="What would you like to change?"
+            placeholder="O que você gostaria de alterar?"
             ref={inputRef}
             value={instruction}
          />
@@ -89,7 +89,7 @@ export function EditPromptPanel({
                <kbd className="rounded border bg-background px-1 py-0.5 font-mono">
                   ↵
                </kbd>
-               <span className="hidden sm:inline">submit</span>
+               <span className="hidden sm:inline">enviar</span>
                <kbd className="ml-1 rounded border bg-background px-1 py-0.5 font-mono">
                   esc
                </kbd>

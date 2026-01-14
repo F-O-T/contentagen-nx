@@ -8,7 +8,7 @@ const router = createRouter({
    defaultPendingMs: 0,
    defaultPreload: "intent",
    defaultPreloadDelay: 0,
-   defaultPreloadStaleTime: 0,
+   defaultPreloadStaleTime: 60_000,
    defaultViewTransition: {
       types: ({ fromLocation, toLocation }) => {
          let direction = "none";

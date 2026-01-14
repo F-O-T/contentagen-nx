@@ -10,11 +10,13 @@ import { useSpellingCheck } from "@/features/content/hooks/use-spelling-check";
 
 /**
  * Plugin that runs spelling/grammar checks on editor content.
- * Uses the LLM-based spelling check hook and updates the diagnostics context.
+ * Uses the typo-js spelling check hook and updates the diagnostics context.
+ * Defers initial check to avoid blocking UI on page load.
  */
 export function SpellingPlugin() {
    const [editor] = useLexicalComposerContext();
    const lastTextRef = useRef<string>("");
+   const isFirstCheck = useRef(true);
 
    const { checkSpelling, isChecking, errors, cancelPending } =
       useSpellingCheck({
@@ -59,7 +61,14 @@ export function SpellingPlugin() {
                // Only check if text has meaningfully changed
                if (text !== lastTextRef.current && text.length > 20) {
                   lastTextRef.current = text;
-                  checkSpelling(text);
+                  
+                  // Defer first spell check to allow UI to render
+                  if (isFirstCheck.current) {
+                     isFirstCheck.current = false;
+                     setTimeout(() => checkSpelling(text), 1000);
+                  } else {
+                     checkSpelling(text);
+                  }
                }
             });
          },

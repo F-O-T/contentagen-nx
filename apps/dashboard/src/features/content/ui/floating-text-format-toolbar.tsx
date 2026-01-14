@@ -34,6 +34,7 @@ interface FloatingTextFormatToolbarProps {
    onToggleLink: () => void;
    onAIEdit: () => void;
    containerRef?: React.RefObject<HTMLDivElement | null>;
+   showAIEdit?: boolean;
 }
 
 /**
@@ -50,6 +51,7 @@ export function FloatingTextFormatToolbar({
    onToggleLink,
    onAIEdit,
    containerRef,
+   showAIEdit = true,
 }: FloatingTextFormatToolbarProps) {
    if (!isVisible) return null;
 
@@ -59,21 +61,21 @@ export function FloatingTextFormatToolbar({
       label: string;
       shortcut: string;
    }[] = [
-      { format: "bold", icon: Bold, label: "Bold", shortcut: "Ctrl+B" },
-      { format: "italic", icon: Italic, label: "Italic", shortcut: "Ctrl+I" },
+      { format: "bold", icon: Bold, label: "Negrito", shortcut: "Ctrl+B" },
+      { format: "italic", icon: Italic, label: "Itálico", shortcut: "Ctrl+I" },
       {
          format: "strikethrough",
          icon: Strikethrough,
-         label: "Strikethrough",
+         label: "Tachado",
          shortcut: "",
       },
       {
          format: "underline",
          icon: Underline,
-         label: "Underline",
+         label: "Sublinhado",
          shortcut: "Ctrl+U",
       },
-      { format: "code", icon: Code, label: "Inline Code", shortcut: "" },
+      { format: "code", icon: Code, label: "Código", shortcut: "" },
    ];
 
    // Calculate absolute position based on container
@@ -137,34 +139,35 @@ export function FloatingTextFormatToolbar({
             </TooltipTrigger>
             <TooltipContent className="text-xs" side="top">
                Link
-               <kbd className="ml-1 rounded border bg-background px-1 py-0.5 font-mono text-[10px]">
-                  Ctrl+K
-               </kbd>
             </TooltipContent>
          </Tooltip>
 
-         {/* Divider */}
-         <div className="mx-1 h-5 w-px bg-border" />
+         {/* AI Edit button - only show if user has access */}
+         {showAIEdit && (
+            <>
+               {/* Divider */}
+               <div className="mx-1 h-5 w-px bg-border" />
 
-         {/* AI Edit button */}
-         <Tooltip>
-            <TooltipTrigger asChild>
-               <button
-                  className="flex h-8 items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                  onClick={onAIEdit}
-                  type="button"
-               >
-                  <Sparkles className="h-3.5 w-3.5 text-primary" />
-                  <span className="font-medium">AI Edit</span>
-               </button>
-            </TooltipTrigger>
-            <TooltipContent className="text-xs" side="top">
-               Edit with AI
-               <kbd className="ml-1 rounded border bg-background px-1 py-0.5 font-mono text-[10px]">
-                  Ctrl+L
-               </kbd>
-            </TooltipContent>
-         </Tooltip>
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <button
+                        className="flex h-8 items-center gap-1.5 rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                        onClick={onAIEdit}
+                        type="button"
+                     >
+                        <Sparkles className="h-3.5 w-3.5 text-primary" />
+                        <span className="font-medium">Editar com IA</span>
+                     </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs" side="top">
+                     Editar com IA
+                     <kbd className="ml-1 rounded border bg-background px-1 py-0.5 font-mono text-[10px]">
+                        Ctrl+K
+                     </kbd>
+                  </TooltipContent>
+               </Tooltip>
+            </>
+         )}
       </div>
    );
 
