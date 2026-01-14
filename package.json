@@ -85,8 +85,8 @@
             "stripe": "^20.0.0"
          },
          "auth": {
-            "better-auth": "1.4.3",
-            "@better-auth/stripe": "^1.4.3"
+            "better-auth": "1.4.12",
+            "@better-auth/stripe": "1.4.12"
          },
          "database": {
             "@types/pg": "^8.15.4",
