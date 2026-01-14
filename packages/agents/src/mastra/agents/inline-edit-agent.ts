@@ -1,16 +1,10 @@
 import { Agent } from "@mastra/core/agent";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { serverEnv } from "@packages/environment/server";
-
-const openrouter = createOpenRouter({
-   apiKey: serverEnv.OPENROUTER_API_KEY,
-});
 
 export const inlineEditAgent = new Agent({
    id: "inline-edit-agent",
    name: "Inline Edit Agent",
 
-   model: openrouter("mistralai/mistral-small-creative"),
+   model: "openrouter/mistralai/mistral-small-creative",
 
    instructions: () => `
 You are a precise text editor. Transform the selected text according to the user's instruction.

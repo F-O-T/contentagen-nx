@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@ai-sdk/openai": "catalog:openrouter",
     "@f-o-t/markdown": "workspace:*",
     "@mastra/rag": "^1.0.0-beta.18",
     "@mastra/core": "^1.0.0-beta.18",
@@ -10,7 +9,6 @@
     "@mastra/memory": "^1.0.0-beta.9",
     "@mastra/observability": "^1.0.0-beta.9",
     "@mastra/pg": "^1.0.0-beta.10",
-    "@openrouter/ai-sdk-provider": "catalog:openrouter",
     "@packages/database": "workspace:*",
     "@packages/environment": "workspace:*",
     "@packages/files": "workspace:*",

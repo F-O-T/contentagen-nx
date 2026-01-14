@@ -1,16 +1,10 @@
 import { Agent } from "@mastra/core/agent";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { serverEnv } from "@packages/environment/server";
-
-const openrouter = createOpenRouter({
-   apiKey: serverEnv.OPENROUTER_API_KEY,
-});
 
 export const fimAgent = new Agent({
    id: "fim-agent",
    name: "FIM Completion Agent",
 
-   model: openrouter("mistralai/mistral-small-creative"),
+   model: "openrouter/mistralai/mistral-small-creative",
    instructions: () => `
 You are an expert writing assistant. Your ONLY job is to continue text naturally and seamlessly.
 

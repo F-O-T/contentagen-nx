@@ -24,7 +24,7 @@ import { memoryTools } from "../tools/memory";
 import { getAllRagToolInstructions, ragTools } from "../tools/rag";
 
 // Shared constants
-import { LANGUAGE_INSTRUCTION, openrouter } from "./shared";
+import { LANGUAGE_INSTRUCTION } from "./shared";
 
 // Dynamic writer agent instructions
 const getWriterAgentInstructions = (
@@ -253,7 +253,7 @@ export const writerAgent = new Agent({
    id: "writer-agent",
    name: "Writer Agent",
 
-   model: openrouter("minimax/minimax-m2.1"),
+   model: "openrouter/minimax/minimax-m2.1",
 
    instructions: ({ requestContext }) => {
       const agentInstructions = requestContext?.get("agentInstructions") as

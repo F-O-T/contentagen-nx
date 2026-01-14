@@ -14,7 +14,7 @@ import { relatedKeywordsTool } from "../tools/research/related-keywords-tool";
 import { researchCompletenessTool } from "../tools/research/research-completeness-tool";
 
 // Shared constants
-import { LANGUAGE_INSTRUCTION, openrouter } from "./shared";
+import { LANGUAGE_INSTRUCTION } from "./shared";
 
 // Plan agent instructions
 const getPlanAgentInstructions = (
@@ -148,7 +148,7 @@ export const planAgent = new Agent({
    id: "plan-agent",
    name: "Plan Agent",
 
-   model: openrouter("minimax/minimax-m2.1"),
+   model: "openrouter/minimax/minimax-m2.1",
 
    instructions: ({ requestContext }) => {
       const agentInstructions = requestContext?.get("agentInstructions") as
