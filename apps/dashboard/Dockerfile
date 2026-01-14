@@ -22,6 +22,7 @@ COPY packages/authentication/package.json ./packages/authentication/
 COPY packages/cache/package.json ./packages/cache/
 COPY packages/database/package.json ./packages/database/
 COPY packages/environment/package.json ./packages/environment/
+
 COPY packages/files/package.json ./packages/files/
 COPY packages/logging/package.json ./packages/logging/
 COPY packages/posthog/package.json ./packages/posthog/
