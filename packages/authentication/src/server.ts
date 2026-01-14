@@ -44,7 +44,7 @@ export interface AuthOptions {
 const getCrossSubDomainCookiesConfig = () => {
    if (isProduction) {
       return {
-         domain: ".contentta.com",
+         domain: ".contentta.co",
          enabled: true,
       };
    }
@@ -97,7 +97,10 @@ export const getAuthOptions = (
                               foundUser.name ?? "Workspace",
                            );
                            // Fetch the newly created membership
-                           member = await findMemberByUserId(db, session.userId);
+                           member = await findMemberByUserId(
+                              db,
+                              session.userId,
+                           );
                         }
                      }
 
