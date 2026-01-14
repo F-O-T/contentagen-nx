@@ -9,8 +9,12 @@ import {
 } from "drizzle-orm/pg-core";
 import { organization, team, user } from "./auth";
 
-// Extensible enum for future resource types
-export const resourceTypeEnum = pgEnum("resource_type", ["bank_account"]);
+// Extensible enum for CMS resource types
+export const resourceTypeEnum = pgEnum("resource_type", [
+   "content",
+   "agent",
+   "brand",
+]);
 
 // Permission levels with clear hierarchy: manage > edit > view
 export const permissionLevelEnum = pgEnum("permission_level", [

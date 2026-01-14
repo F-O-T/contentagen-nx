@@ -102,29 +102,16 @@ export async function runCleanup() {
       return result.length > 0;
    };
 
-   const checkTransactionAttachment = async (key: string): Promise<boolean> => {
+   const checkUserAvatar = async (key: string): Promise<boolean> => {
       const result = await Bun.sql`
-         SELECT 1 FROM transaction_attachment WHERE storage_key = ${key} LIMIT 1
-      `;
-      if (result.length > 0) return true;
-
-      const legacyResult = await Bun.sql`
-         SELECT 1 FROM transaction WHERE attachment_key = ${key} LIMIT 1
-      `;
-      return legacyResult.length > 0;
-   };
-
-   const checkBillAttachment = async (key: string): Promise<boolean> => {
-      const result = await Bun.sql`
-         SELECT 1 FROM bill_attachment WHERE storage_key = ${key} LIMIT 1
+         SELECT 1 FROM "user" WHERE image = ${key} LIMIT 1
       `;
       return result.length > 0;
    };
 
    const prefixes = [
       { checker: checkOrganizationLogo, prefix: "organizations/" },
-      { checker: checkTransactionAttachment, prefix: "transactions/" },
-      { checker: checkBillAttachment, prefix: "bills/" },
+      { checker: checkUserAvatar, prefix: "users/" },
    ];
 
    const results: CleanupResult[] = [];

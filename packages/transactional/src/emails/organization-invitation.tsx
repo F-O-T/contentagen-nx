@@ -77,9 +77,9 @@ export default function OrganizationInvitationEmail({
                      textAlign: "left",
                   }}
                >
-                  • Visualizar transações e contas compartilhadas
-                  <br />• Acompanhar orçamentos e metas financeiras
-                  <br />• Colaborar com a equipe em tempo real
+                  • Criar e editar conteúdo colaborativamente
+                  <br />• Usar assistentes de IA para redação
+                  <br />• Gerenciar agentes e marcas da organização
                </Text>
 
                <Button
@@ -129,6 +129,7 @@ export default function OrganizationInvitationEmail({
 OrganizationInvitationEmail.PreviewProps = {
    invitedByEmail: "maria@exemplo.com",
    invitedByUsername: "Maria Silva",
-   inviteLink: "https://app.contentta.co/callback/organization/invitation/abc123",
+   inviteLink:
+      "https://app.contentta.co/callback/organization/invitation/abc123",
    teamName: "Empresa ABC",
 } satisfies OrganizationInvitationEmailProps;

@@ -16,14 +16,14 @@ interface UpgradeRequiredProps {
    children: ReactNode;
    featureName: string;
    hasAccess: boolean;
-   requiredPlan?: "basic" | "erp";
+   requiredPlan?: "lite" | "pro";
 }
 
 export function UpgradeRequired({
    children,
    featureName,
    hasAccess,
-   requiredPlan = "erp",
+   requiredPlan = "pro",
 }: UpgradeRequiredProps) {
    const { activeOrganization } = useActiveOrganization();
 
@@ -31,7 +31,7 @@ export function UpgradeRequired({
       return <>{children}</>;
    }
 
-   const planDisplayName = requiredPlan === "erp" ? "ERP" : "Basic";
+   const planDisplayName = requiredPlan === "pro" ? "Pro" : "Lite";
 
    return (
       <div className="flex items-center justify-center min-h-[60vh] p-6">

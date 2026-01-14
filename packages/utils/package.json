@@ -13,10 +13,7 @@
          "default": "./src/array.ts",
          "types": "./dist/src/array.d.ts"
       },
-      "./colors": {
-         "default": "./src/colors.ts",
-         "types": "./dist/src/colors.d.ts"
-      },
+
       "./date": {
          "default": "./src/date.ts",
          "types": "./dist/src/date.d.ts"
@@ -25,10 +22,7 @@
          "default": "./src/diff.ts",
          "types": "./dist/src/diff.d.ts"
       },
-      "./duplicate-detection": {
-         "default": "./src/duplicate-detection.ts",
-         "types": "./dist/src/duplicate-detection.d.ts"
-      },
+
       "./errors": {
          "default": "./src/errors.ts",
          "types": "./dist/src/errors.d.ts"
@@ -37,10 +31,7 @@
          "default": "./src/file.ts",
          "types": "./dist/src/file.d.ts"
       },
-      "./interest": {
-         "default": "./src/interest.ts",
-         "types": "./dist/src/interest.d.ts"
-      },
+
       "./number": {
          "default": "./src/numbers.ts",
          "types": "./dist/src/numbers.d.ts"
@@ -49,18 +40,12 @@
          "default": "./src/object.ts",
          "types": "./dist/src/object.d.ts"
       },
-      "./recurrence": {
-         "default": "./src/recurrence.ts",
-         "types": "./dist/src/recurrence.d.ts"
-      },
+
       "./sanitization": {
          "default": "./src/sanitization.ts",
          "types": "./dist/src/sanitization.d.ts"
       },
-      "./split": {
-         "default": "./src/split.ts",
-         "types": "./dist/src/split.d.ts"
-      },
+
       "./text": {
          "default": "./src/text.ts",
          "types": "./dist/src/text.d.ts"

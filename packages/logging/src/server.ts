@@ -12,7 +12,7 @@ export interface ServerLoggerEnv {
 export function getServerLogger(env: ServerLoggerEnv): Logger {
    if (!serverLogger) {
       serverLogger = createSafeLogger({
-         name: "finance-tracker-server",
+         name: "contentta-server",
          logtailToken: env.LOGTAIL_SOURCE_TOKEN,
          logtailEndpoint: env.LOGTAIL_ENDPOINT,
          level: env.LOG_LEVEL || "info",

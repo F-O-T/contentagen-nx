@@ -47,19 +47,14 @@ export async function cleanupAllOrphanedFiles(
    olderThanHours: number,
    dbCheckers: {
       checkOrganizationLogo: (key: string) => Promise<boolean>;
-      checkTransactionAttachment: (key: string) => Promise<boolean>;
-      checkBillAttachment: (key: string) => Promise<boolean>;
+      checkUserAvatar: (key: string) => Promise<boolean>;
    },
 ): Promise<CleanupResult[]> {
    const results: CleanupResult[] = [];
 
    const prefixes = [
       { prefix: "organizations/", checker: dbCheckers.checkOrganizationLogo },
-      {
-         prefix: "transactions/",
-         checker: dbCheckers.checkTransactionAttachment,
-      },
-      { prefix: "bills/", checker: dbCheckers.checkBillAttachment },
+      { prefix: "users/", checker: dbCheckers.checkUserAvatar },
    ];
 
    for (const { prefix, checker } of prefixes) {

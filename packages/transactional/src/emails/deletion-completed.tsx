@@ -67,9 +67,9 @@ export default function DeletionCompletedEmail({
                   }}
                >
                   <li>Informações da conta</li>
-                  <li>Transações e histórico financeiro</li>
-                  <li>Contas a pagar e receber</li>
-                  <li>Relatórios e configurações</li>
+                  <li>Conteúdos e versões</li>
+                  <li>Agentes e configurações de marca</li>
+                  <li>Conversas e configurações</li>
                </ul>
             </Section>
             <Text

@@ -13,7 +13,7 @@ export interface WorkerLoggerEnv {
 export function getWorkerLogger(env: WorkerLoggerEnv): Logger {
    if (!workerLogger) {
       workerLogger = createSafeLogger({
-         name: "finance-tracker-worker",
+         name: "contentta-worker",
          logtailToken: env.LOGTAIL_SOURCE_TOKEN,
          logtailEndpoint: env.LOGTAIL_ENDPOINT,
          level: env.LOG_LEVEL || "info",

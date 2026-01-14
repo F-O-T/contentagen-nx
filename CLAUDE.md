@@ -1,8 +1,8 @@
-# Finance Tracker - Claude Code Guidelines
+# Contentta - Claude Code Guidelines
 
 ## Project Overview
 
-A personal finance management application built as an **Nx monorepo** with Bun as the package manager. The system provides transaction tracking, bill management, budgeting, and financial reporting.
+Contentta is an **AI-powered Content Management System (CMS)** built as an **Nx monorepo** with Bun as the package manager. The system provides AI-assisted content creation, SERP analysis, content optimization, and team collaboration features.
 
 ---
 
@@ -36,6 +36,7 @@ A personal finance management application built as an **Nx monorepo** with Bun a
 | PostgreSQL | - | Database |
 | Better Auth | 1.4.3 | Authentication |
 | Arcjet | 1.0.0-beta | Rate limiting & DDoS protection |
+| Mastra | - | AI agent orchestration |
 
 ### Background Jobs (Worker)
 | Library | Version | Purpose |
@@ -46,42 +47,74 @@ A personal finance management application built as an **Nx monorepo** with Bun a
 ### Integrations
 | Service | Purpose |
 |---------|---------|
-| Stripe | Payments |
+| Stripe | Subscription billing |
 | Resend | Transactional email |
 | PostHog | Analytics |
 | MinIO | File storage |
+| Tavily/Exa/Firecrawl | Web search for AI research |
 
 ---
 
 ## Monorepo Structure
 
 ```
-finance-tracker/
+contentta-nx/
 ├── apps/
 │   ├── dashboard/       # React/Vite SPA - main user interface
 │   ├── server/          # Elysia backend API server
-│   ├── worker/          # BullMQ background job processor
-│   └── landing-page/    # Astro marketing site
+│   └── worker/          # BullMQ background job processor
 ├── packages/
+│   ├── agents/          # Mastra AI agents (planning, research, editing)
 │   ├── api/             # tRPC routers and procedures
+│   ├── arcjet/          # Rate limiting & DDoS protection
 │   ├── authentication/  # Better Auth setup
 │   ├── cache/           # Redis caching layer
 │   ├── database/        # Drizzle ORM schemas & repositories
 │   ├── environment/     # Zod-validated env vars
 │   ├── files/           # MinIO & file utilities
-│   ├── localization/    # i18next translations (en-US, pt-BR)
-│   ├── notifications/   # Push notifications
+│   ├── logging/         # Pino logger configuration
 │   ├── posthog/         # Analytics client
 │   ├── queue/           # BullMQ abstractions
+│   ├── search/          # Web search providers
 │   ├── stripe/          # Stripe SDK wrapper
 │   ├── transactional/   # Email templates (React Email)
 │   ├── ui/              # Radix + Tailwind components
 │   ├── utils/           # Shared utilities
-│   └── workflows/       # Workflow engine
+│   └── workflows/       # Workflow engine for account deletion
+├── libraries/
+│   ├── markdown/        # CommonMark parser with AST
+│   ├── content-analysis/# SEO analysis, readability scoring
+│   └── sdk/             # TypeScript SDK for Contentta API
 ├── tooling/
 │   └── typescript/      # Shared TypeScript configs
-└── scripts/             # Utility scripts
+└── lambdas/             # Standalone cleanup scripts
 ```
+
+---
+
+## Core Domain Concepts
+
+### Database Schemas
+
+| Schema | Purpose |
+|--------|---------|
+| `content` | Blog posts/articles with status, SEO meta, AI stats |
+| `content-version` | Content versioning history |
+| `agent` | AI writer personas with tone, voice, SEO rules |
+| `brand` | Organization brand guidelines |
+| `brand-document` | Reference documents for brand context |
+| `chat` | AI chat conversations |
+| `instruction-memory` | AI agent memory for learned preferences |
+| `related-content` | Content linking/relationships |
+| `export-log` | Content export history |
+
+### Content Workflow
+
+1. **Planning** - AI helps plan content structure and outline
+2. **Research** - SERP analysis and competitor research
+3. **Writing** - AI-assisted content creation
+4. **Editing** - AI-powered editing and optimization
+5. **Publishing** - Export to various formats
 
 ---
 
@@ -133,7 +166,7 @@ Pattern-based exports for directories with multiple files:
 ```typescript
 import { Button } from "@packages/ui/components/button";
 import { Spinner } from "@packages/ui/components/spinner";
-import { createTransaction } from "@packages/database/repositories/transaction-repository";
+import { createContent } from "@packages/database/repositories/content-repository";
 ```
 
 ### Standard Package Structure
@@ -181,10 +214,10 @@ import { createTransaction } from "@packages/database/repositories/transaction-r
 2. **Match the export exactly:**
    ```typescript
    // Good - matches "./repositories/*"
-   import { createBill } from "@packages/database/repositories/bill-repository";
+   import { createContent } from "@packages/database/repositories/content-repository";
 
    // Bad - doesn't match any export
-   import { createBill } from "@packages/database/bill-repository";
+   import { createContent } from "@packages/database/content-repository";
    ```
 
 3. **Types are resolved automatically** from the `types` field in exports.
@@ -199,15 +232,15 @@ Do NOT use barrel files (index.ts/index.tsx) to re-export components or modules.
 
 **Bad:**
 ```typescript
-// features/billing/index.ts
+// features/content/index.ts
 export * from "./hooks";
 export * from "./ui";
 ```
 
 **Good:** Import directly from the source file:
 ```typescript
-import { useBilling } from "@/features/billing/hooks/use-billing";
-import { BillingSection } from "@/features/billing/ui/billing-section";
+import { useContent } from "@/features/content/hooks/use-content";
+import { ContentEditor } from "@/features/content/ui/content-editor";
 ```
 
 **Why:**
@@ -293,12 +326,12 @@ expect(evaluateNumber("between", 5, [1] as any)).toBe(false);
 | Rule | Use Case |
 |------|----------|
 | `lint/suspicious/noExplicitAny` | Test files testing invalid input types |
-| `lint/correctness/noUnusedVariables` | Variables used in templates (Astro) or intentionally unused |
+| `lint/correctness/noUnusedVariables` | Variables used in templates or intentionally unused |
 
 #### When to Suppress
 
 Only suppress lint rules when:
-1. The rule is a false positive (e.g., Astro template variables)
+1. The rule is a false positive
 2. The code is intentionally violating the rule for a valid reason (e.g., testing edge cases)
 3. There's no reasonable alternative that satisfies the rule
 
@@ -308,10 +341,10 @@ Always include a brief reason explaining why the suppression is necessary.
 
 Use **kebab-case** for all files:
 ```
-billing-section.tsx
-use-billing-context.tsx
+content-editor.tsx
+use-content-context.tsx
 account-deletion.ts
-transaction-repository.ts
+content-repository.ts
 ```
 
 ### Component Naming
@@ -319,10 +352,10 @@ transaction-repository.ts
 Use **PascalCase** for components, following `[Feature][Action][Type]` pattern:
 ```typescript
 // Component names
-BillingSection             // feature: billing, type: section
-CookieConsentBanner        // feature: cookie, action: consent, type: banner
-ProfileSection             // feature: profile, type: section
-BillFilterCredenza         // feature: bill, action: filter, type: credenza
+ContentEditor              // feature: content, type: editor
+ContentDataTable           // feature: content, type: data-table
+AgentSettingsSection       // feature: agent, type: section
+BrandDocumentCredenza      // feature: brand-document, type: credenza
 ```
 
 ### Hook Naming
@@ -330,10 +363,10 @@ BillFilterCredenza         // feature: bill, action: filter, type: credenza
 Use **use[Feature][Action]** pattern:
 ```typescript
 useActiveOrganization()
-useCookieConsent()
-useDeleteCategory()
-usePendingOfxImport()
-useBillingContext()
+useContent()
+useCreateContent()
+useAgent()
+useBrand()
 ```
 
 ### Type/Interface Naming
@@ -341,16 +374,16 @@ useBillingContext()
 Use **PascalCase** with descriptive suffixes:
 ```typescript
 // Props interfaces
-interface BillingSettingsProps { ... }
-interface BillFilterCredenzaProps { ... }
+interface ContentEditorProps { ... }
+interface AgentSettingsProps { ... }
 
 // Database types (use Drizzle inference)
-type Transaction = typeof transactionTable.$inferSelect;
-type NewTransaction = typeof transactionTable.$inferInsert;
+type Content = typeof contentTable.$inferSelect;
+type NewContent = typeof contentTable.$inferInsert;
 
 // General types
-type ConsentStatus = "accepted" | "declined" | null;
-type BillingPlan = "free" | "pro" | "enterprise";
+type ContentStatus = "draft" | "published" | "archived";
+type SubscriptionPlan = "free" | "lite" | "pro";
 ```
 
 ---
@@ -366,19 +399,19 @@ Organize features with consistent subfolder patterns:
 │   └── use-[feature]-[action].ts
 ├── ui/
 │   ├── [feature]-[action]-credenza.tsx
-│   └── [feature]-banner.tsx
+│   └── [feature]-section.tsx
 └── utils/ (when needed)
 ```
 
-**Example - Billing Feature:**
+**Example - Content Feature:**
 ```
-/features/billing/
+/features/content/
 ├── hooks/
-│   ├── use-billing-context.tsx
-│   └── use-billing.ts
+│   ├── use-content-context.tsx
+│   └── use-content.ts
 └── ui/
-    ├── billing-section.tsx
-    └── billing-plan-card.tsx
+    ├── content-editor.tsx
+    └── content-data-table.tsx
 ```
 
 ---
@@ -388,7 +421,7 @@ Organize features with consistent subfolder patterns:
 File-based routing with these conventions:
 
 - **kebab-case** for route files
-- **$** prefix for dynamic segments: `$slug`, `$billId`
+- **$** prefix for dynamic segments: `$slug`, `$contentId`, `$writerId`
 - **_** prefix for layout routes: `_dashboard`
 - **index.tsx** for index routes
 
@@ -398,16 +431,30 @@ File-based routing with these conventions:
 │   ├── sign-in.tsx
 │   ├── sign-up.tsx
 │   └── forgot-password.tsx
+├── share/
+│   └── $contentId.tsx
 └── $slug/
+    ├── onboarding.tsx
     └── _dashboard/
         ├── home.tsx
-        ├── bills/
+        ├── content/
         │   ├── index.tsx
-        │   └── $billId.tsx
+        │   └── $contentId.tsx
+        ├── writers/
+        │   ├── index.tsx
+        │   └── $writerId.tsx
+        ├── organization/
+        │   ├── index.tsx
+        │   ├── members.tsx
+        │   ├── teams.tsx
+        │   └── invites.tsx
         └── settings/
+            ├── index.tsx
             ├── profile.tsx
             ├── security.tsx
-            └── billing.tsx
+            ├── billing.tsx
+            ├── api-keys.tsx
+            └── usage.tsx
 ```
 
 ---
@@ -416,15 +463,19 @@ File-based routing with these conventions:
 
 ### Schema Definition
 ```typescript
-// packages/database/src/schemas/transactions.ts
-export const transaction = pgTable("transaction", {
+// packages/database/src/schemas/content.ts
+export const content = pgTable("content", {
    id: uuid("id").primaryKey().defaultRandom(),
-   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-   description: text("description"),
-   date: timestamp("date").notNull(),
+   title: text("title").notNull(),
+   body: text("body"),
+   status: contentStatusEnum("status").default("draft").notNull(),
+   seoTitle: text("seo_title"),
+   seoDescription: text("seo_description"),
    organizationId: uuid("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
+   agentId: uuid("agent_id")
+      .references(() => agent.id, { onDelete: "set null" }),
    createdAt: timestamp("created_at").defaultNow().notNull(),
    updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -432,28 +483,29 @@ export const transaction = pgTable("transaction", {
       .notNull(),
 });
 
-export const transactionRelations = relations(transaction, ({ one, many }) => ({
-   bankAccount: one(bankAccount, { ... }),
-   transactionCategories: many(transactionCategory),
+export const contentRelations = relations(content, ({ one, many }) => ({
+   organization: one(organization, { ... }),
+   agent: one(agent, { ... }),
+   versions: many(contentVersion),
 }));
 ```
 
 ### Repository Pattern
 ```typescript
-// packages/database/src/repositories/transaction-repository.ts
-export async function createTransaction(
+// packages/database/src/repositories/content-repository.ts
+export async function createContent(
    dbClient: DatabaseInstance,
-   data: NewTransaction,
+   data: NewContent,
 ) {
    try {
       const result = await dbClient
-         .insert(transaction)
+         .insert(content)
          .values(data)
          .returning();
       return result[0];
    } catch (err) {
       propagateError(err);
-      throw AppError.database("Failed to create transaction");
+      throw AppError.database("Failed to create content");
    }
 }
 ```
@@ -476,19 +528,22 @@ export const protectedProcedure = baseProcedure
 
 ### Router Structure
 ```typescript
-// packages/api/src/server/routers/categories.ts
-export const categoryRouter = router({
+// packages/api/src/server/routers/content.ts
+export const contentRouter = router({
    create: protectedProcedure
-      .input(createCategorySchema)
+      .input(createContentSchema)
       .mutation(async ({ ctx, input }) => {
          const resolvedCtx = await ctx;
-         return createCategory(resolvedCtx.db, { ...input });
+         return createContent(resolvedCtx.db, {
+            ...input,
+            organizationId: resolvedCtx.organizationId,
+         });
       }),
 
    getAll: protectedProcedure
       .query(async ({ ctx }) => {
          const resolvedCtx = await ctx;
-         return getCategories(resolvedCtx.db, resolvedCtx.organizationId);
+         return getContents(resolvedCtx.db, resolvedCtx.organizationId);
       }),
 
    delete: protectedProcedure
@@ -496,6 +551,24 @@ export const categoryRouter = router({
       .mutation(async ({ ctx, input }) => { ... }),
 });
 ```
+
+### Available Routers
+
+| Router | Purpose |
+|--------|---------|
+| `content` | Content CRUD, versioning, export |
+| `agent` | AI writer persona management |
+| `brand` | Brand guidelines and documents |
+| `organization` | Organization settings |
+| `organization-teams` | Team management |
+| `organization-invites` | Member invitations |
+| `billing` | Stripe subscription management |
+| `usage` | API usage and credits |
+| `account` | User account settings |
+| `account-deletion` | Account deletion workflow |
+| `session` | Session management |
+| `permissions` | Resource permissions |
+| `onboarding` | User onboarding flow |
 
 ### Middleware Chain
 1. Logger middleware
@@ -530,18 +603,18 @@ export function Button({ className, variant, size, ...props }) {
 ### TanStack Form Pattern
 ```typescript
 const form = useForm({
-   defaultValues: { description: "", amount: 0 },
-   validators: { onBlur: transactionSchema },
+   defaultValues: { title: "", body: "" },
+   validators: { onBlur: contentSchema },
    onSubmit: async ({ value, formApi }) => {
       await mutation.mutateAsync(value);
       formApi.reset();
    },
 });
 
-<form.Field name="description">
+<form.Field name="title">
    {(field) => (
       <Field>
-         <FieldLabel>{translate("common.form.description.label")}</FieldLabel>
+         <FieldLabel>Title</FieldLabel>
          <Input
             value={field.state.value}
             onChange={(e) => field.handleChange(e.target.value)}
@@ -575,21 +648,11 @@ function MyComponent() {
    // Open a sheet with a form
    const handleOpen = () => {
       openSheet({
-         children: <CreateTransactionForm onSuccess={closeSheet} />
+         children: <CreateContentForm onSuccess={closeSheet} />
       });
    };
 
-   return <Button onClick={handleOpen}>Add Transaction</Button>;
-}
-
-// Inside the sheet content, close when done
-function CreateTransactionForm({ onSuccess }: { onSuccess: () => void }) {
-   const { closeSheet } = useSheet();
-
-   const handleSubmit = async () => {
-      await saveData();
-      closeSheet();
-   };
+   return <Button onClick={handleOpen}>New Content</Button>;
 }
 ```
 
@@ -601,16 +664,12 @@ import { useCredenza } from "@/hooks/use-credenza";
 function MyComponent() {
    const { openCredenza, closeCredenza } = useCredenza();
 
-   // Example: Filter selection, category picker, important info
    const handleOpen = () => {
       openCredenza({
-         children: <CategoryFilterPicker onApply={closeCredenza} />
+         children: <AgentSelectorPicker onSelect={closeCredenza} />
       });
    };
 }
-
-// Functions are also exported standalone for use outside React components
-import { openCredenza, closeCredenza } from "@/hooks/use-credenza";
 ```
 
 #### useAlertDialog - Destructive Confirmations
@@ -618,19 +677,18 @@ Use for confirming destructive or irreversible actions.
 ```typescript
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 
-function DeleteButton({ itemId }: { itemId: string }) {
+function DeleteButton({ contentId }: { contentId: string }) {
    const { openAlertDialog } = useAlertDialog();
-   const deleteMutation = useDeleteItem();
+   const deleteMutation = useDeleteContent();
 
    const handleDelete = () => {
       openAlertDialog({
-         title: "Delete Item",
+         title: "Delete Content",
          description: "Are you sure? This action cannot be undone.",
-         actionLabel: "Delete",        // Optional, defaults to "Confirm"
-         cancelLabel: "Cancel",        // Optional, defaults to "Cancel"
-         variant: "destructive",       // "default" | "destructive"
+         actionLabel: "Delete",
+         variant: "destructive",
          onAction: async () => {
-            await deleteMutation.mutateAsync(itemId);
+            await deleteMutation.mutateAsync(contentId);
          },
       });
    };
@@ -641,11 +699,11 @@ function DeleteButton({ itemId }: { itemId: string }) {
 
 | Scenario | Use |
 |----------|-----|
-| Creating/editing a transaction, category, bill | `useSheet` |
+| Creating/editing content, agent, brand | `useSheet` |
 | Inviting a member, creating a team | `useSheet` |
-| Applying filters that need immediate action | `useCredenza` |
-| Selecting from important options | `useCredenza` |
-| Deleting a record | `useAlertDialog` |
+| Selecting an AI agent for content | `useCredenza` |
+| Selecting export format | `useCredenza` |
+| Deleting content or agent | `useAlertDialog` |
 | Revoking access, removing a member | `useAlertDialog` |
 
 ---
@@ -657,10 +715,9 @@ function DeleteButton({ itemId }: { itemId: string }) {
 // Within dashboard app
 import { Button } from "@/components/button";
 import { useSheet } from "@/hooks/use-sheet";
-import { TransactionForm } from "@/features/transaction/ui/transaction-form";
+import { ContentEditor } from "@/features/content/ui/content-editor";
 
 // Cross-package imports
-import { translate } from "@packages/localization";
 import { Button } from "@packages/ui/components/button";
 import { serverEnv } from "@packages/environment/server";
 ```
@@ -669,10 +726,10 @@ import { serverEnv } from "@packages/environment/server";
 Never use index.ts re-exports within apps. Always import from the exact source file:
 ```typescript
 // Good
-import { useBilling } from "@/features/billing/hooks/use-billing";
+import { useContent } from "@/features/content/hooks/use-content";
 
 // Bad
-import { useBilling } from "@/features/billing";
+import { useContent } from "@/features/content";
 ```
 
 ---
@@ -686,6 +743,7 @@ DATABASE_URL
 REDIS_URL
 STRIPE_SECRET_KEY
 BETTER_AUTH_SECRET
+OPENAI_API_KEY
 ```
 
 ### Zod Validation Pattern
@@ -695,6 +753,7 @@ const EnvSchema = z.object({
    DATABASE_URL: z.string(),
    REDIS_URL: z.string().optional().default("redis://localhost:6379"),
    NODE_ENV: z.enum(["development", "production", "test"]),
+   OPENAI_API_KEY: z.string(),
 });
 
 export type ServerEnv = z.infer<typeof EnvSchema>;
@@ -715,7 +774,6 @@ export const serverEnv = parseEnv(process.env, EnvSchema);
 bun dev              # Start dashboard, server, worker in parallel
 bun dev:all          # Start all apps and packages
 bun dev:server       # Server only
-bun dev:landing-page # Landing page only
 ```
 
 ### Build
@@ -772,8 +830,8 @@ import { APIError } from "@packages/utils/errors";
 
 ```typescript
 // Resource not found
-if (!category || category.organizationId !== organizationId) {
-   throw APIError.notFound("Category not found");
+if (!content || content.organizationId !== organizationId) {
+   throw APIError.notFound("Content not found");
 }
 
 // Authentication check
@@ -804,10 +862,10 @@ try {
 
 ```typescript
 // Bad - native Error
-throw new Error("Category not found");
+throw new Error("Content not found");
 
 // Good - APIError
-throw APIError.notFound("Category not found");
+throw APIError.notFound("Content not found");
 ```
 
 ### Repository Layer (Database)
@@ -817,13 +875,13 @@ Use `AppError` in repository files (`packages/database/src/repositories/*.ts`):
 ```typescript
 import { AppError, propagateError } from "@packages/utils/errors";
 
-export async function createTransaction(db: DatabaseInstance, data: NewTransaction) {
+export async function createContent(db: DatabaseInstance, data: NewContent) {
    try {
-      const result = await db.insert(transaction).values(data).returning();
+      const result = await db.insert(content).values(data).returning();
       return result[0];
    } catch (err) {
       propagateError(err); // Re-throws if already AppError
-      throw AppError.database("Failed to create transaction");
+      throw AppError.database("Failed to create content");
    }
 }
 ```
@@ -835,33 +893,28 @@ export async function createTransaction(db: DatabaseInstance, data: NewTransacti
 
 ---
 
-## Localization
+## AI Agents (Mastra)
 
-### Usage Pattern
-```typescript
-import { translate } from "@packages/localization";
+The application uses Mastra for AI agent orchestration. Agents are defined in `packages/agents/`.
 
-translate("common.actions.save");
-translate("dashboard.routes.settings.profile.title");
-```
+### Available Agents
 
-### Supported Languages
-- `en-US` (English)
-- `pt-BR` (Portuguese - Brazil)
+| Agent | Purpose |
+|-------|---------|
+| Content Planner | Creates content outlines and structure |
+| SERP Analyzer | Analyzes search results for keyword optimization |
+| Content Researcher | Gathers information from web sources |
+| Content Editor | Edits and improves content quality |
+| Quick Edit | Inline content improvements |
+| FIM (Fill-in-Middle) | Intelligent text completion |
 
-### File Organization
-```
-packages/localization/src/locales/
-├── en-US/
-│   ├── common/
-│   │   ├── actions.json
-│   │   └── form.json
-│   └── dashboard/
-│       └── routes/
-│           └── settings.json
-└── pt-BR/
-    └── (same structure)
-```
+### Agent Configuration
+
+Each agent has configurable parameters stored in the `agent` table:
+- **Tone**: Professional, casual, friendly, etc.
+- **Voice**: Brand voice characteristics
+- **SEO Rules**: Keyword targeting, density, etc.
+- **Instructions**: Custom behavior instructions
 
 ---
 
@@ -880,4 +933,14 @@ const organizationId = resolvedCtx.organizationId;
 - Magic Link
 - Email OTP
 - Two-Factor Authentication (2FA)
+- Anonymous sessions (for share links)
 
+---
+
+## Subscription Plans
+
+| Plan | Features |
+|------|----------|
+| FREE | Basic content creation, limited AI usage |
+| LITE | More AI credits, team collaboration |
+| PRO | Unlimited AI, advanced features, priority support |
