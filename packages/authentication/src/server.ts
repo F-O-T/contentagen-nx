@@ -204,7 +204,7 @@ export const getAuthOptions = (
          }),
          admin(),
          anonymous({
-            emailDomainName: "anon.contentta.com",
+            emailDomainName: "anon.contentta.co",
             onLinkAccount: async ({ anonymousUser, newUser }) => {
                console.log(
                   `Anonymous user ${anonymousUser.user.id} linked to ${newUser.user.id}`,
