@@ -15,11 +15,11 @@ export const Route = createFileRoute("/auth/sign-in/")({
          .fetchQuery(trpc.session.getSession.queryOptions())
          .catch(() => null);
       if (session) {
-         // If there's a redirect URL, use it; otherwise go to home
+         // If there's a redirect URL, use it; otherwise go to auth callback
          if (search.redirect) {
             throw redirect({ to: search.redirect });
          }
-         throw redirect({ params: { slug: "" }, to: "/$slug/home" });
+         throw redirect({ to: "/auth/callback" });
       }
    },
    component: RouteComponent,

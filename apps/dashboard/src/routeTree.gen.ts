@@ -17,6 +17,7 @@ import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthMagicLinkRouteImport } from './routes/auth/magic-link'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-verification'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthAnonymousRouteImport } from './routes/auth/anonymous'
 import { Route as SlugOnboardingRouteImport } from './routes/$slug/onboarding'
 import { Route as SlugDashboardRouteImport } from './routes/$slug/_dashboard'
@@ -84,6 +85,11 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
 const AuthEmailVerificationRoute = AuthEmailVerificationRouteImport.update({
   id: '/email-verification',
   path: '/email-verification',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthAnonymousRoute = AuthAnonymousRouteImport.update({
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteWithChildren
   '/$slug/onboarding': typeof SlugOnboardingRoute
   '/auth/anonymous': typeof AuthAnonymousRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/magic-link': typeof AuthMagicLinkRoute
@@ -286,6 +293,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
   '/$slug/onboarding': typeof SlugOnboardingRoute
   '/auth/anonymous': typeof AuthAnonymousRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/magic-link': typeof AuthMagicLinkRoute
@@ -322,6 +330,7 @@ export interface FileRoutesById {
   '/$slug/_dashboard': typeof SlugDashboardRouteWithChildren
   '/$slug/onboarding': typeof SlugOnboardingRoute
   '/auth/anonymous': typeof AuthAnonymousRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/magic-link': typeof AuthMagicLinkRoute
@@ -361,6 +370,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/$slug/onboarding'
     | '/auth/anonymous'
+    | '/auth/callback'
     | '/auth/email-verification'
     | '/auth/forgot-password'
     | '/auth/magic-link'
@@ -398,6 +408,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/$slug/onboarding'
     | '/auth/anonymous'
+    | '/auth/callback'
     | '/auth/email-verification'
     | '/auth/forgot-password'
     | '/auth/magic-link'
@@ -433,6 +444,7 @@ export interface FileRouteTypes {
     | '/$slug/_dashboard'
     | '/$slug/onboarding'
     | '/auth/anonymous'
+    | '/auth/callback'
     | '/auth/email-verification'
     | '/auth/forgot-password'
     | '/auth/magic-link'
@@ -529,6 +541,13 @@ declare module '@tanstack/react-router' {
       path: '/email-verification'
       fullPath: '/auth/email-verification'
       preLoaderRoute: typeof AuthEmailVerificationRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRoute
     }
     '/auth/anonymous': {
@@ -851,6 +870,7 @@ const AuthSignInRouteWithChildren = AuthSignInRoute._addFileChildren(
 
 interface AuthRouteChildren {
   AuthAnonymousRoute: typeof AuthAnonymousRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   AuthEmailVerificationRoute: typeof AuthEmailVerificationRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthMagicLinkRoute: typeof AuthMagicLinkRoute
@@ -860,6 +880,7 @@ interface AuthRouteChildren {
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthAnonymousRoute: AuthAnonymousRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   AuthEmailVerificationRoute: AuthEmailVerificationRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthMagicLinkRoute: AuthMagicLinkRoute,

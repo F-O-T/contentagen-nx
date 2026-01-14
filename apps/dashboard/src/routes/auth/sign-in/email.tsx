@@ -9,7 +9,7 @@ export const Route = createFileRoute("/auth/sign-in/email")({
          .fetchQuery(trpc.session.getSession.queryOptions())
          .catch(() => null);
       if (session) {
-         throw redirect({ params: { slug: "" }, to: "/$slug/home" });
+         throw redirect({ to: "/auth/callback" });
       }
    },
    component: RouteComponent,

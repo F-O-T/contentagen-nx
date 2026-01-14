@@ -46,7 +46,7 @@ export function SignInEmailPage() {
                },
                onSuccess: () => {
                   toast.success("Bem-vindo de volta!");
-                  router.navigate({ params: { slug: "" }, to: "/$slug/home" });
+                  router.navigate({ to: "/auth/callback" });
                },
             },
          );

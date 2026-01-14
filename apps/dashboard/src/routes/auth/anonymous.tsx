@@ -10,7 +10,7 @@ export const Route = createFileRoute("/auth/anonymous")({
          .fetchQuery(trpc.session.getSession.queryOptions())
          .catch(() => null);
       if (session) {
-         throw redirect({ params: { slug: "" }, to: "/$slug/home" });
+         throw redirect({ to: "/auth/callback" });
       }
    },
    component: RouteComponent,

@@ -22,7 +22,7 @@ export function AnonymousPage() {
             },
             onSuccess: () => {
                toast.success("Pronto! Sua conta foi criada.");
-               router.navigate({ params: { slug: "" }, to: "/$slug/home" });
+               router.navigate({ to: "/auth/callback" });
             },
          },
       );

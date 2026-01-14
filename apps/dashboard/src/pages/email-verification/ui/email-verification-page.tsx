@@ -74,10 +74,7 @@ export function EmailVerificationPage() {
                },
                onSuccess: () => {
                   toast.success("E-mail verificado!");
-                  router.navigate({
-                     params: { slug: "" },
-                     to: "/$slug/home",
-                  });
+                  router.navigate({ to: "/auth/callback" });
                },
             },
          );

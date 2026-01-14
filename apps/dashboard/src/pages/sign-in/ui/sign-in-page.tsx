@@ -16,10 +16,10 @@ export function SignInPage({ redirectUrl }: SignInPageProps) {
    const [isGoogleLoading, setIsGoogleLoading] = useState(false);
    const lastMethod = betterAuthClient.getLastUsedLoginMethod();
 
-   // Determine callback URL - use redirect if provided, otherwise default
+   // Determine callback URL - use redirect if provided, otherwise default to auth callback
    const callbackURL = redirectUrl
       ? `${window.location.origin}${redirectUrl}`
-      : `${window.location.origin}/auth/sign-in`;
+      : `${window.location.origin}/auth/callback`;
 
    const handleGoogleSignIn = useCallback(async () => {
       await betterAuthClient.signIn.social(
