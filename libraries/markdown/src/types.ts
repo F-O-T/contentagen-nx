@@ -47,7 +47,7 @@ export type {
    StrongNode,
    TextNode,
    ThematicBreakNode,
-} from "./schemas.ts";
+} from "./schemas";
 
 /**
  * Result type for parse operations that may fail.

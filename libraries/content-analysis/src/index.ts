@@ -7,15 +7,15 @@
  * @packageDocumentation
  */
 
-export { analyzeBadPatterns } from "./bad-patterns.ts";
-export { analyzeKeywords } from "./keywords.ts";
-export { analyzeReadability } from "./readability.ts";
+export { analyzeBadPatterns } from "./bad-patterns";
+export { analyzeKeywords } from "./keywords";
+export { analyzeReadability } from "./readability";
 // Individual analyzers
-export { analyzeSeo } from "./seo.ts";
-export { analyzeStructure } from "./structure.ts";
+export { analyzeSeo } from "./seo";
+export { analyzeStructure } from "./structure";
 
 // Types
-export * from "./types.ts";
+export * from "./types";
 
 // Utilities (exported for advanced usage)
 export {
@@ -29,15 +29,15 @@ export {
    getReadabilityLevel,
    hasConclusionSection,
    hasQuickAnswerPattern,
-} from "./utils.ts";
+} from "./utils";
 
-import { analyzeBadPatterns } from "./bad-patterns.ts";
-import { analyzeKeywords } from "./keywords.ts";
-import { analyzeReadability } from "./readability.ts";
-import { analyzeSeo } from "./seo.ts";
-import { analyzeStructure } from "./structure.ts";
+import { analyzeBadPatterns } from "./bad-patterns";
+import { analyzeKeywords } from "./keywords";
+import { analyzeReadability } from "./readability";
+import { analyzeSeo } from "./seo";
+import { analyzeStructure } from "./structure";
 // Import for combined analysis
-import type { AnalysisInput, ContentAnalysisResult } from "./types.ts";
+import type { AnalysisInput, ContentAnalysisResult } from "./types";
 
 /**
  * Perform a comprehensive content analysis

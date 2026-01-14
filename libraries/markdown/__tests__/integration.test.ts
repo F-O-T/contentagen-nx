@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { generate, parse, parseOrThrow } from "../src/index.ts";
+import { generate, parse, parseOrThrow } from "../src/index";
 
 describe("integration tests", () => {
    describe("complex documents", () => {

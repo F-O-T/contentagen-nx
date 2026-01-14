@@ -6,7 +6,7 @@
  * code blocks, links, images, and inline formatting.
  */
 
-import { generate } from "./generator.ts";
+import { generate } from "./generator";
 import type {
    BlockNode,
    BlockquoteNode,
@@ -27,7 +27,7 @@ import type {
    TableNode,
    TableRowNode,
    ThematicBreakNode,
-} from "./schemas.ts";
+} from "./schemas";
 
 // =============================================================================
 // Types

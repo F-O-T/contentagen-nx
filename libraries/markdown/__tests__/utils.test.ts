@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { normalizeMarkdownEmphasis } from "../src/utils.ts";
+import { normalizeMarkdownEmphasis } from "../src/utils";
 
 describe("normalizeMarkdownEmphasis", () => {
    describe("basic unescaping", () => {

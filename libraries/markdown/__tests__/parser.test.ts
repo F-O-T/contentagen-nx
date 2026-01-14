@@ -5,7 +5,7 @@ import {
    parseBuffer,
    parseOrThrow,
    parseToAst,
-} from "../src/index.ts";
+} from "../src/index";
 
 describe("parse", () => {
    describe("basic parsing", () => {

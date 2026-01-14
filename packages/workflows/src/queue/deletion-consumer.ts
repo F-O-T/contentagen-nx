@@ -4,11 +4,11 @@ import { accountDeletionRequest, user } from "@packages/database/schema";
 import type { ConnectionOptions, WorkerOptions } from "@packages/queue/bullmq";
 import { type Job, Worker } from "@packages/queue/bullmq";
 import {
+   type ResendClient,
    sendDeletionCompletedEmail,
    sendDeletionReminderEmail,
 } from "@packages/transactional/client";
 import { arrayContains, eq, not, sql } from "drizzle-orm";
-import type { Resend } from "resend";
 
 const REMINDER_7_DAY = "7_day";
 const REMINDER_1_DAY = "1_day";
@@ -21,7 +21,7 @@ import {
 export type DeletionWorkerConfig = {
    connection: ConnectionOptions;
    db: DatabaseInstance;
-   resendClient?: Resend;
+   resendClient?: ResendClient;
    appUrl: string;
    concurrency?: number;
    onCompleted?: (
@@ -52,7 +52,7 @@ type DeletionProcessResult = {
  */
 async function processScheduledDeletions(
    db: DatabaseInstance,
-   resendClient?: Resend,
+   resendClient?: ResendClient,
 ): Promise<DeletionProcessResult> {
    const now = new Date();
    let processedCount = 0;
@@ -62,7 +62,10 @@ async function processScheduledDeletions(
 
    // Find all pending requests where scheduledDeletionAt <= now
    const pendingDeletions = await db.query.accountDeletionRequest.findMany({
-      where: (req, { and: andOp, eq: eqOp, lte: lteOp, isNotNull: isNotNullOp }) =>
+      where: (
+         req,
+         { and: andOp, eq: eqOp, lte: lteOp, isNotNull: isNotNullOp },
+      ) =>
          andOp(
             eqOp(req.status, "pending"),
             eqOp(req.type, "grace_period"),
@@ -108,14 +111,20 @@ async function processScheduledDeletions(
                });
                emailsSent++;
             } catch (emailError) {
-               console.error("Failed to send deletion completed email:", emailError);
+               console.error(
+                  "Failed to send deletion completed email:",
+                  emailError,
+               );
                failedEmails.push(userRecord.email);
             }
          }
 
          processedCount++;
       } catch (error) {
-         console.error(`Failed to process deletion for user ${deletion.userId}:`, error);
+         console.error(
+            `Failed to process deletion for user ${deletion.userId}:`,
+            error,
+         );
          failedDeletions.push(deletion.userId);
       }
    }
@@ -128,7 +137,7 @@ async function processScheduledDeletions(
  */
 async function sendDeletionReminders(
    db: DatabaseInstance,
-   resendClient: Resend | undefined,
+   resendClient: ResendClient | undefined,
    appUrl: string,
 ): Promise<{ processedCount: number; emailsSent: number }> {
    if (!resendClient) {
@@ -273,7 +282,10 @@ export function createDeletionWorker(
             const result = await processScheduledDeletions(db, resendClient);
 
             // If all deletions failed, throw to trigger retry
-            if (result.failedDeletions.length > 0 && result.processedCount === 0) {
+            if (
+               result.failedDeletions.length > 0 &&
+               result.processedCount === 0
+            ) {
                throw new Error(
                   `All deletions failed: ${result.failedDeletions.join(", ")}`,
                );
@@ -293,7 +305,11 @@ export function createDeletionWorker(
          }
 
          if (type === "send-reminders") {
-            const result = await sendDeletionReminders(db, resendClient, appUrl);
+            const result = await sendDeletionReminders(
+               db,
+               resendClient,
+               appUrl,
+            );
             return {
                processedCount: result.processedCount,
                emailsSent: result.emailsSent,

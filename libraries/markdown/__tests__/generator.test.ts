@@ -13,14 +13,14 @@ import {
    generateNode,
    generateStrongString,
    parseOrThrow,
-} from "../src/index.ts";
+} from "../src/index";
 import type {
    CodeBlockNode,
    HeadingNode,
    LinkNode,
    ParagraphNode,
    TextNode,
-} from "../src/schemas.ts";
+} from "../src/schemas";
 
 describe("generate", () => {
    describe("round-trip parsing", () => {

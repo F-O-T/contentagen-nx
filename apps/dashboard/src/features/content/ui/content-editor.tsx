@@ -39,13 +39,27 @@ import { TooltipProvider } from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
 import { $getRoot, type EditorState, type LexicalEditor } from "lexical";
 import { useCallback, useEffect, useRef } from "react";
+import { setDiagnostics } from "../context/diagnostics-context";
 import { GhostTextNode } from "../nodes/ghost-text-node";
 import { $createImageNode, $isImageNode, ImageNode } from "../nodes/image-node";
 import { ChatPlugin } from "../plugins/chat-plugin";
+import { DiagnosticsPlugin } from "../plugins/diagnostics-plugin";
 import { EditPlugin } from "../plugins/edit-plugin";
 import { FIMPlugin } from "../plugins/fim-plugin";
 import { FloatingToolbarPlugin } from "../plugins/floating-toolbar-plugin";
 import { MarkdownPastePlugin } from "../plugins/markdown-paste-plugin";
+import { SeoPlugin } from "../plugins/seo-plugin";
+import { SpellingPlugin } from "../plugins/spelling-plugin";
+import { EditorStatusline } from "./editor-statusline";
+
+type ContentEditorMeta = {
+   /** Content title for SEO analysis */
+   title?: string;
+   /** Meta description for SEO analysis */
+   description?: string;
+   /** Target keywords for SEO analysis */
+   keywords?: string[];
+};
 
 type ContentEditorProps = {
    initialContent?: string;
@@ -54,6 +68,8 @@ type ContentEditorProps = {
    placeholder?: string;
    disabled?: boolean;
    className?: string;
+   /** Metadata for SEO/readability analysis */
+   meta?: ContentEditorMeta;
 };
 
 // Custom transformer for horizontal rule
@@ -338,9 +354,11 @@ export function ContentEditor({
    placeholder = "Start writing...",
    disabled = false,
    className,
+   meta,
 }: ContentEditorProps) {
    const editorRef = useRef<LexicalEditor | null>(null);
    const containerRef = useRef<HTMLDivElement>(null);
+   const lastContentRef = useRef<string>(initialContent || "");
 
    const initialConfig = {
       namespace: "ContentEditor",
@@ -389,10 +407,44 @@ export function ContentEditor({
                // Otherwise, unescape
                return char;
             });
-            onChange(markdown);
+
+            // Only trigger save if content actually changed
+            if (markdown !== lastContentRef.current) {
+               lastContentRef.current = markdown;
+               onChange(markdown);
+            }
          });
       },
       [onChange],
+   );
+
+   // Handle SEO analysis results and update diagnostics context
+   const handleSeoAnalysis = useCallback(
+      (result: import("@f-o-t/content-analysis").ContentAnalysisResult) => {
+         setDiagnostics({
+            spelling: [], // Handled by SpellingPlugin
+            grammar: [], // Handled by SpellingPlugin
+            seo: {
+               score: result.seo.score,
+               issues: result.seo.issues.map((issue) => ({
+                  type: issue.type,
+                  message: issue.message,
+                  severity: issue.severity as "error" | "warning" | "info",
+               })),
+            },
+            patterns: result.badPatterns.patterns.map((pattern) => ({
+               pattern: pattern.pattern,
+               message: pattern.suggestion,
+               severity: pattern.severity as "error" | "warning" | "info",
+            })),
+            readability: {
+               score: result.readability.fleschKincaidReadingEase,
+               level: result.readability.readabilityLevel,
+            },
+            checkedAt: new Date(),
+         });
+      },
+      [],
    );
 
    return (
@@ -578,13 +630,23 @@ export function ContentEditor({
                <TablePlugin />
                <MarkdownShortcutPlugin transformers={EXTENDED_TRANSFORMERS} />
                <MarkdownPastePlugin />
-               <OnChangePlugin onChange={handleChange} />
+               <OnChangePlugin ignoreSelectionChange onChange={handleChange} />
                <EditorRefPlugin editorRef={editorRef} />
                <InitializeContentPlugin content={initialContent} />
                <FloatingToolbarPlugin containerRef={containerRef} />
                <FIMPlugin containerRef={containerRef} />
                <EditPlugin containerRef={containerRef} />
                <ChatPlugin />
+               <DiagnosticsPlugin />
+               <SpellingPlugin />
+               <SeoPlugin
+                  description={meta?.description}
+                  onAnalysisComplete={handleSeoAnalysis}
+                  targetKeywords={meta?.keywords}
+                  title={meta?.title}
+               />
+               {/* Lualine-style statusline */}
+               <EditorStatusline />
             </div>
          </TooltipProvider>
       </LexicalComposer>

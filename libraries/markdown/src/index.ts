@@ -9,7 +9,7 @@ export {
    parseBufferOrThrow,
    parseOrThrow,
    parseToAst,
-} from "./parser.ts";
+} from "./parser";
 
 // =============================================================================
 // Generator Exports
@@ -31,25 +31,25 @@ export {
    generateStrongString,
    generateTableString,
    generateTaskListString,
-} from "./generator.ts";
+} from "./generator";
 
 // =============================================================================
 // HTML Renderer Exports
 // =============================================================================
 
-export type { HtmlRenderOptions } from "./html-renderer.ts";
-export { renderNodeToHtml, renderToHtml } from "./html-renderer.ts";
+export type { HtmlRenderOptions } from "./html-renderer";
+export { renderNodeToHtml, renderToHtml } from "./html-renderer";
 
 // =============================================================================
 // HTML to Markdown Parser Exports
 // =============================================================================
 
-export type { HtmlToMarkdownOptions } from "./html-parser.ts";
+export type { HtmlToMarkdownOptions } from "./html-parser";
 export {
    htmlAstToMarkdownAst,
    htmlToMarkdown,
    parseHtml,
-} from "./html-parser.ts";
+} from "./html-parser";
 
 // =============================================================================
 // Streaming Exports
@@ -61,7 +61,7 @@ export {
    parseBufferStream,
    parseStream,
    parseStreamToDocument,
-} from "./stream.ts";
+} from "./stream";
 
 // =============================================================================
 // Schema Exports
@@ -98,7 +98,7 @@ export {
    tableRowNodeSchema,
    textNodeSchema,
    thematicBreakNodeSchema,
-} from "./schemas.ts";
+} from "./schemas";
 
 // =============================================================================
 // Type Exports
@@ -141,9 +141,9 @@ export type {
    TableRowNode,
    TextNode,
    ThematicBreakNode,
-} from "./schemas.ts";
+} from "./schemas";
 
-export type { ParseResult } from "./types.ts";
+export type { ParseResult } from "./types";
 
 // =============================================================================
 // Utility Exports
@@ -153,4 +153,4 @@ export {
    normalizeEscapedNewlines,
    normalizeLineEndings,
    normalizeMarkdownEmphasis,
-} from "./utils.ts";
+} from "./utils";

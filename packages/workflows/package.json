@@ -22,10 +22,6 @@
       "./queue/*": {
          "default": "./src/queue/*.ts",
          "types": "./dist/src/queue/*.d.ts"
-      },
-      "./utils/*": {
-         "default": "./src/utils/*.ts",
-         "types": "./dist/src/utils/*.d.ts"
       }
    },
    "files": [

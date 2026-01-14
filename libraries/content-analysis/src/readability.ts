@@ -8,12 +8,12 @@ import type {
    ReadabilityResult,
    TargetAudience,
    TargetScore,
-} from "./types.ts";
+} from "./types";
 import {
    calculateFleschKincaid,
    countSyllables,
    getReadabilityLevel,
-} from "./utils.ts";
+} from "./utils";
 
 const TARGET_SCORES: Record<TargetAudience, TargetScore> = {
    general: {

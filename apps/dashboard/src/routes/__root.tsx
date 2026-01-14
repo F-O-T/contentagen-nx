@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { NotFoundComponent } from "@/default/not-found";
+import { DiffView } from "@/features/content/ui/diff-view";
 import { GlobalAlertDialog } from "@/hooks/use-alert-dialog";
 import { GlobalCredenza } from "@/hooks/use-credenza";
 import { GlobalSheet } from "@/hooks/use-sheet";
@@ -88,6 +89,7 @@ function RootComponent() {
                   <GlobalAlertDialog />
                   <GlobalCredenza />
                   <GlobalSheet />
+                  <DiffView />
                   <Toaster />
                   <Outlet />
                   <TanStackRouterDevtools position="bottom-left" />

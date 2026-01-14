@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { parse, renderToHtml } from "../src/index.ts";
-import type { TableNode } from "../src/schemas.ts";
+import { parse, renderToHtml } from "../src/index";
+import type { TableNode } from "../src/schemas";
 
 // =============================================================================
 // Table Parsing Test Suite

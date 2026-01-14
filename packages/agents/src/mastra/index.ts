@@ -6,6 +6,7 @@ import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
 import { planAgent } from "./agents/plan-agent";
 import { pgVectorStore } from "./agents/shared";
+import { spellingGrammarAgent } from "./agents/spelling-grammar-agent";
 import { writerAgent } from "./agents/writer-agent";
 import type { ContentPlan } from "./schemas/plan-schema";
 
@@ -41,6 +42,7 @@ export const mastra = new Mastra({
       writerAgent,
       fimAgent,
       inlineEditAgent,
+      spellingGrammarAgent,
    },
    vectors: vectorsConfig,
    bundler: {
@@ -86,6 +88,7 @@ export { fimAgent } from "./agents/fim-agent";
 export { inlineEditAgent } from "./agents/inline-edit-agent";
 // Export agents for direct access
 export { planAgent } from "./agents/plan-agent";
+export { spellingGrammarAgent } from "./agents/spelling-grammar-agent";
 export { writerAgent } from "./agents/writer-agent";
 
 // Export plan schemas

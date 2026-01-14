@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { analyzeSeo } from "../src/seo.ts";
+import { analyzeSeo } from "../src/seo";
 
 describe("analyzeSeo", () => {
    it("should return a high score for well-optimized content", () => {

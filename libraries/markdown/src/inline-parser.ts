@@ -1,12 +1,12 @@
-import type { InlineNode } from "./schemas.ts";
-import type { Bracket, Delimiter, InlineToken } from "./types.ts";
+import type { InlineNode } from "./schemas";
+import type { Bracket, Delimiter, InlineToken } from "./types";
 import {
    AUTOLINK_REGEX,
    decodeHtmlEntities,
    EMAIL_AUTOLINK_REGEX,
    normalizeLabel,
    unescapeMarkdown,
-} from "./utils.ts";
+} from "./utils";
 
 // =============================================================================
 // Tokenization

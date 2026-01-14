@@ -5,10 +5,7 @@ import DeletionScheduledEmail from "./emails/deletion-scheduled";
 import MagicLinkEmail from "./emails/magic-link";
 import OrganizationInvitationEmail from "./emails/organization-invitation";
 import OTPEmail from "./emails/otp";
-import WorkflowNotificationEmail from "./emails/workflow-notification";
-import type { SendWorkflowEmailOptions } from "./utils";
 
-export type { SendWorkflowEmailOptions };
 export { getResendClient, type ResendClient } from "./utils";
 
 export interface SendEmailOTPOptions {
@@ -72,18 +69,6 @@ export const sendEmailOTP = async (
       react: <OTPEmail otp={otp} type={type} />,
       subject: getSubject(),
       to: email,
-   });
-};
-
-export const sendWorkflowEmail = async (
-   client: Resend,
-   { to, subject, body }: SendWorkflowEmailOptions,
-) => {
-   await client.emails.send({
-      from: `${name} <suporte@mail.contentta.co>`,
-      react: <WorkflowNotificationEmail body={body} />,
-      subject,
-      to,
    });
 };
 

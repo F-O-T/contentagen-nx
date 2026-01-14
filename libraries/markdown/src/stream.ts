@@ -1,4 +1,4 @@
-import { createBlockContext, parseBlocks } from "./block-parser.ts";
+import { createBlockContext, parseBlocks } from "./block-parser";
 import {
    type BatchMarkdownFileInput,
    type BatchMarkdownStreamEvent,
@@ -9,8 +9,8 @@ import {
    type StreamEvent,
    type StreamOptions,
    streamOptionsSchema,
-} from "./schemas.ts";
-import { decodeBuffer, normalizeLineEndings } from "./utils.ts";
+} from "./schemas";
+import { decodeBuffer, normalizeLineEndings } from "./utils";
 
 // =============================================================================
 // Streaming Parser State

@@ -9,8 +9,8 @@ import type {
    KeywordInput,
    KeywordMetrics,
    TopKeyword,
-} from "./types.ts";
-import { extractWords } from "./utils.ts";
+} from "./types";
+import { extractWords } from "./utils";
 
 /**
  * Analyze keyword usage in content

@@ -3,8 +3,8 @@
  * Detects problematic content patterns that hurt quality and SEO
  */
 
-import type { BadPattern, BadPatternResult } from "./types.ts";
-import { extractParagraphs, extractWords, findOccurrences } from "./utils.ts";
+import type { BadPattern, BadPatternResult } from "./types";
+import { extractParagraphs, extractWords, findOccurrences } from "./utils";
 
 /**
  * Analyze content for bad patterns

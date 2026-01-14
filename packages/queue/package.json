@@ -17,10 +17,6 @@
       "./connection": {
          "default": "./src/connection.ts",
          "types": "./dist/src/connection.d.ts"
-      },
-      "./schemas": {
-         "default": "./src/schemas.ts",
-         "types": "./dist/src/schemas.d.ts"
       }
    },
    "files": [

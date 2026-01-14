@@ -89,7 +89,7 @@ export default function DeletionReminderEmail({
             <Button
                href={cancelUrl}
                style={{
-                  backgroundColor: "#42B46E",
+                  backgroundColor: "#C4704A",
                   borderRadius: "8px",
                   color: "#ffffff",
                   display: "inline-block",

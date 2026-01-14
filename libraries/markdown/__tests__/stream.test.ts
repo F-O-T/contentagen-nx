@@ -5,7 +5,7 @@ import {
    parseBufferStream,
    parseStream,
    parseStreamToDocument,
-} from "../src/index.ts";
+} from "../src/index";
 
 describe("parseStream", () => {
    it("parses simple markdown stream", async () => {

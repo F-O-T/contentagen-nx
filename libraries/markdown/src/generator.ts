@@ -16,9 +16,9 @@ import type {
    TableNode,
    TableRowNode,
    ThematicBreakNode,
-} from "./schemas.ts";
-import { generateOptionsSchema } from "./schemas.ts";
-import { encodeUrl, repeat } from "./utils.ts";
+} from "./schemas";
+import { generateOptionsSchema } from "./schemas";
+import { encodeUrl, repeat } from "./utils";
 
 // =============================================================================
 // Default Options

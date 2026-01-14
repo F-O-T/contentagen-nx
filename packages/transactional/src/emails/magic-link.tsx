@@ -38,7 +38,7 @@ export default function MagicLinkEmail({ magicLinkUrl }: MagicLinkEmailProps) {
             <Button
                href={magicLinkUrl}
                style={{
-                  backgroundColor: "#42B46E",
+                  backgroundColor: "#C4704A",
                   borderRadius: "8px",
                   color: "#ffffff",
                   display: "inline-block",

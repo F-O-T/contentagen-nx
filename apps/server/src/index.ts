@@ -13,6 +13,7 @@ import { posthog, posthogPlugin } from "./integrations/posthog";
 import { agentChatRoutes } from "./routes/agent-chat";
 import { agentEditRoutes } from "./routes/agent-edit";
 import { agentFIMRoutes } from "./routes/agent-fim";
+import { agentSpellingRoutes } from "./routes/agent-spelling";
 import { registryRoutes } from "./routes/registry";
 import { sdkRoutes } from "./routes/sdk";
 
@@ -70,6 +71,7 @@ const app = new Elysia({
    .use(agentChatRoutes)
    .use(agentFIMRoutes)
    .use(agentEditRoutes)
+   .use(agentSpellingRoutes)
    .mount(auth.handler)
    .all(
       "/trpc/*",

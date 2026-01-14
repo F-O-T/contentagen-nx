@@ -3,14 +3,14 @@
  * Analyzes content for search engine optimization factors
  */
 
-import type { SeoInput, SeoIssue, SeoMetrics, SeoResult } from "./types.ts";
+import type { SeoInput, SeoIssue, SeoMetrics, SeoResult } from "./types";
 import {
    clampScore,
    extractParagraphs,
    extractWords,
    hasConclusionSection,
    hasQuickAnswerPattern,
-} from "./utils.ts";
+} from "./utils";
 
 /**
  * Analyze content for SEO optimization

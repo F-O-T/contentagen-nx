@@ -6,8 +6,6 @@ import {
    $convertToMarkdownString,
 } from "@lexical/markdown";
 import {
-   $createTextNode,
-   $getNodeByKey,
    $getRoot,
    $getSelection,
    $isRangeSelection,
@@ -15,6 +13,7 @@ import {
    COMMAND_PRIORITY_HIGH,
    KEY_ESCAPE_COMMAND,
    type LexicalNode,
+   type RangeSelection,
 } from "lexical";
 import { useCallback, useEffect, useRef } from "react";
 import {
@@ -23,10 +22,10 @@ import {
    clearEdit,
    completeEdit,
    openEditPrompt,
-   setEditPlaceholderNodeKey,
    startEditStreaming,
    useEditContext,
 } from "../context/edit-context";
+import { showDiff } from "../context/diff-context";
 import { useEditCompletion } from "../hooks/use-edit-completion";
 import { $isGhostTextNode } from "../nodes/ghost-text-node";
 import { EXTENDED_TRANSFORMERS } from "../ui/content-editor";
@@ -37,29 +36,29 @@ interface EditPluginProps {
 }
 
 /**
- * Edit Plugin for Ctrl+K agentic text editing.
+ * Edit Plugin for Ctrl+K agentic text editing with diff preview.
  *
  * Flow:
  * 1. User selects text and presses Ctrl+K
  * 2. Floating prompt appears for edit instruction
  * 3. User enters instruction and presses Enter
- * 4. Selected text is replaced with streaming AI response
+ * 4. AI generates edited text (streamed but collected)
+ * 5. Diff view shows original vs suggested
+ * 6. User accepts (apply changes) or rejects (keep original)
  *
  * Controls:
  * - Ctrl+K: Open edit prompt (with selection)
  * - Enter: Submit instruction
  * - Escape: Cancel/dismiss
+ * - In Diff: Ctrl+Enter to accept, Escape to reject
  */
 export function EditPlugin({ containerRef }: EditPluginProps) {
    const [editor] = useLexicalComposerContext();
-   const { phase, position, selectedText, placeholderNodeKey } =
+   const { phase, position, selectedText, originalSelection } =
       useEditContext();
 
-   // originalSelection is stored in context but not used directly here
-   // It's available for potential undo/restore functionality
-
-   const isFirstChunkRef = useRef(true);
    const fullTextRef = useRef("");
+   const selectionRef = useRef<RangeSelection | null>(null);
 
    // Calculate position relative to container
    const getSelectionPosition = useCallback(() => {
@@ -155,93 +154,71 @@ export function EditPlugin({ containerRef }: EditPluginProps) {
       };
    }, [editor]);
 
-   // Handle streaming chunk
-   const handleChunk = useCallback(
-      (chunk: string) => {
-         appendEditStreamedText(chunk);
-         fullTextRef.current += chunk;
+   // Handle streaming chunk - just collect, don't modify document
+   const handleChunk = useCallback((chunk: string) => {
+      appendEditStreamedText(chunk);
+      fullTextRef.current += chunk;
+   }, []);
 
-         editor.update(
-            () => {
-               if (isFirstChunkRef.current) {
-                  // First chunk: delete selection and insert placeholder
-                  isFirstChunkRef.current = false;
-
-                  const selection = $getSelection();
-                  if ($isRangeSelection(selection)) {
-                     // Delete the selected text
-                     selection.removeText();
-
-                     // Insert placeholder text node with streaming content
-                     const placeholderNode = $createTextNode(chunk);
-                     // Apply a subtle style to indicate streaming
-                     placeholderNode.setStyle("color: var(--muted-foreground)");
-                     selection.insertNodes([placeholderNode]);
-
-                     // Store the node key for subsequent updates
-                     setEditPlaceholderNodeKey(placeholderNode.getKey());
-                  }
-               } else {
-                  // Subsequent chunks: append to placeholder node
-                  const nodeKey = placeholderNodeKey;
-                  if (nodeKey) {
-                     const node = $getNodeByKey(nodeKey);
-                     if ($isTextNode(node)) {
-                        const currentText = node.getTextContent();
-                        node.setTextContent(currentText + chunk);
-                     }
-                  }
-               }
-            },
-            { tag: "edit-streaming" },
-         );
-      },
-      [editor, placeholderNodeKey],
-   );
-
-   // Handle streaming complete
+   // Handle streaming complete - show diff view
    const handleComplete = useCallback(
       (_fullText: string) => {
-         // First, remove the muted styling from the placeholder
-         editor.update(
-            () => {
-               const nodeKey = placeholderNodeKey;
-               if (nodeKey) {
-                  const node = $getNodeByKey(nodeKey);
-                  if ($isTextNode(node)) {
-                     // Remove the muted color styling
-                     node.setStyle("");
-                  }
-               }
-            },
-            { tag: "edit-streaming" },
-         );
+         const suggestedText = fullTextRef.current.trim();
+         const originalText = selectedText;
 
-         // Then re-parse the document to convert markdown to rich text nodes
-         editor.update(
-            () => {
-               const root = $getRoot();
-               const markdown = $convertToMarkdownString(EXTENDED_TRANSFORMERS);
-               root.clear();
-               $convertFromMarkdownString(markdown, EXTENDED_TRANSFORMERS);
-            },
-            { tag: "edit-markdown-parse" },
-         );
+         // Show diff view for user to accept or reject
+         showDiff({
+            originalText,
+            suggestedText,
+            originalTitle: "Original",
+            suggestedTitle: "Sugerido pela IA",
+            source: "ai-edit",
+            onAccept: () => {
+               // Apply the edit to the document
+               editor.update(
+                  () => {
+                     // Restore selection if we have it
+                     if (originalSelection) {
+                        // Get full document markdown, replace selection, re-render
+                        const root = $getRoot();
+                        const markdown = $convertToMarkdownString(
+                           EXTENDED_TRANSFORMERS,
+                        );
 
+                        // Replace the original text with suggested text in markdown
+                        const newMarkdown = markdown.replace(
+                           originalText,
+                           suggestedText,
+                        );
+
+                        root.clear();
+                        $convertFromMarkdownString(
+                           newMarkdown,
+                           EXTENDED_TRANSFORMERS,
+                        );
+                     }
+                  },
+                  { tag: "edit-apply" },
+               );
+
+               completeEdit();
+               setTimeout(() => clearEdit(), 100);
+            },
+            onReject: () => {
+               // Just clear the edit state, document unchanged
+               cancelEdit();
+            },
+         });
+
+         // Move to complete phase while diff is shown
          completeEdit();
-
-         // Clear state after a short delay
-         setTimeout(() => {
-            clearEdit();
-         }, 100);
       },
-      [editor, placeholderNodeKey],
+      [editor, selectedText, originalSelection],
    );
 
    // Handle error
    const handleError = useCallback((error: Error) => {
       console.error("Edit error:", error);
-      // Keep partial result if any
       clearEdit();
    }, []);
 
@@ -257,8 +234,15 @@ export function EditPlugin({ containerRef }: EditPluginProps) {
          if (!selectedText) return;
 
          // Reset streaming state
-         isFirstChunkRef.current = true;
          fullTextRef.current = "";
+
+         // Store current selection for later restoration
+         editor.getEditorState().read(() => {
+            const selection = $getSelection();
+            if ($isRangeSelection(selection)) {
+               selectionRef.current = selection.clone();
+            }
+         });
 
          startEditStreaming();
 
@@ -275,7 +259,7 @@ export function EditPlugin({ containerRef }: EditPluginProps) {
             temperature: 0.3,
          });
       },
-      [selectedText, getDocumentContext, requestEdit],
+      [selectedText, getDocumentContext, requestEdit, editor],
    );
 
    // Handle cancel
@@ -343,7 +327,7 @@ export function EditPlugin({ containerRef }: EditPluginProps) {
       return editor.registerCommand(
          KEY_ESCAPE_COMMAND,
          () => {
-            if (phase !== "idle") {
+            if (phase !== "idle" && phase !== "complete") {
                handleCancel();
                return true;
             }
@@ -358,6 +342,7 @@ export function EditPlugin({ containerRef }: EditPluginProps) {
       return editor.registerUpdateListener(({ tags, dirtyElements }) => {
          // Skip our own updates
          if (tags.has("edit-streaming")) return;
+         if (tags.has("edit-apply")) return;
          if (tags.has("history-merge")) return;
 
          // If user is typing while in prompting phase, cancel

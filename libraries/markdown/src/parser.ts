@@ -1,17 +1,17 @@
-import { parseBlocks } from "./block-parser.ts";
+import { parseBlocks } from "./block-parser";
 import {
    type BlockNodeType,
    type InlineNodeType,
    type MarkdownDocument,
    type ParseOptions,
    parseOptionsSchema,
-} from "./schemas.ts";
-import type { ParseResult } from "./types.ts";
+} from "./schemas";
+import type { ParseResult } from "./types";
 import {
    decodeBuffer,
    detectLineEnding,
    normalizeLineEndings,
-} from "./utils.ts";
+} from "./utils";
 
 // Union type for any node in the AST
 type AnyNode = MarkdownDocument["root"] | BlockNodeType | InlineNodeType;

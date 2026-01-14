@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { analyzeReadability } from "../src/readability.ts";
+import { analyzeReadability } from "../src/readability";
 
 describe("analyzeReadability", () => {
    it("should analyze simple text as easy to read", () => {

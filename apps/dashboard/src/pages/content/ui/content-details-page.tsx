@@ -13,13 +13,7 @@ import {
    useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import {
-   Archive,
-   Lightbulb,
-   Send,
-   Trash2,
-   UserPen,
-} from "lucide-react";
+import { Archive, Lightbulb, Send, Trash2, UserPen } from "lucide-react";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
@@ -204,7 +198,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
    };
 
    // Handler when plan agent detects no writer assigned
-   const handleWriterSelectionNeeded = () => {
+   const handleWriterSelectionNeeded = useCallback(() => {
       openCredenza({
          children: (
             <WriterAssignmentCredenza
@@ -230,7 +224,13 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
             />
          ),
       });
-   };
+   }, [
+      openCredenza,
+      contentId,
+      content.agentId,
+      assignWriterMutation,
+      closeCredenza,
+   ]);
 
    // Handler to start a new plan (Pro only)
    const handleStartNewPlan = () => {
@@ -247,7 +247,7 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
       if (isPlanning && !content.agentId) {
          handleWriterSelectionNeeded();
       }
-   }, [isPlanning, content.agentId]);
+   }, [isPlanning, content.agentId, handleWriterSelectionNeeded]);
 
    const updateMutation = useMutation(
       trpc.content.update.mutationOptions({
@@ -593,6 +593,11 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
                      disabled={content.status === "archived"}
                      initialContent={content.body || ""}
                      key={contentId}
+                     meta={{
+                        title: content.meta.title,
+                        description: content.meta.description,
+                        keywords: content.meta.keywords,
+                     }}
                      onChange={handleContentChange}
                      placeholder={"Comece a escrever..."}
                   />

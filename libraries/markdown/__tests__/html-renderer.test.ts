@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { parseOrThrow, renderNodeToHtml, renderToHtml } from "../src/index.ts";
-import type { HeadingNode, TextNode } from "../src/schemas.ts";
+import { parseOrThrow, renderNodeToHtml, renderToHtml } from "../src/index";
+import type { HeadingNode, TextNode } from "../src/schemas";
 
 describe("renderToHtml", () => {
    describe("block elements", () => {

@@ -21,11 +21,11 @@ export const DefaultFooter = () => {
             Enviado por{" "}
             <Link
                href="https://contentta.co"
-               style={{ color: "#42B46E", textDecoration: "none" }}
+               style={{ color: "#C4704A", textDecoration: "none" }}
             >
                Contentta
             </Link>{" "}
-            - Gestão Financeira
+            - Gestão de Conteúdo com IA
          </Text>
          <Hr
             style={{

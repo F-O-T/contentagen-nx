@@ -9,11 +9,3 @@ export const getResendClient = (RESEND_API_KEY: string): ResendClient => {
    }
    return new Resend(RESEND_API_KEY);
 };
-
-export interface SendWorkflowEmailOptions {
-   to: string;
-   subject: string;
-   body: string;
-}
-
-export type { SendWorkflowEmailOptions as WorkflowEmailOptions };

@@ -3,7 +3,7 @@ import {
    htmlAstToMarkdownAst,
    htmlToMarkdown,
    parseHtml,
-} from "../src/html-parser.ts";
+} from "../src/html-parser";
 
 describe("htmlToMarkdown", () => {
    describe("headings", () => {

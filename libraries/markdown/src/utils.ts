@@ -1,4 +1,4 @@
-import type { EncodingInfo, LineInfo } from "./types.ts";
+import type { EncodingInfo, LineInfo } from "./types";
 
 // =============================================================================
 // Encoding Detection

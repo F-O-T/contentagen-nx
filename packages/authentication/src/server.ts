@@ -77,10 +77,29 @@ export const getAuthOptions = (
             create: {
                before: async (session) => {
                   try {
-                     const member = await findMemberByUserId(
-                        db,
-                        session.userId,
-                     );
+                     let member = await findMemberByUserId(db, session.userId);
+
+                     // If no member found, create default organization first
+                     // This handles the race condition where user.create.after
+                     // may not have completed before session creation
+                     if (!member) {
+                        const foundUser = await db.query.user.findFirst({
+                           where: (user, { eq }) => eq(user.id, session.userId),
+                        });
+
+                        if (foundUser) {
+                           console.log(
+                              `No organization found for user ${session.userId}, creating default organization`,
+                           );
+                           await createDefaultOrganization(
+                              db,
+                              session.userId,
+                              foundUser.name ?? "Workspace",
+                           );
+                           // Fetch the newly created membership
+                           member = await findMemberByUserId(db, session.userId);
+                        }
+                     }
 
                      if (member?.organizationId) {
                         console.log(
@@ -110,8 +129,14 @@ export const getAuthOptions = (
          user: {
             create: {
                after: async (user) => {
+                  // Organization creation is now handled in session.create.before
+                  // to avoid race conditions. This hook is kept for backwards
+                  // compatibility but the session hook will handle the actual creation.
                   try {
-                     await createDefaultOrganization(db, user.id, user.name);
+                     const member = await findMemberByUserId(db, user.id);
+                     if (!member) {
+                        await createDefaultOrganization(db, user.id, user.name);
+                     }
                   } catch (error) {
                      console.error(
                         "Error creating default organization for user:",
@@ -194,7 +219,7 @@ export const getAuthOptions = (
          }),
          emailOTP({
             expiresIn: 60 * 10,
-            otpLength: 8,
+            otpLength: 6,
             sendVerificationOnSignUp: true,
             async sendVerificationOTP({
                email,

@@ -7,7 +7,6 @@ export * from "./schemas/brand-document";
 // Chat schemas
 export * from "./schemas/chat";
 export * from "./schemas/content";
-export * from "./schemas/content-version";
 export * from "./schemas/export-log";
 // Instruction memory schemas
 export * from "./schemas/instruction-memory";

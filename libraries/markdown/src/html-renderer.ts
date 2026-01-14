@@ -22,8 +22,8 @@ import type {
    TableRowNode,
    TextNode,
    ThematicBreakNode,
-} from "./schemas.ts";
-import { encodeHtmlEntities } from "./utils.ts";
+} from "./schemas";
+import { encodeHtmlEntities } from "./utils";
 
 // =============================================================================
 // Types

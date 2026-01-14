@@ -429,6 +429,7 @@ export const contentRouter = router({
             if (input.data.body !== undefined) {
                // Normalize escaped newlines in body content
                const normalizedBody = normalizeEscapedNewlines(input.data.body);
+
                await updateContent(resolvedCtx.db, input.id, {
                   body: normalizedBody,
                });
@@ -755,14 +756,14 @@ export const contentRouter = router({
                createdAt: sharedContent.createdAt,
                agent: sharedContent.agent
                   ? {
-                     name: sharedContent.agent.personaConfig?.metadata?.name,
-                     description:
-                        sharedContent.agent.personaConfig?.metadata
-                           ?.description,
-                     avatar:
-                        sharedContent.agent.personaConfig?.metadata?.avatar,
-                     profilePhotoUrl: agentProfilePhotoUrl,
-                  }
+                       name: sharedContent.agent.personaConfig?.metadata?.name,
+                       description:
+                          sharedContent.agent.personaConfig?.metadata
+                             ?.description,
+                       avatar:
+                          sharedContent.agent.personaConfig?.metadata?.avatar,
+                       profilePhotoUrl: agentProfilePhotoUrl,
+                    }
                   : null,
                relatedPosts: resolvedRelatedPosts,
             };
@@ -1048,7 +1049,10 @@ export const contentRouter = router({
             }
 
             // Verify the content exists and belongs to this organization
-            const existing = await getContentById(resolvedCtx.db, input.contentId);
+            const existing = await getContentById(
+               resolvedCtx.db,
+               input.contentId,
+            );
             if (!existing) {
                throw APIError.notFound("Content not found.");
             }
@@ -1107,7 +1111,10 @@ export const contentRouter = router({
             }
 
             // Verify the content exists and belongs to this organization
-            const existing = await getContentById(resolvedCtx.db, input.contentId);
+            const existing = await getContentById(
+               resolvedCtx.db,
+               input.contentId,
+            );
             if (!existing) {
                throw APIError.notFound("Content not found.");
             }
@@ -1129,10 +1136,7 @@ export const contentRouter = router({
             }
 
             // Delete old image if it exists
-            if (
-               existing.imageUrl &&
-               existing.imageUrl !== input.storageKey
-            ) {
+            if (existing.imageUrl && existing.imageUrl !== input.storageKey) {
                try {
                   await deleteFile(
                      existing.imageUrl,
@@ -1145,9 +1149,13 @@ export const contentRouter = router({
             }
 
             // Update content with new image
-            const updated = await updateContent(resolvedCtx.db, input.contentId, {
-               imageUrl: input.storageKey,
-            });
+            const updated = await updateContent(
+               resolvedCtx.db,
+               input.contentId,
+               {
+                  imageUrl: input.storageKey,
+               },
+            );
 
             return updated;
          } catch (err) {

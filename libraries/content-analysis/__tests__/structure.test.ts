@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { analyzeStructure } from "../src/structure.ts";
+import { analyzeStructure } from "../src/structure";
 
 describe("analyzeStructure", () => {
    it("should validate good heading hierarchy", () => {

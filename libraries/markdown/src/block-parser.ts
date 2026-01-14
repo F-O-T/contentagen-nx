@@ -1,4 +1,4 @@
-import { parseInline } from "./inline-parser.ts";
+import { parseInline } from "./inline-parser";
 import type {
    BlockNode,
    BlockquoteNode,
@@ -13,8 +13,8 @@ import type {
    TableNode,
    TableRowNode,
    ThematicBreakNode,
-} from "./schemas.ts";
-import type { BlockContext, LineInfo } from "./types.ts";
+} from "./schemas";
+import type { BlockContext, LineInfo } from "./types";
 import {
    ATX_HEADING_REGEX,
    BLOCKQUOTE_REGEX,
@@ -30,7 +30,7 @@ import {
    splitLines,
    THEMATIC_BREAK_REGEX,
    UNORDERED_LIST_REGEX,
-} from "./utils.ts";
+} from "./utils";
 
 // =============================================================================
 // Block Context

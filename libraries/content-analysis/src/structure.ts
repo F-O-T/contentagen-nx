@@ -8,7 +8,7 @@ import type {
    ContentType,
    StructureIssue,
    StructureResult,
-} from "./types.ts";
+} from "./types";
 import {
    clampScore,
    extractHeadings,
@@ -16,7 +16,7 @@ import {
    extractWords,
    hasConclusionSection,
    hasQuickAnswerPattern,
-} from "./utils.ts";
+} from "./utils";
 
 /**
  * Analyze content structure

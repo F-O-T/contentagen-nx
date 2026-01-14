@@ -8,7 +8,7 @@ import {
    parseOrThrow,
    parseStream,
    parseStreamToDocument,
-} from "../src/index.ts";
+} from "../src/index";
 
 // =============================================================================
 // Types
