@@ -1,4 +1,3 @@
-import type { CoreMessage } from "@mastra/core/llm";
 import { createRequestContext, mastra } from "@packages/agents";
 import {
    calculateConfidence,
@@ -87,7 +86,7 @@ function shouldStopForProse(
 
 export const agentFIMRoutes = new Elysia({ prefix: "/api/agent/fim" }).post(
    "/stream",
-   async function* ({ body, request }) {
+   async function*({ body, request }) {
       // Validate session
       const session = await auth.api.getSession({ headers: request.headers });
       if (!session) {
@@ -123,7 +122,7 @@ export const agentFIMRoutes = new Elysia({ prefix: "/api/agent/fim" }).post(
       prompt = `[Article Section: ${articleContext}]\n${prompt}`;
 
       // Create messages for the FIM agent
-      const messages: CoreMessage[] = [
+      const messages = [
          {
             role: "user",
             content: prompt,

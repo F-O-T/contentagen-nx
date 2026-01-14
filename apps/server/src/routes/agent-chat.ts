@@ -1,4 +1,3 @@
-import type { CoreMessage } from "@mastra/core/llm";
 import {
    type ChatMode,
    type ContentPlan,
@@ -46,7 +45,7 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
    // Stream chat completion using Mastra blog editor agent
    .post(
       "/stream",
-      async function* ({ body, request }) {
+      async function*({ body, request }) {
          // Validate session
          const session = await auth.api.getSession({
             headers: request.headers,
@@ -120,10 +119,10 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
             // Transform selectionContext to match database type
             const dbSelectionContext = selectionContext
                ? {
-                    text: selectionContext.text,
-                    contextBefore: selectionContext.contextBefore ?? "",
-                    contextAfter: selectionContext.contextAfter ?? "",
-                 }
+                  text: selectionContext.text,
+                  contextBefore: selectionContext.contextBefore ?? "",
+                  contextAfter: selectionContext.contextAfter ?? "",
+               }
                : undefined;
 
             await addChatMessage(
@@ -156,7 +155,7 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
          }
 
          // Convert messages to Mastra format
-         const mastraMessages: CoreMessage[] = messages.map((m) => ({
+         const mastraMessages = messages.map((m) => ({
             role: m.role,
             content: m.content,
          }));

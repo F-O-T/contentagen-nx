@@ -1,4 +1,3 @@
-import type { CoreMessage } from "@mastra/core/llm";
 import { createRequestContext, mastra } from "@packages/agents";
 import {
    captureEditGenerated,
@@ -14,7 +13,7 @@ import { resolveOrganizationId } from "../utils/resolve-organization";
 
 export const agentEditRoutes = new Elysia({ prefix: "/api/agent/edit" }).post(
    "/stream",
-   async function* ({ body, request }) {
+   async function*({ body, request }) {
       // Validate session
       const session = await auth.api.getSession({ headers: request.headers });
       if (!session) {
@@ -48,7 +47,7 @@ export const agentEditRoutes = new Elysia({ prefix: "/api/agent/edit" }).post(
       }
 
       // Create messages for the inline edit agent
-      const messages: CoreMessage[] = [
+      const messages = [
          {
             role: "user",
             content: prompt,
