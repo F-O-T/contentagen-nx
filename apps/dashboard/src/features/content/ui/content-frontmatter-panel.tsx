@@ -260,7 +260,7 @@ export function ContentFrontmatterPanel({
                            name={field.name}
                            onBlur={field.handleBlur}
                            onChange={(e) => handleTitleChange(e.target.value)}
-                           placeholder={"Title Placeholder"}
+                           placeholder={"Digite o título do conteúdo"}
                            type="text"
                            value={field.state.value}
                         />
@@ -292,7 +292,7 @@ export function ContentFrontmatterPanel({
                               onChange={(e) =>
                                  handleFieldChange("slug", e.target.value)
                               }
-                              placeholder={"Slug Placeholder"}
+                              placeholder={"url-amigavel-do-conteudo"}
                               type="text"
                               value={field.state.value}
                            />
@@ -309,7 +309,7 @@ export function ContentFrontmatterPanel({
                                  </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                 Regenerate from title
+                                 Regenerar do título
                               </TooltipContent>
                            </Tooltip>
                         </div>
@@ -341,12 +341,14 @@ export function ContentFrontmatterPanel({
                            onChange={(e) =>
                               handleFieldChange("description", e.target.value)
                            }
-                           placeholder={"Description Placeholder"}
+                           placeholder={
+                              "Breve descrição para SEO e redes sociais"
+                           }
                            rows={2}
                            value={field.state.value}
                         />
                         <div className="flex justify-between text-xs text-muted-foreground">
-                           <span>SEO meta description</span>
+                           <span>Meta descrição para SEO</span>
                            <span>{field.state.value?.length ?? 0}/160</span>
                         </div>
                         {isInvalid && (
@@ -365,13 +367,13 @@ export function ContentFrontmatterPanel({
 
                   return (
                      <Field data-invalid={isInvalid}>
-                        <FieldLabel>Keywords</FieldLabel>
+                        <FieldLabel>Palavras-chave</FieldLabel>
                         <KeywordsInput
                            disabled={disabled}
                            onChange={(keywords) =>
                               handleFieldChange("keywords", keywords)
                            }
-                           placeholder="Add keyword..."
+                           placeholder="Adicionar palavra-chave..."
                            value={field.state.value ?? []}
                         />
                         {isInvalid && (

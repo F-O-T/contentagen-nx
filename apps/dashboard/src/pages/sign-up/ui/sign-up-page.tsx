@@ -129,7 +129,7 @@ export function SignUpPage() {
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder={"Placeholder"}
+                              placeholder={"Seu nome completo"}
                               value={field.state.value}
                            />
                            {isInvalid && (
@@ -159,7 +159,7 @@ export function SignUpPage() {
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder={"Placeholder"}
+                              placeholder={"seu@email.com"}
                               type="email"
                               value={field.state.value}
                            />
@@ -198,7 +198,7 @@ export function SignUpPage() {
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder={"Placeholder"}
+                              placeholder={"Mínimo 8 caracteres"}
                               value={field.state.value}
                            />
                            {isInvalid && (
@@ -228,7 +228,7 @@ export function SignUpPage() {
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder={"Placeholder"}
+                              placeholder={"Repita a senha"}
                               value={field.state.value}
                            />
                            {isInvalid && (

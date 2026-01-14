@@ -117,10 +117,11 @@ export function ChatSidebar({
          {fullPage && (
             <div className="flex items-center justify-center py-6 border-b">
                <div className="text-center">
-                  <h1 className="text-xl font-semibold">Plan Your Content</h1>
+                  <h1 className="text-xl font-semibold">
+                     Planeje Seu Conteúdo
+                  </h1>
                   <p className="text-sm text-muted-foreground mt-1">
-                     Describe what you want to write and the AI will help you
-                     plan it
+                     Descreva o que você quer escrever e a IA ajudará a planejar
                   </p>
                </div>
             </div>
@@ -134,11 +135,11 @@ export function ChatSidebar({
                   <div className="px-3 py-2 border-b bg-primary/5">
                      <div className="flex items-center justify-between text-xs mb-1">
                         <span className="text-primary font-medium">
-                           Executing plan...
+                           Executando plano...
                         </span>
                         <span className="text-muted-foreground">
                            {executionState.completedSteps}/
-                           {executionState.totalSteps} steps
+                           {executionState.totalSteps} etapas
                         </span>
                      </div>
                      <div className="h-1.5 bg-primary/20 rounded-full overflow-hidden">
@@ -186,12 +187,12 @@ export function ChatSidebar({
                      onSkipPlan={fullPage ? onSkipPlan : undefined}
                      placeholder={
                         isSessionLoading
-                           ? "Loading chat session..."
+                           ? "Carregando sessão de chat..."
                            : !sessionId
-                             ? "Unable to load chat session"
+                             ? "Não foi possível carregar a sessão"
                              : mode === "plan"
-                               ? "What would you like to plan?"
-                               : "What should I write or edit?"
+                               ? "O que você gostaria de planejar?"
+                               : "O que devo escrever ou editar?"
                      }
                   />
                </div>
@@ -235,7 +236,7 @@ export function ChatSidebar({
                         value="metadata"
                      >
                         <BarChart3 className="size-3.5 mr-1.5" />
-                        Metadata
+                        Metadados
                      </TabsTrigger>
                   </TabsList>
                </div>
@@ -261,11 +262,11 @@ export function ChatSidebar({
                            <div className="px-3 py-2 border-b bg-primary/5">
                               <div className="flex items-center justify-between text-xs mb-1">
                                  <span className="text-primary font-medium">
-                                    Executing plan...
+                                    Executando plano...
                                  </span>
                                  <span className="text-muted-foreground">
                                     {executionState.completedSteps}/
-                                    {executionState.totalSteps} steps
+                                    {executionState.totalSteps} etapas
                                  </span>
                               </div>
                               <div className="h-1.5 bg-primary/20 rounded-full overflow-hidden">
@@ -312,12 +313,12 @@ export function ChatSidebar({
                               onSend={handleSend}
                               placeholder={
                                  isSessionLoading
-                                    ? "Loading chat session..."
+                                    ? "Carregando sessão de chat..."
                                     : !sessionId
-                                      ? "Unable to load chat session"
+                                      ? "Não foi possível carregar a sessão"
                                       : mode === "plan"
-                                        ? "What would you like to plan?"
-                                        : "What should I write or edit?"
+                                        ? "O que você gostaria de planejar?"
+                                        : "O que devo escrever ou editar?"
                               }
                            />
                         </div>

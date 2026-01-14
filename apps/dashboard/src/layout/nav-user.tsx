@@ -124,7 +124,7 @@ function NavUserCredenza({
                   <ThemeSwitcher />
                </div>
                <div className="flex items-center justify-between gap-8">
-                  <span className="text-sm">{"Language"}</span>
+                  <span className="text-sm">{"Idioma"}</span>
                   <LanguageCommand />
                </div>
             </div>
@@ -148,7 +148,7 @@ function NavUserCredenza({
 function NavUserErrorFallback() {
    return (
       <div className="p-4 text-center text-destructive">
-         Failed to load user info.
+         Erro ao carregar informações do usuário.
       </div>
    );
 }
@@ -203,7 +203,7 @@ function NavUserContent() {
                router.navigate({
                   to: "/auth/sign-in",
                });
-               toast.success("Logout Success", { id: "logout" });
+               toast.success("Você saiu com sucesso", { id: "logout" });
             },
          },
       });
@@ -215,9 +215,9 @@ function NavUserContent() {
       openAlertDialog({
          actionLabel: "Sair",
          cancelLabel: "Cancelar",
-         description: "Description",
+         description: "Tem certeza que deseja sair da sua conta?",
          onAction: handleLogout,
-         title: "Title",
+         title: "Sair da Conta",
          variant: "destructive",
       });
    }, [closeCredenza, openAlertDialog, handleLogout]);
@@ -328,7 +328,7 @@ function NavUserContent() {
                                  to="/$slug/settings/billing"
                               >
                                  <Sparkles />
-                                 {"Upgrade"}
+                                 {"Atualizar para Pro"}
                               </Link>
                            </DropdownMenuItem>
                         </DropdownMenuGroup>
@@ -363,11 +363,11 @@ function NavUserContent() {
                   <DropdownMenuLabel>{"Preferencias"}</DropdownMenuLabel>
                   <div className="px-2 py-1.5 space-y-2">
                      <div className="flex items-center justify-between">
-                        <span className="text-sm">{"Theme"}</span>
+                        <span className="text-sm">{"Tema"}</span>
                         <ThemeSwitcher />
                      </div>
                      <div className="flex items-center justify-between">
-                        <span className="text-sm">{"Language"}</span>
+                        <span className="text-sm">{"Idioma"}</span>
                         <LanguageCommand />
                      </div>
                   </div>

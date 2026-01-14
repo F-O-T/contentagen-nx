@@ -49,8 +49,9 @@ function HomeRecentContentSectionErrorFallback(props: FallbackProps) {
          <RecentContentCardHeader />
          <CardContent>
             {createErrorFallback({
-               errorDescription: "Description",
-               errorTitle: "Title",
+               errorDescription:
+                  "Não foi possível carregar os conteúdos recentes",
+               errorTitle: "Erro ao Carregar",
                retryText: "Tentar novamente",
             })(props)}
          </CardContent>
@@ -146,8 +147,10 @@ function HomeRecentContentSectionContent() {
                      <EmptyMedia variant="icon">
                         <Sparkles className="size-6" />
                      </EmptyMedia>
-                     <EmptyTitle>{"Title"}</EmptyTitle>
-                     <EmptyDescription>{"Description"}</EmptyDescription>
+                     <EmptyTitle>{"Nenhum Conteúdo Ainda"}</EmptyTitle>
+                     <EmptyDescription>
+                        {"Comece criando seu primeiro conteúdo com IA"}
+                     </EmptyDescription>
                   </EmptyContent>
                </Empty>
             )}

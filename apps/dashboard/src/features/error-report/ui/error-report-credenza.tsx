@@ -102,7 +102,7 @@ export function ErrorReportCredenza({ error }: ErrorReportCredenzaProps) {
                   {(field) => (
                      <FieldGroup>
                         <Field>
-                           <FieldLabel>{"Additional Details"}</FieldLabel>
+                           <FieldLabel>{"Detalhes Adicionais"}</FieldLabel>
                            <Textarea
                               id={field.name}
                               name={field.name}
@@ -110,7 +110,9 @@ export function ErrorReportCredenza({ error }: ErrorReportCredenzaProps) {
                               onChange={(e) =>
                                  field.handleChange(e.target.value)
                               }
-                              placeholder={"Additional Details Placeholder"}
+                              placeholder={
+                                 "Descreva o que você estava fazendo quando o erro aconteceu..."
+                              }
                               rows={4}
                               value={field.state.value}
                            />

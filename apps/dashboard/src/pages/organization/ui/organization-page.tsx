@@ -29,7 +29,7 @@ import { OrganizationOverviewStatsCard } from "./organization-overview-stats-car
 
 function OrganizationPageErrorFallback(props: FallbackProps) {
    return createErrorFallback({
-      errorDescription: "Description",
+      errorDescription: "Não foi possível carregar os dados da organização",
       errorTitle: "Erro ao Carregar Organização",
       retryText: "Tentar novamente",
    })(props);
@@ -80,8 +80,12 @@ function OrganizationContent() {
                      <EmptyMedia variant="icon">
                         <Building className="size-12 text-muted-foreground" />
                      </EmptyMedia>
-                     <EmptyTitle>{"Title"}</EmptyTitle>
-                     <EmptyDescription>{"Description"}</EmptyDescription>
+                     <EmptyTitle>{"Nenhuma Organização"}</EmptyTitle>
+                     <EmptyDescription>
+                        {
+                           "Crie sua primeira organização para começar a gerenciar seu conteúdo"
+                        }
+                     </EmptyDescription>
                   </EmptyHeader>
                   <EmptyContent>
                      <Tooltip>
@@ -97,12 +101,12 @@ function OrganizationContent() {
                               variant="default"
                            >
                               <Plus className="size-4" />
-                              {"Action"}
+                              {"Criar Organização"}
                            </Button>
                         </TooltipTrigger>
                         {hasReachedLimit && (
                            <TooltipContent>
-                              <p>{"Limit Reached"}</p>
+                              <p>{"Limite de organizações atingido"}</p>
                            </TooltipContent>
                         )}
                      </Tooltip>

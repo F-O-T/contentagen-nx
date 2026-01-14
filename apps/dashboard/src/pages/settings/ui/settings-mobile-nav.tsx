@@ -5,28 +5,28 @@ import { useActiveOrganization } from "@/hooks/use-active-organization";
 
 const settingsNavItems = [
    {
-      description: "Description",
+      description: "Gerencie seu nome, email e foto",
       href: "/$slug/settings/profile",
       icon: User,
       id: "profile",
       title: "Perfil",
    },
    {
-      description: "Description",
+      description: "Senha e autenticação em dois fatores",
       href: "/$slug/settings/security",
       icon: Shield,
       id: "security",
       title: "Segurança",
    },
    {
-      description: "Description",
+      description: "Tema, idioma e privacidade",
       href: "/$slug/settings/preferences",
       icon: Settings2,
       id: "preferences",
       title: "Preferências",
    },
    {
-      description: "Description",
+      description: "Plano e método de pagamento",
       href: "/$slug/settings/billing",
       icon: CreditCard,
       id: "billing",

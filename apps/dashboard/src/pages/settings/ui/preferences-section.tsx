@@ -91,8 +91,8 @@ function PreferencesSectionErrorFallback(props: FallbackProps) {
          </CardHeader>
          <CardContent>
             {createErrorFallback({
-               errorDescription: "Description",
-               errorTitle: "Title",
+               errorDescription: "Não foi possível carregar suas preferências",
+               errorTitle: "Erro ao Carregar",
                retryText: "Tentar novamente",
             })(props)}
          </CardContent>
@@ -183,7 +183,9 @@ function AppearanceCard() {
       <Card className="h-full">
          <CardHeader>
             <CardTitle>{"Preferências"}</CardTitle>
-            <CardDescription>{"Description"}</CardDescription>
+            <CardDescription>
+               {"Personalize a aparência da interface"}
+            </CardDescription>
          </CardHeader>
          <CardContent>
             <ItemGroup>
@@ -240,33 +242,35 @@ function PrivacyCard({
    return (
       <Card className="h-full">
          <CardHeader>
-            <CardTitle>{"Title"}</CardTitle>
-            <CardDescription>{"Description"}</CardDescription>
+            <CardTitle>{"Privacidade"}</CardTitle>
+            <CardDescription>
+               {"Controle como seus dados são utilizados"}
+            </CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
             <div className="rounded-lg bg-secondary/50 p-4 text-center">
                <p className="text-xs md:text-sm text-muted-foreground mb-1">
-                  {"Telemetry Status"}
+                  {"Status da Telemetria"}
                </p>
                <div className="flex items-center justify-center gap-2">
                   {hasConsent ? (
                      <>
                         <Shield className="size-5 text-green-500" />
                         <span className="text-lg font-semibold text-green-500">
-                           {"Enabled"}
+                           {"Ativada"}
                         </span>
                      </>
                   ) : (
                      <>
                         <Shield className="size-5 text-muted-foreground" />
                         <span className="text-lg font-semibold text-muted-foreground">
-                           {"Disabled"}
+                           {"Desativada"}
                         </span>
                      </>
                   )}
                </div>
                <Badge className="mt-2" variant="secondary">
-                  {hasConsent ? "Sharing Data" : "Private Data"}
+                  {hasConsent ? "Compartilhando Dados" : "Dados Privados"}
                </Badge>
             </div>
 
@@ -276,14 +280,16 @@ function PrivacyCard({
                      <Activity className="size-4" />
                   </ItemMedia>
                   <ItemContent className="min-w-0">
-                     <ItemTitle>{"Title"}</ItemTitle>
+                     <ItemTitle>{"Telemetria"}</ItemTitle>
                      <ItemDescription className="line-clamp-2">
-                        {"Description"}
+                        {
+                           "Ajude-nos a melhorar compartilhando dados de uso anônimos"
+                        }
                      </ItemDescription>
                   </ItemContent>
                   <ItemActions>
                      <Switch
-                        aria-label={"Title"}
+                        aria-label={"Telemetria"}
                         checked={hasConsent}
                         disabled={isPending}
                         onCheckedChange={onConsentChange}

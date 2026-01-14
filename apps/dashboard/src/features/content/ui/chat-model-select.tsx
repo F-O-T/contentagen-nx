@@ -17,13 +17,13 @@ const models = [
       value: "anthropic/claude-haiku-4.5" as const,
       label: "Claude Haiku 4.5",
       icon: Cpu,
-      description: "Fast & capable",
+      description: "Rápido e versátil",
    },
    {
       value: "mistralai/mistral-small-creative" as const,
       label: "Mistral Small",
       icon: Sparkles,
-      description: "Creative writing",
+      description: "Escrita criativa",
    },
 ] as const;
 

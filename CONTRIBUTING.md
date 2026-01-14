@@ -19,7 +19,7 @@
 - Translate UI text, error messages, help docs
 
 ### ✨ Features & Docs
-- Suggest finance tracking features and workflow improvements
+- Suggest content creation features and workflow improvements
 - Improve documentation and examples
 
 ## Project Structure

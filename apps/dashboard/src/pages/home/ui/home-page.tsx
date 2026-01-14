@@ -9,7 +9,7 @@ import { HomeRecentContentSection } from "./home-recent-content-section";
 
 function HomePageErrorFallback(props: FallbackProps) {
    return createErrorFallback({
-      errorDescription: "Description",
+      errorDescription: "Não foi possível carregar o painel",
       errorTitle: "Erro ao carregar painel",
       retryText: "Tentar novamente",
    })(props);
