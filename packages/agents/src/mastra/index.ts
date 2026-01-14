@@ -45,6 +45,7 @@ export const mastra = new Mastra({
    },
    vectors: vectorsConfig,
    bundler: {
+      externals: ["react-dom", "@logtail/pino", "pino"],
       transpilePackages: [
          "@packages/files/client",
          "@packages/environment/helpers",
