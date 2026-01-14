@@ -1,6 +1,5 @@
 import { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
-import { PinoLogger } from "@mastra/loggers";
 import type { PgVector } from "@mastra/pg";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { fimAgent } from "./agents/fim-agent";
@@ -56,10 +55,6 @@ export const mastra = new Mastra({
          "@packages/utils/text",
       ],
    },
-   logger: new PinoLogger({
-      level: "info",
-      name: "Mastra",
-   }),
 });
 
 export function createRequestContext(context: CustomRequestContext) {
