@@ -106,13 +106,11 @@ WORKDIR /app/libraries/content-analysis
 RUN bun run build
 WORKDIR /app
 
-RUN bun build \                                                                                                                                                                                                               
-    --minify-whitespace \                                                                                                                                                                                                     
-    --minify-syntax \                                                                                                                                                                                                         
-    --target bun \                                                                                                                                                                                                            
-    --external react-dom \                                                                                                                                                                                                    
-    --external @mastra/core \                                                                                                                                                                                                 
-    --outfile ./dist/index.js \                                                                                                                                                                                               
+RUN bun build \
+    --minify-whitespace \
+    --minify-syntax \
+    --target bun \
+    --outfile ./dist/index.js \
     ./apps/server/src/index.ts  
 
 FROM oven/bun:alpine AS runner
