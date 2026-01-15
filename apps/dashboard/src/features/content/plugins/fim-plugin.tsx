@@ -37,7 +37,7 @@ import { useFIMCompletion } from "../hooks/use-fim-completion";
 import { detectDiffType } from "../hooks/use-fim-diff";
 import { detectFIMMode } from "../hooks/use-fim-mode";
 import { type TriggerContext, useFIMTriggers } from "../hooks/use-fim-triggers";
-import { checkCompletionSpelling } from "../lib/spell-checker";
+import { checkCompletionSpelling } from "../lib/spell-checker-client";
 import {
    $createGhostTextNode,
    $isGhostTextNode,

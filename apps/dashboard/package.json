@@ -41,7 +41,7 @@
     "@trpc/client": "catalog:trpc",
     "@trpc/tanstack-react-query": "catalog:trpc",
     "@xyflow/react": "^12.10.0",
-    "dictionary-pt": "^4.0.0",
+    "@f-o-t/spelling": "workspace:*",
     "framer-motion": "catalog:ui",
     "lexical": "^0.39.0",
     "lucide-react": "^0.556.0",
@@ -54,7 +54,6 @@
     "remark-gfm": "^4.0.1",
     "sonner": "catalog:ui",
     "tailwindcss": "catalog:ui",
-    "typo-js": "^1.3.1",
     "vite-tsconfig-paths": "catalog:vite",
     "zod": "catalog:validation"
   },

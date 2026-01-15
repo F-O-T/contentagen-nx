@@ -8,6 +8,9 @@
    "exclude": ["**/*.test.ts", "**/__tests__/**", "node_modules"],
    "references": [
     {
+      "path": "../posthog/tsconfig.lib.json"
+    },
+    {
       "path": "../transactional/tsconfig.lib.json"
     },
     {
