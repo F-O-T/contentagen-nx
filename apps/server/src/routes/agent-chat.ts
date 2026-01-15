@@ -171,7 +171,7 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
             brandId: organizationId,
             writerId: contentWriterId ?? undefined,
             mode: (mode as ChatMode) || "plan",
-            model: (model as ModelId) || "x-ai/grok-4.1-fast",
+            model: (model as ModelId) || "openrouter/minimax/minimax-m2.1",
             activePlan:
                mode === "writer" ? (planContext as ContentPlan) : undefined,
             writerInstructions,

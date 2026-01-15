@@ -14,9 +14,8 @@ export type ChatMode = "plan" | "writer";
 
 // Available models
 export type ModelId =
-   | "x-ai/grok-4.1-fast"
-   | "z-ai/glm-4.7"
-   | "mistralai/mistral-small-creative";
+   | "openrouter/minimax/minimax-m2.1"
+   | "openrouter/mistralai/mistral-small-creative";
 
 export type CustomRequestContext = {
    brandId?: string;

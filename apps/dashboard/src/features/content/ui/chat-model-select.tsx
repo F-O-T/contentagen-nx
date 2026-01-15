@@ -14,13 +14,13 @@ import {
 
 const models = [
    {
-      value: "anthropic/claude-haiku-4.5" as const,
-      label: "Claude Haiku 4.5",
+      value: "openrouter/minimax/minimax-m2.1" as const,
+      label: "MiniMax M2.1",
       icon: Cpu,
       description: "Rápido e versátil",
    },
    {
-      value: "mistralai/mistral-small-creative" as const,
+      value: "openrouter/mistralai/mistral-small-creative" as const,
       label: "Mistral Small",
       icon: Sparkles,
       description: "Escrita criativa",

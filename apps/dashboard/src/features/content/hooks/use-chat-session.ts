@@ -293,9 +293,9 @@ export function useChatSession(
             documentContext,
             mode: currentMode,
             model:
-               model === "mistralai/mistral-small-creative"
-                  ? "mistralai/mistral-small-creative"
-                  : "x-ai/grok-4.1-fast",
+               model === "openrouter/mistralai/mistral-small-creative"
+                  ? "openrouter/mistralai/mistral-small-creative"
+                  : "openrouter/minimax/minimax-m2.1",
             planContext: effectivePlanContext || undefined,
          };
 

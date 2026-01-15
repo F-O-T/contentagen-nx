@@ -29,8 +29,8 @@ export interface ActivePlan {
 }
 export type ChatMode = "plan" | "writer";
 export type ChatModel =
-   | "anthropic/claude-haiku-4.5"
-   | "mistralai/mistral-small-creative";
+   | "openrouter/minimax/minimax-m2.1"
+   | "openrouter/mistralai/mistral-small-creative";
 export type ToolCallStatus = "pending" | "executing" | "completed" | "error";
 
 export interface SelectionContext {
@@ -154,7 +154,7 @@ interface ChatState {
 const initialState: ChatState = {
    phase: "idle",
    mode: "writer", // Default to writer mode (safer for all tiers, page can override for Pro)
-   model: "anthropic/claude-haiku-4.5",
+   model: "openrouter/minimax/minimax-m2.1",
    isOpen: false,
    sessionId: null,
    contentId: null,
