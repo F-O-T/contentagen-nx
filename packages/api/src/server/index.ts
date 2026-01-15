@@ -1,12 +1,11 @@
 import type { AuthInstance } from "@packages/authentication/server";
 import type { DatabaseInstance } from "@packages/database/client";
 import type { MinioClient } from "@packages/files/client";
+import type { PostHog } from "@packages/posthog/server";
 import type { StripeClient } from "@packages/stripe";
 import type { ResendClient } from "@packages/transactional/client";
-import type { PostHog } from "@packages/posthog/server";
 import { accountRouter } from "./routers/account";
 import { accountDeletionRouter } from "./routers/account-deletion";
-import { writerRouter } from "./routers/writer";
 import { billingRouter } from "./routers/billing";
 import { contentRouter } from "./routers/content";
 import { onboardingRouter } from "./routers/onboarding";
@@ -16,6 +15,7 @@ import { organizationTeamsRouter } from "./routers/organization-teams";
 import { permissionsRouter } from "./routers/permissions";
 import { sessionRouter } from "./routers/session";
 import { usageRouter } from "./routers/usage";
+import { writerRouter } from "./routers/writer";
 import { createTRPCContext as createTRPCContextInternal, router } from "./trpc";
 
 export const appRouter = router({

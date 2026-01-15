@@ -10,9 +10,9 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { writer } from "./writer";
 import { member, organization } from "./auth";
 import { relatedContent } from "./related-content";
+import { writer } from "./writer";
 
 // Content status enum (traditional CMS flow)
 export const contentStatusEnum = pgEnum("content_status", [

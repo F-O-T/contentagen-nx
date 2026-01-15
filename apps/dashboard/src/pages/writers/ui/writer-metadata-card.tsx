@@ -66,10 +66,10 @@ export function WriterMetadataCard({ writer }: WriterMetadataCardProps) {
             {/* Photo and Name Section */}
             <div className="flex flex-col items-center text-center gap-4">
                <WriterPhotoUpload
-                  writerId={writer.id}
                   currentPhotoUrl={writer.profilePhotoUrl}
                   name={writer.personaConfig.metadata.name}
                   size="lg"
+                  writerId={writer.id}
                />
                <div>
                   <h3 className="text-lg font-semibold">

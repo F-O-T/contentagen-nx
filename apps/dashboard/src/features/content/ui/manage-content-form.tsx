@@ -277,8 +277,8 @@ export const ManageContentForm: FC<ManageContentFormProps> = ({
          <ErrorBoundary FallbackComponent={ManageContentErrorFallback}>
             <Suspense fallback={<ManageContentSkeleton />}>
                <ManageContentFormContent
-                  writerId={writerId}
                   forceManual={forceManual}
+                  writerId={writerId}
                />
             </Suspense>
          </ErrorBoundary>

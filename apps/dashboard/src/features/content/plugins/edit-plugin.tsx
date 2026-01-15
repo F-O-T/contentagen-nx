@@ -1,10 +1,10 @@
 "use client";
 
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
    $convertFromMarkdownString,
    $convertToMarkdownString,
 } from "@lexical/markdown";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
    $getRoot,
    $getSelection,
@@ -17,6 +17,7 @@ import {
 } from "lexical";
 import { useCallback, useEffect, useRef } from "react";
 import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
+import { showDiff } from "../context/diff-context";
 import {
    appendEditStreamedText,
    cancelEdit,
@@ -26,7 +27,6 @@ import {
    startEditStreaming,
    useEditContext,
 } from "../context/edit-context";
-import { showDiff } from "../context/diff-context";
 import { useEditCompletion } from "../hooks/use-edit-completion";
 import { $isGhostTextNode } from "../nodes/ghost-text-node";
 import { EXTENDED_TRANSFORMERS } from "../ui/content-editor";

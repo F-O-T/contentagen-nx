@@ -1,10 +1,10 @@
 "use client";
 
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
    $convertFromMarkdownString,
    $convertToMarkdownString,
 } from "@lexical/markdown";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
    $createTextNode,
    $getRoot,
@@ -49,10 +49,10 @@ import {
    type FIMChunkMetadata,
    type FIMTriggerType,
 } from "../types/streaming-schemas";
+import { EXTENDED_TRANSFORMERS } from "../ui/content-editor";
 import { FIMDiffPanel } from "../ui/fim-diff-panel";
 import { FIMFloatingPanel } from "../ui/fim-floating-panel";
 import { FIMStatusLine } from "../ui/fim-status-line";
-import { EXTENDED_TRANSFORMERS } from "../ui/content-editor";
 
 // Max chain depth to prevent infinite loops
 const MAX_CHAIN_DEPTH = 5;
@@ -342,70 +342,93 @@ export function FIMPlugin({ containerRef }: FIMPluginProps) {
       $acceptGhostText,
    ]);
 
+   // Batched ghost text updates - accumulate chunks and flush on next frame
+   const pendingChunksRef = useRef<string[]>([]);
+   const rafIdRef = useRef<number | null>(null);
+
+   // Flush accumulated chunks in a single DOM update
+   const flushGhostText = useCallback(() => {
+      rafIdRef.current = null;
+
+      if (pendingChunksRef.current.length === 0) return;
+
+      const accumulatedText = pendingChunksRef.current.join("");
+      pendingChunksRef.current = [];
+
+      const shouldInsertInline =
+         currentModeRef.current === "copilot" || !isManualTriggerRef.current;
+
+      if (!shouldInsertInline) return;
+
+      editor.update(
+         () => {
+            const currentId = completionIdRef.current;
+            if (!currentId) return;
+
+            const root = $getRoot();
+
+            const findGhostNode = (
+               node: LexicalNode,
+            ): GhostTextNode | null => {
+               if (
+                  $isGhostTextNode(node) &&
+                  node.getUUID() === currentId
+               ) {
+                  return node;
+               }
+               if ("getChildren" in node) {
+                  const children = (
+                     node as { getChildren: () => LexicalNode[] }
+                  ).getChildren();
+                  for (const child of children) {
+                     const found = findGhostNode(child);
+                     if (found) return found;
+                  }
+               }
+               return null;
+            };
+
+            const existingGhost = findGhostNode(root);
+
+            if (existingGhost) {
+               const newText = existingGhost.getTextContent() + accumulatedText;
+               const newGhost = $createGhostTextNode(newText, currentId);
+               existingGhost.replace(newGhost as LexicalNode);
+               newGhost.selectPrevious();
+            } else {
+               const selection = $getSelection();
+               if (
+                  $isRangeSelection(selection) &&
+                  selection.isCollapsed()
+               ) {
+                  const ghostNode = $createGhostTextNode(
+                     accumulatedText,
+                     currentId,
+                  );
+                  selection.insertNodes([ghostNode as LexicalNode]);
+                  ghostNode.selectPrevious();
+               }
+            }
+         },
+         { tag: "fim-ghost-batch" },
+      );
+   }, [editor]);
+
    // Stable callbacks for useFIMCompletion
    const handleChunk = useCallback(
       (chunk: string) => {
+         // Update state immediately (fast)
          appendGhostText(chunk);
 
-         const shouldInsertInline =
-            currentModeRef.current === "copilot" || !isManualTriggerRef.current;
+         // Accumulate chunk for batched DOM update
+         pendingChunksRef.current.push(chunk);
 
-         if (shouldInsertInline) {
-            editor.update(
-               () => {
-                  const currentId = completionIdRef.current;
-                  if (!currentId) return;
-
-                  const root = $getRoot();
-
-                  const findGhostNode = (
-                     node: LexicalNode,
-                  ): GhostTextNode | null => {
-                     if (
-                        $isGhostTextNode(node) &&
-                        node.getUUID() === currentId
-                     ) {
-                        return node;
-                     }
-                     if ("getChildren" in node) {
-                        const children = (
-                           node as { getChildren: () => LexicalNode[] }
-                        ).getChildren();
-                        for (const child of children) {
-                           const found = findGhostNode(child);
-                           if (found) return found;
-                        }
-                     }
-                     return null;
-                  };
-
-                  const existingGhost = findGhostNode(root);
-
-                  if (existingGhost) {
-                     const newText = existingGhost.getTextContent() + chunk;
-                     const newGhost = $createGhostTextNode(newText, currentId);
-                     existingGhost.replace(newGhost as LexicalNode);
-                     newGhost.selectPrevious();
-                  } else {
-                     const selection = $getSelection();
-                     if (
-                        $isRangeSelection(selection) &&
-                        selection.isCollapsed()
-                     ) {
-                        const ghostNode = $createGhostTextNode(
-                           chunk,
-                           currentId,
-                        );
-                        selection.insertNodes([ghostNode as LexicalNode]);
-                        ghostNode.selectPrevious();
-                     }
-                  }
-               },
-               { tag: "fim-ghost-insert" },
-            );
+         // Schedule batched DOM update on next frame
+         if (rafIdRef.current === null) {
+            rafIdRef.current = requestAnimationFrame(flushGhostText);
          }
       },
-      [editor],
+      [flushGhostText],
    );
 
    const handleComplete = useCallback(
@@ -721,6 +744,12 @@ export function FIMPlugin({ containerRef }: FIMPluginProps) {
          cancelTriggers();
          cancelCompletion();
          clearFIM();
+         // Cancel any pending batched ghost text update
+         if (rafIdRef.current !== null) {
+            cancelAnimationFrame(rafIdRef.current);
+            rafIdRef.current = null;
+         }
+         pendingChunksRef.current = [];
       };
    }, [cancelTriggers, cancelCompletion]);
 

@@ -33,12 +33,68 @@ export interface AIUsageStats {
 }
 
 /**
+ * Daily usage statistics for trend charts
+ */
+export interface DailyUsageStats {
+   date: string; // YYYY-MM-DD
+   requests: number;
+   inputTokens: number;
+   outputTokens: number;
+   totalTokens: number;
+}
+
+/**
+ * Acceptance rate statistics for AI suggestions
+ */
+export interface AcceptanceRateStats {
+   feature: "fim" | "edit";
+   shown: number;
+   accepted: number;
+   rejected: number;
+   acceptanceRate: number; // 0-100 percentage
+}
+
+/**
+ * Previous month statistics for comparison
+ */
+export interface PreviousMonthStats {
+   totalRequests: number;
+   totalTokens: number;
+}
+
+/**
+ * Comparison percentages between current and previous month
+ */
+export interface ComparisonStats {
+   requestsChange: number; // percentage change
+   tokensChange: number; // percentage change
+}
+
+/**
+ * Extended AI usage statistics with charts data
+ */
+export interface ExtendedAIUsageStats extends AIUsageStats {
+   dailyUsage: DailyUsageStats[];
+   acceptanceRates: AcceptanceRateStats[];
+   previousMonth: PreviousMonthStats;
+   comparison: ComparisonStats;
+}
+
+/**
  * Parameters for querying AI usage
  */
 export interface QueryUsageParams {
    organizationId: string;
    startDate: Date;
    endDate: Date;
+}
+
+/**
+ * Extended parameters including previous month for comparison
+ */
+export interface ExtendedQueryUsageParams extends QueryUsageParams {
+   previousMonthStart: Date;
+   previousMonthEnd: Date;
 }
 
 /**
@@ -100,7 +156,9 @@ export async function queryAIUsage(
 
    if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`PostHog query failed: ${response.statusText} - ${errorText}`);
+      throw new Error(
+         `PostHog query failed: ${response.statusText} - ${errorText}`,
+      );
    }
 
    const result = (await response.json()) as {
@@ -146,7 +204,7 @@ function transformQueryResult(
    if (!row) {
       return emptyStats;
    }
-   
+
    const columns = result.columns || [];
 
    // Create a map of column name to value
@@ -187,5 +245,289 @@ function transformQueryResult(
             totalTokens: data.plan_tokens || 0,
          },
       },
+   };
+}
+
+/**
+ * Execute a HogQL query against PostHog
+ */
+async function executeHogQLQuery(
+   posthogHost: string,
+   posthogApiKey: string,
+   projectId: string,
+   query: string,
+): Promise<{ results?: unknown[][]; columns?: string[] }> {
+   const response = await fetch(
+      `${posthogHost}/api/projects/${projectId}/query/`,
+      {
+         method: "POST",
+         headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${posthogApiKey}`,
+         },
+         body: JSON.stringify({
+            query: {
+               kind: "HogQLQuery",
+               query,
+            },
+         }),
+      },
+   );
+
+   if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(
+         `PostHog query failed: ${response.statusText} - ${errorText}`,
+      );
+   }
+
+   return response.json() as Promise<{
+      results?: unknown[][];
+      columns?: string[];
+   }>;
+}
+
+/**
+ * Query daily usage breakdown from PostHog events
+ */
+export async function queryDailyUsage(
+   posthogHost: string,
+   posthogApiKey: string,
+   projectId: string,
+   params: QueryUsageParams,
+): Promise<DailyUsageStats[]> {
+   const { organizationId, startDate, endDate } = params;
+
+   const query = `
+      SELECT
+         toDate(timestamp) as date,
+         count(*) as requests,
+         sum(toInt64OrNull(properties.inputTokens)) as input_tokens,
+         sum(toInt64OrNull(properties.outputTokens)) as output_tokens,
+         sum(toInt64OrNull(properties.totalTokens)) as total_tokens
+      FROM events
+      WHERE 
+         event IN ('llm_fim_generated', 'llm_edit_generated', 'llm_chat_response_complete', 'llm_plan_created')
+         AND properties.$group_organization = '${organizationId}'
+         AND timestamp >= toDateTime('${startDate.toISOString()}')
+         AND timestamp < toDateTime('${endDate.toISOString()}')
+      GROUP BY date
+      ORDER BY date
+   `;
+
+   const result = await executeHogQLQuery(
+      posthogHost,
+      posthogApiKey,
+      projectId,
+      query,
+   );
+
+   if (!result.results || result.results.length === 0) {
+      return [];
+   }
+
+   const columns = result.columns || [];
+   return result.results.map((row) => {
+      const data: Record<string, unknown> = {};
+      columns.forEach((col, idx) => {
+         data[col as string] = row[idx];
+      });
+
+      return {
+         date: String(data.date || ""),
+         requests: Number(data.requests) || 0,
+         inputTokens: Number(data.input_tokens) || 0,
+         outputTokens: Number(data.output_tokens) || 0,
+         totalTokens: Number(data.total_tokens) || 0,
+      };
+   });
+}
+
+/**
+ * Query acceptance rates for FIM and Edit features
+ */
+export async function queryAcceptanceRates(
+   posthogHost: string,
+   posthogApiKey: string,
+   projectId: string,
+   params: QueryUsageParams,
+): Promise<AcceptanceRateStats[]> {
+   const { organizationId, startDate, endDate } = params;
+
+   // Query FIM acceptance stats
+   const fimQuery = `
+      SELECT
+         countIf(event = 'llm_fim_shown') as shown,
+         countIf(event = 'llm_fim_accepted') as accepted,
+         countIf(event = 'llm_fim_rejected') as rejected
+      FROM events
+      WHERE 
+         event IN ('llm_fim_shown', 'llm_fim_accepted', 'llm_fim_rejected')
+         AND properties.$group_organization = '${organizationId}'
+         AND timestamp >= toDateTime('${startDate.toISOString()}')
+         AND timestamp < toDateTime('${endDate.toISOString()}')
+   `;
+
+   // Query Edit acceptance stats
+   const editQuery = `
+      SELECT
+         countIf(event = 'llm_edit_requested') as shown,
+         countIf(event = 'llm_edit_accepted') as accepted,
+         countIf(event = 'llm_edit_rejected') as rejected
+      FROM events
+      WHERE 
+         event IN ('llm_edit_requested', 'llm_edit_accepted', 'llm_edit_rejected')
+         AND properties.$group_organization = '${organizationId}'
+         AND timestamp >= toDateTime('${startDate.toISOString()}')
+         AND timestamp < toDateTime('${endDate.toISOString()}')
+   `;
+
+   const [fimResult, editResult] = await Promise.all([
+      executeHogQLQuery(posthogHost, posthogApiKey, projectId, fimQuery),
+      executeHogQLQuery(posthogHost, posthogApiKey, projectId, editQuery),
+   ]);
+
+   const parseResult = (
+      result: { results?: unknown[][]; columns?: string[] },
+      feature: "fim" | "edit",
+   ): AcceptanceRateStats => {
+      if (!result.results || result.results.length === 0) {
+         return {
+            feature,
+            shown: 0,
+            accepted: 0,
+            rejected: 0,
+            acceptanceRate: 0,
+         };
+      }
+
+      const row = result.results[0];
+      const columns = result.columns || [];
+      const data: Record<string, number> = {};
+      columns.forEach((col, idx) => {
+         data[col as string] = Number(row?.[idx]) || 0;
+      });
+
+      const shown = data.shown || 0;
+      const accepted = data.accepted || 0;
+      const rejected = data.rejected || 0;
+      const acceptanceRate = shown > 0 ? (accepted / shown) * 100 : 0;
+
+      return { feature, shown, accepted, rejected, acceptanceRate };
+   };
+
+   return [parseResult(fimResult, "fim"), parseResult(editResult, "edit")];
+}
+
+/**
+ * Query previous month usage for comparison
+ */
+export async function queryPreviousMonth(
+   posthogHost: string,
+   posthogApiKey: string,
+   projectId: string,
+   organizationId: string,
+   previousMonthStart: Date,
+): Promise<PreviousMonthStats> {
+   const query = `
+      SELECT
+         total_requests,
+         total_tokens
+      FROM llm_usage_monthly
+      WHERE organization_id = '${organizationId}'
+        AND month = toStartOfMonth(toDateTime('${previousMonthStart.toISOString()}'))
+   `;
+
+   const result = await executeHogQLQuery(
+      posthogHost,
+      posthogApiKey,
+      projectId,
+      query,
+   );
+
+   if (!result.results || result.results.length === 0) {
+      return { totalRequests: 0, totalTokens: 0 };
+   }
+
+   const row = result.results[0];
+   const columns = result.columns || [];
+   const data: Record<string, number> = {};
+   columns.forEach((col, idx) => {
+      data[col as string] = Number(row?.[idx]) || 0;
+   });
+
+   return {
+      totalRequests: data.total_requests || 0,
+      totalTokens: data.total_tokens || 0,
+   };
+}
+
+/**
+ * Calculate percentage change between two values
+ */
+function calculatePercentageChange(current: number, previous: number): number {
+   if (previous === 0) {
+      return current > 0 ? 100 : 0;
+   }
+   return ((current - previous) / previous) * 100;
+}
+
+/**
+ * Query extended AI usage statistics including charts data
+ * Combines monthly totals, daily breakdown, acceptance rates, and comparison
+ */
+export async function queryExtendedUsage(
+   posthogHost: string,
+   posthogApiKey: string,
+   projectId: string,
+   params: ExtendedQueryUsageParams,
+): Promise<ExtendedAIUsageStats> {
+   const { organizationId, startDate, endDate, previousMonthStart } = params;
+
+   // Run all queries in parallel for efficiency
+   const [baseStats, dailyUsage, acceptanceRates, previousMonth] =
+      await Promise.all([
+         queryAIUsage(posthogHost, posthogApiKey, projectId, {
+            organizationId,
+            startDate,
+            endDate,
+         }),
+         queryDailyUsage(posthogHost, posthogApiKey, projectId, {
+            organizationId,
+            startDate,
+            endDate,
+         }),
+         queryAcceptanceRates(posthogHost, posthogApiKey, projectId, {
+            organizationId,
+            startDate,
+            endDate,
+         }),
+         queryPreviousMonth(
+            posthogHost,
+            posthogApiKey,
+            projectId,
+            organizationId,
+            previousMonthStart,
+         ),
+      ]);
+
+   // Calculate comparison percentages
+   const comparison: ComparisonStats = {
+      requestsChange: calculatePercentageChange(
+         baseStats.totalRequests,
+         previousMonth.totalRequests,
+      ),
+      tokensChange: calculatePercentageChange(
+         baseStats.totalTokens,
+         previousMonth.totalTokens,
+      ),
+   };
+
+   return {
+      ...baseStats,
+      dailyUsage,
+      acceptanceRates,
+      previousMonth,
+      comparison,
    };
 }

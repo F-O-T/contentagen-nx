@@ -1,6 +1,5 @@
 "use client";
 
-import { $convertToMarkdownString } from "@lexical/markdown";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
    $getRoot,
@@ -11,6 +10,7 @@ import {
 } from "lexical";
 import { useCallback, useEffect } from "react";
 import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import {
    openChatSidebar,
    setDocumentContent,
@@ -19,7 +19,6 @@ import {
    useChatState,
 } from "../context/chat-context";
 import { $isGhostTextNode } from "../nodes/ghost-text-node";
-import { EXTENDED_TRANSFORMERS } from "../ui/content-editor";
 
 /**
  * Chat Plugin for Ctrl+L sidebar chat.
@@ -57,15 +56,31 @@ export function ChatPlugin() {
       return "";
    }, []);
 
-   // Sync document content to chat state on every change (as markdown for analysis)
+   // Debounced content sync - 300ms delay (chat doesn't need real-time sync)
+   const { call: debouncedSyncContent, cancel: cancelDebounce } =
+      useDebouncedCallback(
+         (text: string) => {
+            setDocumentContent(text);
+         },
+         300,
+      );
+
+   // Sync document content to chat state (plain text is sufficient for AI context)
    useEffect(() => {
-      return editor.registerUpdateListener(({ editorState }) => {
+      const unregister = editor.registerUpdateListener(({ editorState }) => {
          editorState.read(() => {
-            const markdown = $convertToMarkdownString(EXTENDED_TRANSFORMERS);
-            setDocumentContent(markdown);
+            // Use plain text instead of expensive markdown conversion
+            const root = $getRoot();
+            const text = getTextWithoutGhost(root);
+            debouncedSyncContent(text);
          });
       });
-   }, [editor]);
+
+      return () => {
+         unregister();
+         cancelDebounce();
+      };
+   }, [editor, debouncedSyncContent, cancelDebounce, getTextWithoutGhost]);
 
    // Get document text and selection context
    const getDocumentContext = useCallback(() => {

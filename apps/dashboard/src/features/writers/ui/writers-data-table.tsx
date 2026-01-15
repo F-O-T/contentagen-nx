@@ -189,7 +189,9 @@ export function WritersDataTable({
                   </EmptyMedia>
                   <EmptyTitle>{"Nenhum escritor ainda"}</EmptyTitle>
                   <EmptyDescription>
-                     {"Crie seu primeiro escritor IA para começar a gerar conteúdo"}
+                     {
+                        "Crie seu primeiro escritor IA para começar a gerar conteúdo"
+                     }
                   </EmptyDescription>
                </EmptyContent>
             </Empty>

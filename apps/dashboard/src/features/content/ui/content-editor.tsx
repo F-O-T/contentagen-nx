@@ -30,16 +30,15 @@ import { HorizontalRulePlugin } from "@lexical/react/LexicalHorizontalRulePlugin
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
-import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { TooltipProvider } from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
-import { $getRoot, type EditorState, type LexicalEditor } from "lexical";
+import { $getRoot, type LexicalEditor } from "lexical";
 import { useCallback, useEffect, useRef } from "react";
-import { setDiagnostics } from "../context/diagnostics-context";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { GhostTextNode } from "../nodes/ghost-text-node";
 import { $createImageNode, $isImageNode, ImageNode } from "../nodes/image-node";
 import { ChatPlugin } from "../plugins/chat-plugin";
@@ -48,19 +47,9 @@ import { EditPlugin } from "../plugins/edit-plugin";
 import { FIMPlugin } from "../plugins/fim-plugin";
 import { FloatingToolbarPlugin } from "../plugins/floating-toolbar-plugin";
 import { MarkdownPastePlugin } from "../plugins/markdown-paste-plugin";
-import { SeoPlugin } from "../plugins/seo-plugin";
 import { SpellingPlugin } from "../plugins/spelling-plugin";
 import { EditorStatusline } from "./editor-statusline";
 import { SpellingErrorDecorator } from "./spelling-error-decorator";
-
-type ContentEditorMeta = {
-   /** Content title for SEO analysis */
-   title?: string;
-   /** Meta description for SEO analysis */
-   description?: string;
-   /** Target keywords for SEO analysis */
-   keywords?: string[];
-};
 
 type ContentEditorProps = {
    initialContent?: string;
@@ -69,8 +58,6 @@ type ContentEditorProps = {
    placeholder?: string;
    disabled?: boolean;
    className?: string;
-   /** Metadata for SEO/readability analysis */
-   meta?: ContentEditorMeta;
 };
 
 // Custom transformer for horizontal rule
@@ -355,7 +342,6 @@ export function ContentEditor({
    placeholder = "Start writing...",
    disabled = false,
    className,
-   meta,
 }: ContentEditorProps) {
    const editorRef = useRef<LexicalEditor | null>(null);
    const containerRef = useRef<HTMLDivElement>(null);
@@ -385,68 +371,6 @@ export function ContentEditor({
       // Don't set editorState here - we'll initialize via plugin for complex content
    };
 
-   const handleChange = useCallback(
-      (editorState: EditorState) => {
-         if (!onChange) return;
-
-         editorState.read(() => {
-            let markdown = $convertToMarkdownString(EXTENDED_TRANSFORMERS);
-            // Clean up unnecessary escapes that Lexical adds
-            // Only unescape pipes that are not part of tables
-            markdown = markdown.replace(/\\([|])/g, (match, char, offset) => {
-               // Check if this pipe is likely part of a table (at line start/end)
-               const beforeNewline = markdown.lastIndexOf("\n", offset);
-               const afterNewline = markdown.indexOf("\n", offset);
-               const line = markdown.slice(
-                  beforeNewline === -1 ? 0 : beforeNewline + 1,
-                  afterNewline === -1 ? markdown.length : afterNewline,
-               );
-               // If line looks like a table row, keep the escape
-               if (/^\|.*\|$/.test(line.trim())) {
-                  return match;
-               }
-               // Otherwise, unescape
-               return char;
-            });
-
-            // Only trigger save if content actually changed
-            if (markdown !== lastContentRef.current) {
-               lastContentRef.current = markdown;
-               onChange(markdown);
-            }
-         });
-      },
-      [onChange],
-   );
-
-   // Handle SEO analysis results and update diagnostics context
-   const handleSeoAnalysis = useCallback(
-      (result: import("@f-o-t/content-analysis").ContentAnalysisResult) => {
-         setDiagnostics({
-            spelling: [], // Handled by SpellingPlugin
-            grammar: [], // Handled by SpellingPlugin
-            seo: {
-               score: result.seo.score,
-               issues: result.seo.issues.map((issue) => ({
-                  type: issue.type,
-                  message: issue.message,
-                  severity: issue.severity as "error" | "warning" | "info",
-               })),
-            },
-            patterns: result.badPatterns.patterns.map((pattern) => ({
-               pattern: pattern.pattern,
-               message: pattern.suggestion,
-               severity: pattern.severity as "error" | "warning" | "info",
-            })),
-            readability: {
-               score: result.readability.fleschKincaidReadingEase,
-               level: result.readability.readabilityLevel,
-            },
-            checkedAt: new Date(),
-         });
-      },
-      [],
-   );
 
    return (
       <LexicalComposer initialConfig={initialConfig}>
@@ -632,7 +556,7 @@ export function ContentEditor({
                <TablePlugin />
                <MarkdownShortcutPlugin transformers={EXTENDED_TRANSFORMERS} />
                <MarkdownPastePlugin />
-               <OnChangePlugin ignoreSelectionChange onChange={handleChange} />
+               <DebouncedOnChangePlugin onChange={onChange} lastContentRef={lastContentRef} />
                <EditorRefPlugin editorRef={editorRef} />
                <InitializeContentPlugin content={initialContent} />
                <FloatingToolbarPlugin containerRef={containerRef} />
@@ -642,12 +566,6 @@ export function ContentEditor({
                <DiagnosticsPlugin />
                <SpellingPlugin />
                <SpellingErrorDecorator containerRef={containerRef} />
-               <SeoPlugin
-                  description={meta?.description}
-                  onAnalysisComplete={handleSeoAnalysis}
-                  targetKeywords={meta?.keywords}
-                  title={meta?.title}
-               />
                {/* Lualine-style statusline */}
                <EditorStatusline />
             </div>
@@ -701,6 +619,73 @@ function InitializeContentPlugin({ content }: { content: string | undefined }) {
          }
       });
    }, [content, editor]);
+
+   return null;
+}
+
+/**
+ * Custom OnChange plugin that truly defers markdown conversion.
+ * Unlike the standard OnChangePlugin which runs the callback on every update,
+ * this plugin only runs the expensive markdown conversion when debounce fires.
+ */
+function DebouncedOnChangePlugin({
+   onChange,
+   lastContentRef,
+}: {
+   onChange?: (content: string) => void;
+   lastContentRef: React.MutableRefObject<string>;
+}) {
+   const [editor] = useLexicalComposerContext();
+   const pendingRef = useRef(false);
+
+   // This callback runs AFTER debounce - does the expensive conversion
+   const processChange = useCallback(() => {
+      if (!pendingRef.current || !onChange) return;
+      pendingRef.current = false;
+
+      editor.getEditorState().read(() => {
+         let markdown = $convertToMarkdownString(EXTENDED_TRANSFORMERS);
+         // Clean up unnecessary escapes that Lexical adds
+         markdown = markdown.replace(/\\([|])/g, (match, char, offset) => {
+            const beforeNewline = markdown.lastIndexOf("\n", offset);
+            const afterNewline = markdown.indexOf("\n", offset);
+            const line = markdown.slice(
+               beforeNewline === -1 ? 0 : beforeNewline + 1,
+               afterNewline === -1 ? markdown.length : afterNewline,
+            );
+            if (/^\|.*\|$/.test(line.trim())) {
+               return match;
+            }
+            return char;
+         });
+
+         if (markdown !== lastContentRef.current) {
+            lastContentRef.current = markdown;
+            onChange(markdown);
+         }
+      });
+   }, [editor, onChange, lastContentRef]);
+
+   const { call: scheduleProcess, cancel: cancelProcess } = useDebouncedCallback(
+      processChange,
+      150, // Debounce delay
+   );
+
+   useEffect(() => {
+      // This runs on every keystroke - just marks pending, NO conversion
+      const unregister = editor.registerUpdateListener(({ tags }) => {
+         // Skip history merging and other internal updates
+         if (tags.has("history-merge")) return;
+
+         pendingRef.current = true;
+         scheduleProcess();
+      });
+
+      return () => {
+         unregister();
+         cancelProcess();
+      };
+   }, [editor, scheduleProcess, cancelProcess]);
 
    return null;
 }

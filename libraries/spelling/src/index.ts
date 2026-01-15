@@ -8,40 +8,36 @@
  * @packageDocumentation
  */
 
-// Main API
-export { createSpellChecker, type SpellChecker } from "./spell-checker.ts";
-
-// Schemas and types
-export {
-	// Configuration
-	spellCheckerConfigSchema,
-	type SpellCheckerConfig,
-	// Results
-	spellingErrorSchema,
-	type SpellingError,
-	checkResultSchema,
-	type CheckResult,
-	// Parsed data (for browser caching)
-	parsedAffDataSchema,
-	type ParsedAffData,
-	parsedDicDataSchema,
-	type ParsedDicData,
-} from "./schemas.ts";
-
-// Utilities (for advanced usage)
-export {
-	WORD_PATTERN,
-	createWordRegex,
-	extractWords,
-	extractWordsIterator,
-	generateErrorId,
-	shouldIgnoreWord,
-} from "./utils.ts";
-
+export { createDictionary, type Dictionary } from "./dictionary.ts";
 // Hunspell parser (for advanced usage)
 export { parseAffFile, parseDicFile, parseFlags } from "./hunspell-parser.ts";
-
 // Internal factories (for advanced usage and customization)
-export { createCache, type Cache } from "./lru-cache.ts";
-export { createDictionary, type Dictionary } from "./dictionary.ts";
+export { type Cache, createCache } from "./lru-cache.ts";
+// Schemas and types
+export {
+   type CheckResult,
+   checkResultSchema,
+   type ParsedAffData,
+   type ParsedDicData,
+   // Parsed data (for browser caching)
+   parsedAffDataSchema,
+   parsedDicDataSchema,
+   type SpellCheckerConfig,
+   type SpellingError,
+   // Configuration
+   spellCheckerConfigSchema,
+   // Results
+   spellingErrorSchema,
+} from "./schemas.ts";
+// Main API
+export { createSpellChecker, type SpellChecker } from "./spell-checker.ts";
 export { createSuggester, type Suggester } from "./suggester.ts";
+// Utilities (for advanced usage)
+export {
+   createWordRegex,
+   extractWords,
+   extractWordsIterator,
+   generateErrorId,
+   shouldIgnoreWord,
+   WORD_PATTERN,
+} from "./utils.ts";

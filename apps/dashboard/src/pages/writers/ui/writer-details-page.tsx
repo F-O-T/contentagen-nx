@@ -72,50 +72,50 @@ function WriterDetailsPageError({ error }: { error: Error }) {
 }
 
 function WriterDetailsPageContent({ writerId }: WriterDetailsPageProps) {
-	const trpc = useTRPC();
-	const navigate = useNavigate();
-	const { activeOrganization } = useActiveOrganization();
+   const trpc = useTRPC();
+   const navigate = useNavigate();
+   const { activeOrganization } = useActiveOrganization();
 
-	const { data: writer } = useSuspenseQuery(
-		trpc.writer.getById.queryOptions({ id: writerId }),
-	);
+   const { data: writer } = useSuspenseQuery(
+      trpc.writer.getById.queryOptions({ id: writerId }),
+   );
 
-	const handleDeleteSuccess = () => {
-		navigate({
-			params: { slug: activeOrganization.slug },
-			to: "/$slug/writers",
-		});
-	};
+   const handleDeleteSuccess = () => {
+      navigate({
+         params: { slug: activeOrganization.slug },
+         to: "/$slug/writers",
+      });
+   };
 
-	return (
-		<main className="space-y-6">
-			{/* Header */}
-			<DefaultHeader
-				description={"Detalhes do escritor"}
-				title={writer.personaConfig.metadata.name}
-			/>
+   return (
+      <main className="space-y-6">
+         {/* Header */}
+         <DefaultHeader
+            description={"Detalhes do escritor"}
+            title={writer.personaConfig.metadata.name}
+         />
 
-			{/* Action Buttons */}
-			<WriterActionButtons
-				onDeleteSuccess={handleDeleteSuccess}
-				writer={writer}
-			/>
+         {/* Action Buttons */}
+         <WriterActionButtons
+            onDeleteSuccess={handleDeleteSuccess}
+            writer={writer}
+         />
 
-			{/* Main Content Grid */}
-			<div className="grid gap-6 lg:grid-cols-3">
-				{/* Left Column - Metadata */}
-				<div className="lg:col-span-1 space-y-6">
-					<WriterMetadataCard writer={writer} />
-				</div>
+         {/* Main Content Grid */}
+         <div className="grid gap-6 lg:grid-cols-3">
+            {/* Left Column - Metadata */}
+            <div className="lg:col-span-1 space-y-6">
+               <WriterMetadataCard writer={writer} />
+            </div>
 
-				{/* Right Column - Memories & Content */}
-				<div className="lg:col-span-2 space-y-6">
-					<AgentMemoriesCard writerId={writerId} />
-					<WriterContentList writerId={writerId} />
-				</div>
-			</div>
-		</main>
-	);
+            {/* Right Column - Memories & Content */}
+            <div className="lg:col-span-2 space-y-6">
+               <AgentMemoriesCard writerId={writerId} />
+               <WriterContentList writerId={writerId} />
+            </div>
+         </div>
+      </main>
+   );
 }
 
 export function WriterDetailsPage({ writerId }: WriterDetailsPageProps) {

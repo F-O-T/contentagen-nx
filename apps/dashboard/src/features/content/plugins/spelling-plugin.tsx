@@ -2,9 +2,9 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { $getRoot } from "lexical";
 import { useEffect, useRef } from "react";
 import {
+   setGrammarErrors,
    setIsChecking,
    setSpellingErrors,
-   setGrammarErrors,
 } from "@/features/content/context/diagnostics-context";
 import { useSpellingCheck } from "@/features/content/hooks/use-spelling-check";
 
@@ -61,7 +61,7 @@ export function SpellingPlugin() {
                // Only check if text has meaningfully changed
                if (text !== lastTextRef.current && text.length > 20) {
                   lastTextRef.current = text;
-                  
+
                   // Defer first spell check to allow UI to render
                   if (isFirstCheck.current) {
                      isFirstCheck.current = false;

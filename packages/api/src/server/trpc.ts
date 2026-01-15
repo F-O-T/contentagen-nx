@@ -14,13 +14,13 @@ import {
 import { serverEnv } from "@packages/environment/server";
 import type { MinioClient } from "@packages/files/client";
 import { getServerLogger } from "@packages/logging/server";
+import type { PostHog } from "@packages/posthog/server";
 import { captureError, identifyUser, setGroup } from "@packages/posthog/server";
 import type { StripeClient } from "@packages/stripe";
 import type { ResendClient } from "@packages/transactional/client";
 import { APIError } from "@packages/utils/errors";
 import { sanitizeData } from "@packages/utils/sanitization";
 import { initTRPC } from "@trpc/server";
-import type { PostHog } from "@packages/posthog/server";
 import SuperJSON from "superjson";
 
 export type MemberRole = "owner" | "admin" | "member";

@@ -27,13 +27,13 @@ type Writer = {
 };
 
 type WriterActionButtonsProps = {
-	writer: Writer;
-	onDeleteSuccess?: () => void;
+   writer: Writer;
+   onDeleteSuccess?: () => void;
 };
 
 export function WriterActionButtons({
-	writer,
-	onDeleteSuccess,
+   writer,
+   onDeleteSuccess,
 }: WriterActionButtonsProps) {
    const trpc = useTRPC();
    const queryClient = useQueryClient();

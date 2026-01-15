@@ -11,7 +11,6 @@ import { serverEnv } from "@packages/environment/server";
 import type { PostHog } from "@packages/posthog/server";
 import type { StripeClient } from "@packages/stripe";
 import { PlanName } from "@packages/stripe/constants";
-import type Stripe from "stripe";
 import {
    type ResendClient,
    type SendEmailOTPOptions,
@@ -32,6 +31,7 @@ import {
    organization,
    twoFactor,
 } from "better-auth/plugins";
+import type Stripe from "stripe";
 
 // Initialize Redis connection for session caching
 const redis = createRedisConnection(serverEnv.REDIS_URL);
@@ -223,7 +223,8 @@ export const getAuthOptions = (
                      properties: {
                         $currency: invoice.currency.toUpperCase(),
                         $revenue: invoice.amount_paid / 100,
-                        interval: stripeSubscription.items.data[0]?.plan.interval,
+                        interval:
+                           stripeSubscription.items.data[0]?.plan.interval,
                         organization_id: subscription.referenceId,
                         plan_name: subscription.plan,
                         subscription_id: subscription.id,

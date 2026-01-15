@@ -29,7 +29,9 @@ export async function getWriterById(
       return result;
    } catch (err) {
       propagateError(err);
-      throw AppError.database(`Failed to get writer: ${(err as Error).message}`);
+      throw AppError.database(
+         `Failed to get writer: ${(err as Error).message}`,
+      );
    }
 }
 
@@ -75,7 +77,10 @@ export async function updateWriter(
    }
 }
 
-export async function deleteWriter(dbClient: DatabaseInstance, writerId: string) {
+export async function deleteWriter(
+   dbClient: DatabaseInstance,
+   writerId: string,
+) {
    try {
       const result = await dbClient
          .delete(writer)

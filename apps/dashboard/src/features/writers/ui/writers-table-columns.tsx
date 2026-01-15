@@ -54,7 +54,9 @@ export function createWriterColumns(slug: string): ColumnDef<Writer>[] {
                      </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                     <p className="font-medium truncate max-w-[200px]">{name}</p>
+                     <p className="font-medium truncate max-w-[200px]">
+                        {name}
+                     </p>
                      {writer.personaConfig.metadata.description && (
                         <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                            {writer.personaConfig.metadata.description}

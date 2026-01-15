@@ -175,10 +175,10 @@ function ManageWriterFormContent({ writer }: ManageWriterFormProps) {
             {isEditMode && writer && (
                <div className="flex justify-center">
                   <WriterPhotoUpload
-                     writerId={writer.id}
                      currentPhotoUrl={writer.profilePhotoUrl}
                      name={writer.personaConfig.metadata.name}
                      size="lg"
+                     writerId={writer.id}
                   />
                </div>
             )}

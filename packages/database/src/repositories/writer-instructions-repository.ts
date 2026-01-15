@@ -1,12 +1,12 @@
 import { AppError, propagateError } from "@packages/utils/errors";
 import { eq } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
-import { writer } from "../schemas/writer";
 import type {
    CreateInstructionMemory,
    InstructionMemoryItem,
    UpdateInstructionMemory,
 } from "../schemas/instruction-memory";
+import { writer } from "../schemas/writer";
 
 /**
  * Get all instruction memories for a writer.

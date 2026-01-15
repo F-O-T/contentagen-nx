@@ -7,11 +7,7 @@ import {
    parseOptionsSchema,
 } from "./schemas";
 import type { ParseResult } from "./types";
-import {
-   decodeBuffer,
-   detectLineEnding,
-   normalizeLineEndings,
-} from "./utils";
+import { decodeBuffer, detectLineEnding, normalizeLineEndings } from "./utils";
 
 // Union type for any node in the AST
 type AnyNode = MarkdownDocument["root"] | BlockNodeType | InlineNodeType;

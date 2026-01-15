@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
-import { writer, member, organization } from "../schema";
+import { member, organization, writer } from "../schema";
 
 /**
  * Delete organization-scoped data for a specific organization.

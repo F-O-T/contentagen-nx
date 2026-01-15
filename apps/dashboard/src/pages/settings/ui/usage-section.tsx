@@ -27,11 +27,12 @@ import {
 } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
-import {
-   Feature,
-   useFeatureAccess,
-} from "@/hooks/use-feature-access";
+import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 import { trpc } from "@/integrations/clients";
+import { AcceptanceRateChart } from "./usage-charts/acceptance-rate-chart";
+import { UsageComparisonBadge } from "./usage-charts/usage-comparison-badge";
+import { UsageLineChart } from "./usage-charts/usage-line-chart";
+import { UsagePieChart } from "./usage-charts/usage-pie-chart";
 
 // ============================================
 // Helper Functions
@@ -76,6 +77,26 @@ function UsageSectionSkeleton() {
                   </CardContent>
                </Card>
             ))}
+         </div>
+         <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+               <CardHeader>
+                  <Skeleton className="h-6 w-40" />
+                  <Skeleton className="h-4 w-56" />
+               </CardHeader>
+               <CardContent>
+                  <Skeleton className="h-[200px] w-full" />
+               </CardContent>
+            </Card>
+            <Card>
+               <CardHeader>
+                  <Skeleton className="h-6 w-40" />
+                  <Skeleton className="h-4 w-56" />
+               </CardHeader>
+               <CardContent>
+                  <Skeleton className="h-[200px] w-full" />
+               </CardContent>
+            </Card>
          </div>
          <Card>
             <CardHeader>
@@ -122,7 +143,7 @@ function UsageSectionErrorFallback(props: FallbackProps) {
 }
 
 // ============================================
-// Usage Card Component
+// Usage Card Component with Comparison
 // ============================================
 
 interface UsageCardProps {
@@ -130,9 +151,16 @@ interface UsageCardProps {
    title: string;
    value: string;
    subtitle: string;
+   comparisonValue?: number;
 }
 
-function UsageCard({ icon: Icon, title, value, subtitle }: UsageCardProps) {
+function UsageCard({
+   icon: Icon,
+   title,
+   value,
+   subtitle,
+   comparisonValue,
+}: UsageCardProps) {
    return (
       <Card>
          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -141,7 +169,12 @@ function UsageCard({ icon: Icon, title, value, subtitle }: UsageCardProps) {
          </CardHeader>
          <CardContent>
             <div className="text-2xl font-bold">{value}</div>
-            <p className="text-xs text-muted-foreground">{subtitle}</p>
+            <div className="flex items-center justify-between">
+               <p className="text-xs text-muted-foreground">{subtitle}</p>
+               {comparisonValue !== undefined && (
+                  <UsageComparisonBadge value={comparisonValue} />
+               )}
+            </div>
          </CardContent>
       </Card>
    );
@@ -173,7 +206,7 @@ function FeatureUsageRow({
    const percentage = totalRequests > 0 ? (requests / totalRequests) * 100 : 0;
 
    return (
-      <Item variant="muted" className="py-4">
+      <Item className="py-4" variant="muted">
          <ItemMedia variant="icon">
             <Icon className="size-4" />
          </ItemMedia>
@@ -183,8 +216,8 @@ function FeatureUsageRow({
                <Badge variant="secondary">{formatNumber(requests)} req</Badge>
             </div>
             <ItemDescription className="mt-1">
-               {formatTokens(inputTokens)} entrada / {formatTokens(outputTokens)}{" "}
-               saída
+               {formatTokens(inputTokens)} entrada /{" "}
+               {formatTokens(outputTokens)} saída
             </ItemDescription>
             <Progress className="mt-2 h-1.5" value={percentage} />
          </ItemContent>
@@ -231,7 +264,7 @@ function NoAIAccessContent() {
 
 function UsageSectionContent() {
    const { data: usage } = useSuspenseQuery(
-      trpc.usage.getCurrentMonthUsage.queryOptions(),
+      trpc.usage.getExtendedUsage.queryOptions(),
    );
    const { hasFeature } = useFeatureAccess();
 
@@ -251,11 +284,19 @@ function UsageSectionContent() {
    const showChat = hasFeature(Feature.CHAT);
    const showPlanMode = hasFeature(Feature.CHAT_PLAN_MODE);
 
+   // Filter acceptance rates based on features
+   const filteredAcceptanceRates = usage.acceptanceRates.filter((rate) => {
+      if (rate.feature === "fim") return showFIM;
+      if (rate.feature === "edit") return showEdit;
+      return false;
+   });
+
    return (
       <div className="space-y-6">
-         {/* Summary Cards */}
+         {/* Summary Cards with Comparison */}
          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <UsageCard
+               comparisonValue={usage.comparison.requestsChange}
                icon={Zap}
                subtitle="este mês"
                title="Total de Requisições"
@@ -274,12 +315,24 @@ function UsageSectionContent() {
                value={formatTokens(usage.totalOutputTokens)}
             />
             <UsageCard
+               comparisonValue={usage.comparison.tokensChange}
                icon={Sparkles}
                subtitle="total"
                title="Total de Tokens"
                value={formatTokens(usage.totalTokens)}
             />
          </div>
+
+         {/* Charts Row */}
+         <div className="grid gap-4 md:grid-cols-2">
+            <UsageLineChart data={usage.dailyUsage} />
+            <UsagePieChart data={usage.byFeature} />
+         </div>
+
+         {/* Acceptance Rate Chart */}
+         {filteredAcceptanceRates.length > 0 && (
+            <AcceptanceRateChart data={filteredAcceptanceRates} />
+         )}
 
          {/* Feature Breakdown */}
          <Card>

@@ -18,7 +18,10 @@ import {
    Target,
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
-import { useSeoScore, useReadabilityInfo } from "../context/diagnostics-context";
+import {
+   useReadabilityInfo,
+   useSeoScore,
+} from "../context/diagnostics-context";
 import { analyzeContent } from "../lib/content-analysis";
 import { ContentStatsDisplay } from "./content-stats-display";
 import { KeywordAnalysisDisplay } from "./keyword-analysis-display";
@@ -284,10 +287,14 @@ export function MetadataPanel({
                   </AccordionTrigger>
                   <AccordionContent>
                      <ContentStatsDisplay
-                        readabilityLevel={diagnosticsReadability.level ?? analysis.readability.readabilityLevel}
+                        readabilityLevel={
+                           diagnosticsReadability.level ??
+                           analysis.readability.readabilityLevel
+                        }
                         readabilityMetrics={analysis.readability.metrics}
                         readabilityScore={
-                           diagnosticsReadability.score ?? analysis.readability.fleschKincaidReadingEase
+                           diagnosticsReadability.score ??
+                           analysis.readability.fleschKincaidReadingEase
                         }
                         seoMetrics={analysis.seo.metrics}
                      />

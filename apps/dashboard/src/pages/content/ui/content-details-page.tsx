@@ -593,11 +593,6 @@ function ContentDetailsPageContent({ contentId }: ContentDetailsPageProps) {
                      disabled={content.status === "archived"}
                      initialContent={content.body || ""}
                      key={contentId}
-                     meta={{
-                        title: content.meta.title,
-                        description: content.meta.description,
-                        keywords: content.meta.keywords,
-                     }}
                      onChange={handleContentChange}
                      placeholder={"Comece a escrever..."}
                   />

@@ -72,9 +72,7 @@ export function captureError(posthog: PostHog, props: CaptureErrorProps) {
          message,
          path,
       },
-      groups: organizationId
-         ? { organization: organizationId }
-         : undefined,
+      groups: organizationId ? { organization: organizationId } : undefined,
    });
 }
 

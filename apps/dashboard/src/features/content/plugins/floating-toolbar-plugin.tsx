@@ -122,7 +122,7 @@ export function FloatingToolbarPlugin({
       });
    }, [editor, getSelectionPosition]);
 
-   // Listen for selection changes
+   // Listen for selection changes (includes format changes)
    useEffect(() => {
       return editor.registerCommand(
          SELECTION_CHANGE_COMMAND,
@@ -132,15 +132,6 @@ export function FloatingToolbarPlugin({
          },
          COMMAND_PRIORITY_LOW,
       );
-   }, [editor, updateToolbar]);
-
-   // Also update on editor updates (for format changes)
-   useEffect(() => {
-      return editor.registerUpdateListener(({ editorState }) => {
-         editorState.read(() => {
-            updateToolbar();
-         });
-      });
    }, [editor, updateToolbar]);
 
    // Hide toolbar when clicking outside or on mouse down in editor

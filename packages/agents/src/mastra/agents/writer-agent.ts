@@ -30,7 +30,9 @@ import { LANGUAGE_INSTRUCTION } from "./shared";
 const getWriterAgentInstructions = (
    writerInstructions?: InstructionMemoryItem[],
 ): string => {
-   const compiledMemories = compileInstructionMemories(writerInstructions ?? []);
+   const compiledMemories = compileInstructionMemories(
+      writerInstructions ?? [],
+   );
 
    return `
 You are an expert blog post writer and editor. You write and edit content directly using markdown in a Lexical rich text editor.

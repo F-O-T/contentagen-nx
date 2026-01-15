@@ -6,13 +6,13 @@
  */
 
 export type {
-	SpellCheckerConfig,
-	SpellingError,
-	CheckResult,
-	AffixRule,
-	ReplacementRule,
-	ParsedAffData,
-	ParsedDicData,
+   AffixRule,
+   CheckResult,
+   ParsedAffData,
+   ParsedDicData,
+   ReplacementRule,
+   SpellCheckerConfig,
+   SpellingError,
 } from "./schemas.ts";
 
 export type { SpellChecker } from "./spell-checker.ts";

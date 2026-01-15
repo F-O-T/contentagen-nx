@@ -27,9 +27,9 @@ function ContenttaBranding() {
                <Link params={{ slug }} to="/$slug/home">
                   <div className="flex aspect-square size-8 items-center justify-center">
                      <img
-                        src="/favicon.svg"
                         alt="Contentta Logo"
                         className="h-6 w-6"
+                        src="/favicon.svg"
                      />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">

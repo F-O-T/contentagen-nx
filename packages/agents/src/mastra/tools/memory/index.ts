@@ -4,7 +4,10 @@ import {
 } from "./get-instructions-tool";
 
 // Re-export for convenience
-export { getInstructionsTool, getInstructionsToolInstructions } from "./get-instructions-tool";
+export {
+   getInstructionsTool,
+   getInstructionsToolInstructions,
+} from "./get-instructions-tool";
 
 // Combined instructions for all memory tools
 export function getAllMemoryToolInstructions(): string {

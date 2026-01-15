@@ -1,5 +1,4 @@
 export * from "./schemas/account-deletion";
-export * from "./schemas/writer";
 export * from "./schemas/auth";
 // Chat schemas
 export * from "./schemas/chat";
@@ -9,3 +8,4 @@ export * from "./schemas/export-log";
 export * from "./schemas/instruction-memory";
 export * from "./schemas/related-content";
 export * from "./schemas/resource-permissions";
+export * from "./schemas/writer";

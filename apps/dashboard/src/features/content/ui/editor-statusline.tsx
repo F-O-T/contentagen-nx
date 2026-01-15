@@ -5,20 +5,11 @@ import {
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
-import {
-   BookOpen,
-   FileText,
-   Loader2,
-   Search,
-   SpellCheck,
-   Type,
-} from "lucide-react";
+import { FileText, Loader2, SpellCheck, Type } from "lucide-react";
 import {
    useCursorPosition,
    useGrammarCount,
    useIsChecking,
-   useReadabilityInfo,
-   useSeoScore,
    useSpellingCount,
    useWordCount,
 } from "@/features/content/context/diagnostics-context";
@@ -53,11 +44,8 @@ export function EditorStatusline({ className }: EditorStatuslineProps) {
                </div>
             </div>
 
-            {/* Center section: SEO + Readability (lualine section C) */}
-            <div className="flex-1 flex items-center justify-center gap-3 px-2">
-               <SeoIndicator />
-               <ReadabilityIndicator />
-            </div>
+            {/* Center section: Spacer (was SEO + Readability) */}
+            <div className="flex-1" />
 
             {/* Right section: Word count + Cursor (lualine sections X, Y) */}
             <div className="flex items-center">
@@ -163,92 +151,6 @@ function CheckingIndicator() {
             </span>
          </TooltipTrigger>
          <TooltipContent>Verificando...</TooltipContent>
-      </Tooltip>
-   );
-}
-
-function SeoIndicator() {
-   const score = useSeoScore();
-
-   if (score === null) {
-      return (
-         <Tooltip>
-            <TooltipTrigger asChild>
-               <span className="flex items-center gap-1 text-muted-foreground">
-                  <Search className="size-3.5" />
-                  <span>SEO: --</span>
-               </span>
-            </TooltipTrigger>
-            <TooltipContent>SEO não analisado</TooltipContent>
-         </Tooltip>
-      );
-   }
-
-   const color =
-      score >= 80
-         ? "text-green-500"
-         : score >= 50
-           ? "text-yellow-500"
-           : "text-red-500";
-
-   return (
-      <Tooltip>
-         <TooltipTrigger asChild>
-            <span className={cn("flex items-center gap-1", color)}>
-               <Search className="size-3.5" />
-               <span>SEO: {score}</span>
-            </span>
-         </TooltipTrigger>
-         <TooltipContent>
-            Score SEO: {score}/100
-            {score >= 80
-               ? " (Excelente)"
-               : score >= 50
-                 ? " (Bom)"
-                 : " (Precisa melhorar)"}
-         </TooltipContent>
-      </Tooltip>
-   );
-}
-
-function ReadabilityIndicator() {
-   const { score, level } = useReadabilityInfo();
-
-   if (score === null) {
-      return (
-         <Tooltip>
-            <TooltipTrigger asChild>
-               <span className="flex items-center gap-1 text-muted-foreground">
-                  <BookOpen className="size-3.5" />
-                  <span>Legibilidade: --</span>
-               </span>
-            </TooltipTrigger>
-            <TooltipContent>Legibilidade não analisada</TooltipContent>
-         </Tooltip>
-      );
-   }
-
-   const color =
-      score >= 60
-         ? "text-green-500"
-         : score >= 30
-           ? "text-yellow-500"
-           : "text-red-500";
-
-   return (
-      <Tooltip>
-         <TooltipTrigger asChild>
-            <span className={cn("flex items-center gap-1", color)}>
-               <BookOpen className="size-3.5" />
-               <span>
-                  Legibilidade: {score} {level ? `(${level})` : ""}
-               </span>
-            </span>
-         </TooltipTrigger>
-         <TooltipContent>
-            Índice Flesch-Kincaid: {score}
-            {level && ` - Nível: ${level}`}
-         </TooltipContent>
       </Tooltip>
    );
 }

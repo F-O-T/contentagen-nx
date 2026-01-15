@@ -7,35 +7,56 @@ import {
    type LexicalNode,
    type TextNode,
 } from "lexical";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
    setCounts,
    setCursorPosition,
 } from "@/features/content/context/diagnostics-context";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
+import { cancelOperation, countText } from "../lib/editor-worker-client";
 
 /**
  * Plugin that tracks editor state and updates diagnostics context.
- * Handles cursor position and word/character counts.
+ * Cursor position runs on main thread (needs DOM access).
+ * Word/character counts are offloaded to a web worker.
  */
 export function DiagnosticsPlugin() {
    const [editor] = useLexicalComposerContext();
+   const lastOperationIdRef = useRef<string | null>(null);
+
+   // Debounced worker call for counting - 150ms delay
+   const countInWorker = useCallback(async (text: string) => {
+      // Generate a new operation ID
+      const operationId = `count-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+      // Cancel previous operation if still pending
+      if (lastOperationIdRef.current) {
+         cancelOperation(lastOperationIdRef.current);
+      }
+      lastOperationIdRef.current = operationId;
+
+      try {
+         const result = await countText(text);
+         setCounts(result.wordCount, result.charCount);
+      } catch {
+         // Ignore errors from cancelled operations
+      }
+   }, []);
+
+   const { call: debouncedCount, cancel: cancelDebounce } =
+      useDebouncedCallback(countInWorker, 150);
 
    useEffect(() => {
-      // Update on selection change
-      const unregisterSelectionListener = editor.registerUpdateListener(
+      const unregisterUpdateListener = editor.registerUpdateListener(
          ({ editorState }) => {
             editorState.read(() => {
-               // Get cursor position
+               // Cursor position - keep on main thread (fast, needs DOM)
                const selection = $getSelection();
                if ($isRangeSelection(selection)) {
                   const anchor = selection.anchor;
                   const anchorNode = anchor.getNode();
-
-                  // Calculate line and column
-                  // This is a simplified calculation - line numbers in Lexical are tricky
                   const offset = anchor.offset;
 
-                  // For a more accurate line count, traverse the document
                   const root = $getRoot();
                   const allText = root.getTextContent();
                   const textBeforeCursor = allText.slice(
@@ -50,21 +71,22 @@ export function DiagnosticsPlugin() {
                   setCursorPosition({ line, column });
                }
 
-               // Get word and character counts
+               // Word/char count - offload to worker with debouncing
                const root = $getRoot();
                const text = root.getTextContent();
-               const charCount = text.length;
-               const wordCount = countWords(text);
-
-               setCounts(wordCount, charCount);
+               debouncedCount(text);
             });
          },
       );
 
       return () => {
-         unregisterSelectionListener();
+         unregisterUpdateListener();
+         cancelDebounce();
+         if (lastOperationIdRef.current) {
+            cancelOperation(lastOperationIdRef.current);
+         }
       };
-   }, [editor]);
+   }, [editor, debouncedCount, cancelDebounce]);
 
    return null;
 }
@@ -109,19 +131,4 @@ function getAbsoluteOffset(
    }
 
    return absoluteOffset;
-}
-
-/**
- * Count words in a text string
- */
-function countWords(text: string): number {
-   if (!text || !text.trim()) return 0;
-
-   // Split by whitespace and filter empty strings
-   const words = text
-      .trim()
-      .split(/\s+/)
-      .filter((word) => word.length > 0);
-
-   return words.length;
 }

@@ -203,7 +203,8 @@ export const accountRouter = router({
 
          // Writers
          db.query.writer.findMany({
-            where: (writer, { eq }) => eq(writer.organizationId, organizationId),
+            where: (writer, { eq }) =>
+               eq(writer.organizationId, organizationId),
          }),
 
          // Content (via writers)

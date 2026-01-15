@@ -1,6 +1,6 @@
 import { Button } from "@packages/ui/components/button";
 import { Check, X } from "lucide-react";
-import { useEffect, useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import {
    acceptDiff,
    rejectDiff,
@@ -65,15 +65,15 @@ export function DiffView() {
                </div>
                <div className="flex items-center gap-2">
                   <Button
-                     variant="outline"
-                     size="sm"
-                     onClick={handleReject}
                      className="gap-1.5"
+                     onClick={handleReject}
+                     size="sm"
+                     variant="outline"
                   >
                      <X className="size-4" />
                      Rejeitar
                   </Button>
-                  <Button size="sm" onClick={handleAccept} className="gap-1.5">
+                  <Button className="gap-1.5" onClick={handleAccept} size="sm">
                      <Check className="size-4" />
                      Aceitar
                   </Button>
@@ -83,11 +83,11 @@ export function DiffView() {
             {/* Split View */}
             <div className="flex-1 overflow-hidden">
                <DiffSplitView
-                  originalText={originalText}
-                  suggestedText={suggestedText}
-                  originalTitle={originalTitle}
-                  suggestedTitle={suggestedTitle}
                   diff={diff}
+                  originalText={originalText}
+                  originalTitle={originalTitle}
+                  suggestedText={suggestedText}
+                  suggestedTitle={suggestedTitle}
                />
             </div>
          </div>

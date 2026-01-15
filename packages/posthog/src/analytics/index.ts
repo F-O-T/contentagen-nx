@@ -1,6 +1,16 @@
 export {
-   queryAIUsage,
+   type AcceptanceRateStats,
    type AIUsageStats,
+   type ComparisonStats,
+   type DailyUsageStats,
+   type ExtendedAIUsageStats,
+   type ExtendedQueryUsageParams,
    type FeatureUsageStats,
+   type PreviousMonthStats,
    type QueryUsageParams,
+   queryAcceptanceRates,
+   queryAIUsage,
+   queryDailyUsage,
+   queryExtendedUsage,
+   queryPreviousMonth,
 } from "./usage-query";

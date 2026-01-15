@@ -8,7 +8,12 @@ import {
    PopoverTrigger,
 } from "@packages/ui/components/popover";
 import { Spinner } from "@packages/ui/components/spinner";
-import { $getRoot, $isTextNode, $isElementNode, type LexicalNode } from "lexical";
+import {
+   $getRoot,
+   $isElementNode,
+   $isTextNode,
+   type LexicalNode,
+} from "lexical";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -42,7 +47,9 @@ type TextNodeEntry = {
  * This ensures offsets match exactly with getTextContent().
  * Stores node keys instead of node references for DOM lookup later.
  */
-function buildLexicalOffsetMap(root: ReturnType<typeof $getRoot>): TextNodeEntry[] {
+function buildLexicalOffsetMap(
+   root: ReturnType<typeof $getRoot>,
+): TextNodeEntry[] {
    const entries: TextNodeEntry[] = [];
    let currentOffset = 0;
 
@@ -166,7 +173,7 @@ function isWithinBounds(
 ): boolean {
    const decorationBottom = decoration.top + decoration.height;
    const decorationRight = decoration.left + decoration.width;
-   
+
    return (
       decoration.top >= containerRect.top - 10 &&
       decorationBottom <= containerRect.bottom + 10 &&
@@ -187,36 +194,44 @@ export function SpellingErrorDecorator({
    const spellingErrors = useSpellingErrors();
    const [decorations, setDecorations] = useState<DecorationPosition[]>([]);
    const [activeErrorId, setActiveErrorId] = useState<string | null>(null);
-   const [loadingSuggestions, setLoadingSuggestions] = useState<string | null>(null);
+   const [loadingSuggestions, setLoadingSuggestions] = useState<string | null>(
+      null,
+   );
    const updateTimeoutRef = useRef<number | null>(null);
    const suggestionsCache = useRef<Map<string, string[]>>(new Map());
 
    // Lazy load suggestions when opening popover
-   const loadSuggestionsForWord = useCallback(async (errorId: string, word: string) => {
-      if (suggestionsCache.current.has(word)) {
-         return suggestionsCache.current.get(word)!;
-      }
-      
-      setLoadingSuggestions(errorId);
-      try {
-         const suggestions = await suggestWord(word);
-         const limitedSuggestions = suggestions.slice(0, 5);
-         suggestionsCache.current.set(word, limitedSuggestions);
-         return limitedSuggestions;
-      } finally {
-         setLoadingSuggestions(null);
-      }
-   }, []);
+   const loadSuggestionsForWord = useCallback(
+      async (errorId: string, word: string) => {
+         if (suggestionsCache.current.has(word)) {
+            return suggestionsCache.current.get(word)!;
+         }
+
+         setLoadingSuggestions(errorId);
+         try {
+            const suggestions = await suggestWord(word);
+            const limitedSuggestions = suggestions.slice(0, 5);
+            suggestionsCache.current.set(word, limitedSuggestions);
+            return limitedSuggestions;
+         } finally {
+            setLoadingSuggestions(null);
+         }
+      },
+      [],
+   );
 
    // Handle popover open - load suggestions lazily
-   const handlePopoverOpen = useCallback((open: boolean, errorId: string, word: string) => {
-      if (open) {
-         setActiveErrorId(errorId);
-         loadSuggestionsForWord(errorId, word);
-      } else {
-         setActiveErrorId(null);
-      }
-   }, [loadSuggestionsForWord]);
+   const handlePopoverOpen = useCallback(
+      (open: boolean, errorId: string, word: string) => {
+         if (open) {
+            setActiveErrorId(errorId);
+            loadSuggestionsForWord(errorId, word);
+         } else {
+            setActiveErrorId(null);
+         }
+      },
+      [loadSuggestionsForWord],
+   );
 
    // Calculate positions of spelling errors using optimized offset map
    const updateDecorationPositions = useCallback(() => {
@@ -239,7 +254,12 @@ export function SpellingErrorDecorator({
 
          // O(n log m) instead of O(n * m)
          for (const error of spellingErrors) {
-            const position = getPositionFromLexicalMap(editor, offsetMap, error.offset, error.length);
+            const position = getPositionFromLexicalMap(
+               editor,
+               offsetMap,
+               error.offset,
+               error.length,
+            );
             if (position && isWithinBounds(position, containerRect)) {
                newDecorations.push({
                   ...position,
@@ -346,7 +366,9 @@ export function SpellingErrorDecorator({
                      currentOffset += nodeText.length;
                   } else if ("getChildren" in child) {
                      // Recursively search child nodes
-                     const found = traverse(child as ReturnType<typeof $getRoot>);
+                     const found = traverse(
+                        child as ReturnType<typeof $getRoot>,
+                     );
                      if (found) return true;
                      // Add text content length for non-text nodes
                      currentOffset += child.getTextContent().length;
@@ -373,103 +395,114 @@ export function SpellingErrorDecorator({
 
    // Render via portal for proper stacking
    return createPortal(
-      <>
-         {decorations.map((decoration) => {
-            const cachedSuggestions = suggestionsCache.current.get(decoration.error.original) || [];
-            const isLoading = loadingSuggestions === decoration.error.id;
-            const isActive = activeErrorId === decoration.error.id;
-            
-            return (
-               <Popover
-                  key={decoration.error.id}
-                  open={isActive}
-                  onOpenChange={(open) => handlePopoverOpen(open, decoration.error.id, decoration.error.original)}
+      decorations.map((decoration) => {
+         const cachedSuggestions =
+            suggestionsCache.current.get(decoration.error.original) || [];
+         const isLoading = loadingSuggestions === decoration.error.id;
+         const isActive = activeErrorId === decoration.error.id;
+
+         return (
+            <Popover
+               key={decoration.error.id}
+               onOpenChange={(open) =>
+                  handlePopoverOpen(
+                     open,
+                     decoration.error.id,
+                     decoration.error.original,
+                  )
+               }
+               open={isActive}
+            >
+               <PopoverTrigger asChild>
+                  <button
+                     aria-label={`Erro de ortografia: ${decoration.error.original}`}
+                     className="cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1 rounded-sm"
+                     style={{
+                        position: "fixed",
+                        top: decoration.top + decoration.height - 3,
+                        left: decoration.left,
+                        width: Math.max(decoration.width, 8),
+                        height: 3,
+                        zIndex: 50,
+                        background:
+                           "linear-gradient(90deg, #ef4444 50%, transparent 50%)",
+                        backgroundSize: "6px 2px",
+                        backgroundRepeat: "repeat-x",
+                        backgroundPosition: "bottom",
+                        border: "none",
+                        padding: 0,
+                     }}
+                     type="button"
+                  />
+               </PopoverTrigger>
+               <PopoverContent
+                  align="start"
+                  className="w-72 p-0 shadow-lg"
+                  side="bottom"
+                  sideOffset={8}
                >
-                  <PopoverTrigger asChild>
-                     <button
-                        type="button"
-                        className="cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1 rounded-sm"
-                        style={{
-                           position: "fixed",
-                           top: decoration.top + decoration.height - 3,
-                           left: decoration.left,
-                           width: Math.max(decoration.width, 8),
-                           height: 3,
-                           zIndex: 50,
-                           background: "linear-gradient(90deg, #ef4444 50%, transparent 50%)",
-                           backgroundSize: "6px 2px",
-                           backgroundRepeat: "repeat-x",
-                           backgroundPosition: "bottom",
-                           border: "none",
-                           padding: 0,
-                        }}
-                        aria-label={`Erro de ortografia: ${decoration.error.original}`}
-                     />
-                  </PopoverTrigger>
-                  <PopoverContent
-                     className="w-72 p-0 shadow-lg"
-                     side="bottom"
-                     align="start"
-                     sideOffset={8}
-                  >
-                     <div className="p-3 border-b bg-muted/30">
-                        <div className="flex items-center gap-2">
-                           <span className="size-2 rounded-full bg-red-500 shrink-0" />
-                           <span className="font-medium text-sm text-red-600 dark:text-red-400">
-                              {decoration.error.original}
-                           </span>
+                  <div className="p-3 border-b bg-muted/30">
+                     <div className="flex items-center gap-2">
+                        <span className="size-2 rounded-full bg-red-500 shrink-0" />
+                        <span className="font-medium text-sm text-red-600 dark:text-red-400">
+                           {decoration.error.original}
+                        </span>
+                     </div>
+                     <p className="text-xs text-muted-foreground mt-1 ml-4">
+                        Palavra não encontrada no dicionário
+                     </p>
+                  </div>
+
+                  <div className="p-3">
+                     <p className="text-xs font-medium text-muted-foreground mb-2">
+                        Sugestões
+                     </p>
+
+                     {isLoading && cachedSuggestions.length === 0 ? (
+                        <div className="flex items-center justify-center py-4 gap-2 text-muted-foreground">
+                           <Spinner className="size-4" />
+                           <span className="text-sm">Carregando...</span>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1 ml-4">
-                           Palavra não encontrada no dicionário
+                     ) : cachedSuggestions.length > 0 ? (
+                        <div className="flex flex-col gap-1">
+                           {cachedSuggestions.map((suggestion) => (
+                              <Button
+                                 className="justify-start h-8 text-sm font-normal"
+                                 key={suggestion}
+                                 onClick={() =>
+                                    handleApplySuggestion(
+                                       decoration.error,
+                                       suggestion,
+                                    )
+                                 }
+                                 size="sm"
+                                 variant="ghost"
+                              >
+                                 {suggestion}
+                              </Button>
+                           ))}
+                        </div>
+                     ) : (
+                        <p className="text-sm text-muted-foreground py-2 text-center">
+                           Nenhuma sugestão encontrada
                         </p>
-                     </div>
-                     
-                     <div className="p-3">
-                        <p className="text-xs font-medium text-muted-foreground mb-2">
-                           Sugestões
-                        </p>
-                        
-                        {isLoading && cachedSuggestions.length === 0 ? (
-                           <div className="flex items-center justify-center py-4 gap-2 text-muted-foreground">
-                              <Spinner className="size-4" />
-                              <span className="text-sm">Carregando...</span>
-                           </div>
-                        ) : cachedSuggestions.length > 0 ? (
-                           <div className="flex flex-col gap-1">
-                              {cachedSuggestions.map((suggestion) => (
-                                 <Button
-                                    key={suggestion}
-                                    className="justify-start h-8 text-sm font-normal"
-                                    onClick={() => handleApplySuggestion(decoration.error, suggestion)}
-                                    size="sm"
-                                    variant="ghost"
-                                 >
-                                    {suggestion}
-                                 </Button>
-                              ))}
-                           </div>
-                        ) : (
-                           <p className="text-sm text-muted-foreground py-2 text-center">
-                              Nenhuma sugestão encontrada
-                           </p>
-                        )}
-                     </div>
-                     
-                     <div className="p-2 border-t bg-muted/30">
-                        <Button
-                           className="w-full h-8 text-xs"
-                           onClick={() => handleIgnore(decoration.error.id)}
-                           size="sm"
-                           variant="outline"
-                        >
-                           Ignorar esta palavra
-                        </Button>
-                     </div>
-                  </PopoverContent>
-               </Popover>
-            );
-         })}
-      </>,
+                     )}
+                  </div>
+
+                  <div className="p-2 border-t bg-muted/30">
+                     <Button
+                        className="w-full h-8 text-xs"
+                        onClick={() => handleIgnore(decoration.error.id)}
+                        size="sm"
+                        variant="outline"
+                     >
+                        Ignorar esta palavra
+                     </Button>
+                  </div>
+               </PopoverContent>
+            </Popover>
+         );
+      }),
       document.body,
    );
 }

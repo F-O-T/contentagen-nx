@@ -5,7 +5,6 @@ import {
    type ModelId,
    mastra,
 } from "@packages/agents";
-import { getWriterInstructions } from "@packages/database/repositories/writer-instructions-repository";
 import {
    addChatMessage,
    clearChatSession,
@@ -15,6 +14,7 @@ import {
    updateChatSessionMode,
 } from "@packages/database/repositories/chat-repository";
 import { getContentById } from "@packages/database/repositories/content-repository";
+import { getWriterInstructions } from "@packages/database/repositories/writer-instructions-repository";
 import type { StoredToolCall } from "@packages/database/schemas/chat";
 import {
    captureAIGeneration,
@@ -50,7 +50,7 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
    // Stream chat completion using Mastra blog editor agent
    .post(
       "/stream",
-      async function*({ body, request }) {
+      async function* ({ body, request }) {
          // Validate session
          const session = await auth.api.getSession({
             headers: request.headers,
@@ -124,10 +124,10 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
             // Transform selectionContext to match database type
             const dbSelectionContext = selectionContext
                ? {
-                  text: selectionContext.text,
-                  contextBefore: selectionContext.contextBefore ?? "",
-                  contextAfter: selectionContext.contextAfter ?? "",
-               }
+                    text: selectionContext.text,
+                    contextBefore: selectionContext.contextBefore ?? "",
+                    contextAfter: selectionContext.contextAfter ?? "",
+                 }
                : undefined;
 
             await addChatMessage(
@@ -478,7 +478,9 @@ export const agentChatRoutes = new Elysia({ prefix: "/api/agent/chat" })
                   role: m.role,
                   content: m.content,
                })),
-               outputChoices: [{ role: "assistant", content: currentStep.text }],
+               outputChoices: [
+                  { role: "assistant", content: currentStep.text },
+               ],
                inputTokens: usage?.inputTokens ?? 0,
                outputTokens: usage?.outputTokens ?? 0,
                latencySeconds: (Date.now() - streamStartTime) / 1000,

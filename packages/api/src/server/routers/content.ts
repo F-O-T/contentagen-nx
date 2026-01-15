@@ -1,3 +1,4 @@
+import { normalizeEscapedNewlines } from "@f-o-t/markdown";
 import {
    indexContent,
    initializeRagService,
@@ -5,10 +6,7 @@ import {
    removeContent as removeContentFromRag,
    searchSimilarContent,
 } from "@packages/agents/mastra/rag";
-import {
-   getWriterById,
-   getWritersByOrganizationId,
-} from "@packages/database/repositories/writer-repository";
+import { eq, sql } from "@packages/database";
 import {
    archiveContent,
    countContentsByOrganization,
@@ -31,6 +29,10 @@ import {
    updateRelatedContentOrder as updateRelatedOrderRepo,
 } from "@packages/database/repositories/related-content-repository";
 import {
+   getWriterById,
+   getWritersByOrganizationId,
+} from "@packages/database/repositories/writer-repository";
+import {
    ContentMetaSchema,
    ContentRequestSchema,
 } from "@packages/database/schema";
@@ -41,9 +43,7 @@ import {
    generatePresignedPutUrl,
    verifyFileExists,
 } from "@packages/files/client";
-import { normalizeEscapedNewlines } from "@f-o-t/markdown";
 import { APIError, propagateError } from "@packages/utils/errors";
-import { eq, sql } from "@packages/database";
 import { z } from "zod";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 
@@ -146,7 +146,9 @@ export const contentRouter = router({
          // Add writer info and resolve image URLs
          const itemsWithWriter = await Promise.all(
             items.map(async (item) => {
-               const writer = item.writerId ? writerMap.get(item.writerId) : null;
+               const writer = item.writerId
+                  ? writerMap.get(item.writerId)
+                  : null;
                return {
                   ...item,
                   imageUrl: await resolveImageUrl(
@@ -336,7 +338,10 @@ export const contentRouter = router({
 
             // If writerId is provided, verify it belongs to organization
             if (input.writerId) {
-               const agent = await getWriterById(resolvedCtx.db, input.writerId);
+               const agent = await getWriterById(
+                  resolvedCtx.db,
+                  input.writerId,
+               );
                if (!agent) {
                   throw APIError.notFound("Writer not found.");
                }

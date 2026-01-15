@@ -1,4 +1,8 @@
 import {
+   getContentCountsByWriterIds,
+   getContentsByWriterId,
+} from "@packages/database/repositories/content-repository";
+import {
    addWriterInstruction,
    deleteWriterInstruction,
    getWriterInstructions,
@@ -14,10 +18,6 @@ import {
    updateWriter,
 } from "@packages/database/repositories/writer-repository";
 import {
-   getContentCountsByWriterIds,
-   getContentsByWriterId,
-} from "@packages/database/repositories/content-repository";
-import {
    CreateInstructionMemorySchema,
    PersonaConfigSchema,
    UpdateInstructionMemorySchema,
@@ -29,9 +29,9 @@ import {
    generatePresignedPutUrl,
    verifyFileExists,
 } from "@packages/files/client";
+import { Feature } from "@packages/stripe/features";
 import { APIError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
-import { Feature } from "@packages/stripe/features";
 import { requireFeature } from "../middleware/feature-gate";
 import { protectedProcedure, router } from "../trpc";
 
@@ -319,7 +319,10 @@ export const writerRouter = router({
             }
 
             // Verify the writer exists and belongs to this organization
-            const existing = await getWriterById(resolvedCtx.db, input.writerId);
+            const existing = await getWriterById(
+               resolvedCtx.db,
+               input.writerId,
+            );
             if (!existing) {
                throw APIError.notFound("Writer not found.");
             }
@@ -412,7 +415,10 @@ export const writerRouter = router({
             }
 
             // Verify the writer exists and belongs to this organization
-            const existing = await getWriterById(resolvedCtx.db, input.writerId);
+            const existing = await getWriterById(
+               resolvedCtx.db,
+               input.writerId,
+            );
             if (!existing) {
                throw APIError.notFound("Writer not found.");
             }

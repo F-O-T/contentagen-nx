@@ -1,9 +1,9 @@
-import { getWriterById } from "@packages/database/repositories/writer-repository";
 import {
    getContentById,
    getContentBySlug,
    listContents,
 } from "@packages/database/repositories/content-repository";
+import { getWriterById } from "@packages/database/repositories/writer-repository";
 import { serverEnv as env } from "@packages/environment/server";
 import { generatePresignedGetUrl } from "@packages/files/client";
 import { Elysia, t } from "elysia";
@@ -20,7 +20,11 @@ async function resolveStorageKeyToUrl(
 ): Promise<string | null> {
    if (!storageKey) return null;
    try {
-      return await generatePresignedGetUrl(storageKey, minioBucket, minioClient);
+      return await generatePresignedGetUrl(
+         storageKey,
+         minioBucket,
+         minioClient,
+      );
    } catch (error) {
       console.error("Error generating presigned URL:", error);
       return null;
@@ -88,7 +92,9 @@ export const sdkRoutes = new Elysia({
          if (agent.profilePhotoUrl) {
             try {
                const url = await resolveStorageKeyToUrl(agent.profilePhotoUrl);
-               profilePhoto = url ? { contentType: "image/jpeg", data: url } : null;
+               profilePhoto = url
+                  ? { contentType: "image/jpeg", data: url }
+                  : null;
             } catch (err) {
                console.error("Error fetching profile photo:", err);
                profilePhoto = null;
@@ -132,7 +138,9 @@ export const sdkRoutes = new Elysia({
                if (post.imageUrl) {
                   try {
                      const url = await resolveStorageKeyToUrl(post.imageUrl);
-                     image = url ? { contentType: "image/jpeg", data: url } : null;
+                     image = url
+                        ? { contentType: "image/jpeg", data: url }
+                        : null;
                   } catch (error) {
                      console.error(
                         "Error fetching image for post:",

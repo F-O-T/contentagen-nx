@@ -1,7 +1,7 @@
 import { ScrollArea } from "@packages/ui/components/scroll-area";
 import { cn } from "@packages/ui/lib/utils";
 import type { LineDiff } from "@packages/utils/diff";
-import { useMemo, useRef, useCallback } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
 type DiffSplitViewProps = {
    originalText: string;
@@ -230,9 +230,9 @@ export function DiffSplitView({
                </div>
                <ScrollArea className="flex-1">
                   <div
-                     ref={leftScrollRef}
                      className="font-mono text-sm"
                      onScroll={() => handleScroll("left")}
+                     ref={leftScrollRef}
                   >
                      {leftLines.map((line, idx) => (
                         <DiffLineRow
@@ -253,9 +253,9 @@ export function DiffSplitView({
                </div>
                <ScrollArea className="flex-1">
                   <div
-                     ref={rightScrollRef}
                      className="font-mono text-sm"
                      onScroll={() => handleScroll("right")}
+                     ref={rightScrollRef}
                   >
                      {rightLines.map((line, idx) => (
                         <DiffLineRow
@@ -342,8 +342,8 @@ function DiffLineRow({
             {line.inlineChanges ? (
                <InlineChanges
                   changes={line.inlineChanges}
-                  side={side}
                   lineType={line.type}
+                  side={side}
                />
             ) : (
                <span
@@ -378,7 +378,6 @@ function InlineChanges({
 
             return (
                <span
-                  key={`inline-${idx + 1}`}
                   className={cn(
                      change.type === "remove" &&
                         "bg-red-500/40 line-through text-red-700 dark:text-red-300",
@@ -388,6 +387,7 @@ function InlineChanges({
                         change.type === "unchanged" &&
                         "opacity-70",
                   )}
+                  key={`inline-${idx + 1}`}
                >
                   {change.text}
                </span>

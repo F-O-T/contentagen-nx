@@ -65,7 +65,8 @@ export function useChatCommands(
          {
             id: "plan",
             label: "planejar",
-            description: "Alternar para modo planejamento (pesquisa e planejamento)",
+            description:
+               "Alternar para modo planejamento (pesquisa e planejamento)",
             icon: ListChecks,
             category: "mode",
             handler: () => setChatMode("plan"),
@@ -205,7 +206,8 @@ export function useChatCommands(
             icon: Tags,
             category: "context",
             getValue: () => {
-               if (!contentMetadata?.keywords?.length) return "[Sem palavras-chave]";
+               if (!contentMetadata?.keywords?.length)
+                  return "[Sem palavras-chave]";
                return `[Palavras-chave: ${contentMetadata.keywords.join(", ")}]`;
             },
          },
@@ -229,7 +231,8 @@ export function useChatCommands(
          {
             id: "keyword-optimization",
             label: "otimizar-palavras-chave",
-            description: "Otimizar densidade e posicionamento de palavras-chave",
+            description:
+               "Otimizar densidade e posicionamento de palavras-chave",
             icon: Target,
             category: "workflow",
             getValue: () => "@workflow:otimizar-palavras-chave",

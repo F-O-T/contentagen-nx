@@ -8,16 +8,16 @@
 import type { PostHog } from "posthog-node";
 
 export interface CaptureAISpanParams {
-	posthog: PostHog;
-	distinctId: string;
-	traceId: string;
-	spanName: string;
-	spanKind?: string;
-	input?: Record<string, unknown>;
-	output?: unknown;
-	durationSeconds: number;
-	isError?: boolean;
-	errorMessage?: string;
+   posthog: PostHog;
+   distinctId: string;
+   traceId: string;
+   spanName: string;
+   spanKind?: string;
+   input?: Record<string, unknown>;
+   output?: unknown;
+   durationSeconds: number;
+   isError?: boolean;
+   errorMessage?: string;
 }
 
 /**
@@ -40,30 +40,30 @@ export interface CaptureAISpanParams {
  * ```
  */
 export function captureAISpan(params: CaptureAISpanParams): void {
-	const {
-		posthog,
-		distinctId,
-		traceId,
-		spanName,
-		spanKind = "tool_execution",
-		input,
-		output,
-		durationSeconds,
-		isError = false,
-		errorMessage,
-	} = params;
+   const {
+      posthog,
+      distinctId,
+      traceId,
+      spanName,
+      spanKind = "tool_execution",
+      input,
+      output,
+      durationSeconds,
+      isError = false,
+      errorMessage,
+   } = params;
 
-	posthog.capture({
-		distinctId,
-		event: "$ai_span",
-		properties: {
-			$ai_trace_id: traceId,
-			$ai_span_name: spanName,
-			$ai_span_kind: spanKind,
-			$ai_span_input: input,
-			$ai_span_output: output,
-			$ai_span_duration: durationSeconds,
-			$ai_span_error: isError ? errorMessage : undefined,
-		},
-	});
+   posthog.capture({
+      distinctId,
+      event: "$ai_span",
+      properties: {
+         $ai_trace_id: traceId,
+         $ai_span_name: spanName,
+         $ai_span_kind: spanKind,
+         $ai_span_input: input,
+         $ai_span_output: output,
+         $ai_span_duration: durationSeconds,
+         $ai_span_error: isError ? errorMessage : undefined,
+      },
+   });
 }

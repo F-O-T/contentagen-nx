@@ -90,7 +90,7 @@ function shouldStopForProse(
 
 export const agentFIMRoutes = new Elysia({ prefix: "/api/agent/fim" }).post(
    "/stream",
-   async function*({ body, request }) {
+   async function* ({ body, request }) {
       // Validate session
       const session = await auth.api.getSession({ headers: request.headers });
       if (!session) {

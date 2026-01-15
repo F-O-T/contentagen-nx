@@ -20,7 +20,9 @@ import { LANGUAGE_INSTRUCTION } from "./shared";
 const getPlanAgentInstructions = (
    writerInstructions?: InstructionMemoryItem[],
 ): string => {
-   const compiledMemories = compileInstructionMemories(writerInstructions ?? []);
+   const compiledMemories = compileInstructionMemories(
+      writerInstructions ?? [],
+   );
 
    return `
 You are an expert content strategist and research assistant. Your job is to thoroughly research topics and create detailed, actionable content plans.

@@ -394,4 +394,3 @@ export async function deleteResourcePermissions(
       );
    }
 }
-

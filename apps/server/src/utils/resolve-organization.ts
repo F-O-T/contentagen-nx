@@ -12,21 +12,21 @@ import { getOrganizationMembership } from "@packages/database/repositories/auth-
  * 2. activeOrganizationId from session
  */
 export async function resolveOrganizationId(
-	db: DatabaseInstance,
-	userId: string,
-	headers: Headers,
-	sessionOrgId: string | null | undefined,
+   db: DatabaseInstance,
+   userId: string,
+   headers: Headers,
+   sessionOrgId: string | null | undefined,
 ): Promise<string | undefined> {
-	const organizationSlug = headers.get("x-organization-slug");
+   const organizationSlug = headers.get("x-organization-slug");
 
-	if (organizationSlug) {
-		const { organization } = await getOrganizationMembership(
-			db,
-			userId,
-			organizationSlug,
-		);
-		return organization?.id;
-	}
+   if (organizationSlug) {
+      const { organization } = await getOrganizationMembership(
+         db,
+         userId,
+         organizationSlug,
+      );
+      return organization?.id;
+   }
 
-	return sessionOrgId ?? undefined;
+   return sessionOrgId ?? undefined;
 }

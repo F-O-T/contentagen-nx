@@ -94,7 +94,7 @@ export function AgentMemoriesCard({ writerId }: AgentMemoriesCardProps) {
       const memory = memories?.find((m) => m.id === memoryId);
       if (memory) {
          openSheet({
-            children: <ManageMemoryForm writerId={writerId} memory={memory} />,
+            children: <ManageMemoryForm memory={memory} writerId={writerId} />,
          });
       }
    };

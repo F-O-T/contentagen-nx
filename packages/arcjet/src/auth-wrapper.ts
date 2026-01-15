@@ -1,7 +1,7 @@
 import type { ArcjetDecision } from "@arcjet/bun";
-import { Feature, planHasFeature } from "@packages/stripe/features";
 import type { AuthInstance } from "@packages/authentication/server";
 import { PlanName } from "@packages/stripe/constants";
+import { Feature, planHasFeature } from "@packages/stripe/features";
 import {
    arcjetInstance,
    BOT_DETECTION,

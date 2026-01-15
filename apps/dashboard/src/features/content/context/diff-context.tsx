@@ -1,5 +1,5 @@
-import { Store, useStore } from "@tanstack/react-store";
 import { createLineDiff, type LineDiff } from "@packages/utils/diff";
+import { Store, useStore } from "@tanstack/react-store";
 
 export type DiffSource = "ai-edit" | "version-compare";
 
