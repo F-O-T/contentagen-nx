@@ -37,6 +37,7 @@ COPY packages/workflows/package.json ./packages/workflows/
 # Libraries
 COPY libraries/markdown/package.json ./libraries/markdown/
 COPY libraries/content-analysis/package.json ./libraries/content-analysis/
+COPY libraries/spelling/package.json ./libraries/spelling/
 
 
 # Install dependencies
@@ -48,6 +49,10 @@ COPY . .
 
 # Build libraries
 WORKDIR /app/libraries/markdown
+RUN bun run build
+WORKDIR /app
+
+WORKDIR /app/libraries/spelling
 RUN bun run build
 WORKDIR /app
 
