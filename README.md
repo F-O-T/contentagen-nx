@@ -32,6 +32,43 @@ Built on Lexical with deeply integrated AI assistance at multiple levels:
     -   Full document and selection context tracking
     -   Real-time streaming responses
 
+### Content Planning & Research
+
+AI-powered research and planning tools to create well-informed content:
+
+-   **SERP Analysis**: Analyze search engine results and competition for your target keywords
+-   **Competitor Content Analysis**: Extract structure and insights from top-ranking content
+-   **Related Keywords Discovery**: Find keyword variations and long-tail opportunities
+-   **Content Gap Identification**: Discover missing content opportunities in your niche
+-   **Fact Finding**: Gather statistics and expert sources to back up your content
+-   **Internal Content Search**: Check existing published content to avoid duplication and identify linking opportunities
+-   **Research Validation**: Ensure sufficient research before creating content plans
+
+### Content Analysis & SEO
+
+Real-time content optimization with actionable insights:
+
+-   **SEO Scoring (0-100)**:
+    -   Title analysis (length, keyword inclusion)
+    -   Meta description optimization (150-160 characters)
+    -   Content structure validation
+    -   Keyword placement and density (1-2% target)
+    -   Link quantity analysis
+    -   Image count and alt text optimization
+    -   Heading frequency (H2/H3 distribution)
+    -   First paragraph and conclusion analysis
+
+-   **Readability Analysis**:
+    -   Flesch-Kincaid Reading Ease scoring
+    -   Grade level calculation
+    -   Target audience profiling (general, technical, academic, casual)
+    -   Actionable readability recommendations
+
+-   **Quality Detection**:
+    -   Filler phrase detection
+    -   Clickbait pattern warnings
+    -   Low-value content identification
+    -   Tone consistency analysis
 
 ### Rich Content Management
 
@@ -44,6 +81,7 @@ Built on Lexical with deeply integrated AI assistance at multiple levels:
 -   **Content Lifecycle**:
     -   Draft, published, and archived states
     -   Auto-save with debouncing
+    -   Version history tracking
     -   Bulk operations (delete, publish, archive)
 
 -   **SEO & Metadata**:
@@ -56,40 +94,116 @@ Built on Lexical with deeply integrated AI assistance at multiple levels:
     -   Create custom AI writing personas with profile photos
     -   Define writing guidelines, audience profiles, tone, and style preferences
     -   Associate writers with content for consistent voice
-    -   Custom instruction memories per writer
+    -   Instruction memory for personalized learning over time
 
 -   **Multi-Agent Orchestration** (Mastra-powered):
-    -   **Content Agents**: Editor, Writer, and Reader agents
-    -   **Specialized Agents**: Researcher (Tavily web search), Strategist, Document Generator
-    -   **Workflows**: Automated article and changelog creation pipelines
-    -   **Knowledge Base**: Brand knowledge, competitor analysis, writing guidelines
+    -   **Plan Agent**: Research, SERP analysis, keyword discovery, content planning
+    -   **Writer Agent**: Content generation with full editor control (insert, replace, format, structure)
+    -   **Inline Edit Agent**: Quick text transformations (shorten, expand, clarify, fix grammar)
+    -   **FIM Agent**: Intelligent text completion
+
+-   **Agent Capabilities**:
+    -   Insert/replace/delete text at any position
+    -   Format text (bold, italic, strikethrough, code)
+    -   Insert headings, lists, tables, code blocks, images
+    -   Add internal and external links
+    -   Optimize meta data (title, description)
+    -   Generate quick-answer sections
+
+### Brand Management
+
+Maintain consistent brand voice across all content:
+
+-   **Brand Guidelines**: Define organization-wide brand voice and style
+-   **Brand Documents**: Upload reference documents for AI context
+-   **Knowledge Base**: Build a brand knowledge base that AI agents reference during content creation
+
+### Content Sharing & Export
+
+-   **Public Sharing**:
+    -   Generate shareable public links for content
+    -   Toggle share status on/off
+    -   Clean public view interface
+
+-   **Multi-Format Export**:
+    -   Markdown, JSON, HTML formats
+    -   Custom file naming
+
+-   **Multi-Destination Publishing**:
+    -   Direct download
+    -   GitHub repository integration
+    -   Notion export
+    -   WordPress publishing
+    -   Custom API with webhook support
+
+### Related Content Management
+
+-   Discover related content suggestions
+-   Manage content relationships and internal linking
+-   Reorder and organize related posts
 
 ### Dashboard & Analytics
 
 -   **Home Dashboard**: Content statistics, quick actions, recent content
 -   **Content List**: Data table with search, filtering, sorting, and bulk operations
 -   **Writer Management**: Statistics, analytics, and detailed writer pages
+-   **Usage Tracking**:
+    -   Usage line charts over time
+    -   Distribution pie charts
+    -   Acceptance rate tracking
+    -   Usage comparison badges
+    -   Plan-based limits
+
+### Team Collaboration
+
+-   **Multi-tenant Organizations**:
+    -   Create and manage organization workspaces
+    -   Organization-level settings and branding
+
+-   **Team Management**:
+    -   Create teams within organizations
+    -   Team-specific permissions and access
+
+-   **Member Management**:
+    -   Invite members via email
+    -   Role-based access control (Owner, Admin, Member)
+    -   Manage pending invitations
+    -   Member activity tracking
+
+### Billing & Subscriptions
+
+-   **Plan Tiers**:
+    -   **FREE**: Basic content creation with limited AI usage
+    -   **LITE**: Enhanced AI features with team collaboration and chat access
+    -   **PRO**: Unlimited AI, advanced planning mode, priority support
+
+-   **Billing Management**:
+    -   View subscription status and billing history
+    -   Upgrade/downgrade plans
+    -   Monthly and annual pricing options
+    -   Stripe-powered payments
+
+### API Access
+
+-   **API Keys**:
+    -   Create API keys for programmatic access
+    -   Manage and revoke keys
+    -   SDK for external integrations
 
 ### Administration & Security
 
 -   **Authentication**:
     -   Email/password and Google OAuth via Better Auth
     -   Magic link authentication
+    -   Email OTP verification
     -   Two-factor authentication (2FA)
     -   Session management with device tracking
-
--   **Multi-tenant Architecture**:
-    -   Organization workspaces
-    -   Team management and member invitations
-    -   Role-based access control (Owner, Admin, Member)
 
 -   **Settings**:
     -   Profile and security management
     -   Theme switching (Light/Dark/System)
     -   Language support (en-US, pt-BR)
-    -   API keys management
     -   Notification preferences
-    -   Billing integration (Stripe)
 
 ---
 
@@ -109,6 +223,8 @@ Contentta is a full-stack application built within an **Nx** monorepo using **Bu
 | **Security**   | **Arcjet** (Rate limiting & DDoS protection)                                                                    |
 | **Analytics**  | **PostHog**                                                                                                     |
 | **Email**      | **Resend** (Transactional emails)                                                                               |
+| **Payments**   | **Stripe** (Subscription billing)                                                                               |
+| **Search**     | **Tavily**, **Exa**, **Firecrawl** (Web search for AI research)                                                 |
 | **Tooling**    | **Nx**, **Biome**, **Docker**, **Husky**                                                                        |
 
 ---
@@ -139,8 +255,8 @@ Publishable libraries for external consumption.
 | Library            | Purpose                                           |
 | ------------------ | ------------------------------------------------- |
 | `sdk`              | Official TypeScript SDK (`@f-o-t/contentta-sdk`) for interacting with the Contentta API |
-| `content-analysis` | Content analysis utilities                        |
-| `markdown`         | Markdown processing utilities                     |
+| `content-analysis` | SEO scoring, readability analysis, keyword optimization |
+| `markdown`         | CommonMark parser with AST support                |
 
 ### Packages (`packages/`)
 
@@ -150,6 +266,7 @@ Shared internal libraries organized by concern. All packages use explicit export
 
 | Package          | Purpose                                           |
 | ---------------- | ------------------------------------------------- |
+| `agents`         | Mastra AI agents (planning, research, writing, editing) |
 | `api`            | tRPC routers and type-safe API layer              |
 | `authentication` | Better Auth setup with OAuth, magic links, 2FA    |
 | `database`       | Drizzle ORM schemas and repositories              |
@@ -165,6 +282,7 @@ Shared internal libraries organized by concern. All packages use explicit export
 | `files`        | MinIO S3-compatible file storage       |
 | `posthog`      | Analytics tracking (client & server)   |
 | `queue`        | BullMQ job queue abstractions          |
+| `search`       | Web search providers (Tavily, Exa, Firecrawl) |
 | `stripe`       | Stripe payments SDK wrapper            |
 | `transactional`| React Email templates with Resend      |
 
@@ -172,7 +290,6 @@ Shared internal libraries organized by concern. All packages use explicit export
 
 | Package        | Purpose                                |
 | -------------- | -------------------------------------- |
-| `notifications`| Push notifications and alerts          |
 | `workflows`    | Content workflow automation            |
 
 #### Frontend
