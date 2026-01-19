@@ -1,17 +1,18 @@
 # apps/dashboard/Dockerfile
 FROM oven/bun:alpine AS base
 
-
-
 WORKDIR /app
-
-ENV NODE_ENV=production
-
 
 # Copy package files
 COPY bun.lock ./
 COPY package.json ./
+
+# Apps - all needed for workspace resolution
 COPY apps/dashboard/package.json ./apps/dashboard/
+COPY apps/server/package.json ./apps/server/
+COPY apps/worker/package.json ./apps/worker/
+
+# Tooling
 COPY tooling/typescript/package.json ./tooling/typescript/
 
 # Packages
@@ -22,7 +23,6 @@ COPY packages/authentication/package.json ./packages/authentication/
 COPY packages/cache/package.json ./packages/cache/
 COPY packages/database/package.json ./packages/database/
 COPY packages/environment/package.json ./packages/environment/
-
 COPY packages/files/package.json ./packages/files/
 COPY packages/logging/package.json ./packages/logging/
 COPY packages/posthog/package.json ./packages/posthog/
@@ -38,11 +38,10 @@ COPY packages/workflows/package.json ./packages/workflows/
 COPY libraries/markdown/package.json ./libraries/markdown/
 COPY libraries/content-analysis/package.json ./libraries/content-analysis/
 COPY libraries/spelling/package.json ./libraries/spelling/
+COPY libraries/sdk/package.json ./libraries/sdk/
 
-
-# Install dependencies
-RUN bun install 
-
+# Install dependencies (includes devDependencies needed for build)
+RUN bun install
 
 # Copy source code
 COPY . .
@@ -61,7 +60,6 @@ RUN bun run build
 WORKDIR /app
 
 # Build the dashboard application
-ENV NODE_ENV=production
 ARG VITE_SERVER_URL
 ARG VITE_POSTHOG_HOST
 ARG VITE_POSTHOG_KEY

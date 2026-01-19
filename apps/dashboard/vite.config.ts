@@ -23,6 +23,18 @@ export default defineConfig({
             manualChunks: {
                // Core React runtime - loaded on every page
                "vendor-react": ["react", "react-dom", "react/jsx-runtime"],
+               // Lexical editor - lazy loaded when editor is opened
+               // Note: @lexical/react excluded as it has no root export
+               "vendor-lexical": [
+                  "lexical",
+                  "@lexical/code",
+                  "@lexical/html",
+                  "@lexical/link",
+                  "@lexical/list",
+                  "@lexical/markdown",
+                  "@lexical/rich-text",
+                  "@lexical/table",
+               ],
                // Charts - lazy loaded when analytics pages are opened
                "vendor-recharts": ["recharts"],
                // Flow diagrams - lazy loaded when flow editor is opened
