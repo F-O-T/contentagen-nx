@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+/* Google Fonts are now loaded via index.html with preconnect/preload for better FCP */
 @import "tw-animate-css";
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";

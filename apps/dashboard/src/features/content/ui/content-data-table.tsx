@@ -313,23 +313,25 @@ export function ContentDataTable({
       [onBulkDelete, selectionState.selectedCount],
    );
 
-   // Filter contents based on search and status
-   const filteredContents = contents.filter((content) => {
-      const matchesSearch =
-         filters.searchTerm === "" ||
-         content.meta.title
-            .toLowerCase()
-            .includes(filters.searchTerm.toLowerCase()) ||
-         content.meta.description
-            ?.toLowerCase()
-            .includes(filters.searchTerm.toLowerCase());
+   // Filter contents based on search and status (memoized for performance)
+   const filteredContents = useMemo(() => {
+      return contents.filter((content) => {
+         const matchesSearch =
+            filters.searchTerm === "" ||
+            content.meta.title
+               .toLowerCase()
+               .includes(filters.searchTerm.toLowerCase()) ||
+            content.meta.description
+               ?.toLowerCase()
+               .includes(filters.searchTerm.toLowerCase());
 
-      const matchesStatus =
-         filters.statusFilter === "all" ||
-         content.status === filters.statusFilter;
+         const matchesStatus =
+            filters.statusFilter === "all" ||
+            content.status === filters.statusFilter;
 
-      return matchesSearch && matchesStatus;
-   });
+         return matchesSearch && matchesStatus;
+      });
+   }, [contents, filters.searchTerm, filters.statusFilter]);
 
    if (contents.length === 0 && !hasSearchTerm && !hasStatusFilter) {
       return (

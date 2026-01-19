@@ -70,6 +70,41 @@ async function resolveImageUrl(
    }
 }
 
+// Batch helper to resolve multiple image URLs efficiently
+// Deduplicates keys and processes in batches to avoid N+1 queries
+const BATCH_SIZE = 20;
+
+async function batchResolveImageUrls(
+   storageKeys: (string | null | undefined)[],
+   bucketName: string,
+   minioClient: Parameters<typeof generatePresignedGetUrl>[2],
+): Promise<Map<string, string | null>> {
+   // Deduplicate and filter out null/undefined keys
+   const uniqueKeys = [...new Set(storageKeys.filter((k): k is string => !!k))];
+   const results = new Map<string, string | null>();
+
+   // Process in batches
+   for (let i = 0; i < uniqueKeys.length; i += BATCH_SIZE) {
+      const batch = uniqueKeys.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+         batch.map(async (key) => {
+            try {
+               const url = await generatePresignedGetUrl(key, bucketName, minioClient);
+               return { key, url };
+            } catch (error) {
+               console.error(`Error generating presigned URL for ${key}:`, error);
+               return { key, url: null };
+            }
+         }),
+      );
+      for (const { key, url } of batchResults) {
+         results.set(key, url);
+      }
+   }
+
+   return results;
+}
+
 export const contentRouter = router({
    listAllContent: protectedProcedure
       .input(
@@ -143,32 +178,39 @@ export const contentRouter = router({
 
          const totalPages = Math.ceil(total / input.limit);
 
-         // Add writer info and resolve image URLs
-         const itemsWithWriter = await Promise.all(
-            items.map(async (item) => {
-               const writer = item.writerId
-                  ? writerMap.get(item.writerId)
-                  : null;
-               return {
-                  ...item,
-                  imageUrl: await resolveImageUrl(
-                     item.imageUrl,
-                     resolvedCtx.minioBucket,
-                     resolvedCtx.minioClient,
-                  ),
-                  writer: writer
-                     ? {
-                          ...writer,
-                          profilePhotoUrl: await resolveImageUrl(
-                             writer.profilePhotoUrl,
-                             resolvedCtx.minioBucket,
-                             resolvedCtx.minioClient,
-                          ),
-                       }
-                     : null,
-               };
-            }),
+         // Collect all image keys for batch resolution (avoids N+1 queries)
+         const allImageKeys = [
+            ...items.map((item) => item.imageUrl),
+            ...items
+               .map((item) => item.writerId ? writerMap.get(item.writerId)?.profilePhotoUrl : null)
+               .filter(Boolean),
+         ];
+
+         // Batch resolve all image URLs at once
+         const imageUrlMap = await batchResolveImageUrls(
+            allImageKeys,
+            resolvedCtx.minioBucket,
+            resolvedCtx.minioClient,
          );
+
+         // Add writer info and resolved image URLs using the pre-resolved map
+         const itemsWithWriter = items.map((item) => {
+            const writer = item.writerId
+               ? writerMap.get(item.writerId)
+               : null;
+            return {
+               ...item,
+               imageUrl: item.imageUrl ? imageUrlMap.get(item.imageUrl) ?? null : null,
+               writer: writer
+                  ? {
+                       ...writer,
+                       profilePhotoUrl: writer.profilePhotoUrl
+                          ? imageUrlMap.get(writer.profilePhotoUrl) ?? null
+                          : null,
+                    }
+                  : null,
+            };
+         });
 
          return {
             items: itemsWithWriter,

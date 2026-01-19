@@ -668,7 +668,7 @@ function DebouncedOnChangePlugin({
 
    const { call: scheduleProcess, cancel: cancelProcess } = useDebouncedCallback(
       processChange,
-      150, // Debounce delay
+      350, // Debounce delay - increased for better INP
    );
 
    useEffect(() => {

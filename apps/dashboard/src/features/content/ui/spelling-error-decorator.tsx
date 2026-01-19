@@ -198,7 +198,10 @@ export function SpellingErrorDecorator({
       null,
    );
    const updateTimeoutRef = useRef<number | null>(null);
+   const rafIdRef = useRef<number | null>(null);
    const suggestionsCache = useRef<Map<string, string[]>>(new Map());
+   // Cache visible text range to filter errors before position calculation
+   const visibleRangeRef = useRef<{ start: number; end: number } | null>(null);
 
    // Lazy load suggestions when opening popover
    const loadSuggestionsForWord = useCallback(
@@ -234,43 +237,94 @@ export function SpellingErrorDecorator({
    );
 
    // Calculate positions of spelling errors using optimized offset map
+   // Uses RAF to batch layout reads and visible range filtering for performance
    const updateDecorationPositions = useCallback(() => {
+      // Cancel any pending RAF
+      if (rafIdRef.current !== null) {
+         cancelAnimationFrame(rafIdRef.current);
+      }
+
       if (!containerRef.current || spellingErrors.length === 0) {
          setDecorations([]);
          return;
       }
 
-      const container = containerRef.current;
-      const editorElement = container.querySelector('[contenteditable="true"]');
-      if (!editorElement) return;
+      // Batch layout reads in RAF to avoid layout thrashing
+      rafIdRef.current = requestAnimationFrame(() => {
+         rafIdRef.current = null;
 
-      const containerRect = container.getBoundingClientRect();
+         const container = containerRef.current;
+         if (!container) return;
 
-      editor.getEditorState().read(() => {
-         // Build offset map once for all errors
-         const root = $getRoot();
-         const offsetMap = buildLexicalOffsetMap(root);
-         const newDecorations: DecorationPosition[] = [];
+         const editorElement = container.querySelector('[contenteditable="true"]');
+         if (!editorElement) return;
 
-         // O(n log m) instead of O(n * m)
-         for (const error of spellingErrors) {
-            const position = getPositionFromLexicalMap(
-               editor,
-               offsetMap,
-               error.offset,
-               error.length,
-            );
-            if (position && isWithinBounds(position, containerRect)) {
-               newDecorations.push({
-                  ...position,
-                  error,
-               });
+         const containerRect = container.getBoundingClientRect();
+
+         editor.getEditorState().read(() => {
+            // Build offset map once for all errors
+            const root = $getRoot();
+            const offsetMap = buildLexicalOffsetMap(root);
+
+            // Estimate visible text range based on scroll position and viewport
+            // This allows us to skip errors that are definitely outside the viewport
+            const totalTextLength = offsetMap.length > 0
+               ? offsetMap[offsetMap.length - 1]?.endOffset ?? 0
+               : 0;
+
+            if (totalTextLength > 0) {
+               const scrollRatio = container.scrollTop / (container.scrollHeight || 1);
+               const viewportRatio = containerRect.height / (container.scrollHeight || 1);
+               const estimatedStart = Math.floor(scrollRatio * totalTextLength);
+               const estimatedEnd = Math.ceil((scrollRatio + viewportRatio) * totalTextLength);
+               // Add buffer for errors near the edge
+               const buffer = Math.ceil(totalTextLength * 0.1);
+               visibleRangeRef.current = {
+                  start: Math.max(0, estimatedStart - buffer),
+                  end: Math.min(totalTextLength, estimatedEnd + buffer),
+               };
             }
-         }
 
-         setDecorations(newDecorations);
+            const newDecorations: DecorationPosition[] = [];
+            const visibleRange = visibleRangeRef.current;
+
+            // O(n log m) instead of O(n * m)
+            for (const error of spellingErrors) {
+               // Skip errors that are definitely outside visible range
+               if (visibleRange) {
+                  const errorEnd = error.offset + error.length;
+                  if (errorEnd < visibleRange.start || error.offset > visibleRange.end) {
+                     continue;
+                  }
+               }
+
+               const position = getPositionFromLexicalMap(
+                  editor,
+                  offsetMap,
+                  error.offset,
+                  error.length,
+               );
+               if (position && isWithinBounds(position, containerRect)) {
+                  newDecorations.push({
+                     ...position,
+                     error,
+                  });
+               }
+            }
+
+            setDecorations(newDecorations);
+         });
       });
    }, [editor, containerRef, spellingErrors]);
+
+   // Cleanup RAF on unmount
+   useEffect(() => {
+      return () => {
+         if (rafIdRef.current !== null) {
+            cancelAnimationFrame(rafIdRef.current);
+         }
+      };
+   }, []);
 
    // Debounced position update
    useEffect(() => {
@@ -290,9 +344,18 @@ export function SpellingErrorDecorator({
    }, [updateDecorationPositions]);
 
    // Update on editor changes and scroll
+   const scrollTimeoutRef = useRef<number | null>(null);
    useEffect(() => {
+      // Debounced scroll handler to reduce layout thrashing
       const handleScroll = () => {
-         updateDecorationPositions();
+         if (scrollTimeoutRef.current) {
+            window.clearTimeout(scrollTimeoutRef.current);
+         }
+         scrollTimeoutRef.current = window.setTimeout(() => {
+            // Invalidate visible range cache on scroll
+            visibleRangeRef.current = null;
+            updateDecorationPositions();
+         }, 50); // Short debounce for responsiveness
       };
 
       const unregister = editor.registerUpdateListener(() => {
@@ -314,6 +377,9 @@ export function SpellingErrorDecorator({
 
       return () => {
          unregister();
+         if (scrollTimeoutRef.current) {
+            window.clearTimeout(scrollTimeoutRef.current);
+         }
          if (container) {
             container.removeEventListener("scroll", handleScroll, true);
          }

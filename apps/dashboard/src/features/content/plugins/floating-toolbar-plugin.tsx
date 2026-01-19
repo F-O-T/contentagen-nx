@@ -9,7 +9,7 @@ import {
    FORMAT_TEXT_COMMAND,
    SELECTION_CHANGE_COMMAND,
 } from "lexical";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 import { openEditPrompt, useEditContext } from "../context/edit-context";
 import {
@@ -33,6 +33,10 @@ export function FloatingToolbarPlugin({
    const { hasFeature } = useFeatureAccess();
    const hasQuickEdit = hasFeature(Feature.QUICK_EDIT);
 
+   // Cache container rect to avoid layout thrashing
+   const containerRectRef = useRef<DOMRect | null>(null);
+   const rafIdRef = useRef<number | null>(null);
+
    const [toolbarState, setToolbarState] = useState<{
       isVisible: boolean;
       position: { top: number; left: number } | null;
@@ -45,17 +49,49 @@ export function FloatingToolbarPlugin({
       isLink: false,
    });
 
-   // Calculate position relative to container, centered on selection
-   const getSelectionPosition = useCallback(() => {
+   // Invalidate container rect cache on scroll/resize
+   useEffect(() => {
+      const invalidateCache = () => {
+         containerRectRef.current = null;
+      };
+
+      const container = containerRef.current;
+      if (container) {
+         container.addEventListener("scroll", invalidateCache, { passive: true });
+      }
+      window.addEventListener("resize", invalidateCache, { passive: true });
+      window.addEventListener("scroll", invalidateCache, { passive: true });
+
+      return () => {
+         if (container) {
+            container.removeEventListener("scroll", invalidateCache);
+         }
+         window.removeEventListener("resize", invalidateCache);
+         window.removeEventListener("scroll", invalidateCache);
+      };
+   }, [containerRef]);
+
+   // Get cached container rect or compute and cache it
+   const getContainerRect = useCallback(() => {
       const container = containerRef.current;
       if (!container) return null;
+
+      if (!containerRectRef.current) {
+         containerRectRef.current = container.getBoundingClientRect();
+      }
+      return containerRectRef.current;
+   }, [containerRef]);
+
+   // Calculate position relative to container, centered on selection
+   const getSelectionPosition = useCallback(() => {
+      const containerRect = getContainerRect();
+      if (!containerRect) return null;
 
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0 || selection.isCollapsed)
          return null;
 
       const range = selection.getRangeAt(0);
-      const containerRect = container.getBoundingClientRect();
       const rangeRect = range.getBoundingClientRect();
 
       // Position at center-top of the selection
@@ -63,64 +99,82 @@ export function FloatingToolbarPlugin({
          top: rangeRect.top - containerRect.top,
          left: rangeRect.left - containerRect.left + rangeRect.width / 2,
       };
-   }, [containerRef]);
+   }, [getContainerRect]);
 
-   // Update toolbar state based on selection
+   // Update toolbar state based on selection (batched with RAF)
    const updateToolbar = useCallback(() => {
-      editor.getEditorState().read(() => {
-         const selection = $getSelection();
+      // Cancel any pending RAF to avoid stacking
+      if (rafIdRef.current !== null) {
+         cancelAnimationFrame(rafIdRef.current);
+      }
 
-         if (!$isRangeSelection(selection) || selection.isCollapsed()) {
-            setToolbarState((prev) => ({
-               ...prev,
-               isVisible: false,
-               position: null,
-            }));
-            return;
-         }
+      rafIdRef.current = requestAnimationFrame(() => {
+         rafIdRef.current = null;
 
-         const text = selection.getTextContent();
-         // Only show for meaningful selections (at least 1 character)
-         if (text.trim().length < 1) {
-            setToolbarState((prev) => ({
-               ...prev,
-               isVisible: false,
-               position: null,
-            }));
-            return;
-         }
+         editor.getEditorState().read(() => {
+            const selection = $getSelection();
 
-         // Get active formats
-         const activeFormats = new Set<TextFormatType>();
-         if (selection.hasFormat("bold")) activeFormats.add("bold");
-         if (selection.hasFormat("italic")) activeFormats.add("italic");
-         if (selection.hasFormat("strikethrough"))
-            activeFormats.add("strikethrough");
-         if (selection.hasFormat("underline")) activeFormats.add("underline");
-         if (selection.hasFormat("code")) activeFormats.add("code");
-
-         // Check if selection contains a link
-         const nodes = selection.getNodes();
-         let isLink = false;
-         for (const node of nodes) {
-            const parent = node.getParent();
-            if ($isLinkNode(parent) || $isLinkNode(node)) {
-               isLink = true;
-               break;
+            if (!$isRangeSelection(selection) || selection.isCollapsed()) {
+               setToolbarState((prev) => ({
+                  ...prev,
+                  isVisible: false,
+                  position: null,
+               }));
+               return;
             }
-         }
 
-         const position = getSelectionPosition();
-         if (position) {
-            setToolbarState({
-               isVisible: true,
-               position,
-               activeFormats,
-               isLink,
-            });
-         }
+            const text = selection.getTextContent();
+            // Only show for meaningful selections (at least 1 character)
+            if (text.trim().length < 1) {
+               setToolbarState((prev) => ({
+                  ...prev,
+                  isVisible: false,
+                  position: null,
+               }));
+               return;
+            }
+
+            // Get active formats
+            const activeFormats = new Set<TextFormatType>();
+            if (selection.hasFormat("bold")) activeFormats.add("bold");
+            if (selection.hasFormat("italic")) activeFormats.add("italic");
+            if (selection.hasFormat("strikethrough"))
+               activeFormats.add("strikethrough");
+            if (selection.hasFormat("underline")) activeFormats.add("underline");
+            if (selection.hasFormat("code")) activeFormats.add("code");
+
+            // Check if selection contains a link
+            const nodes = selection.getNodes();
+            let isLink = false;
+            for (const node of nodes) {
+               const parent = node.getParent();
+               if ($isLinkNode(parent) || $isLinkNode(node)) {
+                  isLink = true;
+                  break;
+               }
+            }
+
+            const position = getSelectionPosition();
+            if (position) {
+               setToolbarState({
+                  isVisible: true,
+                  position,
+                  activeFormats,
+                  isLink,
+               });
+            }
+         });
       });
    }, [editor, getSelectionPosition]);
+
+   // Cleanup RAF on unmount
+   useEffect(() => {
+      return () => {
+         if (rafIdRef.current !== null) {
+            cancelAnimationFrame(rafIdRef.current);
+         }
+      };
+   }, []);
 
    // Listen for selection changes (includes format changes)
    useEffect(() => {

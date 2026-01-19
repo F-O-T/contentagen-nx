@@ -149,7 +149,9 @@ export function makeQueryClient() {
    const queryClient: QueryClient = new QueryClient({
       defaultOptions: {
          queries: {
-            staleTime: 60 * 1000,
+            staleTime: 5 * 60 * 1000, // 5 minutes - reduces unnecessary refetches
+            gcTime: 30 * 60 * 1000, // 30 minutes - keeps data in cache longer
+            refetchOnWindowFocus: false, // Prevents refetch storms on tab switch
          },
       },
       mutationCache: new MutationCache({
