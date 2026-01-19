@@ -26,11 +26,9 @@ export default defineConfig({
                // Lexical editor - lazy loaded when editor is opened
                "vendor-lexical": [
                   "lexical",
-                  "@lexical/react",
                   "@lexical/clipboard",
                   "@lexical/code",
                   "@lexical/hashtag",
-                  "@lexical/headless",
                   "@lexical/history",
                   "@lexical/html",
                   "@lexical/link",
