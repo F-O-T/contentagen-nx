@@ -1,5 +1,5 @@
 # apps/dashboard/Dockerfile
-FROM oven/bun:alpine AS base
+FROM docker.io/oven/bun:alpine AS base
 
 WORKDIR /app
 
@@ -66,7 +66,7 @@ ARG VITE_POSTHOG_KEY
 RUN bun run --filter=dashboard build
 
 # Production stage
-FROM nginx:alpine AS runner
+FROM docker.io/library/nginx:alpine AS runner
 
 # Copy the built static files from the builder stage
 COPY --from=base /app/apps/dashboard/dist /usr/share/nginx/html
