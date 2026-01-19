@@ -97,8 +97,6 @@ RUN bun install
 
 COPY . .
 
-ENV NODE_ENV=production
-
 # Build libraries
 WORKDIR /app/libraries/markdown
 RUN bun run build
