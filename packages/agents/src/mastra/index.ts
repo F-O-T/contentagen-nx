@@ -4,16 +4,12 @@ import type { PgVector } from "@mastra/pg";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
-import { planAgent } from "./agents/plan-agent";
 import { pgVectorStore } from "./agents/shared";
 import { writerAgent } from "./agents/writer-agent";
-import type { ContentPlan } from "./schemas/plan-schema";
-
-// Chat modes for blog editor
-export type ChatMode = "plan" | "writer";
 
 // Available models
 export type ModelId =
+   | "openrouter/x-ai/grok-4.1-fast"
    | "openrouter/minimax/minimax-m2.1"
    | "openrouter/mistralai/mistral-small-creative";
 
@@ -22,9 +18,7 @@ export type CustomRequestContext = {
    userId: string;
    writerId?: string;
    // Fields for blog editor
-   mode?: ChatMode;
    model?: ModelId;
-   activePlan?: ContentPlan;
    // Instruction memories (compiled into agent prompts)
    writerInstructions?: InstructionMemoryItem[];
 };
@@ -36,7 +30,6 @@ const vectorsConfig: Record<string, PgVector> = pgVectorStore
 
 export const mastra = new Mastra({
    agents: {
-      planAgent,
       writerAgent,
       fimAgent,
       inlineEditAgent,
@@ -66,14 +59,8 @@ export function createRequestContext(context: CustomRequestContext) {
    if (context.writerId) {
       requestContext.set("writerId", context.writerId);
    }
-   if (context.mode) {
-      requestContext.set("mode", context.mode);
-   }
    if (context.model) {
       requestContext.set("model", context.model);
-   }
-   if (context.activePlan) {
-      requestContext.set("activePlan", context.activePlan);
    }
    if (context.writerInstructions) {
       requestContext.set("writerInstructions", context.writerInstructions);
@@ -84,15 +71,4 @@ export function createRequestContext(context: CustomRequestContext) {
 export { fimAgent } from "./agents/fim-agent";
 export { inlineEditAgent } from "./agents/inline-edit-agent";
 // Export agents for direct access
-export { planAgent } from "./agents/plan-agent";
 export { writerAgent } from "./agents/writer-agent";
-
-// Export plan schemas
-export {
-   type ContentPlan,
-   ContentPlanSchema,
-   type PlanStep,
-   PlanStepSchema,
-   type ResearchInsights,
-   ResearchInsightsSchema,
-} from "./schemas/plan-schema";

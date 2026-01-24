@@ -22,7 +22,8 @@ export enum Feature {
    // Advanced Features
    AUTOMATIONS = "automations", // Workflow automations
    ADVANCED_ANALYTICS = "advanced_analytics", // Advanced reporting
-   API_ACCESS = "api_access", // API access
+   API_ACCESS = "api_access", // API key management UI (LITE+)
+   SDK_ACCESS = "sdk_access", // Basic SDK read access (all plans)
 }
 
 /**
@@ -34,6 +35,8 @@ export const PLAN_FEATURES: Record<PlanName, Feature[]> = {
       Feature.CONTENT_EDITOR,
       Feature.CONTENT_ANALYSIS,
       Feature.RELATED_CONTENT,
+      // SDK access for static builds (limited rate)
+      Feature.SDK_ACCESS,
    ],
    [PlanName.LITE]: [
       // Includes all FREE features
@@ -47,6 +50,7 @@ export const PLAN_FEATURES: Record<PlanName, Feature[]> = {
       Feature.CHAT,
       Feature.WRITER_AI,
       // SDK/API access
+      Feature.SDK_ACCESS,
       Feature.API_ACCESS,
    ],
    [PlanName.PRO]: [
@@ -64,6 +68,7 @@ export const PLAN_FEATURES: Record<PlanName, Feature[]> = {
       Feature.AGENT_MEMORIES,
       Feature.AUTOMATIONS,
       Feature.ADVANCED_ANALYTICS,
+      Feature.SDK_ACCESS,
       Feature.API_ACCESS,
    ],
 };
@@ -108,4 +113,5 @@ export const FEATURE_DISPLAY_NAMES: Record<Feature, string> = {
    [Feature.AUTOMATIONS]: "Automações",
    [Feature.ADVANCED_ANALYTICS]: "Relatórios avançados",
    [Feature.API_ACCESS]: "Acesso à API",
+   [Feature.SDK_ACCESS]: "Acesso ao SDK",
 };

@@ -31,6 +31,14 @@
 			},
 			"types": "./src/posthog.ts"
 		},
+		"./analytics": {
+			"bun": "./src/analytics.ts",
+			"import": {
+				"default": "./dist/analytics.js",
+				"types": "./dist/analytics.d.ts"
+			},
+			"types": "./src/analytics.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"files": [

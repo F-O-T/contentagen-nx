@@ -1,10 +1,8 @@
-import { betterAuth } from "better-auth";
-import { createDb } from "../../database/src/client";
-import { serverEnv } from "../../environment/src/server";
-import { getElysiaPosthogConfig } from "../../posthog/src/server";
-import { getStripeClient } from "../../stripe/src/index";
-import { getResendClient } from "../../transactional/src/client";
-import { getAuthOptions } from "./server";
+import { createDb } from "@packages/database/client";
+import { env } from "@packages/environment/server";
+import type { betterAuth } from "better-auth";
+import { createAuth } from "./server";
+
 /**
  * @internal
  *
@@ -16,15 +14,7 @@ import { getAuthOptions } from "./server";
  * The documentation for better-auth CLI can be found here:
  * - https://www.better-auth.com/docs/concepts/cli
  */
-export const auth = betterAuth({
-   ...getAuthOptions(
-      createDb(),
-      getElysiaPosthogConfig({
-         POSTHOG_HOST: serverEnv.POSTHOG_HOST,
-         POSTHOG_KEY: serverEnv.POSTHOG_KEY,
-      }),
-      getResendClient(serverEnv.RESEND_API_KEY),
-      getStripeClient(serverEnv.STRIPE_SECRET_KEY),
-      serverEnv.STRIPE_WEBHOOK_SECRET,
-   ),
+export const auth = createAuth({
+   db: createDb({ databaseUrl: env.DATABASE_URL }),
+   env,
 }) as ReturnType<typeof betterAuth>;

@@ -1,4 +1,4 @@
-import { serverEnv } from "@packages/environment/server";
+import { env } from "@packages/environment/server";
 import { AppError, propagateError } from "@packages/utils/errors";
 import Exa from "exa-js";
 import {
@@ -21,7 +21,7 @@ import type {
  * Get all Exa API keys
  */
 function getExaKeys(): string[] {
-	return parseApiKeys(serverEnv.EXA_API_KEYS);
+	return parseApiKeys(env.EXA_API_KEYS);
 }
 
 class ExaProvider implements SearchProvider {

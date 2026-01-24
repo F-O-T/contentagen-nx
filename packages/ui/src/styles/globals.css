@@ -1,8 +1,8 @@
 /* Google Fonts are now loaded via index.html with preconnect/preload for better FCP */
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tw-animate-css";
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
-
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../../../components/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
@@ -42,14 +42,9 @@
   --sidebar-accent-foreground: oklch(0.325 0 0);
   --sidebar-border: oklch(0.9401 0 0);
   --sidebar-ring: oklch(0.7731 0 0);
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
+--font-sans: Montserrat, ui-sans-serif, sans-serif, system-ui;
+  --font-serif:  Montserrat, ui-sans-serif, sans-serif, system-ui;
+  --font-mono: Montserrat, ui-sans-serif, sans-serif, system-ui;
   --radius: 0.5rem;
   --shadow-x: 0;
   --shadow-y: 1px;
@@ -255,4 +250,18 @@ html:active-view-transition-type(slide-right) {
 @keyframes slide-in-right {
    from { transform: translateX(-100%); }
    to { transform: translateX(0); }
+}
+
+/* Ghost text styles - prevents selection and editing */
+.ghost-text {
+   opacity: 0.5 !important;
+   color: var(--muted-foreground) !important;
+   pointer-events: none !important;
+   user-select: none !important;
+   -webkit-user-select: none !important;
+   cursor: default !important;
+}
+
+.ghost-text::selection {
+   background: transparent !important;
 }

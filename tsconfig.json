@@ -4,6 +4,9 @@
    "references": [
     {
       "path": "./packages/queue"
+    },
+    {
+      "path": "./packages/editor"
     }
   ]
 }

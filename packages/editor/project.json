@@ -1,0 +1,31 @@
+{
+   "name": "editor",
+   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+   "sourceRoot": "packages/editor/src",
+   "projectType": "library",
+   "tags": ["scope:packages"],
+   "targets": {
+      "build": {
+         "executor": "nx:run-commands",
+         "outputs": ["{projectRoot}/dist"],
+         "options": {
+            "command": "tsc --build",
+            "cwd": "packages/editor"
+         }
+      },
+      "typecheck": {
+         "executor": "nx:run-commands",
+         "options": {
+            "command": "tsc -p tsconfig.typecheck.json",
+            "cwd": "packages/editor"
+         }
+      },
+      "check": {
+         "executor": "nx:run-commands",
+         "options": {
+            "command": "biome check --write ./src",
+            "cwd": "packages/editor"
+         }
+      }
+   }
+}

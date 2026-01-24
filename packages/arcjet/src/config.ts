@@ -5,9 +5,9 @@ import arcjet, {
    tokenBucket,
    validateEmail,
 } from "@arcjet/bun";
-import { serverEnv } from "@packages/environment/server";
+import { env } from "@packages/environment/server";
 
-const ARCJET_KEY = serverEnv.ARCJET_KEY;
+const ARCJET_KEY = env.ARCJET_KEY;
 
 export const arcjetInstance = ARCJET_KEY
    ? arcjet({

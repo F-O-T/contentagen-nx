@@ -26,6 +26,10 @@
       "./server": {
          "default": "./src/server.ts",
          "types": "./dist/src/server.d.ts"
+      },
+      "./api-key-config": {
+         "default": "./src/api-key-config.ts",
+         "types": "./dist/src/api-key-config.d.ts"
       }
    },
    "files": [

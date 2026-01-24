@@ -17,6 +17,10 @@
          "default": "./src/server.ts",
          "types": "./dist/src/server.d.ts"
       },
+      "./sdk/server": {
+         "default": "./src/sdk/server.ts",
+         "types": "./dist/src/sdk/server.d.ts"
+      },
       "./llm/types": {
          "default": "./src/llm/types.ts",
          "types": "./dist/src/llm/types.d.ts"
@@ -37,9 +41,9 @@
          "default": "./src/llm/ai-span.ts",
          "types": "./dist/src/llm/ai-span.d.ts"
       },
-      "./analytics": {
-         "default": "./src/analytics/index.ts",
-         "types": "./dist/src/analytics/index.d.ts"
+      "./analytics/*": {
+         "default": "./src/analytics/*.ts",
+         "types": "./dist/src/analytics/*.d.ts"
       }
    },
    "files": [

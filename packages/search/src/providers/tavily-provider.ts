@@ -1,4 +1,4 @@
-import { serverEnv } from "@packages/environment/server";
+import { env } from "@packages/environment/server";
 import { AppError, propagateError } from "@packages/utils/errors";
 import { tavily } from "@tavily/core";
 import {
@@ -21,7 +21,7 @@ import type {
  * Get all Tavily API keys
  */
 function getTavilyKeys(): string[] {
-	return parseApiKeys(serverEnv.TAVILY_API_KEYS);
+	return parseApiKeys(env.TAVILY_API_KEYS);
 }
 
 class TavilyProvider implements SearchProvider {

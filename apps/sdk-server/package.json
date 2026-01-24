@@ -1,0 +1,31 @@
+{
+   "dependencies": {
+      "@elysiajs/cors": "catalog:server",
+      "@packages/arcjet": "workspace:*",
+      "@packages/authentication": "workspace:*",
+      "@packages/database": "workspace:*",
+      "@packages/environment": "workspace:*",
+      "@packages/files": "workspace:*",
+      "@packages/posthog": "workspace:*",
+      "@packages/stripe": "workspace:*",
+      "@packages/transactional": "workspace:*",
+      "elysia": "catalog:server"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "@types/bun": "latest",
+      "typescript": "catalog:development"
+   },
+   "license": "Apache-2.0",
+   "name": "sdk-server",
+   "scripts": {
+      "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile sdk-server ./src/index.ts",
+      "check": "bunx --bun biome check --write .",
+      "container-start": "podman-compose down && podman-compose up -d",
+      "dev": "bun run container-start && bun run --watch src/index.ts",
+      "format": "biome format",
+      "start": "./sdk-server",
+      "typecheck": "tsc"
+   },
+   "version": "0.8.1"
+}

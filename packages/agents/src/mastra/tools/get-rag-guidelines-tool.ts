@@ -1,7 +1,7 @@
 import { createTool } from "@mastra/core/tools";
 import { createDb } from "@packages/database/client";
 import { getWriterById } from "@packages/database/repositories/writer-repository";
-import { serverEnv } from "@packages/environment/server";
+import { env } from "@packages/environment/server";
 import { AppError, propagateError } from "@packages/utils/errors";
 export function getRagGuidelinesInstructions(): string {
    return `
@@ -26,7 +26,7 @@ export const getRagGuidelinesTool = createTool({
 
       try {
          const dbClient = createDb({
-            databaseUrl: serverEnv.DATABASE_URL,
+            databaseUrl: env.DATABASE_URL,
          });
 
          const writer = await getWriterById(dbClient, writerId);

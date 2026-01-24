@@ -1,5 +1,5 @@
 import { PgVector } from "@mastra/pg";
-import { serverEnv } from "@packages/environment/server";
+import { env } from "@packages/environment/server";
 import { embed } from "ai";
 import { embeddingModel } from "../agents/shared";
 import type { ContentMetadata } from "./types";
@@ -29,7 +29,7 @@ class RagService {
     * Check if RAG is available (PG_VECTOR_URL configured)
     */
    isAvailable(): boolean {
-      return !!serverEnv.PG_VECTOR_URL;
+      return !!env.PG_VECTOR_URL;
    }
 
    /**
@@ -52,7 +52,7 @@ class RagService {
       try {
          this.pgVector = new PgVector({
             id: "mastra-rag",
-            connectionString: serverEnv.PG_VECTOR_URL!,
+            connectionString: env.PG_VECTOR_URL!,
          });
 
          // Create indexes if they don't exist

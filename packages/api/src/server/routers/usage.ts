@@ -1,5 +1,7 @@
-import { serverEnv } from "@packages/environment/server";
-import { queryAIUsage, queryExtendedUsage } from "@packages/posthog/analytics";
+import {
+   queryAIUsage,
+   queryExtendedUsage,
+} from "@packages/posthog/analytics/usage-query";
 import { APIError } from "@packages/utils/errors";
 import { protectedProcedure, router } from "../trpc";
 
@@ -27,56 +29,11 @@ export const usageRouter = router({
          999,
       );
 
-      try {
-         const usage = await queryAIUsage(
-            serverEnv.POSTHOG_HOST,
-            serverEnv.POSTHOG_PERSONAL_API_KEY,
-            serverEnv.POSTHOG_PROJECT_ID,
-            {
-               organizationId,
-               startDate: startOfMonth,
-               endDate: endOfMonth,
-            },
-         );
-
-         return usage;
-      } catch (error) {
-         console.error("Failed to fetch AI usage:", error);
-         // Return empty stats on error rather than failing
-         return {
-            period: `${startOfMonth.toISOString().split("T")[0]} - ${endOfMonth.toISOString().split("T")[0]}`,
-            totalRequests: 0,
-            totalInputTokens: 0,
-            totalOutputTokens: 0,
-            totalTokens: 0,
-            byFeature: {
-               fim: {
-                  requests: 0,
-                  inputTokens: 0,
-                  outputTokens: 0,
-                  totalTokens: 0,
-               },
-               chat: {
-                  requests: 0,
-                  inputTokens: 0,
-                  outputTokens: 0,
-                  totalTokens: 0,
-               },
-               edit: {
-                  requests: 0,
-                  inputTokens: 0,
-                  outputTokens: 0,
-                  totalTokens: 0,
-               },
-               plan: {
-                  requests: 0,
-                  inputTokens: 0,
-                  outputTokens: 0,
-                  totalTokens: 0,
-               },
-            },
-         };
-      }
+      return await queryAIUsage({
+         organizationId,
+         startDate: startOfMonth,
+         endDate: endOfMonth,
+      });
    }),
 
    /**
@@ -119,61 +76,12 @@ export const usageRouter = router({
          999,
       );
 
-      try {
-         const usage = await queryExtendedUsage(
-            serverEnv.POSTHOG_HOST,
-            serverEnv.POSTHOG_PERSONAL_API_KEY,
-            serverEnv.POSTHOG_PROJECT_ID,
-            {
-               organizationId,
-               startDate: startOfMonth,
-               endDate: endOfMonth,
-               previousMonthStart: startOfPrevMonth,
-               previousMonthEnd: endOfPrevMonth,
-            },
-         );
-
-         return usage;
-      } catch (error) {
-         console.error("Failed to fetch extended AI usage:", error);
-         // Return empty stats on error rather than failing
-         return {
-            period: `${startOfMonth.toISOString().split("T")[0]} - ${endOfMonth.toISOString().split("T")[0]}`,
-            totalRequests: 0,
-            totalInputTokens: 0,
-            totalOutputTokens: 0,
-            totalTokens: 0,
-            byFeature: {
-               fim: {
-                  requests: 0,
-                  inputTokens: 0,
-                  outputTokens: 0,
-                  totalTokens: 0,
-               },
-               chat: {
-                  requests: 0,
-                  inputTokens: 0,
-                  outputTokens: 0,
-                  totalTokens: 0,
-               },
-               edit: {
-                  requests: 0,
-                  inputTokens: 0,
-                  outputTokens: 0,
-                  totalTokens: 0,
-               },
-               plan: {
-                  requests: 0,
-                  inputTokens: 0,
-                  outputTokens: 0,
-                  totalTokens: 0,
-               },
-            },
-            dailyUsage: [],
-            acceptanceRates: [],
-            previousMonth: { totalRequests: 0, totalTokens: 0 },
-            comparison: { requestsChange: 0, tokensChange: 0 },
-         };
-      }
+      return await queryExtendedUsage({
+         organizationId,
+         startDate: startOfMonth,
+         endDate: endOfMonth,
+         previousMonthStart: startOfPrevMonth,
+         previousMonthEnd: endOfPrevMonth,
+      });
    }),
 });

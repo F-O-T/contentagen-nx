@@ -1,0 +1,89 @@
+{
+   "name": "@packages/editor",
+   "type": "module",
+   "private": true,
+   "version": "0.1.0",
+   "exports": {
+      ".": {
+         "default": "./src/index.ts",
+         "types": "./dist/src/index.d.ts"
+      },
+      "./core/*": {
+         "default": "./src/core/*.{ts,tsx}",
+         "types": "./dist/src/core/*.d.ts"
+      },
+      "./stores/*": {
+         "default": "./src/stores/*.ts",
+         "types": "./dist/src/stores/*.d.ts"
+      },
+      "./ai/*": {
+         "default": "./src/ai/*.ts",
+         "types": "./dist/src/ai/*.d.ts"
+      },
+      "./spelling/*": {
+         "default": "./src/spelling/*.{ts,tsx}",
+         "types": "./dist/src/spelling/*.d.ts"
+      },
+      "./diagnostics/*": {
+         "default": "./src/diagnostics/*.{ts,tsx}",
+         "types": "./dist/src/diagnostics/*.d.ts"
+      },
+      "./plugins/*": {
+         "default": "./src/plugins/*.tsx",
+         "types": "./dist/src/plugins/*.d.ts"
+      },
+      "./ui/*": {
+         "default": "./src/ui/*.tsx",
+         "types": "./dist/src/ui/*.d.ts"
+      },
+      "./ui/chat/*": {
+         "default": "./src/ui/chat/*.tsx",
+         "types": "./dist/src/ui/chat/*.d.ts"
+      },
+      "./schemas": {
+         "default": "./src/schemas.ts",
+         "types": "./dist/src/schemas.d.ts"
+      }
+   },
+   "files": [
+      "dist"
+   ],
+   "scripts": {
+      "build": "tsc --build",
+      "check": "biome check --write ./src",
+      "typecheck": "tsc -p tsconfig.typecheck.json",
+      "test": "bun test",
+      "test:watch": "bun test --watch"
+   },
+   "dependencies": {
+      "@f-o-t/content-analysis": "workspace:*",
+      "@f-o-t/spelling": "workspace:*",
+      "@packages/ui": "workspace:*",
+      "@packages/utils": "workspace:*",
+      "@tanstack/react-store": "^0.7.0",
+      "@lexical/code": "^0.21.0",
+      "@lexical/html": "^0.21.0",
+      "@lexical/link": "^0.21.0",
+      "@lexical/list": "^0.21.0",
+      "@lexical/markdown": "^0.21.0",
+      "@lexical/react": "^0.21.0",
+      "@lexical/rich-text": "^0.21.0",
+      "@lexical/selection": "^0.21.0",
+      "@lexical/table": "^0.21.0",
+      "@lexical/utils": "^0.21.0",
+      "clsx": "^2.1.1",
+      "lexical": "^0.21.0",
+      "lucide-react": "^0.556.0",
+      "tailwind-merge": "^3.3.1",
+      "zod": "catalog:validation",
+      "react": "catalog:react"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "@types/react": "catalog:react",
+      "typescript": "catalog:development"
+   },
+   "peerDependencies": {
+      "react": ">=18.0.0"
+   }
+}

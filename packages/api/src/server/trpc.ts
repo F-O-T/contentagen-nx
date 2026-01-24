@@ -11,7 +11,7 @@ import {
    findMemberByUserIdAndOrganizationId,
    getOrganizationMembership,
 } from "@packages/database/repositories/auth-repository";
-import { serverEnv } from "@packages/environment/server";
+import { env } from "@packages/environment/server";
 import type { MinioClient } from "@packages/files/client";
 import { getServerLogger } from "@packages/logging/server";
 import type { PostHog } from "@packages/posthog/server";
@@ -25,7 +25,7 @@ import SuperJSON from "superjson";
 
 export type MemberRole = "owner" | "admin" | "member";
 
-const logger = getServerLogger(serverEnv);
+const logger = getServerLogger(env);
 
 // Initialize cache client lazily
 let cache: ReturnType<typeof createCacheClient> | null = null;

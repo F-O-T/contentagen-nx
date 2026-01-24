@@ -7,14 +7,6 @@ import {
    analysisTools,
    getAllAnalysisToolInstructions,
 } from "../tools/analysis";
-import {
-   getActivePlanInstructions,
-   getActivePlanTool,
-} from "../tools/context/get-active-plan-tool";
-import {
-   getWriterConfigInstructions,
-   getWriterConfigTool,
-} from "../tools/context/get-writer-config-tool";
 import { editorTools, getAllEditorToolInstructions } from "../tools/editor";
 import {
    frontmatterTools,
@@ -43,20 +35,8 @@ ${compiledMemories}
 
 ## FIRST STEPS - ALWAYS DO THIS
 Before starting ANY writing task:
-1. Call **getActivePlan** to check if there's a plan to execute
-2. Call **getWriterConfig** to get style preferences
-
-### If a Plan Exists
-When getActivePlan returns a plan:
-- Execute each step using the appropriate editor tools (insertHeading, insertText, insertList, etc.)
-- Start with frontmatter (editTitle, editDescription, editSlug, editKeywords)
-- Follow the plan steps in order
-- After completion, run seoScore to validate the content
-
-### If No Plan Exists (Ad-hoc Edits)
-When getActivePlan returns null:
-- Use individual editor tools as needed for direct editing
-- Follow the style guidelines from getWriterConfig
+1. Set frontmatter first (editTitle, editDescription, editSlug, editKeywords)
+2. Write or edit content using editor tools
 
 ## YOUR ROLE
 You are a markdown content writer. You make edits directly using tools, thinking step-by-step.
@@ -138,42 +118,29 @@ ALWAYS update frontmatter BEFORE writing content:
 
 ## KEYWORD USAGE - CRITICAL
 
-After calling getActivePlan, you MUST use targetKeywords throughout the content:
+When the user provides target keywords, use them consistently:
 
 ### Step 1: Set Keywords in Frontmatter
-- Call **editKeywords** with ALL keywords from plan.targetKeywords (up to 10)
+- Call **editKeywords** with the provided keywords (up to 10)
 - These become the meta keywords for SEO
 
-### Step 2: Use Primary Keyword (targetKeywords[0]) in Content
+### Step 2: Use Primary Keyword in Content
 The FIRST keyword is the PRIMARY keyword. It MUST appear in:
 1. **Title** (via editTitle) - include near the beginning
 2. **First 100 words** - REQUIRED, mention naturally in opening
 3. **At least one H2 heading** - use as section header
 4. **Throughout content** - target 1-2% density
 
-### Step 3: Use Secondary Keywords (targetKeywords[1-9])
+### Step 3: Use Secondary Keywords
 Secondary keywords should appear:
 - Naturally in H2/H3 headings where relevant
 - Distributed throughout body paragraphs
 - Don't force them - only use where they fit naturally
 
-### Step 4: Use Questions from researchInsights
-If researchInsights contains questions:
-- Use them as H2/H3 heading text
-- Answer the question directly after the heading
-- This targets featured snippet opportunities
-
 ### Validation After Writing
 ALWAYS run these tools after completing content:
 1. **keywordDensity** - verify primary keyword has 1-2% density
 2. **seoScore** - ensure keywordInFirstParagraph is true, score >= 70
-
-### Example Keyword Integration
-If targetKeywords = ["react hooks", "usestate", "useeffect"]:
-- Title: "React Hooks Tutorial: Master useState and useEffect"
-- First paragraph: "React hooks changed how we write components..."
-- H2: "## Understanding useState in React"
-- H2: "## How useEffect Handles Side Effects"
 
 ### No H1 in Content
 - Title is in frontmatter, NOT in content body
@@ -228,10 +195,6 @@ After each tool call:
 
 ## AVAILABLE TOOLS
 
-${getActivePlanInstructions()}
-
-${getWriterConfigInstructions()}
-
 ${getAllEditorToolInstructions()}
 
 ${getAllFrontmatterToolInstructions()}
@@ -255,7 +218,7 @@ export const writerAgent = new Agent({
    id: "writer-agent",
    name: "Writer Agent",
 
-   model: "openrouter/minimax/minimax-m2.1",
+   model: "openrouter/x-ai/grok-4.1-fast",
 
    instructions: ({ requestContext }) => {
       const writerInstructions = requestContext?.get("writerInstructions") as
@@ -270,7 +233,5 @@ export const writerAgent = new Agent({
       ...analysisTools,
       ...ragTools,
       ...memoryTools,
-      getActivePlan: getActivePlanTool,
-      getWriterConfig: getWriterConfigTool,
    },
 });

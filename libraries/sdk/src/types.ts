@@ -47,55 +47,6 @@ export const ContentStatusValues = ["draft", "approved"] as const;
 // Share status enum values
 export const ShareStatusValues = ["private", "shared"] as const;
 
-export const VoiceConfigSchema = z.object({
-	communication: z.enum(["first_person", "third_person"]),
-});
-
-// 2. Audience
-export const AudienceConfigSchema = z.object({
-	base: z.enum(["general_public", "professionals", "beginners", "customers"]),
-});
-
-// 3. Format & Structure
-export const FormatConfigSchema = z.object({
-	style: z.enum(["structured", "narrative", "list_based"]),
-	listStyle: z.enum(["bullets", "numbered"]).optional(),
-});
-
-// 4. Language
-export const LanguageConfigSchema = z.object({
-	primary: z.enum(["en", "pt", "es"]),
-	variant: z
-		.enum(["en-US", "en-GB", "pt-BR", "pt-PT", "es-ES", "es-MX"])
-		.optional(),
-});
-
-// 5. Brand Asset Bundle
-export const BrandConfigSchema = z.object({
-	integrationStyle: z.enum([
-		"strict_guideline",
-		"flexible_guideline",
-		"reference_only",
-		"creative_blend",
-	]),
-	blacklistWords: z.string().optional(),
-});
-
-// 6. Repurposing — strongly-typed channels
-export const PurposeChannelSchema = z.enum(["blog_post"]);
-
-export const PersonaConfigSchema = z.object({
-	metadata: z.object({
-		name: z.string().min(1, "This field is required"),
-		description: z.string().min(1, "This field is required"),
-	}),
-	voice: VoiceConfigSchema.partial().optional(),
-	audience: AudienceConfigSchema.partial().optional(),
-	formatting: FormatConfigSchema.partial().optional(),
-	language: LanguageConfigSchema.partial().optional(),
-	brand: BrandConfigSchema.partial().optional(),
-	purpose: PurposeChannelSchema.optional(),
-});
 // Input schemas for API calls
 const ContentStatusSchema = z.enum(ContentStatusValues, {
 	message: "Invalid content status. Must be one of: draft, approved.",
@@ -119,10 +70,6 @@ export const GetContentBySlugInputSchema = z.object({
 	agentId: z.string().min(1, "Agent ID is required."),
 });
 
-export const StreamAssistantResponseInputSchema = z.object({
-	message: z.string().min(1, "Message is required"),
-});
-export const StreamAssistantResponseOutputSchema = z.string();
 export const LocaleSchema = z.enum(["en-US", "pt-BR"]);
 export type Locale = z.infer<typeof LocaleSchema>;
 // Reusable image schema for SDK responses
@@ -132,12 +79,6 @@ export const ImageSchema = z
 		contentType: z.string(),
 	})
 	.nullable();
-
-// Author schema for getAuthorByAgentId
-export const AuthorByAgentIdSchema = z.object({
-	name: z.string(),
-	profilePhoto: ImageSchema,
-});
 
 // Content select schema and type (agent removed)
 export const ContentSelectSchema = z.object({
@@ -184,3 +125,20 @@ export type ShareStatus = (typeof ShareStatusValues)[number];
 export type ContentSelect = z.infer<typeof ContentSelectSchema>;
 export type RelatedSlugsResponse = z.infer<typeof RelatedSlugsResponseSchema>;
 export type Image = z.infer<typeof ImageSchema>;
+
+// Analytics schemas and types for SDK content responses
+export const AnalyticsResponseSchema = z.object({
+	trackingScript: z
+		.string()
+		.describe("Self-contained tracking script to embed in blog posts"),
+	enabled: z.boolean().describe("Whether analytics tracking is enabled"),
+});
+
+export type AnalyticsResponse = z.infer<typeof AnalyticsResponseSchema>;
+
+// Extended content schema with analytics
+export const ContentWithAnalyticsSchema = ContentSelectSchema.extend({
+	analytics: AnalyticsResponseSchema.optional(),
+});
+
+export type ContentWithAnalytics = z.infer<typeof ContentWithAnalyticsSchema>;

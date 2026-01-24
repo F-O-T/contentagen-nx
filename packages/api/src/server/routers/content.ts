@@ -89,10 +89,17 @@ async function batchResolveImageUrls(
       const batchResults = await Promise.all(
          batch.map(async (key) => {
             try {
-               const url = await generatePresignedGetUrl(key, bucketName, minioClient);
+               const url = await generatePresignedGetUrl(
+                  key,
+                  bucketName,
+                  minioClient,
+               );
                return { key, url };
             } catch (error) {
-               console.error(`Error generating presigned URL for ${key}:`, error);
+               console.error(
+                  `Error generating presigned URL for ${key}:`,
+                  error,
+               );
                return { key, url: null };
             }
          }),
@@ -182,7 +189,11 @@ export const contentRouter = router({
          const allImageKeys = [
             ...items.map((item) => item.imageUrl),
             ...items
-               .map((item) => item.writerId ? writerMap.get(item.writerId)?.profilePhotoUrl : null)
+               .map((item) =>
+                  item.writerId
+                     ? writerMap.get(item.writerId)?.profilePhotoUrl
+                     : null,
+               )
                .filter(Boolean),
          ];
 
@@ -195,17 +206,17 @@ export const contentRouter = router({
 
          // Add writer info and resolved image URLs using the pre-resolved map
          const itemsWithWriter = items.map((item) => {
-            const writer = item.writerId
-               ? writerMap.get(item.writerId)
-               : null;
+            const writer = item.writerId ? writerMap.get(item.writerId) : null;
             return {
                ...item,
-               imageUrl: item.imageUrl ? imageUrlMap.get(item.imageUrl) ?? null : null,
+               imageUrl: item.imageUrl
+                  ? (imageUrlMap.get(item.imageUrl) ?? null)
+                  : null,
                writer: writer
                   ? {
                        ...writer,
                        profilePhotoUrl: writer.profilePhotoUrl
-                          ? imageUrlMap.get(writer.profilePhotoUrl) ?? null
+                          ? (imageUrlMap.get(writer.profilePhotoUrl) ?? null)
                           : null,
                     }
                   : null,

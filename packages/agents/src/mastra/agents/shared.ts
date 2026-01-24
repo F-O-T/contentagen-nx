@@ -1,6 +1,6 @@
 import { ModelRouterEmbeddingModel } from "@mastra/core/llm";
 import { PgVector } from "@mastra/pg";
-import { serverEnv } from "@packages/environment/server";
+import { env as serverEnv } from "@packages/environment/server";
 
 // Language instruction for Brazilian Portuguese
 export const LANGUAGE_INSTRUCTION = `

@@ -1,5 +1,5 @@
 import FirecrawlApp from "@mendable/firecrawl-js";
-import { serverEnv } from "@packages/environment/server";
+import { env } from "@packages/environment/server";
 import { AppError, propagateError } from "@packages/utils/errors";
 import {
 	getAvailableKeyCount,
@@ -21,7 +21,7 @@ import type {
  * Get all Firecrawl API keys
  */
 function getFirecrawlKeys(): string[] {
-	return parseApiKeys(serverEnv.FIRECRAWL_API_KEYS);
+	return parseApiKeys(env.FIRECRAWL_API_KEYS);
 }
 
 class FirecrawlProvider implements SearchProvider {

@@ -64,6 +64,8 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
             ...props
          }) => {
             const { variant } = useStepperProvider();
+            const { current } = useStepper();
+            const currentIndex = rest.utils.getIndex(current.id);
             // Count actual rendered children instead of all defined steps
             const childrenArray = React.Children.toArray(children);
             const totalSteps = childrenArray.length;
@@ -92,7 +94,7 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
                            className="text-sm text-muted-foreground whitespace-nowrap"
                            date-component="stepper-step-counter"
                         >
-                           {"Passo {{current}} de {{total}}"}
+                           {`Passo ${currentIndex + 1} de ${totalSteps}`}
                         </span>
                      </div>
                   </nav>

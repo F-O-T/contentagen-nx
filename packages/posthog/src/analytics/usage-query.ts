@@ -5,6 +5,8 @@
  * for an organization.
  */
 
+import { env } from "@packages/environment/server";
+
 /**
  * Usage stats for a specific AI feature
  */
@@ -102,9 +104,6 @@ export interface ExtendedQueryUsageParams extends QueryUsageParams {
  * Queries the pre-computed llm_usage_monthly materialized view for fast results
  */
 export async function queryAIUsage(
-   posthogHost: string,
-   posthogApiKey: string,
-   projectId: string,
    params: QueryUsageParams,
 ): Promise<AIUsageStats> {
    const { organizationId, startDate } = params;
@@ -138,12 +137,12 @@ export async function queryAIUsage(
    `;
 
    const response = await fetch(
-      `${posthogHost}/api/projects/${projectId}/query/`,
+      `${env.POSTHOG_HOST}/api/projects/${env.POSTHOG_PROJECT_ID}/query/`,
       {
          method: "POST",
          headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${posthogApiKey}`,
+            Authorization: `Bearer ${env.POSTHOG_PERSONAL_API_KEY}`,
          },
          body: JSON.stringify({
             query: {
@@ -252,18 +251,15 @@ function transformQueryResult(
  * Execute a HogQL query against PostHog
  */
 async function executeHogQLQuery(
-   posthogHost: string,
-   posthogApiKey: string,
-   projectId: string,
    query: string,
 ): Promise<{ results?: unknown[][]; columns?: string[] }> {
    const response = await fetch(
-      `${posthogHost}/api/projects/${projectId}/query/`,
+      `${env.POSTHOG_HOST}/api/projects/${env.POSTHOG_PROJECT_ID}/query/`,
       {
          method: "POST",
          headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${posthogApiKey}`,
+            Authorization: `Bearer ${env.POSTHOG_PERSONAL_API_KEY}`,
          },
          body: JSON.stringify({
             query: {
@@ -291,9 +287,6 @@ async function executeHogQLQuery(
  * Query daily usage breakdown from PostHog events
  */
 export async function queryDailyUsage(
-   posthogHost: string,
-   posthogApiKey: string,
-   projectId: string,
    params: QueryUsageParams,
 ): Promise<DailyUsageStats[]> {
    const { organizationId, startDate, endDate } = params;
@@ -302,9 +295,9 @@ export async function queryDailyUsage(
       SELECT
          toDate(timestamp) as date,
          count(*) as requests,
-         sum(toInt64OrNull(properties.inputTokens)) as input_tokens,
-         sum(toInt64OrNull(properties.outputTokens)) as output_tokens,
-         sum(toInt64OrNull(properties.totalTokens)) as total_tokens
+         sum(ifNull(toInt(properties.inputTokens), 0)) as input_tokens,
+         sum(ifNull(toInt(properties.outputTokens), 0)) as output_tokens,
+         sum(ifNull(toInt(properties.totalTokens), 0)) as total_tokens
       FROM events
       WHERE 
          event IN ('llm_fim_generated', 'llm_edit_generated', 'llm_chat_response_complete', 'llm_plan_created')
@@ -315,12 +308,7 @@ export async function queryDailyUsage(
       ORDER BY date
    `;
 
-   const result = await executeHogQLQuery(
-      posthogHost,
-      posthogApiKey,
-      projectId,
-      query,
-   );
+   const result = await executeHogQLQuery(query);
 
    if (!result.results || result.results.length === 0) {
       return [];
@@ -347,9 +335,6 @@ export async function queryDailyUsage(
  * Query acceptance rates for FIM and Edit features
  */
 export async function queryAcceptanceRates(
-   posthogHost: string,
-   posthogApiKey: string,
-   projectId: string,
    params: QueryUsageParams,
 ): Promise<AcceptanceRateStats[]> {
    const { organizationId, startDate, endDate } = params;
@@ -383,8 +368,8 @@ export async function queryAcceptanceRates(
    `;
 
    const [fimResult, editResult] = await Promise.all([
-      executeHogQLQuery(posthogHost, posthogApiKey, projectId, fimQuery),
-      executeHogQLQuery(posthogHost, posthogApiKey, projectId, editQuery),
+      executeHogQLQuery(fimQuery),
+      executeHogQLQuery(editQuery),
    ]);
 
    const parseResult = (
@@ -423,9 +408,6 @@ export async function queryAcceptanceRates(
  * Query previous month usage for comparison
  */
 export async function queryPreviousMonth(
-   posthogHost: string,
-   posthogApiKey: string,
-   projectId: string,
    organizationId: string,
    previousMonthStart: Date,
 ): Promise<PreviousMonthStats> {
@@ -438,12 +420,7 @@ export async function queryPreviousMonth(
         AND month = toStartOfMonth(toDateTime('${previousMonthStart.toISOString()}'))
    `;
 
-   const result = await executeHogQLQuery(
-      posthogHost,
-      posthogApiKey,
-      projectId,
-      query,
-   );
+   const result = await executeHogQLQuery(query);
 
    if (!result.results || result.results.length === 0) {
       return { totalRequests: 0, totalTokens: 0 };
@@ -477,9 +454,6 @@ function calculatePercentageChange(current: number, previous: number): number {
  * Combines monthly totals, daily breakdown, acceptance rates, and comparison
  */
 export async function queryExtendedUsage(
-   posthogHost: string,
-   posthogApiKey: string,
-   projectId: string,
    params: ExtendedQueryUsageParams,
 ): Promise<ExtendedAIUsageStats> {
    const { organizationId, startDate, endDate, previousMonthStart } = params;
@@ -487,28 +461,22 @@ export async function queryExtendedUsage(
    // Run all queries in parallel for efficiency
    const [baseStats, dailyUsage, acceptanceRates, previousMonth] =
       await Promise.all([
-         queryAIUsage(posthogHost, posthogApiKey, projectId, {
+         queryAIUsage({
             organizationId,
             startDate,
             endDate,
          }),
-         queryDailyUsage(posthogHost, posthogApiKey, projectId, {
+         queryDailyUsage({
             organizationId,
             startDate,
             endDate,
          }),
-         queryAcceptanceRates(posthogHost, posthogApiKey, projectId, {
+         queryAcceptanceRates({
             organizationId,
             startDate,
             endDate,
          }),
-         queryPreviousMonth(
-            posthogHost,
-            posthogApiKey,
-            projectId,
-            organizationId,
-            previousMonthStart,
-         ),
+         queryPreviousMonth(organizationId, previousMonthStart),
       ]);
 
    // Calculate comparison percentages

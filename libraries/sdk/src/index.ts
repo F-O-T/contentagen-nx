@@ -1,14 +1,12 @@
 import { z } from "zod";
 import type { ContentList, ContentSelect, Locale } from "./types";
 import {
-	AuthorByAgentIdSchema,
 	ContentListResponseSchema,
 	ContentSelectSchema,
 	GetContentBySlugInputSchema,
 	ImageSchema,
 	ListContentByAgentInputSchema,
 	RelatedSlugsResponseSchema,
-	StreamAssistantResponseInputSchema,
 } from "./types";
 
 export const ERROR_CODES = {
@@ -34,9 +32,7 @@ export const API_ENDPOINTS = {
 	listContentByAgent: "/content",
 	getContentBySlug: "/content",
 	getRelatedSlugs: "/related-slugs",
-	getAuthorByAgentId: "/author",
 	getContentImage: "/content/image",
-	streamAssistantResponse: "/assistant",
 };
 
 const PRODUCTION_API_URL = "https://api.contentagen.com";
@@ -231,30 +227,6 @@ export class ContentaGenSDK {
 		}
 	}
 
-	async getAuthorByAgentId(
-		params: Pick<z.input<typeof GetContentBySlugInputSchema>, "agentId">,
-	): Promise<z.infer<typeof AuthorByAgentIdSchema>> {
-		try {
-			const validatedParams = GetContentBySlugInputSchema.pick({
-				agentId: true,
-			}).parse(params);
-			const { agentId } = validatedParams;
-			return this._get(
-				`${API_ENDPOINTS.getAuthorByAgentId}/${agentId}`,
-				{},
-				AuthorByAgentIdSchema,
-			);
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				const { code, message } = ERROR_CODES.INVALID_INPUT;
-				throw new Error(
-					`${code}: ${message} for getAuthorByAgentId: ${error.issues.map((e) => e.message).join(", ")}`,
-				);
-			}
-			throw error;
-		}
-	}
-
 	async getContentImage(params: {
 		contentId: string;
 	}): Promise<z.infer<typeof ImageSchema>> {
@@ -278,85 +250,24 @@ export class ContentaGenSDK {
 			throw error;
 		}
 	}
-
-	async *streamAssistantResponse(
-		params: z.input<typeof StreamAssistantResponseInputSchema>,
-	): AsyncGenerator<string, void, unknown> {
-		try {
-			const validatedParams = StreamAssistantResponseInputSchema.parse(params);
-
-			const { message } = validatedParams;
-
-			const url = this.buildUrl(API_ENDPOINTS.streamAssistantResponse);
-			this.appendQueryParams(url, { message });
-
-			const headers = this.getHeaders();
-
-			const response = await fetch(url, {
-				method: "GET",
-				headers,
-			});
-
-			if (!response.ok) {
-				const errorText = await response.text();
-				const { code, message } = ERROR_CODES.API_REQUEST_FAILED;
-				throw new Error(
-					`${code}: ${message} (${response.statusText}) - ${errorText}`,
-				);
-			}
-
-			if (!response.body) {
-				throw new Error("Response body is null, cannot create a stream.");
-			}
-
-			const reader = response.body.getReader();
-			const decoder = new TextDecoder();
-
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) {
-					break;
-				}
-				if (!value) {
-					continue;
-				}
-				const chunk = decoder.decode(value, { stream: true });
-				if (chunk) {
-					yield chunk;
-				}
-			}
-			const trailing = decoder.decode();
-			if (trailing) {
-				yield trailing;
-			}
-			if (typeof reader.releaseLock === "function") {
-				reader.releaseLock();
-			}
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				const { code, message } = ERROR_CODES.INVALID_INPUT;
-				const validationErrors = error.issues.map((e) => e.message).join(", ");
-				throw new Error(
-					`${code}: ${message} for streamAssistantResponse: ${validationErrors}`,
-				);
-			}
-			throw error;
-		}
-	}
 }
 
 export const createSdk = (config: SdkConfig): ContentaGenSDK => {
 	return new ContentaGenSDK(config);
 };
 
-export type { ShareStatus } from "./types";
+export type {
+	AnalyticsResponse,
+	ContentWithAnalytics,
+	ShareStatus,
+} from "./types";
 export {
-	AuthorByAgentIdSchema,
+	AnalyticsResponseSchema,
 	ContentListResponseSchema,
 	ContentSelectSchema,
+	ContentWithAnalyticsSchema,
 	GetContentBySlugInputSchema,
 	ImageSchema,
 	ListContentByAgentInputSchema,
 	ShareStatusValues,
-	StreamAssistantResponseInputSchema,
 } from "./types";
