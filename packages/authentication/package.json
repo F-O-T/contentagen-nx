@@ -1,14 +1,14 @@
 {
    "dependencies": {
       "@better-auth/stripe": "catalog:auth",
-      "@packages/cache": "workspace:*",
       "@packages/database": "workspace:*",
       "react": "catalog:react",
       "react-dom": "catalog:react",
       "@packages/environment": "workspace:*",
       "@packages/stripe": "workspace:*",
       "@packages/transactional": "workspace:*",
-      "better-auth": "catalog:auth"
+      "better-auth": "catalog:auth",
+      "ioredis": "catalog:workers"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
@@ -30,6 +30,14 @@
       "./api-key-config": {
          "default": "./src/api-key-config.ts",
          "types": "./dist/src/api-key-config.d.ts"
+      },
+      "./cache": {
+         "default": "./src/cache.ts",
+         "types": "./dist/src/cache.d.ts"
+      },
+      "./redis-connection": {
+         "default": "./src/redis-connection.ts",
+         "types": "./dist/src/redis-connection.d.ts"
       }
    },
    "files": [

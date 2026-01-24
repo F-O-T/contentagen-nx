@@ -21,9 +21,6 @@
     },
     {
       "path": "../database/tsconfig.lib.json"
-    },
-    {
-      "path": "../cache/tsconfig.lib.json"
     }
   ]
 }

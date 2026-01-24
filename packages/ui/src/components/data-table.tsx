@@ -112,17 +112,17 @@ function DataTablePagination({
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
          <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground hidden md:block">
-               {"Showing"}
+               {"Exibindo"}
             </div>
             <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-               {"Página {{current}} de {{total}}"}
+               {`Página ${currentPage} de ${totalPages}`}
             </div>
          </div>
          <div className="flex items-center gap-4">
             {onPageSizeChange && (
                <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground hidden sm:inline">
-                     {"Rows Per Page"}
+                     {"Linhas por página"}
                   </span>
                   <Select
                      onValueChange={(value) => onPageSizeChange(Number(value))}

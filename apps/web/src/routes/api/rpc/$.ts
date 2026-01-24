@@ -6,6 +6,7 @@ import { createDb } from "@packages/database/client";
 import { createAuth } from "@packages/authentication/server";
 import { env } from "@packages/environment/server";
 import { getStripeClient } from "@packages/stripe";
+import { getElysiaPosthogConfig } from "@packages/posthog/server";
 import router from "@/integrations/orpc/router";
 import type { ORPCContextWithAuth } from "@/integrations/orpc/server";
 
@@ -14,6 +15,9 @@ const db = createDb({ databaseUrl: env.DATABASE_URL });
 const auth = createAuth({ db, env });
 const stripeClient = env.STRIPE_SECRET_KEY
 	? getStripeClient(env.STRIPE_SECRET_KEY)
+	: undefined;
+const posthog = env.POSTHOG_KEY
+	? getElysiaPosthogConfig(env)
 	: undefined;
 
 const handler = new RPCHandler(router);
@@ -35,6 +39,7 @@ async function handle({ request }: { request: Request }) {
 		auth,
 		db,
 		session,
+		posthog,
 		stripeClient,
 	};
 

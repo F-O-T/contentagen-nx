@@ -1,4 +1,3 @@
-export * from "./schemas/account-deletion";
 export * from "./schemas/auth";
 // Chat schemas
 export * from "./schemas/chat";

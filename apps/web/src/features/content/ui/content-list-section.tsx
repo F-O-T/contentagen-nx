@@ -114,8 +114,8 @@ export function ContentListSection() {
          return await orpc.content.create({
             input: {
                meta: {
-                  title: "",
-                  description: "",
+                  title: "Novo conteúdo",
+                  description: "Adicione uma descrição para o seu conteúdo",
                   slug: `untitled-${Date.now()}`,
                },
                body: "",
@@ -123,13 +123,11 @@ export function ContentListSection() {
             },
          });
       },
-      onSuccess: (newContent) => {
-         navigate({
-            to: "/$slug/_editor/$contentId",
-            params: { slug: slug || "", contentId: newContent.id },
-         });
+      onSuccess: (data) => {
+         navigate({ to: "/$slug/content/$contentId", params: { contentId: data.id } });
       },
-      onError: () => {
+      onError: (error) => {
+         console.error("Content creation error:", error);
          toast.error("Erro ao criar conteúdo");
       },
    });

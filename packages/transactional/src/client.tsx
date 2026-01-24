@@ -1,7 +1,4 @@
 import type { Resend } from "resend";
-import DeletionCompletedEmail from "./emails/deletion-completed";
-import DeletionReminderEmail from "./emails/deletion-reminder";
-import DeletionScheduledEmail from "./emails/deletion-scheduled";
 import MagicLinkEmail from "./emails/magic-link";
 import OrganizationInvitationEmail from "./emails/organization-invitation";
 import OTPEmail from "./emails/otp";
@@ -85,91 +82,6 @@ export const sendMagicLinkEmail = async (
    await client.emails.send({
       from: `${name} <suporte@mail.contentta.co>`,
       react: <MagicLinkEmail magicLinkUrl={magicLinkUrl} />,
-      subject,
-      to: email,
-   });
-};
-
-// Account Deletion Emails
-
-export interface SendDeletionScheduledEmailOptions {
-   email: string;
-   userName: string;
-   scheduledDate: string;
-   cancelUrl: string;
-}
-
-export const sendDeletionScheduledEmail = async (
-   client: Resend,
-   {
-      email,
-      userName,
-      scheduledDate,
-      cancelUrl,
-   }: SendDeletionScheduledEmailOptions,
-) => {
-   const subject = "Sua conta foi agendada para exclusão";
-   await client.emails.send({
-      from: `${name} <suporte@mail.contentta.co>`,
-      react: (
-         <DeletionScheduledEmail
-            cancelUrl={cancelUrl}
-            scheduledDate={scheduledDate}
-            userName={userName}
-         />
-      ),
-      subject,
-      to: email,
-   });
-};
-
-export interface SendDeletionReminderEmailOptions {
-   email: string;
-   userName: string;
-   daysRemaining: number;
-   cancelUrl: string;
-}
-
-export const sendDeletionReminderEmail = async (
-   client: Resend,
-   {
-      email,
-      userName,
-      daysRemaining,
-      cancelUrl,
-   }: SendDeletionReminderEmailOptions,
-) => {
-   const subject =
-      daysRemaining === 1
-         ? "Última chance: sua conta será excluída amanhã"
-         : `Lembrete: sua conta será excluída em ${daysRemaining} dias`;
-   await client.emails.send({
-      from: `${name} <suporte@mail.contentta.co>`,
-      react: (
-         <DeletionReminderEmail
-            cancelUrl={cancelUrl}
-            daysRemaining={daysRemaining}
-            userName={userName}
-         />
-      ),
-      subject,
-      to: email,
-   });
-};
-
-export interface SendDeletionCompletedEmailOptions {
-   email: string;
-   userName: string;
-}
-
-export const sendDeletionCompletedEmail = async (
-   client: Resend,
-   { email, userName }: SendDeletionCompletedEmailOptions,
-) => {
-   const subject = "Sua conta foi excluída";
-   await client.emails.send({
-      from: `${name} <suporte@mail.contentta.co>`,
-      react: <DeletionCompletedEmail userName={userName} />,
       subject,
       to: email,
    });

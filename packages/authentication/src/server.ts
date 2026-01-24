@@ -1,6 +1,6 @@
 import { stripe as stripePlugin } from "@better-auth/stripe";
-import { createBetterAuthStorage } from "@packages/cache/better-auth";
-import { createRedisConnection } from "@packages/cache/connection";
+import { createBetterAuthStorage } from "./cache";
+import { createRedisConnection } from "./redis-connection";
 import type { DatabaseInstance } from "@packages/database/client";
 import {
    createDefaultOrganization,
@@ -490,22 +490,10 @@ export function createAuth(config: SimplifiedAuthConfig) {
          },
          additionalFields: {
             telemetryConsent: {
-               defaultValue: true,
+               defaultValue: false,
                input: true,
                required: true,
                type: "boolean",
-            },
-            deletionScheduledAt: {
-               defaultValue: null,
-               input: true,
-               required: false,
-               type: "date",
-            },
-            deletionType: {
-               defaultValue: null,
-               input: true,
-               required: false,
-               type: "string",
             },
             contentCreationMode: {
                defaultValue: "plan",
