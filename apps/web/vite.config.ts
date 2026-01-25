@@ -8,6 +8,10 @@ import { defineConfig } from "vite";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 
 const config = defineConfig({
+   ssr: {
+      noExternal: [],
+      external: ["@lexical/code", "prismjs"], // Don't bundle these for SSR
+   },
    resolve: {
       alias: {
          "@": fileURLToPath(new URL("./src", import.meta.url)),
