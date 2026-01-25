@@ -1,7 +1,3 @@
-/**
- * Pagina do editor de conteudo standalone.
- * Prefetch do conteudo e renderizacao do editor IDE.
- */
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { createFileRoute } from "@tanstack/react-router";
@@ -10,7 +6,10 @@ import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { ContentEditorPage } from "@/layout/editor/content-editor-page";
 import { orpc } from "@/integrations/orpc/client";
 
-export const Route = createFileRoute("/_authenticated/$slug/_editor/$contentId")({
+export const Route = createFileRoute(
+	"/_authenticated/$slug/_editor/$contentId",
+)({
+	ssr: false,
 	beforeLoad: async ({ context, params }) => {
 		await context.queryClient.prefetchQuery(
 			orpc.content.getById.queryOptions({
