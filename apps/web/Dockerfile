@@ -30,7 +30,7 @@ COPY libraries/content-analysis/package.json ./libraries/content-analysis/
 COPY libraries/spelling/package.json ./libraries/spelling/
 
 # Install dependencies with frozen lockfile
-RUN bun install --frozen-lockfile
+RUN bun install 
 
 # Copy all source code
 COPY . .
