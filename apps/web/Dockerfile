@@ -1,10 +1,5 @@
 # Stage 1: Builder
-FROM node:22-alpine AS builder
-
-# Install Bun for fast dependency installation
-RUN apk add --no-cache curl bash
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH="/root/.bun/bin:${PATH}"
+FROM oven/bun:alpine AS builder
 
 WORKDIR /app
 
@@ -18,20 +13,17 @@ COPY tooling/typescript/package.json ./tooling/typescript/
 COPY packages/agents/package.json ./packages/agents/
 COPY packages/arcjet/package.json ./packages/arcjet/
 COPY packages/authentication/package.json ./packages/authentication/
-COPY packages/cache/package.json ./packages/cache/
 COPY packages/database/package.json ./packages/database/
 COPY packages/editor/package.json ./packages/editor/
 COPY packages/environment/package.json ./packages/environment/
 COPY packages/files/package.json ./packages/files/
 COPY packages/logging/package.json ./packages/logging/
 COPY packages/posthog/package.json ./packages/posthog/
-COPY packages/queue/package.json ./packages/queue/
 COPY packages/search/package.json ./packages/search/
 COPY packages/stripe/package.json ./packages/stripe/
 COPY packages/transactional/package.json ./packages/transactional/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/utils/package.json ./packages/utils/
-COPY packages/workflows/package.json ./packages/workflows/
 
 # Libraries (These must be built before web can be bundled)
 COPY libraries/markdown/package.json ./libraries/markdown/
