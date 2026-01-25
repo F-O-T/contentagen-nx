@@ -54,7 +54,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ARG VITE_POSTHOG_HOST
 ARG VITE_POSTHOG_KEY
-RUN bun run build --filter=web
+RUN bun run --filter=web build
 
 # Stage 2: Production Runner
 FROM oven/bun:alpine AS runner
