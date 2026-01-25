@@ -109,28 +109,20 @@ export function ContentListSection() {
    });
 
    // Create content mutation
-   const createContentMutation = useMutation({
-      mutationFn: async () => {
-         return await orpc.content.create({
-            input: {
-               meta: {
-                  title: "Novo conteúdo",
-                  description: "Adicione uma descrição para o seu conteúdo",
-                  slug: `untitled-${Date.now()}`,
-               },
-               body: "",
-               draftOrigin: "manual",
-            },
-         });
-      },
-      onSuccess: (data) => {
-         navigate({ to: "/$slug/content/$contentId", params: { contentId: data.id } });
-      },
-      onError: (error) => {
-         console.error("Content creation error:", error);
-         toast.error("Erro ao criar conteúdo");
-      },
-   });
+   const createContentMutation = useMutation(
+      orpc.content.create.mutationOptions({
+         onSuccess: (data) => {
+            navigate({
+               to: "/$slug/$contentId",
+               params: { contentId: data.id },
+            });
+         },
+         onError: (error) => {
+            console.error("Content creation error:", error);
+            toast.error("Erro ao criar conteúdo");
+         },
+      }),
+   );
 
    // Filter content by search query
    const filteredContent = useMemo(() => {
@@ -149,7 +141,7 @@ export function ContentListSection() {
    // Action handlers
    const handleView = (content: ContentItem) => {
       navigate({
-         to: "/$slug/_editor/$contentId",
+         to: "/$slug/$contentId",
          params: { slug: slug || "", contentId: content.id },
       });
    };
@@ -173,7 +165,13 @@ export function ContentListSection() {
    };
 
    const handleCreateNew = () => {
-      createContentMutation.mutate();
+      createContentMutation.mutate({
+         meta: {
+            description: "Sem descricao",
+            title: "Sem titulo",
+            slug: "sem-slug",
+         },
+      });
    };
 
    // Table columns
@@ -235,7 +233,11 @@ export function ContentListSection() {
                         <EmptyDescription>
                            Comece criando seu primeiro conteúdo com IA
                         </EmptyDescription>
-                        <Button className="mt-4" onClick={handleCreateNew} disabled={createContentMutation.isPending}>
+                        <Button
+                           className="mt-4"
+                           onClick={handleCreateNew}
+                           disabled={createContentMutation.isPending}
+                        >
                            <Plus className="mr-2 size-4" />
                            Criar Conteúdo
                         </Button>
@@ -316,7 +318,10 @@ export function ContentListSection() {
                ))}
             </div>
 
-            <Button onClick={handleCreateNew} disabled={createContentMutation.isPending}>
+            <Button
+               onClick={handleCreateNew}
+               disabled={createContentMutation.isPending}
+            >
                <Plus className="mr-2 size-4" />
                Novo
             </Button>

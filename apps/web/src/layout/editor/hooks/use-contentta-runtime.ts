@@ -10,6 +10,7 @@ import { useLocalRuntime } from "@assistant-ui/react";
 import type { ThreadMessage } from "@assistant-ui/react";
 import { createContenttaAdapter } from "@/features/content/lib/assistant-runtime-adapter";
 import { orpc } from "@/integrations/orpc/client";
+import { useQuery } from "@tanstack/react-query";
 
 /**
  * Options for the Contentta runtime
@@ -43,16 +44,20 @@ export function useContenttaRuntime(options: UseContenttaRuntimeOptions = {}) {
 	const { contentId } = options;
 
 	// Load chat history from database
-	const { data: chatHistory, isLoading } = orpc.chat.getChatHistory.useQuery(
-		{ contentId: contentId ?? "" },
-		{
+	const { data: chatHistory, isLoading } = useQuery(
+		orpc.chat.getChatHistory.queryOptions({
+			input: {
+				contentId: contentId || "",
+			},
 			enabled: !!contentId,
 			staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-		},
+		}),
 	);
-
 	// Create adapter with memoization
-	const adapter = useMemo(() => createContenttaAdapter(contentId), [contentId]);
+	const adapter = useMemo(
+		() => createContenttaAdapter(contentId),
+		[contentId],
+	);
 
 	// Create LocalRuntime with the adapter and initial messages
 	const runtime = useLocalRuntime(adapter, {
