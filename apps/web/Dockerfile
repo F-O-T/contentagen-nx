@@ -28,7 +28,6 @@ COPY packages/utils/package.json ./packages/utils/
 # Libraries (These must be built before web can be bundled)
 COPY libraries/markdown/package.json ./libraries/markdown/
 COPY libraries/content-analysis/package.json ./libraries/content-analysis/
-COPY libraries/sdk/package.json ./libraries/sdk/
 COPY libraries/spelling/package.json ./libraries/spelling/
 
 # Install dependencies (workspace packages now resolvable)
@@ -46,7 +45,7 @@ WORKDIR /app/libraries/content-analysis
 RUN bun run build
 WORKDIR /app
 
-WORKDIR /app/libraries/sdk
+WORKDIR /app/libraries/spelling
 RUN bun run build
 WORKDIR /app
 
