@@ -34,6 +34,7 @@ import { DiagnosticsPanel } from "./diagnostics-panel";
 import { EditorCommandPalette } from "./editor-command-palette";
 import { EditorConfigPanel } from "./editor-config-panel";
 import { EditorNavBar } from "./editor-nav-bar";
+import { useContenttaRuntime } from "./hooks/use-contentta-runtime";
 import {
    resetEditorState,
    setCommandPaletteOpen,
@@ -50,9 +51,18 @@ import {
 } from "./hooks/use-editor-state";
 import { useManualSave } from "./hooks/use-manual-save";
 import { useToolExecutionBridge } from "./hooks/use-tool-execution-bridge";
-import { useContenttaRuntime } from "./hooks/use-contentta-runtime";
 import { InlineFrontmatter } from "./inline-frontmatter";
 import { SeoAuditSidebar } from "./seo-audit-sidebar";
+
+function ClientOnly({ children }: { children: React.ReactNode }) {
+   const [mounted, setMounted] = useState(false);
+
+   useEffect(() => {
+      setMounted(true);
+   }, []);
+
+   return mounted ? <>{children}</> : null;
+}
 
 // ============================================================================
 // Types
@@ -261,39 +271,43 @@ export function EditorLayout({
                   {/* Main editor - centered */}
                   <div className="flex-1 overflow-auto">
                      <div className="max-w-7xl mx-auto p-4">
-                        <ContentEditor
-                           className="min-h-full"
-                           config={{
-                              namespace: "contentta-ide",
-                              initialContent: content.body || "",
-                           }}
-                           editable={!isArchived}
-                           editStream={
-                              resolvedFeatures.edit ? editStream : undefined
-                           }
-                           features={resolvedFeatures}
-                           fimConfig={{
-                              debounceMs: editorConfig.fimDebounceMs,
-                              confidenceThreshold:
-                                 editorConfig.fimConfidenceThreshold,
-                           }}
-                           fimStream={resolvedFeatures.fim ? fimStream : undefined}
-                           key={contentId}
-                           onChange={(_, editor) => {
-                              editor.read(() => {
-                                 const markdown = getEditorMarkdown(editor);
-                                 saveBody(markdown);
-                              });
-                           }}
-                           onEditorReady={setEditorInstance}
-                           placeholder="Comece a escrever seu conteudo..."
-                        >
-                           {/* AI Panels rendered inside editor context */}
-                           <EditPanelWrapper />
-                           <FIMPanelWrapper />
-                           <DiffViewWrapper />
-                           <EditSelectionHint />
-                        </ContentEditor>
+                        <ClientOnly>
+                           <ContentEditor
+                              className="min-h-full"
+                              config={{
+                                 namespace: "contentta-ide",
+                                 initialContent: content.body || "",
+                              }}
+                              editable={!isArchived}
+                              editStream={
+                                 resolvedFeatures.edit ? editStream : undefined
+                              }
+                              features={resolvedFeatures}
+                              fimConfig={{
+                                 debounceMs: editorConfig.fimDebounceMs,
+                                 confidenceThreshold:
+                                    editorConfig.fimConfidenceThreshold,
+                              }}
+                              fimStream={
+                                 resolvedFeatures.fim ? fimStream : undefined
+                              }
+                              key={contentId}
+                              onChange={(_, editor) => {
+                                 editor.read(() => {
+                                    const markdown = getEditorMarkdown(editor);
+                                    saveBody(markdown);
+                                 });
+                              }}
+                              onEditorReady={setEditorInstance}
+                              placeholder="Comece a escrever seu conteudo..."
+                           >
+                              {/* AI Panels rendered inside editor context */}
+                              <EditPanelWrapper />
+                              <FIMPanelWrapper />
+                              <DiffViewWrapper />
+                              <EditSelectionHint />
+                           </ContentEditor>
+                        </ClientOnly>
                      </div>
                   </div>
 
@@ -316,7 +330,10 @@ export function EditorLayout({
                )}
 
                {/* SEO audit sidebar */}
-               <SeoAuditSidebar content={content.body || ""} meta={content.meta} />
+               <SeoAuditSidebar
+                  content={content.body || ""}
+                  meta={content.meta}
+               />
 
                {/* Config panel (overlay) */}
                <EditorConfigPanel />
