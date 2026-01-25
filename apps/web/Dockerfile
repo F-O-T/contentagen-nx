@@ -1,43 +1,5 @@
 # Stage 1: Builder
-FROM oven/bun:alpine AS builder
-
-WORKDIR /app
-
-# Copy root workspace config
-COPY bun.lock ./
-COPY package.json ./
-COPY apps/web/package.json ./apps/web/
-COPY tooling/typescript/package.json ./tooling/typescript/
-
-# Packages
-COPY packages/agents/package.json ./packages/agents/
-COPY packages/arcjet/package.json ./packages/arcjet/
-COPY packages/authentication/package.json ./packages/authentication/
-COPY packages/database/package.json ./packages/database/
-COPY packages/editor/package.json ./packages/editor/
-COPY packages/environment/package.json ./packages/environment/
-COPY packages/files/package.json ./packages/files/
-COPY packages/logging/package.json ./packages/logging/
-COPY packages/posthog/package.json ./packages/posthog/
-COPY packages/search/package.json ./packages/search/
-COPY packages/stripe/package.json ./packages/stripe/
-COPY packages/transactional/package.json ./packages/transactional/
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/utils/package.json ./packages/utils/
-
-# Libraries (These must be built before web can be bundled)
-COPY libraries/markdown/package.json ./libraries/markdown/
-COPY libraries/content-analysis/package.json ./libraries/content-analysis/
-COPY libraries/spelling/package.json ./libraries/spelling/
-
-# Install dependencies (workspace packages now resolvable)
-RUN bun install
-
-# Copy all source code
-COPY . .
-
-# Stage 1: Builder
-FROM oven/bun:1.2.0-alpine AS builder
+FROM oven/bun:1.2.8-alpine AS builder
 
 WORKDIR /app
 
@@ -97,7 +59,7 @@ ENV VITE_POSTHOG_KEY=$VITE_POSTHOG_KEY
 RUN bun --bun vite build
 
 # Stage 2: Production Runner
-FROM oven/bun:1.2.0-alpine AS runner
+FROM oven/bun:1.2.8-alpine AS runner
 
 WORKDIR /app
 
