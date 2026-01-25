@@ -1,60 +1,60 @@
 {
-  "dependencies": {
-    "@f-o-t/markdown": "workspace:*",
-    "@mastra/rag": "2.0.0",
-    "@mastra/core": "1.0.4",
-    "@mastra/evals": "1.0.0",
-    "@mastra/libsql": "1.0.0",
-    "@mastra/observability": "1.0.0",
-    "@mastra/pg": "1.0.0",
-    "@packages/database": "workspace:*",
-    "@packages/environment": "workspace:*",
-    "@packages/files": "workspace:*",
-    "@packages/search": "workspace:*",
-    "@packages/utils": "workspace:*",
-    "ai": "catalog:openrouter",
-    "zod": "catalog:validation"
-  },
-  "devDependencies": {
-    "@tooling/typescript": "workspace:*",
-    "dotenv-cli": "catalog:enviroment",
-    "shx": "catalog:enviroment",
-    "typescript": "catalog:development"
-  },
-  "exports": {
-    ".": {
-      "default": "./src/mastra/index.ts",
-      "types": "./dist/src/mastra/index.d.ts"
-    },
-    "./mastra/rag": {
-      "default": "./src/mastra/rag/index.ts",
-      "types": "./dist/src/mastra/rag/index.d.ts"
-    },
-    "./mastra/tools/analysis": {
-      "default": "./src/mastra/tools/analysis/index.ts",
-      "types": "./dist/src/mastra/tools/analysis/index.d.ts"
-    },
-    "./mastra/utils/fim-confidence": {
-      "default": "./src/mastra/utils/fim-confidence.ts",
-      "types": "./dist/src/mastra/utils/fim-confidence.d.ts"
-    },
-    "./mastra/scorers/fim-quality-scorer": {
-      "default": "./src/mastra/scorers/fim-quality-scorer.ts",
-      "types": "./dist/src/mastra/scorers/fim-quality-scorer.d.ts"
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "license": "Apache-2.0",
-  "name": "@packages/agents",
-  "private": true,
-  "scripts": {
-    "build": "tsc --build",
-    "check": "biome check --write ./src",
-    "dev": "dotenv -e .env -- bunx mastra dev",
-    "typecheck": "tsc "
-  },
-  "type": "module",
-  "version": "0.25.1"
+   "dependencies": {
+      "@f-o-t/markdown": "1.0.0",
+      "@mastra/rag": "2.0.0",
+      "@mastra/core": "1.0.4",
+      "@mastra/evals": "1.0.0",
+      "@mastra/libsql": "1.0.0",
+      "@mastra/observability": "1.0.0",
+      "@mastra/pg": "1.0.0",
+      "@packages/database": "workspace:*",
+      "@packages/environment": "workspace:*",
+      "@packages/files": "workspace:*",
+      "@packages/search": "workspace:*",
+      "@packages/utils": "workspace:*",
+      "ai": "catalog:openrouter",
+      "zod": "catalog:validation"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "dotenv-cli": "catalog:enviroment",
+      "shx": "catalog:enviroment",
+      "typescript": "catalog:development"
+   },
+   "exports": {
+      ".": {
+         "default": "./src/mastra/index.ts",
+         "types": "./dist/src/mastra/index.d.ts"
+      },
+      "./mastra/rag": {
+         "default": "./src/mastra/rag/index.ts",
+         "types": "./dist/src/mastra/rag/index.d.ts"
+      },
+      "./mastra/tools/analysis": {
+         "default": "./src/mastra/tools/analysis/index.ts",
+         "types": "./dist/src/mastra/tools/analysis/index.d.ts"
+      },
+      "./mastra/utils/fim-confidence": {
+         "default": "./src/mastra/utils/fim-confidence.ts",
+         "types": "./dist/src/mastra/utils/fim-confidence.d.ts"
+      },
+      "./mastra/scorers/fim-quality-scorer": {
+         "default": "./src/mastra/scorers/fim-quality-scorer.ts",
+         "types": "./dist/src/mastra/scorers/fim-quality-scorer.d.ts"
+      }
+   },
+   "files": [
+      "dist"
+   ],
+   "license": "Apache-2.0",
+   "name": "@packages/agents",
+   "private": true,
+   "scripts": {
+      "build": "tsc --build",
+      "check": "biome check --write ./src",
+      "dev": "dotenv -e .env -- bunx mastra dev",
+      "typecheck": "tsc "
+   },
+   "type": "module",
+   "version": "0.25.1"
 }
