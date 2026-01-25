@@ -32,7 +32,7 @@ COPY libraries/sdk/package.json ./libraries/sdk/
 COPY libraries/spelling/package.json ./libraries/spelling/
 
 # Install dependencies (workspace packages now resolvable)
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Copy all source code
 COPY . .
