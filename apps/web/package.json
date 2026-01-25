@@ -5,7 +5,7 @@
   "scripts": {
     "container-start": "podman-compose down && podman-compose up -d",
     "dev": "bun run container-start && bun --bun vite dev --port 3000",
-    "build": "bun --bun vite build",
+    "build": "vite build",
     "start": "bun run .output/server/index.mjs",
     "preview": "bun --bun vite preview",
     "test": "vitest run",
