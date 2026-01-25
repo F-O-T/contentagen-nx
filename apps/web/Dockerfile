@@ -38,9 +38,17 @@ RUN bun install
 COPY . .
 
 # Build required libraries
-RUN bun run build --filter=@libraries/markdown
-RUN bun run build --filter=@libraries/content-analysis
-RUN bun run build --filter=@libraries/sdk
+WORKDIR /app/libraries/markdown
+RUN bun run build
+WORKDIR /app
+
+WORKDIR /app/libraries/content-analysis
+RUN bun run build
+WORKDIR /app
+
+WORKDIR /app/libraries/sdk
+RUN bun run build
+WORKDIR /app
 
 # Build web app with client env vars
 ENV NODE_ENV=production
