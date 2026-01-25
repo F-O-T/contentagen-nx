@@ -1,6 +1,6 @@
 import "@/polyfill";
 import { BatchHandlerPlugin } from "@orpc/server/plugins";
-import { RPCHandler } from "@orpc/server/fetch";
+import { RPCHandler, CompressionPlugin } from "@orpc/server/fetch";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { SmartCoercionPlugin } from "@orpc/json-schema";
 import { createFileRoute } from "@tanstack/react-router";
@@ -15,6 +15,8 @@ const handler = new RPCHandler(router, {
       }),
    ],
    plugins: [
+      new CompressionPlugin(),
+
       new BatchHandlerPlugin(),
       new SmartCoercionPlugin({
          schemaConverters: [new ZodToJsonSchemaConverter()],

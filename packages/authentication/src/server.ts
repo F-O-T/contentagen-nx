@@ -1,6 +1,4 @@
 import { stripe as stripePlugin } from "@better-auth/stripe";
-import { createBetterAuthStorage } from "./cache";
-import { createRedisConnection } from "./redis-connection";
 import type { DatabaseInstance } from "@packages/database/client";
 import {
    createDefaultOrganization,
@@ -32,6 +30,8 @@ import {
 } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import type Stripe from "stripe";
+import { createBetterAuthStorage } from "./cache";
+import { createRedisConnection } from "./redis-connection";
 
 export const ORGANIZATION_LIMIT = 3;
 
@@ -199,158 +199,158 @@ export function createAuth(config: SimplifiedAuthConfig) {
       // Conditional: Stripe plugin (only if Stripe is configured)
       ...(stripeClient && env.STRIPE_WEBHOOK_SECRET
          ? [
-            stripePlugin({
-               createCustomerOnSignUp: true,
-               stripeClient,
-               stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET,
+              stripePlugin({
+                 createCustomerOnSignUp: true,
+                 stripeClient,
+                 stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET,
 
-               subscription: {
-                  authorizeReference: async ({ user, referenceId }) => {
-                     const membership = await db.query.member.findFirst({
-                        where: (member, { eq, and }) =>
-                           and(
-                              eq(member.organizationId, referenceId),
-                              eq(member.userId, user.id),
-                           ),
-                     });
-                     if (!membership) {
-                        return false;
-                     }
-                     return (
-                        membership.role === "owner" ||
-                        membership.role === "admin"
-                     );
-                  },
-                  enabled: true,
-                  getCheckoutSessionParams: async () => ({
-                     params: {
-                        allow_promotion_codes: true,
-                     },
-                  }),
-                  plans: [
-                     {
-                        annualDiscountPriceId: env.STRIPE_PRO_ANNUAL_PRICE_ID,
-                        name: PlanName.PRO,
-                        priceId: env.STRIPE_PRO_PRICE_ID,
-                     },
-                  ],
-               },
+                 subscription: {
+                    authorizeReference: async ({ user, referenceId }) => {
+                       const membership = await db.query.member.findFirst({
+                          where: (member, { eq, and }) =>
+                             and(
+                                eq(member.organizationId, referenceId),
+                                eq(member.userId, user.id),
+                             ),
+                       });
+                       if (!membership) {
+                          return false;
+                       }
+                       return (
+                          membership.role === "owner" ||
+                          membership.role === "admin"
+                       );
+                    },
+                    enabled: true,
+                    getCheckoutSessionParams: async () => ({
+                       params: {
+                          allow_promotion_codes: true,
+                       },
+                    }),
+                    plans: [
+                       {
+                          annualDiscountPriceId: env.STRIPE_PRO_ANNUAL_PRICE_ID,
+                          name: PlanName.PRO,
+                          priceId: env.STRIPE_PRO_PRICE_ID,
+                       },
+                    ],
+                 },
 
-               // PostHog Revenue Analytics - Track subscription lifecycle events
-               onSubscriptionComplete: async ({
-                  subscription,
-                  stripeSubscription,
-               }: {
-                  subscription: {
-                     id: string;
-                     plan: string;
-                     referenceId: string;
-                  };
-                  stripeSubscription: Stripe.Subscription;
-               }) => {
-                  try {
-                     const invoice = await stripeClient.invoices.retrieve(
-                        stripeSubscription.latest_invoice as string,
-                     );
+                 // PostHog Revenue Analytics - Track subscription lifecycle events
+                 onSubscriptionComplete: async ({
+                    subscription,
+                    stripeSubscription,
+                 }: {
+                    subscription: {
+                       id: string;
+                       plan: string;
+                       referenceId: string;
+                    };
+                    stripeSubscription: Stripe.Subscription;
+                 }) => {
+                    try {
+                       const invoice = await stripeClient.invoices.retrieve(
+                          stripeSubscription.latest_invoice as string,
+                       );
 
-                     posthogClient.capture({
-                        distinctId: subscription.referenceId,
-                        event: "subscription_started",
-                        groups: { organization: subscription.referenceId },
-                        properties: {
-                           $currency: invoice.currency.toUpperCase(),
-                           $revenue: invoice.amount_paid / 100,
-                           interval:
-                              stripeSubscription.items.data[0]?.plan.interval,
-                           organization_id: subscription.referenceId,
-                           plan_name: subscription.plan,
-                           subscription_id: subscription.id,
-                        },
-                     });
-                  } catch (error) {
-                     console.error(
-                        "PostHog: Failed to capture subscription_started event:",
-                        error,
-                     );
-                  }
-               },
+                       posthogClient.capture({
+                          distinctId: subscription.referenceId,
+                          event: "subscription_started",
+                          groups: { organization: subscription.referenceId },
+                          properties: {
+                             $currency: invoice.currency.toUpperCase(),
+                             $revenue: invoice.amount_paid / 100,
+                             interval:
+                                stripeSubscription.items.data[0]?.plan.interval,
+                             organization_id: subscription.referenceId,
+                             plan_name: subscription.plan,
+                             subscription_id: subscription.id,
+                          },
+                       });
+                    } catch (error) {
+                       console.error(
+                          "PostHog: Failed to capture subscription_started event:",
+                          error,
+                       );
+                    }
+                 },
 
-               onSubscriptionCancel: async ({
-                  subscription,
-               }: {
-                  subscription: {
-                     id: string;
-                     plan: string;
-                     referenceId: string;
-                  };
-               }) => {
-                  try {
-                     posthogClient.capture({
-                        distinctId: subscription.referenceId,
-                        event: "subscription_canceled",
-                        groups: { organization: subscription.referenceId },
-                        properties: {
-                           organization_id: subscription.referenceId,
-                           plan_name: subscription.plan,
-                           subscription_id: subscription.id,
-                        },
-                     });
-                  } catch (error) {
-                     console.error(
-                        "PostHog: Failed to capture subscription_canceled event:",
-                        error,
-                     );
-                  }
-               },
+                 onSubscriptionCancel: async ({
+                    subscription,
+                 }: {
+                    subscription: {
+                       id: string;
+                       plan: string;
+                       referenceId: string;
+                    };
+                 }) => {
+                    try {
+                       posthogClient.capture({
+                          distinctId: subscription.referenceId,
+                          event: "subscription_canceled",
+                          groups: { organization: subscription.referenceId },
+                          properties: {
+                             organization_id: subscription.referenceId,
+                             plan_name: subscription.plan,
+                             subscription_id: subscription.id,
+                          },
+                       });
+                    } catch (error) {
+                       console.error(
+                          "PostHog: Failed to capture subscription_canceled event:",
+                          error,
+                       );
+                    }
+                 },
 
-               onEvent: async (event: Stripe.Event) => {
-                  // Track recurring subscription payments (renewals)
-                  if (event.type === "invoice.paid") {
-                     const invoice = event.data.object as Stripe.Invoice;
+                 onEvent: async (event: Stripe.Event) => {
+                    // Track recurring subscription payments (renewals)
+                    if (event.type === "invoice.paid") {
+                       const invoice = event.data.object as Stripe.Invoice;
 
-                     // Only track recurring payments, not initial subscription
-                     if (invoice.billing_reason === "subscription_cycle") {
-                        try {
-                           // Get subscription to find the organization (referenceId)
-                           const subscription = (invoice as any).subscription;
-                           const subscriptionId =
-                              typeof subscription === "string"
-                                 ? subscription
-                                 : null;
-                           if (!subscriptionId) return;
+                       // Only track recurring payments, not initial subscription
+                       if (invoice.billing_reason === "subscription_cycle") {
+                          try {
+                             // Get subscription to find the organization (referenceId)
+                             const subscription = (invoice as any).subscription;
+                             const subscriptionId =
+                                typeof subscription === "string"
+                                   ? subscription
+                                   : null;
+                             if (!subscriptionId) return;
 
-                           const stripeSubscription =
-                              await stripeClient.subscriptions.retrieve(
-                                 subscriptionId,
-                              );
-                           const referenceId =
-                              stripeSubscription.metadata?.referenceId;
+                             const stripeSubscription =
+                                await stripeClient.subscriptions.retrieve(
+                                   subscriptionId,
+                                );
+                             const referenceId =
+                                stripeSubscription.metadata?.referenceId;
 
-                           if (referenceId) {
-                              posthogClient.capture({
-                                 distinctId: referenceId,
-                                 event: "subscription_renewed",
-                                 groups: { organization: referenceId },
-                                 properties: {
-                                    $currency:
-                                       invoice.currency?.toUpperCase(),
-                                    $revenue: invoice.amount_paid / 100,
-                                    organization_id: referenceId,
-                                    subscription_id: subscriptionId,
-                                 },
-                              });
-                           }
-                        } catch (error) {
-                           console.error(
-                              "PostHog: Failed to capture subscription_renewed event:",
-                              error,
-                           );
-                        }
-                     }
-                  }
-               },
-            }),
-         ]
+                             if (referenceId) {
+                                posthogClient.capture({
+                                   distinctId: referenceId,
+                                   event: "subscription_renewed",
+                                   groups: { organization: referenceId },
+                                   properties: {
+                                      $currency:
+                                         invoice.currency?.toUpperCase(),
+                                      $revenue: invoice.amount_paid / 100,
+                                      organization_id: referenceId,
+                                      subscription_id: subscriptionId,
+                                   },
+                                });
+                             }
+                          } catch (error) {
+                             console.error(
+                                "PostHog: Failed to capture subscription_renewed event:",
+                                error,
+                             );
+                          }
+                       }
+                    }
+                 },
+              }),
+           ]
          : []),
 
       // Must be last - enables proper cookie handling for TanStack Start
@@ -473,12 +473,12 @@ export function createAuth(config: SimplifiedAuthConfig) {
       socialProviders: {
          google:
             env.BETTER_AUTH_GOOGLE_CLIENT_ID &&
-               env.BETTER_AUTH_GOOGLE_CLIENT_SECRET
+            env.BETTER_AUTH_GOOGLE_CLIENT_SECRET
                ? {
-                  clientId: env.BETTER_AUTH_GOOGLE_CLIENT_ID,
-                  clientSecret: env.BETTER_AUTH_GOOGLE_CLIENT_SECRET,
-                  prompt: "select_account" as const,
-               }
+                    clientId: env.BETTER_AUTH_GOOGLE_CLIENT_ID,
+                    clientSecret: env.BETTER_AUTH_GOOGLE_CLIENT_SECRET,
+                    prompt: "select_account" as const,
+                 }
                : undefined,
       },
       trustedOrigins: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),

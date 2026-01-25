@@ -1,4 +1,7 @@
 import { createORPCClient } from "@orpc/client";
+import {
+  BatchLinkPlugin
+} from '@orpc/client/plugins'
 import { RPCLink } from "@orpc/client/fetch";
 import type { RouterClient } from "@orpc/server";
 import { createRouterClient } from "@orpc/server";
@@ -43,6 +46,21 @@ const getORPCClient = createIsomorphicFn()
   .client((): RouterClient<typeof router> => {
     const link = new RPCLink({
       url: window.location.origin + "/api/rpc", // Use relative URL - SSR safe, no window reference needed
+      plugins: [
+        new BatchLinkPlugin
+          ({
+            groups
+              : [
+                {
+                  condition
+                    : options
+                      => true,
+                  context
+                    : {} 
+                }
+              ]
+          }),
+      ],
       fetch: (input, init) =>
         fetch(input, {
           ...init,
