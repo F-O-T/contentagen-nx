@@ -1,4 +1,5 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
+import { ClientOnly } from "@tanstack/react-router";
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -6,7 +7,6 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { useEffect, useState } from "react";
 import { ThemeProvider } from "@packages/ui/lib/theme-provider";
 import { Toaster } from "@packages/ui/components/sonner";
 import { PostHogWrapper, PosthogRouterTracker } from "@packages/posthog/client";
@@ -17,14 +17,6 @@ import type { RouterContext } from "../integrations/tanstack-query/root-provider
 import { GlobalSheet } from "@/hooks/use-sheet";
 import { GlobalCredenza } from "@/hooks/use-credenza";
 import { GlobalAlertDialog } from "@/hooks/use-alert-dialog";
-
-function ClientOnly({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-  return mounted ? <>{children}</> : null;
-}
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   beforeLoad: async ({ context }) => {
@@ -72,13 +64,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <PostHogWrapper env={env}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+          >
             {children}
-            <PosthogRouterTracker location={{
-              href: typeof window !== "undefined" ? window.location.href : "",
-              pathname: routerState.location.pathname,
-              search: routerState.location.search,
-            }} />
+            <PosthogRouterTracker
+              location={{
+                href:
+                  typeof window !== "undefined"
+                    ? window.location.href
+                    : "",
+                pathname: routerState.location.pathname,
+                search: routerState.location.search,
+              }}
+            />
             <Toaster position="top-right" richColors />
             <GlobalSheet />
             <GlobalCredenza />

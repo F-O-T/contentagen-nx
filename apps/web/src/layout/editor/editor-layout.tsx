@@ -53,20 +53,7 @@ import { useManualSave } from "./hooks/use-manual-save";
 import { useToolExecutionBridge } from "./hooks/use-tool-execution-bridge";
 import { InlineFrontmatter } from "./inline-frontmatter";
 import { SeoAuditSidebar } from "./seo-audit-sidebar";
-
-function ClientOnly({ children }: { children: React.ReactNode }) {
-   const [mounted, setMounted] = useState(false);
-
-   useEffect(() => {
-      setMounted(true);
-   }, []);
-
-   return mounted ? <>{children}</> : null;
-}
-
-// ============================================================================
-// Types
-// ============================================================================
+import { ClientOnly } from "@tanstack/react-router";
 
 interface EditorLayoutProps {
    contentId: string;
