@@ -44,7 +44,6 @@ RUN bun run build --filter=@libraries/sdk
 
 # Build web app with client env vars
 ENV NODE_ENV=production
-ENV NITRO_PRESET=bun
 ARG VITE_POSTHOG_HOST
 ARG VITE_POSTHOG_KEY
 RUN bun run build --filter=web
