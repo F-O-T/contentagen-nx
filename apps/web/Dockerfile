@@ -44,12 +44,13 @@ RUN bun run build --filter=@libraries/sdk
 
 # Build web app with client env vars
 ENV NODE_ENV=production
+ENV NITRO_PRESET=bun
 ARG VITE_POSTHOG_HOST
 ARG VITE_POSTHOG_KEY
 RUN bun run build --filter=web
 
 # Stage 2: Production Runner
-FROM node:22-alpine AS runner
+FROM oven/bun:alpine AS runner
 
 WORKDIR /app
 
@@ -69,4 +70,4 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://0.0.0.0:${PORT}/ || exit 1
 
 # Start Nitro server (will read server env vars from environment)
-CMD ["node", ".output/server/index.mjs"]
+CMD ["bun", "run", ".output/server/index.mjs"]
