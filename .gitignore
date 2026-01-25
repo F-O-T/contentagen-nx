@@ -5,6 +5,7 @@
 apps/worker/worker
 .claude/**
 .mastra
+.output
 mastra.db**
 node_modules
 .pnp

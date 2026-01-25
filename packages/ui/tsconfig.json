@@ -3,6 +3,7 @@
    "compilerOptions": {
       "baseUrl": ".",
       "jsx": "preserve",
+      "types": ["bun-types"],
       "lib": ["dom", "ES2022"],
       "paths": {
          "@packages/ui/*": ["./src/*"]
