@@ -127,7 +127,7 @@
       "name": "@packages/agents",
       "version": "0.25.1",
       "dependencies": {
-        "@f-o-t/markdown": "1.0.0",
+        "@f-o-t/markdown": "1.0.2",
         "@mastra/core": "1.0.4",
         "@mastra/evals": "1.0.0",
         "@mastra/libsql": "1.0.0",
@@ -203,8 +203,8 @@
       "name": "@packages/editor",
       "version": "0.1.0",
       "dependencies": {
-        "@f-o-t/content-analysis": "1.0.0",
-        "@f-o-t/spelling": "1.0.0",
+        "@f-o-t/content-analysis": "1.0.1",
+        "@f-o-t/spelling": "1.0.1",
         "@lexical/code": "^0.39.0",
         "@lexical/html": "^0.39.0",
         "@lexical/link": "^0.39.0",
@@ -918,13 +918,13 @@
 
     "@exodus/bytes": ["@exodus/bytes@1.9.0", "", { "peerDependencies": { "@noble/hashes": "^1.8.0 || ^2.0.0" }, "optionalPeers": ["@noble/hashes"] }, "sha512-lagqsvnk09NKogQaN/XrtlWeUF8SRhT12odMvbTIIaVObqzwAogL6jhR4DAp0gPuKoM1AOVrKUshJpRdpMFrww=="],
 
-    "@f-o-t/content-analysis": ["@f-o-t/content-analysis@1.0.0", "", { "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-F/szAyun1xB1fAGV6OKI6MWZ1Eb7I3VS81cOhb+r82sXxffvo7pos9xyGCQ67gkhy95GkeKFMJlq7yNrGwki5w=="],
+    "@f-o-t/content-analysis": ["@f-o-t/content-analysis@1.0.1", "", { "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-cY716FNjjYMp4Qbc82OiecQ/biESAXibUL1o/Z1/ryA0h8DjrUdY28L0HOdG7ukvN4LnNzcqvY9/ktYjnnHL7Q=="],
 
     "@f-o-t/contentta-sdk": ["@f-o-t/contentta-sdk@workspace:libraries/sdk"],
 
-    "@f-o-t/markdown": ["@f-o-t/markdown@1.0.0", "", { "dependencies": { "zod": "4.2.1" }, "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-uYLET4NcXCuWOrIoY8ozUlA6XQpFOCDvaY/sr2LsCYiwNupoOlOekrY2jphcBM4i6nXtGw/YoLLf7LzfAM+Qkg=="],
+    "@f-o-t/markdown": ["@f-o-t/markdown@1.0.2", "", { "dependencies": { "zod": "4.3.6" }, "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-EpURxIlF3jQvLR4gJFRU9Re1tHA/vH1I/de0DZWk+rO3NnxyTAVuvqynsSPKgatc1qb8gcsONw8sYVIdw7S3xw=="],
 
-    "@f-o-t/spelling": ["@f-o-t/spelling@1.0.0", "", { "dependencies": { "zod": "^3.24.1" }, "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-53YEcdEW6n9rr589SAsrE4fdLrikMYIR0y9Q6/LLshgnSn4TGnPGRM4/Xmem5HFilfUM4Y/qzOXQDAwuwSydTQ=="],
+    "@f-o-t/spelling": ["@f-o-t/spelling@1.0.1", "", { "dependencies": { "zod": "^3.24.1" }, "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-6kSQB5Nj43pJaskEhltFLFplHAD9YoykVxMJ2Ffa6SCsVA+WoCrExKtzrUIfAsMAG/EGkqtQHwdrMIuvoiCc9A=="],
 
     "@faker-js/faker": ["@faker-js/faker@10.2.0", "", {}, "sha512-rTXwAsIxpCqzUnZvrxVh3L0QA0NzToqWBLAhV+zDV3MIIwiQhAZHMdPCIaj5n/yADu/tyk12wIPgL6YHGXJP+g=="],
 
@@ -3639,6 +3639,8 @@
     "@esbuild-kit/core-utils/source-map-support": ["source-map-support@0.5.21", "", { "dependencies": { "buffer-from": "^1.0.0", "source-map": "^0.6.0" } }, "sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w=="],
 
     "@f-o-t/contentta-sdk/@biomejs/biome": ["@biomejs/biome@2.3.10", "", { "optionalDependencies": { "@biomejs/cli-darwin-arm64": "2.3.10", "@biomejs/cli-darwin-x64": "2.3.10", "@biomejs/cli-linux-arm64": "2.3.10", "@biomejs/cli-linux-arm64-musl": "2.3.10", "@biomejs/cli-linux-x64": "2.3.10", "@biomejs/cli-linux-x64-musl": "2.3.10", "@biomejs/cli-win32-arm64": "2.3.10", "@biomejs/cli-win32-x64": "2.3.10" }, "bin": { "biome": "bin/biome" } }, "sha512-/uWSUd1MHX2fjqNLHNL6zLYWBbrJeG412/8H7ESuK8ewoRoMPUgHDebqKrPTx/5n6f17Xzqc9hdg3MEqA5hXnQ=="],
+
+    "@f-o-t/markdown/zod": ["zod@4.3.6", "", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
 
     "@f-o-t/spelling/zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
 

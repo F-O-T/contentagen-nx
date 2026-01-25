@@ -1,6 +1,6 @@
 {
    "dependencies": {
-      "@f-o-t/markdown": "1.0.0",
+      "@f-o-t/markdown": "1.0.2",
       "@mastra/rag": "2.0.0",
       "@mastra/core": "1.0.4",
       "@mastra/evals": "1.0.0",

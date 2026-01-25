@@ -56,8 +56,8 @@
       "test:watch": "bun test --watch"
    },
    "dependencies": {
-      "@f-o-t/content-analysis": "1.0.0",
-      "@f-o-t/spelling": "1.0.0",
+      "@f-o-t/content-analysis": "1.0.1",
+      "@f-o-t/spelling": "1.0.1",
       "@packages/ui": "workspace:*",
       "@packages/utils": "workspace:*",
       "@tanstack/react-store": "^0.8.0",
