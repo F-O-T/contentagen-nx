@@ -1,6 +1,6 @@
 import "@/polyfill";
-
-import { OpenAPIHandler } from "@orpc/openapi/fetch";
+import { BatchHandlerPlugin } from "@orpc/server/plugins";
+import { RPCHandler } from "@orpc/server/fetch";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { SmartCoercionPlugin } from "@orpc/json-schema";
 import { createFileRoute } from "@tanstack/react-router";
@@ -8,13 +8,14 @@ import { onError } from "@orpc/server";
 
 import router from "@/integrations/orpc/router";
 
-const handler = new OpenAPIHandler(router, {
+const handler = new RPCHandler(router, {
    interceptors: [
       onError((error) => {
          console.error(error);
       }),
    ],
    plugins: [
+      new BatchHandlerPlugin(),
       new SmartCoercionPlugin({
          schemaConverters: [new ZodToJsonSchemaConverter()],
       }),
