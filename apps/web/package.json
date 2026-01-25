@@ -25,7 +25,6 @@
     "@packages/agents": "workspace:*",
     "@packages/authentication": "workspace:*",
     "@packages/database": "workspace:*",
-    "@packages/editor": "workspace:*",
     "@packages/ui": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "@tailwindcss/vite": "^4.1.8",

@@ -1,9 +1,5 @@
 {
    "extends": "@tooling/typescript/base.json",
-   "files": [],
-   "references": [
-    {
-      "path": "./packages/editor"
-    }
-  ]
+  "files": [],
+  "references": []
 }

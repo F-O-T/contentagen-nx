@@ -6,13 +6,13 @@
  */
 
 import { useThread } from "@assistant-ui/react";
-import { executeEditorTool } from "@packages/editor";
 import type { LexicalEditor } from "lexical";
 import { useCallback, useEffect, useRef } from "react";
 import {
    isEditorTool,
    isFrontmatterTool,
 } from "@/features/content/lib/assistant-runtime-adapter";
+import { executeEditorTool } from "@/features/editor";
 
 /**
  * Tool result from content part
@@ -89,7 +89,7 @@ export function useToolExecutionBridge(options: UseToolExecutionBridgeOptions) {
          if (!editor) return;
 
          try {
-            // Use the executeEditorTool from @packages/editor
+            // Use the executeEditorTool from the editor feature
             // It expects a ToolCall object
             executeEditorTool(editor, {
                id: crypto.randomUUID(),
@@ -196,10 +196,18 @@ export function useToolExecutionBridge(options: UseToolExecutionBridgeOptions) {
 
                // Execute based on tool type
                if (isEditorTool(toolName)) {
-                  console.log("[ToolBridge] Executing editor tool:", toolName, args);
+                  console.log(
+                     "[ToolBridge] Executing editor tool:",
+                     toolName,
+                     args,
+                  );
                   executeEditor(toolName, args);
                } else if (isFrontmatterTool(toolName)) {
-                  console.log("[ToolBridge] Executing frontmatter tool:", toolName, args);
+                  console.log(
+                     "[ToolBridge] Executing frontmatter tool:",
+                     toolName,
+                     args,
+                  );
                   executeFrontmatter(toolName, args);
                }
             }

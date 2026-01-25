@@ -1,5 +1,5 @@
 /**
- * @packages/editor
+ * Editor feature (apps/web)
  *
  * AI-powered content editor built on Lexical.
  * Provides FIM (Fill-in-Middle), inline editing (Ctrl+K), and chat features.

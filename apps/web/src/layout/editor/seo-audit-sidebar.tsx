@@ -10,7 +10,6 @@ import type {
    TopKeyword,
 } from "@f-o-t/content-analysis/types";
 import type { ContentMeta } from "@packages/database/schemas/content";
-import { getDiagnosticsClient } from "@packages/editor/diagnostics/client";
 import {
    Accordion,
    AccordionContent,
@@ -33,6 +32,7 @@ import {
    Target,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getDiagnosticsClient } from "@/features/editor/diagnostics/client";
 import {
    setSeoAuditSidebarWidth,
    useSeoAuditSidebar,

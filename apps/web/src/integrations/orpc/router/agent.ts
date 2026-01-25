@@ -10,13 +10,6 @@ import {
    getOrCreateChatSession,
 } from "@packages/database/repositories/chat-repository";
 import type { StoredToolCall } from "@packages/database/schemas/chat";
-import {
-   type ChatChunk,
-   type EditChunk,
-   EditRequestSchema,
-   type FIMChunk,
-   FIMRequestSchema,
-} from "@packages/editor/schemas";
 import { PlanName } from "@packages/stripe/constants";
 import {
    FEATURE_DISPLAY_NAMES,
@@ -24,6 +17,13 @@ import {
    PLAN_FEATURES,
 } from "@packages/stripe/features";
 import { z } from "zod";
+import {
+   type ChatChunk,
+   type EditChunk,
+   EditRequestSchema,
+   type FIMChunk,
+   FIMRequestSchema,
+} from "@/features/editor/schemas";
 import { protectedProcedure } from "../server";
 
 // =============================================================================

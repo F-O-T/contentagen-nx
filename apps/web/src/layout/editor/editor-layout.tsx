@@ -10,6 +10,9 @@
 
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import type { ContentMeta } from "@packages/database/schemas/content";
+import { ClientOnly, useNavigate, useParams } from "@tanstack/react-router";
+import type { LexicalEditor } from "lexical";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
    ContentEditor,
    DiffView,
@@ -25,10 +28,7 @@ import {
    useDiffState,
    useEditState,
    useFIMState,
-} from "@packages/editor";
-import { useNavigate, useParams } from "@tanstack/react-router";
-import type { LexicalEditor } from "lexical";
-import { useCallback, useEffect, useMemo, useState } from "react";
+} from "@/features/editor";
 import { AssistantChatSidebar } from "./assistant-chat-sidebar";
 import { DiagnosticsPanel } from "./diagnostics-panel";
 import { EditorCommandPalette } from "./editor-command-palette";
@@ -53,7 +53,6 @@ import { useManualSave } from "./hooks/use-manual-save";
 import { useToolExecutionBridge } from "./hooks/use-tool-execution-bridge";
 import { InlineFrontmatter } from "./inline-frontmatter";
 import { SeoAuditSidebar } from "./seo-audit-sidebar";
-import { ClientOnly } from "@tanstack/react-router";
 
 interface EditorLayoutProps {
    contentId: string;

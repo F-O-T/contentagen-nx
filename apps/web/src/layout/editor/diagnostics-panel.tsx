@@ -7,11 +7,11 @@
  * - One-click fix actions
  */
 
-import type { SpellingError } from "@packages/editor/schemas";
-import { useDiagnosticsState } from "@packages/editor/stores/diagnostics-store";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { AlertCircle, CheckCircle2, Lightbulb, X } from "lucide-react";
+import type { SpellingError } from "@/features/editor/schemas";
+import { useDiagnosticsState } from "@/features/editor/stores/diagnostics-store";
 import { toggleDiagnosticsPanel } from "./hooks/use-editor-state";
 
 // ============================================================================
