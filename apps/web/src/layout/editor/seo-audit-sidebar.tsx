@@ -10,7 +10,7 @@ import type {
    TopKeyword,
 } from "@f-o-t/content-analysis/types";
 import type { ContentMeta } from "@packages/database/schemas/content";
-import { getDiagnosticsClient } from "@packages/editor";
+import { getDiagnosticsClient } from "@packages/editor/diagnostics/client";
 import {
    Accordion,
    AccordionContent,

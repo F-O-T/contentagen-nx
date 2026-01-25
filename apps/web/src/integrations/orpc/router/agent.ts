@@ -6,8 +6,8 @@ import {
    mastra,
 } from "@packages/agents";
 import {
-   getOrCreateChatSession,
    addChatMessage,
+   getOrCreateChatSession,
 } from "@packages/database/repositories/chat-repository";
 import type { StoredToolCall } from "@packages/database/schemas/chat";
 import {
@@ -16,7 +16,7 @@ import {
    EditRequestSchema,
    type FIMChunk,
    FIMRequestSchema,
-} from "@packages/editor";
+} from "@packages/editor/schemas";
 import { PlanName } from "@packages/stripe/constants";
 import {
    FEATURE_DISPLAY_NAMES,
@@ -227,9 +227,14 @@ export const chatStream = protectedProcedure
       const { userId, db, organizationId } = context;
 
       // Get or create chat session
-      let session: Awaited<ReturnType<typeof getOrCreateChatSession>> | null = null;
+      let session: Awaited<ReturnType<typeof getOrCreateChatSession>> | null =
+         null;
       if (input.contentId) {
-         session = await getOrCreateChatSession(db, input.contentId, organizationId);
+         session = await getOrCreateChatSession(
+            db,
+            input.contentId,
+            organizationId,
+         );
       }
 
       // Save user message to database
@@ -300,7 +305,7 @@ export const chatStream = protectedProcedure
                   const toolName = chunk.toolName ?? chunk.payload?.toolName;
                   const args = chunk.args ?? chunk.payload?.args;
                   if (!toolCallId || !toolName || !args) break;
-                  
+
                   // Add to tool calls collection
                   toolCalls.push({
                      id: toolCallId,
@@ -308,7 +313,7 @@ export const chatStream = protectedProcedure
                      args,
                      status: "completed" as const,
                   });
-                  
+
                   yield {
                      type: "tool_call_start",
                      toolCall: {
@@ -326,14 +331,14 @@ export const chatStream = protectedProcedure
                   const toolName = chunk.toolName ?? chunk.payload?.toolName;
                   const result = chunk.result ?? chunk.payload?.result;
                   if (!toolCallId || !toolName) break;
-                  
+
                   // Update tool call with result
-                  const toolCall = toolCalls.find(tc => tc.id === toolCallId);
+                  const toolCall = toolCalls.find((tc) => tc.id === toolCallId);
                   if (toolCall) {
                      toolCall.result = result;
                      toolCall.executedAt = Date.now();
                   }
-                  
+
                   yield {
                      type: "tool_call_complete",
                      toolCallId,

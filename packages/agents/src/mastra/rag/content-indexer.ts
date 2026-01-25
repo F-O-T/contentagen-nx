@@ -72,7 +72,7 @@ export async function indexContent(
          const doc = MDocument.fromText(content.body);
          const chunks = await doc.chunk({
             strategy: "recursive",
-            size: CHUNK_SIZE,
+            maxSize: CHUNK_SIZE,
             overlap: CHUNK_OVERLAP,
          });
 

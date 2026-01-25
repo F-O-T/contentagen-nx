@@ -20,9 +20,8 @@ import { GlobalAlertDialog } from "@/hooks/use-alert-dialog";
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   beforeLoad: async ({ context }) => {
-    // Prefetch session for SSR - this populates the QueryClient cache
     await context.queryClient.prefetchQuery(
-      context.orpc.session.getSession.queryOptions({}),
+      context.orpc.session.getSession.queryOptions(),
     );
   },
   head: () => ({

@@ -9,8 +9,7 @@ import viteTsConfigPaths from "vite-tsconfig-paths";
 
 const config = defineConfig({
    ssr: {
-      noExternal: [],
-      external: ["@lexical/code", "prismjs"], // Don't bundle these for SSR
+      noExternal: ["@lexical/code"],
    },
    resolve: {
       alias: {
