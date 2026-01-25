@@ -72,7 +72,6 @@ COPY tooling/typescript/package.json ./tooling/typescript/
 
 # Packages
 COPY packages/agents/package.json ./packages/agents/
-COPY packages/api/package.json ./packages/api/
 COPY packages/arcjet/package.json ./packages/arcjet/
 COPY packages/authentication/package.json ./packages/authentication/
 COPY packages/cache/package.json ./packages/cache/

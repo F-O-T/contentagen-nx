@@ -9,16 +9,41 @@ ENV PATH="/root/.bun/bin:${PATH}"
 WORKDIR /app
 
 # Copy root workspace config
-COPY package.json bun.lock ./
+COPY bun.lock ./
+COPY package.json ./
+COPY apps/web/package.json ./apps/web/
+COPY tooling/typescript/package.json ./tooling/typescript/
 
-# Copy all workspace source code (needed for workspace resolution)
-COPY apps/ ./apps/
-COPY packages/ ./packages/
-COPY libraries/ ./libraries/
-COPY tooling/ ./tooling/
+# Packages
+COPY packages/agents/package.json ./packages/agents/
+COPY packages/arcjet/package.json ./packages/arcjet/
+COPY packages/authentication/package.json ./packages/authentication/
+COPY packages/cache/package.json ./packages/cache/
+COPY packages/database/package.json ./packages/database/
+COPY packages/editor/package.json ./packages/editor/
+COPY packages/environment/package.json ./packages/environment/
+COPY packages/files/package.json ./packages/files/
+COPY packages/logging/package.json ./packages/logging/
+COPY packages/posthog/package.json ./packages/posthog/
+COPY packages/queue/package.json ./packages/queue/
+COPY packages/search/package.json ./packages/search/
+COPY packages/stripe/package.json ./packages/stripe/
+COPY packages/transactional/package.json ./packages/transactional/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/utils/package.json ./packages/utils/
+COPY packages/workflows/package.json ./packages/workflows/
+
+# Libraries (These must be built before web can be bundled)
+COPY libraries/markdown/package.json ./libraries/markdown/
+COPY libraries/content-analysis/package.json ./libraries/content-analysis/
+COPY libraries/sdk/package.json ./libraries/sdk/
+COPY libraries/spelling/package.json ./libraries/spelling/
 
 # Install dependencies (workspace packages now resolvable)
 RUN bun install --frozen-lockfile
+
+# Copy all source code
+COPY . .
 
 # Build required libraries
 RUN bun run build --filter=@libraries/markdown
