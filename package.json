@@ -57,7 +57,9 @@
       "reset": "bun run scripts/clean.ts reset",
       "start:dashboard": "nx run dashboard:start",
       "test": "nx run-many -t test --parallel=3",
-      "typecheck": "nx run-many -t typecheck --parallel=8"
+      "typecheck": "nx run-many -t typecheck --parallel=8",
+      "web:build": "bun run --filter=web build",
+      "web:start": "bun run --filter=web start"
    },
    "trustedDependencies": [
       "@parcel/watcher",
