@@ -1,0 +1,37 @@
+{
+   "dependencies": {
+      "zod": "catalog:validation"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "typescript": "catalog:development"
+   },
+   "exports": {
+      ".": {
+         "default": "./src/index.ts",
+         "types": "./dist/src/index.d.ts"
+      },
+      "./catalog": {
+         "default": "./src/catalog.ts",
+         "types": "./dist/src/catalog.d.ts"
+      },
+      "./types/*": {
+         "default": "./src/types/*.ts",
+         "types": "./dist/src/types/*.d.ts"
+      }
+   },
+   "files": [
+      "dist"
+   ],
+   "license": "Apache-2.0",
+   "name": "@packages/events",
+   "private": true,
+   "scripts": {
+      "build": "tsc --build",
+      "check": "biome check --write ./src",
+      "test": "bun test",
+      "typecheck": "tsc"
+   },
+   "type": "module",
+   "version": "0.1.0"
+}
