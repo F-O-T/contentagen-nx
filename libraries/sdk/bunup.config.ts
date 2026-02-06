@@ -10,5 +10,6 @@ export default defineConfig({
 		"src/analytics.ts",
 		"src/events/client.ts",
 		"src/events/types.ts",
+		"src/events/server.ts",
 	],
 });

@@ -55,6 +55,14 @@
 			},
 			"types": "./src/events/types.ts"
 		},
+		"./events/server": {
+			"bun": "./src/events/server.ts",
+			"import": {
+				"default": "./dist/events/server.js",
+				"types": "./dist/events/server.d.ts"
+			},
+			"types": "./src/events/server.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"files": [

@@ -5,6 +5,7 @@ export interface ContenttaSdkConfig {
 	enableAnalytics?: boolean;
 	batchSize?: number;
 	flushInterval?: number;
+	timeout?: number;
 	debug?: boolean;
 }
 
