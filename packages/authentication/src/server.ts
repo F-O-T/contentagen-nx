@@ -1,4 +1,5 @@
 import { stripe as stripePlugin } from "@better-auth/stripe";
+import { oauthProvider } from "@better-auth/oauth-provider";
 import type { DatabaseInstance } from "@packages/database/client";
 import {
    createDefaultOrganization,
@@ -22,6 +23,7 @@ import {
    admin,
    apiKey,
    emailOTP,
+   jwt,
    lastLoginMethod,
    magicLink,
    organization,
@@ -343,6 +345,38 @@ export function createAuth(config: SimplifiedAuthConfig) {
               }),
            ]
          : []),
+
+      // JWT + OAuth 2.1 Provider (enables MCP authentication)
+      jwt(),
+      oauthProvider({
+         loginPage: "/sign-in",
+         consentPage: "/oauth/consent",
+         enableMcp: true,
+         allowDynamicClientRegistration: true,
+         allowUnauthenticatedClientRegistration: true,
+         scopes: [
+            "openid",
+            "profile",
+            "email",
+            "offline_access",
+            "content:read",
+            "content:write",
+            "content:publish",
+            "writer:read",
+         ],
+         accessTokenExpiresIn: 3600, // 1 hour
+         refreshTokenExpiresIn: 2592000, // 30 days
+         postLogin: {
+            page: "/oauth/select-organization",
+            shouldRedirect: async ({ session, headers }) => {
+               return false;
+            },
+            consentReferenceId: ({ session }) => {
+               const orgId = session?.activeOrganizationId;
+               return typeof orgId === "string" ? orgId : undefined;
+            },
+         },
+      }),
 
       // Must be last - enables proper cookie handling for TanStack Start
       tanstackStartCookies(),
