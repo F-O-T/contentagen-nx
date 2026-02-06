@@ -1,5 +1,5 @@
 import { ORPCError } from "@orpc/server";
-import { getRedisConnection } from "@packages/authentication/redis-connection";
+import { getRedisConnection } from "@packages/redis/connection";
 import type { DatabaseInstance } from "@packages/database/client";
 import {
    archiveContent,

@@ -8,7 +8,8 @@
       "@packages/stripe": "workspace:*",
       "@packages/transactional": "workspace:*",
       "better-auth": "catalog:auth",
-      "ioredis": "catalog:workers"
+      "ioredis": "catalog:workers",
+      "@packages/redis": "workspace:*"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",

@@ -40,6 +40,7 @@
     "@packages/authentication": "workspace:*",
     "@packages/database": "workspace:*",
     "@packages/events": "workspace:*",
+    "@packages/redis": "workspace:*",
     "@packages/stripe": "workspace:*",
     "@packages/ui": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
