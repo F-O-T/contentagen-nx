@@ -5,6 +5,7 @@ import { auth } from "./integrations/auth";
 import { db } from "./integrations/database";
 import { minioClient } from "./integrations/minio";
 import { posthog } from "./integrations/posthog";
+import { sdkEventRoutes } from "./routes/sdk-events";
 import { sdkRoutes } from "./routes/sdk";
 
 const app = new Elysia({
@@ -21,13 +22,14 @@ const app = new Elysia({
    }))
    .use(
       cors({
-         allowedHeaders: ["Content-Type", "sdk-api-key", "X-Locale"],
+         allowedHeaders: ["Content-Type", "sdk-api-key", "X-API-Key", "X-Locale"],
          credentials: true,
-         methods: ["GET", "OPTIONS"],
+         methods: ["GET", "POST", "OPTIONS"],
          origin: true,
       }),
    )
    .use(sdkRoutes)
+   .use(sdkEventRoutes)
    .get("/health", () => ({
       status: "healthy",
       timestamp: new Date().toISOString(),

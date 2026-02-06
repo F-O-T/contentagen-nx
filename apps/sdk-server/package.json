@@ -5,6 +5,7 @@
       "@packages/authentication": "workspace:*",
       "@packages/database": "workspace:*",
       "@packages/environment": "workspace:*",
+      "@packages/events": "workspace:*",
       "@packages/files": "workspace:*",
       "@packages/posthog": "workspace:*",
       "@packages/stripe": "workspace:*",
