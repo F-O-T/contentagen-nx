@@ -159,24 +159,29 @@ const trustBadges = [
 // FAQ data
 const faqItems = [
    {
-      question: "Posso mudar de plano a qualquer momento?",
+      question: "Todos os recursos estão disponíveis em todos os planos?",
       answer:
-         "Sim! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. Ao fazer upgrade, você terá acesso imediato aos novos recursos. No downgrade, as mudanças entram em vigor no próximo ciclo de cobrança.",
+         "Sim! Todos os recursos estão disponíveis em todos os planos, incluindo o Free. A diferença entre os planos é a quantidade de créditos que você recebe por mês. Quando seus créditos acabam, você pode fazer upgrade para continuar usando.",
    },
    {
-      question: "O que acontece quando o período de teste termina?",
+      question: "O que são créditos?",
       answer:
-         "Quando o período de teste termina, você será automaticamente cobrado pelo plano escolhido. Não se preocupe, enviaremos um lembrete antes do término do teste. Você pode cancelar a qualquer momento durante o período de teste sem nenhuma cobrança.",
+         "Créditos são usados para medir o uso da plataforma. Cada ação (como usar a IA, publicar conteúdo, ou análises de SEO) consome uma pequena quantidade de créditos. Os créditos são renovados todo mês automaticamente.",
+   },
+   {
+      question: "O que acontece quando meus créditos acabam?",
+      answer:
+         "Quando seus créditos de IA ou plataforma se esgotam, as ações que consomem créditos ficam bloqueadas até o próximo mês. Você pode fazer upgrade do seu plano a qualquer momento para desbloquear imediatamente.",
+   },
+   {
+      question: "Posso mudar de plano a qualquer momento?",
+      answer:
+         "Sim! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. Ao fazer upgrade, seus novos créditos ficam disponíveis imediatamente. No downgrade, as mudanças entram em vigor no próximo ciclo de cobrança.",
    },
    {
       question: "Como funciona o pagamento?",
       answer:
          "Aceitamos os principais cartões de crédito (Visa, Mastercard, American Express) e processamos todos os pagamentos de forma segura através do Stripe. Sua assinatura será renovada automaticamente no final de cada período.",
-   },
-   {
-      question: "Posso cancelar a qualquer momento?",
-      answer:
-         "Absolutamente! Não há contratos de longo prazo ou taxas de cancelamento. Você pode cancelar sua assinatura a qualquer momento e continuará tendo acesso até o final do período já pago.",
    },
 ];
 
@@ -234,8 +239,8 @@ function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.6, delay: 0.2 }}
          >
-            Todos os membros da sua organização terão acesso ao mesmo plano.
-            Comece gratuitamente e faça upgrade quando precisar.
+            Todos os recursos disponíveis em todos os planos. Escolha o plano
+            com a quantidade de créditos ideal para você.
          </motion.p>
       </motion.div>
    );
