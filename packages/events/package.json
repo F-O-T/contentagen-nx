@@ -1,8 +1,11 @@
 {
    "dependencies": {
+      "@f-o-t/money": "1.2.5",
       "@packages/database": "workspace:*",
       "@packages/posthog": "workspace:*",
+      "@packages/stripe": "workspace:*",
       "drizzle-orm": "catalog:database",
+      "ioredis": "catalog:workers",
       "zod": "catalog:validation"
    },
    "devDependencies": {
@@ -10,10 +13,6 @@
       "typescript": "catalog:development"
    },
    "exports": {
-      ".": {
-         "default": "./src/index.ts",
-         "types": "./dist/src/index.d.ts"
-      },
       "./catalog": {
          "default": "./src/catalog.ts",
          "types": "./dist/src/catalog.d.ts"
@@ -22,17 +21,45 @@
          "default": "./src/emit.ts",
          "types": "./dist/src/emit.d.ts"
       },
-      "./refresh-views": {
-         "default": "./src/refresh-views.ts",
-         "types": "./dist/src/refresh-views.d.ts"
-      },
       "./utils": {
          "default": "./src/utils.ts",
          "types": "./dist/src/utils.d.ts"
       },
-      "./types/*": {
-         "default": "./src/types/*.ts",
-         "types": "./dist/src/types/*.d.ts"
+      "./refresh-views": {
+         "default": "./src/refresh-views.ts",
+         "types": "./dist/src/refresh-views.d.ts"
+      },
+      "./content": {
+         "default": "./src/content.ts",
+         "types": "./dist/src/content.d.ts"
+      },
+      "./ai": {
+         "default": "./src/ai.ts",
+         "types": "./dist/src/ai.d.ts"
+      },
+      "./forms": {
+         "default": "./src/forms.ts",
+         "types": "./dist/src/forms.d.ts"
+      },
+      "./seo": {
+         "default": "./src/seo.ts",
+         "types": "./dist/src/seo.d.ts"
+      },
+      "./experiments": {
+         "default": "./src/experiments.ts",
+         "types": "./dist/src/experiments.d.ts"
+      },
+      "./pricing": {
+         "default": "./src/pricing.ts",
+         "types": "./dist/src/pricing.d.ts"
+      },
+      "./credits": {
+         "default": "./src/credits.ts",
+         "types": "./dist/src/credits.d.ts"
+      },
+      "./reconcile": {
+         "default": "./src/reconcile.ts",
+         "types": "./dist/src/reconcile.d.ts"
       }
    },
    "files": [
