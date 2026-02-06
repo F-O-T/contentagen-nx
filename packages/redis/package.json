@@ -1,0 +1,26 @@
+{
+   "name": "@packages/redis",
+   "version": "0.1.0",
+   "type": "module",
+   "private": true,
+   "license": "Apache-2.0",
+   "exports": {
+      "./connection": {
+         "default": "./src/connection.ts",
+         "types": "./dist/src/connection.d.ts"
+      }
+   },
+   "files": ["dist"],
+   "scripts": {
+      "build": "tsc --build",
+      "check": "biome check --write ./src",
+      "typecheck": "tsc"
+   },
+   "dependencies": {
+      "ioredis": "catalog:workers"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "typescript": "catalog:development"
+   }
+}
