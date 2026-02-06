@@ -1,5 +1,8 @@
 {
    "dependencies": {
+      "@packages/database": "workspace:*",
+      "@packages/posthog": "workspace:*",
+      "drizzle-orm": "catalog:database",
       "zod": "catalog:validation"
    },
    "devDependencies": {
@@ -14,6 +17,14 @@
       "./catalog": {
          "default": "./src/catalog.ts",
          "types": "./dist/src/catalog.d.ts"
+      },
+      "./emit": {
+         "default": "./src/emit.ts",
+         "types": "./dist/src/emit.d.ts"
+      },
+      "./utils": {
+         "default": "./src/utils.ts",
+         "types": "./dist/src/utils.d.ts"
       },
       "./types/*": {
          "default": "./src/types/*.ts",

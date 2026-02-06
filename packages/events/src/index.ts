@@ -7,6 +7,9 @@ export {
    getEventCategory,
    isValidEventName,
 } from "./catalog";
+// Event emission infrastructure
+export type { EmitEventBatchParams, EmitEventParams } from "./emit";
+export { emitEvent, emitEventBatch } from "./emit";
 export type {
    AiAgentActionEvent,
    AiChatMessageEvent,
@@ -55,3 +58,6 @@ export {
 export type { SeoAnalyzedEvent, SeoIndexedEvent } from "./types/seo";
 // SEO event schemas and types
 export { seoAnalyzedEventSchema, seoIndexedEventSchema } from "./types/seo";
+
+// Utilities
+export { getEventMetadata, getEventPrice } from "./utils";

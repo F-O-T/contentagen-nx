@@ -55,7 +55,6 @@ export const EVENTS = {
    // Experiment events
    "experiment.started": "experiment.started",
    "experiment.conversion": "experiment.conversion",
-
 } as const;
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS];

@@ -233,6 +233,9 @@
       "name": "@packages/events",
       "version": "0.1.0",
       "dependencies": {
+        "@packages/database": "workspace:*",
+        "@packages/posthog": "workspace:*",
+        "drizzle-orm": "catalog:database",
         "zod": "catalog:validation",
       },
       "devDependencies": {
