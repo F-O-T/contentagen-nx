@@ -1,4 +1,6 @@
 import { ORPCError } from "@orpc/server";
+import { getRedisConnection } from "@packages/authentication/redis-connection";
+import type { DatabaseInstance } from "@packages/database/client";
 import {
    archiveContent,
    countContentsByOrganization,
@@ -9,9 +11,81 @@ import {
    publishContent,
    updateContent,
 } from "@packages/database/repositories/content-repository";
+import { subscription } from "@packages/database/schemas/auth";
 import { ContentMetaSchema } from "@packages/database/schemas/content";
+import {
+   CONTENT_EVENTS,
+   emitContentCreated,
+   emitContentDeleted,
+   emitContentPublished,
+   emitContentUpdated,
+} from "@packages/events/content";
+import { checkCreditBudget, incrementCreditUsage } from "@packages/events/credits";
+import { getEventPrice } from "@packages/events/utils";
+import { PlanName } from "@packages/stripe/constants";
+import { and, eq, or } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
+
+// =============================================================================
+// Helpers
+// =============================================================================
+
+const VALID_PLAN_NAMES = new Set<string>(Object.values(PlanName));
+
+async function resolveOrganizationPlan(
+   db: DatabaseInstance,
+   organizationId: string,
+): Promise<PlanName> {
+   const [sub] = await db
+      .select({ plan: subscription.plan })
+      .from(subscription)
+      .where(
+         and(
+            eq(subscription.referenceId, organizationId),
+            or(
+               eq(subscription.status, "active"),
+               eq(subscription.status, "trialing"),
+            ),
+         ),
+      )
+      .limit(1);
+
+   if (!sub || !VALID_PLAN_NAMES.has(sub.plan)) {
+      return PlanName.FREE;
+   }
+
+   return sub.plan as PlanName;
+}
+
+async function enforcePlatformCreditBudget(
+   db: DatabaseInstance,
+   organizationId: string,
+): Promise<void> {
+   const redis = getRedisConnection();
+   if (!redis) return;
+
+   const plan = await resolveOrganizationPlan(db, organizationId);
+   try {
+      await checkCreditBudget({ redis, organizationId, plan, pool: "platform" });
+   } catch (error) {
+      throw new ORPCError("FORBIDDEN", {
+         message: error instanceof Error ? error.message : "Crédito esgotado.",
+      });
+   }
+}
+
+async function trackPlatformCreditUsage(
+   db: DatabaseInstance,
+   eventName: string,
+   organizationId: string,
+): Promise<void> {
+   const redis = getRedisConnection();
+   if (!redis) return;
+
+   const price = await getEventPrice(db, eventName);
+   await incrementCreditUsage(redis, organizationId, "platform", Number(price.amount));
+}
 
 // =============================================================================
 // Validation Schemas
@@ -57,7 +131,7 @@ export const getById = protectedProcedure
 export const create = protectedProcedure
    .input(createContentSchema)
    .handler(async ({ context, input }) => {
-      const { organizationId, db, session } = context;
+      const { organizationId, db, session, posthog, userId } = context;
 
       // Get member ID from session
       const memberId = session.session.activeOrganizationId
@@ -91,6 +165,15 @@ export const create = protectedProcedure
          createdByMemberId: members[0].id,
       });
 
+      try {
+         await emitContentCreated(
+            { db, posthog, organizationId, userId },
+            { contentId: result.id, title: input.meta.title ?? "" },
+         );
+      } catch {
+         // Event emission must not break the main flow
+      }
+
       return result;
    });
 
@@ -105,7 +188,7 @@ export const update = protectedProcedure
       }),
    )
    .handler(async ({ context, input }) => {
-      const { organizationId, db } = context;
+      const { organizationId, db, posthog, userId } = context;
 
       // Debug: Log update data
       console.log("[ORPC content.update] Received update:", {
@@ -122,6 +205,8 @@ export const update = protectedProcedure
             message: "Conteudo nao encontrado.",
          });
       }
+
+      await enforcePlatformCreditBudget(db, organizationId);
 
       // Build update data, merging partial meta with existing
       const updateData: Parameters<typeof updateContent>[2] = {};
@@ -154,6 +239,28 @@ export const update = protectedProcedure
          bodyLength: result.body?.length ?? 0,
       });
 
+      try {
+         const changedFields: string[] = [];
+         if (input.data.body !== undefined) {
+            changedFields.push("body");
+         }
+         if (input.data.meta) {
+            changedFields.push(...Object.keys(input.data.meta));
+         }
+
+         await emitContentUpdated(
+            { db, posthog, organizationId, userId },
+            { contentId: input.id, changedFields },
+         );
+         await trackPlatformCreditUsage(
+            db,
+            CONTENT_EVENTS["content.page.updated"],
+            organizationId,
+         );
+      } catch {
+         // Event emission must not break the main flow
+      }
+
       return result;
    });
 
@@ -163,7 +270,7 @@ export const update = protectedProcedure
 export const remove = protectedProcedure
    .input(z.object({ id: z.string().uuid() }))
    .handler(async ({ context, input }) => {
-      const { organizationId, db } = context;
+      const { organizationId, db, posthog, userId } = context;
 
       // Verify ownership
       const existing = await getContentById(db, input.id);
@@ -175,6 +282,15 @@ export const remove = protectedProcedure
 
       const result = await deleteContent(db, input.id);
 
+      try {
+         await emitContentDeleted(
+            { db, posthog, organizationId, userId },
+            { contentId: input.id },
+         );
+      } catch {
+         // Event emission must not break the main flow
+      }
+
       return result;
    });
 
@@ -184,7 +300,7 @@ export const remove = protectedProcedure
 export const publish = protectedProcedure
    .input(z.object({ id: z.string().uuid() }))
    .handler(async ({ context, input }) => {
-      const { organizationId, db } = context;
+      const { organizationId, db, posthog, userId } = context;
 
       // Verify ownership
       const existing = await getContentById(db, input.id);
@@ -194,7 +310,31 @@ export const publish = protectedProcedure
          });
       }
 
+      await enforcePlatformCreditBudget(db, organizationId);
+
       const result = await publishContent(db, input.id);
+
+      try {
+         const wordCount =
+            existing.body?.split(/\s+/).filter(Boolean).length ?? 0;
+
+         await emitContentPublished(
+            { db, posthog, organizationId, userId },
+            {
+               contentId: input.id,
+               title: existing.meta?.title ?? "",
+               slug: existing.meta?.slug ?? "",
+               wordCount,
+            },
+         );
+         await trackPlatformCreditUsage(
+            db,
+            CONTENT_EVENTS["content.page.published"],
+            organizationId,
+         );
+      } catch {
+         // Event emission must not break the main flow
+      }
 
       return result;
    });
