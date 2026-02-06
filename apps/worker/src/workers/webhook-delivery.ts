@@ -1,5 +1,6 @@
 import { Worker } from "bullmq";
 import type { ConnectionOptions } from "bullmq";
+import type { DatabaseInstance } from "@packages/database/client";
 import {
 	WEBHOOK_DELIVERY_QUEUE,
 	type WebhookDeliveryJobData,
@@ -12,11 +13,12 @@ import { deliverWebhook } from "../jobs/deliver-webhook";
  */
 export function startWebhookDeliveryWorker(
 	connection: ConnectionOptions,
+	db: DatabaseInstance,
 ): Worker<WebhookDeliveryJobData> {
 	const worker = new Worker<WebhookDeliveryJobData>(
 		WEBHOOK_DELIVERY_QUEUE,
 		async (job) => {
-			await deliverWebhook(job.data);
+			await deliverWebhook(db, job.data);
 		},
 		{
 			connection,
