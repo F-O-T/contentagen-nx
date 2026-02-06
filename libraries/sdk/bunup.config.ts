@@ -11,5 +11,6 @@ export default defineConfig({
 		"src/events/client.ts",
 		"src/events/types.ts",
 		"src/events/server.ts",
+		"src/forms.ts",
 	],
 });

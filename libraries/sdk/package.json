@@ -63,6 +63,14 @@
 			},
 			"types": "./src/events/server.ts"
 		},
+		"./forms": {
+			"bun": "./src/forms.ts",
+			"import": {
+				"default": "./dist/forms.js",
+				"types": "./dist/forms.d.ts"
+			},
+			"types": "./src/forms.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"files": [
