@@ -9,6 +9,7 @@ import * as organizationRouter from "./organization";
 import * as sdkUsageRouter from "./sdk-usage";
 import * as sessionRouter from "./session";
 import * as usageRouter from "./usage";
+import * as webhooksRouter from "./webhooks";
 
 export default {
   account: accountRouter,
@@ -22,4 +23,5 @@ export default {
   session: sessionRouter,
   organization: organizationRouter,
   usage: usageRouter,
+  webhooks: webhooksRouter,
 };
