@@ -1,5 +1,6 @@
 {
    "dependencies": {
+      "@better-auth/oauth-provider": "catalog:auth",
       "@better-auth/stripe": "catalog:auth",
       "@packages/database": "workspace:*",
       "react": "catalog:react",

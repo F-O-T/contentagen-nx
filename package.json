@@ -89,7 +89,8 @@
          },
          "auth": {
             "better-auth": "1.4.12",
-            "@better-auth/stripe": "1.4.12"
+            "@better-auth/stripe": "1.4.12",
+            "@better-auth/oauth-provider": "1.4.12"
          },
          "database": {
             "@types/pg": "^8.15.4",

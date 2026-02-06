@@ -10,7 +10,9 @@
       "@packages/posthog": "workspace:*",
       "@packages/stripe": "workspace:*",
       "@packages/transactional": "workspace:*",
-      "elysia": "catalog:server"
+      "@modelcontextprotocol/sdk": "^1.12.1",
+      "elysia": "catalog:server",
+      "mcp-handler": "^1.0.7"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
