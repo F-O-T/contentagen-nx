@@ -44,6 +44,7 @@
       "dev:mastra": "nx run-many -t dev --parallel=1 -p agents",
       "dev:sdk-blog": "nx run-many -t dev --parallel=2 -p blog server",
       "dev:server": "nx run-many -t dev --parallel=1 -p server ",
+      "dev:worker": "nx run worker:dev",
       "doctor": "bun run scripts/doctor.ts",
       "format": "biome check --write .",
       "prepare": "husky",
