@@ -8,3 +8,6 @@ export * from "./schemas/instruction-memory";
 export * from "./schemas/related-content";
 export * from "./schemas/resource-permissions";
 export * from "./schemas/writer";
+// Events
+export * from "./schemas/events";
+export * from "./schemas/event-catalog";
