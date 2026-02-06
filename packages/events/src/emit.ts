@@ -1,19 +1,26 @@
 import type { DatabaseInstance } from "@packages/database/client";
+import {
+	createWebhookDelivery,
+	findMatchingWebhooks,
+} from "@packages/database/repositories/webhook-repository";
 import { events } from "@packages/database/schemas/events";
 import type { PostHog } from "@packages/posthog/server";
+import {
+	type WebhookDeliveryJobData,
+	createWebhookDeliveryQueue,
+} from "@packages/queue/webhook-delivery";
+import { createQueueConnection } from "@packages/queue/connection";
+import { toMajorUnitsString } from "@f-o-t/money";
+import type { Queue } from "bullmq";
 
-import type { EventCategory, EventName } from "./catalog";
+import type { EventCategory } from "./catalog";
 import { getEventPrice } from "./utils";
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 
 export interface EmitEventParams {
    db: DatabaseInstance;
    posthog?: PostHog;
    organizationId: string;
-   eventName: EventName;
+   eventName: string;
    eventCategory: EventCategory;
    properties: Record<string, unknown>;
    userId?: string;
@@ -28,6 +35,40 @@ export interface EmitEventBatchParams {
 }
 
 // ---------------------------------------------------------------------------
+// Webhook Queue (lazy-initialized)
+// ---------------------------------------------------------------------------
+
+let webhookQueue: Queue<WebhookDeliveryJobData> | null = null;
+
+/**
+ * Initialize the webhook delivery queue.
+ * Must be called once at app startup (web or worker).
+ */
+export function initializeWebhookQueue(redisUrl: string): void {
+	if (webhookQueue) return;
+	const connection = createQueueConnection(redisUrl);
+	webhookQueue = createWebhookDeliveryQueue(connection);
+}
+
+/**
+ * Build the webhook payload from a stored event.
+ */
+function buildWebhookPayload(
+	eventId: string,
+	eventName: string,
+	organizationId: string,
+	properties: Record<string, unknown>,
+): Record<string, unknown> {
+	return {
+		id: eventId,
+		event: eventName,
+		data: properties,
+		created_at: new Date().toISOString(),
+		organization_id: organizationId,
+	};
+}
+
+// ---------------------------------------------------------------------------
 // Single Event Emission
 // ---------------------------------------------------------------------------
 
@@ -37,6 +78,7 @@ export interface EmitEventBatchParams {
  * 1. Looks up the event price from the catalog.
  * 2. Inserts a row into the `events` table (billing source of truth).
  * 3. Sends a capture call to PostHog (analytics, optional).
+ * 4. Triggers matching webhook deliveries via BullMQ (if initialized).
  *
  * **Non-throwing:** errors are logged but never propagated so that event
  * tracking cannot break the caller's main flow.
@@ -56,20 +98,20 @@ export async function emitEvent(params: EmitEventParams): Promise<void> {
 
    try {
       // Look up pricing from the catalog
-      const pricePerEvent = await getEventPrice(db, eventName);
+      const price = await getEventPrice(db, eventName);
 
       // 1. Store in PostgreSQL (billing source of truth)
-      await db.insert(events).values({
+      const [storedEvent] = await db.insert(events).values({
          organizationId,
          eventName,
          eventCategory,
          properties,
          userId,
          isBillable: true,
-         pricePerEvent,
+         pricePerEvent: toMajorUnitsString(price),
          ipAddress,
          userAgent,
-      });
+      }).returning();
 
       // 2. Send to PostHog for analytics (optional)
       if (posthog) {
@@ -82,6 +124,52 @@ export async function emitEvent(params: EmitEventParams): Promise<void> {
             },
             groups: { organization: organizationId },
          });
+      }
+
+      // 3. Trigger webhooks (failure-tolerant)
+      if (webhookQueue && storedEvent) {
+         try {
+            const matchingWebhooks = await findMatchingWebhooks(
+               db,
+               organizationId,
+               eventName,
+            );
+
+            for (const webhook of matchingWebhooks) {
+               const payload = buildWebhookPayload(
+                  storedEvent.id,
+                  eventName,
+                  organizationId,
+                  properties,
+               );
+
+               const delivery = await createWebhookDelivery(db, {
+                  webhookEndpointId: webhook.id,
+                  eventId: storedEvent.id,
+                  url: webhook.url,
+                  eventName,
+                  payload,
+                  status: "pending",
+                  attemptNumber: 1,
+                  maxAttempts: 5,
+               });
+
+               if (!delivery) continue;
+
+               await webhookQueue.add("deliver", {
+                  deliveryId: delivery.id,
+                  webhookEndpointId: webhook.id,
+                  eventId: storedEvent.id,
+                  url: webhook.url,
+                  payload,
+                  signingSecret: webhook.signingSecret,
+                  attemptNumber: 1,
+               });
+            }
+         } catch (error) {
+            console.error("[Events] Failed to trigger webhooks:", error);
+            // Don't throw — webhooks should not block events
+         }
       }
    } catch (error) {
       console.error(`[Events] Failed to emit ${eventName}:`, error);
@@ -111,12 +199,12 @@ export async function emitEventBatch(
    try {
       // Look up prices for all unique event names
       const uniqueNames = [...new Set(eventList.map((e) => e.eventName))];
-      const priceMap = new Map<EventName, string>();
+      const priceMap = new Map<string, string>();
 
       await Promise.all(
          uniqueNames.map(async (name) => {
             const price = await getEventPrice(db, name);
-            priceMap.set(name, price);
+            priceMap.set(name, toMajorUnitsString(price));
          }),
       );
 

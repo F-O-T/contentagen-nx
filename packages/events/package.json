@@ -3,7 +3,9 @@
       "@f-o-t/money": "1.2.5",
       "@packages/database": "workspace:*",
       "@packages/posthog": "workspace:*",
+      "@packages/queue": "workspace:*",
       "@packages/stripe": "workspace:*",
+      "bullmq": "catalog:workers",
       "drizzle-orm": "catalog:database",
       "ioredis": "catalog:workers",
       "zod": "catalog:validation"
