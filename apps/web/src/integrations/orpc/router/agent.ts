@@ -1,21 +1,23 @@
 import type { RequestContext } from "@mastra/core/request-context";
-import { ORPCError } from "@orpc/server";
 import {
    type CustomRequestContext,
    createRequestContext,
    mastra,
 } from "@packages/agents";
+import { getRedisConnection } from "@packages/authentication/redis-connection";
+import type { DatabaseInstance } from "@packages/database/client";
 import {
    addChatMessage,
    getOrCreateChatSession,
 } from "@packages/database/repositories/chat-repository";
 import type { StoredToolCall } from "@packages/database/schemas/chat";
+import { subscription } from "@packages/database/schemas/auth";
+import { AI_EVENTS, emitAiChatMessage, emitAiCompletion } from "@packages/events/ai";
+import { checkCreditBudget, incrementCreditUsage } from "@packages/events/credits";
+import { getEventPrice } from "@packages/events/utils";
 import { PlanName } from "@packages/stripe/constants";
-import {
-   FEATURE_DISPLAY_NAMES,
-   Feature,
-   PLAN_FEATURES,
-} from "@packages/stripe/features";
+import { ORPCError } from "@orpc/server";
+import { and, eq, or } from "drizzle-orm";
 import { z } from "zod";
 import {
    type ChatChunk,
@@ -27,55 +29,63 @@ import {
 import { protectedProcedure } from "../server";
 
 // =============================================================================
-// Feature Gating Helper
+// Helpers
 // =============================================================================
 
-/**
- * Checks if the organization's subscription plan has access to a feature.
- * Throws ORPCError with FORBIDDEN if feature is not available.
- */
-async function requireFeature(
-   context: {
-      auth: {
-         api: {
-            listActiveSubscriptions: (args: {
-               headers: Headers;
-               query: { referenceId: string };
-            }) => Promise<Array<{ status: string; plan?: string }>>;
-         };
-      };
-      organizationId: string;
-      headers: Headers;
-   },
-   feature: Feature,
-): Promise<void> {
-   const { auth, organizationId, headers } = context;
-   let plan = PlanName.FREE;
+const VALID_PLAN_NAMES = new Set<string>(Object.values(PlanName));
 
-   if (organizationId) {
-      try {
-         const subscriptions = await auth.api.listActiveSubscriptions({
-            headers,
-            query: { referenceId: organizationId },
-         });
-         const active = subscriptions.find(
-            (s) => s.status === "active" || s.status === "trialing",
-         );
-         if (active?.plan) {
-            const planName = active.plan.toLowerCase();
-            if (planName === PlanName.LITE) plan = PlanName.LITE;
-            else if (planName === PlanName.PRO) plan = PlanName.PRO;
-         }
-      } catch {
-         // If subscription check fails, default to FREE
-      }
+async function resolveOrganizationPlan(
+   db: DatabaseInstance,
+   organizationId: string,
+): Promise<PlanName> {
+   const [sub] = await db
+      .select({ plan: subscription.plan })
+      .from(subscription)
+      .where(
+         and(
+            eq(subscription.referenceId, organizationId),
+            or(
+               eq(subscription.status, "active"),
+               eq(subscription.status, "trialing"),
+            ),
+         ),
+      )
+      .limit(1);
+
+   if (!sub || !VALID_PLAN_NAMES.has(sub.plan)) {
+      return PlanName.FREE;
    }
 
-   if (!(PLAN_FEATURES[plan]?.includes(feature) ?? false)) {
+   return sub.plan as PlanName;
+}
+
+async function enforceCreditBudget(
+   db: DatabaseInstance,
+   organizationId: string,
+): Promise<void> {
+   const redis = getRedisConnection();
+   if (!redis) return;
+
+   const plan = await resolveOrganizationPlan(db, organizationId);
+   try {
+      await checkCreditBudget({ redis, organizationId, plan, pool: "ai" });
+   } catch (error) {
       throw new ORPCError("FORBIDDEN", {
-         message: `A funcionalidade "${FEATURE_DISPLAY_NAMES[feature]}" não está disponível no seu plano atual. Faça upgrade para acessar.`,
+         message: error instanceof Error ? error.message : "Crédito esgotado.",
       });
    }
+}
+
+async function trackAiCreditUsage(
+   db: DatabaseInstance,
+   eventName: string,
+   organizationId: string,
+): Promise<void> {
+   const redis = getRedisConnection();
+   if (!redis) return;
+
+   const price = await getEventPrice(db, eventName);
+   await incrementCreditUsage(redis, organizationId, "ai", Number(price.amount));
 }
 
 // =============================================================================
@@ -89,10 +99,9 @@ async function requireFeature(
 export const fimStream = protectedProcedure
    .input(FIMRequestSchema)
    .handler(async function* ({ context, input }) {
-      // Check feature access
-      await requireFeature(context, Feature.FIM);
+      const { userId, db, organizationId, posthog } = context;
 
-      const { userId } = context;
+      await enforceCreditBudget(db, organizationId);
 
       // Get the FIM agent from Mastra
       const fimAgent = mastra.getAgent("fimAgent");
@@ -128,6 +137,25 @@ export const fimStream = protectedProcedure
 
          const latencyMs = Date.now() - startTime;
 
+         // Emit event and increment credit usage (failure-tolerant)
+         try {
+            await emitAiCompletion(
+               { db, posthog, organizationId, userId },
+               {
+                  model: "fimAgent",
+                  provider: "openrouter",
+                  promptTokens: 0,
+                  completionTokens: 0,
+                  totalTokens: 0,
+                  latencyMs,
+                  streamed: true,
+               },
+            );
+            await trackAiCreditUsage(db, AI_EVENTS["ai.completion"], organizationId);
+         } catch {
+            // Event tracking must not break the streaming flow
+         }
+
          // Final chunk with metadata
          yield {
             text: "",
@@ -157,10 +185,9 @@ export const fimStream = protectedProcedure
 export const editStream = protectedProcedure
    .input(EditRequestSchema)
    .handler(async function* ({ context, input }) {
-      // Check feature access
-      await requireFeature(context, Feature.QUICK_EDIT);
+      const { userId, db, organizationId, posthog } = context;
 
-      const { userId } = context;
+      await enforceCreditBudget(db, organizationId);
 
       // Get the inline edit agent from Mastra
       const editAgent = mastra.getAgent("inlineEditAgent");
@@ -172,6 +199,8 @@ export const editStream = protectedProcedure
 
       // Build the prompt from edit request
       const prompt = buildEditPrompt(input);
+
+      const startTime = Date.now();
 
       try {
          // Stream the agent response
@@ -190,6 +219,27 @@ export const editStream = protectedProcedure
                text: chunk,
                done: false,
             } satisfies EditChunk;
+         }
+
+         const latencyMs = Date.now() - startTime;
+
+         // Emit event and increment credit usage (failure-tolerant)
+         try {
+            await emitAiCompletion(
+               { db, posthog, organizationId, userId },
+               {
+                  model: "inlineEditAgent",
+                  provider: "openrouter",
+                  promptTokens: 0,
+                  completionTokens: 0,
+                  totalTokens: 0,
+                  latencyMs,
+                  streamed: true,
+               },
+            );
+            await trackAiCreditUsage(db, AI_EVENTS["ai.completion"], organizationId);
+         } catch {
+            // Event tracking must not break the streaming flow
          }
 
          // Final chunk
@@ -221,10 +271,9 @@ export const chatStream = protectedProcedure
       }),
    )
    .handler(async function* ({ context, input }) {
-      // Check feature access
-      await requireFeature(context, Feature.CHAT);
+      const { userId, db, organizationId, posthog } = context;
 
-      const { userId, db, organizationId } = context;
+      await enforceCreditBudget(db, organizationId);
 
       // Get or create chat session
       let session: Awaited<ReturnType<typeof getOrCreateChatSession>> | null =
@@ -256,6 +305,8 @@ export const chatStream = protectedProcedure
       // Collect assistant message data during streaming
       let assistantText = "";
       const toolCalls: StoredToolCall[] = [];
+
+      const startTime = Date.now();
 
       try {
          // Stream the agent response
@@ -375,6 +426,45 @@ export const chatStream = protectedProcedure
                undefined, // selectionContext
                toolCalls.length > 0 ? toolCalls : undefined,
             );
+         }
+
+         const latencyMs = Date.now() - startTime;
+
+         // Emit event and increment credit usage (failure-tolerant)
+         try {
+            if (session) {
+               await emitAiChatMessage(
+                  { db, posthog, organizationId, userId },
+                  {
+                     chatId: session.id,
+                     contentId: input.contentId,
+                     model: "writerAgent",
+                     provider: "openrouter",
+                     role: "assistant",
+                     promptTokens: 0,
+                     completionTokens: 0,
+                     totalTokens: 0,
+                     latencyMs,
+                  },
+               );
+               await trackAiCreditUsage(db, AI_EVENTS["ai.chat_message"], organizationId);
+            } else {
+               await emitAiCompletion(
+                  { db, posthog, organizationId, userId },
+                  {
+                     model: "writerAgent",
+                     provider: "openrouter",
+                     promptTokens: 0,
+                     completionTokens: 0,
+                     totalTokens: 0,
+                     latencyMs,
+                     streamed: true,
+                  },
+               );
+               await trackAiCreditUsage(db, AI_EVENTS["ai.completion"], organizationId);
+            }
+         } catch {
+            // Event tracking must not break the streaming flow
          }
 
          // Final chunk
