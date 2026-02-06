@@ -59,5 +59,8 @@ export type { SeoAnalyzedEvent, SeoIndexedEvent } from "./types/seo";
 // SEO event schemas and types
 export { seoAnalyzedEventSchema, seoIndexedEventSchema } from "./types/seo";
 
+// Materialized view management
+export { createUsageViews, refreshUsageViews } from "./refresh-views";
+
 // Utilities
 export { getEventMetadata, getEventPrice } from "./utils";

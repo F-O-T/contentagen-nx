@@ -22,6 +22,10 @@
          "default": "./src/emit.ts",
          "types": "./dist/src/emit.d.ts"
       },
+      "./refresh-views": {
+         "default": "./src/refresh-views.ts",
+         "types": "./dist/src/refresh-views.d.ts"
+      },
       "./utils": {
          "default": "./src/utils.ts",
          "types": "./dist/src/utils.d.ts"
