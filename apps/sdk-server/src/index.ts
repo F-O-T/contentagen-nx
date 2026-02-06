@@ -6,6 +6,7 @@ import { db } from "./integrations/database";
 import { minioClient } from "./integrations/minio";
 import { posthog } from "./integrations/posthog";
 import { sdkEventRoutes } from "./routes/sdk-events";
+import { sdkFormRoutes } from "./routes/sdk-forms";
 import { sdkRoutes } from "./routes/sdk";
 
 const app = new Elysia({
@@ -30,6 +31,7 @@ const app = new Elysia({
    )
    .use(sdkRoutes)
    .use(sdkEventRoutes)
+   .use(sdkFormRoutes)
    .get("/health", () => ({
       status: "healthy",
       timestamp: new Date().toISOString(),
