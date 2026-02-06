@@ -10,6 +10,11 @@ export const env = createEnv({
 
       // Better Auth (Required core, optional providers)
       BETTER_AUTH_SECRET: z.string().min(32),
+      BETTER_AUTH_URL: z
+         .string()
+         .url()
+         .optional()
+         .default("http://localhost:3000"),
       BETTER_AUTH_TRUSTED_ORIGINS: z.string(),
       BETTER_AUTH_GOOGLE_CLIENT_ID: z.string().optional(),
       BETTER_AUTH_GOOGLE_CLIENT_SECRET: z.string().optional(),
@@ -55,6 +60,11 @@ export const env = createEnv({
          .default("development"),
       APP_URL: z.string().url().optional(),
       SERVER_URL: z.string().url().optional(),
+      SDK_SERVER_URL: z
+         .string()
+         .url()
+         .optional()
+         .default("http://localhost:9877"),
       LOG_LEVEL: z
          .enum(["trace", "debug", "info", "warn", "error", "fatal"])
          .optional()
