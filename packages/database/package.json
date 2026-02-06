@@ -1,5 +1,6 @@
 {
    "dependencies": {
+      "@packages/events": "workspace:*",
       "@packages/utils": "workspace:*",
       "drizzle-orm": "catalog:database",
       "drizzle-zod": "catalog:database",
@@ -57,6 +58,7 @@
       "generate": "bun run env:run drizzle-kit generate --custom",
       "migrate": "bun run env:run drizzle-kit migrate",
       "push": "bun run env:run drizzle-kit push",
+      "seed:events": "bun run env:run bun run scripts/seed-event-catalog.ts",
       "studio": "bun run env:run drizzle-kit studio",
       "typecheck": "tsc "
    },

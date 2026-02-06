@@ -199,6 +199,7 @@
       "name": "@packages/database",
       "version": "0.12.1",
       "dependencies": {
+        "@packages/events": "workspace:*",
         "@packages/utils": "workspace:*",
         "drizzle-orm": "catalog:database",
         "drizzle-zod": "catalog:database",
