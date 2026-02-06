@@ -32,7 +32,6 @@ import { AcceptanceRateChart } from "@/features/settings/ui/usage-charts/accepta
 import { UsageComparisonBadge } from "@/features/settings/ui/usage-charts/usage-comparison-badge";
 import { UsageLineChart } from "@/features/settings/ui/usage-charts/usage-line-chart";
 import { UsagePieChart } from "@/features/settings/ui/usage-charts/usage-pie-chart";
-import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 import { orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
@@ -239,33 +238,6 @@ function FeatureUsageRow({
 }
 
 // ============================================
-// No AI Access Component
-// ============================================
-
-function NoAIAccessContent() {
-   return (
-      <Card>
-         <CardHeader>
-            <CardTitle>Uso de IA</CardTitle>
-            <CardDescription>
-               Visualize o consumo de recursos de IA da sua organização.
-            </CardDescription>
-         </CardHeader>
-         <CardContent className="py-8 text-center">
-            <Sparkles className="mx-auto size-12 text-muted-foreground/50" />
-            <h3 className="mt-4 text-lg font-semibold">
-               Recursos de IA não disponíveis
-            </h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-               Faça upgrade para o plano Lite ou Pro para acessar os recursos de
-               IA e visualizar estatísticas de uso.
-            </p>
-         </CardContent>
-      </Card>
-   );
-}
-
-// ============================================
 // Main Content Component
 // ============================================
 
@@ -273,30 +245,6 @@ function UsageSectionContent() {
    const { data: usage } = useSuspenseQuery(
       orpc.usage.getExtendedUsage.queryOptions({}),
    );
-   const { hasFeature } = useFeatureAccess();
-
-   // Check if user has any AI features
-   const hasAnyAIFeature =
-      hasFeature(Feature.FIM) ||
-      hasFeature(Feature.QUICK_EDIT) ||
-      hasFeature(Feature.CHAT);
-
-   if (!hasAnyAIFeature) {
-      return <NoAIAccessContent />;
-   }
-
-   // Filter features based on plan access
-   const showFIM = hasFeature(Feature.FIM);
-   const showEdit = hasFeature(Feature.QUICK_EDIT);
-   const showChat = hasFeature(Feature.CHAT);
-   const showPlanMode = hasFeature(Feature.CHAT_PLAN_MODE);
-
-   // Filter acceptance rates based on features
-   const filteredAcceptanceRates = usage.acceptanceRates.filter((rate) => {
-      if (rate.feature === "fim") return showFIM;
-      if (rate.feature === "edit") return showEdit;
-      return false;
-   });
 
    return (
       <div className="space-y-6">
@@ -337,8 +285,8 @@ function UsageSectionContent() {
          </div>
 
          {/* Acceptance Rate Chart */}
-         {filteredAcceptanceRates.length > 0 && (
-            <AcceptanceRateChart data={filteredAcceptanceRates} />
+         {usage.acceptanceRates.length > 0 && (
+            <AcceptanceRateChart data={usage.acceptanceRates} />
          )}
 
          {/* Feature Breakdown */}
@@ -350,50 +298,42 @@ function UsageSectionContent() {
                </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-               {showFIM && (
-                  <FeatureUsageRow
-                     icon={Bot}
-                     inputTokens={usage.byFeature.fim.inputTokens}
-                     name="Autocompletar (FIM)"
-                     outputTokens={usage.byFeature.fim.outputTokens}
-                     requests={usage.byFeature.fim.requests}
-                     totalRequests={usage.totalRequests}
-                     totalTokens={usage.byFeature.fim.totalTokens}
-                  />
-               )}
-               {showEdit && (
-                  <FeatureUsageRow
-                     icon={Pencil}
-                     inputTokens={usage.byFeature.edit.inputTokens}
-                     name="Edição Rápida"
-                     outputTokens={usage.byFeature.edit.outputTokens}
-                     requests={usage.byFeature.edit.requests}
-                     totalRequests={usage.totalRequests}
-                     totalTokens={usage.byFeature.edit.totalTokens}
-                  />
-               )}
-               {showChat && (
-                  <FeatureUsageRow
-                     icon={MessageSquare}
-                     inputTokens={usage.byFeature.chat.inputTokens}
-                     name="Chat IA (Escritor)"
-                     outputTokens={usage.byFeature.chat.outputTokens}
-                     requests={usage.byFeature.chat.requests}
-                     totalRequests={usage.totalRequests}
-                     totalTokens={usage.byFeature.chat.totalTokens}
-                  />
-               )}
-               {showPlanMode && (
-                  <FeatureUsageRow
-                     icon={FileText}
-                     inputTokens={usage.byFeature.plan.inputTokens}
-                     name="Planejamento"
-                     outputTokens={usage.byFeature.plan.outputTokens}
-                     requests={usage.byFeature.plan.requests}
-                     totalRequests={usage.totalRequests}
-                     totalTokens={usage.byFeature.plan.totalTokens}
-                  />
-               )}
+               <FeatureUsageRow
+                  icon={Bot}
+                  inputTokens={usage.byFeature.fim.inputTokens}
+                  name="Autocompletar (FIM)"
+                  outputTokens={usage.byFeature.fim.outputTokens}
+                  requests={usage.byFeature.fim.requests}
+                  totalRequests={usage.totalRequests}
+                  totalTokens={usage.byFeature.fim.totalTokens}
+               />
+               <FeatureUsageRow
+                  icon={Pencil}
+                  inputTokens={usage.byFeature.edit.inputTokens}
+                  name="Edição Rápida"
+                  outputTokens={usage.byFeature.edit.outputTokens}
+                  requests={usage.byFeature.edit.requests}
+                  totalRequests={usage.totalRequests}
+                  totalTokens={usage.byFeature.edit.totalTokens}
+               />
+               <FeatureUsageRow
+                  icon={MessageSquare}
+                  inputTokens={usage.byFeature.chat.inputTokens}
+                  name="Chat IA (Escritor)"
+                  outputTokens={usage.byFeature.chat.outputTokens}
+                  requests={usage.byFeature.chat.requests}
+                  totalRequests={usage.totalRequests}
+                  totalTokens={usage.byFeature.chat.totalTokens}
+               />
+               <FeatureUsageRow
+                  icon={FileText}
+                  inputTokens={usage.byFeature.plan.inputTokens}
+                  name="Planejamento"
+                  outputTokens={usage.byFeature.plan.outputTokens}
+                  requests={usage.byFeature.plan.requests}
+                  totalRequests={usage.totalRequests}
+                  totalTokens={usage.byFeature.plan.totalTokens}
+               />
             </CardContent>
          </Card>
 

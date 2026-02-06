@@ -228,19 +228,22 @@ import { createContent } from "@packages/database/repositories/content-repositor
 
 ### No Barrel Files
 
-Do NOT use barrel files (index.ts/index.tsx) to re-export components or modules.
+Do NOT use barrel files (index.ts/index.tsx) to re-export components or modules. **This includes package entry points** — no `packages/*/src/index.ts` files that re-export everything.
 
 **Bad:**
 ```typescript
-// features/content/index.ts
-export * from "./hooks";
-export * from "./ui";
+// packages/events/src/index.ts
+export * from "./catalog";
+export * from "./emit";
+export * from "./types/content-analytics";
 ```
 
-**Good:** Import directly from the source file:
+**Good:** Import directly from the source file using package.json exports:
 ```typescript
 import { useContent } from "@/features/content/hooks/use-content";
-import { ContentEditor } from "@/features/content/ui/content-editor";
+import { EVENTS } from "@packages/events/catalog";
+import { emitEvent } from "@packages/events/emit";
+import { pageViewEventSchema } from "@packages/events/types/content-analytics";
 ```
 
 **Why:**
@@ -249,7 +252,44 @@ import { ContentEditor } from "@/features/content/ui/content-editor";
 - Faster TypeScript compilation
 - Easier to trace imports
 
-**Exception:** Package entry points (packages/*/src/index.ts) are allowed for external consumers.
+Use `package.json` wildcard exports (`"./types/*"`, `"./schemas/*"`) to expose files directly instead of barrel re-exports.
+
+### Package File-Per-Category Pattern
+
+For domain packages (like `packages/events`), organize by **one file per category**. Each file contains its event names, Zod schemas, and related functions — fully self-contained.
+
+```
+packages/events/src/
+├── catalog.ts         # Shared EVENT_CATEGORIES + helpers
+├── content.ts         # CONTENT_EVENTS + content Zod schemas
+├── ai.ts              # AI_EVENTS + AI Zod schemas
+├── forms.ts           # FORM_EVENTS + form Zod schemas
+├── seo.ts             # SEO_EVENTS + SEO Zod schemas
+├── experiments.ts     # EXPERIMENT_EVENTS
+├── emit.ts            # emitEvent() + emitEventBatch()
+├── utils.ts           # getEventPrice() + getEventMetadata()
+└── refresh-views.ts   # Materialized view management
+```
+
+**Package.json exports — one per file:**
+```json
+{
+   "exports": {
+      "./catalog": { "default": "./src/catalog.ts" },
+      "./content": { "default": "./src/content.ts" },
+      "./ai": { "default": "./src/ai.ts" },
+      "./emit": { "default": "./src/emit.ts" }
+   }
+}
+```
+
+**Import usage:**
+```typescript
+import { EVENT_CATEGORIES } from "@packages/events/catalog";
+import { CONTENT_EVENTS, pageViewEventSchema } from "@packages/events/content";
+import { AI_EVENTS, aiCompletionEventSchema } from "@packages/events/ai";
+import { emitEvent } from "@packages/events/emit";
+```
 
 ### Biome Lint Suppressions
 

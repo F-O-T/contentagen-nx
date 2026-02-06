@@ -1,5 +1,9 @@
 {
    "extends": "@tooling/typescript/typecheck.json",
    "include": ["src"],
-   "references": []
+   "references": [
+    {
+      "path": "../queue"
+    }
+  ]
 }

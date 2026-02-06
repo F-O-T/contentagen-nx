@@ -16,5 +16,15 @@
       "noUncheckedIndexedAccess": true,
       "tsBuildInfoFile": ".cache/tsbuildinfo.json"
    },
-   "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../../packages/redis"
+    },
+    {
+      "path": "../../packages/queue"
+    }
+  ]
 }

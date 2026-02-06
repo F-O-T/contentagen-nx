@@ -11,6 +11,9 @@
       "path": "../posthog/tsconfig.lib.json"
     },
     {
+      "path": "../redis"
+    },
+    {
       "path": "../transactional/tsconfig.lib.json"
     },
     {

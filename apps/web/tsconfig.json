@@ -34,5 +34,10 @@
         "../../packages/ui/src/*"
       ]
     }
-  }
+  },
+  "references": [
+    {
+      "path": "../../packages/redis"
+    }
+  ]
 }

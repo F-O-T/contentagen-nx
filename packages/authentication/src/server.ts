@@ -20,7 +20,6 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { betterAuth } from "better-auth/minimal";
 import {
    admin,
-   anonymous,
    apiKey,
    emailOTP,
    lastLoginMethod,
@@ -79,14 +78,6 @@ export function createAuth(config: SimplifiedAuthConfig) {
    const plugins = [
       // Core plugins (always included)
       admin(),
-      anonymous({
-         emailDomainName: "anon.contentta.co",
-         onLinkAccount: async ({ anonymousUser, newUser }) => {
-            console.log(
-               `Anonymous user ${anonymousUser.user.id} linked to ${newUser.user.id}`,
-            );
-         },
-      }),
       magicLink({
          expiresIn: 60 * 15, // 15 minutes
          async sendMagicLink({ email, url }) {
@@ -361,7 +352,6 @@ export function createAuth(config: SimplifiedAuthConfig) {
       account: {
          accountLinking: {
             enabled: true,
-            trustedProviders: ["google"],
          },
       },
       advanced: {
@@ -469,17 +459,6 @@ export function createAuth(config: SimplifiedAuthConfig) {
             enabled: true,
             maxAge: 5 * 60,
          },
-      },
-      socialProviders: {
-         google:
-            env.BETTER_AUTH_GOOGLE_CLIENT_ID &&
-            env.BETTER_AUTH_GOOGLE_CLIENT_SECRET
-               ? {
-                    clientId: env.BETTER_AUTH_GOOGLE_CLIENT_ID,
-                    clientSecret: env.BETTER_AUTH_GOOGLE_CLIENT_SECRET,
-                    prompt: "select_account" as const,
-                 }
-               : undefined,
       },
       trustedOrigins: env.BETTER_AUTH_TRUSTED_ORIGINS.split(","),
       user: {

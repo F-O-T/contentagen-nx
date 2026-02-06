@@ -51,7 +51,7 @@
         "@assistant-ui/react-markdown": "^0.12.0",
         "@f-o-t/content-analysis": "1.0.1",
         "@f-o-t/markdown": "1.0.2",
-        "@f-o-t/money": "1.2.5",
+        "@f-o-t/money": "1.2.6",
         "@f-o-t/spelling": "1.0.1",
         "@faker-js/faker": "^10.0.0",
         "@lexical/code": "^0.39.0",
@@ -259,10 +259,12 @@
       "name": "@packages/events",
       "version": "0.1.0",
       "dependencies": {
-        "@f-o-t/money": "1.2.5",
+        "@f-o-t/money": "1.2.6",
         "@packages/database": "workspace:*",
         "@packages/posthog": "workspace:*",
+        "@packages/queue": "workspace:*",
         "@packages/stripe": "workspace:*",
+        "bullmq": "catalog:workers",
         "drizzle-orm": "catalog:database",
         "ioredis": "catalog:workers",
         "zod": "catalog:validation",
@@ -965,7 +967,7 @@
 
     "@exodus/bytes": ["@exodus/bytes@1.9.0", "", { "peerDependencies": { "@noble/hashes": "^1.8.0 || ^2.0.0" }, "optionalPeers": ["@noble/hashes"] }, "sha512-lagqsvnk09NKogQaN/XrtlWeUF8SRhT12odMvbTIIaVObqzwAogL6jhR4DAp0gPuKoM1AOVrKUshJpRdpMFrww=="],
 
-    "@f-o-t/bigint": ["@f-o-t/bigint@1.0.0", "", { "dependencies": { "zod": "^4.3.6" }, "peerDependencies": { "@f-o-t/condition-evaluator": "^2.0.0" }, "optionalPeers": ["@f-o-t/condition-evaluator"] }, "sha512-auC4DsmJwCVkMGcixK0FZK8VvMtK/TZaRDKsu84HPlTMrUqeFw1WGH7tfevvufjlINf75Ft7KnkNH9rI1q25Kg=="],
+    "@f-o-t/bigint": ["@f-o-t/bigint@1.0.4", "", { "dependencies": { "zod": "^4.3.6" }, "peerDependencies": { "@f-o-t/condition-evaluator": "^2.0.0" }, "optionalPeers": ["@f-o-t/condition-evaluator"] }, "sha512-F83pXIucQF8Ji6uhqv7JNKiOEJPcfeb/Ckn/1j5RPJO2eeCQDZY4wZD8xAPs2RNzixuK75ZmIFzaL8oWzx0ANg=="],
 
     "@f-o-t/content-analysis": ["@f-o-t/content-analysis@1.0.1", "", { "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-cY716FNjjYMp4Qbc82OiecQ/biESAXibUL1o/Z1/ryA0h8DjrUdY28L0HOdG7ukvN4LnNzcqvY9/ktYjnnHL7Q=="],
 
@@ -973,7 +975,7 @@
 
     "@f-o-t/markdown": ["@f-o-t/markdown@1.0.2", "", { "dependencies": { "zod": "4.3.6" }, "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-EpURxIlF3jQvLR4gJFRU9Re1tHA/vH1I/de0DZWk+rO3NnxyTAVuvqynsSPKgatc1qb8gcsONw8sYVIdw7S3xw=="],
 
-    "@f-o-t/money": ["@f-o-t/money@1.2.5", "", { "dependencies": { "@f-o-t/bigint": "^1.0.0", "zod": "^4.3.6" }, "peerDependencies": { "@f-o-t/condition-evaluator": "^2.0.2" }, "optionalPeers": ["@f-o-t/condition-evaluator"] }, "sha512-jKSEZY5c+T910f5VHBYh1VcmHbEuSQL0MTE51CMp+2xPhu0c9c6S7K9H1z6xgDfgEf2pK/IBnYi1j93l86un+w=="],
+    "@f-o-t/money": ["@f-o-t/money@1.2.6", "", { "dependencies": { "@f-o-t/bigint": "^1.0.4", "zod": "^4.3.6" }, "peerDependencies": { "@f-o-t/condition-evaluator": "^2.0.6" }, "optionalPeers": ["@f-o-t/condition-evaluator"] }, "sha512-CGKWv2lOQ2rc3LMR321Q+T6n54DvQQFgPHa1g/7I4jNfdZbOymqmj969yB2JIOpMPKpF2rakQBkSFznUnZn29g=="],
 
     "@f-o-t/spelling": ["@f-o-t/spelling@1.0.1", "", { "dependencies": { "zod": "^3.24.1" }, "peerDependencies": { "typescript": ">=4.5.0" }, "optionalPeers": ["typescript"] }, "sha512-6kSQB5Nj43pJaskEhltFLFplHAD9YoykVxMJ2Ffa6SCsVA+WoCrExKtzrUIfAsMAG/EGkqtQHwdrMIuvoiCc9A=="],
 

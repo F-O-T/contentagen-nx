@@ -1,5 +1,12 @@
 {
    "extends": "@tooling/typescript/base.json",
   "files": [],
-  "references": []
+  "references": [
+    {
+      "path": "./packages/redis"
+    },
+    {
+      "path": "./packages/queue"
+    }
+  ]
 }

@@ -2,7 +2,6 @@ import type { ContentMeta } from "@packages/database/schemas/content";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { Feature, useFeatureAccess } from "@/hooks/use-feature-access";
 import { client, orpc } from "@/integrations/orpc/client";
 import { EditorLayout } from "./editor-layout";
 import { createEditStreamFn, createFIMStreamFn } from "./hooks/use-fim-stream";
@@ -25,19 +24,13 @@ export function ContentEditorPage({
    const navigate = useNavigate();
    const queryClient = useQueryClient();
 
-   // Feature access based on subscription plan
-   const { hasFeature } = useFeatureAccess();
-
-   // Editor features based on plan
-   const editorFeatures = useMemo(
-      () => ({
-         fim: hasFeature(Feature.FIM),
-         edit: hasFeature(Feature.QUICK_EDIT),
-         spelling: hasFeature(Feature.CONTENT_ANALYSIS),
-         diagnostics: hasFeature(Feature.CONTENT_ANALYSIS),
-      }),
-      [hasFeature],
-   );
+   // All features are available to all users (limited by credit budget)
+   const editorFeatures = {
+      fim: true,
+      edit: true,
+      spelling: true,
+      diagnostics: true,
+   };
 
    // Fetch content
    const { data: content } = useQuery({

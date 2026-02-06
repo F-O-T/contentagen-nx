@@ -8,7 +8,7 @@
 
 import { createDb } from "../src/client";
 import { eventCatalog } from "../src/schemas/event-catalog";
-import { eventCatalogSeed } from "../src/seed/event-catalog-seed";
+import { EVENT_PRICING, toSeedEntry } from "@packages/events/pricing";
 
 async function main() {
 	console.log("--- Event Catalog Seed ---\n");
@@ -22,7 +22,7 @@ async function main() {
 	// 2. Insert seed data
 	const inserted = await db
 		.insert(eventCatalog)
-		.values(eventCatalogSeed)
+		.values(EVENT_PRICING.map(toSeedEntry))
 		.returning();
 
 	// 3. Summary

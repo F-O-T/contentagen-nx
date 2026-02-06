@@ -39,6 +39,22 @@
 			},
 			"types": "./src/analytics.ts"
 		},
+		"./events": {
+			"bun": "./src/events/client.ts",
+			"import": {
+				"default": "./dist/events/client.js",
+				"types": "./dist/events/client.d.ts"
+			},
+			"types": "./src/events/client.ts"
+		},
+		"./events/types": {
+			"bun": "./src/events/types.ts",
+			"import": {
+				"default": "./dist/events/types.js",
+				"types": "./dist/events/types.d.ts"
+			},
+			"types": "./src/events/types.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"files": [
