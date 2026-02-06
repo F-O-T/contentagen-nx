@@ -14,3 +14,5 @@ export * from "./schemas/event-catalog";
 export * from "./schemas/event-views";
 // Webhooks
 export * from "./schemas/webhooks";
+// Forms
+export * from "./schemas/forms";
