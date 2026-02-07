@@ -41,6 +41,7 @@ import { Route as AuthenticatedSlugDashboardContentIndexRouteImport } from './ro
 import { Route as AuthenticatedSlugDashboardSettingsSecurityRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/security'
 import { Route as AuthenticatedSlugDashboardSettingsProfileRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/profile'
 import { Route as AuthenticatedSlugDashboardSettingsPreferencesRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/preferences'
+import { Route as AuthenticatedSlugDashboardFormsFormIdRouteImport } from './routes/_authenticated/$slug/_dashboard/forms/$formId'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -213,6 +214,12 @@ const AuthenticatedSlugDashboardSettingsPreferencesRoute =
     path: '/preferences',
     getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
   } as any)
+const AuthenticatedSlugDashboardFormsFormIdRoute =
+  AuthenticatedSlugDashboardFormsFormIdRouteImport.update({
+    id: '/forms/$formId',
+    path: '/forms/$formId',
+    getParentRoute: () => AuthenticatedSlugDashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/$slug/plans': typeof AuthenticatedSlugDashboardPlansRoute
   '/$slug/settings': typeof AuthenticatedSlugDashboardSettingsRouteWithChildren
   '/$slug/$contentId': typeof AuthenticatedSlugEditorContentIdRoute
+  '/$slug/forms/$formId': typeof AuthenticatedSlugDashboardFormsFormIdRoute
   '/$slug/settings/preferences': typeof AuthenticatedSlugDashboardSettingsPreferencesRoute
   '/$slug/settings/profile': typeof AuthenticatedSlugDashboardSettingsProfileRoute
   '/$slug/settings/security': typeof AuthenticatedSlugDashboardSettingsSecurityRoute
@@ -266,6 +274,7 @@ export interface FileRoutesByTo {
   '/$slug/billing': typeof AuthenticatedSlugDashboardBillingRoute
   '/$slug/plans': typeof AuthenticatedSlugDashboardPlansRoute
   '/$slug/$contentId': typeof AuthenticatedSlugEditorContentIdRoute
+  '/$slug/forms/$formId': typeof AuthenticatedSlugDashboardFormsFormIdRoute
   '/$slug/settings/preferences': typeof AuthenticatedSlugDashboardSettingsPreferencesRoute
   '/$slug/settings/profile': typeof AuthenticatedSlugDashboardSettingsProfileRoute
   '/$slug/settings/security': typeof AuthenticatedSlugDashboardSettingsSecurityRoute
@@ -301,6 +310,7 @@ export interface FileRoutesById {
   '/_authenticated/$slug/_dashboard/plans': typeof AuthenticatedSlugDashboardPlansRoute
   '/_authenticated/$slug/_dashboard/settings': typeof AuthenticatedSlugDashboardSettingsRouteWithChildren
   '/_authenticated/$slug/_editor/$contentId': typeof AuthenticatedSlugEditorContentIdRoute
+  '/_authenticated/$slug/_dashboard/forms/$formId': typeof AuthenticatedSlugDashboardFormsFormIdRoute
   '/_authenticated/$slug/_dashboard/settings/preferences': typeof AuthenticatedSlugDashboardSettingsPreferencesRoute
   '/_authenticated/$slug/_dashboard/settings/profile': typeof AuthenticatedSlugDashboardSettingsProfileRoute
   '/_authenticated/$slug/_dashboard/settings/security': typeof AuthenticatedSlugDashboardSettingsSecurityRoute
@@ -334,6 +344,7 @@ export interface FileRouteTypes {
     | '/$slug/plans'
     | '/$slug/settings'
     | '/$slug/$contentId'
+    | '/$slug/forms/$formId'
     | '/$slug/settings/preferences'
     | '/$slug/settings/profile'
     | '/$slug/settings/security'
@@ -363,6 +374,7 @@ export interface FileRouteTypes {
     | '/$slug/billing'
     | '/$slug/plans'
     | '/$slug/$contentId'
+    | '/$slug/forms/$formId'
     | '/$slug/settings/preferences'
     | '/$slug/settings/profile'
     | '/$slug/settings/security'
@@ -397,6 +409,7 @@ export interface FileRouteTypes {
     | '/_authenticated/$slug/_dashboard/plans'
     | '/_authenticated/$slug/_dashboard/settings'
     | '/_authenticated/$slug/_editor/$contentId'
+    | '/_authenticated/$slug/_dashboard/forms/$formId'
     | '/_authenticated/$slug/_dashboard/settings/preferences'
     | '/_authenticated/$slug/_dashboard/settings/profile'
     | '/_authenticated/$slug/_dashboard/settings/security'
@@ -644,6 +657,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsPreferencesRouteImport
       parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
     }
+    '/_authenticated/$slug/_dashboard/forms/$formId': {
+      id: '/_authenticated/$slug/_dashboard/forms/$formId'
+      path: '/forms/$formId'
+      fullPath: '/$slug/forms/$formId'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardFormsFormIdRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardRoute
+    }
   }
 }
 
@@ -675,6 +695,7 @@ interface AuthenticatedSlugDashboardRouteChildren {
   AuthenticatedSlugDashboardBillingRoute: typeof AuthenticatedSlugDashboardBillingRoute
   AuthenticatedSlugDashboardPlansRoute: typeof AuthenticatedSlugDashboardPlansRoute
   AuthenticatedSlugDashboardSettingsRoute: typeof AuthenticatedSlugDashboardSettingsRouteWithChildren
+  AuthenticatedSlugDashboardFormsFormIdRoute: typeof AuthenticatedSlugDashboardFormsFormIdRoute
   AuthenticatedSlugDashboardContentIndexRoute: typeof AuthenticatedSlugDashboardContentIndexRoute
   AuthenticatedSlugDashboardFormsIndexRoute: typeof AuthenticatedSlugDashboardFormsIndexRoute
   AuthenticatedSlugDashboardHomeIndexRoute: typeof AuthenticatedSlugDashboardHomeIndexRoute
@@ -687,6 +708,8 @@ const AuthenticatedSlugDashboardRouteChildren: AuthenticatedSlugDashboardRouteCh
     AuthenticatedSlugDashboardPlansRoute: AuthenticatedSlugDashboardPlansRoute,
     AuthenticatedSlugDashboardSettingsRoute:
       AuthenticatedSlugDashboardSettingsRouteWithChildren,
+    AuthenticatedSlugDashboardFormsFormIdRoute:
+      AuthenticatedSlugDashboardFormsFormIdRoute,
     AuthenticatedSlugDashboardContentIndexRoute:
       AuthenticatedSlugDashboardContentIndexRoute,
     AuthenticatedSlugDashboardFormsIndexRoute:
@@ -791,12 +814,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
