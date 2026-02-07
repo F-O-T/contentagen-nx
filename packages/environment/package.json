@@ -36,6 +36,7 @@
    "scripts": {
       "build": "tsc --build",
       "check": "biome check --write ./src",
+      "test": "bun test --pass-with-no-tests",
       "typecheck": "tsc"
    },
    "type": "module",
