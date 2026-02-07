@@ -16,3 +16,7 @@ export * from "./schemas/resource-permissions";
 // Webhooks
 export * from "./schemas/webhooks";
 export * from "./schemas/writer";
+// Analytics
+export * from "./schemas/annotations";
+export * from "./schemas/dashboards";
+export * from "./schemas/insights";
