@@ -8,7 +8,7 @@ import {
    useSidebar,
 } from "@packages/ui/components/sidebar";
 import { useLocation } from "@tanstack/react-router";
-import { FileText, Home } from "lucide-react";
+import { ClipboardList, FileText, Home } from "lucide-react";
 
 export function NavMain() {
    const { pathname, searchStr } = useLocation();
@@ -45,6 +45,13 @@ export function NavMain() {
          id: "content",
          title: "Conteúdos",
          url: "/$slug/content",
+      },
+
+      {
+         icon: ClipboardList,
+         id: "forms",
+         title: "Formulários",
+         url: "/$slug/forms",
       },
    ];
 

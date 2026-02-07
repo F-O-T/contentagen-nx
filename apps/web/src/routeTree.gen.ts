@@ -36,6 +36,7 @@ import { Route as AuthenticatedSlugDashboardPlansRouteImport } from './routes/_a
 import { Route as AuthenticatedSlugDashboardBillingRouteImport } from './routes/_authenticated/$slug/_dashboard/billing'
 import { Route as AuthenticatedSlugDashboardSettingsIndexRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/index'
 import { Route as AuthenticatedSlugDashboardHomeIndexRouteImport } from './routes/_authenticated/$slug/_dashboard/home/index'
+import { Route as AuthenticatedSlugDashboardFormsIndexRouteImport } from './routes/_authenticated/$slug/_dashboard/forms/index'
 import { Route as AuthenticatedSlugDashboardContentIndexRouteImport } from './routes/_authenticated/$slug/_dashboard/content/index'
 import { Route as AuthenticatedSlugDashboardSettingsSecurityRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/security'
 import { Route as AuthenticatedSlugDashboardSettingsProfileRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/profile'
@@ -182,6 +183,12 @@ const AuthenticatedSlugDashboardHomeIndexRoute =
     path: '/home/',
     getParentRoute: () => AuthenticatedSlugDashboardRoute,
   } as any)
+const AuthenticatedSlugDashboardFormsIndexRoute =
+  AuthenticatedSlugDashboardFormsIndexRouteImport.update({
+    id: '/forms/',
+    path: '/forms/',
+    getParentRoute: () => AuthenticatedSlugDashboardRoute,
+  } as any)
 const AuthenticatedSlugDashboardContentIndexRoute =
   AuthenticatedSlugDashboardContentIndexRouteImport.update({
     id: '/content/',
@@ -234,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/$slug/settings/profile': typeof AuthenticatedSlugDashboardSettingsProfileRoute
   '/$slug/settings/security': typeof AuthenticatedSlugDashboardSettingsSecurityRoute
   '/$slug/content/': typeof AuthenticatedSlugDashboardContentIndexRoute
+  '/$slug/forms/': typeof AuthenticatedSlugDashboardFormsIndexRoute
   '/$slug/home/': typeof AuthenticatedSlugDashboardHomeIndexRoute
   '/$slug/settings/': typeof AuthenticatedSlugDashboardSettingsIndexRoute
 }
@@ -262,6 +270,7 @@ export interface FileRoutesByTo {
   '/$slug/settings/profile': typeof AuthenticatedSlugDashboardSettingsProfileRoute
   '/$slug/settings/security': typeof AuthenticatedSlugDashboardSettingsSecurityRoute
   '/$slug/content': typeof AuthenticatedSlugDashboardContentIndexRoute
+  '/$slug/forms': typeof AuthenticatedSlugDashboardFormsIndexRoute
   '/$slug/home': typeof AuthenticatedSlugDashboardHomeIndexRoute
   '/$slug/settings': typeof AuthenticatedSlugDashboardSettingsIndexRoute
 }
@@ -296,6 +305,7 @@ export interface FileRoutesById {
   '/_authenticated/$slug/_dashboard/settings/profile': typeof AuthenticatedSlugDashboardSettingsProfileRoute
   '/_authenticated/$slug/_dashboard/settings/security': typeof AuthenticatedSlugDashboardSettingsSecurityRoute
   '/_authenticated/$slug/_dashboard/content/': typeof AuthenticatedSlugDashboardContentIndexRoute
+  '/_authenticated/$slug/_dashboard/forms/': typeof AuthenticatedSlugDashboardFormsIndexRoute
   '/_authenticated/$slug/_dashboard/home/': typeof AuthenticatedSlugDashboardHomeIndexRoute
   '/_authenticated/$slug/_dashboard/settings/': typeof AuthenticatedSlugDashboardSettingsIndexRoute
 }
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/$slug/settings/profile'
     | '/$slug/settings/security'
     | '/$slug/content/'
+    | '/$slug/forms/'
     | '/$slug/home/'
     | '/$slug/settings/'
   fileRoutesByTo: FileRoutesByTo
@@ -356,6 +367,7 @@ export interface FileRouteTypes {
     | '/$slug/settings/profile'
     | '/$slug/settings/security'
     | '/$slug/content'
+    | '/$slug/forms'
     | '/$slug/home'
     | '/$slug/settings'
   id:
@@ -389,6 +401,7 @@ export interface FileRouteTypes {
     | '/_authenticated/$slug/_dashboard/settings/profile'
     | '/_authenticated/$slug/_dashboard/settings/security'
     | '/_authenticated/$slug/_dashboard/content/'
+    | '/_authenticated/$slug/_dashboard/forms/'
     | '/_authenticated/$slug/_dashboard/home/'
     | '/_authenticated/$slug/_dashboard/settings/'
   fileRoutesById: FileRoutesById
@@ -596,6 +609,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSlugDashboardHomeIndexRouteImport
       parentRoute: typeof AuthenticatedSlugDashboardRoute
     }
+    '/_authenticated/$slug/_dashboard/forms/': {
+      id: '/_authenticated/$slug/_dashboard/forms/'
+      path: '/forms'
+      fullPath: '/$slug/forms/'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardFormsIndexRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardRoute
+    }
     '/_authenticated/$slug/_dashboard/content/': {
       id: '/_authenticated/$slug/_dashboard/content/'
       path: '/content'
@@ -656,6 +676,7 @@ interface AuthenticatedSlugDashboardRouteChildren {
   AuthenticatedSlugDashboardPlansRoute: typeof AuthenticatedSlugDashboardPlansRoute
   AuthenticatedSlugDashboardSettingsRoute: typeof AuthenticatedSlugDashboardSettingsRouteWithChildren
   AuthenticatedSlugDashboardContentIndexRoute: typeof AuthenticatedSlugDashboardContentIndexRoute
+  AuthenticatedSlugDashboardFormsIndexRoute: typeof AuthenticatedSlugDashboardFormsIndexRoute
   AuthenticatedSlugDashboardHomeIndexRoute: typeof AuthenticatedSlugDashboardHomeIndexRoute
 }
 
@@ -668,6 +689,8 @@ const AuthenticatedSlugDashboardRouteChildren: AuthenticatedSlugDashboardRouteCh
       AuthenticatedSlugDashboardSettingsRouteWithChildren,
     AuthenticatedSlugDashboardContentIndexRoute:
       AuthenticatedSlugDashboardContentIndexRoute,
+    AuthenticatedSlugDashboardFormsIndexRoute:
+      AuthenticatedSlugDashboardFormsIndexRoute,
     AuthenticatedSlugDashboardHomeIndexRoute:
       AuthenticatedSlugDashboardHomeIndexRoute,
   }
