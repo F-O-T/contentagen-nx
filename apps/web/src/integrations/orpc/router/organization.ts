@@ -1,4 +1,43 @@
+import type { DatabaseInstance } from "@packages/database/client";
+import { subscription } from "@packages/database/schemas/auth";
+import { PlanName, getEffectiveProjectLimit } from "@packages/stripe/constants";
+import { and, eq, or } from "drizzle-orm";
 import { protectedProcedure } from "../server";
+
+// =============================================================================
+// Helpers
+// =============================================================================
+
+const VALID_PLAN_NAMES = new Set<string>(Object.values(PlanName));
+
+async function resolveOrganizationPlan(
+   db: DatabaseInstance,
+   organizationId: string,
+): Promise<PlanName> {
+   const [sub] = await db
+      .select({ plan: subscription.plan })
+      .from(subscription)
+      .where(
+         and(
+            eq(subscription.referenceId, organizationId),
+            or(
+               eq(subscription.status, "active"),
+               eq(subscription.status, "trialing"),
+            ),
+         ),
+      )
+      .limit(1);
+
+   if (!sub || !VALID_PLAN_NAMES.has(sub.plan)) {
+      return PlanName.FREE;
+   }
+
+   return sub.plan as PlanName;
+}
+
+// =============================================================================
+// Procedures
+// =============================================================================
 
 /**
  * Get all organizations the user is a member of
@@ -19,7 +58,7 @@ export const getOrganizations = protectedProcedure
  */
 export const getActiveOrganization = protectedProcedure
    .handler(async ({ context }) => {
-      const { auth, headers, session } = context;
+      const { auth, db, headers, session } = context;
 
       const organizationId = session.session.activeOrganizationId;
 
@@ -50,9 +89,21 @@ export const getActiveOrganization = protectedProcedure
             subscription.status === "trialing",
       );
 
+      // Resolve the organization's plan and calculate project limits
+      const plan = await resolveOrganizationPlan(db, organization.id);
+      const projectLimit = getEffectiveProjectLimit(plan, null);
+
+      const teams = await auth.api.listOrganizationTeams({
+         headers,
+         query: { organizationId: organization.id },
+      });
+      const projectCount = teams.length;
+
       return {
          ...organization,
          activeSubscription: activeSubscription ?? null,
+         projectLimit,
+         projectCount,
       };
    });
 
