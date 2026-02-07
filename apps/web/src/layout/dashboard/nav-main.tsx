@@ -8,7 +8,15 @@ import {
    useSidebar,
 } from "@packages/ui/components/sidebar";
 import { useLocation } from "@tanstack/react-router";
-import { ClipboardList, FileText, Home } from "lucide-react";
+import {
+   BarChart3,
+   ClipboardList,
+   Database,
+   FileText,
+   Home,
+   LayoutDashboard,
+   Lightbulb,
+} from "lucide-react";
 
 export function NavMain() {
    const { pathname, searchStr } = useLocation();
@@ -55,6 +63,29 @@ export function NavMain() {
       },
    ];
 
+   const analyticsItems = [
+      {
+         icon: LayoutDashboard,
+         id: "dashboards",
+         title: "Dashboards",
+         url: "/$slug/analytics/dashboards",
+      },
+
+      {
+         icon: Lightbulb,
+         id: "insights",
+         title: "Insights",
+         url: "/$slug/analytics/insights",
+      },
+
+      {
+         icon: Database,
+         id: "data-management",
+         title: "Dados",
+         url: "/$slug/analytics/data-management",
+      },
+   ];
+
    const renderNavItem = (item: {
       icon: typeof Home;
       id: string;
@@ -84,15 +115,31 @@ export function NavMain() {
    };
 
    return (
-      <SidebarGroup className="group-data-[collapsible=icon]">
-         <SidebarGroupContent className="flex flex-col gap-2">
-            {state === "expanded" && (
-               <SidebarGroupLabel>{"Principal"}</SidebarGroupLabel>
-            )}
-            <SidebarMenu>
-               {mainItems.map((item) => renderNavItem(item))}
-            </SidebarMenu>
-         </SidebarGroupContent>
-      </SidebarGroup>
+      <>
+         <SidebarGroup className="group-data-[collapsible=icon]">
+            <SidebarGroupContent className="flex flex-col gap-2">
+               {state === "expanded" && (
+                  <SidebarGroupLabel>{"Principal"}</SidebarGroupLabel>
+               )}
+               <SidebarMenu>
+                  {mainItems.map((item) => renderNavItem(item))}
+               </SidebarMenu>
+            </SidebarGroupContent>
+         </SidebarGroup>
+
+         <SidebarGroup className="group-data-[collapsible=icon]">
+            <SidebarGroupContent className="flex flex-col gap-2">
+               {state === "expanded" && (
+                  <SidebarGroupLabel>
+                     <BarChart3 className="size-3.5 mr-1.5 inline" />
+                     {"Analytics"}
+                  </SidebarGroupLabel>
+               )}
+               <SidebarMenu>
+                  {analyticsItems.map((item) => renderNavItem(item))}
+               </SidebarMenu>
+            </SidebarGroupContent>
+         </SidebarGroup>
+      </>
    );
 }
