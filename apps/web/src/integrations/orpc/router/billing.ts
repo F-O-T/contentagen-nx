@@ -1,5 +1,14 @@
 import { ORPCError } from "@orpc/server";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+
+import {
+	currentMonthUsageByCategory,
+	currentMonthUsageByEvent,
+	dailyUsageByEvent,
+	eventCatalog,
+} from "@packages/database/schema";
+
 import { protectedProcedure } from "../server";
 
 /**
@@ -104,3 +113,129 @@ export const getUpcomingInvoice = protectedProcedure.handler(
       }
    },
 );
+
+/**
+ * Get current month usage summary by category
+ */
+export const getCurrentUsage = protectedProcedure.handler(
+	async ({ context }) => {
+		const { db, organizationId } = context;
+
+		const rows = await db
+			.select()
+			.from(currentMonthUsageByCategory)
+			.where(
+				eq(currentMonthUsageByCategory.organizationId, organizationId),
+			);
+
+		const byCategory = rows.map((row) => ({
+			category: row.eventCategory,
+			eventCount: row.eventCount,
+			monthToDateCost: Number(row.monthToDateCost),
+			projectedCost: Number(row.projectedCost),
+		}));
+
+		const monthToDate = byCategory.reduce(
+			(sum, c) => sum + c.monthToDateCost,
+			0,
+		);
+		const projected = byCategory.reduce(
+			(sum, c) => sum + c.projectedCost,
+			0,
+		);
+
+		return { monthToDate, projected, byCategory };
+	},
+);
+
+/**
+ * Get usage by event for a specific category, enriched with catalog metadata
+ */
+export const getCategoryUsage = protectedProcedure
+	.input(z.object({ category: z.string() }))
+	.handler(async ({ context, input }) => {
+		const { db, organizationId } = context;
+
+		const [usageRows, catalogRows] = await Promise.all([
+			db
+				.select()
+				.from(currentMonthUsageByEvent)
+				.where(
+					and(
+						eq(
+							currentMonthUsageByEvent.organizationId,
+							organizationId,
+						),
+						eq(currentMonthUsageByEvent.eventCategory, input.category),
+					),
+				),
+			db
+				.select()
+				.from(eventCatalog)
+				.where(eq(eventCatalog.category, input.category)),
+		]);
+
+		const catalogByName = new Map(
+			catalogRows.map((c) => [c.eventName, c]),
+		);
+
+		return usageRows.map((row) => {
+			const catalog = catalogByName.get(row.eventName);
+			return {
+				eventName: row.eventName,
+				eventCount: row.eventCount,
+				monthToDateCost: Number(row.monthToDateCost),
+				displayName: catalog?.displayName ?? row.eventName,
+				description: catalog?.description ?? null,
+				pricePerEvent: catalog ? Number(catalog.pricePerEvent) : null,
+				freeTierLimit: catalog?.freeTierLimit ?? 0,
+			};
+		});
+	});
+
+/**
+ * Get daily usage chart data for the last N days
+ */
+export const getDailyUsage = protectedProcedure
+	.input(z.object({ days: z.number().int().min(1).max(90).default(30) }))
+	.handler(async ({ context, input }) => {
+		const { db, organizationId } = context;
+
+		const rows = await db
+			.select()
+			.from(dailyUsageByEvent)
+			.where(
+				and(
+					eq(dailyUsageByEvent.organizationId, organizationId),
+					sql`${dailyUsageByEvent.date} >= CURRENT_DATE - ${sql.raw(String(input.days))} * INTERVAL '1 day'`,
+				),
+			);
+
+		// Group by date, aggregate by category
+		const dateMap = new Map<
+			string,
+			{ total: number; byCategory: Map<string, number> }
+		>();
+
+		for (const row of rows) {
+			const dateStr = row.date;
+			if (!dateMap.has(dateStr)) {
+				dateMap.set(dateStr, { total: 0, byCategory: new Map() });
+			}
+			const entry = dateMap.get(dateStr)!;
+			const cost = Number(row.totalCost);
+			entry.total += cost;
+			entry.byCategory.set(
+				row.eventCategory,
+				(entry.byCategory.get(row.eventCategory) ?? 0) + cost,
+			);
+		}
+
+		return Array.from(dateMap.entries())
+			.map(([date, data]) => ({
+				date,
+				total: data.total,
+				byCategory: Object.fromEntries(data.byCategory),
+			}))
+			.sort((a, b) => a.date.localeCompare(b.date));
+	});
