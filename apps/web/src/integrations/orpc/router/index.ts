@@ -5,7 +5,9 @@ import * as billingRouter from "./billing";
 import * as chatRouter from "./chat";
 import * as contentAnalyticsRouter from "./content-analytics";
 import * as contentRouter from "./content";
+import * as dashboardsRouter from "./dashboards";
 import * as formsRouter from "./forms";
+import * as insightsRouter from "./insights";
 import * as organizationRouter from "./organization";
 import * as sdkUsageRouter from "./sdk-usage";
 import * as sessionRouter from "./session";
@@ -20,7 +22,9 @@ export default {
   chat: chatRouter,
   content: contentRouter,
   contentAnalytics: contentAnalyticsRouter,
+  dashboards: dashboardsRouter,
   forms: formsRouter,
+  insights: insightsRouter,
   sdkUsage: sdkUsageRouter,
   session: sessionRouter,
   organization: organizationRouter,
