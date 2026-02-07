@@ -70,6 +70,7 @@ import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { StripeDataDisclosure } from "@/components/stripe-data-disclosure";
 import { BillingUsage } from "@/features/billing/ui/billing-usage";
+import { BillingSpend } from "@/features/billing/ui/billing-spend";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -983,9 +984,11 @@ function BillingPage() {
          </TabsContent>
 
          <TabsContent className="mt-6" value="spend">
-            <div className="py-6 text-center text-muted-foreground">
-               Gastos — em breve
-            </div>
+            <ErrorBoundary FallbackComponent={BillingSectionErrorFallback}>
+               <Suspense fallback={<BillingSectionSkeleton />}>
+                  <BillingSpend />
+               </Suspense>
+            </ErrorBoundary>
          </TabsContent>
       </Tabs>
    );

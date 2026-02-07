@@ -14,13 +14,13 @@
       "check": "biome check"
    },
    "dependencies": {
+      "@assistant-ui/react": "^0.12.0",
+      "@assistant-ui/react-markdown": "^0.12.0",
       "@f-o-t/content-analysis": "1.0.1",
       "@f-o-t/markdown": "1.0.2",
       "@f-o-t/money": "1.2.6",
       "@f-o-t/spelling": "1.0.1",
       "@faker-js/faker": "^10.0.0",
-      "@assistant-ui/react": "^0.12.0",
-      "@assistant-ui/react-markdown": "^0.12.0",
       "@lexical/code": "^0.39.0",
       "@lexical/html": "^0.39.0",
       "@lexical/link": "^0.39.0",
@@ -66,6 +66,7 @@
       "nitro": "npm:nitro-nightly@latest",
       "react": "catalog:react",
       "react-dom": "catalog:react",
+      "recharts": "^3.7.0",
       "tailwind-merge": "^3.3.1",
       "tailwindcss": "^4.1.16",
       "vite-tsconfig-paths": "^6.0.2",
