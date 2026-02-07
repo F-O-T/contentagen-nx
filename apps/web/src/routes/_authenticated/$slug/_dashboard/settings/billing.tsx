@@ -41,6 +41,12 @@ import {
    TableHeader,
    TableRow,
 } from "@packages/ui/components/table";
+import {
+   Tabs,
+   TabsContent,
+   TabsList,
+   TabsTrigger,
+} from "@packages/ui/components/tabs";
 import { useIsMobile } from "@packages/ui/hooks/use-mobile";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
@@ -952,10 +958,32 @@ function BillingSectionContent() {
 
 function BillingPage() {
    return (
-      <ErrorBoundary FallbackComponent={BillingSectionErrorFallback}>
-         <Suspense fallback={<BillingSectionSkeleton />}>
-            <BillingSectionContent />
-         </Suspense>
-      </ErrorBoundary>
+      <Tabs defaultValue="subscription">
+         <TabsList>
+            <TabsTrigger value="subscription">Assinatura</TabsTrigger>
+            <TabsTrigger value="usage">Uso</TabsTrigger>
+            <TabsTrigger value="spend">Gastos</TabsTrigger>
+         </TabsList>
+
+         <TabsContent className="mt-6" value="subscription">
+            <ErrorBoundary FallbackComponent={BillingSectionErrorFallback}>
+               <Suspense fallback={<BillingSectionSkeleton />}>
+                  <BillingSectionContent />
+               </Suspense>
+            </ErrorBoundary>
+         </TabsContent>
+
+         <TabsContent className="mt-6" value="usage">
+            <div className="py-6 text-center text-muted-foreground">
+               Uso — em breve
+            </div>
+         </TabsContent>
+
+         <TabsContent className="mt-6" value="spend">
+            <div className="py-6 text-center text-muted-foreground">
+               Gastos — em breve
+            </div>
+         </TabsContent>
+      </Tabs>
    );
 }
