@@ -156,10 +156,11 @@ export function captureServerEvent(
    props: CaptureServerEventProps,
 ) {
    const { userId, event, properties, groups, timestamp } = props;
+   const safeProperties = properties ?? {};
    posthog.capture({
       distinctId: userId,
       event,
-      properties,
+      properties: safeProperties,
       groups,
       timestamp,
    });

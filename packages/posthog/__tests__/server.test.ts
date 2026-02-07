@@ -165,13 +165,13 @@ describe("posthog server", () => {
             distinctId: "user-123",
             event: "trpc_error",
             properties: {
-               $groups: { organization: "org-456" },
                code: "BAD_REQUEST",
                errorId: "error-789",
                input: { amount: -100 },
                message: "Invalid input",
                path: "bills.create",
             },
+            groups: { organization: "org-456" },
          });
       });
 
@@ -457,10 +457,10 @@ describe("posthog server", () => {
             distinctId: "user-123",
             event: "purchase_completed",
             properties: {
-               $groups: { organization: "org-456" },
                amount: 99.99,
                currency: "USD",
             },
+            groups: { organization: "org-456" },
             timestamp,
          });
       });
@@ -478,6 +478,7 @@ describe("posthog server", () => {
             distinctId: "user-123",
             event: "page_viewed",
             properties: {},
+            groups: undefined,
             timestamp: undefined,
          });
       });
