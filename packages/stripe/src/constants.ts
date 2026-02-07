@@ -11,6 +11,7 @@ export const STRIPE_PLANS = [
       displayName: "Free",
       features: [
          "Todos os recursos incluídos",
+         "1 projeto",
          "1 usuário",
          "R$ 2,50 em créditos de IA/mês",
          "R$ 2,50 em créditos de plataforma/mês",
@@ -25,6 +26,7 @@ export const STRIPE_PLANS = [
       displayName: "Lite",
       features: [
          "Todos os recursos incluídos",
+         "6 projetos",
          "3 usuários",
          "R$ 25 em créditos de IA/mês",
          "R$ 25 em créditos de plataforma/mês",
@@ -39,6 +41,7 @@ export const STRIPE_PLANS = [
       displayName: "Pro",
       features: [
          "Todos os recursos incluídos",
+         "6 projetos",
          "Membros ilimitados",
          "R$ 50 em créditos de IA/mês",
          "R$ 50 em créditos de plataforma/mês",
@@ -52,38 +55,70 @@ export const STRIPE_PLANS = [
    },
 ];
 
-export enum AddOnType {
-   EXTRA_SEATS = "extra_seats",
-   EXTRA_STORAGE = "extra_storage",
-   AUTOMATION_PACK = "automation_pack",
+export enum PlatformAddOn {
+   BOOST = "boost",
+   SCALE = "scale",
+   ENTERPRISE = "enterprise",
 }
 
-export const STRIPE_ADDONS = [
+export const PLAN_PROJECT_LIMITS: Record<PlanName, number> = {
+   [PlanName.FREE]: 1,
+   [PlanName.LITE]: 6,
+   [PlanName.PRO]: 6,
+};
+
+export const PLATFORM_ADDONS = [
    {
-      name: AddOnType.EXTRA_SEATS,
-      displayName: "Usuário Adicional",
-      description: "Adicione mais usuários ao seu workspace",
-      price: "R$ 8",
-      annualPrice: "R$ 84",
-      perUnit: "/usuário/mês",
-      availableFor: [PlanName.LITE, PlanName.PRO],
-   },
-   {
-      name: AddOnType.EXTRA_STORAGE,
-      displayName: "Armazenamento Extra",
-      description: "Mais espaço para arquivos e anexos",
-      price: "R$ 3",
-      annualPrice: "R$ 24",
-      perUnit: "/5GB/mês",
-      availableFor: [PlanName.LITE, PlanName.PRO],
-   },
-   {
-      name: AddOnType.AUTOMATION_PACK,
-      displayName: "Automações Ilimitadas",
-      description: "Fluxos e regras de automação sem limite",
-      price: "R$ 12",
-      annualPrice: "R$ 120",
+      name: PlatformAddOn.BOOST,
+      displayName: "Boost",
+      description: "Mais projetos e créditos para crescer",
+      price: "R$ 99",
+      annualPrice: "R$ 990",
       perUnit: "/mês",
+      extraProjects: 10,
+      availableFor: [PlanName.LITE, PlanName.PRO],
+   },
+   {
+      name: PlatformAddOn.SCALE,
+      displayName: "Scale",
+      description: "Para equipes em expansão com alto volume",
+      price: "R$ 299",
+      annualPrice: "R$ 2.990",
+      perUnit: "/mês",
+      extraProjects: 50,
+      availableFor: [PlanName.LITE, PlanName.PRO],
+   },
+   {
+      name: PlatformAddOn.ENTERPRISE,
+      displayName: "Enterprise",
+      description: "Uso ilimitado para operações em escala",
+      price: "R$ 799",
+      annualPrice: "R$ 7.990",
+      perUnit: "/mês",
+      extraProjects: Infinity,
       availableFor: [PlanName.PRO],
    },
 ];
+
+export function getEffectiveProjectLimit(
+   plan: PlanName,
+   addOn?: PlatformAddOn | null,
+): number {
+   const baseLimit = PLAN_PROJECT_LIMITS[plan];
+
+   if (!addOn) {
+      return baseLimit;
+   }
+
+   const addOnConfig = PLATFORM_ADDONS.find((a) => a.name === addOn);
+
+   if (!addOnConfig) {
+      return baseLimit;
+   }
+
+   if (addOnConfig.extraProjects === Infinity) {
+      return Infinity;
+   }
+
+   return baseLimit + addOnConfig.extraProjects;
+}
