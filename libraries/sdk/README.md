@@ -9,7 +9,6 @@ Official TypeScript SDK for interacting with the ContentaGen API.
 - Consistent error codes and robust error handling
 - Locale support via `x-locale` header for internationalization
 - Agent-aware author, content, and related slug helpers
-- Streaming AI assistant responses with runtime context awareness
 - Image fetch helpers that proxy assets as base64 payloads
 
 ## Installation
@@ -65,16 +64,6 @@ async function example() {
 	const image = await sdk.getContentImage({ contentId: post.id });
 	// Use image?.contentType and image?.data as needed
 
-	// Get assistant response
-	const stream = sdk.streamAssistantResponse({
-		message: "Hello, assistant!",
-		agentId,
-		language: "en", // Optional, defaults to "en"
-	});
-
-	for await (const chunk of stream) {
-		// Consume streaming chunks as they arrive
-	}
 }
 ```
 
@@ -92,7 +81,6 @@ async function example() {
   - `AuthorByAgentIdSchema`
   - `ImageSchema`
   - `ShareStatusValues`
-	- `StreamAssistantResponseInputSchema`
 
 Note: The PostHog helper is currently internal and not exported from the package entry. See "PostHog Analytics Helper" below for usage details when working inside this repository.
 
@@ -125,13 +113,6 @@ Note: The PostHog helper is currently internal and not exported from the package
   - params: `{ contentId: string }`
   - Returns: `{ data: string; contentType: string } | null`
 
-- `sdk.streamAssistantResponse(params)`
-  - params (validated by `StreamAssistantResponseInputSchema`):
-    - `message`: string — required
-		- `agentId`: string — required
-		- `language`: string — optional, defaults to `"en"`
-	- Returns: `AsyncGenerator<string>` — yields streaming chunks from the assistant
-	- Note: Iterate with `for await ... of` to consume the response stream
 
 ### PostHog Analytics Helper
 

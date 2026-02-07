@@ -16,39 +16,6 @@ const createJsonResponse = (payload: unknown): FetchResponse => {
 	} as unknown as FetchResponse;
 };
 
-const createStreamResponse = (chunks: string[]): FetchResponse => {
-	const encoder = new TextEncoder();
-	let index = 0;
-
-	const body = {
-		getReader() {
-			return {
-				async read(): Promise<{ done: boolean; value?: Uint8Array }> {
-					if (index >= chunks.length) {
-						return { done: true };
-					}
-					const value = encoder.encode(chunks[index] ?? "");
-					index += 1;
-					return { done: false, value };
-				},
-				releaseLock() {
-					return;
-				},
-			};
-		},
-	};
-
-	return {
-		ok: true,
-		status: 200,
-		statusText: "OK",
-		json: async () => {
-			throw new Error("Not a JSON response");
-		},
-		text: async () => chunks.join(""),
-		body,
-	} as unknown as FetchResponse;
-};
 
 describe("ContentaGenSDK", () => {
 	beforeEach(() => {
@@ -82,8 +49,11 @@ describe("ContentaGenSDK", () => {
 		});
 
 		expect(fetchMock).toHaveBeenCalledTimes(1);
-		const requestUrl = fetchMock.mock.calls[0]?.[0];
-		expect(requestUrl).toBeDefined();
+		const calls = fetchMock.mock.calls as unknown as Parameters<typeof fetch>[];
+		const requestUrl = calls[0]?.[0];
+		if (!requestUrl) {
+			throw new Error("Expected fetch to be called with a URL");
+		}
 		const url = new URL(String(requestUrl));
 		expect(url.pathname).toBe("/sdk/content/agent-123");
 		expect(url.searchParams.getAll("status")).toEqual(["draft", "approved"]);
@@ -107,7 +77,11 @@ describe("ContentaGenSDK", () => {
 		});
 
 		expect(fetchMock).toHaveBeenCalledTimes(1);
-		const requestUrl = fetchMock.mock.calls[0]?.[0];
+		const calls = fetchMock.mock.calls as unknown as Parameters<typeof fetch>[];
+		const requestUrl = calls[0]?.[0];
+		if (!requestUrl) {
+			throw new Error("Expected fetch to be called with a URL");
+		}
 		const url = new URL(String(requestUrl));
 		expect(url.pathname).toBe("/sdk/content/agent-456");
 		expect(url.searchParams.getAll("status")).toHaveLength(0);
@@ -115,34 +89,4 @@ describe("ContentaGenSDK", () => {
 		expect(url.searchParams.get("page")).toBeNull();
 	});
 
-	it("prefers per-call locale over default when streaming assistant responses", async () => {
-		const fetchMock = mock(() =>
-			Promise.resolve(createStreamResponse(["hello", " ", "world"])),
-		);
-		globalThis.fetch = fetchMock as unknown as typeof fetch;
-
-		const sdk = createSdk({
-			apiKey: "test-key",
-			host: "https://api.example.com",
-			locale: "pt-BR",
-		});
-
-		const chunks: string[] = [];
-		for await (const chunk of sdk.streamAssistantResponse({
-			message: "Hello!",
-		})) {
-			chunks.push(chunk);
-		}
-
-		expect(chunks.join("")).toBe("hello world");
-
-		const lastCall = fetchMock.mock.calls[0] as
-			| Parameters<typeof fetch>
-			| undefined;
-		expect(lastCall).toBeDefined();
-		const init = (lastCall?.[1] as { headers?: Record<string, string> }) ?? {};
-		const headers = init.headers ?? {};
-		expect(headers["x-locale"]).toBe("pt-BR");
-		expect(headers["sdk-api-key"]).toBe("test-key");
-	});
 });

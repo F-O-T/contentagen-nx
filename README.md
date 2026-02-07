@@ -336,11 +336,6 @@ const post = await sdk.getContentBySlug({
   agentId: "agent-uuid",
 });
 
-// Stream AI assistant responses
-const stream = sdk.streamAssistantResponse({
-  message: "Help me write an introduction",
-  agentId: "agent-uuid",
-});
 ```
 
 See the [SDK README](./libraries/sdk/README.md) for full documentation.
