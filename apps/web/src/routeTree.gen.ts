@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OauthConsentRouteImport } from './routes/oauth/consent'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthMagicLinkRouteImport } from './routes/auth/magic-link'
@@ -21,12 +22,14 @@ import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthAnonymousRouteImport } from './routes/auth/anonymous'
 import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as AuthenticatedSlugRouteImport } from './routes/_authenticated/$slug'
+import { Route as DotwellKnownOpenidConfigurationRouteImport } from './routes/[.]well-known.openid-configuration'
 import { Route as AuthSignInIndexRouteImport } from './routes/auth/sign-in/index'
 import { Route as AuthSignInEmailRouteImport } from './routes/auth/sign-in/email'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthenticatedSlugEditorRouteImport } from './routes/_authenticated/$slug/_editor'
 import { Route as AuthenticatedSlugDashboardRouteImport } from './routes/_authenticated/$slug/_dashboard'
+import { Route as DotwellKnownOauthAuthorizationServerSplatRouteImport } from './routes/[.]well-known.oauth-authorization-server.$'
 import { Route as AuthenticatedSlugEditorContentIdRouteImport } from './routes/_authenticated/$slug/_editor/$contentId'
 import { Route as AuthenticatedSlugDashboardSettingsRouteImport } from './routes/_authenticated/$slug/_dashboard/settings'
 import { Route as AuthenticatedSlugDashboardPlansRouteImport } from './routes/_authenticated/$slug/_dashboard/plans'
@@ -51,6 +54,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OauthConsentRoute = OauthConsentRouteImport.update({
+  id: '/oauth/consent',
+  path: '/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
@@ -98,6 +106,12 @@ const AuthenticatedSlugRoute = AuthenticatedSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const DotwellKnownOpenidConfigurationRoute =
+  DotwellKnownOpenidConfigurationRouteImport.update({
+    id: '/.well-known/openid-configuration',
+    path: '/.well-known/openid-configuration',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthSignInIndexRoute = AuthSignInIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -126,6 +140,12 @@ const AuthenticatedSlugDashboardRoute =
   AuthenticatedSlugDashboardRouteImport.update({
     id: '/_dashboard',
     getParentRoute: () => AuthenticatedSlugRoute,
+  } as any)
+const DotwellKnownOauthAuthorizationServerSplatRoute =
+  DotwellKnownOauthAuthorizationServerSplatRouteImport.update({
+    id: '/.well-known/oauth-authorization-server/$',
+    path: '/.well-known/oauth-authorization-server/$',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedSlugEditorContentIdRoute =
   AuthenticatedSlugEditorContentIdRouteImport.update({
@@ -197,6 +217,7 @@ const AuthenticatedSlugDashboardSettingsBillingRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/.well-known/openid-configuration': typeof DotwellKnownOpenidConfigurationRoute
   '/$slug': typeof AuthenticatedSlugEditorRouteWithChildren
   '/api/$': typeof ApiSplatRoute
   '/auth/anonymous': typeof AuthAnonymousRoute
@@ -206,6 +227,8 @@ export interface FileRoutesByFullPath {
   '/auth/magic-link': typeof AuthMagicLinkRoute
   '/auth/sign-in': typeof AuthSignInRouteWithChildren
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/oauth/consent': typeof OauthConsentRoute
+  '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
@@ -225,6 +248,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/.well-known/openid-configuration': typeof DotwellKnownOpenidConfigurationRoute
   '/$slug': typeof AuthenticatedSlugEditorRouteWithChildren
   '/api/$': typeof ApiSplatRoute
   '/auth/anonymous': typeof AuthAnonymousRoute
@@ -233,6 +257,8 @@ export interface FileRoutesByTo {
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/magic-link': typeof AuthMagicLinkRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/oauth/consent': typeof OauthConsentRoute
+  '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
@@ -253,6 +279,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/.well-known/openid-configuration': typeof DotwellKnownOpenidConfigurationRoute
   '/_authenticated/$slug': typeof AuthenticatedSlugRouteWithChildren
   '/api/$': typeof ApiSplatRoute
   '/auth/anonymous': typeof AuthAnonymousRoute
@@ -262,6 +289,8 @@ export interface FileRoutesById {
   '/auth/magic-link': typeof AuthMagicLinkRoute
   '/auth/sign-in': typeof AuthSignInRouteWithChildren
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/oauth/consent': typeof OauthConsentRoute
+  '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/_authenticated/$slug/_dashboard': typeof AuthenticatedSlugDashboardRouteWithChildren
   '/_authenticated/$slug/_editor': typeof AuthenticatedSlugEditorRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -285,6 +314,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/.well-known/openid-configuration'
     | '/$slug'
     | '/api/$'
     | '/auth/anonymous'
@@ -294,6 +324,8 @@ export interface FileRouteTypes {
     | '/auth/magic-link'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/oauth/consent'
+    | '/.well-known/oauth-authorization-server/$'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/auth/sign-in/email'
@@ -313,6 +345,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/.well-known/openid-configuration'
     | '/$slug'
     | '/api/$'
     | '/auth/anonymous'
@@ -321,6 +354,8 @@ export interface FileRouteTypes {
     | '/auth/forgot-password'
     | '/auth/magic-link'
     | '/auth/sign-up'
+    | '/oauth/consent'
+    | '/.well-known/oauth-authorization-server/$'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/auth/sign-in/email'
@@ -340,6 +375,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/.well-known/openid-configuration'
     | '/_authenticated/$slug'
     | '/api/$'
     | '/auth/anonymous'
@@ -349,6 +385,8 @@ export interface FileRouteTypes {
     | '/auth/magic-link'
     | '/auth/sign-in'
     | '/auth/sign-up'
+    | '/oauth/consent'
+    | '/.well-known/oauth-authorization-server/$'
     | '/_authenticated/$slug/_dashboard'
     | '/_authenticated/$slug/_editor'
     | '/api/auth/$'
@@ -372,7 +410,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  DotwellKnownOpenidConfigurationRoute: typeof DotwellKnownOpenidConfigurationRoute
   ApiSplatRoute: typeof ApiSplatRoute
+  OauthConsentRoute: typeof OauthConsentRoute
+  DotwellKnownOauthAuthorizationServerSplatRoute: typeof DotwellKnownOauthAuthorizationServerSplatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
 }
@@ -398,6 +439,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/oauth/consent': {
+      id: '/oauth/consent'
+      path: '/oauth/consent'
+      fullPath: '/oauth/consent'
+      preLoaderRoute: typeof OauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/sign-up': {
@@ -463,6 +511,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSlugRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/.well-known/openid-configuration': {
+      id: '/.well-known/openid-configuration'
+      path: '/.well-known/openid-configuration'
+      fullPath: '/.well-known/openid-configuration'
+      preLoaderRoute: typeof DotwellKnownOpenidConfigurationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/sign-in/': {
       id: '/auth/sign-in/'
       path: '/'
@@ -504,6 +559,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/$slug'
       preLoaderRoute: typeof AuthenticatedSlugDashboardRouteImport
       parentRoute: typeof AuthenticatedSlugRoute
+    }
+    '/.well-known/oauth-authorization-server/$': {
+      id: '/.well-known/oauth-authorization-server/$'
+      path: '/.well-known/oauth-authorization-server/$'
+      fullPath: '/.well-known/oauth-authorization-server/$'
+      preLoaderRoute: typeof DotwellKnownOauthAuthorizationServerSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/$slug/_editor/$contentId': {
       id: '/_authenticated/$slug/_editor/$contentId'
@@ -718,7 +780,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  DotwellKnownOpenidConfigurationRoute: DotwellKnownOpenidConfigurationRoute,
   ApiSplatRoute: ApiSplatRoute,
+  OauthConsentRoute: OauthConsentRoute,
+  DotwellKnownOauthAuthorizationServerSplatRoute:
+    DotwellKnownOauthAuthorizationServerSplatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
 }
