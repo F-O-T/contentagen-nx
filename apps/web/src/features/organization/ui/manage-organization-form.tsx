@@ -84,6 +84,12 @@ export function ManageOrganizationForm({
                      await setActiveOrganization({
                         organizationId: ctx.data.id,
                      });
+
+                     // Create a default project for the new organization
+                     await authClient.organization.createTeam({
+                        name: "Default",
+                        organizationId: ctx.data.id,
+                     });
                   }
                   fileUpload.clearFile();
                   closeSheet();

@@ -2,7 +2,7 @@ import { AppError, propagateError } from "@packages/utils/errors";
 import { createSlug, generateRandomSuffix } from "@packages/utils/text";
 import { eq } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
-import { member, organization } from "../schemas/auth";
+import { member, organization, team, teamMember } from "../schemas/auth";
 
 export async function findMemberByUserId(
    dbClient: DatabaseInstance,
@@ -139,6 +139,24 @@ export async function createDefaultOrganization(
          role: "owner",
          userId,
       });
+
+      // Create a default project for the organization
+      const [defaultTeam] = await dbClient
+         .insert(team)
+         .values({
+            name: "Default",
+            organizationId: createdOrganization.id,
+            createdAt: now,
+         })
+         .returning();
+
+      if (defaultTeam) {
+         await dbClient.insert(teamMember).values({
+            teamId: defaultTeam.id,
+            userId,
+            createdAt: now,
+         });
+      }
 
       console.log(
          `Created organization "${orgName}" (${createdOrganization.id}) for user ${userId}`,
