@@ -11,7 +11,7 @@ export function useActiveOrganization() {
    }
 
    // Extract activeSubscription from the organization response
-   const { activeSubscription, ...organization } = activeOrganization;
+   const { activeSubscription, projectLimit, projectCount, ...organization } = activeOrganization;
 
-   return { activeOrganization: organization, activeSubscription };
+   return { activeOrganization: organization, activeSubscription, projectLimit, projectCount };
 }

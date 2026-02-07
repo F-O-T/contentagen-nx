@@ -24,7 +24,7 @@ import {
    SidebarMenuItem,
 } from "@packages/ui/components/sidebar";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useLocation, useParams, useRouter } from "@tanstack/react-router";
+import { Link, useLocation, useParams, useRouter } from "@tanstack/react-router";
 import {
    Building2,
    Check,
@@ -41,6 +41,15 @@ import { useSetActiveOrganization } from "@/features/organization/hooks/use-set-
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { useSheet } from "@/hooks/use-sheet";
+import { useCredenza } from "@/hooks/use-credenza";
+import {
+   CredenzaBody,
+   CredenzaDescription,
+   CredenzaFooter,
+   CredenzaHeader,
+   CredenzaTitle,
+} from "@packages/ui/components/credenza";
+import { Button } from "@packages/ui/components/button";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -74,9 +83,10 @@ function SidebarScopeSwitcherSkeleton() {
 }
 
 function SidebarScopeSwitcherContent() {
-   const { activeOrganization } = useActiveOrganization();
+   const { activeOrganization, projectLimit, projectCount } = useActiveOrganization();
    const { activeTeam, teams } = useActiveTeam();
    const { openSheet } = useSheet();
+   const { openCredenza, closeCredenza } = useCredenza();
    const { setActiveOrganization, isPending } = useSetActiveOrganization();
    const queryClient = useQueryClient();
    const router = useRouter();
@@ -161,10 +171,45 @@ function SidebarScopeSwitcherContent() {
 
    const handleNewProject = useCallback(() => {
       setTeamOpen(false);
+
+      if (projectLimit !== null && teams.length >= projectLimit) {
+         openCredenza({
+            children: (
+               <>
+                  <CredenzaHeader>
+                     <CredenzaTitle>Limite de projetos</CredenzaTitle>
+                     <CredenzaDescription>
+                        Você está usando {projectCount} de {projectLimit} projetos
+                     </CredenzaDescription>
+                  </CredenzaHeader>
+                  <CredenzaBody>
+                     <p className="text-sm text-muted-foreground">
+                        Faça upgrade para o add-on Boost para criar projetos ilimitados
+                     </p>
+                  </CredenzaBody>
+                  <CredenzaFooter className="flex gap-2">
+                     <Button variant="outline" onClick={closeCredenza}>
+                        Cancelar
+                     </Button>
+                     <Button asChild>
+                        <Link
+                           to={`/${currentSlug}/billing`}
+                           onClick={closeCredenza}
+                        >
+                           Ver planos
+                        </Link>
+                     </Button>
+                  </CredenzaFooter>
+               </>
+            ),
+         });
+         return;
+      }
+
       openSheet({
          children: <CreateTeamForm />,
       });
-   }, [openSheet]);
+   }, [openSheet, openCredenza, closeCredenza, projectLimit, projectCount, teams.length, currentSlug]);
 
    const handleNavigate = useCallback(
       (path: string) => {
@@ -313,7 +358,11 @@ function SidebarScopeSwitcherContent() {
                                  value="New project"
                               >
                                  <Plus className="size-4" />
-                                 <span>New project</span>
+                                 <span>
+                                    {projectLimit !== null
+                                       ? `Novo projeto (${projectCount}/${projectLimit})`
+                                       : "Novo projeto"}
+                                 </span>
                               </CommandItem>
                            </CommandGroup>
                         </CommandList>
