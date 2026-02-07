@@ -35,15 +35,27 @@ export const mcpRequestHandler = withMcpAuth(
 				issuer: AUTH_SERVER_URL,
 			});
 
+			const claims = payload as Record<string, unknown>;
 			const organizationId =
-				(payload as Record<string, unknown>).activeOrganizationId ??
-				(payload as Record<string, unknown>).referenceId;
-			const userId = payload.sub;
+				typeof claims.activeOrganizationId === "string"
+					? claims.activeOrganizationId
+					: typeof claims.referenceId === "string"
+						? claims.referenceId
+						: undefined;
+			const userId =
+				typeof payload.sub === "string" ? payload.sub : undefined;
+
+			if (!organizationId || !userId) {
+				console.error("JWT missing required claims: organizationId or userId");
+				return undefined;
+			}
 
 			return {
 				token: bearerToken,
 				clientId:
-					((payload as Record<string, unknown>).clientId as string) ?? "unknown",
+					typeof claims.clientId === "string"
+						? claims.clientId
+						: "unknown",
 				scopes:
 					typeof payload.scope === "string"
 						? payload.scope.split(" ")

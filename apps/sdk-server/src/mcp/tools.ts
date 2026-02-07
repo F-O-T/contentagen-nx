@@ -42,13 +42,11 @@ function jsonResponse(data: unknown) {
 }
 
 async function resolveMemberId(organizationId: string, userId: string): Promise<string | null> {
-	const members = await db.query.member.findMany({
+	const member = await db.query.member.findFirst({
 		where: (m, { eq, and }) =>
 			and(eq(m.organizationId, organizationId), eq(m.userId, userId)),
 	});
-	const first = members[0];
-	if (!first) return null;
-	return first.id;
+	return member?.id ?? null;
 }
 
 export function registerTools(server: McpServer) {
@@ -63,31 +61,36 @@ export function registerTools(server: McpServer) {
 			seoDescription: z.string().optional().describe("SEO meta description"),
 		},
 		async (args, extra) => {
-			const auth = extractAuth(extra);
-			if (!auth) return errorResponse("Authentication required");
+			try {
+				const auth = extractAuth(extra);
+				if (!auth) return errorResponse("Authentication required");
 
-			const { organizationId, userId } = auth;
+				const { organizationId, userId } = auth;
 
-			const memberId = await resolveMemberId(organizationId, userId);
-			if (!memberId) return errorResponse("Member not found in organization");
+				const memberId = await resolveMemberId(organizationId, userId);
+				if (!memberId) return errorResponse("Member not found in organization");
 
-			const slug = toSlug(args.title);
+				const slug = toSlug(args.title);
 
-			const result = await createContent(db, {
-				organizationId,
-				createdByMemberId: memberId,
-				writerId: args.writerId,
-				body: args.body ?? "",
-				meta: {
-					title: args.title,
-					description: args.seoDescription ?? "",
-					slug,
-				},
-				status: "draft",
-				draftOrigin: "manual",
-			});
+				const result = await createContent(db, {
+					organizationId,
+					createdByMemberId: memberId,
+					writerId: args.writerId,
+					body: args.body ?? "",
+					meta: {
+						title: args.title,
+						description: args.seoDescription ?? "",
+						slug,
+					},
+					status: "draft",
+					draftOrigin: "manual",
+				});
 
-			return jsonResponse(result);
+				return jsonResponse(result);
+			} catch (err) {
+				console.error("create_content failed:", err);
+				return errorResponse("Failed to create content");
+			}
 		},
 	);
 
@@ -102,42 +105,47 @@ export function registerTools(server: McpServer) {
 			seoDescription: z.string().optional().describe("New SEO meta description"),
 		},
 		async (args, extra) => {
-			const auth = extractAuth(extra);
-			if (!auth) return errorResponse("Authentication required");
+			try {
+				const auth = extractAuth(extra);
+				if (!auth) return errorResponse("Authentication required");
 
-			const { organizationId } = auth;
+				const { organizationId } = auth;
 
-			const existing = await getContentById(db, args.contentId);
-			if (!existing || existing.organizationId !== organizationId) {
-				return errorResponse("Content not found");
+				const existing = await getContentById(db, args.contentId);
+				if (!existing || existing.organizationId !== organizationId) {
+					return errorResponse("Content not found");
+				}
+
+				const updates: Record<string, unknown> = {};
+
+				if (args.body !== undefined) {
+					updates.body = args.body;
+				}
+
+				if (args.title !== undefined || args.seoDescription !== undefined) {
+					const currentMeta = existing.meta ?? { title: "", description: "", slug: "" };
+					const newTitle = args.title ?? currentMeta.title;
+					const newDescription = args.seoDescription ?? currentMeta.description;
+					const newSlug = args.title ? toSlug(args.title) : currentMeta.slug;
+
+					updates.meta = {
+						...currentMeta,
+						title: newTitle,
+						description: newDescription,
+						slug: newSlug,
+					};
+				}
+
+				if (Object.keys(updates).length === 0) {
+					return errorResponse("No fields to update");
+				}
+
+				const result = await updateContent(db, args.contentId, updates);
+				return jsonResponse(result);
+			} catch (err) {
+				console.error("update_content failed:", err);
+				return errorResponse("Failed to update content");
 			}
-
-			const updates: Record<string, unknown> = {};
-
-			if (args.body !== undefined) {
-				updates.body = args.body;
-			}
-
-			if (args.title !== undefined || args.seoDescription !== undefined) {
-				const currentMeta = existing.meta ?? { title: "", description: "", slug: "" };
-				const newTitle = args.title ?? currentMeta.title;
-				const newDescription = args.seoDescription ?? currentMeta.description;
-				const newSlug = args.title ? toSlug(args.title) : currentMeta.slug;
-
-				updates.meta = {
-					...currentMeta,
-					title: newTitle,
-					description: newDescription,
-					slug: newSlug,
-				};
-			}
-
-			if (Object.keys(updates).length === 0) {
-				return errorResponse("No fields to update");
-			}
-
-			const result = await updateContent(db, args.contentId, updates);
-			return jsonResponse(result);
 		},
 	);
 
@@ -149,18 +157,23 @@ export function registerTools(server: McpServer) {
 			contentId: z.string().uuid().describe("The content ID to publish"),
 		},
 		async (args, extra) => {
-			const auth = extractAuth(extra);
-			if (!auth) return errorResponse("Authentication required");
+			try {
+				const auth = extractAuth(extra);
+				if (!auth) return errorResponse("Authentication required");
 
-			const { organizationId } = auth;
+				const { organizationId } = auth;
 
-			const existing = await getContentById(db, args.contentId);
-			if (!existing || existing.organizationId !== organizationId) {
-				return errorResponse("Content not found");
+				const existing = await getContentById(db, args.contentId);
+				if (!existing || existing.organizationId !== organizationId) {
+					return errorResponse("Content not found");
+				}
+
+				const result = await publishContent(db, args.contentId);
+				return jsonResponse(result);
+			} catch (err) {
+				console.error("publish_content failed:", err);
+				return errorResponse("Failed to publish content");
 			}
-
-			const result = await publishContent(db, args.contentId);
-			return jsonResponse(result);
 		},
 	);
 
@@ -176,17 +189,22 @@ export function registerTools(server: McpServer) {
 			limit: z.number().int().min(1).max(100).optional().describe("Max results (default 20)"),
 		},
 		async (args, extra) => {
-			const auth = extractAuth(extra);
-			if (!auth) return errorResponse("Authentication required");
+			try {
+				const auth = extractAuth(extra);
+				if (!auth) return errorResponse("Authentication required");
 
-			const { organizationId } = auth;
+				const { organizationId } = auth;
 
-			const result = await listContentsByOrganization(db, organizationId, {
-				statuses: args.status ? [args.status] : undefined,
-				limit: args.limit ?? 20,
-			});
+				const result = await listContentsByOrganization(db, organizationId, {
+					statuses: args.status ? [args.status] : undefined,
+					limit: args.limit ?? 20,
+				});
 
-			return jsonResponse(result);
+				return jsonResponse(result);
+			} catch (err) {
+				console.error("list_content failed:", err);
+				return errorResponse("Failed to list content");
+			}
 		},
 	);
 
@@ -198,17 +216,22 @@ export function registerTools(server: McpServer) {
 			writerId: z.string().uuid().describe("The writer ID"),
 		},
 		async (args, extra) => {
-			const auth = extractAuth(extra);
-			if (!auth) return errorResponse("Authentication required");
+			try {
+				const auth = extractAuth(extra);
+				if (!auth) return errorResponse("Authentication required");
 
-			const { organizationId } = auth;
+				const { organizationId } = auth;
 
-			const writerResult = await getWriterById(db, args.writerId);
-			if (!writerResult || writerResult.organizationId !== organizationId) {
-				return errorResponse("Writer not found");
+				const writerResult = await getWriterById(db, args.writerId);
+				if (!writerResult || writerResult.organizationId !== organizationId) {
+					return errorResponse("Writer not found");
+				}
+
+				return jsonResponse(writerResult);
+			} catch (err) {
+				console.error("get_writer failed:", err);
+				return errorResponse("Failed to get writer");
 			}
-
-			return jsonResponse(writerResult);
 		},
 	);
 
@@ -218,13 +241,18 @@ export function registerTools(server: McpServer) {
 		"List all writers (AI agents) for the organization",
 		{},
 		async (_args, extra) => {
-			const auth = extractAuth(extra);
-			if (!auth) return errorResponse("Authentication required");
+			try {
+				const auth = extractAuth(extra);
+				if (!auth) return errorResponse("Authentication required");
 
-			const { organizationId } = auth;
+				const { organizationId } = auth;
 
-			const result = await getWritersByOrganizationId(db, organizationId);
-			return jsonResponse(result);
+				const result = await getWritersByOrganizationId(db, organizationId);
+				return jsonResponse(result);
+			} catch (err) {
+				console.error("list_writers failed:", err);
+				return errorResponse("Failed to list writers");
+			}
 		},
 	);
 }
