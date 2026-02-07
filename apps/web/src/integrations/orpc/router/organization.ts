@@ -55,3 +55,18 @@ export const getActiveOrganization = protectedProcedure
          activeSubscription: activeSubscription ?? null,
       };
    });
+
+/**
+ * List teams for the currently active organization
+ */
+export const getOrganizationTeams = protectedProcedure
+   .handler(async ({ context }) => {
+      const { auth, headers, organizationId } = context;
+
+      const teams = await auth.api.listOrganizationTeams({
+         headers,
+         query: { organizationId },
+      });
+
+      return teams;
+   });
