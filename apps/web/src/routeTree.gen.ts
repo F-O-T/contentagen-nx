@@ -33,14 +33,13 @@ import { Route as DotwellKnownOauthAuthorizationServerSplatRouteImport } from '.
 import { Route as AuthenticatedSlugEditorContentIdRouteImport } from './routes/_authenticated/$slug/_editor/$contentId'
 import { Route as AuthenticatedSlugDashboardSettingsRouteImport } from './routes/_authenticated/$slug/_dashboard/settings'
 import { Route as AuthenticatedSlugDashboardPlansRouteImport } from './routes/_authenticated/$slug/_dashboard/plans'
+import { Route as AuthenticatedSlugDashboardBillingRouteImport } from './routes/_authenticated/$slug/_dashboard/billing'
 import { Route as AuthenticatedSlugDashboardSettingsIndexRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/index'
 import { Route as AuthenticatedSlugDashboardHomeIndexRouteImport } from './routes/_authenticated/$slug/_dashboard/home/index'
 import { Route as AuthenticatedSlugDashboardContentIndexRouteImport } from './routes/_authenticated/$slug/_dashboard/content/index'
-import { Route as AuthenticatedSlugDashboardSettingsUsageRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/usage'
 import { Route as AuthenticatedSlugDashboardSettingsSecurityRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/security'
 import { Route as AuthenticatedSlugDashboardSettingsProfileRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/profile'
 import { Route as AuthenticatedSlugDashboardSettingsPreferencesRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/preferences'
-import { Route as AuthenticatedSlugDashboardSettingsBillingRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/billing'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -165,6 +164,12 @@ const AuthenticatedSlugDashboardPlansRoute =
     path: '/plans',
     getParentRoute: () => AuthenticatedSlugDashboardRoute,
   } as any)
+const AuthenticatedSlugDashboardBillingRoute =
+  AuthenticatedSlugDashboardBillingRouteImport.update({
+    id: '/billing',
+    path: '/billing',
+    getParentRoute: () => AuthenticatedSlugDashboardRoute,
+  } as any)
 const AuthenticatedSlugDashboardSettingsIndexRoute =
   AuthenticatedSlugDashboardSettingsIndexRouteImport.update({
     id: '/',
@@ -183,12 +188,6 @@ const AuthenticatedSlugDashboardContentIndexRoute =
     path: '/content/',
     getParentRoute: () => AuthenticatedSlugDashboardRoute,
   } as any)
-const AuthenticatedSlugDashboardSettingsUsageRoute =
-  AuthenticatedSlugDashboardSettingsUsageRouteImport.update({
-    id: '/usage',
-    path: '/usage',
-    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
-  } as any)
 const AuthenticatedSlugDashboardSettingsSecurityRoute =
   AuthenticatedSlugDashboardSettingsSecurityRouteImport.update({
     id: '/security',
@@ -205,12 +204,6 @@ const AuthenticatedSlugDashboardSettingsPreferencesRoute =
   AuthenticatedSlugDashboardSettingsPreferencesRouteImport.update({
     id: '/preferences',
     path: '/preferences',
-    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
-  } as any)
-const AuthenticatedSlugDashboardSettingsBillingRoute =
-  AuthenticatedSlugDashboardSettingsBillingRouteImport.update({
-    id: '/billing',
-    path: '/billing',
     getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
   } as any)
 
@@ -233,14 +226,13 @@ export interface FileRoutesByFullPath {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
   '/auth/sign-in/': typeof AuthSignInIndexRoute
+  '/$slug/billing': typeof AuthenticatedSlugDashboardBillingRoute
   '/$slug/plans': typeof AuthenticatedSlugDashboardPlansRoute
   '/$slug/settings': typeof AuthenticatedSlugDashboardSettingsRouteWithChildren
   '/$slug/$contentId': typeof AuthenticatedSlugEditorContentIdRoute
-  '/$slug/settings/billing': typeof AuthenticatedSlugDashboardSettingsBillingRoute
   '/$slug/settings/preferences': typeof AuthenticatedSlugDashboardSettingsPreferencesRoute
   '/$slug/settings/profile': typeof AuthenticatedSlugDashboardSettingsProfileRoute
   '/$slug/settings/security': typeof AuthenticatedSlugDashboardSettingsSecurityRoute
-  '/$slug/settings/usage': typeof AuthenticatedSlugDashboardSettingsUsageRoute
   '/$slug/content/': typeof AuthenticatedSlugDashboardContentIndexRoute
   '/$slug/home/': typeof AuthenticatedSlugDashboardHomeIndexRoute
   '/$slug/settings/': typeof AuthenticatedSlugDashboardSettingsIndexRoute
@@ -263,13 +255,12 @@ export interface FileRoutesByTo {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
   '/auth/sign-in': typeof AuthSignInIndexRoute
+  '/$slug/billing': typeof AuthenticatedSlugDashboardBillingRoute
   '/$slug/plans': typeof AuthenticatedSlugDashboardPlansRoute
   '/$slug/$contentId': typeof AuthenticatedSlugEditorContentIdRoute
-  '/$slug/settings/billing': typeof AuthenticatedSlugDashboardSettingsBillingRoute
   '/$slug/settings/preferences': typeof AuthenticatedSlugDashboardSettingsPreferencesRoute
   '/$slug/settings/profile': typeof AuthenticatedSlugDashboardSettingsProfileRoute
   '/$slug/settings/security': typeof AuthenticatedSlugDashboardSettingsSecurityRoute
-  '/$slug/settings/usage': typeof AuthenticatedSlugDashboardSettingsUsageRoute
   '/$slug/content': typeof AuthenticatedSlugDashboardContentIndexRoute
   '/$slug/home': typeof AuthenticatedSlugDashboardHomeIndexRoute
   '/$slug/settings': typeof AuthenticatedSlugDashboardSettingsIndexRoute
@@ -297,14 +288,13 @@ export interface FileRoutesById {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
   '/auth/sign-in/': typeof AuthSignInIndexRoute
+  '/_authenticated/$slug/_dashboard/billing': typeof AuthenticatedSlugDashboardBillingRoute
   '/_authenticated/$slug/_dashboard/plans': typeof AuthenticatedSlugDashboardPlansRoute
   '/_authenticated/$slug/_dashboard/settings': typeof AuthenticatedSlugDashboardSettingsRouteWithChildren
   '/_authenticated/$slug/_editor/$contentId': typeof AuthenticatedSlugEditorContentIdRoute
-  '/_authenticated/$slug/_dashboard/settings/billing': typeof AuthenticatedSlugDashboardSettingsBillingRoute
   '/_authenticated/$slug/_dashboard/settings/preferences': typeof AuthenticatedSlugDashboardSettingsPreferencesRoute
   '/_authenticated/$slug/_dashboard/settings/profile': typeof AuthenticatedSlugDashboardSettingsProfileRoute
   '/_authenticated/$slug/_dashboard/settings/security': typeof AuthenticatedSlugDashboardSettingsSecurityRoute
-  '/_authenticated/$slug/_dashboard/settings/usage': typeof AuthenticatedSlugDashboardSettingsUsageRoute
   '/_authenticated/$slug/_dashboard/content/': typeof AuthenticatedSlugDashboardContentIndexRoute
   '/_authenticated/$slug/_dashboard/home/': typeof AuthenticatedSlugDashboardHomeIndexRoute
   '/_authenticated/$slug/_dashboard/settings/': typeof AuthenticatedSlugDashboardSettingsIndexRoute
@@ -330,14 +320,13 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/auth/sign-in/email'
     | '/auth/sign-in/'
+    | '/$slug/billing'
     | '/$slug/plans'
     | '/$slug/settings'
     | '/$slug/$contentId'
-    | '/$slug/settings/billing'
     | '/$slug/settings/preferences'
     | '/$slug/settings/profile'
     | '/$slug/settings/security'
-    | '/$slug/settings/usage'
     | '/$slug/content/'
     | '/$slug/home/'
     | '/$slug/settings/'
@@ -360,13 +349,12 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/auth/sign-in/email'
     | '/auth/sign-in'
+    | '/$slug/billing'
     | '/$slug/plans'
     | '/$slug/$contentId'
-    | '/$slug/settings/billing'
     | '/$slug/settings/preferences'
     | '/$slug/settings/profile'
     | '/$slug/settings/security'
-    | '/$slug/settings/usage'
     | '/$slug/content'
     | '/$slug/home'
     | '/$slug/settings'
@@ -393,14 +381,13 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/auth/sign-in/email'
     | '/auth/sign-in/'
+    | '/_authenticated/$slug/_dashboard/billing'
     | '/_authenticated/$slug/_dashboard/plans'
     | '/_authenticated/$slug/_dashboard/settings'
     | '/_authenticated/$slug/_editor/$contentId'
-    | '/_authenticated/$slug/_dashboard/settings/billing'
     | '/_authenticated/$slug/_dashboard/settings/preferences'
     | '/_authenticated/$slug/_dashboard/settings/profile'
     | '/_authenticated/$slug/_dashboard/settings/security'
-    | '/_authenticated/$slug/_dashboard/settings/usage'
     | '/_authenticated/$slug/_dashboard/content/'
     | '/_authenticated/$slug/_dashboard/home/'
     | '/_authenticated/$slug/_dashboard/settings/'
@@ -588,6 +575,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSlugDashboardPlansRouteImport
       parentRoute: typeof AuthenticatedSlugDashboardRoute
     }
+    '/_authenticated/$slug/_dashboard/billing': {
+      id: '/_authenticated/$slug/_dashboard/billing'
+      path: '/billing'
+      fullPath: '/$slug/billing'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardBillingRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardRoute
+    }
     '/_authenticated/$slug/_dashboard/settings/': {
       id: '/_authenticated/$slug/_dashboard/settings/'
       path: '/'
@@ -608,13 +602,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/$slug/content/'
       preLoaderRoute: typeof AuthenticatedSlugDashboardContentIndexRouteImport
       parentRoute: typeof AuthenticatedSlugDashboardRoute
-    }
-    '/_authenticated/$slug/_dashboard/settings/usage': {
-      id: '/_authenticated/$slug/_dashboard/settings/usage'
-      path: '/usage'
-      fullPath: '/$slug/settings/usage'
-      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsUsageRouteImport
-      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
     }
     '/_authenticated/$slug/_dashboard/settings/security': {
       id: '/_authenticated/$slug/_dashboard/settings/security'
@@ -637,37 +624,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsPreferencesRouteImport
       parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
     }
-    '/_authenticated/$slug/_dashboard/settings/billing': {
-      id: '/_authenticated/$slug/_dashboard/settings/billing'
-      path: '/billing'
-      fullPath: '/$slug/settings/billing'
-      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsBillingRouteImport
-      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
-    }
   }
 }
 
 interface AuthenticatedSlugDashboardSettingsRouteChildren {
-  AuthenticatedSlugDashboardSettingsBillingRoute: typeof AuthenticatedSlugDashboardSettingsBillingRoute
   AuthenticatedSlugDashboardSettingsPreferencesRoute: typeof AuthenticatedSlugDashboardSettingsPreferencesRoute
   AuthenticatedSlugDashboardSettingsProfileRoute: typeof AuthenticatedSlugDashboardSettingsProfileRoute
   AuthenticatedSlugDashboardSettingsSecurityRoute: typeof AuthenticatedSlugDashboardSettingsSecurityRoute
-  AuthenticatedSlugDashboardSettingsUsageRoute: typeof AuthenticatedSlugDashboardSettingsUsageRoute
   AuthenticatedSlugDashboardSettingsIndexRoute: typeof AuthenticatedSlugDashboardSettingsIndexRoute
 }
 
 const AuthenticatedSlugDashboardSettingsRouteChildren: AuthenticatedSlugDashboardSettingsRouteChildren =
   {
-    AuthenticatedSlugDashboardSettingsBillingRoute:
-      AuthenticatedSlugDashboardSettingsBillingRoute,
     AuthenticatedSlugDashboardSettingsPreferencesRoute:
       AuthenticatedSlugDashboardSettingsPreferencesRoute,
     AuthenticatedSlugDashboardSettingsProfileRoute:
       AuthenticatedSlugDashboardSettingsProfileRoute,
     AuthenticatedSlugDashboardSettingsSecurityRoute:
       AuthenticatedSlugDashboardSettingsSecurityRoute,
-    AuthenticatedSlugDashboardSettingsUsageRoute:
-      AuthenticatedSlugDashboardSettingsUsageRoute,
     AuthenticatedSlugDashboardSettingsIndexRoute:
       AuthenticatedSlugDashboardSettingsIndexRoute,
   }
@@ -678,6 +652,7 @@ const AuthenticatedSlugDashboardSettingsRouteWithChildren =
   )
 
 interface AuthenticatedSlugDashboardRouteChildren {
+  AuthenticatedSlugDashboardBillingRoute: typeof AuthenticatedSlugDashboardBillingRoute
   AuthenticatedSlugDashboardPlansRoute: typeof AuthenticatedSlugDashboardPlansRoute
   AuthenticatedSlugDashboardSettingsRoute: typeof AuthenticatedSlugDashboardSettingsRouteWithChildren
   AuthenticatedSlugDashboardContentIndexRoute: typeof AuthenticatedSlugDashboardContentIndexRoute
@@ -686,6 +661,8 @@ interface AuthenticatedSlugDashboardRouteChildren {
 
 const AuthenticatedSlugDashboardRouteChildren: AuthenticatedSlugDashboardRouteChildren =
   {
+    AuthenticatedSlugDashboardBillingRoute:
+      AuthenticatedSlugDashboardBillingRoute,
     AuthenticatedSlugDashboardPlansRoute: AuthenticatedSlugDashboardPlansRoute,
     AuthenticatedSlugDashboardSettingsRoute:
       AuthenticatedSlugDashboardSettingsRouteWithChildren,

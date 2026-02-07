@@ -13,13 +13,45 @@ import {
    SelectValue,
 } from "@packages/ui/components/select";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import {
+   Table,
+   TableBody,
+   TableCell,
+   TableHead,
+   TableHeader,
+   TableRow,
+} from "@packages/ui/components/table";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { orpc } from "@/integrations/orpc/client";
 import { UsageChart } from "@/features/billing/ui/usage-chart";
+import { orpc } from "@/integrations/orpc/client";
 
 // ============================================
-// Helper functions
+// Constants
+// ============================================
+
+const CATEGORY_LABELS: Record<string, string> = {
+   content: "Conteudo",
+   ai: "Inteligencia Artificial",
+   form: "Formularios",
+   seo: "SEO",
+   experiment: "Experimentos",
+   webhook: "Webhooks",
+   system: "Sistema",
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+   content: "#3b82f6",
+   ai: "#8b5cf6",
+   form: "#f59e0b",
+   seo: "#10b981",
+   experiment: "#f43f5e",
+   webhook: "#06b6d4",
+   system: "#64748b",
+};
+
+// ============================================
+// Helpers
 // ============================================
 
 function formatCurrency(value: number): string {
@@ -27,6 +59,13 @@ function formatCurrency(value: number): string {
       style: "currency",
       currency: "BRL",
    });
+}
+
+function formatShortDate(dateStr: string): string {
+   const d = new Date(dateStr);
+   return d
+      .toLocaleDateString("pt-BR", { day: "numeric", month: "short" })
+      .toUpperCase();
 }
 
 // ============================================
@@ -50,20 +89,14 @@ function SpendSkeleton() {
                <Skeleton className="h-[350px] w-full" />
             </CardContent>
          </Card>
-
-         <div className="grid gap-4 md:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-               <Card key={`spend-skeleton-${i}`}>
-                  <CardHeader className="pb-2">
-                     <Skeleton className="h-4 w-24" />
-                  </CardHeader>
-                  <CardContent>
-                     <Skeleton className="h-8 w-28" />
-                     <Skeleton className="mt-1 h-3 w-20" />
-                  </CardContent>
-               </Card>
-            ))}
-         </div>
+         <Card>
+            <CardHeader>
+               <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent>
+               <Skeleton className="h-48 w-full" />
+            </CardContent>
+         </Card>
       </div>
    );
 }
@@ -86,10 +119,32 @@ export function BillingSpend() {
 
    const usageData = data ?? [];
 
-   const totalSpend = usageData.reduce((sum, d) => sum + d.total, 0);
-   const avgDaily = totalSpend / (usageData.length || 1);
-   const maxDay =
-      usageData.length > 0 ? Math.max(...usageData.map((d) => d.total)) : 0;
+   // Build chart data using byCategory (cost) for the area chart
+   const chartData = usageData.map((d) => ({
+      date: d.date,
+      total: d.total,
+      byCategory: d.byCategory,
+   }));
+
+   // Always include all known categories
+   const allCategories = Object.keys(CATEGORY_LABELS);
+   const allDates = usageData.map((d) => d.date);
+
+   // Build totals per category
+   const categoryTotals = new Map<string, number>();
+   for (const cat of allCategories) {
+      categoryTotals.set(cat, 0);
+   }
+   for (const d of usageData) {
+      for (const [cat, cost] of Object.entries(d.byCategory)) {
+         categoryTotals.set(cat, (categoryTotals.get(cat) ?? 0) + cost);
+      }
+   }
+
+   // Sort categories by total descending
+   const sortedCategories = [...allCategories].sort(
+      (a, b) => (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
+   );
 
    return (
       <div className="space-y-6">
@@ -100,7 +155,7 @@ export function BillingSpend() {
                   <div>
                      <CardTitle>Gastos diarios</CardTitle>
                      <CardDescription>
-                        Acompanhe seus gastos ao longo do tempo
+                        Acompanhe seus gastos ao longo do tempo por produto
                      </CardDescription>
                   </div>
                   <Select
@@ -119,64 +174,77 @@ export function BillingSpend() {
                </div>
             </CardHeader>
             <CardContent>
-               {usageData.length === 0 ? (
-                  <div className="h-[350px] flex items-center justify-center text-muted-foreground">
-                     Nenhum dado de gastos neste periodo
-                  </div>
-               ) : (
-                  <UsageChart data={usageData} />
-               )}
+               <UsageChart data={chartData} mode="cost" />
             </CardContent>
          </Card>
 
-         {/* Summary Stats */}
-         <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-               <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">
-                     Gasto total
-                  </CardTitle>
-               </CardHeader>
-               <CardContent>
-                  <div className="text-2xl font-bold tabular-nums">
-                     {formatCurrency(totalSpend)}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                     nos ultimos {days} dias
-                  </p>
-               </CardContent>
-            </Card>
-            <Card>
-               <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">
-                     Media diaria
-                  </CardTitle>
-               </CardHeader>
-               <CardContent>
-                  <div className="text-2xl font-bold tabular-nums">
-                     {formatCurrency(avgDaily)}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                     por dia
-                  </p>
-               </CardContent>
-            </Card>
-            <Card>
-               <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">
-                     Maior gasto diario
-                  </CardTitle>
-               </CardHeader>
-               <CardContent>
-                  <div className="text-2xl font-bold tabular-nums">
-                     {formatCurrency(maxDay)}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                     pico no periodo
-                  </p>
-               </CardContent>
-            </Card>
-         </div>
+         {/* Daily breakdown table - always shown */}
+         <Card>
+            <CardHeader>
+               <CardTitle className="text-base">
+                  Gastos diarios por produto
+               </CardTitle>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+               <Table>
+                  <TableHeader>
+                     <TableRow>
+                        <TableHead className="sticky left-0 bg-card z-10 min-w-[180px]">
+                           Serie
+                        </TableHead>
+                        <TableHead className="text-right min-w-[100px]">
+                           Gasto total
+                        </TableHead>
+                        {allDates.map((date) => (
+                           <TableHead
+                              className="text-right min-w-[80px] text-xs"
+                              key={date}
+                           >
+                              {formatShortDate(date)}
+                           </TableHead>
+                        ))}
+                     </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                     {sortedCategories.map((cat) => (
+                        <TableRow key={cat}>
+                           <TableCell className="sticky left-0 bg-card z-10">
+                              <div className="flex items-center gap-2">
+                                 <div
+                                    className="size-2.5 rounded-full shrink-0"
+                                    style={{
+                                       backgroundColor:
+                                          CATEGORY_COLORS[cat] ?? "#94a3b8",
+                                    }}
+                                 />
+                                 <span className="text-sm font-medium">
+                                    {CATEGORY_LABELS[cat] ?? cat}
+                                 </span>
+                              </div>
+                           </TableCell>
+                           <TableCell className="text-right font-medium tabular-nums">
+                              {formatCurrency(categoryTotals.get(cat) ?? 0)}
+                           </TableCell>
+                           {allDates.map((date) => {
+                              const dayData = usageData.find(
+                                 (d) => d.date === date,
+                              );
+                              const cost = dayData?.byCategory[cat] ?? 0;
+                              return (
+                                 <TableCell
+                                    className="text-right tabular-nums text-sm"
+                                    key={`${cat}-${date}`}
+                                 >
+                                    {formatCurrency(cost)}
+                                 </TableCell>
+                              );
+                           })}
+                        </TableRow>
+                     ))}
+                  </TableBody>
+               </Table>
+            </CardContent>
+         </Card>
       </div>
    );
 }

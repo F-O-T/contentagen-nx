@@ -1,24 +1,24 @@
-import {
-	decimal,
-	integer,
-	date,
-	pgMaterializedView,
-	text,
-	uuid,
-} from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import {
+   date,
+   decimal,
+   integer,
+   pgMaterializedView,
+   text,
+   uuid,
+} from "drizzle-orm/pg-core";
 
 // ---------------------------------------------------------------------------
 // daily_usage_by_event
 // ---------------------------------------------------------------------------
 
 export const dailyUsageByEvent = pgMaterializedView("daily_usage_by_event", {
-	organizationId: uuid("organization_id").notNull(),
-	eventName: text("event_name").notNull(),
-	eventCategory: text("event_category").notNull(),
-	date: date("date").notNull(),
-	eventCount: integer("event_count").notNull(),
-	totalCost: decimal("total_cost", { precision: 10, scale: 6 }).notNull(),
+   organizationId: uuid("organization_id").notNull(),
+   eventName: text("event_name").notNull(),
+   eventCategory: text("event_category").notNull(),
+   date: date("date").notNull(),
+   eventCount: integer("event_count").notNull(),
+   totalCost: decimal("total_cost", { precision: 10, scale: 6 }).notNull(),
 }).as(sql`
 	SELECT
 		organization_id,
@@ -37,17 +37,17 @@ export const dailyUsageByEvent = pgMaterializedView("daily_usage_by_event", {
 // ---------------------------------------------------------------------------
 
 export const currentMonthUsageByEvent = pgMaterializedView(
-	"current_month_usage_by_event",
-	{
-		organizationId: uuid("organization_id").notNull(),
-		eventName: text("event_name").notNull(),
-		eventCategory: text("event_category").notNull(),
-		eventCount: integer("event_count").notNull(),
-		monthToDateCost: decimal("month_to_date_cost", {
-			precision: 10,
-			scale: 6,
-		}).notNull(),
-	},
+   "current_month_usage_by_event",
+   {
+      organizationId: uuid("organization_id").notNull(),
+      eventName: text("event_name").notNull(),
+      eventCategory: text("event_category").notNull(),
+      eventCount: integer("event_count").notNull(),
+      monthToDateCost: decimal("month_to_date_cost", {
+         precision: 10,
+         scale: 6,
+      }).notNull(),
+   },
 ).as(sql`
 	SELECT
 		organization_id,
@@ -66,20 +66,20 @@ export const currentMonthUsageByEvent = pgMaterializedView(
 // ---------------------------------------------------------------------------
 
 export const currentMonthUsageByCategory = pgMaterializedView(
-	"current_month_usage_by_category",
-	{
-		organizationId: uuid("organization_id").notNull(),
-		eventCategory: text("event_category").notNull(),
-		eventCount: integer("event_count").notNull(),
-		monthToDateCost: decimal("month_to_date_cost", {
-			precision: 10,
-			scale: 6,
-		}).notNull(),
-		projectedCost: decimal("projected_cost", {
-			precision: 10,
-			scale: 6,
-		}).notNull(),
-	},
+   "current_month_usage_by_category",
+   {
+      organizationId: uuid("organization_id").notNull(),
+      eventCategory: text("event_category").notNull(),
+      eventCount: integer("event_count").notNull(),
+      monthToDateCost: decimal("month_to_date_cost", {
+         precision: 10,
+         scale: 6,
+      }).notNull(),
+      projectedCost: decimal("projected_cost", {
+         precision: 10,
+         scale: 6,
+      }).notNull(),
+   },
 ).as(sql`
 	SELECT
 		organization_id,

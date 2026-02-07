@@ -1,16 +1,16 @@
+import { toMajorUnitsString } from "@f-o-t/money";
 import type { DatabaseInstance } from "@packages/database/client";
 import {
-	createWebhookDelivery,
-	findMatchingWebhooks,
+   createWebhookDelivery,
+   findMatchingWebhooks,
 } from "@packages/database/repositories/webhook-repository";
 import { events } from "@packages/database/schemas/events";
 import type { PostHog } from "@packages/posthog/server";
-import {
-	type WebhookDeliveryJobData,
-	createWebhookDeliveryQueue,
-} from "@packages/queue/webhook-delivery";
 import { createQueueConnection } from "@packages/queue/connection";
-import { toMajorUnitsString } from "@f-o-t/money";
+import {
+   createWebhookDeliveryQueue,
+   type WebhookDeliveryJobData,
+} from "@packages/queue/webhook-delivery";
 import type { Queue } from "bullmq";
 
 import type { EventCategory } from "./catalog";
@@ -45,27 +45,27 @@ let webhookQueue: Queue<WebhookDeliveryJobData> | null = null;
  * Must be called once at app startup (web or worker).
  */
 export function initializeWebhookQueue(redisUrl: string): void {
-	if (webhookQueue) return;
-	const connection = createQueueConnection(redisUrl);
-	webhookQueue = createWebhookDeliveryQueue(connection);
+   if (webhookQueue) return;
+   const connection = createQueueConnection(redisUrl);
+   webhookQueue = createWebhookDeliveryQueue(connection);
 }
 
 /**
  * Build the webhook payload from a stored event.
  */
 function buildWebhookPayload(
-	eventId: string,
-	eventName: string,
-	organizationId: string,
-	properties: Record<string, unknown>,
+   eventId: string,
+   eventName: string,
+   organizationId: string,
+   properties: Record<string, unknown>,
 ): Record<string, unknown> {
-	return {
-		id: eventId,
-		event: eventName,
-		data: properties,
-		created_at: new Date().toISOString(),
-		organization_id: organizationId,
-	};
+   return {
+      id: eventId,
+      event: eventName,
+      data: properties,
+      created_at: new Date().toISOString(),
+      organization_id: organizationId,
+   };
 }
 
 // ---------------------------------------------------------------------------
@@ -101,17 +101,20 @@ export async function emitEvent(params: EmitEventParams): Promise<void> {
       const price = await getEventPrice(db, eventName);
 
       // 1. Store in PostgreSQL (billing source of truth)
-      const [storedEvent] = await db.insert(events).values({
-         organizationId,
-         eventName,
-         eventCategory,
-         properties,
-         userId,
-         isBillable: true,
-         pricePerEvent: toMajorUnitsString(price),
-         ipAddress,
-         userAgent,
-      }).returning();
+      const [storedEvent] = await db
+         .insert(events)
+         .values({
+            organizationId,
+            eventName,
+            eventCategory,
+            properties,
+            userId,
+            isBillable: true,
+            pricePerEvent: toMajorUnitsString(price),
+            ipAddress,
+            userAgent,
+         })
+         .returning();
 
       // 2. Send to PostHog for analytics (optional)
       if (posthog) {

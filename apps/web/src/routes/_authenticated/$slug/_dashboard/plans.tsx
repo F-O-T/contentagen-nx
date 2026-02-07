@@ -9,13 +9,16 @@ import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { createFileRoute } from "@tanstack/react-router";
 import {
-   AnimatePresence,
-   motion,
-   useMotionValue,
-   useTransform,
-} from "framer-motion";
+   Table,
+   TableBody,
+   TableCell,
+   TableHead,
+   TableHeader,
+   TableRow,
+} from "@packages/ui/components/table";
+import { createFileRoute } from "@tanstack/react-router";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 import {
    Check,
    Clock,
@@ -26,6 +29,7 @@ import {
    Shield,
    Sparkles,
    User,
+   X,
    Zap,
 } from "lucide-react";
 import { Suspense, useState, useTransition } from "react";
@@ -49,6 +53,14 @@ interface Plan {
    highlighted?: boolean;
    hasFreeTrial?: boolean;
    trialDays?: number;
+}
+
+type PlanComparisonValue = string | boolean;
+
+interface PlanComparisonRow {
+   label: string;
+   description?: string;
+   values: Record<PlanName, PlanComparisonValue>;
 }
 
 interface Subscription {
@@ -99,52 +111,133 @@ const plans: Plan[] = STRIPE_PLANS.map((plan) => {
    };
 });
 
+const planHighlights: Record<PlanName, string[]> = {
+   [PlanName.FREE]: [
+      "Todos os recursos incluídos",
+      "1 usuário",
+      "R$ 2,50 em créditos de IA/mês",
+   ],
+   [PlanName.LITE]: [
+      "Todos os recursos incluídos",
+      "3 usuários",
+      "R$ 25 em créditos de IA/mês",
+   ],
+   [PlanName.PRO]: [
+      "Membros ilimitados",
+      "R$ 50 em créditos de IA/mês",
+      "Acesso à API",
+   ],
+};
+
+const comparisonRows: PlanComparisonRow[] = [
+   {
+      label: "Recursos completos",
+      description: "Todas as ferramentas da plataforma",
+      values: {
+         [PlanName.FREE]: true,
+         [PlanName.LITE]: true,
+         [PlanName.PRO]: true,
+      },
+   },
+   {
+      label: "Usuários",
+      values: {
+         [PlanName.FREE]: "1 usuário",
+         [PlanName.LITE]: "3 usuários",
+         [PlanName.PRO]: "Ilimitado",
+      },
+   },
+   {
+      label: "Créditos de IA/mês",
+      values: {
+         [PlanName.FREE]: "R$ 2,50",
+         [PlanName.LITE]: "R$ 25",
+         [PlanName.PRO]: "R$ 50",
+      },
+   },
+   {
+      label: "Créditos de plataforma/mês",
+      values: {
+         [PlanName.FREE]: "R$ 2,50",
+         [PlanName.LITE]: "R$ 25",
+         [PlanName.PRO]: "R$ 50",
+      },
+   },
+   {
+      label: "Suporte por email",
+      values: {
+         [PlanName.FREE]: true,
+         [PlanName.LITE]: true,
+         [PlanName.PRO]: true,
+      },
+   },
+   {
+      label: "Suporte prioritário",
+      values: {
+         [PlanName.FREE]: false,
+         [PlanName.LITE]: true,
+         [PlanName.PRO]: true,
+      },
+   },
+   {
+      label: "Acesso à API",
+      values: {
+         [PlanName.FREE]: false,
+         [PlanName.LITE]: false,
+         [PlanName.PRO]: true,
+      },
+   },
+   {
+      label: "Teste grátis",
+      values: {
+         [PlanName.FREE]: false,
+         [PlanName.LITE]: false,
+         [PlanName.PRO]: "14 dias",
+      },
+   },
+   {
+      label: "Cobrança anual com desconto",
+      values: {
+         [PlanName.FREE]: false,
+         [PlanName.LITE]: "17%",
+         [PlanName.PRO]: "17%",
+      },
+   },
+   {
+      label: "Cancelamento fácil",
+      values: {
+         [PlanName.FREE]: true,
+         [PlanName.LITE]: true,
+         [PlanName.PRO]: true,
+      },
+   },
+   {
+      label: "Atualizações contínuas",
+      values: {
+         [PlanName.FREE]: true,
+         [PlanName.LITE]: true,
+         [PlanName.PRO]: true,
+      },
+   },
+];
+
 // Animation variants
-const containerVariants = {
+const containerVariants: Variants = {
    hidden: { opacity: 0 },
    show: {
       opacity: 1,
       transition: {
-         staggerChildren: 0.1,
-         delayChildren: 0.2,
+         staggerChildren: 0.08,
+         delayChildren: 0.15,
       },
    },
 };
 
-const cardVariants = {
+const cardVariants: Variants = {
    hidden: { opacity: 0, y: 40 },
    show: {
       opacity: 1,
       y: 0,
-      transition: {
-         type: "spring",
-         stiffness: 100,
-         damping: 15,
-      },
-   },
-};
-
-const featureVariants = {
-   hidden: { opacity: 0, x: -10 },
-   show: {
-      opacity: 1,
-      x: 0,
-      transition: {
-         type: "spring",
-         stiffness: 200,
-         damping: 20,
-      },
-   },
-};
-
-const featureListVariants = {
-   hidden: { opacity: 0 },
-   show: {
-      opacity: 1,
-      transition: {
-         staggerChildren: 0.05,
-         delayChildren: 0.1,
-      },
    },
 };
 
@@ -218,20 +311,17 @@ function HeroSection() {
    return (
       <motion.div
          animate={{ opacity: 1, y: 0 }}
-         className="text-center space-y-4 py-8"
+         className="text-center space-y-5 py-10"
          initial={{ opacity: 0, y: 20 }}
          transition={{ duration: 0.6, ease: "easeOut" }}
       >
          <motion.h1
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-bold tracking-tight"
+            className="text-4xl md:text-6xl font-semibold tracking-tight font-serif"
             initial={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.6, delay: 0.1 }}
          >
-            Escolha o plano perfeito para{" "}
-            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-               acelerar sua criação
-            </span>
+            Planos claros para crescer com conteúdo
          </motion.h1>
          <motion.p
             animate={{ opacity: 1, y: 0 }}
@@ -239,8 +329,8 @@ function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.6, delay: 0.2 }}
          >
-            Todos os recursos disponíveis em todos os planos. Escolha o plano
-            com a quantidade de créditos ideal para você.
+            Todos os recursos em todos os planos. O que muda é o volume de
+            créditos e o nível de suporte para o seu ritmo de produção.
          </motion.p>
       </motion.div>
    );
@@ -257,15 +347,15 @@ function BillingToggle({
    return (
       <motion.div
          animate={{ opacity: 1, y: 0 }}
-         className="flex justify-center mb-8"
+         className="flex justify-center mb-10"
          initial={{ opacity: 0, y: 20 }}
          transition={{ duration: 0.6, delay: 0.3 }}
       >
-         <div className="relative bg-muted p-1.5 rounded-full flex items-center">
+         <div className="relative bg-card/80 border border-muted p-1.5 rounded-full flex items-center shadow-sm">
             {/* Sliding indicator */}
             <motion.div
                animate={{ x: isAnnual ? "100%" : "0%" }}
-               className="absolute inset-y-1.5 left-1.5 w-[calc(50%-6px)] bg-background rounded-full shadow-sm"
+               className="absolute inset-y-1.5 left-1.5 w-[calc(50%-6px)] bg-background rounded-full shadow"
                initial={false}
                layoutId="billing-toggle"
                transition={{
@@ -319,7 +409,7 @@ function AnimatedPrice({
          <AnimatePresence mode="wait">
             <motion.span
                animate={{ opacity: 1, y: 0 }}
-               className="text-4xl font-bold inline-block"
+               className="text-4xl font-semibold inline-block tabular-nums"
                exit={{ opacity: 0, y: -10 }}
                initial={{ opacity: 0, y: 10 }}
                key={`${price}-${isAnnual}`}
@@ -369,6 +459,8 @@ function PlanCard({
    const price = isAnnual && plan.annualPrice ? plan.annualPrice : plan.price;
    const period = isFreePlan ? "" : isAnnual ? "/ano" : "/mês";
    const isHighlighted = plan.highlighted;
+   const highlights =
+      planHighlights[plan.name as PlanName] ?? plan.features.slice(0, 3);
 
    const getButtonText = () => {
       if (isCurrentPlan) {
@@ -385,39 +477,20 @@ function PlanCard({
       return "Assinar";
    };
 
-   // Motion values for hover effect
-   const y = useMotionValue(0);
-   const scale = useMotionValue(1);
-   const shadowOpacity = useTransform(y, [-8, 0], [0.15, 0.05]);
-
    return (
       <motion.div
-         className={`relative flex flex-col rounded-2xl border p-8 backdrop-blur-xl transition-colors ${
+         className={`relative flex flex-col rounded-3xl border p-8 bg-card/90 transition-all ${
             isHighlighted
-               ? "bg-card/90 border-primary/50 ring-2 ring-primary/20 lg:scale-105 z-10"
-               : "bg-card/80"
-         } ${isCurrentPlan ? "border-green-500 bg-green-500/5 ring-2 ring-green-500/20" : ""}`}
+               ? "border-primary/50 shadow-[0_24px_60px_rgba(18,18,18,0.12)] lg:scale-[1.02]"
+               : "border-muted shadow-[0_16px_40px_rgba(18,18,18,0.08)]"
+         } ${isCurrentPlan ? "border-green-500/60" : ""}`}
          data-plan={plan.name.toLowerCase()}
-         onHoverEnd={() => {
-            y.set(0);
-            scale.set(1);
-         }}
-         onHoverStart={() => {
-            y.set(-8);
-            scale.set(1.02);
-         }}
-         style={{
-            y,
-            scale,
-            boxShadow: isHighlighted
-               ? `0 8px 32px rgba(251, 146, 60, ${shadowOpacity.get()})`
-               : `0 2px 4px rgba(0,0,0,0.05), 0 12px 24px rgba(0,0,0,${shadowOpacity.get()})`,
-         }}
+         transition={{ type: "spring", stiffness: 200, damping: 20 }}
          variants={cardVariants}
+         whileHover={{ y: -6 }}
       >
-         {/* Glow effect for highlighted card */}
          {isHighlighted && !isCurrentPlan && (
-            <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-primary/20 via-primary/5 to-transparent blur-xl -z-10" />
+            <div className="absolute -inset-px rounded-3xl bg-gradient-to-b from-primary/15 via-primary/5 to-transparent blur-xl -z-10" />
          )}
 
          {/* Badges */}
@@ -452,24 +525,32 @@ function PlanCard({
             </div>
          )}
 
-         {/* Plan Icon */}
-         <div className="text-center pb-2 pt-4">
-            <motion.div
-               className={`mx-auto mb-4 p-4 rounded-2xl inline-flex ${
-                  isHighlighted
-                     ? "bg-primary/10 text-primary"
-                     : "bg-muted text-muted-foreground"
-               }`}
-               transition={{ type: "spring", stiffness: 400, damping: 17 }}
-               whileHover={{ scale: 1.1, rotate: 5 }}
-            >
-               {plan.icon}
-            </motion.div>
-            <h3 className="text-2xl font-bold">{plan.displayName}</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-               {plan.description}
-            </p>
+         <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+               <div
+                  className={`p-3 rounded-2xl ${
+                     isHighlighted
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground"
+                  }`}
+               >
+                  {plan.icon}
+               </div>
+               <div>
+                  <p className="text-sm text-muted-foreground">Plano</p>
+                  <h3 className="text-xl font-semibold tracking-tight">
+                     {plan.displayName}
+                  </h3>
+               </div>
+            </div>
+            {isHighlighted && !isCurrentPlan && (
+               <Badge variant="secondary">Recomendado</Badge>
+            )}
          </div>
+
+         <p className="text-sm text-muted-foreground mt-4">
+            {plan.description}
+         </p>
 
          {/* Price */}
          <AnimatedPrice isAnnual={isAnnual} period={period} price={price} />
@@ -484,29 +565,18 @@ function PlanCard({
             </div>
          )}
 
-         {/* Features List */}
-         <motion.ul
-            className="space-y-3 flex-1"
-            initial="hidden"
-            variants={featureListVariants}
-            viewport={{ once: true }}
-            whileInView="show"
-         >
-            {plan.features.map((feature) => (
-               <motion.li
-                  className="flex items-center gap-3"
-                  key={feature}
-                  variants={featureVariants}
-               >
+         {/* Highlights */}
+         <div className="space-y-3 flex-1">
+            {highlights.map((feature) => (
+               <div className="flex items-center gap-3" key={feature}>
                   <div className="flex-shrink-0 size-5 rounded-full bg-green-500/10 flex items-center justify-center">
                      <Check className="size-3 text-green-500" />
                   </div>
                   <span className="text-sm">{feature}</span>
-               </motion.li>
+               </div>
             ))}
-         </motion.ul>
+         </div>
 
-         {/* CTA Button */}
          <motion.div
             className="mt-8"
             whileHover={{ scale: 1.02 }}
@@ -526,6 +596,93 @@ function PlanCard({
             </Button>
          </motion.div>
       </motion.div>
+   );
+}
+
+function ComparisonTable({ isAnnual }: { isAnnual: boolean }) {
+   const planOrder = [PlanName.FREE, PlanName.LITE, PlanName.PRO];
+
+   const getPriceLabel = (plan: Plan) =>
+      isAnnual && plan.annualPrice ? plan.annualPrice : plan.price;
+
+   return (
+      <div className="overflow-x-auto border rounded-3xl bg-card/90">
+         <Table className="min-w-[720px]">
+            <TableHeader>
+               <TableRow className="bg-muted/40">
+                  <TableHead className="text-left w-[260px] font-medium">
+                     Comparar recursos
+                  </TableHead>
+                  {planOrder.map((planName) => {
+                     const plan = plans.find((p) => p.name === planName);
+                     if (!plan) return null;
+                     const period =
+                        plan.name === PlanName.FREE
+                           ? ""
+                           : isAnnual
+                             ? "/ano"
+                             : "/mês";
+                     return (
+                        <TableHead className="text-center" key={plan.name}>
+                           <div className="space-y-1">
+                              <div className="text-sm text-muted-foreground">
+                                 {plan.displayName}
+                              </div>
+                              <div className="text-lg font-semibold">
+                                 {getPriceLabel(plan)}
+                                 <span className="text-xs text-muted-foreground">
+                                    {period}
+                                 </span>
+                              </div>
+                           </div>
+                        </TableHead>
+                     );
+                  })}
+               </TableRow>
+            </TableHeader>
+            <TableBody>
+               {comparisonRows.map((row, index) => (
+                  <TableRow
+                     className={
+                        index % 2 === 0 ? "bg-background" : "bg-muted/30"
+                     }
+                     key={row.label}
+                  >
+                     <TableCell className="text-sm">
+                        <div className="space-y-1">
+                           <div className="font-medium text-foreground">
+                              {row.label}
+                           </div>
+                           {row.description && (
+                              <div className="text-xs text-muted-foreground">
+                                 {row.description}
+                              </div>
+                           )}
+                        </div>
+                     </TableCell>
+                     {planOrder.map((planName) => {
+                        const value = row.values[planName];
+                        return (
+                           <TableCell className="text-center" key={planName}>
+                              {typeof value === "boolean" ? (
+                                 value ? (
+                                    <Check className="size-4 text-green-600 inline" />
+                                 ) : (
+                                    <X className="size-4 text-muted-foreground inline" />
+                                 )
+                              ) : (
+                                 <span className="text-sm font-medium">
+                                    {value}
+                                 </span>
+                              )}
+                           </TableCell>
+                        );
+                     })}
+                  </TableRow>
+               ))}
+            </TableBody>
+         </Table>
+      </div>
    );
 }
 
@@ -627,54 +784,79 @@ function PlansPageContent() {
    });
 
    return (
-      <main className="flex flex-col">
-         {/* Hero Section */}
-         <HeroSection />
+      <main className="relative overflow-hidden">
+         <div className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 bg-gradient-to-b from-[#f7f1e8] via-background to-background" />
+            <div className="absolute -top-24 left-1/2 h-64 w-[640px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+         </div>
 
-         {/* Billing Toggle */}
-         <BillingToggle isAnnual={isAnnual} onToggle={setIsAnnual} />
+         <div className="relative z-10 flex flex-col gap-12 pb-16">
+            <section className="px-4">
+               <HeroSection />
+               <BillingToggle isAnnual={isAnnual} onToggle={setIsAnnual} />
+            </section>
 
-         {/* Plan Cards */}
-         <motion.div
-            className="grid gap-6 lg:gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto w-full px-4"
-            initial="hidden"
-            variants={containerVariants}
-            viewport={{ once: true, margin: "-100px" }}
-            whileInView="show"
-         >
-            {/* Mobile: Show Pro first */}
-            <div className="contents lg:hidden">
-               {orderedPlans.map((plan) => (
-                  <PlanCard
-                     isAnnual={isAnnual}
-                     isLoading={isLoading}
-                     key={plan.name}
-                     onSelect={handleSelectPlan}
-                     plan={plan}
-                     subscription={activeSubscription as Subscription | null}
-                  />
-               ))}
-            </div>
-            {/* Desktop: Original order */}
-            <div className="hidden lg:contents">
-               {plans.map((plan) => (
-                  <PlanCard
-                     isAnnual={isAnnual}
-                     isLoading={isLoading}
-                     key={plan.name}
-                     onSelect={handleSelectPlan}
-                     plan={plan}
-                     subscription={activeSubscription as Subscription | null}
-                  />
-               ))}
-            </div>
-         </motion.div>
+            <section className="px-4">
+               <motion.div
+                  className="grid gap-6 lg:gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto w-full"
+                  initial="hidden"
+                  variants={containerVariants}
+                  viewport={{ once: true, margin: "-100px" }}
+                  whileInView="show"
+               >
+                  <div className="contents lg:hidden">
+                     {orderedPlans.map((plan) => (
+                        <PlanCard
+                           isAnnual={isAnnual}
+                           isLoading={isLoading}
+                           key={plan.name}
+                           onSelect={handleSelectPlan}
+                           plan={plan}
+                           subscription={
+                              activeSubscription as Subscription | null
+                           }
+                        />
+                     ))}
+                  </div>
+                  <div className="hidden lg:contents">
+                     {plans.map((plan) => (
+                        <PlanCard
+                           isAnnual={isAnnual}
+                           isLoading={isLoading}
+                           key={plan.name}
+                           onSelect={handleSelectPlan}
+                           plan={plan}
+                           subscription={
+                              activeSubscription as Subscription | null
+                           }
+                        />
+                     ))}
+                  </div>
+               </motion.div>
+            </section>
 
-         {/* Trust Badges */}
-         <TrustBadges />
+            <section className="px-4">
+               <div className="max-w-6xl mx-auto space-y-4">
+                  <div className="space-y-2">
+                     <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
+                        Comparativo detalhado
+                     </p>
+                     <h2 className="text-2xl md:text-3xl font-semibold font-serif">
+                        Compare cada detalhe antes de decidir
+                     </h2>
+                     <p className="text-sm text-muted-foreground max-w-2xl">
+                        A diferença entre os planos está no volume de créditos,
+                        membros e nível de suporte. Tudo o que você precisa para
+                        crescer está aqui.
+                     </p>
+                  </div>
+                  <ComparisonTable isAnnual={isAnnual} />
+               </div>
+            </section>
 
-         {/* FAQ Section */}
-         <FAQSection />
+            <TrustBadges />
+            <FAQSection />
+         </div>
       </main>
    );
 }

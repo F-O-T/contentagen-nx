@@ -1,13 +1,12 @@
 import { ORPCError } from "@orpc/server";
+import {
+   currentMonthUsageByCategory,
+   currentMonthUsageByEvent,
+   dailyUsageByEvent,
+   eventCatalog,
+} from "@packages/database/schema";
 import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
-
-import {
-	currentMonthUsageByCategory,
-	currentMonthUsageByEvent,
-	dailyUsageByEvent,
-	eventCatalog,
-} from "@packages/database/schema";
 
 import { protectedProcedure } from "../server";
 
@@ -238,23 +237,39 @@ export const getDailyUsage = protectedProcedure
                ),
             );
 
-         // Group by date, aggregate by category
+         // Group by date, aggregate by category (both cost and event count)
          const dateMap = new Map<
             string,
-            { total: number; byCategory: Map<string, number> }
+            {
+               total: number;
+               totalCount: number;
+               byCategory: Map<string, number>;
+               countByCategory: Map<string, number>;
+            }
          >();
 
          for (const row of rows) {
             const dateStr = row.date;
             if (!dateMap.has(dateStr)) {
-               dateMap.set(dateStr, { total: 0, byCategory: new Map() });
+               dateMap.set(dateStr, {
+                  total: 0,
+                  totalCount: 0,
+                  byCategory: new Map(),
+                  countByCategory: new Map(),
+               });
             }
             const entry = dateMap.get(dateStr)!;
             const cost = Number(row.totalCost);
+            const count = row.eventCount;
             entry.total += cost;
+            entry.totalCount += count;
             entry.byCategory.set(
                row.eventCategory,
                (entry.byCategory.get(row.eventCategory) ?? 0) + cost,
+            );
+            entry.countByCategory.set(
+               row.eventCategory,
+               (entry.countByCategory.get(row.eventCategory) ?? 0) + count,
             );
          }
 
@@ -262,7 +277,9 @@ export const getDailyUsage = protectedProcedure
             .map(([date, data]) => ({
                date,
                total: data.total,
+               totalCount: data.totalCount,
                byCategory: Object.fromEntries(data.byCategory),
+               countByCategory: Object.fromEntries(data.countByCategory),
             }))
             .sort((a, b) => a.date.localeCompare(b.date));
       } catch (error) {

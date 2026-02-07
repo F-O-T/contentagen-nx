@@ -8,7 +8,9 @@ export class ContenttaServerClient {
 	private readonly apiUrl: string;
 	private readonly timeout: number;
 
-	constructor(config: Pick<ContenttaSdkConfig, "apiKey" | "apiUrl" | "timeout">) {
+	constructor(
+		config: Pick<ContenttaSdkConfig, "apiKey" | "apiUrl" | "timeout">,
+	) {
 		if (!config.apiKey) {
 			throw new Error("apiKey is required to initialize ContenttaServerClient");
 		}
@@ -46,9 +48,7 @@ export class ContenttaServerClient {
 			});
 		} catch (error) {
 			if (error instanceof TypeError) {
-				throw new Error(
-					`Contentta SDK: network error — ${error.message}`,
-				);
+				throw new Error(`Contentta SDK: network error — ${error.message}`);
 			}
 			throw error;
 		}

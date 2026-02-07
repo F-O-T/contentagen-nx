@@ -5,9 +5,9 @@
  */
 
 export interface RefreshViewsJobData {
-	triggeredAt: string;
+   triggeredAt: string;
 }
 
 export interface ReconcileCreditsJobData {
-	triggeredAt: string;
+   triggeredAt: string;
 }

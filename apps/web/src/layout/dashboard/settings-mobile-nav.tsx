@@ -1,6 +1,6 @@
 import { QuickAccessCard } from "@packages/ui/components/quick-access-card";
 import { useNavigate } from "@tanstack/react-router";
-import { Activity, CreditCard, Settings2, Shield, User } from "lucide-react";
+import { CreditCard, Settings2, Shield, User } from "lucide-react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 
 const settingsNavItems = [
@@ -25,20 +25,6 @@ const settingsNavItems = [
       id: "preferences",
       title: "Preferências",
    },
-   {
-      description: "Estatísticas de uso de recursos IA",
-      href: "/$slug/settings/usage",
-      icon: Activity,
-      id: "usage",
-      title: "Uso de IA",
-   },
-   {
-      description: "Plano e método de pagamento",
-      href: "/$slug/settings/billing",
-      icon: CreditCard,
-      id: "billing",
-      title: "Assinatura",
-   },
 ];
 
 export function SettingsMobileNav() {
@@ -61,6 +47,17 @@ export function SettingsMobileNav() {
                title={item.title}
             />
          ))}
+         <QuickAccessCard
+            description="Plano, uso e gastos"
+            icon={<CreditCard className="size-4" />}
+            onClick={() =>
+               navigate({
+                  params: { slug: activeOrganization.slug },
+                  to: "/$slug/billing",
+               })
+            }
+            title="Billing"
+         />
       </div>
    );
 }

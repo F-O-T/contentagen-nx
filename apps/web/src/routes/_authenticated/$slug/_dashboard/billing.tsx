@@ -5,6 +5,7 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
+import { Separator } from "@packages/ui/components/separator";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import {
@@ -90,11 +91,12 @@ function BillingPage() {
          <EarlyAccessBanner template={earlyAccessTemplate} />
 
          <Tabs defaultValue="overview">
-            <TabsList>
-               <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsList variant="line">
+               <TabsTrigger value="overview">Geral</TabsTrigger>
                <TabsTrigger value="usage">Uso</TabsTrigger>
                <TabsTrigger value="spend">Gastos</TabsTrigger>
             </TabsList>
+            <Separator />
 
             <TabsContent className="mt-6" value="overview">
                <ErrorBoundary FallbackComponent={BillingSectionErrorFallback}>

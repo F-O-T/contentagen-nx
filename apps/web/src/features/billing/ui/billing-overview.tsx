@@ -1,4 +1,6 @@
+import { PlanName, STRIPE_PLANS } from "@packages/stripe/constants";
 import { Badge } from "@packages/ui/components/badge";
+import { Button } from "@packages/ui/components/button";
 import {
    Card,
    CardContent,
@@ -6,38 +8,114 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
+import {
+   Collapsible,
+   CollapsibleContent,
+   CollapsibleTrigger,
+} from "@packages/ui/components/collapsible";
+import {
+   Empty,
+   EmptyDescription,
+   EmptyHeader,
+   EmptyMedia,
+   EmptyTitle,
+} from "@packages/ui/components/empty";
 import { Progress } from "@packages/ui/components/progress";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { CalendarDays, Layers, TrendingUp, Wallet } from "lucide-react";
+import { Skeleton } from "@packages/ui/components/skeleton";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@packages/ui/components/tooltip";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { Link, useParams } from "@tanstack/react-router";
+import {
+   BarChart3,
+   Calendar,
+   ChevronRight,
+   CreditCard,
+   Crown,
+   ExternalLink,
+   FileInput,
+   Globe,
+   HelpCircle,
+   Receipt,
+   Search,
+   Sparkles,
+   Webhook,
+   Zap,
+} from "lucide-react";
+import type { ReactNode } from "react";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { orpc } from "@/integrations/orpc/client";
 
 // ============================================
-// Category display names (pt-BR)
+// Types
 // ============================================
 
-const CATEGORY_LABELS: Record<string, string> = {
-   content: "Conteudo",
-   ai: "Inteligencia Artificial",
-   form: "Formularios",
-   seo: "SEO",
-   experiment: "Experimentos",
-   webhook: "Webhooks",
-   system: "Sistema",
-};
+interface CategorySummary {
+   category: string;
+   eventCount: number;
+   monthToDateCost: number;
+   projectedCost: number;
+}
 
-const CATEGORY_COLORS: Record<string, string> = {
-   content: "bg-blue-500",
-   ai: "bg-violet-500",
-   form: "bg-amber-500",
-   seo: "bg-emerald-500",
-   experiment: "bg-rose-500",
-   webhook: "bg-cyan-500",
-   system: "bg-slate-500",
+interface EventUsage {
+   eventName: string;
+   eventCount: number;
+   monthToDateCost: number;
+   displayName: string;
+   description: string | null;
+   pricePerEvent: number | null;
+   freeTierLimit: number;
+}
+
+// ============================================
+// Constants
+// ============================================
+
+const CATEGORY_CONFIG: Record<
+   string,
+   { label: string; description: string; icon: ReactNode }
+> = {
+   content: {
+      label: "Conteudo e Analytics",
+      description:
+         "Visualizacoes de pagina, engajamento e profundidade de scroll",
+      icon: <BarChart3 className="size-5" />,
+   },
+   ai: {
+      label: "Inteligencia Artificial",
+      description: "Completamentos IA, mensagens de chat e acoes de agentes",
+      icon: <Sparkles className="size-5" />,
+   },
+   form: {
+      label: "Formularios e Conversoes",
+      description: "Envios de formularios e rastreamento de conversoes",
+      icon: <FileInput className="size-5" />,
+   },
+   seo: {
+      label: "SEO e Otimizacao",
+      description: "Analise SEO e recomendacoes de otimizacao",
+      icon: <Search className="size-5" />,
+   },
+   experiment: {
+      label: "Experimentos",
+      description: "Testes A/B e experimentos de conteudo",
+      icon: <Globe className="size-5" />,
+   },
+   webhook: {
+      label: "Webhooks",
+      description: "Entregas de webhook e notificacoes externas",
+      icon: <Webhook className="size-5" />,
+   },
 };
 
 // ============================================
-// Helper functions
+// Helpers
 // ============================================
 
 function formatCurrency(value: number): string {
@@ -47,18 +125,19 @@ function formatCurrency(value: number): string {
    });
 }
 
-function getBillingPeriod(): string {
+function getBillingPeriodDates(): { start: Date; end: Date } {
    const now = new Date();
    const start = new Date(now.getFullYear(), now.getMonth(), 1);
    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+   return { start, end };
+}
 
-   const formatDay = (d: Date) =>
-      d.toLocaleDateString("pt-BR", {
-         day: "numeric",
-         month: "short",
-      });
-
-   return `${formatDay(start)} a ${formatDay(end)}, ${end.getFullYear()}`;
+function formatPeriodDate(d: Date): string {
+   return d.toLocaleDateString("pt-BR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+   });
 }
 
 function getDaysRemaining(): number {
@@ -70,72 +149,111 @@ function getDaysRemaining(): number {
    );
 }
 
-function getDaysElapsed(): number {
-   const now = new Date();
-   return now.getDate();
-}
+// ============================================
+// Current Bill Header
+// ============================================
 
-function getTotalDaysInMonth(): number {
-   const now = new Date();
-   return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-}
-
-function getCategoryLabel(category: string): string {
-   return CATEGORY_LABELS[category] ?? category;
-}
-
-function getCategoryColor(category: string): string {
-   return CATEGORY_COLORS[category] ?? "bg-muted-foreground";
+function CurrentBillHeader({ monthToDate }: { monthToDate: number }) {
+   return (
+      <div>
+         <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm font-medium text-muted-foreground">
+               Total do mes
+            </span>
+            <TooltipProvider>
+               <Tooltip>
+                  <TooltipTrigger>
+                     <HelpCircle className="size-3.5 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                     <p>
+                        Total acumulado baseado no uso de eventos neste periodo
+                        de cobranca.
+                     </p>
+                  </TooltipContent>
+               </Tooltip>
+            </TooltipProvider>
+         </div>
+         <p className="text-4xl font-bold tracking-tight tabular-nums">
+            {formatCurrency(monthToDate)}
+         </p>
+      </div>
+   );
 }
 
 // ============================================
-// CategoryRow Component
+// Plan Banner
 // ============================================
 
-interface CategoryData {
-   category: string;
-   eventCount: number;
-   monthToDateCost: number;
-   projectedCost: number;
-}
-
-function CategoryRow({ category }: { category: CategoryData }) {
-   const progressPercent =
-      category.projectedCost > 0
-         ? Math.min(
-              (category.monthToDateCost / category.projectedCost) * 100,
-              100,
-           )
-         : 0;
+function PlanBanner({
+   planName,
+   planDisplayName,
+}: {
+   planName: string;
+   planDisplayName: string;
+}) {
+   const { slug } = useParams({ strict: false }) as { slug: string };
+   const isPro = planName === PlanName.PRO;
+   const isFree = planName === PlanName.FREE;
+   const PlanIcon = isPro ? Crown : Zap;
 
    return (
-      <div className="space-y-2">
-         <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 min-w-0">
-               <div
-                  className={`size-2.5 rounded-full shrink-0 ${getCategoryColor(category.category)}`}
-               />
-               <span className="text-sm font-medium truncate">
-                  {getCategoryLabel(category.category)}
-               </span>
-               <Badge variant="secondary">
-                  {category.eventCount.toLocaleString("pt-BR")}{" "}
-                  {category.eventCount === 1 ? "evento" : "eventos"}
-               </Badge>
+      <div className="rounded-lg bg-card border p-5 flex items-start justify-between gap-4">
+         <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+               <PlanIcon className="size-5 text-primary" />
+               <p className="font-semibold text-lg">Plano {planDisplayName}</p>
             </div>
-            <div className="flex items-center gap-4 shrink-0">
-               <div className="text-right">
-                  <span className="text-sm font-medium tabular-nums">
-                     {formatCurrency(category.monthToDateCost)}
-                  </span>
-               </div>
-            </div>
+            {isFree ? (
+               <p className="text-sm text-muted-foreground">
+                  Voce esta no plano gratuito. Faca upgrade para ter mais
+                  creditos e recursos.
+               </p>
+            ) : (
+               <p className="text-sm text-muted-foreground">
+                  Seu plano inclui creditos mensais de IA e plataforma. Uso
+                  acima dos creditos e cobrado por evento.
+               </p>
+            )}
          </div>
+         {isFree && (
+            <Button asChild size="sm" variant="default">
+               <Link
+                  params={{ slug }}
+                  search={{ success: undefined }}
+                  to="/$slug/plans"
+               >
+                  Ver planos
+               </Link>
+            </Button>
+         )}
+      </div>
+   );
+}
 
-         <div className="flex items-center gap-3">
-            <Progress className="h-1.5 flex-1" value={progressPercent} />
-            <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-               Projetado: {formatCurrency(category.projectedCost)}
+// ============================================
+// Billing Period + Payment Link
+// ============================================
+
+function BillingPeriodSection() {
+   const { start, end } = getBillingPeriodDates();
+   const daysRemaining = getDaysRemaining();
+
+   return (
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+         <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Calendar className="size-4" />
+            <span>
+               Periodo de cobranca:{" "}
+               <span className="font-medium text-foreground">
+                  {formatPeriodDate(start)}
+               </span>{" "}
+               a{" "}
+               <span className="font-medium text-foreground">
+                  {formatPeriodDate(end)}
+               </span>{" "}
+               ({daysRemaining}{" "}
+               {daysRemaining === 1 ? "dia restante" : "dias restantes"})
             </span>
          </div>
       </div>
@@ -143,167 +261,390 @@ function CategoryRow({ category }: { category: CategoryData }) {
 }
 
 // ============================================
-// BillingOverview Component
+// Product Card (PostHog-style)
+// ============================================
+
+function OverviewProductCardSkeleton() {
+   return (
+      <div className="space-y-3 pt-4">
+         <Skeleton className="h-6 w-full" />
+         <Skeleton className="h-6 w-full" />
+         <Skeleton className="h-6 w-full" />
+      </div>
+   );
+}
+
+function OverviewProductSubItems({ category }: { category: string }) {
+   const { data: events, isLoading } = useQuery(
+      orpc.billing.getCategoryUsage.queryOptions({
+         input: {
+            category: category as
+               | "content"
+               | "ai"
+               | "form"
+               | "seo"
+               | "experiment"
+               | "webhook"
+               | "system",
+         },
+      }),
+   );
+
+   if (isLoading) {
+      return <OverviewProductCardSkeleton />;
+   }
+
+   if (!events || events.length === 0) {
+      return (
+         <p className="text-sm text-muted-foreground py-3">
+            Nenhum evento registrado nesta categoria
+         </p>
+      );
+   }
+
+   return (
+      <div className="space-y-3 pt-4">
+         {events.map((event: EventUsage) => {
+            const hasLimit = event.freeTierLimit > 0;
+            const percentage = hasLimit
+               ? Math.min((event.eventCount / event.freeTierLimit) * 100, 100)
+               : undefined;
+
+            return (
+               <div className="space-y-1.5" key={event.eventName}>
+                  <div className="flex items-center justify-between text-sm">
+                     <span>{event.displayName}</span>
+                     <div className="flex items-center gap-4">
+                        <span className="tabular-nums text-muted-foreground">
+                           {event.eventCount.toLocaleString("pt-BR")}
+                           {hasLimit && (
+                              <span>
+                                 {" "}
+                                 / {event.freeTierLimit.toLocaleString("pt-BR")}
+                              </span>
+                           )}
+                        </span>
+                        <span className="tabular-nums font-medium w-20 text-right">
+                           {formatCurrency(event.monthToDateCost)}
+                        </span>
+                     </div>
+                  </div>
+                  {percentage !== undefined && (
+                     <Progress className="h-1" value={percentage} />
+                  )}
+               </div>
+            );
+         })}
+      </div>
+   );
+}
+
+function OverviewProductCard({ category }: { category: CategorySummary }) {
+   const config = CATEGORY_CONFIG[category.category];
+   if (!config) return null;
+
+   return (
+      <Card>
+         <Collapsible>
+            <CardHeader className="pb-3">
+               <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                     <div className="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground shrink-0">
+                        {config.icon}
+                     </div>
+                     <div className="min-w-0">
+                        <CardTitle className="text-base">
+                           {config.label}
+                        </CardTitle>
+                        <CardDescription className="text-xs mt-0.5">
+                           {config.description}
+                        </CardDescription>
+                     </div>
+                  </div>
+               </div>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+               {/* Usage bar + stats row */}
+               <div className="flex items-center gap-4">
+                  <CollapsibleTrigger className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors shrink-0">
+                     <ChevronRight className="size-4 transition-transform [[data-state=open]_&]:rotate-90" />
+                  </CollapsibleTrigger>
+
+                  <div className="flex-1 flex items-center gap-6">
+                     {/* Current usage */}
+                     <div className="text-sm">
+                        <span className="text-muted-foreground">Atual</span>
+                        <p className="font-medium tabular-nums">
+                           {category.eventCount.toLocaleString("pt-BR")}
+                        </p>
+                     </div>
+
+                     {/* Progress bar area */}
+                     <div className="flex-1">
+                        <Progress
+                           className="h-2"
+                           value={
+                              category.projectedCost > 0
+                                 ? Math.min(
+                                      (category.monthToDateCost /
+                                         category.projectedCost) *
+                                         100,
+                                      100,
+                                   )
+                                 : 0
+                           }
+                        />
+                     </div>
+
+                     {/* Costs */}
+                     <div className="flex items-center gap-6 shrink-0">
+                        <div className="text-right">
+                           <span className="text-lg font-semibold tabular-nums">
+                              {formatCurrency(category.monthToDateCost)}
+                           </span>
+                           <p className="text-xs text-muted-foreground">
+                              No mes
+                           </p>
+                        </div>
+                        <div className="text-right">
+                           <span className="text-lg font-semibold tabular-nums">
+                              {formatCurrency(category.projectedCost)}
+                           </span>
+                           <p className="text-xs text-muted-foreground">
+                              Projetado
+                           </p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               {/* Expandable sub-items */}
+               <CollapsibleContent>
+                  <div className="border-t">
+                     <ErrorBoundary
+                        fallback={
+                           <p className="text-sm text-destructive py-3">
+                              Erro ao carregar detalhes
+                           </p>
+                        }
+                     >
+                        <Suspense fallback={<OverviewProductCardSkeleton />}>
+                           <OverviewProductSubItems
+                              category={category.category}
+                           />
+                        </Suspense>
+                     </ErrorBoundary>
+                  </div>
+               </CollapsibleContent>
+            </CardContent>
+         </Collapsible>
+      </Card>
+   );
+}
+
+// ============================================
+// Invoices Section (compact)
+// ============================================
+
+function InvoicesPreviewSkeleton() {
+   return (
+      <div className="space-y-2">
+         <Skeleton className="h-10 w-full" />
+         <Skeleton className="h-10 w-full" />
+         <Skeleton className="h-10 w-full" />
+      </div>
+   );
+}
+
+function InvoicesPreviewContent() {
+   const { data: invoices } = useSuspenseQuery(
+      orpc.billing.getInvoices.queryOptions({ limit: 5 }),
+   );
+
+   if (!invoices || invoices.length === 0) {
+      return (
+         <Empty className="border-none py-4">
+            <EmptyHeader>
+               <EmptyMedia variant="icon">
+                  <Receipt className="size-5" />
+               </EmptyMedia>
+               <EmptyTitle className="text-sm">
+                  Nenhuma fatura encontrada
+               </EmptyTitle>
+               <EmptyDescription className="text-xs">
+                  Suas faturas aparecerão aqui apos o primeiro pagamento
+               </EmptyDescription>
+            </EmptyHeader>
+         </Empty>
+      );
+   }
+
+   return (
+      <div className="space-y-1">
+         {invoices.map((invoice) => {
+            const date =
+               typeof invoice.created === "number"
+                  ? new Date(invoice.created * 1000)
+                  : new Date(invoice.created);
+            const formattedDate = date.toLocaleDateString("pt-BR", {
+               day: "2-digit",
+               month: "2-digit",
+               year: "numeric",
+            });
+            const amount = new Intl.NumberFormat("pt-BR", {
+               currency: invoice.currency.toUpperCase(),
+               style: "currency",
+            }).format(invoice.amountPaid / 100);
+
+            const statusLabel =
+               invoice.status === "paid"
+                  ? "Pago"
+                  : invoice.status === "open"
+                    ? "Aberto"
+                    : (invoice.status ?? "—");
+
+            return (
+               <div
+                  className="flex items-center justify-between py-2 px-1 text-sm hover:bg-muted/50 rounded-md transition-colors"
+                  key={invoice.id}
+               >
+                  <div className="flex items-center gap-3 min-w-0">
+                     <span className="text-muted-foreground tabular-nums">
+                        {formattedDate}
+                     </span>
+                     <span className="truncate font-medium">
+                        {invoice.number || `#${invoice.id.slice(0, 8)}`}
+                     </span>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                     <Badge
+                        className={
+                           invoice.status === "paid"
+                              ? "bg-green-500/10 text-green-500 border-green-500/20"
+                              : ""
+                        }
+                        variant={
+                           invoice.status === "paid" ? "secondary" : "outline"
+                        }
+                     >
+                        {statusLabel}
+                     </Badge>
+                     <span className="font-medium tabular-nums">{amount}</span>
+                     {invoice.invoicePdf && (
+                        <a
+                           className="text-muted-foreground hover:text-foreground transition-colors"
+                           href={invoice.invoicePdf}
+                           rel="noopener noreferrer"
+                           target="_blank"
+                        >
+                           <ExternalLink className="size-3.5" />
+                        </a>
+                     )}
+                  </div>
+               </div>
+            );
+         })}
+      </div>
+   );
+}
+
+// ============================================
+// BillingOverview (main export)
 // ============================================
 
 export function BillingOverview() {
+   const { slug } = useParams({ strict: false }) as { slug: string };
    const { data } = useSuspenseQuery(
       orpc.billing.getCurrentUsage.queryOptions({}),
    );
-
    const { activeSubscription } = useActiveOrganization();
 
-   const daysRemaining = getDaysRemaining();
-   const daysElapsed = getDaysElapsed();
-   const totalDays = getTotalDaysInMonth();
-   const periodProgress = Math.round((daysElapsed / totalDays) * 100);
+   const planName = activeSubscription
+      ? (activeSubscription.plan as string).toLowerCase()
+      : PlanName.FREE;
 
-   const planLabel = activeSubscription
-      ? (activeSubscription.plan as string).toUpperCase()
-      : "FREE";
+   const plan = STRIPE_PLANS.find((p) => p.name.toLowerCase() === planName);
 
-   // Sort categories by cost descending
-   const sortedCategories = [...data.byCategory].sort(
+   // All known categories that should always be displayed
+   const ALL_CATEGORIES = Object.keys(CATEGORY_CONFIG);
+
+   // Merge API data with known categories — always show all cards
+   const categoryDataMap = new Map(data.byCategory.map((c) => [c.category, c]));
+
+   const allCategories: CategorySummary[] = ALL_CATEGORIES.map((cat) => {
+      const existing = categoryDataMap.get(cat);
+      return (
+         existing ?? {
+            category: cat,
+            eventCount: 0,
+            monthToDateCost: 0,
+            projectedCost: 0,
+         }
+      );
+   });
+
+   const sortedCategories = allCategories.sort(
       (a, b) => b.monthToDateCost - a.monthToDateCost,
-   );
-
-   const totalEvents = data.byCategory.reduce(
-      (sum, cat) => sum + cat.eventCount,
-      0,
    );
 
    return (
       <div className="space-y-6">
-         {/* Summary Cards */}
-         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {/* Total Bill Card */}
-            <Card>
-               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">
-                     Total do mes
-                  </CardTitle>
-                  <Wallet className="size-4 text-muted-foreground" />
-               </CardHeader>
-               <CardContent>
-                  <div className="text-2xl font-bold tabular-nums">
-                     {formatCurrency(data.monthToDate)}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                     Projecao: {formatCurrency(data.projected)}
-                  </p>
-               </CardContent>
-            </Card>
-
-            {/* Projected Cost Card */}
-            <Card>
-               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">
-                     Projecao final
-                  </CardTitle>
-                  <TrendingUp className="size-4 text-muted-foreground" />
-               </CardHeader>
-               <CardContent>
-                  <div className="text-2xl font-bold tabular-nums">
-                     {formatCurrency(data.projected)}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                     Baseado no uso ate agora
-                  </p>
-               </CardContent>
-            </Card>
-
-            {/* Billing Period Card */}
-            <Card>
-               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">
-                     Periodo de cobranca
-                  </CardTitle>
-                  <CalendarDays className="size-4 text-muted-foreground" />
-               </CardHeader>
-               <CardContent>
-                  <div className="text-sm font-semibold">
-                     {getBillingPeriod()}
-                  </div>
-                  <div className="mt-2 space-y-1">
-                     <Progress className="h-1.5" value={periodProgress} />
-                     <p className="text-xs text-muted-foreground">
-                        {daysRemaining}{" "}
-                        {daysRemaining === 1
-                           ? "dia restante"
-                           : "dias restantes"}
-                     </p>
-                  </div>
-               </CardContent>
-            </Card>
-
-            {/* Active Categories Card */}
-            <Card>
-               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium">
-                     Eventos no mes
-                  </CardTitle>
-                  <Layers className="size-4 text-muted-foreground" />
-               </CardHeader>
-               <CardContent>
-                  <div className="text-2xl font-bold tabular-nums">
-                     {totalEvents.toLocaleString("pt-BR")}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                     {data.byCategory.length}{" "}
-                     {data.byCategory.length === 1
-                        ? "categoria ativa"
-                        : "categorias ativas"}
-                  </p>
-               </CardContent>
-            </Card>
+         {/* Top section: bill total + plan banner */}
+         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <CurrentBillHeader monthToDate={data.monthToDate} />
+            <div className="lg:max-w-md flex-1">
+               <PlanBanner
+                  planDisplayName={plan?.displayName ?? "Free"}
+                  planName={planName}
+               />
+            </div>
          </div>
 
-         {/* Plan Context Banner */}
-         {activeSubscription && (
-            <Card className="bg-secondary/30 border-dashed">
-               <CardContent className="flex items-center justify-between py-3">
-                  <div className="flex items-center gap-2">
-                     <Badge variant="outline">{planLabel}</Badge>
-                     <span className="text-sm text-muted-foreground">
-                        Custos baseados em uso alem do plano
-                     </span>
-                  </div>
-               </CardContent>
-            </Card>
-         )}
+         {/* Billing period */}
+         <BillingPeriodSection />
 
-         {!activeSubscription && (
-            <Card className="bg-secondary/30 border-dashed">
-               <CardContent className="flex items-center justify-between py-3">
-                  <div className="flex items-center gap-2">
-                     <Badge variant="secondary">Pay-as-you-go</Badge>
-                     <span className="text-sm text-muted-foreground">
-                        Cobranca baseada no uso mensal de eventos
-                     </span>
-                  </div>
-               </CardContent>
-            </Card>
-         )}
+         {/* Manage card link */}
+         <Button asChild size="sm" variant="outline">
+            <Link
+               params={{ slug }}
+               search={{ success: undefined }}
+               to="/$slug/plans"
+            >
+               <CreditCard className="size-4 mr-1.5" />
+               Gerenciar plano e faturas
+               <ExternalLink className="size-3 ml-1" />
+            </Link>
+         </Button>
 
-         {/* Category Breakdown */}
+         {/* Products section */}
+         <div>
+            <h2 className="text-lg font-semibold mb-4">Produtos</h2>
+            <div className="space-y-4">
+               {sortedCategories.map((cat) => (
+                  <OverviewProductCard category={cat} key={cat.category} />
+               ))}
+            </div>
+         </div>
+
+         {/* Recent invoices */}
          <Card>
             <CardHeader>
-               <CardTitle>Gastos por categoria</CardTitle>
-               <CardDescription>
-                  Resumo dos custos por categoria de eventos neste periodo
-               </CardDescription>
+               <CardTitle className="text-base">Faturas recentes</CardTitle>
+               <CardDescription>Ultimas cobranças e pagamentos</CardDescription>
             </CardHeader>
             <CardContent>
-               <div className="space-y-5">
-                  {sortedCategories.map((cat) => (
-                     <CategoryRow category={cat} key={cat.category} />
-                  ))}
-                  {sortedCategories.length === 0 && (
-                     <p className="text-sm text-muted-foreground text-center py-6">
-                        Nenhum evento registrado neste periodo
+               <ErrorBoundary
+                  fallback={
+                     <p className="text-sm text-destructive">
+                        Erro ao carregar faturas
                      </p>
-                  )}
-               </div>
+                  }
+               >
+                  <Suspense fallback={<InvoicesPreviewSkeleton />}>
+                     <InvoicesPreviewContent />
+                  </Suspense>
+               </ErrorBoundary>
             </CardContent>
          </Card>
       </div>

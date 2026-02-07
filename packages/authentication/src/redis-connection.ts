@@ -1,6 +1,6 @@
+export type { Redis } from "@packages/redis/connection";
 export {
-   createRedisConnection,
    closeRedisConnection,
+   createRedisConnection,
    getRedisConnection,
 } from "@packages/redis/connection";
-export type { Redis } from "@packages/redis/connection";

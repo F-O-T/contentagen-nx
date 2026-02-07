@@ -8,31 +8,31 @@ import { type EmitEventParams, emitEvent } from "./emit";
 // ---------------------------------------------------------------------------
 
 export const CONTENT_EVENTS = {
-	"content.page.view": "content.page.view",
-	"content.page.published": "content.page.published",
-	"content.page.updated": "content.page.updated",
-	"content.created": "content.created",
-	"content.deleted": "content.deleted",
-	"content.scroll.milestone": "content.scroll.milestone",
-	"content.time.spent": "content.time.spent",
-	"content.cta.click": "content.cta.click",
-	"content.exported": "content.exported",
+   "content.page.view": "content.page.view",
+   "content.page.published": "content.page.published",
+   "content.page.updated": "content.page.updated",
+   "content.created": "content.created",
+   "content.deleted": "content.deleted",
+   "content.scroll.milestone": "content.scroll.milestone",
+   "content.time.spent": "content.time.spent",
+   "content.cta.click": "content.cta.click",
+   "content.exported": "content.exported",
 } as const;
 
 export type ContentEventName =
-	(typeof CONTENT_EVENTS)[keyof typeof CONTENT_EVENTS];
+   (typeof CONTENT_EVENTS)[keyof typeof CONTENT_EVENTS];
 
 // ---------------------------------------------------------------------------
 // Shared enums
 // ---------------------------------------------------------------------------
 
 export const trafficSourceSchema = z.enum([
-	"organic",
-	"direct",
-	"referral",
-	"social",
-	"email",
-	"paid",
+   "organic",
+   "direct",
+   "referral",
+   "social",
+   "email",
+   "paid",
 ]);
 export type TrafficSource = z.infer<typeof trafficSourceSchema>;
 
@@ -40,10 +40,10 @@ export const deviceTypeSchema = z.enum(["desktop", "mobile", "tablet"]);
 export type DeviceType = z.infer<typeof deviceTypeSchema>;
 
 export const scrollDepthSchema = z.union([
-	z.literal(25),
-	z.literal(50),
-	z.literal(75),
-	z.literal(100),
+   z.literal(25),
+   z.literal(50),
+   z.literal(75),
+   z.literal(100),
 ]);
 export type ScrollDepth = z.infer<typeof scrollDepthSchema>;
 
@@ -52,27 +52,27 @@ export type ScrollDepth = z.infer<typeof scrollDepthSchema>;
 // ---------------------------------------------------------------------------
 
 export const pageViewEventSchema = z.object({
-	contentId: z.string().uuid(),
-	url: z.string().url(),
-	referrer: z.string().optional(),
-	trafficSource: trafficSourceSchema.optional(),
-	deviceType: deviceTypeSchema.optional(),
-	country: z.string().optional(),
-	sessionId: z.string().optional(),
-	visitorId: z.string().optional(),
+   contentId: z.string().uuid(),
+   url: z.string().url(),
+   referrer: z.string().optional(),
+   trafficSource: trafficSourceSchema.optional(),
+   deviceType: deviceTypeSchema.optional(),
+   country: z.string().optional(),
+   sessionId: z.string().optional(),
+   visitorId: z.string().optional(),
 });
 export type PageViewEvent = z.infer<typeof pageViewEventSchema>;
 
 export function emitContentPageView(
-	ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
-	properties: PageViewEvent,
+   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   properties: PageViewEvent,
 ) {
-	return emitEvent({
-		...ctx,
-		eventName: CONTENT_EVENTS["content.page.view"],
-		eventCategory: EVENT_CATEGORIES.content,
-		properties,
-	});
+   return emitEvent({
+      ...ctx,
+      eventName: CONTENT_EVENTS["content.page.view"],
+      eventCategory: EVENT_CATEGORIES.content,
+      properties,
+   });
 }
 
 // ---------------------------------------------------------------------------
@@ -80,26 +80,24 @@ export function emitContentPageView(
 // ---------------------------------------------------------------------------
 
 export const contentPublishedEventSchema = z.object({
-	contentId: z.string().uuid(),
-	agentId: z.string().uuid().optional(),
-	title: z.string(),
-	slug: z.string(),
-	wordCount: z.number().int().nonnegative(),
+   contentId: z.string().uuid(),
+   agentId: z.string().uuid().optional(),
+   title: z.string(),
+   slug: z.string(),
+   wordCount: z.number().int().nonnegative(),
 });
-export type ContentPublishedEvent = z.infer<
-	typeof contentPublishedEventSchema
->;
+export type ContentPublishedEvent = z.infer<typeof contentPublishedEventSchema>;
 
 export function emitContentPublished(
-	ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
-	properties: ContentPublishedEvent,
+   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   properties: ContentPublishedEvent,
 ) {
-	return emitEvent({
-		...ctx,
-		eventName: CONTENT_EVENTS["content.page.published"],
-		eventCategory: EVENT_CATEGORIES.content,
-		properties,
-	});
+   return emitEvent({
+      ...ctx,
+      eventName: CONTENT_EVENTS["content.page.published"],
+      eventCategory: EVENT_CATEGORIES.content,
+      properties,
+   });
 }
 
 // ---------------------------------------------------------------------------
@@ -107,23 +105,23 @@ export function emitContentPublished(
 // ---------------------------------------------------------------------------
 
 export const contentUpdatedEventSchema = z.object({
-	contentId: z.string().uuid(),
-	changedFields: z.array(z.string()),
-	previousWordCount: z.number().int().nonnegative().optional(),
-	newWordCount: z.number().int().nonnegative().optional(),
+   contentId: z.string().uuid(),
+   changedFields: z.array(z.string()),
+   previousWordCount: z.number().int().nonnegative().optional(),
+   newWordCount: z.number().int().nonnegative().optional(),
 });
 export type ContentUpdatedEvent = z.infer<typeof contentUpdatedEventSchema>;
 
 export function emitContentUpdated(
-	ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
-	properties: ContentUpdatedEvent,
+   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   properties: ContentUpdatedEvent,
 ) {
-	return emitEvent({
-		...ctx,
-		eventName: CONTENT_EVENTS["content.page.updated"],
-		eventCategory: EVENT_CATEGORIES.content,
-		properties,
-	});
+   return emitEvent({
+      ...ctx,
+      eventName: CONTENT_EVENTS["content.page.updated"],
+      eventCategory: EVENT_CATEGORIES.content,
+      properties,
+   });
 }
 
 // ---------------------------------------------------------------------------
@@ -131,22 +129,22 @@ export function emitContentUpdated(
 // ---------------------------------------------------------------------------
 
 export const contentCreatedEventSchema = z.object({
-	contentId: z.string().uuid(),
-	title: z.string(),
-	agentId: z.string().uuid().optional(),
+   contentId: z.string().uuid(),
+   title: z.string(),
+   agentId: z.string().uuid().optional(),
 });
 export type ContentCreatedEvent = z.infer<typeof contentCreatedEventSchema>;
 
 export function emitContentCreated(
-	ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
-	properties: ContentCreatedEvent,
+   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   properties: ContentCreatedEvent,
 ) {
-	return emitEvent({
-		...ctx,
-		eventName: CONTENT_EVENTS["content.created"],
-		eventCategory: EVENT_CATEGORIES.content,
-		properties,
-	});
+   return emitEvent({
+      ...ctx,
+      eventName: CONTENT_EVENTS["content.created"],
+      eventCategory: EVENT_CATEGORIES.content,
+      properties,
+   });
 }
 
 // ---------------------------------------------------------------------------
@@ -154,20 +152,20 @@ export function emitContentCreated(
 // ---------------------------------------------------------------------------
 
 export const contentDeletedEventSchema = z.object({
-	contentId: z.string().uuid(),
+   contentId: z.string().uuid(),
 });
 export type ContentDeletedEvent = z.infer<typeof contentDeletedEventSchema>;
 
 export function emitContentDeleted(
-	ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
-	properties: ContentDeletedEvent,
+   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   properties: ContentDeletedEvent,
 ) {
-	return emitEvent({
-		...ctx,
-		eventName: CONTENT_EVENTS["content.deleted"],
-		eventCategory: EVENT_CATEGORIES.content,
-		properties,
-	});
+   return emitEvent({
+      ...ctx,
+      eventName: CONTENT_EVENTS["content.deleted"],
+      eventCategory: EVENT_CATEGORIES.content,
+      properties,
+   });
 }
 
 // ---------------------------------------------------------------------------
@@ -175,23 +173,23 @@ export function emitContentDeleted(
 // ---------------------------------------------------------------------------
 
 export const scrollMilestoneEventSchema = z.object({
-	contentId: z.string().uuid(),
-	depth: scrollDepthSchema,
-	sessionId: z.string().optional(),
-	visitorId: z.string().optional(),
+   contentId: z.string().uuid(),
+   depth: scrollDepthSchema,
+   sessionId: z.string().optional(),
+   visitorId: z.string().optional(),
 });
 export type ScrollMilestoneEvent = z.infer<typeof scrollMilestoneEventSchema>;
 
 export function emitScrollMilestone(
-	ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
-	properties: ScrollMilestoneEvent,
+   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   properties: ScrollMilestoneEvent,
 ) {
-	return emitEvent({
-		...ctx,
-		eventName: CONTENT_EVENTS["content.scroll.milestone"],
-		eventCategory: EVENT_CATEGORIES.content,
-		properties,
-	});
+   return emitEvent({
+      ...ctx,
+      eventName: CONTENT_EVENTS["content.scroll.milestone"],
+      eventCategory: EVENT_CATEGORIES.content,
+      properties,
+   });
 }
 
 // ---------------------------------------------------------------------------
@@ -199,23 +197,23 @@ export function emitScrollMilestone(
 // ---------------------------------------------------------------------------
 
 export const timeSpentEventSchema = z.object({
-	contentId: z.string().uuid(),
-	durationSeconds: z.number().nonnegative(),
-	sessionId: z.string().optional(),
-	visitorId: z.string().optional(),
+   contentId: z.string().uuid(),
+   durationSeconds: z.number().nonnegative(),
+   sessionId: z.string().optional(),
+   visitorId: z.string().optional(),
 });
 export type TimeSpentEvent = z.infer<typeof timeSpentEventSchema>;
 
 export function emitTimeSpent(
-	ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
-	properties: TimeSpentEvent,
+   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   properties: TimeSpentEvent,
 ) {
-	return emitEvent({
-		...ctx,
-		eventName: CONTENT_EVENTS["content.time.spent"],
-		eventCategory: EVENT_CATEGORIES.content,
-		properties,
-	});
+   return emitEvent({
+      ...ctx,
+      eventName: CONTENT_EVENTS["content.time.spent"],
+      eventCategory: EVENT_CATEGORIES.content,
+      properties,
+   });
 }
 
 // ---------------------------------------------------------------------------
@@ -223,25 +221,25 @@ export function emitTimeSpent(
 // ---------------------------------------------------------------------------
 
 export const ctaClickEventSchema = z.object({
-	contentId: z.string().uuid(),
-	ctaId: z.string(),
-	ctaLabel: z.string().optional(),
-	ctaUrl: z.string().url().optional(),
-	sessionId: z.string().optional(),
-	visitorId: z.string().optional(),
+   contentId: z.string().uuid(),
+   ctaId: z.string(),
+   ctaLabel: z.string().optional(),
+   ctaUrl: z.string().url().optional(),
+   sessionId: z.string().optional(),
+   visitorId: z.string().optional(),
 });
 export type CtaClickEvent = z.infer<typeof ctaClickEventSchema>;
 
 export function emitCtaClick(
-	ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
-	properties: CtaClickEvent,
+   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   properties: CtaClickEvent,
 ) {
-	return emitEvent({
-		...ctx,
-		eventName: CONTENT_EVENTS["content.cta.click"],
-		eventCategory: EVENT_CATEGORIES.content,
-		properties,
-	});
+   return emitEvent({
+      ...ctx,
+      eventName: CONTENT_EVENTS["content.cta.click"],
+      eventCategory: EVENT_CATEGORIES.content,
+      properties,
+   });
 }
 
 // ---------------------------------------------------------------------------
@@ -249,20 +247,20 @@ export function emitCtaClick(
 // ---------------------------------------------------------------------------
 
 export const contentExportedEventSchema = z.object({
-	contentId: z.string().uuid(),
-	exportFormat: z.string(),
-	destination: z.string().optional(),
+   contentId: z.string().uuid(),
+   exportFormat: z.string(),
+   destination: z.string().optional(),
 });
 export type ContentExportedEvent = z.infer<typeof contentExportedEventSchema>;
 
 export function emitContentExported(
-	ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
-	properties: ContentExportedEvent,
+   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   properties: ContentExportedEvent,
 ) {
-	return emitEvent({
-		...ctx,
-		eventName: CONTENT_EVENTS["content.exported"],
-		eventCategory: EVENT_CATEGORIES.content,
-		properties,
-	});
+   return emitEvent({
+      ...ctx,
+      eventName: CONTENT_EVENTS["content.exported"],
+      eventCategory: EVENT_CATEGORIES.content,
+      properties,
+   });
 }

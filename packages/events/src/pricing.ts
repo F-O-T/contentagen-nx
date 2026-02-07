@@ -300,9 +300,7 @@ export const PLAN_CREDIT_BUDGETS: Record<
  * @returns The pool name, or `undefined` for non-billable categories
  *          (e.g. "webhook", "system").
  */
-export function getCreditPool(
-   category: EventCategory,
-): CreditPool | undefined {
+export function getCreditPool(category: EventCategory): CreditPool | undefined {
    for (const [pool, categories] of Object.entries(POOL_CATEGORIES)) {
       if (categories.includes(category)) {
          return pool as CreditPool;

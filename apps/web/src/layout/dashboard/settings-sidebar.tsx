@@ -1,3 +1,4 @@
+import { Separator } from "@packages/ui/components/separator";
 import {
    SidebarGroup,
    SidebarGroupContent,
@@ -7,8 +8,8 @@ import {
 } from "@packages/ui/components/sidebar";
 import { Link, useLocation } from "@tanstack/react-router";
 import {
-   Activity,
    CreditCard,
+   ExternalLink,
    Settings2,
    Shield,
    User,
@@ -33,18 +34,6 @@ const settingsNavItems = [
       icon: Settings2,
       id: "preferences",
       title: "Preferências",
-   },
-   {
-      href: "/$slug/settings/usage",
-      icon: Activity,
-      id: "usage",
-      title: "Uso de IA",
-   },
-   {
-      href: "/$slug/settings/billing",
-      icon: CreditCard,
-      id: "billing",
-      title: "Assinatura",
    },
 ];
 
@@ -83,6 +72,21 @@ export function SettingsSidebar() {
                      </SidebarMenuButton>
                   </SidebarMenuItem>
                ))}
+            </SidebarMenu>
+            <Separator className="my-2" />
+            <SidebarMenu>
+               <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                     <Link
+                        params={{ slug: activeOrganization.slug }}
+                        to="/$slug/billing"
+                     >
+                        <CreditCard />
+                        <span>Faturamento</span>
+                        <ExternalLink className="ml-auto size-4" />
+                     </Link>
+                  </SidebarMenuButton>
+               </SidebarMenuItem>
             </SidebarMenu>
          </SidebarGroupContent>
       </SidebarGroup>

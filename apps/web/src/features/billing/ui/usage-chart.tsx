@@ -1,10 +1,17 @@
 import {
+   type ChartConfig,
+   ChartContainer,
+   ChartLegend,
+   ChartLegendContent,
+   ChartTooltip,
+   ChartTooltipContent,
+} from "@packages/ui/components/chart";
+import {
    Area,
    AreaChart,
    CartesianGrid,
-   Legend,
-   ResponsiveContainer,
-   Tooltip,
+   Line,
+   LineChart,
    XAxis,
    YAxis,
 } from "recharts";
@@ -34,6 +41,34 @@ const CHART_COLORS: Record<string, string> = {
 };
 
 // ============================================
+// Helpers
+// ============================================
+
+function generateEmptyDateRange(days: number): string[] {
+   const dates: string[] = [];
+   const now = new Date();
+   for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      dates.push(d.toISOString().split("T")[0]);
+   }
+   return dates;
+}
+
+function buildChartConfig(): ChartConfig {
+   const config: ChartConfig = {};
+   for (const [key, label] of Object.entries(CATEGORY_LABELS)) {
+      config[key] = {
+         label,
+         color: CHART_COLORS[key] ?? "#94a3b8",
+      };
+   }
+   return config;
+}
+
+const chartConfig = buildChartConfig();
+
+// ============================================
 // Types
 // ============================================
 
@@ -43,68 +78,114 @@ interface UsageChartProps {
       total: number;
       byCategory: Record<string, number>;
    }>;
+   mode?: "cost" | "count";
 }
 
 // ============================================
 // UsageChart Component
 // ============================================
 
-export function UsageChart({ data }: UsageChartProps) {
-   const chartData = data.map((d) => ({
-      date: new Date(d.date).toLocaleDateString("pt-BR", {
-         day: "numeric",
-         month: "short",
-      }),
-      total: d.total,
-      ...d.byCategory,
-   }));
+export function UsageChart({ data, mode = "cost" }: UsageChartProps) {
+   const categories = Object.keys(CATEGORY_LABELS);
 
-   const categories = [
-      ...new Set(data.flatMap((d) => Object.keys(d.byCategory))),
-   ];
+   const effectiveData =
+      data.length > 0
+         ? data
+         : generateEmptyDateRange(30).map((date) => ({
+              date,
+              total: 0,
+              byCategory: {} as Record<string, number>,
+           }));
+
+   const chartData = effectiveData.map((d) => {
+      const row: Record<string, number | string> = {
+         date: new Date(d.date).toLocaleDateString("pt-BR", {
+            day: "numeric",
+            month: "short",
+         }),
+         total: d.total,
+      };
+      for (const cat of categories) {
+         row[cat] = d.byCategory[cat] ?? 0;
+      }
+      return row;
+   });
+
+   const isCost = mode === "cost";
+
+   const formatTick = (value: number) =>
+      isCost ? `R$ ${value.toFixed(0)}` : value.toLocaleString("pt-BR");
+
+   if (isCost) {
+      return (
+         <ChartContainer className="h-[350px] w-full" config={chartConfig}>
+            <AreaChart
+               accessibilityLayer
+               data={chartData}
+               margin={{ left: 12, right: 12 }}
+            >
+               <CartesianGrid vertical={false} />
+               <XAxis
+                  axisLine={false}
+                  dataKey="date"
+                  tickLine={false}
+                  tickMargin={8}
+               />
+               <YAxis
+                  axisLine={false}
+                  tickFormatter={formatTick}
+                  tickLine={false}
+               />
+               <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
+               <ChartLegend content={<ChartLegendContent />} />
+               {categories.map((cat) => (
+                  <Area
+                     dataKey={cat}
+                     fill={`var(--color-${cat})`}
+                     fillOpacity={0.1}
+                     key={cat}
+                     stroke={`var(--color-${cat})`}
+                     strokeWidth={2}
+                     type="monotone"
+                  />
+               ))}
+            </AreaChart>
+         </ChartContainer>
+      );
+   }
 
    return (
-      <ResponsiveContainer height={350} width="100%">
-         <AreaChart data={chartData}>
-            <CartesianGrid className="stroke-border" strokeDasharray="3 3" />
+      <ChartContainer className="h-[350px] w-full" config={chartConfig}>
+         <LineChart
+            accessibilityLayer
+            data={chartData}
+            margin={{ left: 12, right: 12 }}
+         >
+            <CartesianGrid vertical={false} />
             <XAxis
                axisLine={false}
-               className="text-xs fill-muted-foreground"
                dataKey="date"
                tickLine={false}
+               tickMargin={8}
             />
             <YAxis
                axisLine={false}
-               className="text-xs fill-muted-foreground"
-               tickFormatter={(value) => `R$ ${value.toFixed(0)}`}
+               tickFormatter={formatTick}
                tickLine={false}
             />
-            <Tooltip
-               contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "0.5rem",
-               }}
-               formatter={(value: number, name: string) => [
-                  `R$ ${value.toFixed(2)}`,
-                  CATEGORY_LABELS[name] ?? name,
-               ]}
-            />
-            <Legend
-               formatter={(value) => CATEGORY_LABELS[value] ?? value}
-            />
+            <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
+            <ChartLegend content={<ChartLegendContent />} />
             {categories.map((cat) => (
-               <Area
+               <Line
                   dataKey={cat}
-                  fill={CHART_COLORS[cat] ?? "#94a3b8"}
-                  fillOpacity={0.1}
+                  dot={false}
                   key={cat}
-                  stroke={CHART_COLORS[cat] ?? "#94a3b8"}
+                  stroke={`var(--color-${cat})`}
                   strokeWidth={2}
                   type="monotone"
                />
             ))}
-         </AreaChart>
-      </ResponsiveContainer>
+         </LineChart>
+      </ChartContainer>
    );
 }

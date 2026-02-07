@@ -1,8 +1,4 @@
-import type {
-	ContenttaSdkConfig,
-	EventBatch,
-	TrackedEvent,
-} from "./types.ts";
+import type { ContenttaSdkConfig, EventBatch, TrackedEvent } from "./types.ts";
 
 const DEFAULT_BATCH_SIZE = 10;
 const DEFAULT_FLUSH_INTERVAL = 30_000;
@@ -142,9 +138,7 @@ export class ContenttaEventTracker {
 			});
 
 			if (!response.ok) {
-				this.log(
-					`Flush failed: ${response.status} ${response.statusText}`,
-				);
+				this.log(`Flush failed: ${response.status} ${response.statusText}`);
 				this.consecutiveFailures++;
 
 				// C1: Only re-queue if under the consecutive failure threshold
@@ -196,8 +190,7 @@ export class ContenttaEventTracker {
 			contentId,
 			contentSlug,
 			pageUrl: typeof window !== "undefined" ? window.location.href : "",
-			pagePath:
-				typeof window !== "undefined" ? window.location.pathname : "",
+			pagePath: typeof window !== "undefined" ? window.location.pathname : "",
 			referrer: typeof document !== "undefined" ? document.referrer : "",
 		});
 
@@ -241,10 +234,7 @@ export class ContenttaEventTracker {
 		}
 
 		if (typeof window !== "undefined") {
-			window.removeEventListener(
-				"beforeunload",
-				this.handleBeforeUnload,
-			);
+			window.removeEventListener("beforeunload", this.handleBeforeUnload);
 		}
 
 		// Final flush using sendBeacon if available
@@ -322,8 +312,7 @@ export class ContenttaEventTracker {
 				scrollTimeout = null;
 
 				// M1: Use window.scrollY instead of deprecated pageYOffset
-				const scrollTop =
-					window.scrollY || document.documentElement.scrollTop;
+				const scrollTop = window.scrollY || document.documentElement.scrollTop;
 				const docHeight = Math.max(
 					document.body.scrollHeight,
 					document.documentElement.scrollHeight,
@@ -337,9 +326,7 @@ export class ContenttaEventTracker {
 					return;
 				}
 
-				const scrollPercent = Math.round(
-					(scrollTop / maxScroll) * 100,
-				);
+				const scrollPercent = Math.round((scrollTop / maxScroll) * 100);
 
 				for (const milestone of SCROLL_MILESTONES) {
 					if (scrollPercent >= milestone && !reached.has(milestone)) {
@@ -387,7 +374,9 @@ export class ContenttaEventTracker {
 			}
 		};
 
-		document.addEventListener("visibilitychange", handleVisibilityChange, { signal });
+		document.addEventListener("visibilitychange", handleVisibilityChange, {
+			signal,
+		});
 
 		// Heartbeat to keep active time current
 		this.timeTrackingHeartbeat = setInterval(updateActiveTime, 30_000);
@@ -435,9 +424,7 @@ export class ContenttaEventTracker {
 			}
 
 			const ctaId =
-				ctaElement.getAttribute("data-cta-id") ??
-				ctaElement.id ??
-				"unknown";
+				ctaElement.getAttribute("data-cta-id") ?? ctaElement.id ?? "unknown";
 			const ctaLabel =
 				ctaElement.getAttribute("data-cta-name") ??
 				ctaElement.textContent?.trim().substring(0, 100) ??
@@ -513,4 +500,4 @@ export function createEventTracker(
 	return new ContenttaEventTracker(config);
 }
 
-export type { ContenttaSdkConfig, TrackedEvent, EventBatch } from "./types.ts";
+export type { ContenttaSdkConfig, EventBatch, TrackedEvent } from "./types.ts";

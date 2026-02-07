@@ -157,9 +157,7 @@ function isSafeRedirectUrl(url: string): boolean {
 /**
  * Lightweight validation that an API response looks like a FormDefinition.
  */
-function isFormDefinition(
-	value: unknown,
-): value is FormDefinition {
+function isFormDefinition(value: unknown): value is FormDefinition {
 	if (!value || typeof value !== "object") return false;
 	const obj = value as Record<string, unknown>;
 	return (
@@ -388,10 +386,9 @@ export class ContenttaFormsClient {
 		formElement.addEventListener("submit", (event: Event) => {
 			event.preventDefault();
 
-			const submitButton =
-				formElement.querySelector<HTMLButtonElement>(
-					".contentta-form__submit",
-				);
+			const submitButton = formElement.querySelector<HTMLButtonElement>(
+				".contentta-form__submit",
+			);
 			if (submitButton) {
 				submitButton.disabled = true;
 			}
@@ -403,10 +400,9 @@ export class ContenttaFormsClient {
 			}
 
 			// Handle unchecked checkboxes (FormData omits them)
-			const checkboxes =
-				formElement.querySelectorAll<HTMLInputElement>(
-					'input[type="checkbox"]',
-				);
+			const checkboxes = formElement.querySelectorAll<HTMLInputElement>(
+				'input[type="checkbox"]',
+			);
 			for (const checkbox of checkboxes) {
 				if (!data[checkbox.name]) {
 					data[checkbox.name] = false;
@@ -420,26 +416,19 @@ export class ContenttaFormsClient {
 				metadata: {
 					visitorId: this.tracker.getVisitorId(),
 					sessionId: this.tracker.getSessionId(),
-					referrer:
-						typeof document !== "undefined" ? document.referrer : "",
-					url:
-						typeof window !== "undefined"
-							? window.location.href
-							: "",
+					referrer: typeof document !== "undefined" ? document.referrer : "",
+					url: typeof window !== "undefined" ? window.location.href : "",
 				},
 			};
 
-			fetch(
-				`${this.apiUrl}/sdk/forms/${encodeURIComponent(formId)}/submit`,
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"X-API-Key": this.config.apiKey,
-					},
-					body: JSON.stringify(body),
+			fetch(`${this.apiUrl}/sdk/forms/${encodeURIComponent(formId)}/submit`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"X-API-Key": this.config.apiKey,
 				},
-			)
+				body: JSON.stringify(body),
+			})
 				.then(async (response) => {
 					if (!response.ok) {
 						const result = (await response.json().catch(() => null)) as {
@@ -462,14 +451,8 @@ export class ContenttaFormsClient {
 
 					this.tracker.track("form.submitted", {
 						formId,
-						pageUrl:
-							typeof window !== "undefined"
-								? window.location.href
-								: "",
-						referrer:
-							typeof document !== "undefined"
-								? document.referrer
-								: "",
+						pageUrl: typeof window !== "undefined" ? window.location.href : "",
+						referrer: typeof document !== "undefined" ? document.referrer : "",
 					});
 
 					const result = (await response.json().catch(() => null)) as {

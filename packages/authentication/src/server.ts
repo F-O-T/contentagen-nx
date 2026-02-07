@@ -1,5 +1,5 @@
-import { stripe as stripePlugin } from "@better-auth/stripe";
 import { oauthProvider } from "@better-auth/oauth-provider";
+import { stripe as stripePlugin } from "@better-auth/stripe";
 import type { DatabaseInstance } from "@packages/database/client";
 import {
    createDefaultOrganization,

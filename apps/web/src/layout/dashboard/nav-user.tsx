@@ -77,7 +77,7 @@ function NavUserCredenza({
                onClick={onNavigate}
                variant="outline"
             >
-               <a href={`/${activeOrganization.slug}/settings/billing`}>
+               <a href={`/${activeOrganization.slug}/billing`}>
                   <Sparkles className="size-4" />
                   {"Atualizar para Pro"}
                </a>
@@ -101,7 +101,7 @@ function NavUserCredenza({
                   onClick={onNavigate}
                   variant="outline"
                >
-                  <a href={`/${activeOrganization.slug}/settings/billing`}>
+                  <a href={`/${activeOrganization.slug}/billing`}>
                      <CreditCard className="size-4" />
                      {"Cobrança"}
                   </a>
@@ -305,7 +305,7 @@ function NavUserContent() {
                   {/* Upgrade */}
                   <DropdownMenuGroup>
                      <DropdownMenuItem asChild>
-                        <a href={`/${activeOrganization.slug}/settings/billing`}>
+                        <a href={`/${activeOrganization.slug}/billing`}>
                            <Sparkles />
                            {"Atualizar para Pro"}
                         </a>
@@ -316,13 +316,15 @@ function NavUserContent() {
                   {/* Navigation */}
                   <DropdownMenuGroup>
                      <DropdownMenuItem asChild>
-                        <a href={`/${activeOrganization.slug}/settings/profile`}>
+                        <a
+                           href={`/${activeOrganization.slug}/settings/profile`}
+                        >
                            <BadgeCheck />
                            {"Conta"}
                         </a>
                      </DropdownMenuItem>
                      <DropdownMenuItem asChild>
-                        <a href={`/${activeOrganization.slug}/settings/billing`}>
+                        <a href={`/${activeOrganization.slug}/billing`}>
                            <CreditCard />
                            {"Cobrança"}
                         </a>

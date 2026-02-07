@@ -1,5 +1,5 @@
 import { createMoney, greaterThanOrEqual } from "@f-o-t/money";
-import { PlanName } from "@packages/stripe/constants";
+import type { PlanName } from "@packages/stripe/constants";
 import type { Redis } from "ioredis";
 import { type CreditPool, PLAN_CREDIT_BUDGETS } from "./pricing";
 
@@ -11,8 +11,8 @@ const PRICE_SCALE = 6;
 const CURRENCY = "BRL";
 
 const POOL_DISPLAY_NAMES: Record<CreditPool, string> = {
-	ai: "IA",
-	platform: "plataforma",
+   ai: "IA",
+   platform: "plataforma",
 };
 
 // ---------------------------------------------------------------------------
@@ -20,7 +20,7 @@ const POOL_DISPLAY_NAMES: Record<CreditPool, string> = {
 // ---------------------------------------------------------------------------
 
 function creditKey(organizationId: string, pool: CreditPool): string {
-	return `credits:${organizationId}:${pool}_used`;
+   return `credits:${organizationId}:${pool}_used`;
 }
 
 // ---------------------------------------------------------------------------
@@ -28,10 +28,10 @@ function creditKey(organizationId: string, pool: CreditPool): string {
 // ---------------------------------------------------------------------------
 
 export interface CheckCreditBudgetParams {
-	redis: Redis;
-	organizationId: string;
-	plan: PlanName;
-	pool: CreditPool;
+   redis: Redis;
+   organizationId: string;
+   plan: PlanName;
+   pool: CreditPool;
 }
 
 /**
@@ -39,25 +39,25 @@ export interface CheckCreditBudgetParams {
  * Throws an error (in Portuguese) if the budget is exhausted.
  */
 export async function checkCreditBudget(
-	params: CheckCreditBudgetParams,
+   params: CheckCreditBudgetParams,
 ): Promise<void> {
-	const { redis, organizationId, plan, pool } = params;
+   const { redis, organizationId, plan, pool } = params;
 
-	const budget = PLAN_CREDIT_BUDGETS[plan][pool];
+   const budget = PLAN_CREDIT_BUDGETS[plan][pool];
 
-	const raw = await redis.get(creditKey(organizationId, pool));
-	if (raw === null) {
-		return;
-	}
+   const raw = await redis.get(creditKey(organizationId, pool));
+   if (raw === null) {
+      return;
+   }
 
-	const used = createMoney(BigInt(raw), CURRENCY, PRICE_SCALE);
+   const used = createMoney(BigInt(raw), CURRENCY, PRICE_SCALE);
 
-	if (greaterThanOrEqual(used, budget)) {
-		const poolName = POOL_DISPLAY_NAMES[pool];
-		throw new Error(
-			`Seu crédito de ${poolName} foi esgotado para este mês. Faça upgrade do seu plano para continuar usando.`,
-		);
-	}
+   if (greaterThanOrEqual(used, budget)) {
+      const poolName = POOL_DISPLAY_NAMES[pool];
+      throw new Error(
+         `Seu crédito de ${poolName} foi esgotado para este mês. Faça upgrade do seu plano para continuar usando.`,
+      );
+   }
 }
 
 // ---------------------------------------------------------------------------
@@ -69,12 +69,12 @@ export async function checkCreditBudget(
  * plus one extra day (buffer for timezone edge cases).
  */
 function msUntilEndOfMonth(): number {
-	const now = new Date();
-	const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-	const endOfMonthPlusOneDay = new Date(
-		endOfMonth.getTime() + 24 * 60 * 60 * 1000,
-	);
-	return endOfMonthPlusOneDay.getTime() - now.getTime();
+   const now = new Date();
+   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+   const endOfMonthPlusOneDay = new Date(
+      endOfMonth.getTime() + 24 * 60 * 60 * 1000,
+   );
+   return endOfMonthPlusOneDay.getTime() - now.getTime();
 }
 
 /**
@@ -87,18 +87,18 @@ function msUntilEndOfMonth(): number {
  * @param priceMinorUnits - Amount to increment in minor units (scale-6 integer)
  */
 export async function incrementCreditUsage(
-	redis: Redis,
-	organizationId: string,
-	pool: CreditPool,
-	priceMinorUnits: number,
+   redis: Redis,
+   organizationId: string,
+   pool: CreditPool,
+   priceMinorUnits: number,
 ): Promise<void> {
-	const key = creditKey(organizationId, pool);
+   const key = creditKey(organizationId, pool);
 
-	const newValue = await redis.incrby(key, priceMinorUnits);
+   const newValue = await redis.incrby(key, priceMinorUnits);
 
-	// If this is the first increment, set TTL to end of month + 1 day
-	if (newValue === priceMinorUnits) {
-		const ttlMs = msUntilEndOfMonth();
-		await redis.pexpire(key, ttlMs);
-	}
+   // If this is the first increment, set TTL to end of month + 1 day
+   if (newValue === priceMinorUnits) {
+      const ttlMs = msUntilEndOfMonth();
+      await redis.pexpire(key, ttlMs);
+   }
 }
