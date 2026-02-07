@@ -172,7 +172,7 @@ function SortableFieldCard({
                   className="text-xs font-medium text-muted-foreground"
                   htmlFor={`label-${field.id}`}
                >
-                  Rotulo
+                  Rótulo
                </Label>
                <Input
                   className="h-8 text-sm"
@@ -209,7 +209,7 @@ function SortableFieldCard({
                      className="text-xs font-medium text-muted-foreground"
                      htmlFor={`options-${field.id}`}
                   >
-                     Opcoes (uma por linha)
+                     Opções (uma por linha)
                   </Label>
                   <Textarea
                      className="text-sm resize-none"
@@ -221,7 +221,7 @@ function SortableFieldCard({
                               .filter((o) => o.trim() !== ""),
                         })
                      }
-                     placeholder={"Opcao 1\nOpcao 2\nOpcao 3"}
+                     placeholder={"Opção 1\nOpção 2\nOpção 3"}
                      rows={3}
                      value={(field.options ?? []).join("\n")}
                   />
@@ -260,7 +260,7 @@ function CanvasEmptyState({ isDragOver }: { isDragOver: boolean }) {
             Nenhum campo adicionado
          </p>
          <p className="text-xs text-muted-foreground mt-1 text-center max-w-[260px]">
-            Arraste campos da paleta ou clique para adicionar ao formulario
+            Arraste campos da paleta ou clique para adicionar ao formulário
          </p>
       </div>
    );

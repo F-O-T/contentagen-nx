@@ -93,7 +93,7 @@ function extractHostname(url: string | undefined): string {
 
 function formatFieldValue(value: unknown): string {
 	if (value === null || value === undefined) return "-";
-	if (typeof value === "boolean") return value ? "Sim" : "Nao";
+	if (typeof value === "boolean") return value ? "Sim" : "Não";
 	if (typeof value === "string") return value || "-";
 	return String(value);
 }
@@ -112,7 +112,7 @@ function SubmissionDetail({
 	return (
 		<>
 			<CredenzaHeader>
-				<CredenzaTitle>Detalhes da submissao</CredenzaTitle>
+				<CredenzaTitle>Detalhes da submissão</CredenzaTitle>
 				<CredenzaDescription>
 					Enviado em {formatSubmittedAt(submission.submittedAt)}
 				</CredenzaDescription>
@@ -120,7 +120,7 @@ function SubmissionDetail({
 			<CredenzaBody className="space-y-6">
 				{/* Form data */}
 				<div>
-					<h4 className="text-sm font-medium mb-3">Dados do formulario</h4>
+					<h4 className="text-sm font-medium mb-3">Dados do formulário</h4>
 					<div className="space-y-3">
 						{fields.map((field) => (
 							<div key={field.id} className="space-y-1">
@@ -143,7 +143,7 @@ function SubmissionDetail({
 					<div className="space-y-3">
 						<div className="space-y-1">
 							<p className="text-xs text-muted-foreground font-medium">
-								Referencia
+								Referência
 							</p>
 							<p className="text-sm">
 								{submission.metadata?.referrer
@@ -225,9 +225,9 @@ function SubmissionsEmptyState() {
 						<EmptyMedia variant="icon">
 							<Inbox className="size-12" />
 						</EmptyMedia>
-						<EmptyTitle>Nenhuma submissao ainda</EmptyTitle>
+						<EmptyTitle>Nenhuma submissão ainda</EmptyTitle>
 						<EmptyDescription>
-							Este formulario ainda nao recebeu nenhuma submissao.
+							Este formulário ainda não recebeu nenhuma submissão.
 						</EmptyDescription>
 					</EmptyContent>
 				</Empty>
@@ -258,8 +258,8 @@ function SubmissionsPagination({
 	return (
 		<div className="flex items-center justify-between">
 			<p className="text-sm text-muted-foreground">
-				Pagina {page} de {pages} ({total}{" "}
-				{total === 1 ? "submissao" : "submissoes"})
+				Página {page} de {pages} ({total}{" "}
+				{total === 1 ? "submissão" : "submissões"})
 			</p>
 			<div className="flex items-center gap-2">
 				<Button
@@ -277,7 +277,7 @@ function SubmissionsPagination({
 					size="sm"
 					variant="outline"
 				>
-					Proxima
+					Próxima
 					<ChevronRight className="size-4 ml-1" />
 				</Button>
 			</div>
@@ -354,16 +354,16 @@ export function SubmissionsTable({ formId }: SubmissionsTableProps) {
 					</Button>
 					<div>
 						<h1 className="text-2xl font-bold tracking-tight font-serif">
-							{form?.name ?? "Submissoes"}
+							{form?.name ?? "Submissões"}
 						</h1>
 						<p className="text-sm text-muted-foreground mt-0.5">
-							Visualize e gerencie as submissoes do formulario
+							Visualize e gerencie as submissões do formulário
 						</p>
 					</div>
 				</div>
 				{total > 0 && (
 					<Badge variant="secondary">
-						{total} {total === 1 ? "submissao" : "submissoes"}
+						{total} {total === 1 ? "submissão" : "submissões"}
 					</Badge>
 				)}
 			</div>
@@ -396,7 +396,7 @@ export function SubmissionsTable({ formId }: SubmissionsTableProps) {
 											</TableHead>
 										)}
 										<TableHead className="min-w-[120px]">
-											Referencia
+											Referência
 										</TableHead>
 										<TableHead className="w-[60px]" />
 									</TableRow>

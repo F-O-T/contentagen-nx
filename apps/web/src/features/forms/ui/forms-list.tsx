@@ -33,7 +33,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
-import { orpc } from "@/integrations/orpc/client";
+import { client, orpc } from "@/integrations/orpc/client";
 
 export function FormsList() {
 	const { slug } = useParams({ strict: false });
@@ -45,7 +45,7 @@ export function FormsList() {
 
 	const deleteMutation = useMutation({
 		mutationFn: async (id: string) => {
-			await orpc.forms.remove({ input: { id } });
+			await client.forms.remove({ id });
 		},
 		onSuccess: () => {
 			toast.success("Formulário excluído com sucesso");
@@ -84,7 +84,7 @@ export function FormsList() {
 								visitantes do seu site.
 							</EmptyDescription>
 							<Button className="mt-4" asChild>
-								<Link to="/$slug/forms/new" params={{ slug: slug || "" }}>
+								<Link to="/$slug/forms/$formId" params={{ slug: slug || "", formId: "new" }}>
 									<Plus className="mr-2 size-4" />
 									Criar formulário
 								</Link>
