@@ -9,6 +9,12 @@ import { Input } from "@packages/ui/components/input";
 import { Label } from "@packages/ui/components/label";
 import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import {
+   Tabs,
+   TabsContent,
+   TabsList,
+   TabsTrigger,
+} from "@packages/ui/components/tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
@@ -17,16 +23,14 @@ import { toast } from "sonner";
 import { client, orpc } from "@/integrations/orpc/client";
 import { FieldPalette, type FieldType } from "./field-palette";
 import { FormCanvas, type FormField } from "./form-canvas";
+import { FormPreview } from "./form-preview";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-let fieldCounter = 0;
-
 function generateFieldId(): string {
-   fieldCounter += 1;
-   return `field_${Date.now()}_${fieldCounter}`;
+   return `field_${crypto.randomUUID()}`;
 }
 
 function createDefaultField(type: FieldType): FormField {
@@ -35,7 +39,7 @@ function createDefaultField(type: FieldType): FormField {
       email: "E-mail",
       textarea: "Mensagem",
       checkbox: "Aceito os termos",
-      select: "Selecione uma opcao",
+      select: "Selecione uma opção",
    };
 
    const placeholders: Record<FieldType, string> = {
@@ -53,7 +57,7 @@ function createDefaultField(type: FieldType): FormField {
       placeholder: type !== "checkbox" ? placeholders[type] : undefined,
       required: false,
       options:
-         type === "select" ? ["Opcao 1", "Opcao 2", "Opcao 3"] : undefined,
+         type === "select" ? ["Opção 1", "Opção 2", "Opção 3"] : undefined,
    };
 }
 
@@ -119,7 +123,7 @@ export function FormBuilder({ formId }: FormBuilderProps) {
          });
       },
       onSuccess: () => {
-         toast.success("Formulario criado com sucesso");
+         toast.success("Formulário criado com sucesso");
          queryClient.invalidateQueries({
             queryKey: orpc.forms.list.queryKey({}),
          });
@@ -129,7 +133,7 @@ export function FormBuilder({ formId }: FormBuilderProps) {
          });
       },
       onError: () => {
-         toast.error("Erro ao criar formulario");
+         toast.error("Erro ao criar formulário");
       },
    });
 
@@ -155,7 +159,7 @@ export function FormBuilder({ formId }: FormBuilderProps) {
          });
       },
       onSuccess: () => {
-         toast.success("Formulario atualizado com sucesso");
+         toast.success("Formulário atualizado com sucesso");
          queryClient.invalidateQueries({
             queryKey: orpc.forms.list.queryKey({}),
          });
@@ -164,7 +168,7 @@ export function FormBuilder({ formId }: FormBuilderProps) {
          });
       },
       onError: () => {
-         toast.error("Erro ao atualizar formulario");
+         toast.error("Erro ao atualizar formulário");
       },
    });
 
@@ -195,18 +199,18 @@ export function FormBuilder({ formId }: FormBuilderProps) {
    // ── Save ───────────────────────────────────────────────────────────────
    const handleSave = useCallback(() => {
       if (!name.trim()) {
-         toast.error("O nome do formulario e obrigatorio");
+         toast.error("O nome do formulário é obrigatório");
          return;
       }
       if (fields.length === 0) {
-         toast.error("Adicione pelo menos um campo ao formulario");
+         toast.error("Adicione pelo menos um campo ao formulário");
          return;
       }
 
       // Validate all fields have labels
       const missingLabel = fields.find((f) => !f.label.trim());
       if (missingLabel) {
-         toast.error("Todos os campos precisam ter um rotulo");
+         toast.error("Todos os campos precisam ter um rótulo");
          return;
       }
 
@@ -264,12 +268,12 @@ export function FormBuilder({ formId }: FormBuilderProps) {
                </Button>
                <div>
                   <h1 className="text-2xl font-bold tracking-tight font-serif">
-                     {isCreateMode ? "Criar formulario" : "Editar formulario"}
+                     {isCreateMode ? "Criar formulário" : "Editar formulário"}
                   </h1>
                   <p className="text-sm text-muted-foreground mt-0.5">
                      {isCreateMode
-                        ? "Configure os campos do seu novo formulario"
-                        : "Altere os campos e configuracoes do formulario"}
+                        ? "Configure os campos do seu novo formulário"
+                        : "Altere os campos e configurações do formulário"}
                   </p>
                </div>
             </div>
@@ -292,7 +296,7 @@ export function FormBuilder({ formId }: FormBuilderProps) {
                   ) : (
                      <>
                         <Save className="size-4" />
-                        {isCreateMode ? "Criar formulario" : "Salvar"}
+                        {isCreateMode ? "Criar formulário" : "Salvar"}
                      </>
                   )}
                </Button>
@@ -305,32 +309,32 @@ export function FormBuilder({ formId }: FormBuilderProps) {
          <Card>
             <CardHeader className="pb-3">
                <CardTitle className="text-base">
-                  Detalhes do formulario
+                  Detalhes do formulário
                </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
                      <Label className="text-sm" htmlFor="form-name">
-                        Nome do formulario
+                        Nome do formulário
                      </Label>
                      <Input
                         className="h-9"
                         id="form-name"
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Ex: Formulario de contato"
+                        placeholder="Ex: Formulário de contato"
                         value={name}
                      />
                   </div>
                   <div className="space-y-1.5">
                      <Label className="text-sm" htmlFor="form-description">
-                        Descricao (opcional)
+                        Descrição (opcional)
                      </Label>
                      <Input
                         className="h-9"
                         id="form-description"
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Uma breve descricao do formulario"
+                        placeholder="Uma breve descrição do formulário"
                         value={description}
                      />
                   </div>
@@ -339,30 +343,43 @@ export function FormBuilder({ formId }: FormBuilderProps) {
          </Card>
 
          {/* Builder: palette + canvas */}
-         <div className="flex gap-6 items-start">
-            <FieldPalette onAddField={handleAddField} />
+         <Tabs defaultValue="builder">
+            <TabsList>
+               <TabsTrigger value="builder">Construtor</TabsTrigger>
+               <TabsTrigger value="preview">Visualizar</TabsTrigger>
+            </TabsList>
 
-            <div className="flex-1 min-w-0">
-               <div className="mb-3">
-                  <h3 className="text-sm font-semibold text-foreground tracking-tight">
-                     Campos do formulario
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                     {fields.length === 0
-                        ? "Arraste campos para construir seu formulario"
-                        : `${fields.length} ${fields.length === 1 ? "campo" : "campos"} configurados`}
-                  </p>
+            <TabsContent value="builder">
+               <div className="flex gap-6 items-start">
+                  <FieldPalette onAddField={handleAddField} />
+
+                  <div className="flex-1 min-w-0">
+                     <div className="mb-3">
+                        <h3 className="text-sm font-semibold text-foreground tracking-tight">
+                           Campos do formulário
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                           {fields.length === 0
+                              ? "Arraste campos para construir seu formulário"
+                              : `${fields.length} ${fields.length === 1 ? "campo" : "campos"} configurados`}
+                        </p>
+                     </div>
+
+                     <FormCanvas
+                        fields={fields}
+                        onDropNewField={handleAddField}
+                        onFieldRemove={handleFieldRemove}
+                        onFieldsReorder={handleFieldsReorder}
+                        onFieldUpdate={handleFieldUpdate}
+                     />
+                  </div>
                </div>
+            </TabsContent>
 
-               <FormCanvas
-                  fields={fields}
-                  onDropNewField={handleAddField}
-                  onFieldRemove={handleFieldRemove}
-                  onFieldsReorder={handleFieldsReorder}
-                  onFieldUpdate={handleFieldUpdate}
-               />
-            </div>
-         </div>
+            <TabsContent value="preview">
+               <FormPreview name={name} description={description} fields={fields} />
+            </TabsContent>
+         </Tabs>
       </div>
    );
 }
