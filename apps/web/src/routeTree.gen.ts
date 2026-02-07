@@ -40,9 +40,35 @@ import { Route as AuthenticatedSlugDashboardFormsIndexRouteImport } from './rout
 import { Route as AuthenticatedSlugDashboardContentIndexRouteImport } from './routes/_authenticated/$slug/_dashboard/content/index'
 import { Route as AuthenticatedSlugDashboardSettingsSecurityRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/security'
 import { Route as AuthenticatedSlugDashboardSettingsProfileRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/profile'
-import { Route as AuthenticatedSlugDashboardSettingsPreferencesRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/preferences'
+import { Route as AuthenticatedSlugDashboardSettingsPersonalApiKeysRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/personal-api-keys'
+import { Route as AuthenticatedSlugDashboardSettingsNotificationsRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/notifications'
+import { Route as AuthenticatedSlugDashboardSettingsFeaturePreviewsRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/feature-previews'
+import { Route as AuthenticatedSlugDashboardSettingsDangerZoneRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/danger-zone'
+import { Route as AuthenticatedSlugDashboardSettingsCustomizationRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/customization'
 import { Route as AuthenticatedSlugDashboardFormsFormIdRouteImport } from './routes/_authenticated/$slug/_dashboard/forms/$formId'
+import { Route as AuthenticatedSlugDashboardAnalyticsDataManagementRouteImport } from './routes/_authenticated/$slug/_dashboard/analytics/data-management'
+import { Route as AuthenticatedSlugDashboardAnalyticsInsightsIndexRouteImport } from './routes/_authenticated/$slug/_dashboard/analytics/insights/index'
+import { Route as AuthenticatedSlugDashboardAnalyticsDashboardsIndexRouteImport } from './routes/_authenticated/$slug/_dashboard/analytics/dashboards/index'
+import { Route as AuthenticatedSlugDashboardSettingsProjectWebhooksRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/project/webhooks'
+import { Route as AuthenticatedSlugDashboardSettingsProjectIntegrationsRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/project/integrations'
+import { Route as AuthenticatedSlugDashboardSettingsProjectGeneralRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/project/general'
+import { Route as AuthenticatedSlugDashboardSettingsProjectDangerZoneRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/project/danger-zone'
+import { Route as AuthenticatedSlugDashboardSettingsProjectApiKeysRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/project/api-keys'
+import { Route as AuthenticatedSlugDashboardSettingsProjectActivityLogsRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/project/activity-logs'
+import { Route as AuthenticatedSlugDashboardSettingsProjectAccessControlRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/project/access-control'
+import { Route as AuthenticatedSlugDashboardSettingsOrganizationSecurityRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/organization/security'
+import { Route as AuthenticatedSlugDashboardSettingsOrganizationRolesRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/organization/roles'
+import { Route as AuthenticatedSlugDashboardSettingsOrganizationReverseProxyRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/organization/reverse-proxy'
+import { Route as AuthenticatedSlugDashboardSettingsOrganizationMembersRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/organization/members'
+import { Route as AuthenticatedSlugDashboardSettingsOrganizationGeneralRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/organization/general'
+import { Route as AuthenticatedSlugDashboardSettingsOrganizationDangerZoneRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/organization/danger-zone'
+import { Route as AuthenticatedSlugDashboardSettingsOrganizationAuthenticationRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/organization/authentication'
 import { Route as AuthenticatedSlugDashboardFormsFormIdSubmissionsRouteImport } from './routes/_authenticated/$slug/_dashboard/forms/$formId.submissions'
+import { Route as AuthenticatedSlugDashboardAnalyticsInsightsInsightIdRouteImport } from './routes/_authenticated/$slug/_dashboard/analytics/insights/$insightId'
+import { Route as AuthenticatedSlugDashboardAnalyticsDashboardsDashboardIdRouteImport } from './routes/_authenticated/$slug/_dashboard/analytics/dashboards/$dashboardId'
+import { Route as AuthenticatedSlugDashboardSettingsProjectProductsFormsRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/project/products/forms'
+import { Route as AuthenticatedSlugDashboardSettingsProjectProductsContentRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/project/products/content'
+import { Route as AuthenticatedSlugDashboardSettingsProjectProductsAiAgentsRouteImport } from './routes/_authenticated/$slug/_dashboard/settings/project/products/ai-agents'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -209,10 +235,34 @@ const AuthenticatedSlugDashboardSettingsProfileRoute =
     path: '/profile',
     getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
   } as any)
-const AuthenticatedSlugDashboardSettingsPreferencesRoute =
-  AuthenticatedSlugDashboardSettingsPreferencesRouteImport.update({
-    id: '/preferences',
-    path: '/preferences',
+const AuthenticatedSlugDashboardSettingsPersonalApiKeysRoute =
+  AuthenticatedSlugDashboardSettingsPersonalApiKeysRouteImport.update({
+    id: '/personal-api-keys',
+    path: '/personal-api-keys',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsNotificationsRoute =
+  AuthenticatedSlugDashboardSettingsNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsFeaturePreviewsRoute =
+  AuthenticatedSlugDashboardSettingsFeaturePreviewsRouteImport.update({
+    id: '/feature-previews',
+    path: '/feature-previews',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsDangerZoneRoute =
+  AuthenticatedSlugDashboardSettingsDangerZoneRouteImport.update({
+    id: '/danger-zone',
+    path: '/danger-zone',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsCustomizationRoute =
+  AuthenticatedSlugDashboardSettingsCustomizationRouteImport.update({
+    id: '/customization',
+    path: '/customization',
     getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
   } as any)
 const AuthenticatedSlugDashboardFormsFormIdRoute =
@@ -221,11 +271,145 @@ const AuthenticatedSlugDashboardFormsFormIdRoute =
     path: '/forms/$formId',
     getParentRoute: () => AuthenticatedSlugDashboardRoute,
   } as any)
+const AuthenticatedSlugDashboardAnalyticsDataManagementRoute =
+  AuthenticatedSlugDashboardAnalyticsDataManagementRouteImport.update({
+    id: '/analytics/data-management',
+    path: '/analytics/data-management',
+    getParentRoute: () => AuthenticatedSlugDashboardRoute,
+  } as any)
+const AuthenticatedSlugDashboardAnalyticsInsightsIndexRoute =
+  AuthenticatedSlugDashboardAnalyticsInsightsIndexRouteImport.update({
+    id: '/analytics/insights/',
+    path: '/analytics/insights/',
+    getParentRoute: () => AuthenticatedSlugDashboardRoute,
+  } as any)
+const AuthenticatedSlugDashboardAnalyticsDashboardsIndexRoute =
+  AuthenticatedSlugDashboardAnalyticsDashboardsIndexRouteImport.update({
+    id: '/analytics/dashboards/',
+    path: '/analytics/dashboards/',
+    getParentRoute: () => AuthenticatedSlugDashboardRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsProjectWebhooksRoute =
+  AuthenticatedSlugDashboardSettingsProjectWebhooksRouteImport.update({
+    id: '/project/webhooks',
+    path: '/project/webhooks',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsProjectIntegrationsRoute =
+  AuthenticatedSlugDashboardSettingsProjectIntegrationsRouteImport.update({
+    id: '/project/integrations',
+    path: '/project/integrations',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsProjectGeneralRoute =
+  AuthenticatedSlugDashboardSettingsProjectGeneralRouteImport.update({
+    id: '/project/general',
+    path: '/project/general',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsProjectDangerZoneRoute =
+  AuthenticatedSlugDashboardSettingsProjectDangerZoneRouteImport.update({
+    id: '/project/danger-zone',
+    path: '/project/danger-zone',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsProjectApiKeysRoute =
+  AuthenticatedSlugDashboardSettingsProjectApiKeysRouteImport.update({
+    id: '/project/api-keys',
+    path: '/project/api-keys',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsProjectActivityLogsRoute =
+  AuthenticatedSlugDashboardSettingsProjectActivityLogsRouteImport.update({
+    id: '/project/activity-logs',
+    path: '/project/activity-logs',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsProjectAccessControlRoute =
+  AuthenticatedSlugDashboardSettingsProjectAccessControlRouteImport.update({
+    id: '/project/access-control',
+    path: '/project/access-control',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsOrganizationSecurityRoute =
+  AuthenticatedSlugDashboardSettingsOrganizationSecurityRouteImport.update({
+    id: '/organization/security',
+    path: '/organization/security',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsOrganizationRolesRoute =
+  AuthenticatedSlugDashboardSettingsOrganizationRolesRouteImport.update({
+    id: '/organization/roles',
+    path: '/organization/roles',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsOrganizationReverseProxyRoute =
+  AuthenticatedSlugDashboardSettingsOrganizationReverseProxyRouteImport.update({
+    id: '/organization/reverse-proxy',
+    path: '/organization/reverse-proxy',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsOrganizationMembersRoute =
+  AuthenticatedSlugDashboardSettingsOrganizationMembersRouteImport.update({
+    id: '/organization/members',
+    path: '/organization/members',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsOrganizationGeneralRoute =
+  AuthenticatedSlugDashboardSettingsOrganizationGeneralRouteImport.update({
+    id: '/organization/general',
+    path: '/organization/general',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsOrganizationDangerZoneRoute =
+  AuthenticatedSlugDashboardSettingsOrganizationDangerZoneRouteImport.update({
+    id: '/organization/danger-zone',
+    path: '/organization/danger-zone',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsOrganizationAuthenticationRoute =
+  AuthenticatedSlugDashboardSettingsOrganizationAuthenticationRouteImport.update(
+    {
+      id: '/organization/authentication',
+      path: '/organization/authentication',
+      getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+    } as any,
+  )
 const AuthenticatedSlugDashboardFormsFormIdSubmissionsRoute =
   AuthenticatedSlugDashboardFormsFormIdSubmissionsRouteImport.update({
     id: '/submissions',
     path: '/submissions',
     getParentRoute: () => AuthenticatedSlugDashboardFormsFormIdRoute,
+  } as any)
+const AuthenticatedSlugDashboardAnalyticsInsightsInsightIdRoute =
+  AuthenticatedSlugDashboardAnalyticsInsightsInsightIdRouteImport.update({
+    id: '/analytics/insights/$insightId',
+    path: '/analytics/insights/$insightId',
+    getParentRoute: () => AuthenticatedSlugDashboardRoute,
+  } as any)
+const AuthenticatedSlugDashboardAnalyticsDashboardsDashboardIdRoute =
+  AuthenticatedSlugDashboardAnalyticsDashboardsDashboardIdRouteImport.update({
+    id: '/analytics/dashboards/$dashboardId',
+    path: '/analytics/dashboards/$dashboardId',
+    getParentRoute: () => AuthenticatedSlugDashboardRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsProjectProductsFormsRoute =
+  AuthenticatedSlugDashboardSettingsProjectProductsFormsRouteImport.update({
+    id: '/project/products/forms',
+    path: '/project/products/forms',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsProjectProductsContentRoute =
+  AuthenticatedSlugDashboardSettingsProjectProductsContentRouteImport.update({
+    id: '/project/products/content',
+    path: '/project/products/content',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
+  } as any)
+const AuthenticatedSlugDashboardSettingsProjectProductsAiAgentsRoute =
+  AuthenticatedSlugDashboardSettingsProjectProductsAiAgentsRouteImport.update({
+    id: '/project/products/ai-agents',
+    path: '/project/products/ai-agents',
+    getParentRoute: () => AuthenticatedSlugDashboardSettingsRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -251,15 +435,41 @@ export interface FileRoutesByFullPath {
   '/$slug/plans': typeof AuthenticatedSlugDashboardPlansRoute
   '/$slug/settings': typeof AuthenticatedSlugDashboardSettingsRouteWithChildren
   '/$slug/$contentId': typeof AuthenticatedSlugEditorContentIdRoute
+  '/$slug/analytics/data-management': typeof AuthenticatedSlugDashboardAnalyticsDataManagementRoute
   '/$slug/forms/$formId': typeof AuthenticatedSlugDashboardFormsFormIdRouteWithChildren
-  '/$slug/settings/preferences': typeof AuthenticatedSlugDashboardSettingsPreferencesRoute
+  '/$slug/settings/customization': typeof AuthenticatedSlugDashboardSettingsCustomizationRoute
+  '/$slug/settings/danger-zone': typeof AuthenticatedSlugDashboardSettingsDangerZoneRoute
+  '/$slug/settings/feature-previews': typeof AuthenticatedSlugDashboardSettingsFeaturePreviewsRoute
+  '/$slug/settings/notifications': typeof AuthenticatedSlugDashboardSettingsNotificationsRoute
+  '/$slug/settings/personal-api-keys': typeof AuthenticatedSlugDashboardSettingsPersonalApiKeysRoute
   '/$slug/settings/profile': typeof AuthenticatedSlugDashboardSettingsProfileRoute
   '/$slug/settings/security': typeof AuthenticatedSlugDashboardSettingsSecurityRoute
   '/$slug/content/': typeof AuthenticatedSlugDashboardContentIndexRoute
   '/$slug/forms/': typeof AuthenticatedSlugDashboardFormsIndexRoute
   '/$slug/home/': typeof AuthenticatedSlugDashboardHomeIndexRoute
   '/$slug/settings/': typeof AuthenticatedSlugDashboardSettingsIndexRoute
+  '/$slug/analytics/dashboards/$dashboardId': typeof AuthenticatedSlugDashboardAnalyticsDashboardsDashboardIdRoute
+  '/$slug/analytics/insights/$insightId': typeof AuthenticatedSlugDashboardAnalyticsInsightsInsightIdRoute
   '/$slug/forms/$formId/submissions': typeof AuthenticatedSlugDashboardFormsFormIdSubmissionsRoute
+  '/$slug/settings/organization/authentication': typeof AuthenticatedSlugDashboardSettingsOrganizationAuthenticationRoute
+  '/$slug/settings/organization/danger-zone': typeof AuthenticatedSlugDashboardSettingsOrganizationDangerZoneRoute
+  '/$slug/settings/organization/general': typeof AuthenticatedSlugDashboardSettingsOrganizationGeneralRoute
+  '/$slug/settings/organization/members': typeof AuthenticatedSlugDashboardSettingsOrganizationMembersRoute
+  '/$slug/settings/organization/reverse-proxy': typeof AuthenticatedSlugDashboardSettingsOrganizationReverseProxyRoute
+  '/$slug/settings/organization/roles': typeof AuthenticatedSlugDashboardSettingsOrganizationRolesRoute
+  '/$slug/settings/organization/security': typeof AuthenticatedSlugDashboardSettingsOrganizationSecurityRoute
+  '/$slug/settings/project/access-control': typeof AuthenticatedSlugDashboardSettingsProjectAccessControlRoute
+  '/$slug/settings/project/activity-logs': typeof AuthenticatedSlugDashboardSettingsProjectActivityLogsRoute
+  '/$slug/settings/project/api-keys': typeof AuthenticatedSlugDashboardSettingsProjectApiKeysRoute
+  '/$slug/settings/project/danger-zone': typeof AuthenticatedSlugDashboardSettingsProjectDangerZoneRoute
+  '/$slug/settings/project/general': typeof AuthenticatedSlugDashboardSettingsProjectGeneralRoute
+  '/$slug/settings/project/integrations': typeof AuthenticatedSlugDashboardSettingsProjectIntegrationsRoute
+  '/$slug/settings/project/webhooks': typeof AuthenticatedSlugDashboardSettingsProjectWebhooksRoute
+  '/$slug/analytics/dashboards/': typeof AuthenticatedSlugDashboardAnalyticsDashboardsIndexRoute
+  '/$slug/analytics/insights/': typeof AuthenticatedSlugDashboardAnalyticsInsightsIndexRoute
+  '/$slug/settings/project/products/ai-agents': typeof AuthenticatedSlugDashboardSettingsProjectProductsAiAgentsRoute
+  '/$slug/settings/project/products/content': typeof AuthenticatedSlugDashboardSettingsProjectProductsContentRoute
+  '/$slug/settings/project/products/forms': typeof AuthenticatedSlugDashboardSettingsProjectProductsFormsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -282,15 +492,41 @@ export interface FileRoutesByTo {
   '/$slug/billing': typeof AuthenticatedSlugDashboardBillingRoute
   '/$slug/plans': typeof AuthenticatedSlugDashboardPlansRoute
   '/$slug/$contentId': typeof AuthenticatedSlugEditorContentIdRoute
+  '/$slug/analytics/data-management': typeof AuthenticatedSlugDashboardAnalyticsDataManagementRoute
   '/$slug/forms/$formId': typeof AuthenticatedSlugDashboardFormsFormIdRouteWithChildren
-  '/$slug/settings/preferences': typeof AuthenticatedSlugDashboardSettingsPreferencesRoute
+  '/$slug/settings/customization': typeof AuthenticatedSlugDashboardSettingsCustomizationRoute
+  '/$slug/settings/danger-zone': typeof AuthenticatedSlugDashboardSettingsDangerZoneRoute
+  '/$slug/settings/feature-previews': typeof AuthenticatedSlugDashboardSettingsFeaturePreviewsRoute
+  '/$slug/settings/notifications': typeof AuthenticatedSlugDashboardSettingsNotificationsRoute
+  '/$slug/settings/personal-api-keys': typeof AuthenticatedSlugDashboardSettingsPersonalApiKeysRoute
   '/$slug/settings/profile': typeof AuthenticatedSlugDashboardSettingsProfileRoute
   '/$slug/settings/security': typeof AuthenticatedSlugDashboardSettingsSecurityRoute
   '/$slug/content': typeof AuthenticatedSlugDashboardContentIndexRoute
   '/$slug/forms': typeof AuthenticatedSlugDashboardFormsIndexRoute
   '/$slug/home': typeof AuthenticatedSlugDashboardHomeIndexRoute
   '/$slug/settings': typeof AuthenticatedSlugDashboardSettingsIndexRoute
+  '/$slug/analytics/dashboards/$dashboardId': typeof AuthenticatedSlugDashboardAnalyticsDashboardsDashboardIdRoute
+  '/$slug/analytics/insights/$insightId': typeof AuthenticatedSlugDashboardAnalyticsInsightsInsightIdRoute
   '/$slug/forms/$formId/submissions': typeof AuthenticatedSlugDashboardFormsFormIdSubmissionsRoute
+  '/$slug/settings/organization/authentication': typeof AuthenticatedSlugDashboardSettingsOrganizationAuthenticationRoute
+  '/$slug/settings/organization/danger-zone': typeof AuthenticatedSlugDashboardSettingsOrganizationDangerZoneRoute
+  '/$slug/settings/organization/general': typeof AuthenticatedSlugDashboardSettingsOrganizationGeneralRoute
+  '/$slug/settings/organization/members': typeof AuthenticatedSlugDashboardSettingsOrganizationMembersRoute
+  '/$slug/settings/organization/reverse-proxy': typeof AuthenticatedSlugDashboardSettingsOrganizationReverseProxyRoute
+  '/$slug/settings/organization/roles': typeof AuthenticatedSlugDashboardSettingsOrganizationRolesRoute
+  '/$slug/settings/organization/security': typeof AuthenticatedSlugDashboardSettingsOrganizationSecurityRoute
+  '/$slug/settings/project/access-control': typeof AuthenticatedSlugDashboardSettingsProjectAccessControlRoute
+  '/$slug/settings/project/activity-logs': typeof AuthenticatedSlugDashboardSettingsProjectActivityLogsRoute
+  '/$slug/settings/project/api-keys': typeof AuthenticatedSlugDashboardSettingsProjectApiKeysRoute
+  '/$slug/settings/project/danger-zone': typeof AuthenticatedSlugDashboardSettingsProjectDangerZoneRoute
+  '/$slug/settings/project/general': typeof AuthenticatedSlugDashboardSettingsProjectGeneralRoute
+  '/$slug/settings/project/integrations': typeof AuthenticatedSlugDashboardSettingsProjectIntegrationsRoute
+  '/$slug/settings/project/webhooks': typeof AuthenticatedSlugDashboardSettingsProjectWebhooksRoute
+  '/$slug/analytics/dashboards': typeof AuthenticatedSlugDashboardAnalyticsDashboardsIndexRoute
+  '/$slug/analytics/insights': typeof AuthenticatedSlugDashboardAnalyticsInsightsIndexRoute
+  '/$slug/settings/project/products/ai-agents': typeof AuthenticatedSlugDashboardSettingsProjectProductsAiAgentsRoute
+  '/$slug/settings/project/products/content': typeof AuthenticatedSlugDashboardSettingsProjectProductsContentRoute
+  '/$slug/settings/project/products/forms': typeof AuthenticatedSlugDashboardSettingsProjectProductsFormsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -319,15 +555,41 @@ export interface FileRoutesById {
   '/_authenticated/$slug/_dashboard/plans': typeof AuthenticatedSlugDashboardPlansRoute
   '/_authenticated/$slug/_dashboard/settings': typeof AuthenticatedSlugDashboardSettingsRouteWithChildren
   '/_authenticated/$slug/_editor/$contentId': typeof AuthenticatedSlugEditorContentIdRoute
+  '/_authenticated/$slug/_dashboard/analytics/data-management': typeof AuthenticatedSlugDashboardAnalyticsDataManagementRoute
   '/_authenticated/$slug/_dashboard/forms/$formId': typeof AuthenticatedSlugDashboardFormsFormIdRouteWithChildren
-  '/_authenticated/$slug/_dashboard/settings/preferences': typeof AuthenticatedSlugDashboardSettingsPreferencesRoute
+  '/_authenticated/$slug/_dashboard/settings/customization': typeof AuthenticatedSlugDashboardSettingsCustomizationRoute
+  '/_authenticated/$slug/_dashboard/settings/danger-zone': typeof AuthenticatedSlugDashboardSettingsDangerZoneRoute
+  '/_authenticated/$slug/_dashboard/settings/feature-previews': typeof AuthenticatedSlugDashboardSettingsFeaturePreviewsRoute
+  '/_authenticated/$slug/_dashboard/settings/notifications': typeof AuthenticatedSlugDashboardSettingsNotificationsRoute
+  '/_authenticated/$slug/_dashboard/settings/personal-api-keys': typeof AuthenticatedSlugDashboardSettingsPersonalApiKeysRoute
   '/_authenticated/$slug/_dashboard/settings/profile': typeof AuthenticatedSlugDashboardSettingsProfileRoute
   '/_authenticated/$slug/_dashboard/settings/security': typeof AuthenticatedSlugDashboardSettingsSecurityRoute
   '/_authenticated/$slug/_dashboard/content/': typeof AuthenticatedSlugDashboardContentIndexRoute
   '/_authenticated/$slug/_dashboard/forms/': typeof AuthenticatedSlugDashboardFormsIndexRoute
   '/_authenticated/$slug/_dashboard/home/': typeof AuthenticatedSlugDashboardHomeIndexRoute
   '/_authenticated/$slug/_dashboard/settings/': typeof AuthenticatedSlugDashboardSettingsIndexRoute
+  '/_authenticated/$slug/_dashboard/analytics/dashboards/$dashboardId': typeof AuthenticatedSlugDashboardAnalyticsDashboardsDashboardIdRoute
+  '/_authenticated/$slug/_dashboard/analytics/insights/$insightId': typeof AuthenticatedSlugDashboardAnalyticsInsightsInsightIdRoute
   '/_authenticated/$slug/_dashboard/forms/$formId/submissions': typeof AuthenticatedSlugDashboardFormsFormIdSubmissionsRoute
+  '/_authenticated/$slug/_dashboard/settings/organization/authentication': typeof AuthenticatedSlugDashboardSettingsOrganizationAuthenticationRoute
+  '/_authenticated/$slug/_dashboard/settings/organization/danger-zone': typeof AuthenticatedSlugDashboardSettingsOrganizationDangerZoneRoute
+  '/_authenticated/$slug/_dashboard/settings/organization/general': typeof AuthenticatedSlugDashboardSettingsOrganizationGeneralRoute
+  '/_authenticated/$slug/_dashboard/settings/organization/members': typeof AuthenticatedSlugDashboardSettingsOrganizationMembersRoute
+  '/_authenticated/$slug/_dashboard/settings/organization/reverse-proxy': typeof AuthenticatedSlugDashboardSettingsOrganizationReverseProxyRoute
+  '/_authenticated/$slug/_dashboard/settings/organization/roles': typeof AuthenticatedSlugDashboardSettingsOrganizationRolesRoute
+  '/_authenticated/$slug/_dashboard/settings/organization/security': typeof AuthenticatedSlugDashboardSettingsOrganizationSecurityRoute
+  '/_authenticated/$slug/_dashboard/settings/project/access-control': typeof AuthenticatedSlugDashboardSettingsProjectAccessControlRoute
+  '/_authenticated/$slug/_dashboard/settings/project/activity-logs': typeof AuthenticatedSlugDashboardSettingsProjectActivityLogsRoute
+  '/_authenticated/$slug/_dashboard/settings/project/api-keys': typeof AuthenticatedSlugDashboardSettingsProjectApiKeysRoute
+  '/_authenticated/$slug/_dashboard/settings/project/danger-zone': typeof AuthenticatedSlugDashboardSettingsProjectDangerZoneRoute
+  '/_authenticated/$slug/_dashboard/settings/project/general': typeof AuthenticatedSlugDashboardSettingsProjectGeneralRoute
+  '/_authenticated/$slug/_dashboard/settings/project/integrations': typeof AuthenticatedSlugDashboardSettingsProjectIntegrationsRoute
+  '/_authenticated/$slug/_dashboard/settings/project/webhooks': typeof AuthenticatedSlugDashboardSettingsProjectWebhooksRoute
+  '/_authenticated/$slug/_dashboard/analytics/dashboards/': typeof AuthenticatedSlugDashboardAnalyticsDashboardsIndexRoute
+  '/_authenticated/$slug/_dashboard/analytics/insights/': typeof AuthenticatedSlugDashboardAnalyticsInsightsIndexRoute
+  '/_authenticated/$slug/_dashboard/settings/project/products/ai-agents': typeof AuthenticatedSlugDashboardSettingsProjectProductsAiAgentsRoute
+  '/_authenticated/$slug/_dashboard/settings/project/products/content': typeof AuthenticatedSlugDashboardSettingsProjectProductsContentRoute
+  '/_authenticated/$slug/_dashboard/settings/project/products/forms': typeof AuthenticatedSlugDashboardSettingsProjectProductsFormsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -354,15 +616,41 @@ export interface FileRouteTypes {
     | '/$slug/plans'
     | '/$slug/settings'
     | '/$slug/$contentId'
+    | '/$slug/analytics/data-management'
     | '/$slug/forms/$formId'
-    | '/$slug/settings/preferences'
+    | '/$slug/settings/customization'
+    | '/$slug/settings/danger-zone'
+    | '/$slug/settings/feature-previews'
+    | '/$slug/settings/notifications'
+    | '/$slug/settings/personal-api-keys'
     | '/$slug/settings/profile'
     | '/$slug/settings/security'
     | '/$slug/content/'
     | '/$slug/forms/'
     | '/$slug/home/'
     | '/$slug/settings/'
+    | '/$slug/analytics/dashboards/$dashboardId'
+    | '/$slug/analytics/insights/$insightId'
     | '/$slug/forms/$formId/submissions'
+    | '/$slug/settings/organization/authentication'
+    | '/$slug/settings/organization/danger-zone'
+    | '/$slug/settings/organization/general'
+    | '/$slug/settings/organization/members'
+    | '/$slug/settings/organization/reverse-proxy'
+    | '/$slug/settings/organization/roles'
+    | '/$slug/settings/organization/security'
+    | '/$slug/settings/project/access-control'
+    | '/$slug/settings/project/activity-logs'
+    | '/$slug/settings/project/api-keys'
+    | '/$slug/settings/project/danger-zone'
+    | '/$slug/settings/project/general'
+    | '/$slug/settings/project/integrations'
+    | '/$slug/settings/project/webhooks'
+    | '/$slug/analytics/dashboards/'
+    | '/$slug/analytics/insights/'
+    | '/$slug/settings/project/products/ai-agents'
+    | '/$slug/settings/project/products/content'
+    | '/$slug/settings/project/products/forms'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -385,15 +673,41 @@ export interface FileRouteTypes {
     | '/$slug/billing'
     | '/$slug/plans'
     | '/$slug/$contentId'
+    | '/$slug/analytics/data-management'
     | '/$slug/forms/$formId'
-    | '/$slug/settings/preferences'
+    | '/$slug/settings/customization'
+    | '/$slug/settings/danger-zone'
+    | '/$slug/settings/feature-previews'
+    | '/$slug/settings/notifications'
+    | '/$slug/settings/personal-api-keys'
     | '/$slug/settings/profile'
     | '/$slug/settings/security'
     | '/$slug/content'
     | '/$slug/forms'
     | '/$slug/home'
     | '/$slug/settings'
+    | '/$slug/analytics/dashboards/$dashboardId'
+    | '/$slug/analytics/insights/$insightId'
     | '/$slug/forms/$formId/submissions'
+    | '/$slug/settings/organization/authentication'
+    | '/$slug/settings/organization/danger-zone'
+    | '/$slug/settings/organization/general'
+    | '/$slug/settings/organization/members'
+    | '/$slug/settings/organization/reverse-proxy'
+    | '/$slug/settings/organization/roles'
+    | '/$slug/settings/organization/security'
+    | '/$slug/settings/project/access-control'
+    | '/$slug/settings/project/activity-logs'
+    | '/$slug/settings/project/api-keys'
+    | '/$slug/settings/project/danger-zone'
+    | '/$slug/settings/project/general'
+    | '/$slug/settings/project/integrations'
+    | '/$slug/settings/project/webhooks'
+    | '/$slug/analytics/dashboards'
+    | '/$slug/analytics/insights'
+    | '/$slug/settings/project/products/ai-agents'
+    | '/$slug/settings/project/products/content'
+    | '/$slug/settings/project/products/forms'
   id:
     | '__root__'
     | '/'
@@ -421,15 +735,41 @@ export interface FileRouteTypes {
     | '/_authenticated/$slug/_dashboard/plans'
     | '/_authenticated/$slug/_dashboard/settings'
     | '/_authenticated/$slug/_editor/$contentId'
+    | '/_authenticated/$slug/_dashboard/analytics/data-management'
     | '/_authenticated/$slug/_dashboard/forms/$formId'
-    | '/_authenticated/$slug/_dashboard/settings/preferences'
+    | '/_authenticated/$slug/_dashboard/settings/customization'
+    | '/_authenticated/$slug/_dashboard/settings/danger-zone'
+    | '/_authenticated/$slug/_dashboard/settings/feature-previews'
+    | '/_authenticated/$slug/_dashboard/settings/notifications'
+    | '/_authenticated/$slug/_dashboard/settings/personal-api-keys'
     | '/_authenticated/$slug/_dashboard/settings/profile'
     | '/_authenticated/$slug/_dashboard/settings/security'
     | '/_authenticated/$slug/_dashboard/content/'
     | '/_authenticated/$slug/_dashboard/forms/'
     | '/_authenticated/$slug/_dashboard/home/'
     | '/_authenticated/$slug/_dashboard/settings/'
+    | '/_authenticated/$slug/_dashboard/analytics/dashboards/$dashboardId'
+    | '/_authenticated/$slug/_dashboard/analytics/insights/$insightId'
     | '/_authenticated/$slug/_dashboard/forms/$formId/submissions'
+    | '/_authenticated/$slug/_dashboard/settings/organization/authentication'
+    | '/_authenticated/$slug/_dashboard/settings/organization/danger-zone'
+    | '/_authenticated/$slug/_dashboard/settings/organization/general'
+    | '/_authenticated/$slug/_dashboard/settings/organization/members'
+    | '/_authenticated/$slug/_dashboard/settings/organization/reverse-proxy'
+    | '/_authenticated/$slug/_dashboard/settings/organization/roles'
+    | '/_authenticated/$slug/_dashboard/settings/organization/security'
+    | '/_authenticated/$slug/_dashboard/settings/project/access-control'
+    | '/_authenticated/$slug/_dashboard/settings/project/activity-logs'
+    | '/_authenticated/$slug/_dashboard/settings/project/api-keys'
+    | '/_authenticated/$slug/_dashboard/settings/project/danger-zone'
+    | '/_authenticated/$slug/_dashboard/settings/project/general'
+    | '/_authenticated/$slug/_dashboard/settings/project/integrations'
+    | '/_authenticated/$slug/_dashboard/settings/project/webhooks'
+    | '/_authenticated/$slug/_dashboard/analytics/dashboards/'
+    | '/_authenticated/$slug/_dashboard/analytics/insights/'
+    | '/_authenticated/$slug/_dashboard/settings/project/products/ai-agents'
+    | '/_authenticated/$slug/_dashboard/settings/project/products/content'
+    | '/_authenticated/$slug/_dashboard/settings/project/products/forms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -663,11 +1003,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsProfileRouteImport
       parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
     }
-    '/_authenticated/$slug/_dashboard/settings/preferences': {
-      id: '/_authenticated/$slug/_dashboard/settings/preferences'
-      path: '/preferences'
-      fullPath: '/$slug/settings/preferences'
-      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsPreferencesRouteImport
+    '/_authenticated/$slug/_dashboard/settings/personal-api-keys': {
+      id: '/_authenticated/$slug/_dashboard/settings/personal-api-keys'
+      path: '/personal-api-keys'
+      fullPath: '/$slug/settings/personal-api-keys'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsPersonalApiKeysRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/notifications': {
+      id: '/_authenticated/$slug/_dashboard/settings/notifications'
+      path: '/notifications'
+      fullPath: '/$slug/settings/notifications'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsNotificationsRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/feature-previews': {
+      id: '/_authenticated/$slug/_dashboard/settings/feature-previews'
+      path: '/feature-previews'
+      fullPath: '/$slug/settings/feature-previews'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsFeaturePreviewsRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/danger-zone': {
+      id: '/_authenticated/$slug/_dashboard/settings/danger-zone'
+      path: '/danger-zone'
+      fullPath: '/$slug/settings/danger-zone'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsDangerZoneRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/customization': {
+      id: '/_authenticated/$slug/_dashboard/settings/customization'
+      path: '/customization'
+      fullPath: '/$slug/settings/customization'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsCustomizationRouteImport
       parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
     }
     '/_authenticated/$slug/_dashboard/forms/$formId': {
@@ -677,6 +1045,125 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSlugDashboardFormsFormIdRouteImport
       parentRoute: typeof AuthenticatedSlugDashboardRoute
     }
+    '/_authenticated/$slug/_dashboard/analytics/data-management': {
+      id: '/_authenticated/$slug/_dashboard/analytics/data-management'
+      path: '/analytics/data-management'
+      fullPath: '/$slug/analytics/data-management'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardAnalyticsDataManagementRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardRoute
+    }
+    '/_authenticated/$slug/_dashboard/analytics/insights/': {
+      id: '/_authenticated/$slug/_dashboard/analytics/insights/'
+      path: '/analytics/insights'
+      fullPath: '/$slug/analytics/insights/'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardAnalyticsInsightsIndexRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardRoute
+    }
+    '/_authenticated/$slug/_dashboard/analytics/dashboards/': {
+      id: '/_authenticated/$slug/_dashboard/analytics/dashboards/'
+      path: '/analytics/dashboards'
+      fullPath: '/$slug/analytics/dashboards/'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardAnalyticsDashboardsIndexRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/project/webhooks': {
+      id: '/_authenticated/$slug/_dashboard/settings/project/webhooks'
+      path: '/project/webhooks'
+      fullPath: '/$slug/settings/project/webhooks'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsProjectWebhooksRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/project/integrations': {
+      id: '/_authenticated/$slug/_dashboard/settings/project/integrations'
+      path: '/project/integrations'
+      fullPath: '/$slug/settings/project/integrations'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsProjectIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/project/general': {
+      id: '/_authenticated/$slug/_dashboard/settings/project/general'
+      path: '/project/general'
+      fullPath: '/$slug/settings/project/general'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsProjectGeneralRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/project/danger-zone': {
+      id: '/_authenticated/$slug/_dashboard/settings/project/danger-zone'
+      path: '/project/danger-zone'
+      fullPath: '/$slug/settings/project/danger-zone'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsProjectDangerZoneRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/project/api-keys': {
+      id: '/_authenticated/$slug/_dashboard/settings/project/api-keys'
+      path: '/project/api-keys'
+      fullPath: '/$slug/settings/project/api-keys'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsProjectApiKeysRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/project/activity-logs': {
+      id: '/_authenticated/$slug/_dashboard/settings/project/activity-logs'
+      path: '/project/activity-logs'
+      fullPath: '/$slug/settings/project/activity-logs'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsProjectActivityLogsRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/project/access-control': {
+      id: '/_authenticated/$slug/_dashboard/settings/project/access-control'
+      path: '/project/access-control'
+      fullPath: '/$slug/settings/project/access-control'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsProjectAccessControlRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/organization/security': {
+      id: '/_authenticated/$slug/_dashboard/settings/organization/security'
+      path: '/organization/security'
+      fullPath: '/$slug/settings/organization/security'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationSecurityRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/organization/roles': {
+      id: '/_authenticated/$slug/_dashboard/settings/organization/roles'
+      path: '/organization/roles'
+      fullPath: '/$slug/settings/organization/roles'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationRolesRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/organization/reverse-proxy': {
+      id: '/_authenticated/$slug/_dashboard/settings/organization/reverse-proxy'
+      path: '/organization/reverse-proxy'
+      fullPath: '/$slug/settings/organization/reverse-proxy'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationReverseProxyRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/organization/members': {
+      id: '/_authenticated/$slug/_dashboard/settings/organization/members'
+      path: '/organization/members'
+      fullPath: '/$slug/settings/organization/members'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationMembersRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/organization/general': {
+      id: '/_authenticated/$slug/_dashboard/settings/organization/general'
+      path: '/organization/general'
+      fullPath: '/$slug/settings/organization/general'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationGeneralRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/organization/danger-zone': {
+      id: '/_authenticated/$slug/_dashboard/settings/organization/danger-zone'
+      path: '/organization/danger-zone'
+      fullPath: '/$slug/settings/organization/danger-zone'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationDangerZoneRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/organization/authentication': {
+      id: '/_authenticated/$slug/_dashboard/settings/organization/authentication'
+      path: '/organization/authentication'
+      fullPath: '/$slug/settings/organization/authentication'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationAuthenticationRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
     '/_authenticated/$slug/_dashboard/forms/$formId/submissions': {
       id: '/_authenticated/$slug/_dashboard/forms/$formId/submissions'
       path: '/submissions'
@@ -684,26 +1171,124 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSlugDashboardFormsFormIdSubmissionsRouteImport
       parentRoute: typeof AuthenticatedSlugDashboardFormsFormIdRoute
     }
+    '/_authenticated/$slug/_dashboard/analytics/insights/$insightId': {
+      id: '/_authenticated/$slug/_dashboard/analytics/insights/$insightId'
+      path: '/analytics/insights/$insightId'
+      fullPath: '/$slug/analytics/insights/$insightId'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardAnalyticsInsightsInsightIdRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardRoute
+    }
+    '/_authenticated/$slug/_dashboard/analytics/dashboards/$dashboardId': {
+      id: '/_authenticated/$slug/_dashboard/analytics/dashboards/$dashboardId'
+      path: '/analytics/dashboards/$dashboardId'
+      fullPath: '/$slug/analytics/dashboards/$dashboardId'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardAnalyticsDashboardsDashboardIdRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/project/products/forms': {
+      id: '/_authenticated/$slug/_dashboard/settings/project/products/forms'
+      path: '/project/products/forms'
+      fullPath: '/$slug/settings/project/products/forms'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsProjectProductsFormsRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/project/products/content': {
+      id: '/_authenticated/$slug/_dashboard/settings/project/products/content'
+      path: '/project/products/content'
+      fullPath: '/$slug/settings/project/products/content'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsProjectProductsContentRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
+    '/_authenticated/$slug/_dashboard/settings/project/products/ai-agents': {
+      id: '/_authenticated/$slug/_dashboard/settings/project/products/ai-agents'
+      path: '/project/products/ai-agents'
+      fullPath: '/$slug/settings/project/products/ai-agents'
+      preLoaderRoute: typeof AuthenticatedSlugDashboardSettingsProjectProductsAiAgentsRouteImport
+      parentRoute: typeof AuthenticatedSlugDashboardSettingsRoute
+    }
   }
 }
 
 interface AuthenticatedSlugDashboardSettingsRouteChildren {
-  AuthenticatedSlugDashboardSettingsPreferencesRoute: typeof AuthenticatedSlugDashboardSettingsPreferencesRoute
+  AuthenticatedSlugDashboardSettingsCustomizationRoute: typeof AuthenticatedSlugDashboardSettingsCustomizationRoute
+  AuthenticatedSlugDashboardSettingsDangerZoneRoute: typeof AuthenticatedSlugDashboardSettingsDangerZoneRoute
+  AuthenticatedSlugDashboardSettingsFeaturePreviewsRoute: typeof AuthenticatedSlugDashboardSettingsFeaturePreviewsRoute
+  AuthenticatedSlugDashboardSettingsNotificationsRoute: typeof AuthenticatedSlugDashboardSettingsNotificationsRoute
+  AuthenticatedSlugDashboardSettingsPersonalApiKeysRoute: typeof AuthenticatedSlugDashboardSettingsPersonalApiKeysRoute
   AuthenticatedSlugDashboardSettingsProfileRoute: typeof AuthenticatedSlugDashboardSettingsProfileRoute
   AuthenticatedSlugDashboardSettingsSecurityRoute: typeof AuthenticatedSlugDashboardSettingsSecurityRoute
   AuthenticatedSlugDashboardSettingsIndexRoute: typeof AuthenticatedSlugDashboardSettingsIndexRoute
+  AuthenticatedSlugDashboardSettingsOrganizationAuthenticationRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationAuthenticationRoute
+  AuthenticatedSlugDashboardSettingsOrganizationDangerZoneRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationDangerZoneRoute
+  AuthenticatedSlugDashboardSettingsOrganizationGeneralRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationGeneralRoute
+  AuthenticatedSlugDashboardSettingsOrganizationMembersRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationMembersRoute
+  AuthenticatedSlugDashboardSettingsOrganizationReverseProxyRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationReverseProxyRoute
+  AuthenticatedSlugDashboardSettingsOrganizationRolesRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationRolesRoute
+  AuthenticatedSlugDashboardSettingsOrganizationSecurityRoute: typeof AuthenticatedSlugDashboardSettingsOrganizationSecurityRoute
+  AuthenticatedSlugDashboardSettingsProjectAccessControlRoute: typeof AuthenticatedSlugDashboardSettingsProjectAccessControlRoute
+  AuthenticatedSlugDashboardSettingsProjectActivityLogsRoute: typeof AuthenticatedSlugDashboardSettingsProjectActivityLogsRoute
+  AuthenticatedSlugDashboardSettingsProjectApiKeysRoute: typeof AuthenticatedSlugDashboardSettingsProjectApiKeysRoute
+  AuthenticatedSlugDashboardSettingsProjectDangerZoneRoute: typeof AuthenticatedSlugDashboardSettingsProjectDangerZoneRoute
+  AuthenticatedSlugDashboardSettingsProjectGeneralRoute: typeof AuthenticatedSlugDashboardSettingsProjectGeneralRoute
+  AuthenticatedSlugDashboardSettingsProjectIntegrationsRoute: typeof AuthenticatedSlugDashboardSettingsProjectIntegrationsRoute
+  AuthenticatedSlugDashboardSettingsProjectWebhooksRoute: typeof AuthenticatedSlugDashboardSettingsProjectWebhooksRoute
+  AuthenticatedSlugDashboardSettingsProjectProductsAiAgentsRoute: typeof AuthenticatedSlugDashboardSettingsProjectProductsAiAgentsRoute
+  AuthenticatedSlugDashboardSettingsProjectProductsContentRoute: typeof AuthenticatedSlugDashboardSettingsProjectProductsContentRoute
+  AuthenticatedSlugDashboardSettingsProjectProductsFormsRoute: typeof AuthenticatedSlugDashboardSettingsProjectProductsFormsRoute
 }
 
 const AuthenticatedSlugDashboardSettingsRouteChildren: AuthenticatedSlugDashboardSettingsRouteChildren =
   {
-    AuthenticatedSlugDashboardSettingsPreferencesRoute:
-      AuthenticatedSlugDashboardSettingsPreferencesRoute,
+    AuthenticatedSlugDashboardSettingsCustomizationRoute:
+      AuthenticatedSlugDashboardSettingsCustomizationRoute,
+    AuthenticatedSlugDashboardSettingsDangerZoneRoute:
+      AuthenticatedSlugDashboardSettingsDangerZoneRoute,
+    AuthenticatedSlugDashboardSettingsFeaturePreviewsRoute:
+      AuthenticatedSlugDashboardSettingsFeaturePreviewsRoute,
+    AuthenticatedSlugDashboardSettingsNotificationsRoute:
+      AuthenticatedSlugDashboardSettingsNotificationsRoute,
+    AuthenticatedSlugDashboardSettingsPersonalApiKeysRoute:
+      AuthenticatedSlugDashboardSettingsPersonalApiKeysRoute,
     AuthenticatedSlugDashboardSettingsProfileRoute:
       AuthenticatedSlugDashboardSettingsProfileRoute,
     AuthenticatedSlugDashboardSettingsSecurityRoute:
       AuthenticatedSlugDashboardSettingsSecurityRoute,
     AuthenticatedSlugDashboardSettingsIndexRoute:
       AuthenticatedSlugDashboardSettingsIndexRoute,
+    AuthenticatedSlugDashboardSettingsOrganizationAuthenticationRoute:
+      AuthenticatedSlugDashboardSettingsOrganizationAuthenticationRoute,
+    AuthenticatedSlugDashboardSettingsOrganizationDangerZoneRoute:
+      AuthenticatedSlugDashboardSettingsOrganizationDangerZoneRoute,
+    AuthenticatedSlugDashboardSettingsOrganizationGeneralRoute:
+      AuthenticatedSlugDashboardSettingsOrganizationGeneralRoute,
+    AuthenticatedSlugDashboardSettingsOrganizationMembersRoute:
+      AuthenticatedSlugDashboardSettingsOrganizationMembersRoute,
+    AuthenticatedSlugDashboardSettingsOrganizationReverseProxyRoute:
+      AuthenticatedSlugDashboardSettingsOrganizationReverseProxyRoute,
+    AuthenticatedSlugDashboardSettingsOrganizationRolesRoute:
+      AuthenticatedSlugDashboardSettingsOrganizationRolesRoute,
+    AuthenticatedSlugDashboardSettingsOrganizationSecurityRoute:
+      AuthenticatedSlugDashboardSettingsOrganizationSecurityRoute,
+    AuthenticatedSlugDashboardSettingsProjectAccessControlRoute:
+      AuthenticatedSlugDashboardSettingsProjectAccessControlRoute,
+    AuthenticatedSlugDashboardSettingsProjectActivityLogsRoute:
+      AuthenticatedSlugDashboardSettingsProjectActivityLogsRoute,
+    AuthenticatedSlugDashboardSettingsProjectApiKeysRoute:
+      AuthenticatedSlugDashboardSettingsProjectApiKeysRoute,
+    AuthenticatedSlugDashboardSettingsProjectDangerZoneRoute:
+      AuthenticatedSlugDashboardSettingsProjectDangerZoneRoute,
+    AuthenticatedSlugDashboardSettingsProjectGeneralRoute:
+      AuthenticatedSlugDashboardSettingsProjectGeneralRoute,
+    AuthenticatedSlugDashboardSettingsProjectIntegrationsRoute:
+      AuthenticatedSlugDashboardSettingsProjectIntegrationsRoute,
+    AuthenticatedSlugDashboardSettingsProjectWebhooksRoute:
+      AuthenticatedSlugDashboardSettingsProjectWebhooksRoute,
+    AuthenticatedSlugDashboardSettingsProjectProductsAiAgentsRoute:
+      AuthenticatedSlugDashboardSettingsProjectProductsAiAgentsRoute,
+    AuthenticatedSlugDashboardSettingsProjectProductsContentRoute:
+      AuthenticatedSlugDashboardSettingsProjectProductsContentRoute,
+    AuthenticatedSlugDashboardSettingsProjectProductsFormsRoute:
+      AuthenticatedSlugDashboardSettingsProjectProductsFormsRoute,
   }
 
 const AuthenticatedSlugDashboardSettingsRouteWithChildren =
@@ -730,10 +1315,15 @@ interface AuthenticatedSlugDashboardRouteChildren {
   AuthenticatedSlugDashboardBillingRoute: typeof AuthenticatedSlugDashboardBillingRoute
   AuthenticatedSlugDashboardPlansRoute: typeof AuthenticatedSlugDashboardPlansRoute
   AuthenticatedSlugDashboardSettingsRoute: typeof AuthenticatedSlugDashboardSettingsRouteWithChildren
+  AuthenticatedSlugDashboardAnalyticsDataManagementRoute: typeof AuthenticatedSlugDashboardAnalyticsDataManagementRoute
   AuthenticatedSlugDashboardFormsFormIdRoute: typeof AuthenticatedSlugDashboardFormsFormIdRouteWithChildren
   AuthenticatedSlugDashboardContentIndexRoute: typeof AuthenticatedSlugDashboardContentIndexRoute
   AuthenticatedSlugDashboardFormsIndexRoute: typeof AuthenticatedSlugDashboardFormsIndexRoute
   AuthenticatedSlugDashboardHomeIndexRoute: typeof AuthenticatedSlugDashboardHomeIndexRoute
+  AuthenticatedSlugDashboardAnalyticsDashboardsDashboardIdRoute: typeof AuthenticatedSlugDashboardAnalyticsDashboardsDashboardIdRoute
+  AuthenticatedSlugDashboardAnalyticsInsightsInsightIdRoute: typeof AuthenticatedSlugDashboardAnalyticsInsightsInsightIdRoute
+  AuthenticatedSlugDashboardAnalyticsDashboardsIndexRoute: typeof AuthenticatedSlugDashboardAnalyticsDashboardsIndexRoute
+  AuthenticatedSlugDashboardAnalyticsInsightsIndexRoute: typeof AuthenticatedSlugDashboardAnalyticsInsightsIndexRoute
 }
 
 const AuthenticatedSlugDashboardRouteChildren: AuthenticatedSlugDashboardRouteChildren =
@@ -743,6 +1333,8 @@ const AuthenticatedSlugDashboardRouteChildren: AuthenticatedSlugDashboardRouteCh
     AuthenticatedSlugDashboardPlansRoute: AuthenticatedSlugDashboardPlansRoute,
     AuthenticatedSlugDashboardSettingsRoute:
       AuthenticatedSlugDashboardSettingsRouteWithChildren,
+    AuthenticatedSlugDashboardAnalyticsDataManagementRoute:
+      AuthenticatedSlugDashboardAnalyticsDataManagementRoute,
     AuthenticatedSlugDashboardFormsFormIdRoute:
       AuthenticatedSlugDashboardFormsFormIdRouteWithChildren,
     AuthenticatedSlugDashboardContentIndexRoute:
@@ -751,6 +1343,14 @@ const AuthenticatedSlugDashboardRouteChildren: AuthenticatedSlugDashboardRouteCh
       AuthenticatedSlugDashboardFormsIndexRoute,
     AuthenticatedSlugDashboardHomeIndexRoute:
       AuthenticatedSlugDashboardHomeIndexRoute,
+    AuthenticatedSlugDashboardAnalyticsDashboardsDashboardIdRoute:
+      AuthenticatedSlugDashboardAnalyticsDashboardsDashboardIdRoute,
+    AuthenticatedSlugDashboardAnalyticsInsightsInsightIdRoute:
+      AuthenticatedSlugDashboardAnalyticsInsightsInsightIdRoute,
+    AuthenticatedSlugDashboardAnalyticsDashboardsIndexRoute:
+      AuthenticatedSlugDashboardAnalyticsDashboardsIndexRoute,
+    AuthenticatedSlugDashboardAnalyticsInsightsIndexRoute:
+      AuthenticatedSlugDashboardAnalyticsInsightsIndexRoute,
   }
 
 const AuthenticatedSlugDashboardRouteWithChildren =
