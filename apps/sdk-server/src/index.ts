@@ -5,6 +5,10 @@ import { auth } from "./integrations/auth";
 import { db } from "./integrations/database";
 import { minioClient } from "./integrations/minio";
 import { posthog } from "./integrations/posthog";
+import {
+	mcpRequestHandler,
+	protectedResourceMetadataHandler,
+} from "./mcp/handler";
 import { sdkEventRoutes } from "./routes/sdk-events";
 import { sdkFormRoutes } from "./routes/sdk-forms";
 import { sdkRoutes } from "./routes/sdk";
@@ -23,15 +27,26 @@ const app = new Elysia({
    }))
    .use(
       cors({
-         allowedHeaders: ["Content-Type", "sdk-api-key", "X-API-Key", "X-Locale"],
+         allowedHeaders: [
+            "Content-Type",
+            "sdk-api-key",
+            "X-API-Key",
+            "X-Locale",
+            "Authorization",
+         ],
          credentials: true,
-         methods: ["GET", "POST", "OPTIONS"],
+         methods: ["GET", "POST", "DELETE", "OPTIONS"],
          origin: true,
       }),
    )
    .use(sdkRoutes)
    .use(sdkEventRoutes)
    .use(sdkFormRoutes)
+   .all("/mcp", ({ request }) => mcpRequestHandler(request))
+   .all("/mcp/*", ({ request }) => mcpRequestHandler(request))
+   .get("/.well-known/oauth-protected-resource", ({ request }) =>
+      protectedResourceMetadataHandler(request),
+   )
    .get("/health", () => ({
       status: "healthy",
       timestamp: new Date().toISOString(),

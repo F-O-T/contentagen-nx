@@ -12,6 +12,7 @@
       "@packages/transactional": "workspace:*",
       "@modelcontextprotocol/sdk": "^1.12.1",
       "elysia": "catalog:server",
+      "jose": "^6.0.11",
       "mcp-handler": "^1.0.7"
    },
    "devDependencies": {
