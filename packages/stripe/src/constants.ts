@@ -71,54 +71,65 @@ export const PLATFORM_ADDONS = [
    {
       name: PlatformAddOn.BOOST,
       displayName: "Boost",
-      description: "Mais projetos e créditos para crescer",
+      description:
+         "Projetos ilimitados, white labeling, SSO e recursos de colaboração com membros da equipe",
       price: "R$ 99",
       annualPrice: "R$ 990",
       perUnit: "/mês",
-      extraProjects: 10,
       availableFor: [PlanName.LITE, PlanName.PRO],
+      features: [
+         "Projetos ilimitados",
+         "SSO enforcement",
+         "Forçar 2FA",
+         "White labeling",
+         "Controle de acesso",
+         "Configurações de convite da organização",
+         "Configurações de segurança da organização",
+      ],
    },
    {
       name: PlatformAddOn.SCALE,
       displayName: "Scale",
-      description: "Para equipes em expansão com alto volume",
+      description:
+         "Suporte prioritário, SAML e mais recursos para escalar sua organização. Inclui todos os recursos do Boost",
       price: "R$ 299",
       annualPrice: "R$ 2.990",
       perUnit: "/mês",
-      extraProjects: 50,
-      availableFor: [PlanName.LITE, PlanName.PRO],
+      availableFor: [PlanName.PRO],
+      features: [
+         "Todos os recursos do Boost",
+         "Logs de atividade (2 meses)",
+         "Suporte prioritário (resposta em 24h)",
+         "SAML SSO",
+      ],
    },
    {
       name: PlatformAddOn.ENTERPRISE,
       displayName: "Enterprise",
-      description: "Uso ilimitado para operações em escala",
+      description:
+         "RBAC, suporte dedicado, treinamento e mais. Inclui todos os recursos do Scale e Boost",
       price: "R$ 799",
       annualPrice: "R$ 7.990",
       perUnit: "/mês",
-      extraProjects: Infinity,
       availableFor: [PlanName.PRO],
+      features: [
+         "Todos os recursos do Scale",
+         "RBAC (controle de acesso baseado em função)",
+         "Suporte dedicado (resposta em 8h)",
+         "Treinamento e onboarding",
+         "Retenção de dados customizada",
+      ],
    },
 ];
 
+/**
+ * Get the effective project limit for an org, considering plan + add-on.
+ * Any platform add-on unlocks unlimited projects.
+ */
 export function getEffectiveProjectLimit(
    plan: PlanName,
    addOn?: PlatformAddOn | null,
 ): number {
-   const baseLimit = PLAN_PROJECT_LIMITS[plan];
-
-   if (!addOn) {
-      return baseLimit;
-   }
-
-   const addOnConfig = PLATFORM_ADDONS.find((a) => a.name === addOn);
-
-   if (!addOnConfig) {
-      return baseLimit;
-   }
-
-   if (addOnConfig.extraProjects === Infinity) {
-      return Infinity;
-   }
-
-   return baseLimit + addOnConfig.extraProjects;
+   if (addOn) return Infinity;
+   return PLAN_PROJECT_LIMITS[plan];
 }
