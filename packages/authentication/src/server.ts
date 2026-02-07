@@ -3,6 +3,7 @@ import { stripe as stripePlugin } from "@better-auth/stripe";
 import type { DatabaseInstance } from "@packages/database/client";
 import {
    createDefaultOrganization,
+   ensureDefaultProject,
    findMemberByUserId,
 } from "@packages/database/repositories/auth-repository";
 import { getDomain, isProduction } from "@packages/environment/helpers";
@@ -429,6 +430,13 @@ export function createAuth(config: SimplifiedAuthConfig) {
                      }
 
                      if (member?.organizationId) {
+                        // Ensure the organization has at least one project
+                        await ensureDefaultProject(
+                           db,
+                           member.organizationId,
+                           session.userId,
+                        );
+
                         console.log(
                            `Setting activeOrganizationId for user ${session.userId} to ${member.organizationId}`,
                         );

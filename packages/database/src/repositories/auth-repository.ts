@@ -224,3 +224,46 @@ export async function getOrganizationMembership(
       );
    }
 }
+
+export async function ensureDefaultProject(
+   dbClient: DatabaseInstance,
+   organizationId: string,
+   userId: string,
+) {
+   try {
+      const existingTeam = await dbClient.query.team.findFirst({
+         where: (t, { eq }) => eq(t.organizationId, organizationId),
+      });
+
+      if (existingTeam) return existingTeam;
+
+      const now = new Date();
+      const [created] = await dbClient
+         .insert(team)
+         .values({
+            name: "Default",
+            organizationId,
+            createdAt: now,
+         })
+         .returning();
+
+      if (created) {
+         await dbClient.insert(teamMember).values({
+            teamId: created.id,
+            userId,
+            createdAt: now,
+         });
+      }
+
+      console.log(
+         `Created default project for organization ${organizationId}`,
+      );
+
+      return created;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to ensure default project: ${(err as Error).message}`,
+      );
+   }
+}
