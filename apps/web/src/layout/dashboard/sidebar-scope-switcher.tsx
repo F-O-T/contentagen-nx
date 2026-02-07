@@ -3,6 +3,7 @@ import {
    AvatarFallback,
    AvatarImage,
 } from "@packages/ui/components/avatar";
+import { Button } from "@packages/ui/components/button";
 import {
    Command,
    CommandEmpty,
@@ -13,11 +14,17 @@ import {
    CommandSeparator,
 } from "@packages/ui/components/command";
 import {
+   CredenzaBody,
+   CredenzaDescription,
+   CredenzaFooter,
+   CredenzaHeader,
+   CredenzaTitle,
+} from "@packages/ui/components/credenza";
+import {
    Popover,
    PopoverContent,
    PopoverTrigger,
 } from "@packages/ui/components/popover";
-import { Separator } from "@packages/ui/components/separator";
 import {
    SidebarMenu,
    SidebarMenuButton,
@@ -25,31 +32,16 @@ import {
 } from "@packages/ui/components/sidebar";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useLocation, useParams, useRouter } from "@tanstack/react-router";
-import {
-   Building2,
-   Check,
-   ChevronDown,
-   CreditCard,
-   Settings,
-   Users,
-   Plus,
-} from "lucide-react";
+import { Check, ChevronDown, Plus, Settings } from "lucide-react";
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { CreateTeamForm } from "@/features/organization/ui/create-team-form";
+import { ManageOrganizationForm } from "@/features/organization/ui/manage-organization-form";
 import { useSetActiveOrganization } from "@/features/organization/hooks/use-set-active-organization";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
-import { useSheet } from "@/hooks/use-sheet";
 import { useCredenza } from "@/hooks/use-credenza";
-import {
-   CredenzaBody,
-   CredenzaDescription,
-   CredenzaFooter,
-   CredenzaHeader,
-   CredenzaTitle,
-} from "@packages/ui/components/credenza";
-import { Button } from "@packages/ui/components/button";
+import { useSheet } from "@/hooks/use-sheet";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -57,6 +49,8 @@ type Organization = {
    id: string;
    name: string;
    slug: string;
+   logo?: string | null;
+   role?: string;
 };
 
 type Team = {
@@ -64,9 +58,36 @@ type Team = {
    name: string;
 };
 
+const ORG_AVATAR_COLORS = [
+   "bg-blue-600",
+   "bg-emerald-600",
+   "bg-violet-600",
+   "bg-amber-600",
+   "bg-rose-600",
+   "bg-cyan-600",
+   "bg-pink-600",
+   "bg-indigo-600",
+];
+
 function getInitials(value: string) {
    if (!value) return "?";
    return value.trim().charAt(0).toUpperCase();
+}
+
+function getOrgColor(name: string): string {
+   let hash = 0;
+   for (const char of name) {
+      hash = char.charCodeAt(0) + ((hash << 5) - hash);
+   }
+   return ORG_AVATAR_COLORS[Math.abs(hash) % ORG_AVATAR_COLORS.length];
+}
+
+function RoleBadge({ role }: { role: string }) {
+   return (
+      <span className="ml-auto shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground bg-muted">
+         {role}
+      </span>
+   );
 }
 
 function SidebarScopeSwitcherSkeleton() {
@@ -83,7 +104,8 @@ function SidebarScopeSwitcherSkeleton() {
 }
 
 function SidebarScopeSwitcherContent() {
-   const { activeOrganization, projectLimit, projectCount } = useActiveOrganization();
+   const { activeOrganization, projectLimit, projectCount } =
+      useActiveOrganization();
    const { activeTeam, teams } = useActiveTeam();
    const { openSheet } = useSheet();
    const { openCredenza, closeCredenza } = useCredenza();
@@ -98,7 +120,7 @@ function SidebarScopeSwitcherContent() {
    );
 
    const [orgOpen, setOrgOpen] = useState(false);
-   const [teamOpen, setTeamOpen] = useState(false);
+   const [projectOpen, setProjectOpen] = useState(false);
 
    const organizationList = organizations ?? [];
 
@@ -152,7 +174,7 @@ function SidebarScopeSwitcherContent() {
    const handleTeamSwitch = useCallback(
       async (team: Team) => {
          if (team.id === activeTeam?.id) {
-            setTeamOpen(false);
+            setProjectOpen(false);
             return;
          }
 
@@ -164,13 +186,13 @@ function SidebarScopeSwitcherContent() {
             queryKey: orpc.session.getSession.queryKey({}),
          });
 
-         setTeamOpen(false);
+         setProjectOpen(false);
       },
       [activeTeam?.id, queryClient],
    );
 
    const handleNewProject = useCallback(() => {
-      setTeamOpen(false);
+      setProjectOpen(false);
 
       if (projectLimit !== null && teams.length >= projectLimit) {
          openCredenza({
@@ -179,12 +201,14 @@ function SidebarScopeSwitcherContent() {
                   <CredenzaHeader>
                      <CredenzaTitle>Limite de projetos</CredenzaTitle>
                      <CredenzaDescription>
-                        Você está usando {projectCount} de {projectLimit} projetos
+                        Você está usando {projectCount} de {projectLimit}{" "}
+                        projetos
                      </CredenzaDescription>
                   </CredenzaHeader>
                   <CredenzaBody>
                      <p className="text-sm text-muted-foreground">
-                        Faça upgrade para o add-on Boost para criar projetos ilimitados
+                        Faça upgrade para o add-on Boost para criar projetos
+                        ilimitados
                      </p>
                   </CredenzaBody>
                   <CredenzaFooter className="flex gap-2">
@@ -209,55 +233,84 @@ function SidebarScopeSwitcherContent() {
       openSheet({
          children: <CreateTeamForm />,
       });
-   }, [openSheet, openCredenza, closeCredenza, projectLimit, projectCount, teams.length, currentSlug]);
+   }, [
+      openSheet,
+      openCredenza,
+      closeCredenza,
+      projectLimit,
+      projectCount,
+      teams.length,
+      currentSlug,
+   ]);
 
-   const handleNavigate = useCallback(
-      (path: string) => {
-         router.navigate({ to: path });
-         setOrgOpen(false);
-      },
-      [router],
-   );
+   const handleNewOrganization = useCallback(() => {
+      setOrgOpen(false);
+      openSheet({
+         children: <ManageOrganizationForm />,
+      });
+   }, [openSheet]);
 
    return (
       <SidebarMenu>
          <SidebarMenuItem>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-0">
+               {/* Org avatar — opens org switcher */}
                <Popover onOpenChange={setOrgOpen} open={orgOpen}>
                   <PopoverTrigger asChild>
-                     <SidebarMenuButton
-                        aria-label="Switch organization"
-                        className="h-12 w-12 justify-center p-0"
-                        size="lg"
-                        tooltip="Switch organization"
+                     <button
+                        aria-label="Trocar organização"
+                        className="flex shrink-0 items-center justify-center rounded-md p-1.5 hover:bg-accent transition-colors"
+                        type="button"
                      >
-                        <Avatar className="h-8 w-8 rounded-md">
-                           <AvatarImage alt="Organization" src="" />
-                           <AvatarFallback className="rounded-md text-xs font-semibold">
+                        <Avatar className="size-7 rounded-md">
+                           <AvatarImage
+                              alt={activeOrganization.name}
+                              src=""
+                           />
+                           <AvatarFallback
+                              className={`rounded-md text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
+                           >
                               {getInitials(activeOrganization.name)}
                            </AvatarFallback>
                         </Avatar>
-                     </SidebarMenuButton>
+                     </button>
                   </PopoverTrigger>
-                  <PopoverContent align="start" className="p-0" sideOffset={8}>
+                  <PopoverContent
+                     align="start"
+                     className="w-72 p-0"
+                     sideOffset={8}
+                  >
                      <Command>
-                        <CommandInput placeholder="Search organizations..." />
+                        <CommandInput placeholder="Filtrar organizações..." />
                         <CommandList>
-                           <CommandEmpty>No organizations found.</CommandEmpty>
+                           <CommandEmpty>
+                              Nenhuma organização encontrada.
+                           </CommandEmpty>
                            {currentOrg && (
-                              <CommandGroup heading="Current organization">
+                              <CommandGroup heading="Organização atual">
                                  <CommandItem
                                     disabled
                                     value={currentOrg.name}
                                  >
-                                    <Building2 className="size-4" />
-                                    <span>{currentOrg.name}</span>
-                                    <Check className="ml-auto size-4" />
+                                    <Avatar className="size-5 rounded-md">
+                                       <AvatarFallback
+                                          className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(currentOrg.name)}`}
+                                       >
+                                          {getInitials(currentOrg.name)}
+                                       </AvatarFallback>
+                                    </Avatar>
+                                    <span className="truncate">
+                                       {currentOrg.name}
+                                    </span>
+                                    {currentOrg.role && (
+                                       <RoleBadge role={currentOrg.role} />
+                                    )}
+                                    <Check className="ml-1 size-4 shrink-0" />
                                  </CommandItem>
                               </CommandGroup>
                            )}
                            {otherOrgs.length > 0 && (
-                              <CommandGroup heading="Organizations">
+                              <CommandGroup heading="Outras organizações">
                                  {otherOrgs.map((org, index) => (
                                     <CommandItem
                                        key={`org-${index + 1}`}
@@ -266,33 +319,31 @@ function SidebarScopeSwitcherContent() {
                                        }
                                        value={`${org.name} ${org.slug}`}
                                     >
-                                       <Building2 className="size-4" />
-                                       <span>{org.name}</span>
+                                       <Avatar className="size-5 rounded-md">
+                                          <AvatarFallback
+                                             className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(org.name)}`}
+                                          >
+                                             {getInitials(org.name)}
+                                          </AvatarFallback>
+                                       </Avatar>
+                                       <span className="truncate">
+                                          {org.name}
+                                       </span>
+                                       {org.role && (
+                                          <RoleBadge role={org.role} />
+                                       )}
                                     </CommandItem>
                                  ))}
                               </CommandGroup>
                            )}
                            <CommandSeparator />
-                           <CommandGroup heading="Actions">
+                           <CommandGroup>
                               <CommandItem
-                                 onSelect={() =>
-                                    handleNavigate(`/${currentSlug}/billing`)
-                                 }
-                                 value="Billing"
+                                 onSelect={handleNewOrganization}
+                                 value="Nova organização"
                               >
-                                 <CreditCard className="size-4" />
-                                 <span>Billing</span>
-                              </CommandItem>
-                              <CommandItem
-                                 onSelect={() =>
-                                    handleNavigate(
-                                       `/${currentSlug}/settings/profile`,
-                                    )
-                                 }
-                                 value="Settings"
-                              >
-                                 <Settings className="size-4" />
-                                 <span>Settings</span>
+                                 <Plus className="size-4" />
+                                 <span>Nova organização</span>
                               </CommandItem>
                            </CommandGroup>
                         </CommandList>
@@ -300,66 +351,83 @@ function SidebarScopeSwitcherContent() {
                   </PopoverContent>
                </Popover>
 
-               <Separator
-                  className="h-6 group-data-[collapsible=icon]:hidden"
-                  orientation="vertical"
-               />
-
-               <Popover onOpenChange={setTeamOpen} open={teamOpen}>
+               {/* Project name + chevron — opens project switcher */}
+               <Popover onOpenChange={setProjectOpen} open={projectOpen}>
                   <PopoverTrigger asChild>
-                     <SidebarMenuButton
-                        aria-label="Switch project"
-                        className="flex-1 justify-between gap-3 group-data-[collapsible=icon]:hidden"
-                        size="lg"
+                     <button
+                        aria-label="Trocar projeto"
+                        className="group/project flex min-w-0 flex-1 items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-accent transition-colors group-data-[collapsible=icon]:hidden"
+                        type="button"
                      >
-                        <div className="grid flex-1 text-left text-sm leading-tight">
-                           <span className="truncate font-semibold">
-                              {activeTeam?.name ?? "No project"}
-                           </span>
-                           <span className="truncate text-xs text-muted-foreground">
-                              {activeOrganization.name}
-                           </span>
-                        </div>
-                        <ChevronDown className="size-4" />
-                     </SidebarMenuButton>
+                        <span className="truncate">
+                           {activeTeam?.name ?? "Sem projeto"}
+                        </span>
+                        <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
+                     </button>
                   </PopoverTrigger>
-                  <PopoverContent align="start" className="p-0" sideOffset={8}>
+                  <PopoverContent
+                     align="start"
+                     className="w-72 p-0"
+                     sideOffset={8}
+                  >
                      <Command>
-                        <CommandInput placeholder="Search projects..." />
+                        <CommandInput placeholder="Filtrar projetos..." />
                         <CommandList>
-                           <CommandEmpty>No projects found.</CommandEmpty>
+                           <CommandEmpty>
+                              Nenhum projeto encontrado.
+                           </CommandEmpty>
                            {activeTeam && (
-                              <CommandGroup heading="Current project">
-                                 <CommandItem disabled value={activeTeam.name}>
-                                    <Users className="size-4" />
-                                    <span>{activeTeam.name}</span>
-                                    <Check className="ml-auto size-4" />
+                              <CommandGroup heading="Projeto atual">
+                                 <CommandItem
+                                    disabled
+                                    value={activeTeam.name}
+                                 >
+                                    <Check className="size-4" />
+                                    <span className="truncate">
+                                       {activeTeam.name}
+                                    </span>
+                                    <Link
+                                       className="ml-auto rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-accent"
+                                       onClick={(e) => {
+                                          e.stopPropagation();
+                                          setProjectOpen(false);
+                                       }}
+                                       to={`/${currentSlug}/settings`}
+                                    >
+                                       <Settings className="size-3.5" />
+                                    </Link>
                                  </CommandItem>
                               </CommandGroup>
                            )}
                            {otherTeams.length > 0 && (
-                              <CommandGroup heading="Projects">
+                              <CommandGroup heading="Outros projetos">
                                  {otherTeams.map((team, index) => (
                                     <CommandItem
                                        key={`team-${index + 1}`}
-                                       onSelect={() => handleTeamSwitch(team)}
+                                       onSelect={() =>
+                                          handleTeamSwitch(team)
+                                       }
                                        value={team.name}
                                     >
-                                       <Users className="size-4" />
-                                       <span>{team.name}</span>
+                                       <span className="size-4" />
+                                       <span className="truncate">
+                                          {team.name}
+                                       </span>
+                                       <Settings className="ml-auto size-3.5 text-muted-foreground opacity-0 group-data-[selected=true]:opacity-100" />
                                     </CommandItem>
                                  ))}
                               </CommandGroup>
                            )}
                            <CommandSeparator />
-                           <CommandGroup heading="Actions">
+                           <CommandGroup>
                               <CommandItem
                                  onSelect={handleNewProject}
-                                 value="New project"
+                                 value="Novo projeto"
                               >
                                  <Plus className="size-4" />
                                  <span>
-                                    {projectLimit !== null
+                                    {projectLimit !== null &&
+                                    projectLimit !== Number.POSITIVE_INFINITY
                                        ? `Novo projeto (${projectCount}/${projectLimit})`
                                        : "Novo projeto"}
                                  </span>

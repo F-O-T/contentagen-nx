@@ -1,5 +1,5 @@
 import type { DatabaseInstance } from "@packages/database/client";
-import { subscription } from "@packages/database/schemas/auth";
+import { member, organization, subscription } from "@packages/database/schemas/auth";
 import { PlanName, getEffectiveProjectLimit } from "@packages/stripe/constants";
 import { and, eq, or } from "drizzle-orm";
 import { protectedProcedure } from "../server";
@@ -40,17 +40,25 @@ async function resolveOrganizationPlan(
 // =============================================================================
 
 /**
- * Get all organizations the user is a member of
+ * Get all organizations the user is a member of, with their role
  */
 export const getOrganizations = protectedProcedure
    .handler(async ({ context }) => {
-      const { auth, headers } = context;
+      const { db, userId } = context;
 
-      const organizations = await auth.api.listOrganizations({
-         headers,
-      });
+      const memberships = await db
+         .select({
+            id: organization.id,
+            name: organization.name,
+            slug: organization.slug,
+            logo: organization.logo,
+            role: member.role,
+         })
+         .from(member)
+         .innerJoin(organization, eq(member.organizationId, organization.id))
+         .where(eq(member.userId, userId));
 
-      return organizations;
+      return memberships;
    });
 
 /**
