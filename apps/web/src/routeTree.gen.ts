@@ -27,6 +27,7 @@ import { Route as AuthSignInIndexRouteImport } from './routes/auth/sign-in/index
 import { Route as AuthSignInEmailRouteImport } from './routes/auth/sign-in/email'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AuthenticatedSlugOnboardingRouteImport } from './routes/_authenticated/$slug/onboarding'
 import { Route as AuthenticatedSlugEditorRouteImport } from './routes/_authenticated/$slug/_editor'
 import { Route as AuthenticatedSlugDashboardRouteImport } from './routes/_authenticated/$slug/_dashboard'
 import { Route as DotwellKnownOauthAuthorizationServerSplatRouteImport } from './routes/[.]well-known.oauth-authorization-server.$'
@@ -160,6 +161,12 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedSlugOnboardingRoute =
+  AuthenticatedSlugOnboardingRouteImport.update({
+    id: '/onboarding',
+    path: '/onboarding',
+    getParentRoute: () => AuthenticatedSlugRoute,
+  } as any)
 const AuthenticatedSlugEditorRoute = AuthenticatedSlugEditorRouteImport.update({
   id: '/_editor',
   getParentRoute: () => AuthenticatedSlugRoute,
@@ -427,6 +434,7 @@ export interface FileRoutesByFullPath {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/oauth/consent': typeof OauthConsentRoute
   '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
+  '/$slug/onboarding': typeof AuthenticatedSlugOnboardingRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
@@ -485,6 +493,7 @@ export interface FileRoutesByTo {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/oauth/consent': typeof OauthConsentRoute
   '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
+  '/$slug/onboarding': typeof AuthenticatedSlugOnboardingRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
@@ -547,6 +556,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/_authenticated/$slug/_dashboard': typeof AuthenticatedSlugDashboardRouteWithChildren
   '/_authenticated/$slug/_editor': typeof AuthenticatedSlugEditorRouteWithChildren
+  '/_authenticated/$slug/onboarding': typeof AuthenticatedSlugOnboardingRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
@@ -608,6 +618,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/oauth/consent'
     | '/.well-known/oauth-authorization-server/$'
+    | '/$slug/onboarding'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/auth/sign-in/email'
@@ -666,6 +677,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/oauth/consent'
     | '/.well-known/oauth-authorization-server/$'
+    | '/$slug/onboarding'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/auth/sign-in/email'
@@ -727,6 +739,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-authorization-server/$'
     | '/_authenticated/$slug/_dashboard'
     | '/_authenticated/$slug/_editor'
+    | '/_authenticated/$slug/onboarding'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/auth/sign-in/email'
@@ -911,6 +924,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/$slug/onboarding': {
+      id: '/_authenticated/$slug/onboarding'
+      path: '/onboarding'
+      fullPath: '/$slug/onboarding'
+      preLoaderRoute: typeof AuthenticatedSlugOnboardingRouteImport
+      parentRoute: typeof AuthenticatedSlugRoute
     }
     '/_authenticated/$slug/_editor': {
       id: '/_authenticated/$slug/_editor'
@@ -1376,11 +1396,13 @@ const AuthenticatedSlugEditorRouteWithChildren =
 interface AuthenticatedSlugRouteChildren {
   AuthenticatedSlugDashboardRoute: typeof AuthenticatedSlugDashboardRouteWithChildren
   AuthenticatedSlugEditorRoute: typeof AuthenticatedSlugEditorRouteWithChildren
+  AuthenticatedSlugOnboardingRoute: typeof AuthenticatedSlugOnboardingRoute
 }
 
 const AuthenticatedSlugRouteChildren: AuthenticatedSlugRouteChildren = {
   AuthenticatedSlugDashboardRoute: AuthenticatedSlugDashboardRouteWithChildren,
   AuthenticatedSlugEditorRoute: AuthenticatedSlugEditorRouteWithChildren,
+  AuthenticatedSlugOnboardingRoute: AuthenticatedSlugOnboardingRoute,
 }
 
 const AuthenticatedSlugRouteWithChildren =
