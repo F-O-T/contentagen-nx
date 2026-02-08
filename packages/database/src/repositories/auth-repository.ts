@@ -1,4 +1,5 @@
 import { AppError, propagateError } from "@packages/utils/errors";
+import { generatePublicApiKey } from "@packages/utils/crypto";
 import { createSlug, generateRandomSuffix } from "@packages/utils/text";
 import { eq } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
@@ -116,6 +117,7 @@ export async function createDefaultOrganization(
       const orgName = `${safeUserName}${safeSuffix}`;
       const orgSlug = createSlug(orgName);
       const now = new Date();
+      const publicApiKey = generatePublicApiKey();
 
       const [createdOrganization] = await dbClient
          .insert(organization)
@@ -125,6 +127,7 @@ export async function createDefaultOrganization(
             description: orgName,
             name: orgName,
             onboardingCompleted: false,
+            publicApiKey,
             slug: orgSlug,
          })
          .returning();
@@ -264,6 +267,57 @@ export async function ensureDefaultProject(
       propagateError(err);
       throw AppError.database(
          `Failed to ensure default project: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function getPublicApiKey(
+   dbClient: DatabaseInstance,
+   organizationId: string,
+) {
+   try {
+      const result = await dbClient.query.organization.findFirst({
+         where: (org, { eq }) => eq(org.id, organizationId),
+         columns: {
+            publicApiKey: true,
+         },
+      });
+
+      if (!result) {
+         throw AppError.notFound("Organization not found");
+      }
+
+      return result.publicApiKey;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to get public API key: ${(err as Error).message}`,
+      );
+   }
+}
+
+export async function regeneratePublicApiKey(
+   dbClient: DatabaseInstance,
+   organizationId: string,
+) {
+   try {
+      const newKey = generatePublicApiKey();
+
+      const result = await dbClient
+         .update(organization)
+         .set({ publicApiKey: newKey })
+         .where(eq(organization.id, organizationId))
+         .returning({ publicApiKey: organization.publicApiKey });
+
+      if (!result.length) {
+         throw AppError.notFound("Organization not found");
+      }
+
+      return result[0]!.publicApiKey;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to regenerate public API key: ${(err as Error).message}`,
       );
    }
 }

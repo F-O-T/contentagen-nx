@@ -13,6 +13,10 @@
          "default": "./src/array.ts",
          "types": "./dist/src/array.d.ts"
       },
+      "./crypto": {
+         "default": "./src/crypto.ts",
+         "types": "./dist/src/crypto.d.ts"
+      },
 
       "./date": {
          "default": "./src/date.ts",

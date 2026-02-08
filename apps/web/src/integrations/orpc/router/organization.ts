@@ -1,7 +1,13 @@
 import type { DatabaseInstance } from "@packages/database/client";
+import {
+   getPublicApiKey as getPublicApiKeyFromDb,
+   isOrganizationOwner,
+   regeneratePublicApiKey as regeneratePublicApiKeyFromDb,
+} from "@packages/database/repositories/auth-repository";
 import { member, organization, subscription } from "@packages/database/schemas/auth";
 import { PlanName, getEffectiveProjectLimit } from "@packages/stripe/constants";
 import { and, eq, or } from "drizzle-orm";
+import { ORPCError } from "@orpc/server";
 import { protectedProcedure } from "../server";
 
 // =============================================================================
@@ -128,4 +134,38 @@ export const getOrganizationTeams = protectedProcedure
       });
 
       return teams;
+   });
+
+/**
+ * Get the public API key for the active organization.
+ * Any authenticated member of the organization can read it.
+ */
+export const getPublicApiKey = protectedProcedure
+   .handler(async ({ context }) => {
+      const { db, organizationId } = context;
+
+      const publicApiKey = await getPublicApiKeyFromDb(db, organizationId);
+
+      return { publicApiKey };
+   });
+
+/**
+ * Regenerate the public API key for the active organization.
+ * Only organization owners can regenerate the key.
+ */
+export const regeneratePublicApiKey = protectedProcedure
+   .handler(async ({ context }) => {
+      const { db, organizationId, userId } = context;
+
+      const isOwner = await isOrganizationOwner(db, userId, organizationId);
+
+      if (!isOwner) {
+         throw new ORPCError("FORBIDDEN", {
+            message: "Only organization owners can regenerate the public API key",
+         });
+      }
+
+      const newKey = await regeneratePublicApiKeyFromDb(db, organizationId);
+
+      return { publicApiKey: newKey };
    });
