@@ -106,6 +106,11 @@ export const organization = pgTable(
       context: text("context").default("personal"),
       description: text("description").default(""),
       onboardingCompleted: boolean("onboarding_completed").default(false),
+      publicApiKey: text("public_api_key"),
+      onboardingProducts: jsonb("onboarding_products").$type<string[]>(),
+      onboardingTasks: jsonb("onboarding_tasks").$type<
+         Record<string, boolean>
+      >(),
    },
    (table) => [uniqueIndex("organization_slug_uidx").on(table.slug)],
 );

@@ -20,3 +20,5 @@ export * from "./schemas/writer";
 export * from "./schemas/annotations";
 export * from "./schemas/dashboards";
 export * from "./schemas/insights";
+// Personal API Keys
+export * from "./schemas/personal-api-key";
