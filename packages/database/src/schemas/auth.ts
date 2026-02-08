@@ -106,7 +106,9 @@ export const organization = pgTable(
       context: text("context").default("personal"),
       description: text("description").default(""),
       onboardingCompleted: boolean("onboarding_completed").default(false),
-      publicApiKey: text("public_api_key"),
+      publicApiKey: text("public_api_key").unique(),
+      // Managed via direct Drizzle queries in oRPC routers, not through Better Auth
+      // (Better Auth additionalFields does not support jsonb types)
       onboardingProducts: jsonb("onboarding_products").$type<string[]>(),
       onboardingTasks: jsonb("onboarding_tasks").$type<
          Record<string, boolean>

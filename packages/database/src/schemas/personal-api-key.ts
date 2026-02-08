@@ -5,6 +5,7 @@ import {
 	pgTable,
 	text,
 	timestamp,
+	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
@@ -42,8 +43,8 @@ export const personalApiKey = pgTable(
 		expiresAt: timestamp("expires_at"),
 	},
 	(table) => [
-		index("personal_api_key_userId_idx").on(table.userId),
-		index("personal_api_key_keyPrefix_idx").on(table.keyPrefix),
+		index("personal_api_key_user_id_idx").on(table.userId),
+		uniqueIndex("personal_api_key_key_prefix_uidx").on(table.keyPrefix),
 	],
 );
 
