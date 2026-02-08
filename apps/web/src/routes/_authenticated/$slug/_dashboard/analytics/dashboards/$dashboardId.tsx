@@ -27,7 +27,7 @@ function DashboardSkeleton() {
 }
 
 function DashboardContent() {
-	const { dashboardId, slug } = Route.useParams();
+	const { dashboardId } = Route.useParams();
 	const { data: dashboard } = useSuspenseQuery(
 		orpc.dashboards.getById.queryOptions({ input: { id: dashboardId } }),
 	);
@@ -90,7 +90,7 @@ function DashboardViewPage() {
 		<main className="flex flex-col gap-4">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-3">
-					<Link to={`/${slug}/analytics/dashboards`}>
+					<Link to="/$slug/analytics/dashboards" params={{ slug }}>
 						<Button variant="ghost" size="icon">
 							<ArrowLeft className="size-4" />
 						</Button>

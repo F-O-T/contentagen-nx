@@ -25,7 +25,7 @@ export function DashboardListCard({
 	slug,
 }: DashboardListCardProps) {
 	return (
-		<Link to={`/${slug}/analytics/dashboards/${id}`}>
+		<Link to="/$slug/analytics/dashboards/$dashboardId" params={{ slug, dashboardId: id }}>
 			<Card className="hover:border-primary/50 transition-colors cursor-pointer">
 				<CardHeader>
 					<div className="flex items-center gap-3">

@@ -1,15 +1,20 @@
-import { SidebarInset, SidebarProvider } from "@packages/ui/components/sidebar";
-import { cn } from "@packages/ui/lib/utils";
+import { TooltipProvider } from "@packages/ui/components/tooltip";
+import { useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "@tanstack/react-router";
 import type * as React from "react";
 import { useEffect, useRef } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { useLastOrganization } from "@/hooks/use-last-organization";
+import {
+   closeSubSidebar,
+   openSubSidebar,
+   useSidebarNav,
+} from "@/hooks/use-sidebar-nav";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
-import { useQueryClient } from "@tanstack/react-query";
-import { AppSidebar } from "./app-sidebar";
-import { SiteHeader } from "./site-header";
+import { IconRail } from "./icon-rail";
+import { SubSidebar } from "./sub-sidebar";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const { activeOrganization } = useActiveOrganization();
@@ -17,6 +22,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const { setLastSlug } = useLastOrganization();
    const queryClient = useQueryClient();
    const setTeamForOrgRef = useRef(new Set<string>());
+   const { manualClose } = useSidebarNav();
+   const { pathname } = useLocation();
 
    useEffect(() => {
       if (activeOrganization?.slug) {
@@ -45,15 +52,27 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       void setDefaultTeam();
    }, [activeOrganization?.id, activeTeam, queryClient, teams]);
 
+   useEffect(() => {
+      if (pathname.includes("/analytics/dashboards")) {
+         if (!manualClose) {
+            openSubSidebar("dashboards");
+         }
+      } else if (pathname.includes("/analytics/insights")) {
+         if (!manualClose) {
+            openSubSidebar("insights");
+         }
+      } else {
+         closeSubSidebar();
+      }
+   }, [pathname, manualClose]);
+
    return (
-      <SidebarProvider defaultOpen={false}>
-         <AppSidebar variant="inset" />
-         <SidebarInset>
-            <SiteHeader />
-            <div className={cn("p-4 h-full flex-1 overflow-y-auto")}>
-               {children}
-            </div>
-         </SidebarInset>
-      </SidebarProvider>
+      <TooltipProvider delayDuration={200}>
+         <div className="flex h-screen">
+            <IconRail />
+            <SubSidebar />
+            <main className="flex-1 overflow-y-auto p-4">{children}</main>
+         </div>
+      </TooltipProvider>
    );
 }

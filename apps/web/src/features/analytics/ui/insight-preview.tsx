@@ -51,7 +51,7 @@ function TrendsPreview({ config }: { config: TrendsConfig }) {
 	const series = config.events.filter((e) => e.name).map((e, i) => ({ key: e.name, label: e.label || e.name, color: `hsl(var(--chart-${i + 1}))` }));
 	if (series.length === 0) return <div className="flex items-center justify-center h-64 text-muted-foreground">Add an event to see a preview</div>;
 	if (config.chartType === "number") {
-		const total = data.reduce((sum, d) => sum + ((d[series[0].key] as number) ?? 0), 0);
+		const total = data.reduce((sum, d) => sum + (((d as Record<string, unknown>)[series[0].key] as number) ?? 0), 0);
 		return <TrendsNumberCard value={total} label={series[0].label} trend={{ value: 12, direction: "up", comparison: "vs previous period" }} />;
 	}
 	if (config.chartType === "bar") return <TrendsBarChart data={data} series={series} xAxisKey="date" xAxisFormatter={(v) => new Date(v).toLocaleDateString("pt-BR", { day: "numeric" })} />;

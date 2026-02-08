@@ -1,63 +1,74 @@
+import { Input } from "@packages/ui/components/input";
 import { QuickAccessCard } from "@packages/ui/components/quick-access-card";
 import { useNavigate } from "@tanstack/react-router";
-import { CreditCard, Settings2, Shield, User } from "lucide-react";
+import { Search } from "lucide-react";
+import { useState } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
+import {
+   settingsNavSections,
+   type SettingsNavItemDef,
+} from "./settings-nav-items";
 
-const settingsNavItems = [
-   {
-      description: "Gerencie seu nome, email e foto",
-      href: "/$slug/settings/profile",
-      icon: User,
-      id: "profile",
-      title: "Perfil",
-   },
-   {
-      description: "Senha e autenticação em dois fatores",
-      href: "/$slug/settings/security",
-      icon: Shield,
-      id: "security",
-      title: "Segurança",
-   },
-   {
-      description: "Tema, idioma e privacidade",
-      href: "/$slug/settings/preferences",
-      icon: Settings2,
-      id: "preferences",
-      title: "Preferências",
-   },
-];
+function flattenItems(items: SettingsNavItemDef[]): SettingsNavItemDef[] {
+   return items.flatMap((item) => (item.children ? item.children : [item]));
+}
 
 export function SettingsMobileNav() {
    const { activeOrganization } = useActiveOrganization();
    const navigate = useNavigate();
+   const [search, setSearch] = useState("");
+
+   const q = search.toLowerCase();
 
    return (
-      <div className="grid gap-4">
-         {settingsNavItems.map((item) => (
-            <QuickAccessCard
-               description={item.description}
-               icon={<item.icon className="size-4" />}
-               key={item.id}
-               onClick={() =>
-                  navigate({
-                     params: { slug: activeOrganization.slug },
-                     to: item.href,
-                  })
-               }
-               title={item.title}
+      <div className="space-y-6">
+         <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground pointer-events-none" />
+            <Input
+               className="pl-8 h-9 text-sm"
+               onChange={(e) => setSearch(e.target.value)}
+               placeholder="Pesquisar configurações..."
+               value={search}
             />
-         ))}
-         <QuickAccessCard
-            description="Plano, uso e gastos"
-            icon={<CreditCard className="size-4" />}
-            onClick={() =>
-               navigate({
-                  params: { slug: activeOrganization.slug },
-                  to: "/$slug/billing",
-               })
-            }
-            title="Billing"
-         />
+         </div>
+
+         {settingsNavSections.map((section) => {
+            const allItems = flattenItems(section.items);
+            const filtered = q
+               ? allItems.filter((item) =>
+                    item.title.toLowerCase().includes(q),
+                 )
+               : allItems;
+
+            if (filtered.length === 0) return null;
+
+            return (
+               <div key={section.id}>
+                  <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
+                     {section.label}
+                  </h2>
+                  <div className="grid gap-2">
+                     {filtered.map((item) => (
+                        <QuickAccessCard
+                           icon={
+                              item.icon ? (
+                                 <item.icon className="size-4" />
+                              ) : undefined
+                           }
+                           key={item.id}
+                           onClick={() =>
+                              navigate({
+                                 params: { slug: activeOrganization.slug },
+                                 to: item.href,
+                              })
+                           }
+                           title={item.title}
+                        />
+                     ))}
+                  </div>
+               </div>
+            );
+         })}
       </div>
    );
 }

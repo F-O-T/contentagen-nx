@@ -2,7 +2,6 @@ import { Button } from "@packages/ui/components/button";
 import {
    Sidebar,
    SidebarContent,
-   SidebarHeader,
    SidebarProvider,
 } from "@packages/ui/components/sidebar";
 import { useIsMobile } from "@packages/ui/hooks/use-mobile";
@@ -24,7 +23,6 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
 
    const isIndexRoute = pathname.endsWith("/settings");
 
-   // Mobile: show navigation list at index, content with back header otherwise
    if (isMobile) {
       if (isIndexRoute) {
          return <SettingsMobileNav />;
@@ -38,7 +36,7 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
                   to="/$slug/settings"
                >
                   <ChevronLeft className="size-4 mr-1" />
-                  {"Configurações"}
+                  Configurações
                </Link>
             </Button>
             <div className="flex-1">{children}</div>
@@ -46,7 +44,6 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
       );
    }
 
-   // Desktop: sidebar + content layout
    return (
       <SidebarProvider defaultOpen>
          <div className="flex h-full w-full gap-4">
@@ -55,14 +52,6 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
                collapsible="none"
                variant="inset"
             >
-               <SidebarHeader className="px-4 pt-4">
-                  <h1 className="text-lg font-semibold font-serif">
-                     {"Configurações"}
-                  </h1>
-                  <p className="text-xs text-muted-foreground">
-                     {"Gerencie suas configurações e preferências."}
-                  </p>
-               </SidebarHeader>
                <SidebarContent>
                   <SettingsSidebar />
                </SidebarContent>

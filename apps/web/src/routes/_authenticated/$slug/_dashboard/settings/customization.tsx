@@ -28,7 +28,7 @@ import { orpc } from "@/integrations/orpc/client";
 import { ThemeSwitcher } from "@/layout/dashboard/theme-switcher";
 
 export const Route = createFileRoute(
-   "/_authenticated/$slug/_dashboard/settings/preferences",
+   "/_authenticated/$slug/_dashboard/settings/customization",
 )({
    component: PreferencesPage,
 });

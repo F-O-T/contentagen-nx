@@ -21,7 +21,6 @@ import {
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
 import {
-   SidebarMenu,
    SidebarMenuButton,
    SidebarMenuItem,
    useSidebar,
@@ -147,18 +146,15 @@ function NavUserErrorFallback() {
 
 function NavUserSkeleton() {
    return (
-      <SidebarMenu>
-         <SidebarMenuItem>
-            <SidebarMenuButton className="pointer-events-none" size="lg">
-               <Skeleton className="h-8 w-8 rounded-lg mr-3" />
-               <div className="grid flex-1 text-left text-sm leading-tight">
-                  <Skeleton className="h-4 w-24 mb-1" />
-                  <Skeleton className="h-3 w-32" />
-               </div>
-               <Skeleton className="ml-auto size-4" />
-            </SidebarMenuButton>
-         </SidebarMenuItem>
-      </SidebarMenu>
+      <SidebarMenuItem>
+         <SidebarMenuButton className="pointer-events-none" size="lg">
+            <Skeleton className="h-6 w-6 rounded-lg" />
+            <div className="grid flex-1 text-left text-sm leading-tight">
+               <Skeleton className="h-4 w-24 mb-1" />
+               <Skeleton className="h-3 w-32" />
+            </div>
+         </SidebarMenuButton>
+      </SidebarMenuItem>
    );
 }
 
@@ -237,12 +233,9 @@ function NavUserContent() {
    // Mobile: Use Credenza
    if (isMobile) {
       return (
-         <SidebarMenu>
-            <SidebarMenuItem>
-               <Avatar
-                  className="border-border border-2 cursor-pointer"
-                  onClick={handleOpenCredenza}
-               >
+         <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleOpenCredenza} tooltip="Account">
+               <Avatar className="h-6 w-6">
                   <AvatarImage
                      alt={session?.user.name}
                      src={session?.user.image ?? ""}
@@ -251,18 +244,19 @@ function NavUserContent() {
                      {session?.user.name?.charAt(0) || "?"}
                   </AvatarFallback>
                </Avatar>
-            </SidebarMenuItem>
-         </SidebarMenu>
+               <span className="truncate">{session?.user.name}</span>
+            </SidebarMenuButton>
+         </SidebarMenuItem>
       );
    }
 
    // Desktop: Use DropdownMenu
    return (
-      <SidebarMenu>
-         <SidebarMenuItem>
-            <DropdownMenu>
-               <DropdownMenuTrigger asChild>
-                  <Avatar className="border-border border-2 cursor-pointer">
+      <SidebarMenuItem>
+         <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+               <SidebarMenuButton tooltip="Account">
+                  <Avatar className="h-6 w-6">
                      <AvatarImage
                         alt={session?.user.name}
                         src={session?.user.image ?? ""}
@@ -271,90 +265,89 @@ function NavUserContent() {
                         {session?.user.name?.charAt(0) || "?"}
                      </AvatarFallback>
                   </Avatar>
-               </DropdownMenuTrigger>
-               <DropdownMenuContent
-                  align="end"
-                  className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                  side="bottom"
-                  sideOffset={4}
-               >
-                  {/* Header */}
-                  <DropdownMenuLabel className="p-0 font-normal">
-                     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                        <Avatar className="h-8 w-8 rounded-lg">
-                           <AvatarImage
-                              alt={session?.user.name}
-                              src={session?.user.image ?? ""}
-                           />
-                           <AvatarFallback className="rounded-lg">
-                              {session?.user.name?.charAt(0) || "?"}
-                           </AvatarFallback>
-                        </Avatar>
-                        <div className="grid  flex-1 text-left text-sm leading-tight">
-                           <span className="truncate font-medium">
-                              {session?.user.name}
-                           </span>
-                           <span className="max-w-52 truncate text-xs text-muted-foreground">
-                              {session?.user.email}
-                           </span>
-                        </div>
-                     </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-
-                  {/* Upgrade */}
-                  <DropdownMenuGroup>
-                     <DropdownMenuItem asChild>
-                        <a href={`/${activeOrganization.slug}/billing`}>
-                           <Sparkles />
-                           {"Atualizar para Pro"}
-                        </a>
-                     </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-
-                  {/* Navigation */}
-                  <DropdownMenuGroup>
-                     <DropdownMenuItem asChild>
-                        <a
-                           href={`/${activeOrganization.slug}/settings/profile`}
-                        >
-                           <BadgeCheck />
-                           {"Conta"}
-                        </a>
-                     </DropdownMenuItem>
-                     <DropdownMenuItem asChild>
-                        <a href={`/${activeOrganization.slug}/billing`}>
-                           <CreditCard />
-                           {"Cobrança"}
-                        </a>
-                     </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-
-                  {/* Preferences */}
-                  <DropdownMenuLabel>{"Preferencias"}</DropdownMenuLabel>
-                  <div className="px-2 py-1.5 space-y-2">
-                     <div className="flex items-center justify-between">
-                        <span className="text-sm">{"Tema"}</span>
-                        <ThemeSwitcher />
-                     </div>
-                     <div className="flex items-center justify-between">
-                        <span className="text-sm">{"Idioma"}</span>
-                        <LanguageCommand />
+                  <span className="truncate">{session?.user.name}</span>
+               </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+               align="start"
+               className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+               side="right"
+               sideOffset={8}
+            >
+               {/* Header */}
+               <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                     <Avatar className="h-8 w-8 rounded-lg">
+                        <AvatarImage
+                           alt={session?.user.name}
+                           src={session?.user.image ?? ""}
+                        />
+                        <AvatarFallback className="rounded-lg">
+                           {session?.user.name?.charAt(0) || "?"}
+                        </AvatarFallback>
+                     </Avatar>
+                     <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-medium">
+                           {session?.user.name}
+                        </span>
+                        <span className="max-w-52 truncate text-xs text-muted-foreground">
+                           {session?.user.email}
+                        </span>
                      </div>
                   </div>
-                  <DropdownMenuSeparator />
+               </DropdownMenuLabel>
+               <DropdownMenuSeparator />
 
-                  {/* Logout */}
-                  <DropdownMenuItem onClick={handleLogoutClick}>
-                     <LogOut />
-                     {"Sair"}
+               {/* Upgrade */}
+               <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                     <a href={`/${activeOrganization.slug}/billing`}>
+                        <Sparkles />
+                        {"Atualizar para Pro"}
+                     </a>
                   </DropdownMenuItem>
-               </DropdownMenuContent>
-            </DropdownMenu>
-         </SidebarMenuItem>
-      </SidebarMenu>
+               </DropdownMenuGroup>
+               <DropdownMenuSeparator />
+
+               {/* Navigation */}
+               <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                     <a href={`/${activeOrganization.slug}/settings/profile`}>
+                        <BadgeCheck />
+                        {"Conta"}
+                     </a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                     <a href={`/${activeOrganization.slug}/billing`}>
+                        <CreditCard />
+                        {"Cobrança"}
+                     </a>
+                  </DropdownMenuItem>
+               </DropdownMenuGroup>
+               <DropdownMenuSeparator />
+
+               {/* Preferences */}
+               <DropdownMenuLabel>{"Preferencias"}</DropdownMenuLabel>
+               <div className="px-2 py-1.5 space-y-2">
+                  <div className="flex items-center justify-between">
+                     <span className="text-sm">{"Tema"}</span>
+                     <ThemeSwitcher />
+                  </div>
+                  <div className="flex items-center justify-between">
+                     <span className="text-sm">{"Idioma"}</span>
+                     <LanguageCommand />
+                  </div>
+               </div>
+               <DropdownMenuSeparator />
+
+               {/* Logout */}
+               <DropdownMenuItem onClick={handleLogoutClick}>
+                  <LogOut />
+                  {"Sair"}
+               </DropdownMenuItem>
+            </DropdownMenuContent>
+         </DropdownMenu>
+      </SidebarMenuItem>
    );
 }
 

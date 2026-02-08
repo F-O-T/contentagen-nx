@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, waitFor } from "@testing-library/react";
+import type React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { DashboardLayout } from "@/layout/dashboard/dashboard-layout";
 
@@ -61,12 +63,35 @@ vi.mock("@/integrations/orpc/client", () => ({
    },
 }));
 
-vi.mock("@/layout/dashboard/app-sidebar", () => ({
-   AppSidebar: () => null,
+vi.mock("@/hooks/use-sidebar-nav", () => ({
+   useSidebarNav: () => ({
+      activeSubSidebar: null,
+      manualClose: false,
+      openSubSidebar: vi.fn(),
+      closeSubSidebar: vi.fn(),
+      toggleSubSidebar: vi.fn(),
+      setManualClose: vi.fn(),
+   }),
+   openSubSidebar: vi.fn(),
+   closeSubSidebar: vi.fn(),
 }));
 
-vi.mock("@/layout/dashboard/site-header", () => ({
-   SiteHeader: () => null,
+vi.mock("@/layout/dashboard/icon-rail", () => ({
+   IconRail: () => null,
+}));
+
+vi.mock("@/layout/dashboard/sub-sidebar", () => ({
+   SubSidebar: () => null,
+}));
+
+vi.mock("@packages/ui/components/tooltip", () => ({
+   TooltipProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+   ),
+}));
+
+vi.mock("@tanstack/react-router", () => ({
+   useLocation: () => ({ pathname: "/acme/home" }),
 }));
 
 function renderWithClient() {

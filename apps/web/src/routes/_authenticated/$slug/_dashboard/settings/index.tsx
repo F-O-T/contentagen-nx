@@ -12,17 +12,15 @@ function SettingsIndexRoute() {
    const isMobile = useIsMobile();
    const { slug } = useParams({ strict: false }) as { slug: string };
 
-   // On desktop, redirect to profile by default
    if (!isMobile) {
       return (
          <Navigate
             params={{ slug }}
             replace
-            to="/$slug/settings/profile"
+            to="/$slug/settings/project/general"
          />
       );
    }
 
-   // On mobile, show navigation list (handled by layout, but this is a fallback)
    return <SettingsMobileNav />;
 }
