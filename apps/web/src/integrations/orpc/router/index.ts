@@ -8,6 +8,7 @@ import * as contentRouter from "./content";
 import * as dashboardsRouter from "./dashboards";
 import * as formsRouter from "./forms";
 import * as insightsRouter from "./insights";
+import * as onboardingRouter from "./onboarding";
 import * as organizationRouter from "./organization";
 import * as sdkUsageRouter from "./sdk-usage";
 import * as sessionRouter from "./session";
@@ -25,6 +26,7 @@ export default {
   dashboards: dashboardsRouter,
   forms: formsRouter,
   insights: insightsRouter,
+  onboarding: onboardingRouter,
   sdkUsage: sdkUsageRouter,
   session: sessionRouter,
   organization: organizationRouter,
