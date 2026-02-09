@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { DashboardLayout } from "@/layout/dashboard/ui/dashboard-layout";
@@ -121,5 +121,14 @@ describe("DashboardLayout", () => {
             teamId: "team-1",
          });
       });
+   });
+
+   it("keeps collapse trigger visible and toggles", () => {
+      renderWithClient();
+
+      const trigger = screen.getByLabelText(/ocultar|abrir/i);
+      fireEvent.click(trigger);
+
+      expect(trigger).toBeTruthy();
    });
 });

@@ -18,11 +18,13 @@ if (!window.matchMedia) {
 vi.mock("@/hooks/use-active-organization", () => ({
    useActiveOrganization: () => ({
       activeOrganization: {
-         id: "org-1",
+         id: "org_1",
          name: "Acme",
-         slug: "acme",
+         slug: "acme-co",
       },
       activeSubscription: null,
+      projectCount: 1,
+      projectLimit: null,
    }),
 }));
 
@@ -66,8 +68,8 @@ vi.mock("@/integrations/orpc/client", () => ({
             queryOptions: () => ({
                queryKey: ["organization.getOrganizations"],
                queryFn: async () => [
-                  { id: "org-1", name: "Acme", slug: "acme" },
-                  { id: "org-2", name: "Beta", slug: "beta" },
+                  { id: "org_1", name: "Acme", slug: "acme-co" },
+                  { id: "org_2", name: "Beta", slug: "beta-co" },
                ],
             }),
          },
@@ -82,13 +84,13 @@ vi.mock("@/integrations/orpc/client", () => ({
 
 
 vi.mock("@tanstack/react-router", () => ({
-   useParams: () => ({ slug: "acme" }),
-   useLocation: () => ({ pathname: "/acme/home" }),
+   useParams: () => ({ slug: "acme-co" }),
+   useLocation: () => ({ pathname: "/acme-co/home" }),
    useRouter: () => ({
       navigate: vi.fn(),
       state: {
          location: {
-            pathname: "/acme/home",
+            pathname: "/acme-co/home",
          },
       },
    }),
@@ -104,8 +106,8 @@ function renderWithClient() {
    });
 
    queryClient.setQueryData(["organization.getOrganizations"], [
-      { id: "org-1", name: "Acme", slug: "acme" },
-      { id: "org-2", name: "Beta", slug: "beta" },
+      { id: "org_1", name: "Acme", slug: "acme-co" },
+      { id: "org_2", name: "Beta", slug: "beta-co" },
    ]);
 
    return render(
@@ -120,10 +122,18 @@ function renderWithClient() {
 }
 
 describe("SidebarScopeSwitcher", () => {
-   it("renders organization and project triggers", () => {
+   it("renders separate org and team triggers", () => {
       renderWithClient();
 
-      expect(screen.getByLabelText("Switch organization")).toBeTruthy();
-      expect(screen.getByLabelText("Switch project")).toBeTruthy();
+      expect(screen.getByLabelText(/organizacao/i)).toBeTruthy();
+      expect(screen.getByLabelText(/projeto/i)).toBeTruthy();
+   });
+
+   it("does not render org id or slug in UI", () => {
+      renderWithClient();
+
+      expect(screen.queryByText(/org_[0-9]/i)).toBeNull();
+      expect(screen.queryByText(/acme-co|beta-co/i)).toBeNull();
+      expect(screen.queryByText(/acme\//i)).toBeNull();
    });
 });

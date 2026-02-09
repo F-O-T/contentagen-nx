@@ -118,13 +118,17 @@ function SidebarScopeSwitcherContent() {
    const queryClient = useQueryClient();
    const router = useRouter();
    const { pathname } = useLocation();
-   const params = useParams({ strict: false }) as { slug?: string };
+   const params = useParams({ strict: false }) as {
+      slug?: string;
+      teamId?: string;
+   };
    const currentSlug = params.slug ?? activeOrganization.slug;
    const { data: organizations } = useSuspenseQuery(
       orpc.organization.getOrganizations.queryOptions({}),
    );
 
    const [orgOpen, setOrgOpen] = useState(false);
+   const [teamOpen, setTeamOpen] = useState(false);
 
    const organizationList = organizations ?? [];
 
@@ -177,7 +181,7 @@ function SidebarScopeSwitcherContent() {
    const handleTeamSwitch = useCallback(
       async (team: Team) => {
          if (team.id === activeTeam?.id) {
-            setOrgOpen(false);
+            setTeamOpen(false);
             return;
          }
 
@@ -189,13 +193,36 @@ function SidebarScopeSwitcherContent() {
             queryKey: orpc.session.getSession.queryKey({}),
          });
 
-         setOrgOpen(false);
+         if (currentSlug) {
+            const prefix = `/${currentSlug}`;
+            let nextPath = `/${currentSlug}/${team.id}/home`;
+
+            if (pathname.startsWith(`${prefix}/`)) {
+               nextPath = params.teamId
+                  ? pathname.replace(
+                       `${prefix}/${params.teamId}`,
+                       `${prefix}/${team.id}`,
+                    )
+                  : `/${currentSlug}/${team.id}${pathname.slice(prefix.length)}`;
+            }
+
+            router.navigate({ to: nextPath });
+         }
+
+         setTeamOpen(false);
       },
-      [activeTeam?.id, queryClient],
+      [
+         activeTeam?.id,
+         currentSlug,
+         params.teamId,
+         pathname,
+         queryClient,
+         router,
+      ],
    );
 
    const handleNewProject = useCallback(() => {
-      setOrgOpen(false);
+      setTeamOpen(false);
 
       if (projectLimit !== null && teams.length >= projectLimit) {
          openCredenza({
@@ -221,7 +248,8 @@ function SidebarScopeSwitcherContent() {
                      <Button asChild>
                         <Link
                            onClick={closeCredenza}
-                           to={`/${currentSlug}/billing`}
+                           params={{ slug: currentSlug }}
+                           to="/$slug/billing"
                         >
                            Ver planos
                         </Link>
@@ -256,133 +284,165 @@ function SidebarScopeSwitcherContent() {
    return (
       <SidebarMenu>
          <SidebarMenuItem>
-            <Popover onOpenChange={setOrgOpen} open={orgOpen}>
-               <PopoverTrigger asChild>
-                  <SidebarMenuButton
-                     className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                     size="lg"
-                     tooltip={activeOrganization.name}
+            <div className="flex items-center gap-1.5">
+               <Popover onOpenChange={setOrgOpen} open={orgOpen}>
+                  <PopoverTrigger asChild>
+                     <button
+                        aria-label="Organizacao"
+                        className="flex shrink-0 items-center justify-center rounded-md p-1.5 hover:bg-accent transition-colors"
+                        type="button"
+                     >
+                        <Avatar className="size-8 rounded-md">
+                           <AvatarImage alt={activeOrganization.name} src="" />
+                           <AvatarFallback
+                              className={`rounded-md text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
+                           >
+                              {getInitials(activeOrganization.name)}
+                           </AvatarFallback>
+                        </Avatar>
+                     </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                     align="start"
+                     className="w-72 p-0"
+                     sideOffset={8}
                   >
-                     <Avatar className="size-8 rounded-md">
-                        <AvatarImage alt={activeOrganization.name} src="" />
-                        <AvatarFallback
-                           className={`rounded-md text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
-                        >
-                           {getInitials(activeOrganization.name)}
-                        </AvatarFallback>
-                     </Avatar>
-                     <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-medium">
-                           {activeOrganization.name}
-                        </span>
-                        <span className="truncate text-xs text-muted-foreground">
-                           {activeTeam?.name ?? "Sem projeto"}
-                        </span>
-                     </div>
-                     <ChevronDown className="ml-auto size-4" />
-                  </SidebarMenuButton>
-               </PopoverTrigger>
-               <PopoverContent
-                  align="start"
-                  className="w-72 p-0"
-                  sideOffset={8}
-               >
-                  <Command>
-                     <CommandInput placeholder="Filtrar..." />
-                     <CommandList>
-                        <CommandEmpty>
-                           Nenhum resultado encontrado.
-                        </CommandEmpty>
-                        {currentOrg && (
-                           <CommandGroup heading="Organizacao atual">
-                              <CommandItem disabled value={currentOrg.name}>
-                                 <Avatar className="size-5 rounded-md">
-                                    <AvatarFallback
-                                       className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(currentOrg.name)}`}
-                                    >
-                                       {getInitials(currentOrg.name)}
-                                    </AvatarFallback>
-                                 </Avatar>
-                                 <span className="truncate">
-                                    {currentOrg.name}
-                                 </span>
-                                 {currentOrg.role && (
-                                    <RoleBadge role={currentOrg.role} />
-                                 )}
-                                 <Check className="ml-1 size-4 shrink-0" />
-                              </CommandItem>
-                           </CommandGroup>
-                        )}
-                        {otherOrgs.length > 0 && (
-                           <CommandGroup heading="Outras organizacoes">
-                              {otherOrgs.map((org, index) => (
-                                 <CommandItem
-                                    key={`org-${index + 1}`}
-                                    onSelect={() =>
-                                       handleOrganizationSwitch(org)
-                                    }
-                                    value={`${org.name} ${org.slug}`}
-                                 >
+                     <Command>
+                        <CommandInput placeholder="Filtrar organizacoes..." />
+                        <CommandList>
+                           <CommandEmpty>
+                              Nenhum resultado encontrado.
+                           </CommandEmpty>
+                           {currentOrg && (
+                              <CommandGroup heading="Organizacao atual">
+                                 <CommandItem disabled value={currentOrg.name}>
                                     <Avatar className="size-5 rounded-md">
                                        <AvatarFallback
-                                          className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(org.name)}`}
+                                          className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(currentOrg.name)}`}
                                        >
-                                          {getInitials(org.name)}
+                                          {getInitials(currentOrg.name)}
                                        </AvatarFallback>
                                     </Avatar>
-                                    <span className="truncate">{org.name}</span>
-                                    {org.role && <RoleBadge role={org.role} />}
+                                    <span className="truncate">
+                                       {currentOrg.name}
+                                    </span>
+                                    {currentOrg.role && (
+                                       <RoleBadge role={currentOrg.role} />
+                                    )}
+                                    <Check className="ml-1 size-4 shrink-0" />
+                                 </CommandItem>
+                              </CommandGroup>
+                           )}
+                           {otherOrgs.length > 0 && (
+                              <CommandGroup heading="Outras organizacoes">
+                                 {otherOrgs.map((org, index) => (
+                                    <CommandItem
+                                       key={`org-${index + 1}`}
+                                       onSelect={() =>
+                                          handleOrganizationSwitch(org)
+                                       }
+                                       value={org.name}
+                                    >
+                                       <Avatar className="size-5 rounded-md">
+                                          <AvatarFallback
+                                             className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(org.name)}`}
+                                          >
+                                             {getInitials(org.name)}
+                                          </AvatarFallback>
+                                       </Avatar>
+                                       <span className="truncate">
+                                          {org.name}
+                                       </span>
+                                       {org.role && (
+                                          <RoleBadge role={org.role} />
+                                       )}
+                                    </CommandItem>
+                                 ))}
+                              </CommandGroup>
+                           )}
+                           <CommandSeparator />
+                           <CommandGroup>
+                              <CommandItem
+                                 onSelect={handleNewOrganization}
+                                 value="Nova organizacao"
+                              >
+                                 <Plus className="size-4" />
+                                 <span>Nova organizacao</span>
+                              </CommandItem>
+                           </CommandGroup>
+                        </CommandList>
+                     </Command>
+                  </PopoverContent>
+               </Popover>
+
+               <Popover onOpenChange={setTeamOpen} open={teamOpen}>
+                  <PopoverTrigger asChild>
+                     <button
+                        aria-label="Projeto"
+                        className="flex min-w-0 flex-1 items-center gap-2 rounded-md p-1.5 text-left text-sm hover:bg-accent transition-colors"
+                        type="button"
+                     >
+                        <div className="grid flex-1 text-left text-sm leading-tight">
+                           <span className="truncate font-medium">
+                              {activeOrganization.name}
+                           </span>
+                           <span className="truncate text-xs text-muted-foreground">
+                              {activeTeam?.name ?? "Sem projeto"}
+                           </span>
+                        </div>
+                        <ChevronDown className="ml-auto size-4" />
+                     </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                     align="start"
+                     className="w-72 p-0"
+                     sideOffset={8}
+                  >
+                     <Command>
+                        <CommandInput placeholder="Filtrar projetos..." />
+                        <CommandList>
+                           <CommandEmpty>
+                              Nenhum resultado encontrado.
+                           </CommandEmpty>
+                           <CommandGroup heading="Projetos">
+                              {activeTeam && (
+                                 <CommandItem disabled value={activeTeam.name}>
+                                    <Check className="size-4" />
+                                    <span className="truncate">
+                                       {activeTeam.name}
+                                    </span>
+                                 </CommandItem>
+                              )}
+                              {otherTeams.map((team, index) => (
+                                 <CommandItem
+                                    key={`team-${index + 1}`}
+                                    onSelect={() => handleTeamSwitch(team)}
+                                    value={team.name}
+                                 >
+                                    <span className="size-4" />
+                                    <span className="truncate">
+                                       {team.name}
+                                    </span>
                                  </CommandItem>
                               ))}
-                           </CommandGroup>
-                        )}
-                        <CommandSeparator />
-                        <CommandGroup heading="Projetos">
-                           {activeTeam && (
-                              <CommandItem disabled value={activeTeam.name}>
-                                 <Check className="size-4" />
-                                 <span className="truncate">
-                                    {activeTeam.name}
+                              <CommandItem
+                                 onSelect={handleNewProject}
+                                 value="Novo projeto"
+                              >
+                                 <Plus className="size-4" />
+                                 <span>
+                                    {projectLimit !== null &&
+                                    projectLimit !== Number.POSITIVE_INFINITY
+                                       ? `Novo projeto (${projectCount}/${projectLimit})`
+                                       : "Novo projeto"}
                                  </span>
                               </CommandItem>
-                           )}
-                           {otherTeams.map((team, index) => (
-                              <CommandItem
-                                 key={`team-${index + 1}`}
-                                 onSelect={() => handleTeamSwitch(team)}
-                                 value={team.name}
-                              >
-                                 <span className="size-4" />
-                                 <span className="truncate">{team.name}</span>
-                              </CommandItem>
-                           ))}
-                           <CommandItem
-                              onSelect={handleNewProject}
-                              value="Novo projeto"
-                           >
-                              <Plus className="size-4" />
-                              <span>
-                                 {projectLimit !== null &&
-                                 projectLimit !== Number.POSITIVE_INFINITY
-                                    ? `Novo projeto (${projectCount}/${projectLimit})`
-                                    : "Novo projeto"}
-                              </span>
-                           </CommandItem>
-                        </CommandGroup>
-                        <CommandSeparator />
-                        <CommandGroup>
-                           <CommandItem
-                              onSelect={handleNewOrganization}
-                              value="Nova organizacao"
-                           >
-                              <Plus className="size-4" />
-                              <span>Nova organizacao</span>
-                           </CommandItem>
-                        </CommandGroup>
-                     </CommandList>
-                  </Command>
-               </PopoverContent>
-            </Popover>
+                           </CommandGroup>
+                        </CommandList>
+                     </Command>
+                  </PopoverContent>
+               </Popover>
+            </div>
          </SidebarMenuItem>
       </SidebarMenu>
    );

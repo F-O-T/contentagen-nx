@@ -24,7 +24,7 @@ export function SidebarSubPanel() {
 
    return (
       <SidebarProvider
-         className="contents"
+         className="min-h-0"
          defaultOpen={false}
          style={
             {
@@ -62,7 +62,7 @@ function SubPanelSidebar({
    if (!open || !activeSection) return null;
 
    return (
-      <Sidebar className="border-r" collapsible="none" side="left">
+      <Sidebar className="bg-sidebar border-r" collapsible="none" side="left">
          {/* Header */}
          <SidebarHeader className="px-3 pt-3 pb-2">
             <div className="flex items-center justify-between gap-2">
