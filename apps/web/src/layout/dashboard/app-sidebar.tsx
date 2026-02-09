@@ -1,3 +1,4 @@
+// apps/web/src/layout/dashboard/app-sidebar.tsx
 import { Separator } from "@packages/ui/components/separator";
 import {
    Sidebar,
@@ -9,11 +10,11 @@ import {
    SidebarMenuItem,
    useSidebar,
 } from "@packages/ui/components/sidebar";
-import { useParams } from "@tanstack/react-router";
+import { Link, useParams } from "@tanstack/react-router";
 import { PanelLeft, Settings } from "lucide-react";
 import type * as React from "react";
-import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
+import { SidebarNav } from "./sidebar-nav";
 import { SidebarScopeSwitcher } from "./sidebar-scope-switcher";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
@@ -22,10 +23,12 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
          <SidebarHeader>
             <SidebarScopeSwitcher />
          </SidebarHeader>
+
          <SidebarContent>
             <Separator />
-            <NavMain />
+            <SidebarNav />
          </SidebarContent>
+
          <SidebarFooter>
             <SidebarFooterContent />
          </SidebarFooter>
@@ -41,17 +44,17 @@ function SidebarFooterContent() {
    return (
       <SidebarMenu>
          <SidebarMenuItem>
-            <SidebarMenuButton onClick={toggleSidebar} tooltip="Collapse nav">
+            <SidebarMenuButton onClick={toggleSidebar} tooltip="Recolher menu">
                <PanelLeft />
-               <span>Collapse nav</span>
+               <span>Recolher menu</span>
             </SidebarMenuButton>
          </SidebarMenuItem>
          <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Settings">
-               <a href={`/${slug}/settings`}>
+            <SidebarMenuButton asChild tooltip="Configurações">
+               <Link params={{ slug }} to="/$slug/settings">
                   <Settings />
-                  <span>Settings</span>
-               </a>
+                  <span>Configurações</span>
+               </Link>
             </SidebarMenuButton>
          </SidebarMenuItem>
          <NavUser />
