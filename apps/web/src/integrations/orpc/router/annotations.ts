@@ -18,7 +18,7 @@ const createAnnotationSchema = z.object({
 	description: z.string().optional(),
 	date: z.coerce.date(),
 	scope: z.enum(["global", "content", "forms", "ai"]).optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 const updateAnnotationSchema = z.object({
@@ -27,7 +27,7 @@ const updateAnnotationSchema = z.object({
 	description: z.string().optional(),
 	date: z.coerce.date().optional(),
 	scope: z.enum(["global", "content", "forms", "ai"]).optional(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 const listAnnotationsSchema = z.object({

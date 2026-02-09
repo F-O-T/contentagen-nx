@@ -17,14 +17,14 @@ const createDataSourceSchema = z.object({
 	name: z.string().min(1),
 	type: z.enum(["sdk", "mcp", "webhook"]),
 	description: z.string().optional(),
-	config: z.record(z.unknown()).optional(),
+	config: z.record(z.string(), z.unknown()).optional(),
 });
 
 const updateDataSourceSchema = z.object({
 	id: z.string().uuid(),
 	name: z.string().min(1).optional(),
 	description: z.string().optional(),
-	config: z.record(z.unknown()).optional(),
+	config: z.record(z.string(), z.unknown()).optional(),
 	isActive: z.boolean().optional(),
 });
 
