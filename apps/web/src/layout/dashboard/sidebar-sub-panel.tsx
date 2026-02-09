@@ -58,10 +58,14 @@ export function SidebarSubPanel() {
 
    return (
       <>
-         {/* Backdrop with blur */}
+         {/* Backdrop with blur — Escape is handled by the global keydown listener above */}
+         {/* biome-ignore lint/a11y/noStaticElementInteractions: Backdrop overlay for dismissing the sub-panel */}
          <div
             className="fixed inset-0 z-40 bg-background/60 backdrop-blur-[2px] transition-opacity"
             onClick={handleBackdropClick}
+            onKeyDown={(e) => {
+               if (e.key === "Escape") handleClose();
+            }}
          />
 
          {/* Floating panel — positioned next to the sidebar */}
@@ -73,10 +77,13 @@ export function SidebarSubPanel() {
                "animate-in slide-in-from-left-2 fade-in-0 duration-200",
             )}
             ref={panelRef}
-            style={{
-               // Will be set via CSS variable from the sidebar width
-               "--sidebar-panel-left": "calc(var(--sidebar-width, 220px) + 8px)",
-            } as React.CSSProperties}
+            style={
+               {
+                  // Will be set via CSS variable from the sidebar width
+                  "--sidebar-panel-left":
+                     "calc(var(--sidebar-width, 220px) + 8px)",
+               } as React.CSSProperties
+            }
          >
             {/* Header */}
             <div className="flex items-center justify-between gap-2 px-3 pt-3 pb-2">
