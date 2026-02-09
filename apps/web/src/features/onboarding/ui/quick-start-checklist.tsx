@@ -9,6 +9,7 @@ import {
 import { Progress } from "@packages/ui/components/progress";
 import { ChevronDown, ChevronUp, Rocket, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import { useParams } from "@tanstack/react-router";
 import { useCompleteTask } from "../hooks/use-complete-task";
 import { useOnboardingStatus } from "../hooks/use-onboarding-status";
 import {
@@ -20,7 +21,29 @@ import {
 } from "../task-definitions";
 import { QuickStartTask } from "./quick-start-task";
 
-const CHECKLIST_HIDDEN_KEY = "_checklist_hidden";
+const CHECKLIST_HIDDEN_STORAGE_KEY = "contentta:checklist_hidden";
+
+function getChecklistHidden(slug: string): boolean {
+	try {
+		const stored = localStorage.getItem(CHECKLIST_HIDDEN_STORAGE_KEY);
+		if (!stored) return false;
+		const parsed = JSON.parse(stored) as Record<string, boolean>;
+		return parsed[slug] === true;
+	} catch {
+		return false;
+	}
+}
+
+function setChecklistHidden(slug: string): void {
+	try {
+		const stored = localStorage.getItem(CHECKLIST_HIDDEN_STORAGE_KEY);
+		const parsed = stored ? (JSON.parse(stored) as Record<string, boolean>) : {};
+		parsed[slug] = true;
+		localStorage.setItem(CHECKLIST_HIDDEN_STORAGE_KEY, JSON.stringify(parsed));
+	} catch {
+		// Silently fail if localStorage is not available
+	}
+}
 
 /**
  * Quick Start checklist card for the home page.
@@ -30,7 +53,11 @@ const CHECKLIST_HIDDEN_KEY = "_checklist_hidden";
 export function QuickStartChecklist() {
 	const { data: status, isLoading } = useOnboardingStatus();
 	const completeTaskMutation = useCompleteTask();
+	const { slug } = useParams({ strict: false });
 	const [isCollapsed, setIsCollapsed] = useState(false);
+	const [isHidden, setIsHidden] = useState(() =>
+		getChecklistHidden(slug ?? ""),
+	);
 
 	const tasks = useMemo(
 		() => getTasksForProducts(status?.onboardingProducts ?? null),
@@ -114,13 +141,16 @@ export function QuickStartChecklist() {
 	);
 
 	const handleHide = useCallback(() => {
-		completeTaskMutation.mutate({ taskId: CHECKLIST_HIDDEN_KEY });
-	}, [completeTaskMutation]);
+		if (slug) {
+			setChecklistHidden(slug);
+		}
+		setIsHidden(true);
+	}, [slug]);
 
 	// Determine visibility
 	if (isLoading || !status) return null;
 	if (!status.onboardingCompleted) return null;
-	if (tasksMap[CHECKLIST_HIDDEN_KEY]) return null;
+	if (isHidden) return null;
 	if (allDone) return null;
 
 	return (

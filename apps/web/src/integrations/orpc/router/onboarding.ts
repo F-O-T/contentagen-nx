@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/server";
+import type { DatabaseInstance } from "@packages/database/client";
 import { organization, user } from "@packages/database/schemas/auth";
 import { content } from "@packages/database/schemas/content";
 import { dashboards } from "@packages/database/schemas/dashboards";
@@ -194,8 +195,25 @@ export const completeOnboarding = protectedProcedure.handler(
 );
 
 /**
+ * Atomically merge a task ID into the organization's onboardingTasks jsonb.
+ * Uses PostgreSQL's `||` operator to avoid read-modify-write race conditions.
+ */
+async function markTaskDone(
+   db: DatabaseInstance,
+   organizationId: string,
+   taskId: string,
+) {
+   await db
+      .update(organization)
+      .set({
+         onboardingTasks: sql`COALESCE(${organization.onboardingTasks}, '{}'::jsonb) || ${JSON.stringify({ [taskId]: true })}::jsonb`,
+      })
+      .where(eq(organization.id, organizationId));
+}
+
+/**
  * Mark a specific onboarding task as completed.
- * Merges { [taskId]: true } into the organization's onboardingTasks jsonb.
+ * Atomically merges { [taskId]: true } into the organization's onboardingTasks jsonb.
  */
 export const completeTask = protectedProcedure
    .input(
@@ -205,21 +223,7 @@ export const completeTask = protectedProcedure
    )
    .handler(async ({ context, input }) => {
       const { db, organizationId } = context;
-
-      // Read-modify-write pattern for jsonb merge
-      const org = await db.query.organization.findFirst({
-         where: (o, { eq }) => eq(o.id, organizationId),
-         columns: { onboardingTasks: true },
-      });
-
-      const currentTasks = org?.onboardingTasks ?? {};
-      const updatedTasks = { ...currentTasks, [input.taskId]: true };
-
-      await db
-         .update(organization)
-         .set({ onboardingTasks: updatedTasks })
-         .where(eq(organization.id, organizationId));
-
+      await markTaskDone(db, organizationId, input.taskId);
       return { success: true };
    });
 
@@ -236,20 +240,6 @@ export const skipTask = protectedProcedure
    )
    .handler(async ({ context, input }) => {
       const { db, organizationId } = context;
-
-      // Read-modify-write pattern for jsonb merge
-      const org = await db.query.organization.findFirst({
-         where: (o, { eq }) => eq(o.id, organizationId),
-         columns: { onboardingTasks: true },
-      });
-
-      const currentTasks = org?.onboardingTasks ?? {};
-      const updatedTasks = { ...currentTasks, [input.taskId]: true };
-
-      await db
-         .update(organization)
-         .set({ onboardingTasks: updatedTasks })
-         .where(eq(organization.id, organizationId));
-
+      await markTaskDone(db, organizationId, input.taskId);
       return { success: true };
    });
