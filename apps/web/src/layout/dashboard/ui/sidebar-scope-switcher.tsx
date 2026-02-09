@@ -259,9 +259,9 @@ function SidebarScopeSwitcherContent() {
             <Popover onOpenChange={setOrgOpen} open={orgOpen}>
                <PopoverTrigger asChild>
                   <SidebarMenuButton
+                     className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                      size="lg"
                      tooltip={activeOrganization.name}
-                     className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   >
                      <Avatar className="size-8 rounded-md">
                         <AvatarImage alt={activeOrganization.name} src="" />
@@ -330,12 +330,8 @@ function SidebarScopeSwitcherContent() {
                                           {getInitials(org.name)}
                                        </AvatarFallback>
                                     </Avatar>
-                                    <span className="truncate">
-                                       {org.name}
-                                    </span>
-                                    {org.role && (
-                                       <RoleBadge role={org.role} />
-                                    )}
+                                    <span className="truncate">{org.name}</span>
+                                    {org.role && <RoleBadge role={org.role} />}
                                  </CommandItem>
                               ))}
                            </CommandGroup>

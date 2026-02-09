@@ -58,13 +58,15 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
          }
       >
          <SidebarManager name="settings">
-            <Sidebar
-               className="sticky top-0 h-svh border-r"
-               collapsible="none"
-            >
+            <Sidebar className="sticky top-0 h-svh border-r" collapsible="none">
                <SidebarHeader className="px-3 pt-3 pb-0">
                   <div className="flex items-center gap-2">
-                     <Button asChild className="w-fit" size="sm" variant="ghost">
+                     <Button
+                        asChild
+                        className="w-fit"
+                        size="sm"
+                        variant="ghost"
+                     >
                         <Link
                            params={{ slug: activeOrganization.slug }}
                            to="/$slug/home"
