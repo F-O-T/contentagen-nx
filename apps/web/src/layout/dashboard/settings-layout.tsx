@@ -39,7 +39,7 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
                   to="/$slug/settings"
                >
                   <ChevronLeft className="size-4 mr-1" />
-                  Configurações
+                  Configuracoes
                </Link>
             </Button>
             <div className="flex-1">{children}</div>
@@ -47,46 +47,43 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
       );
    }
 
-      return (
-         <SidebarProvider
-            className="min-h-0 w-full"
-            style={
-               {
-                  "--sidebar-width": "16rem",
-               } as React.CSSProperties
-            }
-         >
-            <SidebarManager name="settings">
-               <Sidebar
-                  className="sticky top-0 h-svh border-r"
-                  collapsible="none"
-               >
-                  <SidebarHeader className="px-3 pt-3 pb-0">
-                     <div className="flex items-center gap-2">
-                        <Button
-                           asChild
-                           className="w-fit"
-                           size="sm"
-                           variant="ghost"
+   return (
+      <SidebarProvider
+         className="min-h-0 w-full"
+         style={
+            {
+               "--sidebar-width": "16rem",
+            } as React.CSSProperties
+         }
+      >
+         <SidebarManager name="settings">
+            <Sidebar className="sticky top-0 h-svh border-r" collapsible="none">
+               <SidebarHeader className="px-3 pt-3 pb-0">
+                  <div className="flex items-center gap-2">
+                     <Button
+                        asChild
+                        className="w-fit"
+                        size="sm"
+                        variant="ghost"
+                     >
+                        <Link
+                           params={{ slug: activeOrganization.slug }}
+                           to="/$slug/home"
                         >
-                           <Link
-                              params={{ slug: activeOrganization.slug }}
-                              to="/$slug/home"
-                           >
-                              <ChevronLeft className="size-4 mr-1" />
-                              Configuracoes
-                           </Link>
-                        </Button>
-                     </div>
-                  </SidebarHeader>
-                  <SidebarContent>
-                     <SettingsSidebar />
-                  </SidebarContent>
-               </Sidebar>
-            </SidebarManager>
-            <SidebarInset>
-               <main className="flex-1 min-w-0 p-6">{children}</main>
-            </SidebarInset>
-         </SidebarProvider>
-      );
-   }
+                           <ChevronLeft className="size-4 mr-1" />
+                           Configuracoes
+                        </Link>
+                     </Button>
+                  </div>
+               </SidebarHeader>
+               <SidebarContent>
+                  <SettingsSidebar />
+               </SidebarContent>
+            </Sidebar>
+         </SidebarManager>
+         <SidebarInset>
+            <main className="flex-1 min-w-0 p-6">{children}</main>
+         </SidebarInset>
+      </SidebarProvider>
+   );
+}
