@@ -9,13 +9,16 @@ import {
    useSidebarManager,
 } from "@packages/ui/components/sidebar";
 import { Link, useLocation, useParams } from "@tanstack/react-router";
-import { useActiveTeam } from "@/hooks/use-active-team";
 import { ChevronRight } from "lucide-react";
 import { useCallback } from "react";
-import type { SubSidebarSection } from "@/hooks/use-sidebar-nav";
-import { useSidebarNav } from "@/hooks/use-sidebar-nav";
+import { useActiveTeam } from "@/hooks/use-active-team";
+import type { SubSidebarSection } from "@/layout/dashboard/hooks/use-sidebar-nav";
+import { useSidebarNav } from "@/layout/dashboard/hooks/use-sidebar-nav";
 import { SidebarItemActions } from "@/layout/dashboard/sidebar-item-actions";
-import type { NavGroupDef, NavItemDef } from "@/layout/dashboard/sidebar-nav-items";
+import type {
+   NavGroupDef,
+   NavItemDef,
+} from "@/layout/dashboard/sidebar-nav-items";
 import { navGroups } from "@/layout/dashboard/sidebar-nav-items";
 
 function NavItem({
