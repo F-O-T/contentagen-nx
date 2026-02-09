@@ -1,40 +1,63 @@
+// apps/web/src/hooks/use-sidebar-nav.ts
 import { Store, useStore } from "@tanstack/react-store";
 
 export type SubSidebarSection = "dashboards" | "insights";
 
+const PINNED_STORAGE_KEY = "contentta:sidebar-pinned";
+
+function loadPinnedItems(): string[] {
+   if (typeof window === "undefined") return [];
+   try {
+      const stored = localStorage.getItem(PINNED_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+   } catch {
+      return [];
+   }
+}
+
+function savePinnedItems(items: string[]) {
+   try {
+      localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify(items));
+   } catch {
+      // silently fail
+   }
+}
+
 interface SidebarNavState {
-   activeSubSidebar: SubSidebarSection | null;
+   activeSubPanel: SubSidebarSection | null;
    manualClose: boolean;
+   pinnedItems: string[];
 }
 
 const initialState: SidebarNavState = {
-   activeSubSidebar: null,
+   activeSubPanel: null,
    manualClose: false,
+   pinnedItems: loadPinnedItems(),
 };
 
 const sidebarNavStore = new Store<SidebarNavState>(initialState);
 
-export function openSubSidebar(section: SubSidebarSection) {
+export function openSubPanel(section: SubSidebarSection) {
    sidebarNavStore.setState((state) => ({
       ...state,
-      activeSubSidebar: section,
+      activeSubPanel: section,
       manualClose: false,
    }));
 }
 
-export function closeSubSidebar() {
+export function closeSubPanel() {
    sidebarNavStore.setState((state) => ({
       ...state,
-      activeSubSidebar: null,
+      activeSubPanel: null,
    }));
 }
 
-export function toggleSubSidebar(section: SubSidebarSection) {
+export function toggleSubPanel(section: SubSidebarSection) {
    sidebarNavStore.setState((state) => {
-      if (state.activeSubSidebar === section) {
-         return { ...state, activeSubSidebar: null, manualClose: true };
+      if (state.activeSubPanel === section) {
+         return { ...state, activeSubPanel: null, manualClose: true };
       }
-      return { ...state, activeSubSidebar: section, manualClose: false };
+      return { ...state, activeSubPanel: section, manualClose: false };
    });
 }
 
@@ -45,15 +68,31 @@ export function setManualClose() {
    }));
 }
 
+export function togglePinnedItem(itemId: string) {
+   sidebarNavStore.setState((state) => {
+      const pinned = state.pinnedItems.includes(itemId)
+         ? state.pinnedItems.filter((id) => id !== itemId)
+         : [...state.pinnedItems, itemId];
+      savePinnedItems(pinned);
+      return { ...state, pinnedItems: pinned };
+   });
+}
+
 export function useSidebarNav() {
    const state = useStore(sidebarNavStore);
 
    return {
-      activeSubSidebar: state.activeSubSidebar,
+      activeSubPanel: state.activeSubPanel,
       manualClose: state.manualClose,
-      openSubSidebar,
-      closeSubSidebar,
-      toggleSubSidebar,
+      pinnedItems: state.pinnedItems,
+      openSubPanel,
+      closeSubPanel,
+      toggleSubPanel,
       setManualClose,
+      togglePinnedItem,
    };
 }
+
+// Keep old names as aliases for backward compat during migration
+export const openSubSidebar = openSubPanel;
+export const closeSubSidebar = closeSubPanel;
