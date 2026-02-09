@@ -1,5 +1,4 @@
 import { Button } from "@packages/ui/components/button";
-import { ScrollArea } from "@packages/ui/components/scroll-area";
 import {
    Sidebar,
    SidebarContent,
@@ -83,9 +82,7 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
             </Sidebar>
          </SidebarManager>
          <SidebarInset>
-            <ScrollArea className="h-svh">
-               <main className="flex-1 min-w-0 p-6">{children}</main>
-            </ScrollArea>
+            <main className="flex-1 min-w-0 p-6">{children}</main>
          </SidebarInset>
       </SidebarProvider>
    );
