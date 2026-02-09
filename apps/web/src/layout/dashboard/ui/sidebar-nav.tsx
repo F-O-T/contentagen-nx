@@ -6,12 +6,13 @@ import {
    SidebarMenu,
    SidebarMenuButton,
    SidebarMenuItem,
+   useSidebarManager,
 } from "@packages/ui/components/sidebar";
 import { Link, useLocation, useParams } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { useCallback } from "react";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
-import { toggleSubPanel, useSidebarNav } from "../hooks/use-sidebar-nav";
+import { setActiveSection, useSidebarNav } from "../hooks/use-sidebar-nav";
 import { SidebarItemActions } from "./sidebar-item-actions";
 import type { NavGroupDef, NavItemDef } from "./sidebar-nav-items";
 import { navGroups } from "./sidebar-nav-items";
@@ -105,23 +106,41 @@ export function SidebarNav() {
    const { pathname, searchStr } = useLocation();
    const params = useParams({ strict: false }) as { slug?: string };
    const slug = params.slug ?? pathname.split("/")[1] ?? "";
-   const { activeSubPanel } = useSidebarNav();
+   const { activeSection } = useSidebarNav();
+   const manager = useSidebarManager();
+
+   const handleSubPanelToggle = useCallback(
+      (section: SubSidebarSection) => {
+         const subPanel = manager.use("sub-panel");
+         if (activeSection === section && subPanel?.open) {
+            // Same section clicked while open — close it
+            subPanel.setOpen(false);
+            setActiveSection(null);
+         } else {
+            // Different section or panel closed — open with new section
+            setActiveSection(section);
+            if (subPanel && !subPanel.open) {
+               subPanel.setOpen(true);
+            }
+         }
+      },
+      [manager, activeSection],
+   );
 
    const isItemActive = useCallback(
       (item: NavItemDef) => {
          const resolvedRoute = item.route.replace("$slug", slug);
 
-         // For sub-panel items, also highlight if the panel is open
          if (item.subPanel) {
             return (
-               activeSubPanel === item.subPanel ||
+               activeSection === item.subPanel ||
                pathname.startsWith(resolvedRoute)
             );
          }
 
          return pathname.startsWith(resolvedRoute) && !searchStr;
       },
-      [slug, pathname, searchStr, activeSubPanel],
+      [slug, pathname, searchStr, activeSection],
    );
 
    return (
@@ -131,7 +150,7 @@ export function SidebarNav() {
                group={group}
                isItemActive={isItemActive}
                key={group.id}
-               onSubPanelToggle={toggleSubPanel}
+               onSubPanelToggle={handleSubPanelToggle}
                slug={slug}
             />
          ))}
