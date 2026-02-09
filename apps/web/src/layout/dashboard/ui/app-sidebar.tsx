@@ -7,7 +7,6 @@ import {
    SidebarMenuButton,
    SidebarMenuItem,
    SidebarRail,
-   SidebarSeparator,
    SidebarTrigger,
 } from "@packages/ui/components/sidebar";
 import { Link, useParams } from "@tanstack/react-router";
@@ -22,9 +21,12 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <Sidebar collapsible="icon" {...props}>
          <SidebarHeader>
             <SidebarScopeSwitcher />
+            <SidebarMenu>
+               <SidebarMenuItem>
+                  <SidebarTrigger className="w-full" />
+               </SidebarMenuItem>
+            </SidebarMenu>
          </SidebarHeader>
-
-         <SidebarSeparator />
 
          <SidebarContent>
             <SidebarNav />
@@ -54,9 +56,6 @@ function SidebarFooterContent() {
             </SidebarMenuButton>
          </SidebarMenuItem>
          <NavUser />
-         <SidebarMenuItem>
-            <SidebarTrigger className="w-full" />
-         </SidebarMenuItem>
       </SidebarMenu>
    );
 }

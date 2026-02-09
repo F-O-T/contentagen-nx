@@ -395,7 +395,10 @@ function SidebarTrigger({
    const button = (
       <Button
          aria-label={tooltipText}
-         className={cn("size-7", className)}
+         className={cn(
+            "size-7 shrink-0 data-[state=open]:opacity-100",
+            className,
+         )}
          data-sidebar="trigger"
          data-slot="sidebar-trigger"
          onClick={(event) => {
