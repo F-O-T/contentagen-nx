@@ -24,6 +24,7 @@ export interface EmitEventParams {
    eventCategory: EventCategory;
    properties: Record<string, unknown>;
    userId?: string;
+   teamId?: string;
    ipAddress?: string;
    userAgent?: string;
 }
@@ -92,6 +93,7 @@ export async function emitEvent(params: EmitEventParams): Promise<void> {
       eventCategory,
       properties,
       userId,
+      teamId,
       ipAddress,
       userAgent,
    } = params;
@@ -109,6 +111,7 @@ export async function emitEvent(params: EmitEventParams): Promise<void> {
             eventCategory,
             properties,
             userId,
+            teamId,
             isBillable: true,
             pricePerEvent: toMajorUnitsString(price),
             ipAddress,
@@ -218,6 +221,7 @@ export async function emitEventBatch(
          eventCategory: evt.eventCategory,
          properties: evt.properties,
          userId: evt.userId,
+         teamId: evt.teamId,
          isBillable: true as const,
          pricePerEvent: priceMap.get(evt.eventName) ?? "0",
          ipAddress: evt.ipAddress,

@@ -10,6 +10,7 @@ import * as formsRouter from "./forms";
 import * as insightsRouter from "./insights";
 import * as onboardingRouter from "./onboarding";
 import * as organizationRouter from "./organization";
+import * as personalApiKeyRouter from "./personal-api-key";
 import * as sdkUsageRouter from "./sdk-usage";
 import * as sessionRouter from "./session";
 import * as usageRouter from "./usage";
@@ -27,6 +28,7 @@ export default {
   forms: formsRouter,
   insights: insightsRouter,
   onboarding: onboardingRouter,
+  personalApiKey: personalApiKeyRouter,
   sdkUsage: sdkUsageRouter,
   session: sessionRouter,
   organization: organizationRouter,

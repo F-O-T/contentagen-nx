@@ -4,20 +4,13 @@ import {
    createRequestContext,
    mastra,
 } from "@packages/agents";
-import { getRedisConnection } from "@packages/redis/connection";
-import type { DatabaseInstance } from "@packages/database/client";
 import {
    addChatMessage,
    getOrCreateChatSession,
 } from "@packages/database/repositories/chat-repository";
 import type { StoredToolCall } from "@packages/database/schemas/chat";
-import { subscription } from "@packages/database/schemas/auth";
 import { AI_EVENTS, emitAiChatMessage, emitAiCompletion } from "@packages/events/ai";
-import { checkCreditBudget, incrementCreditUsage } from "@packages/events/credits";
-import { getEventPrice } from "@packages/events/utils";
-import { PlanName } from "@packages/stripe/constants";
-import { ORPCError } from "@orpc/server";
-import { and, eq, or } from "drizzle-orm";
+import { enforceCreditBudget, trackCreditUsage } from "@packages/events/credits";
 import { z } from "zod";
 import {
    type ChatChunk,
@@ -27,66 +20,6 @@ import {
    FIMRequestSchema,
 } from "@/features/editor/schemas";
 import { protectedProcedure } from "../server";
-
-// =============================================================================
-// Helpers
-// =============================================================================
-
-const VALID_PLAN_NAMES = new Set<string>(Object.values(PlanName));
-
-async function resolveOrganizationPlan(
-   db: DatabaseInstance,
-   organizationId: string,
-): Promise<PlanName> {
-   const [sub] = await db
-      .select({ plan: subscription.plan })
-      .from(subscription)
-      .where(
-         and(
-            eq(subscription.referenceId, organizationId),
-            or(
-               eq(subscription.status, "active"),
-               eq(subscription.status, "trialing"),
-            ),
-         ),
-      )
-      .limit(1);
-
-   if (!sub || !VALID_PLAN_NAMES.has(sub.plan)) {
-      return PlanName.FREE;
-   }
-
-   return sub.plan as PlanName;
-}
-
-async function enforceCreditBudget(
-   db: DatabaseInstance,
-   organizationId: string,
-): Promise<void> {
-   const redis = getRedisConnection();
-   if (!redis) return;
-
-   const plan = await resolveOrganizationPlan(db, organizationId);
-   try {
-      await checkCreditBudget({ redis, organizationId, plan, pool: "ai" });
-   } catch (error) {
-      throw new ORPCError("FORBIDDEN", {
-         message: error instanceof Error ? error.message : "Crédito esgotado.",
-      });
-   }
-}
-
-async function trackAiCreditUsage(
-   db: DatabaseInstance,
-   eventName: string,
-   organizationId: string,
-): Promise<void> {
-   const redis = getRedisConnection();
-   if (!redis) return;
-
-   const price = await getEventPrice(db, eventName);
-   await incrementCreditUsage(redis, organizationId, "ai", Number(price.amount));
-}
 
 // =============================================================================
 // Agent Streaming Procedures
@@ -99,9 +32,9 @@ async function trackAiCreditUsage(
 export const fimStream = protectedProcedure
    .input(FIMRequestSchema)
    .handler(async function* ({ context, input }) {
-      const { userId, db, organizationId, posthog } = context;
+      const { userId, db, organizationId, posthog, teamId } = context;
 
-      await enforceCreditBudget(db, organizationId);
+      await enforceCreditBudget(db, organizationId, "ai");
 
       // Get the FIM agent from Mastra
       const fimAgent = mastra.getAgent("fimAgent");
@@ -140,7 +73,7 @@ export const fimStream = protectedProcedure
          // Emit event and increment credit usage (failure-tolerant)
          try {
             await emitAiCompletion(
-               { db, posthog, organizationId, userId },
+               { db, posthog, organizationId, userId, teamId },
                {
                   model: "fimAgent",
                   provider: "openrouter",
@@ -151,7 +84,7 @@ export const fimStream = protectedProcedure
                   streamed: true,
                },
             );
-            await trackAiCreditUsage(db, AI_EVENTS["ai.completion"], organizationId);
+            await trackCreditUsage(db, AI_EVENTS["ai.completion"], organizationId, "ai");
          } catch {
             // Event tracking must not break the streaming flow
          }
@@ -185,9 +118,9 @@ export const fimStream = protectedProcedure
 export const editStream = protectedProcedure
    .input(EditRequestSchema)
    .handler(async function* ({ context, input }) {
-      const { userId, db, organizationId, posthog } = context;
+      const { userId, db, organizationId, posthog, teamId } = context;
 
-      await enforceCreditBudget(db, organizationId);
+      await enforceCreditBudget(db, organizationId, "ai");
 
       // Get the inline edit agent from Mastra
       const editAgent = mastra.getAgent("inlineEditAgent");
@@ -226,7 +159,7 @@ export const editStream = protectedProcedure
          // Emit event and increment credit usage (failure-tolerant)
          try {
             await emitAiCompletion(
-               { db, posthog, organizationId, userId },
+               { db, posthog, organizationId, userId, teamId },
                {
                   model: "inlineEditAgent",
                   provider: "openrouter",
@@ -237,7 +170,7 @@ export const editStream = protectedProcedure
                   streamed: true,
                },
             );
-            await trackAiCreditUsage(db, AI_EVENTS["ai.completion"], organizationId);
+            await trackCreditUsage(db, AI_EVENTS["ai.completion"], organizationId, "ai");
          } catch {
             // Event tracking must not break the streaming flow
          }
@@ -271,9 +204,9 @@ export const chatStream = protectedProcedure
       }),
    )
    .handler(async function* ({ context, input }) {
-      const { userId, db, organizationId, posthog } = context;
+      const { userId, db, organizationId, posthog, teamId } = context;
 
-      await enforceCreditBudget(db, organizationId);
+      await enforceCreditBudget(db, organizationId, "ai");
 
       // Get or create chat session
       let session: Awaited<ReturnType<typeof getOrCreateChatSession>> | null =
@@ -434,7 +367,7 @@ export const chatStream = protectedProcedure
          try {
             if (session) {
                await emitAiChatMessage(
-                  { db, posthog, organizationId, userId },
+                  { db, posthog, organizationId, userId, teamId },
                   {
                      chatId: session.id,
                      contentId: input.contentId,
@@ -447,10 +380,10 @@ export const chatStream = protectedProcedure
                      latencyMs,
                   },
                );
-               await trackAiCreditUsage(db, AI_EVENTS["ai.chat_message"], organizationId);
+               await trackCreditUsage(db, AI_EVENTS["ai.chat_message"], organizationId, "ai");
             } else {
                await emitAiCompletion(
-                  { db, posthog, organizationId, userId },
+                  { db, posthog, organizationId, userId, teamId },
                   {
                      model: "writerAgent",
                      provider: "openrouter",
@@ -461,7 +394,7 @@ export const chatStream = protectedProcedure
                      streamed: true,
                   },
                );
-               await trackAiCreditUsage(db, AI_EVENTS["ai.completion"], organizationId);
+               await trackCreditUsage(db, AI_EVENTS["ai.completion"], organizationId, "ai");
             }
          } catch {
             // Event tracking must not break the streaming flow

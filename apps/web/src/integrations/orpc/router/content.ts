@@ -1,6 +1,4 @@
 import { ORPCError } from "@orpc/server";
-import { getRedisConnection } from "@packages/redis/connection";
-import type { DatabaseInstance } from "@packages/database/client";
 import {
    archiveContent,
    countContentsByOrganization,
@@ -11,81 +9,18 @@ import {
    publishContent,
    updateContent,
 } from "@packages/database/repositories/content-repository";
-import { subscription } from "@packages/database/schemas/auth";
 import { ContentMetaSchema } from "@packages/database/schemas/content";
 import {
    CONTENT_EVENTS,
+   emitContentArchived,
    emitContentCreated,
    emitContentDeleted,
    emitContentPublished,
    emitContentUpdated,
 } from "@packages/events/content";
-import { checkCreditBudget, incrementCreditUsage } from "@packages/events/credits";
-import { getEventPrice } from "@packages/events/utils";
-import { PlanName } from "@packages/stripe/constants";
-import { and, eq, or } from "drizzle-orm";
+import { enforceCreditBudget, trackCreditUsage } from "@packages/events/credits";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
-
-// =============================================================================
-// Helpers
-// =============================================================================
-
-const VALID_PLAN_NAMES = new Set<string>(Object.values(PlanName));
-
-async function resolveOrganizationPlan(
-   db: DatabaseInstance,
-   organizationId: string,
-): Promise<PlanName> {
-   const [sub] = await db
-      .select({ plan: subscription.plan })
-      .from(subscription)
-      .where(
-         and(
-            eq(subscription.referenceId, organizationId),
-            or(
-               eq(subscription.status, "active"),
-               eq(subscription.status, "trialing"),
-            ),
-         ),
-      )
-      .limit(1);
-
-   if (!sub || !VALID_PLAN_NAMES.has(sub.plan)) {
-      return PlanName.FREE;
-   }
-
-   return sub.plan as PlanName;
-}
-
-async function enforcePlatformCreditBudget(
-   db: DatabaseInstance,
-   organizationId: string,
-): Promise<void> {
-   const redis = getRedisConnection();
-   if (!redis) return;
-
-   const plan = await resolveOrganizationPlan(db, organizationId);
-   try {
-      await checkCreditBudget({ redis, organizationId, plan, pool: "platform" });
-   } catch (error) {
-      throw new ORPCError("FORBIDDEN", {
-         message: error instanceof Error ? error.message : "Crédito esgotado.",
-      });
-   }
-}
-
-async function trackPlatformCreditUsage(
-   db: DatabaseInstance,
-   eventName: string,
-   organizationId: string,
-): Promise<void> {
-   const redis = getRedisConnection();
-   if (!redis) return;
-
-   const price = await getEventPrice(db, eventName);
-   await incrementCreditUsage(redis, organizationId, "platform", Number(price.amount));
-}
 
 // =============================================================================
 // Validation Schemas
@@ -131,7 +66,7 @@ export const getById = protectedProcedure
 export const create = protectedProcedure
    .input(createContentSchema)
    .handler(async ({ context, input }) => {
-      const { organizationId, db, session, posthog, userId } = context;
+      const { organizationId, db, session, posthog, userId, teamId } = context;
 
       // Get member ID from session
       const memberId = session.session.activeOrganizationId
@@ -167,7 +102,7 @@ export const create = protectedProcedure
 
       try {
          await emitContentCreated(
-            { db, posthog, organizationId, userId },
+            { db, posthog, organizationId, userId, teamId },
             { contentId: result.id, title: input.meta.title ?? "" },
          );
       } catch {
@@ -188,15 +123,7 @@ export const update = protectedProcedure
       }),
    )
    .handler(async ({ context, input }) => {
-      const { organizationId, db, posthog, userId } = context;
-
-      // Debug: Log update data
-      console.log("[ORPC content.update] Received update:", {
-         id: input.id,
-         hasBody: input.data.body !== undefined,
-         bodyLength: input.data.body?.length ?? 0,
-         hasMeta: !!input.data.meta,
-      });
+      const { organizationId, db, posthog, userId, teamId } = context;
 
       // Verify ownership
       const existing = await getContentById(db, input.id);
@@ -206,7 +133,7 @@ export const update = protectedProcedure
          });
       }
 
-      await enforcePlatformCreditBudget(db, organizationId);
+      await enforceCreditBudget(db, organizationId, "platform");
 
       // Build update data, merging partial meta with existing
       const updateData: Parameters<typeof updateContent>[2] = {};
@@ -223,21 +150,7 @@ export const update = protectedProcedure
          };
       }
 
-      console.log("[ORPC content.update] Updating content with:", {
-         id: input.id,
-         updateData: {
-            hasBody: updateData.body !== undefined,
-            bodyLength: updateData.body?.length ?? 0,
-            hasMeta: !!updateData.meta,
-         },
-      });
-
       const result = await updateContent(db, input.id, updateData);
-
-      console.log("[ORPC content.update] Update result:", {
-         id: result.id,
-         bodyLength: result.body?.length ?? 0,
-      });
 
       try {
          const changedFields: string[] = [];
@@ -249,13 +162,14 @@ export const update = protectedProcedure
          }
 
          await emitContentUpdated(
-            { db, posthog, organizationId, userId },
+            { db, posthog, organizationId, userId, teamId },
             { contentId: input.id, changedFields },
          );
-         await trackPlatformCreditUsage(
+         await trackCreditUsage(
             db,
             CONTENT_EVENTS["content.page.updated"],
             organizationId,
+            "platform",
          );
       } catch {
          // Event emission must not break the main flow
@@ -270,7 +184,7 @@ export const update = protectedProcedure
 export const remove = protectedProcedure
    .input(z.object({ id: z.string().uuid() }))
    .handler(async ({ context, input }) => {
-      const { organizationId, db, posthog, userId } = context;
+      const { organizationId, db, posthog, userId, teamId } = context;
 
       // Verify ownership
       const existing = await getContentById(db, input.id);
@@ -284,7 +198,7 @@ export const remove = protectedProcedure
 
       try {
          await emitContentDeleted(
-            { db, posthog, organizationId, userId },
+            { db, posthog, organizationId, userId, teamId },
             { contentId: input.id },
          );
       } catch {
@@ -300,7 +214,7 @@ export const remove = protectedProcedure
 export const publish = protectedProcedure
    .input(z.object({ id: z.string().uuid() }))
    .handler(async ({ context, input }) => {
-      const { organizationId, db, posthog, userId } = context;
+      const { organizationId, db, posthog, userId, teamId } = context;
 
       // Verify ownership
       const existing = await getContentById(db, input.id);
@@ -310,7 +224,7 @@ export const publish = protectedProcedure
          });
       }
 
-      await enforcePlatformCreditBudget(db, organizationId);
+      await enforceCreditBudget(db, organizationId, "platform");
 
       const result = await publishContent(db, input.id);
 
@@ -319,7 +233,7 @@ export const publish = protectedProcedure
             existing.body?.split(/\s+/).filter(Boolean).length ?? 0;
 
          await emitContentPublished(
-            { db, posthog, organizationId, userId },
+            { db, posthog, organizationId, userId, teamId },
             {
                contentId: input.id,
                title: existing.meta?.title ?? "",
@@ -327,10 +241,11 @@ export const publish = protectedProcedure
                wordCount,
             },
          );
-         await trackPlatformCreditUsage(
+         await trackCreditUsage(
             db,
             CONTENT_EVENTS["content.page.published"],
             organizationId,
+            "platform",
          );
       } catch {
          // Event emission must not break the main flow
@@ -345,7 +260,7 @@ export const publish = protectedProcedure
 export const archive = protectedProcedure
    .input(z.object({ id: z.string().uuid() }))
    .handler(async ({ context, input }) => {
-      const { organizationId, db } = context;
+      const { organizationId, db, posthog, userId, teamId } = context;
 
       // Verify ownership
       const existing = await getContentById(db, input.id);
@@ -356,6 +271,15 @@ export const archive = protectedProcedure
       }
 
       const result = await archiveContent(db, input.id);
+
+      try {
+         await emitContentArchived(
+            { db, posthog, organizationId, userId, teamId },
+            { contentId: input.id },
+         );
+      } catch {
+         // Event emission must not break the main flow
+      }
 
       return result;
    });

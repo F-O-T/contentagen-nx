@@ -5,5 +5,9 @@
    },
    "include": ["src"],
    "exclude": ["**/*.test.ts", "**/__tests__/**"],
-   "references": []
+   "references": [
+    {
+      "path": "../environment/tsconfig.lib.json"
+    }
+  ]
 }

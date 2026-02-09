@@ -48,6 +48,7 @@ export interface ORPCContextAuthenticated extends ORPCContextWithAuth {
 export interface ORPCContextWithOrganization
 	extends ORPCContextAuthenticated {
 	organizationId: string;
+	teamId: string | null;
 }
 
 // =============================================================================
@@ -92,10 +93,14 @@ const withOrganization = withAuth.use(async ({ context, next }) => {
 		});
 	}
 
+	// Extract team/project ID (may be null)
+	const teamId = (session.session as any).activeTeamId ?? null;
+
 	return next({
 		context: {
 			...context,
 			organizationId,
+			teamId,
 		},
 	});
 });

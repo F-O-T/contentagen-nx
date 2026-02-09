@@ -3,6 +3,9 @@
    "include": ["src"],
    "references": [
     {
+      "path": "../redis"
+    },
+    {
       "path": "../queue"
     }
   ]

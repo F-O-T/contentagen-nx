@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { EditorStandaloneLayout } from "@/layout/editor/editor-standalone-layout";
+import { EditorStandaloneLayout } from "@/layout/editor/ui/editor-standalone-layout";
 
 export const Route = createFileRoute("/_authenticated/$slug/_editor")({
 	component: EditorLayoutRoute,

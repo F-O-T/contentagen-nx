@@ -1,5 +1,5 @@
-import { AppError, propagateError } from "@packages/utils/errors";
 import { generatePublicApiKey } from "@packages/utils/crypto";
+import { AppError, propagateError } from "@packages/utils/errors";
 import { createSlug, generateRandomSuffix } from "@packages/utils/text";
 import { eq } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
@@ -258,9 +258,7 @@ export async function ensureDefaultProject(
          });
       }
 
-      console.log(
-         `Created default project for organization ${organizationId}`,
-      );
+      console.log(`Created default project for organization ${organizationId}`);
 
       return created;
    } catch (err) {

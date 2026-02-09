@@ -1,6 +1,6 @@
 import { useIsMobile } from "@packages/ui/hooks/use-mobile";
 import { createFileRoute, Navigate, useParams } from "@tanstack/react-router";
-import { SettingsMobileNav } from "@/layout/dashboard/settings-mobile-nav";
+import { SettingsMobileNav } from "@/layout/dashboard/ui/settings-mobile-nav";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/_dashboard/settings/",

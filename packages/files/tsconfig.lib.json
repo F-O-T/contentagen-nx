@@ -2,5 +2,9 @@
    "extends": "@tooling/typescript/internal-package.json",
    "include": ["src"],
    "exclude": ["**/*.test.ts", "**/__tests__/**"],
-   "references": []
+   "references": [
+    {
+      "path": "../environment/tsconfig.lib.json"
+    }
+  ]
 }

@@ -50,11 +50,11 @@ function NavItem({
             tooltip={item.label}
          >
             {item.subPanel ? (
-               <button type="button">
+               <>
                   <Icon />
                   <span>{item.label}</span>
                   <ChevronRight className="ml-auto size-3.5 text-muted-foreground group-data-[collapsible=icon]:hidden" />
-               </button>
+               </>
             ) : (
                <Link params={{ slug }} to={item.route}>
                   <Icon />

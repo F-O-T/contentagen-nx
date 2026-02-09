@@ -1,7 +1,13 @@
 import { createMoney, greaterThanOrEqual } from "@f-o-t/money";
-import type { PlanName } from "@packages/stripe/constants";
+import { ORPCError } from "@orpc/server";
+import type { DatabaseInstance } from "@packages/database/client";
+import { subscription } from "@packages/database/schemas/auth";
+import { getRedisConnection } from "@packages/redis/connection";
+import { PlanName } from "@packages/stripe/constants";
 import type { Redis } from "ioredis";
+import { and, eq, or } from "drizzle-orm";
 import { type CreditPool, PLAN_CREDIT_BUDGETS } from "./pricing";
+import { getEventPrice } from "./utils";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -101,4 +107,86 @@ export async function incrementCreditUsage(
       const ttlMs = msUntilEndOfMonth();
       await redis.pexpire(key, ttlMs);
    }
+}
+
+// ---------------------------------------------------------------------------
+// Resolve Organization Plan
+// ---------------------------------------------------------------------------
+
+const VALID_PLAN_NAMES = new Set<string>(Object.values(PlanName));
+
+/**
+ * Looks up the active subscription for an organization and returns its plan.
+ * Falls back to FREE if no active/trialing subscription is found.
+ */
+export async function resolveOrganizationPlan(
+   db: DatabaseInstance,
+   organizationId: string,
+): Promise<PlanName> {
+   const [sub] = await db
+      .select({ plan: subscription.plan })
+      .from(subscription)
+      .where(
+         and(
+            eq(subscription.referenceId, organizationId),
+            or(
+               eq(subscription.status, "active"),
+               eq(subscription.status, "trialing"),
+            ),
+         ),
+      )
+      .limit(1);
+
+   if (!sub || !VALID_PLAN_NAMES.has(sub.plan)) {
+      return PlanName.FREE;
+   }
+
+   return sub.plan as PlanName;
+}
+
+// ---------------------------------------------------------------------------
+// Enforce Credit Budget (convenience wrapper)
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolves the org plan, checks the credit budget, and throws an ORPCError
+ * if the budget is exhausted. Safe to call when Redis is unavailable (no-op).
+ */
+export async function enforceCreditBudget(
+   db: DatabaseInstance,
+   organizationId: string,
+   pool: CreditPool,
+): Promise<void> {
+   const redis = getRedisConnection();
+   if (!redis) return;
+
+   const plan = await resolveOrganizationPlan(db, organizationId);
+   try {
+      await checkCreditBudget({ redis, organizationId, plan, pool });
+   } catch (error) {
+      throw new ORPCError("FORBIDDEN", {
+         message: error instanceof Error ? error.message : "Crédito esgotado.",
+      });
+   }
+}
+
+// ---------------------------------------------------------------------------
+// Track Credit Usage (convenience wrapper)
+// ---------------------------------------------------------------------------
+
+/**
+ * Looks up the event price and increments the credit counter.
+ * Safe to call when Redis is unavailable (no-op).
+ */
+export async function trackCreditUsage(
+   db: DatabaseInstance,
+   eventName: string,
+   organizationId: string,
+   pool: CreditPool,
+): Promise<void> {
+   const redis = getRedisConnection();
+   if (!redis) return;
+
+   const price = await getEventPrice(db, eventName);
+   await incrementCreditUsage(redis, organizationId, pool, Number(price.amount));
 }

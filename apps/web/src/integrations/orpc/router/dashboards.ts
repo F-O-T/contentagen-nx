@@ -7,6 +7,11 @@ import {
 	updateDashboard,
 	updateDashboardTiles,
 } from "@packages/database/repositories/dashboard-repository";
+import {
+	emitDashboardCreated,
+	emitDashboardDeleted,
+	emitDashboardUpdated,
+} from "@packages/events/dashboard";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -35,14 +40,25 @@ const updateTilesSchema = z.object({
 export const create = protectedProcedure
 	.input(createDashboardSchema)
 	.handler(async ({ context, input }) => {
-		const { organizationId, userId, db } = context;
+		const { organizationId, userId, db, posthog, teamId } = context;
 
-		return await createDashboard(db, {
+		const dashboard = await createDashboard(db, {
 			organizationId,
 			createdBy: userId,
 			name: input.name,
 			description: input.description,
 		});
+
+		try {
+			await emitDashboardCreated(
+				{ db, posthog, organizationId, userId, teamId },
+				{ dashboardId: dashboard.id, name: input.name },
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
+
+		return dashboard;
 	});
 
 export const list = protectedProcedure.handler(async ({ context }) => {
@@ -68,7 +84,7 @@ export const getById = protectedProcedure
 export const update = protectedProcedure
 	.input(updateDashboardSchema)
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, db, posthog, userId, teamId } = context;
 		const dashboard = await getDashboardById(db, input.id);
 
 		if (!dashboard || dashboard.organizationId !== organizationId) {
@@ -78,7 +94,21 @@ export const update = protectedProcedure
 		}
 
 		const { id: _, ...updateData } = input;
-		return await updateDashboard(db, input.id, updateData);
+		const updated = await updateDashboard(db, input.id, updateData);
+
+		try {
+			const changedFields = Object.keys(updateData).filter(
+				(k) => updateData[k as keyof typeof updateData] !== undefined,
+			);
+			await emitDashboardUpdated(
+				{ db, posthog, organizationId, userId, teamId },
+				{ dashboardId: input.id, changedFields },
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
+
+		return updated;
 	});
 
 export const updateTiles = protectedProcedure
@@ -99,7 +129,7 @@ export const updateTiles = protectedProcedure
 export const remove = protectedProcedure
 	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, db, posthog, userId, teamId } = context;
 		const dashboard = await getDashboardById(db, input.id);
 
 		if (!dashboard || dashboard.organizationId !== organizationId) {
@@ -109,5 +139,15 @@ export const remove = protectedProcedure
 		}
 
 		await deleteDashboard(db, input.id);
+
+		try {
+			await emitDashboardDeleted(
+				{ db, posthog, organizationId, userId, teamId },
+				{ dashboardId: input.id },
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
+
 		return { success: true };
 	});

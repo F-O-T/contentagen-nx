@@ -12,6 +12,8 @@ export const EVENT_CATEGORIES = {
    seo: "seo",
    experiment: "experiment",
    webhook: "webhook",
+   dashboard: "dashboard",
+   insight: "insight",
    system: "system",
 } as const;
 

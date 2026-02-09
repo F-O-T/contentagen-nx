@@ -1,9 +1,11 @@
 {
    "dependencies": {
       "@f-o-t/money": "1.2.6",
+      "@orpc/server": "^1.13.0",
       "@packages/database": "workspace:*",
       "@packages/posthog": "workspace:*",
       "@packages/queue": "workspace:*",
+      "@packages/redis": "workspace:*",
       "@packages/stripe": "workspace:*",
       "bullmq": "catalog:workers",
       "drizzle-orm": "catalog:database",
@@ -50,6 +52,18 @@
       "./experiments": {
          "default": "./src/experiments.ts",
          "types": "./dist/src/experiments.d.ts"
+      },
+      "./webhook": {
+         "default": "./src/webhook.ts",
+         "types": "./dist/src/webhook.d.ts"
+      },
+      "./dashboard": {
+         "default": "./src/dashboard.ts",
+         "types": "./dist/src/dashboard.d.ts"
+      },
+      "./insight": {
+         "default": "./src/insight.ts",
+         "types": "./dist/src/insight.d.ts"
       },
       "./pricing": {
          "default": "./src/pricing.ts",

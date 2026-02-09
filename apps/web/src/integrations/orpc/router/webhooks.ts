@@ -7,6 +7,11 @@ import {
 	listWebhookEndpoints,
 	updateWebhookEndpoint,
 } from "@packages/database/repositories/webhook-repository";
+import {
+	emitWebhookEndpointCreated,
+	emitWebhookEndpointUpdated,
+	emitWebhookEndpointDeleted,
+} from "@packages/events/webhook";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -38,7 +43,7 @@ const updateWebhookSchema = z.object({
 export const create = protectedProcedure
 	.input(createWebhookSchema)
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, db, posthog, userId, teamId } = context;
 
 		const endpoint = await createWebhookEndpoint(db, {
 			organizationId,
@@ -46,6 +51,15 @@ export const create = protectedProcedure
 			description: input.description,
 			eventPatterns: input.eventPatterns,
 		});
+
+		try {
+			await emitWebhookEndpointCreated(
+				{ db, posthog, organizationId, userId, teamId },
+				{ endpointId: endpoint.id, url: input.url },
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
 
 		return endpoint;
 	});
@@ -93,7 +107,7 @@ export const getById = protectedProcedure
 export const update = protectedProcedure
 	.input(updateWebhookSchema)
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, db, posthog, userId, teamId } = context;
 
 		const endpoint = await getWebhookEndpoint(db, input.id);
 
@@ -105,6 +119,19 @@ export const update = protectedProcedure
 
 		const { id: _id, ...updateData } = input;
 		const updated = await updateWebhookEndpoint(db, input.id, updateData);
+
+		try {
+			const changedFields = Object.keys(updateData).filter(
+				(k) => updateData[k as keyof typeof updateData] !== undefined,
+			);
+			await emitWebhookEndpointUpdated(
+				{ db, posthog, organizationId, userId, teamId },
+				{ endpointId: input.id, changedFields },
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
+
 		return updated;
 	});
 
@@ -114,7 +141,7 @@ export const update = protectedProcedure
 export const remove = protectedProcedure
 	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, db, posthog, userId, teamId } = context;
 
 		const endpoint = await getWebhookEndpoint(db, input.id);
 
@@ -125,6 +152,16 @@ export const remove = protectedProcedure
 		}
 
 		await deleteWebhookEndpoint(db, input.id);
+
+		try {
+			await emitWebhookEndpointDeleted(
+				{ db, posthog, organizationId, userId, teamId },
+				{ endpointId: input.id },
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
+
 		return { success: true };
 	});
 

@@ -11,6 +11,9 @@
     },
     {
       "path": "../stripe/tsconfig.lib.json"
+    },
+    {
+      "path": "../environment/tsconfig.lib.json"
     }
   ]
 }

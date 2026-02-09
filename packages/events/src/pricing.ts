@@ -8,9 +8,12 @@ import { PlanName } from "@packages/stripe/constants";
 import { AI_EVENTS } from "./ai";
 import { EVENT_CATEGORIES, type EventCategory } from "./catalog";
 import { CONTENT_EVENTS } from "./content";
+import { DASHBOARD_EVENTS } from "./dashboard";
 import { EXPERIMENT_EVENTS } from "./experiments";
 import { FORM_EVENTS } from "./forms";
+import { INSIGHT_EVENTS } from "./insight";
 import { SEO_EVENTS } from "./seo";
+import { WEBHOOK_EVENTS } from "./webhook";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -251,6 +254,152 @@ export const EVENT_PRICING: EventPricing[] = [
          "Fired when a conversion is recorded for an active experiment.",
       isBillable: true,
    },
+
+   // -------------------------------------------------------------------------
+   // Webhook events (4)
+   // -------------------------------------------------------------------------
+   {
+      eventName: WEBHOOK_EVENTS["webhook.endpoint.created"],
+      category: EVENT_CATEGORIES.webhook,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Webhook Endpoint Created",
+      description: "Fired when a webhook endpoint is created.",
+      isBillable: false,
+   },
+   {
+      eventName: WEBHOOK_EVENTS["webhook.endpoint.updated"],
+      category: EVENT_CATEGORIES.webhook,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Webhook Endpoint Updated",
+      description: "Fired when a webhook endpoint configuration is updated.",
+      isBillable: false,
+   },
+   {
+      eventName: WEBHOOK_EVENTS["webhook.endpoint.deleted"],
+      category: EVENT_CATEGORIES.webhook,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Webhook Endpoint Deleted",
+      description: "Fired when a webhook endpoint is deleted.",
+      isBillable: false,
+   },
+   {
+      eventName: WEBHOOK_EVENTS["webhook.delivered"],
+      category: EVENT_CATEGORIES.webhook,
+      pricePerEvent: brl("0.000500"),
+      freeTierLimit: 500,
+      displayName: "Webhook Delivered",
+      description: "Fired when a webhook payload is delivered to an endpoint.",
+      isBillable: true,
+   },
+
+   // -------------------------------------------------------------------------
+   // Dashboard events (3)
+   // -------------------------------------------------------------------------
+   {
+      eventName: DASHBOARD_EVENTS["dashboard.created"],
+      category: EVENT_CATEGORIES.dashboard,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Dashboard Created",
+      description: "Fired when a new dashboard is created.",
+      isBillable: false,
+   },
+   {
+      eventName: DASHBOARD_EVENTS["dashboard.updated"],
+      category: EVENT_CATEGORIES.dashboard,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Dashboard Updated",
+      description: "Fired when a dashboard configuration is updated.",
+      isBillable: false,
+   },
+   {
+      eventName: DASHBOARD_EVENTS["dashboard.deleted"],
+      category: EVENT_CATEGORIES.dashboard,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Dashboard Deleted",
+      description: "Fired when a dashboard is deleted.",
+      isBillable: false,
+   },
+
+   // -------------------------------------------------------------------------
+   // Insight events (3)
+   // -------------------------------------------------------------------------
+   {
+      eventName: INSIGHT_EVENTS["insight.created"],
+      category: EVENT_CATEGORIES.insight,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Insight Created",
+      description: "Fired when a new insight is created.",
+      isBillable: false,
+   },
+   {
+      eventName: INSIGHT_EVENTS["insight.updated"],
+      category: EVENT_CATEGORIES.insight,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Insight Updated",
+      description: "Fired when an insight is updated.",
+      isBillable: false,
+   },
+   {
+      eventName: INSIGHT_EVENTS["insight.deleted"],
+      category: EVENT_CATEGORIES.insight,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Insight Deleted",
+      description: "Fired when an insight is deleted.",
+      isBillable: false,
+   },
+
+   // -------------------------------------------------------------------------
+   // Content archived (1)
+   // -------------------------------------------------------------------------
+   {
+      eventName: CONTENT_EVENTS["content.archived"],
+      category: EVENT_CATEGORIES.content,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Content Archived",
+      description: "Fired when content is archived.",
+      isBillable: false,
+   },
+
+   // -------------------------------------------------------------------------
+   // Form CRUD events (3)
+   // -------------------------------------------------------------------------
+   {
+      eventName: FORM_EVENTS["form.created"],
+      category: EVENT_CATEGORIES.form,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Form Created",
+      description: "Fired when a new form is created.",
+      isBillable: false,
+   },
+   {
+      eventName: FORM_EVENTS["form.updated"],
+      category: EVENT_CATEGORIES.form,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Form Updated",
+      description: "Fired when a form is updated.",
+      isBillable: false,
+   },
+   {
+      eventName: FORM_EVENTS["form.deleted"],
+      category: EVENT_CATEGORIES.form,
+      pricePerEvent: brl("0.000000"),
+      freeTierLimit: 0,
+      displayName: "Form Deleted",
+      description: "Fired when a form is deleted.",
+      isBillable: false,
+   },
 ];
 
 // ---------------------------------------------------------------------------
@@ -269,6 +418,9 @@ export const POOL_CATEGORIES: Record<CreditPool, EventCategory[]> = {
       EVENT_CATEGORIES.form,
       EVENT_CATEGORIES.seo,
       EVENT_CATEGORIES.experiment,
+      EVENT_CATEGORIES.dashboard,
+      EVENT_CATEGORIES.insight,
+      EVENT_CATEGORIES.webhook,
    ],
 };
 

@@ -9,7 +9,7 @@ import {
    timestamp,
    uuid,
 } from "drizzle-orm/pg-core";
-import { organization, user } from "./auth";
+import { organization, team, user } from "./auth";
 
 export const events = pgTable(
    "events",
@@ -24,6 +24,9 @@ export const events = pgTable(
          .$type<Record<string, unknown>>()
          .notNull(),
       userId: uuid("user_id").references(() => user.id, {
+         onDelete: "set null",
+      }),
+      teamId: uuid("team_id").references(() => team.id, {
          onDelete: "set null",
       }),
       isBillable: boolean("is_billable").default(true).notNull(),
@@ -41,6 +44,7 @@ export const events = pgTable(
       index("events_name_idx").on(table.eventName),
       index("events_category_idx").on(table.eventCategory),
       index("events_timestamp_idx").on(table.timestamp),
+      index("events_team_time_idx").on(table.teamId, table.timestamp),
    ],
 );
 
@@ -52,6 +56,10 @@ export const eventsRelations = relations(events, ({ one }) => ({
    user: one(user, {
       fields: [events.userId],
       references: [user.id],
+   }),
+   team: one(team, {
+      fields: [events.teamId],
+      references: [team.id],
    }),
 }));
 

@@ -8,6 +8,11 @@ import {
 	listForms,
 	updateForm,
 } from "@packages/database/repositories/form-repository";
+import {
+	emitFormCreated,
+	emitFormUpdated,
+	emitFormDeleted,
+} from "@packages/events/forms";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -57,7 +62,7 @@ const updateFormSchema = z.object({
 export const create = protectedProcedure
 	.input(createFormSchema)
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, db, posthog, userId, teamId } = context;
 
 		const form = await createForm(db, {
 			organizationId,
@@ -66,6 +71,15 @@ export const create = protectedProcedure
 			fields: input.fields,
 			settings: input.settings ?? {},
 		});
+
+		try {
+			await emitFormCreated(
+				{ db, posthog, organizationId, userId, teamId },
+				{ formId: form.id, name: input.name },
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
 
 		return form;
 	});
@@ -104,7 +118,7 @@ export const getById = protectedProcedure
 export const update = protectedProcedure
 	.input(updateFormSchema)
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, db, posthog, userId, teamId } = context;
 
 		const form = await getFormById(db, input.id);
 
@@ -116,6 +130,19 @@ export const update = protectedProcedure
 
 		const { id: _id, ...updateData } = input;
 		const updated = await updateForm(db, input.id, updateData);
+
+		try {
+			const changedFields = Object.keys(updateData).filter(
+				(k) => updateData[k as keyof typeof updateData] !== undefined,
+			);
+			await emitFormUpdated(
+				{ db, posthog, organizationId, userId, teamId },
+				{ formId: input.id, changedFields },
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
+
 		return updated;
 	});
 
@@ -125,7 +152,7 @@ export const update = protectedProcedure
 export const remove = protectedProcedure
 	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, db, posthog, userId, teamId } = context;
 
 		const form = await getFormById(db, input.id);
 
@@ -136,6 +163,16 @@ export const remove = protectedProcedure
 		}
 
 		await deleteForm(db, input.id);
+
+		try {
+			await emitFormDeleted(
+				{ db, posthog, organizationId, userId, teamId },
+				{ formId: input.id },
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
+
 		return { success: true };
 	});
 

@@ -16,7 +16,6 @@ const createJsonResponse = (payload: unknown): FetchResponse => {
 	} as unknown as FetchResponse;
 };
 
-
 describe("ContentaGenSDK", () => {
 	beforeEach(() => {
 		if (originalFetch) {
@@ -88,5 +87,4 @@ describe("ContentaGenSDK", () => {
 		expect(url.searchParams.get("limit")).toBeNull();
 		expect(url.searchParams.get("page")).toBeNull();
 	});
-
 });

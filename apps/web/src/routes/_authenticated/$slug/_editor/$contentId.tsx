@@ -3,7 +3,7 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
-import { ContentEditorPage } from "@/layout/editor/content-editor-page";
+import { ContentEditorPage } from "@/layout/editor/ui/content-editor-page";
 import { orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(

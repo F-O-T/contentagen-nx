@@ -25,7 +25,7 @@ import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
-import { ThemeSwitcher } from "@/layout/dashboard/theme-switcher";
+import { ThemeSwitcher } from "@/layout/dashboard/ui/theme-switcher";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/_dashboard/settings/customization",

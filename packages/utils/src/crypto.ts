@@ -31,5 +31,7 @@ function generateSecureAlphanumeric(length: number): string {
  * Uses `crypto.getRandomValues` for cryptographically secure randomness.
  */
 export function generatePublicApiKey(): string {
-   return PUBLIC_API_KEY_PREFIX + generateSecureAlphanumeric(PUBLIC_API_KEY_LENGTH);
+   return (
+      PUBLIC_API_KEY_PREFIX + generateSecureAlphanumeric(PUBLIC_API_KEY_LENGTH)
+   );
 }

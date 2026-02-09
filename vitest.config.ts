@@ -10,4 +10,7 @@ export default defineConfig({
          "@": fileURLToPath(new URL("./apps/web/src", import.meta.url)),
       },
    },
+   test: {
+      include: ["apps/web/__tests__/**/*.test.{ts,tsx}"],
+   },
 });

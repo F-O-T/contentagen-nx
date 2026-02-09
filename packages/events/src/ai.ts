@@ -33,7 +33,7 @@ export const aiCompletionEventSchema = z.object({
 export type AiCompletionEvent = z.infer<typeof aiCompletionEventSchema>;
 
 export function emitAiCompletion(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
    properties: AiCompletionEvent,
 ) {
    return emitEvent({
@@ -63,7 +63,7 @@ export const aiChatMessageEventSchema = z.object({
 export type AiChatMessageEvent = z.infer<typeof aiChatMessageEventSchema>;
 
 export function emitAiChatMessage(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
    properties: AiChatMessageEvent,
 ) {
    return emitEvent({
@@ -92,7 +92,7 @@ export const aiAgentActionEventSchema = z.object({
 export type AiAgentActionEvent = z.infer<typeof aiAgentActionEventSchema>;
 
 export function emitAiAgentAction(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
    properties: AiAgentActionEvent,
 ) {
    return emitEvent({

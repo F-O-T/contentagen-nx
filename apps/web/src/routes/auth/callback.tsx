@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { authClient } from '@/integrations/better-auth/auth-client'
 
 export const Route = createFileRoute('/auth/callback')({
   beforeLoad: async ({ context }) => {
@@ -17,7 +18,14 @@ export const Route = createFileRoute('/auth/callback')({
       })
     }
 
-    // Fallback if no organization exists (shouldn't happen normally)
+    // No organization exists — sign out to break the redirect loop
+    // (the /auth parent redirects authenticated users back here,
+    // so we must clear the session before redirecting to sign-in)
+    await authClient.signOut()
+    context.queryClient.removeQueries({
+      queryKey: context.orpc.session.getSession.queryOptions().queryKey,
+    })
+
     throw redirect({ to: '/auth/sign-in' })
   },
   component: () => null,

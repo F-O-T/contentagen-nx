@@ -6,6 +6,11 @@ import {
 	listInsights,
 	updateInsight,
 } from "@packages/database/repositories/insight-repository";
+import {
+	emitInsightCreated,
+	emitInsightDeleted,
+	emitInsightUpdated,
+} from "@packages/events/insight";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -30,9 +35,9 @@ const updateInsightSchema = z.object({
 export const create = protectedProcedure
 	.input(createInsightSchema)
 	.handler(async ({ context, input }) => {
-		const { organizationId, userId, db } = context;
+		const { organizationId, userId, db, posthog, teamId } = context;
 
-		return await createInsight(db, {
+		const insight = await createInsight(db, {
 			organizationId,
 			createdBy: userId,
 			name: input.name,
@@ -41,6 +46,17 @@ export const create = protectedProcedure
 			config: input.config,
 			defaultSize: input.defaultSize,
 		});
+
+		try {
+			await emitInsightCreated(
+				{ db, posthog, organizationId, userId, teamId },
+				{ insightId: insight.id, name: input.name },
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
+
+		return insight;
 	});
 
 export const list = protectedProcedure
@@ -74,7 +90,7 @@ export const getById = protectedProcedure
 export const update = protectedProcedure
 	.input(updateInsightSchema)
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, db, posthog, userId, teamId } = context;
 		const insight = await getInsightById(db, input.id);
 
 		if (!insight || insight.organizationId !== organizationId) {
@@ -84,13 +100,27 @@ export const update = protectedProcedure
 		}
 
 		const { id: _, ...updateData } = input;
-		return await updateInsight(db, input.id, updateData);
+		const updated = await updateInsight(db, input.id, updateData);
+
+		try {
+			const changedFields = Object.keys(updateData).filter(
+				(k) => updateData[k as keyof typeof updateData] !== undefined,
+			);
+			await emitInsightUpdated(
+				{ db, posthog, organizationId, userId, teamId },
+				{ insightId: input.id, changedFields },
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
+
+		return updated;
 	});
 
 export const remove = protectedProcedure
 	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, db, posthog, userId, teamId } = context;
 		const insight = await getInsightById(db, input.id);
 
 		if (!insight || insight.organizationId !== organizationId) {
@@ -100,5 +130,15 @@ export const remove = protectedProcedure
 		}
 
 		await deleteInsight(db, input.id);
+
+		try {
+			await emitInsightDeleted(
+				{ db, posthog, organizationId, userId, teamId },
+				{ insightId: input.id },
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
+
 		return { success: true };
 	});

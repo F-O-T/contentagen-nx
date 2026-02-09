@@ -1,45 +1,14 @@
-import type { DatabaseInstance } from "@packages/database/client";
 import {
    getPublicApiKey as getPublicApiKeyFromDb,
    isOrganizationOwner,
    regeneratePublicApiKey as regeneratePublicApiKeyFromDb,
 } from "@packages/database/repositories/auth-repository";
-import { member, organization, subscription } from "@packages/database/schemas/auth";
-import { PlanName, getEffectiveProjectLimit } from "@packages/stripe/constants";
-import { and, eq, or } from "drizzle-orm";
+import { member, organization } from "@packages/database/schemas/auth";
+import { resolveOrganizationPlan } from "@packages/events/credits";
+import { getEffectiveProjectLimit } from "@packages/stripe/constants";
+import { eq } from "drizzle-orm";
 import { ORPCError } from "@orpc/server";
 import { protectedProcedure } from "../server";
-
-// =============================================================================
-// Helpers
-// =============================================================================
-
-const VALID_PLAN_NAMES = new Set<string>(Object.values(PlanName));
-
-async function resolveOrganizationPlan(
-   db: DatabaseInstance,
-   organizationId: string,
-): Promise<PlanName> {
-   const [sub] = await db
-      .select({ plan: subscription.plan })
-      .from(subscription)
-      .where(
-         and(
-            eq(subscription.referenceId, organizationId),
-            or(
-               eq(subscription.status, "active"),
-               eq(subscription.status, "trialing"),
-            ),
-         ),
-      )
-      .limit(1);
-
-   if (!sub || !VALID_PLAN_NAMES.has(sub.plan)) {
-      return PlanName.FREE;
-   }
-
-   return sub.plan as PlanName;
-}
 
 // =============================================================================
 // Procedures

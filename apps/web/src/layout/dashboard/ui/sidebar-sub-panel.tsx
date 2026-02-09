@@ -24,6 +24,7 @@ export function SidebarSubPanel() {
 
    return (
       <SidebarProvider
+         className="contents"
          defaultOpen={false}
          style={
             {
