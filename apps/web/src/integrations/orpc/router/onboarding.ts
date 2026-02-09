@@ -33,12 +33,22 @@ export const getOnboardingStatus = protectedProcedure.handler(
       }
 
       // Run auto-detection queries in parallel to count existing resources
-      const [contentCount, formCount, insightCount, dashboardCount] =
+      const [contentCount, publishedContentCount, formCount, insightCount, dashboardCount] =
          await Promise.all([
             db
                .select({ count: sql<number>`count(*)` })
                .from(content)
                .where(eq(content.organizationId, organizationId))
+               .then((rows) => Number(rows[0]?.count ?? 0)),
+            db
+               .select({ count: sql<number>`count(*)` })
+               .from(content)
+               .where(
+                  and(
+                     eq(content.organizationId, organizationId),
+                     eq(content.status, "published"),
+                  ),
+               )
                .then((rows) => Number(rows[0]?.count ?? 0)),
             db
                .select({ count: sql<number>`count(*)` })
@@ -63,6 +73,9 @@ export const getOnboardingStatus = protectedProcedure.handler(
 
       if (contentCount > 0) {
          autoDetected["create_content"] = true;
+      }
+      if (publishedContentCount > 0) {
+         autoDetected["publish_content"] = true;
       }
       if (formCount > 0) {
          autoDetected["create_form"] = true;

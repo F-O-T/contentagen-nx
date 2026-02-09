@@ -3,6 +3,7 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import { QuickStartChecklist } from "@/features/onboarding/ui/quick-start-checklist";
 import { HomeContentAnalyticsCard } from "./_components/home-content-analytics-card";
 import { HomeContentStatsCard } from "./_components/home-content-stats-card";
 import { HomeRecentContentSection } from "./_components/home-recent-content-section";
@@ -59,6 +60,9 @@ function HomePageContent() {
 	return (
 		<main className="flex flex-col gap-4">
 			<HomePageHeader />
+
+			{/* Quick Start checklist — visible until dismissed or all tasks done */}
+			<QuickStartChecklist />
 
 			{/* 4-column flexible bento grid */}
 			<div className="grid gap-4 grid-cols-2 md:grid-cols-4">
