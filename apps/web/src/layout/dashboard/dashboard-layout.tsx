@@ -1,3 +1,5 @@
+// apps/web/src/layout/dashboard/dashboard-layout.tsx
+import { SidebarInset, SidebarProvider } from "@packages/ui/components/sidebar";
 import { TooltipProvider } from "@packages/ui/components/tooltip";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
@@ -7,14 +9,18 @@ import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { useLastOrganization } from "@/hooks/use-last-organization";
 import {
-   closeSubSidebar,
-   openSubSidebar,
+   closeSubPanel,
+   openSubPanel,
    useSidebarNav,
 } from "@/hooks/use-sidebar-nav";
+import {
+   getSidebarDefaultOpen,
+   persistSidebarState,
+} from "@/hooks/use-sidebar-persistence";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
-import { IconRail } from "./icon-rail";
-import { SubSidebar } from "./sub-sidebar";
+import { AppSidebar } from "./app-sidebar";
+import { SidebarSubPanel } from "./sidebar-sub-panel";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const { activeOrganization } = useActiveOrganization();
@@ -55,24 +61,29 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
    useEffect(() => {
       if (pathname.includes("/analytics/dashboards")) {
          if (!manualClose) {
-            openSubSidebar("dashboards");
+            openSubPanel("dashboards");
          }
       } else if (pathname.includes("/analytics/insights")) {
          if (!manualClose) {
-            openSubSidebar("insights");
+            openSubPanel("insights");
          }
       } else {
-         closeSubSidebar();
+         closeSubPanel();
       }
    }, [pathname, manualClose]);
 
    return (
       <TooltipProvider delayDuration={200}>
-         <div className="flex h-screen">
-            <IconRail />
-            <SubSidebar />
-            <main className="flex-1 overflow-y-auto p-4">{children}</main>
-         </div>
+         <SidebarProvider
+            defaultOpen={getSidebarDefaultOpen()}
+            onOpenChange={persistSidebarState}
+         >
+            <AppSidebar />
+            <SidebarSubPanel />
+            <SidebarInset>
+               <main className="flex-1 overflow-y-auto p-4">{children}</main>
+            </SidebarInset>
+         </SidebarProvider>
       </TooltipProvider>
    );
 }
