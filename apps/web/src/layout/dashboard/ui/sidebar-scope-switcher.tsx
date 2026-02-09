@@ -118,7 +118,10 @@ function SidebarScopeSwitcherContent() {
    const queryClient = useQueryClient();
    const router = useRouter();
    const { pathname } = useLocation();
-   const params = useParams({ strict: false }) as { slug?: string };
+   const params = useParams({ strict: false }) as {
+      slug?: string;
+      teamId?: string;
+   };
    const currentSlug = params.slug ?? activeOrganization.slug;
    const { data: organizations } = useSuspenseQuery(
       orpc.organization.getOrganizations.queryOptions({}),
@@ -190,9 +193,32 @@ function SidebarScopeSwitcherContent() {
             queryKey: orpc.session.getSession.queryKey({}),
          });
 
+         if (currentSlug) {
+            const prefix = `/${currentSlug}`;
+            let nextPath = `/${currentSlug}/${team.id}/home`;
+
+            if (pathname.startsWith(`${prefix}/`)) {
+               nextPath = params.teamId
+                  ? pathname.replace(
+                       `${prefix}/${params.teamId}`,
+                       `${prefix}/${team.id}`,
+                    )
+                  : `/${currentSlug}/${team.id}${pathname.slice(prefix.length)}`;
+            }
+
+            router.navigate({ to: nextPath });
+         }
+
          setTeamOpen(false);
       },
-      [activeTeam?.id, queryClient],
+      [
+         activeTeam?.id,
+         currentSlug,
+         params.teamId,
+         pathname,
+         queryClient,
+         router,
+      ],
    );
 
    const handleNewProject = useCallback(() => {
