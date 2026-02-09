@@ -52,6 +52,124 @@ function useSidebar() {
    return context;
 }
 
+// --- Sidebar Manager (multi-sidebar registry) ---
+
+type SidebarRegistry = Record<string, SidebarContextProps>;
+
+type SidebarManagerContextProps = {
+   register: (name: string, context: SidebarContextProps) => void;
+   unregister: (name: string) => void;
+   use: (name: string) => SidebarContextProps | null;
+};
+
+const SidebarManagerContext =
+   React.createContext<SidebarManagerContextProps | null>(null);
+
+function useSidebarManager() {
+   const context = React.useContext(SidebarManagerContext);
+   if (!context) {
+      throw new Error(
+         "useSidebarManager must be used within a SidebarManagerProvider.",
+      );
+   }
+   return context;
+}
+
+function SidebarManagerProvider({
+   children,
+}: { children: React.ReactNode }) {
+   const [sidebars, setSidebars] = React.useState<SidebarRegistry>({});
+
+   const register = React.useCallback(
+      (name: string, context: SidebarContextProps) => {
+         setSidebars((prev) => ({ ...prev, [name]: context }));
+      },
+      [],
+   );
+
+   const unregister = React.useCallback((name: string) => {
+      setSidebars((prev) => {
+         const next = { ...prev };
+         delete next[name];
+         return next;
+      });
+   }, []);
+
+   const use = React.useCallback(
+      (name: string) => sidebars[name] ?? null,
+      [sidebars],
+   );
+
+   const value = React.useMemo(
+      () => ({ register, unregister, use }),
+      [register, unregister, use],
+   );
+
+   return (
+      <SidebarManagerContext.Provider value={value}>
+         {children}
+      </SidebarManagerContext.Provider>
+   );
+}
+
+function SidebarManager({
+   children,
+   name,
+}: { children: React.ReactNode; name: string }) {
+   const sidebarContext = useSidebar();
+   const manager = useSidebarManager();
+
+   const sidebarContextRef = React.useRef(sidebarContext);
+   const managerRef = React.useRef(manager);
+
+   React.useLayoutEffect(() => {
+      sidebarContextRef.current = sidebarContext;
+      managerRef.current = manager;
+   });
+
+   React.useEffect(() => {
+      managerRef.current.register(name, sidebarContextRef.current);
+      return () => managerRef.current.unregister(name);
+   }, [name]);
+
+   React.useEffect(() => {
+      managerRef.current.register(name, sidebarContext);
+   }, [name, sidebarContext]);
+
+   return <>{children}</>;
+}
+
+function SidebarManagerTrigger({
+   name,
+   className,
+   onClick,
+   ...props
+}: React.ComponentProps<typeof Button> & { name: string }) {
+   const manager = useSidebarManager();
+   const sidebar = manager.use(name);
+
+   return (
+      <Button
+         aria-label={`Toggle ${name} sidebar`}
+         className={cn("size-7", className)}
+         data-sidebar="manager-trigger"
+         data-sidebar-name={name}
+         data-slot="sidebar-manager-trigger"
+         disabled={!sidebar}
+         onClick={(event) => {
+            onClick?.(event);
+            sidebar?.toggleSidebar();
+         }}
+         size="icon"
+         variant="ghost"
+         {...props}
+      >
+         <MenuIcon />
+         <span className="sr-only">Toggle {name} Sidebar</span>
+      </Button>
+   );
+}
+
 function SidebarProvider({
    defaultOpen = true,
    open: openProp,
@@ -740,6 +858,9 @@ export {
    SidebarHeader,
    SidebarInput,
    SidebarInset,
+   SidebarManager,
+   SidebarManagerProvider,
+   SidebarManagerTrigger,
    SidebarMenu,
    SidebarMenuAction,
    SidebarMenuBadge,
@@ -754,4 +875,5 @@ export {
    SidebarSeparator,
    SidebarTrigger,
    useSidebar,
+   useSidebarManager,
 };
