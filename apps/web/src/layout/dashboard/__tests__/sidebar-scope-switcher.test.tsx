@@ -4,7 +4,7 @@ import { SidebarProvider } from "@packages/ui/components/sidebar";
 import { render, screen } from "@testing-library/react";
 import { Suspense } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { SidebarScopeSwitcher } from "@/layout/dashboard/sidebar-scope-switcher";
+import { SidebarScopeSwitcher } from "@/layout/dashboard/ui/sidebar-scope-switcher";
 
 if (!window.matchMedia) {
    window.matchMedia = ((query: string) => ({
@@ -23,6 +23,8 @@ vi.mock("@/hooks/use-active-organization", () => ({
          slug: "acme",
       },
       activeSubscription: null,
+      projectCount: 1,
+      projectLimit: null,
    }),
 }));
 
@@ -120,10 +122,10 @@ function renderWithClient() {
 }
 
 describe("SidebarScopeSwitcher", () => {
-   it("renders organization and project triggers", () => {
+   it("renders separate org and team triggers", () => {
       renderWithClient();
 
-      expect(screen.getByLabelText("Switch organization")).toBeTruthy();
-      expect(screen.getByLabelText("Switch project")).toBeTruthy();
+      expect(screen.getByLabelText(/organizacao/i)).toBeTruthy();
+      expect(screen.getByLabelText(/projeto/i)).toBeTruthy();
    });
 });
