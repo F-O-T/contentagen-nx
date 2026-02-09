@@ -25,7 +25,11 @@ import {
    PopoverContent,
    PopoverTrigger,
 } from "@packages/ui/components/popover";
-import { SidebarMenu, SidebarMenuItem } from "@packages/ui/components/sidebar";
+import {
+   SidebarMenu,
+   SidebarMenuButton,
+   SidebarMenuItem,
+} from "@packages/ui/components/sidebar";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
    Link,
