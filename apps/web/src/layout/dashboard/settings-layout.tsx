@@ -2,6 +2,9 @@ import { Button } from "@packages/ui/components/button";
 import {
    Sidebar,
    SidebarContent,
+   SidebarHeader,
+   SidebarInset,
+   SidebarManager,
    SidebarProvider,
 } from "@packages/ui/components/sidebar";
 import { useIsMobile } from "@packages/ui/hooks/use-mobile";
@@ -44,20 +47,46 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
       );
    }
 
-   return (
-      <SidebarProvider defaultOpen>
-         <div className="flex h-full w-full gap-4">
-            <Sidebar
-               className="border rounded-xl bg-card shadow-sm"
-               collapsible="none"
-               variant="inset"
-            >
-               <SidebarContent>
-                  <SettingsSidebar />
-               </SidebarContent>
-            </Sidebar>
-            <main className="flex-1 min-w-0">{children}</main>
-         </div>
-      </SidebarProvider>
-   );
-}
+      return (
+         <SidebarProvider
+            className="min-h-0 w-full"
+            style={
+               {
+                  "--sidebar-width": "16rem",
+               } as React.CSSProperties
+            }
+         >
+            <SidebarManager name="settings">
+               <Sidebar
+                  className="sticky top-0 h-svh border-r"
+                  collapsible="none"
+               >
+                  <SidebarHeader className="px-3 pt-3 pb-0">
+                     <div className="flex items-center gap-2">
+                        <Button
+                           asChild
+                           className="w-fit"
+                           size="sm"
+                           variant="ghost"
+                        >
+                           <Link
+                              params={{ slug: activeOrganization.slug }}
+                              to="/$slug/home"
+                           >
+                              <ChevronLeft className="size-4 mr-1" />
+                              Configuracoes
+                           </Link>
+                        </Button>
+                     </div>
+                  </SidebarHeader>
+                  <SidebarContent>
+                     <SettingsSidebar />
+                  </SidebarContent>
+               </Sidebar>
+            </SidebarManager>
+            <SidebarInset>
+               <main className="flex-1 min-w-0 p-6">{children}</main>
+            </SidebarInset>
+         </SidebarProvider>
+      );
+   }
