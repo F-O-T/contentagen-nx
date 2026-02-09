@@ -50,7 +50,7 @@ function makeChatSession(overrides = {}) {
 
 function createChatContext(overrides = {}) {
 	return createTestContext({
-		db: {} as any,
+		db: {},
 		...overrides,
 	});
 }
@@ -69,7 +69,7 @@ beforeEach(() => {
 
 describe("getChatHistory", () => {
 	it("returns empty messages when no session exists", async () => {
-		vi.mocked(getChatSessionWithMessages).mockResolvedValueOnce(null as any);
+		vi.mocked(getChatSessionWithMessages).mockResolvedValueOnce(null);
 
 		const ctx = createChatContext();
 		const result = await call(
@@ -102,7 +102,7 @@ describe("getChatHistory", () => {
 				},
 			],
 		});
-		vi.mocked(getChatSessionWithMessages).mockResolvedValueOnce(session as any);
+		vi.mocked(getChatSessionWithMessages).mockResolvedValueOnce(session);
 
 		const ctx = createChatContext();
 		const result = await call(
@@ -133,7 +133,7 @@ describe("getChatHistory", () => {
 				},
 			],
 		});
-		vi.mocked(getChatSessionWithMessages).mockResolvedValueOnce(session as any);
+		vi.mocked(getChatSessionWithMessages).mockResolvedValueOnce(session);
 
 		const ctx = createChatContext();
 		const result = await call(
@@ -171,7 +171,7 @@ describe("getChatHistory", () => {
 				},
 			],
 		});
-		vi.mocked(getChatSessionWithMessages).mockResolvedValueOnce(session as any);
+		vi.mocked(getChatSessionWithMessages).mockResolvedValueOnce(session);
 
 		const ctx = createChatContext();
 		const result = await call(

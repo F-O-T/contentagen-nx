@@ -10,6 +10,14 @@ export const TEST_ORG_ID = "test-org-00000000-0000-0000-0000-000000000001";
 export const TEST_TEAM_ID = "test-team-00000000-0000-0000-0000-000000000001";
 
 // =============================================================================
+// Types
+// =============================================================================
+
+type MockContextOverrides = {
+	[K in keyof ORPCContextWithAuth]?: unknown;
+};
+
+// =============================================================================
 // Helpers
 // =============================================================================
 
@@ -20,7 +28,7 @@ export const TEST_TEAM_ID = "test-team-00000000-0000-0000-0000-000000000001";
  * Pass partial overrides to customize specific fields.
  */
 export function createTestContext(
-	overrides: Partial<ORPCContextWithAuth> = {},
+	overrides: MockContextOverrides = {},
 ): ORPCContextWithAuth {
 	return {
 		auth: { api: {} },
@@ -46,7 +54,7 @@ export function createTestContext(
  * Use this to assert UNAUTHORIZED errors from the `withAuth` middleware.
  */
 export function createUnauthenticatedContext(
-	overrides: Partial<ORPCContextWithAuth> = {},
+	overrides: MockContextOverrides = {},
 ): ORPCContextWithAuth {
 	return createTestContext({
 		session: null,
@@ -59,7 +67,7 @@ export function createUnauthenticatedContext(
  * Use this to assert FORBIDDEN errors from the `withOrganization` middleware.
  */
 export function createNoOrgContext(
-	overrides: Partial<ORPCContextWithAuth> = {},
+	overrides: MockContextOverrides = {},
 ): ORPCContextWithAuth {
 	return createTestContext({
 		session: {
@@ -67,5 +75,5 @@ export function createNoOrgContext(
 			session: { activeOrganizationId: null },
 		},
 		...overrides,
-	} as Partial<ORPCContextWithAuth>);
+	});
 }

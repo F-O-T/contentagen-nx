@@ -1,4 +1,4 @@
-import { call } from "@orpc/server";
+import { ORPCError, call } from "@orpc/server";
 import { describe, expect, it } from "vitest";
 import { getOrganizationTeams } from "@/integrations/orpc/router/organization";
 import {
@@ -13,7 +13,7 @@ describe("oRPC middleware chain", () => {
 
 		await expect(
 			call(getOrganizationTeams, undefined, { context }),
-		).rejects.toSatisfy((error: any) => {
+		).rejects.toSatisfy((error: ORPCError) => {
 			expect(error.code).toBe("UNAUTHORIZED");
 			expect(error.message).toBe(
 				"You must be logged in to access this resource",
@@ -27,7 +27,7 @@ describe("oRPC middleware chain", () => {
 
 		await expect(
 			call(getOrganizationTeams, undefined, { context }),
-		).rejects.toSatisfy((error: any) => {
+		).rejects.toSatisfy((error: ORPCError) => {
 			expect(error.code).toBe("FORBIDDEN");
 			expect(error.message).toBe("No active organization selected");
 			return true;
@@ -42,7 +42,7 @@ describe("oRPC middleware chain", () => {
 					listOrganizationTeams: async () => teams,
 				},
 			},
-		} as any);
+		});
 
 		const result = await call(getOrganizationTeams, undefined, { context });
 

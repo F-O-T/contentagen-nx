@@ -10,7 +10,7 @@ import { TrendsQueryBuilder } from "@/features/analytics/ui/trends-query-builder
 import type { FunnelsConfig, RetentionConfig, TrendsConfig } from "@/features/analytics/hooks/use-insight-config";
 
 export const Route = createFileRoute(
-	"/_authenticated/$slug/_dashboard/analytics/insights/",
+	"/_authenticated/$slug/_dashboard/$teamId/analytics/insights/",
 )({
 	component: InsightsPage,
 });
@@ -22,7 +22,7 @@ function InsightsPage() {
 	const handleSave = () => {
 		// TODO: call orpc.insights.create
 		console.log("Save insight:", { name: insightName, type, config });
-	};
+	}
 
 	return (
 		<main className="flex flex-col gap-4 h-full">
@@ -42,5 +42,5 @@ function InsightsPage() {
 				</div>
 			</div>
 		</main>
-	);
+	)
 }

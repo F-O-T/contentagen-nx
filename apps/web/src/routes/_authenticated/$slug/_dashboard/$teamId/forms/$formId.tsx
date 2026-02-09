@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FormBuilder } from "@/features/forms/ui/form-builder";
 
 export const Route = createFileRoute(
-   "/_authenticated/$slug/_dashboard/forms/$formId",
+   "/_authenticated/$slug/_dashboard/$teamId/forms/$formId",
 )({
    component: FormBuilderPage,
 });

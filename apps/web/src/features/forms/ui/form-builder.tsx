@@ -20,7 +20,7 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { client, orpc } from "@/integrations/orpc/client";
+import { orpc } from "@/integrations/orpc/client";
 import { FieldPalette, type FieldType } from "./field-palette";
 import { FormCanvas, type FormField } from "./form-canvas";
 import { FormPreview } from "./form-preview";
@@ -103,74 +103,42 @@ export function FormBuilder({ formId }: FormBuilderProps) {
    }, [existingForm, hasInitialized]);
 
    // ── Mutations ──────────────────────────────────────────────────────────
-   const createMutation = useMutation({
-      mutationFn: async (data: {
-         name: string;
-         description?: string;
-         fields: FormField[];
-      }) => {
-         return await client.forms.create({
-            name: data.name,
-            description: data.description,
-            fields: data.fields.map((f) => ({
-               id: f.id,
-               type: f.type,
-               label: f.label,
-               placeholder: f.placeholder,
-               required: f.required,
-               options: f.options,
-            })),
-         });
-      },
-      onSuccess: () => {
-         toast.success("Formulário criado com sucesso");
-         queryClient.invalidateQueries({
-            queryKey: orpc.forms.list.queryKey({}),
-         });
-         navigate({
-            to: "/$slug/forms",
-            params: { slug: slug || "" },
-         });
-      },
-      onError: () => {
-         toast.error("Erro ao criar formulário");
-      },
-   });
+   const createMutation = useMutation(
+      orpc.forms.create.mutationOptions({
+         onSuccess: () => {
+            toast.success("Formulário criado com sucesso");
+            queryClient.invalidateQueries({
+               queryKey: orpc.forms.list.queryKey({}),
+            });
+            navigate({
+               to: "/$slug/forms",
+               params: { slug: slug || "" },
+            });
+         },
+         onError: () => {
+            toast.error("Erro ao criar formulário");
+         },
+      }),
+   );
 
-   const updateMutation = useMutation({
-      mutationFn: async (data: {
-         id: string;
-         name: string;
-         description?: string;
-         fields: FormField[];
-      }) => {
-         return await client.forms.update({
-            id: data.id,
-            name: data.name,
-            description: data.description,
-            fields: data.fields.map((f) => ({
-               id: f.id,
-               type: f.type,
-               label: f.label,
-               placeholder: f.placeholder,
-               required: f.required,
-               options: f.options,
-            })),
-         });
-      },
-      onSuccess: () => {
-         toast.success("Formulário atualizado com sucesso");
-         queryClient.invalidateQueries({
-            queryKey: orpc.forms.list.queryKey({}),
-         });
-         queryClient.invalidateQueries({
-            queryKey: orpc.forms.getById.queryKey({ input: { id: formId } }),
-         });
-      },
-      onError: () => {
-         toast.error("Erro ao atualizar formulário");
-      },
-   });
+   const updateMutation = useMutation(
+      orpc.forms.update.mutationOptions({
+         onSuccess: () => {
+            toast.success("Formulário atualizado com sucesso");
+            queryClient.invalidateQueries({
+               queryKey: orpc.forms.list.queryKey({}),
+            });
+            queryClient.invalidateQueries({
+               queryKey: orpc.forms.getById.queryOptions({
+                  input: { id: formId },
+               }).queryKey,
+            });
+         },
+         onError: () => {
+            toast.error("Erro ao atualizar formulário");
+         },
+      }),
+   );
 
    const isSaving = createMutation.isPending || updateMutation.isPending;
 
@@ -214,18 +182,27 @@ export function FormBuilder({ formId }: FormBuilderProps) {
          return;
       }
 
+      const mappedFields = fields.map((f) => ({
+         id: f.id,
+         type: f.type,
+         label: f.label,
+         placeholder: f.placeholder,
+         required: f.required,
+         options: f.options,
+      }));
+
       if (isCreateMode) {
          createMutation.mutate({
             name: name.trim(),
             description: description.trim() || undefined,
-            fields,
+            fields: mappedFields,
          });
       } else {
          updateMutation.mutate({
             id: formId,
             name: name.trim(),
             description: description.trim() || undefined,
-            fields,
+            fields: mappedFields,
          });
       }
    }, [

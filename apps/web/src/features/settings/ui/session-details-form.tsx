@@ -21,7 +21,7 @@ import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { useSheet } from "@/hooks/use-sheet";
-import { orpc, client } from "@/integrations/orpc/client";
+import { orpc } from "@/integrations/orpc/client";
 
 interface SessionDetailsFormProps {
    session: {
@@ -43,23 +43,23 @@ export function SessionDetailsForm({
    const { closeSheet } = useSheet();
    const { openAlertDialog } = useAlertDialog();
 
-   const revokeSessionMutation = useMutation({
-      mutationFn: (token: string) =>
-         client.session.revokeSessionByToken({ token }),
-      onSuccess: () => {
-         toast.success("Sessão encerrada");
-         closeSheet();
-         queryClient.invalidateQueries({
-            queryKey: orpc.session.listSessions.queryKey({}),
-         });
-      },
-      onError: () => {
-         toast.error("Falha ao encerrar sessão");
-      },
-   });
+   const revokeSessionMutation = useMutation(
+      orpc.session.revokeSessionByToken.mutationOptions({
+         onSuccess: () => {
+            toast.success("Sessão encerrada");
+            closeSheet();
+            queryClient.invalidateQueries({
+               queryKey: orpc.session.listSessions.queryKey({}),
+            });
+         },
+         onError: () => {
+            toast.error("Falha ao encerrar sessão");
+         },
+      }),
+   );
 
    const handleDelete = useCallback(async () => {
-      await revokeSessionMutation.mutateAsync(session.token);
+      await revokeSessionMutation.mutateAsync({ token: session.token });
    }, [session, revokeSessionMutation]);
 
    const handleRevokeClick = useCallback(() => {

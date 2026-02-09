@@ -52,8 +52,8 @@ const mockAuth = {
 
 function createOrgContext(overrides: Record<string, unknown> = {}) {
 	return createTestContext({
-		db: mockDb as any,
-		auth: mockAuth as any,
+		db: mockDb,
+		auth: mockAuth,
 		...overrides,
 	});
 }
@@ -120,7 +120,7 @@ describe("getActiveOrganization", () => {
 			{ id: "team-1" },
 			{ id: "team-2" },
 		]);
-		vi.mocked(resolveOrganizationPlan).mockResolvedValueOnce("pro" as any);
+		vi.mocked(resolveOrganizationPlan).mockResolvedValueOnce("pro");
 		vi.mocked(getEffectiveProjectLimit).mockReturnValueOnce(10);
 
 		const ctx = createOrgContext();
@@ -148,7 +148,7 @@ describe("getActiveOrganization", () => {
 
 		await expect(
 			call(orgRouter.getActiveOrganization, undefined, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "FORBIDDEN");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "FORBIDDEN");
 
 		expect(mockAuth.api.getFullOrganization).not.toHaveBeenCalled();
 	});
@@ -175,7 +175,7 @@ describe("getActiveOrganization", () => {
 			{ id: "sub_1", status: "canceled", plan: "pro" },
 		]);
 		mockAuth.api.listOrganizationTeams.mockResolvedValueOnce([]);
-		vi.mocked(resolveOrganizationPlan).mockResolvedValueOnce("free" as any);
+		vi.mocked(resolveOrganizationPlan).mockResolvedValueOnce("free");
 		vi.mocked(getEffectiveProjectLimit).mockReturnValueOnce(3);
 
 		const ctx = createOrgContext();
@@ -262,7 +262,7 @@ describe("regeneratePublicApiKey", () => {
 
 		await expect(
 			call(orgRouter.regeneratePublicApiKey, undefined, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "FORBIDDEN");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "FORBIDDEN");
 
 		expect(regeneratePublicApiKeyFromDb).not.toHaveBeenCalled();
 	});

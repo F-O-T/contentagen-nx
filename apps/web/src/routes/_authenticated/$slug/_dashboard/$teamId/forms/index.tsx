@@ -6,7 +6,7 @@ import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { FormsList } from "@/features/forms/ui/forms-list";
 
 export const Route = createFileRoute(
-	"/_authenticated/$slug/_dashboard/forms/",
+	"/_authenticated/$slug/_dashboard/$teamId/forms/",
 )({
 	component: FormsPage,
 });
@@ -33,7 +33,7 @@ function FormsPageSkeleton() {
 				))}
 			</div>
 		</main>
-	);
+	)
 }
 
 function FormsPageHeader() {
@@ -46,7 +46,7 @@ function FormsPageHeader() {
 				Crie e gerencie formulários para coletar dados dos visitantes
 			</p>
 		</div>
-	);
+	)
 }
 
 function FormsPageContent() {
@@ -55,7 +55,7 @@ function FormsPageContent() {
 			<FormsPageHeader />
 			<FormsList />
 		</main>
-	);
+	)
 }
 
 function FormsPage() {
@@ -65,5 +65,5 @@ function FormsPage() {
 				<FormsPageContent />
 			</Suspense>
 		</ErrorBoundary>
-	);
+	)
 }

@@ -1,4 +1,4 @@
-import { call } from "@orpc/server";
+import { ORPCError, call } from "@orpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	TEST_ORG_ID,
@@ -70,8 +70,8 @@ const mockDb = {
 
 function createBillingContext(overrides: Record<string, unknown> = {}) {
 	return createTestContext({
-		stripeClient: mockStripeClient as any,
-		db: mockDb as any,
+		stripeClient: mockStripeClient,
+		db: mockDb,
 		...overrides,
 	});
 }
@@ -155,7 +155,7 @@ describe("getInvoices", () => {
 
 		await expect(
 			call(billingRouter.getInvoices, undefined, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "INTERNAL_SERVER_ERROR");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "INTERNAL_SERVER_ERROR");
 	});
 });
 

@@ -65,7 +65,7 @@ function createMockFullStream(
 function setupAgentMock(streamResult: unknown) {
 	vi.mocked(mastra.getAgent).mockReturnValue({
 		stream: vi.fn().mockResolvedValue(streamResult),
-	} as any);
+	} as ReturnType<typeof mastra.getAgent>);
 }
 
 const CONTENT_ID = "a0a0a0a0-b1b1-4c2c-9d3d-e4e4e4e4e4e4";
@@ -81,7 +81,7 @@ beforeEach(() => {
 	vi.mocked(trackCreditUsage).mockResolvedValue(undefined);
 	vi.mocked(emitAiCompletion).mockResolvedValue(undefined);
 	vi.mocked(emitAiChatMessage).mockResolvedValue(undefined);
-	vi.mocked(addChatMessage).mockResolvedValue(undefined as any);
+	vi.mocked(addChatMessage).mockResolvedValue(undefined);
 });
 
 // ---------------------------------------------------------------------------
@@ -155,7 +155,7 @@ describe("fimStream", () => {
 		const iterable = await call(agentRouter.fimStream, input, { context: ctx });
 		const chunks = await collectChunks(iterable);
 
-		const textChunks = chunks.filter((c: any) => !c.done);
+		const textChunks = chunks.filter((c: Record<string, unknown>) => !c.done);
 		expect(textChunks).toHaveLength(2);
 		expect(textChunks[0]).toMatchObject({ text: "world", done: false });
 		expect(textChunks[1]).toMatchObject({ text: "!", done: false });
@@ -168,7 +168,7 @@ describe("fimStream", () => {
 		const iterable = await call(agentRouter.fimStream, input, { context: ctx });
 		const chunks = await collectChunks(iterable);
 
-		const lastChunk = chunks.at(-1) as any;
+		const lastChunk = chunks.at(-1) as Record<string, unknown>;
 		expect(lastChunk.done).toBe(true);
 		expect(lastChunk.metadata).toBeDefined();
 		expect(lastChunk.metadata.stopReason).toBe("natural");
@@ -238,7 +238,7 @@ describe("editStream", () => {
 		const iterable = await call(agentRouter.editStream, input, { context: ctx });
 		const chunks = await collectChunks(iterable);
 
-		const textChunks = chunks.filter((c: any) => !c.done);
+		const textChunks = chunks.filter((c: Record<string, unknown>) => !c.done);
 		expect(textChunks).toHaveLength(2);
 		expect(textChunks[0]).toMatchObject({ text: "Fixed", done: false });
 		expect(textChunks[1]).toMatchObject({ text: " text", done: false });
@@ -251,7 +251,7 @@ describe("editStream", () => {
 		const iterable = await call(agentRouter.editStream, input, { context: ctx });
 		const chunks = await collectChunks(iterable);
 
-		const lastChunk = chunks.at(-1) as any;
+		const lastChunk = chunks.at(-1) as Record<string, unknown>;
 		expect(lastChunk.done).toBe(true);
 		expect(lastChunk.text).toBe("");
 	});
@@ -313,7 +313,7 @@ describe("chatStream", () => {
 	it("creates chat session when contentId is provided", async () => {
 		vi.mocked(getOrCreateChatSession).mockResolvedValueOnce({
 			id: CHAT_SESSION_ID,
-		} as any);
+		} as { id: string });
 
 		setupAgentMock(
 			createMockFullStream([{ type: "text-delta", textDelta: "Hi" }]),
@@ -358,7 +358,7 @@ describe("chatStream", () => {
 		);
 		const chunks = await collectChunks(iterable);
 
-		const textChunks = chunks.filter((c: any) => c.type === "text");
+		const textChunks = chunks.filter((c: Record<string, unknown>) => c.type === "text");
 		expect(textChunks).toHaveLength(2);
 		expect(textChunks[0]).toMatchObject({ type: "text", text: "Hi" });
 		expect(textChunks[1]).toMatchObject({
@@ -367,14 +367,14 @@ describe("chatStream", () => {
 		});
 
 		// Last chunk should be done
-		const lastChunk = chunks.at(-1) as any;
+		const lastChunk = chunks.at(-1) as Record<string, unknown>;
 		expect(lastChunk.type).toBe("done");
 	});
 
 	it("emits chat message event with teamId when session exists", async () => {
 		vi.mocked(getOrCreateChatSession).mockResolvedValueOnce({
 			id: CHAT_SESSION_ID,
-		} as any);
+		} as { id: string });
 
 		setupAgentMock(
 			createMockFullStream([{ type: "text-delta", textDelta: "Hi" }]),

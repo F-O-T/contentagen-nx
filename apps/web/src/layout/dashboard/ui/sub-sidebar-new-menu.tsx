@@ -26,7 +26,7 @@ import {
    TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
-import { client, orpc } from "@/integrations/orpc/client";
+import { orpc } from "@/integrations/orpc/client";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
 
 interface SubSidebarNewMenuProps {
@@ -35,49 +35,67 @@ interface SubSidebarNewMenuProps {
 
 export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
    const navigate = useNavigate();
-   const params = useParams({ strict: false }) as { slug?: string };
+   const params = useParams({ strict: false }) as {
+      slug?: string;
+      teamId?: string;
+   };
    const slug = params.slug ?? "";
+   const teamId = params.teamId ?? "";
    const queryClient = useQueryClient();
 
-   const createDashboardMutation = useMutation({
-      mutationFn: async () => {
-         return client.dashboards.create({ name: "Dashboard sem título" });
-      },
-      onSuccess: (data) => {
-         queryClient.invalidateQueries({
-            queryKey: orpc.dashboards.list.queryKey({}),
-         });
-         navigate({
-            to: "/$slug/analytics/dashboards/$dashboardId",
-            params: { slug, dashboardId: data.id },
-         });
-      },
-      onError: () => {
-         toast.error("Erro ao criar dashboard");
-      },
-   });
+   const createDashboardMutation = useMutation(
+      orpc.dashboards.create.mutationOptions({
+         onSuccess: (data) => {
+            queryClient.invalidateQueries({
+               queryKey: orpc.dashboards.list.queryKey({}),
+            });
+            navigate({
+               to: "/$slug/$teamId/analytics/dashboards/$dashboardId",
+               params: { slug, teamId, dashboardId: data.id },
+            } as never);
+         },
+         onError: () => {
+            toast.error("Erro ao criar dashboard");
+         },
+      }),
+   );
 
-   const createInsightMutation = useMutation({
-      mutationFn: async (type: "trends" | "funnels" | "retention") => {
-         return client.insights.create({
-            name: "Insight sem título",
-            type,
-            config: {},
-         });
-      },
-      onSuccess: (data) => {
-         queryClient.invalidateQueries({
-            queryKey: orpc.insights.list.queryKey({}),
-         });
-         navigate({
-            to: "/$slug/analytics/insights/$insightId",
-            params: { slug, insightId: data.id },
-         });
-      },
-      onError: () => {
-         toast.error("Erro ao criar insight");
-      },
-   });
+   const createInsightMutation = useMutation(
+      orpc.insights.create.mutationOptions({
+         onSuccess: (data) => {
+            queryClient.invalidateQueries({
+               queryKey: orpc.insights.list.queryKey({}),
+            });
+            navigate({
+               to: "/$slug/$teamId/analytics/insights/$insightId",
+               params: { slug, teamId, insightId: data.id },
+            } as never);
+         },
+         onError: () => {
+            toast.error("Erro ao criar insight");
+         },
+      }),
+   );
+
+   const handleCreateDashboard = () => {
+      if (!teamId) {
+         toast.error("Selecione um time para criar dashboards");
+         return;
+      }
+      createDashboardMutation.mutate({ name: "Dashboard sem título" });
+   };
+
+   const handleCreateInsight = (type: "trends" | "funnels" | "retention") => {
+      if (!teamId) {
+         toast.error("Selecione um time para criar insights");
+         return;
+      }
+      createInsightMutation.mutate({
+         name: "Insight sem título",
+         type,
+         config: {},
+      });
+   };
 
    return (
       <DropdownMenu>
@@ -95,12 +113,12 @@ export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
             {section === "dashboards" ? (
                <DashboardMenuItems
                   isPending={createDashboardMutation.isPending}
-                  onCreateDashboard={() => createDashboardMutation.mutate()}
+                  onCreateDashboard={handleCreateDashboard}
                />
             ) : (
                <InsightMenuItems
                   isPending={createInsightMutation.isPending}
-                  onCreateInsight={(type) => createInsightMutation.mutate(type)}
+                  onCreateInsight={handleCreateInsight}
                />
             )}
          </DropdownMenuContent>

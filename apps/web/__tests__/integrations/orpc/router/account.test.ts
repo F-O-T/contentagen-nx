@@ -24,7 +24,7 @@ import * as accountRouter from "@/integrations/orpc/router/account";
 
 function createAccountContext(overrides = {}) {
 	return createTestContext({
-		auth: mockAuth as any,
+		auth: mockAuth,
 		...overrides,
 	});
 }

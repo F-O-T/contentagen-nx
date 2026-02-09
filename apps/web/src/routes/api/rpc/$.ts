@@ -1,6 +1,7 @@
 import "@/polyfill";
 
 import { RPCHandler } from "@orpc/server/fetch";
+import { BatchHandlerPlugin } from "@orpc/server/plugins";
 import { createFileRoute } from "@tanstack/react-router";
 import { createDb } from "@packages/database/client";
 import { createAuth } from "@packages/authentication/server";
@@ -20,7 +21,9 @@ const posthog = env.POSTHOG_KEY
 	? getElysiaPosthogConfig(env)
 	: undefined;
 
-const handler = new RPCHandler(router);
+const handler = new RPCHandler(router, {
+	plugins: [new BatchHandlerPlugin()],
+});
 
 async function handle({ request }: { request: Request }) {
 	// Fetch session per-request (cannot be cached)

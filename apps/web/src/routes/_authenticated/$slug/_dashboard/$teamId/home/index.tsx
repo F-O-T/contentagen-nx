@@ -10,7 +10,7 @@ import { HomeRecentContentSection } from "./_components/home-recent-content-sect
 import { HomeSDKUsageCard } from "./_components/home-sdk-usage-card";
 
 export const Route = createFileRoute(
-	"/_authenticated/$slug/_dashboard/home/",
+	"/_authenticated/$slug/_dashboard/$teamId/home/",
 )({
 	component: HomePage,
 });
@@ -40,7 +40,7 @@ function HomePageSkeleton() {
 
 			<Skeleton className="h-[300px] w-full" />
 		</main>
-	);
+	)
 }
 
 function HomePageHeader() {
@@ -53,7 +53,7 @@ function HomePageHeader() {
 				Seu espaço de trabalho para criação de conteúdo com IA
 			</p>
 		</div>
-	);
+	)
 }
 
 function HomePageContent() {
@@ -79,7 +79,7 @@ function HomePageContent() {
 			{/* Recent content - full width outside grid */}
 			<HomeRecentContentSection />
 		</main>
-	);
+	)
 }
 
 function HomePage() {
@@ -89,5 +89,5 @@ function HomePage() {
 				<HomePageContent />
 			</Suspense>
 		</ErrorBoundary>
-	);
+	)
 }

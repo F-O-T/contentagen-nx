@@ -75,9 +75,11 @@ function getInsightIcon(type: string) {
 function DashboardList({ searchQuery }: { searchQuery: string }) {
    const params = useParams({ strict: false }) as {
       slug?: string;
+      teamId?: string;
       dashboardId?: string;
    };
    const slug = params.slug ?? "";
+   const teamId = params.teamId ?? "";
 
    const { data: dashboards } = useSuspenseQuery(
       orpc.dashboards.list.queryOptions({}),
@@ -114,11 +116,16 @@ function DashboardList({ searchQuery }: { searchQuery: string }) {
                   >
                      <Link
                         className="flex items-center gap-2 min-w-0 flex-1"
-                        params={{
-                           slug,
-                           dashboardId: dashboard.id,
-                        }}
-                        to="/$slug/analytics/dashboards/$dashboardId"
+                        params={
+                           {
+                              slug,
+                              teamId,
+                              dashboardId: dashboard.id,
+                           } as never
+                        }
+                        to={
+                           "/$slug/$teamId/analytics/dashboards/$dashboardId" as never
+                        }
                      >
                         <LayoutDashboard className="size-4 flex-shrink-0" />
                         <span className="truncate">{dashboard.name}</span>
@@ -141,9 +148,11 @@ function DashboardList({ searchQuery }: { searchQuery: string }) {
 function InsightList({ searchQuery }: { searchQuery: string }) {
    const params = useParams({ strict: false }) as {
       slug?: string;
+      teamId?: string;
       insightId?: string;
    };
    const slug = params.slug ?? "";
+   const teamId = params.teamId ?? "";
 
    const { data: insights } = useSuspenseQuery(
       orpc.insights.list.queryOptions({}),
@@ -182,11 +191,16 @@ function InsightList({ searchQuery }: { searchQuery: string }) {
                      >
                         <Link
                            className="flex items-center gap-2 min-w-0 flex-1"
-                           params={{
-                              slug,
-                              insightId: insight.id,
-                           }}
-                           to="/$slug/analytics/insights/$insightId"
+                           params={
+                              {
+                                 slug,
+                                 teamId,
+                                 insightId: insight.id,
+                              } as never
+                           }
+                           to={
+                              "/$slug/$teamId/analytics/insights/$insightId" as never
+                           }
                         >
                            <Icon className="size-4 flex-shrink-0" />
                            <span className="truncate">{insight.name}</span>
@@ -217,10 +231,13 @@ function EmptyState({
    slug: string;
 }) {
    const label = section === "dashboards" ? "dashboard" : "insight";
+   const params = useParams({ strict: false }) as { teamId?: string };
+   const teamId = params.teamId ?? "";
+   const teamSegment = teamId ? `/${teamId}` : "";
    const listRoute =
       section === "dashboards"
-         ? `/${slug}/analytics/dashboards`
-         : `/${slug}/analytics/insights`;
+         ? `/${slug}${teamSegment}/analytics/dashboards`
+         : `/${slug}${teamSegment}/analytics/insights`;
 
    if (hasSearchQuery) {
       return (

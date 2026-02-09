@@ -23,6 +23,7 @@ import {
 import { cn } from "@packages/ui/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Activity, AlertTriangle, Clock, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -34,6 +35,12 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function HomeSDKUsageCard({ className }: { className?: string }) {
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
 	// Get last 6 months of data for the chart
 	const now = new Date();
 	const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
@@ -98,55 +105,59 @@ export function HomeSDKUsageCard({ className }: { className?: string }) {
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				<ChartContainer config={chartConfig} className="h-[200px] w-full">
-					<LineChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted" />
-						<XAxis 
-							dataKey="month" 
-							tickLine={false}
-							axisLine={false}
-							tickMargin={8}
-							className="text-xs"
-						/>
-						<YAxis 
-							tickLine={false}
-							axisLine={false}
-							tickMargin={8}
-							width={40}
-							className="text-xs"
-						/>
-						<Line
-							type="monotone"
-							dataKey="author"
-							stroke="var(--color-author)"
-							strokeWidth={2}
-							dot={{ r: 3 }}
-						/>
-						<Line
-							type="monotone"
-							dataKey="list"
-							stroke="var(--color-list)"
-							strokeWidth={2}
-							dot={{ r: 3 }}
-						/>
-						<Line
-							type="monotone"
-							dataKey="content"
-							stroke="var(--color-content)"
-							strokeWidth={2}
-							dot={{ r: 3 }}
-						/>
-						<Line
-							type="monotone"
-							dataKey="image"
-							stroke="var(--color-image)"
-							strokeWidth={2}
-							dot={{ r: 3 }}
-						/>
-						<ChartTooltip content={<ChartTooltipContent />} />
-						<ChartLegend content={<ChartLegendContent />} />
-					</LineChart>
-				</ChartContainer>
+				{mounted ? (
+					<ChartContainer config={chartConfig} className="h-[200px] w-full">
+						<LineChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+							<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted" />
+							<XAxis 
+								dataKey="month" 
+								tickLine={false}
+								axisLine={false}
+								tickMargin={8}
+								className="text-xs"
+							/>
+							<YAxis 
+								tickLine={false}
+								axisLine={false}
+								tickMargin={8}
+								width={40}
+								className="text-xs"
+							/>
+							<Line
+								type="monotone"
+								dataKey="author"
+								stroke="var(--color-author)"
+								strokeWidth={2}
+								dot={{ r: 3 }}
+							/>
+							<Line
+								type="monotone"
+								dataKey="list"
+								stroke="var(--color-list)"
+								strokeWidth={2}
+								dot={{ r: 3 }}
+							/>
+							<Line
+								type="monotone"
+								dataKey="content"
+								stroke="var(--color-content)"
+								strokeWidth={2}
+								dot={{ r: 3 }}
+							/>
+							<Line
+								type="monotone"
+								dataKey="image"
+								stroke="var(--color-image)"
+								strokeWidth={2}
+								dot={{ r: 3 }}
+							/>
+							<ChartTooltip content={<ChartTooltipContent />} />
+							<ChartLegend content={<ChartLegendContent />} />
+						</LineChart>
+					</ChartContainer>
+				) : (
+					<div className="h-[200px] w-full" />
+				)}
 
 				<div className="grid grid-cols-2 md:grid-cols-4 gap-3">
 					<Item size="sm" variant="muted" className="rounded-lg">

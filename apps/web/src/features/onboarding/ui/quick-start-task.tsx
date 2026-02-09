@@ -3,6 +3,7 @@ import { cn } from "@packages/ui/lib/utils";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { CheckCircle2, Lock } from "lucide-react";
 import { useCallback } from "react";
+import type React from "react";
 import type { TaskDefinition } from "../task-definitions";
 
 interface QuickStartTaskProps {
@@ -29,6 +30,16 @@ export function QuickStartTask({
 		navigate({ to: resolvedRoute });
 	}, [isLocked, isCompleted, navigate, slug, task.route]);
 
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (e.key === "Enter" || e.key === " ") {
+				e.preventDefault();
+				handleClick();
+			}
+		},
+		[handleClick],
+	);
+
 	const handleCheckboxChange = useCallback(
 		(checked: boolean | "indeterminate") => {
 			if (checked === true && !isCompleted && !isLocked) {
@@ -39,16 +50,18 @@ export function QuickStartTask({
 	);
 
 	return (
-		<button
+		<div
 			className={cn(
 				"flex items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors w-full",
 				isLocked && "opacity-50 cursor-not-allowed",
 				!isLocked && !isCompleted && "hover:bg-accent cursor-pointer",
 				isCompleted && "opacity-60",
 			)}
-			disabled={isLocked}
+			role="button"
+			tabIndex={isLocked ? -1 : 0}
+			aria-disabled={isLocked}
 			onClick={handleClick}
-			type="button"
+			onKeyDown={handleKeyDown}
 		>
 			{/* Checkbox / checkmark / lock indicator */}
 			<div className="mt-0.5 shrink-0">
@@ -82,6 +95,6 @@ export function QuickStartTask({
 					{task.description}
 				</p>
 			</div>
-		</button>
+		</div>
 	);
 }

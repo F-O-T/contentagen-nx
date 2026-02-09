@@ -235,12 +235,12 @@ function NavUserContent() {
       return (
          <SidebarMenuItem>
             <SidebarMenuButton onClick={handleOpenCredenza} tooltip="Account">
-               <Avatar className="h-6 w-6">
+               <Avatar className="size-4">
                   <AvatarImage
                      alt={session?.user.name}
                      src={session?.user.image ?? ""}
                   />
-                  <AvatarFallback className="rounded-lg">
+                  <AvatarFallback className="rounded-lg text-[10px]">
                      {session?.user.name?.charAt(0) || "?"}
                   </AvatarFallback>
                </Avatar>
@@ -256,12 +256,12 @@ function NavUserContent() {
          <DropdownMenu>
             <DropdownMenuTrigger asChild>
                <SidebarMenuButton tooltip="Account">
-                  <Avatar className="h-6 w-6">
+                  <Avatar className="size-4">
                      <AvatarImage
                         alt={session?.user.name}
                         src={session?.user.image ?? ""}
                      />
-                     <AvatarFallback className="rounded-lg">
+                     <AvatarFallback className="rounded-lg text-[10px]">
                         {session?.user.name?.charAt(0) || "?"}
                      </AvatarFallback>
                   </Avatar>

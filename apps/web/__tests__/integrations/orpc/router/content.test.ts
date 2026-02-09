@@ -6,6 +6,7 @@ import {
 	TEST_USER_ID,
 	createTestContext,
 } from "../../../helpers/create-test-context";
+import { CONTENT_ID, makeContent } from "../../../helpers/mock-factories";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -37,22 +38,6 @@ import { enforceCreditBudget, trackCreditUsage } from "@packages/events/credits"
 import * as contentRouter from "@/integrations/orpc/router/content";
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-const CONTENT_ID = "a0a0a0a0-b1b1-4c2c-9d3d-e4e4e4e4e4e4";
-
-function makeContent(overrides: Record<string, unknown> = {}) {
-	return {
-		id: CONTENT_ID,
-		organizationId: TEST_ORG_ID,
-		body: "Hello world",
-		meta: { title: "Test", description: "Desc", slug: "test" },
-		...overrides,
-	};
-}
-
-// ---------------------------------------------------------------------------
 // Setup
 // ---------------------------------------------------------------------------
 
@@ -76,7 +61,7 @@ beforeEach(() => {
 describe("getById", () => {
 	it("returns content when found and belongs to org", async () => {
 		const content = makeContent();
-		vi.mocked(getContentById).mockResolvedValueOnce(content as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(content);
 
 		const ctx = createTestContext();
 		const result = await call(contentRouter.getById, { id: CONTENT_ID }, { context: ctx });
@@ -86,22 +71,22 @@ describe("getById", () => {
 	});
 
 	it("throws NOT_FOUND when content does not exist", async () => {
-		vi.mocked(getContentById).mockResolvedValueOnce(null as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(null);
 
 		const ctx = createTestContext();
 		await expect(
 			call(contentRouter.getById, { id: CONTENT_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 
 	it("throws NOT_FOUND when content belongs to different org", async () => {
 		const content = makeContent({ organizationId: "other-org-id" });
-		vi.mocked(getContentById).mockResolvedValueOnce(content as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(content);
 
 		const ctx = createTestContext();
 		await expect(
 			call(contentRouter.getById, { id: CONTENT_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -124,12 +109,12 @@ describe("create", () => {
 					},
 				},
 			},
-		} as any);
+		});
 	}
 
 	it("creates content successfully", async () => {
 		const created = makeContent({ id: "new-id" });
-		vi.mocked(createContent).mockResolvedValueOnce(created as any);
+		vi.mocked(createContent).mockResolvedValueOnce(created);
 
 		const ctx = makeCreateCtx();
 		const result = await call(contentRouter.create, input, { context: ctx });
@@ -153,16 +138,16 @@ describe("create", () => {
 					},
 				},
 			},
-		} as any);
+		});
 
 		await expect(
 			call(contentRouter.create, input, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "FORBIDDEN");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "FORBIDDEN");
 	});
 
 	it("emits contentCreated event with teamId", async () => {
 		const created = makeContent({ id: "new-id" });
-		vi.mocked(createContent).mockResolvedValueOnce(created as any);
+		vi.mocked(createContent).mockResolvedValueOnce(created);
 
 		const ctx = makeCreateCtx();
 		await call(contentRouter.create, input, { context: ctx });
@@ -179,7 +164,7 @@ describe("create", () => {
 
 	it("succeeds even when event emission fails", async () => {
 		const created = makeContent({ id: "new-id" });
-		vi.mocked(createContent).mockResolvedValueOnce(created as any);
+		vi.mocked(createContent).mockResolvedValueOnce(created);
 		vi.mocked(emitContentCreated).mockRejectedValueOnce(new Error("emit failed"));
 
 		const ctx = makeCreateCtx();
@@ -200,9 +185,9 @@ describe("update", () => {
 	};
 
 	it("updates content successfully", async () => {
-		vi.mocked(getContentById).mockResolvedValueOnce(makeContent() as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(makeContent());
 		const updated = makeContent({ body: "Updated body" });
-		vi.mocked(updateContent).mockResolvedValueOnce(updated as any);
+		vi.mocked(updateContent).mockResolvedValueOnce(updated);
 
 		const ctx = createTestContext();
 		const result = await call(contentRouter.update, input, { context: ctx });
@@ -217,18 +202,18 @@ describe("update", () => {
 
 	it("throws NOT_FOUND for different org content", async () => {
 		vi.mocked(getContentById).mockResolvedValueOnce(
-			makeContent({ organizationId: "other-org" }) as any,
+			makeContent({ organizationId: "other-org" }),
 		);
 
 		const ctx = createTestContext();
 		await expect(
 			call(contentRouter.update, input, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 
 	it("calls enforceCreditBudget with platform pool", async () => {
-		vi.mocked(getContentById).mockResolvedValueOnce(makeContent() as any);
-		vi.mocked(updateContent).mockResolvedValueOnce(makeContent() as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(makeContent());
+		vi.mocked(updateContent).mockResolvedValueOnce(makeContent());
 
 		const ctx = createTestContext();
 		await call(contentRouter.update, input, { context: ctx });
@@ -241,7 +226,7 @@ describe("update", () => {
 	});
 
 	it("throws FORBIDDEN when credit budget is exhausted", async () => {
-		vi.mocked(getContentById).mockResolvedValueOnce(makeContent() as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(makeContent());
 		vi.mocked(enforceCreditBudget).mockRejectedValueOnce(
 			new ORPCError("FORBIDDEN", { message: "Credit exhausted" }),
 		);
@@ -249,12 +234,12 @@ describe("update", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(contentRouter.update, input, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "FORBIDDEN");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "FORBIDDEN");
 	});
 
 	it("emits contentUpdated event with teamId and changedFields", async () => {
-		vi.mocked(getContentById).mockResolvedValueOnce(makeContent() as any);
-		vi.mocked(updateContent).mockResolvedValueOnce(makeContent() as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(makeContent());
+		vi.mocked(updateContent).mockResolvedValueOnce(makeContent());
 
 		const ctx = createTestContext();
 		await call(contentRouter.update, input, { context: ctx });
@@ -273,8 +258,8 @@ describe("update", () => {
 	});
 
 	it("tracks credit usage after update", async () => {
-		vi.mocked(getContentById).mockResolvedValueOnce(makeContent() as any);
-		vi.mocked(updateContent).mockResolvedValueOnce(makeContent() as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(makeContent());
+		vi.mocked(updateContent).mockResolvedValueOnce(makeContent());
 
 		const ctx = createTestContext();
 		await call(contentRouter.update, input, { context: ctx });
@@ -294,8 +279,8 @@ describe("update", () => {
 
 describe("remove", () => {
 	it("deletes content successfully", async () => {
-		vi.mocked(getContentById).mockResolvedValueOnce(makeContent() as any);
-		vi.mocked(deleteContent).mockResolvedValueOnce(makeContent() as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(makeContent());
+		vi.mocked(deleteContent).mockResolvedValueOnce(makeContent());
 
 		const ctx = createTestContext();
 		const result = await call(contentRouter.remove, { id: CONTENT_ID }, { context: ctx });
@@ -306,18 +291,18 @@ describe("remove", () => {
 
 	it("throws NOT_FOUND for different org content", async () => {
 		vi.mocked(getContentById).mockResolvedValueOnce(
-			makeContent({ organizationId: "other-org" }) as any,
+			makeContent({ organizationId: "other-org" }),
 		);
 
 		const ctx = createTestContext();
 		await expect(
 			call(contentRouter.remove, { id: CONTENT_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 
 	it("emits contentDeleted event with teamId", async () => {
-		vi.mocked(getContentById).mockResolvedValueOnce(makeContent() as any);
-		vi.mocked(deleteContent).mockResolvedValueOnce(makeContent() as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(makeContent());
+		vi.mocked(deleteContent).mockResolvedValueOnce(makeContent());
 
 		const ctx = createTestContext();
 		await call(contentRouter.remove, { id: CONTENT_ID }, { context: ctx });
@@ -339,8 +324,8 @@ describe("remove", () => {
 
 describe("publish", () => {
 	it("publishes content and emits event", async () => {
-		vi.mocked(getContentById).mockResolvedValueOnce(makeContent() as any);
-		vi.mocked(publishContent).mockResolvedValueOnce(makeContent() as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(makeContent());
+		vi.mocked(publishContent).mockResolvedValueOnce(makeContent());
 
 		const ctx = createTestContext();
 		const result = await call(contentRouter.publish, { id: CONTENT_ID }, { context: ctx });
@@ -363,7 +348,7 @@ describe("publish", () => {
 	});
 
 	it("calls enforceCreditBudget before publishing", async () => {
-		vi.mocked(getContentById).mockResolvedValueOnce(makeContent() as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(makeContent());
 		vi.mocked(enforceCreditBudget).mockRejectedValueOnce(
 			new ORPCError("FORBIDDEN", { message: "Credit exhausted" }),
 		);
@@ -371,7 +356,7 @@ describe("publish", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(contentRouter.publish, { id: CONTENT_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "FORBIDDEN");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "FORBIDDEN");
 
 		// publishContent should not have been called
 		expect(publishContent).not.toHaveBeenCalled();
@@ -384,8 +369,8 @@ describe("publish", () => {
 
 describe("archive", () => {
 	it("archives content and emits contentArchived event with teamId", async () => {
-		vi.mocked(getContentById).mockResolvedValueOnce(makeContent() as any);
-		vi.mocked(archiveContent).mockResolvedValueOnce(makeContent() as any);
+		vi.mocked(getContentById).mockResolvedValueOnce(makeContent());
+		vi.mocked(archiveContent).mockResolvedValueOnce(makeContent());
 
 		const ctx = createTestContext();
 		const result = await call(contentRouter.archive, { id: CONTENT_ID }, { context: ctx });
@@ -411,7 +396,7 @@ describe("listAllContent", () => {
 	it("returns paginated results", async () => {
 		const items = [makeContent(), makeContent({ id: "content-2" })];
 		vi.mocked(countContentsByOrganization).mockResolvedValueOnce(2);
-		vi.mocked(listContentsByOrganization).mockResolvedValueOnce(items as any);
+		vi.mocked(listContentsByOrganization).mockResolvedValueOnce(items);
 
 		const ctx = createTestContext();
 		const result = await call(

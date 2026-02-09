@@ -33,7 +33,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
-import { client, orpc } from "@/integrations/orpc/client";
+import { orpc } from "@/integrations/orpc/client";
 
 export function FormsList() {
 	const { slug } = useParams({ strict: false });
@@ -43,18 +43,17 @@ export function FormsList() {
 		orpc.forms.list.queryOptions({}),
 	);
 
-	const deleteMutation = useMutation({
-		mutationFn: async (id: string) => {
-			await client.forms.remove({ id });
-		},
-		onSuccess: () => {
-			toast.success("Formulário excluído com sucesso");
-			refetch();
-		},
-		onError: () => {
-			toast.error("Erro ao excluir formulário");
-		},
-	});
+	const deleteMutation = useMutation(
+		orpc.forms.remove.mutationOptions({
+			onSuccess: () => {
+				toast.success("Formulário excluído com sucesso");
+				refetch();
+			},
+			onError: () => {
+				toast.error("Erro ao excluir formulário");
+			},
+		}),
+	);
 
 	const handleDelete = (id: string, name: string) => {
 		openAlertDialog({
@@ -64,7 +63,7 @@ export function FormsList() {
 			cancelLabel: "Cancelar",
 			variant: "destructive",
 			onAction: async () => {
-				await deleteMutation.mutateAsync(id);
+				await deleteMutation.mutateAsync({ id });
 			},
 		});
 	};

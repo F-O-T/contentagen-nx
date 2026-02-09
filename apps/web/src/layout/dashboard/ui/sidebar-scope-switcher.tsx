@@ -29,6 +29,7 @@ import {
    SidebarMenu,
    SidebarMenuButton,
    SidebarMenuItem,
+   useSidebar,
 } from "@packages/ui/components/sidebar";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -126,6 +127,8 @@ function SidebarScopeSwitcherContent() {
    const { data: organizations } = useSuspenseQuery(
       orpc.organization.getOrganizations.queryOptions({}),
    );
+   const { state } = useSidebar();
+   const isCollapsed = state === "collapsed";
 
    const [orgOpen, setOrgOpen] = useState(false);
    const [teamOpen, setTeamOpen] = useState(false);
@@ -284,15 +287,15 @@ function SidebarScopeSwitcherContent() {
    return (
       <SidebarMenu>
          <SidebarMenuItem>
-            <div className="flex items-center gap-1.5">
+            <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-1.5"}`}>
                <Popover onOpenChange={setOrgOpen} open={orgOpen}>
                   <PopoverTrigger asChild>
                      <button
                         aria-label="Organizacao"
-                        className="flex shrink-0 items-center justify-center rounded-md p-1.5 hover:bg-accent transition-colors"
+                        className={`flex shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent ${isCollapsed ? "w-full p-0" : "p-1.5"}`}
                         type="button"
                      >
-                        <Avatar className="size-8 rounded-md">
+                        <Avatar className={`${isCollapsed ? "size-6" : "size-8"} rounded-md`}>
                            <AvatarImage alt={activeOrganization.name} src="" />
                            <AvatarFallback
                               className={`rounded-md text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
@@ -375,73 +378,70 @@ function SidebarScopeSwitcherContent() {
                   </PopoverContent>
                </Popover>
 
-               <Popover onOpenChange={setTeamOpen} open={teamOpen}>
-                  <PopoverTrigger asChild>
-                     <button
-                        aria-label="Projeto"
-                        className="flex min-w-0 flex-1 items-center gap-2 rounded-md p-1.5 text-left text-sm hover:bg-accent transition-colors"
-                        type="button"
-                     >
-                        <div className="grid flex-1 text-left text-sm leading-tight">
-                           <span className="truncate font-medium">
-                              {activeOrganization.name}
-                           </span>
-                           <span className="truncate text-xs text-muted-foreground">
+               {!isCollapsed && (
+                  <Popover onOpenChange={setTeamOpen} open={teamOpen}>
+                     <PopoverTrigger asChild>
+                        <button
+                           aria-label="Projeto"
+                           className="flex min-w-0 flex-1 items-center gap-2 rounded-md border bg-muted/50 px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-accent"
+                           type="button"
+                        >
+                           <span className="truncate font-medium flex-1">
                               {activeTeam?.name ?? "Sem projeto"}
                            </span>
-                        </div>
-                        <ChevronDown className="ml-auto size-4" />
-                     </button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                     align="start"
-                     className="w-72 p-0"
-                     sideOffset={8}
-                  >
-                     <Command>
-                        <CommandInput placeholder="Filtrar projetos..." />
-                        <CommandList>
-                           <CommandEmpty>
-                              Nenhum resultado encontrado.
-                           </CommandEmpty>
-                           <CommandGroup heading="Projetos">
-                              {activeTeam && (
-                                 <CommandItem disabled value={activeTeam.name}>
-                                    <Check className="size-4" />
-                                    <span className="truncate">
-                                       {activeTeam.name}
-                                    </span>
-                                 </CommandItem>
-                              )}
-                              {otherTeams.map((team, index) => (
+                           <ChevronDown className="ml-auto size-4" />
+                        </button>
+                     </PopoverTrigger>
+                     <PopoverContent
+                        align="start"
+                        className="w-72 p-0"
+                        sideOffset={8}
+                     >
+                        <Command>
+                           <CommandInput placeholder="Filtrar projetos..." />
+                           <CommandList>
+                              <CommandEmpty>
+                                 Nenhum resultado encontrado.
+                              </CommandEmpty>
+                              <CommandGroup heading="Projetos">
+                                 {activeTeam && (
+                                    <CommandItem disabled value={activeTeam.name}>
+                                       <Check className="size-4" />
+                                       <span className="truncate">
+                                          {activeTeam.name}
+                                       </span>
+                                    </CommandItem>
+                                 )}
+                                 {otherTeams.map((team, index) => (
+                                    <CommandItem
+                                       key={`team-${index + 1}`}
+                                       onSelect={() => handleTeamSwitch(team)}
+                                       value={team.name}
+                                    >
+                                       <span className="size-4" />
+                                       <span className="truncate">
+                                          {team.name}
+                                       </span>
+                                    </CommandItem>
+                                 ))}
                                  <CommandItem
-                                    key={`team-${index + 1}`}
-                                    onSelect={() => handleTeamSwitch(team)}
-                                    value={team.name}
+                                    onSelect={handleNewProject}
+                                    value="Novo projeto"
                                  >
-                                    <span className="size-4" />
-                                    <span className="truncate">
-                                       {team.name}
+                                    <Plus className="size-4" />
+                                    <span>
+                                       {projectLimit !== null &&
+                                       projectLimit !== Number.POSITIVE_INFINITY
+                                          ? `Novo projeto (${projectCount}/${projectLimit})`
+                                          : "Novo projeto"}
                                     </span>
                                  </CommandItem>
-                              ))}
-                              <CommandItem
-                                 onSelect={handleNewProject}
-                                 value="Novo projeto"
-                              >
-                                 <Plus className="size-4" />
-                                 <span>
-                                    {projectLimit !== null &&
-                                    projectLimit !== Number.POSITIVE_INFINITY
-                                       ? `Novo projeto (${projectCount}/${projectLimit})`
-                                       : "Novo projeto"}
-                                 </span>
-                              </CommandItem>
-                           </CommandGroup>
-                        </CommandList>
-                     </Command>
-                  </PopoverContent>
-               </Popover>
+                              </CommandGroup>
+                           </CommandList>
+                        </Command>
+                     </PopoverContent>
+                  </Popover>
+               )}
             </div>
          </SidebarMenuItem>
       </SidebarMenu>

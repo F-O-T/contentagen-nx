@@ -77,7 +77,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                <AppSidebar />
             </SidebarManager>
 
-            <SidebarInset>
+            <SidebarInset className="">
                <SidebarSubPanel />
                <main className="flex-1 overflow-y-auto p-4">{children}</main>
             </SidebarInset>

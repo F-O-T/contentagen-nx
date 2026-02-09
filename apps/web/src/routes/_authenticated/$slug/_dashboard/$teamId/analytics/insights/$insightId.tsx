@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute(
-	"/_authenticated/$slug/_dashboard/analytics/insights/$insightId",
+	"/_authenticated/$slug/_dashboard/$teamId/analytics/insights/$insightId",
 )({
 	component: EditInsightPage,
 });
@@ -13,5 +13,5 @@ function EditInsightPage() {
 			<h1 className="text-3xl font-bold tracking-tight font-serif">Editar Insight</h1>
 			<p className="text-muted-foreground">ID: {insightId}</p>
 		</main>
-	);
+	)
 }

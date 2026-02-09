@@ -6,6 +6,10 @@ import {
 	TEST_USER_ID,
 	createTestContext,
 } from "../../../helpers/create-test-context";
+import {
+	DASHBOARD_ID,
+	makeDashboard,
+} from "../../../helpers/mock-factories";
 
 // ---------------------------------------------------------------------------
 // Mocks — must be declared before any import that touches the modules
@@ -31,23 +35,6 @@ import {
 import * as dashboardsRouter from "@/integrations/orpc/router/dashboards";
 
 // ---------------------------------------------------------------------------
-// Mock Helpers
-// ---------------------------------------------------------------------------
-
-const DASHBOARD_ID = "d0d0d0d0-e1e1-4f2f-a3a3-b4b4b4b4b4b4";
-
-function makeDashboard(overrides: Record<string, unknown> = {}) {
-	return {
-		id: DASHBOARD_ID,
-		organizationId: TEST_ORG_ID,
-		name: "My Dashboard",
-		description: "Test dashboard",
-		createdBy: TEST_USER_ID,
-		...overrides,
-	};
-}
-
-// ---------------------------------------------------------------------------
 // Setup
 // ---------------------------------------------------------------------------
 
@@ -70,7 +57,7 @@ describe("create", () => {
 
 	it("creates dashboard successfully", async () => {
 		const dashboard = makeDashboard();
-		vi.mocked(createDashboard).mockResolvedValueOnce(dashboard as any);
+		vi.mocked(createDashboard).mockResolvedValueOnce(dashboard);
 
 		const ctx = createTestContext();
 		const result = await call(dashboardsRouter.create, input, {
@@ -91,7 +78,7 @@ describe("create", () => {
 
 	it("emits dashboard.created event with correct params", async () => {
 		const dashboard = makeDashboard();
-		vi.mocked(createDashboard).mockResolvedValueOnce(dashboard as any);
+		vi.mocked(createDashboard).mockResolvedValueOnce(dashboard);
 
 		const ctx = createTestContext();
 		await call(dashboardsRouter.create, input, { context: ctx });
@@ -111,7 +98,7 @@ describe("create", () => {
 
 	it("succeeds even when event emission fails", async () => {
 		const dashboard = makeDashboard();
-		vi.mocked(createDashboard).mockResolvedValueOnce(dashboard as any);
+		vi.mocked(createDashboard).mockResolvedValueOnce(dashboard);
 		vi.mocked(emitDashboardCreated).mockRejectedValueOnce(
 			new Error("emit failed"),
 		);
@@ -135,7 +122,7 @@ describe("list", () => {
 			makeDashboard(),
 			makeDashboard({ id: "dashboard-2", name: "Second Dashboard" }),
 		];
-		vi.mocked(listDashboards).mockResolvedValueOnce(dashboards as any);
+		vi.mocked(listDashboards).mockResolvedValueOnce(dashboards);
 
 		const ctx = createTestContext();
 		const result = await call(dashboardsRouter.list, undefined, {
@@ -157,7 +144,7 @@ describe("list", () => {
 describe("getById", () => {
 	it("returns dashboard by id", async () => {
 		const dashboard = makeDashboard();
-		vi.mocked(getDashboardById).mockResolvedValueOnce(dashboard as any);
+		vi.mocked(getDashboardById).mockResolvedValueOnce(dashboard);
 
 		const ctx = createTestContext();
 		const result = await call(
@@ -174,7 +161,7 @@ describe("getById", () => {
 	});
 
 	it("throws NOT_FOUND when dashboard does not exist", async () => {
-		vi.mocked(getDashboardById).mockResolvedValueOnce(null as any);
+		vi.mocked(getDashboardById).mockResolvedValueOnce(null);
 
 		const ctx = createTestContext();
 		await expect(
@@ -183,12 +170,12 @@ describe("getById", () => {
 				{ id: DASHBOARD_ID },
 				{ context: ctx },
 			),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 
 	it("throws NOT_FOUND when dashboard belongs to different org", async () => {
 		const dashboard = makeDashboard({ organizationId: "other-org-id" });
-		vi.mocked(getDashboardById).mockResolvedValueOnce(dashboard as any);
+		vi.mocked(getDashboardById).mockResolvedValueOnce(dashboard);
 
 		const ctx = createTestContext();
 		await expect(
@@ -197,7 +184,7 @@ describe("getById", () => {
 				{ id: DASHBOARD_ID },
 				{ context: ctx },
 			),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -214,13 +201,13 @@ describe("update", () => {
 
 	it("updates dashboard successfully and emits event", async () => {
 		vi.mocked(getDashboardById).mockResolvedValueOnce(
-			makeDashboard() as any,
+			makeDashboard(),
 		);
 		const updated = makeDashboard({
 			name: "Updated Dashboard",
 			description: "Updated description",
 		});
-		vi.mocked(updateDashboard).mockResolvedValueOnce(updated as any);
+		vi.mocked(updateDashboard).mockResolvedValueOnce(updated);
 
 		const ctx = createTestContext();
 		const result = await call(dashboardsRouter.update, input, {
@@ -239,20 +226,20 @@ describe("update", () => {
 	});
 
 	it("throws NOT_FOUND when dashboard does not exist", async () => {
-		vi.mocked(getDashboardById).mockResolvedValueOnce(null as any);
+		vi.mocked(getDashboardById).mockResolvedValueOnce(null);
 
 		const ctx = createTestContext();
 		await expect(
 			call(dashboardsRouter.update, input, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 
 	it("emits dashboard.updated with correct changedFields", async () => {
 		vi.mocked(getDashboardById).mockResolvedValueOnce(
-			makeDashboard() as any,
+			makeDashboard(),
 		);
 		vi.mocked(updateDashboard).mockResolvedValueOnce(
-			makeDashboard() as any,
+			makeDashboard(),
 		);
 
 		const ctx = createTestContext();
@@ -293,11 +280,11 @@ describe("updateTiles", () => {
 
 	it("updates tiles successfully", async () => {
 		vi.mocked(getDashboardById).mockResolvedValueOnce(
-			makeDashboard() as any,
+			makeDashboard(),
 		);
 		const tilesResult = { success: true };
 		vi.mocked(updateDashboardTiles).mockResolvedValueOnce(
-			tilesResult as any,
+			tilesResult,
 		);
 
 		const ctx = createTestContext();
@@ -314,12 +301,12 @@ describe("updateTiles", () => {
 	});
 
 	it("throws NOT_FOUND when dashboard does not exist", async () => {
-		vi.mocked(getDashboardById).mockResolvedValueOnce(null as any);
+		vi.mocked(getDashboardById).mockResolvedValueOnce(null);
 
 		const ctx = createTestContext();
 		await expect(
 			call(dashboardsRouter.updateTiles, input, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -330,9 +317,9 @@ describe("updateTiles", () => {
 describe("remove", () => {
 	it("deletes dashboard and emits event", async () => {
 		vi.mocked(getDashboardById).mockResolvedValueOnce(
-			makeDashboard() as any,
+			makeDashboard(),
 		);
-		vi.mocked(deleteDashboard).mockResolvedValueOnce(undefined as any);
+		vi.mocked(deleteDashboard).mockResolvedValueOnce(undefined);
 
 		const ctx = createTestContext();
 		const result = await call(
@@ -360,7 +347,7 @@ describe("remove", () => {
 	});
 
 	it("throws NOT_FOUND when dashboard does not exist", async () => {
-		vi.mocked(getDashboardById).mockResolvedValueOnce(null as any);
+		vi.mocked(getDashboardById).mockResolvedValueOnce(null);
 
 		const ctx = createTestContext();
 		await expect(
@@ -369,6 +356,6 @@ describe("remove", () => {
 				{ id: DASHBOARD_ID },
 				{ context: ctx },
 			),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 });

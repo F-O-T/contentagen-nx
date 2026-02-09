@@ -6,7 +6,7 @@ import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { ContentListSection } from "@/features/content/ui/content-list-section";
 
 export const Route = createFileRoute(
-	"/_authenticated/$slug/_dashboard/content/",
+	"/_authenticated/$slug/_dashboard/$teamId/content/",
 )({
 	component: ContentPage,
 });
@@ -37,7 +37,7 @@ function ContentPageSkeleton() {
 			{/* Table skeleton */}
 			<Skeleton className="h-[400px] w-full" />
 		</main>
-	);
+	)
 }
 
 function ContentPageHeader() {
@@ -50,7 +50,7 @@ function ContentPageHeader() {
 				Gerencie e crie conteúdo para seu site
 			</p>
 		</div>
-	);
+	)
 }
 
 function ContentPageContent() {
@@ -59,7 +59,7 @@ function ContentPageContent() {
 			<ContentPageHeader />
 			<ContentListSection />
 		</main>
-	);
+	)
 }
 
 function ContentPage() {
@@ -69,5 +69,5 @@ function ContentPage() {
 				<ContentPageContent />
 			</Suspense>
 		</ErrorBoundary>
-	);
+	)
 }

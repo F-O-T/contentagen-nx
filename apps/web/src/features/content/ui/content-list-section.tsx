@@ -67,46 +67,43 @@ export function ContentListSection() {
    const { data, refetch } = useSuspenseQuery(queryOptions);
 
    // Delete mutation
-   const deleteMutation = useMutation({
-      mutationFn: async (id: string) => {
-         await orpc.content.remove({ input: { id } });
-      },
-      onSuccess: () => {
-         toast.success("Conteúdo excluído com sucesso");
-         refetch();
-      },
-      onError: () => {
-         toast.error("Erro ao excluir conteúdo");
-      },
-   });
+   const deleteMutation = useMutation(
+      orpc.content.remove.mutationOptions({
+         onSuccess: () => {
+            toast.success("Conteúdo excluído com sucesso");
+            refetch();
+         },
+         onError: () => {
+            toast.error("Erro ao excluir conteúdo");
+         },
+      }),
+   );
 
    // Publish mutation
-   const publishMutation = useMutation({
-      mutationFn: async (id: string) => {
-         await orpc.content.publish({ input: { id } });
-      },
-      onSuccess: () => {
-         toast.success("Conteúdo publicado com sucesso");
-         refetch();
-      },
-      onError: () => {
-         toast.error("Erro ao publicar conteúdo");
-      },
-   });
+   const publishMutation = useMutation(
+      orpc.content.publish.mutationOptions({
+         onSuccess: () => {
+            toast.success("Conteúdo publicado com sucesso");
+            refetch();
+         },
+         onError: () => {
+            toast.error("Erro ao publicar conteúdo");
+         },
+      }),
+   );
 
    // Archive mutation
-   const archiveMutation = useMutation({
-      mutationFn: async (id: string) => {
-         await orpc.content.archive({ input: { id } });
-      },
-      onSuccess: () => {
-         toast.success("Conteúdo arquivado com sucesso");
-         refetch();
-      },
-      onError: () => {
-         toast.error("Erro ao arquivar conteúdo");
-      },
-   });
+   const archiveMutation = useMutation(
+      orpc.content.archive.mutationOptions({
+         onSuccess: () => {
+            toast.success("Conteúdo arquivado com sucesso");
+            refetch();
+         },
+         onError: () => {
+            toast.error("Erro ao arquivar conteúdo");
+         },
+      }),
+   );
 
    // Create content mutation
    const createContentMutation = useMutation(
@@ -147,15 +144,15 @@ export function ContentListSection() {
    };
 
    const handlePublish = (content: ContentItem) => {
-      publishMutation.mutate(content.id);
+      publishMutation.mutate({ id: content.id });
    };
 
    const handleArchive = (content: ContentItem) => {
-      archiveMutation.mutate(content.id);
+      archiveMutation.mutate({ id: content.id });
    };
 
    const handleDelete = (content: ContentItem) => {
-      deleteMutation.mutate(content.id);
+      deleteMutation.mutate({ id: content.id });
    };
 
    // biome-ignore lint/correctness/noUnusedFunctionParameters: Will be implemented when share API is ready

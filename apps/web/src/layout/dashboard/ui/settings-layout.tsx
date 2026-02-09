@@ -49,7 +49,7 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
 
    return (
       <SidebarProvider
-         className="min-h-0 w-full"
+         className="w-full -m-4 border-l border-white/10 bg-sidebar shadow-xl"
          style={
             {
                "--sidebar-width": "16rem",
@@ -59,22 +59,7 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
          <SidebarManager name="settings">
             <Sidebar className="sticky top-0 h-svh border-r" collapsible="none">
                <SidebarHeader className="px-3 pt-3 pb-0">
-                  <div className="flex items-center gap-2">
-                     <Button
-                        asChild
-                        className="w-fit"
-                        size="sm"
-                        variant="ghost"
-                     >
-                        <Link
-                           params={{ slug: activeOrganization.slug }}
-                           to="/$slug/home"
-                        >
-                           <ChevronLeft className="size-4 mr-1" />
-                           Configuracoes
-                        </Link>
-                     </Button>
-                  </div>
+                  <div className="flex items-center gap-2">Configuracoes</div>
                </SidebarHeader>
                <SidebarContent>
                   <SettingsSidebar />

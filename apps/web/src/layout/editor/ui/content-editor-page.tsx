@@ -2,7 +2,7 @@ import type { ContentMeta } from "@packages/database/schemas/content";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { client, orpc } from "@/integrations/orpc/client";
+import { orpc } from "@/integrations/orpc/client";
 import { createEditStreamFn, createFIMStreamFn } from "../hooks/use-fim-stream";
 import { EditorLayout } from "./editor-layout";
 
@@ -52,69 +52,72 @@ export function ContentEditorPage({
    const editStream = useMemo(() => createEditStreamFn(), []);
 
    // Update mutation
-   const updateMutation = useMutation({
-      mutationFn: async (data: {
-         body?: string;
-         meta?: Partial<ContentMeta>;
-      }) => {
-         return client.content.update({ id: contentId, data });
-      },
-      onSuccess: () => {
-         queryClient.invalidateQueries({
-            queryKey: ["content", "getById", contentId],
-         });
-      },
-   });
+   const updateMutation = useMutation(
+      orpc.content.update.mutationOptions({
+         onSuccess: () => {
+            queryClient.invalidateQueries({
+               queryKey: orpc.content.getById.queryOptions({
+                  input: { id: contentId },
+               }).queryKey,
+            });
+         },
+      }),
+   );
 
    // Publish mutation
-   const publishMutation = useMutation({
-      mutationFn: async () => {
-         return client.content.publish({ id: contentId });
-      },
-      onSuccess: () => {
-         queryClient.invalidateQueries({ queryKey: ["content"] });
-      },
-   });
+   const publishMutation = useMutation(
+      orpc.content.publish.mutationOptions({
+         onSuccess: () => {
+            queryClient.invalidateQueries({
+               queryKey: orpc.content.getById.queryOptions({
+                  input: { id: contentId },
+               }).queryKey,
+            });
+         },
+      }),
+   );
 
    // Archive mutation
-   const archiveMutation = useMutation({
-      mutationFn: async () => {
-         return client.content.archive({ id: contentId });
-      },
-      onSuccess: () => {
-         queryClient.invalidateQueries({ queryKey: ["content"] });
-      },
-   });
+   const archiveMutation = useMutation(
+      orpc.content.archive.mutationOptions({
+         onSuccess: () => {
+            queryClient.invalidateQueries({
+               queryKey: orpc.content.getById.queryOptions({
+                  input: { id: contentId },
+               }).queryKey,
+            });
+         },
+      }),
+   );
 
    // Delete mutation
-   const deleteMutation = useMutation({
-      mutationFn: async () => {
-         return client.content.remove({ id: contentId });
-      },
-      onSuccess: () => {
-         navigate({ to: `/${slug}/content` });
-      },
-   });
+   const deleteMutation = useMutation(
+      orpc.content.remove.mutationOptions({
+         onSuccess: () => {
+            navigate({ to: `/${slug}/content` });
+         },
+      }),
+   );
 
    // Handlers
    const handleSave = async (data: {
       body?: string;
       meta?: Partial<ContentMeta>;
    }) => {
-      await updateMutation.mutateAsync(data);
+      await updateMutation.mutateAsync({ id: contentId, data });
    };
 
    const handlePublish = () => {
-      publishMutation.mutate();
+      publishMutation.mutate({ id: contentId });
    };
 
    const handleArchive = () => {
-      archiveMutation.mutate();
+      archiveMutation.mutate({ id: contentId });
    };
 
    const handleDelete = () => {
       if (window.confirm("Tem certeza que deseja excluir este conteudo?")) {
-         deleteMutation.mutate();
+         deleteMutation.mutate({ id: contentId });
       }
    };
 

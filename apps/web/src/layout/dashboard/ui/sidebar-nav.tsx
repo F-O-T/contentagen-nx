@@ -13,13 +13,16 @@ import { ChevronRight } from "lucide-react";
 import { useCallback } from "react";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import type { SubSidebarSection } from "@/layout/dashboard/hooks/use-sidebar-nav";
-import { useSidebarNav } from "@/layout/dashboard/hooks/use-sidebar-nav";
-import { SidebarItemActions } from "@/layout/dashboard/sidebar-item-actions";
+import {
+   setActiveSection,
+   useSidebarNav,
+} from "@/layout/dashboard/hooks/use-sidebar-nav";
+import { SidebarItemActions } from "@/layout/dashboard/ui/sidebar-item-actions";
 import type {
    NavGroupDef,
    NavItemDef,
-} from "@/layout/dashboard/sidebar-nav-items";
-import { navGroups } from "@/layout/dashboard/sidebar-nav-items";
+} from "@/layout/dashboard/ui/sidebar-nav-items";
+import { navGroups } from "@/layout/dashboard/ui/sidebar-nav-items";
 
 function NavItem({
    item,
@@ -27,12 +30,14 @@ function NavItem({
    teamId,
    isActive,
    onSubPanelToggle,
+   onMainItemClick,
 }: {
    item: NavItemDef;
    slug: string;
    teamId?: string | null;
    isActive: boolean;
    onSubPanelToggle: (section: SubSidebarSection) => void;
+   onMainItemClick: () => void;
 }) {
    const Icon = item.icon;
 
@@ -63,6 +68,7 @@ function NavItem({
                </>
             ) : (
                <Link
+                  onClick={onMainItemClick}
                   to={
                      teamId
                         ? item.route.replace("/$slug", `/${slug}/${teamId}`)
@@ -89,12 +95,14 @@ function NavGroup({
    teamId,
    isItemActive,
    onSubPanelToggle,
+   onMainItemClick,
 }: {
    group: NavGroupDef;
    slug: string;
    teamId?: string | null;
    isItemActive: (item: NavItemDef) => boolean;
    onSubPanelToggle: (section: SubSidebarSection) => void;
+   onMainItemClick: () => void;
 }) {
    return (
       <SidebarGroup>
@@ -106,6 +114,7 @@ function NavGroup({
                      isActive={isItemActive(item)}
                      item={item}
                      key={item.id}
+                     onMainItemClick={onMainItemClick}
                      onSubPanelToggle={onSubPanelToggle}
                      slug={slug}
                      teamId={teamId}
@@ -126,24 +135,36 @@ export function SidebarNav() {
    const slug = params.slug ?? pathname.split("/")[1] ?? "";
    const { activeTeamId } = useActiveTeam();
    const teamId = params.teamId ?? activeTeamId ?? null;
-   const { activeSubPanel } = useSidebarNav();
+   const { activeSection } = useSidebarNav();
    const manager = useSidebarManager();
 
    const handleSubPanelToggle = useCallback(
       (section: SubSidebarSection) => {
          const subPanel = manager.use("sub-panel");
-         if (activeSubPanel === section && subPanel?.open) {
+         if (activeSection === section && subPanel?.open) {
             // Same section clicked while open — close it
             subPanel.setOpen(false);
+            setActiveSection(null);
          } else {
             // Different section or panel closed — open with new section
+            setActiveSection(section);
             if (subPanel && !subPanel.open) {
                subPanel.setOpen(true);
             }
          }
       },
-      [manager, activeSubPanel],
+      [manager, activeSection],
    );
+
+   const handleMainItemClick = useCallback(() => {
+      const subPanel = manager.use("sub-panel");
+      if (subPanel?.open) {
+         subPanel.setOpen(false);
+      }
+      if (activeSection) {
+         setActiveSection(null);
+      }
+   }, [manager, activeSection]);
 
    const isItemActive = useCallback(
       (item: NavItemDef) => {
@@ -153,14 +174,14 @@ export function SidebarNav() {
 
          if (item.subPanel) {
             return (
-               activeSubPanel === item.subPanel ||
+               activeSection === item.subPanel ||
                pathname.startsWith(resolvedRoute)
             );
          }
 
          return pathname.startsWith(resolvedRoute) && !searchStr;
       },
-      [slug, teamId, pathname, searchStr, activeSubPanel],
+      [slug, teamId, pathname, searchStr, activeSection],
    );
 
    return (
@@ -170,6 +191,7 @@ export function SidebarNav() {
                group={group}
                isItemActive={isItemActive}
                key={group.id}
+               onMainItemClick={handleMainItemClick}
                onSubPanelToggle={handleSubPanelToggle}
                slug={slug}
                teamId={teamId}

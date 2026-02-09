@@ -1,4 +1,4 @@
-import { call } from "@orpc/server";
+import { call, ORPCError } from "@orpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	TEST_ORG_ID,
@@ -6,6 +6,7 @@ import {
 	TEST_USER_ID,
 	createTestContext,
 } from "../../../helpers/create-test-context";
+import { FORM_ID, makeForm } from "../../../helpers/mock-factories";
 
 // ---------------------------------------------------------------------------
 // Mocks — must be declared before any import that touches the modules
@@ -32,24 +33,6 @@ import {
 import * as formsRouter from "@/integrations/orpc/router/forms";
 
 // ---------------------------------------------------------------------------
-// Mock Helpers
-// ---------------------------------------------------------------------------
-
-const FORM_ID = "a0a0a0a0-b1b1-4c2c-9d3d-e4e4e4e4e4e4";
-
-function makeForm(overrides: Record<string, unknown> = {}) {
-	return {
-		id: FORM_ID,
-		organizationId: TEST_ORG_ID,
-		name: "Contact Form",
-		fields: [{ id: "f1", type: "text", label: "Name", required: true }],
-		settings: {},
-		isActive: true,
-		...overrides,
-	};
-}
-
-// ---------------------------------------------------------------------------
 // Setup
 // ---------------------------------------------------------------------------
 
@@ -72,7 +55,7 @@ describe("create", () => {
 
 	it("creates form successfully", async () => {
 		const form = makeForm();
-		vi.mocked(createForm).mockResolvedValueOnce(form as any);
+		vi.mocked(createForm).mockResolvedValueOnce(form);
 
 		const ctx = createTestContext();
 		const result = await call(formsRouter.create, input, { context: ctx });
@@ -91,7 +74,7 @@ describe("create", () => {
 
 	it("emits formCreated event with teamId", async () => {
 		const form = makeForm();
-		vi.mocked(createForm).mockResolvedValueOnce(form as any);
+		vi.mocked(createForm).mockResolvedValueOnce(form);
 
 		const ctx = createTestContext();
 		await call(formsRouter.create, input, { context: ctx });
@@ -111,7 +94,7 @@ describe("create", () => {
 
 	it("succeeds even when event emission fails", async () => {
 		const form = makeForm();
-		vi.mocked(createForm).mockResolvedValueOnce(form as any);
+		vi.mocked(createForm).mockResolvedValueOnce(form);
 		vi.mocked(emitFormCreated).mockRejectedValueOnce(new Error("emit failed"));
 
 		const ctx = createTestContext();
@@ -128,7 +111,7 @@ describe("create", () => {
 describe("list", () => {
 	it("returns forms for organization", async () => {
 		const forms = [makeForm(), makeForm({ id: "form-2", name: "Signup Form" })];
-		vi.mocked(listForms).mockResolvedValueOnce(forms as any);
+		vi.mocked(listForms).mockResolvedValueOnce(forms);
 
 		const ctx = createTestContext();
 		const result = await call(formsRouter.list, undefined, { context: ctx });
@@ -145,7 +128,7 @@ describe("list", () => {
 describe("getById", () => {
 	it("returns form when found and belongs to org", async () => {
 		const form = makeForm();
-		vi.mocked(getFormById).mockResolvedValueOnce(form as any);
+		vi.mocked(getFormById).mockResolvedValueOnce(form);
 
 		const ctx = createTestContext();
 		const result = await call(
@@ -159,22 +142,22 @@ describe("getById", () => {
 	});
 
 	it("throws NOT_FOUND when form does not exist", async () => {
-		vi.mocked(getFormById).mockResolvedValueOnce(null as any);
+		vi.mocked(getFormById).mockResolvedValueOnce(null);
 
 		const ctx = createTestContext();
 		await expect(
 			call(formsRouter.getById, { id: FORM_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 
 	it("throws NOT_FOUND when form belongs to different org", async () => {
 		const form = makeForm({ organizationId: "other-org-id" });
-		vi.mocked(getFormById).mockResolvedValueOnce(form as any);
+		vi.mocked(getFormById).mockResolvedValueOnce(form);
 
 		const ctx = createTestContext();
 		await expect(
 			call(formsRouter.getById, { id: FORM_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -190,9 +173,9 @@ describe("update", () => {
 	};
 
 	it("updates form successfully", async () => {
-		vi.mocked(getFormById).mockResolvedValueOnce(makeForm() as any);
+		vi.mocked(getFormById).mockResolvedValueOnce(makeForm());
 		const updated = makeForm({ name: "Updated Form", isActive: false });
-		vi.mocked(updateForm).mockResolvedValueOnce(updated as any);
+		vi.mocked(updateForm).mockResolvedValueOnce(updated);
 
 		const ctx = createTestContext();
 		const result = await call(formsRouter.update, input, { context: ctx });
@@ -210,18 +193,18 @@ describe("update", () => {
 
 	it("throws NOT_FOUND for different org form", async () => {
 		vi.mocked(getFormById).mockResolvedValueOnce(
-			makeForm({ organizationId: "other-org" }) as any,
+			makeForm({ organizationId: "other-org" }),
 		);
 
 		const ctx = createTestContext();
 		await expect(
 			call(formsRouter.update, input, { context: ctx }),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 
 	it("emits formUpdated event with changedFields", async () => {
-		vi.mocked(getFormById).mockResolvedValueOnce(makeForm() as any);
-		vi.mocked(updateForm).mockResolvedValueOnce(makeForm() as any);
+		vi.mocked(getFormById).mockResolvedValueOnce(makeForm());
+		vi.mocked(updateForm).mockResolvedValueOnce(makeForm());
 
 		const ctx = createTestContext();
 		await call(formsRouter.update, input, { context: ctx });
@@ -246,8 +229,8 @@ describe("update", () => {
 
 describe("remove", () => {
 	it("deletes form successfully", async () => {
-		vi.mocked(getFormById).mockResolvedValueOnce(makeForm() as any);
-		vi.mocked(deleteForm).mockResolvedValueOnce(undefined as any);
+		vi.mocked(getFormById).mockResolvedValueOnce(makeForm());
+		vi.mocked(deleteForm).mockResolvedValueOnce(undefined);
 
 		const ctx = createTestContext();
 		const result = await call(
@@ -261,8 +244,8 @@ describe("remove", () => {
 	});
 
 	it("emits formDeleted event with teamId", async () => {
-		vi.mocked(getFormById).mockResolvedValueOnce(makeForm() as any);
-		vi.mocked(deleteForm).mockResolvedValueOnce(undefined as any);
+		vi.mocked(getFormById).mockResolvedValueOnce(makeForm());
+		vi.mocked(deleteForm).mockResolvedValueOnce(undefined);
 
 		const ctx = createTestContext();
 		await call(formsRouter.remove, { id: FORM_ID }, { context: ctx });
@@ -286,12 +269,12 @@ describe("remove", () => {
 
 describe("getSubmissions", () => {
 	it("returns paginated submissions for a valid form", async () => {
-		vi.mocked(getFormById).mockResolvedValueOnce(makeForm() as any);
+		vi.mocked(getFormById).mockResolvedValueOnce(makeForm());
 		const mockSubmissions = [
 			{ id: "sub-1", formId: FORM_ID, data: { Name: "Alice" } },
 			{ id: "sub-2", formId: FORM_ID, data: { Name: "Bob" } },
 		];
-		vi.mocked(getFormSubmissions).mockResolvedValueOnce(mockSubmissions as any);
+		vi.mocked(getFormSubmissions).mockResolvedValueOnce(mockSubmissions);
 		vi.mocked(countFormSubmissions).mockResolvedValueOnce(2);
 
 		const ctx = createTestContext();
@@ -318,7 +301,7 @@ describe("getSubmissions", () => {
 
 	it("throws NOT_FOUND when form belongs to different org", async () => {
 		vi.mocked(getFormById).mockResolvedValueOnce(
-			makeForm({ organizationId: "other-org" }) as any,
+			makeForm({ organizationId: "other-org" }),
 		);
 
 		const ctx = createTestContext();
@@ -328,6 +311,6 @@ describe("getSubmissions", () => {
 				{ formId: FORM_ID, page: 1, limit: 50 },
 				{ context: ctx },
 			),
-		).rejects.toSatisfy((e: any) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
 	});
 });

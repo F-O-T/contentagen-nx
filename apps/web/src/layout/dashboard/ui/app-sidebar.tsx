@@ -6,11 +6,10 @@ import {
    SidebarMenu,
    SidebarMenuButton,
    SidebarMenuItem,
-   SidebarRail,
-   SidebarTrigger,
+   useSidebar,
 } from "@packages/ui/components/sidebar";
 import { Link, useParams } from "@tanstack/react-router";
-import { Settings } from "lucide-react";
+import { PanelLeft, PanelLeftClose, Settings } from "lucide-react";
 import type * as React from "react";
 import { NavUser } from "./nav-user";
 import { SidebarNav } from "./sidebar-nav";
@@ -18,14 +17,13 @@ import { SidebarScopeSwitcher } from "./sidebar-scope-switcher";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
    return (
-      <Sidebar collapsible="icon" {...props}>
+      <Sidebar
+         className="border-r-0 group-data-[side=left]:border-r-0"
+         collapsible="icon"
+         {...props}
+      >
          <SidebarHeader>
             <SidebarScopeSwitcher />
-            <SidebarMenu>
-               <SidebarMenuItem>
-                  <SidebarTrigger className="w-full" />
-               </SidebarMenuItem>
-            </SidebarMenu>
          </SidebarHeader>
 
          <SidebarContent>
@@ -35,8 +33,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
          <SidebarFooter>
             <SidebarFooterContent />
          </SidebarFooter>
-
-         <SidebarRail />
       </Sidebar>
    );
 }
@@ -44,9 +40,19 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 function SidebarFooterContent() {
    const params = useParams({ strict: false }) as { slug?: string };
    const slug = params.slug ?? "";
+   const { toggleSidebar, state } = useSidebar();
 
    return (
       <SidebarMenu>
+         <SidebarMenuItem>
+            <SidebarMenuButton
+               onClick={toggleSidebar}
+               tooltip={state === "expanded" ? "Ocultar" : "Abrir"}
+            >
+               {state === "expanded" ? <PanelLeftClose /> : <PanelLeft />}
+               <span>Ocultar</span>
+            </SidebarMenuButton>
+         </SidebarMenuItem>
          <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Configuracoes">
                <Link params={{ slug }} to="/$slug/settings">

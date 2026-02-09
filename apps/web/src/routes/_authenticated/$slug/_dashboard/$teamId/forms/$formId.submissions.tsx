@@ -9,7 +9,7 @@ import { FormAnalytics } from "@/features/forms/ui/form-analytics";
 import { SubmissionsTable } from "@/features/forms/ui/submissions-table";
 
 export const Route = createFileRoute(
-	"/_authenticated/$slug/_dashboard/forms/$formId/submissions",
+	"/_authenticated/$slug/_dashboard/$teamId/forms/$formId/submissions",
 )({
 	component: SubmissionsPage,
 });
@@ -30,5 +30,5 @@ function SubmissionsPage() {
 				<FormAnalytics formId={formId} />
 			</TabsContent>
 		</Tabs>
-	);
+	)
 }

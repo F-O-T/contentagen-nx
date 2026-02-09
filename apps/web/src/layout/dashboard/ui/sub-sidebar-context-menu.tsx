@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
-import { client, orpc } from "@/integrations/orpc/client";
+import { orpc } from "@/integrations/orpc/client";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
 
 interface SubSidebarContextMenuProps {
@@ -36,61 +36,61 @@ export function SubSidebarContextMenu({
    const { openAlertDialog } = useAlertDialog();
    const queryClient = useQueryClient();
 
-   const deleteMutation = useMutation({
-      mutationFn: async () => {
-         if (section === "dashboards") {
-            await client.dashboards.remove({ id: item.id });
-         } else {
-            await client.insights.remove({ id: item.id });
-         }
-      },
-      onSuccess: () => {
-         const label = section === "dashboards" ? "Dashboard" : "Insight";
-         toast.success(`${label} excluído com sucesso`);
-         if (section === "dashboards") {
+   const deleteDashboardMutation = useMutation(
+      orpc.dashboards.remove.mutationOptions({
+         onSuccess: () => {
+            toast.success("Dashboard excluído com sucesso");
             queryClient.invalidateQueries({
                queryKey: orpc.dashboards.list.queryKey({}),
             });
-         } else {
-            queryClient.invalidateQueries({
-               queryKey: orpc.insights.list.queryKey({}),
-            });
-         }
-      },
-      onError: () => {
-         toast.error("Erro ao excluir item");
-      },
-   });
+         },
+         onError: () => {
+            toast.error("Erro ao excluir item");
+         },
+      }),
+   );
 
-   const duplicateMutation = useMutation({
-      mutationFn: async () => {
-         const newName = `${item.name} (cópia)`;
-         if (section === "dashboards") {
-            return client.dashboards.create({ name: newName });
-         }
-         return client.insights.create({
-            name: newName,
-            type: "trends",
-            config: {},
-         });
-      },
-      onSuccess: () => {
-         const label = section === "dashboards" ? "Dashboard" : "Insight";
-         toast.success(`${label} duplicado com sucesso`);
-         if (section === "dashboards") {
-            queryClient.invalidateQueries({
-               queryKey: orpc.dashboards.list.queryKey({}),
-            });
-         } else {
+   const deleteInsightMutation = useMutation(
+      orpc.insights.remove.mutationOptions({
+         onSuccess: () => {
+            toast.success("Insight excluído com sucesso");
             queryClient.invalidateQueries({
                queryKey: orpc.insights.list.queryKey({}),
             });
-         }
-      },
-      onError: () => {
-         toast.error("Erro ao duplicar item");
-      },
-   });
+         },
+         onError: () => {
+            toast.error("Erro ao excluir item");
+         },
+      }),
+   );
+
+   const duplicateDashboardMutation = useMutation(
+      orpc.dashboards.create.mutationOptions({
+         onSuccess: () => {
+            toast.success("Dashboard duplicado com sucesso");
+            queryClient.invalidateQueries({
+               queryKey: orpc.dashboards.list.queryKey({}),
+            });
+         },
+         onError: () => {
+            toast.error("Erro ao duplicar item");
+         },
+      }),
+   );
+
+   const duplicateInsightMutation = useMutation(
+      orpc.insights.create.mutationOptions({
+         onSuccess: () => {
+            toast.success("Insight duplicado com sucesso");
+            queryClient.invalidateQueries({
+               queryKey: orpc.insights.list.queryKey({}),
+            });
+         },
+         onError: () => {
+            toast.error("Erro ao duplicar item");
+         },
+      }),
+   );
 
    const handleDelete = () => {
       const label = section === "dashboards" ? "dashboard" : "insight";
@@ -101,7 +101,11 @@ export function SubSidebarContextMenu({
          cancelLabel: "Cancelar",
          variant: "destructive",
          onAction: async () => {
-            await deleteMutation.mutateAsync();
+            if (section === "dashboards") {
+               await deleteDashboardMutation.mutateAsync({ id: item.id });
+            } else {
+               await deleteInsightMutation.mutateAsync({ id: item.id });
+            }
          },
       });
    };
@@ -140,8 +144,23 @@ export function SubSidebarContextMenu({
                <TooltipContent side="right">(em breve)</TooltipContent>
             </Tooltip>
             <DropdownMenuItem
-               disabled={duplicateMutation.isPending}
-               onClick={() => duplicateMutation.mutate()}
+               disabled={
+                  section === "dashboards"
+                     ? duplicateDashboardMutation.isPending
+                     : duplicateInsightMutation.isPending
+               }
+               onClick={() => {
+                  const newName = `${item.name} (cópia)`;
+                  if (section === "dashboards") {
+                     duplicateDashboardMutation.mutate({ name: newName });
+                  } else {
+                     duplicateInsightMutation.mutate({
+                        name: newName,
+                        type: "trends",
+                        config: {},
+                     });
+                  }
+               }}
             >
                <Copy className="size-4" />
                Duplicar

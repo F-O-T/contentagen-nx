@@ -82,6 +82,9 @@ export function SidebarItemActions({
    item: NavItemDef;
    slug: string;
 }) {
+   if (item.subPanel) {
+      return null;
+   }
    if (item.quickAction) {
       return <QuickCreateButton item={item} slug={slug} />;
    }
