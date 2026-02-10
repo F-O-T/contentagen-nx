@@ -1,5 +1,12 @@
 import { relations, sql } from "drizzle-orm";
-import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+   boolean,
+   jsonb,
+   pgTable,
+   text,
+   timestamp,
+   uuid,
+} from "drizzle-orm/pg-core";
 import { organization, user } from "./auth";
 
 export interface DashboardTile {
@@ -18,6 +25,7 @@ export const dashboards = pgTable("dashboards", {
       .references(() => user.id, { onDelete: "cascade" }),
    name: text("name").notNull(),
    description: text("description"),
+   isDefault: boolean("is_default").default(false).notNull(),
    tiles: jsonb("tiles").$type<DashboardTile[]>().notNull().default([]),
    createdAt: timestamp("created_at").defaultNow().notNull(),
    updatedAt: timestamp("updated_at")

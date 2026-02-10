@@ -1,12 +1,17 @@
 import type { DatabaseInstance } from "@packages/database/client";
 import {
+   contentTrafficSources,
    currentMonthUsageByCategory,
    currentMonthUsageByEvent,
+   dailyContentAnalytics,
+   dailyEventCounts,
    dailyUsageByEvent,
+   monthlyAiUsage,
+   monthlySdkUsage,
 } from "@packages/database/schema";
 
 /**
- * Refresh all billing materialized views.
+ * Refresh all materialized views (billing + analytics).
  * Uses CONCURRENTLY to avoid blocking reads.
  * Should be called hourly via a scheduled job.
  */
@@ -15,9 +20,20 @@ export async function refreshUsageViews(db: DatabaseInstance): Promise<void> {
 
    try {
       await Promise.all([
-         db.refreshMaterializedView(dailyUsageByEvent).concurrently(),
+         // Billing views
+         db
+            .refreshMaterializedView(dailyUsageByEvent)
+            .concurrently(),
          db.refreshMaterializedView(currentMonthUsageByEvent).concurrently(),
          db.refreshMaterializedView(currentMonthUsageByCategory).concurrently(),
+         // Analytics views
+         db
+            .refreshMaterializedView(dailyContentAnalytics)
+            .concurrently(),
+         db.refreshMaterializedView(contentTrafficSources).concurrently(),
+         db.refreshMaterializedView(monthlySdkUsage).concurrently(),
+         db.refreshMaterializedView(monthlyAiUsage).concurrently(),
+         db.refreshMaterializedView(dailyEventCounts).concurrently(),
       ]);
 
       const duration = Date.now() - startTime;
