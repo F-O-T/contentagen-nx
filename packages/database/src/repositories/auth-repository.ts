@@ -4,6 +4,8 @@ import { createSlug, generateRandomSuffix } from "@packages/utils/text";
 import { eq } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
 import { member, organization, team, teamMember } from "../schemas/auth";
+import { dashboards } from "../schemas/dashboards";
+import { insights } from "../schemas/insights";
 
 export async function findMemberByUserId(
    dbClient: DatabaseInstance,
@@ -160,6 +162,44 @@ export async function createDefaultOrganization(
             createdAt: now,
          });
       }
+
+      // Create default insights and dashboard
+      const { DEFAULT_INSIGHTS } = await import(
+         "@packages/analytics/default-dashboard"
+      );
+
+      const createdInsights = await dbClient
+         .insert(insights)
+         .values(
+            DEFAULT_INSIGHTS.map((def) => ({
+               organizationId: createdOrganization.id,
+               createdBy: userId,
+               name: def.name,
+               description: def.description,
+               type: def.type,
+               config: def.config as Record<string, unknown>,
+               defaultSize: def.defaultSize,
+               createdAt: now,
+            })),
+         )
+         .returning({ id: insights.id });
+
+      const tiles = createdInsights.map((insight, index) => ({
+         insightId: insight.id,
+         // biome-ignore lint/style/noNonNullAssertion: arrays have matching length
+         size: DEFAULT_INSIGHTS[index]!.defaultSize,
+         order: index,
+      }));
+
+      await dbClient.insert(dashboards).values({
+         organizationId: createdOrganization.id,
+         createdBy: userId,
+         name: "Home",
+         description: "Default dashboard",
+         isDefault: true,
+         tiles,
+         createdAt: now,
+      });
 
       console.log(
          `Created organization "${orgName}" (${createdOrganization.id}) for user ${userId}`,

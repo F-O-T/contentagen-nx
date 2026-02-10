@@ -1,5 +1,6 @@
 {
    "dependencies": {
+      "@packages/analytics": "workspace:*",
       "@packages/events": "workspace:*",
       "@packages/utils": "workspace:*",
       "drizzle-orm": "catalog:database",

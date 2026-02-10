@@ -1,7 +1,8 @@
 import { AppError, propagateError } from "@packages/utils/errors";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
 import {
+   type Dashboard,
    type DashboardTile,
    dashboards,
    type NewDashboard,
@@ -97,5 +98,27 @@ export async function deleteDashboard(
    } catch (err) {
       propagateError(err);
       throw AppError.database("Failed to delete dashboard");
+   }
+}
+
+export async function getDefaultDashboard(
+   db: DatabaseInstance,
+   organizationId: string,
+): Promise<Dashboard | null> {
+   try {
+      const result = await db
+         .select()
+         .from(dashboards)
+         .where(
+            and(
+               eq(dashboards.organizationId, organizationId),
+               eq(dashboards.isDefault, true),
+            ),
+         )
+         .limit(1);
+      return result[0] ?? null;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database("Failed to get default dashboard");
    }
 }
