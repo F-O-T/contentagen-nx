@@ -1,5 +1,7 @@
 {
    "dependencies": {
+      "@packages/database": "workspace:*",
+      "drizzle-orm": "catalog:database",
       "zod": "catalog:validation"
    },
    "devDependencies": {
