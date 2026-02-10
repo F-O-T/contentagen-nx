@@ -1,12 +1,13 @@
 import * as accountRouter from "./account";
 import * as actionsRouter from "./actions";
 import * as agentRouter from "./agent";
+import * as analyticsRouter from "./analytics";
 import * as annotationsRouter from "./annotations";
 import * as apiKeysRouter from "./api-keys";
 import * as billingRouter from "./billing";
 import * as chatRouter from "./chat";
-import * as contentAnalyticsRouter from "./content-analytics";
 import * as contentRouter from "./content";
+import * as contentAnalyticsRouter from "./content-analytics";
 import * as dashboardsRouter from "./dashboards";
 import * as dataSourcesRouter from "./data-sources";
 import * as eventCatalogRouter from "./event-catalog";
@@ -22,26 +23,27 @@ import * as usageRouter from "./usage";
 import * as webhooksRouter from "./webhooks";
 
 export default {
-  account: accountRouter,
-  actions: actionsRouter,
-  agent: agentRouter,
-  annotations: annotationsRouter,
-  apiKeys: apiKeysRouter,
-  billing: billingRouter,
-  chat: chatRouter,
-  content: contentRouter,
-  contentAnalytics: contentAnalyticsRouter,
-  dashboards: dashboardsRouter,
-  dataSources: dataSourcesRouter,
-  eventCatalog: eventCatalogRouter,
-  forms: formsRouter,
-  insights: insightsRouter,
-  onboarding: onboardingRouter,
-  personalApiKey: personalApiKeyRouter,
-  propertyDefinitions: propertyDefinitionsRouter,
-  sdkUsage: sdkUsageRouter,
-  session: sessionRouter,
-  organization: organizationRouter,
-  usage: usageRouter,
-  webhooks: webhooksRouter,
+   account: accountRouter,
+   actions: actionsRouter,
+   agent: agentRouter,
+   analytics: analyticsRouter,
+   annotations: annotationsRouter,
+   apiKeys: apiKeysRouter,
+   billing: billingRouter,
+   chat: chatRouter,
+   content: contentRouter,
+   contentAnalytics: contentAnalyticsRouter,
+   dashboards: dashboardsRouter,
+   dataSources: dataSourcesRouter,
+   eventCatalog: eventCatalogRouter,
+   forms: formsRouter,
+   insights: insightsRouter,
+   onboarding: onboardingRouter,
+   personalApiKey: personalApiKeyRouter,
+   propertyDefinitions: propertyDefinitionsRouter,
+   sdkUsage: sdkUsageRouter,
+   session: sessionRouter,
+   organization: organizationRouter,
+   usage: usageRouter,
+   webhooks: webhooksRouter,
 };
