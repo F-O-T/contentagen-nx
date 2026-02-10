@@ -69,11 +69,9 @@ function NavItem({
             ) : (
                <Link
                   onClick={onMainItemClick}
-                  to={
-                     teamId
-                        ? item.route.replace("/$slug", `/${slug}/${teamId}`)
-                        : item.route
-                  }
+                  to={item.route
+                     .replace("$slug", slug)
+                     .replace("$teamId", teamId ?? "")}
                >
                   <Icon />
                   <span>{item.label}</span>
@@ -83,7 +81,7 @@ function NavItem({
 
          {/* Action buttons — hidden when sidebar is collapsed */}
          <div className="group-data-[collapsible=icon]:hidden">
-            <SidebarItemActions item={item} slug={slug} />
+            <SidebarItemActions item={item} slug={slug} teamId={teamId} />
          </div>
       </SidebarMenuItem>
    );
@@ -168,9 +166,9 @@ export function SidebarNav() {
 
    const isItemActive = useCallback(
       (item: NavItemDef) => {
-         const resolvedRoute = teamId
-            ? item.route.replace("/$slug", `/${slug}/${teamId}`)
-            : item.route.replace("$slug", slug);
+         const resolvedRoute = item.route
+            .replace("$slug", slug)
+            .replace("$teamId", teamId ?? "");
 
          if (item.subPanel) {
             return (

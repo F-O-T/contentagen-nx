@@ -1,6 +1,6 @@
 import { Store, useStore } from "@tanstack/react-store";
 
-export type SubSidebarSection = "dashboards" | "insights";
+export type SubSidebarSection = "dashboards" | "insights" | "data-management";
 
 const PINNED_STORAGE_KEY = "contentta:sidebar-pinned";
 

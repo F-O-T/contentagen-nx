@@ -3,7 +3,6 @@ import {
    CollapsibleContent,
    CollapsibleTrigger,
 } from "@packages/ui/components/collapsible";
-import { Input } from "@packages/ui/components/input";
 import {
    SidebarGroup,
    SidebarGroupContent,
@@ -15,8 +14,8 @@ import {
    SidebarMenuSubItem,
 } from "@packages/ui/components/sidebar";
 import { cn } from "@packages/ui/lib/utils";
-import { Link, useLocation } from "@tanstack/react-router";
-import { ChevronDown, ChevronRight, ExternalLink, Search } from "lucide-react";
+import { Link, useLocation, useParams } from "@tanstack/react-router";
+import { ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import {
@@ -47,19 +46,25 @@ function filterSection(
 function NavItem({
    item,
    slug,
+   teamId,
    pathname,
 }: {
    item: SettingsNavItemDef;
    slug: string;
+   teamId: string;
    pathname: string;
 }) {
    const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
-   const resolvedHref = item.href.replace("$slug", slug);
+   const resolvedHref = item.href
+      .replace("$slug", slug)
+      .replace("$teamId", teamId);
    const isActive = pathname === resolvedHref;
    const hasChildren = item.children && item.children.length > 0;
 
    const isChildActive = item.children?.some(
-      (child) => pathname === child.href.replace("$slug", slug),
+      (child) =>
+         pathname ===
+         child.href.replace("$slug", slug).replace("$teamId", teamId),
    );
 
    if (hasChildren) {
@@ -86,7 +91,9 @@ function NavItem({
                <CollapsibleContent>
                   <SidebarMenuSub>
                      {item.children?.map((child) => {
-                        const childResolved = child.href.replace("$slug", slug);
+                        const childResolved = child.href
+                           .replace("$slug", slug)
+                           .replace("$teamId", teamId);
                         const childActive = pathname === childResolved;
                         return (
                            <SidebarMenuSubItem key={child.id}>
@@ -96,7 +103,10 @@ function NavItem({
                                     childActive && "bg-primary/10 text-primary",
                                  )}
                               >
-                                 <Link params={{ slug }} to={child.href}>
+                                 <Link
+                                    params={{ slug, teamId }}
+                                    to={child.href}
+                                 >
                                     <span>{child.title}</span>
                                  </Link>
                               </SidebarMenuSubButton>
@@ -114,7 +124,7 @@ function NavItem({
       return (
          <SidebarMenuItem>
             <SidebarMenuButton asChild>
-               <Link params={{ slug }} to={item.href}>
+               <Link params={{ slug, teamId }} to={item.href}>
                   {item.icon && <item.icon className="size-4" />}
                   <span>{item.title}</span>
                   <ExternalLink className="ml-auto size-3.5 text-muted-foreground" />
@@ -133,7 +143,7 @@ function NavItem({
                item.danger && "text-destructive hover:text-destructive",
             )}
          >
-            <Link params={{ slug }} to={item.href}>
+            <Link params={{ slug, teamId }} to={item.href}>
                {item.icon && <item.icon className="size-4" />}
                <span>{item.title}</span>
             </Link>
@@ -145,11 +155,13 @@ function NavItem({
 function NavSection({
    section,
    slug,
+   teamId,
    pathname,
    forceOpen,
 }: {
    section: SettingsNavSection;
    slug: string;
+   teamId: string;
    pathname: string;
    forceOpen: boolean;
 }) {
@@ -181,6 +193,7 @@ function NavSection({
                            key={item.id}
                            pathname={pathname}
                            slug={slug}
+                           teamId={teamId}
                         />
                      ))}
                   </SidebarMenu>
@@ -191,10 +204,10 @@ function NavSection({
    );
 }
 
-export function SettingsSidebar() {
+export function SettingsSidebar({ search }: { search: string }) {
    const { activeOrganization } = useActiveOrganization();
+   const { teamId } = useParams({ strict: false });
    const { pathname } = useLocation();
-   const [search, setSearch] = useState("");
 
    const filteredSections = settingsNavSections.map((section) =>
       filterSection(section, search),
@@ -202,17 +215,6 @@ export function SettingsSidebar() {
 
    return (
       <>
-         <div className="px-3 py-2">
-            <div className="relative">
-               <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground pointer-events-none" />
-               <Input
-                  className="pl-8 h-9 bg-sidebar text-sm"
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Pesquisar configurações..."
-                  value={search}
-               />
-            </div>
-         </div>
          {filteredSections.map((section) => (
             <NavSection
                forceOpen={search.length > 0}
@@ -220,6 +222,7 @@ export function SettingsSidebar() {
                pathname={pathname}
                section={section}
                slug={activeOrganization.slug}
+               teamId={teamId ?? ""}
             />
          ))}
       </>

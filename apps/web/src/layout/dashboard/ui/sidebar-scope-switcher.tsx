@@ -166,7 +166,7 @@ function SidebarScopeSwitcherContent() {
 
          const nextPath = pathname.startsWith(`/${currentSlug}`)
             ? pathname.replace(`/${currentSlug}`, `/${org.slug}`)
-            : `/${org.slug}/home`;
+            : `/${org.slug}/${params.teamId ?? ""}/home`;
 
          router.navigate({ to: nextPath });
          setOrgOpen(false);
@@ -175,6 +175,7 @@ function SidebarScopeSwitcherContent() {
          activeOrganization.id,
          currentSlug,
          isPending,
+         params.teamId,
          pathname,
          router,
          setActiveOrganization,
@@ -251,8 +252,11 @@ function SidebarScopeSwitcherContent() {
                      <Button asChild>
                         <Link
                            onClick={closeCredenza}
-                           params={{ slug: currentSlug }}
-                           to="/$slug/billing"
+                           params={{
+                              slug: currentSlug,
+                              teamId: params.teamId ?? "",
+                           }}
+                           to="/$slug/$teamId/billing"
                         >
                            Ver planos
                         </Link>
@@ -287,7 +291,9 @@ function SidebarScopeSwitcherContent() {
    return (
       <SidebarMenu>
          <SidebarMenuItem>
-            <div className={`flex items-center ${isCollapsed ? "justify-center" : "gap-1.5"}`}>
+            <div
+               className={`flex items-center ${isCollapsed ? "justify-center" : "gap-1.5"}`}
+            >
                <Popover onOpenChange={setOrgOpen} open={orgOpen}>
                   <PopoverTrigger asChild>
                      <button
@@ -295,7 +301,9 @@ function SidebarScopeSwitcherContent() {
                         className={`flex shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent ${isCollapsed ? "w-full p-0" : "p-1.5"}`}
                         type="button"
                      >
-                        <Avatar className={`${isCollapsed ? "size-6" : "size-8"} rounded-md`}>
+                        <Avatar
+                           className={`${isCollapsed ? "size-6" : "size-8"} rounded-md`}
+                        >
                            <AvatarImage alt={activeOrganization.name} src="" />
                            <AvatarFallback
                               className={`rounded-md text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
@@ -405,7 +413,10 @@ function SidebarScopeSwitcherContent() {
                               </CommandEmpty>
                               <CommandGroup heading="Projetos">
                                  {activeTeam && (
-                                    <CommandItem disabled value={activeTeam.name}>
+                                    <CommandItem
+                                       disabled
+                                       value={activeTeam.name}
+                                    >
                                        <Check className="size-4" />
                                        <span className="truncate">
                                           {activeTeam.name}

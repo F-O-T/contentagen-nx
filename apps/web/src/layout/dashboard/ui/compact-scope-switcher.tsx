@@ -84,7 +84,10 @@ function CompactScopeSwitcherContent() {
    const { setActiveOrganization, isPending } = useSetActiveOrganization();
    const router = useRouter();
    const { pathname } = useLocation();
-   const params = useParams({ strict: false }) as { slug?: string };
+   const params = useParams({ strict: false }) as {
+      slug?: string;
+      teamId?: string;
+   };
    const currentSlug = params.slug ?? activeOrganization.slug;
    const { data: organizations } = useSuspenseQuery(
       orpc.organization.getOrganizations.queryOptions({}),
@@ -120,7 +123,7 @@ function CompactScopeSwitcherContent() {
 
          const nextPath = pathname.startsWith(`/${currentSlug}`)
             ? pathname.replace(`/${currentSlug}`, `/${org.slug}`)
-            : `/${org.slug}/home`;
+            : `/${org.slug}/${params.teamId ?? ""}/home`;
 
          router.navigate({ to: nextPath });
          setOpen(false);
@@ -129,6 +132,7 @@ function CompactScopeSwitcherContent() {
          activeOrganization.id,
          currentSlug,
          isPending,
+         params.teamId,
          pathname,
          router,
          setActiveOrganization,

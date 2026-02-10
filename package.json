@@ -5,6 +5,7 @@
       "@commitlint/cli": "20.2.0",
       "@commitlint/config-conventional": "20.2.0",
       "@elysiajs/eden": "^1.4.6",
+      "dotenv": "catalog:enviroment",
       "@nx/js": "22.3.1",
       "@swc-node/register": "1.11.1",
       "@swc/core": "1.15.7",
@@ -46,6 +47,7 @@
       "dev:server": "nx run-many -t dev --parallel=1 -p server ",
       "dev:worker": "nx run worker:dev",
       "doctor": "bun run scripts/doctor.ts",
+      "seed:events": "bun run scripts/seed-event-catalog.ts",
       "format": "biome check --write .",
       "prepare": "husky",
       "rag:reindex": "bun run scripts/reindex-content.ts",
@@ -103,6 +105,7 @@
             "typescript": "5.9.3"
          },
          "enviroment": {
+            "dotenv": "16.4.5",
             "dotenv-cli": "8.0.0",
             "shx": "0.4.0"
          },
@@ -146,13 +149,6 @@
             "react-email": "5.2.0",
             "resend": "6.4.2"
          },
-         "trpc": {
-            "@trpc/client": "^11.4.3",
-            "@trpc/server": "^11.4.3",
-            "@trpc/tanstack-react-query": "^11.4.3",
-            "superjson": "^2.2.2",
-            "url-join": "^5.0.0"
-         },
          "ui": {
             "@tailwindcss/vite": "^4.1.8",
             "framer-motion": "^12.23.12",
@@ -160,7 +156,7 @@
             "tailwindcss": "^4.1.16"
          },
          "validation": {
-            "zod": "4.2.1"
+            "zod": "4.3.6"
          },
          "vite": {
             "@tailwindcss/vite": "^4.1.8",

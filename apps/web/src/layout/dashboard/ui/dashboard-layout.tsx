@@ -62,6 +62,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
          setActiveSection("dashboards");
       } else if (pathname.includes("/analytics/insights")) {
          setActiveSection("insights");
+      } else if (pathname.includes("/analytics/data-management")) {
+         setActiveSection("data-management");
       } else {
          setActiveSection(null);
       }

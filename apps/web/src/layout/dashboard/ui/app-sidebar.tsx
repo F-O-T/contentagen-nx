@@ -38,8 +38,12 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 }
 
 function SidebarFooterContent() {
-   const params = useParams({ strict: false }) as { slug?: string };
+   const params = useParams({ strict: false }) as {
+      slug?: string;
+      teamId?: string;
+   };
    const slug = params.slug ?? "";
+   const teamId = params.teamId ?? "";
    const { toggleSidebar, state } = useSidebar();
 
    return (
@@ -55,7 +59,7 @@ function SidebarFooterContent() {
          </SidebarMenuItem>
          <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Configuracoes">
-               <Link params={{ slug }} to="/$slug/settings">
+               <Link params={{ slug, teamId }} to="/$slug/$teamId/settings">
                   <Settings />
                   <span>Configuracoes</span>
                </Link>

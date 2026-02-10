@@ -1,19 +1,30 @@
 import { Button } from "@packages/ui/components/button";
+import {
+   Collapsible,
+   CollapsibleContent,
+   CollapsibleTrigger,
+} from "@packages/ui/components/collapsible";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { cn } from "@packages/ui/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useParams } from "@tanstack/react-router";
+import { Link, useLocation, useParams } from "@tanstack/react-router";
 import {
+   ChevronDown,
    GitBranch,
    LayoutDashboard,
    Lightbulb,
    Plus,
    RotateCcw,
 } from "lucide-react";
-import { Suspense, useMemo } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { orpc } from "@/integrations/orpc/client";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
+import { dataManagementNavSections } from "./data-management-nav-items";
+import type {
+   SettingsNavItemDef,
+   SettingsNavSection,
+} from "./settings-nav-items";
 import { SubSidebarContextMenu } from "./sub-sidebar-context-menu";
 
 interface SubSidebarItemListProps {
@@ -58,6 +69,9 @@ function ItemListSkeleton() {
 function ItemListContent({ section, searchQuery }: SubSidebarItemListProps) {
    if (section === "dashboards") {
       return <DashboardList searchQuery={searchQuery} />;
+   }
+   if (section === "data-management") {
+      return <DataManagementItemList searchQuery={searchQuery} />;
    }
    return <InsightList searchQuery={searchQuery} />;
 }
@@ -218,6 +232,147 @@ function InsightList({ searchQuery }: { searchQuery: string }) {
             })}
          </ul>
       </div>
+   );
+}
+
+function filterSection(
+   section: SettingsNavSection,
+   query: string,
+): SettingsNavSection {
+   if (!query) return section;
+   const filteredItems = section.items.filter((item) =>
+      item.title.toLowerCase().includes(query.toLowerCase()),
+   );
+   return { ...section, items: filteredItems };
+}
+
+function DataManagementItemList({ searchQuery }: { searchQuery: string }) {
+   const params = useParams({ strict: false }) as {
+      slug?: string;
+      teamId?: string;
+   };
+   const slug = params.slug ?? "";
+   const teamId = params.teamId ?? "";
+   const { pathname } = useLocation();
+
+   const filteredSections = useMemo(
+      () =>
+         dataManagementNavSections.map((section) =>
+            filterSection(section, searchQuery),
+         ),
+      [searchQuery],
+   );
+
+   const hasResults = filteredSections.some(
+      (section) => section.items.length > 0,
+   );
+
+   if (!hasResults) {
+      return (
+         <div className="flex-1 flex items-center justify-center p-4">
+            <p className="text-sm text-muted-foreground text-center">
+               Nenhum item encontrado
+            </p>
+         </div>
+      );
+   }
+
+   return (
+      <div className="flex-1 overflow-y-auto p-1">
+         {filteredSections.map((section) => (
+            <DataManagementSection
+               forceOpen={searchQuery.length > 0}
+               key={section.id}
+               pathname={pathname}
+               section={section}
+               slug={slug}
+               teamId={teamId}
+            />
+         ))}
+      </div>
+   );
+}
+
+function DataManagementSection({
+   section,
+   slug,
+   teamId,
+   pathname,
+   forceOpen,
+}: {
+   section: SettingsNavSection;
+   slug: string;
+   teamId: string;
+   pathname: string;
+   forceOpen: boolean;
+}) {
+   const [isOpen, setIsOpen] = useState(section.defaultOpen);
+   const effectiveOpen = forceOpen || isOpen;
+
+   if (section.items.length === 0) return null;
+
+   return (
+      <Collapsible onOpenChange={setIsOpen} open={effectiveOpen}>
+         <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 group">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+               {section.label}
+            </span>
+            <ChevronDown
+               className={cn(
+                  "size-3.5 text-muted-foreground/50 transition-transform",
+                  !effectiveOpen && "-rotate-90",
+               )}
+            />
+         </CollapsibleTrigger>
+         <CollapsibleContent>
+            <ul className="flex flex-col gap-0.5 px-1 pb-1">
+               {section.items.map((item) => (
+                  <DataManagementNavItem
+                     item={item}
+                     key={item.id}
+                     pathname={pathname}
+                     slug={slug}
+                     teamId={teamId}
+                  />
+               ))}
+            </ul>
+         </CollapsibleContent>
+      </Collapsible>
+   );
+}
+
+function DataManagementNavItem({
+   item,
+   slug,
+   teamId,
+   pathname,
+}: {
+   item: SettingsNavItemDef;
+   slug: string;
+   teamId: string;
+   pathname: string;
+}) {
+   const resolvedHref = item.href
+      .replace("$slug", slug)
+      .replace("$teamId", teamId);
+   const isActive = pathname === resolvedHref;
+
+   return (
+      <li>
+         <Link
+            className={cn(
+               "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
+               isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-foreground hover:bg-accent",
+            )}
+            params={{ slug, teamId }}
+            to={item.href}
+         >
+            {item.icon && <item.icon className="size-4 flex-shrink-0" />}
+            <span className="truncate">{item.title}</span>
+         </Link>
+      </li>
    );
 }
 

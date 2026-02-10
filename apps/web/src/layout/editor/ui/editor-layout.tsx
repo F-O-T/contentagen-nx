@@ -100,8 +100,12 @@ export function EditorLayout({
    isStandalone = false,
 }: EditorLayoutProps) {
    const navigate = useNavigate();
-   const params = useParams({ strict: false });
-   const slug = params.slug as string;
+   const params = useParams({ strict: false }) as {
+      slug: string;
+      teamId: string;
+   };
+   const slug = params.slug;
+   const teamId = params.teamId;
    const diagnosticsOpen = useDiagnosticsPanel();
    const { open: chatOpen } = useChatSidebar();
    const { open: seoAuditOpen } = useSeoAuditSidebar();
@@ -145,8 +149,8 @@ export function EditorLayout({
 
    // Handle navigation back
    const handleBack = useCallback(() => {
-      navigate({ to: `/${slug}/content` });
-   }, [navigate, slug]);
+      navigate({ to: `/${slug}/${teamId}/content` });
+   }, [navigate, slug, teamId]);
 
    // Handle save with loading state
    const handleSave = useCallback(async () => {

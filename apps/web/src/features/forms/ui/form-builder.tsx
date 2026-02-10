@@ -72,7 +72,10 @@ interface FormBuilderProps {
 export function FormBuilder({ formId }: FormBuilderProps) {
    const isCreateMode = formId === "new";
    const navigate = useNavigate();
-   const { slug } = useParams({ strict: false });
+   const { slug, teamId } = useParams({ strict: false }) as {
+      slug?: string;
+      teamId?: string;
+   };
    const queryClient = useQueryClient();
 
    // ── State ──────────────────────────────────────────────────────────────
@@ -111,8 +114,8 @@ export function FormBuilder({ formId }: FormBuilderProps) {
                queryKey: orpc.forms.list.queryKey({}),
             });
             navigate({
-               to: "/$slug/forms",
-               params: { slug: slug || "" },
+               to: "/$slug/$teamId/forms",
+               params: { slug: slug || "", teamId: teamId || "" },
             });
          },
          onError: () => {
@@ -217,10 +220,10 @@ export function FormBuilder({ formId }: FormBuilderProps) {
 
    const handleCancel = useCallback(() => {
       navigate({
-         to: "/$slug/forms",
-         params: { slug: slug || "" },
+         to: "/$slug/$teamId/forms",
+         params: { slug: slug || "", teamId: teamId || "" },
       });
-   }, [navigate, slug]);
+   }, [navigate, slug, teamId]);
 
    // ── Loading state ──────────────────────────────────────────────────────
    if (!isCreateMode && isLoading) {
@@ -354,7 +357,11 @@ export function FormBuilder({ formId }: FormBuilderProps) {
             </TabsContent>
 
             <TabsContent value="preview">
-               <FormPreview name={name} description={description} fields={fields} />
+               <FormPreview
+                  description={description}
+                  fields={fields}
+                  name={name}
+               />
             </TabsContent>
          </Tabs>
       </div>

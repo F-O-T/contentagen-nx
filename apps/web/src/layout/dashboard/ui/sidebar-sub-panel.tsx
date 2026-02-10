@@ -8,13 +8,17 @@ import {
 import { cn } from "@packages/ui/lib/utils";
 import { Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useSidebarNav } from "../hooks/use-sidebar-nav";
+import {
+   type SubSidebarSection,
+   useSidebarNav,
+} from "../hooks/use-sidebar-nav";
 import { SubSidebarItemList } from "./sub-sidebar-item-list";
 import { SubSidebarNewMenu } from "./sub-sidebar-new-menu";
 
 const SECTION_TITLES: Record<string, string> = {
    dashboards: "Dashboards",
    insights: "Insights",
+   "data-management": "Dados",
 };
 
 export function SidebarSubPanel() {
@@ -32,7 +36,7 @@ export function SidebarSubPanel() {
 function SubPanelSidebar({
    activeSection,
 }: {
-   activeSection: "dashboards" | "insights" | null;
+   activeSection: SubSidebarSection | null;
 }) {
    const { open, setOpen } = useSidebar();
    const manager = useSidebarManager();
@@ -82,7 +86,9 @@ function SubPanelSidebar({
                      {SECTION_TITLES[activeSection]}
                   </h2>
                   <div className="flex items-center gap-0.5">
-                     <SubSidebarNewMenu section={activeSection} />
+                     {activeSection !== "data-management" && (
+                        <SubSidebarNewMenu section={activeSection} />
+                     )}
                      <button
                         aria-label="Fechar painel"
                         className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"

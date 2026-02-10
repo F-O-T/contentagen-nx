@@ -27,7 +27,7 @@ import {
 } from "@packages/ui/components/sidebar";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
+import { useParams, useRouter } from "@tanstack/react-router";
 import { BadgeCheck, CreditCard, LogOut, Sparkles } from "lucide-react";
 import { Suspense, useCallback } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -52,11 +52,13 @@ type Session = {
 function NavUserCredenza({
    session,
    activeOrganization,
+   teamId,
    onNavigate,
    onLogout,
 }: {
    session: Session;
    activeOrganization: { slug: string };
+   teamId: string;
    onNavigate: () => void;
    onLogout: () => void;
 }) {
@@ -76,7 +78,7 @@ function NavUserCredenza({
                onClick={onNavigate}
                variant="outline"
             >
-               <a href={`/${activeOrganization.slug}/billing`}>
+               <a href={`/${activeOrganization.slug}/${teamId}/billing`}>
                   <Sparkles className="size-4" />
                   {"Atualizar para Pro"}
                </a>
@@ -89,7 +91,9 @@ function NavUserCredenza({
                   onClick={onNavigate}
                   variant="outline"
                >
-                  <a href={`/${activeOrganization.slug}/settings/profile`}>
+                  <a
+                     href={`/${activeOrganization.slug}/${teamId}/settings/profile`}
+                  >
                      <BadgeCheck className="size-4" />
                      {"Conta"}
                   </a>
@@ -100,7 +104,7 @@ function NavUserCredenza({
                   onClick={onNavigate}
                   variant="outline"
                >
-                  <a href={`/${activeOrganization.slug}/billing`}>
+                  <a href={`/${activeOrganization.slug}/${teamId}/billing`}>
                      <CreditCard className="size-4" />
                      {"Cobrança"}
                   </a>
@@ -163,6 +167,11 @@ function NavUserContent() {
    const { isMobile, setOpenMobile } = useSidebar();
    const router = useRouter();
    const queryClient = useQueryClient();
+   const params = useParams({ strict: false }) as {
+      slug?: string;
+      teamId?: string;
+   };
+   const teamId = params.teamId ?? "";
    const { openCredenza, closeCredenza } = useCredenza();
    const { openAlertDialog } = useAlertDialog();
    const { data: session } = useSuspenseQuery(
@@ -219,6 +228,7 @@ function NavUserContent() {
                onLogout={handleLogoutClick}
                onNavigate={handleNavigate}
                session={currentSession}
+               teamId={teamId}
             />
          ),
       });
@@ -226,6 +236,7 @@ function NavUserContent() {
       openCredenza,
       session,
       activeOrganization,
+      teamId,
       handleNavigate,
       handleLogoutClick,
    ]);
@@ -301,7 +312,7 @@ function NavUserContent() {
                {/* Upgrade */}
                <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
-                     <a href={`/${activeOrganization.slug}/billing`}>
+                     <a href={`/${activeOrganization.slug}/${teamId}/billing`}>
                         <Sparkles />
                         {"Atualizar para Pro"}
                      </a>
@@ -312,13 +323,15 @@ function NavUserContent() {
                {/* Navigation */}
                <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
-                     <a href={`/${activeOrganization.slug}/settings/profile`}>
+                     <a
+                        href={`/${activeOrganization.slug}/${teamId}/settings/profile`}
+                     >
                         <BadgeCheck />
                         {"Conta"}
                      </a>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                     <a href={`/${activeOrganization.slug}/billing`}>
+                     <a href={`/${activeOrganization.slug}/${teamId}/billing`}>
                         <CreditCard />
                         {"Cobrança"}
                      </a>

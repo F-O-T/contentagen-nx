@@ -1,4 +1,3 @@
-import { TRPCError } from "@trpc/server";
 import type { ZodObject } from "zod";
 import { ZodError, type z } from "zod";
 
@@ -97,102 +96,8 @@ export class AppError extends Error {
    }
 }
 
-export class APIError extends TRPCError {
-   constructor(
-      code: ErrorCode,
-      message: string,
-      options?: {
-         cause?: unknown;
-         data?: unknown;
-      },
-   ) {
-      super({
-         code,
-         message,
-         ...options,
-      });
-      this.name = "APIError";
-   }
-
-   static fromAppError(error: AppError): APIError {
-      let code: ErrorCode = ErrorCodes.INTERNAL_SERVER_ERROR;
-
-      switch (error.status) {
-         case 400:
-            code = ErrorCodes.BAD_REQUEST;
-            break;
-         case 401:
-            code = ErrorCodes.UNAUTHORIZED;
-            break;
-         case 403:
-            code = ErrorCodes.FORBIDDEN;
-            break;
-         case 404:
-            code = ErrorCodes.NOT_FOUND;
-            break;
-         case 409:
-            code = ErrorCodes.CONFLICT;
-            break;
-         case 422:
-            code = ErrorCodes.UNPROCESSABLE_CONTENT;
-            break;
-         case 429:
-            code = ErrorCodes.TOO_MANY_REQUESTS;
-            break;
-         default:
-            code = ErrorCodes.INTERNAL_SERVER_ERROR;
-            break;
-      }
-
-      return new APIError(code, error.message, { cause: error });
-   }
-
-   static database(message: string): APIError {
-      return new APIError(
-         ErrorCodes.INTERNAL_SERVER_ERROR,
-         `Database error: ${message}`,
-      );
-   }
-
-   static validation(message: string): APIError {
-      return new APIError(
-         ErrorCodes.BAD_REQUEST,
-         `Validation error: ${message}`,
-      );
-   }
-   static unprocessableContent(message: string): APIError {
-      return new APIError(ErrorCodes.UNPROCESSABLE_CONTENT, message);
-   }
-
-   static notFound(message: string): APIError {
-      return new APIError(ErrorCodes.NOT_FOUND, message);
-   }
-
-   static unauthorized(message: string): APIError {
-      return new APIError(ErrorCodes.UNAUTHORIZED, message);
-   }
-
-   static forbidden(message: string): APIError {
-      return new APIError(ErrorCodes.FORBIDDEN, message);
-   }
-
-   static conflict(message: string): APIError {
-      return new APIError(ErrorCodes.CONFLICT, message);
-   }
-
-   static tooManyRequests(message: string): APIError {
-      return new APIError(ErrorCodes.TOO_MANY_REQUESTS, message);
-   }
-
-   static internal(message: string): APIError {
-      return new APIError(ErrorCodes.INTERNAL_SERVER_ERROR, message);
-   }
-}
 export function propagateError(err: unknown) {
    if (err instanceof AppError) {
-      throw err;
-   }
-   if (err instanceof APIError) {
       throw err;
    }
    return;

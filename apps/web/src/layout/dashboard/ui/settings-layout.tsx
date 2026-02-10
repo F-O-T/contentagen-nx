@@ -1,4 +1,5 @@
 import { Button } from "@packages/ui/components/button";
+import { Input } from "@packages/ui/components/input";
 import {
    Sidebar,
    SidebarContent,
@@ -8,9 +9,10 @@ import {
    SidebarProvider,
 } from "@packages/ui/components/sidebar";
 import { useIsMobile } from "@packages/ui/hooks/use-mobile";
-import { Link, useLocation } from "@tanstack/react-router";
-import { ChevronLeft } from "lucide-react";
+import { Link, useLocation, useParams } from "@tanstack/react-router";
+import { ChevronLeft, Search } from "lucide-react";
 import type * as React from "react";
+import { useState } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { SettingsMobileNav } from "./settings-mobile-nav";
 import { SettingsSidebar } from "./settings-sidebar";
@@ -22,7 +24,9 @@ interface SettingsLayoutProps {
 export function SettingsLayout({ children }: SettingsLayoutProps) {
    const isMobile = useIsMobile();
    const { pathname } = useLocation();
+   const { teamId } = useParams({ strict: false });
    const { activeOrganization } = useActiveOrganization();
+   const [search, setSearch] = useState("");
 
    const isIndexRoute = pathname.endsWith("/settings");
 
@@ -35,8 +39,8 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
          <div className="flex h-full flex-col gap-4">
             <Button asChild className="w-fit" size="sm" variant="ghost">
                <Link
-                  params={{ slug: activeOrganization.slug }}
-                  to="/$slug/settings"
+                  params={{ slug: activeOrganization.slug, teamId }}
+                  to="/$slug/$teamId/settings"
                >
                   <ChevronLeft className="size-4 mr-1" />
                   Configuracoes
@@ -59,10 +63,18 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
          <SidebarManager name="settings">
             <Sidebar className="sticky top-0 h-svh border-r" collapsible="none">
                <SidebarHeader className="px-3 pt-3 pb-0">
-                  <div className="flex items-center gap-2">Configuracoes</div>
+                  <div className="relative">
+                     <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground pointer-events-none" />
+                     <Input
+                        className="pl-8 h-9 bg-sidebar text-sm"
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Pesquisar configurações..."
+                        value={search}
+                     />
+                  </div>
                </SidebarHeader>
                <SidebarContent>
-                  <SettingsSidebar />
+                  <SettingsSidebar search={search} />
                </SidebarContent>
             </Sidebar>
          </SidebarManager>

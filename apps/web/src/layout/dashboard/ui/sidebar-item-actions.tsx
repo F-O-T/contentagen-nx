@@ -12,7 +12,15 @@ import { togglePinnedItem, useSidebarNav } from "../hooks/use-sidebar-nav";
 import type { NavItemDef } from "./sidebar-nav-items";
 import { SubSidebarNewMenu } from "./sub-sidebar-new-menu";
 
-function QuickCreateButton({ item, slug }: { item: NavItemDef; slug: string }) {
+function QuickCreateButton({
+   item,
+   slug,
+   teamId,
+}: {
+   item: NavItemDef;
+   slug: string;
+   teamId?: string | null;
+}) {
    const navigate = useNavigate();
 
    if (!item.quickAction) return null;
@@ -24,7 +32,9 @@ function QuickCreateButton({ item, slug }: { item: NavItemDef; slug: string }) {
 
    // For navigate items, go to the create route
    const handleCreate = () => {
-      const resolvedRoute = item.route.replace("$slug", slug);
+      const resolvedRoute = item.route
+         .replace("$slug", slug)
+         .replace("$teamId", teamId ?? "");
       void navigate({ to: `${resolvedRoute}/new` });
    };
 
@@ -35,12 +45,20 @@ function QuickCreateButton({ item, slug }: { item: NavItemDef; slug: string }) {
    );
 }
 
-function MoreMenu({ item }: { item: NavItemDef }) {
+function MoreMenu({
+   item,
+   teamId,
+}: {
+   item: NavItemDef;
+   teamId?: string | null;
+}) {
    const { pinnedItems } = useSidebarNav();
    const params = useParams({ strict: false }) as { slug?: string };
    const slug = params.slug ?? "";
    const isPinned = pinnedItems.includes(item.id);
-   const resolvedRoute = item.route.replace("$slug", slug);
+   const resolvedRoute = item.route
+      .replace("$slug", slug)
+      .replace("$teamId", teamId ?? "");
 
    const handleOpenNewTab = () => {
       window.open(resolvedRoute, "_blank");
@@ -78,15 +96,17 @@ function MoreMenu({ item }: { item: NavItemDef }) {
 export function SidebarItemActions({
    item,
    slug,
+   teamId,
 }: {
    item: NavItemDef;
    slug: string;
+   teamId?: string | null;
 }) {
    if (item.subPanel) {
       return null;
    }
    if (item.quickAction) {
-      return <QuickCreateButton item={item} slug={slug} />;
+      return <QuickCreateButton item={item} slug={slug} teamId={teamId} />;
    }
-   return <MoreMenu item={item} />;
+   return <MoreMenu item={item} teamId={teamId} />;
 }

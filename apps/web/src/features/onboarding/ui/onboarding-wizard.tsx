@@ -1,5 +1,5 @@
 import { defineStepper } from "@packages/ui/components/stepper";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { toast } from "sonner";
@@ -19,11 +19,15 @@ const { Stepper } = defineStepper(...steps);
 export function OnboardingWizard() {
    const navigate = useNavigate();
    const { slug } = useParams({ from: "/_authenticated/$slug/onboarding" });
+   const { data: teams } = useQuery(
+      orpc.organization.getOrganizationTeams.queryOptions({}),
+   );
 
    const completeMutation = useMutation(
       orpc.onboarding.completeOnboarding.mutationOptions({
          onSuccess: () => {
-            navigate({ to: "/$slug/home", params: { slug } });
+            const teamId = teams?.[0]?.id ?? "";
+            navigate({ to: "/$slug/$teamId/home", params: { slug, teamId } });
          },
          onError: (error) => {
             toast.error(error.message ?? "Erro ao concluir onboarding.");

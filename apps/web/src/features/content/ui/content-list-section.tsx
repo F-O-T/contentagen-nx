@@ -34,7 +34,10 @@ const STATUS_FILTER_OPTIONS = [
 
 export function ContentListSection() {
    const navigate = useNavigate();
-   const { slug } = useParams({ strict: false });
+   const { slug, teamId } = useParams({ strict: false }) as {
+      slug?: string;
+      teamId?: string;
+   };
    const [searchQuery, setSearchQuery] = useState("");
    const [statusFilter, setStatusFilter] = useState<string>("all");
    const [currentPage, setCurrentPage] = useState(1);
@@ -110,8 +113,12 @@ export function ContentListSection() {
       orpc.content.create.mutationOptions({
          onSuccess: (data) => {
             navigate({
-               to: "/$slug/$contentId",
-               params: { contentId: data.id },
+               to: "/$slug/$teamId/$contentId",
+               params: {
+                  slug: slug ?? "",
+                  teamId: teamId ?? "",
+                  contentId: data.id,
+               },
             });
          },
          onError: (error) => {
@@ -138,8 +145,12 @@ export function ContentListSection() {
    // Action handlers
    const handleView = (content: ContentItem) => {
       navigate({
-         to: "/$slug/$contentId",
-         params: { slug: slug || "", contentId: content.id },
+         to: "/$slug/$teamId/$contentId",
+         params: {
+            slug: slug ?? "",
+            teamId: teamId ?? "",
+            contentId: content.id,
+         },
       });
    };
 
@@ -232,8 +243,8 @@ export function ContentListSection() {
                         </EmptyDescription>
                         <Button
                            className="mt-4"
-                           onClick={handleCreateNew}
                            disabled={createContentMutation.isPending}
+                           onClick={handleCreateNew}
                         >
                            <Plus className="mr-2 size-4" />
                            Criar Conteúdo
@@ -316,8 +327,8 @@ export function ContentListSection() {
             </div>
 
             <Button
-               onClick={handleCreateNew}
                disabled={createContentMutation.isPending}
+               onClick={handleCreateNew}
             >
                <Plus className="mr-2 size-4" />
                Novo

@@ -19,8 +19,12 @@ export function ContentEditorPage({
    contentId,
    isStandalone = false,
 }: ContentEditorPageProps) {
-   const params = useParams({ strict: false });
-   const slug = params.slug as string;
+   const params = useParams({ strict: false }) as {
+      slug: string;
+      teamId: string;
+   };
+   const slug = params.slug;
+   const teamId = params.teamId;
    const navigate = useNavigate();
    const queryClient = useQueryClient();
 
@@ -94,7 +98,7 @@ export function ContentEditorPage({
    const deleteMutation = useMutation(
       orpc.content.remove.mutationOptions({
          onSuccess: () => {
-            navigate({ to: `/${slug}/content` });
+            navigate({ to: `/${slug}/${teamId}/content` });
          },
       }),
    );

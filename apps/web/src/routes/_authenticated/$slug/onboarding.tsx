@@ -8,10 +8,19 @@ export const Route = createFileRoute("/_authenticated/$slug/onboarding")({
       );
 
       if (status.onboardingCompleted) {
-         throw redirect({
-            to: "/$slug/home",
-            params: { slug: params.slug },
-         });
+         const teams = await context.queryClient.fetchQuery(
+            context.orpc.organization.getOrganizationTeams.queryOptions(),
+         );
+         const fallbackTeam = teams[0];
+
+         if (fallbackTeam) {
+            throw redirect({
+               to: "/$slug/$teamId/home",
+               params: { slug: params.slug, teamId: fallbackTeam.id },
+            });
+         }
+
+         // No teams exist yet — stay on onboarding
       }
    },
    component: OnboardingRoute,

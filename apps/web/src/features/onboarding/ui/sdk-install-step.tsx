@@ -18,6 +18,9 @@ export function SdkInstallStep() {
    const { data: org } = useQuery(
       orpc.organization.getActiveOrganization.queryOptions({}),
    );
+   const { data: teams } = useQuery(
+      orpc.organization.getOrganizationTeams.queryOptions({}),
+   );
 
    const [copiedKey, setCopiedKey] = useState(false);
    const [copiedInstall, setCopiedInstall] = useState(false);
@@ -26,7 +29,8 @@ export function SdkInstallStep() {
    const completeMutation = useMutation(
       orpc.onboarding.completeOnboarding.mutationOptions({
          onSuccess: () => {
-            navigate({ to: "/$slug/home", params: { slug } });
+            const teamId = teams?.[0]?.id ?? "";
+            navigate({ to: "/$slug/$teamId/home", params: { slug, teamId } });
          },
          onError: (error) => {
             toast.error(error.message ?? "Erro ao concluir onboarding.");

@@ -71,8 +71,8 @@ export function EditorCommandPalette({
 }: EditorCommandPaletteProps) {
    const isOpen = useCommandPalette();
    const navigate = useNavigate();
-   const { slug } = useParams({
-      from: "/_authenticated/$slug/_editor/$contentId",
+   const { slug, teamId } = useParams({
+      from: "/_authenticated/$slug/$teamId/_editor/$contentId",
    });
 
    // Build command list
@@ -170,7 +170,7 @@ export function EditorCommandPalette({
             icon: FileText,
             category: "navigation",
             action: () => {
-               navigate({ to: `/${slug}/content` });
+               navigate({ to: `/${slug}/${teamId}/content` });
             },
          },
          {
@@ -179,13 +179,13 @@ export function EditorCommandPalette({
             icon: Home,
             category: "navigation",
             action: () => {
-               navigate({ to: `/${slug}/home` });
+               navigate({ to: `/${slug}/${teamId}/home` });
             },
          },
       );
 
       return items;
-   }, [status, onSave, onPublish, onArchive, onDelete, navigate, slug]);
+   }, [status, onSave, onPublish, onArchive, onDelete, navigate, slug, teamId]);
 
    // Group commands by category
    const groupedCommands = useMemo(() => {
