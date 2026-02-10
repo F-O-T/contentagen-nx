@@ -1,104 +1,149 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@packages/ui/components/card";
+import type { InsightConfig } from "@packages/analytics/types";
 import { Button } from "@packages/ui/components/button";
+import {
+   Card,
+   CardContent,
+   CardHeader,
+   CardTitle,
+} from "@packages/ui/components/card";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import { cn } from "@packages/ui/lib/utils";
-import { GripVertical, Pencil, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { AlertCircle, GripVertical, Pencil, X } from "lucide-react";
+import { orpc } from "@/integrations/orpc/client";
+import { InsightPreview } from "./insight-preview";
 
 interface DashboardTileProps {
-	id: string;
-	insightName: string;
-	size: "sm" | "md" | "lg" | "full";
-	children: React.ReactNode;
-	onEdit?: () => void;
-	onRemove?: () => void;
+   id: string;
+   insightName: string;
+   size: "sm" | "md" | "lg" | "full";
+   children?: React.ReactNode;
+   insightId?: string;
+   onEdit?: () => void;
+   onRemove?: () => void;
 }
 
 const sizeClasses = {
-	sm: "col-span-12 md:col-span-3",
-	md: "col-span-12 md:col-span-6",
-	lg: "col-span-12 md:col-span-9",
-	full: "col-span-12",
+   sm: "col-span-12 md:col-span-3",
+   md: "col-span-12 md:col-span-6",
+   lg: "col-span-12 md:col-span-9",
+   full: "col-span-12",
 };
 
-export function DashboardTile({
-	id,
-	insightName,
-	size,
-	children,
-	onEdit,
-	onRemove,
-}: DashboardTileProps) {
-	const {
-		attributes,
-		listeners,
-		setNodeRef,
-		transform,
-		transition,
-		isDragging,
-	} = useSortable({ id });
-	const style = {
-		transform: CSS.Transform.toString(transform),
-		transition,
-	};
+function TileLoadingSkeleton() {
+   return (
+      <div className="space-y-3 p-1">
+         <Skeleton className="h-4 w-2/3" />
+         <Skeleton className="h-[160px] w-full" />
+      </div>
+   );
+}
 
-	return (
-		<div
-			ref={setNodeRef}
-			style={style}
-			className={cn(sizeClasses[size], isDragging && "opacity-50 z-10")}
-		>
-			<Card className="h-full">
-				<CardHeader className="pb-3">
-					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-2">
-							<button
-								type="button"
-								className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
-								{...attributes}
-								{...listeners}
-							>
-								<GripVertical className="size-4" />
-							</button>
-							<CardTitle className="text-sm font-medium">
-								{insightName}
-							</CardTitle>
-						</div>
-						<div className="flex items-center gap-1">
-							{onEdit && (
-								<Button
-									variant="ghost"
-									size="icon"
-									className="size-7"
-									onClick={onEdit}
-								>
-									<Pencil className="size-3.5" />
-								</Button>
-							)}
-							{onRemove && (
-								<Button
-									variant="ghost"
-									size="icon"
-									className="size-7"
-									onClick={onRemove}
-								>
-									<X className="size-3.5" />
-								</Button>
-							)}
-						</div>
-					</div>
-				</CardHeader>
-				<CardContent>{children}</CardContent>
-				<CardFooter className="text-xs text-muted-foreground pt-3">
-					Sample data
-				</CardFooter>
-			</Card>
-		</div>
-	);
+function TileErrorState({ error }: { error: Error }) {
+   return (
+      <div className="flex flex-col items-center justify-center h-40 gap-2 text-muted-foreground">
+         <AlertCircle className="size-5 text-destructive/60" />
+         <p className="text-xs text-center">{error.message}</p>
+      </div>
+   );
+}
+
+function DashboardInsightContent({ insightId }: { insightId: string }) {
+   const {
+      data: insight,
+      isLoading,
+      error,
+   } = useQuery(
+      orpc.insights.getById.queryOptions({
+         input: { id: insightId },
+      }),
+   );
+
+   if (isLoading) return <TileLoadingSkeleton />;
+   if (error) return <TileErrorState error={error} />;
+   if (!insight) return null;
+
+   return <InsightPreview config={insight.config as InsightConfig} />;
+}
+
+export function DashboardTile({
+   id,
+   insightName,
+   size,
+   children,
+   insightId,
+   onEdit,
+   onRemove,
+}: DashboardTileProps) {
+   const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+   } = useSortable({ id });
+   const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+   };
+
+   return (
+      <div
+         className={cn(sizeClasses[size], isDragging && "opacity-50 z-10")}
+         ref={setNodeRef}
+         style={style}
+      >
+         <Card className="h-full">
+            <CardHeader className="pb-3">
+               <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                     <button
+                        className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+                        type="button"
+                        {...attributes}
+                        {...listeners}
+                     >
+                        <GripVertical className="size-4" />
+                     </button>
+                     <CardTitle className="text-sm font-medium">
+                        {insightName}
+                     </CardTitle>
+                  </div>
+                  <div className="flex items-center gap-1">
+                     {onEdit && (
+                        <Button
+                           className="size-7"
+                           onClick={onEdit}
+                           size="icon"
+                           variant="ghost"
+                        >
+                           <Pencil className="size-3.5" />
+                        </Button>
+                     )}
+                     {onRemove && (
+                        <Button
+                           className="size-7"
+                           onClick={onRemove}
+                           size="icon"
+                           variant="ghost"
+                        >
+                           <X className="size-3.5" />
+                        </Button>
+                     )}
+                  </div>
+               </div>
+            </CardHeader>
+            <CardContent>
+               {insightId ? (
+                  <DashboardInsightContent insightId={insightId} />
+               ) : (
+                  children
+               )}
+            </CardContent>
+         </Card>
+      </div>
+   );
 }
