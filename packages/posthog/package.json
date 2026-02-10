@@ -40,10 +40,6 @@
       "./llm/ai-span": {
          "default": "./src/llm/ai-span.ts",
          "types": "./dist/src/llm/ai-span.d.ts"
-      },
-      "./analytics/*": {
-         "default": "./src/analytics/*.ts",
-         "types": "./dist/src/analytics/*.d.ts"
       }
    },
    "files": [
