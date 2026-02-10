@@ -17,10 +17,12 @@ import { InsightPreview } from "./insight-preview";
 
 interface DashboardTileProps {
    id: string;
-   insightName: string;
+   insightName?: string;
    size: "sm" | "md" | "lg" | "full";
    children?: React.ReactNode;
    insightId?: string;
+   isEditing?: boolean;
+   headerActions?: React.ReactNode;
    onEdit?: () => void;
    onRemove?: () => void;
 }
@@ -68,12 +70,31 @@ function DashboardInsightContent({ insightId }: { insightId: string }) {
    return <InsightPreview config={insight.config as InsightConfig} />;
 }
 
+/**
+ * Hook to resolve the insight name when insightId is provided.
+ * Returns the explicit name if given, or the fetched insight name, or a loading placeholder.
+ */
+function useInsightName(insightName?: string, insightId?: string): string {
+   const { data: insight } = useQuery({
+      ...orpc.insights.getById.queryOptions({
+         input: { id: insightId ?? "" },
+      }),
+      enabled: !!insightId && !insightName,
+   });
+
+   if (insightName) return insightName;
+   if (insight) return insight.name;
+   return "";
+}
+
 export function DashboardTile({
    id,
    insightName,
    size,
    children,
    insightId,
+   isEditing = true,
+   headerActions,
    onEdit,
    onRemove,
 }: DashboardTileProps) {
@@ -84,11 +105,13 @@ export function DashboardTile({
       transform,
       transition,
       isDragging,
-   } = useSortable({ id });
+   } = useSortable({ id, disabled: !isEditing });
    const style = {
       transform: CSS.Transform.toString(transform),
       transition,
    };
+
+   const resolvedName = useInsightName(insightName, insightId);
 
    return (
       <div
@@ -96,23 +119,26 @@ export function DashboardTile({
          ref={setNodeRef}
          style={style}
       >
-         <Card className="h-full">
+         <Card className="h-full relative">
             <CardHeader className="pb-3">
                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                     <button
-                        className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
-                        type="button"
-                        {...attributes}
-                        {...listeners}
-                     >
-                        <GripVertical className="size-4" />
-                     </button>
+                     {isEditing && (
+                        <button
+                           className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+                           type="button"
+                           {...attributes}
+                           {...listeners}
+                        >
+                           <GripVertical className="size-4" />
+                        </button>
+                     )}
                      <CardTitle className="text-sm font-medium">
-                        {insightName}
+                        {resolvedName}
                      </CardTitle>
                   </div>
                   <div className="flex items-center gap-1">
+                     {headerActions}
                      {onEdit && (
                         <Button
                            className="size-7"
