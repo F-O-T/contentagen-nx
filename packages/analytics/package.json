@@ -1,0 +1,52 @@
+{
+   "dependencies": {
+      "zod": "catalog:validation"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "typescript": "catalog:development"
+   },
+   "exports": {
+      "./types": {
+         "default": "./src/types.ts",
+         "types": "./dist/src/types.d.ts"
+      },
+      "./trends": {
+         "default": "./src/trends.ts",
+         "types": "./dist/src/trends.d.ts"
+      },
+      "./funnels": {
+         "default": "./src/funnels.ts",
+         "types": "./dist/src/funnels.d.ts"
+      },
+      "./retention": {
+         "default": "./src/retention.ts",
+         "types": "./dist/src/retention.d.ts"
+      },
+      "./formula": {
+         "default": "./src/formula.ts",
+         "types": "./dist/src/formula.d.ts"
+      },
+      "./date-ranges": {
+         "default": "./src/date-ranges.ts",
+         "types": "./dist/src/date-ranges.d.ts"
+      },
+      "./default-dashboard": {
+         "default": "./src/default-dashboard.ts",
+         "types": "./dist/src/default-dashboard.d.ts"
+      }
+   },
+   "files": [
+      "dist"
+   ],
+   "name": "@packages/analytics",
+   "private": true,
+   "scripts": {
+      "build": "tsc --build",
+      "check": "biome check --write ./src",
+      "test": "bun test --pass-with-no-tests",
+      "typecheck": "tsc"
+   },
+   "type": "module",
+   "version": "0.1.0"
+}
