@@ -9,8 +9,15 @@ import {
    getOrCreateChatSession,
 } from "@packages/database/repositories/chat-repository";
 import type { StoredToolCall } from "@packages/database/schemas/chat";
-import { AI_EVENTS, emitAiChatMessage, emitAiCompletion } from "@packages/events/ai";
-import { enforceCreditBudget, trackCreditUsage } from "@packages/events/credits";
+import {
+   AI_EVENTS,
+   emitAiChatMessage,
+   emitAiCompletion,
+} from "@packages/events/ai";
+import {
+   enforceCreditBudget,
+   trackCreditUsage,
+} from "@packages/events/credits";
 import { z } from "zod";
 import {
    type ChatChunk,
@@ -32,7 +39,7 @@ import { protectedProcedure } from "../server";
 export const fimStream = protectedProcedure
    .input(FIMRequestSchema)
    .handler(async function* ({ context, input }) {
-      const { userId, db, organizationId, posthog, teamId } = context;
+      const { userId, db, organizationId, posthog, teamId, headers } = context;
 
       await enforceCreditBudget(db, organizationId, "ai");
 
@@ -42,6 +49,7 @@ export const fimStream = protectedProcedure
       // Create request context for the agent
       const requestContext = createRequestContext({
          userId,
+         language: getRequestLanguage(headers),
       } as CustomRequestContext);
 
       // Build the prompt from FIM request
@@ -84,7 +92,12 @@ export const fimStream = protectedProcedure
                   streamed: true,
                },
             );
-            await trackCreditUsage(db, AI_EVENTS["ai.completion"], organizationId, "ai");
+            await trackCreditUsage(
+               db,
+               AI_EVENTS["ai.completion"],
+               organizationId,
+               "ai",
+            );
          } catch {
             // Event tracking must not break the streaming flow
          }
@@ -118,7 +131,7 @@ export const fimStream = protectedProcedure
 export const editStream = protectedProcedure
    .input(EditRequestSchema)
    .handler(async function* ({ context, input }) {
-      const { userId, db, organizationId, posthog, teamId } = context;
+      const { userId, db, organizationId, posthog, teamId, headers } = context;
 
       await enforceCreditBudget(db, organizationId, "ai");
 
@@ -128,6 +141,7 @@ export const editStream = protectedProcedure
       // Create request context
       const requestContext = createRequestContext({
          userId,
+         language: getRequestLanguage(headers),
       } as CustomRequestContext);
 
       // Build the prompt from edit request
@@ -170,7 +184,12 @@ export const editStream = protectedProcedure
                   streamed: true,
                },
             );
-            await trackCreditUsage(db, AI_EVENTS["ai.completion"], organizationId, "ai");
+            await trackCreditUsage(
+               db,
+               AI_EVENTS["ai.completion"],
+               organizationId,
+               "ai",
+            );
          } catch {
             // Event tracking must not break the streaming flow
          }
@@ -191,7 +210,7 @@ export const editStream = protectedProcedure
 
 /**
  * Chat streaming completion
- * Uses Mastra's writerAgent for chat conversations
+ * Uses Mastra's orchestratorAgent for chat conversations
  * Yields full stream events including tool calls
  * Saves messages to database for persistence
  */
@@ -204,7 +223,7 @@ export const chatStream = protectedProcedure
       }),
    )
    .handler(async function* ({ context, input }) {
-      const { userId, db, organizationId, posthog, teamId } = context;
+      const { userId, db, organizationId, posthog, teamId, headers } = context;
 
       await enforceCreditBudget(db, organizationId, "ai");
 
@@ -224,13 +243,14 @@ export const chatStream = protectedProcedure
          await addChatMessage(db, session.id, "user", input.message);
       }
 
-      // Get the writer agent from Mastra for chat
-      const writerAgent = mastra.getAgent("writerAgent");
+      // Get the orchestrator agent from Mastra for chat
+      const orchestratorAgent = mastra.getAgent("orchestratorAgent");
 
       // Create request context
       const requestContext = createRequestContext({
          userId,
          contentId: input.contentId,
+         language: getRequestLanguage(headers),
       } as CustomRequestContext);
 
       let stepIndex = 0;
@@ -243,11 +263,11 @@ export const chatStream = protectedProcedure
 
       try {
          // Stream the agent response
-         const result = await writerAgent.stream(
+         const result = await orchestratorAgent.stream(
             [{ role: "user", content: input.message }],
             {
                requestContext: requestContext as RequestContext<unknown>,
-            } as unknown as Parameters<typeof writerAgent.stream>[1],
+            } as unknown as Parameters<typeof orchestratorAgent.stream>[1],
          );
 
          // Yield full stream events including tool calls
@@ -371,7 +391,7 @@ export const chatStream = protectedProcedure
                   {
                      chatId: session.id,
                      contentId: input.contentId,
-                     model: "writerAgent",
+                     model: "orchestratorAgent",
                      provider: "openrouter",
                      role: "assistant",
                      promptTokens: 0,
@@ -380,12 +400,17 @@ export const chatStream = protectedProcedure
                      latencyMs,
                   },
                );
-               await trackCreditUsage(db, AI_EVENTS["ai.chat_message"], organizationId, "ai");
+               await trackCreditUsage(
+                  db,
+                  AI_EVENTS["ai.chat_message"],
+                  organizationId,
+                  "ai",
+               );
             } else {
                await emitAiCompletion(
                   { db, posthog, organizationId, userId, teamId },
                   {
-                     model: "writerAgent",
+                     model: "orchestratorAgent",
                      provider: "openrouter",
                      promptTokens: 0,
                      completionTokens: 0,
@@ -394,7 +419,12 @@ export const chatStream = protectedProcedure
                      streamed: true,
                   },
                );
-               await trackCreditUsage(db, AI_EVENTS["ai.completion"], organizationId, "ai");
+               await trackCreditUsage(
+                  db,
+                  AI_EVENTS["ai.completion"],
+                  organizationId,
+                  "ai",
+               );
             }
          } catch {
             // Event tracking must not break the streaming flow
@@ -477,4 +507,14 @@ function buildEditPrompt(request: z.infer<typeof EditRequestSchema>): string {
    }
 
    return prompt;
+}
+
+/**
+ * Resolve language from request headers for agent context.
+ */
+function getRequestLanguage(headers: Headers): string | undefined {
+   const raw = headers.get("accept-language");
+   if (!raw) return undefined;
+   const [primary] = raw.split(",");
+   return primary?.trim() || undefined;
 }
