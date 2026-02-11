@@ -2,24 +2,17 @@ import { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
 import type { PgVector } from "@mastra/pg";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
+import type { ModelId } from "../models";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
 import { pgVectorStore } from "./agents/shared";
 import { writerAgent } from "./agents/writer-agent";
 
-// Available models
-export type ModelId =
-   | "openrouter/x-ai/grok-4.1-fast"
-   | "openrouter/minimax/minimax-m2.1"
-   | "openrouter/mistralai/mistral-small-creative";
-
 export type CustomRequestContext = {
    brandId?: string;
    userId: string;
    writerId?: string;
-   // Fields for blog editor
    model?: ModelId;
-   // Instruction memories (compiled into agent prompts)
    writerInstructions?: InstructionMemoryItem[];
 };
 
@@ -67,8 +60,3 @@ export function createRequestContext(context: CustomRequestContext) {
    }
    return requestContext;
 }
-
-export { fimAgent } from "./agents/fim-agent";
-export { inlineEditAgent } from "./agents/inline-edit-agent";
-// Export agents for direct access
-export { writerAgent } from "./agents/writer-agent";

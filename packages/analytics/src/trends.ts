@@ -1,5 +1,6 @@
 import type { DatabaseInstance } from "@packages/database/client";
 import { events } from "@packages/database/schema";
+import { AppError, propagateError } from "@packages/utils/errors";
 import { sql } from "drizzle-orm";
 
 import {
@@ -175,7 +176,7 @@ export async function executeSeriesQuery(
    end: Date,
    seriesIndex: number,
 ): Promise<TrendsDataPoint[]> {
-   const intervalTrunc = sql.raw(config.interval);
+   const intervalTrunc = sql.raw(`'${config.interval}'`);
    const aggregation = buildAggregation(series);
 
    const filterConditions = (config.filters ?? []).map(buildFilterCondition);
@@ -212,14 +213,22 @@ export async function executeSeriesQuery(
 		ORDER BY interval_start ASC
 	`;
 
-   const rows = await db.execute<RawSeriesRow>(query);
+   try {
+      const rows = await db.execute<RawSeriesRow>(query);
 
-   return rows.rows.map((row) => ({
-      intervalStart: new Date(row.interval_start).toISOString(),
-      value: Number(row.value) || 0,
-      breakdownValue: row.breakdown_value ?? null,
-      seriesIndex,
-   }));
+      return rows.rows.map((row) => ({
+         intervalStart: new Date(row.interval_start).toISOString(),
+         value: Number(row.value) || 0,
+         breakdownValue: row.breakdown_value ?? null,
+         seriesIndex,
+      }));
+   } catch (error) {
+      propagateError(error);
+      throw AppError.database(
+         `Failed to execute trends query for series "${series.event}"`,
+         { cause: error },
+      );
+   }
 }
 
 // ──────────────────────────────────────────────
@@ -234,19 +243,23 @@ function buildAggregation(series: TrendsSeries) {
          return sql`COUNT(DISTINCT ${events.userId})`;
       case "sum": {
          const prop = series.mathProperty ?? "";
-         return sql`SUM((${events.properties}->>${prop})::numeric)`;
+         if (!prop) return sql`COUNT(*)`;
+         return sql`COALESCE(SUM(CASE WHEN ${events.properties}->>${prop} ~ '^-?[0-9]*\\.?[0-9]+$' THEN (${events.properties}->>${prop})::numeric ELSE NULL END), 0)`;
       }
       case "avg": {
          const prop = series.mathProperty ?? "";
-         return sql`AVG((${events.properties}->>${prop})::numeric)`;
+         if (!prop) return sql`COUNT(*)`;
+         return sql`COALESCE(AVG(CASE WHEN ${events.properties}->>${prop} ~ '^-?[0-9]*\\.?[0-9]+$' THEN (${events.properties}->>${prop})::numeric ELSE NULL END), 0)`;
       }
       case "min": {
          const prop = series.mathProperty ?? "";
-         return sql`MIN((${events.properties}->>${prop})::numeric)`;
+         if (!prop) return sql`COUNT(*)`;
+         return sql`MIN(CASE WHEN ${events.properties}->>${prop} ~ '^-?[0-9]*\\.?[0-9]+$' THEN (${events.properties}->>${prop})::numeric ELSE NULL END)`;
       }
       case "max": {
          const prop = series.mathProperty ?? "";
-         return sql`MAX((${events.properties}->>${prop})::numeric)`;
+         if (!prop) return sql`COUNT(*)`;
+         return sql`MAX(CASE WHEN ${events.properties}->>${prop} ~ '^-?[0-9]*\\.?[0-9]+$' THEN (${events.properties}->>${prop})::numeric ELSE NULL END)`;
       }
    }
 }
@@ -257,7 +270,7 @@ function buildAggregation(series: TrendsSeries) {
 
 export function buildFilterCondition(filter: Filter) {
    const propAccess = sql`${events.properties}->>${filter.property}`;
-   const numericPropAccess = sql`(${events.properties}->>${filter.property})::numeric`;
+   const safeNumericAccess = sql`CASE WHEN ${events.properties}->>${filter.property} ~ '^-?[0-9]*\\.?[0-9]+$' THEN (${events.properties}->>${filter.property})::numeric ELSE NULL END`;
 
    switch (filter.operator) {
       case "eq":
@@ -265,17 +278,17 @@ export function buildFilterCondition(filter: Filter) {
       case "neq":
          return sql`${propAccess} != ${String(filter.value)}`;
       case "gt":
-         return sql`${numericPropAccess} > ${Number(filter.value)}`;
+         return sql`${safeNumericAccess} > ${Number(filter.value)}`;
       case "lt":
-         return sql`${numericPropAccess} < ${Number(filter.value)}`;
+         return sql`${safeNumericAccess} < ${Number(filter.value)}`;
       case "gte":
-         return sql`${numericPropAccess} >= ${Number(filter.value)}`;
+         return sql`${safeNumericAccess} >= ${Number(filter.value)}`;
       case "lte":
-         return sql`${numericPropAccess} <= ${Number(filter.value)}`;
+         return sql`${safeNumericAccess} <= ${Number(filter.value)}`;
       case "contains":
-         return sql`${propAccess} ILIKE ${"%" + String(filter.value) + "%"}`;
+         return sql`${propAccess} ILIKE ${`%${String(filter.value)}%`}`;
       case "not_contains":
-         return sql`${propAccess} NOT ILIKE ${"%" + String(filter.value) + "%"}`;
+         return sql`${propAccess} NOT ILIKE ${`%${String(filter.value)}%`}`;
       case "is_set":
          return sql`${events.properties} ? ${filter.property}`;
       case "is_not_set":
@@ -332,7 +345,12 @@ export function computeFormulaTimeSeries(
          values[letter] = intervalMap?.get(interval) ?? 0;
       }
 
-      const result = evaluateFormula(formula, values);
+      let result: number | null;
+      try {
+         result = evaluateFormula(formula, values);
+      } catch {
+         result = null;
+      }
       formulaData.push({
          intervalStart: interval,
          value: result ?? 0,

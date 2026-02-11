@@ -45,7 +45,7 @@ function ErrorState({ error }: { error: Error }) {
       <div className="flex flex-col items-center justify-center h-64 gap-3 text-muted-foreground">
          <AlertCircle className="size-8 text-destructive/60" />
          <p className="text-sm text-center max-w-xs">
-            Failed to load preview: {error.message}
+            Erro ao carregar prévia: {error.message}
          </p>
       </div>
    );
@@ -55,7 +55,9 @@ function EmptyState() {
    return (
       <div className="flex flex-col items-center justify-center h-64 gap-3 text-muted-foreground">
          <BarChart3 className="size-8" />
-         <p className="text-sm">No data available for this configuration</p>
+         <p className="text-sm">
+            Nenhum dado disponível para esta configuração
+         </p>
       </div>
    );
 }
@@ -84,7 +86,7 @@ function TrendsPreview({
    if (series.length === 0) {
       return (
          <div className="flex items-center justify-center h-64 text-muted-foreground">
-            Add an event to see a preview
+            Adicione um evento para ver a prévia
          </div>
       );
    }
@@ -148,8 +150,8 @@ function TrendsPreview({
         ]
       : series;
 
-   const xAxisFormatter = (v: string) =>
-      new Date(v).toLocaleDateString("pt-BR", {
+   const xAxisFormatter = (value: string) =>
+      new Date(value).toLocaleDateString("pt-BR", {
          day: "numeric",
          month: "short",
       });
@@ -216,7 +218,7 @@ function FunnelsPreview({
    if (config.steps.length < 2) {
       return (
          <div className="flex items-center justify-center h-64 text-muted-foreground">
-            Add at least 2 steps to see a preview
+            Adicione pelo menos 2 etapas para ver a prévia
          </div>
       );
    }
@@ -287,7 +289,7 @@ export function InsightPreview({ config }: InsightPreviewProps) {
       <Card className="h-full">
          <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-               Preview
+               Prévia
             </CardTitle>
          </CardHeader>
          <CardContent>

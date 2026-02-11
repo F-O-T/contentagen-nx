@@ -8,6 +8,9 @@
     },
     {
       "path": "../events"
+    },
+    {
+      "path": "../analytics"
     }
   ]
 }

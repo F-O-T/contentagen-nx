@@ -3,6 +3,7 @@ import { executeRetentionQuery } from "@packages/analytics/retention";
 import { executeTrendsQuery } from "@packages/analytics/trends";
 import { insightConfigSchema } from "@packages/analytics/types";
 import { getDefaultDashboard as fetchDefaultDashboard } from "@packages/database/repositories/dashboard-repository";
+import { AppError, propagateError } from "@packages/utils/errors";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -19,13 +20,32 @@ export const query = protectedProcedure
    .handler(async ({ context, input }) => {
       const { db, organizationId } = context;
 
-      switch (input.config.type) {
-         case "trends":
-            return executeTrendsQuery(db, organizationId, input.config);
-         case "funnels":
-            return executeFunnelsQuery(db, organizationId, input.config);
-         case "retention":
-            return executeRetentionQuery(db, organizationId, input.config);
+      try {
+         switch (input.config.type) {
+            case "trends":
+               return await executeTrendsQuery(
+                  db,
+                  organizationId,
+                  input.config,
+               );
+            case "funnels":
+               return await executeFunnelsQuery(
+                  db,
+                  organizationId,
+                  input.config,
+               );
+            case "retention":
+               return await executeRetentionQuery(
+                  db,
+                  organizationId,
+                  input.config,
+               );
+         }
+      } catch (error) {
+         propagateError(error);
+         throw AppError.internal("Failed to execute analytics query", {
+            cause: error,
+         });
       }
    });
 
@@ -35,6 +55,14 @@ export const query = protectedProcedure
 export const getDefaultDashboard = protectedProcedure.handler(
    async ({ context }) => {
       const { db, organizationId } = context;
-      return fetchDefaultDashboard(db, organizationId);
+
+      try {
+         return await fetchDefaultDashboard(db, organizationId);
+      } catch (error) {
+         propagateError(error);
+         throw AppError.internal("Failed to fetch default dashboard", {
+            cause: error,
+         });
+      }
    },
 );

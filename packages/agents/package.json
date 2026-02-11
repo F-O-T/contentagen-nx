@@ -26,21 +26,17 @@
          "default": "./src/mastra/index.ts",
          "types": "./dist/src/mastra/index.d.ts"
       },
-      "./mastra/rag": {
-         "default": "./src/mastra/rag/index.ts",
-         "types": "./dist/src/mastra/rag/index.d.ts"
+      "./models": {
+         "default": "./src/models.ts",
+         "types": "./dist/src/models.d.ts"
       },
-      "./mastra/tools/analysis": {
-         "default": "./src/mastra/tools/analysis/index.ts",
-         "types": "./dist/src/mastra/tools/analysis/index.d.ts"
+      "./rag/rag-service": {
+         "default": "./src/mastra/rag/rag-service.ts",
+         "types": "./dist/src/mastra/rag/rag-service.d.ts"
       },
-      "./mastra/utils/fim-confidence": {
-         "default": "./src/mastra/utils/fim-confidence.ts",
-         "types": "./dist/src/mastra/utils/fim-confidence.d.ts"
-      },
-      "./mastra/scorers/fim-quality-scorer": {
-         "default": "./src/mastra/scorers/fim-quality-scorer.ts",
-         "types": "./dist/src/mastra/scorers/fim-quality-scorer.d.ts"
+      "./rag/content-indexer": {
+         "default": "./src/mastra/rag/content-indexer.ts",
+         "types": "./dist/src/mastra/rag/content-indexer.d.ts"
       }
    },
    "files": [

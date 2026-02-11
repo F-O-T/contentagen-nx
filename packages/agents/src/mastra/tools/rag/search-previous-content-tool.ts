@@ -2,12 +2,6 @@ import { createTool } from "@mastra/core/tools";
 import { AppError, propagateError } from "@packages/utils/errors";
 import { embed } from "ai";
 import { z } from "zod";
-import type {
-   ContentChunkMetadata,
-   ContentMetadata,
-   RelatedPost,
-   RelevantChunk,
-} from "../../rag";
 import {
    CONTENT_CHUNKS_INDEX,
    CONTENT_METADATA_INDEX,
@@ -15,7 +9,13 @@ import {
    initializeRagService,
    isRagAvailable,
    ragService,
-} from "../../rag";
+} from "../../rag/rag-service";
+import type {
+   ContentChunkMetadata,
+   ContentMetadata,
+   RelatedPost,
+   RelevantChunk,
+} from "../../rag/types";
 
 export function getSearchPreviousContentInstructions(): string {
    return `

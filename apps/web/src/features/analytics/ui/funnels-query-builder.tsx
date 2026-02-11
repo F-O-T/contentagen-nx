@@ -11,6 +11,7 @@ import {
 } from "@packages/ui/components/select";
 import { Switch } from "@packages/ui/components/switch";
 import { Plus, X } from "lucide-react";
+import { EventCombobox } from "./event-combobox";
 
 interface FunnelsQueryBuilderProps {
    config: FunnelsConfig;
@@ -18,18 +19,18 @@ interface FunnelsQueryBuilderProps {
 }
 
 const DATE_RANGE_PRESETS = [
-   { value: "7d", label: "Last 7 days" },
-   { value: "14d", label: "Last 14 days" },
-   { value: "30d", label: "Last 30 days" },
-   { value: "90d", label: "Last 90 days" },
-   { value: "180d", label: "Last 180 days" },
+   { value: "7d", label: "Últimos 7 dias" },
+   { value: "14d", label: "Últimos 14 dias" },
+   { value: "30d", label: "Últimos 30 dias" },
+   { value: "90d", label: "Últimos 90 dias" },
+   { value: "180d", label: "Últimos 180 dias" },
 ] as const;
 
 const WINDOW_UNITS = [
-   { value: "minute", label: "Minutes" },
-   { value: "hour", label: "Hours" },
-   { value: "day", label: "Days" },
-   { value: "week", label: "Weeks" },
+   { value: "minute", label: "Minutos" },
+   { value: "hour", label: "Horas" },
+   { value: "day", label: "Dias" },
+   { value: "week", label: "Semanas" },
 ] as const;
 
 export function FunnelsQueryBuilder({
@@ -42,7 +43,7 @@ export function FunnelsQueryBuilder({
             ...config.steps,
             {
                event: "",
-               label: `Step ${config.steps.length + 1}`,
+               label: `Etapa ${config.steps.length + 1}`,
                filters: [],
             },
          ],
@@ -70,42 +71,42 @@ export function FunnelsQueryBuilder({
       <div className="space-y-6">
          <div className="space-y-3">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Steps
+               Etapas
             </Label>
             {config.steps.map((step, index) => (
                <div
-                  className="flex items-center gap-2"
+                  className="space-y-2 border rounded-md p-3"
                   key={`step-${index + 1}`}
                >
-                  <span className="text-xs font-bold text-muted-foreground w-5">
-                     {index + 1}
-                  </span>
-                  <Input
-                     className="flex-1"
-                     onChange={(e) =>
-                        updateStep(index, { event: e.target.value })
+                  <div className="flex items-center justify-between">
+                     <span className="text-xs font-bold text-muted-foreground">
+                        Etapa {index + 1}
+                     </span>
+                     {config.steps.length > 2 && (
+                        <Button
+                           className="size-6"
+                           onClick={() => removeStep(index)}
+                           size="icon"
+                           variant="ghost"
+                        >
+                           <X className="size-3.5" />
+                        </Button>
+                     )}
+                  </div>
+                  <EventCombobox
+                     onValueChange={(value) =>
+                        updateStep(index, { event: value })
                      }
-                     placeholder="Event name"
+                     placeholder="Selecione um evento..."
                      value={step.event}
                   />
                   <Input
-                     className="w-[120px]"
                      onChange={(e) =>
                         updateStep(index, { label: e.target.value })
                      }
-                     placeholder="Label"
+                     placeholder="Rótulo (opcional)"
                      value={step.label ?? ""}
                   />
-                  {config.steps.length > 2 && (
-                     <Button
-                        className="size-8"
-                        onClick={() => removeStep(index)}
-                        size="icon"
-                        variant="ghost"
-                     >
-                        <X className="size-4" />
-                     </Button>
-                  )}
                </div>
             ))}
             <Button
@@ -115,13 +116,13 @@ export function FunnelsQueryBuilder({
                variant="outline"
             >
                <Plus className="size-4 mr-1" />
-               Add step
+               Adicionar etapa
             </Button>
          </div>
 
          <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Conversion window
+               Janela de conversão
             </Label>
             <div className="flex items-center gap-2">
                <Input
@@ -132,7 +133,7 @@ export function FunnelsQueryBuilder({
                      onUpdate({
                         conversionWindow: {
                            ...config.conversionWindow,
-                           value: Number.parseInt(e.target.value) || 14,
+                           value: Number.parseInt(e.target.value, 10) || 14,
                         },
                      })
                   }
@@ -166,7 +167,7 @@ export function FunnelsQueryBuilder({
 
          <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Date range
+               Período
             </Label>
             <Select
                onValueChange={(value) =>
@@ -194,7 +195,7 @@ export function FunnelsQueryBuilder({
 
          <div className="flex items-center justify-between">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Compare to previous period
+               Comparar com período anterior
             </Label>
             <Switch
                checked={config.compare}

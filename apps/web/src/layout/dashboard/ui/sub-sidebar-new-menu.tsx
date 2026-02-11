@@ -4,9 +4,6 @@ import {
    DropdownMenuContent,
    DropdownMenuItem,
    DropdownMenuSeparator,
-   DropdownMenuSub,
-   DropdownMenuSubContent,
-   DropdownMenuSubTrigger,
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
 import {
@@ -16,15 +13,7 @@ import {
 } from "@packages/ui/components/tooltip";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import {
-   FolderPlus,
-   GitBranch,
-   LayoutDashboard,
-   Lightbulb,
-   Plus,
-   RotateCcw,
-   TrendingUp,
-} from "lucide-react";
+import { FolderPlus, LayoutDashboard, Lightbulb, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { orpc } from "@/integrations/orpc/client";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
@@ -60,23 +49,6 @@ export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
       }),
    );
 
-   const createInsightMutation = useMutation(
-      orpc.insights.create.mutationOptions({
-         onSuccess: (data) => {
-            queryClient.invalidateQueries({
-               queryKey: orpc.insights.list.queryKey({}),
-            });
-            navigate({
-               to: "/$slug/$teamId/analytics/insights/$insightId",
-               params: { slug, teamId, insightId: data.id },
-            } as never);
-         },
-         onError: () => {
-            toast.error("Erro ao criar insight");
-         },
-      }),
-   );
-
    const handleCreateDashboard = () => {
       if (!teamId) {
          toast.error("Selecione um time para criar dashboards");
@@ -85,16 +57,15 @@ export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
       createDashboardMutation.mutate({ name: "Dashboard sem título" });
    };
 
-   const handleCreateInsight = (type: "trends" | "funnels" | "retention") => {
+   const handleCreateInsight = () => {
       if (!teamId) {
          toast.error("Selecione um time para criar insights");
          return;
       }
-      createInsightMutation.mutate({
-         name: "Insight sem título",
-         type,
-         config: {},
-      });
+      navigate({
+         to: "/$slug/$teamId/analytics/insights/new",
+         params: { slug, teamId },
+      } as never);
    };
 
    return (
@@ -116,10 +87,7 @@ export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
                   onCreateDashboard={handleCreateDashboard}
                />
             ) : (
-               <InsightMenuItems
-                  isPending={createInsightMutation.isPending}
-                  onCreateInsight={handleCreateInsight}
-               />
+               <InsightMenuItems onCreateInsight={handleCreateInsight} />
             )}
          </DropdownMenuContent>
       </DropdownMenu>
@@ -157,42 +125,15 @@ function DashboardMenuItems({
 
 function InsightMenuItems({
    onCreateInsight,
-   isPending,
 }: {
-   onCreateInsight: (type: "trends" | "funnels" | "retention") => void;
-   isPending: boolean;
+   onCreateInsight: () => void;
 }) {
    return (
       <>
-         <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-               <Lightbulb className="size-4 mr-2" />
-               Novo insight
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent>
-               <DropdownMenuItem
-                  disabled={isPending}
-                  onClick={() => onCreateInsight("trends")}
-               >
-                  <TrendingUp className="size-4" />
-                  Novo Trends
-               </DropdownMenuItem>
-               <DropdownMenuItem
-                  disabled={isPending}
-                  onClick={() => onCreateInsight("funnels")}
-               >
-                  <GitBranch className="size-4" />
-                  Novo Funnel
-               </DropdownMenuItem>
-               <DropdownMenuItem
-                  disabled={isPending}
-                  onClick={() => onCreateInsight("retention")}
-               >
-                  <RotateCcw className="size-4" />
-                  Novo Retention
-               </DropdownMenuItem>
-            </DropdownMenuSubContent>
-         </DropdownMenuSub>
+         <DropdownMenuItem onClick={onCreateInsight}>
+            <Lightbulb className="size-4" />
+            Novo insight
+         </DropdownMenuItem>
          <DropdownMenuSeparator />
          <Tooltip>
             <TooltipTrigger asChild>

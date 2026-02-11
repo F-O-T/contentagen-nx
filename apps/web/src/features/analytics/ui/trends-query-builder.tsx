@@ -11,6 +11,7 @@ import {
 } from "@packages/ui/components/select";
 import { Switch } from "@packages/ui/components/switch";
 import { Plus, X } from "lucide-react";
+import { EventCombobox } from "./event-combobox";
 
 interface TrendsQueryBuilderProps {
    config: TrendsConfig;
@@ -18,39 +19,39 @@ interface TrendsQueryBuilderProps {
 }
 
 const DATE_RANGE_PRESETS = [
-   { value: "7d", label: "Last 7 days" },
-   { value: "14d", label: "Last 14 days" },
-   { value: "30d", label: "Last 30 days" },
-   { value: "90d", label: "Last 90 days" },
-   { value: "180d", label: "Last 180 days" },
-   { value: "12m", label: "Last 12 months" },
-   { value: "this_month", label: "This month" },
-   { value: "last_month", label: "Last month" },
-   { value: "this_quarter", label: "This quarter" },
-   { value: "this_year", label: "This year" },
+   { value: "7d", label: "Últimos 7 dias" },
+   { value: "14d", label: "Últimos 14 dias" },
+   { value: "30d", label: "Últimos 30 dias" },
+   { value: "90d", label: "Últimos 90 dias" },
+   { value: "180d", label: "Últimos 180 dias" },
+   { value: "12m", label: "Últimos 12 meses" },
+   { value: "this_month", label: "Este mês" },
+   { value: "last_month", label: "Mês passado" },
+   { value: "this_quarter", label: "Este trimestre" },
+   { value: "this_year", label: "Este ano" },
 ] as const;
 
 const CHART_TYPES = [
-   { value: "line", label: "Line" },
-   { value: "bar", label: "Bar" },
-   { value: "area", label: "Area" },
-   { value: "number", label: "Number" },
+   { value: "line", label: "Linha" },
+   { value: "bar", label: "Barras" },
+   { value: "area", label: "Área" },
+   { value: "number", label: "Número" },
 ] as const;
 
 const MATH_OPERATIONS = [
-   { value: "count", label: "Count" },
-   { value: "sum", label: "Sum" },
-   { value: "avg", label: "Average" },
-   { value: "min", label: "Min" },
-   { value: "max", label: "Max" },
-   { value: "unique_users", label: "Unique users" },
+   { value: "count", label: "Contagem" },
+   { value: "sum", label: "Soma" },
+   { value: "avg", label: "Média" },
+   { value: "min", label: "Mínimo" },
+   { value: "max", label: "Máximo" },
+   { value: "unique_users", label: "Usuários únicos" },
 ] as const;
 
 const INTERVALS = [
-   { value: "hour", label: "Hour" },
-   { value: "day", label: "Day" },
-   { value: "week", label: "Week" },
-   { value: "month", label: "Month" },
+   { value: "hour", label: "Hora" },
+   { value: "day", label: "Dia" },
+   { value: "week", label: "Semana" },
+   { value: "month", label: "Mês" },
 ] as const;
 
 export function TrendsQueryBuilder({
@@ -64,7 +65,7 @@ export function TrendsQueryBuilder({
             {
                event: "",
                math: "count",
-               label: `Series ${String.fromCharCode(65 + config.series.length)}`,
+               label: `Série ${String.fromCharCode(65 + config.series.length)}`,
             },
          ],
       });
@@ -96,22 +97,33 @@ export function TrendsQueryBuilder({
       <div className="space-y-6">
          <div className="space-y-3">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Series
+               Séries
             </Label>
             {config.series.map((s, index) => (
                <div
-                  className="flex items-center gap-2"
+                  className="space-y-2 border rounded-md p-3"
                   key={`series-${index + 1}`}
                >
-                  <span className="text-xs font-bold text-muted-foreground w-5">
-                     {String.fromCharCode(65 + index)}
-                  </span>
-                  <Input
-                     className="flex-1"
-                     onChange={(e) =>
-                        updateSeries(index, { event: e.target.value })
+                  <div className="flex items-center justify-between">
+                     <span className="text-xs font-bold text-muted-foreground">
+                        {String.fromCharCode(65 + index)}
+                     </span>
+                     {config.series.length > 1 && (
+                        <Button
+                           className="size-6"
+                           onClick={() => removeSeries(index)}
+                           size="icon"
+                           variant="ghost"
+                        >
+                           <X className="size-3.5" />
+                        </Button>
+                     )}
+                  </div>
+                  <EventCombobox
+                     onValueChange={(value) =>
+                        updateSeries(index, { event: value })
                      }
-                     placeholder="Event name (e.g., content.page.view)"
+                     placeholder="Selecione um evento..."
                      value={s.event}
                   />
                   <Select
@@ -122,7 +134,7 @@ export function TrendsQueryBuilder({
                      }
                      value={s.math}
                   >
-                     <SelectTrigger className="w-[130px]">
+                     <SelectTrigger className="w-full">
                         <SelectValue />
                      </SelectTrigger>
                      <SelectContent>
@@ -133,16 +145,6 @@ export function TrendsQueryBuilder({
                         ))}
                      </SelectContent>
                   </Select>
-                  {config.series.length > 1 && (
-                     <Button
-                        className="size-8"
-                        onClick={() => removeSeries(index)}
-                        size="icon"
-                        variant="ghost"
-                     >
-                        <X className="size-4" />
-                     </Button>
-                  )}
                </div>
             ))}
             <Button
@@ -152,13 +154,13 @@ export function TrendsQueryBuilder({
                variant="outline"
             >
                <Plus className="size-4 mr-1" />
-               Add series
+               Adicionar série
             </Button>
          </div>
 
          <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Chart type
+               Tipo de gráfico
             </Label>
             <Select
                onValueChange={(value) =>
@@ -181,7 +183,7 @@ export function TrendsQueryBuilder({
 
          <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Date range
+               Período
             </Label>
             <Select
                onValueChange={(value) =>
@@ -209,7 +211,7 @@ export function TrendsQueryBuilder({
 
          <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Interval
+               Intervalo
             </Label>
             <Select
                onValueChange={(value) =>
@@ -232,24 +234,24 @@ export function TrendsQueryBuilder({
 
          <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Formula (optional)
+               Fórmula (opcional)
             </Label>
             <Input
                onChange={(e) =>
                   onUpdate({ formula: e.target.value || undefined })
                }
-               placeholder="e.g., A / B * 100"
+               placeholder="Ex: A / B * 100"
                value={config.formula ?? ""}
             />
             <p className="text-xs text-muted-foreground">
-               Reference series by letter (A, B, C...). Leave empty for no
-               formula.
+               Referencie séries por letra (A, B, C...). Deixe vazio para não
+               usar fórmula.
             </p>
          </div>
 
          <div className="flex items-center justify-between">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Compare to previous period
+               Comparar com período anterior
             </Label>
             <Switch
                checked={config.compare}

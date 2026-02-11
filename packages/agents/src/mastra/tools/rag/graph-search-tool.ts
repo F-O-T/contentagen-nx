@@ -2,14 +2,14 @@ import { createTool } from "@mastra/core/tools";
 import { AppError, propagateError } from "@packages/utils/errors";
 import { embed } from "ai";
 import { z } from "zod";
-import type { ContentMetadata } from "../../rag";
 import {
    CONTENT_METADATA_INDEX,
    embeddingModel,
    initializeRagService,
    isRagAvailable,
    ragService,
-} from "../../rag";
+} from "../../rag/rag-service";
+import type { ContentMetadata } from "../../rag/types";
 
 // Graph traversal threshold (0.7 = only strong connections)
 const GRAPH_SIMILARITY_THRESHOLD = 0.7;

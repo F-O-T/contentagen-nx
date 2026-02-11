@@ -9,6 +9,7 @@ import {
    SelectValue,
 } from "@packages/ui/components/select";
 import { Switch } from "@packages/ui/components/switch";
+import { EventCombobox } from "./event-combobox";
 
 interface RetentionQueryBuilderProps {
    config: RetentionConfig;
@@ -16,18 +17,18 @@ interface RetentionQueryBuilderProps {
 }
 
 const PERIODS = [
-   { value: "day", label: "Day" },
-   { value: "week", label: "Week" },
-   { value: "month", label: "Month" },
+   { value: "day", label: "Dia" },
+   { value: "week", label: "Semana" },
+   { value: "month", label: "Mês" },
 ] as const;
 
 const DATE_RANGE_PRESETS = [
-   { value: "30d", label: "Last 30 days" },
-   { value: "90d", label: "Last 90 days" },
-   { value: "180d", label: "Last 180 days" },
-   { value: "12m", label: "Last 12 months" },
-   { value: "this_quarter", label: "This quarter" },
-   { value: "this_year", label: "This year" },
+   { value: "30d", label: "Últimos 30 dias" },
+   { value: "90d", label: "Últimos 90 dias" },
+   { value: "180d", label: "Últimos 180 dias" },
+   { value: "12m", label: "Últimos 12 meses" },
+   { value: "this_quarter", label: "Este trimestre" },
+   { value: "this_year", label: "Este ano" },
 ] as const;
 
 export function RetentionQueryBuilder({
@@ -41,49 +42,49 @@ export function RetentionQueryBuilder({
       <div className="space-y-6">
          <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Start event
+               Evento de início
             </Label>
-            <Input
-               onChange={(e) =>
+            <EventCombobox
+               onValueChange={(value) =>
                   onUpdate({
                      startEvent: {
                         ...config.startEvent,
-                        event: e.target.value,
+                        event: value,
                      },
                   })
                }
-               placeholder="Event that starts a cohort (e.g., content.page.view)"
+               placeholder="Selecione o evento de início..."
                value={config.startEvent.event}
             />
             <p className="text-xs text-muted-foreground">
-               Users who perform this event start a new cohort
+               Usuários que realizam este evento iniciam uma nova coorte
             </p>
          </div>
 
          <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Return event
+               Evento de retorno
             </Label>
-            <Input
-               onChange={(e) =>
+            <EventCombobox
+               onValueChange={(value) =>
                   onUpdate({
                      returnEvent: {
                         ...config.returnEvent,
-                        event: e.target.value,
+                        event: value,
                      },
                   })
                }
-               placeholder="Event that counts as return (e.g., content.page.view)"
+               placeholder="Selecione o evento de retorno..."
                value={config.returnEvent.event}
             />
             <p className="text-xs text-muted-foreground">
-               Users who perform this event are counted as retained
+               Usuários que realizam este evento são contados como retidos
             </p>
          </div>
 
          <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Period
+               Período
             </Label>
             <Select
                onValueChange={(value) =>
@@ -106,27 +107,27 @@ export function RetentionQueryBuilder({
 
          <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Total periods
+               Total de períodos
             </Label>
             <Input
                max={52}
                min={1}
                onChange={(e) =>
                   onUpdate({
-                     totalPeriods: Number.parseInt(e.target.value) || 8,
+                     totalPeriods: Number.parseInt(e.target.value, 10) || 8,
                   })
                }
                type="number"
                value={config.totalPeriods}
             />
             <p className="text-xs text-muted-foreground">
-               Number of periods to track (1-52)
+               Número de períodos a rastrear (1-52)
             </p>
          </div>
 
          <div className="space-y-2">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Date range
+               Período de análise
             </Label>
             <Select
                onValueChange={(value) =>
@@ -154,7 +155,7 @@ export function RetentionQueryBuilder({
 
          <div className="flex items-center justify-between">
             <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Compare to previous period
+               Comparar com período anterior
             </Label>
             <Switch
                checked={config.compare}

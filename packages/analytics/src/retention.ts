@@ -1,4 +1,5 @@
 import type { DatabaseInstance } from "@packages/database/client";
+import { AppError, propagateError } from "@packages/utils/errors";
 import { sql } from "drizzle-orm";
 
 import {
@@ -105,40 +106,47 @@ async function runRetentionQuery(
    const truncFn = sql.raw(`'${period}'`);
    const periodSecondsLiteral = sql.raw(String(periodSeconds));
 
-   const result = await db.execute<RetentionRow>(sql`
-      WITH cohorts AS (
-         SELECT user_id, DATE_TRUNC(${truncFn}, MIN(timestamp)) AS cohort_period
-         FROM events
-         WHERE organization_id = ${organizationId}
-           AND event_name = ${startEvent.event}
-           AND timestamp >= ${range.start}
-           AND timestamp < ${range.end}
-         GROUP BY user_id
-      ),
-      activity AS (
-         SELECT DISTINCT c.user_id, c.cohort_period,
-            DATE_TRUNC(${truncFn}, e.timestamp) AS activity_period
-         FROM cohorts c
-         JOIN events e ON e.user_id = c.user_id
-           AND e.event_name = ${returnEvent.event}
-           AND e.organization_id = ${organizationId}
-      ),
-      retention AS (
-         SELECT cohort_period,
-            floor(EXTRACT(EPOCH FROM (activity_period - cohort_period)) / ${periodSecondsLiteral})::int AS period_offset,
-            COUNT(DISTINCT user_id)::int AS retained
-         FROM activity
-         GROUP BY cohort_period, period_offset
-         HAVING floor(EXTRACT(EPOCH FROM (activity_period - cohort_period)) / ${periodSecondsLiteral})::int >= 0
-           AND floor(EXTRACT(EPOCH FROM (activity_period - cohort_period)) / ${periodSecondsLiteral})::int <= ${totalPeriods}
-      )
-      SELECT cohort_period, period_offset, retained
-      FROM retention
-      ORDER BY cohort_period, period_offset
-   `);
+   try {
+      const result = await db.execute<RetentionRow>(sql`
+         WITH cohorts AS (
+            SELECT user_id, DATE_TRUNC(${truncFn}, MIN(timestamp)) AS cohort_period
+            FROM events
+            WHERE organization_id = ${organizationId}
+              AND event_name = ${startEvent.event}
+              AND timestamp >= ${range.start}
+              AND timestamp < ${range.end}
+            GROUP BY user_id
+         ),
+         activity AS (
+            SELECT DISTINCT c.user_id, c.cohort_period,
+               DATE_TRUNC(${truncFn}, e.timestamp) AS activity_period
+            FROM cohorts c
+            JOIN events e ON e.user_id = c.user_id
+              AND e.event_name = ${returnEvent.event}
+              AND e.organization_id = ${organizationId}
+         ),
+         retention AS (
+            SELECT cohort_period,
+               floor(EXTRACT(EPOCH FROM (activity_period - cohort_period)) / ${periodSecondsLiteral})::int AS period_offset,
+               COUNT(DISTINCT user_id)::int AS retained
+            FROM activity
+            GROUP BY cohort_period, period_offset
+            HAVING floor(EXTRACT(EPOCH FROM (activity_period - cohort_period)) / ${periodSecondsLiteral})::int >= 0
+              AND floor(EXTRACT(EPOCH FROM (activity_period - cohort_period)) / ${periodSecondsLiteral})::int <= ${totalPeriods}
+         )
+         SELECT cohort_period, period_offset, retained
+         FROM retention
+         ORDER BY cohort_period, period_offset
+      `);
 
-   const rows = result.rows as RetentionRow[];
-   return buildCohorts(rows, totalPeriods);
+      const rows = result.rows as RetentionRow[];
+      return buildCohorts(rows, totalPeriods);
+   } catch (error) {
+      propagateError(error);
+      throw AppError.database("Failed to execute retention query", {
+         cause: error,
+      });
+   }
 }
 
 // ──────────────────────────────────────────────

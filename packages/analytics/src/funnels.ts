@@ -1,4 +1,5 @@
 import type { DatabaseInstance } from "@packages/database/client";
+import { AppError, propagateError } from "@packages/utils/errors";
 import { sql } from "drizzle-orm";
 
 import {
@@ -190,18 +191,25 @@ async function runFunnelQuery(
       sql``,
    );
 
-   const result = await db.execute<StepCountRow>(fullQuery);
+   try {
+      const result = await db.execute<StepCountRow>(fullQuery);
 
-   // Map step_index -> user_count, defaulting to 0 for missing steps
-   const counts: number[] = new Array(steps.length).fill(0) as number[];
-   for (const row of result.rows) {
-      const idx = row.step_index - 1;
-      if (idx >= 0 && idx < counts.length) {
-         counts[idx] = Number(row.user_count);
+      // Map step_index -> user_count, defaulting to 0 for missing steps
+      const counts: number[] = new Array(steps.length).fill(0) as number[];
+      for (const row of result.rows) {
+         const idx = row.step_index - 1;
+         if (idx >= 0 && idx < counts.length) {
+            counts[idx] = Number(row.user_count);
+         }
       }
-   }
 
-   return counts;
+      return counts;
+   } catch (error) {
+      propagateError(error);
+      throw AppError.database("Failed to execute funnels query", {
+         cause: error,
+      });
+   }
 }
 
 // ──────────────────────────────────────────────
@@ -236,23 +244,27 @@ function buildSingleFilter(
       `${prefix}properties->>'${escapeSqlIdentifier(filter.property)}'`,
    );
 
+   const safeNumericCol = sql.raw(
+      `CASE WHEN ${prefix}properties->>'${escapeSqlIdentifier(filter.property)}' ~ '^-?[0-9]*\\.?[0-9]+$' THEN (${prefix}properties->>'${escapeSqlIdentifier(filter.property)}')::numeric ELSE NULL END`,
+   );
+
    switch (filter.operator) {
       case "eq":
          return sql`${col} = ${String(filter.value ?? "")}`;
       case "neq":
          return sql`${col} != ${String(filter.value ?? "")}`;
       case "gt":
-         return sql`(${col})::numeric > ${Number(filter.value ?? 0)}`;
+         return sql`${safeNumericCol} > ${Number(filter.value ?? 0)}`;
       case "lt":
-         return sql`(${col})::numeric < ${Number(filter.value ?? 0)}`;
+         return sql`${safeNumericCol} < ${Number(filter.value ?? 0)}`;
       case "gte":
-         return sql`(${col})::numeric >= ${Number(filter.value ?? 0)}`;
+         return sql`${safeNumericCol} >= ${Number(filter.value ?? 0)}`;
       case "lte":
-         return sql`(${col})::numeric <= ${Number(filter.value ?? 0)}`;
+         return sql`${safeNumericCol} <= ${Number(filter.value ?? 0)}`;
       case "contains":
-         return sql`${col} ILIKE ${"%" + String(filter.value ?? "") + "%"}`;
+         return sql`${col} ILIKE ${`%${String(filter.value ?? "")}%`}`;
       case "not_contains":
-         return sql`${col} NOT ILIKE ${"%" + String(filter.value ?? "") + "%"}`;
+         return sql`${col} NOT ILIKE ${`%${String(filter.value ?? "")}%`}`;
       case "is_set":
          return sql.raw(
             `${prefix}properties ? '${escapeSqlIdentifier(filter.property)}'`,

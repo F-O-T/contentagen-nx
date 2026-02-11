@@ -8,15 +8,6 @@ export const LANGUAGE_INSTRUCTION = `
 Sempre responda e escreva conteudo em Portugues Brasileiro (pt-BR).
 `;
 
-// Available models (unified from both agents)
-export const MODELS = {
-   "anthropic/claude-haiku-4.5": "anthropic/claude-3-5-haiku-20241022",
-   "mistralai/mistral-small-creative":
-      "mistralai/mistral-small-3.1-24b-instruct",
-} as const;
-
-export type ModelId = keyof typeof MODELS;
-
 // Embedding model via OpenRouter (centralized billing)
 export const embeddingModel = new ModelRouterEmbeddingModel({
    providerId: "openrouter",

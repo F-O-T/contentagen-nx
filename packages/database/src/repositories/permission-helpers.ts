@@ -1,4 +1,4 @@
-import { APIError } from "@packages/utils/errors";
+import { AppError } from "@packages/utils/errors";
 import type { DatabaseInstance } from "../client";
 import type {
    PermissionLevel,
@@ -15,7 +15,7 @@ export type MemberRole = "owner" | "admin" | "member";
  * Check if user has permission on a specific resource.
  * Owners bypass all permission checks.
  *
- * @throws APIError.forbidden if permission denied
+ * @throws AppError.forbidden if permission denied
  */
 export async function checkResourcePermission(
    db: DatabaseInstance,
@@ -41,7 +41,7 @@ export async function checkResourcePermission(
    );
 
    if (!hasAccess) {
-      throw APIError.forbidden(
+      throw AppError.forbidden(
          "You do not have permission to access this resource.",
       );
    }
@@ -89,11 +89,11 @@ export async function getAccessibleResources(
 /**
  * Check if the user can manage permissions (owners only).
  *
- * @throws APIError.forbidden if not an owner
+ * @throws AppError.forbidden if not an owner
  */
 export function checkCanManagePermissions(memberRole: MemberRole): void {
    if (memberRole !== "owner") {
-      throw APIError.forbidden(
+      throw AppError.forbidden(
          "Only organization owners can manage permissions.",
       );
    }

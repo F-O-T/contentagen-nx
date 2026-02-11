@@ -70,12 +70,26 @@ export const mathOperationSchema = z.enum([
 // Trends Config
 // ──────────────────────────────────────────────
 
-export const trendsSeriesSchema = z.object({
-   event: z.string(),
-   math: mathOperationSchema.default("count"),
-   mathProperty: z.string().optional(),
-   label: z.string().optional(),
-});
+export const trendsSeriesSchema = z
+   .object({
+      event: z.string(),
+      math: mathOperationSchema.default("count"),
+      mathProperty: z.string().optional(),
+      label: z.string().optional(),
+   })
+   .refine(
+      (data) => {
+         const needsProperty = ["sum", "avg", "min", "max"];
+         if (needsProperty.includes(data.math)) {
+            return !!data.mathProperty;
+         }
+         return true;
+      },
+      {
+         message: "mathProperty is required when math is sum, avg, min, or max",
+         path: ["mathProperty"],
+      },
+   );
 
 export const trendsConfigSchema = z.object({
    type: z.literal("trends"),

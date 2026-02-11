@@ -1,24 +1,242 @@
 import { Agent } from "@mastra/core/agent";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { compileInstructionMemories } from "../helpers";
-
-// Import tools for writer mode
+// Analysis tools — direct imports
 import {
-   analysisTools,
-   getAllAnalysisToolInstructions,
-} from "../tools/analysis";
-import { editorTools, getAllEditorToolInstructions } from "../tools/editor";
+   badPatternTool,
+   getBadPatternInstructions,
+} from "../tools/analysis/bad-pattern-tool";
 import {
-   frontmatterTools,
-   getAllFrontmatterToolInstructions,
-} from "../tools/frontmatter";
-import { memoryTools } from "../tools/memory";
-import { getAllRagToolInstructions, ragTools } from "../tools/rag";
+   citationTool,
+   getCitationInstructions,
+} from "../tools/analysis/citation-tool";
+import {
+   contentStructureTool,
+   getContentStructureInstructions,
+} from "../tools/analysis/content-structure-tool";
+import {
+   duplicateContentTool,
+   getDuplicateContentInstructions,
+} from "../tools/analysis/duplicate-content-tool";
+import {
+   getImageSeoInstructions,
+   imageSeoTool,
+} from "../tools/analysis/image-seo-tool";
+import {
+   getKeywordDensityInstructions,
+   keywordDensityTool,
+} from "../tools/analysis/keyword-density-tool";
+import {
+   getLinkDensityInstructions,
+   linkDensityTool,
+} from "../tools/analysis/link-density-tool";
+import {
+   getOriginalityInstructions,
+   originalityTool,
+} from "../tools/analysis/originality-tool";
+import {
+   getQuickAnswerAnalysisInstructions,
+   quickAnswerAnalysisTool,
+} from "../tools/analysis/quick-answer-tool";
+import {
+   getReadabilityInstructions,
+   readabilityTool,
+} from "../tools/analysis/readability-tool";
+import {
+   getSeoScoreInstructions,
+   seoScoreTool,
+} from "../tools/analysis/seo-score-tool";
+import {
+   getTitleMetaInstructions,
+   titleMetaTool,
+} from "../tools/analysis/title-meta-tool";
+import {
+   getToneAnalysisInstructions,
+   toneAnalysisTool,
+} from "../tools/analysis/tone-analysis-tool";
+// Editor tools — direct imports
+import {
+   addExternalLinksTool,
+   getAddExternalLinksInstructions,
+} from "../tools/editor/add-external-links-tool";
+import {
+   addInternalLinksTool,
+   getAddInternalLinksInstructions,
+} from "../tools/editor/add-internal-links-tool";
+import {
+   deleteTextTool,
+   getDeleteTextInstructions,
+} from "../tools/editor/delete-text-tool";
+import {
+   formatTextTool,
+   getFormatTextInstructions,
+} from "../tools/editor/format-text-tool";
+import {
+   generateQuickAnswerTool,
+   getGenerateQuickAnswerInstructions,
+} from "../tools/editor/generate-quick-answer-tool";
+import {
+   getImproveReadabilityInstructions,
+   improveReadabilityTool,
+} from "../tools/editor/improve-readability-tool";
+import {
+   getInjectKeywordsInstructions,
+   injectKeywordsTool,
+} from "../tools/editor/inject-keywords-tool";
+import {
+   getInsertCodeBlockInstructions,
+   insertCodeBlockTool,
+} from "../tools/editor/insert-code-block-tool";
+import {
+   getInsertHeadingInstructions,
+   insertHeadingTool,
+} from "../tools/editor/insert-heading-tool";
+import {
+   getInsertImageInstructions,
+   insertImageTool,
+} from "../tools/editor/insert-image-tool";
+import {
+   getInsertListInstructions,
+   insertListTool,
+} from "../tools/editor/insert-list-tool";
+import {
+   getInsertTableInstructions,
+   insertTableTool,
+} from "../tools/editor/insert-table-tool";
+import {
+   getInsertTextInstructions,
+   insertTextTool,
+} from "../tools/editor/insert-text-tool";
+import {
+   getOptimizeMetaInstructions,
+   optimizeMetaTool,
+} from "../tools/editor/optimize-meta-tool";
+import {
+   getOptimizeTitleInstructions,
+   optimizeTitleTool,
+} from "../tools/editor/optimize-title-tool";
+import {
+   getReplaceTextInstructions,
+   replaceTextTool,
+} from "../tools/editor/replace-text-tool";
+import {
+   getSuggestImagesInstructions,
+   suggestImagesTool,
+} from "../tools/editor/suggest-images-tool";
+// Frontmatter tools — direct imports
+import {
+   editDescriptionTool,
+   getEditDescriptionInstructions,
+} from "../tools/frontmatter/edit-description-tool";
+import {
+   editKeywordsTool,
+   getEditKeywordsInstructions,
+} from "../tools/frontmatter/edit-keywords-tool";
+import {
+   editSlugTool,
+   getEditSlugInstructions,
+} from "../tools/frontmatter/edit-slug-tool";
+import {
+   editTitleTool,
+   getEditTitleInstructions,
+} from "../tools/frontmatter/edit-title-tool";
+// Memory tools — direct imports
+import { getInstructionsTool } from "../tools/memory/get-instructions-tool";
 
-// Shared constants
+// RAG tools — direct imports
+import {
+   getGraphSearchInstructions,
+   graphSearchTool,
+} from "../tools/rag/graph-search-tool";
+import {
+   getSearchPreviousContentInstructions,
+   searchPreviousContentTool,
+} from "../tools/rag/search-previous-content-tool";
 import { LANGUAGE_INSTRUCTION } from "./shared";
 
-// Dynamic writer agent instructions
+// ─── Tool instruction aggregators ────────────────────────────────────────────
+
+function getAllEditorToolInstructions(): string {
+   return `
+# EDITOR TOOLS
+These tools allow you to manipulate the blog post content directly.
+
+${getInsertTextInstructions()}
+${getReplaceTextInstructions()}
+${getDeleteTextInstructions()}
+${getFormatTextInstructions()}
+${getInsertHeadingInstructions()}
+${getInsertListInstructions()}
+${getInsertCodeBlockInstructions()}
+${getInsertTableInstructions()}
+${getInsertImageInstructions()}
+
+# SEO OPTIMIZATION TOOLS
+These tools help optimize content for search engines.
+
+${getInjectKeywordsInstructions()}
+${getAddInternalLinksInstructions()}
+${getImproveReadabilityInstructions()}
+
+# NEW SEO ACTION TOOLS
+These tools fix specific SEO issues detected by analysis tools.
+
+${getOptimizeTitleInstructions()}
+${getOptimizeMetaInstructions()}
+${getGenerateQuickAnswerInstructions()}
+${getSuggestImagesInstructions()}
+${getAddExternalLinksInstructions()}
+`;
+}
+
+function getAllFrontmatterToolInstructions(): string {
+   return [
+      getEditTitleInstructions(),
+      getEditDescriptionInstructions(),
+      getEditSlugInstructions(),
+      getEditKeywordsInstructions(),
+   ].join("\n");
+}
+
+function getAllAnalysisToolInstructions(): string {
+   return `
+# ANALYSIS TOOLS
+These tools analyze the blog post for quality, SEO, and readability.
+
+## EXISTING TOOLS
+${getSeoScoreInstructions()}
+${getReadabilityInstructions()}
+${getKeywordDensityInstructions()}
+${getContentStructureInstructions()}
+${getBadPatternInstructions()}
+
+## SEO ANALYSIS TOOLS
+${getTitleMetaInstructions()}
+${getQuickAnswerAnalysisInstructions()}
+${getImageSeoInstructions()}
+${getLinkDensityInstructions()}
+
+## CONTENT QUALITY TOOLS
+${getDuplicateContentInstructions()}
+${getToneAnalysisInstructions()}
+${getCitationInstructions()}
+${getOriginalityInstructions()}
+`;
+}
+
+function getAllRagToolInstructions(): string {
+   return `
+# RAG TOOLS
+These tools allow you to search and reference previously published content.
+
+${getSearchPreviousContentInstructions()}
+
+${getGraphSearchInstructions()}
+`;
+}
+
+// ─── Agent instructions ──────────────────────────────────────────────────────
+
 const getWriterAgentInstructions = (
    writerInstructions?: InstructionMemoryItem[],
 ): string => {
@@ -205,6 +423,8 @@ ${getAllRagToolInstructions()}
 `;
 };
 
+// ─── Agent definition ────────────────────────────────────────────────────────
+
 /**
  * Writer Agent
  *
@@ -228,10 +448,47 @@ export const writerAgent = new Agent({
    },
 
    tools: {
-      ...editorTools,
-      ...frontmatterTools,
-      ...analysisTools,
-      ...ragTools,
-      ...memoryTools,
+      // Editor tools
+      insertText: insertTextTool,
+      replaceText: replaceTextTool,
+      deleteText: deleteTextTool,
+      formatText: formatTextTool,
+      insertHeading: insertHeadingTool,
+      insertList: insertListTool,
+      insertCodeBlock: insertCodeBlockTool,
+      insertTable: insertTableTool,
+      insertImage: insertImageTool,
+      injectKeywords: injectKeywordsTool,
+      addInternalLinks: addInternalLinksTool,
+      improveReadability: improveReadabilityTool,
+      optimizeTitle: optimizeTitleTool,
+      optimizeMeta: optimizeMetaTool,
+      generateQuickAnswer: generateQuickAnswerTool,
+      suggestImages: suggestImagesTool,
+      addExternalLinks: addExternalLinksTool,
+      // Frontmatter tools
+      editTitle: editTitleTool,
+      editDescription: editDescriptionTool,
+      editSlug: editSlugTool,
+      editKeywords: editKeywordsTool,
+      // Analysis tools
+      seoScore: seoScoreTool,
+      readability: readabilityTool,
+      keywordDensity: keywordDensityTool,
+      contentStructure: contentStructureTool,
+      badPatterns: badPatternTool,
+      titleMeta: titleMetaTool,
+      quickAnswerAnalysis: quickAnswerAnalysisTool,
+      imageSeo: imageSeoTool,
+      linkDensity: linkDensityTool,
+      duplicateContent: duplicateContentTool,
+      toneAnalysis: toneAnalysisTool,
+      citation: citationTool,
+      originality: originalityTool,
+      // RAG tools
+      searchPreviousContent: searchPreviousContentTool,
+      graphSearch: graphSearchTool,
+      // Memory tools
+      getInstructionMemories: getInstructionsTool,
    },
 });
