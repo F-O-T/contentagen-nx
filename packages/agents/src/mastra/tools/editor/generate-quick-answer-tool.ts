@@ -305,35 +305,3 @@ export const generateQuickAnswerTool = createTool({
       };
    },
 });
-
-export function getGenerateQuickAnswerInstructions(): string {
-   return `
-## GENERATE QUICK ANSWER TOOL
-Creates TL;DR summaries, definition leads, key points, or comparison tables.
-
-**When to use:** After quickAnswerAnalysis shows no quick answer in the first 100 words.
-
-**Input:**
-- content (string): Full content to summarize
-- primaryKeyword (string): Keyword to include
-- answerType (enum): "tldr", "definition", "keypoints", "comparison"
-- targetLength (number): Target word count (default: 60)
-
-**Output:**
-- success: Whether generation succeeded
-- quickAnswer: Generated markdown content
-- type: The answer type used
-- wordCount: Actual word count
-- insertPosition: Where to add ("before_first_heading" or "after_intro")
-
-**Answer Types:**
-- tldr: Blockquote summary with key points
-- definition: Bold keyword + "is" definition pattern
-- keypoints: Bullet list of main takeaways
-- comparison: Before/after table format
-
-**Example Output (tldr):**
-> **Resumo Rápido:** O SEO em 2026 mudou com AI Overviews e busca generativa.
-> 53% do tráfego ainda vem de busca orgânica. Adapte-se com E-E-A-T e novas métricas.
-`;
-}

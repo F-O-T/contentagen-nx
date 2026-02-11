@@ -280,27 +280,3 @@ export const keywordDensityTool = createTool({
       };
    },
 });
-
-export function getKeywordDensityInstructions(): string {
-   return `
-## KEYWORD DENSITY TOOL
-Analyzes keyword usage, placement, and density in the blog post.
-
-**When to use:** To optimize content for target keywords and SEO
-
-**Parameters:**
-- content (string): The blog post content
-- title (string, optional): Blog post title
-- targetKeywords (string[]): Keywords to analyze
-
-**Returns:**
-- analysis: Per-keyword breakdown with count, density, locations, status
-- overallScore: 0-100 keyword optimization score
-- topKeywords: Most frequent words in content
-- recommendations: Suggestions for improvement
-- metrics: Word counts and average density
-
-**Optimal density:** 1-2% for each target keyword
-**Key placements:** Title, first paragraph, headings
-`;
-}

@@ -38,26 +38,3 @@ export const replaceTextTool = createTool({
       };
    },
 });
-
-export function getReplaceTextInstructions(): string {
-   return `
-## REPLACE TEXT TOOL
-Finds and replaces text in the blog post.
-
-**When to use:** Correcting mistakes, rewording sentences, updating terms
-
-**Parameters:**
-- searchText (string): Exact text to find (case-sensitive by default)
-- replaceWith (string): New text to use instead
-- scope (enum): Where to search
-  - "selection": Only in selected text
-  - "paragraph": Current paragraph only
-  - "all": Entire document
-- matchCase (boolean): Whether to match case exactly (default: true)
-
-**Example:**
-searchText: "This is confusing text"
-replaceWith: "This is clearer text"
-scope: "all"
-`;
-}

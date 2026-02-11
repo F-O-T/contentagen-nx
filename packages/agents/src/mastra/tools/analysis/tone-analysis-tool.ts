@@ -356,35 +356,3 @@ export const toneAnalysisTool = createTool({
       };
    },
 });
-
-export function getToneAnalysisInstructions(): string {
-   return `
-## TONE ANALYSIS TOOL
-Detects alarmist, manipulative, and clickbait language patterns.
-
-**When to use:** To ensure content maintains credibility and doesn't manipulate readers.
-
-**Input:**
-- content (string): Full content to analyze
-- targetTone (enum): "professional", "casual", "educational", "persuasive"
-
-**Output:**
-- overallTone: Assessment of the content's tone
-- score: 0-100 (higher = more balanced)
-- alarmistPatterns: Detected alarmist phrases with severity and suggestions
-- manipulativePatterns: Detected manipulation tactics (urgency, fear, scarcity)
-- clickbaitIndicators: Clickbait patterns found
-- issues: Summary of problems
-- recommendations: How to improve
-
-**Pattern Categories:**
-- Alarmist (high/medium/low): "desaparecer completamente", "urgência é real"
-- Urgency: "agora mesmo", "não espere"
-- Fear: "perder", "ficar para trás"
-- Scarcity: "poucos sabem", "segredo"
-- Clickbait: "a verdade chocante", "você não vai acreditar"
-
-**Example Issue:**
-"a urgência é real" - Medium severity alarmist pattern that sounds manipulative.
-`;
-}

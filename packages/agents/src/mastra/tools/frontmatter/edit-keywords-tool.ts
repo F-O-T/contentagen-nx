@@ -22,24 +22,3 @@ export const editKeywordsTool = createTool({
       };
    },
 });
-
-export function getEditKeywordsInstructions(): string {
-   return `
-## EDIT KEYWORDS TOOL
-Sets the SEO keywords/tags for the blog post.
-
-**When to use:** Optimizing the post for search engines
-
-**Parameters:**
-- keywords (array of strings): List of keywords (max 10)
-
-**Best Practices:**
-- Include primary and secondary keywords
-- Use long-tail keywords for better targeting
-- Mix broad and specific terms
-- Keep keywords relevant to content
-
-**Example:**
-keywords: ["productivity", "time management", "entrepreneur tips", "work efficiency"]
-`;
-}

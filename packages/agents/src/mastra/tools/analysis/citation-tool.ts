@@ -313,38 +313,3 @@ export const citationTool = createTool({
       };
    },
 });
-
-export function getCitationInstructions(): string {
-   return `
-## CITATION VERIFICATION TOOL
-Checks if statistics, quotes, and claims have proper citations.
-
-**When to use:** To verify content credibility and identify missing sources.
-
-**Input:**
-- content (string): Full content to analyze
-
-**Output:**
-- statistics: Array of found statistics with citation status
-- quotes: Array of found quotes with attribution verification
-- claims: Array of claims that typically need citation
-- score: 0-100 (higher = better cited)
-- uncitedCount: Total number of items needing citations
-- issues: Summary of problems
-- suggestions: Specific recommendations with search queries
-
-**What It Detects:**
-- Statistics: "53% dos", "2 bilhões de usuários", "84% dos marketers"
-- Quotes: Attributed quotes and their verifiability
-- Claims: "estudos mostram", "segundo especialistas", "pesquisas indicam"
-
-**Citation Types Recognized:**
-- inline_link: [text](url)
-- footnote: [1] or [^1]
-- attribution: "Source:" or "According to:"
-
-**Example Issue:**
-"84% dos marketers acreditam" - statistic without citation
-Suggested search: "84 percent marketers believe source study"
-`;
-}

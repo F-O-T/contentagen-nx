@@ -270,37 +270,3 @@ export const optimizeTitleTool = createTool({
       };
    },
 });
-
-export function getOptimizeTitleInstructions(): string {
-   return `
-## OPTIMIZE TITLE TOOL
-Rewrites titles to include keywords at the start for better SEO.
-
-**When to use:** After titleMeta analysis shows keyword is missing or not at the start.
-
-**Input:**
-- currentTitle (string): Title to optimize
-- primaryKeyword (string): Keyword to include
-- secondaryKeywords (array, optional): Additional keywords
-- style (enum): "how-to", "listicle", "guide", "question", "statement"
-
-**Output:**
-- success: Whether optimization improved the title
-- originalTitle: The input title
-- optimizedTitle: The improved title
-- alternativeTitles: Additional suggestions
-- changes: List of changes made
-- score: Before/after scores (0-100)
-
-**Optimization Strategy:**
-1. Move keyword to start if present but late
-2. Add keyword if missing entirely
-3. Maintain natural readability
-4. Keep length under 60 characters
-5. Generate style-specific alternatives
-
-**Example:**
-Input: "O Que Muda e Como se Adaptar no SEO em 2026"
-Output: "SEO em 2026: O Que Muda e Como se Adaptar"
-`;
-}

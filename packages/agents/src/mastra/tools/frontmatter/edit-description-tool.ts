@@ -24,24 +24,3 @@ export const editDescriptionTool = createTool({
       };
    },
 });
-
-export function getEditDescriptionInstructions(): string {
-   return `
-## EDIT DESCRIPTION TOOL
-Updates the meta description for SEO purposes.
-
-**When to use:** Setting or updating the search engine snippet
-
-**Parameters:**
-- description (string): The meta description (max 500 chars, recommended 150-160)
-
-**Best Practices:**
-- Keep between 150-160 characters to avoid truncation
-- Include the primary keyword naturally
-- Write a compelling summary that encourages clicks
-- Use active voice and action words
-
-**Example:**
-description: "Learn the top 10 productivity strategies used by successful entrepreneurs. Boost your efficiency and accomplish more every day."
-`;
-}

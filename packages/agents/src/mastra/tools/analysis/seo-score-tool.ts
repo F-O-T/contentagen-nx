@@ -416,35 +416,3 @@ export const seoScoreTool = createTool({
       };
    },
 });
-
-export function getSeoScoreInstructions(): string {
-   return `
-## SEO SCORE TOOL
-Analyzes the blog post for SEO best practices.
-
-**When to use:** After writing content, to check optimization and get improvement suggestions
-
-**Parameters:**
-- content (string): The blog post content
-- title (string, optional): Blog post title
-- metaDescription (string, optional): Meta description
-- targetKeywords (string[], optional): Keywords to check for
-- focusArea (enum): What to analyze - title, headings, body, meta, or all
-
-**Returns:**
-- score: 0-100 SEO score
-- issues: Array of problems with severity and suggestions
-- recommendations: General improvement tips
-- metrics: Word count, headings, links, images, quick answer, keyword placement
-
-**Scoring Weights:**
-- Title optimization: 15 points
-- Meta description: 10 points
-- Heading structure: 15 points
-- Content length: 10 points
-- Keyword usage: 15 points
-- Links: 10 points
-- Quick answer format: 10 points
-- Structure quality: 5 points
-`;
-}

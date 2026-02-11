@@ -76,36 +76,3 @@ export const formatTextTool = createTool({
       };
    },
 });
-
-export function getFormatTextInstructions(): string {
-   return `
-## FORMAT TEXT TOOL
-Applies text formatting to the blog post content.
-
-**When to use:** Making text bold, italic, adding links, code formatting
-
-**Parameters:**
-- format (enum): Formatting type
-  - "bold": Makes text bold
-  - "italic": Makes text italic
-  - "underline": Underlines text
-  - "strikethrough": Adds strikethrough
-  - "code": Applies inline code formatting
-  - "link": Creates a hyperlink (requires linkUrl)
-- scope (enum): What to format
-  - "selection": Currently selected text
-  - "word": Word at cursor
-  - "paragraph": Entire paragraph
-- linkUrl (string, optional): URL for links
-- searchText (string, optional): Specific text to find and format
-
-**Example:**
-format: "bold"
-scope: "selection"
-
-Or for links:
-format: "link"
-linkUrl: "https://example.com"
-searchText: "click here"
-`;
-}

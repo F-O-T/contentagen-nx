@@ -475,38 +475,3 @@ export const originalityTool = createTool({
       };
    },
 });
-
-export function getOriginalityInstructions(): string {
-   return `
-## ORIGINALITY ANALYSIS TOOL
-Detects generic patterns and suggests ways to make content more original.
-
-**When to use:** To ensure content stands out from competitors and provides unique value.
-
-**Input:**
-- content (string): Full content to analyze
-- topic (string): Main topic
-- contentType (enum): "how-to", "listicle", "comparison", "explainer", "general"
-
-**Output:**
-- originalityScore: 0-100 (higher = more original)
-- genericPatterns: Template phrases, filler, and clichés found
-- uniqueElements: Original elements detected (research, experience, etc.)
-- missingElements: Differentiators that could be added
-- competitiveAnalysis: What makes content stand out vs what's missing
-- issues/recommendations: Specific improvement suggestions
-
-**Generic Patterns Detected:**
-- Template: "Neste artigo, vamos explorar...", "Você já se perguntou..."
-- Filler: "É importante destacar que", "Vale ressaltar"
-- Clichés: "conteúdo é rei", "otimize para o usuário"
-
-**Originality Indicators:**
-- Original research/testing
-- Personal experience
-- Case studies
-- Proprietary data
-- Expert interviews
-- Counter-intuitive insights
-`;
-}

@@ -25,23 +25,3 @@ export const editTitleTool = createTool({
       };
    },
 });
-
-export function getEditTitleInstructions(): string {
-   return `
-## EDIT TITLE TOOL
-Updates the blog post title.
-
-**When to use:** Changing the main title/headline of the post
-
-**Parameters:**
-- title (string): The new title (1-200 characters)
-
-**Best Practices:**
-- Keep titles under 60 characters for SEO
-- Include the primary keyword
-- Make it compelling and click-worthy
-
-**Example:**
-title: "10 Proven Strategies to Boost Your Productivity"
-`;
-}
