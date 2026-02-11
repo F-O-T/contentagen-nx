@@ -1,11 +1,11 @@
 import { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
-import type { PgVector } from "@mastra/pg";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import type { ModelId } from "../models";
+import { pgVectorStore } from "../utils";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
-import { pgVectorStore } from "./agents/shared";
+import { orchestratorAgent } from "./agents/orchestrator-agent";
 import { writerAgent } from "./agents/writer-agent";
 
 export type CustomRequestContext = {
@@ -13,21 +13,18 @@ export type CustomRequestContext = {
    userId: string;
    writerId?: string;
    model?: ModelId;
+   language?: string;
    writerInstructions?: InstructionMemoryItem[];
 };
 
-// Only include vectors config if PgVector is available
-const vectorsConfig: Record<string, PgVector> = pgVectorStore
-   ? { pgVector: pgVectorStore }
-   : {};
-
 export const mastra = new Mastra({
    agents: {
+      orchestratorAgent,
       writerAgent,
       fimAgent,
       inlineEditAgent,
    },
-   vectors: vectorsConfig,
+   vectors: { pgVector: pgVectorStore },
    bundler: {
       externals: ["react-dom", "@logtail/pino", "pino"],
       transpilePackages: [
@@ -54,6 +51,9 @@ export function createRequestContext(context: CustomRequestContext) {
    }
    if (context.model) {
       requestContext.set("model", context.model);
+   }
+   if (context.language) {
+      requestContext.set("language", context.language);
    }
    if (context.writerInstructions) {
       requestContext.set("writerInstructions", context.writerInstructions);
