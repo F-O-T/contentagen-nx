@@ -26,17 +26,17 @@
          "default": "./src/mastra/index.ts",
          "types": "./dist/src/mastra/index.d.ts"
       },
+      "./mastra": {
+         "default": "./src/mastra/index.ts",
+         "types": "./dist/src/mastra/index.d.ts"
+      },
       "./models": {
          "default": "./src/models.ts",
          "types": "./dist/src/models.d.ts"
       },
-      "./rag/rag-service": {
-         "default": "./src/mastra/rag/rag-service.ts",
-         "types": "./dist/src/mastra/rag/rag-service.d.ts"
-      },
-      "./rag/content-indexer": {
-         "default": "./src/mastra/rag/content-indexer.ts",
-         "types": "./dist/src/mastra/rag/content-indexer.d.ts"
+      "./rag/*": {
+         "default": "./src/mastra/rag/*.ts",
+         "types": "./dist/src/mastra/rag/*.d.ts"
       }
    },
    "files": [
