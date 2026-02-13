@@ -126,12 +126,12 @@ export function TabItem({
          <ContextMenuTrigger asChild>
             <button
                className={cn(
-                  "group/tab relative flex h-8 min-w-0 shrink-0 items-center gap-1.5 border-b-2 px-3 text-xs font-medium transition-colors select-none",
+                  "group/tab relative flex h-8 min-w-0 shrink-0 items-center gap-2 rounded-md px-3 text-xs font-medium transition-colors select-none",
                   isPinned && !isActive && "max-w-10",
                   !isPinned && "max-w-[200px]",
                   isActive
-                     ? "border-primary text-foreground bg-background"
-                     : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                     ? "bg-background text-foreground border border-border"
+                     : "text-muted-foreground hover:text-foreground hover:bg-muted/40",
                )}
                onClick={handleClick}
                onMouseDown={handleMiddleClick}

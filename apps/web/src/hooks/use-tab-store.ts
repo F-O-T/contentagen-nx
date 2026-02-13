@@ -125,13 +125,12 @@ export function initializeTabs(
       return;
    }
 
-   // Default: single pinned Home tab
+   // Default: single pinned Home tab (no icon)
    const homeTab: Tab = {
       id: crypto.randomUUID(),
       route: homeRoute,
       params: homeParams,
       label: "Home",
-      icon: "House",
       type: "home",
       isPinned: true,
       openedAt: Date.now(),
@@ -214,7 +213,6 @@ export function closeTab(
             route: homeRoute,
             params: homeParams,
             label: "Home",
-            icon: "House",
             type: "home",
             isPinned: true,
             openedAt: Date.now(),

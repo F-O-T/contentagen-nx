@@ -1,3 +1,4 @@
+import { Button } from "@packages/ui/components/button";
 import { cn } from "@packages/ui/lib/utils";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -107,7 +108,7 @@ export function TabBar({
    }, []);
 
    return (
-      <div className="relative flex h-9 shrink-0 items-stretch border-b bg-background/50">
+      <div className="relative flex h-9 shrink-0 items-center border-b bg-background/50">
          {/* Left scroll shadow */}
          <div
             className={cn(
@@ -151,14 +152,16 @@ export function TabBar({
          />
 
          {/* New tab button */}
-         <button
-            className="flex h-full w-9 shrink-0 items-center justify-center border-l text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+         <Button
+            className="h-8 w-9 shrink-0 rounded-md border-l text-muted-foreground hover:bg-muted/40 hover:text-foreground"
             onClick={onNewTab}
+            size="icon"
             title="Nova aba"
             type="button"
+            variant="ghost"
          >
             <Plus className="size-3.5" />
-         </button>
+         </Button>
       </div>
    );
 }

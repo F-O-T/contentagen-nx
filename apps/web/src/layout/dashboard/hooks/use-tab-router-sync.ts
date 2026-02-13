@@ -65,15 +65,25 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
             focusTab(existing.id);
          }
       } else {
-         // No matching tab — create one
+         // No matching tab — replace the current one (PostHog-style)
          const metadata = resolveTabMetadata(pathname, params);
-         openTab({
-            route: routePath,
-            params: { ...params },
-            label: metadata.label,
-            icon: metadata.icon,
-            type: metadata.type,
-         });
+         if (tabStore.state.activeTabId) {
+            replaceCurrentTab({
+               route: routePath,
+               params: { ...params },
+               label: metadata.label,
+               icon: metadata.icon,
+               type: metadata.type,
+            });
+         } else {
+            openTab({
+               route: routePath,
+               params: { ...params },
+               label: metadata.label,
+               icon: metadata.icon,
+               type: metadata.type,
+            });
+         }
       }
    }, [pathname, params]);
 
