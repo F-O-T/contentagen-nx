@@ -1,8 +1,8 @@
-import type { RequestContext } from "@mastra/core/request-context";
 import {
    type CustomRequestContext,
    createRequestContext,
    mastra,
+   type RequestContext,
 } from "@packages/agents";
 import {
    addChatMessage,

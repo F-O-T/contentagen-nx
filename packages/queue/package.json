@@ -22,7 +22,7 @@
    "scripts": {
       "build": "tsc --build",
       "check": "biome check --write ./src",
-      "typecheck": "tsc"
+      "typecheck": "tsgo"
    },
    "dependencies": {
       "bullmq": "catalog:workers",

@@ -20,7 +20,7 @@
 	"files": ["dist"],
 	"scripts": {
 		"build": "tsc --build",
-		"typecheck": "tsc"
+		"typecheck": "tsgo"
 	},
 	"dependencies": {
 		"@mendable/firecrawl-js": "^4.10.0",

@@ -27,7 +27,7 @@
    ],
    "scripts": {
       "build": "tsc --build",
-      "typecheck": "tsc"
+      "typecheck": "tsgo"
    },
    "dependencies": {
       "@logtail/pino": "^0.5.0",

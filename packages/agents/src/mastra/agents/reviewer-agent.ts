@@ -7,7 +7,7 @@ import { originalityTool } from "../tools/analysis/originality-tool";
 import { readabilityTool } from "../tools/analysis/readability-tool";
 import { toneAnalysisTool } from "../tools/analysis/tone-analysis-tool";
 
-export const reviewerAgent = new Agent({
+export const reviewerAgent: Agent = new Agent({
    id: "reviewer-agent",
    name: "Content Reviewer",
    description:

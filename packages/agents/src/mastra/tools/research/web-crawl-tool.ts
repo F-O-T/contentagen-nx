@@ -54,28 +54,3 @@ export const webCrawlTool = createTool({
       }
    },
 });
-
-export function getWebCrawlInstructions(): string {
-   return `
-## WEB CRAWL TOOL
-Extracts full content from a specific webpage.
-
-**When to use:** Get detailed content from a URL found via search
-
-**Parameters:**
-- url (string): Full URL to crawl (https://...)
-- preferredProvider (enum, optional): "tavily", "exa", or "firecrawl"
-
-**Returns:**
-- url: The crawled URL
-- title: Page title
-- content: Full text content
-- markdown: Content as markdown (if available)
-- metadata: Description, author, date, word count
-- provider: Which provider was used
-
-**Tips:**
-- Use after webSearch to get full content
-- Great for extracting quotes, statistics, or detailed information
-`;
-}

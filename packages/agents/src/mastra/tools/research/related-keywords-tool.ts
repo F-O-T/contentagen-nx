@@ -307,28 +307,3 @@ export const relatedKeywordsTool = createTool({
       }
    },
 });
-
-export function getRelatedKeywordsInstructions(): string {
-   return `
-## RELATED KEYWORDS TOOL
-Discovers related keywords and variations for your primary keyword.
-
-**When to use:** Early in research to expand keyword coverage and identify search intent variations
-
-**Parameters:**
-- primaryKeyword (string): The main keyword to research
-- maxSuggestions (number): Max related keywords (5-30, default 15)
-
-**Returns:**
-- relatedKeywords: Related terms with relevance scores (high/medium/low)
-- longTailVariations: Longer, more specific keyword phrases
-- questions: Question-based queries ("how to...", "what is...")
-- searchModifiers: Common modifiers found (e.g., "best", "guide", "2024")
-
-**Tips:**
-- Use results to inform your content structure
-- High-relevance keywords should appear in headings
-- Questions make great H2/H3 sections
-- Search modifiers help with title optimization
-`;
-}

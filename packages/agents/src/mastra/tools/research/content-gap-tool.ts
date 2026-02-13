@@ -395,29 +395,3 @@ export const contentGapTool = createTool({
       }
    },
 });
-
-export function getContentGapInstructions(): string {
-   return `
-## CONTENT GAP FINDER TOOL
-Compares multiple competitor articles to find differentiation opportunities.
-
-**When to use:** After serpAnalysis and competitorContent to identify what's missing
-
-**Parameters:**
-- topic (string): The main topic being researched
-- competitorUrls (array): 2-5 competitor URLs to compare
-
-**Returns:**
-- commonTopics: Topics covered by multiple competitors (with importance level)
-- uniqueTopics: Topics only one competitor covers (potential differentiators)
-- gaps: Content types/approaches NO competitor does well (high opportunity)
-- structureInsights: Average heading count, word count, common format
-- recommendations: Actionable suggestions for differentiation
-
-**Tips:**
-- Essential topics (covered by all) MUST be in your content
-- Gaps with "high" opportunity are your best differentiation points
-- Match or exceed avgWordCount for competitive length
-- Unique topics can inspire fresh angles
-`;
-}

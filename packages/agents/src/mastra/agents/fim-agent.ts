@@ -1,6 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 
-export const fimAgent = new Agent({
+export const fimAgent: Agent = new Agent({
    id: "fim-agent",
    name: "FIM Completion Agent",
 

@@ -29,7 +29,7 @@
       "dev": "bun run container-start && bun run --watch src/index.ts",
       "format": "biome format",
       "start": "./sdk-server",
-      "typecheck": "tsc"
+      "typecheck": "tsgo"
    },
    "version": "0.8.1"
 }

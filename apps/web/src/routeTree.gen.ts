@@ -34,6 +34,7 @@ import { Route as AuthenticatedSlugTeamIdEditorRouteImport } from './routes/_aut
 import { Route as AuthenticatedSlugTeamIdDashboardRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard'
 import { Route as AuthenticatedSlugTeamIdEditorContentIdRouteImport } from './routes/_authenticated/$slug/$teamId/_editor/$contentId'
 import { Route as AuthenticatedSlugTeamIdDashboardSettingsRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard/settings'
+import { Route as AuthenticatedSlugTeamIdDashboardSearchRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard/search'
 import { Route as AuthenticatedSlugTeamIdDashboardPlansRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard/plans'
 import { Route as AuthenticatedSlugTeamIdDashboardBillingRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard/billing'
 import { Route as AuthenticatedSlugTeamIdDashboardSettingsIndexRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard/settings/index'
@@ -199,6 +200,12 @@ const AuthenticatedSlugTeamIdDashboardSettingsRoute =
   AuthenticatedSlugTeamIdDashboardSettingsRouteImport.update({
     id: '/settings',
     path: '/settings',
+    getParentRoute: () => AuthenticatedSlugTeamIdDashboardRoute,
+  } as any)
+const AuthenticatedSlugTeamIdDashboardSearchRoute =
+  AuthenticatedSlugTeamIdDashboardSearchRouteImport.update({
+    id: '/search',
+    path: '/search',
     getParentRoute: () => AuthenticatedSlugTeamIdDashboardRoute,
   } as any)
 const AuthenticatedSlugTeamIdDashboardPlansRoute =
@@ -477,6 +484,7 @@ export interface FileRoutesByFullPath {
   '/auth/sign-in/': typeof AuthSignInIndexRoute
   '/$slug/$teamId/billing': typeof AuthenticatedSlugTeamIdDashboardBillingRoute
   '/$slug/$teamId/plans': typeof AuthenticatedSlugTeamIdDashboardPlansRoute
+  '/$slug/$teamId/search': typeof AuthenticatedSlugTeamIdDashboardSearchRoute
   '/$slug/$teamId/settings': typeof AuthenticatedSlugTeamIdDashboardSettingsRouteWithChildren
   '/$slug/$teamId/$contentId': typeof AuthenticatedSlugTeamIdEditorContentIdRoute
   '/$slug/$teamId/analytics/data-management': typeof AuthenticatedSlugTeamIdDashboardAnalyticsDataManagementRouteWithChildren
@@ -537,6 +545,7 @@ export interface FileRoutesByTo {
   '/auth/sign-in': typeof AuthSignInIndexRoute
   '/$slug/$teamId/billing': typeof AuthenticatedSlugTeamIdDashboardBillingRoute
   '/$slug/$teamId/plans': typeof AuthenticatedSlugTeamIdDashboardPlansRoute
+  '/$slug/$teamId/search': typeof AuthenticatedSlugTeamIdDashboardSearchRoute
   '/$slug/$teamId/$contentId': typeof AuthenticatedSlugTeamIdEditorContentIdRoute
   '/$slug/$teamId/forms/$formId': typeof AuthenticatedSlugTeamIdDashboardFormsFormIdRouteWithChildren
   '/$slug/$teamId/settings/customization': typeof AuthenticatedSlugTeamIdDashboardSettingsCustomizationRoute
@@ -600,6 +609,7 @@ export interface FileRoutesById {
   '/_authenticated/$slug/$teamId/_editor': typeof AuthenticatedSlugTeamIdEditorRouteWithChildren
   '/_authenticated/$slug/$teamId/_dashboard/billing': typeof AuthenticatedSlugTeamIdDashboardBillingRoute
   '/_authenticated/$slug/$teamId/_dashboard/plans': typeof AuthenticatedSlugTeamIdDashboardPlansRoute
+  '/_authenticated/$slug/$teamId/_dashboard/search': typeof AuthenticatedSlugTeamIdDashboardSearchRoute
   '/_authenticated/$slug/$teamId/_dashboard/settings': typeof AuthenticatedSlugTeamIdDashboardSettingsRouteWithChildren
   '/_authenticated/$slug/$teamId/_editor/$contentId': typeof AuthenticatedSlugTeamIdEditorContentIdRoute
   '/_authenticated/$slug/$teamId/_dashboard/analytics/data-management': typeof AuthenticatedSlugTeamIdDashboardAnalyticsDataManagementRouteWithChildren
@@ -663,6 +673,7 @@ export interface FileRouteTypes {
     | '/auth/sign-in/'
     | '/$slug/$teamId/billing'
     | '/$slug/$teamId/plans'
+    | '/$slug/$teamId/search'
     | '/$slug/$teamId/settings'
     | '/$slug/$teamId/$contentId'
     | '/$slug/$teamId/analytics/data-management'
@@ -723,6 +734,7 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/$slug/$teamId/billing'
     | '/$slug/$teamId/plans'
+    | '/$slug/$teamId/search'
     | '/$slug/$teamId/$contentId'
     | '/$slug/$teamId/forms/$formId'
     | '/$slug/$teamId/settings/customization'
@@ -785,6 +797,7 @@ export interface FileRouteTypes {
     | '/_authenticated/$slug/$teamId/_editor'
     | '/_authenticated/$slug/$teamId/_dashboard/billing'
     | '/_authenticated/$slug/$teamId/_dashboard/plans'
+    | '/_authenticated/$slug/$teamId/_dashboard/search'
     | '/_authenticated/$slug/$teamId/_dashboard/settings'
     | '/_authenticated/$slug/$teamId/_editor/$contentId'
     | '/_authenticated/$slug/$teamId/_dashboard/analytics/data-management'
@@ -1011,6 +1024,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/$slug/$teamId/settings'
       preLoaderRoute: typeof AuthenticatedSlugTeamIdDashboardSettingsRouteImport
+      parentRoute: typeof AuthenticatedSlugTeamIdDashboardRoute
+    }
+    '/_authenticated/$slug/$teamId/_dashboard/search': {
+      id: '/_authenticated/$slug/$teamId/_dashboard/search'
+      path: '/search'
+      fullPath: '/$slug/$teamId/search'
+      preLoaderRoute: typeof AuthenticatedSlugTeamIdDashboardSearchRouteImport
       parentRoute: typeof AuthenticatedSlugTeamIdDashboardRoute
     }
     '/_authenticated/$slug/$teamId/_dashboard/plans': {
@@ -1389,6 +1409,7 @@ const AuthenticatedSlugTeamIdDashboardFormsFormIdRouteWithChildren =
 interface AuthenticatedSlugTeamIdDashboardRouteChildren {
   AuthenticatedSlugTeamIdDashboardBillingRoute: typeof AuthenticatedSlugTeamIdDashboardBillingRoute
   AuthenticatedSlugTeamIdDashboardPlansRoute: typeof AuthenticatedSlugTeamIdDashboardPlansRoute
+  AuthenticatedSlugTeamIdDashboardSearchRoute: typeof AuthenticatedSlugTeamIdDashboardSearchRoute
   AuthenticatedSlugTeamIdDashboardSettingsRoute: typeof AuthenticatedSlugTeamIdDashboardSettingsRouteWithChildren
   AuthenticatedSlugTeamIdDashboardAnalyticsDataManagementRoute: typeof AuthenticatedSlugTeamIdDashboardAnalyticsDataManagementRouteWithChildren
   AuthenticatedSlugTeamIdDashboardFormsFormIdRoute: typeof AuthenticatedSlugTeamIdDashboardFormsFormIdRouteWithChildren
@@ -1408,6 +1429,8 @@ const AuthenticatedSlugTeamIdDashboardRouteChildren: AuthenticatedSlugTeamIdDash
       AuthenticatedSlugTeamIdDashboardBillingRoute,
     AuthenticatedSlugTeamIdDashboardPlansRoute:
       AuthenticatedSlugTeamIdDashboardPlansRoute,
+    AuthenticatedSlugTeamIdDashboardSearchRoute:
+      AuthenticatedSlugTeamIdDashboardSearchRoute,
     AuthenticatedSlugTeamIdDashboardSettingsRoute:
       AuthenticatedSlugTeamIdDashboardSettingsRouteWithChildren,
     AuthenticatedSlugTeamIdDashboardAnalyticsDataManagementRoute:

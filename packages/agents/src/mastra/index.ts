@@ -8,6 +8,11 @@ import { inlineEditAgent } from "./agents/inline-edit-agent";
 import { orchestratorAgent } from "./agents/orchestrator-agent";
 import { writerAgent } from "./agents/writer-agent";
 
+/**
+ * Re-export RequestContext so consumers don't need to depend on @mastra/core directly.
+ */
+export type { RequestContext };
+
 export type CustomRequestContext = {
    brandId?: string;
    userId: string;
@@ -17,7 +22,7 @@ export type CustomRequestContext = {
    writerInstructions?: InstructionMemoryItem[];
 };
 
-export const mastra = new Mastra({
+export const mastra: Mastra = new Mastra({
    agents: {
       orchestratorAgent,
       writerAgent,
@@ -25,18 +30,6 @@ export const mastra = new Mastra({
       inlineEditAgent,
    },
    vectors: { pgVector: pgVectorStore },
-   bundler: {
-      externals: ["react-dom", "@logtail/pino", "pino"],
-      transpilePackages: [
-         "@packages/files/client",
-         "@packages/environment/helpers",
-         "@packages/environment/server",
-         "@packages/database/client",
-         "@packages/database/schema",
-         "@packages/utils/errors",
-         "@packages/utils/text",
-      ],
-   },
 });
 
 export function createRequestContext(context: CustomRequestContext) {

@@ -95,7 +95,7 @@ After each tool call:
  * Deep knowledge comes from Mastra Skills (edicao-de-conteudo, gestao-de-frontmatter,
  * diretrizes-de-escrita, otimizacao-seo, escrita-humana, etc.)
  */
-export const writerAgent = new Agent({
+export const writerAgent: Agent = new Agent({
    id: "writer-agent",
    name: "Writer Agent",
    description:

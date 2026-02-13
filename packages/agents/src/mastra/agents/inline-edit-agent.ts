@@ -1,6 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 
-export const inlineEditAgent = new Agent({
+export const inlineEditAgent: Agent = new Agent({
    id: "inline-edit-agent",
    name: "Inline Edit Agent",
 

@@ -5,7 +5,7 @@ import { editKeywordsTool } from "../tools/frontmatter/edit-keywords-tool";
 import { editTitleTool } from "../tools/frontmatter/edit-title-tool";
 import { searchPreviousContentTool } from "../tools/rag/search-previous-content-tool";
 
-export const plannerAgent = new Agent({
+export const plannerAgent: Agent = new Agent({
    id: "planner-agent",
    name: "Content Planner",
    description:

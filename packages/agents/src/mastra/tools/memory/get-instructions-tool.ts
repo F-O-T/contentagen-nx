@@ -2,33 +2,6 @@ import { createTool } from "@mastra/core/tools";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { z } from "zod";
 
-export function getInstructionsToolInstructions(): string {
-   return `
-## GET INSTRUCTION MEMORIES TOOL
-Retrieves custom instruction memories configured for this agent.
-
-**When to use:**
-- When you need to recall persistent instructions or preferences
-- To check what custom rules or guidelines have been configured
-- When you want to ensure you're following user-configured instructions
-
-**Parameters:**
-- enabledOnly (optional, default: true): Only return enabled instructions
-- limit (optional): Maximum number of instructions to return
-
-**Returns:**
-- instructions: Array of instruction objects with:
-  - id: Unique identifier
-  - title: Short title describing the instruction
-  - content: Full markdown content of the instruction
-  - enabled: Whether this instruction is active
-  - order: Sort order for the instruction
-- count: Total number of instructions returned
-
-**Note:** Instructions are automatically compiled into your system prompt, but this tool lets you explicitly reference them during execution.
-`;
-}
-
 export const getInstructionsTool = createTool({
    id: "getInstructionMemories",
    description:

@@ -11,7 +11,7 @@ import { serpAnalysisTool } from "../tools/research/serp-analysis-tool";
 import { webCrawlTool } from "../tools/research/web-crawl-tool";
 import { webSearchTool } from "../tools/research/web-search-tool";
 
-export const researcherAgent = new Agent({
+export const researcherAgent: Agent = new Agent({
    id: "researcher-agent",
    name: "Content Researcher",
    description:

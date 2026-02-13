@@ -6,7 +6,7 @@ import { reviewerAgent } from "./reviewer-agent";
 import { seoAuditorAgent } from "./seo-auditor-agent";
 import { writerAgent } from "./writer-agent";
 
-export const orchestratorAgent = new Agent({
+export const orchestratorAgent: Agent = new Agent({
    id: "orchestrator-agent",
    name: "Content Orchestrator",
    description:

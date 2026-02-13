@@ -71,27 +71,3 @@ export const webSearchTool = createTool({
       }
    },
 });
-
-export function getWebSearchInstructions(): string {
-   return `
-## WEB SEARCH TOOL
-Searches the web for information to enhance your blog post.
-
-**When to use:** Research facts, find sources, discover related content
-
-**Parameters:**
-- query (string): Search query (2-10 words)
-- maxResults (number): Number of results (1-20, default 5)
-- searchDepth (enum): "basic" (fast) or "advanced" (thorough)
-- preferredProvider (enum, optional): "tavily", "exa", or "firecrawl"
-
-**Returns:**
-- results: Array of {title, url, snippet, score}
-- provider: Which search provider was used
-- query: The search query used
-
-**Tips:**
-- Use specific, focused queries
-- Combine with webCrawl to get full content from interesting results
-`;
-}

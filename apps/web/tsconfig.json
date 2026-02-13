@@ -1,7 +1,9 @@
 {
   "include": [
-    "**/*.ts",
-    "**/*.tsx"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "__tests__/**/*.tsx",
+    "__tests__/**/*.ts"
   ],
   "compilerOptions": {
     "target": "ES2022",
@@ -25,7 +27,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/*"

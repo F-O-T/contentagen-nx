@@ -9,7 +9,7 @@ import {
    isRagAvailable,
    ragService,
 } from "../../rag/rag-service";
-import type { ContentMetadata } from "../../rag/types";
+import type { ContentMetadata } from "../../rag/schemas";
 
 // Graph traversal threshold (0.7 = only strong connections)
 const GRAPH_SIMILARITY_THRESHOLD = 0.7;

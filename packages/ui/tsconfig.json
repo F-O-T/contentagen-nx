@@ -1,7 +1,6 @@
 {
    "extends": "@tooling/typescript/typecheck.json",
    "compilerOptions": {
-      "baseUrl": ".",
       "jsx": "preserve",
       "types": ["bun-types"],
       "lib": ["dom", "ES2022"],

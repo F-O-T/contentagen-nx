@@ -52,7 +52,7 @@
       "auth-schema-generate": "npx @better-auth/cli@latest generate --config ./src/cli-config.ts --output ../database/src/schemas/auth.ts",
       "build": "tsc --build",
       "check": "biome check --write ./src",
-      "typecheck": "tsc "
+      "typecheck": "tsgo"
    },
    "type": "module",
    "version": "0.8.1"

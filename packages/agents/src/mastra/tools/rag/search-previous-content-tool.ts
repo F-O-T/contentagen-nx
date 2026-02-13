@@ -15,7 +15,7 @@ import type {
    ContentMetadata,
    RelatedPost,
    RelevantChunk,
-} from "../../rag/types";
+} from "../../rag/schemas";
 
 export const searchPreviousContentTool = createTool({
    id: "search-previous-content",

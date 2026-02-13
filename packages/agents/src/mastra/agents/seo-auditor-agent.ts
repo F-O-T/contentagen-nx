@@ -14,7 +14,7 @@ import { seoScoreTool } from "../tools/analysis/seo-score-tool";
 import { titleMetaTool } from "../tools/analysis/title-meta-tool";
 import { toneAnalysisTool } from "../tools/analysis/tone-analysis-tool";
 
-export const seoAuditorAgent = new Agent({
+export const seoAuditorAgent: Agent = new Agent({
    id: "seo-auditor-agent",
    name: "SEO Auditor",
    description:

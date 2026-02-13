@@ -1,5 +1,9 @@
 {
 	"exclude": ["node_modules"],
 	"extends": "@tooling/typescript/typecheck.json",
+	"compilerOptions": {
+		"allowJs": false,
+		"checkJs": false
+	},
 	"include": ["src"]
 }

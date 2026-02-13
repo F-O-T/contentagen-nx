@@ -383,33 +383,3 @@ export const factFinderTool = createTool({
       }
    },
 });
-
-export function getFactFinderInstructions(): string {
-   return `
-## FACT FINDER TOOL
-Searches for facts, statistics, studies, and quotes from authoritative sources.
-
-**When to use:** To enrich content with credible data and citations
-
-**Parameters:**
-- topic (string): The topic to find facts about
-- factTypes (array): Types to search for: "statistics", "studies", "quotes", "examples"
-- maxFacts (number): Maximum facts to return (3-20, default 10)
-
-**Returns:**
-- facts: Array of facts with content, source, URL, and credibility rating
-- sourcesSummary: Breakdown of sources by credibility level
-- suggestedCitations: Ready-to-use citation strings
-
-**Credibility Levels:**
-- high: Government sites (.gov), academic (.edu), peer-reviewed journals
-- medium: Reputable news outlets, Wikipedia, major tech publications
-- low: Blogs, forums, unverified sources
-
-**Tips:**
-- Prioritize high-credibility facts for key claims
-- Use statistics to support arguments
-- Include study references for technical topics
-- Expert quotes add authority and engagement
-`;
-}

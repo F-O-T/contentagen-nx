@@ -19,8 +19,11 @@ import {
    getSidebarDefaultOpen,
    persistSidebarState,
 } from "../hooks/use-sidebar-persistence";
+import { useTabKeyboardShortcuts } from "../hooks/use-tab-keyboard-shortcuts";
+import { useTabRouterSync } from "../hooks/use-tab-router-sync";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarSubPanel } from "./sidebar-sub-panel";
+import { TabBar } from "./tab-bar";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const { activeOrganization } = useActiveOrganization();
@@ -29,6 +32,28 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const queryClient = useQueryClient();
    const setTeamForOrgRef = useRef(new Set<string>());
    const { pathname } = useLocation();
+
+   const orgSlug = activeOrganization?.slug ?? "";
+   const teamId = activeTeam?.id ?? "";
+
+   // ── Tab system ───────────────────────────────────────────────────────────
+
+   const homeRoute = `/${orgSlug}/${teamId}/home`;
+   const homeParams = { slug: orgSlug, teamId };
+
+   const { navigateToTab, openNewSearchTab } = useTabRouterSync(
+      orgSlug,
+      teamId,
+   );
+
+   useTabKeyboardShortcuts({
+      onNewTab: openNewSearchTab,
+      onTabFocus: navigateToTab,
+      homeRoute,
+      homeParams,
+   });
+
+   // ── Existing effects ─────────────────────────────────────────────────────
 
    useEffect(() => {
       if (activeOrganization?.slug) {
@@ -81,6 +106,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
             <SidebarInset className="">
                <SidebarSubPanel />
+               <TabBar
+                  homeParams={homeParams}
+                  homeRoute={homeRoute}
+                  onNewTab={openNewSearchTab}
+                  onTabFocus={navigateToTab}
+               />
                <main className="flex-1 overflow-y-auto p-4">{children}</main>
             </SidebarInset>
          </SidebarProvider>

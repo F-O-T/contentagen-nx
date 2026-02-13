@@ -6,7 +6,21 @@ import { env as serverEnv } from "@packages/environment/server";
 export const pgVectorStore = new PgVector({
    id: "mastra-rag",
    connectionString: serverEnv.PG_VECTOR_URL,
+   max: 10,
+   idleTimeoutMillis: 30_000,
+   pgPoolOptions: {
+      connectionTimeoutMillis: 5_000,
+      allowExitOnIdle: true,
+   },
 });
+
+/**
+ * Gracefully close the PgVector connection pool.
+ * Call this on process shutdown (SIGTERM / SIGINT).
+ */
+export async function disconnectVectorStore(): Promise<void> {
+   await pgVectorStore.disconnect();
+}
 
 export const embeddingModel = new ModelRouterEmbeddingModel({
    providerId: "openrouter",
