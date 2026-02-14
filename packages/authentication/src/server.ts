@@ -1,4 +1,5 @@
 import { oauthProvider } from "@better-auth/oauth-provider";
+import { z } from "zod";
 import { stripe as stripePlugin } from "@better-auth/stripe";
 import type { DatabaseInstance } from "@packages/database/client";
 import {
@@ -145,6 +146,22 @@ export function createAuth(config: SimplifiedAuthConfig) {
                      input: true,
                      required: false,
                      type: "string",
+                  },
+                  allowedDomains: {
+                     type: "string[]",
+                     defaultValue: [],
+                     input: true,
+                     required: false,
+                     validator: {
+                        input: z.array(
+                           z
+                              .string()
+                              .regex(
+                                 /^(\*\.)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/,
+                                 "Invalid domain pattern. Examples: example.com, *.example.com, app.example.com, localhost",
+                              ),
+                        ),
+                     },
                   },
                },
             },

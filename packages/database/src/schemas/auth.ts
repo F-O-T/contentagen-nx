@@ -109,9 +109,12 @@ export const organization = pgTable(
       publicApiKey: text("public_api_key").unique(),
       // Managed via direct Drizzle queries in oRPC routers, not through Better Auth
       // (Better Auth additionalFields does not support jsonb types)
-      onboardingProducts: jsonb("onboarding_products").$type<string[]>(),
-      onboardingTasks:
-         jsonb("onboarding_tasks").$type<Record<string, boolean>>(),
+      onboardingProducts: jsonb("onboarding_products")
+         .$type<Array<"content" | "forms" | "analytics">>(),
+      onboardingTasks: jsonb("onboarding_tasks")
+         .$type<Record<string, boolean>>()
+         .default({})
+         .notNull(),
    },
    (table) => [uniqueIndex("organization_slug_uidx").on(table.slug)],
 );

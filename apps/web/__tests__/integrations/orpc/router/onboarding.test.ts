@@ -17,7 +17,6 @@ vi.mock("@packages/database/schemas/auth", () => ({
 		onboardingTasks: "onboardingTasks",
 		onboardingCompleted: "onboardingCompleted",
 		onboardingProducts: "onboardingProducts",
-		publicApiKey: "publicApiKey",
 		name: "name",
 	},
 	user: { id: "id", name: "name" },
@@ -122,7 +121,6 @@ describe("getOnboardingStatus", () => {
 			onboardingCompleted: false,
 			onboardingProducts: ["content"],
 			onboardingTasks: { setup_profile: true },
-			publicApiKey: "pk_test_123",
 		});
 
 		// Mock the 5 count queries: content=2, published=1, forms=1, insights=0, dashboards=0
@@ -146,7 +144,6 @@ describe("getOnboardingStatus", () => {
 				publish_content: true,
 				create_form: true,
 			},
-			publicApiKey: "pk_test_123",
 		});
 	});
 
@@ -166,7 +163,6 @@ describe("getOnboardingStatus", () => {
 			onboardingCompleted: false,
 			onboardingProducts: null,
 			onboardingTasks: null,
-			publicApiKey: null,
 		});
 
 		// All count queries return 0
@@ -182,7 +178,6 @@ describe("getOnboardingStatus", () => {
 			onboardingCompleted: false,
 			onboardingProducts: null,
 			tasks: null,
-			publicApiKey: null,
 		});
 	});
 
@@ -192,7 +187,6 @@ describe("getOnboardingStatus", () => {
 			onboardingCompleted: false,
 			onboardingProducts: ["content", "forms"],
 			onboardingTasks: { invite_team: true, custom_task: true },
-			publicApiKey: "pk_test_456",
 		});
 
 		// content=1, published=0, forms=0, insights=1, dashboards=1
@@ -216,7 +210,6 @@ describe("getOnboardingStatus", () => {
 				create_insight: true,
 				create_dashboard: true,
 			},
-			publicApiKey: "pk_test_456",
 		});
 	});
 });
@@ -344,5 +337,91 @@ describe("skipTask", () => {
 		expect(result).toEqual({ success: true });
 		expect(mocks.db.update).toHaveBeenCalled();
 		expect(mocks.mockSet).toHaveBeenCalled();
+	});
+});
+
+// =============================================================================
+// Onboarding Fields Persistence
+// =============================================================================
+
+describe("Onboarding Fields Persistence", () => {
+	it("should persist onboardingProducts when selected", async () => {
+		// Mock getOnboardingStatus to verify persistence
+		mocks.db.query.organization.findFirst.mockResolvedValueOnce({
+			id: TEST_ORG_ID,
+			onboardingCompleted: false,
+			onboardingProducts: ["content", "forms"],
+			onboardingTasks: {},
+		});
+
+		// All count queries return 0
+		mocks.mockWhere.mockImplementation(() => ({
+			then: vi.fn((cb: any) => cb([{ count: 0 }])),
+			limit: mocks.mockLimit,
+		}));
+
+		const ctx = createOnboardingContext(mocks.db);
+
+		// First, select products
+		await call(
+			onboardingRouter.selectProducts,
+			{ products: ["content", "forms"] },
+			{ context: ctx },
+		);
+
+		// Then fetch status to verify persistence
+		const status = await call(onboardingRouter.getOnboardingStatus, undefined, { context: ctx });
+		expect(status.onboardingProducts).toEqual(["content", "forms"]);
+	});
+
+	it("should persist onboardingTasks when completed", async () => {
+		// Mock getOnboardingStatus to verify persistence
+		mocks.db.query.organization.findFirst.mockResolvedValueOnce({
+			id: TEST_ORG_ID,
+			onboardingCompleted: false,
+			onboardingProducts: null,
+			onboardingTasks: { create_content: true },
+		});
+
+		// All count queries return 0
+		mocks.mockWhere.mockImplementation(() => ({
+			then: vi.fn((cb: any) => cb([{ count: 0 }])),
+			limit: mocks.mockLimit,
+		}));
+
+		const ctx = createOnboardingContext(mocks.db);
+
+		// First, complete a task
+		await call(
+			onboardingRouter.completeTask,
+			{ taskId: "create_content" },
+			{ context: ctx },
+		);
+
+		// Then fetch status to verify persistence
+		const status = await call(onboardingRouter.getOnboardingStatus, undefined, { context: ctx });
+		expect(status.tasks?.create_content).toBe(true);
+	});
+
+	it("should initialize with empty tasks and null products", async () => {
+		// Mock a fresh org
+		mocks.db.query.organization.findFirst.mockResolvedValueOnce({
+			id: TEST_ORG_ID,
+			onboardingCompleted: false,
+			onboardingProducts: null,
+			onboardingTasks: {},
+		});
+
+		// All count queries return 0
+		mocks.mockWhere.mockImplementation(() => ({
+			then: vi.fn((cb: any) => cb([{ count: 0 }])),
+			limit: mocks.mockLimit,
+		}));
+
+		const ctx = createOnboardingContext(mocks.db);
+		const status = await call(onboardingRouter.getOnboardingStatus, undefined, { context: ctx });
+
+		expect(status.onboardingProducts).toBeNull();
+		expect(status.tasks).toEqual({});
 	});
 });
