@@ -111,26 +111,6 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       autoDetect: false,
       route: "/$slug/$teamId/forms",
    },
-   {
-      id: "embed_form",
-      title: "Incorpore o formulario",
-      description: "Adicione o formulario ao seu site usando o SDK ou iframe.",
-      type: "onboarding",
-      product: "forms",
-      dependsOn: "create_form",
-      autoDetect: false,
-      route: "/$slug/$teamId/forms",
-   },
-   {
-      id: "view_submission",
-      title: "Visualize uma resposta",
-      description: "Receba e visualize a primeira resposta de um formulario.",
-      type: "explore",
-      product: "forms",
-      dependsOn: "embed_form",
-      autoDetect: false,
-      route: "/$slug/$teamId/forms",
-   },
 
    // ── Analytics tasks ────────────────────────────────────────────────
    {
