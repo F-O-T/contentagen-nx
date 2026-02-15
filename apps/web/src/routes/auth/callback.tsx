@@ -3,6 +3,11 @@ import { authClient } from "@/integrations/better-auth/auth-client";
 
 export const Route = createFileRoute("/auth/callback")({
    beforeLoad: async ({ context }) => {
+      // Fetch onboarding status to determine where to redirect
+      const status = await context.queryClient.fetchQuery(
+         context.orpc.onboarding.getOnboardingStatus.queryOptions(),
+      );
+
       // Fetch user's organizations to get the correct slug
       const organizations = await context.queryClient.fetchQuery(
          context.orpc.organization.getOrganizations.queryOptions(),
@@ -15,16 +20,30 @@ export const Route = createFileRoute("/auth/callback")({
          const teams = await context.queryClient.fetchQuery(
             context.orpc.organization.getOrganizationTeams.queryOptions(),
          );
-         const fallbackTeam = teams[0];
+         const fallbackTeam = teams.length > 0 ? teams[0] : undefined;
 
-         if (fallbackTeam) {
+         // Check if both org and project onboarding are complete
+         const bothComplete =
+            status.organization.onboardingCompleted &&
+            status.project.onboardingCompleted;
+
+         if (fallbackTeam && bothComplete) {
+            // Both complete → go to dashboard
             throw redirect({
                to: "/$slug/$teamId/home",
                params: { slug: firstOrg.slug, teamId: fallbackTeam.id },
             });
          }
 
-         // No teams — go to onboarding
+         if (status.organization.onboardingCompleted && fallbackTeam) {
+            // Org complete but project incomplete → go to project onboarding
+            throw redirect({
+               to: "/$slug/$teamId/onboarding",
+               params: { slug: firstOrg.slug, teamId: fallbackTeam.id },
+            });
+         }
+
+         // Org not complete → go to org onboarding
          throw redirect({
             to: "/$slug/onboarding",
             params: { slug: firstOrg.slug },
