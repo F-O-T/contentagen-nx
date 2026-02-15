@@ -18,6 +18,10 @@ bun run typecheck    # TypeScript checks
 bun run check        # Biome lint/format
 bun run test         # Tests with parallelization
 
+# ⚠️ NEVER use NODE_OPTIONS to increase memory for builds
+# If builds run out of memory, fix the root cause (dependencies, bundle size, etc.)
+# Do NOT add NODE_OPTIONS='--max-old-space-size=...' to build commands
+
 # Database
 bun run db:push      # Push schema changes
 bun run db:studio    # Drizzle Studio GUI

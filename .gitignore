@@ -2,6 +2,7 @@
 
 # Dependencies
 .trigger
+.nitro
 apps/worker/worker
 .claude/**
 .mastra
