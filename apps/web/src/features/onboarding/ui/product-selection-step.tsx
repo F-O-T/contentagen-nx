@@ -46,7 +46,7 @@ export function ProductSelectionStep({
    onNext,
    onSkipToEnd,
 }: ProductSelectionStepProps) {
-   const [selected, setSelected] = useState<Product[]>(["content"]);
+   const [selected, setSelected] = useState<Product[]>([]);
 
    const mutation = useMutation(
       orpc.onboarding.selectProducts.mutationOptions({
@@ -68,8 +68,7 @@ export function ProductSelectionStep({
    const toggleProduct = useCallback((productId: Product) => {
       setSelected((prev) => {
          if (prev.includes(productId)) {
-            // Don't allow deselecting if it's the last one
-            if (prev.length === 1) return prev;
+            // Allow deselecting - button will be disabled if none selected
             return prev.filter((p) => p !== productId);
          }
          return [...prev, productId];

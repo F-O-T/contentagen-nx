@@ -28,10 +28,10 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { orpc } from "@/integrations/orpc/client";
 
 const chartConfig = {
-	author: { label: "Autor", color: "hsl(var(--chart-1))" },
-	list: { label: "Listagem", color: "hsl(var(--chart-2))" },
-	content: { label: "Conteúdo", color: "hsl(var(--chart-3))" },
-	image: { label: "Imagem", color: "hsl(var(--chart-4))" },
+	author: { label: "Autor", color: "var(--chart-1)" },
+	list: { label: "Listagem", color: "var(--chart-2)" },
+	content: { label: "Conteúdo", color: "var(--chart-3)" },
+	image: { label: "Imagem", color: "var(--chart-4)" },
 } satisfies ChartConfig;
 
 export function HomeSDKUsageCard({ className }: { className?: string }) {
@@ -97,18 +97,23 @@ export function HomeSDKUsageCard({ className }: { className?: string }) {
 		: generatePlaceholderData();
 
 	return (
-		<Card className={cn(className)}>
-			<CardHeader>
-				<CardTitle>Uso do SDK</CardTitle>
-				<CardDescription>
+		<Card className={cn("border-l-4 border-l-primary/80", className)}>
+			<CardHeader className="pb-2">
+				<div className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5">
+					API USAGE • LAST 30 DAYS
+				</div>
+				<CardTitle className="text-base font-semibold leading-tight mb-1">
+					Uso do SDK
+				</CardTitle>
+				<CardDescription className="text-xs leading-relaxed">
 					Estatísticas de uso da API neste mês
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				{mounted ? (
-					<ChartContainer config={chartConfig} className="h-[200px] w-full">
+					<ChartContainer config={chartConfig} className="h-[200px] w-full aspect-auto">
 						<LineChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-							<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted" />
+							<CartesianGrid strokeDasharray="0" vertical={false} className="stroke-muted/20" />
 							<XAxis 
 								dataKey="month" 
 								tickLine={false}

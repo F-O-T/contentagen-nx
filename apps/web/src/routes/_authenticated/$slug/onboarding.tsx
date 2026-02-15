@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { OrganizationOnboardingWizard } from "@/features/onboarding/ui/organization-onboarding-wizard";
 
-export const Route = createFileRoute("/_authenticated/$slug/onboarding/")({
+export const Route = createFileRoute("/_authenticated/$slug/onboarding")({
    beforeLoad: async ({ context, params }) => {
       const status = await context.queryClient.fetchQuery(
          context.orpc.onboarding.getOnboardingStatus.queryOptions(),

@@ -67,6 +67,18 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
       } else {
          // No matching tab — replace the current one (PostHog-style)
          const metadata = resolveTabMetadata(pathname, params);
+
+         // If we have an active tab, replace it; otherwise open a new tab
+         // Exception: if no tabs exist and we're on search, don't open a tab for search
+         const searchPath = `/${orgSlug}/${teamId}/search`;
+         const isSearchPage = pathname === searchPath;
+         const hasNoTabs = tabStore.state.tabs.length === 0;
+
+         if (isSearchPage && hasNoTabs) {
+            // Don't create a tab for search when it's the fallback page
+            return;
+         }
+
          if (tabStore.state.activeTabId) {
             replaceCurrentTab({
                route: routePath,
@@ -85,7 +97,7 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
             });
          }
       }
-   }, [pathname, params]);
+   }, [pathname, params, orgSlug, teamId]);
 
    // ── Direction 2: Tab focus → navigate router ────────────────────────────
 
@@ -113,16 +125,13 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
       [navigate, pathname],
    );
 
-   // ── Tab close → navigate to new active tab ──────────────────────────────
+   // ── Tab close → navigate to new active tab or search if no tabs remain ──
 
    const handleCloseTab = useCallback(
       (tabId: string) => {
-         const homeRoute = `/${orgSlug}/${teamId}/home`;
-         const homeParams = { slug: orgSlug, teamId };
+         closeTab(tabId);
 
-         closeTab(tabId, homeRoute, homeParams);
-
-         // After closing, navigate to whatever is now active
+         // After closing, navigate to whatever is now active (or search if empty)
          const newActiveId = tabStore.state.activeTabId;
          if (newActiveId) {
             const newTab = tabStore.state.tabs.find(
@@ -138,6 +147,13 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
                   isTabNavigatingRef.current = true;
                   navigate({ to: resolvedPath });
                }
+            }
+         } else {
+            // No tabs remain — navigate to search
+            const searchPath = `/${orgSlug}/${teamId}/search`;
+            if (searchPath !== pathname) {
+               isTabNavigatingRef.current = true;
+               navigate({ to: searchPath });
             }
          }
       },

@@ -15,18 +15,12 @@ import { TabItem } from "./tab-item";
 
 interface TabBarProps {
    onTabFocus: (tabId: string) => void;
+   onTabClose: (tabId: string) => void;
    onNewTab: () => void;
-   homeRoute: string;
-   homeParams: Record<string, string>;
 }
 
-export function TabBar({
-   onTabFocus,
-   onNewTab,
-   homeRoute,
-   homeParams,
-}: TabBarProps) {
-   const { tabs, activeTabId } = useTabStore();
+export function TabBar({ onTabFocus, onTabClose, onNewTab }: TabBarProps) {
+   const { tabs, activeTabId, isHydrated } = useTabStore();
    const scrollRef = useRef<HTMLDivElement>(null);
    const [showLeftShadow, setShowLeftShadow] = useState(false);
    const [showRightShadow, setShowRightShadow] = useState(false);
@@ -86,9 +80,9 @@ export function TabBar({
 
    const handleClose = useCallback(
       (tabId: string) => {
-         closeTab(tabId, homeRoute, homeParams);
+         onTabClose(tabId);
       },
-      [homeRoute, homeParams],
+      [onTabClose],
    );
 
    const handlePin = useCallback((tabId: string) => {
@@ -107,16 +101,12 @@ export function TabBar({
       closeAllTabs();
    }, []);
 
-   return (
-      <div className="relative flex h-9 shrink-0 items-center border-b bg-background/50">
-         {/* Left scroll shadow */}
-         <div
-            className={cn(
-               "pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-background/80 to-transparent transition-opacity",
-               showLeftShadow ? "opacity-100" : "opacity-0",
-            )}
-         />
+   if (!isHydrated) {
+      return <div className="h-12 shrink-0 bg-sidebar" />;
+   }
 
+   return (
+      <div className="flex h-12 shrink-0 items-center bg-sidebar">
          {/* Scrollable tab area */}
          <div
             className="flex min-w-0 flex-1 items-stretch overflow-x-auto scrollbar-none"
@@ -141,27 +131,19 @@ export function TabBar({
                   />
                </div>
             ))}
+
+            {/* New tab button - directly after tabs */}
+            <Button
+               className="h-9 w-9 ml-1 shrink-0 rounded-md text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+               onClick={onNewTab}
+               size="icon"
+               title="Nova aba"
+               type="button"
+               variant="ghost"
+            >
+               <Plus className="size-4" />
+            </Button>
          </div>
-
-         {/* Right scroll shadow */}
-         <div
-            className={cn(
-               "pointer-events-none absolute inset-y-0 right-9 z-10 w-6 bg-gradient-to-l from-background/80 to-transparent transition-opacity",
-               showRightShadow ? "opacity-100" : "opacity-0",
-            )}
-         />
-
-         {/* New tab button */}
-         <Button
-            className="h-8 w-9 shrink-0 rounded-md border-l text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-            onClick={onNewTab}
-            size="icon"
-            title="Nova aba"
-            type="button"
-            variant="ghost"
-         >
-            <Plus className="size-3.5" />
-         </Button>
       </div>
    );
 }

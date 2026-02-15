@@ -1,15 +1,16 @@
 import { Button } from "@packages/ui/components/button";
-import {
-   Card,
-   CardDescription,
-   CardHeader,
-   CardTitle,
-} from "@packages/ui/components/card";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { BarChart3, Pencil } from "lucide-react";
+import {
+   Calendar,
+   Clock,
+   LayoutDashboard,
+   Pencil,
+   Plus,
+   RefreshCw,
+} from "lucide-react";
 import { Suspense, useState } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { EditableDashboardGrid } from "@/features/analytics/ui/editable-dashboard-grid";
@@ -36,18 +37,32 @@ function HomePageErrorFallback(props: FallbackProps) {
 
 function HomePageSkeleton() {
    return (
-      <main className="flex flex-col gap-4">
-         <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-2">
-               <Skeleton className="h-9 w-48" />
-               <Skeleton className="h-5 w-80" />
+      <main className="flex flex-col gap-0">
+         {/* Header skeleton */}
+         <div className="flex flex-col gap-2 pb-3">
+            <div className="flex items-center justify-between">
+               <div className="flex items-center gap-2">
+                  <Skeleton className="size-5 rounded" />
+                  <Skeleton className="h-7 w-64" />
+               </div>
+               <div className="flex items-center gap-2">
+                  <Skeleton className="h-8 w-24" />
+                  <Skeleton className="h-8 w-28" />
+               </div>
             </div>
-            <Skeleton className="h-9 w-28" />
+            <Skeleton className="h-4 w-96" />
+         </div>
+
+         {/* Filter bar skeleton */}
+         <div className="flex items-center gap-2 border-t border-b py-2 mb-4">
+            <Skeleton className="h-7 w-44" />
+            <Skeleton className="h-7 w-16" />
          </div>
 
          {/* Grid skeleton */}
          <div className="grid grid-cols-12 gap-4">
-            <Skeleton className="h-[260px] col-span-12" />
+            <Skeleton className="h-[300px] col-span-12 md:col-span-6" />
+            <Skeleton className="h-[300px] col-span-12 md:col-span-6" />
             <Skeleton className="h-[300px] col-span-12 md:col-span-6" />
             <Skeleton className="h-[300px] col-span-12 md:col-span-6" />
          </div>
@@ -56,56 +71,85 @@ function HomePageSkeleton() {
 }
 
 // =============================================================================
-// Header
+// Header (PostHog-style)
 // =============================================================================
 
-function HomePageHeader({
+function DashboardHeader({
    isEditing,
    onEditToggle,
-   hasDashboard,
+   onAddInsight,
 }: {
    isEditing: boolean;
    onEditToggle: () => void;
-   hasDashboard: boolean;
+   onAddInsight: () => void;
 }) {
    return (
-      <div className="flex items-center justify-between gap-4">
-         <div className="flex flex-col gap-1">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-               Dashboard
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
-               Seu espaço de trabalho para criação de conteúdo com IA
-            </p>
+      <div className="flex flex-col gap-0">
+         {/* Title row */}
+         <div className="flex items-center justify-between gap-4 pb-1">
+            <div className="flex items-center gap-2 min-w-0">
+               <LayoutDashboard className="size-5 text-muted-foreground shrink-0" />
+               <h1 className="text-lg font-semibold tracking-tight truncate">
+                  Dashboard
+               </h1>
+            </div>
+            {!isEditing && (
+               <div className="flex items-center gap-1.5 shrink-0">
+                  <Button onClick={onEditToggle} size="sm" variant="outline">
+                     <Pencil className="size-3.5" />
+                     Personalizar
+                  </Button>
+                  <Button onClick={onAddInsight} size="sm">
+                     <Plus className="size-3.5" />
+                     Add insight
+                  </Button>
+               </div>
+            )}
          </div>
-         {hasDashboard && !isEditing && (
-            <Button onClick={onEditToggle} size="sm" variant="outline">
-               <Pencil className="size-4" />
-               Personalizar
-            </Button>
-         )}
+
+         {/* Description */}
+         <p className="text-sm text-muted-foreground pb-3">
+            Seu espaço de trabalho para criação de conteúdo com IA
+         </p>
+
+         {/* Filter bar */}
+         <DashboardFilterBar />
       </div>
    );
 }
 
-// =============================================================================
-// Empty State (no default dashboard)
-// =============================================================================
-
-function EmptyDashboardState() {
+function DashboardFilterBar() {
    return (
-      <Card>
-         <CardHeader className="items-center text-center py-12">
-            <BarChart3 className="size-10 text-muted-foreground mb-2" />
-            <CardTitle className="text-base">
-               Dashboard ainda não configurado
-            </CardTitle>
-            <CardDescription>
-               Um dashboard padrão será criado automaticamente quando insights
-               estiverem disponíveis.
-            </CardDescription>
-         </CardHeader>
-      </Card>
+      <div className="flex items-center justify-between gap-3 border-t border-b py-2">
+         <div className="flex items-center gap-1.5">
+            <Button
+               className="h-7 text-xs gap-1.5 text-muted-foreground"
+               size="sm"
+               variant="outline"
+            >
+               <Calendar className="size-3.5" />
+               No date range override
+            </Button>
+            <Button
+               className="h-7 text-xs gap-1 text-muted-foreground"
+               size="sm"
+               variant="outline"
+            >
+               <Plus className="size-3" />
+               Filter
+            </Button>
+         </div>
+         <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="hidden sm:inline-flex items-center gap-1">
+               <Clock className="size-3" />
+               Last refreshed just now
+            </span>
+            <Button className="h-7 text-xs gap-1.5" size="sm" variant="outline">
+               <RefreshCw className="size-3" />
+               Refresh
+            </Button>
+         </div>
+      </div>
    );
 }
 
@@ -119,33 +163,21 @@ function HomePageContent() {
    );
    const [isEditing, setIsEditing] = useState(false);
 
-   if (!dashboard) {
-      return (
-         <main className="flex flex-col gap-4">
-            <HomePageHeader
-               hasDashboard={false}
-               isEditing={false}
-               onEditToggle={() => {}}
-            />
-            <QuickStartChecklist />
-            <EmptyDashboardState />
-         </main>
-      );
-   }
-
    return (
-      <main className="flex flex-col gap-4">
-         <HomePageHeader
-            hasDashboard
+      <main className="flex flex-col gap-0">
+         <DashboardHeader
             isEditing={isEditing}
+            onAddInsight={() => setIsEditing(true)}
             onEditToggle={() => setIsEditing(true)}
          />
-         <QuickStartChecklist />
-         <EditableDashboardGrid
-            dashboard={dashboard}
-            isEditing={isEditing}
-            onDoneEditing={() => setIsEditing(false)}
-         />
+         <div className="flex flex-col gap-4 pt-4">
+            <QuickStartChecklist />
+            <EditableDashboardGrid
+               dashboard={dashboard}
+               isEditing={isEditing}
+               onDoneEditing={() => setIsEditing(false)}
+            />
+         </div>
       </main>
    );
 }

@@ -6,7 +6,7 @@ import { emitEventBatch } from "@packages/events/emit";
 import { Elysia, t } from "elysia";
 import { db } from "../integrations/database";
 import { posthog } from "../integrations/posthog";
-import { authenticateRequest } from "../utils/sdk-auth";
+import { authenticateRequest, checkDomainAllowed } from "../utils/sdk-auth";
 
 export const sdkEventRoutes = new Elysia({
 	prefix: "/sdk",
@@ -18,6 +18,19 @@ export const sdkEventRoutes = new Elysia({
 			return {
 				success: false as const,
 				error: authResult.error,
+			};
+		}
+
+		const domainCheck = await checkDomainAllowed(
+			request,
+			authResult.teamId,
+			db,
+		);
+		if (!domainCheck.allowed) {
+			set.status = 403;
+			return {
+				success: false as const,
+				error: domainCheck.reason,
 			};
 		}
 

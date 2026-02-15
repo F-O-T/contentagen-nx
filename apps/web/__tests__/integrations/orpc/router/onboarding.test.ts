@@ -20,6 +20,7 @@ vi.mock("@packages/database/schemas/auth", () => ({
 		name: "name",
 	},
 	user: { id: "id", name: "name" },
+	team: { id: "id", name: "name", organizationId: "organizationId" },
 }));
 vi.mock("@packages/database/schemas/content", () => ({
 	content: { organizationId: "organizationId", status: "status" },
@@ -219,9 +220,11 @@ describe("getOnboardingStatus", () => {
 // =============================================================================
 
 describe("completeProfileSetup", () => {
-	it("updates user name and org name/slug", async () => {
+	it("updates user name, org name/slug, and renames default team", async () => {
 		// Slug uniqueness check returns empty (no conflict)
 		mocks.mockLimit.mockResolvedValueOnce([]);
+		// Default team query
+		mocks.mockLimit.mockResolvedValueOnce([{ id: "team-1", name: "Default", organizationId: TEST_ORG_ID }]);
 
 		const ctx = createOnboardingContext(mocks.db);
 		const result = await call(
@@ -232,8 +235,8 @@ describe("completeProfileSetup", () => {
 
 		expect(createSlug).toHaveBeenCalledWith("My Workspace");
 		expect(result).toEqual({ success: true, slug: "my-workspace" });
-		// Two parallel updates: user name + org name/slug
-		expect(mocks.db.update).toHaveBeenCalledTimes(2);
+		// Three parallel updates: user name + org name/slug + team name
+		expect(mocks.db.update).toHaveBeenCalledTimes(3);
 	});
 
 	it("throws BAD_REQUEST when slug is invalid", async () => {
@@ -263,6 +266,42 @@ describe("completeProfileSetup", () => {
 				{ context: ctx },
 			),
 		).rejects.toSatisfy((e: ORPCError) => e.code === "CONFLICT");
+	});
+
+	it("throws NOT_FOUND when default team does not exist", async () => {
+		// Slug uniqueness check returns empty (no conflict)
+		mocks.mockLimit.mockResolvedValueOnce([]);
+		// Default team query returns empty
+		mocks.mockLimit.mockResolvedValueOnce([]);
+
+		const ctx = createOnboardingContext(mocks.db);
+
+		await expect(
+			call(
+				onboardingRouter.completeProfileSetup,
+				{ userName: "Alice", workspaceName: "My Workspace" },
+				{ context: ctx },
+			),
+		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+	});
+
+	it("renames default team to workspace name", async () => {
+		// Slug uniqueness check returns empty (no conflict)
+		mocks.mockLimit.mockResolvedValueOnce([]);
+		// Default team query
+		const defaultTeam = { id: "team-1", name: "Default", organizationId: TEST_ORG_ID };
+		mocks.mockLimit.mockResolvedValueOnce([defaultTeam]);
+
+		const ctx = createOnboardingContext(mocks.db);
+		await call(
+			onboardingRouter.completeProfileSetup,
+			{ userName: "Alice", workspaceName: "My Awesome Project" },
+			{ context: ctx },
+		);
+
+		// Verify team update was called
+		expect(mocks.db.update).toHaveBeenCalledTimes(3);
+		expect(mocks.mockSet).toHaveBeenCalledWith({ name: "My Awesome Project" });
 	});
 });
 

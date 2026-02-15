@@ -3,7 +3,15 @@ import { Button } from "@packages/ui/components/button";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Plus, RefreshCw } from "lucide-react";
+import {
+   ArrowLeft,
+   Calendar,
+   Clock,
+   LayoutDashboard,
+   Pencil,
+   Plus,
+   RefreshCw,
+} from "lucide-react";
 import { Suspense, useState } from "react";
 import { TrendsLineChart } from "@/features/analytics/charts/trends-line-chart";
 import { DashboardGrid } from "@/features/analytics/ui/dashboard-grid";
@@ -21,7 +29,8 @@ function DashboardSkeleton() {
       <div className="grid grid-cols-12 gap-4">
          <Skeleton className="col-span-6 h-[300px]" />
          <Skeleton className="col-span-6 h-[300px]" />
-         <Skeleton className="col-span-12 h-[300px]" />
+         <Skeleton className="col-span-6 h-[300px]" />
+         <Skeleton className="col-span-6 h-[300px]" />
       </div>
    );
 }
@@ -72,7 +81,7 @@ function DashboardContent() {
                      {
                         key: "views",
                         label: "Views",
-                        color: "hsl(var(--chart-1))",
+                        color: "var(--chart-1)",
                      },
                   ]}
                   xAxisKey="date"
@@ -84,38 +93,134 @@ function DashboardContent() {
    );
 }
 
-function DashboardViewPage() {
-   const { slug, teamId } = Route.useParams();
+// =============================================================================
+// Dashboard Header (PostHog-style)
+// =============================================================================
+
+function DashboardPageHeader({
+   name,
+   description,
+   backTo,
+}: {
+   name: string;
+   description?: string | null;
+   backTo: { slug: string; teamId: string };
+}) {
    return (
-      <main className="flex flex-col gap-4">
-         <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-0">
+         {/* Title row */}
+         <div className="flex items-center justify-between gap-4 pb-1">
+            <div className="flex items-center gap-2 min-w-0">
                <Link
-                  params={{ slug, teamId } as never}
+                  params={backTo as never}
                   to={"/$slug/$teamId/analytics/dashboards" as never}
                >
-                  <Button size="icon" variant="ghost">
+                  <Button className="size-7" size="icon" variant="ghost">
                      <ArrowLeft className="size-4" />
                   </Button>
                </Link>
-               <h1 className="text-2xl font-bold tracking-tight font-serif">
-                  Dashboard
+               <LayoutDashboard className="size-5 text-muted-foreground shrink-0" />
+               <h1 className="text-lg font-semibold tracking-tight truncate">
+                  {name}
                </h1>
-            </div>
-            <div className="flex items-center gap-2">
-               <Button size="sm" variant="outline">
-                  <RefreshCw className="size-4 mr-1" />
-                  Refresh
+               <Button className="size-6" size="icon" variant="ghost">
+                  <Pencil className="size-3" />
                </Button>
-               <Button size="sm">
-                  <Plus className="size-4 mr-1" />
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+               <Button size="sm" variant="outline">
+                  <Plus className="size-3.5" />
                   Add insight
                </Button>
             </div>
          </div>
-         <Suspense fallback={<DashboardSkeleton />}>
+
+         {/* Description */}
+         {description && (
+            <p className="text-sm text-muted-foreground pb-3 pl-16">
+               {description}
+            </p>
+         )}
+
+         {/* Filter bar */}
+         <div className="flex items-center justify-between gap-3 border-t border-b py-2">
+            <div className="flex items-center gap-1.5">
+               <Button
+                  className="h-7 text-xs gap-1.5 text-muted-foreground"
+                  size="sm"
+                  variant="outline"
+               >
+                  <Calendar className="size-3.5" />
+                  No date range override
+               </Button>
+               <Button
+                  className="h-7 text-xs gap-1 text-muted-foreground"
+                  size="sm"
+                  variant="outline"
+               >
+                  <Plus className="size-3" />
+                  Filter
+               </Button>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+               <span className="hidden sm:inline-flex items-center gap-1">
+                  <Clock className="size-3" />
+                  Last refreshed just now
+               </span>
+               <Button
+                  className="h-7 text-xs gap-1.5"
+                  size="sm"
+                  variant="outline"
+               >
+                  <RefreshCw className="size-3" />
+                  Refresh
+               </Button>
+            </div>
+         </div>
+      </div>
+   );
+}
+
+function DashboardViewPageContent() {
+   const { slug, teamId, dashboardId } = Route.useParams();
+   const { data: dashboard } = useSuspenseQuery(
+      orpc.dashboards.getById.queryOptions({ input: { id: dashboardId } }),
+   );
+
+   return (
+      <main className="flex flex-col gap-0">
+         <DashboardPageHeader
+            backTo={{ slug, teamId }}
+            description={dashboard.description}
+            name={dashboard.name}
+         />
+         <div className="pt-4">
             <DashboardContent />
-         </Suspense>
+         </div>
       </main>
+   );
+}
+
+function DashboardViewPage() {
+   return (
+      <Suspense
+         fallback={
+            <main className="flex flex-col gap-0">
+               <div className="flex flex-col gap-2 pb-3">
+                  <div className="flex items-center gap-2">
+                     <Skeleton className="size-5 rounded" />
+                     <Skeleton className="h-7 w-64" />
+                  </div>
+                  <Skeleton className="h-4 w-96" />
+               </div>
+               <div className="border-t border-b py-2 mb-4">
+                  <Skeleton className="h-7 w-44" />
+               </div>
+               <DashboardSkeleton />
+            </main>
+         }
+      >
+         <DashboardViewPageContent />
+      </Suspense>
    );
 }

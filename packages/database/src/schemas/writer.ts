@@ -9,7 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { organization } from "./auth";
+import { organization, team } from "./auth";
 import type { InstructionMemoryItem } from "./instruction-memory";
 
 // Zod schema for persona configuration
@@ -93,6 +93,9 @@ export const writer = pgTable(
       organizationId: uuid("organization_id")
          .notNull()
          .references(() => organization.id, { onDelete: "cascade" }),
+      teamId: uuid("team_id")
+         .notNull()
+         .references(() => team.id, { onDelete: "cascade" }),
       personaConfig: jsonb("persona_config").$type<PersonaConfig>().notNull(),
       profilePhotoUrl: text("profile_photo_url"),
       instructionMemories: jsonb("instruction_memories")
@@ -105,13 +108,20 @@ export const writer = pgTable(
          .$onUpdate(() => new Date())
          .notNull(),
    },
-   (table) => [index("writer_organization_id_idx").on(table.organizationId)],
+   (table) => [
+      index("writer_organization_id_idx").on(table.organizationId),
+      index("writer_team_idx").on(table.teamId),
+   ],
 );
 
 export const writerRelations = relations(writer, ({ one }) => ({
    organization: one(organization, {
       fields: [writer.organizationId],
       references: [organization.id],
+   }),
+   team: one(team, {
+      fields: [writer.teamId],
+      references: [team.id],
    }),
 }));
 

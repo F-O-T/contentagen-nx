@@ -32,13 +32,13 @@ export function ProfileSetupStep({ onNext }: ProfileSetupStepProps) {
    );
 
    const mutation = useMutation(
-      orpc.onboarding.completeProfileSetup.mutationOptions({
+      orpc.onboarding.completeOrgSetup.mutationOptions({
          onSuccess: (data) => {
-            toast.success("Perfil atualizado com sucesso!");
+            toast.success("Workspace configurado com sucesso!");
             onNext(data.slug);
          },
          onError: (error) => {
-            toast.error(error.message ?? "Erro ao atualizar perfil.");
+            toast.error(error.message ?? "Erro ao configurar workspace.");
          },
       }),
    );

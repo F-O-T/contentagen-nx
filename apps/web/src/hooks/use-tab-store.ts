@@ -34,6 +34,7 @@ export type Tab = {
 type TabStoreState = {
    tabs: Tab[];
    activeTabId: string | null;
+   isHydrated: boolean;
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -56,25 +57,27 @@ function loadFromStorage(
    orgSlug: string,
    teamId: string,
 ): TabStoreState | null {
+   if (typeof window === "undefined") return null;
    try {
-      const raw = localStorage.getItem(getStorageKey(orgSlug, teamId));
+      const raw = sessionStorage.getItem(getStorageKey(orgSlug, teamId));
       if (!raw) return null;
       const parsed = JSON.parse(raw) as TabStoreState;
       if (!Array.isArray(parsed.tabs)) return null;
-      return parsed;
+      return { tabs: parsed.tabs, activeTabId: parsed.activeTabId, isHydrated: true };
    } catch {
       return null;
    }
 }
 
 function saveToStorage(orgSlug: string, teamId: string, state: TabStoreState) {
+   if (typeof window === "undefined") return;
    try {
-      localStorage.setItem(
+      sessionStorage.setItem(
          getStorageKey(orgSlug, teamId),
          JSON.stringify({ tabs: state.tabs, activeTabId: state.activeTabId }),
       );
    } catch {
-      // localStorage full or unavailable — silently ignore
+      // sessionStorage full or unavailable — silently ignore
    }
 }
 
@@ -83,6 +86,7 @@ function saveToStorage(orgSlug: string, teamId: string, state: TabStoreState) {
 const INITIAL_STATE: TabStoreState = {
    tabs: [],
    activeTabId: null,
+   isHydrated: false,
 };
 
 export const tabStore = new Store<TabStoreState>(INITIAL_STATE);
@@ -101,8 +105,8 @@ function persist() {
 export function initializeTabs(
    orgSlug: string,
    teamId: string,
-   homeRoute: string,
-   homeParams: Record<string, string>,
+   _homeRoute: string,
+   _homeParams: Record<string, string>,
 ) {
    const previousScope = currentScope;
    currentScope = { orgSlug, teamId };
@@ -121,24 +125,25 @@ export function initializeTabs(
 
    const saved = loadFromStorage(orgSlug, teamId);
    if (saved && saved.tabs.length > 0) {
-      tabStore.setState(() => saved);
+      tabStore.setState(() => ({ ...saved, isHydrated: true }));
       return;
    }
 
-   // Default: single pinned Home tab (no icon)
    const homeTab: Tab = {
       id: crypto.randomUUID(),
-      route: homeRoute,
-      params: homeParams,
-      label: "Home",
-      type: "home",
-      isPinned: true,
+      route: _homeRoute,
+      params: _homeParams,
+      label: "Dashboard",
+      icon: "LayoutDashboard",
+      type: "dashboard",
+      isPinned: false,
       openedAt: Date.now(),
    };
 
    tabStore.setState(() => ({
       tabs: [homeTab],
       activeTabId: homeTab.id,
+      isHydrated: true,
    }));
    persist();
 }
@@ -187,12 +192,8 @@ export function focusTab(tabId: string) {
    persist();
 }
 
-/** Close a tab. Focuses an adjacent tab or creates a Home tab if last one closed. */
-export function closeTab(
-   tabId: string,
-   homeRoute?: string,
-   homeParams?: Record<string, string>,
-) {
+/** Close a tab. Focuses an adjacent tab or returns null if no tabs remain. */
+export function closeTab(tabId: string) {
    const { tabs, activeTabId } = tabStore.state;
    const tab = tabs.find((t) => t.id === tabId);
    if (!tab || tab.isPinned) return;
@@ -202,23 +203,10 @@ export function closeTab(
 
    let newActiveId = activeTabId;
    if (activeTabId === tabId) {
-      // Focus the next tab, or previous, or null
+      // Focus the next tab, or previous, or null if no tabs remain
       if (newTabs.length > 0) {
          const nextIndex = Math.min(index, newTabs.length - 1);
          newActiveId = newTabs[nextIndex].id;
-      } else if (homeRoute && homeParams) {
-         // Last tab closed — create a Home tab
-         const homeTab: Tab = {
-            id: crypto.randomUUID(),
-            route: homeRoute,
-            params: homeParams,
-            label: "Home",
-            type: "home",
-            isPinned: true,
-            openedAt: Date.now(),
-         };
-         newTabs.push(homeTab);
-         newActiveId = homeTab.id;
       } else {
          newActiveId = null;
       }
@@ -335,5 +323,6 @@ export function useTabStore() {
       tabs: state.tabs,
       activeTabId: state.activeTabId,
       activeTab,
+      isHydrated: state.isHydrated,
    };
 }

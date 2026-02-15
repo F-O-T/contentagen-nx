@@ -1,13 +1,10 @@
 const ALPHANUMERIC_CHARS =
    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-const PUBLIC_API_KEY_PREFIX = "cta_pub_";
-const PUBLIC_API_KEY_LENGTH = 32;
-
 /**
  * Generate a cryptographically secure random string of alphanumeric characters.
  */
-function generateSecureAlphanumeric(length: number): string {
+export function generateSecureAlphanumeric(length: number): string {
    const bytes = new Uint8Array(length);
    crypto.getRandomValues(bytes);
 
@@ -20,18 +17,4 @@ function generateSecureAlphanumeric(length: number): string {
    }
 
    return result;
-}
-
-/**
- * Generate a public API key with the format `cta_pub_` + 32 random alphanumeric chars.
- *
- * This key is safe to expose in frontend/client-side code and is used for
- * event tracking and form submission via the SDK.
- *
- * Uses `crypto.getRandomValues` for cryptographically secure randomness.
- */
-export function generatePublicApiKey(): string {
-   return (
-      PUBLIC_API_KEY_PREFIX + generateSecureAlphanumeric(PUBLIC_API_KEY_LENGTH)
-   );
 }

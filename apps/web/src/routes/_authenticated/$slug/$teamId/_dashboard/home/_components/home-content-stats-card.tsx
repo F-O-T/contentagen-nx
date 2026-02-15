@@ -72,17 +72,24 @@ export function HomeContentStatsCard({ className }: { className?: string }) {
    ];
 
    return (
-      <Card className={cn(className)}>
-         <CardHeader>
-            <CardTitle>Visão Geral</CardTitle>
-            <CardDescription>Seus conteúdos em resumo</CardDescription>
+      <Card className={cn("border-l-4 border-l-primary/80", className)}>
+         <CardHeader className="pb-2">
+            <div className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5">
+               CONTENT OVERVIEW • ALL TIME
+            </div>
+            <CardTitle className="text-base font-semibold leading-tight mb-1">
+               Visão Geral
+            </CardTitle>
+            <CardDescription className="text-xs leading-relaxed">
+               Seus conteúdos em resumo
+            </CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
             <ClientOnly
                fallback={<div className="mx-auto aspect-square h-[180px]" />}
             >
                <ChartContainer
-                  className="mx-auto aspect-square h-[180px]"
+                  className="mx-auto h-[180px] w-[180px] aspect-auto"
                   config={statusChartConfig}
                >
                   <PieChart>

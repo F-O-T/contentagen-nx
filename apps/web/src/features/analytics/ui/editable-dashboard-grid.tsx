@@ -12,15 +12,7 @@ import {
 } from "@packages/ui/components/card";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-   BarChart3,
-   Check,
-   Loader2,
-   Maximize2,
-   Minimize2,
-   Plus,
-   RotateCcw,
-} from "lucide-react";
+import { BarChart3, Check, Loader2, Plus, RotateCcw } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useSheet } from "@/hooks/use-sheet";
 import { orpc } from "@/integrations/orpc/client";
@@ -38,23 +30,18 @@ interface EditableDashboardGridProps {
 }
 
 // =============================================================================
-// Size cycling helpers
+// Size helpers — PostHog-style: charts = half, numbers = quarter
 // =============================================================================
 
-const sizeOrder: DashboardTileType["size"][] = ["sm", "md", "lg", "full"];
-
-function nextSize(
-   current: DashboardTileType["size"],
-): DashboardTileType["size"] {
-   const idx = sizeOrder.indexOf(current);
-   return sizeOrder[(idx + 1) % sizeOrder.length];
-}
-
-function prevSize(
-   current: DashboardTileType["size"],
-): DashboardTileType["size"] {
-   const idx = sizeOrder.indexOf(current);
-   return sizeOrder[(idx - 1 + sizeOrder.length) % sizeOrder.length];
+/**
+ * Derive tile size from insight config.
+ * - "number" chart type → "sm" (quarter screen, 4 per row)
+ * - everything else → "md" (half screen, 2 per row)
+ */
+function deriveTileSize(insight: Insight): DashboardTileType["size"] {
+   const config = insight.config as Record<string, unknown> | undefined;
+   const chartType = config?.chartType as string | undefined;
+   return chartType === "number" ? "sm" : "md";
 }
 
 // =============================================================================
@@ -181,51 +168,6 @@ function EditToolbar({
 }
 
 // =============================================================================
-// Tile Size Controls (shown in edit mode)
-// =============================================================================
-
-function TileSizeControls({
-   size,
-   onGrow,
-   onShrink,
-}: {
-   size: DashboardTileType["size"];
-   onGrow: () => void;
-   onShrink: () => void;
-}) {
-   const isSmallest = size === "sm";
-   const isLargest = size === "full";
-
-   return (
-      <div className="flex items-center gap-0.5">
-         <Button
-            className="size-6"
-            disabled={isSmallest}
-            onClick={onShrink}
-            size="icon"
-            title="Diminuir"
-            variant="ghost"
-         >
-            <Minimize2 className="size-3" />
-         </Button>
-         <span className="text-[10px] font-medium text-muted-foreground uppercase w-6 text-center">
-            {size}
-         </span>
-         <Button
-            className="size-6"
-            disabled={isLargest}
-            onClick={onGrow}
-            size="icon"
-            title="Aumentar"
-            variant="ghost"
-         >
-            <Maximize2 className="size-3" />
-         </Button>
-      </div>
-   );
-}
-
-// =============================================================================
 // Main Component
 // =============================================================================
 
@@ -281,29 +223,13 @@ export function EditableDashboardGrid({
       );
    }, []);
 
-   const handleResizeGrow = useCallback((insightId: string) => {
-      setLocalTiles((prev) =>
-         prev.map((t) =>
-            t.insightId === insightId ? { ...t, size: nextSize(t.size) } : t,
-         ),
-      );
-   }, []);
-
-   const handleResizeShrink = useCallback((insightId: string) => {
-      setLocalTiles((prev) =>
-         prev.map((t) =>
-            t.insightId === insightId ? { ...t, size: prevSize(t.size) } : t,
-         ),
-      );
-   }, []);
-
    const handleAddTile = useCallback(
       (insight: Insight) => {
          setLocalTiles((prev) => [
             ...prev,
             {
                insightId: insight.id,
-               size: (insight.defaultSize as DashboardTileType["size"]) || "md",
+               size: deriveTileSize(insight),
                order: prev.length,
             },
          ]);
@@ -366,15 +292,6 @@ export function EditableDashboardGrid({
             onReorder={isEditing ? handleReorder : () => {}}
             renderTile={(tile) => (
                <DashboardTile
-                  headerActions={
-                     isEditing ? (
-                        <TileSizeControls
-                           onGrow={() => handleResizeGrow(tile.insightId)}
-                           onShrink={() => handleResizeShrink(tile.insightId)}
-                           size={tile.size}
-                        />
-                     ) : undefined
-                  }
                   id={tile.insightId}
                   insightId={tile.insightId}
                   isEditing={isEditing}

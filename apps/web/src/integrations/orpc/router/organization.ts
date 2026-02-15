@@ -1,13 +1,8 @@
-import {
-   getPublicApiKey as getPublicApiKeyFromDb,
-   isOrganizationOwner,
-   regeneratePublicApiKey as regeneratePublicApiKeyFromDb,
-} from "@packages/database/repositories/auth-repository";
+import { getOrganizationMembers } from "@packages/database/repositories/auth-repository";
 import { member, organization } from "@packages/database/schemas/auth";
 import { resolveOrganizationPlan } from "@packages/events/credits";
 import { getEffectiveProjectLimit } from "@packages/stripe/constants";
 import { eq } from "drizzle-orm";
-import { ORPCError } from "@orpc/server";
 import { protectedProcedure } from "../server";
 
 // =============================================================================
@@ -106,35 +101,21 @@ export const getOrganizationTeams = protectedProcedure
    });
 
 /**
- * Get the public API key for the active organization.
- * Any authenticated member of the organization can read it.
+ * Get all members of the currently active organization
  */
-export const getPublicApiKey = protectedProcedure
+export const getMembers = protectedProcedure
    .handler(async ({ context }) => {
       const { db, organizationId } = context;
 
-      const publicApiKey = await getPublicApiKeyFromDb(db, organizationId);
+      const members = await getOrganizationMembers(db, organizationId);
 
-      return { publicApiKey };
+      return members.map((m) => ({
+         id: m.id,
+         name: m.user.name,
+         email: m.user.email,
+         role: m.role,
+         image: m.user.image,
+         createdAt: m.createdAt,
+      }));
    });
 
-/**
- * Regenerate the public API key for the active organization.
- * Only organization owners can regenerate the key.
- */
-export const regeneratePublicApiKey = protectedProcedure
-   .handler(async ({ context }) => {
-      const { db, organizationId, userId } = context;
-
-      const isOwner = await isOrganizationOwner(db, userId, organizationId);
-
-      if (!isOwner) {
-         throw new ORPCError("FORBIDDEN", {
-            message: "Only organization owners can regenerate the public API key",
-         });
-      }
-
-      const newKey = await regeneratePublicApiKeyFromDb(db, organizationId);
-
-      return { publicApiKey: newKey };
-   });

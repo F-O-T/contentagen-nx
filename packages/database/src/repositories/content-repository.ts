@@ -349,6 +349,61 @@ export async function listContents(
    }
 }
 
+/**
+ * List contents by team (team-scoped query for UI)
+ */
+export async function listContentsByTeam(
+   dbClient: DatabaseInstance,
+   teamId: string,
+   options?: {
+      statuses?: ContentStatus[];
+      writerId?: string | null; // null = manual content only, undefined = all
+      limit?: number;
+      offset?: number;
+   },
+) {
+   try {
+      const conditions = [eq(content.teamId, teamId)];
+
+      if (options?.statuses && options.statuses.length > 0) {
+         conditions.push(inArray(content.status, options.statuses));
+      }
+
+      if (options?.writerId === null) {
+         // Manual content only (no agent)
+         conditions.push(sql`${content.writerId} IS NULL`);
+      } else if (options?.writerId) {
+         // Specific agent
+         conditions.push(eq(content.writerId, options.writerId));
+      }
+      // If writerId is undefined, get all content (both manual and agent-based)
+
+      const query = dbClient
+         .select()
+         .from(content)
+         .where(and(...conditions))
+         .orderBy(desc(content.createdAt));
+
+      if (options?.limit) {
+         query.limit(options.limit);
+      }
+      if (options?.offset) {
+         query.offset(options.offset);
+      }
+
+      const result = await query;
+      return result;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to list contents by team: ${(err as Error).message}`,
+      );
+   }
+}
+
+/**
+ * List contents by organization (for admin/billing queries - not team-scoped)
+ */
 export async function listContentsByOrganization(
    dbClient: DatabaseInstance,
    organizationId: string,
@@ -398,6 +453,38 @@ export async function listContentsByOrganization(
    }
 }
 
+/**
+ * Count contents by team (team-scoped query for UI)
+ */
+export async function countContentsByTeam(
+   dbClient: DatabaseInstance,
+   teamId: string,
+   statuses?: ContentStatus[],
+) {
+   try {
+      const conditions = [eq(content.teamId, teamId)];
+
+      if (statuses && statuses.length > 0) {
+         conditions.push(inArray(content.status, statuses));
+      }
+
+      const result = await dbClient
+         .select({ count: count() })
+         .from(content)
+         .where(and(...conditions));
+
+      return result[0]?.count ?? 0;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to count contents by team: ${(err as Error).message}`,
+      );
+   }
+}
+
+/**
+ * Count contents by organization (for admin/billing queries - not team-scoped)
+ */
 export async function countContentsByOrganization(
    dbClient: DatabaseInstance,
    organizationId: string,

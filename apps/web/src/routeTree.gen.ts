@@ -30,6 +30,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthenticatedSlugOnboardingRouteImport } from './routes/_authenticated/$slug/onboarding'
 import { Route as AuthenticatedSlugTeamIdRouteImport } from './routes/_authenticated/$slug/$teamId'
 import { Route as DotwellKnownOauthAuthorizationServerSplatRouteImport } from './routes/[.]well-known.oauth-authorization-server.$'
+import { Route as AuthenticatedSlugTeamIdOnboardingRouteImport } from './routes/_authenticated/$slug/$teamId/onboarding'
 import { Route as AuthenticatedSlugTeamIdEditorRouteImport } from './routes/_authenticated/$slug/$teamId/_editor'
 import { Route as AuthenticatedSlugTeamIdDashboardRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard'
 import { Route as AuthenticatedSlugTeamIdEditorContentIdRouteImport } from './routes/_authenticated/$slug/$teamId/_editor/$contentId'
@@ -179,6 +180,12 @@ const DotwellKnownOauthAuthorizationServerSplatRoute =
     id: '/.well-known/oauth-authorization-server/$',
     path: '/.well-known/oauth-authorization-server/$',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedSlugTeamIdOnboardingRoute =
+  AuthenticatedSlugTeamIdOnboardingRouteImport.update({
+    id: '/onboarding',
+    path: '/onboarding',
+    getParentRoute: () => AuthenticatedSlugTeamIdRoute,
   } as any)
 const AuthenticatedSlugTeamIdEditorRoute =
   AuthenticatedSlugTeamIdEditorRouteImport.update({
@@ -482,6 +489,7 @@ export interface FileRoutesByFullPath {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
   '/auth/sign-in/': typeof AuthSignInIndexRoute
+  '/$slug/$teamId/onboarding': typeof AuthenticatedSlugTeamIdOnboardingRoute
   '/$slug/$teamId/billing': typeof AuthenticatedSlugTeamIdDashboardBillingRoute
   '/$slug/$teamId/plans': typeof AuthenticatedSlugTeamIdDashboardPlansRoute
   '/$slug/$teamId/search': typeof AuthenticatedSlugTeamIdDashboardSearchRoute
@@ -543,6 +551,7 @@ export interface FileRoutesByTo {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
   '/auth/sign-in': typeof AuthSignInIndexRoute
+  '/$slug/$teamId/onboarding': typeof AuthenticatedSlugTeamIdOnboardingRoute
   '/$slug/$teamId/billing': typeof AuthenticatedSlugTeamIdDashboardBillingRoute
   '/$slug/$teamId/plans': typeof AuthenticatedSlugTeamIdDashboardPlansRoute
   '/$slug/$teamId/search': typeof AuthenticatedSlugTeamIdDashboardSearchRoute
@@ -607,6 +616,7 @@ export interface FileRoutesById {
   '/auth/sign-in/': typeof AuthSignInIndexRoute
   '/_authenticated/$slug/$teamId/_dashboard': typeof AuthenticatedSlugTeamIdDashboardRouteWithChildren
   '/_authenticated/$slug/$teamId/_editor': typeof AuthenticatedSlugTeamIdEditorRouteWithChildren
+  '/_authenticated/$slug/$teamId/onboarding': typeof AuthenticatedSlugTeamIdOnboardingRoute
   '/_authenticated/$slug/$teamId/_dashboard/billing': typeof AuthenticatedSlugTeamIdDashboardBillingRoute
   '/_authenticated/$slug/$teamId/_dashboard/plans': typeof AuthenticatedSlugTeamIdDashboardPlansRoute
   '/_authenticated/$slug/$teamId/_dashboard/search': typeof AuthenticatedSlugTeamIdDashboardSearchRoute
@@ -671,6 +681,7 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/auth/sign-in/email'
     | '/auth/sign-in/'
+    | '/$slug/$teamId/onboarding'
     | '/$slug/$teamId/billing'
     | '/$slug/$teamId/plans'
     | '/$slug/$teamId/search'
@@ -732,6 +743,7 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/auth/sign-in/email'
     | '/auth/sign-in'
+    | '/$slug/$teamId/onboarding'
     | '/$slug/$teamId/billing'
     | '/$slug/$teamId/plans'
     | '/$slug/$teamId/search'
@@ -795,6 +807,7 @@ export interface FileRouteTypes {
     | '/auth/sign-in/'
     | '/_authenticated/$slug/$teamId/_dashboard'
     | '/_authenticated/$slug/$teamId/_editor'
+    | '/_authenticated/$slug/$teamId/onboarding'
     | '/_authenticated/$slug/$teamId/_dashboard/billing'
     | '/_authenticated/$slug/$teamId/_dashboard/plans'
     | '/_authenticated/$slug/$teamId/_dashboard/search'
@@ -997,6 +1010,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/.well-known/oauth-authorization-server/$'
       preLoaderRoute: typeof DotwellKnownOauthAuthorizationServerSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/$slug/$teamId/onboarding': {
+      id: '/_authenticated/$slug/$teamId/onboarding'
+      path: '/onboarding'
+      fullPath: '/$slug/$teamId/onboarding'
+      preLoaderRoute: typeof AuthenticatedSlugTeamIdOnboardingRouteImport
+      parentRoute: typeof AuthenticatedSlugTeamIdRoute
     }
     '/_authenticated/$slug/$teamId/_editor': {
       id: '/_authenticated/$slug/$teamId/_editor'
@@ -1478,6 +1498,7 @@ const AuthenticatedSlugTeamIdEditorRouteWithChildren =
 interface AuthenticatedSlugTeamIdRouteChildren {
   AuthenticatedSlugTeamIdDashboardRoute: typeof AuthenticatedSlugTeamIdDashboardRouteWithChildren
   AuthenticatedSlugTeamIdEditorRoute: typeof AuthenticatedSlugTeamIdEditorRouteWithChildren
+  AuthenticatedSlugTeamIdOnboardingRoute: typeof AuthenticatedSlugTeamIdOnboardingRoute
 }
 
 const AuthenticatedSlugTeamIdRouteChildren: AuthenticatedSlugTeamIdRouteChildren =
@@ -1486,6 +1507,8 @@ const AuthenticatedSlugTeamIdRouteChildren: AuthenticatedSlugTeamIdRouteChildren
       AuthenticatedSlugTeamIdDashboardRouteWithChildren,
     AuthenticatedSlugTeamIdEditorRoute:
       AuthenticatedSlugTeamIdEditorRouteWithChildren,
+    AuthenticatedSlugTeamIdOnboardingRoute:
+      AuthenticatedSlugTeamIdOnboardingRoute,
   }
 
 const AuthenticatedSlugTeamIdRouteWithChildren =

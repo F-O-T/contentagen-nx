@@ -1,12 +1,20 @@
 // apps/web/src/layout/dashboard/dashboard-layout.tsx
 import {
+   Banner,
+   BannerClose,
+   BannerIcon,
+   BannerTitle,
+} from "@packages/ui/components/banner";
+import {
    SidebarInset,
    SidebarManager,
    SidebarManagerProvider,
    SidebarProvider,
 } from "@packages/ui/components/sidebar";
+import { cn } from "@packages/ui/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
+import { FlaskConicalIcon } from "lucide-react";
 import type * as React from "react";
 import { useEffect, useRef } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
@@ -33,6 +41,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const setTeamForOrgRef = useRef(new Set<string>());
    const { pathname } = useLocation();
 
+   // Disable scroll on main when in settings
+   const isSettingsPage = pathname.includes("/settings");
+
    const orgSlug = activeOrganization?.slug ?? "";
    const teamId = activeTeam?.id ?? "";
 
@@ -41,7 +52,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const homeRoute = `/${orgSlug}/${teamId}/home`;
    const homeParams = { slug: orgSlug, teamId };
 
-   const { navigateToTab, openNewSearchTab } = useTabRouterSync(
+   const { navigateToTab, handleCloseTab, openNewSearchTab } = useTabRouterSync(
       orgSlug,
       teamId,
    );
@@ -97,6 +108,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
    return (
       <SidebarManagerProvider>
          <SidebarProvider
+            className="h-svh"
             defaultOpen={getSidebarDefaultOpen()}
             onOpenChange={persistSidebarState}
          >
@@ -104,15 +116,32 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                <AppSidebar />
             </SidebarManager>
 
-            <SidebarInset className="">
+            <SidebarInset className="flex flex-col overflow-hidden">
                <SidebarSubPanel />
-               <TabBar
-                  homeParams={homeParams}
-                  homeRoute={homeRoute}
-                  onNewTab={openNewSearchTab}
-                  onTabFocus={navigateToTab}
-               />
-               <main className="flex-1 overflow-y-auto p-4">{children}</main>
+               <div className="shrink-0">
+                  <Banner>
+                     <BannerIcon icon={FlaskConicalIcon} />
+                     <BannerTitle>
+                        Este aplicativo esta em fase beta e passa por melhorias
+                        frequentes. Algumas funcionalidades podem mudar sem aviso
+                        previo.
+                     </BannerTitle>
+                     <BannerClose />
+                  </Banner>
+                  <TabBar
+                     onNewTab={openNewSearchTab}
+                     onTabFocus={navigateToTab}
+                     onTabClose={handleCloseTab}
+                  />
+               </div>
+               <main
+                  className={cn(
+                     "relative flex-1 bg-background p-4",
+                     isSettingsPage ? "overflow-hidden" : "overflow-y-auto",
+                  )}
+               >
+                  {children}
+               </main>
             </SidebarInset>
          </SidebarProvider>
       </SidebarManagerProvider>

@@ -21,11 +21,6 @@ vi.mock("@packages/stripe/constants", () => ({
 	getEffectiveProjectLimit: vi.fn().mockReturnValue(5),
 }));
 
-import {
-	getPublicApiKey as getPublicApiKeyFromDb,
-	isOrganizationOwner,
-	regeneratePublicApiKey as regeneratePublicApiKeyFromDb,
-} from "@packages/database/repositories/auth-repository";
 import { resolveOrganizationPlan } from "@packages/events/credits";
 import { getEffectiveProjectLimit } from "@packages/stripe/constants";
 
@@ -213,67 +208,3 @@ describe("getOrganizationTeams", () => {
 	});
 });
 
-// =============================================================================
-// getPublicApiKey
-// =============================================================================
-
-describe("getPublicApiKey", () => {
-	it("returns the public API key", async () => {
-		vi.mocked(getPublicApiKeyFromDb).mockResolvedValueOnce("pk_live_abc123");
-
-		const ctx = createOrgContext();
-		const result = await call(orgRouter.getPublicApiKey, undefined, { context: ctx });
-
-		expect(getPublicApiKeyFromDb).toHaveBeenCalledWith(mockDb, TEST_ORG_ID);
-		expect(result).toEqual({ publicApiKey: "pk_live_abc123" });
-	});
-
-	it("returns null when no key exists", async () => {
-		vi.mocked(getPublicApiKeyFromDb).mockResolvedValueOnce(null);
-
-		const ctx = createOrgContext();
-		const result = await call(orgRouter.getPublicApiKey, undefined, { context: ctx });
-
-		expect(result).toEqual({ publicApiKey: null });
-	});
-});
-
-// =============================================================================
-// regeneratePublicApiKey
-// =============================================================================
-
-describe("regeneratePublicApiKey", () => {
-	it("regenerates key when user is owner", async () => {
-		vi.mocked(isOrganizationOwner).mockResolvedValueOnce(true);
-		vi.mocked(regeneratePublicApiKeyFromDb).mockResolvedValueOnce("pk_live_new456");
-
-		const ctx = createOrgContext();
-		const result = await call(orgRouter.regeneratePublicApiKey, undefined, { context: ctx });
-
-		expect(isOrganizationOwner).toHaveBeenCalledWith(mockDb, TEST_USER_ID, TEST_ORG_ID);
-		expect(regeneratePublicApiKeyFromDb).toHaveBeenCalledWith(mockDb, TEST_ORG_ID);
-		expect(result).toEqual({ publicApiKey: "pk_live_new456" });
-	});
-
-	it("throws FORBIDDEN when user is not owner", async () => {
-		vi.mocked(isOrganizationOwner).mockResolvedValueOnce(false);
-
-		const ctx = createOrgContext();
-
-		await expect(
-			call(orgRouter.regeneratePublicApiKey, undefined, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "FORBIDDEN");
-
-		expect(regeneratePublicApiKeyFromDb).not.toHaveBeenCalled();
-	});
-
-	it("returns new key after successful regeneration", async () => {
-		vi.mocked(isOrganizationOwner).mockResolvedValueOnce(true);
-		vi.mocked(regeneratePublicApiKeyFromDb).mockResolvedValueOnce("pk_live_xyz789");
-
-		const ctx = createOrgContext();
-		const result = await call(orgRouter.regeneratePublicApiKey, undefined, { context: ctx });
-
-		expect(result).toEqual({ publicApiKey: "pk_live_xyz789" });
-	});
-});

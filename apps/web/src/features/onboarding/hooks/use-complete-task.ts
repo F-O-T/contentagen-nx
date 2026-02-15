@@ -28,7 +28,6 @@ export function useCompleteTask() {
 									onboardingCompleted: boolean;
 									onboardingProducts: string[] | null;
 									tasks: Record<string, boolean> | null;
-									publicApiKey: string | null;
 							  }
 							| undefined,
 					) => {

@@ -26,9 +26,11 @@ export const events = pgTable(
       userId: uuid("user_id").references(() => user.id, {
          onDelete: "set null",
       }),
-      teamId: uuid("team_id").references(() => team.id, {
-         onDelete: "set null",
-      }),
+      teamId: uuid("team_id")
+         .notNull()
+         .references(() => team.id, {
+            onDelete: "cascade",
+         }),
       isBillable: boolean("is_billable").default(true).notNull(),
       pricePerEvent: decimal("price_per_event", {
          precision: 10,

@@ -2,10 +2,12 @@ import { ORPCError } from "@orpc/server";
 import {
    archiveContent,
    countContentsByOrganization,
+   countContentsByTeam,
    createContent,
    deleteContent,
    getContentById,
    listContentsByOrganization,
+   listContentsByTeam,
    publishContent,
    updateContent,
 } from "@packages/database/repositories/content-repository";
@@ -97,6 +99,7 @@ export const create = protectedProcedure
       const result = await createContent(db, {
          ...input,
          organizationId,
+         teamId,
          createdByMemberId: members[0].id,
       });
 
@@ -285,7 +288,7 @@ export const archive = protectedProcedure
    });
 
 /**
- * List all content for the organization with pagination and filters
+ * List all content for the active team with pagination and filters
  */
 export const listAllContent = protectedProcedure
    .input(
@@ -299,18 +302,18 @@ export const listAllContent = protectedProcedure
       }),
    )
    .handler(async ({ context, input }) => {
-      const { organizationId, db } = context;
+      const { teamId, db } = context;
 
-      if (!organizationId) {
-         throw new ORPCError("UNAUTHORIZED", {
-            message: "Organization must be specified.",
+      if (!teamId) {
+         throw new ORPCError("FORBIDDEN", {
+            message: "No active team selected.",
          });
       }
 
-      // Get total count for pagination
-      const total = await countContentsByOrganization(
+      // Get total count for pagination (team-scoped)
+      const total = await countContentsByTeam(
          db,
-         organizationId,
+         teamId,
          input.status as ("draft" | "published" | "archived")[] | undefined,
       );
 
@@ -324,9 +327,9 @@ export const listAllContent = protectedProcedure
          };
       }
 
-      // Get content using the organization-based query
+      // Get content using the team-based query
       const offset = (input.page - 1) * input.limit;
-      const items = await listContentsByOrganization(db, organizationId, {
+      const items = await listContentsByTeam(db, teamId, {
          statuses: input.status as
             | ("draft" | "published" | "archived")[]
             | undefined,

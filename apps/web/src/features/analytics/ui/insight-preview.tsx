@@ -7,15 +7,9 @@ import type {
    TrendsConfig,
    TrendsResult,
 } from "@packages/analytics/types";
-import {
-   Card,
-   CardContent,
-   CardHeader,
-   CardTitle,
-} from "@packages/ui/components/card";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, BarChart3 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { orpc } from "@/integrations/orpc/client";
 import { FunnelChart } from "../charts/funnel-chart";
 import { RetentionGrid } from "../charts/retention-grid";
@@ -51,14 +45,85 @@ function ErrorState({ error }: { error: Error }) {
    );
 }
 
-function EmptyState() {
+/**
+ * Generate placeholder date labels for the last N days.
+ * Used to render an empty chart shell with proper x-axis labels.
+ */
+function generatePlaceholderDates(
+   days: number,
+): Array<Record<string, unknown>> {
+   const now = new Date();
+   return Array.from({ length: days }, (_, i) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() - (days - 1 - i));
+      return { date: d.toISOString().split("T")[0] };
+   });
+}
+
+/**
+ * Renders an empty chart with grid lines and date axis labels.
+ * Matches PostHog behavior where charts show their skeleton even without data.
+ */
+function EmptyTrendsChart({ config }: { config: TrendsConfig }) {
+   const seriesGroups = new Map<
+      number,
+      { key: string; label: string; color: string }
+   >();
+   for (const s of config.series) {
+      const idx = config.series.indexOf(s);
+      seriesGroups.set(idx, {
+         key: s.event || `series_${idx}`,
+         label: s.label || s.event || `Series ${String.fromCharCode(65 + idx)}`,
+         color: `var(--chart-${idx + 1})`,
+      });
+   }
+
+   const series = Array.from(seriesGroups.values());
+   if (series.length === 0) {
+      return (
+         <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
+            Adicione um evento para ver a prévia
+         </div>
+      );
+   }
+
+   // Generate empty data points with all series set to 0
+   const placeholderData = generatePlaceholderDates(30).map((point) => {
+      const row: Record<string, unknown> = { ...point };
+      for (const s of series) {
+         row[s.key] = 0;
+      }
+      return row;
+   });
+
+   const xAxisFormatter = (value: string) =>
+      new Date(value).toLocaleDateString("pt-BR", {
+         day: "numeric",
+         month: "short",
+      });
+
+   if (config.chartType === "number") {
+      return <TrendsNumberCard label={series[0].label} value={0} />;
+   }
+
+   if (config.chartType === "bar") {
+      return (
+         <TrendsBarChart
+            data={placeholderData}
+            series={series}
+            xAxisFormatter={xAxisFormatter}
+            xAxisKey="date"
+         />
+      );
+   }
+
    return (
-      <div className="flex flex-col items-center justify-center h-64 gap-3 text-muted-foreground">
-         <BarChart3 className="size-8" />
-         <p className="text-sm">
-            Nenhum dado disponível para esta configuração
-         </p>
-      </div>
+      <TrendsLineChart
+         data={placeholderData}
+         series={series}
+         xAxisFormatter={xAxisFormatter}
+         xAxisKey="date"
+      />
    );
 }
 
@@ -78,7 +143,7 @@ function TrendsPreview({
       seriesGroups.set(idx, {
          key: s.event || `series_${idx}`,
          label: s.label || s.event || `Series ${String.fromCharCode(65 + idx)}`,
-         color: `hsl(var(--chart-${idx + 1}))`,
+         color: `var(--chart-${idx + 1})`,
       });
    }
 
@@ -119,6 +184,11 @@ function TrendsPreview({
       String(a.date).localeCompare(String(b.date)),
    );
 
+   // If we have config but no data points, show empty chart with axes
+   if (chartData.length === 0) {
+      return <EmptyTrendsChart config={config} />;
+   }
+
    // Build comparison data if available
    let comparisonData: Array<Record<string, unknown>> | undefined;
    if (data.comparison) {
@@ -145,7 +215,7 @@ function TrendsPreview({
            {
               key: "__formula",
               label: "Formula",
-              color: "hsl(var(--chart-6))",
+              color: "var(--chart-6)",
            },
         ]
       : series;
@@ -285,17 +355,17 @@ export function InsightPreview({ config }: InsightPreviewProps) {
       }),
    );
 
+   // Show empty chart when no data instead of a generic empty state
+   const showEmptyChart = !isLoading && !error && !data;
+
    return (
-      <Card className="h-full">
-         <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-               Prévia
-            </CardTitle>
-         </CardHeader>
-         <CardContent>
+      <div className="h-full">
+         <div className="space-y-3">
             {isLoading && <LoadingState />}
             {error && <ErrorState error={error} />}
-            {!isLoading && !error && !data && <EmptyState />}
+            {showEmptyChart && config.type === "trends" && (
+               <EmptyTrendsChart config={config} />
+            )}
             {!isLoading && !error && data && (
                <>
                   {config.type === "trends" && (
@@ -318,7 +388,7 @@ export function InsightPreview({ config }: InsightPreviewProps) {
                   )}
                </>
             )}
-         </CardContent>
-      </Card>
+         </div>
+      </div>
    );
 }

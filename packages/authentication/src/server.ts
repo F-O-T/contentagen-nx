@@ -163,6 +163,30 @@ export function createAuth(config: SimplifiedAuthConfig) {
                         ),
                      },
                   },
+                  onboardingCompleted: {
+                     defaultValue: false,
+                     input: true,
+                     required: false,
+                     type: "boolean",
+                  },
+                  onboardingProducts: {
+                     defaultValue: null,
+                     input: true,
+                     required: false,
+                     type: "json",
+                     validator: {
+                        input: z.array(z.enum(["content", "forms", "analytics"])).nullable(),
+                     },
+                  },
+                  onboardingTasks: {
+                     defaultValue: null,
+                     input: true,
+                     required: false,
+                     type: "json",
+                     validator: {
+                        input: z.record(z.string(), z.boolean()).nullable(),
+                     },
+                  },
                },
             },
          },
@@ -454,7 +478,7 @@ export function createAuth(config: SimplifiedAuthConfig) {
 
                      if (member?.organizationId) {
                         // Ensure the organization has at least one project
-                        await ensureDefaultProject(
+                        const defaultTeam = await ensureDefaultProject(
                            db,
                            member.organizationId,
                            session.userId,
@@ -463,10 +487,14 @@ export function createAuth(config: SimplifiedAuthConfig) {
                         console.log(
                            `Setting activeOrganizationId for user ${session.userId} to ${member.organizationId}`,
                         );
+                        console.log(
+                           `Setting activeTeamId for user ${session.userId} to ${defaultTeam.id}`,
+                        );
                         return {
                            data: {
                               ...session,
                               activeOrganizationId: member.organizationId,
+                              activeTeamId: defaultTeam.id,
                            },
                         };
                      }

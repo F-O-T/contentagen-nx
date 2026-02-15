@@ -53,6 +53,24 @@ export async function getWritersByOrganizationId(
    }
 }
 
+export async function getWritersByTeamId(
+   dbClient: DatabaseInstance,
+   teamId: string,
+) {
+   try {
+      const result = await dbClient.query.writer.findMany({
+         where: (writer, { eq }) => eq(writer.teamId, teamId),
+         orderBy: (writer, { desc }) => desc(writer.createdAt),
+      });
+      return result;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database(
+         `Failed to get writers by team: ${(err as Error).message}`,
+      );
+   }
+}
+
 export async function updateWriter(
    dbClient: DatabaseInstance,
    writerId: string,

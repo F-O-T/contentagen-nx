@@ -127,8 +127,6 @@ export async function createDefaultOrganization(
             description: orgName,
             name: orgName,
             onboardingCompleted: false,
-            onboardingTasks: {},
-            onboardingProducts: null,
             slug: orgSlug,
          })
          .returning();
@@ -170,6 +168,7 @@ export async function createDefaultOrganization(
          .values(
             DEFAULT_INSIGHTS.map((def) => ({
                organizationId: createdOrganization.id,
+               teamId: defaultTeam.id,
                createdBy: userId,
                name: def.name,
                description: def.description,
@@ -190,6 +189,7 @@ export async function createDefaultOrganization(
 
       await dbClient.insert(dashboards).values({
          organizationId: createdOrganization.id,
+         teamId: defaultTeam.id,
          createdBy: userId,
          name: "Home",
          description: "Default dashboard",

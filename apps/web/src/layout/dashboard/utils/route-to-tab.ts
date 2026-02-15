@@ -21,12 +21,12 @@ type TabMetadata = {
 // Order matters: more specific patterns must come before generic ones.
 
 const ROUTE_TAB_MAPPINGS: RouteTabMapping[] = [
-   // Home
+   // Home (shown as Dashboard)
    {
       pattern: /\/home$/,
-      type: "home",
-      icon: "House",
-      labelFn: () => "Home",
+      type: "dashboard",
+      icon: "LayoutDashboard",
+      labelFn: () => "Dashboard",
    },
 
    // Content

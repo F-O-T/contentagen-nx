@@ -2,16 +2,10 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { InsightConfig } from "@packages/analytics/types";
 import { Button } from "@packages/ui/components/button";
-import {
-   Card,
-   CardContent,
-   CardHeader,
-   CardTitle,
-} from "@packages/ui/components/card";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { cn } from "@packages/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, GripVertical, Pencil, X } from "lucide-react";
+import { AlertCircle, Ellipsis, GripVertical, X } from "lucide-react";
 import { orpc } from "@/integrations/orpc/client";
 import { InsightPreview } from "./insight-preview";
 
@@ -22,8 +16,6 @@ interface DashboardTileProps {
    children?: React.ReactNode;
    insightId?: string;
    isEditing?: boolean;
-   headerActions?: React.ReactNode;
-   onEdit?: () => void;
    onRemove?: () => void;
 }
 
@@ -37,8 +29,10 @@ const sizeClasses = {
 function TileLoadingSkeleton() {
    return (
       <div className="space-y-3 p-1">
-         <Skeleton className="h-4 w-2/3" />
-         <Skeleton className="h-[160px] w-full" />
+         <Skeleton className="h-3 w-24" />
+         <Skeleton className="h-5 w-2/3" />
+         <Skeleton className="h-3 w-1/2" />
+         <Skeleton className="h-[200px] w-full" />
       </div>
    );
 }
@@ -71,10 +65,9 @@ function DashboardInsightContent({ insightId }: { insightId: string }) {
 }
 
 /**
- * Hook to resolve the insight name when insightId is provided.
- * Returns the explicit name if given, or the fetched insight name, or a loading placeholder.
+ * Resolve insight metadata for the tile header.
  */
-function useInsightName(insightName?: string, insightId?: string): string {
+function useInsightMetadata(insightName?: string, insightId?: string) {
    const { data: insight } = useQuery({
       ...orpc.insights.getById.queryOptions({
          input: { id: insightId ?? "" },
@@ -82,9 +75,51 @@ function useInsightName(insightName?: string, insightId?: string): string {
       enabled: !!insightId && !insightName,
    });
 
-   if (insightName) return insightName;
-   if (insight) return insight.name;
-   return "";
+   const name = insightName || insight?.name || "";
+   const description = insight?.description || "";
+   const type = insight?.type || "trends";
+
+   // PostHog-style type label with date range
+   const typeLabel =
+      type === "trends"
+         ? "TRENDS"
+         : type === "funnels"
+           ? "FUNNELS"
+           : type === "retention"
+             ? "RETENTION"
+             : "INSIGHT";
+
+   // Extract date range from config if available
+   const config = insight?.config as Record<string, unknown> | undefined;
+   const dateRange = config?.dateRange as
+      | { type: string; value: string }
+      | undefined;
+   const dateRangeLabel = dateRange?.value
+      ? formatDateRange(dateRange.value)
+      : "LAST 30 DAYS";
+
+   return { name, description, typeLabel, dateRangeLabel };
+}
+
+function formatDateRange(value: string): string {
+   switch (value) {
+      case "7d":
+         return "LAST 7 DAYS";
+      case "14d":
+         return "LAST 14 DAYS";
+      case "30d":
+         return "LAST 30 DAYS";
+      case "90d":
+         return "LAST 90 DAYS";
+      case "this_month":
+         return "THIS MONTH";
+      case "last_month":
+         return "LAST MONTH";
+      case "this_year":
+         return "THIS YEAR";
+      default:
+         return value.toUpperCase();
+   }
 }
 
 export function DashboardTile({
@@ -94,8 +129,6 @@ export function DashboardTile({
    children,
    insightId,
    isEditing = true,
-   headerActions,
-   onEdit,
    onRemove,
 }: DashboardTileProps) {
    const {
@@ -111,7 +144,10 @@ export function DashboardTile({
       transition,
    };
 
-   const resolvedName = useInsightName(insightName, insightId);
+   const { name, description, typeLabel, dateRangeLabel } = useInsightMetadata(
+      insightName,
+      insightId,
+   );
 
    return (
       <div
@@ -119,13 +155,14 @@ export function DashboardTile({
          ref={setNodeRef}
          style={style}
       >
-         <Card className="h-full relative">
-            <CardHeader className="pb-3">
-               <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+         <div className="h-full rounded-lg border bg-card text-card-foreground">
+            {/* Card header — PostHog style */}
+            <div className="px-4 pt-4 pb-2">
+               <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-2 min-w-0 flex-1">
                      {isEditing && (
                         <button
-                           className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+                           className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground shrink-0 mt-0.5"
                            type="button"
                            {...attributes}
                            {...listeners}
@@ -133,43 +170,52 @@ export function DashboardTile({
                            <GripVertical className="size-4" />
                         </button>
                      )}
-                     <CardTitle className="text-sm font-medium">
-                        {resolvedName}
-                     </CardTitle>
+                     <div className="min-w-0 flex-1 space-y-1">
+                        {/* Type + Date range badge */}
+                        <p className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+                           {typeLabel} &bull; {dateRangeLabel}
+                        </p>
+                        {/* Title */}
+                        <h3 className="text-sm font-semibold leading-snug">
+                           {name}
+                        </h3>
+                        {/* Description */}
+                        {description && (
+                           <p className="text-xs text-muted-foreground leading-relaxed">
+                              {description}
+                           </p>
+                        )}
+                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                     {headerActions}
-                     {onEdit && (
-                        <Button
-                           className="size-7"
-                           onClick={onEdit}
-                           size="icon"
-                           variant="ghost"
-                        >
-                           <Pencil className="size-3.5" />
-                        </Button>
-                     )}
+                  <div className="flex items-center gap-0.5 shrink-0">
                      {onRemove && (
                         <Button
-                           className="size-7"
+                           className="size-6"
                            onClick={onRemove}
                            size="icon"
                            variant="ghost"
                         >
-                           <X className="size-3.5" />
+                           <X className="size-3" />
+                        </Button>
+                     )}
+                     {!isEditing && (
+                        <Button className="size-6" size="icon" variant="ghost">
+                           <Ellipsis className="size-3.5" />
                         </Button>
                      )}
                   </div>
                </div>
-            </CardHeader>
-            <CardContent>
+            </div>
+
+            {/* Chart / content area */}
+            <div className="px-4 pb-4">
                {insightId ? (
                   <DashboardInsightContent insightId={insightId} />
                ) : (
                   children
                )}
-            </CardContent>
-         </Card>
+            </div>
+         </div>
       </div>
    );
 }

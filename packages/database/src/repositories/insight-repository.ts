@@ -35,6 +35,28 @@ export async function listInsights(
    }
 }
 
+export async function listInsightsByTeam(
+   db: DatabaseInstance,
+   teamId: string,
+   type?: string,
+) {
+   try {
+      const conditions = [eq(insights.teamId, teamId)];
+      if (type) {
+         conditions.push(eq(insights.type, type));
+      }
+
+      return await db
+         .select()
+         .from(insights)
+         .where(and(...conditions))
+         .orderBy(desc(insights.updatedAt));
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database("Failed to list insights by team");
+   }
+}
+
 export async function getInsightById(db: DatabaseInstance, insightId: string) {
    try {
       const [insight] = await db

@@ -10,7 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { member, organization } from "./auth";
+import { member, organization, team } from "./auth";
 import { relatedContent } from "./related-content";
 import { writer } from "./writer";
 
@@ -72,6 +72,9 @@ export const content = pgTable(
       organizationId: uuid("organization_id")
          .notNull()
          .references(() => organization.id, { onDelete: "cascade" }),
+      teamId: uuid("team_id").references(() => team.id, {
+         onDelete: "cascade",
+      }),
       createdByMemberId: uuid("created_by_member_id")
          .notNull()
          .references(() => member.id, { onDelete: "cascade" }),
@@ -94,6 +97,7 @@ export const content = pgTable(
    (table) => [
       index("content_writer_id_idx").on(table.writerId),
       index("content_organization_id_idx").on(table.organizationId),
+      index("content_team_id_idx").on(table.teamId),
       index("content_created_by_member_id_idx").on(table.createdByMemberId),
       index("content_status_idx").on(table.status),
       index("content_draft_origin_idx").on(table.draftOrigin),
@@ -109,6 +113,10 @@ export const contentRelations = relations(content, ({ one, many }) => ({
    organization: one(organization, {
       fields: [content.organizationId],
       references: [organization.id],
+   }),
+   team: one(team, {
+      fields: [content.teamId],
+      references: [team.id],
    }),
    createdByMember: one(member, {
       fields: [content.createdByMemberId],
