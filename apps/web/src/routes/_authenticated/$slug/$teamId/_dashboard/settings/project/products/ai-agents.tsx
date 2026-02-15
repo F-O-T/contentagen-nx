@@ -454,9 +454,10 @@ function WebSearchConfigSection({
                   min={1}
                   max={20}
                   value={searchMaxResults}
-                  onChange={(e) =>
-                     setSearchMaxResults(Number.parseInt(e.target.value))
-                  }
+                  onChange={(e) => {
+                     const val = Number.parseInt(e.target.value);
+                     if (!Number.isNaN(val)) setSearchMaxResults(val);
+                  }}
                />
             </div>
 
@@ -714,9 +715,10 @@ function RagConfigSection({
                         min={1}
                         max={50}
                         value={ragMaxResults}
-                        onChange={(e) =>
-                           setRagMaxResults(Number.parseInt(e.target.value))
-                        }
+                        onChange={(e) => {
+                           const val = Number.parseInt(e.target.value);
+                           if (!Number.isNaN(val)) setRagMaxResults(val);
+                        }}
                      />
                   </div>
 
@@ -731,9 +733,10 @@ function RagConfigSection({
                         max={1}
                         step={0.1}
                         value={ragMinScore}
-                        onChange={(e) =>
-                           setRagMinScore(Number.parseFloat(e.target.value))
-                        }
+                        onChange={(e) => {
+                           const val = Number.parseFloat(e.target.value);
+                           if (!Number.isNaN(val)) setRagMinScore(val);
+                        }}
                      />
                   </div>
                </>
@@ -825,9 +828,10 @@ function LimitsSection({
                   min={100}
                   max={10000}
                   value={maxChatTokens}
-                  onChange={(e) =>
-                     setMaxChatTokens(Number.parseInt(e.target.value))
-                  }
+                  onChange={(e) => {
+                     const val = Number.parseInt(e.target.value);
+                     if (!Number.isNaN(val)) setMaxChatTokens(val);
+                  }}
                />
             </div>
 
@@ -841,9 +845,10 @@ function LimitsSection({
                   min={1}
                   max={20}
                   value={maxReasoningSteps}
-                  onChange={(e) =>
-                     setMaxReasoningSteps(Number.parseInt(e.target.value))
-                  }
+                  onChange={(e) => {
+                     const val = Number.parseInt(e.target.value);
+                     if (!Number.isNaN(val)) setMaxReasoningSteps(val);
+                  }}
                />
             </div>
          </div>
