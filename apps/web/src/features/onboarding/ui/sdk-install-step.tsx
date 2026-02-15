@@ -27,7 +27,7 @@ export function SdkInstallStep() {
    const [copiedCode, setCopiedCode] = useState(false);
 
    const completeMutation = useMutation(
-      orpc.onboarding.completeOnboarding.mutationOptions({
+      orpc.onboarding.completeProjectOnboarding.mutationOptions({
          onSuccess: () => {
             const teamId = teams?.[0]?.id ?? "";
             navigate({ to: "/$slug/$teamId/home", params: { slug, teamId } });
@@ -38,7 +38,15 @@ export function SdkInstallStep() {
       }),
    );
 
-   const publicApiKey = status?.publicApiKey ?? "cta_pub_...";
+   const teamId = teams?.[0]?.id;
+   const { data: publicKeyData } = useQuery(
+      orpc.team.getPublicApiKey.queryOptions({
+         input: { teamId: teamId! },
+         enabled: !!teamId,
+      }),
+   );
+
+   const publicApiKey = publicKeyData?.publicApiKey ?? "cta_pub_...";
    const organizationId = org?.id ?? "org_...";
 
    const installSnippet = "npm install @f-o-t/contentta-sdk";
