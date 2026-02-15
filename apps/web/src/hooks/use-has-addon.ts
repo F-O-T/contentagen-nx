@@ -1,4 +1,4 @@
-import { ADDON_IDS, type AddonId } from "@packages/utils/addons";
+import { ADDON_IDS, type AddonId } from "@packages/stripe/constants";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { orpc } from "@/integrations/orpc/client";

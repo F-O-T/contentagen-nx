@@ -61,6 +61,15 @@ export enum PlatformAddOn {
    ENTERPRISE = "enterprise",
 }
 
+// Backward compatibility aliases
+export const ADDON_IDS = {
+	BOOST: PlatformAddOn.BOOST,
+	SCALE: PlatformAddOn.SCALE,
+	ENTERPRISE: PlatformAddOn.ENTERPRISE,
+} as const;
+
+export type AddonId = PlatformAddOn;
+
 export const PLAN_PROJECT_LIMITS: Record<PlanName, number> = {
    [PlanName.FREE]: 1,
    [PlanName.LITE]: 6,

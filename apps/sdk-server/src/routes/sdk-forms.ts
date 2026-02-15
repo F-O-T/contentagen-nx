@@ -191,6 +191,7 @@ export const sdkFormRoutes = new Elysia({
                .values({
                   formId: form.id,
                   organizationId,
+                  teamId: form.teamId,
                   data: body.data,
                   metadata: submissionMetadata,
                })

@@ -29,6 +29,10 @@ describe("Writer Team Scoping", () => {
 	beforeEach(async () => {
 		db = createDb({ databaseUrl: process.env.DATABASE_URL! });
 
+		// Cleanup: Delete existing test data
+		await db.delete(user).where(eq(user.email, "test-writer-scoping@example.com"));
+		await db.delete(organization).where(eq(organization.slug, "test-org-writer-scoping"));
+
 		// Create test user
 		const [testUser] = await db
 			.insert(user)
@@ -45,6 +49,7 @@ describe("Writer Team Scoping", () => {
 			.values({
 				name: "Test Org",
 				slug: "test-org-writer-scoping",
+				createdAt: new Date(),
 				onboardingCompleted: true,
 			})
 			.returning();

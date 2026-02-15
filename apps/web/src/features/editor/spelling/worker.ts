@@ -16,7 +16,7 @@ import {
 import {
    createDictionaryStorage,
    loadDictionary,
-} from "@f-o-t/spelling/browser-storage";
+} from "@f-o-t/spelling/plugins/browser-storage";
 import { spellCheckIgnoreList } from "../core/config";
 import type {
    CompletionSpellingResult,

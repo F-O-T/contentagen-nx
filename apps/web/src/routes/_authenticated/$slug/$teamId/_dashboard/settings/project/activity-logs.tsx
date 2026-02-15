@@ -1,4 +1,4 @@
-import { ADDON_IDS } from "@packages/utils/addons";
+import { ADDON_IDS } from "@packages/stripe/constants";
 import { Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ScrollText } from "lucide-react";

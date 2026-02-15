@@ -1,10 +1,10 @@
-import { ADDON_IDS } from "@packages/utils/addons";
-import { Suspense } from "react";
+import { ADDON_IDS } from "@packages/stripe/constants";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { Globe } from "lucide-react";
-import { Skeleton } from "@packages/ui/components/skeleton";
-import { useHasAddon } from "@/hooks/use-has-addon";
+import { Suspense } from "react";
 import { OrganizationAuthentication } from "@/features/sso/ui/organization-authentication";
+import { useHasAddon } from "@/hooks/use-has-addon";
 import { SettingsAddonGatedPage } from "@/layout/dashboard/ui/settings-addon-gated-page";
 
 export const Route = createFileRoute(

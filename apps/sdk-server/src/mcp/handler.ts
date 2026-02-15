@@ -14,7 +14,9 @@ const jwks = createRemoteJWKSet(new URL(JWKS_URL));
 // Create base MCP handler
 const baseMcpHandler = createMcpHandler(
    (server) => {
-      registerTools(server);
+      // Type assertion needed due to SDK version mismatch (root: 1.26, mcp-handler: 1.25)
+      // Runtime compatible, types are structurally identical
+      registerTools(server as unknown as Parameters<typeof registerTools>[0]);
    },
    { serverInfo: { name: "contentta-mcp", version: "1.0.0" } },
    {

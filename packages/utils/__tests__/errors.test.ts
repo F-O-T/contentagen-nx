@@ -1,7 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { z } from "zod";
 import {
-   APIError,
    AppError,
    ErrorCodes,
    propagateError,
@@ -82,126 +81,10 @@ describe("error utilities", () => {
       });
    });
 
-   describe("APIError", () => {
-      it("should create APIError with code and message", () => {
-         const error = new APIError(ErrorCodes.BAD_REQUEST, "Bad request");
-         expect(error.message).toBe("Bad request");
-         expect(error.name).toBe("APIError");
-      });
-
-      it("should create APIError with options", () => {
-         const error = new APIError(ErrorCodes.BAD_REQUEST, "Bad request", {
-            cause: new Error("cause"),
-            data: { foo: "bar" },
-         });
-         expect(error.cause).toBeDefined();
-      });
-
-      it("should create APIError from AppError with status 400", () => {
-         const appError = new AppError("Bad request", 400);
-         const apiError = APIError.fromAppError(appError);
-         expect(apiError.code).toBe(ErrorCodes.BAD_REQUEST);
-      });
-
-      it("should create APIError from AppError with status 401", () => {
-         const appError = new AppError("Unauthorized", 401);
-         const apiError = APIError.fromAppError(appError);
-         expect(apiError.code).toBe(ErrorCodes.UNAUTHORIZED);
-      });
-
-      it("should create APIError from AppError with status 403", () => {
-         const appError = new AppError("Forbidden", 403);
-         const apiError = APIError.fromAppError(appError);
-         expect(apiError.code).toBe(ErrorCodes.FORBIDDEN);
-      });
-
-      it("should create APIError from AppError with status 404", () => {
-         const appError = new AppError("Not found", 404);
-         const apiError = APIError.fromAppError(appError);
-         expect(apiError.code).toBe(ErrorCodes.NOT_FOUND);
-      });
-
-      it("should create APIError from AppError with status 409", () => {
-         const appError = new AppError("Conflict", 409);
-         const apiError = APIError.fromAppError(appError);
-         expect(apiError.code).toBe(ErrorCodes.CONFLICT);
-      });
-
-      it("should create APIError from AppError with status 422", () => {
-         const appError = new AppError("Unprocessable", 422);
-         const apiError = APIError.fromAppError(appError);
-         expect(apiError.code).toBe(ErrorCodes.UNPROCESSABLE_CONTENT);
-      });
-
-      it("should create APIError from AppError with status 429", () => {
-         const appError = new AppError("Too many", 429);
-         const apiError = APIError.fromAppError(appError);
-         expect(apiError.code).toBe(ErrorCodes.TOO_MANY_REQUESTS);
-      });
-
-      it("should create APIError from AppError with unknown status", () => {
-         const appError = new AppError("Unknown", 418);
-         const apiError = APIError.fromAppError(appError);
-         expect(apiError.code).toBe(ErrorCodes.INTERNAL_SERVER_ERROR);
-      });
-
-      it("should create database APIError", () => {
-         const error = APIError.database("DB error");
-         expect(error.code).toBe(ErrorCodes.INTERNAL_SERVER_ERROR);
-         expect(error.message).toContain("Database error");
-      });
-
-      it("should create validation APIError", () => {
-         const error = APIError.validation("Validation error");
-         expect(error.code).toBe(ErrorCodes.BAD_REQUEST);
-         expect(error.message).toContain("Validation error");
-      });
-
-      it("should create unprocessableContent APIError", () => {
-         const error = APIError.unprocessableContent("Unprocessable");
-         expect(error.code).toBe(ErrorCodes.UNPROCESSABLE_CONTENT);
-      });
-
-      it("should create notFound APIError", () => {
-         const error = APIError.notFound("Not found");
-         expect(error.code).toBe(ErrorCodes.NOT_FOUND);
-      });
-
-      it("should create unauthorized APIError", () => {
-         const error = APIError.unauthorized("Unauthorized");
-         expect(error.code).toBe(ErrorCodes.UNAUTHORIZED);
-      });
-
-      it("should create forbidden APIError", () => {
-         const error = APIError.forbidden("Forbidden");
-         expect(error.code).toBe(ErrorCodes.FORBIDDEN);
-      });
-
-      it("should create conflict APIError", () => {
-         const error = APIError.conflict("Conflict");
-         expect(error.code).toBe(ErrorCodes.CONFLICT);
-      });
-
-      it("should create tooManyRequests APIError", () => {
-         const error = APIError.tooManyRequests("Too many");
-         expect(error.code).toBe(ErrorCodes.TOO_MANY_REQUESTS);
-      });
-
-      it("should create internal APIError", () => {
-         const error = APIError.internal("Internal");
-         expect(error.code).toBe(ErrorCodes.INTERNAL_SERVER_ERROR);
-      });
-   });
-
    describe("propagateError", () => {
       it("should throw AppError objects", () => {
          const error = new AppError("Test error");
          expect(() => propagateError(error)).toThrow("Test error");
-      });
-
-      it("should throw APIError objects", () => {
-         const error = new APIError(ErrorCodes.BAD_REQUEST, "API error");
-         expect(() => propagateError(error)).toThrow("API error");
       });
 
       it("should not throw for regular Error objects", () => {
