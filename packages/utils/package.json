@@ -8,6 +8,10 @@
       "typescript": "catalog:development"
    },
    "exports": {
+      "./addons": {
+         "default": "./src/addons.ts",
+         "types": "./dist/src/addons.d.ts"
+      },
       "./array": {
          "default": "./src/array.ts",
          "types": "./dist/src/array.d.ts"
