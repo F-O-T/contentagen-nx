@@ -28,8 +28,8 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { orpc } from "@/integrations/orpc/client";
 
 const chartConfig = {
-   views: { label: "Visualizações", color: "hsl(var(--chart-1))" },
-   visitors: { label: "Visitantes", color: "hsl(var(--chart-2))" },
+   views: { label: "Visualizações", color: "var(--chart-1)" },
+   visitors: { label: "Visitantes", color: "var(--chart-2)" },
 } satisfies ChartConfig;
 
 function formatDuration(seconds: number): string {
@@ -83,15 +83,22 @@ export function HomeContentAnalyticsCard({
          : generatePlaceholderData();
 
    return (
-      <Card className={cn(className)}>
-         <CardHeader>
-            <CardTitle>Analytics de Conteúdo</CardTitle>
-            <CardDescription>Métricas de performance deste mês</CardDescription>
+      <Card className={cn("border-l-4 border-l-primary/80", className)}>
+         <CardHeader className="pb-2">
+            <div className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase mb-1.5">
+               TRENDS • LAST 30 DAYS
+            </div>
+            <CardTitle className="text-base font-semibold leading-tight mb-1">
+               Analytics de Conteúdo
+            </CardTitle>
+            <CardDescription className="text-xs leading-relaxed">
+               Métricas de performance deste mês
+            </CardDescription>
          </CardHeader>
          <CardContent className="space-y-4">
             <ClientOnly fallback={<div className="h-[200px] w-full" />}>
                <ChartContainer
-                  className="h-[200px] w-full"
+                  className="h-[200px] w-full aspect-auto"
                   config={chartConfig}
                >
                   <LineChart
@@ -99,8 +106,8 @@ export function HomeContentAnalyticsCard({
                      margin={{ top: 10, right: 10, bottom: 0, left: 0 }}
                   >
                      <CartesianGrid
-                        className="stroke-muted"
-                        strokeDasharray="3 3"
+                        className="stroke-muted/20"
+                        strokeDasharray="0"
                         vertical={false}
                      />
                      <XAxis

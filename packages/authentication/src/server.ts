@@ -1,4 +1,5 @@
 import { oauthProvider } from "@better-auth/oauth-provider";
+import { z } from "zod";
 import { stripe as stripePlugin } from "@better-auth/stripe";
 import type { DatabaseInstance } from "@packages/database/client";
 import {
@@ -145,6 +146,46 @@ export function createAuth(config: SimplifiedAuthConfig) {
                      input: true,
                      required: false,
                      type: "string",
+                  },
+                  allowedDomains: {
+                     type: "string[]",
+                     defaultValue: [],
+                     input: true,
+                     required: false,
+                     validator: {
+                        input: z.array(
+                           z
+                              .string()
+                              .regex(
+                                 /^(\*\.)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/,
+                                 "Invalid domain pattern. Examples: example.com, *.example.com, app.example.com, localhost",
+                              ),
+                        ),
+                     },
+                  },
+                  onboardingCompleted: {
+                     defaultValue: false,
+                     input: true,
+                     required: false,
+                     type: "boolean",
+                  },
+                  onboardingProducts: {
+                     defaultValue: null,
+                     input: true,
+                     required: false,
+                     type: "json",
+                     validator: {
+                        input: z.array(z.enum(["content", "forms", "analytics"])).nullable(),
+                     },
+                  },
+                  onboardingTasks: {
+                     defaultValue: null,
+                     input: true,
+                     required: false,
+                     type: "json",
+                     validator: {
+                        input: z.record(z.string(), z.boolean()).nullable(),
+                     },
                   },
                },
             },
@@ -437,7 +478,7 @@ export function createAuth(config: SimplifiedAuthConfig) {
 
                      if (member?.organizationId) {
                         // Ensure the organization has at least one project
-                        await ensureDefaultProject(
+                        const defaultTeam = await ensureDefaultProject(
                            db,
                            member.organizationId,
                            session.userId,
@@ -446,10 +487,14 @@ export function createAuth(config: SimplifiedAuthConfig) {
                         console.log(
                            `Setting activeOrganizationId for user ${session.userId} to ${member.organizationId}`,
                         );
+                        console.log(
+                           `Setting activeTeamId for user ${session.userId} to ${defaultTeam.id}`,
+                        );
                         return {
                            data: {
                               ...session,
                               activeOrganizationId: member.organizationId,
+                              activeTeamId: defaultTeam.id,
                            },
                         };
                      }

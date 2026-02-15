@@ -211,28 +211,3 @@ export const readabilityTool = createTool({
       };
    },
 });
-
-export function getReadabilityInstructions(): string {
-   return `
-## READABILITY TOOL
-Analyzes how easy the content is to read using Flesch-Kincaid scores.
-
-**When to use:** After writing, to ensure content matches audience expectations
-
-**Parameters:**
-- content (string): The blog post content
-- targetAudience (enum): Who the content is for
-  - "general": General public (score 60-70 ideal)
-  - "technical": Tech-savvy readers (score 40-60 ideal)
-  - "academic": Professional/scholarly (score 30-50 ideal)
-  - "casual": Very easy reading (score 70-80 ideal)
-
-**Returns:**
-- fleschKincaidReadingEase: Score 0-100 (higher = easier)
-- fleschKincaidGradeLevel: US school grade level
-- readabilityLevel: Human-readable description
-- isOnTarget: Whether score matches target audience
-- suggestions: Improvement recommendations
-- metrics: Sentence count, word count, complexity stats
-`;
-}

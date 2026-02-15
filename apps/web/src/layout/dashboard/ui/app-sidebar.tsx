@@ -2,15 +2,19 @@ import {
    Sidebar,
    SidebarContent,
    SidebarFooter,
+   SidebarGroup,
+   SidebarGroupContent,
    SidebarHeader,
    SidebarMenu,
    SidebarMenuButton,
    SidebarMenuItem,
    useSidebar,
 } from "@packages/ui/components/sidebar";
-import { Link, useParams } from "@tanstack/react-router";
-import { PanelLeft, PanelLeftClose, Settings } from "lucide-react";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { PanelLeft, PanelLeftClose, Search, Settings } from "lucide-react";
 import type * as React from "react";
+import { useCallback } from "react";
+import { replaceCurrentTab, tabStore } from "@/hooks/use-tab-store";
 import { NavUser } from "./nav-user";
 import { SidebarNav } from "./sidebar-nav";
 import { SidebarScopeSwitcher } from "./sidebar-scope-switcher";
@@ -27,6 +31,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
          </SidebarHeader>
 
          <SidebarContent>
+            <SidebarSearchButton />
             <SidebarNav />
          </SidebarContent>
 
@@ -34,6 +39,50 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
             <SidebarFooterContent />
          </SidebarFooter>
       </Sidebar>
+   );
+}
+
+function SidebarSearchButton() {
+   const params = useParams({ strict: false }) as {
+      slug?: string;
+      teamId?: string;
+   };
+   const slug = params.slug ?? "";
+   const teamId = params.teamId ?? "";
+   const navigate = useNavigate();
+
+   const handleSearch = useCallback(() => {
+      const searchRoute = `/$slug/$teamId/search`;
+      const searchParams = { slug, teamId };
+      const searchPath = `/${slug}/${teamId}/search`;
+
+      // Replace current tab with search (don't open a new tab)
+      if (tabStore.state.activeTabId) {
+         replaceCurrentTab({
+            route: searchRoute,
+            params: searchParams,
+            label: "Pesquisar",
+            icon: "Search",
+            type: "search",
+         });
+      }
+
+      navigate({ to: searchPath });
+   }, [navigate, slug, teamId]);
+
+   return (
+      <SidebarGroup className="py-0">
+         <SidebarGroupContent>
+            <SidebarMenu>
+               <SidebarMenuItem>
+                  <SidebarMenuButton onClick={handleSearch} tooltip="Pesquisar">
+                     <Search />
+                     <span>Pesquisar</span>
+                  </SidebarMenuButton>
+               </SidebarMenuItem>
+            </SidebarMenu>
+         </SidebarGroupContent>
+      </SidebarGroup>
    );
 }
 

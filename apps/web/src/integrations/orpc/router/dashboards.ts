@@ -3,7 +3,7 @@ import {
 	createDashboard,
 	deleteDashboard,
 	getDashboardById,
-	listDashboards,
+	listDashboardsByTeam,
 	updateDashboard,
 	updateDashboardTiles,
 } from "@packages/database/repositories/dashboard-repository";
@@ -44,6 +44,7 @@ export const create = protectedProcedure
 
 		const dashboard = await createDashboard(db, {
 			organizationId,
+			teamId,
 			createdBy: userId,
 			name: input.name,
 			description: input.description,
@@ -62,17 +63,21 @@ export const create = protectedProcedure
 	});
 
 export const list = protectedProcedure.handler(async ({ context }) => {
-	const { organizationId, db } = context;
-	return await listDashboards(db, organizationId);
+	const { teamId, db } = context;
+	return await listDashboardsByTeam(db, teamId);
 });
 
 export const getById = protectedProcedure
 	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, teamId, db } = context;
 		const dashboard = await getDashboardById(db, input.id);
 
-		if (!dashboard || dashboard.organizationId !== organizationId) {
+		if (
+			!dashboard ||
+			dashboard.organizationId !== organizationId ||
+			dashboard.teamId !== teamId
+		) {
 			throw new ORPCError("NOT_FOUND", {
 				message: "Dashboard not found.",
 			});
@@ -87,7 +92,11 @@ export const update = protectedProcedure
 		const { organizationId, db, posthog, userId, teamId } = context;
 		const dashboard = await getDashboardById(db, input.id);
 
-		if (!dashboard || dashboard.organizationId !== organizationId) {
+		if (
+			!dashboard ||
+			dashboard.organizationId !== organizationId ||
+			dashboard.teamId !== teamId
+		) {
 			throw new ORPCError("NOT_FOUND", {
 				message: "Dashboard not found.",
 			});
@@ -114,10 +123,14 @@ export const update = protectedProcedure
 export const updateTiles = protectedProcedure
 	.input(updateTilesSchema)
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, teamId, db } = context;
 		const dashboard = await getDashboardById(db, input.id);
 
-		if (!dashboard || dashboard.organizationId !== organizationId) {
+		if (
+			!dashboard ||
+			dashboard.organizationId !== organizationId ||
+			dashboard.teamId !== teamId
+		) {
 			throw new ORPCError("NOT_FOUND", {
 				message: "Dashboard not found.",
 			});
@@ -132,7 +145,11 @@ export const remove = protectedProcedure
 		const { organizationId, db, posthog, userId, teamId } = context;
 		const dashboard = await getDashboardById(db, input.id);
 
-		if (!dashboard || dashboard.organizationId !== organizationId) {
+		if (
+			!dashboard ||
+			dashboard.organizationId !== organizationId ||
+			dashboard.teamId !== teamId
+		) {
 			throw new ORPCError("NOT_FOUND", {
 				message: "Dashboard not found.",
 			});

@@ -30,6 +30,7 @@ export const badPatternTool = createTool({
          const matches: string[] = [];
          let match: RegExpExecArray | null;
          const globalRegex = new RegExp(regex.source, `${regex.flags}g`);
+         // biome-ignore lint/suspicious/noAssignInExpressions: Standard regex iteration pattern
          while ((match = globalRegex.exec(text)) !== null) {
             // Get surrounding context
             const start = Math.max(0, match.index - 20);
@@ -277,33 +278,3 @@ export const badPatternTool = createTool({
       };
    },
 });
-
-export function getBadPatternInstructions(): string {
-   return `
-## BAD PATTERN DETECTOR TOOL
-Detects common bad writing patterns in blog posts.
-
-**When to use:** After writing content, to identify problematic patterns
-
-**Parameters:**
-- content (string): The blog post content
-- title (string, optional): The blog post title
-
-**Returns:**
-- hasIssues: Whether any patterns were detected
-- issueCount: Number of patterns found
-- patterns: Array of detected patterns with locations and suggestions
-
-**Patterns detected (all as warnings):**
-1. Word count mentions (high priority)
-2. Meta-commentary (high priority)
-3. Engagement begging (high priority)
-4. Endless introduction (> 150 words before first H2)
-5. Vague instructions
-6. Clickbait markers
-7. Filler phrases
-8. Over-formatting
-9. Wall of text (paragraph > 100 words)
-10. Keyword stuffing (> 3% density)
-`;
-}

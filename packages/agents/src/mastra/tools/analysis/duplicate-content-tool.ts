@@ -268,35 +268,3 @@ export const duplicateContentTool = createTool({
       };
    },
 });
-
-export function getDuplicateContentInstructions(): string {
-   return `
-## DUPLICATE CONTENT DETECTION TOOL
-Detects exact and near-duplicate content sections within a document.
-
-**When to use:** To catch copy-paste errors and repetitive content that hurts readability and SEO.
-
-**Input:**
-- content (string): Full markdown content
-
-**Output:**
-- hasDuplicates: Whether duplicates were found
-- duplicates: Array of duplicate sections with:
-  - text: The duplicated content (truncated)
-  - occurrences: Number of times it appears
-  - locations: Array of {startLine, endLine}
-  - type: "exact" or "near-duplicate"
-- score: 0-100 (higher = less duplication)
-- issues: Problems found
-- suggestions: Specific locations and recommendations
-
-**Detection:**
-- Exact duplicates: Identical content after normalization
-- Near-duplicates: >80% word similarity (Jaccard)
-- Compares headings with headings, paragraphs with paragraphs
-- Minimum 50 characters to be considered
-
-**Example Issue Detected:**
-"O Cenário do SEO em 2026" section appearing twice at lines 10-20 and 25-35.
-`;
-}

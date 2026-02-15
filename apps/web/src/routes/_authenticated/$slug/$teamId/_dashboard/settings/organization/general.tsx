@@ -14,23 +14,27 @@ import {
    ItemSeparator,
    ItemTitle,
 } from "@packages/ui/components/item";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import {
    Tooltip,
    TooltipContent,
    TooltipProvider,
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
    Building2,
    Copy,
-   Globe,
    Hash,
    ImageIcon,
    Pencil,
    Users,
 } from "lucide-react";
+import { Suspense } from "react";
+import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
+import { orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamId/_dashboard/settings/organization/general",
@@ -39,24 +43,91 @@ export const Route = createFileRoute(
 });
 
 // ============================================
-// Mock Data
+// Skeleton
 // ============================================
 
-const mockOrganization = {
-   name: "Minha Organização",
-   slug: "minha-organizacao",
-   logo: null as string | null,
-   domain: "exemplo.com.br",
-   memberCount: 5,
-};
+function OrganizationGeneralSkeleton() {
+   return (
+      <div className="space-y-6">
+         <div>
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-4 w-64 mt-1" />
+         </div>
+
+         <div className="space-y-3">
+            <div>
+               <Skeleton className="h-6 w-56" />
+               <Skeleton className="h-4 w-72 mt-1" />
+            </div>
+            <div className="space-y-1">
+               <Skeleton className="h-16 w-full rounded-lg" />
+               <Skeleton className="h-16 w-full rounded-lg" />
+               <Skeleton className="h-16 w-full rounded-lg" />
+            </div>
+         </div>
+
+         <div className="space-y-3">
+            <div>
+               <Skeleton className="h-6 w-32" />
+               <Skeleton className="h-4 w-48 mt-1" />
+            </div>
+            <div className="flex items-center gap-4">
+               <Skeleton className="size-14 rounded-full" />
+               <div>
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-4 w-32 mt-1" />
+               </div>
+            </div>
+            <Skeleton className="h-16 w-full rounded-lg" />
+         </div>
+      </div>
+   );
+}
 
 // ============================================
-// Main Page Component
+// Error Fallback
 // ============================================
 
-function OrganizationGeneralPage() {
+function OrganizationGeneralErrorFallback({
+   resetErrorBoundary,
+}: FallbackProps) {
+   return (
+      <div className="space-y-6">
+         <div>
+            <h1 className="text-2xl font-semibold font-serif">Geral</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+               Gerencie as informações da sua organização.
+            </p>
+         </div>
+         <div className="flex flex-col items-center justify-center py-12 text-center">
+            <p className="text-sm text-muted-foreground mb-4">
+               Não foi possível carregar as configurações da organização
+            </p>
+            <Button variant="outline" onClick={resetErrorBoundary}>
+               Tentar novamente
+            </Button>
+         </div>
+      </div>
+   );
+}
+
+// ============================================
+// Main Content Component
+// ============================================
+
+function OrganizationGeneralContent() {
+   const { data: activeOrganization } = useSuspenseQuery(
+      orpc.organization.getActiveOrganization.queryOptions({}),
+   );
+
+   if (!activeOrganization) {
+      throw new Error("No active organization found");
+   }
+
+   const memberCount = activeOrganization.members?.length ?? 0;
+
    const handleCopySlug = () => {
-      navigator.clipboard.writeText(mockOrganization.slug);
+      navigator.clipboard.writeText(activeOrganization.slug);
       toast.success("Slug copiado para a área de transferência!");
    };
 
@@ -85,7 +156,7 @@ function OrganizationGeneralPage() {
                      <ItemContent className="min-w-0">
                         <ItemTitle>Nome da organização</ItemTitle>
                         <ItemDescription className="truncate">
-                           {mockOrganization.name}
+                           {activeOrganization.name}
                         </ItemDescription>
                      </ItemContent>
                      <ItemActions>
@@ -109,7 +180,7 @@ function OrganizationGeneralPage() {
                      <ItemContent className="min-w-0">
                         <ItemTitle>Slug</ItemTitle>
                         <ItemDescription className="truncate font-mono">
-                           {mockOrganization.slug}
+                           {activeOrganization.slug}
                         </ItemDescription>
                      </ItemContent>
                      <ItemActions>
@@ -137,7 +208,7 @@ function OrganizationGeneralPage() {
                      <ItemContent className="min-w-0">
                         <ItemTitle>Logo</ItemTitle>
                         <ItemDescription>
-                           {mockOrganization.logo
+                           {activeOrganization.logo
                               ? "Logo configurado"
                               : "Nenhum logo definido"}
                         </ItemDescription>
@@ -150,30 +221,6 @@ function OrganizationGeneralPage() {
                               </Button>
                            </TooltipTrigger>
                            <TooltipContent>Editar logo</TooltipContent>
-                        </Tooltip>
-                     </ItemActions>
-                  </Item>
-
-                  <ItemSeparator />
-
-                  <Item variant="muted">
-                     <ItemMedia variant="icon">
-                        <Globe className="size-4" />
-                     </ItemMedia>
-                     <ItemContent className="min-w-0">
-                        <ItemTitle>Domínio</ItemTitle>
-                        <ItemDescription className="truncate">
-                           {mockOrganization.domain}
-                        </ItemDescription>
-                     </ItemContent>
-                     <ItemActions>
-                        <Tooltip>
-                           <TooltipTrigger asChild>
-                              <Button size="icon" variant="ghost">
-                                 <Pencil className="size-4" />
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>Editar domínio</TooltipContent>
                         </Tooltip>
                      </ItemActions>
                   </Item>
@@ -190,17 +237,17 @@ function OrganizationGeneralPage() {
                <div className="flex items-center gap-4">
                   <Avatar className="size-14">
                      <AvatarImage
-                        alt={mockOrganization.name}
-                        src={mockOrganization.logo || undefined}
+                        alt={activeOrganization.name}
+                        src={activeOrganization.logo || undefined}
                      />
                      <AvatarFallback className="text-lg">
                         <Building2 className="size-6" />
                      </AvatarFallback>
                   </Avatar>
                   <div>
-                     <h3 className="font-semibold">{mockOrganization.name}</h3>
+                     <h3 className="font-semibold">{activeOrganization.name}</h3>
                      <p className="text-sm text-muted-foreground font-mono">
-                        {mockOrganization.slug}
+                        {activeOrganization.slug}
                      </p>
                   </div>
                </div>
@@ -213,8 +260,8 @@ function OrganizationGeneralPage() {
                      <ItemContent>
                         <ItemTitle>Membros</ItemTitle>
                         <ItemDescription>
-                           {mockOrganization.memberCount}{" "}
-                           {mockOrganization.memberCount === 1
+                           {memberCount}{" "}
+                           {memberCount === 1
                               ? "membro"
                               : "membros"}
                         </ItemDescription>
@@ -224,5 +271,19 @@ function OrganizationGeneralPage() {
             </section>
          </TooltipProvider>
       </div>
+   );
+}
+
+// ============================================
+// Page Component
+// ============================================
+
+function OrganizationGeneralPage() {
+   return (
+      <ErrorBoundary FallbackComponent={OrganizationGeneralErrorFallback}>
+         <Suspense fallback={<OrganizationGeneralSkeleton />}>
+            <OrganizationGeneralContent />
+         </Suspense>
+      </ErrorBoundary>
    );
 }

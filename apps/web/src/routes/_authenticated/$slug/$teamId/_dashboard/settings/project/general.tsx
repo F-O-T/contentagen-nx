@@ -1,8 +1,3 @@
-import {
-   Alert,
-   AlertDescription,
-   AlertTitle,
-} from "@packages/ui/components/alert";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
@@ -16,21 +11,6 @@ import {
    ItemSeparator,
    ItemTitle,
 } from "@packages/ui/components/item";
-import { Label } from "@packages/ui/components/label";
-import {
-   Select,
-   SelectContent,
-   SelectItem,
-   SelectTrigger,
-   SelectValue,
-} from "@packages/ui/components/select";
-import {
-   SheetClose,
-   SheetDescription,
-   SheetFooter,
-   SheetHeader,
-   SheetTitle,
-} from "@packages/ui/components/sheet";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import {
    Tooltip,
@@ -38,24 +18,29 @@ import {
    TooltipProvider,
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
+import {
+   useMutation,
+   useQueryClient,
+   useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
    Calendar,
    Check,
-   Clock,
-   Coins,
    Copy,
+   Globe,
    Hash,
-   Info,
    Key,
    Loader2,
-   Pencil,
+   RefreshCw,
    Settings2,
+   X,
 } from "lucide-react";
 import { Suspense, useState } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
-import { useSheet } from "@/hooks/use-sheet";
+import { useAlertDialog } from "@/hooks/use-alert-dialog";
+import { orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamId/_dashboard/settings/project/general",
@@ -63,292 +48,7 @@ export const Route = createFileRoute(
    component: ProjectGeneralPage,
 });
 
-// ============================================
-// Mock Data
-// ============================================
-
-const MOCK_PROJECT = {
-   id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-   name: "Meu Projeto",
-   slug: "meu-projeto",
-   timezone: "America/Sao_Paulo",
-   currency: "BRL",
-   publicApiKey: "pk_live_abc123def456ghi789jkl012mno345pqr678stu901",
-   createdAt: new Date("2025-06-15T10:30:00Z"),
-   status: "active" as const,
-};
-
-const TIMEZONE_OPTIONS = [
-   { value: "America/Sao_Paulo", label: "América/São Paulo (BRT, UTC-3)" },
-   { value: "America/Manaus", label: "América/Manaus (AMT, UTC-4)" },
-   { value: "America/Belem", label: "América/Belém (BRT, UTC-3)" },
-   { value: "America/Fortaleza", label: "América/Fortaleza (BRT, UTC-3)" },
-   { value: "America/Recife", label: "América/Recife (BRT, UTC-3)" },
-   { value: "America/Noronha", label: "América/Noronha (FNT, UTC-2)" },
-   { value: "America/New_York", label: "América/Nova York (EST, UTC-5)" },
-   { value: "America/Los_Angeles", label: "América/Los Angeles (PST, UTC-8)" },
-   { value: "Europe/Lisbon", label: "Europa/Lisboa (WET, UTC+0)" },
-   { value: "Europe/London", label: "Europa/Londres (GMT, UTC+0)" },
-];
-
-const CURRENCY_OPTIONS = [
-   { value: "BRL", label: "Real Brasileiro (BRL)" },
-   { value: "USD", label: "Dólar Americano (USD)" },
-   { value: "EUR", label: "Euro (EUR)" },
-   { value: "GBP", label: "Libra Esterlina (GBP)" },
-];
-
-function formatDate(date: Date | string | null): string {
-   if (!date) return "-";
-   const d = new Date(date);
-   return d.toLocaleDateString("pt-BR", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-   });
-}
-
-function getTimezoneLabel(value: string): string {
-   return (
-      TIMEZONE_OPTIONS.find((tz) => tz.value === value)?.label || value
-   );
-}
-
-function getCurrencyLabel(value: string): string {
-   return (
-      CURRENCY_OPTIONS.find((c) => c.value === value)?.label || value
-   );
-}
-
-// ============================================
-// Change Name Sheet Content
-// ============================================
-
-function ChangeNameSheetContent({
-   currentName,
-   onClose,
-}: {
-   currentName: string;
-   onClose: () => void;
-}) {
-   const [name, setName] = useState(currentName);
-   const [isPending, setIsPending] = useState(false);
-
-   const isValid = name.trim().length > 0 && name !== currentName;
-
-   const handleSave = () => {
-      setIsPending(true);
-      setTimeout(() => {
-         setIsPending(false);
-         toast.success("Nome do projeto atualizado com sucesso!");
-         onClose();
-      }, 500);
-   };
-
-   return (
-      <div className="flex flex-col h-full">
-         <SheetHeader>
-            <SheetTitle>Alterar Nome do Projeto</SheetTitle>
-            <SheetDescription>
-               Atualize o nome de exibição do projeto
-            </SheetDescription>
-         </SheetHeader>
-
-         <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-            <Alert>
-               <Info className="size-4" />
-               <AlertTitle>Nome do Projeto</AlertTitle>
-               <AlertDescription>
-                  Este é o nome que aparecerá no painel e nas integrações.
-               </AlertDescription>
-            </Alert>
-
-            <div className="space-y-2">
-               <Label htmlFor="project-name">Nome</Label>
-               <Input
-                  id="project-name"
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Meu Projeto"
-                  value={name}
-               />
-            </div>
-         </div>
-
-         <SheetFooter>
-            <SheetClose asChild>
-               <Button variant="outline">Cancelar</Button>
-            </SheetClose>
-            <Button
-               disabled={!isValid || isPending}
-               onClick={handleSave}
-            >
-               {isPending && (
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-               )}
-               Salvar
-            </Button>
-         </SheetFooter>
-      </div>
-   );
-}
-
-// ============================================
-// Change Timezone Sheet Content
-// ============================================
-
-function ChangeTimezoneSheetContent({
-   currentTimezone,
-   onClose,
-}: {
-   currentTimezone: string;
-   onClose: () => void;
-}) {
-   const [timezone, setTimezone] = useState(currentTimezone);
-   const [isPending, setIsPending] = useState(false);
-
-   const isValid = timezone !== currentTimezone;
-
-   const handleSave = () => {
-      setIsPending(true);
-      setTimeout(() => {
-         setIsPending(false);
-         toast.success("Fuso horário atualizado com sucesso!");
-         onClose();
-      }, 500);
-   };
-
-   return (
-      <div className="flex flex-col h-full">
-         <SheetHeader>
-            <SheetTitle>Alterar Fuso Horário</SheetTitle>
-            <SheetDescription>
-               Selecione o fuso horário do projeto
-            </SheetDescription>
-         </SheetHeader>
-
-         <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-            <Alert>
-               <Info className="size-4" />
-               <AlertTitle>Fuso Horário</AlertTitle>
-               <AlertDescription>
-                  O fuso horário é usado para exibir datas e agendar
-                  publicações.
-               </AlertDescription>
-            </Alert>
-
-            <div className="space-y-2">
-               <Label htmlFor="timezone">Fuso Horário</Label>
-               <Select value={timezone} onValueChange={setTimezone}>
-                  <SelectTrigger id="timezone">
-                     <SelectValue placeholder="Selecione um fuso horário" />
-                  </SelectTrigger>
-                  <SelectContent>
-                     {TIMEZONE_OPTIONS.map((tz) => (
-                        <SelectItem key={tz.value} value={tz.value}>
-                           {tz.label}
-                        </SelectItem>
-                     ))}
-                  </SelectContent>
-               </Select>
-            </div>
-         </div>
-
-         <SheetFooter>
-            <SheetClose asChild>
-               <Button variant="outline">Cancelar</Button>
-            </SheetClose>
-            <Button
-               disabled={!isValid || isPending}
-               onClick={handleSave}
-            >
-               {isPending && (
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-               )}
-               Salvar
-            </Button>
-         </SheetFooter>
-      </div>
-   );
-}
-
-// ============================================
-// Change Currency Sheet Content
-// ============================================
-
-function ChangeCurrencySheetContent({
-   currentCurrency,
-   onClose,
-}: {
-   currentCurrency: string;
-   onClose: () => void;
-}) {
-   const [currency, setCurrency] = useState(currentCurrency);
-   const [isPending, setIsPending] = useState(false);
-
-   const isValid = currency !== currentCurrency;
-
-   const handleSave = () => {
-      setIsPending(true);
-      setTimeout(() => {
-         setIsPending(false);
-         toast.success("Moeda padrão atualizada com sucesso!");
-         onClose();
-      }, 500);
-   };
-
-   return (
-      <div className="flex flex-col h-full">
-         <SheetHeader>
-            <SheetTitle>Alterar Moeda Padrão</SheetTitle>
-            <SheetDescription>
-               Selecione a moeda padrão do projeto
-            </SheetDescription>
-         </SheetHeader>
-
-         <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-            <Alert>
-               <Info className="size-4" />
-               <AlertTitle>Moeda Padrão</AlertTitle>
-               <AlertDescription>
-                  A moeda é usada para exibir valores monetários em
-                  relatórios e métricas.
-               </AlertDescription>
-            </Alert>
-
-            <div className="space-y-2">
-               <Label htmlFor="currency">Moeda</Label>
-               <Select value={currency} onValueChange={setCurrency}>
-                  <SelectTrigger id="currency">
-                     <SelectValue placeholder="Selecione uma moeda" />
-                  </SelectTrigger>
-                  <SelectContent>
-                     {CURRENCY_OPTIONS.map((c) => (
-                        <SelectItem key={c.value} value={c.value}>
-                           {c.label}
-                        </SelectItem>
-                     ))}
-                  </SelectContent>
-               </Select>
-            </div>
-         </div>
-
-         <SheetFooter>
-            <SheetClose asChild>
-               <Button variant="outline">Cancelar</Button>
-            </SheetClose>
-            <Button
-               disabled={!isValid || isPending}
-               onClick={handleSave}
-            >
-               {isPending && (
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-               )}
-               Salvar
-            </Button>
-         </SheetFooter>
-      </div>
-   );
-}
+// TODO: Add team.updateName procedure when Better Auth supports it
 
 // ============================================
 // Skeleton
@@ -364,15 +64,19 @@ function ProjectGeneralSkeleton() {
                <Skeleton className="h-16 w-full rounded-lg" />
                <Skeleton className="h-16 w-full rounded-lg" />
                <Skeleton className="h-16 w-full rounded-lg" />
-               <Skeleton className="h-16 w-full rounded-lg" />
-               <Skeleton className="h-16 w-full rounded-lg" />
             </div>
+         </div>
+
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-1/3" />
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-10 w-full rounded-lg" />
+            <Skeleton className="h-10 w-full rounded-lg" />
          </div>
 
          <div className="space-y-3">
             <Skeleton className="h-6 w-2/3" />
             <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-16 w-full rounded-lg" />
             <Skeleton className="h-16 w-full rounded-lg" />
             <Skeleton className="h-16 w-full rounded-lg" />
          </div>
@@ -384,7 +88,10 @@ function ProjectGeneralSkeleton() {
 // Error Fallback
 // ============================================
 
-function ProjectGeneralErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+function ProjectGeneralErrorFallback({
+   error,
+   resetErrorBoundary,
+}: FallbackProps) {
    return (
       <div className="space-y-6">
          <div>
@@ -410,58 +117,140 @@ function ProjectGeneralErrorFallback({ error, resetErrorBoundary }: FallbackProp
 // ============================================
 
 function ProjectGeneralContent() {
-   const { openSheet, closeSheet } = useSheet();
+   const { openAlertDialog } = useAlertDialog();
+   const queryClient = useQueryClient();
+   const { teamId } = Route.useParams();
 
-   const project = MOCK_PROJECT;
-   const [slugCopied, setSlugCopied] = useState(false);
+   const { data: teamData } = useSuspenseQuery(
+      orpc.team.get.queryOptions({ input: { teamId } }),
+   );
+
+   const { data: publicKeyData } = useSuspenseQuery(
+      orpc.team.getPublicApiKey.queryOptions({ input: { teamId } }),
+   );
+
    const [apiKeyCopied, setApiKeyCopied] = useState(false);
+   const [newDomain, setNewDomain] = useState("");
 
-   const handleChangeName = () => {
-      openSheet({
-         children: (
-            <ChangeNameSheetContent
-               currentName={project.name}
-               onClose={closeSheet}
-            />
-         ),
-      });
-   };
+   // ── Mutations ──────────────────────────────────────────────────────
 
-   const handleChangeTimezone = () => {
-      openSheet({
-         children: (
-            <ChangeTimezoneSheetContent
-               currentTimezone={project.timezone}
-               onClose={closeSheet}
-            />
-         ),
-      });
-   };
+   const regenerateKeyMutation = useMutation(
+      orpc.team.regeneratePublicApiKey.mutationOptions({
+         onSuccess: (data) => {
+            if (data.publicApiKey) {
+               navigator.clipboard.writeText(data.publicApiKey);
+               toast.success(
+                  "Chave de API regenerada e copiada para a área de transferência!",
+               );
+            } else {
+               toast.success("Chave de API regenerada!");
+            }
+            queryClient.invalidateQueries({
+               queryKey: orpc.team.getPublicApiKey.queryOptions({
+                  input: { teamId },
+               }).queryKey,
+            });
+         },
+         onError: () => {
+            toast.error("Não foi possível regenerar a chave de API.");
+         },
+      }),
+   );
 
-   const handleChangeCurrency = () => {
-      openSheet({
-         children: (
-            <ChangeCurrencySheetContent
-               currentCurrency={project.currency}
-               onClose={closeSheet}
-            />
-         ),
-      });
-   };
+   const updateDomainsMutation = useMutation(
+      orpc.team.updateAllowedDomains.mutationOptions({
+         onSuccess: () => {
+            queryClient.invalidateQueries({
+               queryKey: orpc.team.get.queryOptions({ input: { teamId } })
+                  .queryKey,
+            });
+         },
+         onError: () => {
+            toast.error("Não foi possível atualizar os domínios permitidos.");
+         },
+      }),
+   );
 
-   const handleCopySlug = () => {
-      navigator.clipboard.writeText(project.slug);
-      setSlugCopied(true);
-      toast.success("Slug copiado!");
-      setTimeout(() => setSlugCopied(false), 2000);
-   };
+   // ── Handlers ───────────────────────────────────────────────────────
 
    const handleCopyApiKey = () => {
-      navigator.clipboard.writeText(project.publicApiKey);
+      const key = publicKeyData.publicApiKey;
+      if (!key) return;
+      navigator.clipboard.writeText(key);
       setApiKeyCopied(true);
       toast.success("Chave de API copiada!");
       setTimeout(() => setApiKeyCopied(false), 2000);
    };
+
+   const handleRegenerateApiKey = () => {
+      openAlertDialog({
+         title: "Regenerar Chave de API",
+         description:
+            "Isso invalidará a chave atual. Todas as integrações que usam a chave antiga deixarão de funcionar. Deseja continuar?",
+         actionLabel: "Regenerar",
+         variant: "destructive",
+         onAction: async () => {
+            await regenerateKeyMutation.mutateAsync({ teamId });
+         },
+      });
+   };
+
+   const handleAddDomain = () => {
+      const domain = newDomain.trim().toLowerCase();
+      if (!domain) return;
+
+      const domainPattern =
+         /^(\*\.)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
+      if (!domainPattern.test(domain)) {
+         toast.error(
+            "Domínio inválido. Use formatos como exemplo.com ou *.exemplo.com",
+         );
+         return;
+      }
+
+      const currentDomains = teamData.allowedDomains ?? [];
+      if (currentDomains.includes(domain)) {
+         toast.error("Este domínio já está na lista.");
+         return;
+      }
+
+      const updatedDomains = [...currentDomains, domain];
+      setNewDomain("");
+      updateDomainsMutation.mutate({
+         teamId,
+         allowedDomains: updatedDomains,
+      });
+   };
+
+   const handleRemoveDomain = (domainToRemove: string) => {
+      const currentDomains = teamData.allowedDomains ?? [];
+      const updatedDomains = currentDomains.filter(
+         (d) => d !== domainToRemove,
+      );
+      updateDomainsMutation.mutate({
+         teamId,
+         allowedDomains: updatedDomains,
+      });
+   };
+
+   const handleDomainKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+         e.preventDefault();
+         handleAddDomain();
+      }
+   };
+
+   // ── Render ─────────────────────────────────────────────────────────
+
+   const allowedDomains = teamData.allowedDomains ?? [];
+
+   const formattedCreatedAt = teamData.createdAt
+      ? new Date(teamData.createdAt).toLocaleDateString("pt-BR", {
+           day: "numeric",
+           month: "long",
+           year: "numeric",
+        })
+      : "-";
 
    return (
       <TooltipProvider>
@@ -473,9 +262,12 @@ function ProjectGeneralContent() {
                </p>
             </div>
 
+            {/* ── Project Settings ─────────────────────────────────── */}
             <section className="space-y-3">
                <div>
-                  <h2 className="text-lg font-medium">Configurações do Projeto</h2>
+                  <h2 className="text-lg font-medium">
+                     Configurações do Projeto
+                  </h2>
                   <p className="text-sm text-muted-foreground mt-1">
                      Gerencie o nome, slug e configurações padrão do projeto
                   </p>
@@ -489,116 +281,24 @@ function ProjectGeneralContent() {
                      <ItemContent className="min-w-0">
                         <ItemTitle>Nome do Projeto</ItemTitle>
                         <ItemDescription className="truncate">
-                           {project.name}
+                           {teamData.name}
                         </ItemDescription>
                      </ItemContent>
-                     <ItemActions>
-                        <Tooltip>
-                           <TooltipTrigger asChild>
-                              <Button
-                                 onClick={handleChangeName}
-                                 size="icon"
-                                 variant="ghost"
-                              >
-                                 <Pencil className="size-4" />
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>Editar nome</TooltipContent>
-                        </Tooltip>
-                     </ItemActions>
                   </Item>
 
                   <ItemSeparator />
 
-                  {/* Slug */}
+                  {/* Team ID */}
                   <Item variant="muted">
                      <ItemMedia variant="icon">
                         <Hash className="size-4" />
                      </ItemMedia>
                      <ItemContent className="min-w-0">
-                        <ItemTitle>Slug</ItemTitle>
+                        <ItemTitle>ID do Projeto</ItemTitle>
                         <ItemDescription className="truncate font-mono">
-                           {project.slug}
+                           {teamId}
                         </ItemDescription>
                      </ItemContent>
-                     <ItemActions>
-                        <Tooltip>
-                           <TooltipTrigger asChild>
-                              <Button
-                                 onClick={handleCopySlug}
-                                 size="icon"
-                                 variant="ghost"
-                              >
-                                 {slugCopied ? (
-                                    <Check className="size-4" />
-                                 ) : (
-                                    <Copy className="size-4" />
-                                 )}
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                              {slugCopied ? "Copiado!" : "Copiar slug"}
-                           </TooltipContent>
-                        </Tooltip>
-                     </ItemActions>
-                  </Item>
-
-                  <ItemSeparator />
-
-                  {/* Timezone */}
-                  <Item variant="muted">
-                     <ItemMedia variant="icon">
-                        <Clock className="size-4" />
-                     </ItemMedia>
-                     <ItemContent className="min-w-0">
-                        <ItemTitle>Fuso Horário</ItemTitle>
-                        <ItemDescription className="truncate">
-                           {getTimezoneLabel(project.timezone)}
-                        </ItemDescription>
-                     </ItemContent>
-                     <ItemActions>
-                        <Tooltip>
-                           <TooltipTrigger asChild>
-                              <Button
-                                 onClick={handleChangeTimezone}
-                                 size="icon"
-                                 variant="ghost"
-                              >
-                                 <Pencil className="size-4" />
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>Alterar fuso horário</TooltipContent>
-                        </Tooltip>
-                     </ItemActions>
-                  </Item>
-
-                  <ItemSeparator />
-
-                  {/* Currency */}
-                  <Item variant="muted">
-                     <ItemMedia variant="icon">
-                        <Coins className="size-4" />
-                     </ItemMedia>
-                     <ItemContent className="min-w-0">
-                        <ItemTitle>Moeda Padrão</ItemTitle>
-                        <ItemDescription className="truncate">
-                           {getCurrencyLabel(project.currency)}
-                        </ItemDescription>
-                     </ItemContent>
-                     <ItemActions>
-                        <Tooltip>
-                           <TooltipTrigger asChild>
-                              <Button
-                                 onClick={handleChangeCurrency}
-                                 size="icon"
-                                 variant="ghost"
-                              >
-                                 <Pencil className="size-4" />
-                              </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>Alterar moeda</TooltipContent>
-                        </Tooltip>
-                     </ItemActions>
                   </Item>
 
                   <ItemSeparator />
@@ -611,33 +311,111 @@ function ProjectGeneralContent() {
                      <ItemContent className="min-w-0">
                         <ItemTitle>Chave de API Pública</ItemTitle>
                         <ItemDescription className="truncate font-mono">
-                           {project.publicApiKey}
+                           {publicKeyData.publicApiKey ?? "Nenhuma chave gerada"}
                         </ItemDescription>
                      </ItemContent>
-                     <ItemActions>
+                     <ItemActions className="flex gap-1">
+                        {publicKeyData.publicApiKey && (
+                           <Tooltip>
+                              <TooltipTrigger asChild>
+                                 <Button
+                                    onClick={handleCopyApiKey}
+                                    size="icon"
+                                    variant="ghost"
+                                 >
+                                    {apiKeyCopied ? (
+                                       <Check className="size-4" />
+                                    ) : (
+                                       <Copy className="size-4" />
+                                    )}
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                 {apiKeyCopied
+                                    ? "Copiado!"
+                                    : "Copiar chave de API"}
+                              </TooltipContent>
+                           </Tooltip>
+                        )}
                         <Tooltip>
                            <TooltipTrigger asChild>
                               <Button
-                                 onClick={handleCopyApiKey}
+                                 onClick={handleRegenerateApiKey}
                                  size="icon"
                                  variant="ghost"
                               >
-                                 {apiKeyCopied ? (
-                                    <Check className="size-4" />
-                                 ) : (
-                                    <Copy className="size-4" />
-                                 )}
+                                 <RefreshCw className="size-4" />
                               </Button>
                            </TooltipTrigger>
-                           <TooltipContent>
-                              {apiKeyCopied ? "Copiado!" : "Copiar chave de API"}
-                           </TooltipContent>
+                           <TooltipContent>Regenerar chave</TooltipContent>
                         </Tooltip>
                      </ItemActions>
                   </Item>
                </ItemGroup>
             </section>
 
+            {/* ── Allowed Domains ──────────────────────────────────── */}
+            <section className="space-y-3">
+               <div>
+                  <h2 className="text-lg font-medium">Domínios Permitidos</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                     Restrinja quais domínios podem usar a chave de API pública.
+                     Deixe vazio para permitir todos os domínios.
+                  </p>
+               </div>
+
+               {allowedDomains.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                     {allowedDomains.map((domain) => (
+                        <Badge
+                           key={domain}
+                           variant="secondary"
+                           className="gap-1 pr-1"
+                        >
+                           <Globe className="size-3" />
+                           {domain}
+                           <button
+                              type="button"
+                              className="ml-1 rounded-sm hover:bg-muted-foreground/20 p-0.5"
+                              onClick={() => handleRemoveDomain(domain)}
+                              disabled={updateDomainsMutation.isPending}
+                           >
+                              <X className="size-3" />
+                           </button>
+                        </Badge>
+                     ))}
+                  </div>
+               ) : (
+                  <p className="text-sm text-muted-foreground italic">
+                     Todos os domínios são permitidos.
+                  </p>
+               )}
+
+               <div className="flex gap-2">
+                  <Input
+                     placeholder="exemplo.com ou *.exemplo.com"
+                     value={newDomain}
+                     onChange={(e) => setNewDomain(e.target.value)}
+                     onKeyDown={handleDomainKeyDown}
+                     disabled={updateDomainsMutation.isPending}
+                  />
+                  <Button
+                     onClick={handleAddDomain}
+                     size="sm"
+                     disabled={
+                        !newDomain.trim() || updateDomainsMutation.isPending
+                     }
+                  >
+                     {updateDomainsMutation.isPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                     ) : (
+                        "Adicionar"
+                     )}
+                  </Button>
+               </div>
+            </section>
+
+            {/* ── Project Summary ──────────────────────────────────── */}
             <section className="space-y-3">
                <div>
                   <h2 className="text-lg font-medium">Resumo do Projeto</h2>
@@ -648,45 +426,12 @@ function ProjectGeneralContent() {
                <ItemGroup>
                   <Item variant="muted">
                      <ItemMedia variant="icon">
-                        <Hash className="size-4" />
-                     </ItemMedia>
-                     <ItemContent className="min-w-0">
-                        <ItemTitle>ID do Projeto</ItemTitle>
-                        <ItemDescription className="truncate font-mono">
-                           {project.id.slice(0, 8)}...
-                        </ItemDescription>
-                     </ItemContent>
-                  </Item>
-
-                  <ItemSeparator />
-
-                  <Item variant="muted">
-                     <ItemMedia variant="icon">
                         <Calendar className="size-4" />
                      </ItemMedia>
                      <ItemContent>
                         <ItemTitle>Criado em</ItemTitle>
                         <ItemDescription>
-                           {formatDate(project.createdAt)}
-                        </ItemDescription>
-                     </ItemContent>
-                  </Item>
-
-                  <ItemSeparator />
-
-                  <Item variant="muted">
-                     <ItemMedia variant="icon">
-                        <Settings2 className="size-4" />
-                     </ItemMedia>
-                     <ItemContent>
-                        <ItemTitle>Status</ItemTitle>
-                        <ItemDescription>
-                           <Badge
-                              className="bg-green-500/10 text-green-500 hover:bg-green-500/20"
-                              variant="outline"
-                           >
-                              Ativo
-                           </Badge>
+                           {formattedCreatedAt}
                         </ItemDescription>
                      </ItemContent>
                   </Item>

@@ -19,6 +19,7 @@ import { auth } from "../integrations/auth";
 import { db } from "../integrations/database";
 import { minioClient } from "../integrations/minio";
 import { posthog } from "../integrations/posthog";
+import { checkDomainAllowed } from "../utils/sdk-auth";
 
 const minioBucket = env.MINIO_BUCKET;
 
@@ -97,12 +98,26 @@ export const sdkRoutes = new Elysia({
                throw new Error("Invalid API Key.");
             }
 
-            const { plan, organizationId, sdkMode } = result.key.metadata ?? {};
+            const { plan, organizationId, sdkMode, teamId } =
+               result.key.metadata ?? {};
+
+            const resolvedTeamId =
+               typeof teamId === "string" ? teamId : undefined;
+
+            const domainCheck = await checkDomainAllowed(
+               request,
+               resolvedTeamId,
+               db,
+            );
+            if (!domainCheck.allowed) {
+               throw new Error("Origin not allowed");
+            }
 
             return {
                apiKey: result.key,
                plan: (plan as PlanName) ?? PlanName.FREE,
                organizationId: organizationId as string | undefined,
+               teamId: resolvedTeamId,
                sdkMode: (sdkMode as "static" | "ssr") ?? "static",
                remaining: result.key.remaining,
                userId: result.key.userId,

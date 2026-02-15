@@ -8,7 +8,7 @@ import {
    timestamp,
    uuid,
 } from "drizzle-orm/pg-core";
-import { organization } from "./auth";
+import { organization, team } from "./auth";
 
 /**
  * Forms — embeddable form definitions for content pages.
@@ -20,6 +20,9 @@ export const forms = pgTable(
       organizationId: uuid("organization_id")
          .notNull()
          .references(() => organization.id, { onDelete: "cascade" }),
+      teamId: uuid("team_id")
+         .notNull()
+         .references(() => team.id, { onDelete: "cascade" }),
       name: text("name").notNull(),
       description: text("description"),
       fields: jsonb("fields")
@@ -50,7 +53,10 @@ export const forms = pgTable(
          .$onUpdate(() => new Date())
          .notNull(),
    },
-   (table) => [index("forms_org_idx").on(table.organizationId)],
+   (table) => [
+      index("forms_org_idx").on(table.organizationId),
+      index("forms_team_idx").on(table.teamId),
+   ],
 );
 
 /**
@@ -66,6 +72,9 @@ export const formSubmissions = pgTable(
       organizationId: uuid("organization_id")
          .notNull()
          .references(() => organization.id, { onDelete: "cascade" }),
+      teamId: uuid("team_id")
+         .notNull()
+         .references(() => team.id, { onDelete: "cascade" }),
       data: jsonb("data").$type<Record<string, unknown>>().notNull(),
       metadata: jsonb("metadata").$type<{
          ipAddress?: string;
@@ -79,6 +88,7 @@ export const formSubmissions = pgTable(
    (table) => [
       index("form_submissions_form_idx").on(table.formId),
       index("form_submissions_org_idx").on(table.organizationId),
+      index("form_submissions_team_idx").on(table.teamId),
    ],
 );
 
@@ -86,6 +96,10 @@ export const formsRelations = relations(forms, ({ one, many }) => ({
    organization: one(organization, {
       fields: [forms.organizationId],
       references: [organization.id],
+   }),
+   team: one(team, {
+      fields: [forms.teamId],
+      references: [team.id],
    }),
    submissions: many(formSubmissions),
 }));
@@ -100,6 +114,10 @@ export const formSubmissionsRelations = relations(
       organization: one(organization, {
          fields: [formSubmissions.organizationId],
          references: [organization.id],
+      }),
+      team: one(team, {
+         fields: [formSubmissions.teamId],
+         references: [team.id],
       }),
    }),
 );

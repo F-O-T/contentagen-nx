@@ -9,45 +9,10 @@ import {
    isRagAvailable,
    ragService,
 } from "../../rag/rag-service";
-import type { ContentMetadata } from "../../rag/types";
+import type { ContentMetadata } from "../../rag/schemas";
 
 // Graph traversal threshold (0.7 = only strong connections)
 const GRAPH_SIMILARITY_THRESHOLD = 0.7;
-
-export function getGraphSearchInstructions(): string {
-   return `
-## GRAPH SEARCH TOOL
-Searches content using relationship-based traversal for deeper discovery.
-
-**When to use:**
-- **Finding indirect connections**: Discover content related through topic clusters
-- **Topic exploration**: Find all content in a semantic neighborhood
-- **Content gaps**: Identify areas with limited coverage
-
-**Parameters:**
-- query (string): Starting point for graph traversal
-- depth (number, optional): How many hops to traverse (1-3, default: 2)
-- limit (number, optional): Max results to return (default: 10)
-
-**How it works:**
-1. Finds initial content matching your query
-2. Traverses semantic connections to find related content
-3. Returns content that may not directly match but is contextually related
-
-**Examples:**
-- graphSearch({ query: "React state management", depth: 2 })
-- graphSearch({ query: "SEO optimization", depth: 1, limit: 5 })
-
-**Output format:**
-- results: Array of { slug, title, description, relevance, depth }
-  - depth indicates how many hops from the original query
-
-**Best practices:**
-1. Use depth=1 for tightly related content
-2. Use depth=2-3 for broader topic exploration
-3. Higher relevance scores indicate stronger connections
-`;
-}
 
 interface GraphSearchResult {
    slug: string;

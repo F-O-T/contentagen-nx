@@ -267,37 +267,3 @@ export const titleMetaTool = createTool({
       };
    },
 });
-
-export function getTitleMetaInstructions(): string {
-   return `
-## TITLE & META ANALYSIS TOOL
-Analyzes title and meta description for SEO optimization.
-
-**When to use:** Before publishing content to ensure title and meta are optimized for search.
-
-**Input:**
-- title (string): The content title
-- metaDescription (string): The meta description
-- primaryKeyword (string): The main keyword to target
-- secondaryKeywords (array, optional): Additional keywords to check
-
-**Output:**
-- titleAnalysis: Score (0-100), keyword presence/position, length, issues, suggestions
-- metaAnalysis: Score (0-100), keyword presence, CTA presence, length, issues, suggestions
-- overallScore: Combined score (title 60%, meta 40%)
-
-**Best Practices:**
-- Title: 50-60 characters, keyword at the beginning, include power words
-- Meta: 150-160 characters, include keyword, add a CTA
-
-**Example:**
-\`\`\`json
-{
-  "title": "SEO em 2026: O Que Muda e Como se Adaptar",
-  "metaDescription": "Descubra as mudanças no SEO para 2026...",
-  "primaryKeyword": "SEO 2026",
-  "secondaryKeywords": ["mudanças SEO", "otimização"]
-}
-\`\`\`
-`;
-}

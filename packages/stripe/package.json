@@ -26,7 +26,7 @@
    "scripts": {
       "build": "tsc --build",
       "check": "biome check --write ./src",
-      "typecheck": "tsc "
+      "typecheck": "tsgo"
    },
    "type": "module",
    "version": "0.3.0"

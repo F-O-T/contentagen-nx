@@ -24,7 +24,9 @@ interface SettingsLayoutProps {
 export function SettingsLayout({ children }: SettingsLayoutProps) {
    const isMobile = useIsMobile();
    const { pathname } = useLocation();
-   const { teamId } = useParams({ strict: false });
+   const { teamId } = useParams({
+      from: "/_authenticated/$slug/$teamId/_dashboard/settings",
+   });
    const { activeOrganization } = useActiveOrganization();
    const [search, setSearch] = useState("");
 
@@ -53,7 +55,7 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
 
    return (
       <SidebarProvider
-         className="w-full -m-4 border-l border-white/10 bg-sidebar shadow-xl"
+         className="!absolute !inset-0  !min-h-0 !h-full border-l border-white/10 bg-sidebar shadow-xl"
          style={
             {
                "--sidebar-width": "16rem",
@@ -61,7 +63,7 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
          }
       >
          <SidebarManager name="settings">
-            <Sidebar className="sticky top-0 h-svh border-r" collapsible="none">
+            <Sidebar className="border-r" collapsible="none">
                <SidebarHeader className="px-3 pt-3 pb-0">
                   <div className="relative">
                      <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground pointer-events-none" />
@@ -78,8 +80,8 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
                </SidebarContent>
             </Sidebar>
          </SidebarManager>
-         <SidebarInset>
-            <main className="flex-1 min-w-0 p-6">{children}</main>
+         <SidebarInset className="flex-1 overflow-y-auto">
+            <main className="p-4">{children}</main>
          </SidebarInset>
       </SidebarProvider>
    );

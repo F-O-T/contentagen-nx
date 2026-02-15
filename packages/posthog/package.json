@@ -52,7 +52,7 @@
       "build": "tsc --build",
       "check": "biome check --write ./src",
       "test": "bun test",
-      "typecheck": "tsc "
+      "typecheck": "tsgo"
    },
    "type": "module",
    "version": "0.8.1"

@@ -1,16 +1,17 @@
 {
    "devDependencies": {
-      "bun-types": "latest",
       "@biomejs/biome": "2.3.11",
       "@commitlint/cli": "20.2.0",
       "@commitlint/config-conventional": "20.2.0",
       "@elysiajs/eden": "^1.4.6",
-      "dotenv": "catalog:enviroment",
       "@nx/js": "22.3.1",
       "@swc-node/register": "1.11.1",
       "@swc/core": "1.15.7",
       "@swc/helpers": "0.5.17",
       "@tooling/typescript": "workspace:*",
+      "@typescript/native-preview": "^7.0.0-dev.20260211.1",
+      "bun-types": "latest",
+      "dotenv": "catalog:enviroment",
       "husky": "9.1.7",
       "nx": "22.3.1",
       "typescript": "catalog:development"

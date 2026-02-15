@@ -51,26 +51,3 @@ export const insertTextTool = createTool({
       };
    },
 });
-
-export function getInsertTextInstructions(): string {
-   return `
-## INSERT TEXT TOOL
-Inserts new text content at a specific position in the blog post.
-
-**When to use:** Adding new paragraphs, sentences, or content blocks
-
-**Parameters:**
-- text (string): The text to insert
-- position (enum): Where to insert
-  - "cursor": At current cursor position
-  - "start": Beginning of document
-  - "end": End of document
-  - "afterHeading": After a specific heading (requires targetIndex)
-  - "beforeParagraph": Before a specific paragraph (requires targetIndex)
-- targetIndex (number, optional): Index for heading/paragraph targeting
-
-**Example:**
-text: "This is a new paragraph about the topic."
-position: "end"
-`;
-}

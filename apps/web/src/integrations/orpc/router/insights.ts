@@ -3,7 +3,7 @@ import {
 	createInsight,
 	deleteInsight,
 	getInsightById,
-	listInsights,
+	listInsightsByTeam,
 	updateInsight,
 } from "@packages/database/repositories/insight-repository";
 import {
@@ -39,6 +39,7 @@ export const create = protectedProcedure
 
 		const insight = await createInsight(db, {
 			organizationId,
+			teamId,
 			createdBy: userId,
 			name: input.name,
 			description: input.description,
@@ -68,17 +69,21 @@ export const list = protectedProcedure
 			.optional(),
 	)
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
-		return await listInsights(db, organizationId, input?.type);
+		const { teamId, db } = context;
+		return await listInsightsByTeam(db, teamId, input?.type);
 	});
 
 export const getById = protectedProcedure
 	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, teamId, db } = context;
 		const insight = await getInsightById(db, input.id);
 
-		if (!insight || insight.organizationId !== organizationId) {
+		if (
+			!insight ||
+			insight.organizationId !== organizationId ||
+			insight.teamId !== teamId
+		) {
 			throw new ORPCError("NOT_FOUND", {
 				message: "Insight not found.",
 			});
@@ -93,7 +98,11 @@ export const update = protectedProcedure
 		const { organizationId, db, posthog, userId, teamId } = context;
 		const insight = await getInsightById(db, input.id);
 
-		if (!insight || insight.organizationId !== organizationId) {
+		if (
+			!insight ||
+			insight.organizationId !== organizationId ||
+			insight.teamId !== teamId
+		) {
 			throw new ORPCError("NOT_FOUND", {
 				message: "Insight not found.",
 			});
@@ -123,7 +132,11 @@ export const remove = protectedProcedure
 		const { organizationId, db, posthog, userId, teamId } = context;
 		const insight = await getInsightById(db, input.id);
 
-		if (!insight || insight.organizationId !== organizationId) {
+		if (
+			!insight ||
+			insight.organizationId !== organizationId ||
+			insight.teamId !== teamId
+		) {
 			throw new ORPCError("NOT_FOUND", {
 				message: "Insight not found.",
 			});

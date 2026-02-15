@@ -326,37 +326,3 @@ export const optimizeMetaTool = createTool({
       };
    },
 });
-
-export function getOptimizeMetaInstructions(): string {
-   return `
-## OPTIMIZE META DESCRIPTION TOOL
-Generates or improves meta descriptions with keywords and CTAs.
-
-**When to use:** After titleMeta analysis shows meta issues or when meta is missing.
-
-**Input:**
-- currentMeta (string | null): Existing meta or null to generate new
-- primaryKeyword (string): Keyword to include
-- contentSummary (string): First 200 words for context
-- includeCTA (boolean): Add call-to-action (default: true)
-
-**Output:**
-- success: Whether optimization succeeded
-- originalMeta: Input meta
-- optimizedMeta: Improved meta
-- alternativeMetas: Additional suggestions
-- changes: What was modified
-- score: Before/after scores (0-100)
-
-**Optimization Strategy:**
-1. Generate from content summary if meta is null
-2. Add keyword if missing
-3. Add CTA ("Descubra", "Aprenda", etc.)
-4. Ensure 150-160 character length
-5. Extract key points from content for relevance
-
-**Example:**
-Input: null, keyword: "SEO 2026", summary: "O SEO em 2026 mudou..."
-Output: "Descubra como o SEO em 2026 mudou. Guia completo com estratégias..."
-`;
-}

@@ -43,12 +43,12 @@ export interface ORPCContextAuthenticated extends ORPCContextWithAuth {
 }
 
 /**
- * Context after organization middleware - includes organizationId
+ * Context after organization middleware - includes organizationId and teamId
  */
 export interface ORPCContextWithOrganization
 	extends ORPCContextAuthenticated {
 	organizationId: string;
-	teamId: string | null;
+	teamId: string;
 }
 
 // =============================================================================
@@ -80,7 +80,7 @@ const withAuth = baseProcedure.use(async ({ context, next }) => {
 });
 
 /**
- * Procedure requiring active organization
+ * Procedure requiring active organization and team
  */
 const withOrganization = withAuth.use(async ({ context, next }) => {
 	const { session } = context;
@@ -93,8 +93,14 @@ const withOrganization = withAuth.use(async ({ context, next }) => {
 		});
 	}
 
-	// Extract team/project ID (may be null)
-	const teamId = (session.session as any).activeTeamId ?? null;
+	// Extract team/project ID (now required)
+	const teamId = (session.session as any).activeTeamId;
+
+	if (!teamId) {
+		throw new ORPCError("FORBIDDEN", {
+			message: "No active team selected",
+		});
+	}
 
 	return next({
 		context: {

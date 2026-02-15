@@ -54,27 +54,3 @@ export const insertHeadingTool = createTool({
       };
    },
 });
-
-export function getInsertHeadingInstructions(): string {
-   return `
-## INSERT HEADING TOOL
-Adds a heading to structure the blog post.
-
-**When to use:** Creating sections, adding subheadings, organizing content
-
-**Parameters:**
-- level (enum): h1, h2, h3, or h4
-  - h1: Main title (use sparingly, usually only one per post)
-  - h2: Major sections
-  - h3: Subsections
-  - h4: Minor subsections
-- text (string): Heading text
-- position (enum): Where to insert
-- paragraphIndex (number, optional): For paragraph-relative positioning
-
-**Example:**
-level: "h2"
-text: "Getting Started with the Feature"
-position: "end"
-`;
-}

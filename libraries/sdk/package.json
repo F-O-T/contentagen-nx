@@ -103,7 +103,7 @@
 		"release": "bumpp --commit --push --tag",
 		"test": "bun test",
 		"test:watch": "bun test --watch",
-		"typecheck": "tsc"
+		"typecheck": "tsgo"
 	},
 	"type": "module",
 	"types": "./dist/index.d.ts",

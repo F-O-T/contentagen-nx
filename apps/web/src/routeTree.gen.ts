@@ -30,10 +30,12 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthenticatedSlugOnboardingRouteImport } from './routes/_authenticated/$slug/onboarding'
 import { Route as AuthenticatedSlugTeamIdRouteImport } from './routes/_authenticated/$slug/$teamId'
 import { Route as DotwellKnownOauthAuthorizationServerSplatRouteImport } from './routes/[.]well-known.oauth-authorization-server.$'
+import { Route as AuthenticatedSlugTeamIdOnboardingRouteImport } from './routes/_authenticated/$slug/$teamId/onboarding'
 import { Route as AuthenticatedSlugTeamIdEditorRouteImport } from './routes/_authenticated/$slug/$teamId/_editor'
 import { Route as AuthenticatedSlugTeamIdDashboardRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard'
 import { Route as AuthenticatedSlugTeamIdEditorContentIdRouteImport } from './routes/_authenticated/$slug/$teamId/_editor/$contentId'
 import { Route as AuthenticatedSlugTeamIdDashboardSettingsRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard/settings'
+import { Route as AuthenticatedSlugTeamIdDashboardSearchRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard/search'
 import { Route as AuthenticatedSlugTeamIdDashboardPlansRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard/plans'
 import { Route as AuthenticatedSlugTeamIdDashboardBillingRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard/billing'
 import { Route as AuthenticatedSlugTeamIdDashboardSettingsIndexRouteImport } from './routes/_authenticated/$slug/$teamId/_dashboard/settings/index'
@@ -179,6 +181,12 @@ const DotwellKnownOauthAuthorizationServerSplatRoute =
     path: '/.well-known/oauth-authorization-server/$',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedSlugTeamIdOnboardingRoute =
+  AuthenticatedSlugTeamIdOnboardingRouteImport.update({
+    id: '/onboarding',
+    path: '/onboarding',
+    getParentRoute: () => AuthenticatedSlugTeamIdRoute,
+  } as any)
 const AuthenticatedSlugTeamIdEditorRoute =
   AuthenticatedSlugTeamIdEditorRouteImport.update({
     id: '/_editor',
@@ -199,6 +207,12 @@ const AuthenticatedSlugTeamIdDashboardSettingsRoute =
   AuthenticatedSlugTeamIdDashboardSettingsRouteImport.update({
     id: '/settings',
     path: '/settings',
+    getParentRoute: () => AuthenticatedSlugTeamIdDashboardRoute,
+  } as any)
+const AuthenticatedSlugTeamIdDashboardSearchRoute =
+  AuthenticatedSlugTeamIdDashboardSearchRouteImport.update({
+    id: '/search',
+    path: '/search',
     getParentRoute: () => AuthenticatedSlugTeamIdDashboardRoute,
   } as any)
 const AuthenticatedSlugTeamIdDashboardPlansRoute =
@@ -475,8 +489,10 @@ export interface FileRoutesByFullPath {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
   '/auth/sign-in/': typeof AuthSignInIndexRoute
+  '/$slug/$teamId/onboarding': typeof AuthenticatedSlugTeamIdOnboardingRoute
   '/$slug/$teamId/billing': typeof AuthenticatedSlugTeamIdDashboardBillingRoute
   '/$slug/$teamId/plans': typeof AuthenticatedSlugTeamIdDashboardPlansRoute
+  '/$slug/$teamId/search': typeof AuthenticatedSlugTeamIdDashboardSearchRoute
   '/$slug/$teamId/settings': typeof AuthenticatedSlugTeamIdDashboardSettingsRouteWithChildren
   '/$slug/$teamId/$contentId': typeof AuthenticatedSlugTeamIdEditorContentIdRoute
   '/$slug/$teamId/analytics/data-management': typeof AuthenticatedSlugTeamIdDashboardAnalyticsDataManagementRouteWithChildren
@@ -535,8 +551,10 @@ export interface FileRoutesByTo {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
   '/auth/sign-in': typeof AuthSignInIndexRoute
+  '/$slug/$teamId/onboarding': typeof AuthenticatedSlugTeamIdOnboardingRoute
   '/$slug/$teamId/billing': typeof AuthenticatedSlugTeamIdDashboardBillingRoute
   '/$slug/$teamId/plans': typeof AuthenticatedSlugTeamIdDashboardPlansRoute
+  '/$slug/$teamId/search': typeof AuthenticatedSlugTeamIdDashboardSearchRoute
   '/$slug/$teamId/$contentId': typeof AuthenticatedSlugTeamIdEditorContentIdRoute
   '/$slug/$teamId/forms/$formId': typeof AuthenticatedSlugTeamIdDashboardFormsFormIdRouteWithChildren
   '/$slug/$teamId/settings/customization': typeof AuthenticatedSlugTeamIdDashboardSettingsCustomizationRoute
@@ -598,8 +616,10 @@ export interface FileRoutesById {
   '/auth/sign-in/': typeof AuthSignInIndexRoute
   '/_authenticated/$slug/$teamId/_dashboard': typeof AuthenticatedSlugTeamIdDashboardRouteWithChildren
   '/_authenticated/$slug/$teamId/_editor': typeof AuthenticatedSlugTeamIdEditorRouteWithChildren
+  '/_authenticated/$slug/$teamId/onboarding': typeof AuthenticatedSlugTeamIdOnboardingRoute
   '/_authenticated/$slug/$teamId/_dashboard/billing': typeof AuthenticatedSlugTeamIdDashboardBillingRoute
   '/_authenticated/$slug/$teamId/_dashboard/plans': typeof AuthenticatedSlugTeamIdDashboardPlansRoute
+  '/_authenticated/$slug/$teamId/_dashboard/search': typeof AuthenticatedSlugTeamIdDashboardSearchRoute
   '/_authenticated/$slug/$teamId/_dashboard/settings': typeof AuthenticatedSlugTeamIdDashboardSettingsRouteWithChildren
   '/_authenticated/$slug/$teamId/_editor/$contentId': typeof AuthenticatedSlugTeamIdEditorContentIdRoute
   '/_authenticated/$slug/$teamId/_dashboard/analytics/data-management': typeof AuthenticatedSlugTeamIdDashboardAnalyticsDataManagementRouteWithChildren
@@ -661,8 +681,10 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/auth/sign-in/email'
     | '/auth/sign-in/'
+    | '/$slug/$teamId/onboarding'
     | '/$slug/$teamId/billing'
     | '/$slug/$teamId/plans'
+    | '/$slug/$teamId/search'
     | '/$slug/$teamId/settings'
     | '/$slug/$teamId/$contentId'
     | '/$slug/$teamId/analytics/data-management'
@@ -721,8 +743,10 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/auth/sign-in/email'
     | '/auth/sign-in'
+    | '/$slug/$teamId/onboarding'
     | '/$slug/$teamId/billing'
     | '/$slug/$teamId/plans'
+    | '/$slug/$teamId/search'
     | '/$slug/$teamId/$contentId'
     | '/$slug/$teamId/forms/$formId'
     | '/$slug/$teamId/settings/customization'
@@ -783,8 +807,10 @@ export interface FileRouteTypes {
     | '/auth/sign-in/'
     | '/_authenticated/$slug/$teamId/_dashboard'
     | '/_authenticated/$slug/$teamId/_editor'
+    | '/_authenticated/$slug/$teamId/onboarding'
     | '/_authenticated/$slug/$teamId/_dashboard/billing'
     | '/_authenticated/$slug/$teamId/_dashboard/plans'
+    | '/_authenticated/$slug/$teamId/_dashboard/search'
     | '/_authenticated/$slug/$teamId/_dashboard/settings'
     | '/_authenticated/$slug/$teamId/_editor/$contentId'
     | '/_authenticated/$slug/$teamId/_dashboard/analytics/data-management'
@@ -985,6 +1011,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotwellKnownOauthAuthorizationServerSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/$slug/$teamId/onboarding': {
+      id: '/_authenticated/$slug/$teamId/onboarding'
+      path: '/onboarding'
+      fullPath: '/$slug/$teamId/onboarding'
+      preLoaderRoute: typeof AuthenticatedSlugTeamIdOnboardingRouteImport
+      parentRoute: typeof AuthenticatedSlugTeamIdRoute
+    }
     '/_authenticated/$slug/$teamId/_editor': {
       id: '/_authenticated/$slug/$teamId/_editor'
       path: ''
@@ -1011,6 +1044,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/$slug/$teamId/settings'
       preLoaderRoute: typeof AuthenticatedSlugTeamIdDashboardSettingsRouteImport
+      parentRoute: typeof AuthenticatedSlugTeamIdDashboardRoute
+    }
+    '/_authenticated/$slug/$teamId/_dashboard/search': {
+      id: '/_authenticated/$slug/$teamId/_dashboard/search'
+      path: '/search'
+      fullPath: '/$slug/$teamId/search'
+      preLoaderRoute: typeof AuthenticatedSlugTeamIdDashboardSearchRouteImport
       parentRoute: typeof AuthenticatedSlugTeamIdDashboardRoute
     }
     '/_authenticated/$slug/$teamId/_dashboard/plans': {
@@ -1389,6 +1429,7 @@ const AuthenticatedSlugTeamIdDashboardFormsFormIdRouteWithChildren =
 interface AuthenticatedSlugTeamIdDashboardRouteChildren {
   AuthenticatedSlugTeamIdDashboardBillingRoute: typeof AuthenticatedSlugTeamIdDashboardBillingRoute
   AuthenticatedSlugTeamIdDashboardPlansRoute: typeof AuthenticatedSlugTeamIdDashboardPlansRoute
+  AuthenticatedSlugTeamIdDashboardSearchRoute: typeof AuthenticatedSlugTeamIdDashboardSearchRoute
   AuthenticatedSlugTeamIdDashboardSettingsRoute: typeof AuthenticatedSlugTeamIdDashboardSettingsRouteWithChildren
   AuthenticatedSlugTeamIdDashboardAnalyticsDataManagementRoute: typeof AuthenticatedSlugTeamIdDashboardAnalyticsDataManagementRouteWithChildren
   AuthenticatedSlugTeamIdDashboardFormsFormIdRoute: typeof AuthenticatedSlugTeamIdDashboardFormsFormIdRouteWithChildren
@@ -1408,6 +1449,8 @@ const AuthenticatedSlugTeamIdDashboardRouteChildren: AuthenticatedSlugTeamIdDash
       AuthenticatedSlugTeamIdDashboardBillingRoute,
     AuthenticatedSlugTeamIdDashboardPlansRoute:
       AuthenticatedSlugTeamIdDashboardPlansRoute,
+    AuthenticatedSlugTeamIdDashboardSearchRoute:
+      AuthenticatedSlugTeamIdDashboardSearchRoute,
     AuthenticatedSlugTeamIdDashboardSettingsRoute:
       AuthenticatedSlugTeamIdDashboardSettingsRouteWithChildren,
     AuthenticatedSlugTeamIdDashboardAnalyticsDataManagementRoute:
@@ -1455,6 +1498,7 @@ const AuthenticatedSlugTeamIdEditorRouteWithChildren =
 interface AuthenticatedSlugTeamIdRouteChildren {
   AuthenticatedSlugTeamIdDashboardRoute: typeof AuthenticatedSlugTeamIdDashboardRouteWithChildren
   AuthenticatedSlugTeamIdEditorRoute: typeof AuthenticatedSlugTeamIdEditorRouteWithChildren
+  AuthenticatedSlugTeamIdOnboardingRoute: typeof AuthenticatedSlugTeamIdOnboardingRoute
 }
 
 const AuthenticatedSlugTeamIdRouteChildren: AuthenticatedSlugTeamIdRouteChildren =
@@ -1463,6 +1507,8 @@ const AuthenticatedSlugTeamIdRouteChildren: AuthenticatedSlugTeamIdRouteChildren
       AuthenticatedSlugTeamIdDashboardRouteWithChildren,
     AuthenticatedSlugTeamIdEditorRoute:
       AuthenticatedSlugTeamIdEditorRouteWithChildren,
+    AuthenticatedSlugTeamIdOnboardingRoute:
+      AuthenticatedSlugTeamIdOnboardingRoute,
   }
 
 const AuthenticatedSlugTeamIdRouteWithChildren =

@@ -51,7 +51,7 @@ function setChecklistHidden(slug: string): void {
  * Only renders when onboarding is completed and tasks remain.
  */
 export function QuickStartChecklist() {
-	const { data: status, isLoading } = useOnboardingStatus();
+	const { data: status } = useOnboardingStatus();
 	const completeTaskMutation = useCompleteTask();
 	const { slug } = useParams({ strict: false });
 	const [isCollapsed, setIsCollapsed] = useState(false);
@@ -148,7 +148,6 @@ export function QuickStartChecklist() {
 	}, [slug]);
 
 	// Determine visibility
-	if (isLoading || !status) return null;
 	if (!status.onboardingCompleted) return null;
 	if (isHidden) return null;
 	if (allDone) return null;

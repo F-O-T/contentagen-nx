@@ -46,22 +46,3 @@ export const deleteTextTool = createTool({
       };
    },
 });
-
-export function getDeleteTextInstructions(): string {
-   return `
-## DELETE TEXT TOOL
-Removes text from the blog post.
-
-**When to use:** Removing unnecessary content, cleaning up, restructuring
-
-**Parameters:**
-- target (object): What to delete
-  - { type: "selection" }: Delete currently selected text
-  - { type: "pattern", pattern: "text" }: Delete specific text
-  - { type: "paragraph", index: 0 }: Delete paragraph by index
-  - { type: "heading", index: 0, includeContent: false }: Delete heading (optionally with its content)
-
-**Example:**
-target: { type: "pattern", pattern: "Remove this sentence." }
-`;
-}

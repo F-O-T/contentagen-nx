@@ -107,6 +107,27 @@ contentta-nx/
 | `instruction-memory` | AI agent memory for learned preferences |
 | `related-content` | Content linking/relationships |
 | `export-log` | Content export history |
+| `dashboards` | Analytics dashboards with tiles configuration |
+| `insights` | Analytics insights (trends, funnels, retention) |
+
+### Default Dashboard
+
+Every organization automatically gets a default dashboard with 8 pre-configured insights:
+
+| Insight | Type | Size | Description |
+|---------|------|------|-------------|
+| Page Views | Trends | Large | Daily page views over last 30 days |
+| Unique Visitors | Trends | Large | Daily unique visitors over last 30 days |
+| Content Created | Trends | Small | Content created this month |
+| Top Content | Trends | Full | Most viewed content (with breakdown) |
+| AI Usage | Trends | Large | AI completions, chat messages, agent actions |
+| SDK Requests | Trends | Large | SDK API requests by endpoint |
+| Conversion Rate | Trends | Small | CTA click rate formula (B/A*100) |
+| Credit Usage | Trends | Full | Billable events by category |
+
+**Default Insights Location**: `packages/database/src/default-insights.ts`
+
+**Auto-Creation**: The `getDefaultDashboard` function automatically creates the dashboard with all insights and tiles on first access.
 
 ### Content Workflow
 
@@ -621,6 +642,116 @@ export const contentRouter = router({
 
 ## UI Patterns
 
+### TanStack Query - Data Fetching
+
+**ALWAYS prefer `useSuspenseQuery` over `useQuery`** for data fetching in components.
+
+#### Why Use Suspense Query?
+
+- **Better UX**: Leverages React Suspense for coordinated loading states
+- **Simpler Code**: No need to handle loading states manually
+- **Type Safety**: Guarantees data is defined (no `data | undefined`)
+- **Error Boundaries**: Automatically throws to nearest error boundary
+- **Streaming SSR**: Better support for React Server Components (future-proof)
+
+#### Pattern: Use Suspense Query
+
+```typescript
+// ✅ GOOD - Use useSuspenseQuery
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { orpc } from "@/integrations/orpc/client";
+
+export function MyComponent() {
+   const { data } = useSuspenseQuery(
+      orpc.content.getAll.queryOptions(),
+   );
+
+   // `data` is always defined - no need for optional chaining!
+   return <div>{data.length} items</div>;
+}
+
+// Wrap with Suspense boundary at a higher level:
+<Suspense fallback={<LoadingSpinner />}>
+   <MyComponent />
+</Suspense>
+```
+
+```typescript
+// ❌ BAD - Avoid useQuery unless absolutely necessary
+import { useQuery } from "@tanstack/react-query";
+
+export function MyComponent() {
+   const { data, isLoading } = useQuery(
+      orpc.content.getAll.queryOptions(),
+   );
+
+   if (isLoading) return <LoadingSpinner />; // Manual loading state
+   if (!data) return null; // Manual null check
+
+   return <div>{data.length} items</div>;
+}
+```
+
+#### When to Use Regular `useQuery`
+
+Only use `useQuery` in these specific cases:
+
+1. **Optional/Background Queries**: Data that doesn't block rendering
+   ```typescript
+   // Analytics data that's nice-to-have but not required
+   const { data: analytics } = useQuery({
+      ...orpc.analytics.getStats.queryOptions(),
+      enabled: false, // Fetch on demand
+   });
+   ```
+
+2. **Polling/Refetching**: Queries that update frequently in the background
+   ```typescript
+   const { data } = useQuery({
+      ...orpc.notifications.getUnread.queryOptions(),
+      refetchInterval: 30000, // Poll every 30s
+   });
+   ```
+
+3. **Conditional Queries**: Queries that depend on user interaction
+   ```typescript
+   const [enabled, setEnabled] = useState(false);
+   const { data } = useQuery({
+      ...orpc.heavyData.get.queryOptions(),
+      enabled, // Only fetch when user requests it
+   });
+   ```
+
+#### Migration from useQuery to useSuspenseQuery
+
+When converting existing code:
+
+1. Change `useQuery` to `useSuspenseQuery`
+2. Remove manual `isLoading` checks
+3. Remove `data?` optional chaining (data is guaranteed)
+4. Add `<Suspense>` boundary at appropriate level (route/layout)
+5. Add error boundary if needed
+
+```typescript
+// Before
+function Content() {
+   const { data, isLoading } = useQuery(orpc.content.get.queryOptions({ id }));
+   if (isLoading) return <Spinner />;
+   return <div>{data?.title}</div>;
+}
+
+// After
+function Content() {
+   const { data } = useSuspenseQuery(orpc.content.get.queryOptions({ id }));
+   return <div>{data.title}</div>; // No optional chaining needed!
+}
+
+// In parent/route:
+<Suspense fallback={<Spinner />}>
+   <Content />
+</Suspense>
+```
+
 ### Component Library (CVA + Radix)
 ```typescript
 // packages/ui/src/components/button.tsx
@@ -772,6 +903,57 @@ import { useContent } from "@/features/content/hooks/use-content";
 import { useContent } from "@/features/content";
 ```
 
+### ❌ NEVER Use Dynamic Imports for Hooks or Components
+
+**DO NOT** use `await import()` to dynamically import hooks or components within function bodies:
+
+```typescript
+// ❌ BAD - NEVER do this
+async function someFunction() {
+   const { useQueryClient } = await import("@tanstack/react-query");
+   const queryClient = useQueryClient(); // This breaks React rules
+}
+
+// ❌ BAD - NEVER do this
+const completeOrgMutation = useMutation({
+   onSuccess: async () => {
+      const queryClient = (await import("@tanstack/react-query")).useQueryClient;
+      queryClient().invalidateQueries(...); // Invalid hook call
+   },
+});
+```
+
+**Why this is wrong:**
+- Hooks must be called at the top level of React components
+- Dynamic imports are async and break the Rules of Hooks
+- Creates runtime errors and unpredictable behavior
+
+**✅ CORRECT - Import at the top of the file:**
+
+```typescript
+import { useQueryClient } from "@tanstack/react-query";
+
+export function MyComponent() {
+   const queryClient = useQueryClient(); // Correct - top level of component
+
+   const mutation = useMutation({
+      onSuccess: () => {
+         queryClient.invalidateQueries(...); // Correct - using hook from component scope
+      },
+   });
+}
+```
+
+**When dynamic imports ARE acceptable:**
+- Code splitting for routes/pages (handled by bundler)
+- Lazy loading heavy libraries (outside of React render)
+- Server-side conditional imports (Node.js/Bun contexts)
+
+**Never dynamically import:**
+- React hooks (`useState`, `useQuery`, `useMutation`, etc.)
+- React components during render
+- Any function that uses hooks internally
+
 ---
 
 ## Environment Variables
@@ -829,9 +1011,340 @@ bun run db:push      # Push schema changes to database
 bun run db:studio    # Open Drizzle Studio GUI
 ```
 
+### Scripts
+
+**Seed Default Dashboard**
+```bash
+# Add default insights and tiles to empty dashboards
+bun run scripts/seed-default-dashboard.ts run
+bun run scripts/seed-default-dashboard.ts run --env production
+bun run scripts/seed-default-dashboard.ts run --dry-run
+
+# Check configuration
+bun run scripts/seed-default-dashboard.ts check
+```
+
+**Other Scripts**
+```bash
+bun run scripts/reindex-content.ts          # Re-index published content for RAG
+bun run scripts/seed-event-catalog.ts run   # Seed event catalog with pricing
+```
+
 ### Testing
 ```bash
 bun run test         # Run tests with parallelization
+```
+
+---
+
+## Writing Scripts
+
+### Script Location
+
+All scripts MUST be placed in the root-level `scripts/` directory:
+```
+contentta-nx/
+├── scripts/
+│   ├── seed-default-dashboard.ts
+│   ├── seed-event-catalog.ts
+│   ├── reindex-content.ts
+│   └── your-new-script.ts
+```
+
+**❌ NEVER create scripts in:**
+- `packages/*/src/scripts/`
+- `apps/*/scripts/`
+- Any subdirectory
+
+### Script Structure
+
+Every script MUST follow this standard structure:
+
+```typescript
+/**
+ * Script Title
+ *
+ * Brief description of what this script does and when to use it.
+ *
+ * Usage:
+ *   bun run scripts/your-script.ts run
+ *   bun run scripts/your-script.ts run --env production
+ *   bun run scripts/your-script.ts run --dry-run
+ *   bun run scripts/your-script.ts check
+ */
+
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { createDb } from "@packages/database/client";
+import chalk from "chalk";
+import { Command } from "commander";
+import { config } from "dotenv";
+
+// ── Configuration ────────────────────────────────────────────────────────
+
+const program = new Command();
+
+const colors = {
+   blue: chalk.blue,
+   cyan: chalk.cyan,
+   green: chalk.green,
+   red: chalk.red,
+   yellow: chalk.yellow,
+   gray: chalk.gray,
+};
+
+const DATABASE_PACKAGE_DIR = path.join(process.cwd(), "packages", "database");
+
+// ── Environment Handling ─────────────────────────────────────────────────
+
+function getEnvFilePath(env: string): string {
+   const possibleFiles = [
+      `.env.${env}.local`,
+      `.env.${env}`,
+      ".env.local",
+      ".env",
+   ];
+
+   for (const file of possibleFiles) {
+      const filePath = path.join(DATABASE_PACKAGE_DIR, file);
+      if (fs.existsSync(filePath)) {
+         return filePath;
+      }
+   }
+
+   throw new Error(`No environment file found for ${env} in packages/database`);
+}
+
+function loadEnv(env: string) {
+   const envFile = getEnvFilePath(env);
+   console.log(colors.cyan(`   Loading env from: ${envFile}`));
+   config({ path: envFile });
+}
+
+function requireDatabaseUrl() {
+   const databaseUrl = process.env.DATABASE_URL;
+   if (!databaseUrl) {
+      console.error(colors.red("❌ DATABASE_URL is required"));
+      process.exit(1);
+   }
+   return databaseUrl;
+}
+
+// ── Main Logic ───────────────────────────────────────────────────────────
+
+async function runScript(env: string, dryRun: boolean) {
+   console.log(colors.blue("--- Script Name ---\n"));
+   console.log(colors.cyan(`   Environment: ${env}`));
+   console.log(colors.cyan(`   Mode: ${dryRun ? "DRY RUN" : "LIVE"}`));
+   console.log(colors.cyan("-".repeat(50)));
+
+   loadEnv(env);
+   const databaseUrl = requireDatabaseUrl();
+   const db = createDb({ databaseUrl });
+
+   // Your script logic here
+
+   if (dryRun) {
+      console.log(colors.yellow("\n⚠️  DRY RUN - no data was modified\n"));
+      return;
+   }
+
+   // Actual modifications here
+
+   console.log(colors.green("\n✅ Script completed successfully!\n"));
+}
+
+// ── CLI Commands ─────────────────────────────────────────────────────────
+
+program
+   .name("your-script-name")
+   .description("Description of what this script does")
+   .version("1.0.0");
+
+program
+   .command("run")
+   .description("Run the script")
+   .option(
+      "-e, --env <environment>",
+      "Environment to use (local, production, etc.)",
+      "local",
+   )
+   .option("--dry-run", "Preview changes without modifying data", false)
+   .action(async (options) => {
+      await runScript(options.env, options.dryRun).catch((err) => {
+         console.error(colors.red("\n❌ Script failed:"), err);
+         process.exit(1);
+      });
+   });
+
+program
+   .command("check")
+   .description("Check required configuration")
+   .option(
+      "-e, --env <environment>",
+      "Environment to use (local, production, etc.)",
+      "local",
+   )
+   .action((options) => {
+      loadEnv(options.env);
+      const databaseUrl = process.env.DATABASE_URL;
+
+      console.log(colors.blue("🔍 Checking configuration...\n"));
+
+      if (!databaseUrl) {
+         console.log(colors.red("❌ DATABASE_URL is not set"));
+         process.exit(1);
+      }
+
+      console.log(colors.green("✅ DATABASE_URL is set"));
+      // Add other configuration checks as needed
+   });
+
+program.parse();
+```
+
+### Required Patterns
+
+#### 1. Header Documentation
+```typescript
+/**
+ * [Script Title]
+ *
+ * [2-3 sentence description]
+ *
+ * Usage:
+ *   bun run scripts/[script-name].ts run
+ *   bun run scripts/[script-name].ts run --env production
+ *   bun run scripts/[script-name].ts run --dry-run
+ */
+```
+
+#### 2. Environment Handling
+- ✅ ALWAYS support `--env` flag (local, production)
+- ✅ ALWAYS support `--dry-run` flag
+- ✅ Load env from `packages/database/.env[.environment][.local]`
+- ✅ Validate required environment variables
+
+#### 3. CLI Structure (commander)
+- ✅ Use `program.command("run")` for main action
+- ✅ Use `program.command("check")` for validation
+- ✅ Always wrap in `.catch()` with error handling
+
+#### 4. Output Formatting (chalk)
+```typescript
+const colors = {
+   blue: chalk.blue,     // Headers, titles
+   cyan: chalk.cyan,     // Info, metadata
+   green: chalk.green,   // Success messages
+   red: chalk.red,       // Errors
+   yellow: chalk.yellow, // Warnings, dry-run
+   gray: chalk.gray,     // Subtle info
+};
+```
+
+#### 5. Error Handling
+```typescript
+// At top level
+program
+   .command("run")
+   .action(async (options) => {
+      await runScript(options.env, options.dryRun).catch((err) => {
+         console.error(colors.red("\n❌ Script failed:"), err);
+         process.exit(1);
+      });
+   });
+
+// In validation functions
+function requireDatabaseUrl() {
+   const databaseUrl = process.env.DATABASE_URL;
+   if (!databaseUrl) {
+      console.error(colors.red("❌ DATABASE_URL is required"));
+      process.exit(1);
+   }
+   return databaseUrl;
+}
+```
+
+#### 6. Dry-Run Pattern
+```typescript
+if (dryRun) {
+   // Show what WOULD be done
+   console.log(colors.yellow(`   Would create ${count} records`));
+   console.log(colors.yellow("\n⚠️  DRY RUN - no data was modified\n"));
+   return;
+}
+
+// Actually do the modifications
+const result = await db.insert(...).values(...);
+console.log(colors.green(`   ✓ Created ${result.length} records`));
+```
+
+#### 7. Summary Output
+```typescript
+console.log(colors.cyan("-".repeat(50)));
+console.log(colors.blue("\n📊 Summary:\n"));
+console.log(colors.green(`   ✓ Updated ${count} records`));
+console.log(colors.green(`   ✓ Created ${created} items`));
+console.log(colors.green("\n✅ Script completed successfully!\n"));
+```
+
+### Common Imports
+
+```typescript
+// Node.js built-ins
+import * as fs from "node:fs";
+import * as path from "node:path";
+
+// Database
+import { createDb } from "@packages/database/client";
+import { someTable } from "@packages/database/schemas/some-schema";
+import { eq, and, desc } from "drizzle-orm";
+
+// CLI & Environment
+import chalk from "chalk";
+import { Command } from "commander";
+import { config } from "dotenv";
+```
+
+### Testing Your Script
+
+Before committing, test all modes:
+
+```bash
+# 1. Check configuration
+bun run scripts/your-script.ts check
+
+# 2. Dry run (preview)
+bun run scripts/your-script.ts run --dry-run
+
+# 3. Local execution
+bun run scripts/your-script.ts run
+
+# 4. Production (careful!)
+bun run scripts/your-script.ts run --env production --dry-run
+bun run scripts/your-script.ts run --env production
+```
+
+### Documentation Checklist
+
+After creating a script, update `CLAUDE.md`:
+
+1. ✅ Add to **Commands Reference > Scripts** section
+2. ✅ Include usage examples with all flags
+3. ✅ Describe what the script does
+4. ✅ Note any prerequisites or warnings
+
+Example:
+```markdown
+### Scripts
+
+**Your Script Name**
+```bash
+# Description of what it does
+bun run scripts/your-script.ts run
+bun run scripts/your-script.ts run --env production
+bun run scripts/your-script.ts run --dry-run
+```
 ```
 
 ---
@@ -968,12 +1481,210 @@ const userId = resolvedCtx.userId;
 const organizationId = resolvedCtx.organizationId;
 ```
 
+### Adding Fields to Auth Tables
+
+**IMPORTANT**: Better Auth manages the `user`, `session`, `organization`, and `team` tables. To add fields to these tables, you MUST use the `additionalFields` configuration in `packages/authentication/src/server.ts`, NOT by directly modifying the Drizzle schema.
+
+#### Why Use `additionalFields`?
+
+- Better Auth syncs the schema automatically
+- Validates field types and defaults
+- Handles migrations through Better Auth's system
+- Fields are accessible through Better Auth's API methods
+
+#### Pattern: Adding Fields to Organization or Team
+
+```typescript
+// packages/authentication/src/server.ts
+
+organization({
+   schema: {
+      organization: {
+         additionalFields: {
+            // String field
+            publicApiKey: {
+               type: "string",
+               defaultValue: null,
+               input: true,
+               required: false,
+            },
+            // Boolean field
+            onboardingCompleted: {
+               type: "boolean",
+               defaultValue: false,
+               input: true,
+               required: false,
+            },
+         },
+      },
+      team: {
+         additionalFields: {
+            // String array field
+            allowedDomains: {
+               type: "string[]",
+               defaultValue: [],
+               input: true,
+               required: false,
+               validator: {
+                  input: z.array(z.string().url()),
+               },
+            },
+            // JSONB array field with enum validator
+            onboardingProducts: {
+               type: "json",
+               defaultValue: null,
+               input: true,
+               required: false,
+               validator: {
+                  input: z.array(z.enum(["content", "forms", "analytics"])).nullable(),
+               },
+            },
+            // JSONB object/record field with validator
+            onboardingTasks: {
+               type: "json",
+               defaultValue: null,
+               input: true,
+               required: false,
+               validator: {
+                  input: z.record(z.string(), z.boolean()).nullable(),
+               },
+            },
+         },
+      },
+   },
+})
+```
+
+#### Accessing Additional Fields
+
+After adding fields through `additionalFields`:
+
+1. **The schema is automatically updated** - Better Auth syncs it
+2. **Use Drizzle queries normally**:
+   ```typescript
+   const team = await db.query.team.findFirst({
+      where: eq(team.id, teamId),
+   });
+   // team.onboardingTasks is now available
+   ```
+
+3. **Update through Drizzle**:
+   ```typescript
+   await db.update(team)
+      .set({ onboardingTasks: { task1: true } })
+      .where(eq(team.id, teamId));
+   ```
+
+#### Field Types
+
+| Type | Database | TypeScript | Notes |
+|------|----------|-----------|-------|
+| `"string"` | TEXT | `string \| null` | Basic text field |
+| `"boolean"` | BOOLEAN | `boolean` | True/false values |
+| `"number"` | INTEGER | `number \| null` | Integer values |
+| `"string[]"` | TEXT[] | `string[]` | Array of strings |
+| `"json"` | JSONB | Custom via validator | Use with `validator.input` for typed JSONB |
+
+**JSONB Type Pattern**: For complex JSONB types, use `type: "json"` with a Zod validator:
+
+```typescript
+// Array of specific values
+onboardingProducts: {
+   type: "json",
+   defaultValue: null,
+   validator: {
+      input: z.array(z.enum(["content", "forms", "analytics"])).nullable(),
+   },
+}
+
+// Object/record type
+onboardingTasks: {
+   type: "json",
+   defaultValue: null,
+   validator: {
+      input: z.record(z.string(), z.boolean()).nullable(),
+   },
+}
+```
+
 ### Plugins Enabled
 - Google OAuth
 - Magic Link
 - Email OTP
 - Two-Factor Authentication (2FA)
 - Anonymous sessions (for share links)
+
+---
+
+## Onboarding System
+
+The application has **two separate onboarding flows**:
+
+### 1. Organization Onboarding (Company/Workspace Level)
+
+**Purpose**: One-time setup for the company/workspace
+**Tracked by**: `organization.onboardingCompleted`
+**Scope**: Applies to the entire organization
+
+**Steps:**
+1. Set workspace name and slug
+2. Set user profile name
+3. (Optional) Invite team members
+4. (Optional) Configure billing
+
+**Procedures:**
+- `completeOrgSetup({ userName, workspaceName })` - Set workspace and user name
+- `completeOrgOnboarding()` - Mark organization onboarding as complete
+
+### 2. Project Onboarding (Team/Project Level)
+
+**Purpose**: Per-project setup (can have multiple projects in one organization)
+**Tracked by**: `team.onboardingCompleted`, `team.onboardingProducts`, `team.onboardingTasks`
+**Scope**: Applies to a specific team/project
+
+**Steps:**
+1. **Set project name** - Name your project/team (e.g., "Marketing Blog", "Corporate Site")
+2. **Select products** - Choose which products this project uses (content, forms, analytics)
+3. **SDK installation** - Get SDK setup instructions if forms or analytics are selected
+4. **Complete setup tasks** - Auto-detected tasks (create content, publish, etc.)
+
+**Procedures:**
+- `completeProjectSetup({ projectName })` - Set project name
+- `selectProducts({ products: ["content", "forms", "analytics"] })` - Choose products for this project
+- `completeTask({ taskId })` - Mark a task as complete
+- `skipTask({ taskId })` - Skip/dismiss a task
+- `completeProjectOnboarding()` - Mark project onboarding as complete
+
+### Onboarding Status
+
+The `getOnboardingStatus()` procedure returns both organization and project states:
+
+```typescript
+{
+  organization: {
+    onboardingCompleted: boolean,
+    name: string,
+    slug: string,
+  },
+  project: {
+    onboardingCompleted: boolean,
+    onboardingProducts: Array<"content" | "forms" | "analytics"> | null,
+    tasks: Record<string, boolean> | null,
+    name: string,
+  }
+}
+```
+
+**Auto-detection**: Tasks are automatically marked as complete when resources are detected (e.g., `create_content` is auto-completed when content exists).
+
+### Data Model
+
+| Table | Fields | Purpose |
+|-------|--------|---------|
+| `organization` | `onboardingCompleted` | Workspace-level onboarding flag |
+| `team` | `onboardingCompleted`, `onboardingProducts`, `onboardingTasks` | Project-level onboarding state |
+
+**Note**: Organization can have multiple teams/projects, each with their own onboarding state.
 
 ---
 

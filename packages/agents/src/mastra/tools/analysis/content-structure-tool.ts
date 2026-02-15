@@ -260,35 +260,3 @@ export const contentStructureTool = createTool({
       };
    },
 });
-
-export function getContentStructureInstructions(): string {
-   return `
-## CONTENT STRUCTURE TOOL
-Validates blog post structure against best practices.
-
-**When to use:** After writing content, to verify structure and organization
-
-**Parameters:**
-- content (string): The blog post content
-- contentType (enum, optional): Type of content for specific checks
-  - "how-to": Checks for numbered steps
-  - "comparison": Checks for comparison tables
-  - "explainer": Checks for definition lead
-  - "listicle": Checks for list items
-  - "general": Default checks
-
-**Returns:**
-- score: 0-100 structure score
-- issues: Array of problems with severity and suggestions
-- structure: Object with detected structure elements
-
-**Checks performed:**
-- No H1 in content body (title is in frontmatter)
-- Heading hierarchy (no skipping levels H2 -> H4)
-- Quick answer in first 100 words
-- Paragraph length (max 4 sentences)
-- H2 frequency (every 200-300 words)
-- Table of contents (if > 1500 words)
-- Conclusion section presence
-`;
-}

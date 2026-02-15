@@ -49,6 +49,14 @@ async function resolveMemberId(organizationId: string, userId: string): Promise<
 	return member?.id ?? null;
 }
 
+async function resolveDefaultTeamId(organizationId: string): Promise<string | null> {
+	const team = await db.query.team.findFirst({
+		where: (t, { eq }) => eq(t.organizationId, organizationId),
+		orderBy: (t, { asc }) => asc(t.createdAt),
+	});
+	return team?.id ?? null;
+}
+
 export function registerTools(server: McpServer) {
 	// 1. create_content
 	server.tool(
@@ -70,10 +78,14 @@ export function registerTools(server: McpServer) {
 				const memberId = await resolveMemberId(organizationId, userId);
 				if (!memberId) return errorResponse("Member not found in organization");
 
+				const teamId = await resolveDefaultTeamId(organizationId);
+				if (!teamId) return errorResponse("No team found in organization");
+
 				const slug = toSlug(args.title);
 
 				const result = await createContent(db, {
 					organizationId,
+					teamId,
 					createdByMemberId: memberId,
 					writerId: args.writerId,
 					body: args.body ?? "",

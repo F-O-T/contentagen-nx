@@ -47,29 +47,3 @@ export const insertTableTool = createTool({
       };
    },
 });
-
-export function getInsertTableInstructions(): string {
-   return `
-## INSERT TABLE TOOL
-Adds a table to the blog post.
-
-**When to use:** Feature comparisons, data presentation, structured information
-
-**Parameters:**
-- headers (string[]): Column header names
-- rows (string[][]): 2D array of cell values
-- position (enum): Where to insert
-- paragraphIndex (number, optional): For paragraph-relative positioning
-- caption (string, optional): Table caption/title
-
-**Example:**
-headers: ["Feature", "Free", "Pro"]
-rows: [
-  ["Storage", "5GB", "100GB"],
-  ["Users", "1", "Unlimited"],
-  ["Support", "Email", "24/7 Priority"]
-]
-position: "end"
-caption: "Plan Comparison"
-`;
-}

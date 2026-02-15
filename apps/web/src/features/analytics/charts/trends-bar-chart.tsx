@@ -57,17 +57,17 @@ export function TrendsBarChart({
 
    return (
       <ChartContainer
-         className="w-full"
+         className="w-full aspect-auto"
          config={chartConfig}
-         style={{ height }}
+         style={{ height: `${height}px` }}
       >
          <BarChart
             data={mergedData}
             margin={{ top: 10, right: 10, bottom: 0, left: 0 }}
          >
             <CartesianGrid
-               className="stroke-muted"
-               strokeDasharray="3 3"
+               className="stroke-muted/20"
+               strokeDasharray="0"
                vertical={false}
             />
             <XAxis

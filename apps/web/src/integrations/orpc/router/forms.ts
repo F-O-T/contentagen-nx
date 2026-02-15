@@ -5,7 +5,7 @@ import {
 	deleteForm,
 	getFormById,
 	getFormSubmissions,
-	listForms,
+	listFormsByTeam,
 	updateForm,
 } from "@packages/database/repositories/form-repository";
 import {
@@ -62,10 +62,11 @@ const updateFormSchema = z.object({
 export const create = protectedProcedure
 	.input(createFormSchema)
 	.handler(async ({ context, input }) => {
-		const { organizationId, db, posthog, userId, teamId } = context;
+		const { organizationId, teamId, db, posthog, userId } = context;
 
 		const form = await createForm(db, {
 			organizationId,
+			teamId,
 			name: input.name,
 			description: input.description,
 			fields: input.fields,
@@ -85,25 +86,29 @@ export const create = protectedProcedure
 	});
 
 /**
- * List all forms for the organization, including submission counts
+ * List all forms for the active team, including submission counts
  */
 export const list = protectedProcedure.handler(async ({ context }) => {
-	const { organizationId, db } = context;
+	const { teamId, db } = context;
 
-	return await listForms(db, organizationId);
+	return await listFormsByTeam(db, teamId);
 });
 
 /**
- * Get form by ID (verifies organization ownership)
+ * Get form by ID (verifies organization ownership and team access)
  */
 export const getById = protectedProcedure
 	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, teamId, db } = context;
 
 		const form = await getFormById(db, input.id);
 
-		if (!form || form.organizationId !== organizationId) {
+		if (
+			!form ||
+			form.organizationId !== organizationId ||
+			form.teamId !== teamId
+		) {
 			throw new ORPCError("NOT_FOUND", {
 				message: "Form not found.",
 			});
@@ -118,11 +123,15 @@ export const getById = protectedProcedure
 export const update = protectedProcedure
 	.input(updateFormSchema)
 	.handler(async ({ context, input }) => {
-		const { organizationId, db, posthog, userId, teamId } = context;
+		const { organizationId, teamId, db, posthog, userId } = context;
 
 		const form = await getFormById(db, input.id);
 
-		if (!form || form.organizationId !== organizationId) {
+		if (
+			!form ||
+			form.organizationId !== organizationId ||
+			form.teamId !== teamId
+		) {
 			throw new ORPCError("NOT_FOUND", {
 				message: "Form not found.",
 			});
@@ -152,11 +161,15 @@ export const update = protectedProcedure
 export const remove = protectedProcedure
 	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ context, input }) => {
-		const { organizationId, db, posthog, userId, teamId } = context;
+		const { organizationId, teamId, db, posthog, userId } = context;
 
 		const form = await getFormById(db, input.id);
 
-		if (!form || form.organizationId !== organizationId) {
+		if (
+			!form ||
+			form.organizationId !== organizationId ||
+			form.teamId !== teamId
+		) {
 			throw new ORPCError("NOT_FOUND", {
 				message: "Form not found.",
 			});
@@ -177,7 +190,7 @@ export const remove = protectedProcedure
 	});
 
 /**
- * Get paginated submissions for a form (verifies form ownership)
+ * Get paginated submissions for a form (verifies form ownership and team access)
  */
 export const getSubmissions = protectedProcedure
 	.input(
@@ -188,11 +201,15 @@ export const getSubmissions = protectedProcedure
 		}),
 	)
 	.handler(async ({ context, input }) => {
-		const { organizationId, db } = context;
+		const { organizationId, teamId, db } = context;
 
 		const form = await getFormById(db, input.formId);
 
-		if (!form || form.organizationId !== organizationId) {
+		if (
+			!form ||
+			form.organizationId !== organizationId ||
+			form.teamId !== teamId
+		) {
 			throw new ORPCError("NOT_FOUND", {
 				message: "Form not found.",
 			});

@@ -276,27 +276,3 @@ export const competitorContentTool = createTool({
       }
    },
 });
-
-export function getCompetitorContentInstructions(): string {
-   return `
-## COMPETITOR CONTENT TOOL
-Analyzes a specific competitor blog post to understand what makes it rank.
-
-**When to use:** To understand a specific competing article's structure and strategy
-
-**Parameters:**
-- url (string): Full URL of the competitor's blog post
-
-**Returns:**
-- wordCount/readingTime: Content length metrics
-- structure: Headings, paragraphs, lists, images, code blocks, links
-- content: Introduction, key points, conclusion
-- seo: Title analysis, power words, keyword opportunities
-- improvements: Specific suggestions to outrank the competitor
-
-**Tips:**
-- Use after serpAnalysis to deep-dive into top results
-- Focus on matching or exceeding their structure
-- Look for gaps you can fill with better content
-`;
-}

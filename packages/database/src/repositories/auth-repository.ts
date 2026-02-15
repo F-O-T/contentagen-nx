@@ -1,4 +1,3 @@
-import { generatePublicApiKey } from "@packages/utils/crypto";
 import { AppError, propagateError } from "@packages/utils/errors";
 import { createSlug, generateRandomSuffix } from "@packages/utils/text";
 import { eq } from "drizzle-orm";
@@ -119,7 +118,6 @@ export async function createDefaultOrganization(
       const orgName = `${safeUserName}${safeSuffix}`;
       const orgSlug = createSlug(orgName);
       const now = new Date();
-      const publicApiKey = generatePublicApiKey();
 
       const [createdOrganization] = await dbClient
          .insert(organization)
@@ -129,7 +127,6 @@ export async function createDefaultOrganization(
             description: orgName,
             name: orgName,
             onboardingCompleted: false,
-            publicApiKey,
             slug: orgSlug,
          })
          .returning();
@@ -164,15 +161,14 @@ export async function createDefaultOrganization(
       }
 
       // Create default insights and dashboard
-      const { DEFAULT_INSIGHTS } = await import(
-         "@packages/analytics/default-dashboard"
-      );
+      const { DEFAULT_INSIGHTS } = await import("../default-insights");
 
       const createdInsights = await dbClient
          .insert(insights)
          .values(
             DEFAULT_INSIGHTS.map((def) => ({
                organizationId: createdOrganization.id,
+               teamId: defaultTeam.id,
                createdBy: userId,
                name: def.name,
                description: def.description,
@@ -193,6 +189,7 @@ export async function createDefaultOrganization(
 
       await dbClient.insert(dashboards).values({
          organizationId: createdOrganization.id,
+         teamId: defaultTeam.id,
          createdBy: userId,
          name: "Home",
          description: "Default dashboard",
@@ -309,53 +306,3 @@ export async function ensureDefaultProject(
    }
 }
 
-export async function getPublicApiKey(
-   dbClient: DatabaseInstance,
-   organizationId: string,
-) {
-   try {
-      const result = await dbClient.query.organization.findFirst({
-         where: (org, { eq }) => eq(org.id, organizationId),
-         columns: {
-            publicApiKey: true,
-         },
-      });
-
-      if (!result) {
-         throw AppError.notFound("Organization not found");
-      }
-
-      return result.publicApiKey;
-   } catch (err) {
-      propagateError(err);
-      throw AppError.database(
-         `Failed to get public API key: ${(err as Error).message}`,
-      );
-   }
-}
-
-export async function regeneratePublicApiKey(
-   dbClient: DatabaseInstance,
-   organizationId: string,
-) {
-   try {
-      const newKey = generatePublicApiKey();
-
-      const result = await dbClient
-         .update(organization)
-         .set({ publicApiKey: newKey })
-         .where(eq(organization.id, organizationId))
-         .returning({ publicApiKey: organization.publicApiKey });
-
-      if (!result.length) {
-         throw AppError.notFound("Organization not found");
-      }
-
-      return result[0]!.publicApiKey;
-   } catch (err) {
-      propagateError(err);
-      throw AppError.database(
-         `Failed to regenerate public API key: ${(err as Error).message}`,
-      );
-   }
-}

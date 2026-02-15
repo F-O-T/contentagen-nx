@@ -50,14 +50,14 @@ export const query = protectedProcedure
    });
 
 /**
- * Get the organization's default dashboard
+ * Get the organization's default dashboard (creates one if it doesn't exist)
  */
 export const getDefaultDashboard = protectedProcedure.handler(
    async ({ context }) => {
-      const { db, organizationId } = context;
+      const { db, organizationId, teamId, userId } = context;
 
       try {
-         return await fetchDefaultDashboard(db, organizationId);
+         return await fetchDefaultDashboard(db, organizationId, teamId, userId);
       } catch (error) {
          propagateError(error);
          throw AppError.internal("Failed to fetch default dashboard", {

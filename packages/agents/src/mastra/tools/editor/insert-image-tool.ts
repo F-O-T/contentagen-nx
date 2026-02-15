@@ -43,33 +43,3 @@ export const insertImageTool = createTool({
       };
    },
 });
-
-export function getInsertImageInstructions(): string {
-   return `
-## INSERT IMAGE TOOL
-Inserts an image into the blog post using a URL provided by the user.
-
-**When to use:** When the user provides an image URL to add to the content.
-
-**Parameters:**
-- url (string): Full image URL provided by the user (REQUIRED)
-- alt (string): Descriptive alt text for accessibility and SEO (REQUIRED)
-- caption (string, optional): Caption below the image
-- position (enum): Where to insert - "cursor", "afterParagraph", "end"
-- width (enum, optional): "small", "medium", "large", "full"
-
-**Example:**
-If the user says "Add this image: https://example.com/photo.jpg"
-
-insertImage({
-  url: "https://example.com/photo.jpg",
-  alt: "Descriptive text for the image",
-  position: "end"
-})
-
-**DO NOT:**
-- Search for images automatically - wait for the user to provide a URL
-- Use placeholder URLs or made-up URLs
-- Write markdown syntax like ![alt](url) in text - use this tool instead
-`;
-}

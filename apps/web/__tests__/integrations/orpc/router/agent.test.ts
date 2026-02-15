@@ -397,7 +397,7 @@ describe("chatStream", () => {
 			expect.objectContaining({
 				chatId: CHAT_SESSION_ID,
 				contentId: CONTENT_ID,
-				model: "writerAgent",
+				model: "orchestratorAgent",
 				role: "assistant",
 			}),
 		);

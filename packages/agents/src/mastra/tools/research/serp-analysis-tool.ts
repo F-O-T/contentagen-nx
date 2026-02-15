@@ -293,27 +293,3 @@ export const serpAnalysisTool = createTool({
       }
    },
 });
-
-export function getSerpAnalysisInstructions(): string {
-   return `
-## SERP ANALYSIS TOOL
-Analyzes search results to understand ranking patterns and competition.
-
-**When to use:** Before writing to understand what content ranks well
-
-**Parameters:**
-- query (string): The keyword to analyze
-- analyzeTopResults (number): How many results to crawl for detailed analysis (1-10)
-
-**Returns:**
-- topResults: Top 10 search results with position, title, URL, snippet
-- commonPatterns: Avg title/snippet length, common words, title formats
-- contentAnalysis: Word count, headings, key topics from top pages
-- recommendations: Actionable SEO suggestions
-
-**Tips:**
-- Run this before starting your blog post
-- Use recommendations to structure your content
-- Match or exceed the word count of top results
-`;
-}

@@ -1,16 +1,13 @@
 {
    "extends": "@tooling/typescript/typecheck.json",
    "compilerOptions": {
-      "baseUrl": ".",
       "jsx": "react-jsx"
    },
    "include": ["src"],
-  "exclude": [
-    "node_modules"
-  ],
-  "references": [
-    {
-      "path": "../redis"
-    }
-  ]
+   "exclude": ["node_modules"],
+   "references": [
+      {
+         "path": "../redis"
+      }
+   ]
 }

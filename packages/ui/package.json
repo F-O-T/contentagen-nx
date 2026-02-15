@@ -96,7 +96,7 @@
    "private": true,
    "scripts": {
       "check": "biome check --write ./src",
-      "typecheck": "tsc"
+      "typecheck": "tsgo"
    },
    "type": "module",
    "version": "0.12.0"

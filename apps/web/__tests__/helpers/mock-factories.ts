@@ -10,7 +10,7 @@ import type { Insight } from "@packages/database/schemas/insights";
 import type { PersonalApiKey } from "@packages/database/schemas/personal-api-key";
 import type { PropertyDefinition } from "@packages/database/schemas/property-definitions";
 import type { WebhookEndpoint } from "@packages/database/schemas/webhooks";
-import { TEST_ORG_ID, TEST_USER_ID } from "./create-test-context";
+import { TEST_ORG_ID, TEST_TEAM_ID, TEST_USER_ID } from "./create-test-context";
 
 // =============================================================================
 // Shared Constants
@@ -37,6 +37,7 @@ export function makeContent(overrides: Partial<Content> = {}): Content {
 	return {
 		id: CONTENT_ID,
 		organizationId: TEST_ORG_ID,
+		teamId: TEST_TEAM_ID,
 		createdByMemberId: "member-1",
 		body: "Hello world",
 		status: "draft",
@@ -77,6 +78,7 @@ export function makeForm(overrides: Partial<Form> = {}): Form {
 	return {
 		id: FORM_ID,
 		organizationId: TEST_ORG_ID,
+		teamId: TEST_TEAM_ID,
 		name: "Contact Form",
 		description: null,
 		fields: [{ id: "f1", type: "text", label: "Name", required: true }],
@@ -94,6 +96,7 @@ export function makeDashboard(
 	return {
 		id: DASHBOARD_ID,
 		organizationId: TEST_ORG_ID,
+		teamId: TEST_TEAM_ID,
 		createdBy: TEST_USER_ID,
 		name: "My Dashboard",
 		description: "Test dashboard",
@@ -108,6 +111,7 @@ export function makeInsight(overrides: Partial<Insight> = {}): Insight {
 	return {
 		id: INSIGHT_ID,
 		organizationId: TEST_ORG_ID,
+		teamId: TEST_TEAM_ID,
 		createdBy: TEST_USER_ID,
 		name: "My Insight",
 		description: "Test insight",

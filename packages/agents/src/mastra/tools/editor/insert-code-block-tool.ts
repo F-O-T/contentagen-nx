@@ -48,26 +48,3 @@ export const insertCodeBlockTool = createTool({
       };
    },
 });
-
-export function getInsertCodeBlockInstructions(): string {
-   return `
-## INSERT CODE BLOCK TOOL
-Adds a code block with syntax highlighting.
-
-**When to use:** Including code examples, configuration snippets, command-line instructions
-
-**Parameters:**
-- code (string): The code to display
-- language (string, optional): Language for highlighting
-  - Common: javascript, typescript, python, bash, json, html, css
-- position (enum): Where to insert
-- paragraphIndex (number, optional): For paragraph-relative positioning
-- caption (string, optional): Filename or description
-
-**Example:**
-code: "const greeting = 'Hello World';\\nconsole.log(greeting);"
-language: "javascript"
-position: "end"
-caption: "example.js"
-`;
-}

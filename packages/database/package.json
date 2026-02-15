@@ -1,7 +1,5 @@
 {
    "dependencies": {
-      "@packages/analytics": "workspace:*",
-      "@packages/events": "workspace:*",
       "@packages/utils": "workspace:*",
       "drizzle-orm": "catalog:database",
       "drizzle-zod": "catalog:database",
@@ -58,7 +56,7 @@
       "migrate": "bun run env:run drizzle-kit migrate",
       "push": "bun run env:run drizzle-kit push",
       "studio": "bun run env:run drizzle-kit studio",
-      "typecheck": "tsc "
+      "typecheck": "tsgo"
    },
    "type": "module",
    "version": "0.12.1"

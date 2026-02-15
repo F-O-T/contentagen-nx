@@ -1,45 +1,35 @@
 import { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
-import type { PgVector } from "@mastra/pg";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import type { ModelId } from "../models";
+import { pgVectorStore } from "../utils";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
-import { pgVectorStore } from "./agents/shared";
+import { orchestratorAgent } from "./agents/orchestrator-agent";
 import { writerAgent } from "./agents/writer-agent";
+
+/**
+ * Re-export RequestContext so consumers don't need to depend on @mastra/core directly.
+ */
+export type { RequestContext };
 
 export type CustomRequestContext = {
    brandId?: string;
    userId: string;
    writerId?: string;
    model?: ModelId;
+   language?: string;
    writerInstructions?: InstructionMemoryItem[];
 };
 
-// Only include vectors config if PgVector is available
-const vectorsConfig: Record<string, PgVector> = pgVectorStore
-   ? { pgVector: pgVectorStore }
-   : {};
-
-export const mastra = new Mastra({
+export const mastra: Mastra = new Mastra({
    agents: {
+      orchestratorAgent,
       writerAgent,
       fimAgent,
       inlineEditAgent,
    },
-   vectors: vectorsConfig,
-   bundler: {
-      externals: ["react-dom", "@logtail/pino", "pino"],
-      transpilePackages: [
-         "@packages/files/client",
-         "@packages/environment/helpers",
-         "@packages/environment/server",
-         "@packages/database/client",
-         "@packages/database/schema",
-         "@packages/utils/errors",
-         "@packages/utils/text",
-      ],
-   },
+   vectors: { pgVector: pgVectorStore },
 });
 
 export function createRequestContext(context: CustomRequestContext) {
@@ -54,6 +44,9 @@ export function createRequestContext(context: CustomRequestContext) {
    }
    if (context.model) {
       requestContext.set("model", context.model);
+   }
+   if (context.language) {
+      requestContext.set("language", context.language);
    }
    if (context.writerInstructions) {
       requestContext.set("writerInstructions", context.writerInstructions);

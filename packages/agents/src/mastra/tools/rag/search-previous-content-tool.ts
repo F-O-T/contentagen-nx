@@ -15,42 +15,7 @@ import type {
    ContentMetadata,
    RelatedPost,
    RelevantChunk,
-} from "../../rag/types";
-
-export function getSearchPreviousContentInstructions(): string {
-   return `
-## SEARCH PREVIOUS CONTENT TOOL
-Searches your previously published content to find related posts and context.
-
-**When to use:**
-- **For internal linking**: Find related posts to link to ("See our guide on X")
-- **For consistency**: Check terminology, facts, or tone used in past content
-- **For avoiding duplication**: Ensure you're not repeating what you've already written
-
-**Parameters:**
-- query (string): What you're looking for (e.g., "SEO best practices", "React hooks tutorial")
-- mode (enum):
-  - "links" - Returns post titles/slugs for internal linking
-  - "context" - Returns content chunks for reference
-  - "both" - Returns both (recommended for comprehensive search)
-- limit (number, optional): Max results (default: 5 for links, 10 for chunks)
-
-**Examples:**
-- Looking for posts to link: searchPreviousContent({ query: "beginner SEO guide", mode: "links" })
-- Checking past terminology: searchPreviousContent({ query: "API authentication", mode: "context" })
-- Comprehensive search: searchPreviousContent({ query: "React performance", mode: "both" })
-
-**Output format:**
-- relatedPosts: Array of { slug, title, description, relevance }
-- relevantChunks: Array of { content, relevance }
-
-**Best practices:**
-1. Use "links" mode when you want to add internal links to your content
-2. Use "context" mode to maintain consistency with previously written content
-3. Use "both" mode during planning to understand existing content coverage
-4. Higher similarity scores (>70%) indicate stronger relevance
-`;
-}
+} from "../../rag/schemas";
 
 export const searchPreviousContentTool = createTool({
    id: "search-previous-content",

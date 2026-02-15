@@ -22,12 +22,16 @@ export async function createForm(db: DatabaseInstance, data: NewForm) {
    }
 }
 
+/**
+ * List forms by organization (admin/org-wide view)
+ */
 export async function listForms(db: DatabaseInstance, organizationId: string) {
    try {
       const result = await db
          .select({
             id: forms.id,
             organizationId: forms.organizationId,
+            teamId: forms.teamId,
             name: forms.name,
             description: forms.description,
             fields: forms.fields,
@@ -50,6 +54,64 @@ export async function listForms(db: DatabaseInstance, organizationId: string) {
    } catch (err) {
       propagateError(err);
       throw AppError.database("Failed to list forms");
+   }
+}
+
+/**
+ * List forms by team (team-scoped view)
+ */
+export async function listFormsByTeam(
+   db: DatabaseInstance,
+   teamId: string,
+) {
+   try {
+      const result = await db
+         .select({
+            id: forms.id,
+            organizationId: forms.organizationId,
+            teamId: forms.teamId,
+            name: forms.name,
+            description: forms.description,
+            fields: forms.fields,
+            settings: forms.settings,
+            isActive: forms.isActive,
+            createdAt: forms.createdAt,
+            updatedAt: forms.updatedAt,
+            submissionCount:
+               sql<number>`cast(count(${formSubmissions.id}) as int)`.as(
+                  "submission_count",
+               ),
+         })
+         .from(forms)
+         .leftJoin(formSubmissions, eq(forms.id, formSubmissions.formId))
+         .where(eq(forms.teamId, teamId))
+         .groupBy(forms.id)
+         .orderBy(desc(forms.createdAt));
+
+      return result;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database("Failed to list forms by team");
+   }
+}
+
+/**
+ * Count forms by team
+ */
+export async function countFormsByTeam(
+   db: DatabaseInstance,
+   teamId: string,
+) {
+   try {
+      const [result] = await db
+         .select({ count: count() })
+         .from(forms)
+         .where(eq(forms.teamId, teamId));
+
+      return result?.count ?? 0;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database("Failed to count forms by team");
    }
 }
 

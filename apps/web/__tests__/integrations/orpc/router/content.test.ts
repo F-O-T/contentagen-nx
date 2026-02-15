@@ -19,10 +19,12 @@ vi.mock("@packages/events/credits");
 import {
 	archiveContent,
 	countContentsByOrganization,
+	countContentsByTeam,
 	createContent,
 	deleteContent,
 	getContentById,
 	listContentsByOrganization,
+	listContentsByTeam,
 	publishContent,
 	updateContent,
 } from "@packages/database/repositories/content-repository";
@@ -123,6 +125,7 @@ describe("create", () => {
 			expect.anything(),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
+				teamId: TEST_TEAM_ID,
 				createdByMemberId: "member-1",
 			}),
 		);
@@ -395,8 +398,8 @@ describe("archive", () => {
 describe("listAllContent", () => {
 	it("returns paginated results", async () => {
 		const items = [makeContent(), makeContent({ id: "content-2" })];
-		vi.mocked(countContentsByOrganization).mockResolvedValueOnce(2);
-		vi.mocked(listContentsByOrganization).mockResolvedValueOnce(items);
+		vi.mocked(countContentsByTeam).mockResolvedValueOnce(2);
+		vi.mocked(listContentsByTeam).mockResolvedValueOnce(items);
 
 		const ctx = createTestContext();
 		const result = await call(
@@ -415,7 +418,7 @@ describe("listAllContent", () => {
 	});
 
 	it("returns empty results when total is 0", async () => {
-		vi.mocked(countContentsByOrganization).mockResolvedValueOnce(0);
+		vi.mocked(countContentsByTeam).mockResolvedValueOnce(0);
 
 		const ctx = createTestContext();
 		const result = await call(
@@ -431,6 +434,6 @@ describe("listAllContent", () => {
 			total: 0,
 			totalPages: 0,
 		});
-		expect(listContentsByOrganization).not.toHaveBeenCalled();
+		expect(listContentsByTeam).not.toHaveBeenCalled();
 	});
 });

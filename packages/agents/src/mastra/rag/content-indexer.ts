@@ -1,18 +1,19 @@
 import { MDocument } from "@mastra/rag";
 import { AppError, propagateError } from "@packages/utils/errors";
 import { embed, embedMany } from "ai";
+import { pgVectorStore } from "../../utils";
 import {
    CONTENT_CHUNKS_INDEX,
    CONTENT_METADATA_INDEX,
    embeddingModel,
-   ragService,
+   initializeRagService,
 } from "./rag-service";
 import type {
    ContentChunkMetadata,
    ContentMetadata,
    ContentToIndex,
    IndexingResult,
-} from "./types";
+} from "./schemas";
 
 // Chunk configuration
 const CHUNK_SIZE = 512; // Characters per chunk
@@ -29,7 +30,8 @@ export async function indexContent(
    content: ContentToIndex,
 ): Promise<IndexingResult> {
    try {
-      const store = ragService.getStore();
+      await initializeRagService();
+      const store = pgVectorStore;
 
       // Remove existing vectors first (re-index)
       await removeContent(content.id);
@@ -124,7 +126,8 @@ export async function indexContent(
  */
 export async function removeContent(contentId: string): Promise<void> {
    try {
-      const store = ragService.getStore();
+      await initializeRagService();
+      const store = pgVectorStore;
 
       // Delete metadata vector
       try {

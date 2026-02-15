@@ -1,4 +1,8 @@
-import { Avatar, AvatarFallback } from "@packages/ui/components/avatar";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from "@packages/ui/components/avatar";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -18,31 +22,14 @@ import {
 	ItemSeparator,
 	ItemTitle,
 } from "@packages/ui/components/item";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import { getInitials } from "@packages/utils/text";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ChevronRight, Mail, UserPlus } from "lucide-react";
-import { Fragment } from "react";
-
-const MOCK_MEMBERS = [
-	{
-		name: "João Silva",
-		email: "joao@exemplo.com",
-		role: "Admin",
-		image: null,
-	},
-	{
-		name: "Maria Santos",
-		email: "maria@exemplo.com",
-		role: "Membro",
-		image: null,
-	},
-	{
-		name: "Pedro Costa",
-		email: "pedro@exemplo.com",
-		role: "Membro",
-		image: null,
-	},
-];
+import { Fragment, Suspense } from "react";
+import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import { orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
 	"/_authenticated/$slug/$teamId/_dashboard/settings/organization/members",
@@ -50,7 +37,78 @@ export const Route = createFileRoute(
 	component: MembersPage,
 });
 
-function MembersPage() {
+// ============================================
+// Skeleton
+// ============================================
+
+function MembersSkeleton() {
+	return (
+		<div className="space-y-6">
+			<div className="flex items-center justify-between">
+				<div>
+					<Skeleton className="h-8 w-32" />
+					<Skeleton className="h-4 w-64 mt-1" />
+				</div>
+				<Skeleton className="h-8 w-24" />
+			</div>
+
+			<div className="space-y-3">
+				<div>
+					<Skeleton className="h-6 w-24" />
+					<Skeleton className="h-4 w-48 mt-1" />
+				</div>
+				<div className="space-y-1">
+					<Skeleton className="h-16 w-full rounded-lg" />
+					<Skeleton className="h-16 w-full rounded-lg" />
+					<Skeleton className="h-16 w-full rounded-lg" />
+				</div>
+			</div>
+
+			<div className="space-y-3">
+				<div>
+					<Skeleton className="h-6 w-40" />
+					<Skeleton className="h-4 w-64 mt-1" />
+				</div>
+				<Skeleton className="h-24 w-full rounded-lg" />
+			</div>
+		</div>
+	);
+}
+
+// ============================================
+// Error Fallback
+// ============================================
+
+function MembersErrorFallback({ resetErrorBoundary }: FallbackProps) {
+	return (
+		<div className="space-y-6">
+			<div>
+				<h1 className="text-2xl font-semibold font-serif">Membros</h1>
+				<p className="text-sm text-muted-foreground mt-1">
+					Gerencie os membros da sua organização.
+				</p>
+			</div>
+			<div className="flex flex-col items-center justify-center py-12 text-center">
+				<p className="text-sm text-muted-foreground mb-4">
+					Não foi possível carregar os membros da organização
+				</p>
+				<Button variant="outline" onClick={resetErrorBoundary}>
+					Tentar novamente
+				</Button>
+			</div>
+		</div>
+	);
+}
+
+// ============================================
+// Main Content Component
+// ============================================
+
+function MembersContent() {
+	const { data: members } = useSuspenseQuery(
+		orpc.organization.getMembers.queryOptions({}),
+	);
+
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
@@ -70,16 +128,20 @@ function MembersPage() {
 				<div>
 					<h2 className="text-lg font-medium">Membros</h2>
 					<p className="text-sm text-muted-foreground mt-1">
-						{MOCK_MEMBERS.length} membros na organização
+						{members.length} {members.length === 1 ? "membro" : "membros"} na organização
 					</p>
 				</div>
 				<ItemGroup>
-					{MOCK_MEMBERS.map((member, index) => (
-						<Fragment key={`member-${index + 1}`}>
+					{members.map((member, index) => (
+						<Fragment key={`member-${member.id}`}>
 							{index > 0 && <ItemSeparator />}
 							<Item variant="muted">
 								<ItemMedia>
 									<Avatar className="size-8">
+										<AvatarImage
+											alt={member.name}
+											src={member.image || undefined}
+										/>
 										<AvatarFallback className="text-xs">
 											{getInitials(member.name)}
 										</AvatarFallback>
@@ -96,7 +158,7 @@ function MembersPage() {
 								<ItemActions className="flex items-center gap-2">
 									<Badge
 										variant={
-											member.role === "Admin"
+											member.role === "owner"
 												? "default"
 												: "secondary"
 										}
@@ -134,5 +196,19 @@ function MembersPage() {
 				</Empty>
 			</section>
 		</div>
-	)
+	);
+}
+
+// ============================================
+// Page Component
+// ============================================
+
+function MembersPage() {
+	return (
+		<ErrorBoundary FallbackComponent={MembersErrorFallback}>
+			<Suspense fallback={<MembersSkeleton />}>
+				<MembersContent />
+			</Suspense>
+		</ErrorBoundary>
+	);
 }

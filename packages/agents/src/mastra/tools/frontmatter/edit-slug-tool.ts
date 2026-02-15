@@ -27,29 +27,3 @@ export const editSlugTool = createTool({
       };
    },
 });
-
-export function getEditSlugInstructions(): string {
-   return `
-## EDIT SLUG TOOL
-Updates the URL slug for the blog post.
-
-**When to use:** Setting a custom URL path for the post
-
-**Parameters:**
-- slug (string): URL-friendly identifier (lowercase, hyphens, no spaces)
-
-**Format Rules:**
-- Lowercase letters only
-- Numbers allowed
-- Hyphens to separate words
-- No spaces or special characters
-
-**Best Practices:**
-- Keep short and descriptive
-- Include primary keyword
-- Avoid stop words (the, a, an, etc.)
-
-**Example:**
-slug: "productivity-strategies-entrepreneurs"
-`;
-}
