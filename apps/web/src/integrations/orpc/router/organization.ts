@@ -1,8 +1,11 @@
 import { getOrganizationMembers } from "@packages/database/repositories/auth-repository";
+import { organizationAddons } from "@packages/database/schemas/addons";
 import { member, organization } from "@packages/database/schemas/auth";
 import { resolveOrganizationPlan } from "@packages/events/credits";
 import { getEffectiveProjectLimit } from "@packages/stripe/constants";
-import { eq } from "drizzle-orm";
+import { ORPCError } from "@orpc/server";
+import { and, eq } from "drizzle-orm";
+import { z } from "zod";
 import { authenticatedProcedure, protectedProcedure } from "../server";
 
 // =============================================================================
@@ -38,51 +41,80 @@ export const getActiveOrganization = protectedProcedure
    .handler(async ({ context }) => {
       const { auth, db, headers, session } = context;
 
-      const organizationId = session.session.activeOrganizationId;
+      try {
+         const organizationId = session.session.activeOrganizationId;
 
-      if (!organizationId) {
-         return null;
+         if (!organizationId) {
+            return null;
+         }
+
+         const organization = await auth.api.getFullOrganization({
+            headers,
+            query: {
+               organizationId,
+            },
+         });
+
+         if (!organization) {
+            return null;
+         }
+
+         // Fetch active subscriptions for the organization
+         const subscriptions = await auth.api.listActiveSubscriptions({
+            headers,
+            query: { referenceId: organization.id },
+         });
+
+         const activeSubscription = subscriptions.find(
+            (subscription) =>
+               subscription.status === "active" ||
+               subscription.status === "trialing",
+         );
+
+         // Resolve the organization's plan and calculate project limits
+         const plan = await resolveOrganizationPlan(db, organization.id);
+         const projectLimit = getEffectiveProjectLimit(plan, null);
+
+         const teams = await auth.api.listOrganizationTeams({
+            headers,
+            query: { organizationId: organization.id },
+         });
+         const projectCount = teams.length;
+
+         return {
+            ...organization,
+            activeSubscription: activeSubscription ?? null,
+            projectLimit,
+            projectCount,
+         };
+      } catch (error) {
+         // Convert Better Auth API errors to ORPCError
+         if (error && typeof error === "object" && "status" in error) {
+            const apiError = error as { status: string; statusCode?: number };
+
+            if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+               throw new ORPCError("UNAUTHORIZED", {
+                  message: "Authentication required to access organization data",
+               });
+            }
+
+            if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+               throw new ORPCError("FORBIDDEN", {
+                  message: "Insufficient permissions to access organization data",
+               });
+            }
+         }
+
+         // Re-throw ORPCErrors as-is
+         if (error instanceof ORPCError) {
+            throw error;
+         }
+
+         // Convert unknown errors to INTERNAL_SERVER_ERROR
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to retrieve organization data",
+         });
       }
-
-      const organization = await auth.api.getFullOrganization({
-         headers,
-         query: {
-            organizationId,
-         },
-      });
-
-      if (!organization) {
-         return null;
-      }
-
-      // Fetch active subscriptions for the organization
-      const subscriptions = await auth.api.listActiveSubscriptions({
-         headers,
-         query: { referenceId: organization.id },
-      });
-
-      const activeSubscription = subscriptions.find(
-         (subscription) =>
-            subscription.status === "active" ||
-            subscription.status === "trialing",
-      );
-
-      // Resolve the organization's plan and calculate project limits
-      const plan = await resolveOrganizationPlan(db, organization.id);
-      const projectLimit = getEffectiveProjectLimit(plan, null);
-
-      const teams = await auth.api.listOrganizationTeams({
-         headers,
-         query: { organizationId: organization.id },
-      });
-      const projectCount = teams.length;
-
-      return {
-         ...organization,
-         activeSubscription: activeSubscription ?? null,
-         projectLimit,
-         projectCount,
-      };
    });
 
 /**
@@ -92,12 +124,41 @@ export const getOrganizationTeams = protectedProcedure
    .handler(async ({ context }) => {
       const { auth, headers, organizationId } = context;
 
-      const teams = await auth.api.listOrganizationTeams({
-         headers,
-         query: { organizationId },
-      });
+      try {
+         const teams = await auth.api.listOrganizationTeams({
+            headers,
+            query: { organizationId },
+         });
 
-      return teams;
+         return teams;
+      } catch (error) {
+         // Convert Better Auth API errors to ORPCError
+         if (error && typeof error === "object" && "status" in error) {
+            const apiError = error as { status: string; statusCode?: number };
+
+            if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+               throw new ORPCError("UNAUTHORIZED", {
+                  message: "Authentication required to access organization teams",
+               });
+            }
+
+            if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+               throw new ORPCError("FORBIDDEN", {
+                  message: "Insufficient permissions to access organization teams",
+               });
+            }
+         }
+
+         // Re-throw ORPCErrors as-is
+         if (error instanceof ORPCError) {
+            throw error;
+         }
+
+         // Convert unknown errors to INTERNAL_SERVER_ERROR
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to retrieve organization teams",
+         });
+      }
    });
 
 /**
@@ -118,4 +179,84 @@ export const getMembers = protectedProcedure
          createdAt: m.createdAt,
       }));
    });
+
+/**
+ * Get teams a specific user has access to within the organization
+ */
+export const getMemberTeams = protectedProcedure
+   .input(z.object({ userId: z.string().uuid() }))
+   .handler(async ({ context, input }) => {
+      const { db, organizationId } = context;
+
+      // Get all teams for this organization
+      const teams = await db.query.team.findMany({
+         where: (team, { eq }) => eq(team.organizationId, organizationId),
+      });
+
+      // Get team memberships for this user
+      const teamMemberships = await db.query.teamMember.findMany({
+         where: (teamMember, { eq }) => eq(teamMember.userId, input.userId),
+      });
+
+      const memberTeamIds = new Set(teamMemberships.map((tm) => tm.teamId));
+
+      // Return only teams this user is a member of
+      return teams
+         .filter((t) => memberTeamIds.has(t.id))
+         .map((t) => ({
+            id: t.id,
+            name: t.name,
+         }));
+   });
+
+/**
+ * Check if organization has a specific addon activated
+ */
+export const hasAddon = protectedProcedure
+	.input(z.object({ addonId: z.string() }))
+	.handler(async ({ context, input }) => {
+		const { db, organizationId } = context;
+
+		const addon = await db.query.organizationAddons.findFirst({
+			where: (addons, { eq, and, or, isNull, gt }) =>
+				and(
+					eq(addons.organizationId, organizationId),
+					eq(addons.addonId, input.addonId),
+					or(
+						isNull(addons.expiresAt),
+						gt(addons.expiresAt, new Date()),
+					),
+				),
+		});
+
+		return { hasAddon: !!addon };
+	});
+
+/**
+ * Get all active addons for organization
+ */
+export const getAddons = protectedProcedure.handler(
+	async ({ context }) => {
+		const { db, organizationId } = context;
+
+		const addons = await db.query.organizationAddons.findMany({
+			where: (addons, { eq, and, or, isNull, gt }) =>
+				and(
+					eq(addons.organizationId, organizationId),
+					or(
+						isNull(addons.expiresAt),
+						gt(addons.expiresAt, new Date()),
+					),
+				),
+		});
+
+		return addons.map((a) => ({
+			id: a.id,
+			addonId: a.addonId,
+			activatedAt: a.activatedAt,
+			expiresAt: a.expiresAt,
+			autoRenew: a.autoRenew,
+		}));
+	},
+);
 
