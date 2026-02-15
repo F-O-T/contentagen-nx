@@ -88,7 +88,6 @@ export const get = sdkProcedure
 		const content = await getContentBySlug(
 			context.db,
 			input.slug,
-			context.organizationId,
 			input.agentId,
 		);
 
