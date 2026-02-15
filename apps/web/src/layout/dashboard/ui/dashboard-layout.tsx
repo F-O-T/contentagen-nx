@@ -22,6 +22,7 @@ import { useActiveTeam } from "@/hooks/use-active-team";
 import { useLastOrganization } from "@/hooks/use-last-organization";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
+import { EarlyAccessProvider } from "@/hooks/use-early-access";
 import { setActiveSection } from "../hooks/use-sidebar-nav";
 import {
    getSidebarDefaultOpen,
@@ -106,6 +107,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
    }, [pathname]);
 
    return (
+      <EarlyAccessProvider>
       <SidebarManagerProvider>
          <SidebarProvider
             className="h-svh"
@@ -145,5 +147,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             </SidebarInset>
          </SidebarProvider>
       </SidebarManagerProvider>
+      </EarlyAccessProvider>
    );
 }
