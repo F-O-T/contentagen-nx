@@ -2,7 +2,7 @@
    "dependencies": {
       "@elysiajs/cors": "catalog:server",
       "@modelcontextprotocol/sdk": "catalog:mcp",
-      "@orpc/server": "^1.13.5",
+      "@orpc/server": "catalog:orpc",
       "@packages/arcjet": "workspace:*",
       "@packages/authentication": "workspace:*",
       "@packages/database": "workspace:*",
