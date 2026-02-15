@@ -4,16 +4,24 @@ import { authClient } from "@/integrations/better-auth/auth-client";
 export const Route = createFileRoute("/auth/callback")({
    beforeLoad: async ({ context }) => {
       // Fetch onboarding status to determine where to redirect
-      const status = await context.queryClient.fetchQuery(
-         context.orpc.onboarding.getOnboardingStatus.queryOptions(),
-      );
+      // Note: This might fail for brand new users who don't have teams yet
+      let status;
+      try {
+         status = await context.queryClient.fetchQuery(
+            context.orpc.onboarding.getOnboardingStatus.queryOptions(),
+         );
+      } catch (error) {
+         // If status fetch fails (no team yet), assume project onboarding is incomplete
+         // We'll still check org status and route accordingly
+         status = null;
+      }
 
       // Fetch user's organizations to get the correct slug
       const organizations = await context.queryClient.fetchQuery(
          context.orpc.organization.getOrganizations.queryOptions(),
       );
 
-      const firstOrg = organizations[0];
+      const firstOrg = organizations.length > 0 ? organizations[0] : undefined;
 
       if (firstOrg) {
          // Fetch teams to find the first team for routing
@@ -23,9 +31,10 @@ export const Route = createFileRoute("/auth/callback")({
          const fallbackTeam = teams.length > 0 ? teams[0] : undefined;
 
          // Check if both org and project onboarding are complete
-         const bothComplete =
-            status.organization.onboardingCompleted &&
-            status.project.onboardingCompleted;
+         const bothComplete = status
+            ? status.organization.onboardingCompleted &&
+              status.project.onboardingCompleted
+            : false;
 
          if (fallbackTeam && bothComplete) {
             // Both complete → go to dashboard
@@ -35,7 +44,7 @@ export const Route = createFileRoute("/auth/callback")({
             });
          }
 
-         if (status.organization.onboardingCompleted && fallbackTeam) {
+         if (status?.organization.onboardingCompleted && fallbackTeam) {
             // Org complete but project incomplete → go to project onboarding
             throw redirect({
                to: "/$slug/$teamId/onboarding",
@@ -43,7 +52,8 @@ export const Route = createFileRoute("/auth/callback")({
             });
          }
 
-         // Org not complete → go to org onboarding
+         // Org not complete OR no teams yet → go to org onboarding
+         // (org onboarding creates the first team if needed)
          throw redirect({
             to: "/$slug/onboarding",
             params: { slug: firstOrg.slug },
