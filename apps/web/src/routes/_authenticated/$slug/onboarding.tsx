@@ -12,17 +12,17 @@ export const Route = createFileRoute("/_authenticated/$slug/onboarding/")({
          const teams = await context.queryClient.fetchQuery(
             context.orpc.organization.getOrganizationTeams.queryOptions(),
          );
-         const firstTeam = teams[0];
 
-         if (firstTeam) {
+         if (teams.length > 0) {
+            const firstTeam = teams[0];
             throw redirect({
                to: "/$slug/$teamId/onboarding",
                params: { slug: params.slug, teamId: firstTeam.id },
             });
          }
 
-         // No teams exist yet — this shouldn't happen in normal flow
-         // but stay on onboarding to handle edge case
+         // No teams exist yet — stay on onboarding page
+         // This edge case is handled by the onboarding wizard
       }
    },
    component: OrganizationOnboardingRoute,
