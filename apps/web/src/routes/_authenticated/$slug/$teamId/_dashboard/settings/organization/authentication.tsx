@@ -1,21 +1,56 @@
+import { ADDON_IDS } from "@packages/utils/addons";
+import { Suspense } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { SettingsAddonGatedPage } from "@/layout/dashboard/ui/settings-addon-gated-page";
 import { Globe } from "lucide-react";
+import { Skeleton } from "@packages/ui/components/skeleton";
+import { useHasAddon } from "@/hooks/use-has-addon";
+import { OrganizationAuthentication } from "@/features/sso/ui/organization-authentication";
+import { SettingsAddonGatedPage } from "@/layout/dashboard/ui/settings-addon-gated-page";
 
 export const Route = createFileRoute(
-   "/_authenticated/$slug/$teamId/_dashboard/settings/organization/authentication",
+	"/_authenticated/$slug/$teamId/_dashboard/settings/organization/authentication",
 )({
-   component: OrgAuthenticationPage,
+	component: OrgAuthenticationPage,
 });
 
+function AuthenticationPageContent() {
+	const hasEnterprise = useHasAddon(ADDON_IDS.ENTERPRISE);
+
+	if (hasEnterprise) {
+		return <OrganizationAuthentication />;
+	}
+
+	return (
+		<SettingsAddonGatedPage
+			addonDescription="O addon Enterprise desbloqueia SSO e autenticação por domínio, permitindo integração com provedores como Okta, Azure AD e Google Workspace."
+			addonName="Enterprise"
+			description="SSO e autenticação empresarial."
+			features={[
+				{
+					title: "SAML 2.0 e OIDC",
+					description:
+						"Integre com Okta, Azure AD, Google Workspace e outros provedores",
+				},
+				{
+					title: "Domínios verificados",
+					description:
+						"Verifique domínios e permita auto-join para emails corporativos",
+				},
+				{
+					title: "Autenticação forçada",
+					description: "Exija SSO para todos os membros da organização",
+				},
+			]}
+			icon={Globe}
+			title="Autenticação e SSO"
+		/>
+	);
+}
+
 function OrgAuthenticationPage() {
-   return (
-      <SettingsAddonGatedPage
-         addonName="Boost"
-         description="Configure SSO e domínios de autenticação."
-         icon={Globe}
-         lockedText="SSO e domínios de autenticação permitem controlar como seus membros fazem login. Disponível com o addon Boost."
-         title="Domínios de Auth & SSO"
-      />
-   );
+	return (
+		<Suspense fallback={<Skeleton className="h-[600px] w-full" />}>
+			<AuthenticationPageContent />
+		</Suspense>
+	);
 }
