@@ -272,9 +272,9 @@ function ForgotPasswordPage() {
               Esqueci Minha Senha
             </h1>
             <p className="text-muted-foreground text-sm">
-              {methods.current.id === 'enter-email'
+              {methods.state.current.data.id === 'enter-email'
                 ? 'Digite seu e-mail para receber o codigo de recuperacao'
-                : methods.current.id === 'enter-otp'
+                : methods.state.current.data.id === 'enter-otp'
                   ? 'Digite o codigo enviado para seu e-mail'
                   : 'Digite sua nova senha'}
             </p>
@@ -287,21 +287,21 @@ function ForgotPasswordPage() {
               ))}
             </Stepper.Navigation>
             <form className="space-y-4" onSubmit={handleSubmit}>
-              {methods.switch({
+              {methods.flow.switch({
                 'enter-email': () => <EmailStep />,
                 'enter-otp': () => <OtpStep />,
                 'enter-password': () => <PasswordStep />,
               })}
               <Stepper.Controls className="flex w-full justify-between">
                 <Button
-                  disabled={methods.isFirst}
-                  onClick={methods.prev}
+                  disabled={methods.state.isFirst}
+                  onClick={() => methods.navigation.prev()}
                   type="button"
                   variant="outline"
                 >
                   Voltar
                 </Button>
-                {methods.isLast ? (
+                {methods.state.isLast ? (
                   <form.Subscribe>
                     {(formState) => (
                       <Button
@@ -316,7 +316,7 @@ function ForgotPasswordPage() {
                       </Button>
                     )}
                   </form.Subscribe>
-                ) : methods.current.id === 'enter-email' ? (
+                ) : methods.flow.is('enter-email') ? (
                   <form.Subscribe
                     selector={(state) => ({
                       emailValid: state.fieldMeta.email?.isValid,
@@ -328,7 +328,7 @@ function ForgotPasswordPage() {
                         disabled={!emailValid}
                         onClick={async () => {
                           await handleSendOtp(emailValue)
-                          methods.next()
+                          methods.navigation.next()
                         }}
                         type="button"
                       >
@@ -337,7 +337,7 @@ function ForgotPasswordPage() {
                     )}
                   </form.Subscribe>
                 ) : (
-                  <Button onClick={methods.next} type="button">
+                  <Button onClick={() => methods.navigation.next()} type="button">
                     Proximo
                   </Button>
                 )}

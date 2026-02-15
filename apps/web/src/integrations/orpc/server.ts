@@ -207,6 +207,13 @@ const withTelemetry = withOrganization.use(async ({ context, path, input, next }
 export const publicProcedure = os.$context<ORPCContextWithAuth>();
 
 /**
+ * Authenticated procedure - requires authenticated session (userId only)
+ * Use this for endpoints that need a logged-in user but NOT org/team context
+ * (e.g., listing organizations, account settings)
+ */
+export const authenticatedProcedure = withAuth;
+
+/**
  * Protected procedure - requires authenticated session with active organization
  * Use this for all workspace-scoped operations (most endpoints)
  * Automatically provides userId and organizationId in context

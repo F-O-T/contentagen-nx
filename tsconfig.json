@@ -1,6 +1,7 @@
 {
-   "extends": "@tooling/typescript/base.json",
+  "extends": "@tooling/typescript/base.json",
   "files": [],
+  "exclude": [".worktrees", "node_modules", "dist"],
   "references": [
     {
       "path": "./packages/redis"

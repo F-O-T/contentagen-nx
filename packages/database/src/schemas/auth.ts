@@ -136,7 +136,7 @@ export const team = pgTable(
       () => /* @__PURE__ */ new Date(),
     ),
     description: text("description").default(""),
-    allowedDomains: text("allowed_domains").array().default(),
+    allowedDomains: text("allowed_domains").array(),
     onboardingCompleted: boolean("onboarding_completed").default(false),
     onboardingProducts: jsonb("onboarding_products"),
     onboardingTasks: jsonb("onboarding_tasks"),

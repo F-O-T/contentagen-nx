@@ -4,17 +4,13 @@ import { z } from "zod";
 export const env = createEnv({
    server: {
       // Database (Required)
-      DATABASE_URL: z.string().url(),
-      PG_VECTOR_URL: z.string().url().optional(),
-      REDIS_URL: z.string().url().optional().default("redis://localhost:6379"),
+      DATABASE_URL: z.url(),
+      PG_VECTOR_URL: z.url().optional(),
+      REDIS_URL: z.url().optional().default("redis://localhost:6379"),
 
       // Better Auth (Required core, optional providers)
       BETTER_AUTH_SECRET: z.string().min(32),
-      BETTER_AUTH_URL: z
-         .string()
-         .url()
-         .optional()
-         .default("http://localhost:3000"),
+      BETTER_AUTH_URL: z.url().optional().default("http://localhost:3000"),
       BETTER_AUTH_TRUSTED_ORIGINS: z.string(),
       BETTER_AUTH_GOOGLE_CLIENT_ID: z.string().optional(),
       BETTER_AUTH_GOOGLE_CLIENT_SECRET: z.string().optional(),
@@ -28,7 +24,7 @@ export const env = createEnv({
       STRIPE_LITE_ANNUAL_PRICE_ID: z.string().optional(),
 
       // PostHog (Required for analytics)
-      POSTHOG_HOST: z.string().url(),
+      POSTHOG_HOST: z.url(),
       POSTHOG_KEY: z.string(),
       POSTHOG_PUBLIC_KEY: z.string().optional(), // Client-side project API key (safe to expose in tracking scripts)
       POSTHOG_PROJECT_ID: z.string(),
@@ -58,23 +54,19 @@ export const env = createEnv({
          .enum(["development", "production", "test"])
          .optional()
          .default("development"),
-      APP_URL: z.string().url().optional(),
-      SERVER_URL: z.string().url().optional(),
-      SDK_SERVER_URL: z
-         .string()
-         .url()
-         .optional()
-         .default("http://localhost:9877"),
+      APP_URL: z.url().optional(),
+      SERVER_URL: z.url().optional(),
+      SDK_SERVER_URL: z.url().optional().default("http://localhost:9877"),
       LOG_LEVEL: z
          .enum(["trace", "debug", "info", "warn", "error", "fatal"])
          .optional()
          .default("info"),
-      LOGTAIL_ENDPOINT: z.string().url().optional(),
+      LOGTAIL_ENDPOINT: z.url().optional(),
       LOGTAIL_SOURCE_TOKEN: z.string().optional(),
 
       // Worker
       WORKER_CONCURRENCY: z.coerce.number().optional().default(5),
-      BETTER_STACK_HEARTBEAT_URL: z.string().url().optional(),
+      BETTER_STACK_HEARTBEAT_URL: z.url().optional(),
    },
 
    runtimeEnv: process.env,

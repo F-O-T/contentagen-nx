@@ -10,10 +10,10 @@
       "@packages/posthog": "workspace:*",
       "@packages/stripe": "workspace:*",
       "@packages/transactional": "workspace:*",
-      "@modelcontextprotocol/sdk": "^1.12.1",
+      "@modelcontextprotocol/sdk": "catalog:mcp",
       "elysia": "catalog:server",
-      "jose": "^6.0.11",
-      "mcp-handler": "^1.0.7"
+      "jose": "catalog:mcp",
+      "mcp-handler": "catalog:mcp"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",

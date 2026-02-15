@@ -264,21 +264,21 @@ function SignUpPage() {
               ))}
             </Stepper.Navigation>
             <form className="space-y-4" onSubmit={handleSubmit}>
-              {methods.switch({
+              {methods.flow.switch({
                 'basic-info': () => <BasicInfoStep />,
                 password: () => <PasswordStep />,
               })}
               <Stepper.Controls className="flex w-full justify-between">
                 <Button
                   className="h-11"
-                  disabled={methods.isFirst}
-                  onClick={methods.prev}
+                  disabled={methods.state.isFirst}
+                  onClick={() => methods.navigation.prev()}
                   type="button"
                   variant="outline"
                 >
                   Voltar
                 </Button>
-                {methods.isLast ? (
+                {methods.state.isLast ? (
                   <form.Subscribe>
                     {(formState) => (
                       <Button
@@ -304,7 +304,7 @@ function SignUpPage() {
                       <Button
                         className="h-11"
                         disabled={!nameValid || !emailValid}
-                        onClick={methods.next}
+                        onClick={() => methods.navigation.next()}
                         type="button"
                       >
                         Proximo

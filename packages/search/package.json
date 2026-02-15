@@ -23,11 +23,11 @@
 		"typecheck": "tsgo"
 	},
 	"dependencies": {
-		"@mendable/firecrawl-js": "^4.10.0",
+		"@mendable/firecrawl-js": "catalog:search-providers",
 		"@packages/environment": "workspace:*",
 		"@packages/utils": "workspace:*",
-		"@tavily/core": "0.6.3",
-		"exa-js": "^2.0.12",
+		"@tavily/core": "catalog:search-providers",
+		"exa-js": "catalog:search-providers",
 		"zod": "catalog:validation"
 	},
 	"devDependencies": {

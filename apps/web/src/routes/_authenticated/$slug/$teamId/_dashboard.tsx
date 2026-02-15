@@ -7,10 +7,17 @@ export const Route = createFileRoute('/_authenticated/$slug/$teamId/_dashboard')
       context.orpc.onboarding.getOnboardingStatus.queryOptions(),
     )
 
-    if (!status.onboardingCompleted) {
+    if (!status.organization.onboardingCompleted) {
       throw redirect({
         to: '/$slug/onboarding',
         params: { slug: params.slug },
+      })
+    }
+
+    if (!status.project.onboardingCompleted) {
+      throw redirect({
+        to: '/$slug/$teamId/onboarding',
+        params: { slug: params.slug, teamId: params.teamId },
       })
     }
   },

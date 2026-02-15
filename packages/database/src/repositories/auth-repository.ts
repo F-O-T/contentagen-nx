@@ -2,6 +2,7 @@ import { AppError, propagateError } from "@packages/utils/errors";
 import { createSlug, generateRandomSuffix } from "@packages/utils/text";
 import { eq } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
+import { DEFAULT_INSIGHTS } from "../default-insights";
 import { member, organization, team, teamMember } from "../schemas/auth";
 import { dashboards } from "../schemas/dashboards";
 import { insights } from "../schemas/insights";
@@ -161,14 +162,12 @@ export async function createDefaultOrganization(
       }
 
       // Create default insights and dashboard
-      const { DEFAULT_INSIGHTS } = await import("../default-insights");
-
       const createdInsights = await dbClient
          .insert(insights)
          .values(
             DEFAULT_INSIGHTS.map((def) => ({
                organizationId: createdOrganization.id,
-               teamId: defaultTeam.id,
+               teamId: defaultTeam?.id ?? "",
                createdBy: userId,
                name: def.name,
                description: def.description,
@@ -189,7 +188,7 @@ export async function createDefaultOrganization(
 
       await dbClient.insert(dashboards).values({
          organizationId: createdOrganization.id,
-         teamId: defaultTeam.id,
+         teamId: defaultTeam?.id ?? "",
          createdBy: userId,
          name: "Home",
          description: "Default dashboard",
@@ -305,4 +304,3 @@ export async function ensureDefaultProject(
       );
    }
 }
-

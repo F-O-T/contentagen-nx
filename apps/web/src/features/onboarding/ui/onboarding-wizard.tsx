@@ -110,7 +110,7 @@ export function OnboardingWizard() {
                            ))}
                         </OrgStepper.Navigation>
 
-                        {methods.switch({
+                        {methods.flow.switch({
                            "org-profile": () => (
                               <ProfileSetupStep
                                  onNext={(newSlug) => {
@@ -144,13 +144,13 @@ export function OnboardingWizard() {
                            ))}
                         </ProjectStepper.Navigation>
 
-                        {methods.switch({
+                        {methods.flow.switch({
                            "project-setup": () => (
-                              <ProjectSetupStep onNext={() => methods.next()} />
+                              <ProjectSetupStep onNext={() => methods.navigation.next()} />
                            ),
                            products: () => (
                               <ProductSelectionStep
-                                 onNext={() => methods.next()}
+                                 onNext={() => methods.navigation.next()}
                                  onSkipToEnd={handleCompleteProject}
                               />
                            ),

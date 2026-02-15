@@ -1,7 +1,7 @@
 {
    "dependencies": {
-      "@f-o-t/money": "1.2.6",
-      "@orpc/server": "^1.13.0",
+      "@f-o-t/money": "catalog:fot",
+      "@orpc/server": "catalog:orpc",
       "@packages/database": "workspace:*",
       "@packages/posthog": "workspace:*",
       "@packages/queue": "workspace:*",

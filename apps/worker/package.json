@@ -17,11 +17,11 @@
       "@packages/redis": "workspace:*",
       "bullmq": "catalog:workers",
       "ioredis": "catalog:workers",
-      "node-cron": "^3.0.3"
+      "node-cron": "catalog:workers"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",
-      "@types/node-cron": "^3.0.11",
+      "@types/node-cron": "catalog:workers",
       "typescript": "catalog:development"
    }
 }

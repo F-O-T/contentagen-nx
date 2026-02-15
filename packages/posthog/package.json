@@ -1,8 +1,8 @@
 {
    "dependencies": {
       "@packages/environment": "workspace:*",
-      "posthog-js": "^1.259.0",
-      "posthog-node": "^5.5.0"
+      "posthog-js": "catalog:analytics-client",
+      "posthog-node": "catalog:analytics-client"
    },
    "devDependencies": {
       "@tooling/typescript": "workspace:*",

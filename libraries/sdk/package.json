@@ -4,7 +4,7 @@
 	},
 	"dependencies": {
 		"superjson": "2.2.2",
-		"zod": "4.2.1"
+		"zod": "4.3.6"
 	},
 	"description": "Official TypeScript SDK to interact with the Contentta API. Provides lightweight client methods for listing and retrieving content, automatic input validation, date parsing, and robust error handling.",
 	"devDependencies": {

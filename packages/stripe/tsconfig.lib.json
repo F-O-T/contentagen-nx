@@ -4,6 +4,9 @@
    "exclude": ["**/*.test.ts", "**/__tests__/**"],
    "references": [
     {
+      "path": "../utils/tsconfig.lib.json"
+    },
+    {
       "path": "../environment/tsconfig.lib.json"
     }
   ]

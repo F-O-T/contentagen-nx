@@ -25,9 +25,16 @@ export const Route = createFileRoute("/auth/callback")({
 
       if (firstOrg) {
          // Fetch teams to find the first team for routing
-         const teams = await context.queryClient.fetchQuery(
-            context.orpc.organization.getOrganizationTeams.queryOptions(),
-         );
+         // This may fail if session doesn't have activeTeamId yet (protectedProcedure requires it)
+         let teams: { id: string }[] = [];
+         try {
+            teams = await context.queryClient.fetchQuery(
+               context.orpc.organization.getOrganizationTeams.queryOptions(),
+            );
+         } catch {
+            // If the protected procedure fails (no active team in session),
+            // teams stays empty — we'll route to org onboarding which sets up the team
+         }
          const fallbackTeam = teams.length > 0 ? teams[0] : undefined;
 
          // Check if both org and project onboarding are complete

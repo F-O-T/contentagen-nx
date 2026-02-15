@@ -1,15 +1,15 @@
 {
    "dependencies": {
-      "@f-o-t/markdown": "1.0.2",
-      "@mastra/rag": "2.1.0",
-      "@mastra/core": "1.2.0",
-      "@mastra/pg": "1.2.0",
+      "@f-o-t/markdown": "catalog:fot",
+      "@mastra/rag": "catalog:mastra",
+      "@mastra/core": "catalog:mastra",
+      "@mastra/pg": "catalog:mastra",
       "@packages/database": "workspace:*",
       "@packages/environment": "workspace:*",
       "@packages/files": "workspace:*",
       "@packages/search": "workspace:*",
       "@packages/utils": "workspace:*",
-      "ai": "catalog:openrouter",
+      "ai": "catalog:mastra",
       "zod": "catalog:validation"
    },
    "devDependencies": {

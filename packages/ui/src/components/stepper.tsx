@@ -18,7 +18,11 @@ const useStepperProvider = (): Stepper.ConfigProps => {
 const defineStepper = <const Steps extends Stepperize.Step[]>(
    ...steps: Steps
 ): Stepper.DefineProps<Steps> => {
-   const { Scoped, useStepper, ...rest } = Stepperize.defineStepper(...steps);
+   const {
+      Scoped,
+      useStepper,
+      steps: definedSteps,
+   } = Stepperize.defineStepper(...steps);
 
    const StepperContainer = ({
       children,
@@ -43,7 +47,7 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
    };
 
    return {
-      ...rest,
+      steps: definedSteps,
       Stepper: {
          Controls: ({ children, className, asChild, ...props }) => {
             const Comp = asChild ? Slot : "div";
@@ -64,8 +68,10 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
             ...props
          }) => {
             const { variant } = useStepperProvider();
-            const { current } = useStepper();
-            const currentIndex = rest.utils.getIndex(current.id);
+            const stepper = useStepper();
+            const currentIndex = stepper.lookup.getIndex(
+               stepper.state.current.data.id,
+            );
             // Count actual rendered children instead of all defined steps
             const childrenArray = React.Children.toArray(children);
             const totalSteps = childrenArray.length;
@@ -156,16 +162,16 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
          },
          Step: ({ children, className, icon, ...props }) => {
             const { variant, labelOrientation } = useStepperProvider();
-            const { current } = useStepper();
+            const stepper = useStepper();
 
-            const utils = rest.utils;
-            const steps = rest.steps;
+            const current = stepper.state.current.data;
+            const steps = stepper.state.all;
 
-            const stepIndex = utils.getIndex(props.of);
+            const stepIndex = stepper.lookup.getIndex(props.of);
             const step = steps[stepIndex];
-            const currentIndex = utils.getIndex(current.id);
+            const currentIndex = stepper.lookup.getIndex(current.id);
 
-            const isLast = utils.getLast().id === props.of;
+            const isLast = stepper.lookup.getLast().id === props.of;
             const isActive = current.id === props.of;
 
             const dataState = getStepState(currentIndex, stepIndex);
@@ -251,8 +257,8 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
                         onKeyDown={(e) =>
                            onStepKeyDown(
                               e,
-                              utils.getNext(props.of),
-                              utils.getPrev(props.of),
+                              stepper.lookup.getNext(props.of),
+                              stepper.lookup.getPrev(props.of),
                            )
                         }
                         role="tab"
@@ -559,7 +565,7 @@ namespace Stepper {
 
    export type DefineProps<Steps extends Stepperize.Step[]> = Omit<
       Stepperize.StepperReturn<Steps>,
-      "Scoped"
+      "Scoped" | "Stepper"
    > & {
       Stepper: {
          Provider: (

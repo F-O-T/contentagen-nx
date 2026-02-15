@@ -3,7 +3,7 @@ import { member, organization } from "@packages/database/schemas/auth";
 import { resolveOrganizationPlan } from "@packages/events/credits";
 import { getEffectiveProjectLimit } from "@packages/stripe/constants";
 import { eq } from "drizzle-orm";
-import { protectedProcedure } from "../server";
+import { authenticatedProcedure, protectedProcedure } from "../server";
 
 // =============================================================================
 // Procedures
@@ -12,7 +12,7 @@ import { protectedProcedure } from "../server";
 /**
  * Get all organizations the user is a member of, with their role
  */
-export const getOrganizations = protectedProcedure
+export const getOrganizations = authenticatedProcedure
    .handler(async ({ context }) => {
       const { db, userId } = context;
 

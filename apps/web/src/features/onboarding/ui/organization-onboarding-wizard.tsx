@@ -71,7 +71,7 @@ export function OrganizationOnboardingWizard() {
 								))}
 							</Stepper.Navigation>
 
-							{methods.switch({
+							{methods.flow.switch({
 								profile: () => <OrganizationProfileStep onNext={handleComplete} />,
 							})}
 						</div>
