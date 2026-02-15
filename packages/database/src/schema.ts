@@ -1,5 +1,7 @@
 // Actions
 export * from "./schemas/actions";
+// Addons
+export * from "./schemas/addons";
 // Analytics
 export * from "./schemas/annotations";
 export * from "./schemas/auth";
@@ -21,6 +23,8 @@ export * from "./schemas/insights";
 export * from "./schemas/instruction-memory";
 // Personal API Keys
 export * from "./schemas/personal-api-key";
+// Product settings
+export * from "./schemas/product-settings";
 // Property definitions
 export * from "./schemas/property-definitions";
 export * from "./schemas/related-content";
