@@ -8,6 +8,7 @@ import {
    addChatMessage,
    getOrCreateChatSession,
 } from "@packages/database/repositories/chat-repository";
+import { getProductSettings } from "@packages/database/repositories/product-settings-repository";
 import type { StoredToolCall } from "@packages/database/schemas/chat";
 import {
    AI_EVENTS,
@@ -31,6 +32,22 @@ import { protectedProcedure } from "../server";
 // =============================================================================
 // Agent Streaming Procedures
 // =============================================================================
+//
+// NOTE: Product settings for language and model selection are now integrated.
+// RAG and search tool settings (ragEnabled, ragMaxResults, ragMinScore,
+// searchDepth, searchMaxResults, etc.) require tool-level changes to read
+// from requestContext. Currently, tools use hardcoded defaults defined in
+// their input schemas.
+//
+// TODO: Modify RAG tools (search-previous-content-tool, graph-search-tool) to:
+//   - Read ragEnabled, ragMaxResults, ragMinScore from requestContext
+//   - Use these as defaults when minScore/topK are not explicitly provided
+//
+// TODO: Modify search tools (web-search-tool, serp-analysis-tool, etc.) to:
+//   - Read searchDepth, searchMaxResults, includeSearchAnswer, searchTimeRange,
+//     preferredSearchProvider, requireAuthoritativeSources, minCredibility
+//   - Use these as defaults when parameters are not explicitly provided
+// =============================================================================
 
 /**
  * FIM (Fill-in-Middle) streaming completion
@@ -43,13 +60,18 @@ export const fimStream = protectedProcedure
 
       await enforceCreditBudget(db, organizationId, "ai");
 
+      // Fetch product settings for AI configuration
+      const settings = await getProductSettings(db, teamId);
+      const aiDefaults = settings?.aiDefaults ?? {};
+
       // Get the FIM agent from Mastra
       const fimAgent = mastra.getAgent("fimAgent");
 
-      // Create request context for the agent
+      // Create request context for the agent with settings
       const requestContext = createRequestContext({
          userId,
-         language: getRequestLanguage(headers),
+         language: aiDefaults.defaultLanguage ?? getRequestLanguage(headers) ?? "pt-BR",
+         model: aiDefaults.editModel ?? "openrouter/mistralai/mistral-small-creative",
       } as CustomRequestContext);
 
       // Build the prompt from FIM request
@@ -135,13 +157,18 @@ export const editStream = protectedProcedure
 
       await enforceCreditBudget(db, organizationId, "ai");
 
+      // Fetch product settings for AI configuration
+      const settings = await getProductSettings(db, teamId);
+      const aiDefaults = settings?.aiDefaults ?? {};
+
       // Get the inline edit agent from Mastra
       const editAgent = mastra.getAgent("inlineEditAgent");
 
-      // Create request context
+      // Create request context with settings
       const requestContext = createRequestContext({
          userId,
-         language: getRequestLanguage(headers),
+         language: aiDefaults.defaultLanguage ?? getRequestLanguage(headers) ?? "pt-BR",
+         model: aiDefaults.editModel ?? "openrouter/mistralai/mistral-small-creative",
       } as CustomRequestContext);
 
       // Build the prompt from edit request
@@ -227,6 +254,10 @@ export const chatStream = protectedProcedure
 
       await enforceCreditBudget(db, organizationId, "ai");
 
+      // Fetch product settings for AI configuration
+      const settings = await getProductSettings(db, teamId);
+      const aiDefaults = settings?.aiDefaults ?? {};
+
       // Get or create chat session
       let session: Awaited<ReturnType<typeof getOrCreateChatSession>> | null =
          null;
@@ -246,11 +277,12 @@ export const chatStream = protectedProcedure
       // Get the orchestrator agent from Mastra for chat
       const orchestratorAgent = mastra.getAgent("orchestratorAgent");
 
-      // Create request context
+      // Create request context with settings
       const requestContext = createRequestContext({
          userId,
          contentId: input.contentId,
-         language: getRequestLanguage(headers),
+         language: aiDefaults.defaultLanguage ?? getRequestLanguage(headers) ?? "pt-BR",
+         model: aiDefaults.contentModel ?? "openrouter/x-ai/grok-4.1-fast",
       } as CustomRequestContext);
 
       let stepIndex = 0;
