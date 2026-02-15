@@ -1,5 +1,6 @@
 import * as accountRouter from "./account";
 import * as actionsRouter from "./actions";
+import * as activityLogsRouter from "./activity-logs";
 import * as agentRouter from "./agent";
 import * as analyticsRouter from "./analytics";
 import * as annotationsRouter from "./annotations";
@@ -16,6 +17,7 @@ import * as insightsRouter from "./insights";
 import * as onboardingRouter from "./onboarding";
 import * as organizationRouter from "./organization";
 import * as personalApiKeyRouter from "./personal-api-key";
+import * as productSettingsRouter from "./product-settings";
 import * as propertyDefinitionsRouter from "./property-definitions";
 import * as sdkUsageRouter from "./sdk-usage";
 import * as sessionRouter from "./session";
@@ -26,6 +28,7 @@ import * as webhooksRouter from "./webhooks";
 export default {
    account: accountRouter,
    actions: actionsRouter,
+   activityLogs: activityLogsRouter,
    agent: agentRouter,
    analytics: analyticsRouter,
    annotations: annotationsRouter,
@@ -41,6 +44,7 @@ export default {
    insights: insightsRouter,
    onboarding: onboardingRouter,
    personalApiKey: personalApiKeyRouter,
+   productSettings: productSettingsRouter,
    propertyDefinitions: propertyDefinitionsRouter,
    sdkUsage: sdkUsageRouter,
    session: sessionRouter,
