@@ -30,6 +30,7 @@
       "dependencies": {
         "@elysiajs/cors": "catalog:server",
         "@modelcontextprotocol/sdk": "catalog:mcp",
+        "@orpc/server": "^1.13.5",
         "@packages/arcjet": "workspace:*",
         "@packages/authentication": "workspace:*",
         "@packages/database": "workspace:*",
@@ -157,6 +158,7 @@
       "name": "@f-o-t/contentta-sdk",
       "version": "0.16.1",
       "dependencies": {
+        "@orpc/client": "^1.13.5",
         "superjson": "2.2.2",
         "zod": "4.3.6",
       },

@@ -3,6 +3,7 @@
 		"url": "https://github.com/F-O-T/contentta-nx/issues"
 	},
 	"dependencies": {
+		"@orpc/client": "^1.13.5",
 		"superjson": "2.2.2",
 		"zod": "4.3.6"
 	},

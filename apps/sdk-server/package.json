@@ -1,6 +1,8 @@
 {
    "dependencies": {
       "@elysiajs/cors": "catalog:server",
+      "@modelcontextprotocol/sdk": "catalog:mcp",
+      "@orpc/server": "^1.13.5",
       "@packages/arcjet": "workspace:*",
       "@packages/authentication": "workspace:*",
       "@packages/database": "workspace:*",
@@ -10,7 +12,6 @@
       "@packages/posthog": "workspace:*",
       "@packages/stripe": "workspace:*",
       "@packages/transactional": "workspace:*",
-      "@modelcontextprotocol/sdk": "catalog:mcp",
       "elysia": "catalog:server",
       "jose": "catalog:mcp",
       "mcp-handler": "catalog:mcp"
