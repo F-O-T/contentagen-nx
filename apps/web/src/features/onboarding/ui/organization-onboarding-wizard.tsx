@@ -1,5 +1,5 @@
 import { defineStepper } from "@packages/ui/components/stepper";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { toast } from "sonner";
@@ -11,7 +11,6 @@ const { Stepper } = defineStepper(...orgSteps);
 
 export function OrganizationOnboardingWizard() {
 	const navigate = useNavigate();
-	const queryClient = useQueryClient();
 	const { slug } = useParams({ from: "/_authenticated/$slug/onboarding/" });
 	const { data: teams } = useQuery(
 		orpc.organization.getOrganizationTeams.queryOptions({}),
