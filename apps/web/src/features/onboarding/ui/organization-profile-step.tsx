@@ -84,49 +84,69 @@ export function OrganizationProfileStep({
 			<form className="space-y-4" onSubmit={handleSubmit}>
 				<FieldGroup>
 					<form.Field name="userName">
-						{(field) => (
-							<Field>
-								<FieldLabel htmlFor={field.name}>Seu Nome</FieldLabel>
-								<Input
-									id={field.name}
-									name={field.name}
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder="Ex: João Silva"
-								/>
-								<FieldError errors={field.state.meta.errors} />
-							</Field>
-						)}
+						{(field) => {
+							const isInvalid =
+								field.state.meta.isTouched && !field.state.meta.isValid;
+							return (
+								<Field data-invalid={isInvalid}>
+									<FieldLabel htmlFor={field.name}>Seu Nome</FieldLabel>
+									<Input
+										id={field.name}
+										name={field.name}
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										placeholder="Ex: João Silva"
+										aria-invalid={isInvalid}
+										autoComplete="name"
+									/>
+									{isInvalid && <FieldError errors={field.state.meta.errors} />}
+								</Field>
+							);
+						}}
 					</form.Field>
 
 					<form.Field name="workspaceName">
-						{(field) => (
-							<Field>
-								<FieldLabel htmlFor={field.name}>
-									Nome do Workspace
-								</FieldLabel>
-								<Input
-									id={field.name}
-									name={field.name}
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder="Ex: Minha Empresa"
-								/>
-								<FieldError errors={field.state.meta.errors} />
-							</Field>
-						)}
+						{(field) => {
+							const isInvalid =
+								field.state.meta.isTouched && !field.state.meta.isValid;
+							return (
+								<Field data-invalid={isInvalid}>
+									<FieldLabel htmlFor={field.name}>
+										Nome do Workspace
+									</FieldLabel>
+									<Input
+										id={field.name}
+										name={field.name}
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										placeholder="Ex: Minha Empresa"
+										aria-invalid={isInvalid}
+										autoComplete="organization"
+									/>
+									{isInvalid && <FieldError errors={field.state.meta.errors} />}
+								</Field>
+							);
+						}}
 					</form.Field>
 				</FieldGroup>
 
-				<Button
-					className="h-11 w-full"
-					disabled={mutation.isPending}
-					type="submit"
-				>
-					{mutation.isPending ? <Spinner className="size-4" /> : "Continuar"}
-				</Button>
+				<form.Subscribe>
+					{(formState) => (
+						<Button
+							className="h-11 w-full"
+							disabled={
+								!formState.canSubmit ||
+								formState.isSubmitting ||
+								mutation.isPending
+							}
+							type="submit"
+						>
+							{mutation.isPending ? <Spinner className="size-4" /> : "Continuar"}
+						</Button>
+					)}
+				</form.Subscribe>
 			</form>
 		</div>
 	);
