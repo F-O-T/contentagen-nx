@@ -172,7 +172,9 @@ function RedirectUrlSection({ current }: { current: string | undefined }) {
 					saveMutation.isPending ||
 					validationError !== null
 				}
-				onClick={() => saveMutation.mutate({ redirectUrl: url })}
+				onClick={() => saveMutation.mutate({
+					redirectUrl: url.trim() ? url.trim() : undefined
+				})}
 				size="sm"
 			>
 				{saveMutation.isPending && (
@@ -217,10 +219,12 @@ function EmailNotificationSection({
 		}),
 	);
 
+	const isValidEmail = (email: string) => z.string().email().safeParse(email).success;
 	const parsedEmails = emailsInput
 		.split(",")
 		.map((e) => e.trim())
 		.filter(Boolean);
+	const allEmailsValid = parsedEmails.length === 0 || parsedEmails.every(isValidEmail);
 
 	const hasChanged =
 		enabled !== (currentEnabled ?? false) ||
@@ -261,10 +265,13 @@ function EmailNotificationSection({
 					<p className="text-xs text-muted-foreground">
 						Digite os emails separados por vírgula
 					</p>
+					{parsedEmails.length > 0 && !allEmailsValid && (
+						<p className="text-xs text-destructive">Um ou mais emails são inválidos</p>
+					)}
 				</div>
 			)}
 			<Button
-				disabled={!hasChanged || saveMutation.isPending}
+				disabled={!hasChanged || saveMutation.isPending || (enabled && !allEmailsValid)}
 				onClick={handleSave}
 				size="sm"
 			>
