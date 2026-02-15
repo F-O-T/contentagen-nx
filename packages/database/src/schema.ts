@@ -34,6 +34,8 @@ export * from "./schemas/related-content";
 export * from "./schemas/resource-permissions";
 // Roles
 export * from "./schemas/roles";
+// SSO
+export * from "./schemas/sso";
 // Webhooks
 export * from "./schemas/webhooks";
 export * from "./schemas/writer";
