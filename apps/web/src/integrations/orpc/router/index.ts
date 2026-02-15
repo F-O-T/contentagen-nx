@@ -19,6 +19,7 @@ import * as organizationRouter from "./organization";
 import * as personalApiKeyRouter from "./personal-api-key";
 import * as productSettingsRouter from "./product-settings";
 import * as propertyDefinitionsRouter from "./property-definitions";
+import * as rolesRouter from "./roles";
 import * as sdkUsageRouter from "./sdk-usage";
 import * as sessionRouter from "./session";
 import * as teamRouter from "./team";
@@ -46,6 +47,7 @@ export default {
    personalApiKey: personalApiKeyRouter,
    productSettings: productSettingsRouter,
    propertyDefinitions: propertyDefinitionsRouter,
+   roles: rolesRouter,
    sdkUsage: sdkUsageRouter,
    session: sessionRouter,
    team: teamRouter,
