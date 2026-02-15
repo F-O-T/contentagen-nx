@@ -4,8 +4,8 @@ import type { DatabaseInstance } from "@packages/database/client";
 import { subscription } from "@packages/database/schemas/auth";
 import { getRedisConnection } from "@packages/redis/connection";
 import { PlanName } from "@packages/stripe/constants";
-import type { Redis } from "ioredis";
 import { and, eq, or } from "drizzle-orm";
+import type { Redis } from "ioredis";
 import { type CreditPool, PLAN_CREDIT_BUDGETS } from "./pricing";
 import { getEventPrice } from "./utils";
 
@@ -188,5 +188,10 @@ export async function trackCreditUsage(
    if (!redis) return;
 
    const price = await getEventPrice(db, eventName);
-   await incrementCreditUsage(redis, organizationId, pool, Number(price.amount));
+   await incrementCreditUsage(
+      redis,
+      organizationId,
+      pool,
+      Number(price.amount),
+   );
 }

@@ -33,7 +33,25 @@ export const hasPassword = protectedProcedure.handler(async ({ context }) => {
          (account) => account.providerId === "credential",
       );
       return { hasPassword: hasCredential };
-   } catch {
+   } catch (error) {
+      // Convert Better Auth API errors to ORPCError
+      if (error && typeof error === "object" && "status" in error) {
+         const apiError = error as { status: string; statusCode?: number };
+
+         if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+            throw new ORPCError("UNAUTHORIZED", {
+               message: "Authentication required to check password status",
+            });
+         }
+
+         if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+            throw new ORPCError("FORBIDDEN", {
+               message: "Insufficient permissions to check password status",
+            });
+         }
+      }
+
+      // For other errors, return false as fallback
       return { hasPassword: false };
    }
 });
@@ -52,7 +70,25 @@ export const getLinkedAccounts = protectedProcedure.handler(
             accountId: account.accountId,
             createdAt: account.createdAt,
          }));
-      } catch {
+      } catch (error) {
+         // Convert Better Auth API errors to ORPCError
+         if (error && typeof error === "object" && "status" in error) {
+            const apiError = error as { status: string; statusCode?: number };
+
+            if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+               throw new ORPCError("UNAUTHORIZED", {
+                  message: "Authentication required to access linked accounts",
+               });
+            }
+
+            if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+               throw new ORPCError("FORBIDDEN", {
+                  message: "Insufficient permissions to access linked accounts",
+               });
+            }
+         }
+
+         // For other errors, return empty array as fallback
          return [];
       }
    },

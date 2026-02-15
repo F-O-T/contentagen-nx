@@ -185,9 +185,7 @@ export async function executeSeriesQuery(
       ? sql`, ${events.properties}->>${config.breakdown.property} AS breakdown_value`
       : sql` , NULL AS breakdown_value`;
 
-   const breakdownGroupBy = config.breakdown
-      ? sql`, ${events.properties}->>${config.breakdown.property}`
-      : sql``;
+   const breakdownGroupBy = config.breakdown ? sql`, breakdown_value` : sql``;
 
    const filtersSql =
       filterConditions.length > 0

@@ -33,7 +33,10 @@ export const formImpressionEventSchema = z.object({
 export type FormImpressionEvent = z.infer<typeof formImpressionEventSchema>;
 
 export function emitFormImpression(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: FormImpressionEvent,
 ) {
    return emitEvent({
@@ -60,7 +63,10 @@ export const formSubmittedEventSchema = z.object({
 export type FormSubmittedEvent = z.infer<typeof formSubmittedEventSchema>;
 
 export function emitFormSubmitted(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: FormSubmittedEvent,
 ) {
    return emitEvent({
@@ -87,7 +93,10 @@ export const formFieldErrorEventSchema = z.object({
 export type FormFieldErrorEvent = z.infer<typeof formFieldErrorEventSchema>;
 
 export function emitFormFieldError(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: FormFieldErrorEvent,
 ) {
    return emitEvent({
@@ -110,7 +119,10 @@ export const formConversionEventSchema = z.object({
 export type FormConversionEvent = z.infer<typeof formConversionEventSchema>;
 
 export function emitFormConversion(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: FormConversionEvent,
 ) {
    return emitEvent({
@@ -132,7 +144,10 @@ export const formCreatedEventSchema = z.object({
 export type FormCreatedEvent = z.infer<typeof formCreatedEventSchema>;
 
 export function emitFormCreated(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: FormCreatedEvent,
 ) {
    return emitEvent({
@@ -154,7 +169,10 @@ export const formUpdatedEventSchema = z.object({
 export type FormUpdatedEvent = z.infer<typeof formUpdatedEventSchema>;
 
 export function emitFormUpdated(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: FormUpdatedEvent,
 ) {
    return emitEvent({
@@ -175,7 +193,10 @@ export const formDeletedEventSchema = z.object({
 export type FormDeletedEvent = z.infer<typeof formDeletedEventSchema>;
 
 export function emitFormDeleted(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: FormDeletedEvent,
 ) {
    return emitEvent({

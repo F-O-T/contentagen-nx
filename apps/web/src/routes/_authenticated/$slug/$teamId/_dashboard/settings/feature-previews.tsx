@@ -10,8 +10,8 @@ import {
 } from "@packages/ui/components/item";
 import { Switch } from "@packages/ui/components/switch";
 import { createFileRoute } from "@tanstack/react-router";
-import { FlaskConical, LayoutGrid } from "lucide-react";
-import { useState } from "react";
+import { FlaskConical } from "lucide-react";
+import { useEarlyAccess } from "@/hooks/use-early-access";
 
 export const Route = createFileRoute(
 	"/_authenticated/$slug/$teamId/_dashboard/settings/feature-previews",
@@ -19,76 +19,76 @@ export const Route = createFileRoute(
 	component: FeaturePreviewsPage,
 });
 
-const featurePreviews = [
-	{
-		id: "forms",
-		name: "Formulários",
-		description:
-			"Crie formulários de captura de leads e incorpore-os no conteúdo do blog.",
-		icon: LayoutGrid,
-		status: "Beta" as const,
-	},
-];
+const STAGE_LABELS: Record<string, string> = {
+	alpha: "Alpha",
+	beta: "Beta",
+	concept: "Conceito",
+};
 
 function FeaturePreviewsPage() {
-	const [enabledFeatures, setEnabledFeatures] = useState<Set<string>>(
-		new Set(),
-	)
-
-	const toggleFeature = (id: string) => {
-		setEnabledFeatures((prev) => {
-			const next = new Set(prev);
-			if (next.has(id)) next.delete(id);
-			else next.add(id);
-			return next;
-		})
-	}
+	const { features, loaded, isEnrolled, updateEnrollment } = useEarlyAccess();
 
 	return (
 		<div className="space-y-6">
 			<div>
 				<h1 className="text-2xl font-semibold font-serif">
-					Prévias de Funcionalidades
+					Previas de Funcionalidades
 				</h1>
 				<p className="text-sm text-muted-foreground mt-1">
-					Experimente funcionalidades em fase beta antes do lançamento
+					Experimente funcionalidades em fase beta antes do lancamento
 					oficial.
 				</p>
 			</div>
-			<ItemGroup>
-				{featurePreviews.map((feature) => (
-					<Item key={feature.id} variant="muted">
-						<ItemMedia variant="icon">
-							<feature.icon className="size-4" />
-						</ItemMedia>
-						<ItemContent>
-							<div className="flex items-center gap-2">
-								<ItemTitle>{feature.name}</ItemTitle>
-								<Badge
-									variant="secondary"
-									className="text-xs"
-								>
-									<FlaskConical className="size-3 mr-1" />
-									{feature.status}
-								</Badge>
-							</div>
-							<ItemDescription>
-								{feature.description}
-							</ItemDescription>
-						</ItemContent>
-						<ItemActions>
-							<Switch
-								checked={enabledFeatures.has(
-									feature.id,
-								)}
-								onCheckedChange={() =>
-									toggleFeature(feature.id)
-								}
-							/>
-						</ItemActions>
-					</Item>
-				))}
-			</ItemGroup>
+			{!loaded && (
+				<p className="text-sm text-muted-foreground">Carregando...</p>
+			)}
+			{loaded && features.length === 0 && (
+				<p className="text-sm text-muted-foreground">
+					Nenhuma funcionalidade em beta disponivel no momento.
+				</p>
+			)}
+			{loaded && features.length > 0 && (
+				<ItemGroup>
+					{features.map((feature) => {
+						if (!feature.flagKey) return null;
+						const enrolled = isEnrolled(feature.flagKey);
+						return (
+							<Item key={feature.flagKey} variant="muted">
+								<ItemMedia variant="icon">
+									<FlaskConical className="size-4" />
+								</ItemMedia>
+								<ItemContent>
+									<div className="flex items-center gap-2">
+										<ItemTitle>{feature.name}</ItemTitle>
+										<Badge
+											variant="secondary"
+											className="text-xs"
+										>
+											<FlaskConical className="size-3 mr-1" />
+											{STAGE_LABELS[feature.stage] ??
+												feature.stage}
+										</Badge>
+									</div>
+									<ItemDescription>
+										{feature.description}
+									</ItemDescription>
+								</ItemContent>
+								<ItemActions>
+									<Switch
+										checked={enrolled}
+										onCheckedChange={(checked) =>
+											updateEnrollment(
+												feature.flagKey!,
+												checked,
+											)
+										}
+									/>
+								</ItemActions>
+							</Item>
+						);
+					})}
+				</ItemGroup>
+			)}
 		</div>
-	)
+	);
 }

@@ -15,9 +15,11 @@ import { PanelLeft, PanelLeftClose, Search, Settings } from "lucide-react";
 import type * as React from "react";
 import { useCallback } from "react";
 import { replaceCurrentTab, tabStore } from "@/hooks/use-tab-store";
+import { EarlyAccessSidebarBanner } from "./early-access-sidebar-banner";
 import { NavUser } from "./nav-user";
 import { SidebarNav } from "./sidebar-nav";
 import { SidebarScopeSwitcher } from "./sidebar-scope-switcher";
+import { Separator } from "@packages/ui/components/separator";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
    return (
@@ -32,10 +34,15 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 
          <SidebarContent>
             <SidebarSearchButton />
+            <Separator />
+
             <SidebarNav />
          </SidebarContent>
 
          <SidebarFooter>
+            <EarlyAccessSidebarBanner />
+            <Separator />
+
             <SidebarFooterContent />
          </SidebarFooter>
       </Sidebar>

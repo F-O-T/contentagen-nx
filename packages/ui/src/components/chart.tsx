@@ -98,7 +98,7 @@ function ChartContainer({
             {...props}
          >
             <ChartStyle config={config} id={chartId} />
-            <RechartsPrimitive.ResponsiveContainer>
+            <RechartsPrimitive.ResponsiveContainer minWidth={0}>
                {children}
             </RechartsPrimitive.ResponsiveContainer>
          </div>
@@ -169,7 +169,7 @@ function ChartTooltipContent({
       const value = (() => {
          const v =
             !labelKey && typeof label === "string"
-               ? config[label as keyof typeof config]?.label ?? label
+               ? (config[label as keyof typeof config]?.label ?? label)
                : itemConfig?.label;
 
          return typeof v === "string" || typeof v === "number" ? v : undefined;
@@ -220,8 +220,7 @@ function ChartTooltipContent({
                   item,
                   key,
                );
-               const indicatorColor =
-                  color || item.payload.fill || item.color;
+               const indicatorColor = color || item.payload.fill || item.color;
 
                return (
                   <div
@@ -320,11 +319,7 @@ function ChartLegendContent({
       >
          {payload.map((item) => {
             const key = `${nameKey || item.dataKey || "value"}`;
-            const itemConfig = getPayloadConfigFromPayload(
-               config,
-               item,
-               key,
-            );
+            const itemConfig = getPayloadConfigFromPayload(config, item, key);
 
             return (
                <div

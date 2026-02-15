@@ -87,9 +87,7 @@ function BillingSectionSkeleton() {
 
 function BillingPage() {
    return (
-      <div className="space-y-6">
-         <EarlyAccessBanner template={earlyAccessTemplate} />
-
+      <div className="space-y-2">
          <Tabs defaultValue="overview">
             <TabsList variant="line">
                <TabsTrigger value="overview">Geral</TabsTrigger>
@@ -98,7 +96,7 @@ function BillingPage() {
             </TabsList>
             <Separator />
 
-            <TabsContent className="mt-6" value="overview">
+            <TabsContent className="space-y-4" value="overview">
                <ErrorBoundary FallbackComponent={BillingSectionErrorFallback}>
                   <Suspense fallback={<BillingSectionSkeleton />}>
                      <BillingOverview />
@@ -106,17 +104,20 @@ function BillingPage() {
                </ErrorBoundary>
             </TabsContent>
 
-            <TabsContent className="mt-6" value="usage">
+            <TabsContent className="space-y-4" value="usage">
                <ErrorBoundary FallbackComponent={BillingSectionErrorFallback}>
                   <Suspense fallback={<BillingSectionSkeleton />}>
+                     <EarlyAccessBanner template={earlyAccessTemplate} />
                      <BillingUsage />
                   </Suspense>
                </ErrorBoundary>
             </TabsContent>
 
-            <TabsContent className="mt-6" value="spend">
+            <TabsContent className="space-y-4" value="spend">
                <ErrorBoundary FallbackComponent={BillingSectionErrorFallback}>
                   <Suspense fallback={<BillingSectionSkeleton />}>
+                     <EarlyAccessBanner template={earlyAccessTemplate} />
+
                      <BillingSpend />
                   </Suspense>
                </ErrorBoundary>

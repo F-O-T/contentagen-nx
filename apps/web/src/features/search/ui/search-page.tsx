@@ -13,12 +13,18 @@ import {
    type KeyboardEvent,
    useCallback,
    useEffect,
+   useMemo,
    useRef,
    useState,
 } from "react";
+import { useEarlyAccess } from "@/hooks/use-early-access";
 import { replaceCurrentTab } from "@/hooks/use-tab-store";
 import { resolveTabMetadata } from "@/layout/dashboard/utils/route-to-tab";
-import { type SearchResultItem, useSearch } from "../hooks/use-search";
+import {
+   type SearchResultItem,
+   type SearchResultType,
+   useSearch,
+} from "../hooks/use-search";
 
 // ── Icon mapping ─────────────────────────────────────────────────────────────
 
@@ -77,11 +83,35 @@ export function SearchPage() {
    const navigate = useNavigate();
    const inputRef = useRef<HTMLInputElement>(null);
    const [selectedIndex, setSelectedIndex] = useState(-1);
+   const { isEnrolled } = useEarlyAccess();
+
+   const EARLY_ACCESS_SEARCH_MAP: Record<string, SearchResultType> = {
+      "forms-beta": "form",
+   };
+
+   const hiddenSearchTypes = useMemo(() => {
+      const hidden = new Set<SearchResultType>();
+      for (const [flagKey, resultType] of Object.entries(EARLY_ACCESS_SEARCH_MAP)) {
+         if (!isEnrolled(flagKey)) {
+            hidden.add(resultType);
+         }
+      }
+      return hidden;
+   }, [isEnrolled]);
 
    const { query, setQuery, results, hasResults, hasQuery } = useSearch(
       params.slug,
       params.teamId,
+      { hiddenTypes: hiddenSearchTypes },
    );
+
+   const quickActions = useMemo(() => {
+      const actions = getQuickActions(params.slug, params.teamId);
+      return actions.filter((a) => {
+         if (a.route.includes("/forms") && !isEnrolled("forms-beta")) return false;
+         return true;
+      });
+   }, [params.slug, params.teamId, isEnrolled]);
 
    // Auto-focus the input on mount
    useEffect(() => {
@@ -201,7 +231,7 @@ export function SearchPage() {
 
             {!hasQuery && (
                <QuickActionsGrid
-                  actions={getQuickActions(params.slug, params.teamId)}
+                  actions={quickActions}
                   onNavigate={navigateToQuickAction}
                />
             )}

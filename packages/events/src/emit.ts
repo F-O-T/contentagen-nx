@@ -139,6 +139,7 @@ export async function emitEvent(params: EmitEventParams): Promise<void> {
                db,
                organizationId,
                eventName,
+               teamId,
             );
 
             for (const webhook of matchingWebhooks) {

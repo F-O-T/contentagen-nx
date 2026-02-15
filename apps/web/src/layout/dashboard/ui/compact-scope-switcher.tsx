@@ -157,7 +157,10 @@ function CompactScopeSwitcherContent() {
                      type="button"
                   >
                      <Avatar className="size-7 rounded-md">
-                        <AvatarImage alt={activeOrganization.name} src="" />
+                        <AvatarImage
+                           alt={activeOrganization.name}
+                           src={activeOrganization.logo ?? undefined}
+                        />
                         <AvatarFallback
                            className={cn(
                               "rounded-md text-xs font-bold text-white",
@@ -190,6 +193,10 @@ function CompactScopeSwitcherContent() {
                      <CommandGroup heading="Organização atual">
                         <CommandItem disabled value={currentOrg.name}>
                            <Avatar className="size-5 rounded-md">
+                              <AvatarImage
+                                 alt={currentOrg.name}
+                                 src={currentOrg.logo ?? undefined}
+                              />
                               <AvatarFallback
                                  className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(currentOrg.name)}`}
                               >
@@ -213,6 +220,10 @@ function CompactScopeSwitcherContent() {
                               value={`${org.name} ${org.slug}`}
                            >
                               <Avatar className="size-5 rounded-md">
+                                 <AvatarImage
+                                    alt={org.name}
+                                    src={org.logo ?? undefined}
+                                 />
                                  <AvatarFallback
                                     className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(org.name)}`}
                                  >

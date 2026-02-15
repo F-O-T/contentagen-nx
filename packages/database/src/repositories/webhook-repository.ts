@@ -22,15 +22,12 @@ export function generateWebhookSecret(): string {
 
 export async function createWebhookEndpoint(
    db: DatabaseInstance,
-   data: Omit<NewWebhookEndpoint, "signingSecret">,
+   data: NewWebhookEndpoint,
 ) {
    try {
       const [endpoint] = await db
          .insert(webhookEndpoints)
-         .values({
-            ...data,
-            signingSecret: generateWebhookSecret(),
-         })
+         .values(data)
          .returning();
 
       return endpoint;
@@ -42,13 +39,13 @@ export async function createWebhookEndpoint(
 
 export async function listWebhookEndpoints(
    db: DatabaseInstance,
-   organizationId: string,
+   teamId: string,
 ) {
    try {
       return await db
          .select()
          .from(webhookEndpoints)
-         .where(eq(webhookEndpoints.organizationId, organizationId))
+         .where(eq(webhookEndpoints.teamId, teamId))
          .orderBy(desc(webhookEndpoints.createdAt));
    } catch (err) {
       propagateError(err);
@@ -156,6 +153,7 @@ export async function findMatchingWebhooks(
    db: DatabaseInstance,
    organizationId: string,
    eventName: string,
+   teamId?: string,
 ) {
    try {
       const endpoints = await db
@@ -165,6 +163,7 @@ export async function findMatchingWebhooks(
             and(
                eq(webhookEndpoints.organizationId, organizationId),
                eq(webhookEndpoints.isActive, true),
+               ...(teamId ? [eq(webhookEndpoints.teamId, teamId)] : []),
             ),
          );
 

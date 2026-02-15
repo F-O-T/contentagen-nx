@@ -1,4 +1,8 @@
-import { PlanName, STRIPE_PLANS } from "@packages/stripe/constants";
+import {
+   PLATFORM_ADDONS,
+   PlanName,
+   STRIPE_PLANS,
+} from "@packages/stripe/constants";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -33,6 +37,7 @@ import { Link, useParams } from "@tanstack/react-router";
 import {
    BarChart3,
    Calendar,
+   Check,
    ChevronRight,
    CreditCard,
    Crown,
@@ -40,6 +45,7 @@ import {
    FileInput,
    Globe,
    HelpCircle,
+   Package,
    Receipt,
    Search,
    Sparkles,
@@ -444,6 +450,77 @@ function OverviewProductCard({ category }: { category: CategorySummary }) {
 }
 
 // ============================================
+// Addon Card
+// ============================================
+
+function AddonCard({
+   addon,
+   currentPlan,
+}: {
+   addon: (typeof PLATFORM_ADDONS)[number];
+   currentPlan: string;
+}) {
+   const isAvailable = addon.availableFor.includes(currentPlan as PlanName);
+
+   return (
+      <Card className={!isAvailable ? "opacity-60" : ""}>
+         <CardHeader>
+            <div className="flex items-start justify-between gap-4">
+               <div className="flex items-start gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                     <Package className="size-5" />
+                  </div>
+                  <div className="min-w-0">
+                     <CardTitle className="text-base">
+                        Addon {addon.displayName}
+                     </CardTitle>
+                     <CardDescription className="text-xs mt-0.5">
+                        {addon.description}
+                     </CardDescription>
+                  </div>
+               </div>
+               <div className="text-right shrink-0">
+                  <p className="text-lg font-semibold">
+                     {addon.price}
+                     <span className="text-sm font-normal text-muted-foreground">
+                        {addon.perUnit}
+                     </span>
+                  </p>
+               </div>
+            </div>
+         </CardHeader>
+         <CardContent className="space-y-4">
+            <div className="grid gap-2 sm:grid-cols-2">
+               {addon.features.map((feature) => (
+                  <div className="flex items-center gap-2" key={feature}>
+                     <Check className="size-3.5 text-primary shrink-0" />
+                     <span className="text-sm text-muted-foreground">
+                        {feature}
+                     </span>
+                  </div>
+               ))}
+            </div>
+            {!isAvailable && (
+               <p className="text-xs text-muted-foreground">
+                  Disponível para planos:{" "}
+                  {addon.availableFor
+                     .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+                     .join(", ")}
+               </p>
+            )}
+            <Button
+               disabled={!isAvailable}
+               size="sm"
+               variant={isAvailable ? "default" : "outline"}
+            >
+               {isAvailable ? "Conhecer addon" : "Indisponível no seu plano"}
+            </Button>
+         </CardContent>
+      </Card>
+   );
+}
+
+// ============================================
 // Invoices Section (compact)
 // ============================================
 
@@ -617,6 +694,18 @@ export function BillingOverview() {
             </Link>
          </Button>
 
+         <div>
+            <h2 className="text-lg font-semibold mb-4">Addons</h2>
+            <div className="space-y-4">
+               {PLATFORM_ADDONS.map((addon) => (
+                  <AddonCard
+                     addon={addon}
+                     currentPlan={planName}
+                     key={addon.name}
+                  />
+               ))}
+            </div>
+         </div>
          {/* Products section */}
          <div>
             <h2 className="text-lg font-semibold mb-4">Produtos</h2>

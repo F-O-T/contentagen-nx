@@ -4,7 +4,7 @@ import {
 } from "@packages/authentication/api-key-config";
 import type { DatabaseInstance } from "@packages/database/client";
 import { isOrganizationOwner } from "@packages/database/repositories/auth-repository";
-import { team } from "@packages/database/schemas/auth";
+import { team, teamMember } from "@packages/database/schemas/auth";
 import { resolveOrganizationPlan } from "@packages/events/credits";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -93,43 +93,72 @@ export const getPublicApiKey = protectedProcedure
 	.handler(async ({ context, input }) => {
 		const { auth, db, headers, organizationId, userId } = context;
 
-		// Verify team belongs to this organization
-		await verifyTeamOwnership(db, input.teamId, organizationId);
+		try {
+			// Verify team belongs to this organization
+			await verifyTeamOwnership(db, input.teamId, organizationId);
 
-		const keys = await auth.api.listApiKeys({
-			headers,
-		});
+			const keys = await auth.api.listApiKeys({
+				headers,
+			});
 
-		const publicKey = keys.find(
-			(key: any) =>
-				key.metadata?.teamId === input.teamId &&
-				key.metadata?.type === "public",
-		);
+			const publicKey = keys.find(
+				(key: any) =>
+					key.metadata?.teamId === input.teamId &&
+					key.metadata?.type === "public",
+			);
 
-		if (publicKey) {
-			return { publicApiKey: publicKey.start ?? null, keyId: publicKey.id };
-		}
+			if (publicKey) {
+				return { publicApiKey: publicKey.start ?? null, keyId: publicKey.id };
+			}
 
-		// Auto-create if none exists (lazy creation)
-		const plan = await resolveOrganizationPlan(db, organizationId);
-		const rateLimitConfig = getRateLimitConfig(plan);
+			// Auto-create if none exists (lazy creation)
+			const plan = await resolveOrganizationPlan(db, organizationId);
+			const rateLimitConfig = getRateLimitConfig(plan);
 
-		const newKey = await auth.api.createApiKey({
-			body: {
-				prefix: "cta_pub",
-				name: "Public Key",
-				userId,
-				metadata: {
-					type: "public",
-					teamId: input.teamId,
-					organizationId,
-					plan,
+			const newKey = await auth.api.createApiKey({
+				body: {
+					prefix: "cta_pub",
+					name: "Public Key",
+					userId,
+					metadata: {
+						type: "public",
+						teamId: input.teamId,
+						organizationId,
+						plan,
+					},
+					...rateLimitConfig,
 				},
-				...rateLimitConfig,
-			},
-		});
+			});
 
-		return { publicApiKey: newKey.key, keyId: newKey.id };
+			return { publicApiKey: newKey.key, keyId: newKey.id };
+		} catch (error) {
+			// Convert Better Auth API errors to ORPCError
+			if (error && typeof error === "object" && "status" in error) {
+				const apiError = error as { status: string; statusCode?: number };
+
+				if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+					throw new ORPCError("UNAUTHORIZED", {
+						message: "Authentication required to access API keys",
+					});
+				}
+
+				if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+					throw new ORPCError("FORBIDDEN", {
+						message: "Insufficient permissions to access API keys",
+					});
+				}
+			}
+
+			// Re-throw ORPCErrors as-is
+			if (error instanceof ORPCError) {
+				throw error;
+			}
+
+			// Convert unknown errors to INTERNAL_SERVER_ERROR
+			throw new ORPCError("INTERNAL_SERVER_ERROR", {
+				message: "Failed to retrieve public API key",
+			});
+		}
 	});
 
 /**
@@ -142,55 +171,97 @@ export const regeneratePublicApiKey = protectedProcedure
 	.handler(async ({ context, input }) => {
 		const { auth, headers, db, organizationId, userId } = context;
 
-		// Owner-only check
-		const isOwner = await isOrganizationOwner(db, userId, organizationId);
-		if (!isOwner) {
-			throw new ORPCError("FORBIDDEN", {
-				message: "Only organization owners can regenerate API keys",
+		try {
+			// Owner-only check
+			const isOwner = await isOrganizationOwner(db, userId, organizationId);
+			if (!isOwner) {
+				throw new ORPCError("FORBIDDEN", {
+					message: "Only organization owners can regenerate API keys",
+				});
+			}
+
+			// Verify team belongs to this organization
+			await verifyTeamOwnership(db, input.teamId, organizationId);
+
+			// Find and delete existing public key for this team
+			console.log("[regeneratePublicApiKey] Listing API keys...");
+			const existingKeys = await auth.api.listApiKeys({
+				headers,
 			});
-		}
+			console.log(`[regeneratePublicApiKey] Found ${existingKeys?.length || 0} keys`);
 
-		// Verify team belongs to this organization
-		await verifyTeamOwnership(db, input.teamId, organizationId);
+			const existingPublicKey = existingKeys.find(
+				(key: any) =>
+					key.metadata?.teamId === input.teamId &&
+					key.metadata?.type === "public",
+			);
 
-		// Find and delete existing public key for this team
-		const existingKeys = await auth.api.listApiKeys({
-			headers,
-		});
+			if (existingPublicKey) {
+				console.log(`[regeneratePublicApiKey] Deleting existing key: ${existingPublicKey.id}`);
+				await auth.api.deleteApiKey({
+					body: { keyId: existingPublicKey.id },
+				});
+			}
 
-		const existingPublicKey = existingKeys.find(
-			(key: any) =>
-				key.metadata?.teamId === input.teamId &&
-				key.metadata?.type === "public",
-		);
+			// Resolve the organization's plan for rate limits
+			console.log("[regeneratePublicApiKey] Resolving organization plan...");
+			const plan = await resolveOrganizationPlan(db, organizationId);
+			console.log(`[regeneratePublicApiKey] Plan: ${plan}`);
 
-		if (existingPublicKey) {
-			await auth.api.deleteApiKey({
-				body: { keyId: existingPublicKey.id },
-			});
-		}
+			const rateLimitConfig = getRateLimitConfig(plan);
+			console.log("[regeneratePublicApiKey] Rate limit config:", rateLimitConfig);
 
-		// Resolve the organization's plan for rate limits
-		const plan = await resolveOrganizationPlan(db, organizationId);
-		const rateLimitConfig = getRateLimitConfig(plan);
-
-		// Create a new public API key
-		const newKey = await auth.api.createApiKey({
-			body: {
-				prefix: "cta_pub",
-				name: "Public Key",
-				userId,
-				metadata: {
-					type: "public",
-					teamId: input.teamId,
-					organizationId,
-					plan,
+			// Create a new public API key
+			console.log("[regeneratePublicApiKey] Creating new API key...");
+			const newKey = await auth.api.createApiKey({
+				body: {
+					prefix: "cta_pub",
+					name: "Public Key",
+					userId,
+					metadata: {
+						type: "public",
+						teamId: input.teamId,
+						organizationId,
+						plan,
+					},
+					...rateLimitConfig,
 				},
-				...rateLimitConfig,
-			},
-		});
+			});
+			console.log("[regeneratePublicApiKey] New key created successfully");
 
-		return { publicApiKey: newKey.key };
+			return { publicApiKey: newKey.key };
+		} catch (error) {
+			console.error("[regeneratePublicApiKey] Error:", error);
+			console.error("[regeneratePublicApiKey] Error stack:", error instanceof Error ? error.stack : "No stack");
+
+			// Convert Better Auth API errors to ORPCError
+			if (error && typeof error === "object" && "status" in error) {
+				const apiError = error as { status: string; statusCode?: number };
+
+				// Map Better Auth status codes to oRPC error codes
+				if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+					throw new ORPCError("UNAUTHORIZED", {
+						message: "Authentication required to regenerate API keys",
+					});
+				}
+
+				if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+					throw new ORPCError("FORBIDDEN", {
+						message: "Insufficient permissions to regenerate API keys",
+					});
+				}
+			}
+
+			// Re-throw ORPCErrors as-is
+			if (error instanceof ORPCError) {
+				throw error;
+			}
+
+			// Convert unknown errors to INTERNAL_SERVER_ERROR
+			throw new ORPCError("INTERNAL_SERVER_ERROR", {
+				message: "Failed to regenerate public API key",
+			});
+		}
 	});
 
 /**
@@ -218,4 +289,135 @@ export const updateAllowedDomains = protectedProcedure
 		}
 
 		return { allowedDomains: updated.allowedDomains };
+	});
+
+/**
+ * Get all members of a team (read-only).
+ * Uses Better Auth for member data enrichment.
+ */
+export const getMembers = protectedProcedure
+	.input(teamIdSchema)
+	.handler(async ({ context, input }) => {
+		const { auth, db, headers, organizationId } = context;
+
+		// Verify team belongs to this organization
+		await verifyTeamOwnership(db, input.teamId, organizationId);
+
+		// Get organization members via Better Auth
+		const orgMembers = await auth.api.listOrganizationMembers({
+			headers,
+			query: { organizationId },
+		});
+
+		// Get team member IDs
+		const teamMemberRecords = await db.query.teamMember.findMany({
+			where: (teamMember, { eq }) => eq(teamMember.teamId, input.teamId),
+		});
+
+		const teamMemberIds = new Set(
+			teamMemberRecords.map((tm) => tm.userId),
+		);
+
+		// Filter org members to only include team members
+		const teamMembers = orgMembers
+			.filter((m) => teamMemberIds.has(m.userId))
+			.map((m) => ({
+				id: m.userId,
+				name: m.user.name,
+				email: m.user.email,
+				role: m.role,
+				image: m.user.image,
+				createdAt: new Date(m.createdAt),
+			}));
+
+		return teamMembers;
+	});
+
+/**
+ * Add a member to a team.
+ * Requires the user to be an organization member first.
+ */
+export const addMember = protectedProcedure
+	.input(
+		z.object({
+			teamId: z.string().uuid(),
+			userId: z.string().uuid(),
+		}),
+	)
+	.handler(async ({ context, input }) => {
+		const { db, organizationId } = context;
+
+		// Verify team belongs to this organization
+		await verifyTeamOwnership(db, input.teamId, organizationId);
+
+		// Check if user is a member of the organization
+		const orgMember = await db.query.member.findFirst({
+			where: (member, { eq, and }) =>
+				and(
+					eq(member.organizationId, organizationId),
+					eq(member.userId, input.userId),
+				),
+		});
+
+		if (!orgMember) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "User must be an organization member first",
+			});
+		}
+
+		// Check if already a team member
+		const existingTeamMember = await db.query.teamMember.findFirst({
+			where: (teamMember, { eq, and }) =>
+				and(
+					eq(teamMember.teamId, input.teamId),
+					eq(teamMember.userId, input.userId),
+				),
+		});
+
+		if (existingTeamMember) {
+			throw new ORPCError("BAD_REQUEST", {
+				message: "User is already a team member",
+			});
+		}
+
+		// Add user to team
+		const [newTeamMember] = await db
+			.insert(teamMember)
+			.values({
+				teamId: input.teamId,
+				userId: input.userId,
+				createdAt: new Date(),
+			})
+			.returning();
+
+		return newTeamMember;
+	});
+
+/**
+ * Remove a member from a team.
+ */
+export const removeMember = protectedProcedure
+	.input(
+		z.object({
+			teamId: z.string().uuid(),
+			userId: z.string().uuid(),
+		}),
+	)
+	.handler(async ({ context, input }) => {
+		const { db, organizationId } = context;
+
+		// Verify team belongs to this organization
+		await verifyTeamOwnership(db, input.teamId, organizationId);
+
+		// Remove from team
+		await db
+			.delete(teamMember)
+			.where(
+				and(
+					eq(teamMember.teamId, input.teamId),
+					eq(teamMember.userId, input.userId),
+				),
+			);
+
+		return { success: true };
 	});

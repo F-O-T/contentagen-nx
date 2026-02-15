@@ -6,12 +6,12 @@ import { db } from "./integrations/database";
 import { minioClient } from "./integrations/minio";
 import { posthog } from "./integrations/posthog";
 import {
-	mcpRequestHandler,
-	protectedResourceMetadataHandler,
+   mcpRequestHandler,
+   protectedResourceMetadataHandler,
 } from "./mcp/handler";
+import { sdkRoutes } from "./routes/sdk";
 import { sdkEventRoutes } from "./routes/sdk-events";
 import { sdkFormRoutes } from "./routes/sdk-forms";
-import { sdkRoutes } from "./routes/sdk";
 
 const app = new Elysia({
    serve: {

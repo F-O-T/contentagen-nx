@@ -10,13 +10,7 @@ import {
 } from "@packages/ui/components/avatar";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
-import {
-   Card,
-   CardContent,
-   CardDescription,
-   CardHeader,
-   CardTitle,
-} from "@packages/ui/components/card";
+import { Card, CardContent } from "@packages/ui/components/card";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Input } from "@packages/ui/components/input";
 import {
@@ -267,40 +261,18 @@ function ChangeEmailSheetContent({
 
 function ProfileSectionSkeleton() {
    return (
-      <div className="space-y-4 md:space-y-6">
-         <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Profile Card Skeleton */}
-            <div className="md:col-span-2 lg:col-span-2">
-               <Card className="h-full">
-                  <CardHeader>
-                     <Skeleton className="h-6 w-1/3" />
-                     <Skeleton className="h-4 w-2/3" />
-                  </CardHeader>
-                  <CardContent>
-                     <div className="space-y-1">
-                        <Skeleton className="h-16 w-full rounded-lg" />
-                        <Skeleton className="h-16 w-full rounded-lg" />
-                        <Skeleton className="h-16 w-full rounded-lg" />
-                     </div>
-                  </CardContent>
-               </Card>
-            </div>
-
-            {/* Account Summary Skeleton */}
-            <Card className="h-full">
-               <CardHeader>
-                  <Skeleton className="h-6 w-2/3" />
-                  <Skeleton className="h-4 w-full" />
-               </CardHeader>
-               <CardContent className="space-y-4">
-                  <div className="flex flex-col items-center">
-                     <Skeleton className="h-20 w-20 rounded-full" />
-                     <Skeleton className="h-5 w-32 mt-3" />
-                     <Skeleton className="h-4 w-24 mt-1" />
-                  </div>
-                  <Skeleton className="h-16 w-full rounded-lg" />
-               </CardContent>
-            </Card>
+      <div className="space-y-6">
+         <div>
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-4 w-64 mt-2" />
+         </div>
+         <div className="space-y-1">
+            <Skeleton className="h-16 w-full rounded-lg" />
+            <Skeleton className="h-16 w-full rounded-lg" />
+            <Skeleton className="h-16 w-full rounded-lg" />
+         </div>
+         <div className="space-y-1">
+            <Skeleton className="h-16 w-full rounded-lg" />
          </div>
       </div>
    );
@@ -312,21 +284,23 @@ function ProfileSectionSkeleton() {
 
 function ProfileSectionErrorFallback(props: FallbackProps) {
    return (
-      <Card className="h-full">
-         <CardHeader>
-            <CardTitle>Perfil</CardTitle>
-            <CardDescription>
+      <div className="space-y-6">
+         <div>
+            <h1 className="text-2xl font-semibold font-serif">Perfil</h1>
+            <p className="text-sm text-muted-foreground mt-1">
                Gerencie suas informações pessoais.
-            </CardDescription>
-         </CardHeader>
-         <CardContent>
-            {createErrorFallback({
-               errorDescription: "Não foi possível carregar seu perfil",
-               errorTitle: "Erro ao Carregar",
-               retryText: "Tentar novamente",
-            })(props)}
-         </CardContent>
-      </Card>
+            </p>
+         </div>
+         <Card>
+            <CardContent className="py-8">
+               {createErrorFallback({
+                  errorDescription: "Não foi possível carregar seu perfil",
+                  errorTitle: "Erro ao Carregar",
+                  retryText: "Tentar novamente",
+               })(props)}
+            </CardContent>
+         </Card>
+      </div>
    );
 }
 
@@ -349,112 +323,110 @@ function ProfileCard({
    onChangeEmail: () => void;
 }) {
    return (
-      <Card className="h-full">
-         <CardHeader>
-            <CardTitle>Informações Pessoais</CardTitle>
-            <CardDescription>
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Informações Pessoais</h2>
+            <p className="text-sm text-muted-foreground mt-1">
                Gerencie seu nome, email e foto de perfil
-            </CardDescription>
-         </CardHeader>
-         <CardContent>
-            <ItemGroup>
-               <Item variant="muted">
-                  <ItemMedia variant="icon">
-                     <User className="size-4" />
-                  </ItemMedia>
-                  <ItemContent className="min-w-0">
-                     <ItemTitle>Nome</ItemTitle>
-                     <ItemDescription className="truncate">
-                        {user.name || "Não definido"}
-                     </ItemDescription>
-                  </ItemContent>
-                  <ItemActions>
-                     <Tooltip>
-                        <TooltipTrigger asChild>
-                           <Button
-                              onClick={onChangeName}
-                              size="icon"
-                              variant="ghost"
-                           >
-                              <Pencil className="size-4" />
-                           </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Editar nome</TooltipContent>
-                     </Tooltip>
-                  </ItemActions>
-               </Item>
+            </p>
+         </div>
+         <ItemGroup>
+            <Item variant="muted">
+               <ItemMedia variant="icon">
+                  <User className="size-4" />
+               </ItemMedia>
+               <ItemContent className="min-w-0">
+                  <ItemTitle>Nome</ItemTitle>
+                  <ItemDescription className="truncate">
+                     {user.name || "Não definido"}
+                  </ItemDescription>
+               </ItemContent>
+               <ItemActions>
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <Button
+                           onClick={onChangeName}
+                           size="icon"
+                           variant="ghost"
+                        >
+                           <Pencil className="size-4" />
+                        </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Editar nome</TooltipContent>
+                  </Tooltip>
+               </ItemActions>
+            </Item>
 
-               <ItemSeparator />
+            <ItemSeparator />
 
-               <Item variant="muted">
-                  <ItemMedia variant="icon">
-                     <Mail className="size-4" />
-                  </ItemMedia>
-                  <ItemContent className="min-w-0">
-                     <div className="flex items-center gap-2">
-                        <ItemTitle>Email</ItemTitle>
-                        {user.emailVerified && (
-                           <Badge
-                              className="bg-green-500/10 text-green-500 hover:bg-green-500/20"
-                              variant="outline"
-                           >
-                              <ShieldCheck className="size-3 mr-1" />
-                              Verificado
-                           </Badge>
-                        )}
-                     </div>
-                     <ItemDescription className="truncate">
-                        {user.email}
-                     </ItemDescription>
-                  </ItemContent>
-                  <ItemActions>
-                     <Tooltip>
-                        <TooltipTrigger asChild>
-                           <Button
-                              onClick={onChangeEmail}
-                              size="icon"
-                              variant="ghost"
-                           >
-                              <Pencil className="size-4" />
-                           </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Alterar email</TooltipContent>
-                     </Tooltip>
-                  </ItemActions>
-               </Item>
+            <Item variant="muted">
+               <ItemMedia variant="icon">
+                  <Mail className="size-4" />
+               </ItemMedia>
+               <ItemContent className="min-w-0">
+                  <div className="flex items-center gap-2">
+                     <ItemTitle>Email</ItemTitle>
+                     {user.emailVerified && (
+                        <Badge
+                           className="bg-green-500/10 text-green-500 hover:bg-green-500/20"
+                           variant="outline"
+                        >
+                           <ShieldCheck className="size-3 mr-1" />
+                           Verificado
+                        </Badge>
+                     )}
+                  </div>
+                  <ItemDescription className="truncate">
+                     {user.email}
+                  </ItemDescription>
+               </ItemContent>
+               <ItemActions>
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <Button
+                           onClick={onChangeEmail}
+                           size="icon"
+                           variant="ghost"
+                        >
+                           <Pencil className="size-4" />
+                        </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Alterar email</TooltipContent>
+                  </Tooltip>
+               </ItemActions>
+            </Item>
 
-               <ItemSeparator />
+            <ItemSeparator />
 
-               <Item variant="muted">
-                  <ItemMedia variant="icon">
-                     <Lock className="size-4" />
-                  </ItemMedia>
-                  <ItemContent className="min-w-0">
-                     <ItemTitle>Senha</ItemTitle>
-                     <ItemDescription>••••••••</ItemDescription>
-                  </ItemContent>
-                  <ItemActions>
-                     <Tooltip>
-                        <TooltipTrigger asChild>
-                           <Button size="icon" variant="ghost" disabled>
-                              <ChevronRight className="size-4" />
-                           </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Em breve</TooltipContent>
-                     </Tooltip>
-                  </ItemActions>
-               </Item>
-            </ItemGroup>
-         </CardContent>
-      </Card>
+            <Item variant="muted">
+               <ItemMedia variant="icon">
+                  <Lock className="size-4" />
+               </ItemMedia>
+               <ItemContent className="min-w-0">
+                  <ItemTitle>Senha</ItemTitle>
+                  <ItemDescription>••••••••</ItemDescription>
+               </ItemContent>
+               <ItemActions>
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <Button disabled size="icon" variant="ghost">
+                           <ChevronRight className="size-4" />
+                        </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Em breve</TooltipContent>
+                  </Tooltip>
+               </ItemActions>
+            </Item>
+         </ItemGroup>
+      </section>
    );
 }
 
 // ============================================
-// Account Summary Card Component
+// Account Summary Section Component
 // ============================================
 
-function AccountSummaryCard({
+function AccountSummarySection({
    user,
 }: {
    user: {
@@ -465,38 +437,51 @@ function AccountSummaryCard({
    };
 }) {
    return (
-      <Card className="h-full">
-         <CardHeader>
-            <CardTitle>Resumo da Conta</CardTitle>
-            <CardDescription>Visão geral do seu perfil</CardDescription>
-         </CardHeader>
-         <CardContent className="space-y-4">
-            <div className="flex flex-col items-center">
-               <Avatar className="size-20">
-                  <AvatarImage alt={user.name || "Avatar"} src={user.image || undefined} />
-                  <AvatarFallback className="text-xl">
-                     {user.name ? getInitials(user.name) : <User className="size-8" />}
-                  </AvatarFallback>
-               </Avatar>
-               <h3 className="mt-3 font-semibold">{user.name || "Usuário"}</h3>
-               <p className="text-sm text-muted-foreground">{user.email}</p>
-            </div>
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Resumo da Conta</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+               Visão geral do seu perfil
+            </p>
+         </div>
+         <ItemGroup>
+            <Item variant="muted">
+               <ItemMedia>
+                  <Avatar className="size-10">
+                     <AvatarImage
+                        alt={user.name || "Avatar"}
+                        src={user.image || undefined}
+                     />
+                     <AvatarFallback>
+                        {user.name ? (
+                           getInitials(user.name)
+                        ) : (
+                           <User className="size-4" />
+                        )}
+                     </AvatarFallback>
+                  </Avatar>
+               </ItemMedia>
+               <ItemContent>
+                  <ItemTitle>{user.name || "Usuário"}</ItemTitle>
+                  <ItemDescription>{user.email}</ItemDescription>
+               </ItemContent>
+            </Item>
 
-            <ItemGroup>
-               <Item variant="muted">
-                  <ItemMedia variant="icon">
-                     <Calendar className="size-4" />
-                  </ItemMedia>
-                  <ItemContent>
-                     <ItemTitle>Membro desde</ItemTitle>
-                     <ItemDescription>
-                        {formatDate(user.createdAt)}
-                     </ItemDescription>
-                  </ItemContent>
-               </Item>
-            </ItemGroup>
-         </CardContent>
-      </Card>
+            <ItemSeparator />
+
+            <Item variant="muted">
+               <ItemMedia variant="icon">
+                  <Calendar className="size-4" />
+               </ItemMedia>
+               <ItemContent>
+                  <ItemTitle>Membro desde</ItemTitle>
+                  <ItemDescription>
+                     {formatDate(user.createdAt)}
+                  </ItemDescription>
+               </ItemContent>
+            </Item>
+         </ItemGroup>
+      </section>
    );
 }
 
@@ -548,29 +533,33 @@ function ProfileSectionContent() {
 
    return (
       <TooltipProvider>
-         <div className="space-y-4 md:space-y-6">
-            <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
-               <div className="md:col-span-2 lg:col-span-2">
-                  <ProfileCard
-                     onChangeEmail={handleChangeEmail}
-                     onChangeName={handleChangeName}
-                     user={{
-                        name: user.name,
-                        email: user.email,
-                        image: user.image,
-                        emailVerified: user.emailVerified,
-                     }}
-                  />
-               </div>
-               <AccountSummaryCard
-                  user={{
-                     name: user.name,
-                     email: user.email,
-                     image: user.image,
-                     createdAt: user.createdAt,
-                  }}
-               />
+         <div className="space-y-6">
+            <div>
+               <h1 className="text-2xl font-semibold font-serif">Perfil</h1>
+               <p className="text-sm text-muted-foreground mt-1">
+                  Gerencie suas informações pessoais e resumo da conta.
+               </p>
             </div>
+
+            <ProfileCard
+               onChangeEmail={handleChangeEmail}
+               onChangeName={handleChangeName}
+               user={{
+                  name: user.name,
+                  email: user.email,
+                  image: user.image,
+                  emailVerified: user.emailVerified,
+               }}
+            />
+
+            <AccountSummarySection
+               user={{
+                  name: user.name,
+                  email: user.email,
+                  image: user.image,
+                  createdAt: user.createdAt,
+               }}
+            />
          </div>
       </TooltipProvider>
    );

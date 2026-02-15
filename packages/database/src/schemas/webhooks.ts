@@ -9,7 +9,7 @@ import {
    timestamp,
    uuid,
 } from "drizzle-orm/pg-core";
-import { organization } from "./auth";
+import { organization, team } from "./auth";
 import { events } from "./events";
 
 /**
@@ -23,10 +23,14 @@ export const webhookEndpoints = pgTable(
       organizationId: uuid("organization_id")
          .notNull()
          .references(() => organization.id, { onDelete: "cascade" }),
+      teamId: uuid("team_id")
+         .notNull()
+         .references(() => team.id, { onDelete: "cascade" }),
       url: text("url").notNull(),
       description: text("description"),
       eventPatterns: jsonb("event_patterns").$type<string[]>().notNull(),
       signingSecret: text("signing_secret").notNull(),
+      apiKeyId: text("api_key_id"),
       isActive: boolean("is_active").default(true).notNull(),
       failureCount: integer("failure_count").default(0).notNull(),
       lastSuccessAt: timestamp("last_success_at"),
@@ -39,6 +43,8 @@ export const webhookEndpoints = pgTable(
    },
    (table) => [
       index("webhook_endpoints_org_idx").on(table.organizationId),
+      index("webhook_endpoints_team_idx").on(table.teamId),
+      index("webhook_endpoints_api_key_idx").on(table.apiKeyId),
       index("webhook_endpoints_active_idx").on(table.isActive),
    ],
 );
@@ -82,6 +88,10 @@ export const webhookEndpointsRelations = relations(
       organization: one(organization, {
          fields: [webhookEndpoints.organizationId],
          references: [organization.id],
+      }),
+      team: one(team, {
+         fields: [webhookEndpoints.teamId],
+         references: [team.id],
       }),
       deliveries: many(webhookDeliveries),
    }),

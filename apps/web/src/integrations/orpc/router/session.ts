@@ -1,3 +1,4 @@
+import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { protectedProcedure, publicProcedure } from "../server";
 
@@ -6,7 +7,31 @@ import { protectedProcedure, publicProcedure } from "../server";
  */
 export const getSession = publicProcedure.handler(async ({ context }) => {
    const { auth, headers } = context;
-   return auth.api.getSession({ headers });
+
+   try {
+      return auth.api.getSession({ headers });
+   } catch (error) {
+      // Convert Better Auth API errors to ORPCError
+      if (error && typeof error === "object" && "status" in error) {
+         const apiError = error as { status: string; statusCode?: number };
+
+         if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+            throw new ORPCError("UNAUTHORIZED", {
+               message: "Authentication required",
+            });
+         }
+      }
+
+      // Re-throw ORPCErrors as-is
+      if (error instanceof ORPCError) {
+         throw error;
+      }
+
+      // Convert unknown errors to INTERNAL_SERVER_ERROR
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+         message: "Failed to retrieve session",
+      });
+   }
 });
 
 /**
@@ -16,11 +41,40 @@ export const listSessions = protectedProcedure
    .handler(async ({ context }) => {
       const { auth, headers } = context;
 
-      const sessions = await auth.api.listSessions({
-         headers,
-      });
+      try {
+         const sessions = await auth.api.listSessions({
+            headers,
+         });
 
-      return sessions;
+         return sessions;
+      } catch (error) {
+         // Convert Better Auth API errors to ORPCError
+         if (error && typeof error === "object" && "status" in error) {
+            const apiError = error as { status: string; statusCode?: number };
+
+            if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+               throw new ORPCError("UNAUTHORIZED", {
+                  message: "Authentication required to list sessions",
+               });
+            }
+
+            if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+               throw new ORPCError("FORBIDDEN", {
+                  message: "Insufficient permissions to list sessions",
+               });
+            }
+         }
+
+         // Re-throw ORPCErrors as-is
+         if (error instanceof ORPCError) {
+            throw error;
+         }
+
+         // Convert unknown errors to INTERNAL_SERVER_ERROR
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to list sessions",
+         });
+      }
    });
 
 /**
@@ -31,12 +85,41 @@ export const revokeSessionByToken = protectedProcedure
    .handler(async ({ context, input }) => {
       const { auth, headers } = context;
 
-      await auth.api.revokeSession({
-         headers,
-         body: { token: input.token },
-      });
+      try {
+         await auth.api.revokeSession({
+            headers,
+            body: { token: input.token },
+         });
 
-      return { success: true };
+         return { success: true };
+      } catch (error) {
+         // Convert Better Auth API errors to ORPCError
+         if (error && typeof error === "object" && "status" in error) {
+            const apiError = error as { status: string; statusCode?: number };
+
+            if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+               throw new ORPCError("UNAUTHORIZED", {
+                  message: "Authentication required to revoke session",
+               });
+            }
+
+            if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+               throw new ORPCError("FORBIDDEN", {
+                  message: "Insufficient permissions to revoke session",
+               });
+            }
+         }
+
+         // Re-throw ORPCErrors as-is
+         if (error instanceof ORPCError) {
+            throw error;
+         }
+
+         // Convert unknown errors to INTERNAL_SERVER_ERROR
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to revoke session",
+         });
+      }
    });
 
 /**
@@ -46,11 +129,40 @@ export const revokeOtherSessions = protectedProcedure.handler(
    async ({ context }) => {
       const { auth, headers } = context;
 
-      await auth.api.revokeOtherSessions({
-         headers,
-      });
+      try {
+         await auth.api.revokeOtherSessions({
+            headers,
+         });
 
-      return { success: true };
+         return { success: true };
+      } catch (error) {
+         // Convert Better Auth API errors to ORPCError
+         if (error && typeof error === "object" && "status" in error) {
+            const apiError = error as { status: string; statusCode?: number };
+
+            if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+               throw new ORPCError("UNAUTHORIZED", {
+                  message: "Authentication required to revoke sessions",
+               });
+            }
+
+            if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+               throw new ORPCError("FORBIDDEN", {
+                  message: "Insufficient permissions to revoke sessions",
+               });
+            }
+         }
+
+         // Re-throw ORPCErrors as-is
+         if (error instanceof ORPCError) {
+            throw error;
+         }
+
+         // Convert unknown errors to INTERNAL_SERVER_ERROR
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to revoke other sessions",
+         });
+      }
    },
 );
 
@@ -60,9 +172,38 @@ export const revokeOtherSessions = protectedProcedure.handler(
 export const revokeSessions = protectedProcedure.handler(async ({ context }) => {
    const { auth, headers } = context;
 
-   await auth.api.revokeSessions({
-      headers,
-   });
+   try {
+      await auth.api.revokeSessions({
+         headers,
+      });
 
-   return { success: true };
+      return { success: true };
+   } catch (error) {
+      // Convert Better Auth API errors to ORPCError
+      if (error && typeof error === "object" && "status" in error) {
+         const apiError = error as { status: string; statusCode?: number };
+
+         if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+            throw new ORPCError("UNAUTHORIZED", {
+               message: "Authentication required to revoke all sessions",
+            });
+         }
+
+         if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+            throw new ORPCError("FORBIDDEN", {
+               message: "Insufficient permissions to revoke all sessions",
+            });
+         }
+      }
+
+      // Re-throw ORPCErrors as-is
+      if (error instanceof ORPCError) {
+         throw error;
+      }
+
+      // Convert unknown errors to INTERNAL_SERVER_ERROR
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+         message: "Failed to revoke all sessions",
+      });
+   }
 });

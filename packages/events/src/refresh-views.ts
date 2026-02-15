@@ -21,15 +21,11 @@ export async function refreshUsageViews(db: DatabaseInstance): Promise<void> {
    try {
       await Promise.all([
          // Billing views
-         db
-            .refreshMaterializedView(dailyUsageByEvent)
-            .concurrently(),
+         db.refreshMaterializedView(dailyUsageByEvent).concurrently(),
          db.refreshMaterializedView(currentMonthUsageByEvent).concurrently(),
          db.refreshMaterializedView(currentMonthUsageByCategory).concurrently(),
          // Analytics views
-         db
-            .refreshMaterializedView(dailyContentAnalytics)
-            .concurrently(),
+         db.refreshMaterializedView(dailyContentAnalytics).concurrently(),
          db.refreshMaterializedView(contentTrafficSources).concurrently(),
          db.refreshMaterializedView(monthlySdkUsage).concurrently(),
          db.refreshMaterializedView(monthlyAiUsage).concurrently(),

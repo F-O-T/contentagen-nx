@@ -150,7 +150,7 @@ export function TabItem({
 
                {/* Close button */}
                {!isPinned && (
-                  <button
+                  <span
                      className={cn(
                         "ml-auto flex size-4 shrink-0 items-center justify-center rounded-sm transition-colors",
                         "hover:bg-muted-foreground/20",
@@ -159,11 +159,14 @@ export function TabItem({
                            : "opacity-0 group-hover/tab:opacity-70 group-hover/tab:hover:opacity-100",
                      )}
                      onClick={handleClose}
+                     onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") handleClose(e as unknown as MouseEvent);
+                     }}
+                     role="button"
                      tabIndex={-1}
-                     type="button"
                   >
                      <X className="size-3" />
-                  </button>
+                  </span>
                )}
             </button>
          </ContextMenuTrigger>

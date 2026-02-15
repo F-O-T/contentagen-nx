@@ -75,9 +75,7 @@ function useSidebarManager() {
    return context;
 }
 
-function SidebarManagerProvider({
-   children,
-}: { children: React.ReactNode }) {
+function SidebarManagerProvider({ children }: { children: React.ReactNode }) {
    const [sidebars, setSidebars] = React.useState<SidebarRegistry>({});
 
    const register = React.useCallback(
@@ -115,7 +113,10 @@ function SidebarManagerProvider({
 function SidebarManager({
    children,
    name,
-}: { children: React.ReactNode; name: string }) {
+}: {
+   children: React.ReactNode;
+   name: string;
+}) {
    const sidebarContext = useSidebar();
    const manager = useSidebarManager();
 

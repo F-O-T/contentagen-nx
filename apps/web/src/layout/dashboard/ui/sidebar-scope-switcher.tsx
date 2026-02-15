@@ -304,7 +304,10 @@ function SidebarScopeSwitcherContent() {
                         <Avatar
                            className={`${isCollapsed ? "size-6" : "size-8"} rounded-md`}
                         >
-                           <AvatarImage alt={activeOrganization.name} src="" />
+                           <AvatarImage
+                              alt={activeOrganization.name}
+                              src={activeOrganization.logo ?? undefined}
+                           />
                            <AvatarFallback
                               className={`rounded-md text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
                            >
@@ -328,6 +331,10 @@ function SidebarScopeSwitcherContent() {
                               <CommandGroup heading="Organizacao atual">
                                  <CommandItem disabled value={currentOrg.name}>
                                     <Avatar className="size-5 rounded-md">
+                                       <AvatarImage
+                                          alt={currentOrg.name}
+                                          src={currentOrg.logo ?? undefined}
+                                       />
                                        <AvatarFallback
                                           className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(currentOrg.name)}`}
                                        >
@@ -355,6 +362,10 @@ function SidebarScopeSwitcherContent() {
                                        value={org.name}
                                     >
                                        <Avatar className="size-5 rounded-md">
+                                          <AvatarImage
+                                             alt={org.name}
+                                             src={org.logo ?? undefined}
+                                          />
                                           <AvatarFallback
                                              className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(org.name)}`}
                                           >

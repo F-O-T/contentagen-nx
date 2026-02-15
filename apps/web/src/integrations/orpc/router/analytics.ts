@@ -3,7 +3,7 @@ import { executeRetentionQuery } from "@packages/analytics/retention";
 import { executeTrendsQuery } from "@packages/analytics/trends";
 import { insightConfigSchema } from "@packages/analytics/types";
 import { getDefaultDashboard as fetchDefaultDashboard } from "@packages/database/repositories/dashboard-repository";
-import { AppError, propagateError } from "@packages/utils/errors";
+import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -42,8 +42,8 @@ export const query = protectedProcedure
                );
          }
       } catch (error) {
-         propagateError(error);
-         throw AppError.internal("Failed to execute analytics query", {
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to execute analytics query",
             cause: error,
          });
       }
@@ -59,8 +59,8 @@ export const getDefaultDashboard = protectedProcedure.handler(
       try {
          return await fetchDefaultDashboard(db, organizationId, teamId, userId);
       } catch (error) {
-         propagateError(error);
-         throw AppError.internal("Failed to fetch default dashboard", {
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to fetch default dashboard",
             cause: error,
          });
       }

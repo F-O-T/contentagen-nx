@@ -25,6 +25,8 @@ export type NavItemDef = {
    quickAction?: NavItemAction;
    /** Item expands a floating sub-panel */
    subPanel?: SubSidebarSection;
+   /** PostHog early access flag key — if set, item is hidden when user is not enrolled */
+   earlyAccessFlag?: string;
 };
 
 export type NavGroupDef = {
@@ -58,6 +60,7 @@ export const navGroups: NavGroupDef[] = [
             icon: ClipboardList,
             route: "/$slug/$teamId/forms",
             quickAction: { type: "create", target: "navigate" },
+            earlyAccessFlag: "forms-beta",
          },
       ],
    },

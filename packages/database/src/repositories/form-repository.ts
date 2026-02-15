@@ -60,10 +60,7 @@ export async function listForms(db: DatabaseInstance, organizationId: string) {
 /**
  * List forms by team (team-scoped view)
  */
-export async function listFormsByTeam(
-   db: DatabaseInstance,
-   teamId: string,
-) {
+export async function listFormsByTeam(db: DatabaseInstance, teamId: string) {
    try {
       const result = await db
          .select({
@@ -98,10 +95,7 @@ export async function listFormsByTeam(
 /**
  * Count forms by team
  */
-export async function countFormsByTeam(
-   db: DatabaseInstance,
-   teamId: string,
-) {
+export async function countFormsByTeam(db: DatabaseInstance, teamId: string) {
    try {
       const [result] = await db
          .select({ count: count() })

@@ -65,7 +65,10 @@ export const pageViewEventSchema = z.object({
 export type PageViewEvent = z.infer<typeof pageViewEventSchema>;
 
 export function emitContentPageView(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: PageViewEvent,
 ) {
    return emitEvent({
@@ -90,7 +93,10 @@ export const contentPublishedEventSchema = z.object({
 export type ContentPublishedEvent = z.infer<typeof contentPublishedEventSchema>;
 
 export function emitContentPublished(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: ContentPublishedEvent,
 ) {
    return emitEvent({
@@ -114,7 +120,10 @@ export const contentUpdatedEventSchema = z.object({
 export type ContentUpdatedEvent = z.infer<typeof contentUpdatedEventSchema>;
 
 export function emitContentUpdated(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: ContentUpdatedEvent,
 ) {
    return emitEvent({
@@ -137,7 +146,10 @@ export const contentCreatedEventSchema = z.object({
 export type ContentCreatedEvent = z.infer<typeof contentCreatedEventSchema>;
 
 export function emitContentCreated(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: ContentCreatedEvent,
 ) {
    return emitEvent({
@@ -158,7 +170,10 @@ export const contentDeletedEventSchema = z.object({
 export type ContentDeletedEvent = z.infer<typeof contentDeletedEventSchema>;
 
 export function emitContentDeleted(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: ContentDeletedEvent,
 ) {
    return emitEvent({
@@ -182,7 +197,10 @@ export const scrollMilestoneEventSchema = z.object({
 export type ScrollMilestoneEvent = z.infer<typeof scrollMilestoneEventSchema>;
 
 export function emitScrollMilestone(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: ScrollMilestoneEvent,
 ) {
    return emitEvent({
@@ -206,7 +224,10 @@ export const timeSpentEventSchema = z.object({
 export type TimeSpentEvent = z.infer<typeof timeSpentEventSchema>;
 
 export function emitTimeSpent(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: TimeSpentEvent,
 ) {
    return emitEvent({
@@ -232,7 +253,10 @@ export const ctaClickEventSchema = z.object({
 export type CtaClickEvent = z.infer<typeof ctaClickEventSchema>;
 
 export function emitCtaClick(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: CtaClickEvent,
 ) {
    return emitEvent({
@@ -255,7 +279,10 @@ export const contentExportedEventSchema = z.object({
 export type ContentExportedEvent = z.infer<typeof contentExportedEventSchema>;
 
 export function emitContentExported(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: ContentExportedEvent,
 ) {
    return emitEvent({
@@ -276,7 +303,10 @@ export const contentArchivedEventSchema = z.object({
 export type ContentArchivedEvent = z.infer<typeof contentArchivedEventSchema>;
 
 export function emitContentArchived(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: ContentArchivedEvent,
 ) {
    return emitEvent({

@@ -1,4 +1,3 @@
-// apps/web/src/layout/dashboard/dashboard-layout.tsx
 import {
    Banner,
    BannerClose,
@@ -12,7 +11,8 @@ import {
    SidebarProvider,
 } from "@packages/ui/components/sidebar";
 import { cn } from "@packages/ui/lib/utils";
-import { useQueryClient } from "@tanstack/react-query";
+import { identifyClient, setClientGroup } from "@packages/posthog/client";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import { FlaskConicalIcon } from "lucide-react";
 import type * as React from "react";
@@ -21,8 +21,8 @@ import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { useLastOrganization } from "@/hooks/use-last-organization";
 import { authClient } from "@/integrations/better-auth/auth-client";
-import { orpc } from "@/integrations/orpc/client";
 import { EarlyAccessProvider } from "@/hooks/use-early-access";
+import { orpc } from "@/integrations/orpc/client";
 import { setActiveSection } from "../hooks/use-sidebar-nav";
 import {
    getSidebarDefaultOpen,
@@ -41,6 +41,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const queryClient = useQueryClient();
    const setTeamForOrgRef = useRef(new Set<string>());
    const { pathname } = useLocation();
+
+   // Fetch session for PostHog client-side identification
+   const { data: session } = useSuspenseQuery(
+      orpc.session.getSession.queryOptions({}),
+   );
 
    // Disable scroll on main when in settings
    const isSettingsPage = pathname.includes("/settings");
@@ -94,6 +99,29 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       void setDefaultTeam();
    }, [activeOrganization?.id, activeTeam, queryClient, teams]);
 
+   // ── PostHog client-side identification ──────────────────────────────────
+   useEffect(() => {
+      if (session?.user?.id) {
+         identifyClient(session.user.id, {
+            email: session.user.email,
+            name: session.user.name,
+         });
+      }
+      if (activeOrganization?.id) {
+         setClientGroup("organization", activeOrganization.id, {
+            name: activeOrganization.name,
+            slug: activeOrganization.slug,
+         });
+      }
+   }, [
+      session?.user?.id,
+      session?.user?.email,
+      session?.user?.name,
+      activeOrganization?.id,
+      activeOrganization?.name,
+      activeOrganization?.slug,
+   ]);
+
    useEffect(() => {
       if (pathname.includes("/analytics/dashboards")) {
          setActiveSection("dashboards");
@@ -108,45 +136,36 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
    return (
       <EarlyAccessProvider>
-      <SidebarManagerProvider>
-         <SidebarProvider
-            className="h-svh"
-            defaultOpen={getSidebarDefaultOpen()}
-            onOpenChange={persistSidebarState}
-         >
-            <SidebarManager name="main">
-               <AppSidebar />
-            </SidebarManager>
+         <SidebarManagerProvider>
+            <SidebarProvider
+               className="h-svh"
+               defaultOpen={getSidebarDefaultOpen()}
+               onOpenChange={persistSidebarState}
+            >
+               <SidebarManager name="main">
+                  <AppSidebar />
+               </SidebarManager>
 
-            <SidebarInset className="flex flex-col overflow-hidden">
-               <SidebarSubPanel />
-               <div className="shrink-0">
-                  <Banner>
-                     <BannerIcon icon={FlaskConicalIcon} />
-                     <BannerTitle>
-                        Este aplicativo esta em fase beta e passa por melhorias
-                        frequentes. Algumas funcionalidades podem mudar sem aviso
-                        previo.
-                     </BannerTitle>
-                     <BannerClose />
-                  </Banner>
-                  <TabBar
-                     onNewTab={openNewSearchTab}
-                     onTabFocus={navigateToTab}
-                     onTabClose={handleCloseTab}
-                  />
-               </div>
-               <main
-                  className={cn(
-                     "relative flex-1 bg-background p-4",
-                     isSettingsPage ? "overflow-hidden" : "overflow-y-auto",
-                  )}
-               >
-                  {children}
-               </main>
-            </SidebarInset>
-         </SidebarProvider>
-      </SidebarManagerProvider>
+               <SidebarInset className="flex flex-col overflow-hidden">
+                  <SidebarSubPanel />
+                  <div className="shrink-0">
+                     <TabBar
+                        onNewTab={openNewSearchTab}
+                        onTabFocus={navigateToTab}
+                        onTabClose={handleCloseTab}
+                     />
+                  </div>
+                  <main
+                     className={cn(
+                        "relative flex-1 bg-background p-4 border-white/10 border-t-1",
+                        isSettingsPage ? "overflow-hidden" : "overflow-y-auto",
+                     )}
+                  >
+                     {children}
+                  </main>
+               </SidebarInset>
+            </SidebarProvider>
+         </SidebarManagerProvider>
       </EarlyAccessProvider>
    );
 }

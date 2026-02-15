@@ -141,6 +141,18 @@ import { emitEvent } from "@packages/events";
 
 ---
 
+## Data Table Pattern
+
+Use `DataTable` from `@packages/ui/components/data-table` for all tabular lists.
+
+**Rules:**
+- Prefer `DataTable` over manual `Table` primitives for list views.
+- Tables should be expandable via row click using `renderSubComponent`.
+- Do not wrap `DataTable` in `Card`/`CardContent` containers.
+- Provide a mobile card renderer when the table is used on responsive pages.
+
+---
+
 ## Package Exports
 
 Packages use explicit `package.json` exports. Always match the export path exactly:
@@ -207,7 +219,12 @@ export async function createContent(db: DatabaseInstance, data: NewContent) {
 
 Config at `packages/authentication/src/server.ts`. Plugins: Google OAuth, Magic Link, Email OTP, 2FA, Anonymous sessions.
 
-**Adding fields to auth-managed tables** (`user`, `session`, `organization`, `team`): Use `additionalFields` in Better Auth config, NOT direct Drizzle schema edits.
+**⚠️ CRITICAL: Updating Auth Schema**
+
+To add fields to auth-managed tables (`user`, `session`, `organization`, `team`):
+- **ALWAYS** use `additionalFields` in `packages/authentication/src/server.ts`
+- **NEVER** edit Drizzle schemas directly for these tables
+- Better Auth manages these tables — schema changes must go through its config
 
 ```typescript
 // packages/authentication/src/server.ts
@@ -227,6 +244,24 @@ organization({
 ```
 
 Field types: `"string"` (TEXT), `"boolean"` (BOOLEAN), `"number"` (INTEGER), `"string[]"` (TEXT[]), `"json"` (JSONB + Zod validator)
+
+**Organization operations** use the Better Auth client directly — do NOT wrap in oRPC procedures:
+```typescript
+// Client-side (apps/web) — use authClient.organization.*
+authClient.organization.create({ name, slug })
+authClient.organization.update({ data: { name }, organizationId })
+authClient.organization.delete({ organizationId })
+authClient.organization.inviteMember({ email, role, organizationId })
+authClient.organization.removeMember({ memberIdOrEmail, organizationId })
+authClient.organization.updateMemberRole({ memberId, role, organizationId })
+authClient.organization.cancelInvitation({ invitationId })
+authClient.organization.getInvitation({ id })
+authClient.organization.setActive({ organizationId })
+authClient.organization.createTeam({ name, organizationId })
+authClient.organization.setActiveTeam({ teamId })
+```
+
+Read-only org data (members list, active org with subscription) uses oRPC (`orpc.organization.*`) since those enrich with DB data (plans, credits, etc.).
 
 ---
 

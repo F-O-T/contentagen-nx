@@ -30,7 +30,10 @@ export type WebhookEndpointCreatedEvent = z.infer<
 >;
 
 export function emitWebhookEndpointCreated(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: WebhookEndpointCreatedEvent,
 ) {
    return emitEvent({
@@ -54,7 +57,10 @@ export type WebhookEndpointUpdatedEvent = z.infer<
 >;
 
 export function emitWebhookEndpointUpdated(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: WebhookEndpointUpdatedEvent,
 ) {
    return emitEvent({
@@ -77,7 +83,10 @@ export type WebhookEndpointDeletedEvent = z.infer<
 >;
 
 export function emitWebhookEndpointDeleted(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: WebhookEndpointDeletedEvent,
 ) {
    return emitEvent({
@@ -97,12 +106,13 @@ export const webhookDeliveredEventSchema = z.object({
    eventName: z.string(),
    statusCode: z.number().int(),
 });
-export type WebhookDeliveredEvent = z.infer<
-   typeof webhookDeliveredEventSchema
->;
+export type WebhookDeliveredEvent = z.infer<typeof webhookDeliveredEventSchema>;
 
 export function emitWebhookDelivered(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: WebhookDeliveredEvent,
 ) {
    return emitEvent({

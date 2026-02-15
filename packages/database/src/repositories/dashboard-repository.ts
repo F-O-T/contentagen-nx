@@ -188,7 +188,9 @@ export async function getDefaultDashboard(
       const tiles: DashboardTile[] = insightIds.map((insightId, index) => {
          const defaultInsight = DEFAULT_INSIGHTS[index];
          if (!defaultInsight) {
-            throw AppError.internal("Mismatch between insights and definitions");
+            throw AppError.internal(
+               "Mismatch between insights and definitions",
+            );
          }
          return {
             insightId,

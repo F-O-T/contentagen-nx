@@ -27,7 +27,10 @@ export const insightCreatedEventSchema = z.object({
 export type InsightCreatedEvent = z.infer<typeof insightCreatedEventSchema>;
 
 export function emitInsightCreated(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: InsightCreatedEvent,
 ) {
    return emitEvent({
@@ -49,7 +52,10 @@ export const insightUpdatedEventSchema = z.object({
 export type InsightUpdatedEvent = z.infer<typeof insightUpdatedEventSchema>;
 
 export function emitInsightUpdated(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: InsightUpdatedEvent,
 ) {
    return emitEvent({
@@ -70,7 +76,10 @@ export const insightDeletedEventSchema = z.object({
 export type InsightDeletedEvent = z.infer<typeof insightDeletedEventSchema>;
 
 export function emitInsightDeleted(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: InsightDeletedEvent,
 ) {
    return emitEvent({

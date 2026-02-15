@@ -82,7 +82,11 @@ function extractFromCache<T>(
 
 // ── Hook ─────────────────────────────────────────────────────────────────────
 
-export function useSearch(orgSlug: string, teamId: string) {
+export function useSearch(
+   orgSlug: string,
+   teamId: string,
+   options?: { hiddenTypes?: Set<SearchResultType> },
+) {
    const queryClient = useQueryClient();
    const [query, setQuery] = useState("");
 
@@ -238,9 +242,13 @@ export function useSearch(orgSlug: string, teamId: string) {
             });
          }
 
+         if (options?.hiddenTypes && options.hiddenTypes.size > 0) {
+            return groups.filter((g) => !options.hiddenTypes!.has(g.type));
+         }
+
          return groups;
       },
-      [queryClient, orgSlug, teamId],
+      [queryClient, orgSlug, teamId, options?.hiddenTypes],
    );
 
    const results = useMemo(() => search(query), [search, query]);

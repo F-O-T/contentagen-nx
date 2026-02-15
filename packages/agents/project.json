@@ -1,8 +1,0 @@
-{
-   "name": "@packages/agents",
-   "targets": {
-      "typecheck": {
-         "command": "echo '@packages/agents: typecheck skipped — @mastra/core .d.ts files (~100K lines) exceed tsc memory limits'"
-      }
-   }
-}

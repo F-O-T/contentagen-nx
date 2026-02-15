@@ -1,3 +1,4 @@
+import type { ColumnDef } from "@tanstack/react-table";
 import {
    Card,
    CardContent,
@@ -5,6 +6,7 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
+import { DataTable } from "@packages/ui/components/data-table";
 import {
    Select,
    SelectContent,
@@ -13,16 +15,8 @@ import {
    SelectValue,
 } from "@packages/ui/components/select";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import {
-   Table,
-   TableBody,
-   TableCell,
-   TableHead,
-   TableHeader,
-   TableRow,
-} from "@packages/ui/components/table";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { UsageChart } from "@/features/billing/ui/usage-chart";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -48,6 +42,16 @@ const CATEGORY_COLORS: Record<string, string> = {
    experiment: "#f43f5e",
    webhook: "#06b6d4",
    system: "#64748b",
+};
+
+// ============================================
+// Types
+// ============================================
+
+type UsageRow = {
+   category: string;
+   total: number;
+   [date: string]: number | string;
 };
 
 // ============================================
@@ -110,10 +114,6 @@ export function BillingUsage() {
       placeholderData: keepPreviousData,
    });
 
-   if (isLoading && !data) {
-      return <UsageSkeleton />;
-   }
-
    const usageData = data ?? [];
 
    // Build chart data using countByCategory for the line chart
@@ -142,6 +142,72 @@ export function BillingUsage() {
    const sortedCategories = [...allCategories].sort(
       (a, b) => (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
    );
+
+   // Transform data into flat rows for DataTable
+   const tableData: UsageRow[] = sortedCategories.map((cat) => {
+      const row: UsageRow = {
+         category: cat,
+         total: categoryTotals.get(cat) ?? 0,
+      };
+      for (const date of allDates) {
+         const dayData = usageData.find((d) => d.date === date);
+         row[date] = dayData?.countByCategory[cat] ?? 0;
+      }
+      return row;
+   });
+
+   // Build columns dynamically based on dates
+   // biome-ignore lint/correctness/useExhaustiveDependencies: columns depend on allDates which changes with data
+   const columns = useMemo<ColumnDef<UsageRow>[]>(() => {
+      const cols: ColumnDef<UsageRow>[] = [
+         {
+            accessorKey: "category",
+            header: "Serie",
+            enableSorting: false,
+            cell: ({ row }) => {
+               const cat = row.original.category;
+               return (
+                  <div className="flex items-center gap-2">
+                     <div
+                        className="size-2.5 rounded-full shrink-0"
+                        style={{
+                           backgroundColor:
+                              CATEGORY_COLORS[cat] ?? "#94a3b8",
+                        }}
+                     />
+                     <span className="text-sm font-medium">
+                        {CATEGORY_LABELS[cat] ?? cat}
+                     </span>
+                  </div>
+               );
+            },
+         },
+         {
+            accessorKey: "total",
+            header: "Total",
+            cell: ({ row }) => (
+               <div className="text-right font-medium tabular-nums">
+                  {formatNumber(row.original.total)}
+               </div>
+            ),
+         },
+         ...allDates.map<ColumnDef<UsageRow>>((date) => ({
+            accessorKey: date,
+            header: formatShortDate(date),
+            enableSorting: false,
+            cell: ({ row }) => (
+               <div className="text-right tabular-nums text-sm">
+                  {formatNumber((row.original[date] as number) ?? 0)}
+               </div>
+            ),
+         })),
+      ];
+      return cols;
+   }, [allDates.join(",")]);
+
+   if (isLoading && !data) {
+      return <UsageSkeleton />;
+   }
 
    return (
       <div className="space-y-6">
@@ -175,71 +241,19 @@ export function BillingUsage() {
             </CardContent>
          </Card>
 
-         {/* Daily breakdown table - always shown */}
+         {/* Daily breakdown table */}
          <Card>
             <CardHeader>
                <CardTitle className="text-base">
                   Uso diario por produto
                </CardTitle>
             </CardHeader>
-            <CardContent className="overflow-x-auto">
-               <Table>
-                  <TableHeader>
-                     <TableRow>
-                        <TableHead className="sticky left-0 bg-card z-10 min-w-[180px]">
-                           Serie
-                        </TableHead>
-                        <TableHead className="text-right min-w-[80px]">
-                           Total
-                        </TableHead>
-                        {allDates.map((date) => (
-                           <TableHead
-                              className="text-right min-w-[70px] text-xs"
-                              key={date}
-                           >
-                              {formatShortDate(date)}
-                           </TableHead>
-                        ))}
-                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                     {sortedCategories.map((cat) => (
-                        <TableRow key={cat}>
-                           <TableCell className="sticky left-0 bg-card z-10">
-                              <div className="flex items-center gap-2">
-                                 <div
-                                    className="size-2.5 rounded-full shrink-0"
-                                    style={{
-                                       backgroundColor:
-                                          CATEGORY_COLORS[cat] ?? "#94a3b8",
-                                    }}
-                                 />
-                                 <span className="text-sm font-medium">
-                                    {CATEGORY_LABELS[cat] ?? cat}
-                                 </span>
-                              </div>
-                           </TableCell>
-                           <TableCell className="text-right font-medium tabular-nums">
-                              {formatNumber(categoryTotals.get(cat) ?? 0)}
-                           </TableCell>
-                           {allDates.map((date) => {
-                              const dayData = usageData.find(
-                                 (d) => d.date === date,
-                              );
-                              const count = dayData?.countByCategory[cat] ?? 0;
-                              return (
-                                 <TableCell
-                                    className="text-right tabular-nums text-sm"
-                                    key={`${cat}-${date}`}
-                                 >
-                                    {formatNumber(count)}
-                                 </TableCell>
-                              );
-                           })}
-                        </TableRow>
-                     ))}
-                  </TableBody>
-               </Table>
+            <CardContent>
+               <DataTable
+                  columns={columns}
+                  data={tableData}
+                  getRowId={(row) => row.category}
+               />
             </CardContent>
          </Card>
       </div>

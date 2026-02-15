@@ -8,10 +8,12 @@ import {
    SidebarMenuItem,
    useSidebarManager,
 } from "@packages/ui/components/sidebar";
+import { Badge } from "@packages/ui/components/badge";
 import { Link, useLocation, useParams } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { useCallback } from "react";
 import { useActiveTeam } from "@/hooks/use-active-team";
+import { useEarlyAccess } from "@/hooks/use-early-access";
 import type { SubSidebarSection } from "@/layout/dashboard/hooks/use-sidebar-nav";
 import {
    setActiveSection,
@@ -64,6 +66,11 @@ function NavItem({
                <>
                   <Icon />
                   <span>{item.label}</span>
+                  {item.earlyAccessFlag && (
+                     <Badge variant="secondary" className="ml-1.5 px-1.5 py-0 text-[10px] leading-4 group-data-[collapsible=icon]:hidden">
+                        Beta
+                     </Badge>
+                  )}
                   <ChevronRight className="ml-auto size-3.5 text-muted-foreground group-data-[collapsible=icon]:hidden" />
                </>
             ) : (
@@ -75,6 +82,11 @@ function NavItem({
                >
                   <Icon />
                   <span>{item.label}</span>
+                  {item.earlyAccessFlag && (
+                     <Badge variant="secondary" className="ml-1.5 px-1.5 py-0 text-[10px] leading-4 group-data-[collapsible=icon]:hidden">
+                        Beta
+                     </Badge>
+                  )}
                </Link>
             )}
          </SidebarMenuButton>
@@ -102,12 +114,21 @@ function NavGroup({
    onSubPanelToggle: (section: SubSidebarSection) => void;
    onMainItemClick: () => void;
 }) {
+   const { isEnrolled } = useEarlyAccess();
+
+   const visibleItems = group.items.filter((item) => {
+      if (!item.earlyAccessFlag) return true;
+      return isEnrolled(item.earlyAccessFlag);
+   });
+
+   if (visibleItems.length === 0) return null;
+
    return (
       <SidebarGroup>
          <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
          <SidebarGroupContent>
             <SidebarMenu>
-               {group.items.map((item) => (
+               {visibleItems.map((item) => (
                   <NavItem
                      isActive={isItemActive(item)}
                      item={item}

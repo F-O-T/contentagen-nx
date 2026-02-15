@@ -1,11 +1,4 @@
-import { Badge } from "@packages/ui/components/badge";
-import {
-   Card,
-   CardContent,
-   CardDescription,
-   CardHeader,
-   CardTitle,
-} from "@packages/ui/components/card";
+import { Card, CardContent } from "@packages/ui/components/card";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import {
    Item,
@@ -20,7 +13,7 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { Switch } from "@packages/ui/components/switch";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Activity, Moon, Shield } from "lucide-react";
+import { Activity, Moon } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { authClient } from "@/integrations/better-auth/auth-client";
@@ -35,38 +28,16 @@ export const Route = createFileRoute(
 
 function PreferencesSectionSkeleton() {
    return (
-      <div className="space-y-4 md:space-y-6">
-         <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Appearance Card Skeleton */}
-            <div className="md:col-span-2 lg:col-span-2">
-               <Card className="h-full">
-                  <CardHeader>
-                     <Skeleton className="h-6 w-1/3" />
-                     <Skeleton className="h-4 w-2/3" />
-                  </CardHeader>
-                  <CardContent>
-                     <div className="space-y-1">
-                        <Skeleton className="h-16 w-full rounded-lg" />
-                        <Skeleton className="h-16 w-full rounded-lg" />
-                     </div>
-                  </CardContent>
-               </Card>
-            </div>
-
-            {/* Privacy Card Skeleton */}
-            <Card className="h-full">
-               <CardHeader>
-                  <Skeleton className="h-6 w-2/3" />
-                  <Skeleton className="h-4 w-full" />
-               </CardHeader>
-               <CardContent className="space-y-4">
-                  <div className="rounded-lg bg-secondary/50 p-4 text-center">
-                     <Skeleton className="h-4 w-1/2 mx-auto mb-2" />
-                     <Skeleton className="h-6 w-24 mx-auto" />
-                  </div>
-                  <Skeleton className="h-16 w-full rounded-lg" />
-               </CardContent>
-            </Card>
+      <div className="space-y-6">
+         <div>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-72 mt-2" />
+         </div>
+         <div className="space-y-1">
+            <Skeleton className="h-16 w-full rounded-lg" />
+         </div>
+         <div className="space-y-1">
+            <Skeleton className="h-16 w-full rounded-lg" />
          </div>
       </div>
    );
@@ -74,21 +45,26 @@ function PreferencesSectionSkeleton() {
 
 function PreferencesSectionErrorFallback(props: FallbackProps) {
    return (
-      <Card className="h-full">
-         <CardHeader>
-            <CardTitle>Preferências</CardTitle>
-            <CardDescription>
+      <div className="space-y-6">
+         <div>
+            <h1 className="text-2xl font-semibold font-serif">
+               Personalização
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
                Personalize sua experiência no aplicativo.
-            </CardDescription>
-         </CardHeader>
-         <CardContent>
-            {createErrorFallback({
-               errorDescription: "Não foi possível carregar suas preferências",
-               errorTitle: "Erro ao Carregar",
-               retryText: "Tentar novamente",
-            })(props)}
-         </CardContent>
-      </Card>
+            </p>
+         </div>
+         <Card>
+            <CardContent className="py-8">
+               {createErrorFallback({
+                  errorDescription:
+                     "Não foi possível carregar suas preferências",
+                  errorTitle: "Erro ao Carregar",
+                  retryText: "Tentar novamente",
+               })(props)}
+            </CardContent>
+         </Card>
+      </div>
    );
 }
 
@@ -100,42 +76,40 @@ function PreferencesSectionErrorFallback(props: FallbackProps) {
 // Appearance Card Component
 // ============================================
 
-function AppearanceCard() {
+function AppearanceSection() {
    return (
-      <Card className="h-full">
-         <CardHeader>
-            <CardTitle>Preferências</CardTitle>
-            <CardDescription>
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Aparência</h2>
+            <p className="text-sm text-muted-foreground mt-1">
                Personalize a aparência da interface
-            </CardDescription>
-         </CardHeader>
-         <CardContent>
-            <ItemGroup>
-               <Item variant="muted">
-                  <ItemMedia variant="icon">
-                     <Moon className="size-4" />
-                  </ItemMedia>
-                  <ItemContent className="min-w-0">
-                     <ItemTitle>Tema</ItemTitle>
-                     <ItemDescription className="line-clamp-2">
-                        Escolha o tema da interface
-                     </ItemDescription>
-                  </ItemContent>
-                  <ItemActions>
-                     <ThemeSwitcher />
-                  </ItemActions>
-               </Item>
-            </ItemGroup>
-         </CardContent>
-      </Card>
+            </p>
+         </div>
+         <ItemGroup>
+            <Item variant="muted">
+               <ItemMedia variant="icon">
+                  <Moon className="size-4" />
+               </ItemMedia>
+               <ItemContent className="min-w-0">
+                  <ItemTitle>Tema</ItemTitle>
+                  <ItemDescription className="line-clamp-2">
+                     Escolha o tema da interface
+                  </ItemDescription>
+               </ItemContent>
+               <ItemActions>
+                  <ThemeSwitcher />
+               </ItemActions>
+            </Item>
+         </ItemGroup>
+      </section>
    );
 }
 
 // ============================================
-// Privacy Card Component
+// Privacy Section Component
 // ============================================
 
-function PrivacyCard({
+function PrivacySection({
    hasConsent,
    isPending,
    onConsentChange,
@@ -145,64 +119,35 @@ function PrivacyCard({
    onConsentChange: (consent: boolean) => void;
 }) {
    return (
-      <Card className="h-full">
-         <CardHeader>
-            <CardTitle>Privacidade</CardTitle>
-            <CardDescription>
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Privacidade</h2>
+            <p className="text-sm text-muted-foreground mt-1">
                Controle como seus dados são utilizados
-            </CardDescription>
-         </CardHeader>
-         <CardContent className="space-y-4">
-            <div className="rounded-lg bg-secondary/50 p-4 text-center">
-               <p className="text-xs md:text-sm text-muted-foreground mb-1">
-                  Status da Telemetria
-               </p>
-               <div className="flex items-center justify-center gap-2">
-                  {hasConsent ? (
-                     <>
-                        <Shield className="size-5 text-green-500" />
-                        <span className="text-lg font-semibold text-green-500">
-                           Ativada
-                        </span>
-                     </>
-                  ) : (
-                     <>
-                        <Shield className="size-5 text-muted-foreground" />
-                        <span className="text-lg font-semibold text-muted-foreground">
-                           Desativada
-                        </span>
-                     </>
-                  )}
-               </div>
-               <Badge className="mt-2" variant="secondary">
-                  {hasConsent ? "Compartilhando Dados" : "Dados Privados"}
-               </Badge>
-            </div>
-
-            <ItemGroup>
-               <Item variant="muted">
-                  <ItemMedia variant="icon">
-                     <Activity className="size-4" />
-                  </ItemMedia>
-                  <ItemContent className="min-w-0">
-                     <ItemTitle>Telemetria</ItemTitle>
-                     <ItemDescription className="line-clamp-2">
-                        Ajude-nos a melhorar compartilhando dados de uso
-                        anônimos
-                     </ItemDescription>
-                  </ItemContent>
-                  <ItemActions>
-                     <Switch
-                        aria-label="Telemetria"
-                        checked={hasConsent}
-                        disabled={isPending}
-                        onCheckedChange={onConsentChange}
-                     />
-                  </ItemActions>
-               </Item>
-            </ItemGroup>
-         </CardContent>
-      </Card>
+            </p>
+         </div>
+         <ItemGroup>
+            <Item variant="muted">
+               <ItemMedia variant="icon">
+                  <Activity className="size-4" />
+               </ItemMedia>
+               <ItemContent className="min-w-0">
+                  <ItemTitle>Telemetria</ItemTitle>
+                  <ItemDescription className="line-clamp-2">
+                     Ajude-nos a melhorar compartilhando dados de uso anônimos
+                  </ItemDescription>
+               </ItemContent>
+               <ItemActions>
+                  <Switch
+                     aria-label="Telemetria"
+                     checked={hasConsent}
+                     disabled={isPending}
+                     onCheckedChange={onConsentChange}
+                  />
+               </ItemActions>
+            </Item>
+         </ItemGroup>
+      </section>
    );
 }
 
@@ -226,19 +171,25 @@ function PreferencesSectionContent() {
    const hasConsent = session?.user?.telemetryConsent ?? true;
 
    return (
-      <div className="space-y-4 md:space-y-6">
-         <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <div className="md:col-span-2 lg:col-span-2">
-               <AppearanceCard />
-            </div>
-            <PrivacyCard
-               hasConsent={hasConsent}
-               isPending={updateConsentMutation.isPending}
-               onConsentChange={(checked) => {
-                  updateConsentMutation.mutate(checked);
-               }}
-            />
+      <div className="space-y-6">
+         <div>
+            <h1 className="text-2xl font-semibold font-serif">
+               Personalização
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+               Personalize sua experiência no aplicativo.
+            </p>
          </div>
+
+         <AppearanceSection />
+
+         <PrivacySection
+            hasConsent={hasConsent}
+            isPending={updateConsentMutation.isPending}
+            onConsentChange={(checked) => {
+               updateConsentMutation.mutate(checked);
+            }}
+         />
       </div>
    );
 }

@@ -1,3 +1,4 @@
+import type { ColumnDef } from "@tanstack/react-table";
 import {
    Card,
    CardContent,
@@ -5,6 +6,7 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
+import { DataTable } from "@packages/ui/components/data-table";
 import {
    Select,
    SelectContent,
@@ -13,16 +15,8 @@ import {
    SelectValue,
 } from "@packages/ui/components/select";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import {
-   Table,
-   TableBody,
-   TableCell,
-   TableHead,
-   TableHeader,
-   TableRow,
-} from "@packages/ui/components/table";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { UsageChart } from "@/features/billing/ui/usage-chart";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -48,6 +42,16 @@ const CATEGORY_COLORS: Record<string, string> = {
    experiment: "#f43f5e",
    webhook: "#06b6d4",
    system: "#64748b",
+};
+
+// ============================================
+// Types
+// ============================================
+
+type SpendRow = {
+   category: string;
+   total: number;
+   [date: string]: number | string;
 };
 
 // ============================================
@@ -146,8 +150,70 @@ export function BillingSpend() {
       (a, b) => (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
    );
 
+   // Transform data into flat rows for DataTable
+   const tableData: SpendRow[] = sortedCategories.map((cat) => {
+      const row: SpendRow = {
+         category: cat,
+         total: categoryTotals.get(cat) ?? 0,
+      };
+      for (const date of allDates) {
+         const dayData = usageData.find((d) => d.date === date);
+         row[date] = dayData?.byCategory[cat] ?? 0;
+      }
+      return row;
+   });
+
+   // Build columns dynamically based on dates
+   // biome-ignore lint/correctness/useExhaustiveDependencies: columns depend on allDates which changes with data
+   const columns = useMemo<ColumnDef<SpendRow>[]>(() => {
+      const cols: ColumnDef<SpendRow>[] = [
+         {
+            accessorKey: "category",
+            header: "Serie",
+            enableSorting: false,
+            cell: ({ row }) => {
+               const cat = row.original.category;
+               return (
+                  <div className="flex items-center gap-2">
+                     <div
+                        className="size-2.5 rounded-full shrink-0"
+                        style={{
+                           backgroundColor:
+                              CATEGORY_COLORS[cat] ?? "#94a3b8",
+                        }}
+                     />
+                     <span className="text-sm font-medium">
+                        {CATEGORY_LABELS[cat] ?? cat}
+                     </span>
+                  </div>
+               );
+            },
+         },
+         {
+            accessorKey: "total",
+            header: "Gasto total",
+            cell: ({ row }) => (
+               <div className="text-right font-medium tabular-nums">
+                  {formatCurrency(row.original.total)}
+               </div>
+            ),
+         },
+         ...allDates.map<ColumnDef<SpendRow>>((date) => ({
+            accessorKey: date,
+            header: formatShortDate(date),
+            enableSorting: false,
+            cell: ({ row }) => (
+               <div className="text-right tabular-nums text-sm">
+                  {formatCurrency((row.original[date] as number) ?? 0)}
+               </div>
+            ),
+         })),
+      ];
+      return cols;
+   }, [allDates.join(",")]);
+
    return (
-      <div className="space-y-6">
+      <div className="space-y-4">
          {/* Chart Card */}
          <Card>
             <CardHeader>
@@ -178,71 +244,19 @@ export function BillingSpend() {
             </CardContent>
          </Card>
 
-         {/* Daily breakdown table - always shown */}
+         {/* Daily breakdown table */}
          <Card>
             <CardHeader>
                <CardTitle className="text-base">
                   Gastos diarios por produto
                </CardTitle>
             </CardHeader>
-            <CardContent className="overflow-x-auto">
-               <Table>
-                  <TableHeader>
-                     <TableRow>
-                        <TableHead className="sticky left-0 bg-card z-10 min-w-[180px]">
-                           Serie
-                        </TableHead>
-                        <TableHead className="text-right min-w-[100px]">
-                           Gasto total
-                        </TableHead>
-                        {allDates.map((date) => (
-                           <TableHead
-                              className="text-right min-w-[80px] text-xs"
-                              key={date}
-                           >
-                              {formatShortDate(date)}
-                           </TableHead>
-                        ))}
-                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                     {sortedCategories.map((cat) => (
-                        <TableRow key={cat}>
-                           <TableCell className="sticky left-0 bg-card z-10">
-                              <div className="flex items-center gap-2">
-                                 <div
-                                    className="size-2.5 rounded-full shrink-0"
-                                    style={{
-                                       backgroundColor:
-                                          CATEGORY_COLORS[cat] ?? "#94a3b8",
-                                    }}
-                                 />
-                                 <span className="text-sm font-medium">
-                                    {CATEGORY_LABELS[cat] ?? cat}
-                                 </span>
-                              </div>
-                           </TableCell>
-                           <TableCell className="text-right font-medium tabular-nums">
-                              {formatCurrency(categoryTotals.get(cat) ?? 0)}
-                           </TableCell>
-                           {allDates.map((date) => {
-                              const dayData = usageData.find(
-                                 (d) => d.date === date,
-                              );
-                              const cost = dayData?.byCategory[cat] ?? 0;
-                              return (
-                                 <TableCell
-                                    className="text-right tabular-nums text-sm"
-                                    key={`${cat}-${date}`}
-                                 >
-                                    {formatCurrency(cost)}
-                                 </TableCell>
-                              );
-                           })}
-                        </TableRow>
-                     ))}
-                  </TableBody>
-               </Table>
+            <CardContent>
+               <DataTable
+                  columns={columns}
+                  data={tableData}
+                  getRowId={(row) => row.category}
+               />
             </CardContent>
          </Card>
       </div>

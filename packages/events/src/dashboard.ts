@@ -24,12 +24,13 @@ export const dashboardCreatedEventSchema = z.object({
    dashboardId: z.string().uuid(),
    name: z.string(),
 });
-export type DashboardCreatedEvent = z.infer<
-   typeof dashboardCreatedEventSchema
->;
+export type DashboardCreatedEvent = z.infer<typeof dashboardCreatedEventSchema>;
 
 export function emitDashboardCreated(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: DashboardCreatedEvent,
 ) {
    return emitEvent({
@@ -48,12 +49,13 @@ export const dashboardUpdatedEventSchema = z.object({
    dashboardId: z.string().uuid(),
    changedFields: z.array(z.string()),
 });
-export type DashboardUpdatedEvent = z.infer<
-   typeof dashboardUpdatedEventSchema
->;
+export type DashboardUpdatedEvent = z.infer<typeof dashboardUpdatedEventSchema>;
 
 export function emitDashboardUpdated(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: DashboardUpdatedEvent,
 ) {
    return emitEvent({
@@ -71,12 +73,13 @@ export function emitDashboardUpdated(
 export const dashboardDeletedEventSchema = z.object({
    dashboardId: z.string().uuid(),
 });
-export type DashboardDeletedEvent = z.infer<
-   typeof dashboardDeletedEventSchema
->;
+export type DashboardDeletedEvent = z.infer<typeof dashboardDeletedEventSchema>;
 
 export function emitDashboardDeleted(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId" | "teamId">,
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
    properties: DashboardDeletedEvent,
 ) {
    return emitEvent({
