@@ -22,6 +22,7 @@ import * as propertyDefinitionsRouter from "./property-definitions";
 import * as rolesRouter from "./roles";
 import * as sdkUsageRouter from "./sdk-usage";
 import * as sessionRouter from "./session";
+import * as ssoRouter from "./sso";
 import * as teamRouter from "./team";
 import * as usageRouter from "./usage";
 import * as webhooksRouter from "./webhooks";
@@ -50,6 +51,7 @@ export default {
    roles: rolesRouter,
    sdkUsage: sdkUsageRouter,
    session: sessionRouter,
+   sso: ssoRouter,
    team: teamRouter,
    organization: organizationRouter,
    usage: usageRouter,
