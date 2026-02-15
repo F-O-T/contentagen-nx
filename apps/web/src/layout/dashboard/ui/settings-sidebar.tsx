@@ -18,6 +18,7 @@ import { Link, useLocation, useParams } from "@tanstack/react-router";
 import { ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
+import { useEarlyAccess } from "@/hooks/use-early-access";
 import {
    type SettingsNavItemDef,
    type SettingsNavSection,
@@ -54,14 +55,22 @@ function NavItem({
    teamId: string;
    pathname: string;
 }) {
+   const { isEnrolled } = useEarlyAccess();
    const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
    const resolvedHref = item.href
       .replace("$slug", slug)
       .replace("$teamId", teamId);
    const isActive = pathname === resolvedHref;
-   const hasChildren = item.children && item.children.length > 0;
 
-   const isChildActive = item.children?.some(
+   // Filter children based on early access enrollment
+   const visibleChildren = item.children?.filter((child) => {
+      if (!child.earlyAccessFlag) return true;
+      return isEnrolled(child.earlyAccessFlag);
+   });
+
+   const hasChildren = visibleChildren && visibleChildren.length > 0;
+
+   const isChildActive = visibleChildren?.some(
       (child) =>
          pathname ===
          child.href.replace("$slug", slug).replace("$teamId", teamId),
@@ -90,7 +99,7 @@ function NavItem({
                </CollapsibleTrigger>
                <CollapsibleContent>
                   <SidebarMenuSub>
-                     {item.children?.map((child) => {
+                     {visibleChildren?.map((child) => {
                         const childResolved = child.href
                            .replace("$slug", slug)
                            .replace("$teamId", teamId);

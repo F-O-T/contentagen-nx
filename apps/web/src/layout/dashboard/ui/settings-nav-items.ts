@@ -29,6 +29,7 @@ export type SettingsNavItemDef = {
    icon?: LucideIcon;
    external?: boolean;
    danger?: boolean;
+   earlyAccessFlag?: string;
    children?: SettingsNavItemDef[];
 };
 
@@ -74,6 +75,7 @@ export const settingsNavSections: SettingsNavSection[] = [
                   title: "Formulários",
                   href: "/$slug/$teamId/settings/project/products/forms",
                   icon: LayoutGrid,
+                  earlyAccessFlag: "forms-beta",
                },
                {
                   id: "product-ai-agents",

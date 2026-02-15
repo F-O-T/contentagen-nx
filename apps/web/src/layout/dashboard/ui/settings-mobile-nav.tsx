@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
+import { useEarlyAccess } from "@/hooks/use-early-access";
 import {
    type SettingsNavItemDef,
    settingsNavSections,
@@ -15,6 +16,7 @@ function flattenItems(items: SettingsNavItemDef[]): SettingsNavItemDef[] {
 
 export function SettingsMobileNav() {
    const { activeOrganization } = useActiveOrganization();
+   const { isEnrolled } = useEarlyAccess();
    const navigate = useNavigate();
    const [search, setSearch] = useState("");
 
@@ -34,9 +36,14 @@ export function SettingsMobileNav() {
 
          {settingsNavSections.map((section) => {
             const allItems = flattenItems(section.items);
-            const filtered = q
+            const filtered = (q
                ? allItems.filter((item) => item.title.toLowerCase().includes(q))
-               : allItems;
+               : allItems
+            ).filter((item) => {
+               // Filter by early access enrollment
+               if (!item.earlyAccessFlag) return true;
+               return isEnrolled(item.earlyAccessFlag);
+            });
 
             if (filtered.length === 0) return null;
 
