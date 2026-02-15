@@ -3,6 +3,8 @@ import { ProjectOnboardingWizard } from "@/features/onboarding/ui/project-onboar
 
 export const Route = createFileRoute("/_authenticated/$slug/$teamId/onboarding")({
 	beforeLoad: async ({ context, params }) => {
+		// NOTE: Assumes parent layout (/$slug/$teamId) has validated teamId
+		// and set activeTeamId in session. If team is invalid, parent redirects.
 		const status = await context.queryClient.fetchQuery(
 			context.orpc.onboarding.getOnboardingStatus.queryOptions(),
 		);
