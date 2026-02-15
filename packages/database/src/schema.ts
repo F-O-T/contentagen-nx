@@ -1,7 +1,8 @@
 // Activity logs
-export * from "./schemas/activity-logs";
+
 // Actions
 export * from "./schemas/actions";
+export * from "./schemas/activity-logs";
 // Addons
 export * from "./schemas/addons";
 // Analytics
@@ -31,6 +32,8 @@ export * from "./schemas/product-settings";
 export * from "./schemas/property-definitions";
 export * from "./schemas/related-content";
 export * from "./schemas/resource-permissions";
+// Roles
+export * from "./schemas/roles";
 // Webhooks
 export * from "./schemas/webhooks";
 export * from "./schemas/writer";

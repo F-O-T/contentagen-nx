@@ -44,6 +44,10 @@
          "default": "./src/object.ts",
          "types": "./dist/src/object.d.ts"
       },
+      "./permissions": {
+         "default": "./src/permissions.ts",
+         "types": "./dist/src/permissions.d.ts"
+      },
       "./sanitization": {
          "default": "./src/sanitization.ts",
          "types": "./dist/src/sanitization.d.ts"
