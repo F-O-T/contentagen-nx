@@ -1,3 +1,5 @@
+// Activity logs
+export * from "./schemas/activity-logs";
 // Actions
 export * from "./schemas/actions";
 // Addons
