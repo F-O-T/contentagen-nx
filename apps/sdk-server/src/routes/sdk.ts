@@ -202,9 +202,13 @@ export const sdkRoutes = new Elysia({
       "/content/:agentId/:slug",
       async ({ params, organizationId, plan, sdkMode, remaining, set }) => {
          try {
+            if (!organizationId) {
+               throw new Error("Organization ID is required");
+            }
             const content = await getContentBySlug(
                db,
                params.slug,
+               organizationId,
                params.agentId,
             );
             if (!content) {
