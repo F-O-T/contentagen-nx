@@ -58,9 +58,25 @@ export const getDefaultDashboard = protectedProcedure.handler(
    async ({ context }) => {
       const { db, organizationId, teamId } = context;
 
+      console.log("[Analytics] getDefaultDashboard called:", {
+         organizationId,
+         teamId,
+      });
+
       try {
-         return await fetchDefaultDashboard(db, organizationId, teamId);
+         const dashboard = await fetchDefaultDashboard(
+            db,
+            organizationId,
+            teamId,
+         );
+         console.log("[Analytics] Dashboard found:", dashboard.id);
+         return dashboard;
       } catch (error) {
+         console.error("[Analytics] Dashboard query failed:", {
+            organizationId,
+            teamId,
+            error,
+         });
          // Check if it's a not found error
          if (error instanceof Error && error.message.includes("not found")) {
             throw new ORPCError("NOT_FOUND", {

@@ -1,16 +1,26 @@
 import {
+   Avatar,
+   AvatarFallback,
+   AvatarImage,
+} from "@packages/ui/components/avatar";
+import {
    Field,
    FieldError,
    FieldGroup,
    FieldLabel,
 } from "@packages/ui/components/field";
+import {
+   Dropzone,
+   DropzoneContent,
+   DropzoneEmptyState,
+} from "@packages/ui/components/dropzone";
 import { Input } from "@packages/ui/components/input";
 import { cn } from "@packages/ui/lib/utils";
 import { createSlug } from "@packages/utils/text";
 import { useForm } from "@tanstack/react-form";
-import { Camera } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { Building2, Camera } from "lucide-react";
 import {
-   type ChangeEvent,
    type FormEvent,
    forwardRef,
    useCallback,
@@ -54,6 +64,62 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
 
       const presignedUpload = usePresignedUpload();
 
+      const saveMutation = useMutation({
+         mutationFn: async () => {
+            console.log("[Logo Upload] Starting mutation...");
+
+            if (!fileUpload.selectedFile) {
+               throw new Error("No file selected");
+            }
+
+            // Get file extension and content type
+            const fileExtension = fileUpload.selectedFile.name.split(".").pop() ?? "png";
+            const contentType = fileUpload.selectedFile.type;
+
+            console.log("[Logo Upload] File details:", {
+               name: fileUpload.selectedFile.name,
+               size: fileUpload.selectedFile.size,
+               type: contentType,
+               extension: fileExtension,
+            });
+
+            // Generate presigned URL for MinIO upload
+            console.log("[Logo Upload] Requesting presigned URL...");
+            const uploadData = await orpc.organization.generateLogoUploadUrl.call({
+               fileExtension,
+               contentType,
+            });
+            console.log("[Logo Upload] Got presigned URL:", {
+               presignedUrl: uploadData.presignedUrl.substring(0, 100) + "...",
+               publicUrl: uploadData.publicUrl,
+            });
+
+            // Upload file to MinIO
+            console.log("[Logo Upload] Uploading to MinIO...");
+            await presignedUpload.uploadToPresignedUrl(
+               uploadData.presignedUrl,
+               fileUpload.selectedFile,
+               contentType,
+            );
+            console.log("[Logo Upload] MinIO upload complete");
+
+            // Update organization with logo path
+            console.log("[Logo Upload] Updating organization with logo URL:", uploadData.publicUrl);
+            await orpc.organization.updateLogo.call({
+               logoUrl: uploadData.publicUrl,
+            });
+            console.log("[Logo Upload] Organization updated successfully");
+         },
+         onError: (error) => {
+            console.error("[Logo Upload] Failed:", {
+               error,
+               message: error instanceof Error ? error.message : "Unknown error",
+               stack: error instanceof Error ? error.stack : undefined,
+            });
+            toast.error("Workspace criado, mas falha ao fazer upload do logo.");
+         },
+      });
+
       const form = useForm({
          defaultValues: {
             workspaceName: "",
@@ -81,30 +147,7 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
 
                // Upload logo if selected
                if (fileUpload.selectedFile) {
-                  try {
-                     const fileExtension = fileUpload.selectedFile.name.split(".").pop() ?? "png";
-
-                     // Get presigned URL
-                     const uploadData = await orpc.organization.generateLogoUploadUrl({
-                        fileExtension,
-                        contentType: fileUpload.selectedFile.type,
-                     });
-
-                     // Upload to MinIO
-                     await presignedUpload.uploadToPresignedUrl(
-                        uploadData.presignedUrl,
-                        fileUpload.selectedFile,
-                        fileUpload.selectedFile.type,
-                     );
-
-                     // Update organization with logo URL (MinIO path)
-                     await orpc.organization.updateLogo({
-                        logoUrl: uploadData.publicUrl,
-                     });
-                  } catch (uploadError) {
-                     console.error("Logo upload failed:", uploadError);
-                     toast.error("Workspace criado, mas falha ao fazer upload do logo.");
-                  }
+                  await saveMutation.mutateAsync();
                }
 
                toast.success("Workspace criado com sucesso!");
@@ -122,16 +165,6 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
          validators: { onBlur: workspaceSchema },
       });
 
-      const handleFileChange = useCallback(
-         (e: ChangeEvent<HTMLInputElement>) => {
-            const files = e.target.files;
-            if (!files) return;
-
-            fileUpload.handleFileSelect(Array.from(files));
-         },
-         [fileUpload],
-      );
-
       useImperativeHandle(
          ref,
          () => ({
@@ -140,15 +173,15 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
                return true;
             },
             canContinue: true,
-            isPending: isPending || fileUpload.isUploading || presignedUpload.isUploading,
+            isPending: isPending || saveMutation.isPending,
          }),
-         [form, isPending, fileUpload.isUploading, presignedUpload.isUploading],
+         [form, isPending, saveMutation.isPending],
       );
 
       useEffect(() => {
-         const isProcessing = isPending || fileUpload.isUploading || presignedUpload.isUploading;
+         const isProcessing = isPending || saveMutation.isPending;
          onStateChange({ canContinue: true, isPending: isProcessing });
-      }, [isPending, fileUpload.isUploading, presignedUpload.isUploading, onStateChange]);
+      }, [isPending, saveMutation.isPending, onStateChange]);
 
       const handleSubmit = useCallback(
          (e: FormEvent) => {
@@ -171,42 +204,46 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
             </div>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
-               {/* Circular logo upload */}
-               <div className="flex flex-col items-center gap-2">
-                  <label
-                     className={cn(
-                        "relative flex size-16 items-center justify-center rounded-full border-2 border-dashed transition-colors overflow-hidden cursor-pointer",
-                        fileUpload.filePreview
-                           ? "border-primary"
-                           : "border-muted-foreground/30 hover:border-muted-foreground/50",
-                        (isPending || fileUpload.isUploading || presignedUpload.isUploading) && "opacity-50 cursor-not-allowed",
-                     )}
-                  >
-                     {fileUpload.filePreview ? (
-                        <img
+               {/* Logo upload */}
+               <div className="flex flex-col items-center gap-3">
+                  {fileUpload.filePreview && (
+                     <Avatar className="size-20 rounded-lg">
+                        <AvatarImage
                            alt="Logo preview"
-                           className="size-full object-cover"
                            src={fileUpload.filePreview}
                         />
-                     ) : (
-                        <Camera className="size-5 text-muted-foreground" />
-                     )}
-                     <input
-                        accept="image/png,image/jpeg,image/gif,image/webp"
-                        className="hidden"
-                        disabled={isPending || fileUpload.isUploading || presignedUpload.isUploading}
-                        onChange={handleFileChange}
-                        type="file"
-                     />
-                  </label>
-                  <span className="text-xs text-muted-foreground">
-                     Logo (opcional)
-                  </span>
+                        <AvatarFallback className="rounded-lg">
+                           <Building2 className="size-8" />
+                        </AvatarFallback>
+                     </Avatar>
+                  )}
+                  <Dropzone
+                     accept={{
+                        "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
+                     }}
+                     className="h-20 w-full max-w-md"
+                     maxFiles={1}
+                     maxSize={5 * 1024 * 1024}
+                     onDrop={(files) =>
+                        fileUpload.handleFileSelect(files, () => {})
+                     }
+                  >
+                     <DropzoneEmptyState>
+                        <div className="flex flex-col items-center gap-1">
+                           <Camera className="size-5 text-muted-foreground" />
+                           <p className="text-xs text-muted-foreground">
+                              Clique ou arraste para enviar o logo (opcional)
+                           </p>
+                        </div>
+                     </DropzoneEmptyState>
+                     <DropzoneContent>
+                        <p className="text-xs text-muted-foreground">
+                           Logo selecionado
+                        </p>
+                     </DropzoneContent>
+                  </Dropzone>
                   {fileUpload.error && (
                      <p className="text-xs text-destructive">{fileUpload.error}</p>
-                  )}
-                  {presignedUpload.error && (
-                     <p className="text-xs text-destructive">{presignedUpload.error}</p>
                   )}
                </div>
 

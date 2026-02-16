@@ -160,6 +160,13 @@ export const completeOnboarding = protectedProcedure
    .handler(async ({ context, input }) => {
       const { db, organizationId, teamId, userId } = context;
 
+      console.log("[Onboarding] Starting completeOnboarding:", {
+         organizationId,
+         teamId,
+         userId,
+         products: input.products,
+      });
+
       await db.transaction(async (tx) => {
          // Update team: set products and mark completed
          await tx
@@ -170,11 +177,15 @@ export const completeOnboarding = protectedProcedure
             })
             .where(eq(team.id, teamId));
 
+         console.log("[Onboarding] Team updated:", teamId);
+
          // Update org: mark completed
          await tx
             .update(organization)
             .set({ onboardingCompleted: true })
             .where(eq(organization.id, organizationId));
+
+         console.log("[Onboarding] Organization updated:", organizationId);
 
          // Create default insights for the team
          const insightIds = await createDefaultInsights(
@@ -183,6 +194,8 @@ export const completeOnboarding = protectedProcedure
             teamId,
             userId,
          );
+
+         console.log("[Onboarding] Created insights:", insightIds.length);
 
          // Compute initial cached data for each insight synchronously
          for (const insightId of insightIds) {
@@ -215,16 +228,45 @@ export const completeOnboarding = protectedProcedure
             order: index,
          }));
 
-         // Create default dashboard with tiles
-         await tx.insert(dashboards).values({
+         console.log("[Onboarding] Creating dashboard with:", {
             organizationId,
             teamId,
-            createdBy: userId,
-            name: "Dashboard Principal",
-            description: "Seu painel de análise principal",
-            isDefault: true,
-            tiles,
+            tilesCount: tiles.length,
          });
+
+         // Create default dashboard with tiles
+         const [createdDashboard] = await tx
+            .insert(dashboards)
+            .values({
+               organizationId,
+               teamId,
+               createdBy: userId,
+               name: "Dashboard Principal",
+               description: "Seu painel de análise principal",
+               isDefault: true,
+               tiles,
+            })
+            .returning({ id: dashboards.id });
+
+         console.log("[Onboarding] Dashboard created:", createdDashboard);
+      });
+
+      // Verify dashboard was created (outside transaction)
+      const verifyDashboard = await db
+         .select()
+         .from(dashboards)
+         .where(
+            and(
+               eq(dashboards.organizationId, organizationId),
+               eq(dashboards.teamId, teamId),
+               eq(dashboards.isDefault, true),
+            ),
+         )
+         .limit(1);
+
+      console.log("[Onboarding] Dashboard verification:", {
+         found: verifyDashboard.length > 0,
+         dashboard: verifyDashboard[0],
       });
 
       // Fetch org slug for navigation (outside transaction)
