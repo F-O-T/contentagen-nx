@@ -39,6 +39,7 @@ import { Suspense, useState } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
 import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
+import { usePresignedUpload } from "@/features/file-upload/lib/use-presigned-upload";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -140,12 +141,34 @@ function LogoSection({
       acceptedTypes: ["image/*"],
       maxSize: 5 * 1024 * 1024,
    });
+   const presignedUpload = usePresignedUpload();
 
    const saveMutation = useMutation({
       mutationFn: async () => {
-         await authClient.organization.update({
-            data: { logo: fileUpload.filePreview || undefined },
-            organizationId,
+         if (!fileUpload.selectedFile) {
+            throw new Error("No file selected");
+         }
+
+         // Get file extension and content type
+         const fileExtension = fileUpload.selectedFile.name.split(".").pop() ?? "png";
+         const contentType = fileUpload.selectedFile.type;
+
+         // Generate presigned URL for MinIO upload
+         const uploadData = await orpc.organization.generateLogoUploadUrl({
+            fileExtension,
+            contentType,
+         });
+
+         // Upload file to MinIO
+         await presignedUpload.uploadToPresignedUrl(
+            uploadData.presignedUrl,
+            fileUpload.selectedFile,
+            contentType,
+         );
+
+         // Update organization with logo path
+         await orpc.organization.updateLogo({
+            logoUrl: uploadData.publicUrl,
          });
       },
       onSuccess: () => {
@@ -156,7 +179,8 @@ function LogoSection({
                .queryKey,
          });
       },
-      onError: () => {
+      onError: (error) => {
+         console.error("Logo upload failed:", error);
          toast.error("Erro ao atualizar logo");
       },
    });
@@ -206,11 +230,11 @@ function LogoSection({
          </div>
          {fileUpload.filePreview && (
             <Button
-               disabled={saveMutation.isPending}
+               disabled={saveMutation.isPending || presignedUpload.isUploading}
                onClick={() => saveMutation.mutate()}
                size="sm"
             >
-               {saveMutation.isPending && (
+               {(saveMutation.isPending || presignedUpload.isUploading) && (
                   <Loader2 className="size-4 mr-2 animate-spin" />
                )}
                Salvar logo
@@ -218,6 +242,9 @@ function LogoSection({
          )}
          {fileUpload.error && (
             <p className="text-sm text-destructive">{fileUpload.error}</p>
+         )}
+         {presignedUpload.error && (
+            <p className="text-sm text-destructive">{presignedUpload.error}</p>
          )}
       </section>
    );
