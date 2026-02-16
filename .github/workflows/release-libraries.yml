@@ -27,9 +27,6 @@ jobs:
 
       - name: Bun & Nx Setup
         uses: ./.github/actions/setup-bun-nx
-        with:
-          nx-cache-server: ${{ secrets.NX_CACHE_SERVER }}
-          nx-cache-token: ${{ secrets.NX_CACHE_TOKEN }}
 
       - name: Install dependencies
         run: bun install --frozen-lockfile

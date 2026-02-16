@@ -17,7 +17,11 @@ export const DEFAULT_INSIGHTS: DefaultInsightDef[] = [
       config: {
          type: "trends",
          series: [
-            { event: "content.page.view", math: "count", label: "Visualizações" },
+            {
+               event: "content.page.view",
+               math: "count",
+               label: "Visualizações",
+            },
          ],
          dateRange: { type: "relative", value: "30d" },
          interval: "day",
@@ -76,7 +80,11 @@ export const DEFAULT_INSIGHTS: DefaultInsightDef[] = [
       config: {
          type: "trends",
          series: [
-            { event: "content.page.view", math: "count", label: "Visualizações" },
+            {
+               event: "content.page.view",
+               math: "count",
+               label: "Visualizações",
+            },
          ],
          dateRange: { type: "relative", value: "30d" },
          interval: "day",
@@ -141,7 +149,11 @@ export const DEFAULT_INSIGHTS: DefaultInsightDef[] = [
       config: {
          type: "trends",
          series: [
-            { event: "content.page.view", math: "count", label: "Visualizações" },
+            {
+               event: "content.page.view",
+               math: "count",
+               label: "Visualizações",
+            },
             { event: "content.cta.click", math: "count", label: "Cliques" },
          ],
          dateRange: { type: "relative", value: "30d" },

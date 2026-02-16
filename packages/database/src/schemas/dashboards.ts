@@ -52,7 +52,9 @@ export const dashboards = pgTable(
       isDefault: boolean("is_default").default(false).notNull(),
       tiles: jsonb("tiles").$type<DashboardTile[]>().notNull().default([]),
       globalDateRange: jsonb("global_date_range").$type<DashboardDateRange>(),
-      globalFilters: jsonb("global_filters").$type<DashboardFilter[]>().default([]),
+      globalFilters: jsonb("global_filters")
+         .$type<DashboardFilter[]>()
+         .default([]),
       createdAt: timestamp("created_at").defaultNow().notNull(),
       updatedAt: timestamp("updated_at")
          .defaultNow()

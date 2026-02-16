@@ -18,9 +18,6 @@ jobs:
 
       - name: Bun & Nx Setup
         uses: ./.github/actions/setup-bun-nx
-        with:
-          nx-cache-server: ${{ secrets.NX_CACHE_SERVER }}
-          nx-cache-token: ${{ secrets.NX_CACHE_TOKEN }}
 
       - name: Run Nx affected tests
         run: bunx nx affected -t test --base=origin/master --head=HEAD

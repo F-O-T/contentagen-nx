@@ -1,12 +1,5 @@
 name: "Setup Bun & Nx"
-description: "Setup Bun, install dependencies, cache, and configure Nx"
-inputs:
-  nx-cache-server:
-    description: "Nx remote cache server URL"
-    required: false
-  nx-cache-token:
-    description: "Nx remote cache access token"
-    required: false
+description: "Setup Bun, install dependencies, and configure Nx"
 runs:
   using: "composite"
   steps:
@@ -21,11 +14,4 @@ runs:
       uses: nrwl/nx-set-shas@v4
       with:
         main-branch-name: master
-
-    - name: Configure Nx Remote Cache
-      if: inputs.nx-cache-server != '' && inputs.nx-cache-token != ''
-      shell: bash
-      run: |
-        echo "NX_SELF_HOSTED_REMOTE_CACHE_SERVER=${{ inputs.nx-cache-server }}" >> $GITHUB_ENV
-        echo "NX_SELF_HOSTED_REMOTE_CACHE_ACCESS_TOKEN=${{ inputs.nx-cache-token }}" >> $GITHUB_ENV
 
