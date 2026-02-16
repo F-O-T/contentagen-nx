@@ -1,144 +1,26 @@
-import { z } from "zod";
+/**
+ * SDK Type Definitions
+ *
+ * This file contains type exports for the Contentta SDK.
+ * All runtime types are inferred from the oRPC router at sdk-server/src/orpc/router/*.
+ *
+ * We only maintain minimal helper types here for backward compatibility and documentation.
+ */
 
-// Content-related schemas and types (extracted from database package)
-export const ContentStatsSchema = z.object({
-	wordsCount: z
-		.string()
-		.optional()
-		.describe("The number of words in the content."),
-	readTimeMinutes: z
-		.string()
-		.optional()
-		.describe("Estimated reading time in minutes."),
-	qualityScore: z
-		.string()
-		.optional()
-		.describe("A score representing the quality of the content."),
-});
+import type { createSdk } from "./index";
 
-export const ContentMetaSchema = z.object({
-	title: z.string().optional().describe("The title of the content."),
-	description: z
-		.string()
-		.optional()
-		.describe("A brief seo optmized description of the content."),
-	keywords: z
-		.array(z.string())
-		.optional()
-		.describe("SEO optimized keywords associated with the content."),
-	slug: z
-		.string()
-		.optional()
-		.describe("A URL-friendly identifier for the content."),
-	sources: z
-		.array(z.string())
-		.optional()
-		.describe("Sources or references used in the content."),
-});
-
-export const ContentRequestSchema = z.object({
-	description: z.string().min(1, "Description is required"),
-	layout: z.enum(["tutorial", "article", "changelog"]),
-});
-
-// Content status enum values
-export const ContentStatusValues = ["draft", "approved"] as const;
-
-// Share status enum values
-export const ShareStatusValues = ["private", "shared"] as const;
-
-// Input schemas for API calls
-const ContentStatusSchema = z.enum(ContentStatusValues, {
-	message: "Invalid content status. Must be one of: draft, approved.",
-});
-
-export const ListContentByAgentInputSchema = z.object({
-	status: z
-		.union([ContentStatusSchema, z.array(ContentStatusSchema)])
-		.optional()
-		.transform((value) => {
-			if (!value) return undefined;
-			return Array.isArray(value) ? value : [value];
-		}),
-	agentId: z.string().min(1, "Agent ID is required."),
-	limit: z.coerce.number().min(1).max(100).optional(),
-	page: z.coerce.number().min(1).optional(),
-});
-
-export const GetContentBySlugInputSchema = z.object({
-	slug: z.string().min(1, "Slug is required."),
-	agentId: z.string().min(1, "Agent ID is required."),
-});
-
-export const LocaleSchema = z.enum(["en-US", "pt-BR"]);
-export type Locale = z.infer<typeof LocaleSchema>;
-// Reusable image schema for SDK responses
-export const ImageSchema = z
-	.object({
-		data: z.string(),
-		contentType: z.string(),
-	})
-	.nullable();
-
-// Content select schema and type (agent removed)
-export const ContentSelectSchema = z.object({
-	id: z.string(),
-	agentId: z.string(),
-	imageUrl: z.string().nullable(),
-	body: z.string(),
-	status: z.enum(ContentStatusValues),
-	shareStatus: z.enum(ShareStatusValues),
-	meta: ContentMetaSchema,
-	request: ContentRequestSchema,
-	stats: ContentStatsSchema,
-	createdAt: z.date(),
-	updatedAt: z.date(),
-	image: ImageSchema,
-});
-
-export const ContentListResponseSchema = z.object({
-	posts: ContentSelectSchema.pick({
-		id: true,
-		meta: true,
-		imageUrl: true,
-		status: true,
-		shareStatus: true,
-		createdAt: true,
-		stats: true,
-	})
-		.extend({
-			image: ImageSchema,
-		})
-		.array(),
-	total: z.number(),
-});
-export type ContentList = z.infer<typeof ContentListResponseSchema>;
-// Related slugs response schema
-export const RelatedSlugsResponseSchema = z.array(z.string());
-
-// Exported types
-export type ContentStats = z.infer<typeof ContentStatsSchema>;
-export type ContentMeta = z.infer<typeof ContentMetaSchema>;
-export type ContentRequest = z.infer<typeof ContentRequestSchema>;
-export type ContentStatus = (typeof ContentStatusValues)[number];
-export type ShareStatus = (typeof ShareStatusValues)[number];
-export type ContentSelect = z.infer<typeof ContentSelectSchema>;
-export type RelatedSlugsResponse = z.infer<typeof RelatedSlugsResponseSchema>;
-export type Image = z.infer<typeof ImageSchema>;
-
-// Analytics schemas and types for SDK content responses
-export const AnalyticsResponseSchema = z.object({
-	trackingScript: z
-		.string()
-		.describe("Self-contained tracking script to embed in blog posts"),
-	enabled: z.boolean().describe("Whether analytics tracking is enabled"),
-});
-
-export type AnalyticsResponse = z.infer<typeof AnalyticsResponseSchema>;
-
-// Extended content schema with analytics
-export const ContentWithAnalyticsSchema = ContentSelectSchema.extend({
-	analytics: AnalyticsResponseSchema.optional(),
-});
-
-export type ContentWithAnalytics = z.infer<typeof ContentWithAnalyticsSchema>;
+/**
+ * SDK Router Type
+ *
+ * Inferred from the oRPC client created by createSdk().
+ * Use this type for fully type-safe SDK client instances.
+ *
+ * @example
+ * ```typescript
+ * import type { SdkRouter } from "@contentta/sdk";
+ *
+ * const sdk = createSdk({ apiKey: "..." });
+ * // sdk is of type SdkRouter
+ * ```
+ */
+export type SdkRouter = ReturnType<typeof createSdk>;

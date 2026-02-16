@@ -42,6 +42,10 @@ export interface SdkConfig {
  * });
  * ```
  */
+/**
+ * Create a type-safe SDK client for Contentta API.
+ * Returns an oRPC client with methods for content, events, and forms.
+ */
 export function createSdk(config: SdkConfig) {
 	if (!config.apiKey) {
 		throw new Error("apiKey is required to initialize the SDK");
@@ -60,35 +64,5 @@ export function createSdk(config: SdkConfig) {
 	return createORPCClient(link);
 }
 
-// Re-export types and schemas for backward compatibility
-export type {
-	AnalyticsResponse,
-	ContentList,
-	ContentMeta,
-	ContentRequest,
-	ContentSelect,
-	ContentStats,
-	ContentStatus,
-	ContentWithAnalytics,
-	Image,
-	Locale,
-	RelatedSlugsResponse,
-	ShareStatus,
-} from "./types";
-
-export {
-	AnalyticsResponseSchema,
-	ContentListResponseSchema,
-	ContentMetaSchema,
-	ContentRequestSchema,
-	ContentSelectSchema,
-	ContentStatsSchema,
-	ContentStatusValues,
-	ContentWithAnalyticsSchema,
-	GetContentBySlugInputSchema,
-	ImageSchema,
-	ListContentByAgentInputSchema,
-	LocaleSchema,
-	RelatedSlugsResponseSchema,
-	ShareStatusValues,
-} from "./types";
+// Re-export types
+export type { SdkRouter } from "./types";
