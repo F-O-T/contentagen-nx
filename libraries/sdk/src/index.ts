@@ -1,273 +1,94 @@
-import { z } from "zod";
-import type { ContentList, ContentSelect, Locale } from "./types";
-import {
-	ContentListResponseSchema,
-	ContentSelectSchema,
-	GetContentBySlugInputSchema,
-	ImageSchema,
-	ListContentByAgentInputSchema,
-	RelatedSlugsResponseSchema,
-} from "./types";
-
-export const ERROR_CODES = {
-	MISSING_API_KEY: {
-		code: "SDK_E001",
-		message: "apiKey is required to initialize the ContentaGenSDK",
-	},
-	API_REQUEST_FAILED: {
-		code: "SDK_E002",
-		message: "API request failed",
-	},
-	INVALID_API_RESPONSE: {
-		code: "SDK_E003",
-		message: "Invalid API response format.",
-	},
-	INVALID_INPUT: {
-		code: "SDK_E004",
-		message: "Invalid input.",
-	},
-};
-
-export const API_ENDPOINTS = {
-	listContentByAgent: "/content",
-	getContentBySlug: "/content",
-	getRelatedSlugs: "/related-slugs",
-	getContentImage: "/content/image",
-};
+import { createORPCClient } from "@orpc/client";
+import { RPCLink } from "@orpc/client/fetch";
 
 const PRODUCTION_API_URL = "https://api.contentagen.com";
 
 export interface SdkConfig {
 	apiKey: string;
-	locale?: Locale;
 	host?: string;
 }
 
-export class ContentaGenSDK {
-	private baseUrl: string;
-	private apiKey: string;
-	private locale?: string;
-
-	constructor(config: SdkConfig) {
-		if (!config.apiKey) {
-			throw new Error("apiKey is required to initialize the ContentaGenSDK");
-		}
-
-		const host = config.host || PRODUCTION_API_URL;
-		this.baseUrl = host.replace(/\/+$/, "");
-		this.apiKey = config.apiKey;
-		this.locale = config.locale;
+/**
+ * Create a type-safe SDK client for Contentta API
+ *
+ * @example
+ * ```typescript
+ * const sdk = createSdk({ apiKey: "your-api-key" });
+ *
+ * // List content by agent
+ * const { posts, total } = await sdk.content.list({
+ *   agentId: "agent-uuid",
+ *   limit: "10",
+ *   page: "1",
+ * });
+ *
+ * // Get content by slug
+ * const content = await sdk.content.get({
+ *   agentId: "agent-uuid",
+ *   slug: "my-post",
+ * });
+ *
+ * // Track events
+ * await sdk.events.track({
+ *   eventName: "page_view",
+ *   properties: { page: "/blog/my-post" },
+ * });
+ *
+ * // Get form and submit
+ * const form = await sdk.forms.get({ formId: "form-uuid" });
+ * await sdk.forms.submit({
+ *   formId: "form-uuid",
+ *   data: { email: "user@example.com" },
+ * });
+ * ```
+ */
+export function createSdk(config: SdkConfig) {
+	if (!config.apiKey) {
+		throw new Error("apiKey is required to initialize the SDK");
 	}
 
-	private getHeaders(): Record<string, string> {
-		const headers: Record<string, string> = {
-			"sdk-api-key": this.apiKey,
-		};
+	const host = config.host || PRODUCTION_API_URL;
+	const baseUrl = `${host.replace(/\/+$/, "")}/sdk`;
 
-		if (this.locale) {
-			headers["x-locale"] = this.locale;
-		}
+	const link = new RPCLink({
+		url: baseUrl,
+		headers: {
+			"sdk-api-key": config.apiKey,
+		},
+	});
 
-		return headers;
-	}
-
-	private buildUrl(path: string): URL {
-		const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-		return new URL(`${this.baseUrl}/sdk${normalizedPath}`);
-	}
-
-	private appendQueryParams(url: URL, params: Record<string, unknown>): void {
-		for (const [key, value] of Object.entries(params)) {
-			if (value === undefined || value === null) {
-				continue;
-			}
-
-			if (Array.isArray(value)) {
-				let appended = false;
-				for (const item of value) {
-					if (item === undefined || item === null) {
-						continue;
-					}
-					url.searchParams.append(key, String(item));
-					appended = true;
-				}
-				if (!appended) {
-					url.searchParams.delete(key);
-				}
-				continue;
-			}
-
-			url.searchParams.set(key, String(value));
-		}
-	}
-
-	private transformDates(data: unknown): unknown {
-		if (Array.isArray(data)) {
-			return data.map((item) => this.transformDates(item));
-		}
-		if (data && typeof data === "object" && data !== null) {
-			const obj: Record<string, unknown> = { ...data };
-			for (const key of Object.keys(obj)) {
-				if (
-					(key === "createdAt" || key === "updatedAt") &&
-					typeof obj[key] === "string"
-				) {
-					obj[key] = new Date(obj[key] as string);
-				} else if (
-					Array.isArray(obj[key]) ||
-					(obj[key] && typeof obj[key] === "object")
-				) {
-					obj[key] = this.transformDates(obj[key]);
-				}
-			}
-			return obj;
-		}
-		return data;
-	}
-
-	private _parseApiResponse<T>(json: unknown, schema: z.ZodType<T>): T {
-		const transformedData = this.transformDates(json);
-		return schema.parse(transformedData);
-	}
-
-	private async _get<T>(
-		path: string,
-		params: Record<string, unknown>,
-		schema: z.ZodType<T>,
-	): Promise<T> {
-		const url = this.buildUrl(path);
-		this.appendQueryParams(url, params);
-
-		let response: Awaited<ReturnType<typeof fetch>>;
-		try {
-			response = await fetch(url, {
-				headers: this.getHeaders(),
-			});
-		} catch (cause) {
-			const { code, message } = ERROR_CODES.API_REQUEST_FAILED;
-			const reason = cause instanceof Error ? cause.message : String(cause);
-			throw new Error(`${code}: ${message}. ${reason}`.trim());
-		}
-
-		if (!response.ok) {
-			const errorText = await response.text();
-			const { code, message } = ERROR_CODES.API_REQUEST_FAILED;
-			throw new Error(
-				`${code}: ${message} (${response.statusText}) - ${errorText}`,
-			);
-		}
-
-		const json = await response.json();
-		return this._parseApiResponse(json, schema);
-	}
-
-	async listContentByAgent(
-		params: z.input<typeof ListContentByAgentInputSchema>,
-	): Promise<ContentList> {
-		try {
-			const validatedParams = ListContentByAgentInputSchema.parse(params);
-			const { agentId, limit, page, status } = validatedParams;
-			return this._get(
-				`${API_ENDPOINTS.listContentByAgent}/${agentId}`,
-				{ limit, page, status },
-				ContentListResponseSchema,
-			);
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				const { code, message } = ERROR_CODES.INVALID_INPUT;
-				throw new Error(
-					`${code}: ${message} for listContentByAgent: ${error.issues.map((e) => e.message).join(", ")}`,
-				);
-			}
-			throw error;
-		}
-	}
-
-	async getContentBySlug(
-		params: z.input<typeof GetContentBySlugInputSchema>,
-	): Promise<ContentSelect> {
-		try {
-			const validatedParams = GetContentBySlugInputSchema.parse(params);
-			const { agentId, slug } = validatedParams;
-			return this._get(
-				`${API_ENDPOINTS.getContentBySlug}/${agentId}/${slug}`,
-				{},
-				ContentSelectSchema,
-			);
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				const { code, message } = ERROR_CODES.INVALID_INPUT;
-				throw new Error(
-					`${code}: ${message} for getContentBySlug: ${error.issues.map((e) => e.message).join(", ")}`,
-				);
-			}
-			throw error;
-		}
-	}
-
-	async getRelatedSlugs(
-		params: z.input<typeof GetContentBySlugInputSchema>,
-	): Promise<string[]> {
-		try {
-			const validatedParams = GetContentBySlugInputSchema.parse(params);
-			const { agentId, slug } = validatedParams;
-			return this._get(
-				API_ENDPOINTS.getRelatedSlugs,
-				{ agentId, slug },
-				RelatedSlugsResponseSchema,
-			);
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				const { code, message } = ERROR_CODES.INVALID_INPUT;
-				throw new Error(
-					`${code}: ${message} for getRelatedSlugs: ${error.issues.map((e) => e.message).join(", ")}`,
-				);
-			}
-			throw error;
-		}
-	}
-
-	async getContentImage(params: {
-		contentId: string;
-	}): Promise<z.infer<typeof ImageSchema>> {
-		try {
-			const validatedParams = z
-				.object({ contentId: z.string().min(1, "Content ID is required") })
-				.parse(params);
-			const { contentId } = validatedParams;
-			return this._get(
-				`${API_ENDPOINTS.getContentImage}/${contentId}`,
-				{},
-				ImageSchema,
-			);
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				const { code, message } = ERROR_CODES.INVALID_INPUT;
-				throw new Error(
-					`${code}: ${message} for getContentImage: ${error.issues.map((e) => e.message).join(", ")}`,
-				);
-			}
-			throw error;
-		}
-	}
+	return createORPCClient(link);
 }
 
-export const createSdk = (config: SdkConfig): ContentaGenSDK => {
-	return new ContentaGenSDK(config);
-};
-
+// Re-export types and schemas for backward compatibility
 export type {
 	AnalyticsResponse,
+	ContentList,
+	ContentMeta,
+	ContentRequest,
+	ContentSelect,
+	ContentStats,
+	ContentStatus,
 	ContentWithAnalytics,
+	Image,
+	Locale,
+	RelatedSlugsResponse,
 	ShareStatus,
 } from "./types";
+
 export {
 	AnalyticsResponseSchema,
 	ContentListResponseSchema,
+	ContentMetaSchema,
+	ContentRequestSchema,
 	ContentSelectSchema,
+	ContentStatsSchema,
+	ContentStatusValues,
 	ContentWithAnalyticsSchema,
 	GetContentBySlugInputSchema,
 	ImageSchema,
 	ListContentByAgentInputSchema,
+	LocaleSchema,
+	RelatedSlugsResponseSchema,
 	ShareStatusValues,
 } from "./types";
