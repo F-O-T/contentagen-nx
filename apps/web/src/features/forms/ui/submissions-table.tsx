@@ -285,9 +285,9 @@ interface SubmissionsTableProps {
 }
 
 export function SubmissionsTable({ formId }: SubmissionsTableProps) {
-   const { slug, teamId } = useParams({ strict: false }) as {
+   const { slug, teamSlug } = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
    };
    const { openCredenza } = useCredenza();
    const [page, setPage] = useState(1);
@@ -334,8 +334,8 @@ export function SubmissionsTable({ formId }: SubmissionsTableProps) {
             <div className="flex items-center gap-3">
                <Button asChild className="size-8" size="icon" variant="ghost">
                   <Link
-                     params={{ slug: slug || "", teamId: teamId || "" }}
-                     to="/$slug/$teamId/forms"
+                     params={{ slug: slug || "", teamSlug: teamSlug || "" }}
+                     to="/$slug/$teamSlug/forms"
                   >
                      <ArrowLeft className="size-4" />
                      <span className="sr-only">Voltar</span>

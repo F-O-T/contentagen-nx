@@ -47,19 +47,19 @@ function filterSection(
 function NavItem({
    item,
    slug,
-   teamId,
+   teamSlug,
    pathname,
 }: {
    item: SettingsNavItemDef;
    slug: string;
-   teamId: string;
+   teamSlug: string;
    pathname: string;
 }) {
    const { isEnrolled } = useEarlyAccess();
    const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
    const resolvedHref = item.href
       .replace("$slug", slug)
-      .replace("$teamId", teamId);
+      .replace("$teamSlug", teamSlug);
    const isActive = pathname === resolvedHref;
 
    // Filter children based on early access enrollment
@@ -73,7 +73,7 @@ function NavItem({
    const isChildActive = visibleChildren?.some(
       (child) =>
          pathname ===
-         child.href.replace("$slug", slug).replace("$teamId", teamId),
+         child.href.replace("$slug", slug).replace("$teamSlug", teamSlug),
    );
 
    if (hasChildren) {
@@ -102,7 +102,7 @@ function NavItem({
                      {visibleChildren?.map((child) => {
                         const childResolved = child.href
                            .replace("$slug", slug)
-                           .replace("$teamId", teamId);
+                           .replace("$teamSlug", teamSlug);
                         const childActive = pathname === childResolved;
                         return (
                            <SidebarMenuSubItem key={child.id}>
@@ -113,7 +113,7 @@ function NavItem({
                                  )}
                               >
                                  <Link
-                                    params={{ slug, teamId }}
+                                    params={{ slug, teamSlug }}
                                     to={child.href}
                                  >
                                     <span>{child.title}</span>
@@ -133,7 +133,7 @@ function NavItem({
       return (
          <SidebarMenuItem>
             <SidebarMenuButton asChild>
-               <Link params={{ slug, teamId }} to={item.href}>
+               <Link params={{ slug, teamSlug }} to={item.href}>
                   {item.icon && <item.icon className="size-4" />}
                   <span>{item.title}</span>
                   <ExternalLink className="ml-auto size-3.5 text-muted-foreground" />
@@ -152,7 +152,7 @@ function NavItem({
                item.danger && "text-destructive hover:text-destructive",
             )}
          >
-            <Link params={{ slug, teamId }} to={item.href}>
+            <Link params={{ slug, teamSlug }} to={item.href}>
                {item.icon && <item.icon className="size-4" />}
                <span>{item.title}</span>
             </Link>
@@ -164,13 +164,13 @@ function NavItem({
 function NavSection({
    section,
    slug,
-   teamId,
+   teamSlug,
    pathname,
    forceOpen,
 }: {
    section: SettingsNavSection;
    slug: string;
-   teamId: string;
+   teamSlug: string;
    pathname: string;
    forceOpen: boolean;
 }) {
@@ -202,7 +202,7 @@ function NavSection({
                            key={item.id}
                            pathname={pathname}
                            slug={slug}
-                           teamId={teamId}
+                           teamSlug={teamSlug}
                         />
                      ))}
                   </SidebarMenu>
@@ -215,7 +215,7 @@ function NavSection({
 
 export function SettingsSidebar({ search }: { search: string }) {
    const { activeOrganization } = useActiveOrganization();
-   const { teamId } = useParams({ strict: false });
+   const { teamSlug } = useParams({ strict: false });
    const { pathname } = useLocation();
 
    const filteredSections = settingsNavSections.map((section) =>
@@ -231,7 +231,7 @@ export function SettingsSidebar({ search }: { search: string }) {
                pathname={pathname}
                section={section}
                slug={activeOrganization.slug}
-               teamId={teamId ?? ""}
+               teamSlug={teamSlug ?? ""}
             />
          ))}
       </>

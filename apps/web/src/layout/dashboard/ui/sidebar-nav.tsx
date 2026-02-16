@@ -30,14 +30,14 @@ import { navGroups } from "@/layout/dashboard/ui/sidebar-nav-items";
 function NavItem({
    item,
    slug,
-   teamId,
+   teamSlug,
    isActive,
    onSubPanelToggle,
    onMainItemClick,
 }: {
    item: NavItemDef;
    slug: string;
-   teamId?: string | null;
+   teamSlug?: string | null;
    isActive: boolean;
    onSubPanelToggle: (section: SubSidebarSection) => void;
    onMainItemClick: () => void;
@@ -82,7 +82,7 @@ function NavItem({
                   onClick={onMainItemClick}
                   to={item.route
                      .replace("$slug", slug)
-                     .replace("$teamId", teamId ?? "")}
+                     .replace("$teamSlug", teamSlug ?? "")}
                >
                   <Icon />
                   <span>{item.label}</span>
@@ -100,7 +100,7 @@ function NavItem({
 
          {/* Action buttons — hidden when sidebar is collapsed */}
          <div className="group-data-[collapsible=icon]:hidden">
-            <SidebarItemActions item={item} slug={slug} teamId={teamId} />
+            <SidebarItemActions item={item} slug={slug} teamSlug={teamSlug} />
          </div>
       </SidebarMenuItem>
    );
@@ -109,14 +109,14 @@ function NavItem({
 function NavGroup({
    group,
    slug,
-   teamId,
+   teamSlug,
    isItemActive,
    onSubPanelToggle,
    onMainItemClick,
 }: {
    group: NavGroupDef;
    slug: string;
-   teamId?: string | null;
+   teamSlug?: string | null;
    isItemActive: (item: NavItemDef) => boolean;
    onSubPanelToggle: (section: SubSidebarSection) => void;
    onMainItemClick: () => void;
@@ -143,7 +143,7 @@ function NavGroup({
                      onMainItemClick={onMainItemClick}
                      onSubPanelToggle={onSubPanelToggle}
                      slug={slug}
-                     teamId={teamId}
+                     teamSlug={teamSlug}
                   />
                ))}
             </SidebarMenu>
@@ -156,11 +156,11 @@ export function SidebarNav() {
    const { pathname, searchStr } = useLocation();
    const params = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
    };
    const slug = params.slug ?? pathname.split("/")[1] ?? "";
    const { activeTeamId } = useActiveTeam();
-   const teamId = params.teamId ?? activeTeamId ?? null;
+   const teamSlug = params.teamSlug ?? activeTeamId ?? null;
    const { activeSection } = useSidebarNav();
    const manager = useSidebarManager();
 
@@ -196,7 +196,7 @@ export function SidebarNav() {
       (item: NavItemDef) => {
          const resolvedRoute = item.route
             .replace("$slug", slug)
-            .replace("$teamId", teamId ?? "");
+            .replace("$teamSlug", teamSlug ?? "");
 
          if (item.subPanel) {
             return (
@@ -207,7 +207,7 @@ export function SidebarNav() {
 
          return pathname.startsWith(resolvedRoute) && !searchStr;
       },
-      [slug, teamId, pathname, searchStr, activeSection],
+      [slug, teamSlug, pathname, searchStr, activeSection],
    );
 
    return (
@@ -220,7 +220,7 @@ export function SidebarNav() {
                onMainItemClick={handleMainItemClick}
                onSubPanelToggle={handleSubPanelToggle}
                slug={slug}
-               teamId={teamId}
+               teamSlug={teamSlug}
             />
          ))}
       </>

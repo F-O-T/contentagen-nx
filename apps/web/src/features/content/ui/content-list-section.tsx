@@ -34,9 +34,9 @@ const STATUS_FILTER_OPTIONS = [
 
 export function ContentListSection() {
    const navigate = useNavigate();
-   const { slug, teamId } = useParams({ strict: false }) as {
+   const { slug, teamSlug } = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
    };
    const [searchQuery, setSearchQuery] = useState("");
    const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -113,10 +113,10 @@ export function ContentListSection() {
       orpc.content.create.mutationOptions({
          onSuccess: (data) => {
             navigate({
-               to: "/$slug/$teamId/$contentId",
+               to: "/$slug/$teamSlug/$contentId",
                params: {
                   slug: slug ?? "",
-                  teamId: teamId ?? "",
+                  teamSlug: teamSlug ?? "",
                   contentId: data.id,
                },
             });
@@ -145,10 +145,10 @@ export function ContentListSection() {
    // Action handlers
    const handleView = (content: ContentItem) => {
       navigate({
-         to: "/$slug/$teamId/$contentId",
+         to: "/$slug/$teamSlug/$contentId",
          params: {
             slug: slug ?? "",
-            teamId: teamId ?? "",
+            teamSlug: teamSlug ?? "",
             contentId: content.id,
          },
       });

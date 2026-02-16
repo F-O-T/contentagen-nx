@@ -72,9 +72,9 @@ interface FormBuilderProps {
 export function FormBuilder({ formId }: FormBuilderProps) {
    const isCreateMode = formId === "new";
    const navigate = useNavigate();
-   const { slug, teamId } = useParams({ strict: false }) as {
+   const { slug, teamSlug } = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
    };
    const queryClient = useQueryClient();
 
@@ -114,8 +114,8 @@ export function FormBuilder({ formId }: FormBuilderProps) {
                queryKey: orpc.forms.list.queryKey({}),
             });
             navigate({
-               to: "/$slug/$teamId/forms",
-               params: { slug: slug || "", teamId: teamId || "" },
+               to: "/$slug/$teamSlug/forms",
+               params: { slug: slug || "", teamSlug: teamSlug || "" },
             });
          },
          onError: () => {
@@ -220,10 +220,10 @@ export function FormBuilder({ formId }: FormBuilderProps) {
 
    const handleCancel = useCallback(() => {
       navigate({
-         to: "/$slug/$teamId/forms",
-         params: { slug: slug || "", teamId: teamId || "" },
+         to: "/$slug/$teamSlug/forms",
+         params: { slug: slug || "", teamSlug: teamSlug || "" },
       });
-   }, [navigate, slug, teamId]);
+   }, [navigate, slug, teamSlug]);
 
    // ── Loading state ──────────────────────────────────────────────────────
    if (!isCreateMode && isLoading) {

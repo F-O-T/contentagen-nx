@@ -15,11 +15,11 @@ import { SubSidebarNewMenu } from "./sub-sidebar-new-menu";
 function QuickCreateButton({
    item,
    slug,
-   teamId,
+   teamSlug,
 }: {
    item: NavItemDef;
    slug: string;
-   teamId?: string | null;
+   teamSlug?: string | null;
 }) {
    const navigate = useNavigate();
 
@@ -34,7 +34,7 @@ function QuickCreateButton({
    const handleCreate = () => {
       const resolvedRoute = item.route
          .replace("$slug", slug)
-         .replace("$teamId", teamId ?? "");
+         .replace("$teamSlug", teamSlug ?? "");
       void navigate({ to: `${resolvedRoute}/new` });
    };
 
@@ -47,10 +47,10 @@ function QuickCreateButton({
 
 function MoreMenu({
    item,
-   teamId,
+   teamSlug,
 }: {
    item: NavItemDef;
-   teamId?: string | null;
+   teamSlug?: string | null;
 }) {
    const { pinnedItems } = useSidebarNav();
    const params = useParams({ strict: false }) as { slug?: string };
@@ -58,7 +58,7 @@ function MoreMenu({
    const isPinned = pinnedItems.includes(item.id);
    const resolvedRoute = item.route
       .replace("$slug", slug)
-      .replace("$teamId", teamId ?? "");
+      .replace("$teamSlug", teamSlug ?? "");
 
    const handleOpenNewTab = () => {
       window.open(resolvedRoute, "_blank");
@@ -96,17 +96,17 @@ function MoreMenu({
 export function SidebarItemActions({
    item,
    slug,
-   teamId,
+   teamSlug,
 }: {
    item: NavItemDef;
    slug: string;
-   teamId?: string | null;
+   teamSlug?: string | null;
 }) {
    if (item.subPanel) {
       return null;
    }
    if (item.quickAction) {
-      return <QuickCreateButton item={item} slug={slug} teamId={teamId} />;
+      return <QuickCreateButton item={item} slug={slug} teamSlug={teamSlug} />;
    }
-   return <MoreMenu item={item} teamId={teamId} />;
+   return <MoreMenu item={item} teamSlug={teamSlug} />;
 }

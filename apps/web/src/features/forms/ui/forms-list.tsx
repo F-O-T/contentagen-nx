@@ -36,9 +36,9 @@ import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { orpc } from "@/integrations/orpc/client";
 
 export function FormsList() {
-   const { slug, teamId } = useParams({ strict: false }) as {
+   const { slug, teamSlug } = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
    };
    const { openAlertDialog } = useAlertDialog();
 
@@ -89,10 +89,10 @@ export function FormsList() {
                         <Link
                            params={{
                               slug: slug || "",
-                              teamId: teamId || "",
+                              teamSlug: teamSlug || "",
                               formId: "new",
                            }}
-                           to="/$slug/$teamId/forms/$formId"
+                           to="/$slug/$teamSlug/forms/$formId"
                         >
                            <Plus className="mr-2 size-4" />
                            Criar formulário
@@ -136,10 +136,10 @@ export function FormsList() {
                            <Link
                               params={{
                                  slug: slug || "",
-                                 teamId: teamId || "",
+                                 teamSlug: teamSlug || "",
                                  formId: form.id,
                               }}
-                              to="/$slug/$teamId/forms/$formId"
+                              to="/$slug/$teamSlug/forms/$formId"
                            >
                               <Edit className="mr-2 size-4" />
                               Editar
@@ -149,10 +149,10 @@ export function FormsList() {
                            <Link
                               params={{
                                  slug: slug || "",
-                                 teamId: teamId || "",
+                                 teamSlug: teamSlug || "",
                                  formId: form.id,
                               }}
-                              to="/$slug/$teamId/forms/$formId/submissions"
+                              to="/$slug/$teamSlug/forms/$formId/submissions"
                            >
                               <Inbox className="mr-2 size-4" />
                               Submissões

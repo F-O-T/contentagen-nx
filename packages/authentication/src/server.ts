@@ -2,7 +2,6 @@ import { oauthProvider } from "@better-auth/oauth-provider";
 import { stripe as stripePlugin } from "@better-auth/stripe";
 import type { DatabaseInstance } from "@packages/database/client";
 import {
-   createDefaultOrganization,
    ensureDefaultProject,
    findMemberByUserId,
 } from "@packages/database/repositories/auth-repository";
@@ -135,6 +134,11 @@ export function createAuth(config: SimplifiedAuthConfig) {
             },
             team: {
                additionalFields: {
+                  slug: {
+                     input: true,
+                     required: true,
+                     type: "string",
+                  },
                   description: {
                      defaultValue: "",
                      input: true,
@@ -404,47 +408,15 @@ export function createAuth(config: SimplifiedAuthConfig) {
             create: {
                before: async (session) => {
                   try {
-                     let member = await findMemberByUserId(db, session.userId);
-
-                     // If no member found, create default organization first
-                     // This handles the race condition where user.create.after
-                     // may not have completed before session creation
-                     if (!member) {
-                        const foundUser = await db.query.user.findFirst({
-                           where: (user, { eq }) => eq(user.id, session.userId),
-                        });
-
-                        if (foundUser) {
-                           console.log(
-                              `No organization found for user ${session.userId}, creating default organization`,
-                           );
-                           await createDefaultOrganization(
-                              db,
-                              session.userId,
-                              foundUser.name ?? "Workspace",
-                           );
-                           // Fetch the newly created membership
-                           member = await findMemberByUserId(
-                              db,
-                              session.userId,
-                           );
-                        }
-                     }
+                     const member = await findMemberByUserId(db, session.userId);
 
                      if (member?.organizationId) {
-                        // Ensure the organization has at least one project
                         const defaultTeam = await ensureDefaultProject(
                            db,
                            member.organizationId,
                            session.userId,
                         );
 
-                        console.log(
-                           `Setting activeOrganizationId for user ${session.userId} to ${member.organizationId}`,
-                        );
-                        console.log(
-                           `Setting activeTeamId for user ${session.userId} to ${defaultTeam?.id}`,
-                        );
                         return {
                            data: {
                               ...session,
@@ -453,37 +425,25 @@ export function createAuth(config: SimplifiedAuthConfig) {
                            },
                         };
                      }
+
+                     // No organization — session created without org context.
+                     // User will be redirected to onboarding by route guards.
+                     return { data: session };
                   } catch (error) {
                      console.error(
                         "Error in session create before hook:",
                         error,
                      );
-                     return {
-                        data: {
-                           ...session,
-                        },
-                     };
+                     return { data: session };
                   }
                },
             },
          },
          user: {
             create: {
-               after: async (user) => {
-                  // Organization creation is now handled in session.create.before
-                  // to avoid race conditions. This hook is kept for backwards
-                  // compatibility but the session hook will handle the actual creation.
-                  try {
-                     const member = await findMemberByUserId(db, user.id);
-                     if (!member) {
-                        await createDefaultOrganization(db, user.id, user.name);
-                     }
-                  } catch (error) {
-                     console.error(
-                        "Error creating default organization for user:",
-                        error,
-                     );
-                  }
+               after: async (_user) => {
+                  // Organization creation handled by onboarding flow.
+                  // No auto-creation — user starts with zero orgs.
                },
             },
          },

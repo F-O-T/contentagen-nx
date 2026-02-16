@@ -52,16 +52,16 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 function SidebarSearchButton() {
    const params = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
    };
    const slug = params.slug ?? "";
-   const teamId = params.teamId ?? "";
+   const teamSlug = params.teamSlug ?? "";
    const navigate = useNavigate();
 
    const handleSearch = useCallback(() => {
-      const searchRoute = `/$slug/$teamId/search`;
-      const searchParams = { slug, teamId };
-      const searchPath = `/${slug}/${teamId}/search`;
+      const searchRoute = `/$slug/$teamSlug/search`;
+      const searchParams = { slug, teamSlug };
+      const searchPath = `/${slug}/${teamSlug}/search`;
 
       // Replace current tab with search (don't open a new tab)
       if (tabStore.state.activeTabId) {
@@ -75,7 +75,7 @@ function SidebarSearchButton() {
       }
 
       navigate({ to: searchPath });
-   }, [navigate, slug, teamId]);
+   }, [navigate, slug, teamSlug]);
 
    return (
       <SidebarGroup className="py-0">
@@ -96,10 +96,10 @@ function SidebarSearchButton() {
 function SidebarFooterContent() {
    const params = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
    };
    const slug = params.slug ?? "";
-   const teamId = params.teamId ?? "";
+   const teamSlug = params.teamSlug ?? "";
    const { toggleSidebar, state } = useSidebar();
 
    return (
@@ -115,7 +115,7 @@ function SidebarFooterContent() {
          </SidebarMenuItem>
          <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Configuracoes">
-               <Link params={{ slug, teamId }} to="/$slug/$teamId/settings">
+               <Link params={{ slug, teamSlug }} to="/$slug/$teamSlug/settings">
                   <Settings />
                   <span>Configuracoes</span>
                </Link>

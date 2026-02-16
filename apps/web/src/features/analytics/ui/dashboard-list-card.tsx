@@ -14,7 +14,7 @@ interface DashboardListCardProps {
    tileCount: number;
    updatedAt: string;
    slug: string;
-   teamId?: string | null;
+   teamSlug?: string | null;
 }
 
 export function DashboardListCard({
@@ -24,12 +24,12 @@ export function DashboardListCard({
    tileCount,
    updatedAt,
    slug,
-   teamId,
+   teamSlug,
 }: DashboardListCardProps) {
    return (
       <Link
-         params={{ slug, teamId: teamId ?? "", dashboardId: id } as never}
-         to={"/$slug/$teamId/analytics/dashboards/$dashboardId" as never}
+         params={{ slug, teamSlug: teamSlug ?? "", dashboardId: id } as never}
+         to={"/$slug/$teamSlug/analytics/dashboards/$dashboardId" as never}
       >
          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
             <CardHeader>

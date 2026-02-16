@@ -25,6 +25,7 @@ export const getOrganizations = authenticatedProcedure.handler(
             slug: organization.slug,
             logo: organization.logo,
             role: member.role,
+            onboardingCompleted: organization.onboardingCompleted,
          })
          .from(member)
          .innerJoin(organization, eq(member.organizationId, organization.id))
@@ -139,7 +140,10 @@ export const getOrganizationTeams = protectedProcedure.handler(
             query: { organizationId },
          });
 
-         return teams;
+         return teams.map((team) => ({
+            ...team,
+            slug: (team as Record<string, unknown>).slug as string,
+         }));
       } catch (error) {
          // Convert Better Auth API errors to ORPCError
          if (error && typeof error === "object" && "status" in error) {
