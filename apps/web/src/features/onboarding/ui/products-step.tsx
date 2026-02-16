@@ -17,6 +17,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/integrations/better-auth/auth-client";
+import { orpc } from "@/integrations/orpc/client";
 import type { StepHandle, StepState } from "./step-handle";
 
 type Product = "content" | "analytics";
@@ -101,29 +102,15 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
          try {
             setIsPending(true);
 
-            // Better Auth additionalFields aren't reflected in TS types
-            await authClient.organization.updateTeam({
-               teamId,
-               data: { onboardingProducts: selected },
-            });
-
-            await authClient.organization.update({
-               organizationId,
-               data: { onboardingCompleted: true },
-            });
-
-            await authClient.organization.updateTeam({
-               teamId,
-               data: { onboardingCompleted: true },
+            // Call oRPC procedure to complete onboarding (creates dashboard + insights)
+            const result = await orpc.onboarding.completeOnboarding.call({
+               products: selected,
             });
 
             await authClient.organization.setActiveTeam({ teamId });
 
-            const orgs = await authClient.organization.list();
-            const currentOrg = orgs.data?.find((o) => o.id === organizationId);
-
             toast.success("Onboarding concluído!");
-            onComplete(currentOrg?.slug ?? "", teamSlug);
+            onComplete(result.slug, teamSlug);
             return true;
          } catch (error) {
             toast.error(

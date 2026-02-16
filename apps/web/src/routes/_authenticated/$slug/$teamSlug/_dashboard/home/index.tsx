@@ -381,6 +381,7 @@ function HomePageContent() {
       orpc.analytics.getDefaultDashboard.queryOptions(),
    );
    const [isEditing, setIsEditing] = useState(false);
+   const [openAddSheet, setOpenAddSheet] = useState<(() => void) | null>(null);
 
    // Show empty state if dashboard doesn't exist
    if (error) {
@@ -400,7 +401,6 @@ function HomePageContent() {
    if (!dashboard) {
       return <HomePageSkeleton />;
    }
-   const [openAddSheet, setOpenAddSheet] = useState<(() => void) | null>(null);
 
    return (
       <main className="flex flex-col gap-0">
