@@ -134,3 +134,33 @@ export function formatDate(
       .replace(/mm/g, parts.minutes)
       .replace(/ss/g, parts.seconds);
 }
+
+/**
+ * Format a date as relative time (e.g., "just now", "5 minutes ago", "2 hours ago")
+ */
+export function formatRelativeTime(date: Date): string {
+   const now = new Date();
+   const diffInMs = now.getTime() - date.getTime();
+   const diffInSeconds = Math.floor(diffInMs / 1000);
+   const diffInMinutes = Math.floor(diffInSeconds / 60);
+   const diffInHours = Math.floor(diffInMinutes / 60);
+   const diffInDays = Math.floor(diffInHours / 24);
+
+   if (diffInSeconds < 60) {
+      return "agora mesmo";
+   }
+
+   if (diffInMinutes < 60) {
+      return `${diffInMinutes} ${diffInMinutes === 1 ? "minuto" : "minutos"} atrás`;
+   }
+
+   if (diffInHours < 24) {
+      return `${diffInHours} ${diffInHours === 1 ? "hora" : "horas"} atrás`;
+   }
+
+   if (diffInDays < 30) {
+      return `${diffInDays} ${diffInDays === 1 ? "dia" : "dias"} atrás`;
+   }
+
+   return formatDate(date, "DD/MM/YYYY");
+}

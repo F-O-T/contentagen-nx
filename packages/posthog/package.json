@@ -17,6 +17,10 @@
          "default": "./src/server.ts",
          "types": "./dist/src/server.d.ts"
       },
+      "./early-access-ssr": {
+         "default": "./src/early-access-ssr.ts",
+         "types": "./dist/src/early-access-ssr.d.ts"
+      },
       "./sdk/server": {
          "default": "./src/sdk/server.ts",
          "types": "./dist/src/sdk/server.d.ts"

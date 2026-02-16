@@ -10,10 +10,13 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
+import { Input } from "@packages/ui/components/input";
+import { Label } from "@packages/ui/components/label";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BarChart3, Check, Loader2, Plus, RotateCcw } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSheet } from "@/hooks/use-sheet";
 import { orpc } from "@/integrations/orpc/client";
 import { DashboardGrid } from "./dashboard-grid";
@@ -27,6 +30,7 @@ interface EditableDashboardGridProps {
    dashboard: Dashboard;
    isEditing: boolean;
    onDoneEditing: () => void;
+   onOpenAddSheet?: (handler: () => void) => void;
 }
 
 // =============================================================================
@@ -175,6 +179,7 @@ export function EditableDashboardGrid({
    dashboard,
    isEditing,
    onDoneEditing,
+   onOpenAddSheet: externalOnOpenAddSheet,
 }: EditableDashboardGridProps) {
    const queryClient = useQueryClient();
    const { openSheet, closeSheet } = useSheet();
@@ -184,19 +189,52 @@ export function EditableDashboardGrid({
       dashboard.tiles,
    );
 
+   // Metadata form with TanStack Form
+   const metadataForm = useForm({
+      defaultValues: {
+         name: dashboard.name,
+         description: dashboard.description ?? "",
+      },
+      onSubmit: async () => {
+         // Handled by handleSave
+      },
+   });
+
    // Reset local state when dashboard changes (e.g., after save) or editing starts
    const dashboardTilesJson = JSON.stringify(dashboard.tiles);
+   const dashboardMetadataJson = JSON.stringify({
+      name: dashboard.name,
+      description: dashboard.description,
+   });
    const [lastDashboardTiles, setLastDashboardTiles] =
       useState(dashboardTilesJson);
+   const [lastDashboardMetadata, setLastDashboardMetadata] = useState(
+      dashboardMetadataJson,
+   );
+
    if (dashboardTilesJson !== lastDashboardTiles) {
       setLastDashboardTiles(dashboardTilesJson);
       setLocalTiles(dashboard.tiles);
    }
 
-   const hasChanges = useMemo(
+   if (dashboardMetadataJson !== lastDashboardMetadata) {
+      setLastDashboardMetadata(dashboardMetadataJson);
+      metadataForm.reset();
+   }
+
+   const tilesChanged = useMemo(
       () => JSON.stringify(localTiles) !== dashboardTilesJson,
       [localTiles, dashboardTilesJson],
    );
+
+   const metadataChanged = useMemo(
+      () =>
+         metadataForm.state.values.name !== dashboard.name ||
+         metadataForm.state.values.description !== (dashboard.description ?? ""),
+      [metadataForm.state.values, dashboard.name, dashboard.description],
+   );
+
+   const hasChanges = tilesChanged || metadataChanged;
 
    // Save mutation
    const saveMutation = useMutation(
@@ -250,14 +288,28 @@ export function EditableDashboardGrid({
       });
    }, [localTiles, openSheet, handleAddTile]);
 
+   // Expose handler to parent component
+   useEffect(() => {
+      if (externalOnOpenAddSheet) {
+         externalOnOpenAddSheet(handleOpenAddSheet);
+      }
+   }, [externalOnOpenAddSheet, handleOpenAddSheet]);
+
    const handleSave = useCallback(() => {
-      saveMutation.mutate({ id: dashboard.id, tiles: localTiles });
-   }, [saveMutation, dashboard.id, localTiles]);
+      const metadata = metadataForm.state.values;
+      saveMutation.mutate({
+         id: dashboard.id,
+         tiles: localTiles,
+         name: metadata.name,
+         description: metadata.description || undefined,
+      });
+   }, [saveMutation, dashboard.id, localTiles, metadataForm.state.values]);
 
    const handleCancel = useCallback(() => {
       setLocalTiles(dashboard.tiles);
+      metadataForm.reset();
       onDoneEditing();
-   }, [dashboard.tiles, onDoneEditing]);
+   }, [dashboard.tiles, metadataForm, onDoneEditing]);
 
    const tiles = isEditing ? localTiles : dashboard.tiles;
 
@@ -279,13 +331,61 @@ export function EditableDashboardGrid({
    return (
       <div className="flex flex-col gap-4">
          {isEditing && (
-            <EditToolbar
-               hasChanges={hasChanges}
-               isSaving={saveMutation.isPending}
-               onAddTile={handleOpenAddSheet}
-               onCancel={handleCancel}
-               onSave={handleSave}
-            />
+            <>
+               <EditToolbar
+                  hasChanges={hasChanges}
+                  isSaving={saveMutation.isPending}
+                  onAddTile={handleOpenAddSheet}
+                  onCancel={handleCancel}
+                  onSave={handleSave}
+               />
+
+               {/* Metadata form */}
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
+                  <metadataForm.Field
+                     name="name"
+                     validators={{
+                        onChange: ({ value }) =>
+                           !value ? "Nome é obrigatório" : undefined,
+                     }}
+                  >
+                     {(field) => (
+                        <div className="flex flex-col gap-1.5">
+                           <Label htmlFor="dashboard-name">
+                              Nome do Dashboard
+                           </Label>
+                           <Input
+                              id="dashboard-name"
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="Digite o nome do dashboard"
+                              value={field.state.value}
+                           />
+                           {field.state.meta.errors?.[0] && (
+                              <p className="text-xs text-destructive">
+                                 {field.state.meta.errors[0]}
+                              </p>
+                           )}
+                        </div>
+                     )}
+                  </metadataForm.Field>
+
+                  <metadataForm.Field name="description">
+                     {(field) => (
+                        <div className="flex flex-col gap-1.5">
+                           <Label htmlFor="dashboard-description">
+                              Descrição (opcional)
+                           </Label>
+                           <Input
+                              id="dashboard-description"
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="Digite a descrição do dashboard"
+                              value={field.state.value}
+                           />
+                        </div>
+                     )}
+                  </metadataForm.Field>
+               </div>
+            </>
          )}
 
          <DashboardGrid
