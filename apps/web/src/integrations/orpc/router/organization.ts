@@ -1,7 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import { getOrganizationMembers } from "@packages/database/repositories/auth-repository";
 import { member, organization } from "@packages/database/schemas/auth";
-import { serverEnv } from "@packages/environment/server";
+import { env as serverEnv } from "@packages/environment/server";
 import { resolveOrganizationPlan } from "@packages/events/credits";
 import { generatePresignedPutUrl, getMinioClient } from "@packages/files/client";
 import { getEffectiveProjectLimit } from "@packages/stripe/constants";
