@@ -28,8 +28,8 @@ export function DashboardListCard({
 }: DashboardListCardProps) {
    return (
       <Link
-         params={{ slug, teamSlug: teamSlug ?? "", dashboardId: id } as never}
-         to={"/$slug/$teamSlug/analytics/dashboards/$dashboardId" as never}
+         params={{ slug, teamSlug: teamSlug ?? "", dashboardId: id }}
+         to={"/$slug/$teamSlug/analytics/dashboards/$dashboardId"}
       >
          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
             <CardHeader>
