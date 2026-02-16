@@ -1,5 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import type { DatabaseInstance } from "@packages/database/client";
+import { DEFAULT_INSIGHTS } from "@packages/database/default-insights";
+import { createDefaultInsights } from "@packages/database/repositories/dashboard-repository";
 import { organization, team } from "@packages/database/schemas/auth";
 import { content } from "@packages/database/schemas/content";
 import { dashboards } from "@packages/database/schemas/dashboards";
@@ -154,24 +156,52 @@ export const completeOnboarding = protectedProcedure
       }),
    )
    .handler(async ({ context, input }) => {
-      const { db, organizationId, teamId } = context;
+      const { db, organizationId, teamId, userId } = context;
 
-      // Update team: set products and mark completed
-      await db
-         .update(team)
-         .set({
-            onboardingProducts: input.products,
-            onboardingCompleted: true,
-         })
-         .where(eq(team.id, teamId));
+      await db.transaction(async (tx) => {
+         // Update team: set products and mark completed
+         await tx
+            .update(team)
+            .set({
+               onboardingProducts: input.products,
+               onboardingCompleted: true,
+            })
+            .where(eq(team.id, teamId));
 
-      // Update org: mark completed
-      await db
-         .update(organization)
-         .set({ onboardingCompleted: true })
-         .where(eq(organization.id, organizationId));
+         // Update org: mark completed
+         await tx
+            .update(organization)
+            .set({ onboardingCompleted: true })
+            .where(eq(organization.id, organizationId));
 
-      // Fetch org slug for navigation
+         // Create default insights for the team
+         const insightIds = await createDefaultInsights(
+            tx,
+            organizationId,
+            teamId,
+            userId,
+         );
+
+         // Build tiles array from insight IDs
+         const tiles = insightIds.map((insightId, index) => ({
+            insightId,
+            size: DEFAULT_INSIGHTS[index].defaultSize,
+            order: index,
+         }));
+
+         // Create default dashboard with tiles
+         await tx.insert(dashboards).values({
+            organizationId,
+            teamId,
+            createdBy: userId,
+            name: "Dashboard Principal",
+            description: "Seu painel de análise principal",
+            isDefault: true,
+            tiles,
+         });
+      });
+
+      // Fetch org slug for navigation (outside transaction)
       const org = await db.query.organization.findFirst({
          where: (o, { eq }) => eq(o.id, organizationId),
          columns: { slug: true },

@@ -50,14 +50,15 @@ export const query = protectedProcedure
    });
 
 /**
- * Get the organization's default dashboard (creates one if it doesn't exist)
+ * Get the organization's default dashboard.
+ * Dashboard is created during onboarding completion.
  */
 export const getDefaultDashboard = protectedProcedure.handler(
    async ({ context }) => {
-      const { db, organizationId, teamId, userId } = context;
+      const { db, organizationId, teamId } = context;
 
       try {
-         return await fetchDefaultDashboard(db, organizationId, teamId, userId);
+         return await fetchDefaultDashboard(db, organizationId, teamId);
       } catch (error) {
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "Failed to fetch default dashboard",
