@@ -8,7 +8,6 @@ import {
    SelectTrigger,
    SelectValue,
 } from "@packages/ui/components/select";
-import { Switch } from "@packages/ui/components/switch";
 import { EventCombobox } from "./event-combobox";
 
 interface RetentionQueryBuilderProps {
@@ -22,22 +21,10 @@ const PERIODS = [
    { value: "month", label: "Mês" },
 ] as const;
 
-const DATE_RANGE_PRESETS = [
-   { value: "30d", label: "Últimos 30 dias" },
-   { value: "90d", label: "Últimos 90 dias" },
-   { value: "180d", label: "Últimos 180 dias" },
-   { value: "12m", label: "Últimos 12 meses" },
-   { value: "this_quarter", label: "Este trimestre" },
-   { value: "this_year", label: "Este ano" },
-] as const;
-
 export function RetentionQueryBuilder({
    config,
    onUpdate,
 }: RetentionQueryBuilderProps) {
-   const dateRangeValue =
-      config.dateRange.type === "relative" ? config.dateRange.value : "90d";
-
    return (
       <div className="space-y-6">
          <div className="space-y-2">
@@ -123,44 +110,6 @@ export function RetentionQueryBuilder({
             <p className="text-xs text-muted-foreground">
                Número de períodos a rastrear (1-52)
             </p>
-         </div>
-
-         <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Período de análise
-            </Label>
-            <Select
-               onValueChange={(value) =>
-                  onUpdate({
-                     dateRange: {
-                        type: "relative",
-                        value: value as (typeof DATE_RANGE_PRESETS)[number]["value"],
-                     },
-                  })
-               }
-               value={dateRangeValue}
-            >
-               <SelectTrigger>
-                  <SelectValue />
-               </SelectTrigger>
-               <SelectContent>
-                  {DATE_RANGE_PRESETS.map((dr) => (
-                     <SelectItem key={dr.value} value={dr.value}>
-                        {dr.label}
-                     </SelectItem>
-                  ))}
-               </SelectContent>
-            </Select>
-         </div>
-
-         <div className="flex items-center justify-between">
-            <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Comparar com período anterior
-            </Label>
-            <Switch
-               checked={config.compare}
-               onCheckedChange={(checked) => onUpdate({ compare: checked })}
-            />
          </div>
       </div>
    );

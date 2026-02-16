@@ -24,7 +24,7 @@ function DashboardsPageSkeleton() {
 }
 
 function DashboardsList() {
-   const { slug, teamId } = Route.useParams();
+   const { slug, teamSlug } = Route.useParams();
    const { data: dashboards } = useSuspenseQuery(
       orpc.dashboards.list.queryOptions({}),
    );
@@ -54,10 +54,11 @@ function DashboardsList() {
             <DashboardListCard
                description={dashboard.description}
                id={dashboard.id}
+               isDefault={dashboard.isDefault}
                key={dashboard.id}
                name={dashboard.name}
                slug={slug}
-               teamId={teamId}
+               teamSlug={teamSlug}
                tileCount={
                   Array.isArray(dashboard.tiles) ? dashboard.tiles.length : 0
                }

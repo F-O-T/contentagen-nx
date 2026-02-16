@@ -10,14 +10,26 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
-import { Input } from "@packages/ui/components/input";
-import { Label } from "@packages/ui/components/label";
+import {
+   CredenzaBody,
+   CredenzaDescription,
+   CredenzaHeader,
+   CredenzaTitle,
+} from "@packages/ui/components/credenza";
+import { DataTable } from "@packages/ui/components/data-table";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, Check, Loader2, Plus, RotateCcw } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+import {
+   BarChart3,
+   Check,
+   CheckCircle2,
+   Loader2,
+   Plus,
+   RotateCcw,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSheet } from "@/hooks/use-sheet";
+import { useCredenza } from "@/hooks/use-credenza";
 import { orpc } from "@/integrations/orpc/client";
 import { DashboardGrid } from "./dashboard-grid";
 import { DashboardTile } from "./dashboard-tile";
@@ -28,20 +40,13 @@ import { DashboardTile } from "./dashboard-tile";
 
 interface EditableDashboardGridProps {
    dashboard: Dashboard;
-   isEditing: boolean;
-   onDoneEditing: () => void;
-   onOpenAddSheet?: (handler: () => void) => void;
+   onOpenAddInsight?: (handler: () => void) => void;
 }
 
 // =============================================================================
 // Size helpers — PostHog-style: charts = half, numbers = quarter
 // =============================================================================
 
-/**
- * Derive tile size from insight config.
- * - "number" chart type → "sm" (quarter screen, 4 per row)
- * - everything else → "md" (half screen, 2 per row)
- */
 function deriveTileSize(insight: Insight): DashboardTileType["size"] {
    const config = insight.config as Record<string, unknown> | undefined;
    const chartType = config?.chartType as string | undefined;
@@ -49,117 +54,167 @@ function deriveTileSize(insight: Insight): DashboardTileType["size"] {
 }
 
 // =============================================================================
-// Add Tile Sheet
+// Add Insight Credenza
 // =============================================================================
 
-function AddTileSheet({
+function makeInsightColumns(
+   existingInsightIds: Set<string>,
+   onAdd: (insight: Insight) => void,
+): ColumnDef<Insight>[] {
+   return [
+      {
+         accessorKey: "name",
+         header: "Nome",
+         cell: ({ row }) => {
+            const isAdded = existingInsightIds.has(row.original.id);
+            return (
+               <div className="flex items-center gap-3">
+                  <div className="size-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                     <BarChart3 className="size-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                     <p className="text-sm font-medium truncate">
+                        {row.original.name}
+                     </p>
+                     {row.original.description && (
+                        <p className="text-xs text-muted-foreground truncate">
+                           {row.original.description}
+                        </p>
+                     )}
+                  </div>
+                  {isAdded && (
+                     <CheckCircle2 className="size-4 text-muted-foreground shrink-0" />
+                  )}
+               </div>
+            );
+         },
+      },
+      {
+         accessorKey: "type",
+         header: "Tipo",
+         cell: ({ getValue }) => (
+            <span className="text-sm capitalize">{getValue() as string}</span>
+         ),
+      },
+      {
+         id: "actions",
+         header: "Status",
+         cell: ({ row }) => {
+            const isAdded = existingInsightIds.has(row.original.id);
+            if (isAdded) {
+               return (
+                  <span className="text-xs text-muted-foreground">
+                     Adicionado
+                  </span>
+               );
+            }
+            return (
+               <Button
+                  onClick={() => onAdd(row.original)}
+                  size="sm"
+                  variant="outline"
+               >
+                  <Plus className="size-3.5" />
+                  Adicionar
+               </Button>
+            );
+         },
+      },
+   ];
+}
+
+const PAGE_SIZE = 5;
+
+function AddInsightCredenza({
    existingInsightIds,
    onAdd,
 }: {
    existingInsightIds: Set<string>;
    onAdd: (insight: Insight) => void;
 }) {
+   const [currentPage, setCurrentPage] = useState(1);
    const { data: insights, isLoading } = useQuery(
       orpc.insights.list.queryOptions({}),
    );
 
-   const availableInsights = useMemo(
-      () => (insights ?? []).filter((i) => !existingInsightIds.has(i.id)),
-      [insights, existingInsightIds],
+   const columns = useMemo(
+      () => makeInsightColumns(existingInsightIds, onAdd),
+      [existingInsightIds, onAdd],
    );
 
-   if (isLoading) {
-      return (
-         <div className="flex flex-col gap-3 p-4">
-            <h3 className="text-lg font-semibold">Adicionar tile</h3>
-            {Array.from({ length: 4 }).map((_, i) => (
-               <Skeleton className="h-16 w-full" key={`skeleton-${i + 1}`} />
-            ))}
-         </div>
-      );
-   }
-
-   if (availableInsights.length === 0) {
-      return (
-         <div className="flex flex-col items-center justify-center gap-3 p-8 text-muted-foreground">
-            <BarChart3 className="size-8" />
-            <p className="text-sm text-center">
-               {(insights ?? []).length === 0
-                  ? "Nenhum insight criado ainda. Crie insights na seção de Analytics."
-                  : "Todos os insights já estão no dashboard."}
-            </p>
-         </div>
-      );
-   }
+   const allInsights = insights ?? [];
+   const totalPages = Math.max(1, Math.ceil(allInsights.length / PAGE_SIZE));
+   const paginatedInsights = allInsights.slice(
+      (currentPage - 1) * PAGE_SIZE,
+      currentPage * PAGE_SIZE,
+   );
 
    return (
-      <div className="flex flex-col gap-3 p-4">
-         <h3 className="text-lg font-semibold">Adicionar tile</h3>
-         <p className="text-sm text-muted-foreground">
-            Selecione um insight para adicionar ao dashboard.
-         </p>
-         <div className="flex flex-col gap-2 mt-2">
-            {availableInsights.map((insight) => (
-               <button
-                  className="text-left rounded-lg border p-3 hover:bg-accent transition-colors"
-                  key={insight.id}
-                  onClick={() => onAdd(insight)}
-                  type="button"
-               >
-                  <div className="flex items-center gap-3">
-                     <div className="size-9 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-                        <BarChart3 className="size-4 text-primary" />
-                     </div>
-                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                           {insight.name}
-                        </p>
-                        {insight.description && (
-                           <p className="text-xs text-muted-foreground truncate">
-                              {insight.description}
-                           </p>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-0.5 capitalize">
-                           {insight.type}
-                        </p>
-                     </div>
-                  </div>
-               </button>
-            ))}
-         </div>
-      </div>
+      <>
+         <CredenzaHeader>
+            <CredenzaTitle>Adicionar insight</CredenzaTitle>
+            <CredenzaDescription>
+               Selecione um insight para adicionar ao dashboard.
+            </CredenzaDescription>
+         </CredenzaHeader>
+         <CredenzaBody>
+            {isLoading ? (
+               <div className="flex flex-col gap-3">
+                  {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                     <Skeleton
+                        className="h-12 w-full"
+                        key={`skeleton-${i + 1}`}
+                     />
+                  ))}
+               </div>
+            ) : allInsights.length === 0 ? (
+               <div className="flex flex-col items-center justify-center gap-3 py-8 text-muted-foreground">
+                  <BarChart3 className="size-8" />
+                  <p className="text-sm text-center">
+                     Nenhum insight criado ainda. Crie insights na seção de
+                     Analytics.
+                  </p>
+               </div>
+            ) : (
+               <DataTable
+                  columns={columns}
+                  data={paginatedInsights}
+                  getRowId={(row) => row.id}
+                  pagination={{
+                     currentPage,
+                     totalPages,
+                     totalCount: allInsights.length,
+                     pageSize: PAGE_SIZE,
+                     onPageChange: setCurrentPage,
+                  }}
+               />
+            )}
+         </CredenzaBody>
+      </>
    );
 }
 
 // =============================================================================
-// Edit Mode Toolbar
+// Unsaved Changes Toolbar
 // =============================================================================
 
-function EditToolbar({
+function UnsavedChangesBar({
    onSave,
    onCancel,
-   onAddTile,
    isSaving,
-   hasChanges,
 }: {
    onSave: () => void;
    onCancel: () => void;
-   onAddTile: () => void;
    isSaving: boolean;
-   hasChanges: boolean;
 }) {
    return (
       <div className="flex items-center gap-2 flex-wrap">
-         <Button onClick={onAddTile} size="sm" variant="outline">
-            <Plus className="size-4" />
-            Adicionar tile
-         </Button>
          <div className="flex-1" />
          <Button onClick={onCancel} size="sm" variant="ghost">
             <RotateCcw className="size-4" />
             Cancelar
          </Button>
-         <Button disabled={!hasChanges || isSaving} onClick={onSave} size="sm">
+         <Button disabled={isSaving} onClick={onSave} size="sm">
             {isSaving ? (
                <Loader2 className="size-4 animate-spin" />
             ) : (
@@ -177,73 +232,43 @@ function EditToolbar({
 
 export function EditableDashboardGrid({
    dashboard,
-   isEditing,
-   onDoneEditing,
-   onOpenAddSheet: externalOnOpenAddSheet,
+   onOpenAddInsight: externalOnOpenAddInsight,
 }: EditableDashboardGridProps) {
    const queryClient = useQueryClient();
-   const { openSheet, closeSheet } = useSheet();
+   const { openCredenza, closeCredenza } = useCredenza();
 
    // Local tile state for optimistic editing
    const [localTiles, setLocalTiles] = useState<DashboardTileType[]>(
       dashboard.tiles,
    );
 
-   // Metadata form with TanStack Form
-   const metadataForm = useForm({
-      defaultValues: {
-         name: dashboard.name,
-         description: dashboard.description ?? "",
-      },
-      onSubmit: async () => {
-         // Handled by handleSave
-      },
-   });
-
-   // Reset local state when dashboard changes (e.g., after save) or editing starts
+   // Sync local state when dashboard changes (e.g., after save/refetch)
    const dashboardTilesJson = JSON.stringify(dashboard.tiles);
-   const dashboardMetadataJson = JSON.stringify({
-      name: dashboard.name,
-      description: dashboard.description,
-   });
    const [lastDashboardTiles, setLastDashboardTiles] =
       useState(dashboardTilesJson);
-   const [lastDashboardMetadata, setLastDashboardMetadata] = useState(
-      dashboardMetadataJson,
-   );
 
    if (dashboardTilesJson !== lastDashboardTiles) {
       setLastDashboardTiles(dashboardTilesJson);
       setLocalTiles(dashboard.tiles);
    }
 
-   if (dashboardMetadataJson !== lastDashboardMetadata) {
-      setLastDashboardMetadata(dashboardMetadataJson);
-      metadataForm.reset();
-   }
-
-   const tilesChanged = useMemo(
+   const hasChanges = useMemo(
       () => JSON.stringify(localTiles) !== dashboardTilesJson,
       [localTiles, dashboardTilesJson],
    );
 
-   const metadataChanged = useMemo(
-      () =>
-         metadataForm.state.values.name !== dashboard.name ||
-         metadataForm.state.values.description !== (dashboard.description ?? ""),
-      [metadataForm.state.values, dashboard.name, dashboard.description],
-   );
-
-   const hasChanges = tilesChanged || metadataChanged;
-
-   // Save mutation
+   // Save tiles mutation
    const saveMutation = useMutation(
       orpc.dashboards.updateTiles.mutationOptions({
          onSuccess: () => {
             queryClient.invalidateQueries({
                queryKey: orpc.analytics.getDefaultDashboard.queryKey({}),
             });
-            onDoneEditing();
+            queryClient.invalidateQueries({
+               queryKey: orpc.dashboards.getById.queryKey({
+                  input: { id: dashboard.id },
+               }),
+            });
          },
       }),
    );
@@ -261,7 +286,32 @@ export function EditableDashboardGrid({
       );
    }, []);
 
-   const handleAddTile = useCallback(
+   const handleResizeTile = useCallback(
+      (insightId: string, size: DashboardTileType["size"]) => {
+         setLocalTiles((prev) =>
+            prev.map((t) => (t.insightId === insightId ? { ...t, size } : t)),
+         );
+      },
+      [],
+   );
+
+   const handleDuplicateTile = useCallback((insightId: string) => {
+      setLocalTiles((prev) => {
+         const source = prev.find((t) => t.insightId === insightId);
+         if (!source) return prev;
+         // Add a duplicate right after the source tile
+         const sourceIndex = prev.indexOf(source);
+         const updated = [...prev];
+         updated.splice(sourceIndex + 1, 0, {
+            insightId: source.insightId,
+            size: source.size,
+            order: sourceIndex + 1,
+         });
+         return updated.map((t, i) => ({ ...t, order: i }));
+      });
+   }, []);
+
+   const handleAddInsight = useCallback(
       (insight: Insight) => {
          setLocalTiles((prev) => [
             ...prev,
@@ -271,57 +321,50 @@ export function EditableDashboardGrid({
                order: prev.length,
             },
          ]);
-         closeSheet();
+         closeCredenza();
       },
-      [closeSheet],
+      [closeCredenza],
    );
 
-   const handleOpenAddSheet = useCallback(() => {
+   const handleOpenAddInsight = useCallback(() => {
       const existingIds = new Set(localTiles.map((t) => t.insightId));
-      openSheet({
+      openCredenza({
+         className: "w-full sm:!max-w-2xl",
          children: (
-            <AddTileSheet
+            <AddInsightCredenza
                existingInsightIds={existingIds}
-               onAdd={handleAddTile}
+               onAdd={handleAddInsight}
             />
          ),
       });
-   }, [localTiles, openSheet, handleAddTile]);
+   }, [localTiles, openCredenza, handleAddInsight]);
 
-   // Expose handler to parent component
+   // Expose add handler to parent (DashboardView header button)
    useEffect(() => {
-      if (externalOnOpenAddSheet) {
-         externalOnOpenAddSheet(handleOpenAddSheet);
+      if (externalOnOpenAddInsight) {
+         externalOnOpenAddInsight(handleOpenAddInsight);
       }
-   }, [externalOnOpenAddSheet, handleOpenAddSheet]);
+   }, [externalOnOpenAddInsight, handleOpenAddInsight]);
 
    const handleSave = useCallback(() => {
-      const metadata = metadataForm.state.values;
       saveMutation.mutate({
          id: dashboard.id,
          tiles: localTiles,
-         name: metadata.name,
-         description: metadata.description || undefined,
       });
-   }, [saveMutation, dashboard.id, localTiles, metadataForm.state.values]);
+   }, [saveMutation, dashboard.id, localTiles]);
 
    const handleCancel = useCallback(() => {
       setLocalTiles(dashboard.tiles);
-      metadataForm.reset();
-      onDoneEditing();
-   }, [dashboard.tiles, metadataForm, onDoneEditing]);
+   }, [dashboard.tiles]);
 
-   const tiles = isEditing ? localTiles : dashboard.tiles;
-
-   if (tiles.length === 0 && !isEditing) {
+   if (localTiles.length === 0 && !hasChanges) {
       return (
          <Card>
             <CardHeader className="items-center text-center py-12">
                <BarChart3 className="size-10 text-muted-foreground mb-2" />
                <CardTitle className="text-base">Dashboard vazio</CardTitle>
                <CardDescription>
-                  Clique em "Personalizar" para adicionar tiles ao seu
-                  dashboard.
+                  Use o botão "Adicionar insight" para começar.
                </CardDescription>
             </CardHeader>
          </Card>
@@ -330,93 +373,30 @@ export function EditableDashboardGrid({
 
    return (
       <div className="flex flex-col gap-4">
-         {isEditing && (
-            <>
-               <EditToolbar
-                  hasChanges={hasChanges}
-                  isSaving={saveMutation.isPending}
-                  onAddTile={handleOpenAddSheet}
-                  onCancel={handleCancel}
-                  onSave={handleSave}
-               />
-
-               {/* Metadata form */}
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
-                  <metadataForm.Field
-                     name="name"
-                     validators={{
-                        onChange: ({ value }) =>
-                           !value ? "Nome é obrigatório" : undefined,
-                     }}
-                  >
-                     {(field) => (
-                        <div className="flex flex-col gap-1.5">
-                           <Label htmlFor="dashboard-name">
-                              Nome do Dashboard
-                           </Label>
-                           <Input
-                              id="dashboard-name"
-                              onChange={(e) => field.handleChange(e.target.value)}
-                              placeholder="Digite o nome do dashboard"
-                              value={field.state.value}
-                           />
-                           {field.state.meta.errors?.[0] && (
-                              <p className="text-xs text-destructive">
-                                 {field.state.meta.errors[0]}
-                              </p>
-                           )}
-                        </div>
-                     )}
-                  </metadataForm.Field>
-
-                  <metadataForm.Field name="description">
-                     {(field) => (
-                        <div className="flex flex-col gap-1.5">
-                           <Label htmlFor="dashboard-description">
-                              Descrição (opcional)
-                           </Label>
-                           <Input
-                              id="dashboard-description"
-                              onChange={(e) => field.handleChange(e.target.value)}
-                              placeholder="Digite a descrição do dashboard"
-                              value={field.state.value}
-                           />
-                        </div>
-                     )}
-                  </metadataForm.Field>
-               </div>
-            </>
+         {hasChanges && (
+            <UnsavedChangesBar
+               isSaving={saveMutation.isPending}
+               onCancel={handleCancel}
+               onSave={handleSave}
+            />
          )}
 
          <DashboardGrid
-            onReorder={isEditing ? handleReorder : () => {}}
+            onReorder={handleReorder}
             renderTile={(tile) => (
                <DashboardTile
                   id={tile.insightId}
                   insightId={tile.insightId}
-                  isEditing={isEditing}
+                  isEditing
                   key={tile.insightId}
-                  onRemove={
-                     isEditing
-                        ? () => handleRemoveTile(tile.insightId)
-                        : undefined
-                  }
+                  onDuplicate={() => handleDuplicateTile(tile.insightId)}
+                  onRemove={() => handleRemoveTile(tile.insightId)}
+                  onResize={(size) => handleResizeTile(tile.insightId, size)}
                   size={tile.size}
                />
             )}
-            tiles={tiles}
+            tiles={localTiles}
          />
-
-         {isEditing && (
-            <Button
-               className="w-full border-dashed"
-               onClick={handleOpenAddSheet}
-               variant="outline"
-            >
-               <Plus className="size-4" />
-               Adicionar tile
-            </Button>
-         )}
       </div>
    );
 }

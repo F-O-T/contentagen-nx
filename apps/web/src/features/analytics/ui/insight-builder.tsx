@@ -3,60 +3,48 @@ import type {
    InsightConfig,
    RetentionConfig,
    TrendsConfig,
+   TrendsResult,
 } from "@packages/analytics/types";
 import { Button } from "@packages/ui/components/button";
-import { Input } from "@packages/ui/components/input";
-import { Label } from "@packages/ui/components/label";
-import { Textarea } from "@packages/ui/components/textarea";
+import { Card, CardContent } from "@packages/ui/components/card";
 import { cn } from "@packages/ui/lib/utils";
-import { Loader2 } from "lucide-react";
-import type { InsightType } from "../hooks/use-insight-config";
+import type { InsightType } from "@/features/analytics/hooks/use-insight-config";
 import { FunnelsQueryBuilder } from "./funnels-query-builder";
+import { InsightFilterBar } from "./insight-filter-bar";
+import { InsightHeader } from "./insight-header";
 import { InsightPreview } from "./insight-preview";
+import { InsightStatusLine } from "./insight-status-line";
 import { RetentionQueryBuilder } from "./retention-query-builder";
 import { TrendsQueryBuilder } from "./trends-query-builder";
+import { TrendsResultsTable } from "./trends-results-table";
 
-// ---------------------------------------------------------------------------
-// Tab bar (inline — keeps this file self-contained)
-// ---------------------------------------------------------------------------
-
-const TABS: Array<{ id: InsightType; label: string }> = [
-   { id: "trends", label: "Tendências" },
-   { id: "funnels", label: "Funis" },
-   { id: "retention", label: "Retenção" },
+const INSIGHT_TABS: { value: InsightType; label: string }[] = [
+   { value: "trends", label: "Tendências" },
+   { value: "funnels", label: "Funis" },
+   { value: "retention", label: "Retenção" },
 ];
 
-// ---------------------------------------------------------------------------
-// Props
-// ---------------------------------------------------------------------------
-
 interface InsightBuilderProps {
-   /** Page heading text */
-   heading: string;
-   /** Insight name (controlled) */
    name: string;
    onNameChange: (name: string) => void;
-   /** Optional description */
    description: string;
    onDescriptionChange: (description: string) => void;
-   /** Insight type & config (controlled via useInsightConfig) */
    type: InsightType;
    config: InsightConfig;
    onTypeChange: (type: InsightType) => void;
    onConfigUpdate: (updates: Partial<InsightConfig>) => void;
-   /** Save action */
    onSave: () => void;
    isSaving: boolean;
-   /** Disable type switching (e.g. when editing an existing insight) */
-   disableTypeSwitch?: boolean;
+   backTo: { slug: string; teamSlug: string };
+   onDuplicate?: () => void;
+   onDelete?: () => void;
+   lastComputedAt?: Date | null;
+   onRefresh: () => void;
+   isRefreshing?: boolean;
+   queryResult?: unknown;
 }
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
 export function InsightBuilder({
-   heading,
    name,
    onNameChange,
    description,
@@ -67,111 +55,211 @@ export function InsightBuilder({
    onConfigUpdate,
    onSave,
    isSaving,
-   disableTypeSwitch = false,
+   backTo,
+   onDuplicate,
+   onDelete,
+   lastComputedAt,
+   onRefresh,
+   isRefreshing = false,
+   queryResult,
 }: InsightBuilderProps) {
-   const canSave = name.trim().length > 0;
+   const isTrends = type === "trends";
+   const isFunnels = type === "funnels";
+   const isRetention = type === "retention";
 
    return (
-      <main className="flex flex-col gap-4 h-full">
+      <div className="flex flex-col gap-0 h-full">
          {/* Header */}
-         <div className="flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-2 flex-1 max-w-lg">
-               <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-                  {heading}
-               </h1>
-               <div className="space-y-2">
-                  <div>
-                     <Label
-                        className="text-xs font-semibold uppercase text-muted-foreground tracking-wider"
-                        htmlFor="insight-name"
-                     >
-                        Nome
-                     </Label>
-                     <Input
-                        id="insight-name"
-                        onChange={(e) => onNameChange(e.target.value)}
-                        placeholder="Ex: Visualizações por conteúdo"
-                        value={name}
-                     />
-                  </div>
-                  <div>
-                     <Label
-                        className="text-xs font-semibold uppercase text-muted-foreground tracking-wider"
-                        htmlFor="insight-description"
-                     >
-                        Descrição (opcional)
-                     </Label>
-                     <Textarea
-                        className="resize-none"
-                        id="insight-description"
-                        onChange={(e) => onDescriptionChange(e.target.value)}
-                        placeholder="Descreva brevemente o que este insight mostra"
-                        rows={2}
-                        value={description}
-                     />
-                  </div>
-               </div>
-            </div>
-            <Button
-               className="mt-2"
-               disabled={!canSave || isSaving}
-               onClick={onSave}
-               size="sm"
-            >
-               {isSaving && <Loader2 className="size-4 animate-spin" />}
-               {isSaving ? "Salvando..." : "Salvar insight"}
-            </Button>
-         </div>
+         <InsightHeader
+            backTo={backTo}
+            description={description}
+            isSaving={isSaving}
+            name={name}
+            onDelete={onDelete}
+            onDescriptionChange={onDescriptionChange}
+            onDuplicate={onDuplicate}
+            onNameChange={onNameChange}
+            onSave={onSave}
+            type={type}
+         />
 
          {/* Tab bar */}
-         <div className="flex items-center border-b pb-0">
-            <div className="flex items-center gap-0">
-               {TABS.map((tab) => (
-                  <button
-                     className={cn(
-                        "px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
-                        "disabled:opacity-40 disabled:cursor-not-allowed",
-                        type === tab.id
-                           ? "border-primary text-primary"
-                           : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/50",
-                     )}
-                     disabled={disableTypeSwitch && tab.id !== type}
-                     key={tab.id}
-                     onClick={() => onTypeChange(tab.id)}
-                     type="button"
-                  >
-                     {tab.label}
-                  </button>
-               ))}
+         <div className="border-b bg-background">
+            <div className="container mx-auto px-4">
+               <div className="flex items-center gap-0">
+                  {INSIGHT_TABS.map((tab) => (
+                     <Button
+                        className={cn(
+                           "px-4 py-2.5 h-auto rounded-none border-b-2 text-sm font-medium",
+                           type === tab.value
+                              ? "border-primary text-primary"
+                              : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/50",
+                        )}
+                        key={tab.value}
+                        onClick={() => onTypeChange(tab.value)}
+                        variant="ghost"
+                     >
+                        {tab.label}
+                     </Button>
+                  ))}
+               </div>
             </div>
          </div>
 
-         {/* Builder + Preview */}
-         <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 flex-1 min-h-0">
-            <div className="overflow-y-auto border rounded-lg p-4 bg-card">
-               {type === "trends" && (
-                  <TrendsQueryBuilder
-                     config={config as TrendsConfig}
-                     onUpdate={onConfigUpdate}
-                  />
+         {/* Content */}
+         <div className="flex-1 overflow-auto">
+            <div className="container mx-auto px-4 py-6 flex flex-col gap-4">
+               {/* TRENDS — full-width vertical flow */}
+               {isTrends && (
+                  <>
+                     <TrendsQueryBuilder
+                        config={config as TrendsConfig}
+                        onUpdate={onConfigUpdate}
+                     />
+
+                     <Card>
+                        <CardContent className="p-0">
+                           <div className="px-4">
+                              <InsightFilterBar
+                                 chartType={(config as TrendsConfig).chartType}
+                                 compare={config.compare}
+                                 dateRange={
+                                    (config as TrendsConfig).dateRange.value
+                                 }
+                                 interval={(config as TrendsConfig).interval}
+                                 onChartTypeChange={(v) =>
+                                    onConfigUpdate({ chartType: v })
+                                 }
+                                 onCompareChange={(v) =>
+                                    onConfigUpdate({ compare: v })
+                                 }
+                                 onDateRangeChange={(v) =>
+                                    onConfigUpdate({
+                                       dateRange: {
+                                          type: "relative",
+                                          value: v,
+                                       },
+                                    })
+                                 }
+                                 onIntervalChange={(v) =>
+                                    onConfigUpdate({ interval: v })
+                                 }
+                                 type="trends"
+                              />
+                           </div>
+                           <div className="px-4">
+                              <InsightStatusLine
+                                 isRefreshing={isRefreshing}
+                                 lastComputedAt={lastComputedAt}
+                                 onRefresh={onRefresh}
+                              />
+                           </div>
+                           <div className="min-h-[400px] p-4">
+                              <InsightPreview config={config} />
+                           </div>
+                        </CardContent>
+                     </Card>
+
+                     {queryResult && (
+                        <TrendsResultsTable
+                           config={config as TrendsConfig}
+                           result={queryResult as TrendsResult}
+                        />
+                     )}
+                  </>
                )}
-               {type === "funnels" && (
-                  <FunnelsQueryBuilder
-                     config={config as FunnelsConfig}
-                     onUpdate={onConfigUpdate}
-                  />
+
+               {/* FUNNELS — sidebar layout */}
+               {isFunnels && (
+                  <div className="flex gap-4">
+                     <div className="w-[400px] shrink-0">
+                        <Card className="sticky top-4">
+                           <CardContent className="p-6">
+                              <FunnelsQueryBuilder
+                                 config={config as FunnelsConfig}
+                                 onUpdate={onConfigUpdate}
+                              />
+                           </CardContent>
+                        </Card>
+                     </div>
+
+                     <Card className="flex-1 min-w-0">
+                        <CardContent className="p-0">
+                           <div className="px-4">
+                              <InsightFilterBar
+                                 dateRange={config.dateRange.value}
+                                 onDateRangeChange={(v) =>
+                                    onConfigUpdate({
+                                       dateRange: {
+                                          type: "relative",
+                                          value: v,
+                                       },
+                                    })
+                                 }
+                                 type={type}
+                              />
+                           </div>
+                           <div className="px-4">
+                              <InsightStatusLine
+                                 isRefreshing={isRefreshing}
+                                 lastComputedAt={lastComputedAt}
+                                 onRefresh={onRefresh}
+                              />
+                           </div>
+                           <div className="min-h-[400px] p-4">
+                              <InsightPreview config={config} />
+                           </div>
+                        </CardContent>
+                     </Card>
+                  </div>
                )}
-               {type === "retention" && (
-                  <RetentionQueryBuilder
-                     config={config as RetentionConfig}
-                     onUpdate={onConfigUpdate}
-                  />
+
+               {/* RETENTION — sidebar layout */}
+               {isRetention && (
+                  <div className="flex gap-4">
+                     <div className="w-[400px] shrink-0">
+                        <Card className="sticky top-4">
+                           <CardContent className="p-6">
+                              <RetentionQueryBuilder
+                                 config={config as RetentionConfig}
+                                 onUpdate={onConfigUpdate}
+                              />
+                           </CardContent>
+                        </Card>
+                     </div>
+
+                     <Card className="flex-1 min-w-0">
+                        <CardContent className="p-0">
+                           <div className="px-4">
+                              <InsightFilterBar
+                                 dateRange={config.dateRange.value}
+                                 onDateRangeChange={(v) =>
+                                    onConfigUpdate({
+                                       dateRange: {
+                                          type: "relative",
+                                          value: v,
+                                       },
+                                    })
+                                 }
+                                 type={type}
+                              />
+                           </div>
+                           <div className="px-4">
+                              <InsightStatusLine
+                                 isRefreshing={isRefreshing}
+                                 lastComputedAt={lastComputedAt}
+                                 onRefresh={onRefresh}
+                              />
+                           </div>
+                           <div className="min-h-[400px] p-4">
+                              <InsightPreview config={config} />
+                           </div>
+                        </CardContent>
+                     </Card>
+                  </div>
                )}
-            </div>
-            <div className="min-h-[400px]">
-               <InsightPreview config={config} />
             </div>
          </div>
-      </main>
+      </div>
    );
 }

@@ -100,13 +100,13 @@ export function DashboardFilterSheet({
    };
 
    return (
-      <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <Sheet onOpenChange={(open) => !open && onClose()} open={isOpen}>
          <SheetContent className="w-full sm:max-w-[540px] overflow-y-auto">
             <SheetHeader>
                <SheetTitle>Filtros do Dashboard</SheetTitle>
                <SheetDescription>
-                  Adicione filtros de propriedades que serão aplicados a todos os
-                  insights deste dashboard.
+                  Adicione filtros de propriedades que serão aplicados a todos
+                  os insights deste dashboard.
                </SheetDescription>
             </SheetHeader>
 
@@ -173,7 +173,11 @@ export function DashboardFilterSheet({
                                     onValueChange={(value) =>
                                        handleOperatorChange(
                                           index,
-                                          value as "equals" | "contains" | "gt" | "lt",
+                                          value as
+                                             | "equals"
+                                             | "contains"
+                                             | "gt"
+                                             | "lt",
                                        )
                                     }
                                     value={filter.operator}
@@ -183,7 +187,10 @@ export function DashboardFilterSheet({
                                     </SelectTrigger>
                                     <SelectContent>
                                        {FILTER_OPERATORS.map((op) => (
-                                          <SelectItem key={op.value} value={op.value}>
+                                          <SelectItem
+                                             key={op.value}
+                                             value={op.value}
+                                          >
                                              {op.label}
                                           </SelectItem>
                                        ))}
