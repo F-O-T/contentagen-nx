@@ -62,6 +62,7 @@ type Organization = {
 type Team = {
    id: string;
    name: string;
+   slug: string;
 };
 
 const ORG_AVATAR_COLORS = [
@@ -121,7 +122,7 @@ function SidebarScopeSwitcherContent() {
    const { pathname } = useLocation();
    const params = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
    };
    const currentSlug = params.slug ?? activeOrganization.slug;
    const { data: organizations } = useSuspenseQuery(
@@ -166,7 +167,7 @@ function SidebarScopeSwitcherContent() {
 
          const nextPath = pathname.startsWith(`/${currentSlug}`)
             ? pathname.replace(`/${currentSlug}`, `/${org.slug}`)
-            : `/${org.slug}/${params.teamId ?? ""}/home`;
+            : `/${org.slug}/${params.teamSlug ?? ""}/home`;
 
          router.navigate({ to: nextPath });
          setOrgOpen(false);
@@ -175,7 +176,7 @@ function SidebarScopeSwitcherContent() {
          activeOrganization.id,
          currentSlug,
          isPending,
-         params.teamId,
+         params.teamSlug,
          pathname,
          router,
          setActiveOrganization,
@@ -198,16 +199,17 @@ function SidebarScopeSwitcherContent() {
          });
 
          if (currentSlug) {
+            const teamParam = team.slug;
             const prefix = `/${currentSlug}`;
-            let nextPath = `/${currentSlug}/${team.id}/home`;
+            let nextPath = `/${currentSlug}/${teamParam}/home`;
 
             if (pathname.startsWith(`${prefix}/`)) {
-               nextPath = params.teamId
+               nextPath = params.teamSlug
                   ? pathname.replace(
-                       `${prefix}/${params.teamId}`,
-                       `${prefix}/${team.id}`,
+                       `${prefix}/${params.teamSlug}`,
+                       `${prefix}/${teamParam}`,
                     )
-                  : `/${currentSlug}/${team.id}${pathname.slice(prefix.length)}`;
+                  : `/${currentSlug}/${teamParam}${pathname.slice(prefix.length)}`;
             }
 
             router.navigate({ to: nextPath });
@@ -218,7 +220,7 @@ function SidebarScopeSwitcherContent() {
       [
          activeTeam?.id,
          currentSlug,
-         params.teamId,
+         params.teamSlug,
          pathname,
          queryClient,
          router,
@@ -254,9 +256,9 @@ function SidebarScopeSwitcherContent() {
                            onClick={closeCredenza}
                            params={{
                               slug: currentSlug,
-                              teamId: params.teamId ?? "",
+                              teamSlug: params.teamSlug ?? "",
                            }}
-                           to="/$slug/$teamId/billing"
+                           to="/$slug/$teamSlug/billing"
                         >
                            Ver planos
                         </Link>

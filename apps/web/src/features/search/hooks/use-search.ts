@@ -121,8 +121,8 @@ export function useSearch(
                type: "content" as const,
                tabType: "content-editor" as const,
                icon: "FileText",
-               route: "/$slug/$teamId/$contentId",
-               params: { slug: orgSlug, teamId, contentId: item.id },
+               route: "/$slug/$teamSlug/$contentId",
+               params: { slug: orgSlug, teamSlug: teamId, contentId: item.id },
             }));
 
          if (contentResults.length > 0) {
@@ -157,8 +157,8 @@ export function useSearch(
                type: "dashboard" as const,
                tabType: "dashboard" as const,
                icon: "LayoutDashboard",
-               route: "/$slug/$teamId/analytics/dashboards/$dashboardId",
-               params: { slug: orgSlug, teamId, dashboardId: item.id },
+               route: "/$slug/$teamSlug/analytics/dashboards/$dashboardId",
+               params: { slug: orgSlug, teamSlug: teamId, dashboardId: item.id },
             }));
 
          if (dashboardResults.length > 0) {
@@ -194,8 +194,8 @@ export function useSearch(
                type: "insight" as const,
                tabType: "insight" as const,
                icon: "Lightbulb",
-               route: "/$slug/$teamId/analytics/insights/$insightId",
-               params: { slug: orgSlug, teamId, insightId: item.id },
+               route: "/$slug/$teamSlug/analytics/insights/$insightId",
+               params: { slug: orgSlug, teamSlug: teamId, insightId: item.id },
             }));
 
          if (insightResults.length > 0) {
@@ -230,8 +230,8 @@ export function useSearch(
                type: "form" as const,
                tabType: "form" as const,
                icon: "ClipboardList",
-               route: "/$slug/$teamId/forms/$formId",
-               params: { slug: orgSlug, teamId, formId: item.id },
+               route: "/$slug/$teamSlug/forms/$formId",
+               params: { slug: orgSlug, teamSlug: teamId, formId: item.id },
             }));
 
          if (formResults.length > 0) {

@@ -13,10 +13,10 @@ export function EarlyAccessSidebarBanner() {
    const { isBannerVisible, dismissBanner } = useEarlyAccess();
    const params = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
    };
    const slug = params.slug ?? "";
-   const teamId = params.teamId ?? "";
+   const teamSlug = params.teamSlug ?? "";
 
    if (!isBannerVisible) return null;
 
@@ -45,8 +45,8 @@ export function EarlyAccessSidebarBanner() {
                </p>
                <Link
                   className="mt-2 inline-block text-xs font-medium text-primary hover:underline"
-                  params={{ slug, teamId }}
-                  to="/$slug/$teamId/settings/feature-previews"
+                  params={{ slug, teamSlug }}
+                  to="/$slug/$teamSlug/settings/feature-previews"
                >
                   Ver funcionalidades
                </Link>
@@ -57,8 +57,8 @@ export function EarlyAccessSidebarBanner() {
                <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Funcionalidades em Beta">
                      <Link
-                        params={{ slug, teamId }}
-                        to="/$slug/$teamId/settings/feature-previews"
+                        params={{ slug, teamSlug }}
+                        to="/$slug/$teamSlug/settings/feature-previews"
                      >
                         <FlaskConical />
                         <span>Beta</span>

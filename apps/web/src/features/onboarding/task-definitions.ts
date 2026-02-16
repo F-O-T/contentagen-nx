@@ -35,7 +35,7 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       type: "onboarding",
       product: "content",
       autoDetect: true,
-      route: "/$slug/$teamId/content",
+      route: "/$slug/$teamSlug/content",
    },
    {
       id: "publish_content",
@@ -46,7 +46,7 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       product: "content",
       dependsOn: "create_content",
       autoDetect: true,
-      route: "/$slug/$teamId/content",
+      route: "/$slug/$teamSlug/content",
    },
    {
       id: "setup_brand",
@@ -56,7 +56,7 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       type: "setup",
       product: "content",
       autoDetect: false,
-      route: "/$slug/$teamId/brand",
+      route: "/$slug/$teamSlug/brand",
    },
    {
       id: "configure_writer",
@@ -66,7 +66,7 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       type: "setup",
       product: "content",
       autoDetect: false,
-      route: "/$slug/$teamId/writers",
+      route: "/$slug/$teamSlug/writers",
    },
 
    // ── Forms tasks ────────────────────────────────────────────────────
@@ -78,7 +78,7 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       type: "setup",
       product: "forms",
       autoDetect: false,
-      route: "/$slug/$teamId/settings",
+      route: "/$slug/$teamSlug/settings",
    },
    {
       id: "create_form",
@@ -89,7 +89,7 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       product: "forms",
       dependsOn: "install_sdk",
       autoDetect: true,
-      route: "/$slug/$teamId/forms",
+      route: "/$slug/$teamSlug/forms",
    },
    {
       id: "embed_form",
@@ -99,7 +99,7 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       product: "forms",
       dependsOn: "create_form",
       autoDetect: false,
-      route: "/$slug/$teamId/forms",
+      route: "/$slug/$teamSlug/forms",
    },
    {
       id: "view_submission",
@@ -109,7 +109,7 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       product: "forms",
       dependsOn: "embed_form",
       autoDetect: false,
-      route: "/$slug/$teamId/forms",
+      route: "/$slug/$teamSlug/forms",
    },
 
    // ── Analytics tasks ────────────────────────────────────────────────
@@ -120,7 +120,7 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       type: "setup",
       product: "analytics",
       autoDetect: false,
-      route: "/$slug/$teamId/settings",
+      route: "/$slug/$teamSlug/settings",
    },
    {
       id: "verify_event",
@@ -131,7 +131,7 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       product: "analytics",
       dependsOn: "install_sdk_analytics",
       autoDetect: false,
-      route: "/$slug/$teamId/analytics",
+      route: "/$slug/$teamSlug/analytics",
    },
    {
       id: "create_insight",
@@ -141,7 +141,7 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       product: "analytics",
       dependsOn: "verify_event",
       autoDetect: true,
-      route: "/$slug/$teamId/analytics/insights",
+      route: "/$slug/$teamSlug/analytics/insights",
    },
    {
       id: "create_dashboard",
@@ -151,7 +151,7 @@ export const TASK_DEFINITIONS: TaskDefinition[] = [
       product: "analytics",
       dependsOn: "create_insight",
       autoDetect: true,
-      route: "/$slug/$teamId/analytics/dashboards",
+      route: "/$slug/$teamSlug/analytics/dashboards",
    },
 ];
 

@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import type { SettingsNavSection } from "./settings-nav-items";
 
-const basePath = "/$slug/$teamId/analytics/data-management";
+const basePath = "/$slug/$teamSlug/analytics/data-management";
 
 export const dataManagementNavSections: SettingsNavSection[] = [
    {

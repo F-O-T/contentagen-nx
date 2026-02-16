@@ -24,8 +24,8 @@ interface SettingsLayoutProps {
 export function SettingsLayout({ children }: SettingsLayoutProps) {
    const isMobile = useIsMobile();
    const { pathname } = useLocation();
-   const { teamId } = useParams({
-      from: "/_authenticated/$slug/$teamId/_dashboard/settings",
+   const { teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard/settings",
    });
    const { activeOrganization } = useActiveOrganization();
    const [search, setSearch] = useState("");
@@ -41,8 +41,8 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
          <div className="flex h-full flex-col gap-4">
             <Button asChild className="w-fit" size="sm" variant="ghost">
                <Link
-                  params={{ slug: activeOrganization.slug, teamId }}
-                  to="/$slug/$teamId/settings"
+                  params={{ slug: activeOrganization.slug, teamSlug }}
+                  to="/$slug/$teamSlug/settings"
                >
                   <ChevronLeft className="size-4 mr-1" />
                   Configuracoes

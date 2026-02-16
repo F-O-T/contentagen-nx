@@ -2,22 +2,54 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated")({
    beforeLoad: async ({ context, location }) => {
-      // Get session from cache (prefetched in __root.tsx)
-      const session = await context.queryClient.fetchQuery(
-         context.orpc.session.getSession.queryOptions({}),
-      );
+      let session;
 
-      // If not authenticated, redirect to sign-in with return URL
-      if (!session?.user) {
+      try {
+         session = await context.queryClient.fetchQuery(
+            context.orpc.session.getSession.queryOptions({}),
+         );
+      } catch (error) {
+         // If session fetch fails, redirect to sign in
          throw redirect({
             to: "/auth/sign-in",
-            search: {
-               redirect: location.href,
-            },
+            search: { redirect: location.href },
          });
       }
 
-      // Return session data for child routes
+      if (!session?.user?.id) {
+         throw redirect({
+            to: "/auth/sign-in",
+            search: { redirect: location.href },
+         });
+      }
+
+      // Check if user has any organizations
+      const organizations = await context.queryClient.fetchQuery(
+         context.orpc.organization.getOrganizations.queryOptions(),
+      );
+
+      const hasOrgs = organizations.length > 0;
+
+      // If no orgs and not already on onboarding, redirect
+      if (!hasOrgs && !location.pathname.startsWith("/onboarding")) {
+         throw redirect({ to: "/onboarding" });
+      }
+
+      // If has orgs, check if active org needs onboarding
+      if (hasOrgs) {
+         const activeOrg = organizations.find(
+            (org) => org.id === session.session.activeOrganizationId,
+         ) ?? organizations[0];
+
+         if (
+            activeOrg &&
+            !activeOrg.onboardingCompleted &&
+            !location.pathname.startsWith("/onboarding")
+         ) {
+            throw redirect({ to: "/onboarding" });
+         }
+      }
+
       return {
          session,
          userId: session.user.id,

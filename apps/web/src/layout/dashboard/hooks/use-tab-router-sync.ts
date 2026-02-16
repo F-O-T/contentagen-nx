@@ -38,7 +38,7 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
 
    useEffect(() => {
       const homeRoute = `/${orgSlug}/${teamId}/home`;
-      const homeParams = { slug: orgSlug, teamId };
+      const homeParams = { slug: orgSlug, teamSlug: teamId };
       initializeTabs(orgSlug, teamId, homeRoute, homeParams);
    }, [orgSlug, teamId]);
 
@@ -163,8 +163,8 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
    // ── Open search as new tab ──────────────────────────────────────────────
 
    const openNewSearchTab = useCallback(() => {
-      const searchRoute = `/$slug/$teamId/search`;
-      const searchParams = { slug: orgSlug, teamId };
+      const searchRoute = `/$slug/$teamSlug/search`;
+      const searchParams = { slug: orgSlug, teamSlug: teamId };
       const searchPath = `/${orgSlug}/${teamId}/search`;
 
       openTab({
@@ -182,8 +182,8 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
    // ── Replace current tab with search ─────────────────────────────────────
 
    const replaceWithSearch = useCallback(() => {
-      const searchRoute = `/$slug/$teamId/search`;
-      const searchParams = { slug: orgSlug, teamId };
+      const searchRoute = `/$slug/$teamSlug/search`;
+      const searchParams = { slug: orgSlug, teamSlug: teamId };
       const searchPath = `/${orgSlug}/${teamId}/search`;
 
       replaceCurrentTab({

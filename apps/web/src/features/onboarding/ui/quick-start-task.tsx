@@ -22,18 +22,18 @@ export function QuickStartTask({
    onComplete,
 }: QuickStartTaskProps) {
    const navigate = useNavigate();
-   const { slug, teamId } = useParams({ strict: false }) as {
+   const { slug, teamSlug } = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
    };
 
    const handleClick = useCallback(() => {
       if (isLocked || isCompleted) return;
       const resolvedRoute = task.route
          .replace("$slug", slug ?? "")
-         .replace("$teamId", teamId ?? "");
+         .replace("$teamSlug", teamSlug ?? "");
       navigate({ to: resolvedRoute });
-   }, [isLocked, isCompleted, navigate, slug, teamId, task.route]);
+   }, [isLocked, isCompleted, navigate, slug, teamSlug, task.route]);
 
    const handleKeyDown = useCallback(
       (e: React.KeyboardEvent) => {

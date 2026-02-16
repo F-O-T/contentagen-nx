@@ -26,10 +26,10 @@ export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
    const navigate = useNavigate();
    const params = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
    };
    const slug = params.slug ?? "";
-   const teamId = params.teamId ?? "";
+   const teamSlug = params.teamSlug ?? "";
    const queryClient = useQueryClient();
 
    const createDashboardMutation = useMutation(
@@ -39,8 +39,8 @@ export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
                queryKey: orpc.dashboards.list.queryKey({}),
             });
             navigate({
-               to: "/$slug/$teamId/analytics/dashboards/$dashboardId",
-               params: { slug, teamId, dashboardId: data.id },
+               to: "/$slug/$teamSlug/analytics/dashboards/$dashboardId",
+               params: { slug, teamSlug, dashboardId: data.id },
             } as never);
          },
          onError: () => {
@@ -50,7 +50,7 @@ export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
    );
 
    const handleCreateDashboard = () => {
-      if (!teamId) {
+      if (!teamSlug) {
          toast.error("Selecione um time para criar dashboards");
          return;
       }
@@ -58,13 +58,13 @@ export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
    };
 
    const handleCreateInsight = () => {
-      if (!teamId) {
+      if (!teamSlug) {
          toast.error("Selecione um time para criar insights");
          return;
       }
       navigate({
-         to: "/$slug/$teamId/analytics/insights/new",
-         params: { slug, teamId },
+         to: "/$slug/$teamSlug/analytics/insights/new",
+         params: { slug, teamSlug },
       } as never);
    };
 

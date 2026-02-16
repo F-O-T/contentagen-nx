@@ -171,7 +171,7 @@ export function resolveTabMetadata(
 /**
  * Build the TanStack Router `to` path (with $param placeholders) from a resolved pathname.
  *
- * For example: "/my-org/team-1/home" → "/$slug/$teamId/home"
+ * For example: "/my-org/team-1/home" → "/$slug/$teamSlug/home"
  *
  * This re-parameterizes known dynamic segments.
  */
@@ -185,8 +185,8 @@ export function pathnameToRoutePath(
    if (params.slug) {
       route = route.replace(`/${params.slug}`, "/$slug");
    }
-   if (params.teamId) {
-      route = route.replace(`/${params.teamId}`, "/$teamId");
+   if (params.teamSlug) {
+      route = route.replace(`/${params.teamSlug}`, "/$teamSlug");
    }
    if (params.contentId) {
       route = route.replace(`/${params.contentId}`, "/$contentId");

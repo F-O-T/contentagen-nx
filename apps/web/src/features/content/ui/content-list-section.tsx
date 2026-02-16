@@ -34,10 +34,9 @@ const STATUS_FILTER_OPTIONS = [
 
 export function ContentListSection() {
    const navigate = useNavigate();
-   const { slug, teamId } = useParams({ strict: false }) as {
-      slug?: string;
-      teamId?: string;
-   };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard/content/",
+   });
    const [searchQuery, setSearchQuery] = useState("");
    const [statusFilter, setStatusFilter] = useState<string>("all");
    const [currentPage, setCurrentPage] = useState(1);
@@ -113,10 +112,10 @@ export function ContentListSection() {
       orpc.content.create.mutationOptions({
          onSuccess: (data) => {
             navigate({
-               to: "/$slug/$teamId/$contentId",
+               to: "/$slug/$teamSlug/$contentId",
                params: {
                   slug: slug ?? "",
-                  teamId: teamId ?? "",
+                  teamSlug: teamSlug ?? "",
                   contentId: data.id,
                },
             });
@@ -145,10 +144,10 @@ export function ContentListSection() {
    // Action handlers
    const handleView = (content: ContentItem) => {
       navigate({
-         to: "/$slug/$teamId/$contentId",
+         to: "/$slug/$teamSlug/$contentId",
          params: {
-            slug: slug ?? "",
-            teamId: teamId ?? "",
+            slug: slug,
+            teamSlug: teamSlug,
             contentId: content.id,
          },
       });
@@ -164,12 +163,6 @@ export function ContentListSection() {
 
    const handleDelete = (content: ContentItem) => {
       deleteMutation.mutate({ id: content.id });
-   };
-
-   // biome-ignore lint/correctness/noUnusedFunctionParameters: Will be implemented when share API is ready
-   const handleToggleShare = (content: ContentItem) => {
-      // TODO: Implement share toggle when API is ready
-      toast.info("Compartilhamento em breve");
    };
 
    const handleCreateNew = () => {
@@ -190,7 +183,6 @@ export function ContentListSection() {
             onPublish: handlePublish,
             onArchive: handleArchive,
             onDelete: handleDelete,
-            onToggleShare: handleToggleShare,
          }),
       [],
    );
@@ -358,7 +350,6 @@ export function ContentListSection() {
                            onArchive={handleArchive}
                            onDelete={handleDelete}
                            onPublish={handlePublish}
-                           onToggleShare={handleToggleShare}
                            onView={handleView}
                         />
                      )}

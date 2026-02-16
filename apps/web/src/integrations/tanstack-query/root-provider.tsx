@@ -1,4 +1,9 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+   MutationCache,
+   QueryClient,
+   QueryClientProvider,
+} from "@tanstack/react-query";
+import { setQueryClient } from "../better-auth/query-bridge";
 import { orpc } from "../orpc/client";
 
 export type RouterContext = {
@@ -8,6 +13,13 @@ export type RouterContext = {
 
 export function getContext(): RouterContext {
    const queryClient = new QueryClient({
+      mutationCache: new MutationCache({
+         onSuccess: () => {
+            // Invalidate all queries on any successful mutation
+            // This ensures cache stays fresh after oRPC mutations
+            queryClient.invalidateQueries();
+         },
+      }),
       defaultOptions: {
          queries: {
             staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh
@@ -17,6 +29,10 @@ export function getContext(): RouterContext {
          },
       },
    });
+
+   // Set up Better Auth to invalidate queries on success
+   setQueryClient(queryClient);
+
    return {
       queryClient,
       orpc,

@@ -89,11 +89,11 @@ function getInsightIcon(type: string) {
 function DashboardList({ searchQuery }: { searchQuery: string }) {
    const params = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
       dashboardId?: string;
    };
    const slug = params.slug ?? "";
-   const teamId = params.teamId ?? "";
+   const teamSlug = params.teamSlug ?? "";
 
    const { data: dashboards } = useSuspenseQuery(
       orpc.dashboards.list.queryOptions({}),
@@ -133,12 +133,12 @@ function DashboardList({ searchQuery }: { searchQuery: string }) {
                         params={
                            {
                               slug,
-                              teamId,
+                              teamSlug,
                               dashboardId: dashboard.id,
                            } as never
                         }
                         to={
-                           "/$slug/$teamId/analytics/dashboards/$dashboardId" as never
+                           "/$slug/$teamSlug/analytics/dashboards/$dashboardId" as never
                         }
                      >
                         <LayoutDashboard className="size-4 flex-shrink-0" />
@@ -162,11 +162,11 @@ function DashboardList({ searchQuery }: { searchQuery: string }) {
 function InsightList({ searchQuery }: { searchQuery: string }) {
    const params = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
       insightId?: string;
    };
    const slug = params.slug ?? "";
-   const teamId = params.teamId ?? "";
+   const teamSlug = params.teamSlug ?? "";
 
    const { data: insights } = useSuspenseQuery(
       orpc.insights.list.queryOptions({}),
@@ -208,12 +208,12 @@ function InsightList({ searchQuery }: { searchQuery: string }) {
                            params={
                               {
                                  slug,
-                                 teamId,
+                                 teamSlug,
                                  insightId: insight.id,
                               } as never
                            }
                            to={
-                              "/$slug/$teamId/analytics/insights/$insightId" as never
+                              "/$slug/$teamSlug/analytics/insights/$insightId" as never
                            }
                         >
                            <Icon className="size-4 flex-shrink-0" />
@@ -249,10 +249,10 @@ function filterSection(
 function DataManagementItemList({ searchQuery }: { searchQuery: string }) {
    const params = useParams({ strict: false }) as {
       slug?: string;
-      teamId?: string;
+      teamSlug?: string;
    };
    const slug = params.slug ?? "";
-   const teamId = params.teamId ?? "";
+   const teamSlug = params.teamSlug ?? "";
    const { pathname } = useLocation();
 
    const filteredSections = useMemo(
@@ -286,7 +286,7 @@ function DataManagementItemList({ searchQuery }: { searchQuery: string }) {
                pathname={pathname}
                section={section}
                slug={slug}
-               teamId={teamId}
+               teamSlug={teamSlug}
             />
          ))}
       </div>
@@ -296,13 +296,13 @@ function DataManagementItemList({ searchQuery }: { searchQuery: string }) {
 function DataManagementSection({
    section,
    slug,
-   teamId,
+   teamSlug,
    pathname,
    forceOpen,
 }: {
    section: SettingsNavSection;
    slug: string;
-   teamId: string;
+   teamSlug: string;
    pathname: string;
    forceOpen: boolean;
 }) {
@@ -332,7 +332,7 @@ function DataManagementSection({
                      key={item.id}
                      pathname={pathname}
                      slug={slug}
-                     teamId={teamId}
+                     teamSlug={teamSlug}
                   />
                ))}
             </ul>
@@ -344,17 +344,17 @@ function DataManagementSection({
 function DataManagementNavItem({
    item,
    slug,
-   teamId,
+   teamSlug,
    pathname,
 }: {
    item: SettingsNavItemDef;
    slug: string;
-   teamId: string;
+   teamSlug: string;
    pathname: string;
 }) {
    const resolvedHref = item.href
       .replace("$slug", slug)
-      .replace("$teamId", teamId);
+      .replace("$teamSlug", teamSlug);
    const isActive = pathname === resolvedHref;
 
    return (
@@ -366,7 +366,7 @@ function DataManagementNavItem({
                   ? "bg-primary/10 text-primary"
                   : "text-foreground hover:bg-accent",
             )}
-            params={{ slug, teamId }}
+            params={{ slug, teamSlug }}
             to={item.href}
          >
             {item.icon && <item.icon className="size-4 flex-shrink-0" />}
@@ -386,9 +386,9 @@ function EmptyState({
    slug: string;
 }) {
    const label = section === "dashboards" ? "dashboard" : "insight";
-   const params = useParams({ strict: false }) as { teamId?: string };
-   const teamId = params.teamId ?? "";
-   const teamSegment = teamId ? `/${teamId}` : "";
+   const params = useParams({ strict: false }) as { teamSlug?: string };
+   const teamSlug = params.teamSlug ?? "";
+   const teamSegment = teamSlug ? `/${teamSlug}` : "";
    const listRoute =
       section === "dashboards"
          ? `/${slug}${teamSegment}/analytics/dashboards`

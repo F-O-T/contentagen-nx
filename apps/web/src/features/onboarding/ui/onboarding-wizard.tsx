@@ -1,168 +1,276 @@
+import { Badge } from "@packages/ui/components/badge";
+import { Button } from "@packages/ui/components/button";
+import { Spinner } from "@packages/ui/components/spinner";
 import { defineStepper } from "@packages/ui/components/stepper";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useParams } from "@tanstack/react-router";
-import { useCallback, useMemo } from "react";
-import { toast } from "sonner";
-import { orpc } from "@/integrations/orpc/client";
-import { useOnboardingStatus } from "../hooks/use-onboarding-status";
-import { ProductSelectionStep } from "./product-selection-step";
-import { ProfileSetupStep } from "./profile-setup-step";
-import { ProjectSetupStep } from "./project-setup-step";
-import { SdkInstallStep } from "./sdk-install-step";
+import { useNavigate } from "@tanstack/react-router";
+import { useCallback, useMemo, useRef, useState } from "react";
+import type { Session } from "@/integrations/better-auth/auth-client";
+import { ProductsStep } from "./products-step";
+import { ProfileStep } from "./profile-step";
+import { ProjectStep } from "./project-step";
+import type { StepHandle, StepState } from "./step-handle";
+import { WorkspaceStep } from "./workspace-step";
 
-// Organization onboarding steps
-const orgSteps = [{ id: "org-profile", title: "Workspace" }] as const;
+type Organization = {
+   id: string;
+   name: string;
+   slug: string;
+   logo: string | null;
+   role: string;
+   onboardingCompleted: boolean | null;
+};
 
-// Project onboarding steps
-const projectSteps = [
-   { id: "project-setup", title: "Projeto" },
-   { id: "products", title: "Produtos" },
-   { id: "sdk-install", title: "SDK" },
-] as const;
+interface OnboardingWizardProps {
+   session: NonNullable<Session>;
+   organizations: Organization[];
+   activeOrg: Organization | null;
+}
 
-const { Stepper: OrgStepper } = defineStepper(...orgSteps);
-const { Stepper: ProjectStepper } = defineStepper(...projectSteps);
+type WizardState = {
+   organizationId: string | null;
+   organizationSlug: string | null;
+   teamId: string | null;
+   teamSlug: string | null;
+};
 
-export function OnboardingWizard() {
+export function OnboardingWizard({
+   session,
+   organizations: _organizations,
+   activeOrg,
+}: OnboardingWizardProps) {
    const navigate = useNavigate();
-   const queryClient = useQueryClient();
-   const { slug } = useParams({ from: "/_authenticated/$slug/onboarding" });
-   const { data: status } = useOnboardingStatus();
-   const { data: teams } = useQuery(
-      orpc.organization.getOrganizationTeams.queryOptions({}),
+
+   const needsProfile = !session.user.name;
+   const needsWorkspace = !activeOrg;
+
+   const steps = useMemo(() => {
+      const s: { id: string; title: string }[] = [];
+      if (needsProfile) s.push({ id: "profile", title: "Perfil" });
+      if (needsWorkspace) s.push({ id: "workspace", title: "Workspace" });
+      s.push({ id: "project", title: "Projeto" });
+      s.push({ id: "products", title: "Produtos" });
+      return s;
+   }, [needsProfile, needsWorkspace]);
+
+   const { Stepper } = useMemo(() => defineStepper(...steps), [steps]);
+
+   const [wizardState, setWizardState] = useState<WizardState>({
+      organizationId: activeOrg?.id ?? null,
+      organizationSlug: activeOrg?.slug ?? null,
+      teamId: null,
+      teamSlug: null,
+   });
+
+   const [workspaceSlug, setWorkspaceSlug] = useState<string | null>(
+      activeOrg?.slug ?? null,
+   );
+   const [projectSlug, setProjectSlug] = useState<string | null>(null);
+
+   const stepRef = useRef<StepHandle>(null);
+
+   const [stepState, setStepState] = useState<StepState>({
+      canContinue: true,
+      isPending: false,
+   });
+
+   const handleStepStateChange = useCallback((state: StepState) => {
+      setStepState(state);
+   }, []);
+
+   const handleProfileComplete = useCallback(
+      (methods: { navigation: { next: () => void } }) => {
+         methods.navigation.next();
+      },
+      [],
    );
 
-   // Determine which onboarding flow to show
-   const onboardingMode = useMemo(() => {
-      if (!status) return "loading";
-      if (!status.organization.onboardingCompleted) return "organization";
-      if (!status.project.onboardingCompleted) return "project";
-      return "complete";
-   }, [status]);
-
-   const completeOrgMutation = useMutation(
-      orpc.onboarding.completeOrgOnboarding.mutationOptions({
-         onSuccess: () => {
-            toast.success("Workspace configurado com sucesso!");
-            // Invalidate the onboarding status query to trigger re-render
-            // This will cause the wizard to show project onboarding
-            queryClient.invalidateQueries(
-               orpc.onboarding.getOnboardingStatus.queryOptions(),
-            );
-         },
-         onError: (error) => {
-            toast.error(error.message ?? "Erro ao concluir configuração.");
-         },
-      }),
+   const handleWorkspaceComplete = useCallback(
+      (
+         org: { id: string; slug: string },
+         methods: { navigation: { next: () => void } },
+      ) => {
+         setWizardState((prev) => ({
+            ...prev,
+            organizationId: org.id,
+            organizationSlug: org.slug,
+         }));
+         methods.navigation.next();
+      },
+      [],
    );
 
-   const completeProjectMutation = useMutation(
-      orpc.onboarding.completeProjectOnboarding.mutationOptions({
-         onSuccess: () => {
-            const teamId = teams?.[0]?.id ?? "";
-            navigate({ to: "/$slug/$teamId/home", params: { slug, teamId } });
-         },
-         onError: (error) => {
-            toast.error(error.message ?? "Erro ao concluir onboarding.");
-         },
-      }),
+   const handleProjectComplete = useCallback(
+      (
+         team: { id: string; slug: string },
+         methods: { navigation: { next: () => void } },
+      ) => {
+         setWizardState((prev) => ({
+            ...prev,
+            teamId: team.id,
+            teamSlug: team.slug,
+         }));
+         methods.navigation.next();
+      },
+      [],
    );
 
-   const handleCompleteOrg = useCallback(() => {
-      completeOrgMutation.mutate({});
-   }, [completeOrgMutation]);
-
-   const handleCompleteProject = useCallback(() => {
-      completeProjectMutation.mutate({});
-   }, [completeProjectMutation]);
-
-   if (onboardingMode === "loading") {
-      return (
-         <div className="flex min-h-screen items-center justify-center">
-            <div className="text-center">Carregando...</div>
-         </div>
-      );
-   }
+   const handleOnboardingComplete = useCallback(
+      (slug: string, teamSlug: string) => {
+         navigate({
+            to: "/$slug/$teamSlug/home",
+            params: { slug, teamSlug },
+         });
+      },
+      [navigate],
+   );
 
    return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-         <div className="w-full max-w-lg space-y-8">
-            {/* Brand */}
-            <div className="text-center">
-               <h1 className="font-serif text-3xl font-bold tracking-tight">
-                  Contentta
-               </h1>
-               <p className="mt-2 text-sm text-muted-foreground">
-                  {onboardingMode === "organization"
-                     ? "Configure seu workspace"
-                     : "Configure seu projeto"}
-               </p>
-            </div>
+      <Stepper.Provider
+         variant="line"
+         className="mx-auto flex min-h-screen max-w-6xl flex-col"
+      >
+         {({ methods }) => {
+            const isFirstStep = methods.state.isFirst;
+            const isLastStep = methods.state.isLast;
 
-            {/* Organization Onboarding */}
-            {onboardingMode === "organization" && (
-               <OrgStepper.Provider variant="line">
-                  {({ methods }) => (
-                     <div className="space-y-6">
-                        <OrgStepper.Navigation>
-                           {orgSteps.map((step) => (
-                              <OrgStepper.Step key={step.id} of={step.id} />
+            const handleContinue = async () => {
+               await stepRef.current?.submit();
+            };
+
+            const handleBack = () => {
+               methods.navigation.prev();
+            };
+
+            return (
+               <>
+                  {/* Header: stepper + logo */}
+                  <header className="shrink-0 border-b p-4">
+                     <div className="mx-auto flex w-full  items-center gap-4">
+                        <Stepper.Navigation className="flex-1">
+                           {steps.map((step) => (
+                              <Stepper.Step key={step.id} of={step.id} />
                            ))}
-                        </OrgStepper.Navigation>
-
-                        {methods.flow.switch({
-                           "org-profile": () => (
-                              <ProfileSetupStep
-                                 onNext={(newSlug) => {
-                                    // Update URL if slug changed
-                                    if (newSlug !== slug) {
-                                       navigate({
-                                          to: "/$slug/onboarding",
-                                          params: { slug: newSlug },
-                                          replace: true,
-                                       });
-                                    }
-                                    // Complete org onboarding
-                                    handleCompleteOrg();
-                                 }}
-                              />
-                           ),
-                        })}
+                        </Stepper.Navigation>
+                        <div className="flex shrink-0 items-center gap-2">
+                           <img
+                              alt="Contentta"
+                              className="size-8 shrink-0 rounded-full"
+                              src="/favicon.svg"
+                           />
+                           <Badge
+                              variant="outline"
+                              className="bg-muted text-muted-foreground"
+                           >
+                              app.contentta.co
+                              {workspaceSlug ? `/${workspaceSlug}` : ""}
+                              {projectSlug ? `/${projectSlug}` : ""}
+                           </Badge>
+                        </div>
                      </div>
-                  )}
-               </OrgStepper.Provider>
-            )}
+                  </header>
 
-            {/* Project Onboarding */}
-            {onboardingMode === "project" && (
-               <ProjectStepper.Provider variant="line">
-                  {({ methods }) => (
-                     <div className="space-y-6">
-                        <ProjectStepper.Navigation>
-                           {projectSteps.map((step) => (
-                              <ProjectStepper.Step key={step.id} of={step.id} />
-                           ))}
-                        </ProjectStepper.Navigation>
-
+                  {/* Main: step content centered */}
+                  <main className="flex flex-1 items-center justify-center overflow-y-auto px-4 py-8">
+                     <div
+                        className="w-full animate-in fade-in slide-in-from-bottom-2 duration-200"
+                        key={methods.state.current.data.id}
+                     >
                         {methods.flow.switch({
-                           "project-setup": () => (
-                              <ProjectSetupStep
-                                 onNext={() => methods.navigation.next()}
+                           ...(needsProfile
+                              ? {
+                                 profile: () => (
+                                    <ProfileStep
+                                       defaultName={session.user.name ?? ""}
+                                       onNext={() =>
+                                          handleProfileComplete(methods)
+                                       }
+                                       onStateChange={handleStepStateChange}
+                                       ref={stepRef}
+                                    />
+                                 ),
+                              }
+                              : {}),
+                           ...(needsWorkspace
+                              ? {
+                                 workspace: () => (
+                                    <WorkspaceStep
+                                       onNext={(org) =>
+                                          handleWorkspaceComplete(
+                                             org,
+                                             methods,
+                                          )
+                                       }
+                                       onSlugChange={setWorkspaceSlug}
+                                       onStateChange={handleStepStateChange}
+                                       ref={stepRef}
+                                    />
+                                 ),
+                              }
+                              : {}),
+                           project: () => (
+                              <ProjectStep
+                                 onNext={(team) =>
+                                    handleProjectComplete(team, methods)
+                                 }
+                                 onSlugChange={setProjectSlug}
+                                 onStateChange={handleStepStateChange}
+                                 organizationId={
+                                    wizardState.organizationId ?? ""
+                                 }
+                                 ref={stepRef}
                               />
                            ),
                            products: () => (
-                              <ProductSelectionStep
-                                 onNext={() => methods.navigation.next()}
-                                 onSkipToEnd={handleCompleteProject}
+                              <ProductsStep
+                                 onComplete={handleOnboardingComplete}
+                                 onStateChange={handleStepStateChange}
+                                 organizationId={
+                                    wizardState.organizationId ?? ""
+                                 }
+                                 ref={stepRef}
+                                 teamId={wizardState.teamId ?? ""}
+                                 teamSlug={wizardState.teamSlug ?? ""}
                               />
                            ),
-                           "sdk-install": () => <SdkInstallStep />,
                         })}
                      </div>
-                  )}
-               </ProjectStepper.Provider>
-            )}
-         </div>
-      </div>
+                  </main>
+
+                  {/* Footer: back/continue buttons */}
+                  <footer className="shrink-0 border-t px-4 py-4">
+                     <div className="mx-auto flex w-full  gap-3">
+                        {!isFirstStep && (
+                           <Button
+                              className="h-11"
+                              disabled={stepState.isPending}
+                              onClick={handleBack}
+                              type="button"
+                              variant="outline"
+                           >
+                              Voltar
+                           </Button>
+                        )}
+                        <Button
+                           className="h-11 flex-1"
+                           disabled={
+                              stepState.isPending || !stepState.canContinue
+                           }
+                           onClick={handleContinue}
+                           type="button"
+                        >
+                           {stepState.isPending ? (
+                              <Spinner className="size-4" />
+                           ) : isLastStep ? (
+                              "Concluir"
+                           ) : (
+                              "Continuar"
+                           )}
+                        </Button>
+                     </div>
+                  </footer>
+               </>
+            );
+         }}
+      </Stepper.Provider>
    );
 }

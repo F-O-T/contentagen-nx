@@ -14,7 +14,7 @@ export function DataManagementLayout({ children }: DataManagementLayoutProps) {
    const isMobile = useIsMobile();
    const { pathname } = useLocation();
    const { activeOrganization } = useActiveOrganization();
-   const { teamId } = useParams({ strict: false });
+   const { teamSlug } = useParams({ strict: false });
 
    const isIndexRoute = pathname.endsWith("/data-management");
 
@@ -29,9 +29,9 @@ export function DataManagementLayout({ children }: DataManagementLayoutProps) {
                <Link
                   params={{
                      slug: activeOrganization.slug,
-                     teamId: teamId ?? "",
+                     teamSlug: teamSlug ?? "",
                   }}
-                  to="/$slug/$teamId/analytics/data-management"
+                  to="/$slug/$teamSlug/analytics/data-management"
                >
                   <ChevronLeft className="size-4 mr-1" />
                   Gerenciamento de Dados

@@ -1,18 +1,20 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/$slug")({
-   beforeLoad: async ({ context, params }) => {
-      // Fetch user's organizations
+   beforeLoad: async ({ context, params, location }) => {
       const organizations = await context.queryClient.fetchQuery(
          context.orpc.organization.getOrganizations.queryOptions(),
       );
 
-      // Find the organization matching the slug
+      // No organizations — redirect to onboarding
+      if (organizations.length === 0) {
+         throw redirect({ to: "/onboarding" });
+      }
+
       const currentOrganization = organizations.find(
          (org) => org.slug === params.slug,
       );
 
-      // If slug is invalid, redirect to first valid org or sign-in
       if (!currentOrganization) {
          const firstOrg = organizations[0];
          if (firstOrg) {
@@ -23,25 +25,47 @@ export const Route = createFileRoute("/_authenticated/$slug")({
 
             if (fallbackTeam) {
                throw redirect({
-                  to: "/$slug/$teamId/home",
-                  params: { slug: firstOrg.slug, teamId: fallbackTeam.id },
+                  to: "/$slug/$teamSlug/home",
+                  params: {
+                     slug: firstOrg.slug,
+                     teamSlug: fallbackTeam.slug,
+                  },
                });
             }
 
-            throw redirect({
-               to: "/$slug/onboarding",
-               params: { slug: firstOrg.slug },
-            });
+            // Org exists but no teams — redirect to onboarding
+            throw redirect({ to: "/onboarding" });
          }
-         // No organizations exist, redirect to sign-in
-         throw redirect({ to: "/auth/sign-in" });
       }
 
-      // Return organization data for child routes
+      // If navigating directly to /$slug (no child route), redirect to first team
+      const isBarePath =
+         location.pathname === `/${params.slug}` ||
+         location.pathname === `/${params.slug}/`;
+
+      if (isBarePath) {
+         const teams = await context.queryClient.fetchQuery(
+            context.orpc.organization.getOrganizationTeams.queryOptions(),
+         );
+         const firstTeam = teams[0];
+
+         if (firstTeam) {
+            throw redirect({
+               to: "/$slug/$teamSlug/home",
+               params: {
+                  slug: params.slug,
+                  teamSlug: firstTeam.slug,
+               },
+            });
+         }
+
+         throw redirect({ to: "/onboarding" });
+      }
+
       return {
          organizations,
          currentOrganization,
-         organizationId: currentOrganization.id,
+         organizationId: currentOrganization!.id,
       };
    },
    component: OrganizationLayout,

@@ -1,9 +1,12 @@
 import { ORPCError } from "@orpc/server";
 import { getOrganizationMembers } from "@packages/database/repositories/auth-repository";
 import { member, organization } from "@packages/database/schemas/auth";
+import { serverEnv } from "@packages/environment/server";
 import { resolveOrganizationPlan } from "@packages/events/credits";
+import { generatePresignedPutUrl, getMinioClient } from "@packages/files/client";
 import { getEffectiveProjectLimit } from "@packages/stripe/constants";
 import { eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
 import { z } from "zod";
 import { authenticatedProcedure, protectedProcedure } from "../server";
 
@@ -25,6 +28,7 @@ export const getOrganizations = authenticatedProcedure.handler(
             slug: organization.slug,
             logo: organization.logo,
             role: member.role,
+            onboardingCompleted: organization.onboardingCompleted,
          })
          .from(member)
          .innerJoin(organization, eq(member.organizationId, organization.id))
@@ -139,7 +143,10 @@ export const getOrganizationTeams = protectedProcedure.handler(
             query: { organizationId },
          });
 
-         return teams;
+         return teams.map((team) => ({
+            ...team,
+            slug: (team as Record<string, unknown>).slug as string,
+         }));
       } catch (error) {
          // Convert Better Auth API errors to ORPCError
          if (error && typeof error === "object" && "status" in error) {
@@ -268,3 +275,43 @@ export const getAddons = protectedProcedure.handler(async ({ context }) => {
       autoRenew: a.autoRenew,
    }));
 });
+
+/**
+ * Generate presigned URL for organization logo upload
+ */
+export const generateLogoUploadUrl = protectedProcedure
+   .input(
+      z.object({
+         fileExtension: z.string(),
+         contentType: z.string(),
+      }),
+   )
+   .handler(async ({ context, input }) => {
+      const { organizationId } = context;
+
+      try {
+         const minioClient = getMinioClient(serverEnv);
+         const bucketName = "organization-logos";
+
+         // Generate unique filename: org-{orgId}-{nanoid}.{ext}
+         const fileName = `org-${organizationId}-${nanoid()}.${input.fileExtension}`;
+
+         const presignedUrl = await generatePresignedPutUrl(
+            fileName,
+            bucketName,
+            minioClient,
+            300, // 5 minutes
+         );
+
+         return {
+            presignedUrl,
+            fileName,
+            publicUrl: `/api/files/${bucketName}/${fileName}`,
+         };
+      } catch (error) {
+         console.error("Failed to generate presigned URL:", error);
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to generate upload URL",
+         });
+      }
+   });
