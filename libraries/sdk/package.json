@@ -72,6 +72,14 @@
 			},
 			"types": "./src/forms.ts"
 		},
+		"./browser": {
+			"bun": "./src/browser.ts",
+			"import": {
+				"default": "./dist/browser.js",
+				"types": "./dist/browser.d.ts"
+			},
+			"types": "./src/browser.ts"
+		},
 		"./package.json": "./package.json"
 	},
 	"files": [
@@ -98,7 +106,7 @@
 		"url": "https://github.com/F-O-T/contentta-nx.git"
 	},
 	"scripts": {
-		"build": "bunup",
+		"build": "bunup src/index.ts src/posthog.ts src/analytics.ts src/events/client.ts src/events/types.ts src/events/server.ts src/forms.ts src/browser.ts --out-dir dist",
 		"check": "biome check --write .",
 		"dev": "bunup --watch",
 		"release": "bumpp --commit --push --tag",
