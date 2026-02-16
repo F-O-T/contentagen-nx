@@ -1,3 +1,4 @@
+import { createSdk } from "./index.ts";
 import type { ContenttaEventTracker } from "./events/client.ts";
 import type { ContenttaSdkConfig } from "./events/types.ts";
 
@@ -184,11 +185,18 @@ export class ContenttaFormsClient {
 	private config: ContenttaSdkConfig;
 	private tracker: ContenttaEventTracker;
 	private apiUrl: string;
+	private readonly sdk: any;
 
 	constructor(config: ContenttaSdkConfig, tracker: ContenttaEventTracker) {
 		this.config = config;
 		this.tracker = tracker;
 		this.apiUrl = (config.apiUrl ?? DEFAULT_API_URL).replace(/\/+$/, "");
+
+		// Initialize SDK client for oRPC calls
+		this.sdk = createSdk({
+			apiKey: this.config.apiKey,
+			host: this.apiUrl,
+		}) as any;
 	}
 
 	// ── Public API ──────────────────────────────────────────────
@@ -205,36 +213,25 @@ export class ContenttaFormsClient {
 		let form: FormDefinition;
 
 		try {
-			const response = await fetch(
-				`${this.apiUrl}/sdk/forms/${encodeURIComponent(formId)}`,
-				{
-					method: "GET",
-					headers: {
-						"X-API-Key": this.config.apiKey,
-					},
-				},
-			);
+			// Use oRPC client to fetch form definition
+			const result = await this.sdk.forms.get({ formId });
 
-			if (!response.ok) {
-				const errorText = await response.text();
-				console.error(
-					`[ContenttaForms] Failed to fetch form: ${response.status} ${response.statusText} - ${errorText}`,
-				);
-				return;
-			}
-
-			const json: unknown = await response.json();
-
-			if (!isFormDefinition(json)) {
+			if (!isFormDefinition(result)) {
 				console.error(
 					"[ContenttaForms] Invalid form definition received from API.",
 				);
 				return;
 			}
 
-			form = json;
+			form = result;
 		} catch (error) {
-			console.error("[ContenttaForms] Network error fetching form:", error);
+			// Handle ORPCError and other errors
+			const errorMessage =
+				error instanceof Error ? error.message : "Unknown error";
+			console.error(
+				`[ContenttaForms] Failed to fetch form: ${errorMessage}`,
+				error,
+			);
 			return;
 		}
 
@@ -411,7 +408,8 @@ export class ContenttaFormsClient {
 				}
 			}
 
-			const body = {
+			const submissionData = {
+				formId,
 				data,
 				metadata: {
 					visitorId: this.tracker.getVisitorId(),
@@ -421,51 +419,20 @@ export class ContenttaFormsClient {
 				},
 			};
 
-			fetch(`${this.apiUrl}/sdk/forms/${encodeURIComponent(formId)}/submit`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					"X-API-Key": this.config.apiKey,
-				},
-				body: JSON.stringify(body),
-			})
-				.then(async (response) => {
-					if (!response.ok) {
-						const result = (await response.json().catch(() => null)) as {
-							errors?: Record<string, string>;
-						} | null;
-
-						if (response.status === 422 && result?.errors) {
-							this.showErrors(formElement, result.errors);
-						} else {
-							console.error(
-								`[ContenttaForms] Submission failed: ${response.status} ${response.statusText}`,
-							);
-						}
-
-						if (submitButton) {
-							submitButton.disabled = false;
-						}
-						return;
-					}
-
+			// Use oRPC client to submit form
+			this.sdk.forms
+				.submit(submissionData)
+				.then((result: { success: boolean; submissionId: string; settings: { successMessage?: string; redirectUrl?: string } }) => {
 					this.tracker.track("form.submitted", {
 						formId,
 						pageUrl: typeof window !== "undefined" ? window.location.href : "",
 						referrer: typeof document !== "undefined" ? document.referrer : "",
 					});
 
-					const result = (await response.json().catch(() => null)) as {
-						settings?: {
-							successMessage?: string;
-							redirectUrl?: string;
-						};
-					} | null;
-
 					const successMessage =
-						result?.settings?.successMessage ??
+						result.settings?.successMessage ??
 						"Thank you! Your submission has been received.";
-					const redirectUrl = result?.settings?.redirectUrl;
+					const redirectUrl = result.settings?.redirectUrl;
 
 					if (redirectUrl) {
 						if (isSafeRedirectUrl(redirectUrl)) {
@@ -479,11 +446,19 @@ export class ContenttaFormsClient {
 						this.showSuccess(container, successMessage);
 					}
 				})
-				.catch((error) => {
-					console.error(
-						"[ContenttaForms] Network error submitting form:",
-						error,
-					);
+				.catch((error: any) => {
+					// Handle validation errors (ORPCError with UNPROCESSABLE_ENTITY)
+					if (error?.cause?.errors && typeof error.cause.errors === "object") {
+						this.showErrors(formElement, error.cause.errors as Record<string, string>);
+					} else {
+						const errorMessage =
+							error instanceof Error ? error.message : "Unknown error";
+						console.error(
+							`[ContenttaForms] Submission failed: ${errorMessage}`,
+							error,
+						);
+					}
+
 					if (submitButton) {
 						submitButton.disabled = false;
 					}
