@@ -1,12 +1,10 @@
 import { ORPCError } from "@orpc/server";
 import {
    archiveContent,
-   countContentsByOrganization,
    countContentsByTeam,
    createContent,
    deleteContent,
    getContentById,
-   listContentsByOrganization,
    listContentsByTeam,
    publishContent,
    updateContent,
@@ -20,7 +18,10 @@ import {
    emitContentPublished,
    emitContentUpdated,
 } from "@packages/events/content";
-import { enforceCreditBudget, trackCreditUsage } from "@packages/events/credits";
+import {
+   enforceCreditBudget,
+   trackCreditUsage,
+} from "@packages/events/credits";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 

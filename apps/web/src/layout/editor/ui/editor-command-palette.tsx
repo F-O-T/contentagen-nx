@@ -40,7 +40,7 @@ import {
 // Types
 // ============================================================================
 
-interface CommandItem {
+interface CommandPaletteItem {
    id: string;
    label: string;
    description?: string;
@@ -76,8 +76,8 @@ export function EditorCommandPalette({
    });
 
    // Build command list
-   const commands = useMemo<CommandItem[]>(() => {
-      const items: CommandItem[] = [];
+   const commands = useMemo<CommandPaletteItem[]>(() => {
+      const items: CommandPaletteItem[] = [];
 
       // === Actions ===
       items.push({
@@ -189,7 +189,7 @@ export function EditorCommandPalette({
 
    // Group commands by category
    const groupedCommands = useMemo(() => {
-      const groups: Record<string, CommandItem[]> = {
+      const groups: Record<string, CommandPaletteItem[]> = {
          actions: [],
          panels: [],
          navigation: [],
@@ -203,7 +203,7 @@ export function EditorCommandPalette({
    }, [commands]);
 
    // Handle command execution
-   const executeCommand = useCallback((command: CommandItem) => {
+   const executeCommand = useCallback((command: CommandPaletteItem) => {
       setCommandPaletteOpen(false);
       // Execute after dialog closes for smoother UX
       requestAnimationFrame(() => {
@@ -269,7 +269,7 @@ export function EditorCommandPalette({
 // ============================================================================
 
 interface CommandPaletteItemProps {
-   command: CommandItem;
+   command: CommandPaletteItem;
    onSelect: () => void;
 }
 

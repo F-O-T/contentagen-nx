@@ -7,8 +7,8 @@ import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Card, CardContent } from "@packages/ui/components/card";
 import {
-   type MobileCardRenderProps,
    DataTable,
+   type MobileCardRenderProps,
 } from "@packages/ui/components/data-table";
 import {
    DropdownMenu,
@@ -49,7 +49,7 @@ import {
    useSuspenseQuery,
 } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import type { ColumnDef, Row } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import {
    ChevronDown,
    EllipsisVertical,
@@ -230,7 +230,11 @@ function InviteMemberSheetContent({
                   id="invite-email"
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => {
-                     if (e.key === "Enter" && isValid && !inviteMutation.isPending) {
+                     if (
+                        e.key === "Enter" &&
+                        isValid &&
+                        !inviteMutation.isPending
+                     ) {
                         inviteMutation.mutate();
                      }
                   }}
@@ -411,7 +415,10 @@ function MemberMobileCard({
          <CardContent className="p-4">
             <div className="flex items-start gap-3">
                <Avatar className="size-10">
-                  <AvatarImage alt={member.name} src={member.image || undefined} />
+                  <AvatarImage
+                     alt={member.name}
+                     src={member.image || undefined}
+                  />
                   <AvatarFallback className="text-sm">
                      {getInitials(member.name)}
                   </AvatarFallback>
@@ -438,11 +445,7 @@ function MemberMobileCard({
                   </div>
                </div>
                {canExpand && (
-                  <Button
-                     onClick={toggleExpanded}
-                     size="icon"
-                     variant="ghost"
-                  >
+                  <Button onClick={toggleExpanded} size="icon" variant="ghost">
                      <ChevronDown
                         className={`size-4 transition-transform ${
                            isExpanded ? "rotate-180" : ""

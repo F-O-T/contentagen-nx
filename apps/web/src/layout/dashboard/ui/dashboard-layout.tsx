@@ -1,9 +1,4 @@
-import {
-   Banner,
-   BannerClose,
-   BannerIcon,
-   BannerTitle,
-} from "@packages/ui/components/banner";
+import { identifyClient, setClientGroup } from "@packages/posthog/client";
 import {
    SidebarInset,
    SidebarManager,
@@ -11,17 +6,15 @@ import {
    SidebarProvider,
 } from "@packages/ui/components/sidebar";
 import { cn } from "@packages/ui/lib/utils";
-import { identifyClient, setClientGroup } from "@packages/posthog/client";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
-import { FlaskConicalIcon } from "lucide-react";
 import type * as React from "react";
 import { useEffect, useRef } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
+import { EarlyAccessProvider } from "@/hooks/use-early-access";
 import { useLastOrganization } from "@/hooks/use-last-organization";
 import { authClient } from "@/integrations/better-auth/auth-client";
-import { EarlyAccessProvider } from "@/hooks/use-early-access";
 import { orpc } from "@/integrations/orpc/client";
 import { setActiveSection } from "../hooks/use-sidebar-nav";
 import {
@@ -151,8 +144,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <div className="shrink-0">
                      <TabBar
                         onNewTab={openNewSearchTab}
-                        onTabFocus={navigateToTab}
                         onTabClose={handleCloseTab}
+                        onTabFocus={navigateToTab}
                      />
                   </div>
                   <main

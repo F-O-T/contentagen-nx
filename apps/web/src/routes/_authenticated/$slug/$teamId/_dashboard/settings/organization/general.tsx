@@ -14,9 +14,7 @@ import {
    Item,
    ItemContent,
    ItemDescription,
-   ItemGroup,
    ItemMedia,
-   ItemSeparator,
    ItemTitle,
 } from "@packages/ui/components/item";
 import { Separator } from "@packages/ui/components/separator";

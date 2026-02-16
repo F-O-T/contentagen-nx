@@ -10,7 +10,9 @@ import { orpc } from "@/integrations/orpc/client";
 
 export function SdkInstallStep() {
    const navigate = useNavigate();
-   const { slug } = useParams({ from: "/_authenticated/$slug/onboarding" });
+   const { slug, teamId } = useParams({
+      from: "/_authenticated/$slug/$teamId/onboarding",
+   });
 
    const { data: status } = useQuery(
       orpc.onboarding.getOnboardingStatus.queryOptions({}),
@@ -29,7 +31,6 @@ export function SdkInstallStep() {
    const completeMutation = useMutation(
       orpc.onboarding.completeProjectOnboarding.mutationOptions({
          onSuccess: () => {
-            const teamId = teams?.[0]?.id ?? "";
             navigate({ to: "/$slug/$teamId/home", params: { slug, teamId } });
          },
          onError: (error) => {
@@ -38,11 +39,9 @@ export function SdkInstallStep() {
       }),
    );
 
-   const teamId = teams?.[0]?.id;
    const { data: publicKeyData } = useQuery(
       orpc.team.getPublicApiKey.queryOptions({
-         input: { teamId: teamId! },
-         enabled: !!teamId,
+         input: { teamId },
       }),
    );
 

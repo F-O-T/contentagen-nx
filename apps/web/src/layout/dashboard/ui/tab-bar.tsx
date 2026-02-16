@@ -1,11 +1,9 @@
 import { Button } from "@packages/ui/components/button";
-import { cn } from "@packages/ui/lib/utils";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
    closeAllTabs,
    closeOtherTabs,
-   closeTab,
    focusTab,
    pinTab,
    unpinTab,
@@ -22,8 +20,8 @@ interface TabBarProps {
 export function TabBar({ onTabFocus, onTabClose, onNewTab }: TabBarProps) {
    const { tabs, activeTabId, isHydrated } = useTabStore();
    const scrollRef = useRef<HTMLDivElement>(null);
-   const [showLeftShadow, setShowLeftShadow] = useState(false);
-   const [showRightShadow, setShowRightShadow] = useState(false);
+   const [_showLeftShadow, setShowLeftShadow] = useState(false);
+   const [_showRightShadow, setShowRightShadow] = useState(false);
 
    // ── Scroll shadows ───────────────────────────────────────────────────────
 

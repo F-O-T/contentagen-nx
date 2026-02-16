@@ -63,7 +63,11 @@ function loadFromStorage(
       if (!raw) return null;
       const parsed = JSON.parse(raw) as TabStoreState;
       if (!Array.isArray(parsed.tabs)) return null;
-      return { tabs: parsed.tabs, activeTabId: parsed.activeTabId, isHydrated: true };
+      return {
+         tabs: parsed.tabs,
+         activeTabId: parsed.activeTabId,
+         isHydrated: true,
+      };
    } catch {
       return null;
    }

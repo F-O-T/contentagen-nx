@@ -12,8 +12,6 @@ import {
    COMMAND_PRIORITY_HIGH,
    KEY_ESCAPE_COMMAND,
    KEY_TAB_COMMAND,
-   SELECTION_CHANGE_COMMAND,
-   TextNode,
 } from "lexical";
 import { useCallback, useEffect, useRef } from "react";
 import { detectTriggerType, getTriggerDelay } from "../ai/fim";
@@ -21,7 +19,6 @@ import { handleStreamError } from "../ai/streaming";
 import { defaultFIMConfig } from "../core/config";
 import {
    $createGhostTextNode,
-   $isGhostTextNode,
    $removeAllGhostTextNodes,
 } from "../core/ghost-text-node";
 import type { FIMChunk, FIMConfig, FIMRequest } from "../schemas";
@@ -66,7 +63,7 @@ export function FIMPlugin({
    const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
    const abortControllerRef = useRef<AbortController | null>(null);
    const lastTextRef = useRef<string>("");
-   const lastCursorRef = useRef<number>(0);
+   const _lastCursorRef = useRef<number>(0);
 
    /**
     * Cancel current completion

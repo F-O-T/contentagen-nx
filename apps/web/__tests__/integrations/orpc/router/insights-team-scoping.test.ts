@@ -29,7 +29,7 @@ describe("Insights Team Scoping", () => {
 		const [testUser] = await db
 			.insert(user)
 			.values({
-				email: "test-insights-scoping@example.com",
+				email: `test-insights-scoping-${crypto.randomUUID()}@example.com`,
 				name: "Test User",
 			})
 			.returning();
@@ -40,7 +40,8 @@ describe("Insights Team Scoping", () => {
 			.insert(organization)
 			.values({
 				name: "Test Org",
-				slug: "test-org-insights-scoping",
+				slug: `test-org-insights-scoping-${crypto.randomUUID()}`,
+				createdAt: new Date(),
 				onboardingCompleted: true,
 			})
 			.returning();
@@ -64,6 +65,7 @@ describe("Insights Team Scoping", () => {
 			.values({
 				name: "Team A",
 				organizationId: testOrgId,
+				createdAt: new Date(),
 			})
 			.returning();
 		teamAId = createdTeamA.id;
@@ -79,6 +81,7 @@ describe("Insights Team Scoping", () => {
 			.values({
 				name: "Team B",
 				organizationId: testOrgId,
+				createdAt: new Date(),
 			})
 			.returning();
 		teamBId = createdTeamB.id;

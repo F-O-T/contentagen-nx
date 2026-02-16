@@ -5,7 +5,7 @@
  * Handles original/modified text comparison and display.
  */
 import { Store, useStore } from "@tanstack/react-store";
-import type { DiffLine, DiffLineType, DiffState } from "../schemas";
+import type { DiffLine, DiffState } from "../schemas";
 
 const initialState: DiffState = {
    isVisible: false,

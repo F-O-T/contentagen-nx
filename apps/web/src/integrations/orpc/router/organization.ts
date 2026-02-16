@@ -1,10 +1,9 @@
+import { ORPCError } from "@orpc/server";
 import { getOrganizationMembers } from "@packages/database/repositories/auth-repository";
-import { organizationAddons } from "@packages/database/schemas/addons";
 import { member, organization } from "@packages/database/schemas/auth";
 import { resolveOrganizationPlan } from "@packages/events/credits";
 import { getEffectiveProjectLimit } from "@packages/stripe/constants";
-import { ORPCError } from "@orpc/server";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { authenticatedProcedure, protectedProcedure } from "../server";
 
@@ -15,8 +14,8 @@ import { authenticatedProcedure, protectedProcedure } from "../server";
 /**
  * Get all organizations the user is a member of, with their role
  */
-export const getOrganizations = authenticatedProcedure
-   .handler(async ({ context }) => {
+export const getOrganizations = authenticatedProcedure.handler(
+   async ({ context }) => {
       const { db, userId } = context;
 
       const memberships = await db
@@ -32,13 +31,14 @@ export const getOrganizations = authenticatedProcedure
          .where(eq(member.userId, userId));
 
       return memberships;
-   });
+   },
+);
 
 /**
  * Get the currently active organization with subscription info
  */
-export const getActiveOrganization = protectedProcedure
-   .handler(async ({ context }) => {
+export const getActiveOrganization = protectedProcedure.handler(
+   async ({ context }) => {
       const { auth, db, headers, session } = context;
 
       try {
@@ -92,15 +92,23 @@ export const getActiveOrganization = protectedProcedure
          if (error && typeof error === "object" && "status" in error) {
             const apiError = error as { status: string; statusCode?: number };
 
-            if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+            if (
+               apiError.status === "UNAUTHORIZED" ||
+               apiError.statusCode === 401
+            ) {
                throw new ORPCError("UNAUTHORIZED", {
-                  message: "Authentication required to access organization data",
+                  message:
+                     "Authentication required to access organization data",
                });
             }
 
-            if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+            if (
+               apiError.status === "FORBIDDEN" ||
+               apiError.statusCode === 403
+            ) {
                throw new ORPCError("FORBIDDEN", {
-                  message: "Insufficient permissions to access organization data",
+                  message:
+                     "Insufficient permissions to access organization data",
                });
             }
          }
@@ -115,13 +123,14 @@ export const getActiveOrganization = protectedProcedure
             message: "Failed to retrieve organization data",
          });
       }
-   });
+   },
+);
 
 /**
  * List teams for the currently active organization
  */
-export const getOrganizationTeams = protectedProcedure
-   .handler(async ({ context }) => {
+export const getOrganizationTeams = protectedProcedure.handler(
+   async ({ context }) => {
       const { auth, headers, organizationId } = context;
 
       try {
@@ -136,15 +145,23 @@ export const getOrganizationTeams = protectedProcedure
          if (error && typeof error === "object" && "status" in error) {
             const apiError = error as { status: string; statusCode?: number };
 
-            if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+            if (
+               apiError.status === "UNAUTHORIZED" ||
+               apiError.statusCode === 401
+            ) {
                throw new ORPCError("UNAUTHORIZED", {
-                  message: "Authentication required to access organization teams",
+                  message:
+                     "Authentication required to access organization teams",
                });
             }
 
-            if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+            if (
+               apiError.status === "FORBIDDEN" ||
+               apiError.statusCode === 403
+            ) {
                throw new ORPCError("FORBIDDEN", {
-                  message: "Insufficient permissions to access organization teams",
+                  message:
+                     "Insufficient permissions to access organization teams",
                });
             }
          }
@@ -159,26 +176,26 @@ export const getOrganizationTeams = protectedProcedure
             message: "Failed to retrieve organization teams",
          });
       }
-   });
+   },
+);
 
 /**
  * Get all members of the currently active organization
  */
-export const getMembers = protectedProcedure
-   .handler(async ({ context }) => {
-      const { db, organizationId } = context;
+export const getMembers = protectedProcedure.handler(async ({ context }) => {
+   const { db, organizationId } = context;
 
-      const members = await getOrganizationMembers(db, organizationId);
+   const members = await getOrganizationMembers(db, organizationId);
 
-      return members.map((m) => ({
-         id: m.id,
-         name: m.user.name,
-         email: m.user.email,
-         role: m.role,
-         image: m.user.image,
-         createdAt: m.createdAt,
-      }));
-   });
+   return members.map((m) => ({
+      id: m.id,
+      name: m.user.name,
+      email: m.user.email,
+      role: m.role,
+      image: m.user.image,
+      createdAt: m.createdAt,
+   }));
+});
 
 /**
  * Get teams a specific user has access to within the organization
@@ -213,50 +230,41 @@ export const getMemberTeams = protectedProcedure
  * Check if organization has a specific addon activated
  */
 export const hasAddon = protectedProcedure
-	.input(z.object({ addonId: z.string() }))
-	.handler(async ({ context, input }) => {
-		const { db, organizationId } = context;
+   .input(z.object({ addonId: z.string() }))
+   .handler(async ({ context, input }) => {
+      const { db, organizationId } = context;
 
-		const addon = await db.query.organizationAddons.findFirst({
-			where: (addons, { eq, and, or, isNull, gt }) =>
-				and(
-					eq(addons.organizationId, organizationId),
-					eq(addons.addonId, input.addonId),
-					or(
-						isNull(addons.expiresAt),
-						gt(addons.expiresAt, new Date()),
-					),
-				),
-		});
+      const addon = await db.query.organizationAddons.findFirst({
+         where: (addons, { eq, and, or, isNull, gt }) =>
+            and(
+               eq(addons.organizationId, organizationId),
+               eq(addons.addonId, input.addonId),
+               or(isNull(addons.expiresAt), gt(addons.expiresAt, new Date())),
+            ),
+      });
 
-		return { hasAddon: !!addon };
-	});
+      return { hasAddon: !!addon };
+   });
 
 /**
  * Get all active addons for organization
  */
-export const getAddons = protectedProcedure.handler(
-	async ({ context }) => {
-		const { db, organizationId } = context;
+export const getAddons = protectedProcedure.handler(async ({ context }) => {
+   const { db, organizationId } = context;
 
-		const addons = await db.query.organizationAddons.findMany({
-			where: (addons, { eq, and, or, isNull, gt }) =>
-				and(
-					eq(addons.organizationId, organizationId),
-					or(
-						isNull(addons.expiresAt),
-						gt(addons.expiresAt, new Date()),
-					),
-				),
-		});
+   const addons = await db.query.organizationAddons.findMany({
+      where: (addons, { eq, and, or, isNull, gt }) =>
+         and(
+            eq(addons.organizationId, organizationId),
+            or(isNull(addons.expiresAt), gt(addons.expiresAt, new Date())),
+         ),
+   });
 
-		return addons.map((a) => ({
-			id: a.id,
-			addonId: a.addonId,
-			activatedAt: a.activatedAt,
-			expiresAt: a.expiresAt,
-			autoRenew: a.autoRenew,
-		}));
-	},
-);
-
+   return addons.map((a) => ({
+      id: a.id,
+      addonId: a.addonId,
+      activatedAt: a.activatedAt,
+      expiresAt: a.expiresAt,
+      autoRenew: a.autoRenew,
+   }));
+});

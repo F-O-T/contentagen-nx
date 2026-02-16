@@ -205,13 +205,14 @@ async function handleCheckCompletion(
       // Extract words from completion
       const words: string[] = [];
       const regex = createWordRegex();
-      let match: RegExpExecArray | null;
+      let match: RegExpExecArray | null = regex.exec(completion);
 
-      while ((match = regex.exec(completion)) !== null) {
+      while (match !== null) {
          const word = match[0];
          if (!shouldIgnoreWord(word)) {
             words.push(word);
          }
+         match = regex.exec(completion);
       }
 
       // No checkable words

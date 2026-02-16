@@ -150,6 +150,7 @@ export function TabItem({
 
                {/* Close button */}
                {!isPinned && (
+                  // biome-ignore lint/a11y/useSemanticElements: Span used for close icon within button context
                   <span
                      className={cn(
                         "ml-auto flex size-4 shrink-0 items-center justify-center rounded-sm transition-colors",
@@ -160,7 +161,8 @@ export function TabItem({
                      )}
                      onClick={handleClose}
                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") handleClose(e as unknown as MouseEvent);
+                        if (e.key === "Enter" || e.key === " ")
+                           handleClose(e as unknown as MouseEvent);
                      }}
                      role="button"
                      tabIndex={-1}

@@ -7,7 +7,7 @@
  * Note: This is separate from the user-facing analytics (llm_* custom events).
  */
 
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import type { PostHog } from "posthog-node";
 
 export interface AIGenerationInput {

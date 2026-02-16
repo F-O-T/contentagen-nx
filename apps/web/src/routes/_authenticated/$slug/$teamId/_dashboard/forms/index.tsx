@@ -6,64 +6,64 @@ import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { FormsList } from "@/features/forms/ui/forms-list";
 
 export const Route = createFileRoute(
-	"/_authenticated/$slug/$teamId/_dashboard/forms/",
+   "/_authenticated/$slug/$teamId/_dashboard/forms/",
 )({
-	component: FormsPage,
+   component: FormsPage,
 });
 
 function FormsPageErrorFallback(props: FallbackProps) {
-	return createErrorFallback({
-		errorDescription: "Não foi possível carregar a lista de formulários",
-		errorTitle: "Erro ao carregar formulários",
-		retryText: "Tentar novamente",
-	})(props);
+   return createErrorFallback({
+      errorDescription: "Não foi possível carregar a lista de formulários",
+      errorTitle: "Erro ao carregar formulários",
+      retryText: "Tentar novamente",
+   })(props);
 }
 
 function FormsPageSkeleton() {
-	return (
-		<main className="flex flex-col gap-4">
-			<div className="flex flex-col gap-2">
-				<Skeleton className="h-9 w-48" />
-				<Skeleton className="h-5 w-80" />
-			</div>
+   return (
+      <main className="flex flex-col gap-4">
+         <div className="flex flex-col gap-2">
+            <Skeleton className="h-9 w-48" />
+            <Skeleton className="h-5 w-80" />
+         </div>
 
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{Array.from({ length: 3 }).map((_, i) => (
-					<Skeleton key={`form-skeleton-${i + 1}`} className="h-[160px]" />
-				))}
-			</div>
-		</main>
-	)
+         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+               <Skeleton className="h-[160px]" key={`form-skeleton-${i + 1}`} />
+            ))}
+         </div>
+      </main>
+   );
 }
 
 function FormsPageHeader() {
-	return (
-		<div className="flex flex-col gap-2">
-			<h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-				Formulários
-			</h1>
-			<p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
-				Crie e gerencie formulários para coletar dados dos visitantes
-			</p>
-		</div>
-	)
+   return (
+      <div className="flex flex-col gap-2">
+         <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
+            Formulários
+         </h1>
+         <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
+            Crie e gerencie formulários para coletar dados dos visitantes
+         </p>
+      </div>
+   );
 }
 
 function FormsPageContent() {
-	return (
-		<main className="flex flex-col gap-4">
-			<FormsPageHeader />
-			<FormsList />
-		</main>
-	)
+   return (
+      <main className="flex flex-col gap-4">
+         <FormsPageHeader />
+         <FormsList />
+      </main>
+   );
 }
 
 function FormsPage() {
-	return (
-		<ErrorBoundary FallbackComponent={FormsPageErrorFallback}>
-			<Suspense fallback={<FormsPageSkeleton />}>
-				<FormsPageContent />
-			</Suspense>
-		</ErrorBoundary>
-	)
+   return (
+      <ErrorBoundary FallbackComponent={FormsPageErrorFallback}>
+         <Suspense fallback={<FormsPageSkeleton />}>
+            <FormsPageContent />
+         </Suspense>
+      </ErrorBoundary>
+   );
 }

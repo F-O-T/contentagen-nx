@@ -37,9 +37,7 @@ import {
    setFIMLoading,
    setFIMMetrics,
    setGhostText,
-   setPrefetchedSuggestion,
    startFIMSession,
-   startPreFetching,
    useFIMContext,
 } from "../stores/fim-store";
 import { handleStreamError } from "./streaming";

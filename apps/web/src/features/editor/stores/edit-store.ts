@@ -5,12 +5,7 @@
  * Handles selection, instruction input, streaming, and diff preview.
  */
 import { Store, useStore } from "@tanstack/react-store";
-import type {
-   EditPhase,
-   EditPosition,
-   EditState,
-   SelectionState,
-} from "../schemas";
+import type { EditPosition, EditState, SelectionState } from "../schemas";
 
 const initialState: EditState = {
    phase: "idle",

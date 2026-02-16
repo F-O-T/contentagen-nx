@@ -5,8 +5,8 @@ import {
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
-import { Separator } from "@packages/ui/components/separator";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
+import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import {
    Tabs,

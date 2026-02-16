@@ -47,58 +47,63 @@ export const getOnboardingStatus = protectedProcedure.handler(
       }
 
       // Run auto-detection queries in parallel to count existing resources
-      const [contentCount, publishedContentCount, formCount, insightCount, dashboardCount] =
-         await Promise.all([
-            db
-               .select({ count: sql<number>`count(*)` })
-               .from(content)
-               .where(eq(content.organizationId, organizationId))
-               .then((rows) => Number(rows[0]?.count ?? 0)),
-            db
-               .select({ count: sql<number>`count(*)` })
-               .from(content)
-               .where(
-                  and(
-                     eq(content.organizationId, organizationId),
-                     eq(content.status, "published"),
-                  ),
-               )
-               .then((rows) => Number(rows[0]?.count ?? 0)),
-            db
-               .select({ count: sql<number>`count(*)` })
-               .from(forms)
-               .where(eq(forms.organizationId, organizationId))
-               .then((rows) => Number(rows[0]?.count ?? 0)),
-            db
-               .select({ count: sql<number>`count(*)` })
-               .from(insights)
-               .where(eq(insights.organizationId, organizationId))
-               .then((rows) => Number(rows[0]?.count ?? 0)),
-            db
-               .select({ count: sql<number>`count(*)` })
-               .from(dashboards)
-               .where(eq(dashboards.organizationId, organizationId))
-               .then((rows) => Number(rows[0]?.count ?? 0)),
-         ]);
+      const [
+         contentCount,
+         publishedContentCount,
+         formCount,
+         insightCount,
+         dashboardCount,
+      ] = await Promise.all([
+         db
+            .select({ count: sql<number>`count(*)` })
+            .from(content)
+            .where(eq(content.organizationId, organizationId))
+            .then((rows) => Number(rows[0]?.count ?? 0)),
+         db
+            .select({ count: sql<number>`count(*)` })
+            .from(content)
+            .where(
+               and(
+                  eq(content.organizationId, organizationId),
+                  eq(content.status, "published"),
+               ),
+            )
+            .then((rows) => Number(rows[0]?.count ?? 0)),
+         db
+            .select({ count: sql<number>`count(*)` })
+            .from(forms)
+            .where(eq(forms.organizationId, organizationId))
+            .then((rows) => Number(rows[0]?.count ?? 0)),
+         db
+            .select({ count: sql<number>`count(*)` })
+            .from(insights)
+            .where(eq(insights.organizationId, organizationId))
+            .then((rows) => Number(rows[0]?.count ?? 0)),
+         db
+            .select({ count: sql<number>`count(*)` })
+            .from(dashboards)
+            .where(eq(dashboards.organizationId, organizationId))
+            .then((rows) => Number(rows[0]?.count ?? 0)),
+      ]);
 
       // Merge stored tasks with auto-detected completions
       const storedTasks = currentTeam.onboardingTasks ?? {};
       const autoDetected: Record<string, boolean> = {};
 
       if (contentCount > 0) {
-         autoDetected["create_content"] = true;
+         autoDetected.create_content = true;
       }
       if (publishedContentCount > 0) {
-         autoDetected["publish_content"] = true;
+         autoDetected.publish_content = true;
       }
       if (formCount > 0) {
-         autoDetected["create_form"] = true;
+         autoDetected.create_form = true;
       }
       if (insightCount > 0) {
-         autoDetected["create_insight"] = true;
+         autoDetected.create_insight = true;
       }
       if (dashboardCount > 0) {
-         autoDetected["create_dashboard"] = true;
+         autoDetected.create_dashboard = true;
       }
 
       const tasks = { ...storedTasks, ...autoDetected };
@@ -241,7 +246,10 @@ export const completeProfileSetup = protectedProcedure
 
       // Update user name, organization, and team
       await Promise.all([
-         db.update(user).set({ name: input.userName }).where(eq(user.id, userId)),
+         db
+            .update(user)
+            .set({ name: input.userName })
+            .where(eq(user.id, userId)),
          db
             .update(organization)
             .set({ name: input.workspaceName, slug: newSlug })

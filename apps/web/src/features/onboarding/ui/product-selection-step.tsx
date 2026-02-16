@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { ClipboardList, FileText, LayoutDashboard } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { useEarlyAccess } from "@/hooks/use-early-access";
 import { orpc } from "@/integrations/orpc/client";
 
 type Product = "content" | "forms" | "analytics";
@@ -14,6 +15,7 @@ interface ProductCard {
    title: string;
    description: string;
    icon: React.ComponentType<{ className?: string }>;
+   earlyAccessFlag?: string;
 }
 
 const products: ProductCard[] = [
@@ -28,6 +30,7 @@ const products: ProductCard[] = [
       title: "Coletar leads com formularios",
       description: "Crie formularios e colete respostas no seu site",
       icon: ClipboardList,
+      earlyAccessFlag: "forms-beta",
    },
    {
       id: "analytics",
@@ -46,7 +49,14 @@ export function ProductSelectionStep({
    onNext,
    onSkipToEnd,
 }: ProductSelectionStepProps) {
+   const { isEnrolled } = useEarlyAccess();
    const [selected, setSelected] = useState<Product[]>([]);
+
+   // Filter products based on early access enrollment
+   const visibleProducts = products.filter((product) => {
+      if (!product.earlyAccessFlag) return true;
+      return isEnrolled(product.earlyAccessFlag);
+   });
 
    const mutation = useMutation(
       orpc.onboarding.selectProducts.mutationOptions({
@@ -91,7 +101,7 @@ export function ProductSelectionStep({
          </div>
 
          <div className="space-y-3">
-            {products.map((product) => {
+            {visibleProducts.map((product) => {
                const isSelected = selected.includes(product.id);
                const Icon = product.icon;
 

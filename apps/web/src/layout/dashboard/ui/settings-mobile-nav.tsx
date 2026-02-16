@@ -36,9 +36,12 @@ export function SettingsMobileNav() {
 
          {settingsNavSections.map((section) => {
             const allItems = flattenItems(section.items);
-            const filtered = (q
-               ? allItems.filter((item) => item.title.toLowerCase().includes(q))
-               : allItems
+            const filtered = (
+               q
+                  ? allItems.filter((item) =>
+                       item.title.toLowerCase().includes(q),
+                    )
+                  : allItems
             ).filter((item) => {
                // Filter by early access enrollment
                if (!item.earlyAccessFlag) return true;

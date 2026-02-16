@@ -70,8 +70,13 @@ export const fimStream = protectedProcedure
       // Create request context for the agent with settings
       const requestContext = createRequestContext({
          userId,
-         language: aiDefaults.defaultLanguage ?? getRequestLanguage(headers) ?? "pt-BR",
-         model: aiDefaults.editModel ?? "openrouter/mistralai/mistral-small-creative",
+         language:
+            aiDefaults.defaultLanguage ??
+            getRequestLanguage(headers) ??
+            "pt-BR",
+         model:
+            aiDefaults.editModel ??
+            "openrouter/mistralai/mistral-small-creative",
       } as CustomRequestContext);
 
       // Build the prompt from FIM request
@@ -89,9 +94,9 @@ export const fimStream = protectedProcedure
          );
 
          // Yield chunks as FIMChunk format
-         let fullText = "";
+         let _fullText = "";
          for await (const chunk of result.textStream) {
-            fullText += chunk;
+            _fullText += chunk;
             yield {
                text: chunk,
                done: false,
@@ -133,7 +138,7 @@ export const fimStream = protectedProcedure
                latencyMs,
             },
          } satisfies FIMChunk;
-      } catch (error) {
+      } catch (_error) {
          // Yield error chunk
          yield {
             text: "",
@@ -167,8 +172,13 @@ export const editStream = protectedProcedure
       // Create request context with settings
       const requestContext = createRequestContext({
          userId,
-         language: aiDefaults.defaultLanguage ?? getRequestLanguage(headers) ?? "pt-BR",
-         model: aiDefaults.editModel ?? "openrouter/mistralai/mistral-small-creative",
+         language:
+            aiDefaults.defaultLanguage ??
+            getRequestLanguage(headers) ??
+            "pt-BR",
+         model:
+            aiDefaults.editModel ??
+            "openrouter/mistralai/mistral-small-creative",
       } as CustomRequestContext);
 
       // Build the prompt from edit request
@@ -186,9 +196,9 @@ export const editStream = protectedProcedure
          );
 
          // Yield chunks as EditChunk format
-         let fullText = "";
+         let _fullText = "";
          for await (const chunk of result.textStream) {
-            fullText += chunk;
+            _fullText += chunk;
             yield {
                text: chunk,
                done: false,
@@ -226,7 +236,7 @@ export const editStream = protectedProcedure
             text: "",
             done: true,
          } satisfies EditChunk;
-      } catch (error) {
+      } catch (_error) {
          // Yield error indication
          yield {
             text: "",
@@ -281,7 +291,10 @@ export const chatStream = protectedProcedure
       const requestContext = createRequestContext({
          userId,
          contentId: input.contentId,
-         language: aiDefaults.defaultLanguage ?? getRequestLanguage(headers) ?? "pt-BR",
+         language:
+            aiDefaults.defaultLanguage ??
+            getRequestLanguage(headers) ??
+            "pt-BR",
          model: aiDefaults.contentModel ?? "openrouter/x-ai/grok-4.1-fast",
       } as CustomRequestContext);
 

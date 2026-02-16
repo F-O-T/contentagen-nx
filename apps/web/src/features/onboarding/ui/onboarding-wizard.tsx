@@ -146,7 +146,9 @@ export function OnboardingWizard() {
 
                         {methods.flow.switch({
                            "project-setup": () => (
-                              <ProjectSetupStep onNext={() => methods.navigation.next()} />
+                              <ProjectSetupStep
+                                 onNext={() => methods.navigation.next()}
+                              />
                            ),
                            products: () => (
                               <ProductSelectionStep

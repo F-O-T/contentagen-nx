@@ -11,7 +11,7 @@ export const verifyPassword = protectedProcedure
 
       try {
          // Use Better Auth's verify password endpoint
-         const result = await auth.api.verifyPassword({
+         const _result = await auth.api.verifyPassword({
             headers,
             body: { password: input.password },
          });
@@ -38,7 +38,10 @@ export const hasPassword = protectedProcedure.handler(async ({ context }) => {
       if (error && typeof error === "object" && "status" in error) {
          const apiError = error as { status: string; statusCode?: number };
 
-         if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+         if (
+            apiError.status === "UNAUTHORIZED" ||
+            apiError.statusCode === 401
+         ) {
             throw new ORPCError("UNAUTHORIZED", {
                message: "Authentication required to check password status",
             });
@@ -75,13 +78,19 @@ export const getLinkedAccounts = protectedProcedure.handler(
          if (error && typeof error === "object" && "status" in error) {
             const apiError = error as { status: string; statusCode?: number };
 
-            if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+            if (
+               apiError.status === "UNAUTHORIZED" ||
+               apiError.statusCode === 401
+            ) {
                throw new ORPCError("UNAUTHORIZED", {
                   message: "Authentication required to access linked accounts",
                });
             }
 
-            if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+            if (
+               apiError.status === "FORBIDDEN" ||
+               apiError.statusCode === 403
+            ) {
                throw new ORPCError("FORBIDDEN", {
                   message: "Insufficient permissions to access linked accounts",
                });

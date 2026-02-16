@@ -55,6 +55,7 @@ export function QuickStartTask({
    );
 
    return (
+      // biome-ignore lint/a11y/useSemanticElements: Div used for flexible layout with conditional interactions
       <div
          aria-disabled={isLocked}
          className={cn(

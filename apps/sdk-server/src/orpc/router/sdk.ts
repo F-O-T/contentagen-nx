@@ -120,7 +120,7 @@ export const get = sdkProcedure
       }
 
       // Generate analytics tracking script if PostHog public key is available
-      let analytics;
+      let analytics: { trackingScript: string; enabled: boolean } | undefined;
       const posthogPublicKey = env.POSTHOG_PUBLIC_KEY;
       if (posthogPublicKey && context.organizationId) {
          const tracker = new BlogAnalyticsTracker();

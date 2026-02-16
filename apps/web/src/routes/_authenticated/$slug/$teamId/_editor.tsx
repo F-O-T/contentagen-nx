@@ -2,14 +2,14 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { EditorStandaloneLayout } from "@/layout/editor/ui/editor-standalone-layout";
 
 export const Route = createFileRoute("/_authenticated/$slug/$teamId/_editor")({
-	component: EditorLayoutRoute,
-	ssr: false,
+   component: EditorLayoutRoute,
+   ssr: false,
 });
 
 function EditorLayoutRoute() {
-	return (
-		<EditorStandaloneLayout>
-			<Outlet />
-		</EditorStandaloneLayout>
-	)
+   return (
+      <EditorStandaloneLayout>
+         <Outlet />
+      </EditorStandaloneLayout>
+   );
 }

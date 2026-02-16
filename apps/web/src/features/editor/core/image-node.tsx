@@ -17,7 +17,6 @@ import {
    type SerializedLexicalNode,
    type Spread,
 } from "lexical";
-import type { JSX } from "react";
 import type { ImageWidth } from "../schemas";
 
 export type { ImageWidth };

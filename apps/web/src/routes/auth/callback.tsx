@@ -5,12 +5,15 @@ export const Route = createFileRoute("/auth/callback")({
    beforeLoad: async ({ context }) => {
       // Fetch onboarding status to determine where to redirect
       // Note: This might fail for brand new users who don't have teams yet
-      let status;
+      let status: {
+         organization: { onboardingCompleted: boolean };
+         project: { onboardingCompleted: boolean };
+      } | null = null;
       try {
          status = await context.queryClient.fetchQuery(
             context.orpc.onboarding.getOnboardingStatus.queryOptions(),
          );
-      } catch (error) {
+      } catch (_error) {
          // If status fetch fails (no team yet), assume project onboarding is incomplete
          // We'll still check org status and route accordingly
          status = null;
