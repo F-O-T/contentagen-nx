@@ -16,6 +16,17 @@ export interface DashboardTile {
    order: number;
 }
 
+export interface DashboardDateRange {
+   type: "relative" | "absolute";
+   value: string; // "7d" | "30d" | "2024-01-01,2024-01-31"
+}
+
+export interface DashboardFilter {
+   property: string;
+   operator: "equals" | "contains" | "gt" | "lt";
+   value: string;
+}
+
 export const dashboards = pgTable(
    "dashboards",
    {
@@ -33,6 +44,8 @@ export const dashboards = pgTable(
       description: text("description"),
       isDefault: boolean("is_default").default(false).notNull(),
       tiles: jsonb("tiles").$type<DashboardTile[]>().notNull().default([]),
+      globalDateRange: jsonb("global_date_range").$type<DashboardDateRange>(),
+      globalFilters: jsonb("global_filters").$type<DashboardFilter[]>(),
       createdAt: timestamp("created_at").defaultNow().notNull(),
       updatedAt: timestamp("updated_at")
          .defaultNow()

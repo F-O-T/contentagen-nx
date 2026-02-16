@@ -27,6 +27,8 @@ export const insights = pgTable(
       type: text("type").notNull(), // 'trends' | 'funnels' | 'retention'
       config: jsonb("config").$type<Record<string, unknown>>().notNull(),
       defaultSize: text("default_size").notNull().default("md"), // 'sm' | 'md' | 'lg' | 'full'
+      cachedResults: jsonb("cached_results"),
+      lastComputedAt: timestamp("last_computed_at", { withTimezone: true }),
       createdAt: timestamp("created_at").defaultNow().notNull(),
       updatedAt: timestamp("updated_at")
          .defaultNow()
