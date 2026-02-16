@@ -1,8 +1,8 @@
 import cors from "@elysiajs/cors";
-import { env } from "@packages/environment/server";
-import { Elysia } from "elysia";
 import { RPCHandler } from "@orpc/server/fetch";
 import { BatchHandlerPlugin } from "@orpc/server/plugins";
+import { env } from "@packages/environment/server";
+import { Elysia } from "elysia";
 import { auth } from "./integrations/auth";
 import { db } from "./integrations/database";
 import { minioClient } from "./integrations/minio";

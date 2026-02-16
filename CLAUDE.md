@@ -223,12 +223,22 @@ export async function createContent(db: DatabaseInstance, data: NewContent) {
 
 Config at `packages/authentication/src/server.ts`. Plugins: Google OAuth, Magic Link, Email OTP, 2FA, Anonymous sessions.
 
-**⚠️ CRITICAL: Updating Auth Schema**
+**⚠️ CRITICAL: Auth Tables Are Read-Only**
 
-To add fields to auth-managed tables (`user`, `session`, `organization`, `team`):
-- **ALWAYS** use `additionalFields` in `packages/authentication/src/server.ts`
-- **NEVER** edit Drizzle schemas directly for these tables
-- Better Auth manages these tables — schema changes must go through its config
+Better Auth fully manages these tables in `packages/database/src/schemas/auth.ts`:
+- `user`, `session`, `account`, `verification`
+- `organization`, `team`, `member`, `teamMember`
+- `invitation`, `twoFactor`
+
+**Rules:**
+- **NEVER** edit these Drizzle schema definitions directly (fields, defaults, constraints)
+- **NEVER** add/remove/modify columns in these tables manually
+- To add custom fields to `user`, `session`, `organization`, or `team`:
+  - **ALWAYS** use `additionalFields` in `packages/authentication/src/server.ts`
+  - Schema changes must go through Better Auth's config
+- Other tables (`member`, `invitation`, `twoFactor`, etc.) have NO `additionalFields` support
+  - These are entirely managed by Better Auth core
+  - Cannot be customized — use separate related tables if needed
 
 ```typescript
 // packages/authentication/src/server.ts

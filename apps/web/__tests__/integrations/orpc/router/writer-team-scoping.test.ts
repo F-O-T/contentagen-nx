@@ -62,6 +62,7 @@ describe("Writer Team Scoping", () => {
 				userId: testUserId,
 				organizationId: testOrgId,
 				role: "owner",
+				createdAt: new Date(),
 			})
 			.returning();
 		memberId = createdMember.id;

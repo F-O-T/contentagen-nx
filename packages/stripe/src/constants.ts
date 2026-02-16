@@ -63,9 +63,9 @@ export enum PlatformAddOn {
 
 // Backward compatibility aliases
 export const ADDON_IDS = {
-	BOOST: PlatformAddOn.BOOST,
-	SCALE: PlatformAddOn.SCALE,
-	ENTERPRISE: PlatformAddOn.ENTERPRISE,
+   BOOST: PlatformAddOn.BOOST,
+   SCALE: PlatformAddOn.SCALE,
+   ENTERPRISE: PlatformAddOn.ENTERPRISE,
 } as const;
 
 export type AddonId = PlatformAddOn;
