@@ -315,3 +315,30 @@ export const generateLogoUploadUrl = protectedProcedure
          });
       }
    });
+
+/**
+ * Update organization logo URL
+ */
+export const updateLogo = protectedProcedure
+   .input(
+      z.object({
+         logoUrl: z.string(),
+      }),
+   )
+   .handler(async ({ context, input }) => {
+      const { db, organizationId } = context;
+
+      try {
+         await db
+            .update(organization)
+            .set({ logo: input.logoUrl })
+            .where(eq(organization.id, organizationId));
+
+         return { success: true };
+      } catch (error) {
+         console.error("Failed to update organization logo:", error);
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to update logo",
+         });
+      }
+   });

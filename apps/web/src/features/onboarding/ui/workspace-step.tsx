@@ -97,10 +97,9 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
                         fileUpload.selectedFile.type,
                      );
 
-                     // Update organization with logo URL
-                     await authClient.organization.update({
-                        organizationId: orgId,
-                        data: { logo: uploadData.publicUrl },
+                     // Update organization with logo URL (MinIO path)
+                     await orpc.organization.updateLogo({
+                        logoUrl: uploadData.publicUrl,
                      });
                   } catch (uploadError) {
                      console.error("Logo upload failed:", uploadError);
