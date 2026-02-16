@@ -1,7 +1,4 @@
 import { ORPCError } from "@orpc/server";
-import {
-	getRateLimitConfig,
-} from "@packages/authentication/api-key-config";
 import type { DatabaseInstance } from "@packages/database/client";
 import { isOrganizationOwner } from "@packages/database/repositories/auth-repository";
 import { team, teamMember } from "@packages/database/schemas/auth";
@@ -15,14 +12,14 @@ import { protectedProcedure } from "../server";
 // =============================================================================
 
 const teamIdSchema = z.object({
-	teamId: z.string().uuid(),
+	teamId: z.uuid(),
 });
 
 const domainPatternRegex =
 	/^(\*\.)?([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)*[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
 
 const updateAllowedDomainsSchema = z.object({
-	teamId: z.string().uuid(),
+	teamId: z.uuid(),
 	allowedDomains: z
 		.array(
 			z
@@ -52,6 +49,7 @@ async function verifyTeamOwnership(
 			name: team.name,
 			description: team.description,
 			allowedDomains: team.allowedDomains,
+			publicApiKey: team.publicApiKey,
 			createdAt: team.createdAt,
 			updatedAt: team.updatedAt,
 		})
@@ -85,7 +83,7 @@ export const get = protectedProcedure
 
 /**
  * Get the public API key for a team.
- * Returns the visible prefix portion (start field).
+ * Returns the full public API key (stored in team.publicApiKey).
  * Auto-creates a key if none exists (lazy creation).
  */
 export const getPublicApiKey = protectedProcedure
@@ -94,28 +92,23 @@ export const getPublicApiKey = protectedProcedure
 		const { auth, db, headers, organizationId, userId } = context;
 
 		try {
-			// Verify team belongs to this organization
-			await verifyTeamOwnership(db, input.teamId, organizationId);
-
-			const keys = await auth.api.listApiKeys({
-				headers,
-			});
-
-			const publicKey = keys.find(
-				(key: any) =>
-					key.metadata?.teamId === input.teamId &&
-					key.metadata?.type === "public",
+			// Verify team belongs to this organization and get the stored public key
+			const teamData = await verifyTeamOwnership(
+				db,
+				input.teamId,
+				organizationId,
 			);
 
-			if (publicKey) {
-				return { publicApiKey: publicKey.start ?? null, keyId: publicKey.id };
+			// If the team already has a public key stored, return it
+			if (teamData.publicApiKey) {
+				return { publicApiKey: teamData.publicApiKey, keyId: null };
 			}
 
 			// Auto-create if none exists (lazy creation)
 			const plan = await resolveOrganizationPlan(db, organizationId);
-			const rateLimitConfig = getRateLimitConfig(plan);
 
 			const newKey = await auth.api.createApiKey({
+				headers,
 				body: {
 					prefix: "cta_pub",
 					name: "Public Key",
@@ -126,9 +119,14 @@ export const getPublicApiKey = protectedProcedure
 						organizationId,
 						plan,
 					},
-					...rateLimitConfig,
 				},
 			});
+
+			// Store the full key in the team table for future retrieval
+			await db
+				.update(team)
+				.set({ publicApiKey: newKey.key })
+				.where(eq(team.id, input.teamId));
 
 			return { publicApiKey: newKey.key, keyId: newKey.id };
 		} catch (error) {
@@ -136,13 +134,19 @@ export const getPublicApiKey = protectedProcedure
 			if (error && typeof error === "object" && "status" in error) {
 				const apiError = error as { status: string; statusCode?: number };
 
-				if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+				if (
+					apiError.status === "UNAUTHORIZED" ||
+					apiError.statusCode === 401
+				) {
 					throw new ORPCError("UNAUTHORIZED", {
 						message: "Authentication required to access API keys",
 					});
 				}
 
-				if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+				if (
+					apiError.status === "FORBIDDEN" ||
+					apiError.statusCode === 403
+				) {
 					throw new ORPCError("FORBIDDEN", {
 						message: "Insufficient permissions to access API keys",
 					});
@@ -164,7 +168,7 @@ export const getPublicApiKey = protectedProcedure
 /**
  * Regenerate the public API key for a team.
  * Owner-only. Deletes the existing key (if any) and creates a new one.
- * Returns the full key value (shown only once).
+ * Returns the full key value and stores it in team.publicApiKey.
  */
 export const regeneratePublicApiKey = protectedProcedure
 	.input(teamIdSchema)
@@ -188,32 +192,35 @@ export const regeneratePublicApiKey = protectedProcedure
 			const existingKeys = await auth.api.listApiKeys({
 				headers,
 			});
-			console.log(`[regeneratePublicApiKey] Found ${existingKeys?.length || 0} keys`);
+			console.log(
+				`[regeneratePublicApiKey] Found ${existingKeys?.length || 0} keys`,
+			);
 
 			const existingPublicKey = existingKeys.find(
-				(key: any) =>
+				(key) =>
 					key.metadata?.teamId === input.teamId &&
 					key.metadata?.type === "public",
 			);
 
 			if (existingPublicKey) {
-				console.log(`[regeneratePublicApiKey] Deleting existing key: ${existingPublicKey.id}`);
+				console.log(
+					`[regeneratePublicApiKey] Deleting existing key: ${existingPublicKey.id}`,
+				);
 				await auth.api.deleteApiKey({
+					headers,
 					body: { keyId: existingPublicKey.id },
 				});
 			}
 
-			// Resolve the organization's plan for rate limits
+			// Resolve the organization's plan for metadata
 			console.log("[regeneratePublicApiKey] Resolving organization plan...");
 			const plan = await resolveOrganizationPlan(db, organizationId);
 			console.log(`[regeneratePublicApiKey] Plan: ${plan}`);
 
-			const rateLimitConfig = getRateLimitConfig(plan);
-			console.log("[regeneratePublicApiKey] Rate limit config:", rateLimitConfig);
-
 			// Create a new public API key
 			console.log("[regeneratePublicApiKey] Creating new API key...");
 			const newKey = await auth.api.createApiKey({
+				headers,
 				body: {
 					prefix: "cta_pub",
 					name: "Public Key",
@@ -224,28 +231,40 @@ export const regeneratePublicApiKey = protectedProcedure
 						organizationId,
 						plan,
 					},
-					...rateLimitConfig,
 				},
 			});
-			console.log("[regeneratePublicApiKey] New key created successfully");
+
+			await db
+				.update(team)
+				.set({ publicApiKey: newKey.key })
+				.where(eq(team.id, input.teamId));
 
 			return { publicApiKey: newKey.key };
 		} catch (error) {
 			console.error("[regeneratePublicApiKey] Error:", error);
-			console.error("[regeneratePublicApiKey] Error stack:", error instanceof Error ? error.stack : "No stack");
+			console.error(
+				"[regeneratePublicApiKey] Error stack:",
+				error instanceof Error ? error.stack : "No stack",
+			);
 
 			// Convert Better Auth API errors to ORPCError
 			if (error && typeof error === "object" && "status" in error) {
 				const apiError = error as { status: string; statusCode?: number };
 
 				// Map Better Auth status codes to oRPC error codes
-				if (apiError.status === "UNAUTHORIZED" || apiError.statusCode === 401) {
+				if (
+					apiError.status === "UNAUTHORIZED" ||
+					apiError.statusCode === 401
+				) {
 					throw new ORPCError("UNAUTHORIZED", {
 						message: "Authentication required to regenerate API keys",
 					});
 				}
 
-				if (apiError.status === "FORBIDDEN" || apiError.statusCode === 403) {
+				if (
+					apiError.status === "FORBIDDEN" ||
+					apiError.statusCode === 403
+				) {
 					throw new ORPCError("FORBIDDEN", {
 						message: "Insufficient permissions to regenerate API keys",
 					});
@@ -304,7 +323,7 @@ export const getMembers = protectedProcedure
 		await verifyTeamOwnership(db, input.teamId, organizationId);
 
 		// Get organization members via Better Auth
-		const orgMembers = await auth.api.listOrganizationMembers({
+		const orgMembers = await auth.api.listMembers({
 			headers,
 			query: { organizationId },
 		});
@@ -314,12 +333,10 @@ export const getMembers = protectedProcedure
 			where: (teamMember, { eq }) => eq(teamMember.teamId, input.teamId),
 		});
 
-		const teamMemberIds = new Set(
-			teamMemberRecords.map((tm) => tm.userId),
-		);
+		const teamMemberIds = new Set(teamMemberRecords.map((tm) => tm.userId));
 
 		// Filter org members to only include team members
-		const teamMembers = orgMembers
+		const teamMembers = orgMembers.members
 			.filter((m) => teamMemberIds.has(m.userId))
 			.map((m) => ({
 				id: m.userId,
@@ -340,8 +357,8 @@ export const getMembers = protectedProcedure
 export const addMember = protectedProcedure
 	.input(
 		z.object({
-			teamId: z.string().uuid(),
-			userId: z.string().uuid(),
+			teamId: z.uuid(),
+			userId: z.uuid(),
 		}),
 	)
 	.handler(async ({ context, input }) => {
@@ -399,8 +416,8 @@ export const addMember = protectedProcedure
 export const removeMember = protectedProcedure
 	.input(
 		z.object({
-			teamId: z.string().uuid(),
-			userId: z.string().uuid(),
+			teamId: z.uuid(),
+			userId: z.uuid(),
 		}),
 	)
 	.handler(async ({ context, input }) => {
