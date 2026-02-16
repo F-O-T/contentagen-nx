@@ -1,21 +1,42 @@
 import { Button } from "@packages/ui/components/button";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
+import {
+   Popover,
+   PopoverContent,
+   PopoverTrigger,
+} from "@packages/ui/components/popover";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { cn } from "@packages/ui/lib/utils";
+import { formatRelativeTime } from "@packages/utils/date";
+import {
+   useMutation,
+   useQuery,
+   useQueryClient,
+   useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
    Calendar,
    Clock,
+   Filter,
    LayoutDashboard,
    Pencil,
    Plus,
    RefreshCw,
+   X,
 } from "lucide-react";
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import { DashboardFilterSheet } from "@/features/analytics/ui/dashboard-filter-sheet";
 import { EditableDashboardGrid } from "@/features/analytics/ui/editable-dashboard-grid";
 import { QuickStartChecklist } from "@/features/onboarding/ui/quick-start-checklist";
 import { orpc } from "@/integrations/orpc/client";
+import type {
+   Dashboard,
+   DashboardDateRange,
+   DashboardFilter,
+} from "@packages/database/schemas/dashboards";
+import { Badge } from "@packages/ui/components/badge";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/home/",
@@ -75,10 +96,12 @@ function HomePageSkeleton() {
 // =============================================================================
 
 function DashboardHeader({
+   dashboard,
    isEditing,
    onEditToggle,
    onAddInsight,
 }: {
+   dashboard: Dashboard;
    isEditing: boolean;
    onEditToggle: () => void;
    onAddInsight: () => void;
@@ -113,43 +136,239 @@ function DashboardHeader({
          </p>
 
          {/* Filter bar */}
-         <DashboardFilterBar />
+         <DashboardFilterBar dashboard={dashboard} />
       </div>
    );
 }
 
-function DashboardFilterBar() {
+// Date range presets
+const DATE_RANGE_PRESETS = [
+   { label: "Últimos 7 dias", value: "7d" },
+   { label: "Últimos 30 dias", value: "30d" },
+   { label: "Últimos 90 dias", value: "90d" },
+   { label: "Este mês", value: "this_month" },
+   { label: "Mês passado", value: "last_month" },
+] as const;
+
+function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
+   const queryClient = useQueryClient();
+   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+   const [isDateRangeOpen, setIsDateRangeOpen] = useState(false);
+
+   // Get insights for last refreshed time
+   const { data: insights } = useQuery(
+      orpc.analytics.getDashboardInsights.queryOptions({
+         input: { dashboardId: dashboard.id },
+      }),
+   );
+
+   // Calculate last refreshed time (oldest lastComputedAt)
+   const lastRefreshedTime = useMemo(() => {
+      if (!insights || insights.length === 0) {
+         return null;
+      }
+
+      const oldestComputedAt = insights.reduce((oldest, insight) => {
+         if (!insight.lastComputedAt) return oldest;
+         if (!oldest) return insight.lastComputedAt;
+         return insight.lastComputedAt < oldest
+            ? insight.lastComputedAt
+            : oldest;
+      }, null as Date | null);
+
+      return oldestComputedAt ? formatRelativeTime(oldestComputedAt) : null;
+   }, [insights]);
+
+   // Refresh dashboard mutation
+   const refreshMutation = useMutation(
+      orpc.insights.refreshDashboard.mutationOptions({
+         onSuccess: () => {
+            queryClient.invalidateQueries({
+               queryKey: orpc.analytics.getDashboardInsights.queryKey({
+                  input: { dashboardId: dashboard.id },
+               }),
+            });
+            queryClient.invalidateQueries({
+               queryKey: orpc.analytics.getDefaultDashboard.queryKey(),
+            });
+         },
+      }),
+   );
+
+   // Update global filters mutation
+   const updateFiltersMutation = useMutation(
+      orpc.dashboards.updateGlobalFilters.mutationOptions({
+         onSuccess: () => {
+            queryClient.invalidateQueries({
+               queryKey: orpc.analytics.getDefaultDashboard.queryKey(),
+            });
+            setIsFilterSheetOpen(false);
+         },
+      }),
+   );
+
+   // Handle date range change
+   const handleDateRangeChange = (preset: string) => {
+      const dateRange: DashboardDateRange = {
+         type: "relative",
+         value: preset,
+      };
+
+      updateFiltersMutation.mutate({
+         dashboardId: dashboard.id,
+         globalDateRange: dateRange,
+      });
+
+      setIsDateRangeOpen(false);
+   };
+
+   // Handle date range removal
+   const handleRemoveDateRange = () => {
+      updateFiltersMutation.mutate({
+         dashboardId: dashboard.id,
+         globalDateRange: null,
+      });
+
+      setIsDateRangeOpen(false);
+   };
+
+   // Handle filter save
+   const handleFiltersSave = (filters: DashboardFilter[]) => {
+      updateFiltersMutation.mutate({
+         dashboardId: dashboard.id,
+         globalFilters: filters,
+      });
+   };
+
+   // Get current date range label
+   const dateRangeLabel = useMemo(() => {
+      if (!dashboard.globalDateRange) {
+         return "Sem período global";
+      }
+
+      const preset = DATE_RANGE_PRESETS.find(
+         (p) => p.value === dashboard.globalDateRange?.value,
+      );
+
+      return preset?.label ?? dashboard.globalDateRange.value;
+   }, [dashboard.globalDateRange]);
+
+   // Get filter count
+   const filterCount = dashboard.globalFilters?.length ?? 0;
+
    return (
-      <div className="flex items-center justify-between gap-3 border-t border-b py-2">
-         <div className="flex items-center gap-1.5">
-            <Button
-               className="h-7 text-xs gap-1.5 text-muted-foreground"
-               size="sm"
-               variant="outline"
-            >
-               <Calendar className="size-3.5" />
-               No date range override
-            </Button>
-            <Button
-               className="h-7 text-xs gap-1 text-muted-foreground"
-               size="sm"
-               variant="outline"
-            >
-               <Plus className="size-3" />
-               Filter
-            </Button>
+      <>
+         <div className="flex items-center justify-between gap-3 border-t border-b py-2">
+            <div className="flex items-center gap-1.5">
+               {/* Date range popover */}
+               <Popover open={isDateRangeOpen} onOpenChange={setIsDateRangeOpen}>
+                  <PopoverTrigger asChild>
+                     <Button
+                        className={cn(
+                           "h-7 text-xs gap-1.5",
+                           dashboard.globalDateRange
+                              ? "text-foreground"
+                              : "text-muted-foreground",
+                        )}
+                        size="sm"
+                        variant="outline"
+                     >
+                        <Calendar className="size-3.5" />
+                        {dateRangeLabel}
+                     </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-64 p-2">
+                     <div className="flex flex-col gap-1">
+                        {DATE_RANGE_PRESETS.map((preset) => (
+                           <Button
+                              className="justify-start"
+                              key={preset.value}
+                              onClick={() => handleDateRangeChange(preset.value)}
+                              size="sm"
+                              variant={
+                                 dashboard.globalDateRange?.value === preset.value
+                                    ? "secondary"
+                                    : "ghost"
+                              }
+                           >
+                              {preset.label}
+                           </Button>
+                        ))}
+
+                        {dashboard.globalDateRange && (
+                           <>
+                              <div className="my-1 border-t" />
+                              <Button
+                                 className="justify-start text-destructive hover:text-destructive"
+                                 onClick={handleRemoveDateRange}
+                                 size="sm"
+                                 variant="ghost"
+                              >
+                                 <X className="size-3.5" />
+                                 Remover período global
+                              </Button>
+                           </>
+                        )}
+                     </div>
+                  </PopoverContent>
+               </Popover>
+
+               {/* Filter button */}
+               <Button
+                  className={cn(
+                     "h-7 text-xs gap-1",
+                     filterCount > 0 ? "text-foreground" : "text-muted-foreground",
+                  )}
+                  onClick={() => setIsFilterSheetOpen(true)}
+                  size="sm"
+                  variant="outline"
+               >
+                  <Filter className="size-3" />
+                  Filtros
+                  {filterCount > 0 && (
+                     <Badge className="ml-1 h-4 px-1 text-xs" variant="secondary">
+                        {filterCount}
+                     </Badge>
+                  )}
+               </Button>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+               {lastRefreshedTime && (
+                  <span className="hidden sm:inline-flex items-center gap-1">
+                     <Clock className="size-3" />
+                     Atualizado {lastRefreshedTime}
+                  </span>
+               )}
+               <Button
+                  className="h-7 text-xs gap-1.5"
+                  disabled={refreshMutation.isPending}
+                  onClick={() =>
+                     refreshMutation.mutate({ dashboardId: dashboard.id })
+                  }
+                  size="sm"
+                  variant="outline"
+               >
+                  <RefreshCw
+                     className={cn(
+                        "size-3",
+                        refreshMutation.isPending && "animate-spin",
+                     )}
+                  />
+                  {refreshMutation.isPending ? "Atualizando..." : "Atualizar"}
+               </Button>
+            </div>
          </div>
-         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="hidden sm:inline-flex items-center gap-1">
-               <Clock className="size-3" />
-               Last refreshed just now
-            </span>
-            <Button className="h-7 text-xs gap-1.5" size="sm" variant="outline">
-               <RefreshCw className="size-3" />
-               Refresh
-            </Button>
-         </div>
-      </div>
+
+         {/* Filter sheet */}
+         <DashboardFilterSheet
+            dashboard={dashboard}
+            isOpen={isFilterSheetOpen}
+            isPending={updateFiltersMutation.isPending}
+            onClose={() => setIsFilterSheetOpen(false)}
+            onSave={handleFiltersSave}
+         />
+      </>
    );
 }
 
@@ -158,16 +377,41 @@ function DashboardFilterBar() {
 // =============================================================================
 
 function HomePageContent() {
-   const { data: dashboard } = useSuspenseQuery(
+   const { data: dashboard, error } = useQuery(
       orpc.analytics.getDefaultDashboard.queryOptions(),
    );
    const [isEditing, setIsEditing] = useState(false);
+   const [openAddSheet, setOpenAddSheet] = useState<(() => void) | null>(null);
+
+   // Show empty state if dashboard doesn't exist
+   if (error) {
+      return (
+         <main className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+            <div className="text-center">
+               <h2 className="text-lg font-semibold">Dashboard não encontrado</h2>
+               <p className="text-sm text-muted-foreground mt-2">
+                  Complete o processo de onboarding para criar seu dashboard.
+               </p>
+            </div>
+         </main>
+      );
+   }
+
+   // Show loading state while fetching
+   if (!dashboard) {
+      return <HomePageSkeleton />;
+   }
 
    return (
       <main className="flex flex-col gap-0">
          <DashboardHeader
+            dashboard={dashboard}
             isEditing={isEditing}
-            onAddInsight={() => setIsEditing(true)}
+            onAddInsight={() => {
+               if (openAddSheet) {
+                  openAddSheet();
+               }
+            }}
             onEditToggle={() => setIsEditing(true)}
          />
          <div className="flex flex-col gap-4 pt-4">
@@ -176,6 +420,7 @@ function HomePageContent() {
                dashboard={dashboard}
                isEditing={isEditing}
                onDoneEditing={() => setIsEditing(false)}
+               onOpenAddSheet={setOpenAddSheet}
             />
          </div>
       </main>

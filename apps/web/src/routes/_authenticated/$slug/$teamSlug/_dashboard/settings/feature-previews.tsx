@@ -1,4 +1,4 @@
-import { Badge } from "@packages/ui/components/badge";
+import { FeatureStageBadge } from "@packages/ui/components/feature-stage-badge";
 import {
    Item,
    ItemActions,
@@ -18,12 +18,6 @@ export const Route = createFileRoute(
 )({
    component: FeaturePreviewsPage,
 });
-
-const STAGE_LABELS: Record<string, string> = {
-   alpha: "Alpha",
-   beta: "Beta",
-   concept: "Conceito",
-};
 
 function FeaturePreviewsPage() {
    const { features, loaded, isEnrolled, updateEnrollment } = useEarlyAccess();
@@ -60,10 +54,10 @@ function FeaturePreviewsPage() {
                         <ItemContent>
                            <div className="flex items-center gap-2">
                               <ItemTitle>{feature.name}</ItemTitle>
-                              <Badge className="text-xs" variant="secondary">
-                                 <FlaskConical className="size-3 mr-1" />
-                                 {STAGE_LABELS[feature.stage] ?? feature.stage}
-                              </Badge>
+                              <FeatureStageBadge
+                                 className="text-xs"
+                                 stage={feature.stage}
+                              />
                            </div>
                            <ItemDescription>
                               {feature.description}

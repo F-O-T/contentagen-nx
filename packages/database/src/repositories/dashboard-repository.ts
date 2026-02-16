@@ -120,9 +120,10 @@ export async function deleteDashboard(
 }
 
 /**
- * Create default insights for a new organization
+ * Create default insights for a new organization.
+ * Exported for use in onboarding flow.
  */
-async function createDefaultInsights(
+export async function createDefaultInsights(
    db: DatabaseInstance,
    organizationId: string,
    teamId: string,
@@ -156,7 +157,6 @@ export async function getDefaultDashboard(
    db: DatabaseInstance,
    organizationId: string,
    teamId: string,
-   userId: string,
 ): Promise<Dashboard> {
    try {
       const result = await db
@@ -171,55 +171,13 @@ export async function getDefaultDashboard(
          )
          .limit(1);
 
-      // If default dashboard exists, return it
-      if (result[0]) {
-         return result[0];
+      if (!result[0]) {
+         throw AppError.notFound("Default dashboard not found");
       }
 
-      // Create default insights first
-      const insightIds = await createDefaultInsights(
-         db,
-         organizationId,
-         teamId,
-         userId,
-      );
-
-      // Build tiles from insights (using their default sizes and order)
-      const tiles: DashboardTile[] = insightIds.map((insightId, index) => {
-         const defaultInsight = DEFAULT_INSIGHTS[index];
-         if (!defaultInsight) {
-            throw AppError.internal(
-               "Mismatch between insights and definitions",
-            );
-         }
-         return {
-            insightId,
-            size: defaultInsight.defaultSize,
-            order: index,
-         };
-      });
-
-      // Create the default dashboard with tiles
-      const [newDashboard] = await db
-         .insert(dashboards)
-         .values({
-            organizationId,
-            teamId,
-            createdBy: userId,
-            name: "Dashboard Principal",
-            description: "Seu painel de análise principal",
-            isDefault: true,
-            tiles,
-         })
-         .returning();
-
-      if (!newDashboard) {
-         throw AppError.database("Failed to create default dashboard");
-      }
-
-      return newDashboard;
+      return result[0];
    } catch (err) {
       propagateError(err);
-      throw AppError.database("Failed to get or create default dashboard");
+      throw AppError.database("Failed to get default dashboard");
    }
 }

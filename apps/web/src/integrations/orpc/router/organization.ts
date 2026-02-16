@@ -1,9 +1,12 @@
 import { ORPCError } from "@orpc/server";
 import { getOrganizationMembers } from "@packages/database/repositories/auth-repository";
 import { member, organization } from "@packages/database/schemas/auth";
-import { serverEnv } from "@packages/environment/server";
+import { env as serverEnv } from "@packages/environment/server";
 import { resolveOrganizationPlan } from "@packages/events/credits";
-import { generatePresignedPutUrl, getMinioClient } from "@packages/files/client";
+import {
+   generatePresignedPutUrl,
+   getMinioClient,
+} from "@packages/files/client";
 import { getEffectiveProjectLimit } from "@packages/stripe/constants";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
@@ -13,6 +16,7 @@ import { authenticatedProcedure, protectedProcedure } from "../server";
 // =============================================================================
 // Procedures
 // =============================================================================
+// Force rebuild: logo upload procedures added
 
 /**
  * Get all organizations the user is a member of, with their role
@@ -208,7 +212,7 @@ export const getMembers = protectedProcedure.handler(async ({ context }) => {
  * Get teams a specific user has access to within the organization
  */
 export const getMemberTeams = protectedProcedure
-   .input(z.object({ userId: z.string().uuid() }))
+   .input(z.object({ userId: z.uuid() }))
    .handler(async ({ context, input }) => {
       const { db, organizationId } = context;
 
@@ -312,6 +316,33 @@ export const generateLogoUploadUrl = protectedProcedure
          console.error("Failed to generate presigned URL:", error);
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "Failed to generate upload URL",
+         });
+      }
+   });
+
+/**
+ * Update organization logo URL
+ */
+export const updateLogo = protectedProcedure
+   .input(
+      z.object({
+         logoUrl: z.string(),
+      }),
+   )
+   .handler(async ({ context, input }) => {
+      const { db, organizationId } = context;
+
+      try {
+         await db
+            .update(organization)
+            .set({ logo: input.logoUrl })
+            .where(eq(organization.id, organizationId));
+
+         return { success: true };
+      } catch (error) {
+         console.error("Failed to update organization logo:", error);
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to update logo",
          });
       }
    });

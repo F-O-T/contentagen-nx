@@ -1,4 +1,7 @@
 import { ORPCError } from "@orpc/server";
+import { computeInsightData } from "@packages/analytics/compute-insight";
+import { insightConfigSchema } from "@packages/analytics/types";
+import { getDashboardById } from "@packages/database/repositories/dashboard-repository";
 import {
    createInsight,
    deleteInsight,
@@ -6,6 +9,8 @@ import {
    listInsightsByTeam,
    updateInsight,
 } from "@packages/database/repositories/insight-repository";
+import { insights } from "@packages/database/schemas/insights";
+import { eq } from "drizzle-orm";
 import {
    emitInsightCreated,
    emitInsightDeleted,
@@ -13,8 +18,6 @@ import {
 } from "@packages/events/insight";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
-
-const insightConfigSchema = z.record(z.string(), z.unknown());
 
 const createInsightSchema = z.object({
    name: z.string().min(1),
@@ -154,4 +157,68 @@ export const remove = protectedProcedure
       }
 
       return { success: true };
+   });
+
+/**
+ * Refresh cached results for all insights on a specific dashboard.
+ * This is triggered manually by the user via the dashboard refresh button.
+ */
+export const refreshDashboard = protectedProcedure
+   .input(z.object({ dashboardId: z.string().uuid() }))
+   .handler(async ({ context, input }) => {
+      const { organizationId, teamId, db } = context;
+
+      // Verify dashboard ownership
+      const dashboard = await getDashboardById(db, input.dashboardId);
+
+      if (
+         !dashboard ||
+         dashboard.organizationId !== organizationId ||
+         dashboard.teamId !== teamId
+      ) {
+         throw new ORPCError("NOT_FOUND", {
+            message: "Dashboard not found.",
+         });
+      }
+
+      // Extract unique insight IDs from dashboard tiles
+      const insightIds = [
+         ...new Set(dashboard.tiles.map((tile) => tile.insightId)),
+      ];
+
+      // Refresh each insight's cached data in parallel
+      const refreshPromises = insightIds.map(async (insightId) => {
+         try {
+            const insight = await getInsightById(db, insightId);
+            if (!insight) {
+               console.warn(
+                  `[Insights] Insight ${insightId} not found during refresh`,
+               );
+               return;
+            }
+
+            const freshData = await computeInsightData(db, insight);
+
+            await db
+               .update(insights)
+               .set({
+                  cachedResults: freshData,
+                  lastComputedAt: new Date(),
+               })
+               .where(eq(insights.id, insightId));
+         } catch (error) {
+            console.error(
+               `[Insights] Failed to refresh insight ${insightId}:`,
+               error,
+            );
+            // Continue with other insights even if one fails
+         }
+      });
+
+      await Promise.all(refreshPromises);
+
+      return {
+         success: true,
+         refreshedCount: insightIds.length,
+      };
    });

@@ -82,11 +82,11 @@ function useInsightMetadata(insightName?: string, insightId?: string) {
    // PostHog-style type label with date range
    const typeLabel =
       type === "trends"
-         ? "TRENDS"
+         ? "TENDÊNCIAS"
          : type === "funnels"
-           ? "FUNNELS"
+           ? "FUNIS"
            : type === "retention"
-             ? "RETENTION"
+             ? "RETENÇÃO"
              : "INSIGHT";
 
    // Extract date range from config if available
@@ -96,7 +96,7 @@ function useInsightMetadata(insightName?: string, insightId?: string) {
       | undefined;
    const dateRangeLabel = dateRange?.value
       ? formatDateRange(dateRange.value)
-      : "LAST 30 DAYS";
+      : "ÚLTIMOS 30 DIAS";
 
    return { name, description, typeLabel, dateRangeLabel };
 }
@@ -104,19 +104,19 @@ function useInsightMetadata(insightName?: string, insightId?: string) {
 function formatDateRange(value: string): string {
    switch (value) {
       case "7d":
-         return "LAST 7 DAYS";
+         return "ÚLTIMOS 7 DIAS";
       case "14d":
-         return "LAST 14 DAYS";
+         return "ÚLTIMOS 14 DIAS";
       case "30d":
-         return "LAST 30 DAYS";
+         return "ÚLTIMOS 30 DIAS";
       case "90d":
-         return "LAST 90 DAYS";
+         return "ÚLTIMOS 90 DIAS";
       case "this_month":
-         return "THIS MONTH";
+         return "ESTE MÊS";
       case "last_month":
-         return "LAST MONTH";
+         return "MÊS PASSADO";
       case "this_year":
-         return "THIS YEAR";
+         return "ESTE ANO";
       default:
          return value.toUpperCase();
    }

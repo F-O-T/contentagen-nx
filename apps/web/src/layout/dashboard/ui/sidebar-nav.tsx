@@ -1,6 +1,6 @@
 // apps/web/src/layout/dashboard/sidebar-nav.tsx
 
-import { Badge } from "@packages/ui/components/badge";
+import { FeatureStageBadge } from "@packages/ui/components/feature-stage-badge";
 import {
    SidebarGroup,
    SidebarGroupContent,
@@ -68,12 +68,10 @@ function NavItem({
                   <Icon />
                   <span>{item.label}</span>
                   {item.earlyAccessFlag && (
-                     <Badge
-                        className="ml-1.5 px-1.5 py-0 text-[10px] leading-4 group-data-[collapsible=icon]:hidden"
-                        variant="secondary"
-                     >
-                        Beta
-                     </Badge>
+                     <FeatureStageBadge
+                        className="ml-1.5 group-data-[collapsible=icon]:hidden"
+                        stage="beta"
+                     />
                   )}
                   <ChevronRight className="ml-auto size-3.5 text-muted-foreground group-data-[collapsible=icon]:hidden" />
                </>
@@ -87,12 +85,10 @@ function NavItem({
                   <Icon />
                   <span>{item.label}</span>
                   {item.earlyAccessFlag && (
-                     <Badge
-                        className="ml-1.5 px-1.5 py-0 text-[10px] leading-4 group-data-[collapsible=icon]:hidden"
-                        variant="secondary"
-                     >
-                        Beta
-                     </Badge>
+                     <FeatureStageBadge
+                        className="ml-1.5 group-data-[collapsible=icon]:hidden"
+                        stage="beta"
+                     />
                   )}
                </Link>
             )}

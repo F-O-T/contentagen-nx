@@ -39,6 +39,7 @@ import { Suspense, useState } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
 import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
+import { usePresignedUpload } from "@/features/file-upload/lib/use-presigned-upload";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -135,18 +136,65 @@ function LogoSection({
    currentLogo: string | null;
    organizationName: string;
 }) {
+   // DEBUG: Check what's available in orpc.organization
+   console.log("[DEBUG] orpc keys:", Object.keys(orpc));
+   console.log("[DEBUG] orpc.organization:", orpc.organization);
+   console.log("[DEBUG] orpc.organization keys:", Object.keys(orpc.organization));
+   console.log("[DEBUG] orpc.organization.generateLogoUploadUrl:", orpc.organization.generateLogoUploadUrl);
+   console.log("[DEBUG] Type:", typeof orpc.organization.generateLogoUploadUrl);
+
    const queryClient = useQueryClient();
    const fileUpload = useFileUpload({
       acceptedTypes: ["image/*"],
       maxSize: 5 * 1024 * 1024,
    });
+   const presignedUpload = usePresignedUpload();
 
    const saveMutation = useMutation({
       mutationFn: async () => {
-         await authClient.organization.update({
-            data: { logo: fileUpload.filePreview || undefined },
-            organizationId,
+         console.log("[Logo Upload] Starting mutation...");
+
+         if (!fileUpload.selectedFile) {
+            throw new Error("No file selected");
+         }
+
+         // Get file extension and content type
+         const fileExtension = fileUpload.selectedFile.name.split(".").pop() ?? "png";
+         const contentType = fileUpload.selectedFile.type;
+
+         console.log("[Logo Upload] File details:", {
+            name: fileUpload.selectedFile.name,
+            size: fileUpload.selectedFile.size,
+            type: contentType,
+            extension: fileExtension,
          });
+
+         // Generate presigned URL for MinIO upload
+         console.log("[Logo Upload] Requesting presigned URL...");
+         const uploadData = await orpc.organization.generateLogoUploadUrl.call({
+            fileExtension,
+            contentType,
+         });
+         console.log("[Logo Upload] Got presigned URL:", {
+            presignedUrl: uploadData.presignedUrl.substring(0, 100) + "...",
+            publicUrl: uploadData.publicUrl,
+         });
+
+         // Upload file to MinIO
+         console.log("[Logo Upload] Uploading to MinIO...");
+         await presignedUpload.uploadToPresignedUrl(
+            uploadData.presignedUrl,
+            fileUpload.selectedFile,
+            contentType,
+         );
+         console.log("[Logo Upload] MinIO upload complete");
+
+         // Update organization with logo path
+         console.log("[Logo Upload] Updating organization with logo URL:", uploadData.publicUrl);
+         await orpc.organization.updateLogo.call({
+            logoUrl: uploadData.publicUrl,
+         });
+         console.log("[Logo Upload] Organization updated successfully");
       },
       onSuccess: () => {
          toast.success("Logo atualizado com sucesso!");
@@ -156,7 +204,12 @@ function LogoSection({
                .queryKey,
          });
       },
-      onError: () => {
+      onError: (error) => {
+         console.error("[Logo Upload] Failed:", {
+            error,
+            message: error instanceof Error ? error.message : "Unknown error",
+            stack: error instanceof Error ? error.stack : undefined,
+         });
          toast.error("Erro ao atualizar logo");
       },
    });
@@ -206,11 +259,11 @@ function LogoSection({
          </div>
          {fileUpload.filePreview && (
             <Button
-               disabled={saveMutation.isPending}
+               disabled={saveMutation.isPending || presignedUpload.isUploading}
                onClick={() => saveMutation.mutate()}
                size="sm"
             >
-               {saveMutation.isPending && (
+               {(saveMutation.isPending || presignedUpload.isUploading) && (
                   <Loader2 className="size-4 mr-2 animate-spin" />
                )}
                Salvar logo
@@ -218,6 +271,9 @@ function LogoSection({
          )}
          {fileUpload.error && (
             <p className="text-sm text-destructive">{fileUpload.error}</p>
+         )}
+         {presignedUpload.error && (
+            <p className="text-sm text-destructive">{presignedUpload.error}</p>
          )}
       </section>
    );

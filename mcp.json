@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "@upstash/context7-mcp"
+      ],
+      "env": {}
+    },
+    "yaak": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://127.0.0.1:64343/mcp"
+      ]
+    },
+    "supabase": {
+      "type": "http",
+      "url": "http://localhost:54321/mcp"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { AppError, propagateError } from "@packages/utils/errors";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
 import { insights, type NewInsight } from "../schemas/insights";
 
@@ -67,6 +67,25 @@ export async function getInsightById(db: DatabaseInstance, insightId: string) {
    } catch (err) {
       propagateError(err);
       throw AppError.database("Failed to get insight");
+   }
+}
+
+export async function getInsightsByIds(
+   db: DatabaseInstance,
+   insightIds: string[],
+) {
+   if (insightIds.length === 0) {
+      return [];
+   }
+
+   try {
+      return await db
+         .select()
+         .from(insights)
+         .where(inArray(insights.id, insightIds));
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database("Failed to get insights by IDs");
    }
 }
 

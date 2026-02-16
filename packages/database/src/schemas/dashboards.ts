@@ -8,6 +8,7 @@ import {
    timestamp,
    uuid,
 } from "drizzle-orm/pg-core";
+import { z } from "zod";
 import { organization, team, user } from "./auth";
 
 export interface DashboardTile {
@@ -15,6 +16,23 @@ export interface DashboardTile {
    size: "sm" | "md" | "lg" | "full";
    order: number;
 }
+
+// Dashboard date range schema for JSONB
+export const DashboardDateRangeSchema = z.object({
+   type: z.enum(["relative", "absolute"]),
+   value: z.string(), // "7d" | "30d" | "2024-01-01,2024-01-31"
+});
+
+export type DashboardDateRange = z.infer<typeof DashboardDateRangeSchema>;
+
+// Dashboard filter schema for JSONB
+export const DashboardFilterSchema = z.object({
+   property: z.string(),
+   operator: z.enum(["equals", "contains", "gt", "lt"]),
+   value: z.string(),
+});
+
+export type DashboardFilter = z.infer<typeof DashboardFilterSchema>;
 
 export const dashboards = pgTable(
    "dashboards",
@@ -33,6 +51,10 @@ export const dashboards = pgTable(
       description: text("description"),
       isDefault: boolean("is_default").default(false).notNull(),
       tiles: jsonb("tiles").$type<DashboardTile[]>().notNull().default([]),
+      globalDateRange: jsonb("global_date_range").$type<DashboardDateRange>(),
+      globalFilters: jsonb("global_filters")
+         .$type<DashboardFilter[]>()
+         .default([]),
       createdAt: timestamp("created_at").defaultNow().notNull(),
       updatedAt: timestamp("updated_at")
          .defaultNow()
