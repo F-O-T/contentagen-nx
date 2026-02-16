@@ -2,6 +2,126 @@
 
 All notable changes to this package will be documented in this file.
 
+## [2.0.0] - 2026-02-15
+
+### Breaking Changes
+
+This is a complete rewrite of the Contentta SDK, transitioning from a class-based REST client to a modern oRPC-based architecture. See [BREAKING_CHANGES.md](./BREAKING_CHANGES.md) and [MIGRATION.md](./MIGRATION.md) for detailed upgrade instructions.
+
+#### Package Name
+- Package renamed from `@contentagen/sdk` to `@contentta/sdk`
+- All imports must be updated to use the new package name
+
+#### API Architecture
+- **Replaced class-based API with functional oRPC client**
+  - `new ContentaGenSDK()` → `createSdk()`
+  - Removed `locale` configuration option (now handled server-side)
+  - All methods now organized into namespaced procedures
+
+#### Content Methods
+- `listContentByAgent()` → `sdk.content.list()`
+  - `limit` and `page` parameters now accept strings (auto-coerced to numbers)
+- `getContentBySlug()` → `sdk.content.get()`
+- `getRelatedSlugs()` → `sdk.content.getRelatedSlugs()`
+- `getAuthorByAgentId()` → `sdk.content.getAuthor()`
+- `getContentImage()` → `sdk.content.getImage()`
+
+#### Browser SDK
+- Consolidated event tracking and forms into unified browser SDK
+- `@contentagen/sdk/events` → `@contentta/sdk/browser`
+- `@contentagen/sdk/forms` → `@contentta/sdk/browser`
+- New `createBrowserSdk()` factory provides both `tracker` and `forms` clients
+
+### Added
+
+#### Server-Side Features
+- **New oRPC-based SDK Client**
+  - Type-safe RPC calls with full TypeScript support
+  - Modular API structure with organized namespaces (`content`, `events`, `forms`)
+  - Automatic input validation with Zod schemas
+  - Structured error handling with detailed error types
+
+- **Event Tracking (Server-Side)**
+  - `sdk.events.track()` - Track single events from server-side code
+  - `sdk.events.batch()` - Efficiently batch multiple events
+  - Full TypeScript support for event properties
+
+- **Forms Integration (Server-Side)**
+  - `sdk.forms.get()` - Fetch form definitions with field schemas
+  - `sdk.forms.submit()` - Submit form data with validation
+  - Automatic validation and error handling
+
+- **Analytics Integration**
+  - `sdk.content.getAnalytics()` - Get content with analytics data
+  - Includes view counts, engagement metrics, and image data
+
+#### Browser-Side Features
+- **Unified Browser SDK**
+  - `createBrowserSdk()` - Single entry point for browser features
+  - Access both event tracking and forms from one instance
+  - Consistent configuration across features
+
+- **Enhanced Event Tracker**
+  - `tracker.track()` - Track custom events
+  - `tracker.autoTrackPageViews()` - Auto-track page views with scroll depth, time on page, CTA clicks
+  - `tracker.flush()` - Manually flush pending events
+  - `tracker.destroy()` - Clean up and flush final events
+  - Automatic batching and retry logic
+  - Respects Do Not Track and Global Privacy Control
+
+- **Forms Client**
+  - `forms.embedForm()` - Embed forms with automatic rendering
+  - Pre-styled form components
+  - Built-in validation and error handling
+  - Success messages and redirect support
+  - Automatic event tracking for impressions and submissions
+
+### Changed
+
+- **Type System Improvements**
+  - All Zod schemas exported for runtime validation
+  - TypeScript types extracted from schemas for better IDE support
+  - Comprehensive type exports for content, events, forms, and analytics
+
+- **Error Handling**
+  - Replaced custom error codes with standard JavaScript errors
+  - oRPC client provides typed error responses
+  - Better error messages with detailed context
+
+- **Documentation**
+  - Complete rewrite of README with new API examples
+  - Added comprehensive BREAKING_CHANGES.md document
+  - Added detailed MIGRATION.md guide
+  - Updated all code examples to reflect oRPC API
+
+### Removed
+
+- **Deprecated Class-Based API**
+  - Removed `ContentaGenSDK` class
+  - Removed `locale` configuration option
+  - Removed custom error codes (SDK_E001, SDK_E002, etc.)
+
+- **Legacy Methods**
+  - All flat method names replaced with namespaced procedures
+  - See BREAKING_CHANGES.md for complete mapping
+
+### Migration Guide
+
+Users of v1.x should follow the [MIGRATION.md](./MIGRATION.md) guide for step-by-step upgrade instructions. Key steps:
+
+1. Update package name: `npm install @contentta/sdk`
+2. Replace SDK initialization: `createSdk()` instead of `new ContentaGenSDK()`
+3. Update method calls to use namespaced API
+4. Update browser imports to use `@contentta/sdk/browser`
+5. Remove `locale` from configuration
+6. Convert numeric parameters to strings where needed
+
+### Notes
+
+- v1.x will receive critical bug fixes only
+- All new features and improvements will be in v2.x
+- The oRPC architecture provides better type safety and developer experience
+
 ## [0.16.1] - 2025-11-12
 
 ### Fixed
