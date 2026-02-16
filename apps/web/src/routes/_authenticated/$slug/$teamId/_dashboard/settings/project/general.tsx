@@ -104,7 +104,7 @@ function ProjectGeneralErrorFallback({
             <p className="text-sm text-muted-foreground mb-4">
                Não foi possível carregar as configurações do projeto
             </p>
-            <Button variant="outline" onClick={resetErrorBoundary}>
+            <Button onClick={resetErrorBoundary} variant="outline">
                Tentar novamente
             </Button>
          </div>
@@ -224,9 +224,7 @@ function ProjectGeneralContent() {
 
    const handleRemoveDomain = (domainToRemove: string) => {
       const currentDomains = teamData.allowedDomains ?? [];
-      const updatedDomains = currentDomains.filter(
-         (d) => d !== domainToRemove,
-      );
+      const updatedDomains = currentDomains.filter((d) => d !== domainToRemove);
       updateDomainsMutation.mutate({
          teamId,
          allowedDomains: updatedDomains,
@@ -311,7 +309,8 @@ function ProjectGeneralContent() {
                      <ItemContent className="min-w-0">
                         <ItemTitle>Chave de API Pública</ItemTitle>
                         <ItemDescription className="truncate font-mono">
-                           {publicKeyData.publicApiKey ?? "Nenhuma chave gerada"}
+                           {publicKeyData.publicApiKey ??
+                              "Nenhuma chave gerada"}
                         </ItemDescription>
                      </ItemContent>
                      <ItemActions className="flex gap-1">
@@ -368,17 +367,17 @@ function ProjectGeneralContent() {
                   <div className="flex flex-wrap gap-2">
                      {allowedDomains.map((domain) => (
                         <Badge
+                           className="gap-1 pr-1"
                            key={domain}
                            variant="secondary"
-                           className="gap-1 pr-1"
                         >
                            <Globe className="size-3" />
                            {domain}
                            <button
-                              type="button"
                               className="ml-1 rounded-sm hover:bg-muted-foreground/20 p-0.5"
-                              onClick={() => handleRemoveDomain(domain)}
                               disabled={updateDomainsMutation.isPending}
+                              onClick={() => handleRemoveDomain(domain)}
+                              type="button"
                            >
                               <X className="size-3" />
                            </button>
@@ -393,18 +392,18 @@ function ProjectGeneralContent() {
 
                <div className="flex gap-2">
                   <Input
-                     placeholder="exemplo.com ou *.exemplo.com"
-                     value={newDomain}
+                     disabled={updateDomainsMutation.isPending}
                      onChange={(e) => setNewDomain(e.target.value)}
                      onKeyDown={handleDomainKeyDown}
-                     disabled={updateDomainsMutation.isPending}
+                     placeholder="exemplo.com ou *.exemplo.com"
+                     value={newDomain}
                   />
                   <Button
-                     onClick={handleAddDomain}
-                     size="sm"
                      disabled={
                         !newDomain.trim() || updateDomainsMutation.isPending
                      }
+                     onClick={handleAddDomain}
+                     size="sm"
                   >
                      {updateDomainsMutation.isPending ? (
                         <Loader2 className="size-4 animate-spin" />
@@ -430,9 +429,7 @@ function ProjectGeneralContent() {
                      </ItemMedia>
                      <ItemContent>
                         <ItemTitle>Criado em</ItemTitle>
-                        <ItemDescription>
-                           {formattedCreatedAt}
-                        </ItemDescription>
+                        <ItemDescription>{formattedCreatedAt}</ItemDescription>
                      </ItemContent>
                   </Item>
                </ItemGroup>

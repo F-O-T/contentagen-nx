@@ -243,7 +243,7 @@ export function useSearch(
          }
 
          if (options?.hiddenTypes && options.hiddenTypes.size > 0) {
-            return groups.filter((g) => !options.hiddenTypes!.has(g.type));
+            return groups.filter((g) => !options.hiddenTypes?.has(g.type));
          }
 
          return groups;

@@ -1,10 +1,10 @@
 import "@/polyfill";
-import { BatchHandlerPlugin } from "@orpc/server/plugins";
-import { RPCHandler, CompressionPlugin } from "@orpc/server/fetch";
-import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { SmartCoercionPlugin } from "@orpc/json-schema";
-import { createFileRoute } from "@tanstack/react-router";
 import { onError } from "@orpc/server";
+import { CompressionPlugin, RPCHandler } from "@orpc/server/fetch";
+import { BatchHandlerPlugin } from "@orpc/server/plugins";
+import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
+import { createFileRoute } from "@tanstack/react-router";
 
 import router from "@/integrations/orpc/router";
 

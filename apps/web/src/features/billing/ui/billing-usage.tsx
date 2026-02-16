@@ -1,4 +1,3 @@
-import type { ColumnDef } from "@tanstack/react-table";
 import {
    Card,
    CardContent,
@@ -16,6 +15,7 @@ import {
 } from "@packages/ui/components/select";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import { UsageChart } from "@/features/billing/ui/usage-chart";
 import { orpc } from "@/integrations/orpc/client";
@@ -171,8 +171,7 @@ export function BillingUsage() {
                      <div
                         className="size-2.5 rounded-full shrink-0"
                         style={{
-                           backgroundColor:
-                              CATEGORY_COLORS[cat] ?? "#94a3b8",
+                           backgroundColor: CATEGORY_COLORS[cat] ?? "#94a3b8",
                         }}
                      />
                      <span className="text-sm font-medium">

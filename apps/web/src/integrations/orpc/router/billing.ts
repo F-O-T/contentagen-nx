@@ -59,7 +59,7 @@ export const getInvoices = protectedProcedure
             invoicePdf: invoice.invoice_pdf ?? null,
             hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
          }));
-      } catch (error) {
+      } catch (_error) {
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "Failed to fetch invoices",
          });
@@ -104,7 +104,7 @@ export const getUpcomingInvoice = protectedProcedure.handler(
                quantity: line.quantity,
             })),
          };
-      } catch (error) {
+      } catch (_error) {
          // If no upcoming invoice exists (e.g., canceled subscription), return null
          return null;
       }
@@ -143,7 +143,7 @@ export const getCurrentUsage = protectedProcedure.handler(
          );
 
          return { monthToDate, projected, byCategory };
-      } catch (error) {
+      } catch (_error) {
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "Failed to fetch current usage",
          });
@@ -207,7 +207,7 @@ export const getCategoryUsage = protectedProcedure
                freeTierLimit: catalog?.freeTierLimit ?? 0,
             };
          });
-      } catch (error) {
+      } catch (_error) {
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "Failed to fetch category usage",
          });
@@ -278,7 +278,7 @@ export const getDailyUsage = protectedProcedure
                countByCategory: Object.fromEntries(data.countByCategory),
             }))
             .sort((a, b) => a.date.localeCompare(b.date));
-      } catch (error) {
+      } catch (_error) {
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "Failed to fetch daily usage",
          });

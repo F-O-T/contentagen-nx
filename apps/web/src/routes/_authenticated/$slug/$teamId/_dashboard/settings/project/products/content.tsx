@@ -86,9 +86,7 @@ function DefaultLayoutSection({
          </RadioGroup>
          <Button
             disabled={!hasChanged || saveMutation.isPending}
-            onClick={() =>
-               saveMutation.mutate({ defaultLayout: layout })
-            }
+            onClick={() => saveMutation.mutate({ defaultLayout: layout })}
             size="sm"
          >
             {saveMutation.isPending && (
@@ -178,11 +176,7 @@ function DefaultShareStatusSection({
 // Auto Slug Section
 // ============================================
 
-function AutoSlugSection({
-   current,
-}: {
-   current: boolean | undefined;
-}) {
+function AutoSlugSection({ current }: { current: boolean | undefined }) {
    const queryClient = useQueryClient();
 
    const saveMutation = useMutation(
@@ -306,7 +300,9 @@ function ContentProductContent() {
 
          <Separator />
 
-         <AutoSlugSection current={settings?.contentDefaults?.autoGenerateSlug} />
+         <AutoSlugSection
+            current={settings?.contentDefaults?.autoGenerateSlug}
+         />
       </div>
    );
 }

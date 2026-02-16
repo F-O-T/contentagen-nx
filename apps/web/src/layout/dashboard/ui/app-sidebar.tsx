@@ -1,3 +1,4 @@
+import { Separator } from "@packages/ui/components/separator";
 import {
    Sidebar,
    SidebarContent,
@@ -19,7 +20,6 @@ import { EarlyAccessSidebarBanner } from "./early-access-sidebar-banner";
 import { NavUser } from "./nav-user";
 import { SidebarNav } from "./sidebar-nav";
 import { SidebarScopeSwitcher } from "./sidebar-scope-switcher";
-import { Separator } from "@packages/ui/components/separator";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
    return (

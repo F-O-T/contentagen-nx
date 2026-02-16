@@ -38,7 +38,9 @@ import { toast } from "sonner";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { authClient } from "@/integrations/better-auth/auth-client";
 
-export const Route = createFileRoute("/_authenticated/$slug/$teamId/_dashboard/plans")({
+export const Route = createFileRoute(
+   "/_authenticated/$slug/$teamId/_dashboard/plans",
+)({
    component: PlansPage,
 });
 

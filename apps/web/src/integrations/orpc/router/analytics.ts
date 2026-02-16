@@ -1,9 +1,9 @@
+import { ORPCError } from "@orpc/server";
 import { executeFunnelsQuery } from "@packages/analytics/funnels";
 import { executeRetentionQuery } from "@packages/analytics/retention";
 import { executeTrendsQuery } from "@packages/analytics/trends";
 import { insightConfigSchema } from "@packages/analytics/types";
 import { getDefaultDashboard as fetchDefaultDashboard } from "@packages/database/repositories/dashboard-repository";
-import { ORPCError } from "@orpc/server";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 

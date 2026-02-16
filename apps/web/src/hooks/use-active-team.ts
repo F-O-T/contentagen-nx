@@ -11,8 +11,7 @@ export function useActiveTeam() {
    );
 
    const activeTeamId = session?.session.activeTeamId ?? null;
-   const activeTeam =
-      teams.find((team) => team.id === activeTeamId) ?? null;
+   const activeTeam = teams.find((team) => team.id === activeTeamId) ?? null;
 
    return { activeTeam, activeTeamId, teams };
 }

@@ -59,9 +59,9 @@ export class GhostTextNode extends TextNode {
    }
 
    updateDOM(
-      prevNode: GhostTextNode,
+      _prevNode: GhostTextNode,
       dom: HTMLElement,
-      config: EditorConfig,
+      _config: EditorConfig,
    ): boolean {
       // Re-apply critical styles that may be lost during reconciliation
       dom.style.opacity = "0.5";

@@ -131,12 +131,6 @@ export function createAuth(config: SimplifiedAuthConfig) {
                      required: false,
                      type: "boolean",
                   },
-                  publicApiKey: {
-                     defaultValue: null,
-                     input: false,
-                     required: false,
-                     type: "string",
-                  },
                },
             },
             team: {
@@ -163,6 +157,7 @@ export function createAuth(config: SimplifiedAuthConfig) {
                      },
                   },
                   publicApiKey: {
+                     unique: true,
                      defaultValue: null,
                      input: false,
                      required: false,

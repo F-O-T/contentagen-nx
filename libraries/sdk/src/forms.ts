@@ -1,6 +1,6 @@
-import { createSdk } from "./index.ts";
 import type { ContenttaEventTracker } from "./events/client.ts";
 import type { ContenttaSdkConfig } from "./events/types.ts";
+import { createSdk } from "./index.ts";
 
 // ── Type Definitions ────────────────────────────────────────────
 
@@ -422,34 +422,45 @@ export class ContenttaFormsClient {
 			// Use oRPC client to submit form
 			this.sdk.forms
 				.submit(submissionData)
-				.then((result: { success: boolean; submissionId: string; settings: { successMessage?: string; redirectUrl?: string } }) => {
-					this.tracker.track("form.submitted", {
-						formId,
-						pageUrl: typeof window !== "undefined" ? window.location.href : "",
-						referrer: typeof document !== "undefined" ? document.referrer : "",
-					});
+				.then(
+					(result: {
+						success: boolean;
+						submissionId: string;
+						settings: { successMessage?: string; redirectUrl?: string };
+					}) => {
+						this.tracker.track("form.submitted", {
+							formId,
+							pageUrl:
+								typeof window !== "undefined" ? window.location.href : "",
+							referrer:
+								typeof document !== "undefined" ? document.referrer : "",
+						});
 
-					const successMessage =
-						result.settings?.successMessage ??
-						"Thank you! Your submission has been received.";
-					const redirectUrl = result.settings?.redirectUrl;
+						const successMessage =
+							result.settings?.successMessage ??
+							"Thank you! Your submission has been received.";
+						const redirectUrl = result.settings?.redirectUrl;
 
-					if (redirectUrl) {
-						if (isSafeRedirectUrl(redirectUrl)) {
-							window.location.href = redirectUrl;
+						if (redirectUrl) {
+							if (isSafeRedirectUrl(redirectUrl)) {
+								window.location.href = redirectUrl;
+							} else {
+								console.error(
+									`[ContenttaForms] Unsafe redirect URL: ${redirectUrl}`,
+								);
+							}
 						} else {
-							console.error(
-								`[ContenttaForms] Unsafe redirect URL: ${redirectUrl}`,
-							);
+							this.showSuccess(container, successMessage);
 						}
-					} else {
-						this.showSuccess(container, successMessage);
-					}
-				})
+					},
+				)
 				.catch((error: any) => {
 					// Handle validation errors (ORPCError with UNPROCESSABLE_ENTITY)
 					if (error?.cause?.errors && typeof error.cause.errors === "object") {
-						this.showErrors(formElement, error.cause.errors as Record<string, string>);
+						this.showErrors(
+							formElement,
+							error.cause.errors as Record<string, string>,
+						);
 					} else {
 						const errorMessage =
 							error instanceof Error ? error.message : "Unknown error";

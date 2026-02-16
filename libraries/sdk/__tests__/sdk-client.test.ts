@@ -79,7 +79,9 @@ describe("Contentta SDK - createSdk", () => {
 		});
 
 		expect(fetchMock).toHaveBeenCalledTimes(1);
-		const calls = fetchMock.mock.calls as unknown as Array<[Request | string, RequestInit?]>;
+		const calls = fetchMock.mock.calls as unknown as Array<
+			[Request | string, RequestInit?]
+		>;
 		const firstArg = calls[0]?.[0];
 
 		// oRPC passes a Request object, extract the URL from it
@@ -158,7 +160,9 @@ describe("Contentta SDK - Content", () => {
 		});
 
 		expect(fetchMock).toHaveBeenCalledTimes(1);
-		const calls = fetchMock.mock.calls as unknown as Array<[Request | string, RequestInit?]>;
+		const calls = fetchMock.mock.calls as unknown as Array<
+			[Request | string, RequestInit?]
+		>;
 		const firstArg = calls[0]?.[0];
 
 		// oRPC passes a Request object with headers
@@ -300,9 +304,7 @@ describe("Contentta SDK - Forms", () => {
 			},
 		};
 
-		const fetchMock = mock(() =>
-			Promise.resolve(createJsonResponse(mockForm)),
-		);
+		const fetchMock = mock(() => Promise.resolve(createJsonResponse(mockForm)));
 		globalThis.fetch = fetchMock as unknown as typeof fetch;
 
 		const sdk = createSdk({
@@ -675,9 +677,7 @@ describe("Contentta SDK - Error Handling", () => {
 			host: "https://api.example.com",
 		});
 
-		await expect(
-			sdk.content.list({ agentId: "agent-123" }),
-		).rejects.toThrow();
+		await expect(sdk.content.list({ agentId: "agent-123" })).rejects.toThrow();
 	});
 
 	it("handles forbidden error", async () => {
@@ -700,9 +700,7 @@ describe("Contentta SDK - Error Handling", () => {
 			host: "https://api.example.com",
 		});
 
-		await expect(
-			sdk.content.list({ agentId: "agent-123" }),
-		).rejects.toThrow();
+		await expect(sdk.content.list({ agentId: "agent-123" })).rejects.toThrow();
 	});
 
 	it("handles rate limit error", async () => {
@@ -753,9 +751,7 @@ describe("Contentta SDK - Error Handling", () => {
 			host: "https://api.example.com",
 		});
 
-		await expect(
-			sdk.content.list({ agentId: "agent-123" }),
-		).rejects.toThrow();
+		await expect(sdk.content.list({ agentId: "agent-123" })).rejects.toThrow();
 	});
 
 	it("includes SDK API key header in requests", async () => {
@@ -772,7 +768,9 @@ describe("Contentta SDK - Error Handling", () => {
 		await sdk.content.list({ agentId: "agent-123" });
 
 		expect(fetchMock).toHaveBeenCalledTimes(1);
-		const calls = fetchMock.mock.calls as unknown as Array<[Request | string, RequestInit?]>;
+		const calls = fetchMock.mock.calls as unknown as Array<
+			[Request | string, RequestInit?]
+		>;
 		const firstArg = calls[0]?.[0];
 
 		// oRPC passes a Request object with headers

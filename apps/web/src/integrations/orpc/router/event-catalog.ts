@@ -1,6 +1,6 @@
 import {
-	listEventCatalog,
-	updateEventCatalogEntry,
+   listEventCatalog,
+   updateEventCatalogEntry,
 } from "@packages/database/repositories/event-catalog-repository";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
@@ -10,10 +10,10 @@ import { protectedProcedure } from "../server";
 // =============================================================================
 
 const updateEventCatalogSchema = z.object({
-	id: z.string().uuid(),
-	description: z.string().optional(),
-	displayName: z.string().optional(),
-	isActive: z.boolean().optional(),
+   id: z.string().uuid(),
+   description: z.string().optional(),
+   displayName: z.string().optional(),
+   isActive: z.boolean().optional(),
 });
 
 // =============================================================================
@@ -21,18 +21,18 @@ const updateEventCatalogSchema = z.object({
 // =============================================================================
 
 export const list = protectedProcedure.handler(async ({ context }) => {
-	const { db } = context;
+   const { db } = context;
 
-	return await listEventCatalog(db);
+   return await listEventCatalog(db);
 });
 
 export const update = protectedProcedure
-	.input(updateEventCatalogSchema)
-	.handler(async ({ context, input }) => {
-		const { db } = context;
+   .input(updateEventCatalogSchema)
+   .handler(async ({ context, input }) => {
+      const { db } = context;
 
-		const { id: _id, ...updateData } = input;
-		const updated = await updateEventCatalogEntry(db, input.id, updateData);
+      const { id: _id, ...updateData } = input;
+      const updated = await updateEventCatalogEntry(db, input.id, updateData);
 
-		return updated;
-	});
+      return updated;
+   });

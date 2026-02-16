@@ -29,15 +29,11 @@ describe("Writer Team Scoping", () => {
 	beforeEach(async () => {
 		db = createDb({ databaseUrl: process.env.DATABASE_URL! });
 
-		// Cleanup: Delete existing test data
-		await db.delete(user).where(eq(user.email, "test-writer-scoping@example.com"));
-		await db.delete(organization).where(eq(organization.slug, "test-org-writer-scoping"));
-
 		// Create test user
 		const [testUser] = await db
 			.insert(user)
 			.values({
-				email: "test-writer-scoping@example.com",
+				email: `test-writer-scoping-${crypto.randomUUID()}@example.com`,
 				name: "Test User",
 			})
 			.returning();
@@ -48,7 +44,7 @@ describe("Writer Team Scoping", () => {
 			.insert(organization)
 			.values({
 				name: "Test Org",
-				slug: "test-org-writer-scoping",
+				slug: `test-org-writer-scoping-${crypto.randomUUID()}`,
 				createdAt: new Date(),
 				onboardingCompleted: true,
 			})
@@ -62,6 +58,7 @@ describe("Writer Team Scoping", () => {
 				userId: testUserId,
 				organizationId: testOrgId,
 				role: "owner",
+				createdAt: new Date(),
 			})
 			.returning();
 		memberId = createdMember.id;
@@ -72,6 +69,7 @@ describe("Writer Team Scoping", () => {
 			.values({
 				name: "Team A",
 				organizationId: testOrgId,
+				createdAt: new Date(),
 			})
 			.returning();
 		teamAId = createdTeamA.id;
@@ -87,6 +85,7 @@ describe("Writer Team Scoping", () => {
 			.values({
 				name: "Team B",
 				organizationId: testOrgId,
+				createdAt: new Date(),
 			})
 			.returning();
 		teamBId = createdTeamB.id;

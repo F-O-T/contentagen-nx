@@ -30,4 +30,4 @@ jobs:
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         with:
-          model: openrouter/qwen/qwen3-coder-next
+          model: openrouter/minimax/minimax-m2.5

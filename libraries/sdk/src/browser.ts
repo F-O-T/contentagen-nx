@@ -24,12 +24,11 @@
 
 // ── Re-exports from Forms ───────────────────────────────────────
 
+export type { FormDefinition, FormField } from "./forms.ts";
 export {
 	ContenttaFormsClient,
 	createFormsClient,
 } from "./forms.ts";
-
-export type { FormField, FormDefinition } from "./forms.ts";
 
 // ── Re-exports from Event Tracker ──────────────────────────────
 
@@ -47,9 +46,9 @@ export type {
 
 // ── Browser SDK Factory ─────────────────────────────────────────
 
-import { createFormsClient } from "./forms.ts";
 import { createEventTracker } from "./events/client.ts";
 import type { ContenttaSdkConfig } from "./events/types.ts";
+import { createFormsClient } from "./forms.ts";
 
 export interface BrowserSdk {
 	tracker: ReturnType<typeof createEventTracker>;

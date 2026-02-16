@@ -1,4 +1,6 @@
 // apps/web/src/layout/dashboard/sidebar-nav.tsx
+
+import { Badge } from "@packages/ui/components/badge";
 import {
    SidebarGroup,
    SidebarGroupContent,
@@ -8,7 +10,6 @@ import {
    SidebarMenuItem,
    useSidebarManager,
 } from "@packages/ui/components/sidebar";
-import { Badge } from "@packages/ui/components/badge";
 import { Link, useLocation, useParams } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { useCallback } from "react";
@@ -67,7 +68,10 @@ function NavItem({
                   <Icon />
                   <span>{item.label}</span>
                   {item.earlyAccessFlag && (
-                     <Badge variant="secondary" className="ml-1.5 px-1.5 py-0 text-[10px] leading-4 group-data-[collapsible=icon]:hidden">
+                     <Badge
+                        className="ml-1.5 px-1.5 py-0 text-[10px] leading-4 group-data-[collapsible=icon]:hidden"
+                        variant="secondary"
+                     >
                         Beta
                      </Badge>
                   )}
@@ -83,7 +87,10 @@ function NavItem({
                   <Icon />
                   <span>{item.label}</span>
                   {item.earlyAccessFlag && (
-                     <Badge variant="secondary" className="ml-1.5 px-1.5 py-0 text-[10px] leading-4 group-data-[collapsible=icon]:hidden">
+                     <Badge
+                        className="ml-1.5 px-1.5 py-0 text-[10px] leading-4 group-data-[collapsible=icon]:hidden"
+                        variant="secondary"
+                     >
                         Beta
                      </Badge>
                   )}

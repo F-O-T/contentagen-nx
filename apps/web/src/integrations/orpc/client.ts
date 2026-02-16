@@ -42,7 +42,7 @@ const getORPCClient = createIsomorphicFn()
    )
    .client((): RouterClient<typeof router> => {
       const link = new RPCLink({
-         url: window.location.origin + "/api/rpc", // Use relative URL - SSR safe, no window reference needed
+         url: `${window.location.origin}/api/rpc`, // Use relative URL - SSR safe, no window reference needed
          plugins: [
             new BatchLinkPlugin({
                groups: [

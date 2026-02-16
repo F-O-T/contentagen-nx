@@ -3,27 +3,27 @@ import { createFileRoute, Navigate, useParams } from "@tanstack/react-router";
 import { DataManagementMobileNav } from "@/layout/dashboard/ui/data-management-mobile-nav";
 
 export const Route = createFileRoute(
-	"/_authenticated/$slug/$teamId/_dashboard/analytics/data-management/",
+   "/_authenticated/$slug/$teamId/_dashboard/analytics/data-management/",
 )({
-	component: DataManagementIndexRoute,
+   component: DataManagementIndexRoute,
 });
 
 function DataManagementIndexRoute() {
-	const isMobile = useIsMobile();
-	const { slug, teamId } = useParams({ strict: false }) as {
-		slug: string;
-		teamId: string;
-	}
+   const isMobile = useIsMobile();
+   const { slug, teamId } = useParams({ strict: false }) as {
+      slug: string;
+      teamId: string;
+   };
 
-	if (!isMobile) {
-		return (
-			<Navigate
-				params={{ slug, teamId }}
-				replace
-				to="/$slug/$teamId/analytics/data-management/event-definitions"
-			/>
-		)
-	}
+   if (!isMobile) {
+      return (
+         <Navigate
+            params={{ slug, teamId }}
+            replace
+            to="/$slug/$teamId/analytics/data-management/event-definitions"
+         />
+      );
+   }
 
-	return <DataManagementMobileNav />;
+   return <DataManagementMobileNav />;
 }

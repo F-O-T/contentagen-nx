@@ -2,15 +2,15 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { DataManagementLayout } from "@/layout/dashboard/ui/data-management-layout";
 
 export const Route = createFileRoute(
-	"/_authenticated/$slug/$teamId/_dashboard/analytics/data-management",
+   "/_authenticated/$slug/$teamId/_dashboard/analytics/data-management",
 )({
-	component: DataManagementLayoutRoute,
+   component: DataManagementLayoutRoute,
 });
 
 function DataManagementLayoutRoute() {
-	return (
-		<DataManagementLayout>
-			<Outlet />
-		</DataManagementLayout>
-	)
+   return (
+      <DataManagementLayout>
+         <Outlet />
+      </DataManagementLayout>
+   );
 }

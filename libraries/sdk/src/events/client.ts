@@ -145,7 +145,9 @@ export class ContenttaEventTracker {
 				})),
 			});
 
-			this.log(`Batch sent: ${result.eventsProcessed} processed, ${result.eventsRejected} rejected`);
+			this.log(
+				`Batch sent: ${result.eventsProcessed} processed, ${result.eventsRejected} rejected`,
+			);
 
 			// C1: Reset failure counter on success
 			this.consecutiveFailures = 0;

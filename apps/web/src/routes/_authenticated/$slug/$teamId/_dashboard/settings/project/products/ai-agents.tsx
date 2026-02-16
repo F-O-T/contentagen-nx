@@ -139,17 +139,21 @@ function DefaultLanguageSection({
             </div>
          </div>
          <Select
-            value={language}
             onValueChange={(value) =>
                setLanguage(value as "pt-BR" | "en-US" | "es")
             }
+            value={language}
          >
             <SelectTrigger>
                <SelectValue placeholder="Selecione o idioma" />
             </SelectTrigger>
             <SelectContent>
-               <SelectItem value="pt-BR">{getLanguageLabel("pt-BR")}</SelectItem>
-               <SelectItem value="en-US">{getLanguageLabel("en-US")}</SelectItem>
+               <SelectItem value="pt-BR">
+                  {getLanguageLabel("pt-BR")}
+               </SelectItem>
+               <SelectItem value="en-US">
+                  {getLanguageLabel("en-US")}
+               </SelectItem>
                <SelectItem value="es">{getLanguageLabel("es")}</SelectItem>
             </SelectContent>
          </Select>
@@ -232,7 +236,6 @@ function ModelSelectionSection({
             <div className="space-y-2">
                <Label>Modelo de criação de conteúdo</Label>
                <Select
-                  value={contentModel}
                   onValueChange={(value) =>
                      setContentModel(
                         value as
@@ -240,16 +243,23 @@ function ModelSelectionSection({
                            | "openrouter/minimax/minimax-m2.1",
                      )
                   }
+                  value={contentModel}
                >
                   <SelectTrigger>
                      <SelectValue placeholder="Selecione o modelo" />
                   </SelectTrigger>
                   <SelectContent>
                      <SelectItem value="openrouter/x-ai/grok-4.1-fast">
-                        {AVAILABLE_MODELS["openrouter/x-ai/grok-4.1-fast"].label}
+                        {
+                           AVAILABLE_MODELS["openrouter/x-ai/grok-4.1-fast"]
+                              .label
+                        }
                      </SelectItem>
                      <SelectItem value="openrouter/minimax/minimax-m2.1">
-                        {AVAILABLE_MODELS["openrouter/minimax/minimax-m2.1"].label}
+                        {
+                           AVAILABLE_MODELS["openrouter/minimax/minimax-m2.1"]
+                              .label
+                        }
                      </SelectItem>
                   </SelectContent>
                </Select>
@@ -257,7 +267,6 @@ function ModelSelectionSection({
             <div className="space-y-2">
                <Label>Modelo de edição</Label>
                <Select
-                  value={editModel}
                   onValueChange={(value) =>
                      setEditModel(
                         value as
@@ -265,6 +274,7 @@ function ModelSelectionSection({
                            | "openrouter/x-ai/grok-4.1-fast",
                      )
                   }
+                  value={editModel}
                >
                   <SelectTrigger>
                      <SelectValue placeholder="Selecione o modelo" />
@@ -278,7 +288,10 @@ function ModelSelectionSection({
                         }
                      </SelectItem>
                      <SelectItem value="openrouter/x-ai/grok-4.1-fast">
-                        {AVAILABLE_MODELS["openrouter/x-ai/grok-4.1-fast"].label}
+                        {
+                           AVAILABLE_MODELS["openrouter/x-ai/grok-4.1-fast"]
+                              .label
+                        }
                      </SelectItem>
                   </SelectContent>
                </Select>
@@ -403,7 +416,9 @@ function WebSearchConfigSection({
                <Search className="size-5" />
             </div>
             <div className="flex-1">
-               <h2 className="text-lg font-medium">Configuração de busca web</h2>
+               <h2 className="text-lg font-medium">
+                  Configuração de busca web
+               </h2>
                <p className="text-sm text-muted-foreground">
                   Controle como os agentes pesquisam informações na web.
                </p>
@@ -418,10 +433,10 @@ function WebSearchConfigSection({
                   Basic: rápido 2-3s | Advanced: profundo 5-10s
                </p>
                <Select
-                  value={searchDepth}
                   onValueChange={(value) =>
                      setSearchDepth(value as "basic" | "advanced")
                   }
+                  value={searchDepth}
                >
                   <SelectTrigger>
                      <SelectValue placeholder="Selecione a profundidade" />
@@ -450,14 +465,14 @@ function WebSearchConfigSection({
                   Mais fontes = melhor síntese (1-20)
                </p>
                <Input
-                  type="number"
-                  min={1}
                   max={20}
-                  value={searchMaxResults}
+                  min={1}
                   onChange={(e) => {
-                     const val = Number.parseInt(e.target.value);
+                     const val = Number.parseInt(e.target.value, 10);
                      if (!Number.isNaN(val)) setSearchMaxResults(val);
                   }}
+                  type="number"
+                  value={searchMaxResults}
                />
             </div>
 
@@ -482,12 +497,12 @@ function WebSearchConfigSection({
                   Priorizar resultados recentes
                </p>
                <Select
-                  value={searchTimeRange}
                   onValueChange={(value) =>
                      setSearchTimeRange(
                         value as "day" | "week" | "month" | "year" | "all",
                      )
                   }
+                  value={searchTimeRange}
                >
                   <SelectTrigger>
                      <SelectValue placeholder="Selecione o período" />
@@ -509,7 +524,6 @@ function WebSearchConfigSection({
                   Provedor preferencial com auto-fallback
                </p>
                <Select
-                  value={preferredSearchProvider ?? "none"}
                   onValueChange={(value) =>
                      setPreferredSearchProvider(
                         value === "none"
@@ -517,6 +531,7 @@ function WebSearchConfigSection({
                            : (value as "tavily" | "exa" | "firecrawl"),
                      )
                   }
+                  value={preferredSearchProvider ?? "none"}
                >
                   <SelectTrigger>
                      <SelectValue placeholder="Selecione o provedor" />
@@ -545,9 +560,16 @@ function WebSearchConfigSection({
                <p className="text-sm text-muted-foreground">
                   Apenas .gov/.edu/.org + domínios verificados
                </p>
-               <Collapsible open={isDomainsOpen} onOpenChange={setIsDomainsOpen}>
+               <Collapsible
+                  onOpenChange={setIsDomainsOpen}
+                  open={isDomainsOpen}
+               >
                   <CollapsibleTrigger asChild>
-                     <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                     <Button
+                        className="flex items-center gap-1"
+                        size="sm"
+                        variant="ghost"
+                     >
                         <ChevronDown
                            className={`size-4 transition-transform ${isDomainsOpen ? "rotate-180" : ""}`}
                         />
@@ -598,10 +620,10 @@ function WebSearchConfigSection({
                   Nível mínimo de credibilidade para fatos
                </p>
                <Select
-                  value={minCredibility}
                   onValueChange={(value) =>
                      setMinCredibility(value as "high" | "medium" | "low")
                   }
+                  value={minCredibility}
                >
                   <SelectTrigger>
                      <SelectValue placeholder="Selecione o nível" />
@@ -711,14 +733,14 @@ function RagConfigSection({
                         Número de documentos recuperados (1-50)
                      </p>
                      <Input
-                        type="number"
-                        min={1}
                         max={50}
-                        value={ragMaxResults}
+                        min={1}
                         onChange={(e) => {
-                           const val = Number.parseInt(e.target.value);
+                           const val = Number.parseInt(e.target.value, 10);
                            if (!Number.isNaN(val)) setRagMaxResults(val);
                         }}
+                        type="number"
+                        value={ragMaxResults}
                      />
                   </div>
 
@@ -728,15 +750,15 @@ function RagConfigSection({
                         Similaridade mínima para incluir documento (0.0-1.0)
                      </p>
                      <Input
-                        type="number"
-                        min={0}
                         max={1}
-                        step={0.1}
-                        value={ragMinScore}
+                        min={0}
                         onChange={(e) => {
                            const val = Number.parseFloat(e.target.value);
                            if (!Number.isNaN(val)) setRagMinScore(val);
                         }}
+                        step={0.1}
+                        type="number"
+                        value={ragMinScore}
                      />
                   </div>
                </>
@@ -824,14 +846,14 @@ function LimitsSection({
                   Limite de tokens por interação de chat (100-10000)
                </p>
                <Input
-                  type="number"
-                  min={100}
                   max={10000}
-                  value={maxChatTokens}
+                  min={100}
                   onChange={(e) => {
-                     const val = Number.parseInt(e.target.value);
+                     const val = Number.parseInt(e.target.value, 10);
                      if (!Number.isNaN(val)) setMaxChatTokens(val);
                   }}
+                  type="number"
+                  value={maxChatTokens}
                />
             </div>
 
@@ -841,14 +863,14 @@ function LimitsSection({
                   Passos máximos de raciocínio do agente (1-20)
                </p>
                <Input
-                  type="number"
-                  min={1}
                   max={20}
-                  value={maxReasoningSteps}
+                  min={1}
                   onChange={(e) => {
-                     const val = Number.parseInt(e.target.value);
+                     const val = Number.parseInt(e.target.value, 10);
                      if (!Number.isNaN(val)) setMaxReasoningSteps(val);
                   }}
+                  type="number"
+                  value={maxReasoningSteps}
                />
             </div>
          </div>
@@ -950,19 +972,19 @@ function AiAgentsContent() {
          <Separator />
 
          <WebSearchConfigSection
-            currentSearchDepth={settings?.aiDefaults?.searchDepth}
-            currentSearchMaxResults={settings?.aiDefaults?.searchMaxResults}
             currentIncludeSearchAnswer={
                settings?.aiDefaults?.includeSearchAnswer
             }
-            currentSearchTimeRange={settings?.aiDefaults?.searchTimeRange}
+            currentMinCredibility={settings?.aiDefaults?.minCredibility}
             currentPreferredSearchProvider={
                settings?.aiDefaults?.preferredSearchProvider
             }
             currentRequireAuthoritativeSources={
                settings?.aiDefaults?.requireAuthoritativeSources
             }
-            currentMinCredibility={settings?.aiDefaults?.minCredibility}
+            currentSearchDepth={settings?.aiDefaults?.searchDepth}
+            currentSearchMaxResults={settings?.aiDefaults?.searchMaxResults}
+            currentSearchTimeRange={settings?.aiDefaults?.searchTimeRange}
          />
 
          <Separator />

@@ -14,7 +14,7 @@ import type {
 type CheckProgressCallback = (errors: SpellingError[], done: boolean) => void;
 
 interface PendingRequest {
-   resolve: (value: void | string[] | CompletionSpellingResult) => void;
+   resolve: (value: undefined | string[] | CompletionSpellingResult) => void;
    reject: (error: Error) => void;
    progressCallback?: CheckProgressCallback;
 }

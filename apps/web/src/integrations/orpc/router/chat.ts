@@ -47,7 +47,14 @@ export const getChatHistory = protectedProcedure
 
          // Assistant message with potential tool calls
          const contentParts: Array<
-            { type: "text"; text: string } | { type: "tool-call"; toolCallId: string; toolName: string; args: Record<string, unknown>; result?: unknown }
+            | { type: "text"; text: string }
+            | {
+                 type: "tool-call";
+                 toolCallId: string;
+                 toolName: string;
+                 args: Record<string, unknown>;
+                 result?: unknown;
+              }
          > = [];
 
          // Add text content if present

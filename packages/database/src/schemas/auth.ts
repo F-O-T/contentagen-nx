@@ -10,7 +10,6 @@ import {
    uniqueIndex,
    uuid,
 } from "drizzle-orm/pg-core";
-import { organizationAddons } from "./addons";
 
 export const user = pgTable("user", {
    id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
@@ -107,7 +106,6 @@ export const organization = pgTable(
       context: text("context").default("personal"),
       description: text("description").default(""),
       onboardingCompleted: boolean("onboarding_completed").default(false),
-      publicApiKey: text("public_api_key"),
    },
    (table) => [uniqueIndex("organization_slug_uidx").on(table.slug)],
 );
@@ -126,7 +124,7 @@ export const team = pgTable(
       ),
       description: text("description").default(""),
       allowedDomains: text("allowed_domains").array(),
-      publicApiKey: text("public_api_key"),
+      publicApiKey: text("public_api_key").unique(),
       onboardingCompleted: boolean("onboarding_completed").default(false),
       onboardingProducts: jsonb("onboarding_products"),
       onboardingTasks: jsonb("onboarding_tasks"),
@@ -384,7 +382,6 @@ export const organizationRelations = relations(organization, ({ many }) => ({
    teams: many(team),
    members: many(member),
    invitations: many(invitation),
-   addons: many(organizationAddons),
 }));
 
 export const teamRelations = relations(team, ({ one, many }) => ({

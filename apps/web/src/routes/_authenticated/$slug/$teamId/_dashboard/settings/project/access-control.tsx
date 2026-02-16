@@ -1,58 +1,58 @@
 import { ADDON_IDS } from "@packages/stripe/constants";
-import { Suspense } from "react";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
-import { Skeleton } from "@packages/ui/components/skeleton";
-import { useHasAddon } from "@/hooks/use-has-addon";
+import { Suspense } from "react";
 import { ProjectAccessControl } from "@/features/access-control/ui/project-access-control";
+import { useHasAddon } from "@/hooks/use-has-addon";
 import { SettingsAddonGatedPage } from "@/layout/dashboard/ui/settings-addon-gated-page";
 
 export const Route = createFileRoute(
-	"/_authenticated/$slug/$teamId/_dashboard/settings/project/access-control",
+   "/_authenticated/$slug/$teamId/_dashboard/settings/project/access-control",
 )({
-	component: ProjectAccessControlPage,
+   component: ProjectAccessControlPage,
 });
 
 function AccessControlPageContent() {
-	const { teamId } = Route.useParams();
-	const hasBoost = useHasAddon(ADDON_IDS.BOOST);
+   const { teamId } = Route.useParams();
+   const hasBoost = useHasAddon(ADDON_IDS.BOOST);
 
-	if (hasBoost) {
-		return <ProjectAccessControl teamId={teamId} />;
-	}
+   if (hasBoost) {
+      return <ProjectAccessControl teamId={teamId} />;
+   }
 
-	return (
-		<SettingsAddonGatedPage
-			addonDescription="O addon Boost desbloqueia controle de acesso granular, permitindo definir quem pode fazer o quê dentro de cada projeto."
-			addonName="Boost"
-			description="Defina permissões granulares por projeto."
-			features={[
-				{
-					title: "Permissões por projeto",
-					description:
-						"Defina quem pode visualizar, editar ou gerenciar cada projeto individualmente",
-				},
-				{
-					title: "Grupos de acesso",
-					description:
-						"Organize membros em grupos com permissões pré-definidas",
-				},
-				{
-					title: "Auditoria de acesso",
-					description:
-						"Acompanhe quem acessou e modificou recursos do projeto",
-				},
-			]}
-			icon={ShieldCheck}
-			title="Controle de Acesso"
-		/>
-	);
+   return (
+      <SettingsAddonGatedPage
+         addonDescription="O addon Boost desbloqueia controle de acesso granular, permitindo definir quem pode fazer o quê dentro de cada projeto."
+         addonName="Boost"
+         description="Defina permissões granulares por projeto."
+         features={[
+            {
+               title: "Permissões por projeto",
+               description:
+                  "Defina quem pode visualizar, editar ou gerenciar cada projeto individualmente",
+            },
+            {
+               title: "Grupos de acesso",
+               description:
+                  "Organize membros em grupos com permissões pré-definidas",
+            },
+            {
+               title: "Auditoria de acesso",
+               description:
+                  "Acompanhe quem acessou e modificou recursos do projeto",
+            },
+         ]}
+         icon={ShieldCheck}
+         title="Controle de Acesso"
+      />
+   );
 }
 
 function ProjectAccessControlPage() {
-	return (
-		<Suspense fallback={<Skeleton className="h-[600px] w-full" />}>
-			<AccessControlPageContent />
-		</Suspense>
-	);
+   return (
+      <Suspense fallback={<Skeleton className="h-[600px] w-full" />}>
+         <AccessControlPageContent />
+      </Suspense>
+   );
 }

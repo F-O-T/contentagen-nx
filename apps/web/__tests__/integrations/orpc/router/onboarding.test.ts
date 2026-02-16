@@ -78,6 +78,9 @@ function createMockDb() {
 				organization: {
 					findFirst: vi.fn(),
 				},
+				team: {
+					findFirst: vi.fn(),
+				},
 			},
 			select: vi.fn().mockReturnValue({ from: mockFrom }),
 			update: vi.fn().mockReturnValue({ set: mockSet }),
@@ -117,6 +120,12 @@ beforeEach(() => {
 
 describe("getOnboardingStatus", () => {
 	it("returns onboarding status with auto-detected tasks", async () => {
+		mocks.db.query.team.findFirst.mockResolvedValueOnce({
+			id: "test-team-id",
+			name: "Test Team",
+			organizationId: TEST_ORG_ID,
+		});
+
 		mocks.db.query.organization.findFirst.mockResolvedValueOnce({
 			id: TEST_ORG_ID,
 			onboardingCompleted: false,
@@ -149,6 +158,7 @@ describe("getOnboardingStatus", () => {
 	});
 
 	it("throws NOT_FOUND when organization does not exist", async () => {
+		mocks.db.query.team.findFirst.mockResolvedValueOnce(null);
 		mocks.db.query.organization.findFirst.mockResolvedValueOnce(null);
 
 		const ctx = createOnboardingContext(mocks.db);
@@ -159,6 +169,11 @@ describe("getOnboardingStatus", () => {
 	});
 
 	it("returns all false tasks when org is fresh", async () => {
+		mocks.db.query.team.findFirst.mockResolvedValueOnce({
+			id: "test-team-id",
+			name: "Test Team",
+			organizationId: TEST_ORG_ID,
+		});
 		mocks.db.query.organization.findFirst.mockResolvedValueOnce({
 			id: TEST_ORG_ID,
 			onboardingCompleted: false,
@@ -183,6 +198,11 @@ describe("getOnboardingStatus", () => {
 	});
 
 	it("merges stored tasks with auto-detected ones", async () => {
+		mocks.db.query.team.findFirst.mockResolvedValueOnce({
+			id: "test-team-id",
+			name: "Test Team",
+			organizationId: TEST_ORG_ID,
+		});
 		mocks.db.query.organization.findFirst.mockResolvedValueOnce({
 			id: TEST_ORG_ID,
 			onboardingCompleted: false,
@@ -386,6 +406,11 @@ describe("skipTask", () => {
 describe("Onboarding Fields Persistence", () => {
 	it("should persist onboardingProducts when selected", async () => {
 		// Mock getOnboardingStatus to verify persistence
+		mocks.db.query.team.findFirst.mockResolvedValueOnce({
+			id: "test-team-id",
+			name: "Test Team",
+			organizationId: TEST_ORG_ID,
+		});
 		mocks.db.query.organization.findFirst.mockResolvedValueOnce({
 			id: TEST_ORG_ID,
 			onboardingCompleted: false,
@@ -415,6 +440,11 @@ describe("Onboarding Fields Persistence", () => {
 
 	it("should persist onboardingTasks when completed", async () => {
 		// Mock getOnboardingStatus to verify persistence
+		mocks.db.query.team.findFirst.mockResolvedValueOnce({
+			id: "test-team-id",
+			name: "Test Team",
+			organizationId: TEST_ORG_ID,
+		});
 		mocks.db.query.organization.findFirst.mockResolvedValueOnce({
 			id: TEST_ORG_ID,
 			onboardingCompleted: false,
@@ -444,6 +474,11 @@ describe("Onboarding Fields Persistence", () => {
 
 	it("should initialize with empty tasks and null products", async () => {
 		// Mock a fresh org
+		mocks.db.query.team.findFirst.mockResolvedValueOnce({
+			id: "test-team-id",
+			name: "Test Team",
+			organizationId: TEST_ORG_ID,
+		});
 		mocks.db.query.organization.findFirst.mockResolvedValueOnce({
 			id: TEST_ORG_ID,
 			onboardingCompleted: false,
