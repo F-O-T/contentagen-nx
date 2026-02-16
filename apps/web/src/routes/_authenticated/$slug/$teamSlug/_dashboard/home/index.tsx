@@ -1,4 +1,9 @@
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
+import {
+   Popover,
+   PopoverContent,
+   PopoverTrigger,
+} from "@packages/ui/components/popover";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -7,6 +12,12 @@ import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { DashboardView } from "@/features/analytics/ui/dashboard-view";
 import { QuickStartChecklist } from "@/features/onboarding/ui/quick-start-checklist";
 import { orpc } from "@/integrations/orpc/client";
+import type {
+   Dashboard,
+   DashboardDateRange,
+   DashboardFilter,
+} from "@packages/database/schemas/dashboards";
+import { Badge } from "@packages/ui/components/badge";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/home/",

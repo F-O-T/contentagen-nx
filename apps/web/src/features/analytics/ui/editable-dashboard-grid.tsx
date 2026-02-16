@@ -18,6 +18,7 @@ import {
 } from "@packages/ui/components/credenza";
 import { DataTable } from "@packages/ui/components/data-table";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
@@ -244,6 +245,10 @@ export function EditableDashboardGrid({
 
    // Sync local state when dashboard changes (e.g., after save/refetch)
    const dashboardTilesJson = JSON.stringify(dashboard.tiles);
+   const dashboardMetadataJson = JSON.stringify({
+      name: dashboard.name,
+      description: dashboard.description,
+   });
    const [lastDashboardTiles, setLastDashboardTiles] =
       useState(dashboardTilesJson);
 
@@ -252,7 +257,12 @@ export function EditableDashboardGrid({
       setLocalTiles(dashboard.tiles);
    }
 
-   const hasChanges = useMemo(
+   if (dashboardMetadataJson !== lastDashboardMetadata) {
+      setLastDashboardMetadata(dashboardMetadataJson);
+      metadataForm.reset();
+   }
+
+   const tilesChanged = useMemo(
       () => JSON.stringify(localTiles) !== dashboardTilesJson,
       [localTiles, dashboardTilesJson],
    );
@@ -345,6 +355,13 @@ export function EditableDashboardGrid({
          externalOnOpenAddInsight(handleOpenAddInsight);
       }
    }, [externalOnOpenAddInsight, handleOpenAddInsight]);
+
+   // Expose handler to parent component
+   useEffect(() => {
+      if (externalOnOpenAddSheet) {
+         externalOnOpenAddSheet(handleOpenAddSheet);
+      }
+   }, [externalOnOpenAddSheet, handleOpenAddSheet]);
 
    const handleSave = useCallback(() => {
       saveMutation.mutate({
