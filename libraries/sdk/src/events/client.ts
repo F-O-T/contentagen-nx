@@ -1,3 +1,4 @@
+import { createSdk } from "../index.ts";
 import type { ContenttaSdkConfig, EventBatch, TrackedEvent } from "./types.ts";
 
 const DEFAULT_BATCH_SIZE = 10;
@@ -44,6 +45,9 @@ export class ContenttaEventTracker {
 	/** Callback for time-spent event on destroy */
 	private sendTimeEvent: (() => void) | null = null;
 
+	/** oRPC SDK client for sending events */
+	private readonly sdk: any;
+
 	constructor(config: ContenttaSdkConfig) {
 		this.apiKey = config.apiKey;
 		this.apiUrl = (config.apiUrl ?? DEFAULT_API_URL).replace(/\/+$/, "");
@@ -61,6 +65,12 @@ export class ContenttaEventTracker {
 				.globalPrivacyControl === true;
 
 		this.enabled = (config.enableAnalytics ?? true) && !dnt && !gpc;
+
+		// Initialize SDK client
+		this.sdk = createSdk({
+			apiKey: this.apiKey,
+			host: this.apiUrl,
+		}) as any;
 
 		if (!this.enabled) {
 			this.log("Analytics disabled — tracking is a no-op");
@@ -122,37 +132,23 @@ export class ContenttaEventTracker {
 		this.flushing = true;
 
 		const events = this.queue.splice(0, this.queue.length);
-		const batch: EventBatch = { events };
 
 		this.log(`Flushing ${events.length} events`);
 
 		try {
-			const response = await fetch(`${this.apiUrl}/sdk/events`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					"X-API-Key": this.apiKey,
-				},
-				body: JSON.stringify(batch),
-				keepalive: true,
+			// Use oRPC batch endpoint for efficient event submission
+			const result = await this.sdk.events.batch({
+				events: events.map((event) => ({
+					eventName: event.eventName,
+					properties: event.properties,
+					timestamp: event.timestamp,
+				})),
 			});
 
-			if (!response.ok) {
-				this.log(`Flush failed: ${response.status} ${response.statusText}`);
-				this.consecutiveFailures++;
+			this.log(`Batch sent: ${result.eventsProcessed} processed, ${result.eventsRejected} rejected`);
 
-				// C1: Only re-queue if under the consecutive failure threshold
-				if (this.consecutiveFailures < MAX_CONSECUTIVE_FAILURES) {
-					this.queue.unshift(...events);
-				} else {
-					this.log(
-						`Dropping ${events.length} events after ${MAX_CONSECUTIVE_FAILURES} consecutive failures`,
-					);
-				}
-			} else {
-				// C1: Reset failure counter on success
-				this.consecutiveFailures = 0;
-			}
+			// C1: Reset failure counter on success
+			this.consecutiveFailures = 0;
 		} catch (error) {
 			this.log("Flush error:", error);
 			this.consecutiveFailures++;
@@ -454,25 +450,36 @@ export class ContenttaEventTracker {
 		}
 
 		const events = this.queue.splice(0, this.queue.length);
-		const batch: EventBatch = { events };
+		const batch = {
+			events: events.map((event) => ({
+				eventName: event.eventName,
+				properties: event.properties,
+				timestamp: event.timestamp,
+			})),
+		};
 		const payload = JSON.stringify(batch);
+
+		// For synchronous flush during unload, use direct fetch since oRPC client is async
+		// The oRPC endpoint expects the same payload structure
+		const url = `${this.apiUrl}/sdk/events.batch`;
 
 		if (
 			typeof navigator !== "undefined" &&
 			typeof navigator.sendBeacon === "function"
 		) {
 			const blob = new Blob([payload], { type: "application/json" });
-			const beaconUrl = `${this.apiUrl}/sdk/events?apiKey=${encodeURIComponent(this.apiKey)}`;
+			// Note: sendBeacon doesn't support custom headers well, so we include apiKey in URL
+			const beaconUrl = `${url}?apiKey=${encodeURIComponent(this.apiKey)}`;
 			navigator.sendBeacon(beaconUrl, blob);
 			this.log(`Beacon sent ${events.length} events`);
 		} else {
 			// Fallback: fire-and-forget fetch with proper headers
 			try {
-				void fetch(`${this.apiUrl}/sdk/events`, {
+				void fetch(url, {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
-						"X-API-Key": this.apiKey,
+						"sdk-api-key": this.apiKey,
 					},
 					body: payload,
 					keepalive: true,
