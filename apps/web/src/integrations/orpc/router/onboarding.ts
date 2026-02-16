@@ -1,7 +1,9 @@
 import { ORPCError } from "@orpc/server";
+import { computeInsightData } from "@packages/analytics/compute-insight";
 import type { DatabaseInstance } from "@packages/database/client";
 import { DEFAULT_INSIGHTS } from "@packages/database/default-insights";
 import { createDefaultInsights } from "@packages/database/repositories/dashboard-repository";
+import { getInsightById } from "@packages/database/repositories/insight-repository";
 import { organization, team } from "@packages/database/schemas/auth";
 import { content } from "@packages/database/schemas/content";
 import { dashboards } from "@packages/database/schemas/dashboards";
@@ -181,6 +183,30 @@ export const completeOnboarding = protectedProcedure
             teamId,
             userId,
          );
+
+         // Compute initial cached data for each insight synchronously
+         for (const insightId of insightIds) {
+            try {
+               const insight = await getInsightById(tx, insightId);
+               if (!insight) continue;
+
+               const freshData = await computeInsightData(tx, insight);
+
+               await tx
+                  .update(insights)
+                  .set({
+                     cachedResults: freshData,
+                     lastComputedAt: new Date(),
+                  })
+                  .where(eq(insights.id, insightId));
+            } catch (error) {
+               // Log but don't fail onboarding if insight computation fails
+               console.error(
+                  `[Onboarding] Failed to compute insight ${insightId}:`,
+                  error,
+               );
+            }
+         }
 
          // Build tiles array from insight IDs
          const tiles = insightIds.map((insightId, index) => ({

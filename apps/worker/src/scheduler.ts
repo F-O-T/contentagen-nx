@@ -1,8 +1,9 @@
 import * as cron from "node-cron";
 import type { DatabaseInstance } from "@packages/database/client";
 import type { Redis } from "ioredis";
-import { runRefreshViews } from "./jobs/refresh-views";
 import { runReconcileCredits } from "./jobs/reconcile-credits";
+import { runRefreshInsights } from "./jobs/refresh-insights";
+import { runRefreshViews } from "./jobs/refresh-views";
 
 /**
  * Start all scheduled (cron) jobs.
@@ -26,8 +27,21 @@ export function startScheduler(
 		}
 	});
 
-	tasks.push(hourlyTask);
-	console.log("[Scheduler] Cron jobs registered (hourly billing reconciliation)");
+	// Every 3 hours: refresh insight cached results
+	const insightsTask = cron.schedule("0 */3 * * *", async () => {
+		console.log("[Scheduler] Running insight cache refresh...");
+		try {
+			await runRefreshInsights(db);
+			console.log("[Scheduler] Insight cache refresh complete");
+		} catch (error) {
+			console.error("[Scheduler] Insight refresh job failed:", error);
+		}
+	});
+
+	tasks.push(hourlyTask, insightsTask);
+	console.log(
+		"[Scheduler] Cron jobs registered (hourly billing reconciliation, 3-hourly insight refresh)",
+	);
 
 	return tasks;
 }

@@ -37,6 +37,10 @@
       "./default-dashboard": {
          "default": "./src/default-dashboard.ts",
          "types": "./dist/src/default-dashboard.d.ts"
+      },
+      "./compute-insight": {
+         "default": "./src/compute-insight.ts",
+         "types": "./dist/src/compute-insight.d.ts"
       }
    },
    "files": [
