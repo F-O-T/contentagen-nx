@@ -23,6 +23,10 @@
          "default": "./src/client.ts",
          "types": "./dist/src/client.d.ts"
       },
+      "./default-insights": {
+         "default": "./src/default-insights.ts",
+         "types": "./dist/src/default-insights.d.ts"
+      },
       "./repositories/*": {
          "default": "./src/repositories/*.ts",
          "types": "./dist/src/repositories/*.d.ts"
