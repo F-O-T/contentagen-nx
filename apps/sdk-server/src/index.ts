@@ -1,6 +1,8 @@
 import cors from "@elysiajs/cors";
 import { env } from "@packages/environment/server";
 import { Elysia } from "elysia";
+import { RPCHandler } from "@orpc/server/fetch";
+import { BatchHandlerPlugin } from "@orpc/server/plugins";
 import { auth } from "./integrations/auth";
 import { db } from "./integrations/database";
 import { minioClient } from "./integrations/minio";
@@ -9,9 +11,28 @@ import {
    mcpRequestHandler,
    protectedResourceMetadataHandler,
 } from "./mcp/handler";
-import { sdkRoutes } from "./routes/sdk";
-import { sdkEventRoutes } from "./routes/sdk-events";
-import { sdkFormRoutes } from "./routes/sdk-forms";
+import sdkRouter from "./orpc/router";
+
+// Initialize oRPC handler
+const orpcHandler = new RPCHandler(sdkRouter, {
+   plugins: [new BatchHandlerPlugin()],
+});
+
+// oRPC endpoint handler
+async function handleOrpcRequest({ request }: { request: Request }) {
+   const context = {
+      db,
+      posthog,
+      request,
+   };
+
+   const { response } = await orpcHandler.handle(request, {
+      prefix: "/sdk/orpc",
+      context,
+   });
+
+   return response ?? new Response("Not Found", { status: 404 });
+}
 
 const app = new Elysia({
    serve: {
@@ -39,9 +60,7 @@ const app = new Elysia({
          origin: true,
       }),
    )
-   .use(sdkRoutes)
-   .use(sdkEventRoutes)
-   .use(sdkFormRoutes)
+   .post("/sdk/orpc", handleOrpcRequest)
    .all("/mcp", ({ request }) => mcpRequestHandler(request))
    .all("/mcp/*", ({ request }) => mcpRequestHandler(request))
    .get("/.well-known/oauth-protected-resource", ({ request }) =>
