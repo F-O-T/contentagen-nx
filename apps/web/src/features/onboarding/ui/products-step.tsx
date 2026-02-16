@@ -104,7 +104,7 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
             // Better Auth additionalFields aren't reflected in TS types
             await authClient.organization.updateTeam({
                teamId,
-               data: { onboardingProduct: selected },
+               data: { onboardingProducts: selected },
             });
 
             await authClient.organization.update({
@@ -188,9 +188,14 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
                               isPending && "cursor-not-allowed opacity-50",
                            )}
                            key={product.id}
-                           onClick={() => !isPending && toggleProduct(product.id)}
+                           onClick={() =>
+                              !isPending && toggleProduct(product.id)
+                           }
                            onKeyDown={(e) => {
-                              if (!isPending && (e.key === "Enter" || e.key === " ")) {
+                              if (
+                                 !isPending &&
+                                 (e.key === "Enter" || e.key === " ")
+                              ) {
                                  e.preventDefault();
                                  toggleProduct(product.id);
                               }

@@ -23,6 +23,31 @@ CREATE TABLE "actions" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "activity_logs" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"team_id" uuid NOT NULL,
+	"user_id" uuid,
+	"action" text NOT NULL,
+	"resource_type" text NOT NULL,
+	"resource_id" text,
+	"resource_name" text,
+	"metadata" jsonb,
+	"ip_address" text,
+	"user_agent" text,
+	"created_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "organization_addons" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"addon_id" text NOT NULL,
+	"activated_at" timestamp DEFAULT now() NOT NULL,
+	"expires_at" timestamp,
+	"auto_renew" boolean DEFAULT true NOT NULL,
+	"stripe_subscription_item_id" text
+);
+--> statement-breakpoint
 CREATE TABLE "annotations" (
 	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
@@ -183,11 +208,7 @@ CREATE TABLE "organization" (
 	"context" text DEFAULT 'personal',
 	"description" text DEFAULT '',
 	"onboarding_completed" boolean DEFAULT false,
-	"public_api_key" text,
-	"onboarding_products" jsonb,
-	"onboarding_tasks" jsonb DEFAULT '{}'::jsonb NOT NULL,
-	CONSTRAINT "organization_slug_unique" UNIQUE("slug"),
-	CONSTRAINT "organization_public_api_key_unique" UNIQUE("public_api_key")
+	CONSTRAINT "organization_slug_unique" UNIQUE("slug")
 );
 --> statement-breakpoint
 CREATE TABLE "session" (
@@ -229,7 +250,14 @@ CREATE TABLE "team" (
 	"organization_id" uuid NOT NULL,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp,
-	"description" text DEFAULT ''
+	"slug" text NOT NULL,
+	"description" text DEFAULT '',
+	"allowed_domains" text[],
+	"public_api_key" text,
+	"onboarding_completed" boolean DEFAULT false,
+	"onboarding_products" jsonb,
+	"onboarding_tasks" jsonb,
+	CONSTRAINT "team_public_api_key_unique" UNIQUE("public_api_key")
 );
 --> statement-breakpoint
 CREATE TABLE "team_member" (
@@ -300,6 +328,7 @@ CREATE TABLE "content" (
 	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
 	"writer_id" uuid,
 	"organization_id" uuid NOT NULL,
+	"team_id" uuid,
 	"created_by_member_id" uuid NOT NULL,
 	"body" text DEFAULT '',
 	"image_url" text,
@@ -316,6 +345,7 @@ CREATE TABLE "content" (
 CREATE TABLE "dashboards" (
 	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
+	"team_id" uuid NOT NULL,
 	"created_by" uuid NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
@@ -361,7 +391,7 @@ CREATE TABLE "events" (
 	"event_category" text NOT NULL,
 	"properties" jsonb NOT NULL,
 	"user_id" uuid,
-	"team_id" uuid,
+	"team_id" uuid NOT NULL,
 	"is_billable" boolean DEFAULT true NOT NULL,
 	"price_per_event" numeric(10, 6),
 	"timestamp" timestamp DEFAULT now() NOT NULL,
@@ -386,6 +416,7 @@ CREATE TABLE "form_submissions" (
 	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
 	"form_id" uuid NOT NULL,
 	"organization_id" uuid NOT NULL,
+	"team_id" uuid NOT NULL,
 	"data" jsonb NOT NULL,
 	"metadata" jsonb,
 	"submitted_at" timestamp DEFAULT now() NOT NULL
@@ -394,6 +425,7 @@ CREATE TABLE "form_submissions" (
 CREATE TABLE "forms" (
 	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
+	"team_id" uuid NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
 	"fields" jsonb NOT NULL,
@@ -406,6 +438,7 @@ CREATE TABLE "forms" (
 CREATE TABLE "insights" (
 	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
+	"team_id" uuid NOT NULL,
 	"created_by" uuid NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
@@ -427,6 +460,17 @@ CREATE TABLE "personal_api_key" (
 	"last_used_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"expires_at" timestamp
+);
+--> statement-breakpoint
+CREATE TABLE "product_settings" (
+	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
+	"team_id" uuid NOT NULL,
+	"content_defaults" jsonb DEFAULT '{}'::jsonb,
+	"forms_defaults" jsonb DEFAULT '{}'::jsonb,
+	"ai_defaults" jsonb DEFAULT '{}'::jsonb,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "product_settings_team_id_unique" UNIQUE("team_id")
 );
 --> statement-breakpoint
 CREATE TABLE "property_definitions" (
@@ -466,6 +510,45 @@ CREATE TABLE "resource_permission" (
 	CONSTRAINT "resource_permission_unique" UNIQUE("resource_type","resource_id","grantee_type","grantee_id")
 );
 --> statement-breakpoint
+CREATE TABLE "custom_roles" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"name" text NOT NULL,
+	"description" text,
+	"permissions" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"is_default" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "member_roles" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"member_id" uuid NOT NULL,
+	"role_id" uuid NOT NULL,
+	"assigned_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "sso_configurations" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"provider" text NOT NULL,
+	"enabled" boolean DEFAULT false NOT NULL,
+	"config" jsonb NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "verified_domains" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"domain" text NOT NULL,
+	"verification_token" text NOT NULL,
+	"verified" boolean DEFAULT false NOT NULL,
+	"verified_at" timestamp,
+	"auto_join_enabled" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "webhook_deliveries" (
 	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
 	"webhook_endpoint_id" uuid NOT NULL,
@@ -487,10 +570,12 @@ CREATE TABLE "webhook_deliveries" (
 CREATE TABLE "webhook_endpoints" (
 	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
+	"team_id" uuid NOT NULL,
 	"url" text NOT NULL,
 	"description" text,
 	"event_patterns" jsonb NOT NULL,
 	"signing_secret" text NOT NULL,
+	"api_key_id" text,
 	"is_active" boolean DEFAULT true NOT NULL,
 	"failure_count" integer DEFAULT 0 NOT NULL,
 	"last_success_at" timestamp,
@@ -502,6 +587,7 @@ CREATE TABLE "webhook_endpoints" (
 CREATE TABLE "writer" (
 	"id" uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
+	"team_id" uuid NOT NULL,
 	"persona_config" jsonb NOT NULL,
 	"profile_photo_url" text,
 	"instruction_memories" jsonb DEFAULT '[]'::jsonb,
@@ -512,6 +598,10 @@ CREATE TABLE "writer" (
 --> statement-breakpoint
 ALTER TABLE "actions" ADD CONSTRAINT "actions_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "actions" ADD CONSTRAINT "actions_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "organization_addons" ADD CONSTRAINT "organization_addons_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "annotations" ADD CONSTRAINT "annotations_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "annotations" ADD CONSTRAINT "annotations_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -540,30 +630,49 @@ ALTER TABLE "chat_session" ADD CONSTRAINT "chat_session_content_id_content_id_fk
 ALTER TABLE "chat_session" ADD CONSTRAINT "chat_session_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "content" ADD CONSTRAINT "content_writer_id_writer_id_fk" FOREIGN KEY ("writer_id") REFERENCES "public"."writer"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "content" ADD CONSTRAINT "content_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "content" ADD CONSTRAINT "content_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "content" ADD CONSTRAINT "content_created_by_member_id_member_id_fk" FOREIGN KEY ("created_by_member_id") REFERENCES "public"."member"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "dashboards" ADD CONSTRAINT "dashboards_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "dashboards" ADD CONSTRAINT "dashboards_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "dashboards" ADD CONSTRAINT "dashboards_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "data_sources" ADD CONSTRAINT "data_sources_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "events" ADD CONSTRAINT "events_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "events" ADD CONSTRAINT "events_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "events" ADD CONSTRAINT "events_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "events" ADD CONSTRAINT "events_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "export_log" ADD CONSTRAINT "export_log_content_id_content_id_fk" FOREIGN KEY ("content_id") REFERENCES "public"."content"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "export_log" ADD CONSTRAINT "export_log_member_id_member_id_fk" FOREIGN KEY ("member_id") REFERENCES "public"."member"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "form_submissions" ADD CONSTRAINT "form_submissions_form_id_forms_id_fk" FOREIGN KEY ("form_id") REFERENCES "public"."forms"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "form_submissions" ADD CONSTRAINT "form_submissions_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "form_submissions" ADD CONSTRAINT "form_submissions_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "forms" ADD CONSTRAINT "forms_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "forms" ADD CONSTRAINT "forms_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "insights" ADD CONSTRAINT "insights_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "insights" ADD CONSTRAINT "insights_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "insights" ADD CONSTRAINT "insights_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "personal_api_key" ADD CONSTRAINT "personal_api_key_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_settings" ADD CONSTRAINT "product_settings_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "property_definitions" ADD CONSTRAINT "property_definitions_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "related_content" ADD CONSTRAINT "related_content_source_content_id_content_id_fk" FOREIGN KEY ("source_content_id") REFERENCES "public"."content"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "related_content" ADD CONSTRAINT "related_content_target_content_id_content_id_fk" FOREIGN KEY ("target_content_id") REFERENCES "public"."content"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "resource_permission" ADD CONSTRAINT "resource_permission_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "resource_permission" ADD CONSTRAINT "resource_permission_granted_by_user_id_fk" FOREIGN KEY ("granted_by") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "custom_roles" ADD CONSTRAINT "custom_roles_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "member_roles" ADD CONSTRAINT "member_roles_member_id_member_id_fk" FOREIGN KEY ("member_id") REFERENCES "public"."member"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "member_roles" ADD CONSTRAINT "member_roles_role_id_custom_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."custom_roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "sso_configurations" ADD CONSTRAINT "sso_configurations_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "verified_domains" ADD CONSTRAINT "verified_domains_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "webhook_deliveries" ADD CONSTRAINT "webhook_deliveries_webhook_endpoint_id_webhook_endpoints_id_fk" FOREIGN KEY ("webhook_endpoint_id") REFERENCES "public"."webhook_endpoints"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "webhook_deliveries" ADD CONSTRAINT "webhook_deliveries_event_id_events_id_fk" FOREIGN KEY ("event_id") REFERENCES "public"."events"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "webhook_endpoints" ADD CONSTRAINT "webhook_endpoints_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "webhook_endpoints" ADD CONSTRAINT "webhook_endpoints_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "writer" ADD CONSTRAINT "writer_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "writer" ADD CONSTRAINT "writer_team_id_team_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."team"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "activity_logs_team_idx" ON "activity_logs" USING btree ("team_id");--> statement-breakpoint
+CREATE INDEX "activity_logs_user_idx" ON "activity_logs" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "activity_logs_created_idx" ON "activity_logs" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "activity_logs_resource_idx" ON "activity_logs" USING btree ("resource_type","resource_id");--> statement-breakpoint
+CREATE INDEX "organization_addons_org_idx" ON "organization_addons" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "organization_addons_addon_idx" ON "organization_addons" USING btree ("addon_id");--> statement-breakpoint
 CREATE INDEX "account_userId_idx" ON "account" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "apikey_key_idx" ON "apikey" USING btree ("key");--> statement-breakpoint
 CREATE INDEX "apikey_userId_idx" ON "apikey" USING btree ("user_id");--> statement-breakpoint
@@ -585,10 +694,12 @@ CREATE INDEX "chat_session_content_id_idx" ON "chat_session" USING btree ("conte
 CREATE INDEX "chat_session_organization_id_idx" ON "chat_session" USING btree ("organization_id");--> statement-breakpoint
 CREATE INDEX "content_writer_id_idx" ON "content" USING btree ("writer_id");--> statement-breakpoint
 CREATE INDEX "content_organization_id_idx" ON "content" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "content_team_id_idx" ON "content" USING btree ("team_id");--> statement-breakpoint
 CREATE INDEX "content_created_by_member_id_idx" ON "content" USING btree ("created_by_member_id");--> statement-breakpoint
 CREATE INDEX "content_status_idx" ON "content" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "content_draft_origin_idx" ON "content" USING btree ("draft_origin");--> statement-breakpoint
 CREATE INDEX "content_slug_idx" ON "content" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "dashboards_team_idx" ON "dashboards" USING btree ("team_id");--> statement-breakpoint
 CREATE INDEX "events_org_time_idx" ON "events" USING btree ("organization_id","timestamp");--> statement-breakpoint
 CREATE INDEX "events_name_idx" ON "events" USING btree ("event_name");--> statement-breakpoint
 CREATE INDEX "events_category_idx" ON "events" USING btree ("event_category");--> statement-breakpoint
@@ -600,7 +711,10 @@ CREATE INDEX "export_log_format_idx" ON "export_log" USING btree ("format");--> 
 CREATE INDEX "export_log_destination_idx" ON "export_log" USING btree ("destination");--> statement-breakpoint
 CREATE INDEX "form_submissions_form_idx" ON "form_submissions" USING btree ("form_id");--> statement-breakpoint
 CREATE INDEX "form_submissions_org_idx" ON "form_submissions" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "form_submissions_team_idx" ON "form_submissions" USING btree ("team_id");--> statement-breakpoint
 CREATE INDEX "forms_org_idx" ON "forms" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "forms_team_idx" ON "forms" USING btree ("team_id");--> statement-breakpoint
+CREATE INDEX "insights_team_idx" ON "insights" USING btree ("team_id");--> statement-breakpoint
 CREATE INDEX "personal_api_key_user_id_idx" ON "personal_api_key" USING btree ("user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "personal_api_key_key_prefix_uidx" ON "personal_api_key" USING btree ("key_prefix");--> statement-breakpoint
 CREATE INDEX "related_content_source_idx" ON "related_content" USING btree ("source_content_id");--> statement-breakpoint
@@ -608,12 +722,21 @@ CREATE INDEX "related_content_target_idx" ON "related_content" USING btree ("tar
 CREATE INDEX "resource_permission_organization_idx" ON "resource_permission" USING btree ("organization_id");--> statement-breakpoint
 CREATE INDEX "resource_permission_resource_idx" ON "resource_permission" USING btree ("resource_type","resource_id");--> statement-breakpoint
 CREATE INDEX "resource_permission_grantee_idx" ON "resource_permission" USING btree ("grantee_type","grantee_id");--> statement-breakpoint
+CREATE INDEX "custom_roles_org_idx" ON "custom_roles" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "member_roles_member_idx" ON "member_roles" USING btree ("member_id");--> statement-breakpoint
+CREATE INDEX "member_roles_role_idx" ON "member_roles" USING btree ("role_id");--> statement-breakpoint
+CREATE INDEX "sso_configurations_org_idx" ON "sso_configurations" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "verified_domains_org_idx" ON "verified_domains" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "verified_domains_domain_idx" ON "verified_domains" USING btree ("domain");--> statement-breakpoint
 CREATE INDEX "webhook_deliveries_webhook_idx" ON "webhook_deliveries" USING btree ("webhook_endpoint_id");--> statement-breakpoint
 CREATE INDEX "webhook_deliveries_status_idx" ON "webhook_deliveries" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "webhook_deliveries_event_idx" ON "webhook_deliveries" USING btree ("event_id");--> statement-breakpoint
 CREATE INDEX "webhook_endpoints_org_idx" ON "webhook_endpoints" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "webhook_endpoints_team_idx" ON "webhook_endpoints" USING btree ("team_id");--> statement-breakpoint
+CREATE INDEX "webhook_endpoints_api_key_idx" ON "webhook_endpoints" USING btree ("api_key_id");--> statement-breakpoint
 CREATE INDEX "webhook_endpoints_active_idx" ON "webhook_endpoints" USING btree ("is_active");--> statement-breakpoint
 CREATE INDEX "writer_organization_id_idx" ON "writer" USING btree ("organization_id");--> statement-breakpoint
+CREATE INDEX "writer_team_idx" ON "writer" USING btree ("team_id");--> statement-breakpoint
 CREATE MATERIALIZED VIEW "public"."content_traffic_sources" AS (
 	SELECT
 		organization_id,
