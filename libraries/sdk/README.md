@@ -1,147 +1,525 @@
-# ContentaGen SDK
+# Contentta SDK
 
-Official TypeScript SDK for interacting with the ContentaGen API.
+Official TypeScript SDK for interacting with the Contentta API.
 
 ## Features
-- Lightweight client for ContentaGen API
+- Type-safe oRPC client with full TypeScript support
+- Modular API structure with organized namespaces (`content`, `events`, `forms`)
 - Input validation with Zod schemas and shared schema exports
 - Automatic date parsing for `createdAt` / `updatedAt`
-- Consistent error codes and robust error handling
-- Locale support via `x-locale` header for internationalization
-- Agent-aware author, content, and related slug helpers
-- Image fetch helpers that proxy assets as base64 payloads
+- Structured error handling with detailed error types
+- Server-side and browser-side SDKs for different use cases
+- Event tracking with automatic batching and retry logic
+- Forms integration with automatic rendering and validation
 
 ## Installation
 
 npm:
 ```bash
-npm install @contentagen/sdk
+npm install @contentta/sdk
 ```
 
 yarn:
 ```bash
-yarn add @contentagen/sdk
+yarn add @contentta/sdk
 ```
 
-## Quick Start (TypeScript)
+bun:
+```bash
+bun add @contentta/sdk
+```
 
-```ts
-import { createSdk } from "@contentagen/sdk";
+## Quick Start
+
+### Server-Side Usage (Node.js, Bun, Deno)
+
+```typescript
+import { createSdk } from "@contentta/sdk";
 
 const sdk = createSdk({
-	apiKey: "YOUR_API_KEY",
-	locale: "en-US", // Optional: sets the x-locale header for all requests
-	host: "https://custom.api.example.com", // Optional: custom API host
+  apiKey: "YOUR_API_KEY",
+  host: "https://custom.api.example.com", // Optional: custom API host
 });
 
 async function example() {
-	const agentId = "00000000-0000-0000-0000-000000000000";
+  const agentId = "00000000-0000-0000-0000-000000000000";
 
-	// List content by agent(s)
-	const listParams = {
-		agentId, // required agent ID
-		status: ["approved", "draft"], // optional: string or array, defaults to approved
-		limit: 10, // optional, default 10
-		page: 1, // optional, default 1
-	};
-	const list = await sdk.listContentByAgent(listParams);
-	// Use list.total and list.posts[0] as needed
+  // List content by agent
+  const { posts, total } = await sdk.content.list({
+    agentId,
+    status: ["approved", "draft"],
+    limit: "10",
+    page: "1",
+  });
 
-	// Get content by slug (use the same agentId you queried with)
-	const selectParams = { slug: "my-post-slug", agentId };
-	const post = await sdk.getContentBySlug(selectParams);
-	// Use post.id, post.meta.title, post.createdAt, post.shareStatus as needed
+  console.log(`Found ${total} posts`);
+  console.log(posts[0].meta.title);
 
-	// Get related slugs for a post
-	const relatedSlugs = await sdk.getRelatedSlugs({ slug: "my-post-slug", agentId });
-	// Use relatedSlugs array as needed
+  // Get content by slug
+  const content = await sdk.content.get({
+    slug: "my-post-slug",
+    agentId,
+  });
 
-	// Get author info by agent ID
-	const author = await sdk.getAuthorByAgentId({ agentId });
-	// Use author.name and author.profilePhoto as needed
+  console.log(content.body);
 
-	// Get the image data for a specific content ID
-	const image = await sdk.getContentImage({ contentId: post.id });
-	// Use image?.contentType and image?.data as needed
+  // Get related slugs for a post
+  const relatedSlugs = await sdk.content.getRelatedSlugs({
+    slug: "my-post-slug",
+    agentId,
+  });
 
+  console.log(relatedSlugs);
+
+  // Get author info by agent ID
+  const author = await sdk.content.getAuthor({
+    agentId,
+  });
+
+  console.log(author.name);
+  console.log(author.profilePhoto?.data); // base64 image data
+
+  // Get the image data for a specific content ID
+  const image = await sdk.content.getImage({
+    contentId: content.id,
+  });
+
+  console.log(image?.contentType);
+  console.log(image?.data); // base64 image data
+
+  // Track events
+  await sdk.events.track({
+    eventName: "content.page.view",
+    properties: {
+      contentId: content.id,
+      contentSlug: "my-post-slug",
+      pageUrl: "https://example.com/blog/my-post-slug",
+    },
+  });
+
+  // Get form definition
+  const form = await sdk.forms.get({
+    formId: "form-uuid",
+  });
+
+  console.log(form.name);
+  console.log(form.fields);
+}
+
+example().catch(console.error);
+```
+
+### Browser Usage (Analytics + Forms)
+
+```typescript
+import { createBrowserSdk } from "@contentta/sdk/browser";
+
+const sdk = createBrowserSdk({
+  apiKey: "YOUR_API_KEY",
+  organizationId: "YOUR_ORG_ID",
+  batchSize: 10,
+  flushInterval: 30000,
+  debug: true,
+});
+
+// Track custom events
+sdk.tracker.track("button_click", {
+  buttonId: "cta-signup",
+  page: "/pricing",
+});
+
+// Auto-track page views (includes scroll depth, time on page, CTA clicks)
+sdk.tracker.autoTrackPageViews("content-uuid", "content-slug");
+
+// Embed a form
+await sdk.forms.embedForm("form-uuid", "form-container-id");
+
+// Clean up on page unload
+window.addEventListener("beforeunload", () => {
+  sdk.tracker.destroy();
+});
+```
+
+## Migrating from v1.x
+
+If you're upgrading from v1.x, please see the [MIGRATION.md](./MIGRATION.md) guide for detailed instructions.
+
+## API Reference
+
+### Main SDK (Server-Side)
+
+Create an SDK client for server-side usage (Node.js, Bun, Deno):
+
+```typescript
+import { createSdk } from "@contentta/sdk";
+
+const sdk = createSdk({
+  apiKey: string;        // Required: Your API key
+  host?: string;         // Optional: Custom API host (defaults to production)
+});
+```
+
+#### Content Methods
+
+**`sdk.content.list(params)`**
+
+List content by agent with pagination and filtering.
+
+```typescript
+const { posts, total } = await sdk.content.list({
+  agentId: string;                  // Required: Agent UUID
+  status?: "draft" | "approved" | Array<"draft" | "approved">;  // Optional
+  limit?: string;                   // Optional: Default "10", max "100"
+  page?: string;                    // Optional: Default "1"
+});
+```
+
+Returns:
+```typescript
+{
+  posts: Array<{
+    id: string;
+    meta: { title?: string; description?: string; slug?: string; ... };
+    imageUrl: string | null;
+    status: "draft" | "approved";
+    shareStatus: "private" | "shared";
+    createdAt: Date;
+    stats: { wordsCount?: string; readTimeMinutes?: string; ... };
+    image: { data: string; contentType: string } | null;
+  }>;
+  total: number;
 }
 ```
 
-## API
+**`sdk.content.get(params)`**
 
-### Exports
-- `createSdk(config: { apiKey: string; locale?: string; host?: string }): ContentaGenSDK` — factory for SDK instance
-- `ContentaGenSDK` class — all methods available on instances
-- `type ShareStatus` — union type: `"private" | "shared"`
-- Zod schemas for advanced validation:
-  - `ContentListResponseSchema`
-  - `ContentSelectSchema`
-  - `GetContentBySlugInputSchema`
-  - `ListContentByAgentInputSchema`
-  - `AuthorByAgentIdSchema`
-  - `ImageSchema`
-  - `ShareStatusValues`
+Get content by slug.
 
-Note: The PostHog helper is currently internal and not exported from the package entry. See "PostHog Analytics Helper" below for usage details when working inside this repository.
-
-### Methods
-
-- `sdk.listContentByAgent(params)`
-  - params (validated by `ListContentByAgentInputSchema`):
-		- `agentId`: string (UUID) — required
-		- `status`: "draft" | "approved" | array of the same — optional, defaults to approved on the API
-    - `limit?: number` — optional, default 10, between 1 and 100
-    - `page?: number` — optional, default 1, min 1
-  - Returns: `Promise<{ posts: Array<{ id, meta, imageUrl, status, shareStatus, createdAt, stats, image }>; total: number }>`
-
-- `sdk.getContentBySlug(params)`
-  - params (validated by `GetContentBySlugInputSchema`):
-    - `slug`: string — required
-    - `agentId`: string (UUID) — required
-  - Returns: `Promise<ContentSelect-like object>` (see Types below)
-
-- `sdk.getRelatedSlugs(params)`
-  - params: `{ slug: string; agentId: string }`
-  - Returns: `Promise<string[]>` (array of related slugs)
-
-- `sdk.getAuthorByAgentId(params)`
-  - params: `{ agentId: string }`
-  - Returns: `{ name: string; profilePhoto: { data: string; contentType: string } | null }`
-  - Note: The agent serves as the author. The returned name and profile photo are derived directly from the agent config.
-
-- `sdk.getContentImage(params)`
-  - params: `{ contentId: string }`
-  - Returns: `{ data: string; contentType: string } | null`
-
-
-### PostHog Analytics Helper
-
-The codebase includes a PostHog helper for tracking blog post views and custom events, designed for build-time frameworks like AstroJS.
-
-Note: In v0.11.0 the helper is not exported through the package entry. If you are working inside this repo (or until a public export is added), import it directly from the source file.
-
-#### Import (internal use in this repo)
-
-```ts
-import { createPostHogHelper } from "./src/posthog"; // not exported from the package entry yet
+```typescript
+const content = await sdk.content.get({
+  slug: string;      // Required: Content slug
+  agentId: string;   // Required: Agent UUID
+});
 ```
 
-#### PostHogHelper Methods
+Returns the full content object with `id`, `body`, `meta`, `status`, `createdAt`, `updatedAt`, etc.
 
-- `posthogHelper.trackBlogPostView(postData)`
-  - params: `{ id: string; slug: string; title?: string; agentId: string }`
-  - Returns: `string` — HTML script tag to track a blog post view event
+**`sdk.content.getRelatedSlugs(params)`**
 
-#### Event payload
+Get related content slugs.
 
-- Includes stable identifiers for the post (`post_id`, `post_slug`) and agent (`agent_id`).
-- May include optional metadata such as `post_title`.
-- Includes event classification fields and a timestamp.
-- Security: JSON payload is escaped for safe HTML injection.
+```typescript
+const slugs = await sdk.content.getRelatedSlugs({
+  slug: string;      // Required: Content slug
+  agentId: string;   // Required: Agent UUID
+});
+```
 
-## Types
+Returns `string[]` (array of related slugs).
 
-Shapes shown here reflect the runtime Zod schemas returned by the SDK. Only `ShareStatus` is exported as a type; use the schemas above for runtime validation if needed.
+**`sdk.content.getAuthor(params)`**
+
+Get author information by agent ID.
+
+```typescript
+const author = await sdk.content.getAuthor({
+  agentId: string;   // Required: Agent UUID
+});
+```
+
+Returns:
+```typescript
+{
+  name: string;
+  profilePhoto: { data: string; contentType: string } | null;
+}
+```
+
+**`sdk.content.getImage(params)`**
+
+Get image data for content.
+
+```typescript
+const image = await sdk.content.getImage({
+  contentId: string; // Required: Content UUID
+});
+```
+
+Returns `{ data: string; contentType: string } | null` (base64-encoded image).
+
+---
+
+#### Event Methods
+
+**`sdk.events.track(params)`**
+
+Track a single event.
+
+```typescript
+await sdk.events.track({
+  eventName: string;
+  properties: Record<string, unknown>;
+});
+```
+
+**`sdk.events.batch(params)`**
+
+Track multiple events in a single request (more efficient).
+
+```typescript
+await sdk.events.batch({
+  events: Array<{
+    eventName: string;
+    properties: Record<string, unknown>;
+    timestamp: number;
+  }>;
+});
+```
+
+---
+
+#### Forms Methods
+
+**`sdk.forms.get(params)`**
+
+Get form definition.
+
+```typescript
+const form = await sdk.forms.get({
+  formId: string;  // Required: Form UUID
+});
+```
+
+Returns:
+```typescript
+{
+  id: string;
+  name: string;
+  description?: string;
+  fields: Array<{
+    id: string;
+    type: "text" | "email" | "textarea" | "checkbox" | "select";
+    label: string;
+    placeholder?: string;
+    required: boolean;
+    options?: string[];
+  }>;
+  settings?: {
+    successMessage?: string;
+    redirectUrl?: string;
+  };
+}
+```
+
+**`sdk.forms.submit(params)`**
+
+Submit form data.
+
+```typescript
+const result = await sdk.forms.submit({
+  formId: string;
+  data: Record<string, unknown>;
+});
+```
+
+Returns:
+```typescript
+{
+  success: boolean;
+  submissionId: string;
+  settings: {
+    successMessage?: string;
+    redirectUrl?: string;
+  };
+}
+```
+
+---
+
+### Browser SDK
+
+For browser environments, use the dedicated browser SDK:
+
+```typescript
+import { createBrowserSdk } from "@contentta/sdk/browser";
+
+const sdk = createBrowserSdk({
+  apiKey: string;              // Required: Your API key
+  organizationId: string;      // Required: Your organization UUID
+  apiUrl?: string;             // Optional: Custom API URL
+  batchSize?: number;          // Optional: Event batch size (default: 10)
+  flushInterval?: number;      // Optional: Flush interval in ms (default: 30000)
+  debug?: boolean;             // Optional: Enable debug logging (default: false)
+  enableAnalytics?: boolean;   // Optional: Enable analytics (default: true)
+});
+```
+
+The browser SDK provides two clients:
+
+#### Event Tracker (`sdk.tracker`)
+
+**`sdk.tracker.track(eventName, properties)`**
+
+Track a custom event.
+
+```typescript
+sdk.tracker.track("button_click", {
+  buttonId: "cta-signup",
+  page: "/pricing",
+});
+```
+
+**`sdk.tracker.autoTrackPageViews(contentId, contentSlug)`**
+
+Auto-track page views with scroll depth, time on page, and CTA clicks.
+
+```typescript
+sdk.tracker.autoTrackPageViews("content-uuid", "content-slug");
+```
+
+**`sdk.tracker.flush()`**
+
+Manually flush pending events.
+
+```typescript
+await sdk.tracker.flush();
+```
+
+**`sdk.tracker.destroy()`**
+
+Clean up and flush final events.
+
+```typescript
+sdk.tracker.destroy();
+```
+
+---
+
+#### Forms Client (`sdk.forms`)
+
+**`sdk.forms.embedForm(formId, containerId)`**
+
+Embed a form into a DOM container.
+
+```typescript
+await sdk.forms.embedForm("form-uuid", "form-container-id");
+```
+
+This will:
+- Fetch the form definition
+- Render the form with pre-styled components
+- Set up validation and submission handling
+- Track form impressions and submissions
+- Handle success messages and redirects
+
+---
+
+### Analytics (PostHog)
+
+For PostHog analytics integration:
+
+```typescript
+import { createPostHogHelper } from "@contentta/sdk/posthog";
+
+const posthog = createPostHogHelper();
+
+// Track blog post views
+const trackingScript = posthog.trackBlogPostView({
+  id: "content-uuid",
+  slug: "content-slug",
+  title: "Post Title",
+  agentId: "agent-uuid",
+});
+
+// Inject trackingScript into your HTML
+```
+
+## Exported Types
+
+All types are fully documented with TypeScript. Import them for type safety:
+
+```typescript
+import type {
+  // Content types
+  ContentList,
+  ContentSelect,
+  ContentMeta,
+  ContentRequest,
+  ContentStats,
+  ContentStatus,
+  ContentWithAnalytics,
+  ShareStatus,
+  Image,
+
+  // Event types
+  TrackedEvent,
+  EventBatch,
+  ContenttaSdkConfig,
+
+  // Form types
+  FormDefinition,
+  FormField,
+
+  // Analytics types
+  AnalyticsResponse,
+} from "@contentta/sdk";
+```
+
+## Exported Schemas (Zod)
+
+For runtime validation:
+
+```typescript
+import {
+  // Content schemas
+  ContentListResponseSchema,
+  ContentSelectSchema,
+  ContentMetaSchema,
+  ContentRequestSchema,
+  ContentStatsSchema,
+  ContentStatusValues,
+  ContentWithAnalyticsSchema,
+  ShareStatusValues,
+  GetContentBySlugInputSchema,
+  ListContentByAgentInputSchema,
+  ImageSchema,
+
+  // Analytics schemas
+  AnalyticsResponseSchema,
+} from "@contentta/sdk";
+```
+
+## Error Handling
+
+The SDK uses structured error handling with detailed error types:
+
+```typescript
+import { createSdk } from "@contentta/sdk";
+
+const sdk = createSdk({ apiKey: "your-api-key" });
+
+try {
+  const content = await sdk.content.get({
+    slug: "non-existent",
+    agentId: "agent-uuid",
+  });
+} catch (error) {
+  // Error includes status code, message, and cause
+  console.error("Error:", error.message);
+  console.error("Status:", error.status);
+  console.error("Cause:", error.cause);
+}
+```
+
+Common error scenarios:
+- **Authentication errors**: Invalid API key
+- **Not found errors**: Content/form/agent not found
+- **Validation errors**: Invalid input parameters
+- **Rate limit errors**: Too many requests
+
+## Types Reference
+
+Shapes shown here reflect the runtime Zod schemas returned by the SDK.
 
 - ContentList
   - posts: Array of summary objects:
@@ -169,86 +547,200 @@ Shapes shown here reflect the runtime Zod schemas returned by the SDK. Only `Sha
   - `updatedAt`: Date
   - `image`: { data: string; contentType: string } | null
 
-- AuthorByAgentId
-  - `name`: string
-  - `profilePhoto`: { data: string; contentType: string } | null
+## Complete Examples
 
-- RelatedSlugsResponse
-  - Array of strings (slugs)
+### Example 1: Blog Post Listing with Pagination
 
-- ShareStatus
-  - `"private" | "shared"`
+```typescript
+import { createSdk } from "@contentta/sdk";
 
-## Error Codes
-- `SDK_E001`: apiKey is required to initialize the ContentaGenSDK
-- `SDK_E002`: API request failed
-- `SDK_E003`: Invalid API response format
-- `SDK_E004`: Invalid input
+const sdk = createSdk({
+  apiKey: process.env.CONTENTTA_API_KEY!,
+});
 
-## Example with Error Handling
+async function getBlogPosts(page = 1, pageSize = 12) {
+  try {
+    const { posts, total } = await sdk.content.list({
+      agentId: process.env.AGENT_ID!,
+      status: "approved",
+      limit: String(pageSize),
+      page: String(page),
+    });
 
-```ts
-async function run() {
-	try {
-		const sdk = createSdk({ apiKey: process.env.CONTENTAGEN_API_KEY! });
+    const totalPages = Math.ceil(total / pageSize);
 
-		const agentId = "00000000-0000-0000-0000-000000000000";
-
-		const list = await sdk.listContentByAgent({
-			agentId,
-			status: "approved",
-			limit: 5,
-			page: 1,
-		});
-
-		if (list.total === 0) {
-			// Handle no posts found
-			return;
-		}
-
-		const first = list.posts[0];
-		// Use first.id as needed
-
-		const post = await sdk.getContentBySlug({
-			slug: first.meta.slug ?? "unknown-slug",
-			agentId,
-		});
-
-		// Use post.body as needed
-	} catch (err) {
-		console.error("SDK error:", err);
-	}
+    return {
+      posts,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    };
+  } catch (error) {
+    console.error("Failed to fetch blog posts:", error);
+    throw error;
+  }
 }
+
+// Usage
+const { posts, pagination } = await getBlogPosts(1, 12);
+console.log(`Showing ${posts.length} of ${pagination.total} posts`);
 ```
 
-## PostHog Analytics Example (internal import in this repo)
+---
 
-```ts
-import { createSdk } from "@contentagen/sdk";
-import { createPostHogHelper } from "./src/posthog"; // not exported from the package entry yet
+### Example 2: Blog Post Detail Page
 
-const sdk = createSdk({ apiKey: "YOUR_API_KEY" });
-const posthogHelper = createPostHogHelper();
+```typescript
+import { createSdk } from "@contentta/sdk";
 
-// Example usage in AstroJS or other build-time frameworks
-async function renderBlogPost(slug: string, agentId: string) {
-	// Get post data
-	const post = await sdk.getContentBySlug({ slug, agentId });
+const sdk = createSdk({
+  apiKey: process.env.CONTENTTA_API_KEY!,
+});
 
-	// Generate tracking script for blog post view
-	const trackViewScript = posthogHelper.trackBlogPostView({
-		id: post.id,
-		slug: post.meta.slug || slug,
-		title: post.meta.title,
-		agentId: post.agentId,
-	});
+async function getBlogPostDetail(slug: string) {
+  const agentId = process.env.AGENT_ID!;
 
-	// In AstroJS, inject the tracking script into the page
-	return {
-		trackingScript: trackViewScript,
-		post,
-	};
+  try {
+    // Fetch post, related content, and author in parallel
+    const [content, relatedSlugs, author] = await Promise.all([
+      sdk.content.get({ slug, agentId }),
+      sdk.content.getRelatedSlugs({ slug, agentId }),
+      sdk.content.getAuthor({ agentId }),
+    ]);
+
+    return {
+      content,
+      relatedSlugs,
+      author,
+    };
+  } catch (error) {
+    console.error("Failed to fetch blog post:", error);
+    throw error;
+  }
 }
+
+// Usage
+const { content, relatedSlugs, author } = await getBlogPostDetail("my-post-slug");
+console.log(`Title: ${content.meta.title}`);
+console.log(`Author: ${author.name}`);
+console.log(`Related posts: ${relatedSlugs.length}`);
+```
+
+---
+
+### Example 3: Blog with Analytics (Browser)
+
+```typescript
+import { createBrowserSdk } from "@contentta/sdk/browser";
+
+const sdk = createBrowserSdk({
+  apiKey: import.meta.env.VITE_CONTENTTA_API_KEY,
+  organizationId: import.meta.env.VITE_CONTENTTA_ORG_ID,
+  debug: import.meta.env.DEV,
+});
+
+// Initialize analytics on page load
+document.addEventListener("DOMContentLoaded", () => {
+  const contentId = document.querySelector("[data-content-id]")?.getAttribute("data-content-id");
+  const contentSlug = document.querySelector("[data-content-slug]")?.getAttribute("data-content-slug");
+
+  if (contentId && contentSlug) {
+    // Auto-track page views, scroll depth, time on page, and CTA clicks
+    sdk.tracker.autoTrackPageViews(contentId, contentSlug);
+  }
+
+  // Track custom events
+  document.querySelectorAll("[data-track]").forEach((element) => {
+    element.addEventListener("click", () => {
+      const eventName = element.getAttribute("data-track");
+      const eventData = JSON.parse(element.getAttribute("data-track-data") || "{}");
+
+      sdk.tracker.track(eventName!, eventData);
+    });
+  });
+});
+
+// Clean up on page unload
+window.addEventListener("beforeunload", () => {
+  sdk.tracker.destroy();
+});
+```
+
+---
+
+### Example 4: Contact Form Integration
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contact Us</title>
+</head>
+<body>
+  <h1>Contact Us</h1>
+  <div id="contact-form"></div>
+
+  <script type="module">
+    import { createBrowserSdk } from "@contentta/sdk/browser";
+
+    const sdk = createBrowserSdk({
+      apiKey: "your-api-key",
+      organizationId: "your-org-id",
+    });
+
+    // Embed form
+    await sdk.forms.embedForm("form-uuid", "contact-form");
+  </script>
+</body>
+</html>
+```
+
+---
+
+### Example 5: Server-Side Event Tracking
+
+```typescript
+import { createSdk } from "@contentta/sdk";
+
+const sdk = createSdk({
+  apiKey: process.env.CONTENTTA_API_KEY!,
+});
+
+// Track events from your backend
+async function trackContentPublication(contentId: string) {
+  await sdk.events.track({
+    eventName: "content.published",
+    properties: {
+      contentId,
+      publishedAt: Date.now(),
+      publishedBy: "system",
+    },
+  });
+}
+
+// Batch track multiple events
+async function trackBatchEvents(events: Array<{ eventName: string; properties: Record<string, unknown> }>) {
+  await sdk.events.batch({
+    events: events.map((event) => ({
+      ...event,
+      timestamp: Date.now(),
+    })),
+  });
+}
+
+// Usage
+await trackContentPublication("content-uuid");
+
+await trackBatchEvents([
+  { eventName: "content.created", properties: { contentId: "uuid-1" } },
+  { eventName: "content.approved", properties: { contentId: "uuid-1" } },
+  { eventName: "content.published", properties: { contentId: "uuid-1" } },
+]);
 ```
 
 ## Changelog
