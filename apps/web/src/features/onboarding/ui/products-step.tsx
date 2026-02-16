@@ -76,13 +76,14 @@ client.capture('page_view', {
 interface ProductsStepProps {
    organizationId: string;
    teamId: string;
-   onComplete: (slug: string, teamId: string) => void;
+   teamSlug: string;
+   onComplete: (slug: string, teamSlug: string) => void;
    onStateChange: (state: StepState) => void;
 }
 
 export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
    function ProductsStep(
-      { organizationId, teamId, onComplete, onStateChange },
+      { organizationId, teamId, teamSlug, onComplete, onStateChange },
       ref,
    ) {
       const [selected, setSelected] = useState<Product[]>([]);
@@ -103,20 +104,17 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
             // Better Auth additionalFields aren't reflected in TS types
             await authClient.organization.updateTeam({
                teamId,
-               data: { onboardingProducts: selected } as Record<
-                  string,
-                  unknown
-               >,
+               data: { onboardingProduct: selected },
             });
 
             await authClient.organization.update({
                organizationId,
-               data: { onboardingCompleted: true } as Record<string, unknown>,
+               data: { onboardingCompleted: true },
             });
 
             await authClient.organization.updateTeam({
                teamId,
-               data: { onboardingCompleted: true } as Record<string, unknown>,
+               data: { onboardingCompleted: true },
             });
 
             await authClient.organization.setActiveTeam({ teamId });
@@ -125,7 +123,7 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
             const currentOrg = orgs.data?.find((o) => o.id === organizationId);
 
             toast.success("Onboarding concluído!");
-            onComplete(currentOrg?.slug ?? "", teamId);
+            onComplete(currentOrg?.slug ?? "", teamSlug);
             return true;
          } catch (error) {
             toast.error(
@@ -137,7 +135,7 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
          } finally {
             setIsPending(false);
          }
-      }, [selected, organizationId, teamId, onComplete]);
+      }, [selected, organizationId, teamId, teamSlug, onComplete]);
 
       const canContinue = selected.length > 0;
 
@@ -181,17 +179,24 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
                      const Icon = product.icon;
 
                      return (
-                        <button
+                        <div
                            className={cn(
-                              "flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all",
+                              "flex w-full cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-all",
                               isSelected
                                  ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                                  : "border-border hover:border-muted-foreground/30",
+                              isPending && "cursor-not-allowed opacity-50",
                            )}
-                           disabled={isPending}
                            key={product.id}
-                           onClick={() => toggleProduct(product.id)}
-                           type="button"
+                           onClick={() => !isPending && toggleProduct(product.id)}
+                           onKeyDown={(e) => {
+                              if (!isPending && (e.key === "Enter" || e.key === " ")) {
+                                 e.preventDefault();
+                                 toggleProduct(product.id);
+                              }
+                           }}
+                           role="button"
+                           tabIndex={isPending ? -1 : 0}
                         >
                            <div
                               className={cn(
@@ -213,10 +218,10 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
                            </div>
                            <Checkbox
                               checked={isSelected}
-                              className="shrink-0"
+                              className="shrink-0 pointer-events-none"
                               tabIndex={-1}
                            />
-                        </button>
+                        </div>
                      );
                   })}
                </div>

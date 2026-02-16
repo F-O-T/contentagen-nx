@@ -3,6 +3,7 @@ import {
    createAuthClient as createBetterAuthClient,
 } from "@packages/authentication/client";
 import { toast } from "sonner";
+import { invalidateAllQueries } from "./query-bridge";
 
 // Error tracking for showing error modal after repeated errors
 const ERROR_THRESHOLD = 3;
@@ -60,7 +61,9 @@ export const authClient = createBetterAuthClient({
    apiBaseUrl: "",
    onError: handleAuthError,
    onSuccess: () => {
-      // Query invalidation will be handled by the QueryClient
+      // Invalidate all queries after any successful Better Auth operation
+      // This ensures cache stays fresh after org/team/user updates
+      invalidateAllQueries();
    },
 });
 

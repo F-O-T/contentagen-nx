@@ -1,10 +1,7 @@
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { stripe as stripePlugin } from "@better-auth/stripe";
 import type { DatabaseInstance } from "@packages/database/client";
-import {
-   ensureDefaultProject,
-   findMemberByUserId,
-} from "@packages/database/repositories/auth-repository";
+import { findMemberByUserId } from "@packages/database/repositories/auth-repository";
 import { getDomain, isProduction } from "@packages/environment/helpers";
 import type { ServerEnv } from "@packages/environment/server";
 import { getElysiaPosthogConfig } from "@packages/posthog/server";
@@ -214,6 +211,9 @@ export function createAuth(config: SimplifiedAuthConfig) {
          },
          teams: {
             allowRemovingAllTeams: false,
+            defaultTeam: {
+               enabled: false, // Don't auto-create team on org creation
+            },
             enabled: true,
             maximumMembersPerTeam: 50,
             maximumTeams: 10,
@@ -246,111 +246,111 @@ export function createAuth(config: SimplifiedAuthConfig) {
       // Conditional: Stripe plugin (only if Stripe is configured)
       ...(stripeClient && env.STRIPE_WEBHOOK_SECRET
          ? [
-              stripePlugin({
-                 createCustomerOnSignUp: true,
-                 stripeClient,
-                 stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET,
+            stripePlugin({
+               createCustomerOnSignUp: true,
+               stripeClient,
+               stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET,
 
-                 subscription: {
-                    authorizeReference: async ({ user, referenceId }) => {
-                       const membership = await db.query.member.findFirst({
-                          where: (member, { eq, and }) =>
-                             and(
-                                eq(member.organizationId, referenceId),
-                                eq(member.userId, user.id),
-                             ),
-                       });
-                       if (!membership) {
-                          return false;
-                       }
-                       return (
-                          membership.role === "owner" ||
-                          membership.role === "admin"
-                       );
-                    },
-                    enabled: true,
-                    getCheckoutSessionParams: async () => ({
-                       params: {
-                          allow_promotion_codes: true,
-                       },
-                    }),
-                    plans: [
-                       {
-                          annualDiscountPriceId: env.STRIPE_PRO_ANNUAL_PRICE_ID,
-                          name: PlanName.PRO,
-                          priceId: env.STRIPE_PRO_PRICE_ID,
-                       },
-                    ],
-                 },
+               subscription: {
+                  authorizeReference: async ({ user, referenceId }) => {
+                     const membership = await db.query.member.findFirst({
+                        where: (member, { eq, and }) =>
+                           and(
+                              eq(member.organizationId, referenceId),
+                              eq(member.userId, user.id),
+                           ),
+                     });
+                     if (!membership) {
+                        return false;
+                     }
+                     return (
+                        membership.role === "owner" ||
+                        membership.role === "admin"
+                     );
+                  },
+                  enabled: true,
+                  getCheckoutSessionParams: async () => ({
+                     params: {
+                        allow_promotion_codes: true,
+                     },
+                  }),
+                  plans: [
+                     {
+                        annualDiscountPriceId: env.STRIPE_PRO_ANNUAL_PRICE_ID,
+                        name: PlanName.PRO,
+                        priceId: env.STRIPE_PRO_PRICE_ID,
+                     },
+                  ],
+               },
 
-                 // PostHog Revenue Analytics - Track subscription lifecycle events
-                 onSubscriptionComplete: async ({
-                    subscription,
-                    stripeSubscription,
-                 }: {
-                    subscription: {
-                       id: string;
-                       plan: string;
-                       referenceId: string;
-                    };
-                    stripeSubscription: Stripe.Subscription;
-                 }) => {
-                    try {
-                       const invoice = await stripeClient.invoices.retrieve(
-                          stripeSubscription.latest_invoice as string,
-                       );
+               // PostHog Revenue Analytics - Track subscription lifecycle events
+               onSubscriptionComplete: async ({
+                  subscription,
+                  stripeSubscription,
+               }: {
+                  subscription: {
+                     id: string;
+                     plan: string;
+                     referenceId: string;
+                  };
+                  stripeSubscription: Stripe.Subscription;
+               }) => {
+                  try {
+                     const invoice = await stripeClient.invoices.retrieve(
+                        stripeSubscription.latest_invoice as string,
+                     );
 
-                       posthogClient.capture({
-                          distinctId: subscription.referenceId,
-                          event: "subscription_started",
-                          groups: { organization: subscription.referenceId },
-                          properties: {
-                             $currency: invoice.currency.toUpperCase(),
-                             $revenue: invoice.amount_paid / 100,
-                             interval:
-                                stripeSubscription.items.data[0]?.plan.interval,
-                             organization_id: subscription.referenceId,
-                             plan_name: subscription.plan,
-                             subscription_id: subscription.id,
-                          },
-                       });
-                    } catch (error) {
-                       console.error(
-                          "PostHog: Failed to capture subscription_started event:",
-                          error,
-                       );
-                    }
-                 },
+                     posthogClient.capture({
+                        distinctId: subscription.referenceId,
+                        event: "subscription_started",
+                        groups: { organization: subscription.referenceId },
+                        properties: {
+                           $currency: invoice.currency.toUpperCase(),
+                           $revenue: invoice.amount_paid / 100,
+                           interval:
+                              stripeSubscription.items.data[0]?.plan.interval,
+                           organization_id: subscription.referenceId,
+                           plan_name: subscription.plan,
+                           subscription_id: subscription.id,
+                        },
+                     });
+                  } catch (error) {
+                     console.error(
+                        "PostHog: Failed to capture subscription_started event:",
+                        error,
+                     );
+                  }
+               },
 
-                 onSubscriptionCancel: async ({
-                    subscription,
-                 }: {
-                    subscription: {
-                       id: string;
-                       plan: string;
-                       referenceId: string;
-                    };
-                 }) => {
-                    try {
-                       posthogClient.capture({
-                          distinctId: subscription.referenceId,
-                          event: "subscription_canceled",
-                          groups: { organization: subscription.referenceId },
-                          properties: {
-                             organization_id: subscription.referenceId,
-                             plan_name: subscription.plan,
-                             subscription_id: subscription.id,
-                          },
-                       });
-                    } catch (error) {
-                       console.error(
-                          "PostHog: Failed to capture subscription_canceled event:",
-                          error,
-                       );
-                    }
-                 },
-              }),
-           ]
+               onSubscriptionCancel: async ({
+                  subscription,
+               }: {
+                  subscription: {
+                     id: string;
+                     plan: string;
+                     referenceId: string;
+                  };
+               }) => {
+                  try {
+                     posthogClient.capture({
+                        distinctId: subscription.referenceId,
+                        event: "subscription_canceled",
+                        groups: { organization: subscription.referenceId },
+                        properties: {
+                           organization_id: subscription.referenceId,
+                           plan_name: subscription.plan,
+                           subscription_id: subscription.id,
+                        },
+                     });
+                  } catch (error) {
+                     console.error(
+                        "PostHog: Failed to capture subscription_canceled event:",
+                        error,
+                     );
+                  }
+               },
+            }),
+         ]
          : []),
 
       // JWT + OAuth 2.1 Provider (enables MCP authentication)
@@ -408,20 +408,23 @@ export function createAuth(config: SimplifiedAuthConfig) {
             create: {
                before: async (session) => {
                   try {
-                     const member = await findMemberByUserId(db, session.userId);
+                     const member = await findMemberByUserId(
+                        db,
+                        session.userId,
+                     );
 
                      if (member?.organizationId) {
-                        const defaultTeam = await ensureDefaultProject(
-                           db,
-                           member.organizationId,
-                           session.userId,
-                        );
+                        // Check if user has any teams in this organization
+                        const existingTeam = await db.query.team.findFirst({
+                           where: (team, { eq }) =>
+                              eq(team.organizationId, member.organizationId),
+                        });
 
                         return {
                            data: {
                               ...session,
                               activeOrganizationId: member.organizationId,
-                              activeTeamId: defaultTeam?.id,
+                              activeTeamId: existingTeam?.id,
                            },
                         };
                      }

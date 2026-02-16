@@ -2,11 +2,21 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated")({
    beforeLoad: async ({ context, location }) => {
-      const session = await context.queryClient.fetchQuery(
-         context.orpc.session.getSession.queryOptions({}),
-      );
+      let session;
 
-      if (!session?.user) {
+      try {
+         session = await context.queryClient.fetchQuery(
+            context.orpc.session.getSession.queryOptions({}),
+         );
+      } catch (error) {
+         // If session fetch fails, redirect to sign in
+         throw redirect({
+            to: "/auth/sign-in",
+            search: { redirect: location.href },
+         });
+      }
+
+      if (!session?.user?.id) {
          throw redirect({
             to: "/auth/sign-in",
             search: { redirect: location.href },

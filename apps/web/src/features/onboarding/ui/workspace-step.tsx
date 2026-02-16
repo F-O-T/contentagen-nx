@@ -16,19 +16,20 @@ import {
    useCallback,
    useEffect,
    useImperativeHandle,
-   useRef,
    useState,
 } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { authClient } from "@/integrations/better-auth/auth-client";
+import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
+import { usePresignedUpload } from "@/features/file-upload/lib/use-presigned-upload";
+import { orpc } from "@/integrations/orpc/client";
 import type { StepHandle, StepState } from "./step-handle";
 
 const workspaceSchema = z.object({
    workspaceName: z
       .string()
       .min(2, "O nome do workspace deve ter no mínimo 2 caracteres."),
-   logo: z.instanceof(File).nullable(),
 });
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -43,14 +44,19 @@ interface WorkspaceStepProps {
 export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
    function WorkspaceStep({ onNext, onStateChange, onSlugChange }, ref) {
       const [isPending, setIsPending] = useState(false);
-      const [logoPreview, setLogoPreview] = useState<string | null>(null);
-      const [logoError, setLogoError] = useState<string | null>(null);
-      const fileInputRef = useRef<HTMLInputElement>(null);
+
+      const fileUpload = useFileUpload({
+         maxSize: MAX_FILE_SIZE,
+         acceptedTypes: ACCEPTED_TYPES,
+         typeErrorMessage: "Formato inválido. Use PNG, JPG, GIF ou WebP.",
+         sizeErrorMessage: "Arquivo muito grande. Máximo 5MB.",
+      });
+
+      const presignedUpload = usePresignedUpload();
 
       const form = useForm({
          defaultValues: {
             workspaceName: "",
-            logo: null as File | null,
          },
          onSubmit: async ({ value }) => {
             try {
@@ -73,7 +79,34 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
                   organizationId: orgId,
                });
 
-               // TODO: Upload logo to MinIO and update org with logo URL
+               // Upload logo if selected
+               if (fileUpload.selectedFile) {
+                  try {
+                     const fileExtension = fileUpload.selectedFile.name.split(".").pop() ?? "png";
+
+                     // Get presigned URL
+                     const uploadData = await orpc.organization.generateLogoUploadUrl({
+                        fileExtension,
+                        contentType: fileUpload.selectedFile.type,
+                     });
+
+                     // Upload to MinIO
+                     await presignedUpload.uploadToPresignedUrl(
+                        uploadData.presignedUrl,
+                        fileUpload.selectedFile,
+                        fileUpload.selectedFile.type,
+                     );
+
+                     // Update organization with logo URL
+                     await authClient.organization.update({
+                        organizationId: orgId,
+                        data: { logo: uploadData.publicUrl },
+                     });
+                  } catch (uploadError) {
+                     console.error("Logo upload failed:", uploadError);
+                     toast.error("Workspace criado, mas falha ao fazer upload do logo.");
+                  }
+               }
 
                toast.success("Workspace criado com sucesso!");
                onNext({ id: orgId, slug: orgSlug });
@@ -92,29 +125,12 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
 
       const handleFileChange = useCallback(
          (e: ChangeEvent<HTMLInputElement>) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
+            const files = e.target.files;
+            if (!files) return;
 
-            setLogoError(null);
-
-            if (!ACCEPTED_TYPES.includes(file.type)) {
-               setLogoError("Formato inválido. Use PNG, JPG, GIF ou WebP.");
-               return;
-            }
-
-            if (file.size > MAX_FILE_SIZE) {
-               setLogoError("Arquivo muito grande. Máximo 5MB.");
-               return;
-            }
-
-            form.setFieldValue("logo", file);
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-               setLogoPreview(ev.target?.result as string);
-            };
-            reader.readAsDataURL(file);
+            fileUpload.handleFileSelect(Array.from(files));
          },
-         [form],
+         [fileUpload],
       );
 
       useImperativeHandle(
@@ -125,14 +141,15 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
                return true;
             },
             canContinue: true,
-            isPending,
+            isPending: isPending || fileUpload.isUploading || presignedUpload.isUploading,
          }),
-         [form, isPending],
+         [form, isPending, fileUpload.isUploading, presignedUpload.isUploading],
       );
 
       useEffect(() => {
-         onStateChange({ canContinue: true, isPending });
-      }, [isPending, onStateChange]);
+         const isProcessing = isPending || fileUpload.isUploading || presignedUpload.isUploading;
+         onStateChange({ canContinue: true, isPending: isProcessing });
+      }, [isPending, fileUpload.isUploading, presignedUpload.isUploading, onStateChange]);
 
       const handleSubmit = useCallback(
          (e: FormEvent) => {
@@ -157,39 +174,40 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
             <form className="space-y-4" onSubmit={handleSubmit}>
                {/* Circular logo upload */}
                <div className="flex flex-col items-center gap-2">
-                  <button
+                  <label
                      className={cn(
-                        "relative flex size-16 items-center justify-center rounded-full border-2 border-dashed transition-colors overflow-hidden",
-                        logoPreview
+                        "relative flex size-16 items-center justify-center rounded-full border-2 border-dashed transition-colors overflow-hidden cursor-pointer",
+                        fileUpload.filePreview
                            ? "border-primary"
                            : "border-muted-foreground/30 hover:border-muted-foreground/50",
+                        (isPending || fileUpload.isUploading || presignedUpload.isUploading) && "opacity-50 cursor-not-allowed",
                      )}
-                     disabled={isPending}
-                     onClick={() => fileInputRef.current?.click()}
-                     type="button"
                   >
-                     {logoPreview ? (
+                     {fileUpload.filePreview ? (
                         <img
                            alt="Logo preview"
                            className="size-full object-cover"
-                           src={logoPreview}
+                           src={fileUpload.filePreview}
                         />
                      ) : (
                         <Camera className="size-5 text-muted-foreground" />
                      )}
-                  </button>
-                  <input
-                     accept="image/png,image/jpeg,image/gif,image/webp"
-                     className="hidden"
-                     onChange={handleFileChange}
-                     ref={fileInputRef}
-                     type="file"
-                  />
+                     <input
+                        accept="image/png,image/jpeg,image/gif,image/webp"
+                        className="hidden"
+                        disabled={isPending || fileUpload.isUploading || presignedUpload.isUploading}
+                        onChange={handleFileChange}
+                        type="file"
+                     />
+                  </label>
                   <span className="text-xs text-muted-foreground">
                      Logo (opcional)
                   </span>
-                  {logoError && (
-                     <p className="text-xs text-destructive">{logoError}</p>
+                  {fileUpload.error && (
+                     <p className="text-xs text-destructive">{fileUpload.error}</p>
+                  )}
+                  {presignedUpload.error && (
+                     <p className="text-xs text-destructive">{presignedUpload.error}</p>
                   )}
                </div>
 

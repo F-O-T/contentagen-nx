@@ -49,6 +49,7 @@ export const ProjectStep = forwardRef<StepHandle, ProjectStepProps>(
 
                const result = await authClient.organization.createTeam({
                   name: value.projectName,
+                  slug,
                   organizationId,
                });
 
@@ -58,11 +59,20 @@ export const ProjectStep = forwardRef<StepHandle, ProjectStepProps>(
 
                const teamId = result.data.id;
 
-               // Set the slug on the team
-               await authClient.organization.updateTeam({
+               // Get current user session
+               const session = await authClient.getSession();
+               if (!session?.data?.user?.id) {
+                  throw new Error("No active session");
+               }
+
+               // Add the creator as a team member
+               await authClient.organization.addTeamMember({
                   teamId,
-                  data: { slug } as Record<string, unknown>,
+                  userId: session.data.user.id,
                });
+
+               // Set the newly created team as active
+               await authClient.organization.setActiveTeam({ teamId });
 
                toast.success("Projeto criado com sucesso!");
                onNext({ id: teamId, slug });

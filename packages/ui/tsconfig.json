@@ -1,7 +1,7 @@
 {
    "extends": "@tooling/typescript/typecheck.json",
    "compilerOptions": {
-      "jsx": "preserve",
+      "jsx": "react-jsx",
       "types": ["bun-types"],
       "lib": ["dom", "ES2022"],
       "paths": {

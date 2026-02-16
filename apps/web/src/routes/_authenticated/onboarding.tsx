@@ -3,11 +3,17 @@ import { OnboardingWizard } from "@/features/onboarding/ui/onboarding-wizard";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
 	beforeLoad: async ({ context }) => {
-		const session = await context.queryClient.fetchQuery(
-			context.orpc.session.getSession.queryOptions({}),
-		);
+		let session;
 
-		if (!session?.user) {
+		try {
+			session = await context.queryClient.fetchQuery(
+				context.orpc.session.getSession.queryOptions({}),
+			);
+		} catch (error) {
+			throw redirect({ to: "/auth/sign-in" });
+		}
+
+		if (!session?.user?.id) {
 			throw redirect({ to: "/auth/sign-in" });
 		}
 

@@ -115,13 +115,13 @@ export function OnboardingWizard({
    );
 
    const handleOnboardingComplete = useCallback(
-      (slug: string, _teamId: string) => {
+      (slug: string, teamSlug: string) => {
          navigate({
             to: "/$slug/$teamSlug/home",
-            params: { slug, teamSlug: wizardState.teamSlug ?? _teamId },
+            params: { slug, teamSlug },
          });
       },
-      [navigate, wizardState.teamSlug],
+      [navigate],
    );
 
    return (
@@ -229,6 +229,7 @@ export function OnboardingWizard({
                                  }
                                  ref={stepRef}
                                  teamId={wizardState.teamId ?? ""}
+                                 teamSlug={wizardState.teamSlug ?? ""}
                               />
                            ),
                         })}
