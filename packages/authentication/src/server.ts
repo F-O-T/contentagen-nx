@@ -121,12 +121,6 @@ export function createAuth(config: SimplifiedAuthConfig) {
                      required: false,
                      type: "string",
                   },
-                  logo: {
-                     defaultValue: null,
-                     input: true,
-                     required: false,
-                     type: "string",
-                  },
                   onboardingCompleted: {
                      defaultValue: false,
                      input: true,
