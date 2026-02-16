@@ -1,4 +1,4 @@
-import { BlogAnalyticsTracker } from "@f-o-t/contentta-sdk/analytics";
+import { BlogAnalyticsTracker } from "@contentta/sdk/analytics";
 import {
 	getContentById,
 	getContentBySlug,

@@ -254,7 +254,7 @@ Publishable libraries for external consumption.
 
 | Library            | Purpose                                           |
 | ------------------ | ------------------------------------------------- |
-| `sdk`              | Official TypeScript SDK (`@f-o-t/contentta-sdk`) for interacting with the Contentta API |
+| `sdk`              | Official TypeScript SDK (`@contentta/sdk`) for interacting with the Contentta API |
 | `content-analysis` | SEO scoring, readability analysis, keyword optimization |
 | `markdown`         | CommonMark parser with AST support                |
 
@@ -312,11 +312,11 @@ Shared internal libraries organized by concern. All packages use explicit export
 Contentta provides an official TypeScript SDK for integrating with the API from external applications.
 
 ```bash
-npm install @f-o-t/contentta-sdk
+npm install @contentta/sdk
 ```
 
 ```typescript
-import { createSdk } from "@f-o-t/contentta-sdk";
+import { createSdk } from "@contentta/sdk";
 
 const sdk = createSdk({
   apiKey: "YOUR_API_KEY",

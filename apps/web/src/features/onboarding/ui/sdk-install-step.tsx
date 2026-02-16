@@ -49,9 +49,9 @@ export function SdkInstallStep() {
    const publicApiKey = publicKeyData?.publicApiKey ?? "cta_pub_...";
    const organizationId = org?.id ?? "org_...";
 
-   const installSnippet = "npm install @f-o-t/contentta-sdk";
+   const installSnippet = "npm install @contentta/sdk";
 
-   const codeSnippet = `import { createEventTracker } from "@f-o-t/contentta-sdk/events/client";
+   const codeSnippet = `import { createEventTracker } from "@contentta/sdk/events";
 
 const tracker = createEventTracker({
   apiKey: "${publicApiKey}",

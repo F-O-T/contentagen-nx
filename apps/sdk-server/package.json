@@ -1,5 +1,6 @@
 {
    "dependencies": {
+      "@contentta/sdk": "workspace:*",
       "@elysiajs/cors": "catalog:server",
       "@modelcontextprotocol/sdk": "catalog:mcp",
       "@orpc/server": "catalog:orpc",

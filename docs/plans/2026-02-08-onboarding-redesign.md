@@ -89,11 +89,11 @@ The onboarding route's `beforeLoad` checks the opposite:
 - Shows the auto-generated public API key (`cta_pub_xxxx`) with copy button
 - Installation snippet:
   ```bash
-  npm install @f-o-t/contentta-sdk
+  npm install @contentta/sdk
   ```
 - Initialization code:
   ```typescript
-  import { createEventTracker } from "@f-o-t/contentta-sdk/events/client";
+  import { createEventTracker } from "@contentta/sdk/events";
 
   const tracker = createEventTracker({
     apiKey: "cta_pub_xxxx",
