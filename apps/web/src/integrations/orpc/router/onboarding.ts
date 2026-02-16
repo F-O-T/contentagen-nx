@@ -234,6 +234,12 @@ export const completeOnboarding = protectedProcedure
             tilesCount: tiles.length,
          });
 
+         // Get team name for dashboard
+         const teamRecord = await tx.query.team.findFirst({
+            where: (t, { eq }) => eq(t.id, teamId),
+            columns: { name: true },
+         });
+
          // Create default dashboard with tiles
          const [createdDashboard] = await tx
             .insert(dashboards)
@@ -241,8 +247,10 @@ export const completeOnboarding = protectedProcedure
                organizationId,
                teamId,
                createdBy: userId,
-               name: "Dashboard Principal",
-               description: "Seu painel de análise principal",
+               name: teamRecord?.name
+                  ? `Dashboard ${teamRecord.name}`
+                  : "Dashboard",
+               description: null,
                isDefault: true,
                tiles,
             })

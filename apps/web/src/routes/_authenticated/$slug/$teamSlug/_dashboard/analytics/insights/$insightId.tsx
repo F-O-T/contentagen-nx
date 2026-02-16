@@ -1,7 +1,7 @@
 import type { InsightConfig } from "@packages/analytics/types";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import {
    useInsightConfig,
 } from "@/features/analytics/hooks/use-insight-config";
 import { InsightBuilder } from "@/features/analytics/ui/insight-builder";
+import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
@@ -19,8 +20,10 @@ export const Route = createFileRoute(
 });
 
 function EditInsightPage() {
-   const { insightId } = Route.useParams();
+   const { insightId, slug, teamSlug } = Route.useParams();
+   const navigate = useNavigate();
    const queryClient = useQueryClient();
+   const { openAlertDialog } = useAlertDialog();
 
    const {
       data: insight,
@@ -31,6 +34,14 @@ function EditInsightPage() {
          input: { id: insightId },
       }),
    );
+
+   // Query for analytics results (used by TrendsResultsTable)
+   const { data: queryResult } = useQuery({
+      ...orpc.analytics.query.queryOptions({
+         input: { config: insight?.config as InsightConfig },
+      }),
+      enabled: !!insight?.config,
+   });
 
    const { type, config, setType, updateConfigImmediate } = useInsightConfig();
    const [insightName, setInsightName] = useState("");
@@ -44,8 +55,6 @@ function EditInsightPage() {
          setInsightDescription(insight.description ?? "");
          const insightConfig = insight.config as InsightConfig;
          setType(insightConfig.type as InsightType);
-         // After setType resets config to defaults, we need to override with the real config
-         // Use a microtask to ensure setType's state update is processed first
          queueMicrotask(() => {
             updateConfigImmediate(insightConfig);
          });
@@ -72,6 +81,42 @@ function EditInsightPage() {
       }),
    );
 
+   const deleteMutation = useMutation(
+      orpc.insights.remove.mutationOptions({
+         onSuccess: () => {
+            toast.success("Insight deletado");
+            queryClient.invalidateQueries({
+               queryKey: orpc.insights.list.queryKey({}),
+            });
+            navigate({
+               to: "/$slug/$teamSlug/analytics/insights",
+               params: { slug, teamSlug },
+            } as never);
+         },
+         onError: () => {
+            toast.error("Erro ao deletar insight");
+         },
+      }),
+   );
+
+   const duplicateMutation = useMutation(
+      orpc.insights.create.mutationOptions({
+         onSuccess: (data) => {
+            toast.success("Insight duplicado");
+            queryClient.invalidateQueries({
+               queryKey: orpc.insights.list.queryKey({}),
+            });
+            navigate({
+               to: "/$slug/$teamSlug/analytics/insights/$insightId",
+               params: { slug, teamSlug, insightId: data.id },
+            } as never);
+         },
+         onError: () => {
+            toast.error("Erro ao duplicar insight");
+         },
+      }),
+   );
+
    const handleSave = useCallback(() => {
       if (!insightName.trim()) {
          toast.error("O nome do insight é obrigatório");
@@ -85,16 +130,47 @@ function EditInsightPage() {
       });
    }, [insightId, insightName, insightDescription, config, updateMutation]);
 
+   const handleDelete = useCallback(() => {
+      openAlertDialog({
+         title: "Deletar insight",
+         description:
+            "Tem certeza que deseja deletar este insight? Esta ação não pode ser desfeita.",
+         confirmLabel: "Deletar",
+         onConfirm: () => deleteMutation.mutate({ id: insightId }),
+      });
+   }, [insightId, deleteMutation, openAlertDialog]);
+
+   const handleDuplicate = useCallback(() => {
+      if (!insight) return;
+      duplicateMutation.mutate({
+         name: `${insight.name} (cópia)`,
+         description: insight.description ?? undefined,
+         type: insight.type,
+         config: insight.config as Record<string, unknown>,
+      });
+   }, [insight, duplicateMutation]);
+
+   const handleRefresh = useCallback(() => {
+      queryClient.invalidateQueries({
+         queryKey: orpc.analytics.query.queryKey({
+            input: { config: insight?.config as InsightConfig },
+         }),
+      });
+      queryClient.invalidateQueries({
+         queryKey: orpc.insights.getById.queryOptions({
+            input: { id: insightId },
+         }).queryKey,
+      });
+   }, [queryClient, insight?.config, insightId]);
+
    if (isLoading) {
       return (
          <main className="flex flex-col gap-4 h-full">
             <Skeleton className="h-10 w-64" />
             <Skeleton className="h-8 w-full max-w-md" />
-            <Skeleton className="h-8 w-full" />
-            <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 flex-1">
-               <Skeleton className="h-[400px]" />
-               <Skeleton className="h-[400px]" />
-            </div>
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-[200px] w-full" />
+            <Skeleton className="h-[400px] w-full" />
          </main>
       );
    }
@@ -114,17 +190,21 @@ function EditInsightPage() {
 
    return (
       <InsightBuilder
+         backTo={{ slug, teamSlug }}
          config={config}
          description={insightDescription}
-         disableTypeSwitch
-         heading="Editar Insight"
          isSaving={updateMutation.isPending}
+         lastComputedAt={insight.lastComputedAt}
          name={insightName}
          onConfigUpdate={updateConfigImmediate}
+         onDelete={handleDelete}
          onDescriptionChange={setInsightDescription}
+         onDuplicate={handleDuplicate}
          onNameChange={setInsightName}
+         onRefresh={handleRefresh}
          onSave={handleSave}
          onTypeChange={setType}
+         queryResult={queryResult}
          type={type}
       />
    );

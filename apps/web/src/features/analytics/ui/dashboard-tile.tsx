@@ -2,22 +2,54 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { InsightConfig } from "@packages/analytics/types";
 import { Button } from "@packages/ui/components/button";
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuPortal,
+   DropdownMenuSeparator,
+   DropdownMenuSub,
+   DropdownMenuSubContent,
+   DropdownMenuSubTrigger,
+   DropdownMenuTrigger,
+} from "@packages/ui/components/dropdown-menu";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { cn } from "@packages/ui/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Ellipsis, GripVertical, X } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link, useParams } from "@tanstack/react-router";
+import {
+   AlertCircle,
+   Copy,
+   Ellipsis,
+   GripVertical,
+   Maximize2,
+   Pencil,
+   RefreshCw,
+   Trash2,
+} from "lucide-react";
 import { orpc } from "@/integrations/orpc/client";
 import { InsightPreview } from "./insight-preview";
+
+export type TileSize = "sm" | "md" | "lg" | "full";
 
 interface DashboardTileProps {
    id: string;
    insightName?: string;
-   size: "sm" | "md" | "lg" | "full";
+   size: TileSize;
    children?: React.ReactNode;
    insightId?: string;
    isEditing?: boolean;
    onRemove?: () => void;
+   onResize?: (size: TileSize) => void;
+   onDuplicate?: () => void;
 }
+
+const sizeLabels: Record<TileSize, string> = {
+   sm: "Pequeno (25%)",
+   md: "Médio (50%)",
+   lg: "Grande (75%)",
+   full: "Largura total (100%)",
+};
 
 const sizeClasses = {
    sm: "col-span-12 md:col-span-3",
@@ -78,6 +110,7 @@ function useInsightMetadata(insightName?: string, insightId?: string) {
    const name = insightName || insight?.name || "";
    const description = insight?.description || "";
    const type = insight?.type || "trends";
+   const lastComputedAt = insight?.lastComputedAt ?? null;
 
    // PostHog-style type label with date range
    const typeLabel =
@@ -98,7 +131,7 @@ function useInsightMetadata(insightName?: string, insightId?: string) {
       ? formatDateRange(dateRange.value)
       : "ÚLTIMOS 30 DIAS";
 
-   return { name, description, typeLabel, dateRangeLabel };
+   return { name, description, typeLabel, dateRangeLabel, lastComputedAt };
 }
 
 function formatDateRange(value: string): string {
@@ -122,6 +155,21 @@ function formatDateRange(value: string): string {
    }
 }
 
+function formatLastComputed(date: Date): string {
+   const now = new Date();
+   const diffMs = now.getTime() - date.getTime();
+   const diffMinutes = Math.floor(diffMs / 60000);
+
+   if (diffMinutes < 1) return "Atualizado agora";
+   if (diffMinutes < 60) return `Atualizado há ${diffMinutes}min`;
+
+   const diffHours = Math.floor(diffMinutes / 60);
+   if (diffHours < 24) return `Atualizado há ${diffHours}h`;
+
+   const diffDays = Math.floor(diffHours / 24);
+   return `Atualizado há ${diffDays}d`;
+}
+
 export function DashboardTile({
    id,
    insightName,
@@ -130,7 +178,10 @@ export function DashboardTile({
    insightId,
    isEditing = true,
    onRemove,
+   onResize,
+   onDuplicate,
 }: DashboardTileProps) {
+   const queryClient = useQueryClient();
    const {
       attributes,
       listeners,
@@ -144,10 +195,20 @@ export function DashboardTile({
       transition,
    };
 
-   const { name, description, typeLabel, dateRangeLabel } = useInsightMetadata(
-      insightName,
-      insightId,
-   );
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
+   const { name, description, typeLabel, dateRangeLabel, lastComputedAt } =
+      useInsightMetadata(insightName, insightId);
+
+   const handleRefresh = () => {
+      if (!insightId) return;
+      queryClient.invalidateQueries({
+         queryKey: orpc.insights.getById.queryKey({
+            input: { id: insightId },
+         }),
+      });
+   };
 
    return (
       <div
@@ -188,21 +249,105 @@ export function DashboardTile({
                      </div>
                   </div>
                   <div className="flex items-center gap-0.5 shrink-0">
-                     {onRemove && (
-                        <Button
-                           className="size-6"
-                           onClick={onRemove}
-                           size="icon"
-                           variant="ghost"
-                        >
-                           <X className="size-3" />
-                        </Button>
-                     )}
-                     {!isEditing && (
-                        <Button className="size-6" size="icon" variant="ghost">
-                           <Ellipsis className="size-3.5" />
-                        </Button>
-                     )}
+                     <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                           <Button
+                              className="size-6"
+                              size="icon"
+                              variant="ghost"
+                           >
+                              <Ellipsis className="size-3.5" />
+                           </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                           {/* Edit insight */}
+                           {insightId && (
+                              <DropdownMenuItem asChild>
+                                 <Link
+                                    params={{
+                                       insightId,
+                                       slug,
+                                       teamSlug,
+                                    }}
+                                    to="/$slug/$teamSlug/analytics/insights/$insightId"
+                                 >
+                                    <Pencil className="mr-2 size-4" />
+                                    Editar
+                                 </Link>
+                              </DropdownMenuItem>
+                           )}
+
+                           {/* Duplicate on dashboard */}
+                           {onDuplicate && (
+                              <DropdownMenuItem onClick={onDuplicate}>
+                                 <Copy className="mr-2 size-4" />
+                                 Duplicar
+                              </DropdownMenuItem>
+                           )}
+
+                           {/* Resize submenu */}
+                           {onResize && (
+                              <DropdownMenuSub>
+                                 <DropdownMenuSubTrigger>
+                                    <Maximize2 className="mr-2 size-4" />
+                                    Redimensionar
+                                 </DropdownMenuSubTrigger>
+                                 <DropdownMenuPortal>
+                                    <DropdownMenuSubContent>
+                                       {(
+                                          Object.entries(sizeLabels) as [
+                                             TileSize,
+                                             string,
+                                          ][]
+                                       ).map(([key, label]) => (
+                                          <DropdownMenuItem
+                                             disabled={key === size}
+                                             key={key}
+                                             onClick={() => onResize(key)}
+                                          >
+                                             {label}
+                                             {key === size && " \u2713"}
+                                          </DropdownMenuItem>
+                                       ))}
+                                    </DropdownMenuSubContent>
+                                 </DropdownMenuPortal>
+                              </DropdownMenuSub>
+                           )}
+
+                           <DropdownMenuSeparator />
+
+                           {/* Refresh data */}
+                           {insightId && (
+                              <DropdownMenuItem onClick={handleRefresh}>
+                                 <RefreshCw className="mr-2 size-4" />
+                                 <div className="flex flex-col">
+                                    <span>Atualizar dados</span>
+                                    {lastComputedAt && (
+                                       <span className="text-[11px] text-muted-foreground">
+                                          {formatLastComputed(
+                                             new Date(lastComputedAt),
+                                          )}
+                                       </span>
+                                    )}
+                                 </div>
+                              </DropdownMenuItem>
+                           )}
+
+                           {/* Remove from dashboard */}
+                           {onRemove && (
+                              <>
+                                 <DropdownMenuSeparator />
+                                 <DropdownMenuItem
+                                    className="text-destructive focus:text-destructive"
+                                    onClick={onRemove}
+                                 >
+                                    <Trash2 className="mr-2 size-4" />
+                                    Remover do dashboard
+                                 </DropdownMenuItem>
+                              </>
+                           )}
+                        </DropdownMenuContent>
+                     </DropdownMenu>
                   </div>
                </div>
             </div>

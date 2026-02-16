@@ -6,6 +6,7 @@ import {
    pgTable,
    text,
    timestamp,
+   uniqueIndex,
    uuid,
 } from "drizzle-orm/pg-core";
 import { z } from "zod";
@@ -61,7 +62,12 @@ export const dashboards = pgTable(
          .$onUpdate(() => new Date())
          .notNull(),
    },
-   (table) => [index("dashboards_team_idx").on(table.teamId)],
+   (table) => [
+      index("dashboards_team_idx").on(table.teamId),
+      uniqueIndex("dashboards_team_default_idx")
+         .on(table.teamId)
+         .where(sql`${table.isDefault} = true`),
+   ],
 );
 
 export const dashboardsRelations = relations(dashboards, ({ one }) => ({

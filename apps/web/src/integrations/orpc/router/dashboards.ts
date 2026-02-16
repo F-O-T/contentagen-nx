@@ -4,6 +4,7 @@ import {
    deleteDashboard,
    getDashboardById,
    listDashboardsByTeam,
+   setDashboardAsHome,
    updateDashboard,
    updateDashboardTiles,
 } from "@packages/database/repositories/dashboard-repository";
@@ -186,7 +187,16 @@ export const remove = protectedProcedure
          });
       }
 
-      await deleteDashboard(db, input.id);
+      try {
+         await deleteDashboard(db, input.id);
+      } catch (err) {
+         if (err instanceof Error && err.message.includes("home dashboard")) {
+            throw new ORPCError("BAD_REQUEST", {
+               message: err.message,
+            });
+         }
+         throw err;
+      }
 
       try {
          await emitDashboardDeleted(
@@ -239,17 +249,48 @@ export const updateGlobalFilters = protectedProcedure
       }
 
       // Update dashboard
-      const updated = await updateDashboard(
-         db,
-         input.dashboardId,
-         updateData,
-      );
+      const updated = await updateDashboard(db, input.dashboardId, updateData);
 
       try {
          const changedFields = Object.keys(updateData);
          await emitDashboardUpdated(
             { db, posthog, organizationId, userId, teamId },
             { dashboardId: input.dashboardId, changedFields },
+         );
+      } catch {
+         // Event emission must not break the main flow
+      }
+
+      return updated;
+   });
+
+export const setAsHome = protectedProcedure
+   .input(z.object({ id: z.string().uuid() }))
+   .handler(async ({ context, input }) => {
+      const { organizationId, teamId, db, posthog, userId } = context;
+
+      const dashboard = await getDashboardById(db, input.id);
+
+      if (
+         !dashboard ||
+         dashboard.organizationId !== organizationId ||
+         dashboard.teamId !== teamId
+      ) {
+         throw new ORPCError("NOT_FOUND", {
+            message: "Dashboard not found.",
+         });
+      }
+
+      if (dashboard.isDefault) {
+         return dashboard;
+      }
+
+      const updated = await setDashboardAsHome(db, input.id, teamId);
+
+      try {
+         await emitDashboardUpdated(
+            { db, posthog, organizationId, userId, teamId },
+            { dashboardId: input.id, changedFields: ["isDefault"] },
          );
       } catch {
          // Event emission must not break the main flow

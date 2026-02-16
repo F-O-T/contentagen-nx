@@ -112,10 +112,57 @@ export async function deleteDashboard(
    dashboardId: string,
 ) {
    try {
+      const dashboard = await getDashboardById(db, dashboardId);
+
+      if (dashboard?.isDefault) {
+         const teamDashboards = await listDashboardsByTeam(
+            db,
+            dashboard.teamId,
+         );
+         if (teamDashboards.length > 1) {
+            throw AppError.validation(
+               "Cannot delete home dashboard. Set another dashboard as home first.",
+            );
+         }
+      }
+
       await db.delete(dashboards).where(eq(dashboards.id, dashboardId));
    } catch (err) {
       propagateError(err);
       throw AppError.database("Failed to delete dashboard");
+   }
+}
+
+export async function setDashboardAsHome(
+   db: DatabaseInstance,
+   dashboardId: string,
+   teamId: string,
+) {
+   try {
+      return await db.transaction(async (tx) => {
+         // Unset current home dashboard for this team
+         await tx
+            .update(dashboards)
+            .set({ isDefault: false })
+            .where(
+               and(
+                  eq(dashboards.teamId, teamId),
+                  eq(dashboards.isDefault, true),
+               ),
+            );
+
+         // Set the target dashboard as home
+         const [updated] = await tx
+            .update(dashboards)
+            .set({ isDefault: true })
+            .where(eq(dashboards.id, dashboardId))
+            .returning();
+
+         return updated;
+      });
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database("Failed to set dashboard as home");
    }
 }
 

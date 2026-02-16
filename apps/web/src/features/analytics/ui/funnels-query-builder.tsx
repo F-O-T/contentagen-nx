@@ -9,7 +9,6 @@ import {
    SelectTrigger,
    SelectValue,
 } from "@packages/ui/components/select";
-import { Switch } from "@packages/ui/components/switch";
 import { Plus, X } from "lucide-react";
 import { EventCombobox } from "./event-combobox";
 
@@ -17,14 +16,6 @@ interface FunnelsQueryBuilderProps {
    config: FunnelsConfig;
    onUpdate: (updates: Partial<FunnelsConfig>) => void;
 }
-
-const DATE_RANGE_PRESETS = [
-   { value: "7d", label: "Últimos 7 dias" },
-   { value: "14d", label: "Últimos 14 dias" },
-   { value: "30d", label: "Últimos 30 dias" },
-   { value: "90d", label: "Últimos 90 dias" },
-   { value: "180d", label: "Últimos 180 dias" },
-] as const;
 
 const WINDOW_UNITS = [
    { value: "minute", label: "Minutos" },
@@ -63,9 +54,6 @@ export function FunnelsQueryBuilder({
       steps[index] = { ...steps[index], ...updates };
       onUpdate({ steps });
    };
-
-   const dateRangeValue =
-      config.dateRange.type === "relative" ? config.dateRange.value : "30d";
 
    return (
       <div className="space-y-6">
@@ -163,44 +151,6 @@ export function FunnelsQueryBuilder({
                   </SelectContent>
                </Select>
             </div>
-         </div>
-
-         <div className="space-y-2">
-            <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Período
-            </Label>
-            <Select
-               onValueChange={(value) =>
-                  onUpdate({
-                     dateRange: {
-                        type: "relative",
-                        value: value as (typeof DATE_RANGE_PRESETS)[number]["value"],
-                     },
-                  })
-               }
-               value={dateRangeValue}
-            >
-               <SelectTrigger>
-                  <SelectValue />
-               </SelectTrigger>
-               <SelectContent>
-                  {DATE_RANGE_PRESETS.map((dr) => (
-                     <SelectItem key={dr.value} value={dr.value}>
-                        {dr.label}
-                     </SelectItem>
-                  ))}
-               </SelectContent>
-            </Select>
-         </div>
-
-         <div className="flex items-center justify-between">
-            <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">
-               Comparar com período anterior
-            </Label>
-            <Switch
-               checked={config.compare}
-               onCheckedChange={(checked) => onUpdate({ compare: checked })}
-            />
          </div>
       </div>
    );

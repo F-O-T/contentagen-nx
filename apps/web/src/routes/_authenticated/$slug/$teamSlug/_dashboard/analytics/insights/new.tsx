@@ -4,7 +4,7 @@ import {
    useNavigate,
    useParams,
 } from "@tanstack/react-router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { useInsightConfig } from "@/features/analytics/hooks/use-insight-config";
 import { InsightBuilder } from "@/features/analytics/ui/insight-builder";
@@ -46,7 +46,7 @@ function NewInsightPage() {
       }),
    );
 
-   const handleSave = () => {
+   const handleSave = useCallback(() => {
       if (!insightName.trim()) {
          toast.error("O nome do insight é obrigatório");
          return;
@@ -57,18 +57,23 @@ function NewInsightPage() {
          type,
          config: config as Record<string, unknown>,
       });
-   };
+   }, [insightName, insightDescription, type, config, createMutation]);
+
+   const handleRefresh = useCallback(() => {
+      // No-op for new insights (nothing to refresh yet)
+   }, []);
 
    return (
       <InsightBuilder
+         backTo={{ slug, teamSlug }}
          config={config}
          description={insightDescription}
-         heading="Novo Insight"
          isSaving={createMutation.isPending}
          name={insightName}
          onConfigUpdate={updateConfigImmediate}
          onDescriptionChange={setInsightDescription}
          onNameChange={setInsightName}
+         onRefresh={handleRefresh}
          onSave={handleSave}
          onTypeChange={setType}
          type={type}
