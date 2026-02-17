@@ -30,6 +30,7 @@ import type { ToolStatus } from "./chat/tool-cards/tool-card-base";
 import { setChatSidebarWidth, useChatSidebar } from "../hooks/use-editor-state";
 import { useStore } from "@tanstack/react-store";
 import { editorContextStore } from "../stores/editor-context-store";
+import { EnhancedComposer } from "./enhanced-composer";
 
 // ============================================================================
 // Types
@@ -314,16 +315,7 @@ export function AssistantChatSidebar({
          {/* Composer */}
          <ComposerPrimitive.Root className="p-2 border-t">
             <div className="flex gap-2">
-               <ComposerPrimitive.Input
-                  className={cn(
-                     "flex-1 px-3 py-2 text-sm rounded-lg resize-none",
-                     "bg-muted border-none",
-                     "focus:outline-none focus:ring-2 focus:ring-ring",
-                     "min-h-[60px] max-h-[120px]",
-                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                  )}
-                  placeholder="Como posso ajudar com seu conteudo?"
-               />
+               <EnhancedComposer className="flex-1" />
                <ComposerPrimitive.Send asChild>
                   <Button className="self-end h-10 w-10" size="icon">
                      <ThreadPrimitive.If running>
