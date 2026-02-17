@@ -14,7 +14,7 @@ import {
    isEditorTool,
    isFrontmatterTool,
 } from "@/features/content/lib/assistant-runtime-adapter";
-import { executeEditorTool } from "@/features/editor";
+import { executeEditorTool, setEditorFromMarkdown } from "@/features/editor";
 
 const ANIMATION_CHARS_PER_TICK = 10;
 const ANIMATION_INTERVAL_MS = 30;
@@ -32,6 +32,44 @@ interface UseStreamingToolBridgeOptions {
       keywords?: string[];
    }) => void;
    autoExecute?: boolean;
+}
+
+/**
+ * Parse writer-agent YAML frontmatter response into structured data.
+ * Format: ---\ntitle: "..."\ndescription: "..."\nslug: "..."\nkeywords: [...]\n---\n\n# Body...
+ */
+function parseWriterResponse(text: string): {
+   title?: string;
+   description?: string;
+   slug?: string;
+   keywords?: string[];
+   body: string;
+} {
+   const match = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+   if (!match) return { body: text };
+
+   const yaml = match[1];
+   const body = match[2].trim();
+
+   const titleMatch = yaml.match(/^title:\s*["']?(.+?)["']?\s*$/m);
+   const descMatch = yaml.match(/^description:\s*["']?(.+?)["']?\s*$/m);
+   const slugMatch = yaml.match(/^slug:\s*["']?(.+?)["']?\s*$/m);
+   const kwMatch = yaml.match(/^keywords:\s*\[([^\]]*)\]/m);
+
+   const keywords = kwMatch
+      ? kwMatch[1]
+           .split(",")
+           .map((k) => k.trim().replace(/^["']|["']$/g, ""))
+           .filter(Boolean)
+      : undefined;
+
+   return {
+      title: titleMatch?.[1]?.trim(),
+      description: descMatch?.[1]?.trim(),
+      slug: slugMatch?.[1]?.trim(),
+      keywords,
+      body,
+   };
 }
 
 export function useStreamingToolBridge({
@@ -180,6 +218,31 @@ export function useStreamingToolBridge({
                flashHighlight();
             } else if (isFrontmatterTool(toolName)) {
                executeFrontmatter(toolName, args);
+            } else if (toolName === "agent-writer" && editor) {
+               const resultRecord = result as Record<string, unknown>;
+               const text = typeof resultRecord?.text === "string" ? resultRecord.text : null;
+               if (text) {
+                  const parsed = parseWriterResponse(text);
+
+                  // Apply frontmatter updates if metadata was extracted
+                  if (onFrontmatterUpdate) {
+                     const updates: {
+                        title?: string;
+                        description?: string;
+                        slug?: string;
+                        keywords?: string[];
+                     } = {};
+                     if (parsed.title) updates.title = parsed.title;
+                     if (parsed.description) updates.description = parsed.description;
+                     if (parsed.slug) updates.slug = parsed.slug;
+                     if (parsed.keywords) updates.keywords = parsed.keywords;
+                     if (Object.keys(updates).length > 0) onFrontmatterUpdate(updates);
+                  }
+
+                  // Set full markdown body in editor (replaces any existing content)
+                  setEditorFromMarkdown(editor, parsed.body);
+                  flashHighlight();
+               }
             }
          }
       }
