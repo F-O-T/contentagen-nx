@@ -45,7 +45,7 @@ import {
    useSeoAuditSidebar,
 } from "../hooks/use-editor-state";
 import { useManualSave } from "../hooks/use-manual-save";
-import { useToolExecutionBridge } from "../hooks/use-tool-execution-bridge";
+import { useStreamingToolBridge } from "../hooks/use-streaming-tool-bridge";
 import { AssistantChatSidebar } from "./assistant-chat-sidebar";
 import { DiagnosticsPanel } from "./diagnostics-panel";
 import { EditorCommandPalette } from "./editor-command-palette";
@@ -393,7 +393,7 @@ function ToolExecutionBridgeWrapper({
    editor,
    onFrontmatterUpdate,
 }: ToolExecutionBridgeWrapperProps) {
-   useToolExecutionBridge({
+   useStreamingToolBridge({
       editor,
       onFrontmatterUpdate,
    });
