@@ -1,17 +1,24 @@
+import { ORPCError } from "@orpc/server";
 import {
    type CustomRequestContext,
    createRequestContext,
    mastra,
    type RequestContext,
 } from "@packages/agents";
+import type { ModelId } from "@packages/agents/models";
 import {
    addChatMessage,
    getOrCreateChatSession,
 } from "@packages/database/repositories/chat-repository";
 import { getProductSettings } from "@packages/database/repositories/product-settings-repository";
+import { teamMember } from "@packages/database/schemas/auth";
 import type { StoredToolCall } from "@packages/database/schemas/chat";
+import { content } from "@packages/database/schemas/content";
+import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
+import { writer } from "@packages/database/schemas/writer";
 import {
    AI_EVENTS,
+   emitAiAgentAction,
    emitAiChatMessage,
    emitAiCompletion,
 } from "@packages/events/ai";
@@ -19,6 +26,7 @@ import {
    enforceCreditBudget,
    trackCreditUsage,
 } from "@packages/events/credits";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import {
    type ChatChunk,
@@ -295,7 +303,7 @@ export const chatStream = protectedProcedure
             aiDefaults.defaultLanguage ??
             getRequestLanguage(headers) ??
             "pt-BR",
-         model: aiDefaults.contentModel ?? "openrouter/x-ai/grok-4.1-fast",
+         model: aiDefaults.contentModel ?? "openrouter/moonshotai/kimi-k2.5",
       } as CustomRequestContext);
 
       let stepIndex = 0;
@@ -486,6 +494,117 @@ export const chatStream = protectedProcedure
             error: error instanceof Error ? error.message : "Unknown error",
          } satisfies ChatChunk;
       }
+   });
+
+/**
+ * Execute unified content agent
+ * New unified agent that combines all workflows (planning, research, writing, SEO, review)
+ */
+export const executeUnifiedAgent = protectedProcedure
+   .input(
+      z.object({
+         teamId: z.string().uuid(),
+         contentId: z.string().uuid(),
+         prompt: z.string().min(1).max(10000),
+         brandId: z.string().uuid().optional(),
+         writerId: z.string().uuid().optional(),
+         model: z.string().optional(),
+      }),
+   )
+   .handler(async ({ context, input }) => {
+      const { teamId, contentId, prompt, brandId, writerId, model } = input;
+      const { userId, db, organizationId, posthog } = context;
+
+      // Verify team membership
+      const membership = await db.query.teamMember.findFirst({
+         where: and(
+            eq(teamMember.teamId, teamId),
+            eq(teamMember.userId, userId),
+         ),
+      });
+
+      if (!membership) {
+         throw new ORPCError("FORBIDDEN", {
+            message: "You don't have access to this team",
+         });
+      }
+
+      // Get content
+      const contentRecord = await db.query.content.findFirst({
+         where: and(eq(content.id, contentId), eq(content.teamId, teamId)),
+      });
+
+      if (!contentRecord) {
+         throw new ORPCError("NOT_FOUND", { message: "Content not found" });
+      }
+
+      // Get writer instructions if writerId provided
+      let writerInstructions: InstructionMemoryItem[] | undefined;
+      if (writerId) {
+         const writerRecord = await db.query.writer.findFirst({
+            where: and(eq(writer.id, writerId), eq(writer.teamId, teamId)),
+         });
+         if (writerRecord?.instructionMemories) {
+            writerInstructions = writerRecord.instructionMemories.slice(0, 10);
+         }
+      }
+
+      // Enforce credit budget
+      await enforceCreditBudget(db, organizationId, "ai");
+
+      // Create request context
+      const requestContext = createRequestContext({
+         userId,
+         brandId,
+         writerId,
+         model: (model as ModelId) ?? "openrouter/moonshotai/kimi-k2.5",
+         language: "pt-BR",
+         writerInstructions,
+      } as CustomRequestContext);
+
+      const startTime = Date.now();
+
+      // Execute unified agent
+      const agent = mastra.getAgent("unifiedContent");
+      const result = await agent.generate(prompt, {
+         requestContext: requestContext as RequestContext<unknown>,
+      });
+
+      const latencyMs = Date.now() - startTime;
+
+      // Emit agent event and track credits (failure-tolerant)
+      try {
+         await emitAiAgentAction(
+            { db, posthog, organizationId, userId, teamId },
+            {
+               agentId: "unified-content-agent",
+               contentId,
+               action: "generate",
+               model: model ?? "openrouter/moonshotai/kimi-k2.5",
+               provider: "openrouter",
+               promptTokens: result.usage?.inputTokens ?? 0,
+               completionTokens: result.usage?.outputTokens ?? 0,
+               totalTokens:
+                  (result.usage?.inputTokens ?? 0) +
+                  (result.usage?.outputTokens ?? 0),
+               latencyMs,
+            },
+         );
+         await trackCreditUsage(
+            db,
+            AI_EVENTS["ai.agent_action"],
+            organizationId,
+            "ai",
+         );
+      } catch {
+         // Event tracking must not break the flow
+      }
+
+      return {
+         text: result.text,
+         toolCalls: result.toolCalls,
+         usage: result.usage,
+      };
    });
 
 // =============================================================================
