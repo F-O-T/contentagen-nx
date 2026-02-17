@@ -1,8 +1,2 @@
-export const SURVEY_IDS = {
-	BUG_REPORT: "019c6be5-4893-0000-7270-57dc03529638",
-	FEATURE_REQUEST: "019c6be5-5783-0000-684e-aceb5002b650",
-	FEATURE_FEEDBACK: "019c6be5-6296-0000-b0a3-2ab421e77719",
-} as const;
-
 export const API_ERROR_THRESHOLD = 3;
 export const API_ERROR_WINDOW_MS = 5 * 60 * 1000; // 5 minutes

@@ -45,6 +45,7 @@
       "@packages/authentication": "workspace:*",
       "@packages/database": "workspace:*",
       "@packages/events": "workspace:*",
+      "@packages/feedback": "workspace:*",
       "@packages/redis": "workspace:*",
       "@packages/stripe": "workspace:*",
       "@packages/ui": "workspace:*",

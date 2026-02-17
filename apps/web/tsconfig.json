@@ -39,6 +39,9 @@
   "references": [
     {
       "path": "../../packages/redis"
+    },
+    {
+      "path": "../../packages/feedback"
     }
   ]
 }

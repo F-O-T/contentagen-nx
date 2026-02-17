@@ -67,6 +67,14 @@ export const env = createEnv({
       // Worker
       WORKER_CONCURRENCY: z.coerce.number().optional().default(5),
       BETTER_STACK_HEARTBEAT_URL: z.url().optional(),
+
+      // Discord (Optional - feedback notifications)
+      DISCORD_FEEDBACK_WEBHOOK_URL: z.url().optional(),
+
+      // GitHub (Optional - feedback issue creation)
+      GITHUB_FEEDBACK_TOKEN: z.string().optional(),
+      GITHUB_FEEDBACK_OWNER: z.string().optional(),
+      GITHUB_FEEDBACK_REPO: z.string().optional(),
    },
 
    runtimeEnv: process.env,
