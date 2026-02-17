@@ -7,9 +7,7 @@ import type { ModelId } from "../models";
 import { pgVectorStore } from "../utils";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
-import { orchestratorAgent } from "./agents/orchestrator-agent";
 import { unifiedContentAgent } from "./agents/unified-content-agent";
-import { writerAgent } from "./agents/writer-agent";
 
 /**
  * Re-export RequestContext so consumers don't need to depend on @mastra/core directly.
@@ -32,16 +30,12 @@ const mastraStorage = new PostgresStore({
 
 export const mastra: Mastra = new Mastra({
    agents: {
-      // New unified agent (replaces orchestrator + sub-agents)
+      // Unified content agent (combines all workflows)
       unifiedContent: unifiedContentAgent,
 
       // Specialized agents (kept separate)
       fimAgent,
       inlineEditAgent,
-
-      // DEPRECATED: Will be removed in next phase
-      orchestratorAgent,
-      writerAgent,
    },
    vectors: { pgVector: pgVectorStore },
    storage: mastraStorage,

@@ -255,7 +255,7 @@ export const editStream = protectedProcedure
 
 /**
  * Chat streaming completion
- * Uses Mastra's orchestratorAgent for chat conversations
+ * Uses Mastra's unified content agent for chat conversations
  * Yields full stream events including tool calls
  * Saves messages to database for persistence
  */
@@ -292,8 +292,8 @@ export const chatStream = protectedProcedure
          await addChatMessage(db, session.id, "user", input.message);
       }
 
-      // Get the orchestrator agent from Mastra for chat
-      const orchestratorAgent = mastra.getAgent("orchestratorAgent");
+      // Get the unified content agent from Mastra for chat
+      const unifiedAgent = mastra.getAgent("unifiedContent");
 
       // Create request context with settings
       const requestContext = createRequestContext({
@@ -316,11 +316,11 @@ export const chatStream = protectedProcedure
 
       try {
          // Stream the agent response
-         const result = await orchestratorAgent.stream(
+         const result = await unifiedAgent.stream(
             [{ role: "user", content: input.message }],
             {
                requestContext: requestContext as RequestContext<unknown>,
-            } as unknown as Parameters<typeof orchestratorAgent.stream>[1],
+            } as unknown as Parameters<typeof unifiedAgent.stream>[1],
          );
 
          // Yield full stream events including tool calls
@@ -444,7 +444,7 @@ export const chatStream = protectedProcedure
                   {
                      chatId: session.id,
                      contentId: input.contentId,
-                     model: "orchestratorAgent",
+                     model: "unifiedContent",
                      provider: "openrouter",
                      role: "assistant",
                      promptTokens: 0,
@@ -463,7 +463,7 @@ export const chatStream = protectedProcedure
                await emitAiCompletion(
                   { db, posthog, organizationId, userId, teamId },
                   {
-                     model: "orchestratorAgent",
+                     model: "unifiedContent",
                      provider: "openrouter",
                      promptTokens: 0,
                      completionTokens: 0,
