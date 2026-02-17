@@ -14,7 +14,7 @@ const config = defineConfig({
       },
    },
    optimizeDeps: {
-      include: ["react", "react-dom"],
+      include: ["react", "react-dom", "prismjs"],
    },
    plugins: [
       devtools(),
