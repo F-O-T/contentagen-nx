@@ -1,6 +1,11 @@
 import { useSurveys } from "@packages/posthog/client";
 import { Button } from "@packages/ui/components/button";
-import { Label } from "@packages/ui/components/label";
+import {
+	Field,
+	FieldError,
+	FieldGroup,
+	FieldLabel,
+} from "@packages/ui/components/field";
 import {
 	Select,
 	SelectContent,
@@ -9,9 +14,16 @@ import {
 	SelectValue,
 } from "@packages/ui/components/select";
 import { Textarea } from "@packages/ui/components/textarea";
+import { useForm } from "@tanstack/react-form";
 import { CheckCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { z } from "zod";
 import { SURVEY_IDS } from "../constants";
+
+const bugReportSchema = z.object({
+	description: z.string().min(1, "Descreva o problema encontrado."),
+	severity: z.string().optional(),
+});
 
 type BugReportFormProps = {
 	onSuccess: () => void;
@@ -19,26 +31,34 @@ type BugReportFormProps = {
 
 export function BugReportForm({ onSuccess }: BugReportFormProps) {
 	const { captureSurveySent, captureSurveyShown } = useSurveys();
-	const [description, setDescription] = useState("");
-	const [severity, setSeverity] = useState("");
 	const [submitted, setSubmitted] = useState(false);
 
 	useEffect(() => {
 		captureSurveyShown(SURVEY_IDS.BUG_REPORT);
 	}, [captureSurveyShown]);
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!description.trim()) return;
+	const form = useForm({
+		defaultValues: { description: "", severity: "" },
+		onSubmit: ({ value }) => {
+			captureSurveySent(SURVEY_IDS.BUG_REPORT, {
+				$survey_response: value.description,
+				$survey_response_1: value.severity,
+			});
 
-		captureSurveySent(SURVEY_IDS.BUG_REPORT, {
-			$survey_response: description,
-			$survey_response_1: severity,
-		});
+			setSubmitted(true);
+			setTimeout(onSuccess, 2000);
+		},
+		validators: { onBlur: bugReportSchema },
+	});
 
-		setSubmitted(true);
-		setTimeout(onSuccess, 2000);
-	};
+	const handleSubmit = useCallback(
+		(e: FormEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			form.handleSubmit();
+		},
+		[form],
+	);
 
 	if (submitted) {
 		return (
@@ -54,44 +74,75 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
 
 	return (
 		<form className="space-y-4" onSubmit={handleSubmit}>
-			<div className="space-y-2">
-				<Label htmlFor="bug-description">O que aconteceu?</Label>
-				<Textarea
-					id="bug-description"
-					onChange={(e) => setDescription(e.target.value)}
-					placeholder="Descreva o problema que você encontrou..."
-					rows={4}
-					value={description}
-				/>
-			</div>
+			<FieldGroup>
+				<form.Field name="description">
+					{(field) => {
+						const isInvalid =
+							field.state.meta.isTouched && !field.state.meta.isValid;
+						return (
+							<Field data-invalid={isInvalid}>
+								<FieldLabel htmlFor={field.name}>
+									O que aconteceu?
+								</FieldLabel>
+								<Textarea
+									aria-invalid={isInvalid}
+									id={field.name}
+									name={field.name}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(e.target.value)}
+									placeholder="Descreva o problema que você encontrou..."
+									rows={4}
+									value={field.state.value}
+								/>
+								{isInvalid && (
+									<FieldError errors={field.state.meta.errors} />
+								)}
+							</Field>
+						);
+					}}
+				</form.Field>
 
-			<div className="space-y-2">
-				<Label htmlFor="bug-severity">Qual a gravidade?</Label>
-				<Select onValueChange={setSeverity} value={severity}>
-					<SelectTrigger id="bug-severity">
-						<SelectValue placeholder="Selecione..." />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="Bloqueante — não consigo usar">
-							Bloqueante — não consigo usar
-						</SelectItem>
-						<SelectItem value="Importante — atrapalha mas consigo contornar">
-							Importante — atrapalha mas consigo contornar
-						</SelectItem>
-						<SelectItem value="Menor — incômodo pequeno">
-							Menor — incômodo pequeno
-						</SelectItem>
-					</SelectContent>
-				</Select>
-			</div>
+				<form.Field name="severity">
+					{(field) => (
+						<Field>
+							<FieldLabel htmlFor={field.name}>
+								Qual a gravidade?
+							</FieldLabel>
+							<Select
+								onValueChange={(value) => field.handleChange(value)}
+								value={field.state.value}
+							>
+								<SelectTrigger className="w-full" id={field.name}>
+									<SelectValue placeholder="Selecione..." />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="Bloqueante — não consigo usar">
+										Bloqueante — não consigo usar
+									</SelectItem>
+									<SelectItem value="Importante — atrapalha mas consigo contornar">
+										Importante — atrapalha mas consigo contornar
+									</SelectItem>
+									<SelectItem value="Menor — incômodo pequeno">
+										Menor — incômodo pequeno
+									</SelectItem>
+								</SelectContent>
+							</Select>
+						</Field>
+					)}
+				</form.Field>
+			</FieldGroup>
 
-			<Button
-				className="w-full"
-				disabled={!description.trim()}
-				type="submit"
-			>
-				Enviar relato
-			</Button>
+			<form.Subscribe selector={(state) => state.canSubmit}>
+				{(canSubmit) => (
+					<Button
+						className="w-full"
+						disabled={!canSubmit}
+						type="submit"
+					>
+						Enviar relato
+					</Button>
+				)}
+			</form.Subscribe>
 		</form>
 	);
 }

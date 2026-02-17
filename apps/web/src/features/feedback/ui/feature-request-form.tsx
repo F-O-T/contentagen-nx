@@ -1,10 +1,23 @@
 import { useSurveys } from "@packages/posthog/client";
 import { Button } from "@packages/ui/components/button";
-import { Label } from "@packages/ui/components/label";
+import {
+	Field,
+	FieldError,
+	FieldGroup,
+	FieldLabel,
+} from "@packages/ui/components/field";
 import { Textarea } from "@packages/ui/components/textarea";
+import { useForm } from "@tanstack/react-form";
 import { CheckCircle, Star } from "lucide-react";
-import { useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
+import { z } from "zod";
 import { SURVEY_IDS } from "../constants";
+
+const featureRequestSchema = z.object({
+	feature: z.string().min(1, "Descreva a funcionalidade desejada."),
+	problem: z.string().optional(),
+	priority: z.number(),
+});
 
 type FeatureRequestFormProps = {
 	onSuccess: () => void;
@@ -12,28 +25,35 @@ type FeatureRequestFormProps = {
 
 export function FeatureRequestForm({ onSuccess }: FeatureRequestFormProps) {
 	const { captureSurveySent, captureSurveyShown } = useSurveys();
-	const [feature, setFeature] = useState("");
-	const [problem, setProblem] = useState("");
-	const [priority, setPriority] = useState(0);
 	const [submitted, setSubmitted] = useState(false);
 
 	useEffect(() => {
 		captureSurveyShown(SURVEY_IDS.FEATURE_REQUEST);
 	}, [captureSurveyShown]);
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!feature.trim()) return;
+	const form = useForm({
+		defaultValues: { feature: "", problem: "", priority: 0 },
+		onSubmit: ({ value }) => {
+			captureSurveySent(SURVEY_IDS.FEATURE_REQUEST, {
+				$survey_response: value.feature,
+				$survey_response_1: value.problem,
+				$survey_response_2: value.priority,
+			});
 
-		captureSurveySent(SURVEY_IDS.FEATURE_REQUEST, {
-			$survey_response: feature,
-			$survey_response_1: problem,
-			$survey_response_2: priority,
-		});
+			setSubmitted(true);
+			setTimeout(onSuccess, 2000);
+		},
+		validators: { onBlur: featureRequestSchema },
+	});
 
-		setSubmitted(true);
-		setTimeout(onSuccess, 2000);
-	};
+	const handleSubmit = useCallback(
+		(e: FormEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			form.handleSubmit();
+		},
+		[form],
+	);
 
 	if (submitted) {
 		return (
@@ -49,66 +69,96 @@ export function FeatureRequestForm({ onSuccess }: FeatureRequestFormProps) {
 
 	return (
 		<form className="space-y-4" onSubmit={handleSubmit}>
-			<div className="space-y-2">
-				<Label htmlFor="feature-description">
-					Que feature você gostaria?
-				</Label>
-				<Textarea
-					id="feature-description"
-					onChange={(e) => setFeature(e.target.value)}
-					placeholder="Descreva a funcionalidade que você precisa..."
-					rows={3}
-					value={feature}
-				/>
-			</div>
+			<FieldGroup>
+				<form.Field name="feature">
+					{(field) => {
+						const isInvalid =
+							field.state.meta.isTouched && !field.state.meta.isValid;
+						return (
+							<Field data-invalid={isInvalid}>
+								<FieldLabel htmlFor={field.name}>
+									Que feature você gostaria?
+								</FieldLabel>
+								<Textarea
+									aria-invalid={isInvalid}
+									id={field.name}
+									name={field.name}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(e.target.value)}
+									placeholder="Descreva a funcionalidade que você precisa..."
+									rows={3}
+									value={field.state.value}
+								/>
+								{isInvalid && (
+									<FieldError errors={field.state.meta.errors} />
+								)}
+							</Field>
+						);
+					}}
+				</form.Field>
 
-			<div className="space-y-2">
-				<Label htmlFor="feature-problem">
-					Qual problema ela resolveria?{" "}
-					<span className="text-muted-foreground">(opcional)</span>
-				</Label>
-				<Textarea
-					id="feature-problem"
-					onChange={(e) => setProblem(e.target.value)}
-					placeholder="Nos ajude a entender o contexto..."
-					rows={2}
-					value={problem}
-				/>
-			</div>
-
-			<div className="space-y-2">
-				<Label>Qual a prioridade para você?</Label>
-				<div className="flex items-center gap-1">
-					{[1, 2, 3, 4, 5].map((value) => (
-						<button
-							className="rounded-md p-1.5 transition-colors hover:bg-muted"
-							key={`priority-${value}`}
-							onClick={() => setPriority(value)}
-							type="button"
-						>
-							<Star
-								className={`size-6 ${
-									value <= priority
-										? "fill-amber-400 text-amber-400"
-										: "text-muted-foreground"
-								}`}
+				<form.Field name="problem">
+					{(field) => (
+						<Field>
+							<FieldLabel htmlFor={field.name}>
+								Qual problema ela resolveria?{" "}
+								<span className="text-muted-foreground">(opcional)</span>
+							</FieldLabel>
+							<Textarea
+								id={field.name}
+								name={field.name}
+								onBlur={field.handleBlur}
+								onChange={(e) => field.handleChange(e.target.value)}
+								placeholder="Nos ajude a entender o contexto..."
+								rows={2}
+								value={field.state.value}
 							/>
-						</button>
-					))}
-				</div>
-				<div className="flex justify-between text-xs text-muted-foreground">
-					<span>Seria legal</span>
-					<span>Preciso muito</span>
-				</div>
-			</div>
+						</Field>
+					)}
+				</form.Field>
 
-			<Button
-				className="w-full"
-				disabled={!feature.trim()}
-				type="submit"
-			>
-				Enviar sugestão
-			</Button>
+				<form.Field name="priority">
+					{(field) => (
+						<Field>
+							<FieldLabel>Qual a prioridade para você?</FieldLabel>
+							<div className="flex items-center gap-1">
+								{[1, 2, 3, 4, 5].map((value) => (
+									<button
+										className="rounded-md p-1.5 transition-colors hover:bg-muted"
+										key={`priority-${value}`}
+										onClick={() => field.handleChange(value)}
+										type="button"
+									>
+										<Star
+											className={`size-6 ${
+												value <= field.state.value
+													? "fill-amber-400 text-amber-400"
+													: "text-muted-foreground"
+											}`}
+										/>
+									</button>
+								))}
+							</div>
+							<div className="flex justify-between text-xs text-muted-foreground">
+								<span>Seria legal</span>
+								<span>Preciso muito</span>
+							</div>
+						</Field>
+					)}
+				</form.Field>
+			</FieldGroup>
+
+			<form.Subscribe selector={(state) => state.canSubmit}>
+				{(canSubmit) => (
+					<Button
+						className="w-full"
+						disabled={!canSubmit}
+						type="submit"
+					>
+						Enviar sugestão
+					</Button>
+				)}
+			</form.Subscribe>
 		</form>
 	);
 }

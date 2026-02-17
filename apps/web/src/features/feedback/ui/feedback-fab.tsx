@@ -1,8 +1,14 @@
+import { Button } from "@packages/ui/components/button";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@packages/ui/components/popover";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@packages/ui/components/tooltip";
 import {
 	Bug,
 	ExternalLink,
@@ -10,7 +16,7 @@ import {
 	MessageSquarePlus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useSheet } from "@/hooks/use-sheet";
+import { useCredenza } from "@/hooks/use-credenza";
 import { useApiErrorTracker } from "../hooks/use-api-error-tracker";
 import { BugReportForm } from "./bug-report-form";
 import { FeatureRequestForm } from "./feature-request-form";
@@ -19,12 +25,12 @@ const DOCS_URL = "https://docs.contentta.com";
 
 export function FeedbackFab() {
 	const [open, setOpen] = useState(false);
-	const { openSheet, closeSheet } = useSheet();
+	const { openCredenza, closeCredenza } = useCredenza();
 	const { shouldShowBugReport, dismiss } = useApiErrorTracker();
 
 	const openBugReport = () => {
 		setOpen(false);
-		openSheet({
+		openCredenza({
 			children: (
 				<div className="space-y-4">
 					<div>
@@ -36,7 +42,7 @@ export function FeedbackFab() {
 					<BugReportForm
 						onSuccess={() => {
 							dismiss();
-							closeSheet();
+							closeCredenza();
 						}}
 					/>
 				</div>
@@ -46,7 +52,7 @@ export function FeedbackFab() {
 
 	const openFeatureRequest = () => {
 		setOpen(false);
-		openSheet({
+		openCredenza({
 			children: (
 				<div className="space-y-4">
 					<div>
@@ -55,7 +61,7 @@ export function FeedbackFab() {
 							Compartilhe suas ideias para novas funcionalidades.
 						</p>
 					</div>
-					<FeatureRequestForm onSuccess={closeSheet} />
+					<FeatureRequestForm onSuccess={closeCredenza} />
 				</div>
 			),
 		});
@@ -71,14 +77,19 @@ export function FeedbackFab() {
 	return (
 		<div className="fixed bottom-6 right-6 z-50">
 			<Popover onOpenChange={setOpen} open={open}>
-				<PopoverTrigger asChild>
-					<button
-						className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 active:scale-95"
-						type="button"
-					>
-						<MessageSquarePlus className="size-5" />
-					</button>
-				</PopoverTrigger>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<PopoverTrigger asChild>
+							<Button
+								className="size-12 cursor-pointer rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95"
+								size="icon"
+							>
+								<MessageSquarePlus className="size-5" />
+							</Button>
+						</PopoverTrigger>
+					</TooltipTrigger>
+					<TooltipContent side="left">Feedback</TooltipContent>
+				</Tooltip>
 				<PopoverContent
 					align="end"
 					className="w-56 p-2"
@@ -86,31 +97,36 @@ export function FeedbackFab() {
 					sideOffset={8}
 				>
 					<div className="flex flex-col gap-1">
-						<button
-							className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted text-left"
+						<Button
+							className="justify-start gap-3"
 							onClick={openBugReport}
-							type="button"
+							variant="ghost"
 						>
 							<Bug className="size-4 text-red-500" />
 							<span>Reportar Bug</span>
-						</button>
-						<button
-							className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted text-left"
+						</Button>
+						<Button
+							className="justify-start gap-3"
 							onClick={openFeatureRequest}
-							type="button"
+							variant="ghost"
 						>
 							<Lightbulb className="size-4 text-amber-500" />
 							<span>Sugerir Feature</span>
-						</button>
-						<a
-							className="flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-muted"
-							href={DOCS_URL}
-							rel="noopener noreferrer"
-							target="_blank"
+						</Button>
+						<Button
+							asChild
+							className="justify-start gap-3"
+							variant="ghost"
 						>
-							<ExternalLink className="size-4 text-blue-500" />
-							<span>Documentação</span>
-						</a>
+							<a
+								href={DOCS_URL}
+								rel="noopener noreferrer"
+								target="_blank"
+							>
+								<ExternalLink className="size-4 text-blue-500" />
+								<span>Documentação</span>
+							</a>
+						</Button>
 					</div>
 				</PopoverContent>
 			</Popover>
