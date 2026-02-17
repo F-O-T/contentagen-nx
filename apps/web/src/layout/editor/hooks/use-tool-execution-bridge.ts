@@ -5,7 +5,7 @@
  * Subscribes to assistant-ui thread messages and applies editor/frontmatter tools.
  */
 
-import { useThread } from "@assistant-ui/react";
+import { useAuiState } from "@assistant-ui/react";
 import type { LexicalEditor } from "lexical";
 import { useCallback, useEffect, useRef } from "react";
 import {
@@ -78,8 +78,8 @@ export function useToolExecutionBridge(options: UseToolExecutionBridgeOptions) {
    // Track executed tool IDs to avoid duplicates
    const executedTools = useRef(new Set<string>());
 
-   // Get thread messages using useThread selector
-   const messages = useThread((state) => state.messages);
+   // Get thread messages using useAuiState selector
+   const messages = useAuiState((s) => s.thread.messages);
 
    /**
     * Execute an editor tool
