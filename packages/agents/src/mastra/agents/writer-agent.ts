@@ -4,20 +4,6 @@ import {
    buildLanguageInstruction,
    compileInstructionMemories,
 } from "../../utils";
-// Analysis tools
-import { badPatternTool } from "../tools/analysis/bad-pattern-tool";
-import { citationTool } from "../tools/analysis/citation-tool";
-import { contentStructureTool } from "../tools/analysis/content-structure-tool";
-import { duplicateContentTool } from "../tools/analysis/duplicate-content-tool";
-import { imageSeoTool } from "../tools/analysis/image-seo-tool";
-import { keywordDensityTool } from "../tools/analysis/keyword-density-tool";
-import { linkDensityTool } from "../tools/analysis/link-density-tool";
-import { originalityTool } from "../tools/analysis/originality-tool";
-import { quickAnswerAnalysisTool } from "../tools/analysis/quick-answer-tool";
-import { readabilityTool } from "../tools/analysis/readability-tool";
-import { seoScoreTool } from "../tools/analysis/seo-score-tool";
-import { titleMetaTool } from "../tools/analysis/title-meta-tool";
-import { toneAnalysisTool } from "../tools/analysis/tone-analysis-tool";
 // Memory tools
 import { getInstructionsTool } from "../tools/memory/get-instructions-tool";
 // RAG tools
@@ -67,7 +53,7 @@ Full article content here...
 4. keywords MUST be a JSON array of strings: \`["kw1", "kw2"]\`
 5. slug MUST be lowercase, hyphenated, no spaces or special chars
 6. After the closing \`---\`, write the full article in markdown
-7. DO NOT call any tools — your entire response IS the content
+7. Your final response IS the content — do not call any tools to generate or format the output. You may use search and memory tools ONLY to research the topic before writing.
 8. Generate a complete, high-quality article. Not a stub. Not a summary.
 
 ## ARTICLE QUALITY STANDARDS
@@ -108,20 +94,6 @@ export const writerAgent: Agent = new Agent({
    },
 
    tools: {
-      // Analysis tools
-      seoScore: seoScoreTool,
-      readability: readabilityTool,
-      keywordDensity: keywordDensityTool,
-      contentStructure: contentStructureTool,
-      badPatterns: badPatternTool,
-      titleMeta: titleMetaTool,
-      quickAnswerAnalysis: quickAnswerAnalysisTool,
-      imageSeo: imageSeoTool,
-      linkDensity: linkDensityTool,
-      duplicateContent: duplicateContentTool,
-      toneAnalysis: toneAnalysisTool,
-      citation: citationTool,
-      originality: originalityTool,
       // RAG tools
       searchPreviousContent: searchPreviousContentTool,
       graphSearch: graphSearchTool,
