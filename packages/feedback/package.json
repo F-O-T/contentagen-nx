@@ -1,0 +1,32 @@
+{
+   "name": "@packages/feedback",
+   "version": "0.1.0",
+   "type": "module",
+   "private": true,
+   "license": "Apache-2.0",
+   "exports": {
+      "./sender": {
+         "default": "./src/sender.ts",
+         "types": "./dist/src/sender.d.ts"
+      },
+      "./schemas": {
+         "default": "./src/schemas.ts",
+         "types": "./dist/src/schemas.d.ts"
+      }
+   },
+   "files": ["dist"],
+   "scripts": {
+      "build": "tsc --build",
+      "check": "biome check --write ./src",
+      "typecheck": "tsgo"
+   },
+   "dependencies": {
+      "@octokit/rest": "^21.1.1",
+      "@packages/environment": "workspace:*",
+      "zod": "catalog:validation"
+   },
+   "devDependencies": {
+      "@tooling/typescript": "workspace:*",
+      "typescript": "catalog:development"
+   }
+}

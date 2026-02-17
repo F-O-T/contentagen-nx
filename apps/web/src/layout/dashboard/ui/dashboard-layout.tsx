@@ -16,6 +16,7 @@ import { EarlyAccessProvider } from "@/hooks/use-early-access";
 import { useLastOrganization } from "@/hooks/use-last-organization";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
+import { FeedbackFab } from "@/features/feedback/ui/feedback-fab";
 import { setActiveSection } from "../hooks/use-sidebar-nav";
 import {
    getSidebarDefaultOpen,
@@ -156,6 +157,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   >
                      {children}
                   </main>
+                  <FeedbackFab />
                </SidebarInset>
             </SidebarProvider>
          </SidebarManagerProvider>

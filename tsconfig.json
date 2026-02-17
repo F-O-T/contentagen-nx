@@ -8,6 +8,9 @@
     },
     {
       "path": "./packages/queue"
+    },
+    {
+      "path": "./packages/feedback"
     }
   ]
 }

@@ -12,6 +12,7 @@ import * as contentAnalyticsRouter from "./content-analytics";
 import * as dashboardsRouter from "./dashboards";
 import * as dataSourcesRouter from "./data-sources";
 import * as eventCatalogRouter from "./event-catalog";
+import * as feedbackRouter from "./feedback";
 import * as formsRouter from "./forms";
 import * as insightsRouter from "./insights";
 import * as onboardingRouter from "./onboarding";
@@ -42,6 +43,7 @@ export default {
    dashboards: dashboardsRouter,
    dataSources: dataSourcesRouter,
    eventCatalog: eventCatalogRouter,
+   feedback: feedbackRouter,
    forms: formsRouter,
    insights: insightsRouter,
    onboarding: onboardingRouter,
