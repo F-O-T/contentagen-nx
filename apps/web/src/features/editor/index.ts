@@ -294,6 +294,7 @@ export { EditPlugin } from "./plugins/edit-plugin";
 export { FIMPlugin } from "./plugins/fim-plugin";
 export { FloatingToolbarPlugin } from "./plugins/floating-toolbar";
 export { MarkdownPastePlugin } from "./plugins/markdown-paste";
+export { SelectionContextPlugin } from "./plugins/selection-context-plugin";
 export { SpellCheckerClient } from "./spelling/client";
 // ============================================================================
 // Spelling
