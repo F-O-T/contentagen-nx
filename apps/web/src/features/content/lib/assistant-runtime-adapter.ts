@@ -12,6 +12,7 @@ import type {
    ToolCallMessagePart,
 } from "@assistant-ui/react";
 import { client } from "@/integrations/orpc/client";
+import { getEditorContext } from "@/layout/editor/stores/editor-context-store";
 
 // =============================================================================
 // Tool Categories
@@ -125,9 +126,22 @@ export function createContenttaAdapter(contentId?: string): ChatModelAdapter {
          // Extract text from message content
          const messageText = extractMessageText(lastMessage);
 
+         // Enrich with editor context
+         const editorCtx = getEditorContext();
+         const contextParts: string[] = [];
+
+         if (editorCtx.selectedText) {
+            contextParts.push(`[TEXTO SELECIONADO]\n${editorCtx.selectedText}`);
+         }
+
+         const enrichedMessage =
+            contextParts.length > 0
+               ? `${messageText}\n\n${contextParts.join("\n\n")}`
+               : messageText;
+
          // Call ORPC chatStream
          const stream = await client.agent.chatStream({
-            message: messageText,
+            message: enrichedMessage,
             contentId,
          });
 
