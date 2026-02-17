@@ -11,12 +11,23 @@ import {
    MessagePrimitive,
    ThreadPrimitive,
 } from "@assistant-ui/react";
+import type { ToolCallMessagePartProps } from "@assistant-ui/react";
 import { Button } from "@packages/ui/components/button";
 import { cn } from "@packages/ui/lib/utils";
 import { ArrowDown, GripVertical, Loader2, Send, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+   isEditorTool,
+   isFrontmatterTool,
+   isResearchTool,
+   isSEOTool,
+} from "@/features/content/lib/assistant-runtime-adapter";
+import { EditorToolCard } from "./chat/tool-cards/editor-tool-card";
+import { FrontmatterToolCard } from "./chat/tool-cards/frontmatter-tool-card";
+import { ResearchToolCard } from "./chat/tool-cards/research-tool-card";
+import { SeoToolCard } from "./chat/tool-cards/seo-tool-card";
+import type { ToolStatus } from "./chat/tool-cards/tool-card-base";
 import { setChatSidebarWidth, useChatSidebar } from "../hooks/use-editor-state";
-import { TOOL_UIS } from "../lib/tool-ui-registry";
 
 // ============================================================================
 // Types
@@ -37,6 +48,45 @@ interface AssistantChatSidebarProps {
     * Additional CSS classes
     */
    className?: string;
+}
+
+// ============================================================================
+// Tool Override Component
+// ============================================================================
+
+/**
+ * Catches ALL tool calls via MessagePrimitive.Content's components.tools.Override.
+ * Routes each call to the appropriate card component based on tool category.
+ */
+function ToolCallOverride({ toolName, args, result, status }: ToolCallMessagePartProps) {
+   const toolStatus: ToolStatus =
+      status.type === "complete" ? "complete"
+      : status.type === "running" ? "running"
+      : "error";
+   const resolvedArgs = args as Record<string, unknown>;
+
+   if (isEditorTool(toolName))
+      return <EditorToolCard toolName={toolName} args={resolvedArgs} result={result} status={toolStatus} />;
+   if (isFrontmatterTool(toolName))
+      return <FrontmatterToolCard toolName={toolName} args={resolvedArgs} result={result} status={toolStatus} />;
+   if (isResearchTool(toolName))
+      return <ResearchToolCard toolName={toolName} args={resolvedArgs} result={result} status={toolStatus} />;
+   if (isSEOTool(toolName))
+      return <SeoToolCard toolName={toolName} args={resolvedArgs} result={result} status={toolStatus} />;
+
+   return (
+      <div className="p-3 rounded-lg border bg-card text-card-foreground shadow-sm">
+         <div className="font-medium text-sm mb-2">{toolName}</div>
+         <pre className="text-xs text-muted-foreground p-2 rounded bg-muted overflow-x-auto">
+            {JSON.stringify(args, null, 2)}
+         </pre>
+         {result !== undefined && (
+            <pre className="mt-2 text-xs text-muted-foreground p-2 rounded bg-muted overflow-x-auto">
+               {JSON.stringify(result, null, 2)}
+            </pre>
+         )}
+      </div>
+   );
 }
 
 // ============================================================================
@@ -75,8 +125,8 @@ function TypingIndicator() {
 
 /**
  * Custom assistant message component
- * Uses MessagePrimitive.Content to render text and tool calls
- * Tool calls are automatically rendered by registered TOOL_UIS
+ * Uses MessagePrimitive.Content to render text and tool calls.
+ * Tool calls are routed via the ToolCallOverride component.
  */
 function CustomAssistantMessage() {
    return (
@@ -107,7 +157,9 @@ function CustomAssistantMessage() {
                   </MessagePrimitive.If>
                   <MessagePrimitive.If hasContent>
                      <div className="rounded-lg px-3 py-2 text-sm bg-muted ring-2 ring-primary/20 animate-pulse transition-all">
-                        <MessagePrimitive.Content />
+                        <MessagePrimitive.Content
+                           components={{ tools: { Override: ToolCallOverride } }}
+                        />
                      </div>
                   </MessagePrimitive.If>
                </ThreadPrimitive.If>
@@ -116,13 +168,17 @@ function CustomAssistantMessage() {
             {/* Show normal content when not generating or not last message */}
             <MessagePrimitive.If last={false}>
                <div className="rounded-lg px-3 py-2 text-sm bg-muted">
-                  <MessagePrimitive.Content />
+                  <MessagePrimitive.Content
+                     components={{ tools: { Override: ToolCallOverride } }}
+                  />
                </div>
             </MessagePrimitive.If>
             <MessagePrimitive.If last>
                <ThreadPrimitive.If running={false}>
                   <div className="rounded-lg px-3 py-2 text-sm bg-muted">
-                     <MessagePrimitive.Content />
+                     <MessagePrimitive.Content
+                        components={{ tools: { Override: ToolCallOverride } }}
+                     />
                   </div>
                </ThreadPrimitive.If>
             </MessagePrimitive.If>
@@ -203,11 +259,6 @@ export function AssistantChatSidebar({
 
          {/* Thread with messages */}
          <ThreadPrimitive.Root className="flex-1 flex flex-col min-h-0">
-            {/* Register tool UIs */}
-            {TOOL_UIS.map((ToolUI, index) => (
-               <ToolUI key={index} />
-            ))}
-
             <ThreadPrimitive.Viewport className="flex-1 overflow-y-auto">
                <ThreadPrimitive.Empty>
                   <EmptyState />
