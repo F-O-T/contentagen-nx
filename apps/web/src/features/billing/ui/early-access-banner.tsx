@@ -1,7 +1,8 @@
-import { useSurveys } from "@packages/posthog/client";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { FlaskConical } from "lucide-react";
+import { useSheet } from "@/hooks/use-sheet";
+import { FeatureFeedbackForm } from "@/features/feedback/ui/feature-feedback-form";
 
 export type EarlyAccessBannerTemplate = {
    badgeLabel: string;
@@ -16,20 +17,25 @@ export type EarlyAccessBannerProps = {
 };
 
 export function EarlyAccessBanner({ template }: EarlyAccessBannerProps) {
-   const { activeSurveys, loaded } = useSurveys();
-   const targetSurveyId = template.surveyId ?? activeSurveys[0]?.id;
-   const isCtaDisabled = !loaded || !targetSurveyId;
+   const { openSheet, closeSheet } = useSheet();
 
    const handleCtaClick = () => {
-      if (!targetSurveyId) {
-         return;
-      }
-
-      if (!import.meta.env.PROD) {
-         console.info("Early access survey CTA clicked", {
-            surveyId: targetSurveyId,
-         });
-      }
+      openSheet({
+         children: (
+            <div className="space-y-4">
+               <div>
+                  <h3 className="text-lg font-semibold">Feedback</h3>
+                  <p className="text-sm text-muted-foreground">
+                     {template.message}
+                  </p>
+               </div>
+               <FeatureFeedbackForm
+                  featureName={template.badgeLabel}
+                  onSuccess={closeSheet}
+               />
+            </div>
+         ),
+      });
    };
 
    return (
@@ -50,7 +56,6 @@ export function EarlyAccessBanner({ template }: EarlyAccessBannerProps) {
                {template.message}{" "}
                <Button
                   className="h-auto p-0 text-foreground underline underline-offset-4 hover:text-primary"
-                  disabled={isCtaDisabled}
                   onClick={handleCtaClick}
                   type="button"
                   variant="link"

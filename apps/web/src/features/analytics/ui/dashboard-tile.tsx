@@ -117,10 +117,10 @@ function useInsightMetadata(insightName?: string, insightId?: string) {
       type === "trends"
          ? "TENDÊNCIAS"
          : type === "funnels"
-           ? "FUNIS"
-           : type === "retention"
-             ? "RETENÇÃO"
-             : "INSIGHT";
+            ? "FUNIS"
+            : type === "retention"
+               ? "RETENÇÃO"
+               : "INSIGHT";
 
    // Extract date range from config if available
    const config = insight?.config as Record<string, unknown> | undefined;
