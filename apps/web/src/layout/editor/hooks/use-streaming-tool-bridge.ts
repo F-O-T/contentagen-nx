@@ -8,7 +8,7 @@
  */
 import { useAuiState } from "@assistant-ui/react";
 import type { LexicalEditor } from "lexical";
-import { $createTextNode, $getRoot } from "lexical";
+import { $createParagraphNode, $createTextNode, $getRoot, $isElementNode } from "lexical";
 import { useCallback, useEffect, useRef } from "react";
 import {
    isEditorTool,
@@ -59,11 +59,12 @@ export function useStreamingToolBridge({
             if (chunk) {
                editor.update(() => {
                   const root = $getRoot();
-                  const lastChild = root.getLastChild();
-                  if (lastChild) {
-                     const textNode = $createTextNode(chunk);
-                     lastChild.append(textNode);
+                  let target = root.getLastChild();
+                  if (!target || !$isElementNode(target)) {
+                     target = $createParagraphNode();
+                     root.append(target);
                   }
+                  target.append($createTextNode(chunk));
                });
             }
 
@@ -174,10 +175,8 @@ export function useStreamingToolBridge({
             executedTools.current.add(toolCallId);
 
             if (isEditorTool(toolName) && editor) {
-               // Non-streaming tools: execute via executeEditorTool
-               if (!STREAMING_TOOLS.has(toolName)) {
-                  executeEditorTool(editor, { id: toolCallId, name: toolName, args });
-               }
+               // Always execute — streaming tools may have had animation interrupted
+               executeEditorTool(editor, { id: toolCallId, name: toolName, args });
                flashHighlight();
             } else if (isFrontmatterTool(toolName)) {
                executeFrontmatter(toolName, args);
