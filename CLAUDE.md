@@ -230,14 +230,6 @@ unifiedAgent.mutate({
 - **FIM Agent** (`fimAgent`) - Autocomplete and fill-in-the-middle
 - **Inline Edit Agent** (`inlineEditAgent`) - Real-time inline editing
 
-### Deprecated Agents
-
-⚠️ **Orchestrator pattern is deprecated:**
-- `orchestratorAgent` - Replaced by `unifiedContent`
-- `writerAgent`, `plannerAgent`, `researcherAgent`, `seoAuditorAgent`, `reviewerAgent` - All merged into `unifiedContent`
-
-See `packages/agents/MIGRATION.md` for migration guide.
-
 ---
 
 ## Feature Folder Structure (in apps/web/src/features/)
