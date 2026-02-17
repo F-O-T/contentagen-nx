@@ -240,8 +240,11 @@ export function useStreamingToolBridge({
                   }
 
                   // Set full markdown body in editor (replaces any existing content)
-                  setEditorFromMarkdown(editor, parsed.body);
-                  flashHighlight();
+                  // Guard against empty body to avoid wiping the editor when agent only returned frontmatter
+                  if (parsed.body) {
+                     setEditorFromMarkdown(editor, parsed.body);
+                     flashHighlight();
+                  }
                }
             }
          }
