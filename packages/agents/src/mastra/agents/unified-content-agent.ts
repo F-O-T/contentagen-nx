@@ -407,6 +407,6 @@ export const unifiedContentAgent: Agent = new Agent({
       suggestImages: suggestImagesTool,
 
       // ─── Utility ──────────────────────────────────────────────────────────
-      dateTool: dateToolTool,
+      dateTool: dateTool,
    },
 });
