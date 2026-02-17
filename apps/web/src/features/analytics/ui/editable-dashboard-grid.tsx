@@ -18,7 +18,6 @@ import {
 } from "@packages/ui/components/credenza";
 import { DataTable } from "@packages/ui/components/data-table";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
@@ -245,10 +244,6 @@ export function EditableDashboardGrid({
 
    // Sync local state when dashboard changes (e.g., after save/refetch)
    const dashboardTilesJson = JSON.stringify(dashboard.tiles);
-   const dashboardMetadataJson = JSON.stringify({
-      name: dashboard.name,
-      description: dashboard.description,
-   });
    const [lastDashboardTiles, setLastDashboardTiles] =
       useState(dashboardTilesJson);
 
@@ -257,10 +252,6 @@ export function EditableDashboardGrid({
       setLocalTiles(dashboard.tiles);
    }
 
-   if (dashboardMetadataJson !== lastDashboardMetadata) {
-      setLastDashboardMetadata(dashboardMetadataJson);
-      metadataForm.reset();
-   }
 
    const tilesChanged = useMemo(
       () => JSON.stringify(localTiles) !== dashboardTilesJson,
@@ -356,12 +347,6 @@ export function EditableDashboardGrid({
       }
    }, [externalOnOpenAddInsight, handleOpenAddInsight]);
 
-   // Expose handler to parent component
-   useEffect(() => {
-      if (externalOnOpenAddSheet) {
-         externalOnOpenAddSheet(handleOpenAddSheet);
-      }
-   }, [externalOnOpenAddSheet, handleOpenAddSheet]);
 
    const handleSave = useCallback(() => {
       saveMutation.mutate({
@@ -374,7 +359,7 @@ export function EditableDashboardGrid({
       setLocalTiles(dashboard.tiles);
    }, [dashboard.tiles]);
 
-   if (localTiles.length === 0 && !hasChanges) {
+   if (localTiles.length === 0 && !tilesChanged) {
       return (
          <Card>
             <CardHeader className="items-center text-center py-12">
@@ -390,7 +375,7 @@ export function EditableDashboardGrid({
 
    return (
       <div className="flex flex-col gap-4">
-         {hasChanges && (
+         {tilesChanged && (
             <UnsavedChangesBar
                isSaving={saveMutation.isPending}
                onCancel={handleCancel}
