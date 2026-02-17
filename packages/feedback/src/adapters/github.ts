@@ -74,13 +74,18 @@ export function githubAdapter(config: GitHubAdapterConfig): FeedbackAdapter {
       async send(payload) {
          const issue = buildIssue(payload);
 
-         await config.octokit.issues.create({
-            owner: config.owner,
-            repo: config.repo,
-            title: issue.title,
-            body: issue.body,
-            labels: issue.labels,
-         });
+         try {
+            await config.octokit.issues.create({
+               owner: config.owner,
+               repo: config.repo,
+               title: issue.title,
+               body: issue.body,
+               labels: issue.labels,
+            });
+         } catch (err) {
+            console.error("[github-adapter] issue creation failed", err);
+            throw err;
+         }
       },
    };
 }

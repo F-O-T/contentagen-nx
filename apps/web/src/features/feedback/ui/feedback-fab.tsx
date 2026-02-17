@@ -10,7 +10,7 @@ import {
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
 import { Bug, ExternalLink, Lightbulb, MessageSquarePlus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useCredenza } from "@/hooks/use-credenza";
 import { useApiErrorTracker } from "../hooks/use-api-error-tracker";
 import { BugReportForm } from "./bug-report-form";
@@ -23,7 +23,7 @@ export function FeedbackFab() {
    const { openCredenza, closeCredenza } = useCredenza();
    const { shouldShowBugReport, dismiss } = useApiErrorTracker();
 
-   const openBugReport = () => {
+   const openBugReport = useCallback(() => {
       setOpen(false);
       openCredenza({
          children: (
@@ -35,7 +35,7 @@ export function FeedbackFab() {
             />
          ),
       });
-   };
+   }, [openCredenza, closeCredenza, dismiss]);
 
    const openFeatureRequest = () => {
       setOpen(false);
@@ -49,7 +49,7 @@ export function FeedbackFab() {
       if (shouldShowBugReport) {
          openBugReport();
       }
-   }, [shouldShowBugReport]);
+   }, [shouldShowBugReport, openBugReport]);
 
    return (
       <div className="fixed bottom-6 right-6 z-50">

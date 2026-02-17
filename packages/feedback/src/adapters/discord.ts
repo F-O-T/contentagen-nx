@@ -80,21 +80,31 @@ export function discordAdapter(config: DiscordAdapterConfig): FeedbackAdapter {
       async send(payload) {
          const embed = buildEmbed(payload);
 
-         await fetch(`${config.webhookUrl}?wait=true`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-               thread_name: embed.threadName,
-               embeds: [
-                  {
-                     title: embed.title,
-                     color: embed.color,
-                     fields: embed.fields,
-                     timestamp: new Date().toISOString(),
-                  },
-               ],
-            }),
-         });
+         try {
+            const response = await fetch(`${config.webhookUrl}?wait=true`, {
+               method: "POST",
+               headers: { "Content-Type": "application/json" },
+               body: JSON.stringify({
+                  thread_name: embed.threadName,
+                  embeds: [
+                     {
+                        title: embed.title,
+                        color: embed.color,
+                        fields: embed.fields,
+                        timestamp: new Date().toISOString(),
+                     },
+                  ],
+               }),
+            });
+            if (!response.ok) {
+               console.error("[discord-adapter] webhook delivery failed", {
+                  status: response.status,
+                  statusText: response.statusText,
+               });
+            }
+         } catch (err) {
+            console.error("[discord-adapter] webhook request failed", err);
+         }
       },
    };
 }
