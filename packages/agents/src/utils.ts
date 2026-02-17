@@ -32,7 +32,7 @@ export const embeddingModel = new ModelRouterEmbeddingModel({
 export function buildLanguageInstruction(language: string): string {
    const languageMap: Record<string, string> = {
       "pt-BR":
-         "Sempre responda e escreva conteúdo em Português Brasileiro (pt-BR).",
+         "OBRIGATÓRIO: Sempre escreva e responda EXCLUSIVAMENTE em Português Brasileiro (pt-BR). NUNCA use inglês ou qualquer outro idioma. Isso se aplica a TODO o conteúdo gerado, incluindo o que você passa para sub-agentes.",
       "en-US": "Always respond and write content in American English (en-US).",
       es: "Siempre responda y escriba contenido en Español.",
    };

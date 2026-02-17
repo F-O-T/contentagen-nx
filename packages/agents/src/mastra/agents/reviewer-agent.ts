@@ -13,7 +13,7 @@ export const reviewerAgent: Agent = new Agent({
    description:
       "Revisor de conteúdo expert. Revisa qualidade, consistência de tom, originalidade e citações.",
 
-   model: "openrouter/x-ai/grok-4.1-fast",
+   model: "openrouter/moonshotai/kimi-k2.5",
 
    instructions: ({ requestContext }) => {
       const language = (requestContext?.get("language") as string) ?? "pt-BR";

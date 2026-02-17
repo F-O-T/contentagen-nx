@@ -10,6 +10,7 @@
  * - UUID tracking to prevent stale suggestions
  */
 import {
+   type DOMConversionMap,
    type DOMExportOutput,
    type EditorConfig,
    type LexicalEditor,
@@ -75,6 +76,11 @@ export class GhostTextNode extends TextNode {
    // Prevent copying ghost text
    excludeFromCopy(): boolean {
       return true;
+   }
+
+   // Never reconstruct ghost text from HTML — it's transient UI only
+   static importDOM(): DOMConversionMap | null {
+      return null;
    }
 
    // Prevent exporting ghost text to HTML (returns empty span)

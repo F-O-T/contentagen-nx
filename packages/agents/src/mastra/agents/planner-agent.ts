@@ -11,7 +11,7 @@ export const plannerAgent: Agent = new Agent({
    description:
       "Estrategista de conteúdo expert. Planeja estrutura, cria outlines, briefings editoriais e clusters de tópicos.",
 
-   model: "openrouter/x-ai/grok-4.1-fast",
+   model: "openrouter/moonshotai/kimi-k2.5",
 
    instructions: ({ requestContext }) => {
       const language = (requestContext?.get("language") as string) ?? "pt-BR";

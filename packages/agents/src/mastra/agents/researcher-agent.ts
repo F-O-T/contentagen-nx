@@ -17,7 +17,7 @@ export const researcherAgent: Agent = new Agent({
    description:
       "Pesquisador de conteúdo expert. Analisa SERPs, pesquisa concorrência, identifica gaps de conteúdo e coleta dados.",
 
-   model: "openrouter/x-ai/grok-4.1-fast",
+   model: "openrouter/moonshotai/kimi-k2.5",
 
    instructions: ({ requestContext }) => {
       const language = (requestContext?.get("language") as string) ?? "pt-BR";

@@ -60,6 +60,18 @@ export const RESEARCH_TOOLS = [
 export const SEO_TOOLS = ["analyzeSEO", "optimizeKeywords"] as const;
 
 /**
+ * Agent delegation tools created by Mastra for sub-agent calls
+ * Named pattern: "agent-{agentKey}" matching orchestrator's agents config
+ */
+export const AGENT_TOOLS = [
+   "agent-writer",
+   "agent-planner",
+   "agent-researcher",
+   "agent-seoAuditor",
+   "agent-reviewer",
+] as const;
+
+/**
  * All tool names
  */
 export const ALL_TOOLS = [
@@ -67,6 +79,7 @@ export const ALL_TOOLS = [
    ...FRONTMATTER_TOOLS,
    ...RESEARCH_TOOLS,
    ...SEO_TOOLS,
+   ...AGENT_TOOLS,
 ] as const;
 
 /**
@@ -95,6 +108,13 @@ export function isResearchTool(name: string): boolean {
  */
 export function isSEOTool(name: string): boolean {
    return (SEO_TOOLS as readonly string[]).includes(name);
+}
+
+/**
+ * Check if a tool name is an agent delegation tool
+ */
+export function isAgentTool(name: string): boolean {
+   return (AGENT_TOOLS as readonly string[]).includes(name);
 }
 
 // =============================================================================

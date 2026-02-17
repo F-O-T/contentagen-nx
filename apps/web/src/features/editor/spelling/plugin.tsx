@@ -362,11 +362,12 @@ export function SpellingSuggestionPopover({
    error,
    onApplySuggestion,
    onIgnore,
-   isOpen,
-   onOpenChange,
    suggestions = [],
    isLoading = false,
-}: SpellingSuggestionPopoverProps): React.JSX.Element {
+}: Omit<
+   SpellingSuggestionPopoverProps,
+   "isOpen" | "onOpenChange"
+>): React.JSX.Element {
    return (
       <PopoverContent
          align="start"
@@ -504,6 +505,7 @@ export function SpellingErrorDecorator({
 
    // Calculate positions of spelling errors using optimized offset map
    // Uses RAF to batch layout reads and visible range filtering for performance
+   // OPTIMIZED: Only processes errors in visible viewport + limits max decorations
    const updateDecorationPositions = useCallback(() => {
       // Cancel any pending RAF
       if (rafIdRef.current !== null) {
@@ -551,7 +553,7 @@ export function SpellingErrorDecorator({
                   (scrollRatio + viewportRatio) * totalTextLength,
                );
                // Add buffer for errors near the edge
-               const buffer = Math.ceil(totalTextLength * 0.1);
+               const buffer = Math.ceil(totalTextLength * 0.15);
                visibleRangeRef.current = {
                   start: Math.max(0, estimatedStart - buffer),
                   end: Math.min(totalTextLength, estimatedEnd + buffer),
@@ -561,19 +563,25 @@ export function SpellingErrorDecorator({
             const newDecorations: DecorationPosition[] = [];
             const visibleRange = visibleRangeRef.current;
 
-            // O(n log m) instead of O(n * m)
-            for (const error of filteredErrors) {
-               // Skip errors that are definitely outside visible range
-               if (visibleRange) {
-                  const errorEnd = error.offset + error.length;
-                  if (
-                     errorEnd < visibleRange.start ||
-                     error.offset > visibleRange.end
-                  ) {
-                     continue;
-                  }
-               }
+            // OPTIMIZATION: Pre-filter errors by visible range BEFORE position calculation
+            const candidateErrors = visibleRange
+               ? filteredErrors.filter((error) => {
+                    const errorEnd = error.offset + error.length;
+                    return (
+                       errorEnd >= visibleRange.start &&
+                       error.offset <= visibleRange.end
+                    );
+                 })
+               : filteredErrors;
 
+            // OPTIMIZATION: Limit max decorations to prevent performance issues
+            const errorsToProcess = candidateErrors.slice(
+               0,
+               spellingConfig.maxVisibleDecorations,
+            );
+
+            // O(n log m) instead of O(n * m)
+            for (const error of errorsToProcess) {
                const position = getPositionFromLexicalMap(
                   editor,
                   offsetMap,
@@ -602,7 +610,7 @@ export function SpellingErrorDecorator({
       };
    }, []);
 
-   // Debounced position update
+   // Debounced position update - increased delay for better performance
    useEffect(() => {
       if (updateTimeoutRef.current) {
          window.clearTimeout(updateTimeoutRef.current);
@@ -610,7 +618,7 @@ export function SpellingErrorDecorator({
 
       updateTimeoutRef.current = window.setTimeout(() => {
          updateDecorationPositions();
-      }, 100);
+      }, 200);
 
       return () => {
          if (updateTimeoutRef.current) {
@@ -619,10 +627,16 @@ export function SpellingErrorDecorator({
       };
    }, [updateDecorationPositions]);
 
-   // Update on editor changes and scroll
+   // Update on editor changes and scroll - optimized with longer debounce
    useEffect(() => {
-      // Debounced scroll handler to reduce layout thrashing
+      // Throttled scroll handler to reduce layout thrashing
+      let isScrolling = false;
+
       const handleScroll = () => {
+         if (isScrolling) return; // Throttle during scroll
+
+         isScrolling = true;
+
          if (scrollTimeoutRef.current) {
             window.clearTimeout(scrollTimeoutRef.current);
          }
@@ -630,7 +644,8 @@ export function SpellingErrorDecorator({
             // Invalidate visible range cache on scroll
             visibleRangeRef.current = null;
             updateDecorationPositions();
-         }, 50); // Short debounce for responsiveness
+            isScrolling = false;
+         }, 150); // Increased debounce for better performance
       };
 
       const unregister = editor.registerUpdateListener(() => {
@@ -639,16 +654,16 @@ export function SpellingErrorDecorator({
          }
          updateTimeoutRef.current = window.setTimeout(() => {
             updateDecorationPositions();
-         }, 200);
+         }, 300); // Increased delay for editor updates
       });
 
       // Listen to scroll events on the editor container
       const container = containerRef.current;
       if (container) {
-         container.addEventListener("scroll", handleScroll, true);
+         container.addEventListener("scroll", handleScroll, { passive: true });
       }
-      window.addEventListener("scroll", handleScroll, true);
-      window.addEventListener("resize", handleScroll);
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      window.addEventListener("resize", handleScroll, { passive: true });
 
       return () => {
          unregister();
@@ -656,9 +671,9 @@ export function SpellingErrorDecorator({
             window.clearTimeout(scrollTimeoutRef.current);
          }
          if (container) {
-            container.removeEventListener("scroll", handleScroll, true);
+            container.removeEventListener("scroll", handleScroll);
          }
-         window.removeEventListener("scroll", handleScroll, true);
+         window.removeEventListener("scroll", handleScroll);
          window.removeEventListener("resize", handleScroll);
       };
    }, [editor, updateDecorationPositions, containerRef]);
@@ -782,18 +797,10 @@ export function SpellingErrorDecorator({
                <SpellingSuggestionPopover
                   error={decoration.error}
                   isLoading={isLoading}
-                  isOpen={isActive}
                   onApplySuggestion={(suggestion) =>
                      handleApplySuggestion(decoration.error, suggestion)
                   }
                   onIgnore={() => handleIgnore(decoration.error.id)}
-                  onOpenChange={(open) =>
-                     handlePopoverOpen(
-                        open,
-                        decoration.error.id,
-                        decoration.error.original,
-                     )
-                  }
                   suggestions={cachedSuggestions}
                />
             </Popover>

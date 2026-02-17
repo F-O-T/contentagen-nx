@@ -19,7 +19,7 @@ import { seoScoreTool } from "../tools/analysis/seo-score-tool";
 import { titleMetaTool } from "../tools/analysis/title-meta-tool";
 import { toneAnalysisTool } from "../tools/analysis/tone-analysis-tool";
 // ─── Utility Tools ───────────────────────────────────────────────────────────
-import { dateToolTool } from "../tools/date-tool";
+import { dateTool } from "../tools/date-tool";
 // ─── Editor Tools ────────────────────────────────────────────────────────────
 import { addExternalLinksTool } from "../tools/editor/add-external-links-tool";
 import { addInternalLinksTool } from "../tools/editor/add-internal-links-tool";

@@ -20,7 +20,7 @@ export const seoAuditorAgent: Agent = new Agent({
    description:
       "Auditor SEO expert. Analisa qualidade SEO, legibilidade, densidade de keywords e gera recomendações de otimização.",
 
-   model: "openrouter/x-ai/grok-4.1-fast",
+   model: "openrouter/moonshotai/kimi-k2.5",
 
    instructions: ({ requestContext }) => {
       const language = (requestContext?.get("language") as string) ?? "pt-BR";
