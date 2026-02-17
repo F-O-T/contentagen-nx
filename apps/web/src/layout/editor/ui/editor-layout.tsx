@@ -44,6 +44,7 @@ import {
    useEditorConfig,
    useSeoAuditSidebar,
 } from "../hooks/use-editor-state";
+import { setEditorDocument } from "../stores/editor-context-store";
 import { useManualSave } from "../hooks/use-manual-save";
 import { useStreamingToolBridge } from "../hooks/use-streaming-tool-bridge";
 import { AssistantChatSidebar } from "./assistant-chat-sidebar";
@@ -286,6 +287,7 @@ export function EditorLayout({
                                  editor.read(() => {
                                     const markdown = getEditorMarkdown(editor);
                                     saveBody(markdown);
+                                    setEditorDocument(markdown);
                                  });
                               }}
                               onEditorReady={setEditorInstance}

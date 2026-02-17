@@ -134,6 +134,11 @@ export function createContenttaAdapter(contentId?: string): ChatModelAdapter {
             contextParts.push(`[TEXTO SELECIONADO]\n${editorCtx.selectedText}`);
          }
 
+         // Only inject full doc if message contains the @documento resolved token
+         if (messageText.includes("[documento completo incluído]") && editorCtx.documentMarkdown) {
+            contextParts.push(`[DOCUMENTO COMPLETO]\n${editorCtx.documentMarkdown}`);
+         }
+
          const enrichedMessage =
             contextParts.length > 0
                ? `${messageText}\n\n${contextParts.join("\n\n")}`
