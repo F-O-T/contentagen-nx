@@ -18,29 +18,6 @@ import { readabilityTool } from "../tools/analysis/readability-tool";
 import { seoScoreTool } from "../tools/analysis/seo-score-tool";
 import { titleMetaTool } from "../tools/analysis/title-meta-tool";
 import { toneAnalysisTool } from "../tools/analysis/tone-analysis-tool";
-// Editor tools
-import { addExternalLinksTool } from "../tools/editor/add-external-links-tool";
-import { addInternalLinksTool } from "../tools/editor/add-internal-links-tool";
-import { deleteTextTool } from "../tools/editor/delete-text-tool";
-import { formatTextTool } from "../tools/editor/format-text-tool";
-import { generateQuickAnswerTool } from "../tools/editor/generate-quick-answer-tool";
-import { improveReadabilityTool } from "../tools/editor/improve-readability-tool";
-import { injectKeywordsTool } from "../tools/editor/inject-keywords-tool";
-import { insertCodeBlockTool } from "../tools/editor/insert-code-block-tool";
-import { insertHeadingTool } from "../tools/editor/insert-heading-tool";
-import { insertImageTool } from "../tools/editor/insert-image-tool";
-import { insertListTool } from "../tools/editor/insert-list-tool";
-import { insertTableTool } from "../tools/editor/insert-table-tool";
-import { insertTextTool } from "../tools/editor/insert-text-tool";
-import { optimizeMetaTool } from "../tools/editor/optimize-meta-tool";
-import { optimizeTitleTool } from "../tools/editor/optimize-title-tool";
-import { replaceTextTool } from "../tools/editor/replace-text-tool";
-import { suggestImagesTool } from "../tools/editor/suggest-images-tool";
-// Frontmatter tools
-import { editDescriptionTool } from "../tools/frontmatter/edit-description-tool";
-import { editKeywordsTool } from "../tools/frontmatter/edit-keywords-tool";
-import { editSlugTool } from "../tools/frontmatter/edit-slug-tool";
-import { editTitleTool } from "../tools/frontmatter/edit-title-tool";
 // Memory tools
 import { getInstructionsTool } from "../tools/memory/get-instructions-tool";
 // RAG tools
@@ -59,25 +36,49 @@ const getWriterAgentInstructions = (
    const languageInstruction = buildLanguageInstruction(language);
 
    return `
-You are an expert blog post writer and editor. You write and edit content directly using markdown in a Lexical rich text editor.
+You are an expert blog post writer. You generate complete, high-quality articles as a single markdown document.
 
 ${languageInstruction}
 
 ${compiledMemories}
 
-## FIRST STEPS - ALWAYS DO THIS
-Before starting ANY writing task:
-1. Set frontmatter first (editTitle, editDescription, editSlug, editKeywords)
-2. Write or edit content using editor tools
+## OUTPUT FORMAT
 
-## YOUR ROLE
-You are a markdown content writer. You make edits directly using tools, thinking step-by-step.
+ALWAYS start your response with YAML frontmatter, followed by the full article body:
 
-## INTERLEAVED THINKING
-After each tool call:
-1. **Reflect** on the result
-2. **Think** about what's next
-3. **Act** by calling the next tool
+\`\`\`
+---
+title: "Article Title Here"
+description: "1-2 sentence meta description"
+slug: "article-title-here"
+keywords: ["keyword1", "keyword2", "keyword3", "keyword4"]
+---
+
+# Article Title Here
+
+Full article content here...
+\`\`\`
+
+## RULES
+
+1. The frontmatter MUST be the very first thing in your response — no text before it
+2. Use exactly this YAML format: \`title:\`, \`description:\`, \`slug:\`, \`keywords:\`
+3. title and description values MUST be wrapped in double quotes
+4. keywords MUST be a JSON array of strings: \`["kw1", "kw2"]\`
+5. slug MUST be lowercase, hyphenated, no spaces or special chars
+6. After the closing \`---\`, write the full article in markdown
+7. DO NOT call any tools — your entire response IS the content
+8. Generate a complete, high-quality article. Not a stub. Not a summary.
+
+## ARTICLE QUALITY STANDARDS
+
+- Comprehensive coverage of the topic
+- Clear headings hierarchy (h2 for main sections, h3 for subsections)
+- Use lists, tables, code blocks where appropriate
+- At least 800 words for a standard article
+- Human-sounding writing, not AI-sounding
+- Include a strong introduction and conclusion
+- Specific examples, data points, or case studies where relevant
 `;
 };
 
@@ -86,22 +87,17 @@ After each tool call:
 /**
  * Writer Agent
  *
- * A content writing agent for editing blog posts with tools for:
- * - Text manipulation (insert, replace, delete, format)
- * - Structure (headings, lists, code blocks, tables, images)
- * - Frontmatter (title, description, slug, keywords)
- * - Analysis (SEO, readability, keyword density)
- *
- * Deep knowledge comes from Mastra Skills (edicao-de-conteudo, gestao-de-frontmatter,
- * diretrizes-de-escrita, otimizacao-seo, escrita-humana, etc.)
+ * A content writing agent that generates complete, high-quality articles as
+ * a single markdown document with YAML frontmatter. Designed to run as a
+ * sub-agent under the orchestrator, returning its full article as text output.
  */
 export const writerAgent: Agent = new Agent({
    id: "writer-agent",
    name: "Writer Agent",
    description:
-      "Escritor e editor expert de blog posts. Escreve, edita e otimiza conteúdo usando ferramentas markdown em um editor rich text.",
+      "Escritor e editor expert de blog posts. Gera artigos completos em markdown com frontmatter YAML estruturado.",
 
-   model: "openrouter/x-ai/grok-4.1-fast",
+   model: "openrouter/moonshotai/kimi-k2.5",
 
    instructions: ({ requestContext }) => {
       const writerInstructions = requestContext?.get("writerInstructions") as
@@ -112,29 +108,6 @@ export const writerAgent: Agent = new Agent({
    },
 
    tools: {
-      // Editor tools
-      insertText: insertTextTool,
-      replaceText: replaceTextTool,
-      deleteText: deleteTextTool,
-      formatText: formatTextTool,
-      insertHeading: insertHeadingTool,
-      insertList: insertListTool,
-      insertCodeBlock: insertCodeBlockTool,
-      insertTable: insertTableTool,
-      insertImage: insertImageTool,
-      injectKeywords: injectKeywordsTool,
-      addInternalLinks: addInternalLinksTool,
-      improveReadability: improveReadabilityTool,
-      optimizeTitle: optimizeTitleTool,
-      optimizeMeta: optimizeMetaTool,
-      generateQuickAnswer: generateQuickAnswerTool,
-      suggestImages: suggestImagesTool,
-      addExternalLinks: addExternalLinksTool,
-      // Frontmatter tools
-      editTitle: editTitleTool,
-      editDescription: editDescriptionTool,
-      editSlug: editSlugTool,
-      editKeywords: editKeywordsTool,
       // Analysis tools
       seoScore: seoScoreTool,
       readability: readabilityTool,
