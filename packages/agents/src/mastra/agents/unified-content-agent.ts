@@ -150,7 +150,7 @@ Full article content here in markdown...
 3. title and description MUST be wrapped in double quotes
 4. keywords MUST be JSON array: \`["kw1", "kw2"]\`
 5. slug MUST be lowercase, hyphenated, no special chars
-6. Generate complete, high-quality articles (800+ words)
+6. Default to 800+ words unless the user explicitly requests a shorter length
 7. Human-sounding writing, NOT AI-sounding
 8. Use tools to research BEFORE writing
 9. Include strong intro and conclusion
