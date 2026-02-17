@@ -28,6 +28,8 @@ import { ResearchToolCard } from "./chat/tool-cards/research-tool-card";
 import { SeoToolCard } from "./chat/tool-cards/seo-tool-card";
 import type { ToolStatus } from "./chat/tool-cards/tool-card-base";
 import { setChatSidebarWidth, useChatSidebar } from "../hooks/use-editor-state";
+import { useStore } from "@tanstack/react-store";
+import { editorContextStore } from "../stores/editor-context-store";
 
 // ============================================================================
 // Types
@@ -197,6 +199,7 @@ export function AssistantChatSidebar({
    className,
 }: AssistantChatSidebarProps) {
    const { open, width } = useChatSidebar();
+   const selectedText = useStore(editorContextStore, (s) => s.selectedText);
 
    // Resize state
    const [isResizing, setIsResizing] = useState(false);
@@ -297,6 +300,16 @@ export function AssistantChatSidebar({
                <span>Assistente está gerando...</span>
             </div>
          </ThreadPrimitive.If>
+
+         {/* Selection context banner */}
+         {selectedText && (
+            <div className="flex items-center gap-2 px-3 py-1.5 text-xs bg-primary/5 border-t border-primary/20 text-primary">
+               <span className="size-1.5 rounded-full bg-primary shrink-0" />
+               <span className="flex-1 truncate">
+                  Usando seleção: "{selectedText.slice(0, 50)}{selectedText.length > 50 ? "…" : ""}"
+               </span>
+            </div>
+         )}
 
          {/* Composer */}
          <ComposerPrimitive.Root className="p-2 border-t">
