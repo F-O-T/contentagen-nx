@@ -116,8 +116,7 @@ export const getLinkedAccounts = protectedProcedure.handler(
 export const generateAvatarUploadUrl = protectedProcedure
    .input(
       z.object({
-         fileExtension: z.string(),
-         contentType: z.string(),
+         fileExtension: z.string().regex(/^[a-zA-Z0-9]{1,10}$/, "Invalid file extension"),
       }),
    )
    .handler(async ({ context, input }) => {

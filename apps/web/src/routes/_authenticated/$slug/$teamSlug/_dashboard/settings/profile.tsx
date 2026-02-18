@@ -86,7 +86,6 @@ function AvatarUploadSection({
 
          const uploadData = await orpc.account.generateAvatarUploadUrl.call({
             fileExtension,
-            contentType,
          });
 
          await presignedUpload.uploadToPresignedUrl(
