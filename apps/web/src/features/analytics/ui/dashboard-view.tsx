@@ -4,6 +4,7 @@ import type {
    DashboardDateRange,
 } from "@packages/database/schemas/dashboards";
 import { Button } from "@packages/ui/components/button";
+import { DateRangePicker } from "@packages/ui/components/date-range-picker";
 import {
    Popover,
    PopoverContent,
@@ -27,7 +28,6 @@ import { DashboardFilterPopover } from "@/features/analytics/ui/dashboard-filter
 import { EditableDashboardGrid } from "@/features/analytics/ui/editable-dashboard-grid";
 import { InlineEditableText } from "@/features/analytics/ui/inline-editable-text";
 import { orpc } from "@/integrations/orpc/client";
-import { DateRangePicker } from "@packages/ui/components/date-range-picker";
 
 // =============================================================================
 // Types

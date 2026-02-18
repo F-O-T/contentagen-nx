@@ -177,7 +177,8 @@ function toAnalyticsDateRange(dr: DashboardDateRange): DateRange | undefined {
       const endStr = parts[1].trim();
       const start = new Date(`${startStr}T00:00:00.000Z`);
       const end = new Date(`${endStr}T23:59:59.999Z`);
-      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return undefined;
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()))
+         return undefined;
       return {
          type: "absolute",
          start: start.toISOString(),
