@@ -121,7 +121,7 @@ function Calendar({
                defaultClassNames.dropdown_root,
             ),
             dropdowns: cn(
-               "w-full flex items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
+               "relative z-10 w-full flex items-center text-sm font-medium justify-center h-(--cell-size) gap-1.5",
                defaultClassNames.dropdowns,
             ),
             hidden: cn("invisible", defaultClassNames.hidden),

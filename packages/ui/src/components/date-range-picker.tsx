@@ -33,7 +33,7 @@ function CalendarDropdown({
          }}
          value={String(value)}
       >
-         <SelectTrigger className="h-7 w-auto min-w-[70px] border-input text-sm font-medium gap-1 focus:ring-0 focus:ring-offset-0 shadow-none">
+         <SelectTrigger className="h-7 w-auto min-w-[70px] border-input text-sm font-medium gap-1 focus:ring-0 focus:ring-offset-0 shadow-none cursor-pointer">
             <SelectValue />
          </SelectTrigger>
          <SelectContent>
@@ -137,7 +137,7 @@ export function DateRangePicker({
                captionLayout="dropdown"
                classNames={{
                   months: "flex gap-0 flex-col md:flex-row relative",
-                  month: "p-2 [&:not(:first-child)]:border-l",
+                  month: "flex flex-col w-full gap-4 px-2 pb-2 [&:nth-child(n+3)]:border-l",
                }}
                components={{ Dropdown: CalendarDropdown }}
                fromYear={2020}
