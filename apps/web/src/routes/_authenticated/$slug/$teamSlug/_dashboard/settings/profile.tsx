@@ -12,6 +12,12 @@ import {
    DropzoneEmptyState,
 } from "@packages/ui/components/dropzone";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
+import {
+   Field,
+   FieldError,
+   FieldGroup,
+   FieldLabel,
+} from "@packages/ui/components/field";
 import { Input } from "@packages/ui/components/input";
 import { Label } from "@packages/ui/components/label";
 import { PasswordInput } from "@packages/ui/components/password-input";
@@ -19,7 +25,8 @@ import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { getInitials } from "@packages/utils/text";
 import { generateQrCode } from "@f-o-t/qrcode";
-import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useForm } from "@tanstack/react-form";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
    Loader2,
@@ -27,9 +34,17 @@ import {
    Trash2,
    User,
 } from "lucide-react";
-import { Suspense, useMemo, useState } from "react";
+import {
+   type FormEvent,
+   Suspense,
+   useCallback,
+   useMemo,
+   useState,
+   useTransition,
+} from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
+import { z } from "zod";
 import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
 import { usePresignedUpload } from "@/features/file-upload/lib/use-presigned-upload";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
@@ -55,38 +70,41 @@ function AvatarUploadSection({
 }) {
    const fileUpload = useFileUpload({
       acceptedTypes: ["image/*"],
-      maxSize: 5 * 1024 * 1024, // 5 MB
+      maxSize: 5 * 1024 * 1024,
    });
    const presignedUpload = usePresignedUpload();
+   const [isPending, startTransition] = useTransition();
 
-   const saveMutation = useMutation({
-      mutationFn: async () => {
-         if (!fileUpload.selectedFile) throw new Error("No file selected");
+   const handleSave = () => {
+      if (!fileUpload.selectedFile) return;
+      startTransition(async () => {
+         try {
+            const fileExtension =
+               fileUpload.selectedFile!.name.split(".").pop() ?? "png";
+            const contentType = fileUpload.selectedFile!.type;
 
-         const fileExtension =
-            fileUpload.selectedFile.name.split(".").pop() ?? "png";
-         const contentType = fileUpload.selectedFile.type;
+            const uploadData = await orpc.account.generateAvatarUploadUrl.call({
+               fileExtension,
+            });
 
-         const uploadData = await orpc.account.generateAvatarUploadUrl.call({
-            fileExtension,
-         });
+            await presignedUpload.uploadToPresignedUrl(
+               uploadData.presignedUrl,
+               fileUpload.selectedFile!,
+               contentType,
+            );
 
-         await presignedUpload.uploadToPresignedUrl(
-            uploadData.presignedUrl,
-            fileUpload.selectedFile,
-            contentType,
-         );
-
-         await authClient.updateUser({ image: uploadData.publicUrl });
-      },
-      onSuccess: () => {
-         toast.success("Foto de perfil atualizada!");
-         fileUpload.clearFile();
-      },
-      onError: () => {
-         toast.error("Erro ao atualizar foto de perfil");
-      },
-   });
+            const { error } = await authClient.updateUser({ image: uploadData.publicUrl });
+            if (error) {
+               toast.error(error.message ?? "Erro ao atualizar foto de perfil");
+            } else {
+               toast.success("Foto de perfil atualizada!");
+               fileUpload.clearFile();
+            }
+         } catch {
+            toast.error("Erro ao atualizar foto de perfil");
+         }
+      });
+   };
 
    return (
       <section className="space-y-3">
@@ -135,11 +153,11 @@ function AvatarUploadSection({
          </div>
          {fileUpload.filePreview && (
             <Button
-               disabled={saveMutation.isPending || presignedUpload.isUploading}
-               onClick={() => saveMutation.mutate()}
+               disabled={isPending || presignedUpload.isUploading}
+               onClick={handleSave}
                size="sm"
             >
-               {(saveMutation.isPending || presignedUpload.isUploading) && (
+               {(isPending || presignedUpload.isUploading) && (
                   <Loader2 className="size-4 mr-2 animate-spin" />
                )}
                Salvar foto
@@ -175,6 +193,7 @@ function TwoFactorSection({
    const [totpCode, setTotpCode] = useState("");
    const [totpUri, setTotpUri] = useState("");
    const [backupCodes, setBackupCodes] = useState<string[]>([]);
+   const [isPending, startTransition] = useTransition();
 
    const resetState = () => {
       setStep("idle");
@@ -184,57 +203,42 @@ function TwoFactorSection({
       setBackupCodes([]);
    };
 
-   const enableMutation = useMutation({
-      mutationFn: async () => {
-         const result = await authClient.twoFactor.enable({ password });
-         if (result.error) throw new Error(result.error.message);
-         return result.data;
-      },
-      onSuccess: (data) => {
+   const handleEnable = () => {
+      startTransition(async () => {
+         const { data, error } = await authClient.twoFactor.enable({ password });
+         if (error) {
+            toast.error(error.message ?? "Senha incorreta");
+            return;
+         }
          setTotpUri(data?.totpURI ?? "");
          setBackupCodes(data?.backupCodes ?? []);
          setPassword("");
          setStep("show-qr");
-      },
-      onError: (error) => {
-         toast.error(
-            error instanceof Error ? error.message : "Senha incorreta",
-         );
-      },
-   });
+      });
+   };
 
-   const verifyMutation = useMutation({
-      mutationFn: async () => {
-         const result = await authClient.twoFactor.verifyTotp({ code: totpCode });
-         if (result.error) throw new Error(result.error.message);
-         return result.data;
-      },
-      onSuccess: () => {
+   const handleVerify = () => {
+      startTransition(async () => {
+         const { error } = await authClient.twoFactor.verifyTotp({ code: totpCode });
+         if (error) {
+            toast.error(error.message ?? "Código inválido");
+            return;
+         }
          setStep("show-backup-codes");
-      },
-      onError: (error) => {
-         toast.error(
-            error instanceof Error ? error.message : "Código inválido",
-         );
-      },
-   });
+      });
+   };
 
-   const disableMutation = useMutation({
-      mutationFn: async () => {
-         const result = await authClient.twoFactor.disable({ password });
-         if (result.error) throw new Error(result.error.message);
-         return result.data;
-      },
-      onSuccess: () => {
+   const handleDisable = () => {
+      startTransition(async () => {
+         const { error } = await authClient.twoFactor.disable({ password });
+         if (error) {
+            toast.error(error.message ?? "Senha incorreta");
+            return;
+         }
          toast.success("2FA desativado com sucesso!");
          resetState();
-      },
-      onError: (error) => {
-         toast.error(
-            error instanceof Error ? error.message : "Senha incorreta",
-         );
-      },
-   });
+      });
+   };
 
    const qrSrc = useMemo(() => {
       if (!totpUri) return "";
@@ -300,11 +304,11 @@ function TwoFactorSection({
                   </div>
                   <div className="flex gap-2">
                      <Button
-                        disabled={password.length === 0 || enableMutation.isPending}
-                        onClick={() => enableMutation.mutate()}
+                        disabled={password.length === 0 || isPending}
+                        onClick={handleEnable}
                         size="sm"
                      >
-                        {enableMutation.isPending && (
+                        {isPending && (
                            <Loader2 className="size-4 mr-2 animate-spin" />
                         )}
                         Continuar
@@ -341,11 +345,11 @@ function TwoFactorSection({
                   </div>
                   <div className="flex gap-2">
                      <Button
-                        disabled={totpCode.length !== 6 || verifyMutation.isPending}
-                        onClick={() => verifyMutation.mutate()}
+                        disabled={totpCode.length !== 6 || isPending}
+                        onClick={handleVerify}
                         size="sm"
                      >
-                        {verifyMutation.isPending && (
+                        {isPending && (
                            <Loader2 className="size-4 mr-2 animate-spin" />
                         )}
                         Verificar
@@ -400,12 +404,12 @@ function TwoFactorSection({
                   </div>
                   <div className="flex gap-2">
                      <Button
-                        disabled={password.length === 0 || disableMutation.isPending}
-                        onClick={() => disableMutation.mutate()}
+                        disabled={password.length === 0 || isPending}
+                        onClick={handleDisable}
                         size="sm"
                         variant="destructive"
                      >
-                        {disableMutation.isPending && (
+                        {isPending && (
                            <Loader2 className="size-4 mr-2 animate-spin" />
                         )}
                         Desativar
@@ -428,6 +432,7 @@ function TwoFactorSection({
 function PasskeysSection() {
    const queryClient = useQueryClient();
    const [deletingId, setDeletingId] = useState<string | null>(null);
+   const [isAdding, startAddTransition] = useTransition();
 
    const { data: passkeys = [] } = useQuery({
       queryKey: ["passkeys"],
@@ -437,47 +442,31 @@ function PasskeysSection() {
       },
    });
 
-   const addMutation = useMutation({
-      mutationFn: async () => {
+   const handleAddPasskey = () => {
+      startAddTransition(async () => {
          const result = await authClient.passkey.addPasskey();
          if (result?.error) {
-            if ((result.error as { code?: string }).code === "ERROR_CEREMONY_ABORTED") return null;
-            throw new Error(result.error.message);
+            if ((result.error as { code?: string }).code === "ERROR_CEREMONY_ABORTED") return;
+            toast.error(result.error.message ?? "Erro ao adicionar passkey");
+            return;
          }
-         return result?.data;
-      },
-      onSuccess: (data) => {
-         if (!data) return; // user cancelled — silent no-op
+         if (!result?.data) return; // user cancelled — silent no-op
          toast.success("Passkey adicionada com sucesso!");
          queryClient.invalidateQueries({ queryKey: ["passkeys"] });
-      },
-      onError: (error) => {
-         toast.error(
-            error instanceof Error ? error.message : "Erro ao adicionar passkey",
-         );
-      },
-   });
+      });
+   };
 
-   const deleteMutation = useMutation({
-      mutationFn: async (id: string) => {
-         setDeletingId(id);
-         const result = await authClient.passkey.deletePasskey({ id });
-         if (result?.error) throw new Error(result.error.message);
-         return result?.data;
-      },
-      onSuccess: () => {
-         toast.success("Passkey removida!");
-         queryClient.invalidateQueries({ queryKey: ["passkeys"] });
-      },
-      onError: (error) => {
-         toast.error(
-            error instanceof Error ? error.message : "Erro ao remover passkey",
-         );
-      },
-      onSettled: () => {
-         setDeletingId(null);
-      },
-   });
+   const handleDeletePasskey = async (id: string) => {
+      setDeletingId(id);
+      const result = await authClient.passkey.deletePasskey({ id });
+      setDeletingId(null);
+      if (result?.error) {
+         toast.error(result.error.message ?? "Erro ao remover passkey");
+         return;
+      }
+      toast.success("Passkey removida!");
+      queryClient.invalidateQueries({ queryKey: ["passkeys"] });
+   };
 
    return (
       <section className="space-y-3">
@@ -513,7 +502,7 @@ function PasskeysSection() {
                         </div>
                         <Button
                            disabled={deletingId === passkey.id}
-                           onClick={() => deleteMutation.mutate(passkey.id)}
+                           onClick={() => handleDeletePasskey(passkey.id)}
                            size="icon"
                            variant="ghost"
                            className="text-destructive hover:text-destructive shrink-0"
@@ -526,12 +515,12 @@ function PasskeysSection() {
             )}
 
             <Button
-               disabled={addMutation.isPending}
-               onClick={() => addMutation.mutate()}
+               disabled={isAdding}
+               onClick={handleAddPasskey}
                size="sm"
                variant="outline"
             >
-               {addMutation.isPending && (
+               {isAdding && (
                   <Loader2 className="size-4 mr-2 animate-spin" />
                )}
                Adicionar passkey
@@ -632,22 +621,34 @@ function ProfileSectionErrorFallback(props: FallbackProps) {
 // Profile Name Section
 // ============================================
 
-function ProfileNameSection({ currentName }: { currentName: string }) {
-   const [name, setName] = useState(currentName);
+const nameSchema = z.object({
+   name: z.string().min(1, "Nome é obrigatório"),
+});
 
-   const updateMutation = useMutation({
-      mutationFn: async () => {
-         return authClient.updateUser({ name });
-      },
-      onSuccess: () => {
+function ProfileNameSection({ currentName }: { currentName: string }) {
+   const [isPending, startTransition] = useTransition();
+
+   const form = useForm({
+      defaultValues: { name: currentName },
+      onSubmit: async ({ value }) => {
+         const { error } = await authClient.updateUser({ name: value.name });
+         if (error) {
+            toast.error(error.message ?? "Erro ao atualizar nome");
+            return;
+         }
          toast.success("Nome atualizado com sucesso!");
       },
-      onError: () => {
-         toast.error("Erro ao atualizar nome");
-      },
+      validators: { onBlur: nameSchema },
    });
 
-   const hasChanged = name.trim() !== currentName && name.trim().length > 0;
+   const handleSubmit = useCallback(
+      (e: FormEvent) => {
+         e.preventDefault();
+         e.stopPropagation();
+         startTransition(async () => { await form.handleSubmit(); });
+      },
+      [form, startTransition],
+   );
 
    return (
       <section className="space-y-3">
@@ -657,23 +658,42 @@ function ProfileNameSection({ currentName }: { currentName: string }) {
                O nome que aparecerá no seu perfil e em suas publicações.
             </p>
          </div>
-         <div className="max-w-md space-y-3">
-            <Input
-               onChange={(e) => setName(e.target.value)}
-               placeholder="João Silva"
-               value={name}
-            />
-            <Button
-               disabled={!hasChanged || updateMutation.isPending}
-               onClick={() => updateMutation.mutate()}
-               size="sm"
-            >
-               {updateMutation.isPending && (
-                  <Loader2 className="size-4 mr-2 animate-spin" />
+         <form className="max-w-md space-y-3" onSubmit={handleSubmit}>
+            <FieldGroup>
+               <form.Field name="name">
+                  {(field) => {
+                     const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                     return (
+                        <Field data-invalid={isInvalid}>
+                           <FieldLabel htmlFor={field.name}>Nome</FieldLabel>
+                           <Input
+                              aria-invalid={isInvalid}
+                              id={field.name}
+                              name={field.name}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="João Silva"
+                              value={field.state.value}
+                           />
+                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                        </Field>
+                     );
+                  }}
+               </form.Field>
+            </FieldGroup>
+            <form.Subscribe>
+               {(formState) => (
+                  <Button
+                     disabled={!formState.isDirty || !formState.canSubmit || isPending}
+                     size="sm"
+                     type="submit"
+                  >
+                     {isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
+                     Salvar nome
+                  </Button>
                )}
-               Salvar nome
-            </Button>
-         </div>
+            </form.Subscribe>
+         </form>
       </section>
    );
 }
@@ -690,36 +710,32 @@ function ProfileEmailSection({
    emailVerified: boolean;
 }) {
    const [email, setEmail] = useState(currentEmail);
+   const [isPending, startTransition] = useTransition();
    const { openAlertDialog } = useAlertDialog();
-
-   const changeMutation = useMutation({
-      mutationFn: async () => {
-         return authClient.changeEmail({
-            newEmail: email,
-            callbackURL: window.location.href,
-         });
-      },
-      onSuccess: () => {
-         toast.success("Email de verificação enviado para o novo endereço!");
-      },
-      onError: (error) => {
-         const errorMessage =
-            error instanceof Error ? error.message : "Erro ao alterar email";
-         toast.error(errorMessage);
-      },
-   });
 
    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
    const hasChanged = isValidEmail && email.toLowerCase() !== currentEmail.toLowerCase();
+
+   const handleConfirmSave = () => {
+      startTransition(async () => {
+         const { error } = await authClient.changeEmail({
+            newEmail: email,
+            callbackURL: window.location.href,
+         });
+         if (error) {
+            toast.error(error.message ?? "Erro ao alterar email");
+            return;
+         }
+         toast.success("Email de verificação enviado para o novo endereço!");
+      });
+   };
 
    const handleSave = () => {
       openAlertDialog({
          title: "Confirmar Alteração de Email",
          description:
             "Enviaremos um link de verificação para o novo endereço. Você precisará confirmá-lo para concluir a alteração.",
-         onAction: async () => {
-            await changeMutation.mutateAsync();
-         },
+         onAction: handleConfirmSave,
          actionLabel: "Confirmar",
          cancelLabel: "Cancelar",
          variant: "default",
@@ -735,38 +751,38 @@ function ProfileEmailSection({
             </p>
          </div>
          <div className="max-w-md space-y-3">
-            <div className="space-y-1.5">
-               <div className="flex items-center gap-2">
-                  <Label htmlFor="profile-email">Email</Label>
-                  {emailVerified && (
-                     <Badge
-                        className="bg-green-500/10 text-green-500 hover:bg-green-500/20"
-                        variant="outline"
-                     >
-                        <ShieldCheck className="size-3 mr-1" />
-                        Verificado
-                     </Badge>
+            <FieldGroup>
+               <Field data-invalid={email !== currentEmail && !isValidEmail}>
+                  <div className="flex items-center gap-2">
+                     <FieldLabel htmlFor="profile-email">Email</FieldLabel>
+                     {emailVerified && (
+                        <Badge
+                           className="bg-green-500/10 text-green-500 hover:bg-green-500/20"
+                           variant="outline"
+                        >
+                           <ShieldCheck className="size-3 mr-1" />
+                           Verificado
+                        </Badge>
+                     )}
+                  </div>
+                  <Input
+                     id="profile-email"
+                     onChange={(e) => setEmail(e.target.value)}
+                     placeholder="seu@email.com"
+                     type="email"
+                     value={email}
+                  />
+                  {email !== currentEmail && !isValidEmail && (
+                     <FieldError errors={["Email inválido"]} />
                   )}
-               </div>
-               <Input
-                  id="profile-email"
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
-                  type="email"
-                  value={email}
-               />
-               {email !== currentEmail && !isValidEmail && (
-                  <p className="text-sm text-destructive">Email inválido</p>
-               )}
-            </div>
+               </Field>
+            </FieldGroup>
             <Button
-               disabled={!hasChanged || changeMutation.isPending}
+               disabled={!hasChanged || isPending}
                onClick={handleSave}
                size="sm"
             >
-               {changeMutation.isPending && (
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-               )}
+               {isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
                Salvar email
             </Button>
          </div>
@@ -779,38 +795,53 @@ function ProfileEmailSection({
 // ============================================
 
 function ProfilePasswordSection({ hasPassword }: { hasPassword: boolean }) {
-   const [currentPassword, setCurrentPassword] = useState("");
-   const [newPassword, setNewPassword] = useState("");
-   const [confirmPassword, setConfirmPassword] = useState("");
+   const [isPending, startTransition] = useTransition();
 
-   const changeMutation = useMutation({
-      mutationFn: async () => {
-         return authClient.changePassword({
-            currentPassword: hasPassword ? currentPassword : "",
-            newPassword,
+   const schema = z
+      .object({
+         currentPassword: hasPassword
+            ? z.string().min(1, "Senha atual é obrigatória")
+            : z.string(),
+         newPassword: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
+         confirmPassword: z.string(),
+      })
+      .refine((d) => d.newPassword === d.confirmPassword, {
+         message: "As senhas não coincidem",
+         path: ["confirmPassword"],
+      });
+
+   const form = useForm({
+      defaultValues: {
+         currentPassword: "",
+         newPassword: "",
+         confirmPassword: "",
+      },
+      onSubmit: async ({ value, formApi }) => {
+         const { error } = await authClient.changePassword({
+            currentPassword: hasPassword ? value.currentPassword : "",
+            newPassword: value.newPassword,
             revokeOtherSessions: false,
          });
-      },
-      onSuccess: () => {
+         if (error) {
+            toast.error(
+               error.message ?? (hasPassword ? "Erro ao alterar senha" : "Erro ao definir senha"),
+            );
+            return;
+         }
          toast.success(hasPassword ? "Senha alterada com sucesso!" : "Senha definida com sucesso!");
-         setCurrentPassword("");
-         setNewPassword("");
-         setConfirmPassword("");
+         formApi.reset();
       },
-      onError: (error) => {
-         const errorMessage =
-            error instanceof Error
-               ? error.message
-               : hasPassword
-                 ? "Erro ao alterar senha"
-                 : "Erro ao definir senha";
-         toast.error(errorMessage);
-      },
+      validators: { onBlur: schema },
    });
 
-   const isValid = hasPassword
-      ? currentPassword.length > 0 && newPassword.length >= 8 && newPassword === confirmPassword
-      : newPassword.length >= 8 && newPassword === confirmPassword;
+   const handleSubmit = useCallback(
+      (e: FormEvent) => {
+         e.preventDefault();
+         e.stopPropagation();
+         startTransition(async () => { await form.handleSubmit(); });
+      },
+      [form, startTransition],
+   );
 
    return (
       <section className="space-y-3">
@@ -822,63 +853,84 @@ function ProfilePasswordSection({ hasPassword }: { hasPassword: boolean }) {
                   : "Defina uma senha para acessar sua conta além do magic link."}
             </p>
          </div>
-         <div className="max-w-md space-y-3">
-            {hasPassword && (
-               <div className="space-y-1.5">
-                  <Label htmlFor="current-password">Senha Atual</Label>
-                  <PasswordInput
-                     id="current-password"
-                     onChange={(e) => setCurrentPassword(e.target.value)}
-                     placeholder="••••••••"
-                     value={currentPassword}
-                  />
-                  {(newPassword.length > 0 || confirmPassword.length > 0) &&
-                     currentPassword.length === 0 && (
-                        <p className="text-sm text-destructive">
-                           Senha atual é obrigatória
-                        </p>
-                     )}
-               </div>
-            )}
-            <div className="space-y-1.5">
-               <Label htmlFor="new-password">Nova Senha</Label>
-               <PasswordInput
-                  id="new-password"
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="••••••••"
-                  value={newPassword}
-               />
-               {newPassword.length > 0 && newPassword.length < 8 && (
-                  <p className="text-sm text-destructive">
-                     A senha deve ter pelo menos 8 caracteres
-                  </p>
+         <form className="max-w-md space-y-3" onSubmit={handleSubmit}>
+            <FieldGroup>
+               {hasPassword && (
+                  <form.Field name="currentPassword">
+                     {(field) => {
+                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                        return (
+                           <Field data-invalid={isInvalid}>
+                              <FieldLabel htmlFor={field.name}>Senha Atual</FieldLabel>
+                              <PasswordInput
+                                 aria-invalid={isInvalid}
+                                 id={field.name}
+                                 name={field.name}
+                                 onBlur={field.handleBlur}
+                                 onChange={(e) => field.handleChange(e.target.value)}
+                                 placeholder="••••••••"
+                                 value={field.state.value}
+                              />
+                              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                           </Field>
+                        );
+                     }}
+                  </form.Field>
                )}
-            </div>
-            <div className="space-y-1.5">
-               <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-               <PasswordInput
-                  id="confirm-password"
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  value={confirmPassword}
-               />
-               {confirmPassword.length > 0 && newPassword !== confirmPassword && (
-                  <p className="text-sm text-destructive">
-                     As senhas não coincidem
-                  </p>
+               <form.Field name="newPassword">
+                  {(field) => {
+                     const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                     return (
+                        <Field data-invalid={isInvalid}>
+                           <FieldLabel htmlFor={field.name}>Nova Senha</FieldLabel>
+                           <PasswordInput
+                              aria-invalid={isInvalid}
+                              id={field.name}
+                              name={field.name}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="••••••••"
+                              value={field.state.value}
+                           />
+                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                        </Field>
+                     );
+                  }}
+               </form.Field>
+               <form.Field name="confirmPassword">
+                  {(field) => {
+                     const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                     return (
+                        <Field data-invalid={isInvalid}>
+                           <FieldLabel htmlFor={field.name}>Confirmar Nova Senha</FieldLabel>
+                           <PasswordInput
+                              aria-invalid={isInvalid}
+                              id={field.name}
+                              name={field.name}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="••••••••"
+                              value={field.state.value}
+                           />
+                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                        </Field>
+                     );
+                  }}
+               </form.Field>
+            </FieldGroup>
+            <form.Subscribe>
+               {(formState) => (
+                  <Button
+                     disabled={!formState.canSubmit || isPending}
+                     size="sm"
+                     type="submit"
+                  >
+                     {isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
+                     {hasPassword ? "Alterar senha" : "Definir senha"}
+                  </Button>
                )}
-            </div>
-            <Button
-               disabled={!isValid || changeMutation.isPending}
-               onClick={() => changeMutation.mutate()}
-               size="sm"
-            >
-               {changeMutation.isPending && (
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-               )}
-               {hasPassword ? "Alterar senha" : "Definir senha"}
-            </Button>
-         </div>
+            </form.Subscribe>
+         </form>
       </section>
    );
 }
