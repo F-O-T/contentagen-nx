@@ -65,6 +65,7 @@
       "@tanstack/react-table": "catalog:tanstack",
       "@tanstack/router-plugin": "catalog:tanstack",
       "@tanstack/store": "catalog:tanstack",
+      "@better-auth/passkey": "catalog:auth",
       "better-auth": "catalog:auth",
       "clsx": "catalog:ui",
       "drizzle-orm": "catalog:database",
