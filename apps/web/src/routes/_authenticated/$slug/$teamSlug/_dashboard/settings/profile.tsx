@@ -446,6 +446,7 @@ function TwoFactorSection({
 
 function PasskeysSection() {
    const queryClient = useQueryClient();
+   const [deletingId, setDeletingId] = useState<string | null>(null);
 
    const { data: passkeys = [] } = useQuery({
       queryKey: ["passkeys"],
@@ -458,10 +459,14 @@ function PasskeysSection() {
    const addMutation = useMutation({
       mutationFn: async () => {
          const result = await authClient.passkey.addPasskey();
-         if (result?.error) throw new Error(result.error.message);
+         if (result?.error) {
+            if ((result.error as { code?: string }).code === "ERROR_CEREMONY_ABORTED") return null;
+            throw new Error(result.error.message);
+         }
          return result?.data;
       },
-      onSuccess: () => {
+      onSuccess: (data) => {
+         if (!data) return; // user cancelled — silent no-op
          toast.success("Passkey adicionada com sucesso!");
          queryClient.invalidateQueries({ queryKey: ["passkeys"] });
       },
@@ -474,6 +479,7 @@ function PasskeysSection() {
 
    const deleteMutation = useMutation({
       mutationFn: async (id: string) => {
+         setDeletingId(id);
          const result = await authClient.passkey.deletePasskey({ id });
          if (result?.error) throw new Error(result.error.message);
          return result?.data;
@@ -486,6 +492,9 @@ function PasskeysSection() {
          toast.error(
             error instanceof Error ? error.message : "Erro ao remover passkey",
          );
+      },
+      onSettled: () => {
+         setDeletingId(null);
       },
    });
 
@@ -522,7 +531,7 @@ function PasskeysSection() {
                            )}
                         </div>
                         <Button
-                           disabled={deleteMutation.isPending}
+                           disabled={deletingId === passkey.id}
                            onClick={() => deleteMutation.mutate(passkey.id)}
                            size="icon"
                            variant="ghost"
