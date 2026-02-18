@@ -6,6 +6,11 @@ import {
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Card, CardContent } from "@packages/ui/components/card";
+import {
+   Dropzone,
+   DropzoneContent,
+   DropzoneEmptyState,
+} from "@packages/ui/components/dropzone";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Input } from "@packages/ui/components/input";
 import {
@@ -31,6 +36,8 @@ import {
 import { Suspense, useState } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
+import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
+import { usePresignedUpload } from "@/features/file-upload/lib/use-presigned-upload";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
@@ -53,6 +60,115 @@ function formatDate(date: Date | string | null): string {
 
 
 // ============================================
+// Avatar Upload Section
+// ============================================
+
+function AvatarUploadSection({
+   currentImage,
+   name,
+}: {
+   currentImage: string | null;
+   name: string | null;
+}) {
+   const fileUpload = useFileUpload({
+      acceptedTypes: ["image/*"],
+      maxSize: 5 * 1024 * 1024, // 5 MB
+   });
+   const presignedUpload = usePresignedUpload();
+
+   const saveMutation = useMutation({
+      mutationFn: async () => {
+         if (!fileUpload.selectedFile) throw new Error("No file selected");
+
+         const fileExtension =
+            fileUpload.selectedFile.name.split(".").pop() ?? "png";
+         const contentType = fileUpload.selectedFile.type;
+
+         const uploadData = await orpc.account.generateAvatarUploadUrl.call({
+            fileExtension,
+            contentType,
+         });
+
+         await presignedUpload.uploadToPresignedUrl(
+            uploadData.presignedUrl,
+            fileUpload.selectedFile,
+            contentType,
+         );
+
+         await authClient.updateUser({ image: uploadData.publicUrl });
+      },
+      onSuccess: () => {
+         toast.success("Foto de perfil atualizada!");
+         fileUpload.clearFile();
+      },
+      onError: () => {
+         toast.error("Erro ao atualizar foto de perfil");
+      },
+   });
+
+   return (
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Foto de perfil</h2>
+            <p className="text-sm text-muted-foreground">
+               Sua foto de perfil visível para outros membros.
+            </p>
+         </div>
+         <div className="flex items-start gap-4">
+            <Avatar className="size-16 rounded-lg">
+               <AvatarImage
+                  alt={name || "Avatar"}
+                  src={fileUpload.filePreview || currentImage || undefined}
+               />
+               <AvatarFallback className="rounded-lg">
+                  {name ? (
+                     getInitials(name)
+                  ) : (
+                     <User className="size-6" />
+                  )}
+               </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 max-w-xs">
+               <Dropzone
+                  accept={{ "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"] }}
+                  className="h-20"
+                  maxFiles={1}
+                  maxSize={5 * 1024 * 1024}
+                  onDrop={(files) => fileUpload.handleFileSelect(files, () => {})}
+               >
+                  <DropzoneEmptyState>
+                     <p className="text-xs text-muted-foreground">
+                        Clique ou arraste para enviar
+                     </p>
+                  </DropzoneEmptyState>
+                  <DropzoneContent>
+                     <p className="text-xs text-muted-foreground">
+                        Imagem selecionada
+                     </p>
+                  </DropzoneContent>
+               </Dropzone>
+            </div>
+         </div>
+         {fileUpload.filePreview && (
+            <Button
+               disabled={saveMutation.isPending || presignedUpload.isUploading}
+               onClick={() => saveMutation.mutate()}
+               size="sm"
+            >
+               {(saveMutation.isPending || presignedUpload.isUploading) && (
+                  <Loader2 className="size-4 mr-2 animate-spin" />
+               )}
+               Salvar foto
+            </Button>
+         )}
+         {fileUpload.error && (
+            <p className="text-sm text-destructive">{fileUpload.error}</p>
+         )}
+      </section>
+   );
+}
+
+// ============================================
 // Skeleton
 // ============================================
 
@@ -63,6 +179,14 @@ function ProfileSectionSkeleton() {
             <Skeleton className="h-8 w-24" />
             <Skeleton className="h-4 w-64 mt-1" />
          </div>
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-36" />
+            <div className="flex items-start gap-4">
+               <Skeleton className="size-16 rounded-lg" />
+               <Skeleton className="h-20 w-64" />
+            </div>
+         </div>
+         <Skeleton className="h-px w-full" />
          <div className="space-y-3">
             <Skeleton className="h-6 w-40" />
             <Skeleton className="h-10 w-80" />
@@ -457,6 +581,13 @@ function ProfileSectionContent() {
                Gerencie suas informações pessoais e resumo da conta.
             </p>
          </div>
+
+         <AvatarUploadSection
+            currentImage={user.image ?? null}
+            name={user.name}
+         />
+
+         <Separator />
 
          <ProfileNameSection currentName={user.name || ""} />
 
