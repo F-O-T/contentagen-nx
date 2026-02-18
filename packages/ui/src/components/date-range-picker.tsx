@@ -2,8 +2,54 @@
 
 import { Button } from "@packages/ui/components/button";
 import { Calendar } from "@packages/ui/components/calendar";
+import {
+   Select,
+   SelectContent,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from "@packages/ui/components/select";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
+
+function CalendarDropdown({
+   value,
+   onChange,
+   options,
+   components: _components,
+   classNames: _classNames,
+}: React.SelectHTMLAttributes<HTMLSelectElement> & {
+   components?: unknown;
+   classNames?: unknown;
+   options?: { value: number; label: string; disabled?: boolean }[];
+}) {
+   return (
+      <Select
+         onValueChange={(v) => {
+            const event = {
+               target: { value: v },
+            } as React.ChangeEvent<HTMLSelectElement>;
+            onChange?.(event);
+         }}
+         value={String(value)}
+      >
+         <SelectTrigger className="h-7 w-auto min-w-[70px] border-input text-sm font-medium gap-1 focus:ring-0 focus:ring-offset-0 shadow-none">
+            <SelectValue />
+         </SelectTrigger>
+         <SelectContent>
+            {options?.map((opt) => (
+               <SelectItem
+                  disabled={opt.disabled}
+                  key={opt.value}
+                  value={String(opt.value)}
+               >
+                  {opt.label}
+               </SelectItem>
+            ))}
+         </SelectContent>
+      </Select>
+   );
+}
 
 export interface DateRangePreset {
    label: string;
@@ -81,6 +127,7 @@ export function DateRangePicker({
          <div className="p-2">
             <Calendar
                captionLayout="dropdown"
+               components={{ Dropdown: CalendarDropdown }}
                fromYear={2020}
                mode="range"
                numberOfMonths={2}
