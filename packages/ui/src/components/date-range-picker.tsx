@@ -137,6 +137,9 @@ export function DateRangePicker({
                captionLayout="dropdown"
                classNames={{
                   months: "flex gap-0 flex-col md:flex-row relative",
+                  // react-day-picker v9 renders a <nav> as the 1st child of the months container,
+                  // so month panels start at position 2. n+3 targets the 2nd month panel (position 3)
+                  // to add a divider. If upgrading react-day-picker, verify nav placement hasn't changed.
                   month: "flex flex-col w-full gap-4 px-2 pb-2 [&:nth-child(n+3)]:border-l",
                }}
                components={{ Dropdown: CalendarDropdown }}
