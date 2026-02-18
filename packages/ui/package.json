@@ -24,7 +24,7 @@
       "@radix-ui/react-toggle": "catalog:ui",
       "@radix-ui/react-toggle-group": "catalog:ui",
       "@radix-ui/react-tooltip": "catalog:ui",
-      "@radix-ui/react-use-controllable-state": "catalog:ui",
+      "@radix-ui/react-use-controllable-state": "^1.2.2",
       "@stepperize/react": "catalog:ui",
       "@tanstack/react-form": "catalog:tanstack",
       "@tanstack/react-router": "catalog:tanstack",
@@ -39,7 +39,7 @@
       "embla-carousel-autoplay": "catalog:ui",
       "embla-carousel-react": "catalog:ui",
       "input-otp": "catalog:ui",
-      "lucide-react": "catalog:ui",
+      "lucide-react": "^0.574.0",
       "motion": "catalog:ui",
       "radix-ui": "catalog:ui",
       "react": "catalog:react",
@@ -95,6 +95,7 @@
    "name": "@packages/ui",
    "private": true,
    "scripts": {
+      "build": "tsc --build tsconfig.lib.json",
       "check": "biome check --write ./src",
       "typecheck": "tsgo"
    },

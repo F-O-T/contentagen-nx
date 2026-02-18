@@ -14,25 +14,39 @@ import {
 import { Textarea } from "@packages/ui/components/textarea";
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
-import { CheckCircle, Loader2, Star } from "lucide-react";
+import { Rating, RatingButton } from "@packages/ui/components/rating";
+import { CheckCircle, Loader2 } from "lucide-react";
 import { type FormEvent, useCallback } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { orpc } from "@/integrations/orpc/client";
 
+const COPY = {
+   feature: {
+      title: "Sugerir Feature",
+      description: "Compartilhe suas ideias para novas funcionalidades.",
+      featureLabel: "Que feature você gostaria?",
+      problemLabel: "Qual problema ela resolveria?",
+   },
+   integration: {
+      title: "Solicitar Integração",
+      description: "Compartilhe quais integrações seriam mais úteis para você.",
+      featureLabel: "Que integração você gostaria?",
+      problemLabel: "Como ela ajudaria seu workflow?",
+   },
+} as const;
+
 type FeatureRequestFormProps = {
-   defaultValues?: {
-      feature?: string;
-      problem?: string;
-      priority?: number;
-   };
+   context?: keyof typeof COPY;
    onSuccess: () => void;
 };
 
 export function FeatureRequestForm({
-   defaultValues,
+   context = "feature",
    onSuccess,
 }: FeatureRequestFormProps) {
+   const copy = COPY[context];
+
    const featureRequestSchema = z.object({
       feature: z.string().min(1, "Descreva a funcionalidade desejada."),
       problem: z.string(),
@@ -53,9 +67,9 @@ export function FeatureRequestForm({
 
    const form = useForm({
       defaultValues: {
-         feature: defaultValues?.feature ?? "",
-         problem: defaultValues?.problem ?? "",
-         priority: defaultValues?.priority ?? 0,
+         feature: "",
+         problem: "",
+         priority: 0,
       },
       onSubmit: async ({ value }) => {
          await mutation.mutateAsync({
@@ -93,10 +107,8 @@ export function FeatureRequestForm({
    return (
       <>
          <CredenzaHeader>
-            <CredenzaTitle>Sugerir Feature</CredenzaTitle>
-            <CredenzaDescription>
-               Compartilhe suas ideias para novas funcionalidades.
-            </CredenzaDescription>
+            <CredenzaTitle>{copy.title}</CredenzaTitle>
+            <CredenzaDescription>{copy.description}</CredenzaDescription>
          </CredenzaHeader>
          <CredenzaBody>
             <form className="space-y-4" onSubmit={handleSubmit}>
@@ -109,7 +121,7 @@ export function FeatureRequestForm({
                         return (
                            <Field data-invalid={isInvalid}>
                               <FieldLabel htmlFor={field.name}>
-                                 Que feature você gostaria?
+                                 {copy.featureLabel}
                               </FieldLabel>
                               <Textarea
                                  aria-invalid={isInvalid}
@@ -135,7 +147,7 @@ export function FeatureRequestForm({
                      {(field) => (
                         <Field>
                            <FieldLabel htmlFor={field.name}>
-                              Qual problema ela resolveria?
+                              {copy.problemLabel}
                            </FieldLabel>
                            <Textarea
                               id={field.name}
@@ -156,24 +168,16 @@ export function FeatureRequestForm({
                      {(field) => (
                         <Field>
                            <FieldLabel>Qual a prioridade para você?</FieldLabel>
-                           <div className="flex items-center gap-1">
-                              {[1, 2, 3, 4, 5].map((value) => (
-                                 <button
-                                    className="rounded-md p-1.5 transition-colors hover:bg-muted"
-                                    key={`priority-${value}`}
-                                    onClick={() => field.handleChange(value)}
-                                    type="button"
-                                 >
-                                    <Star
-                                       className={`size-6 ${
-                                          value <= field.state.value
-                                             ? "fill-amber-400 text-amber-400"
-                                             : "text-muted-foreground"
-                                       }`}
-                                    />
-                                 </button>
-                              ))}
-                           </div>
+                           <Rating
+                              value={field.state.value}
+                              onValueChange={(v) => field.handleChange(v)}
+                           >
+                              <RatingButton />
+                              <RatingButton />
+                              <RatingButton />
+                              <RatingButton />
+                              <RatingButton />
+                           </Rating>
                            <div className="flex justify-between text-xs text-muted-foreground">
                               <span>Seria legal</span>
                               <span>Preciso muito</span>

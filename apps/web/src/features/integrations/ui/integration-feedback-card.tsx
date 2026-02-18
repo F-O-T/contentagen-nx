@@ -17,14 +17,7 @@ export function IntegrationFeedbackCard() {
    const handleCtaClick = () => {
       openCredenza({
          children: (
-            <FeatureRequestForm
-               defaultValues={{
-                  feature: "Nova integração",
-                  problem:
-                     "Quais plataformas você usa hoje para publicar conteúdo?\nQue ferramentas de analytics ou SEO você gostaria de integrar?\nHá alguma integração específica que desbloquearia seu workflow?",
-               }}
-               onSuccess={closeCredenza}
-            />
+            <FeatureRequestForm context="integration" onSuccess={closeCredenza} />
          ),
       });
    };
