@@ -165,9 +165,7 @@ export function DashboardFilterPopover({
    const savedFilters = (dashboard.globalFilters ?? []) as Condition[];
    const filterCount = savedFilters.length;
 
-   const [rows, setRows] = useState<FilterRow[]>(() =>
-      savedFilters.map(conditionToRow),
-   );
+   const [rows, setRows] = useState<FilterRow[]>([]);
 
    const handleOpenChange = (next: boolean) => {
       if (next) setRows(savedFilters.map(conditionToRow));
