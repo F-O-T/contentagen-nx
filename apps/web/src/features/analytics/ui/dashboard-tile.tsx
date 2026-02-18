@@ -284,7 +284,11 @@ function DashboardInsightContent({
 /**
  * Resolve insight metadata for the tile header.
  */
-function useInsightMetadata(insightName?: string, insightId?: string) {
+function useInsightMetadata(
+   insightName?: string,
+   insightId?: string,
+   globalDateRange?: DashboardDateRange,
+) {
    const { data: insight } = useQuery({
       ...orpc.insights.getById.queryOptions({
          input: { id: insightId ?? "" },
@@ -312,8 +316,9 @@ function useInsightMetadata(insightName?: string, insightId?: string) {
    const dateRange = config?.dateRange as
       | { type: string; value: string }
       | undefined;
-   const dateRangeLabel = dateRange?.value
-      ? formatDateRange(dateRange.value)
+   const effectiveDateRange = globalDateRange ?? dateRange;
+   const dateRangeLabel = effectiveDateRange?.value
+      ? formatDateRange(effectiveDateRange.value)
       : "ÚLTIMOS 30 DIAS";
 
    return { name, description, typeLabel, dateRangeLabel, lastComputedAt };
@@ -335,8 +340,20 @@ function formatDateRange(value: string): string {
          return "MÊS PASSADO";
       case "this_year":
          return "ESTE ANO";
-      default:
+      default: {
+         // Handle absolute "YYYY-MM-DD,YYYY-MM-DD" format
+         const parts = value.split(",");
+         if (parts.length === 2) {
+            const fmt = (s: string) =>
+               new Date(`${s.trim()}T00:00:00Z`).toLocaleDateString("pt-BR", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+               });
+            return `${fmt(parts[0])} – ${fmt(parts[1])}`;
+         }
          return value.toUpperCase();
+      }
    }
 }
 
@@ -386,7 +403,7 @@ export function DashboardTile({
       from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    const { name, description, typeLabel, dateRangeLabel, lastComputedAt } =
-      useInsightMetadata(insightName, insightId);
+      useInsightMetadata(insightName, insightId, globalDateRange);
 
    const handleRefresh = () => {
       if (!insightId) return;
