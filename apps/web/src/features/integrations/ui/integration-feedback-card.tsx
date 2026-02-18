@@ -1,4 +1,3 @@
-import { useSurveys } from "@packages/posthog/client";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -9,22 +8,18 @@ import {
    CardTitle,
 } from "@packages/ui/components/card";
 import { MessageCircleHeart } from "lucide-react";
+import { FeatureRequestForm } from "@/features/feedback/ui/feature-request-form";
+import { useCredenza } from "@/hooks/use-credenza";
 
 export function IntegrationFeedbackCard() {
-   const { activeSurveys, loaded } = useSurveys();
-   const targetSurveyId = activeSurveys[0]?.id;
-   const isCtaDisabled = !loaded || !targetSurveyId;
+   const { openCredenza, closeCredenza } = useCredenza();
 
    const handleCtaClick = () => {
-      if (!targetSurveyId) {
-         return;
-      }
-
-      if (!import.meta.env.PROD) {
-         console.info("Integration feedback survey CTA clicked", {
-            surveyId: targetSurveyId,
-         });
-      }
+      openCredenza({
+         children: (
+            <FeatureRequestForm context="integration" onSuccess={closeCredenza} />
+         ),
+      });
    };
 
    return (
@@ -74,7 +69,6 @@ export function IntegrationFeedbackCard() {
                </ul>
                <Button
                   className="mt-2"
-                  disabled={isCtaDisabled}
                   onClick={handleCtaClick}
                   size="sm"
                   type="button"
