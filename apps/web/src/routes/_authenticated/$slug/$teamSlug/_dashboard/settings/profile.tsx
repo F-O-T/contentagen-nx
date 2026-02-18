@@ -25,6 +25,7 @@ import { PasswordInput } from "@packages/ui/components/password-input";
 import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { getInitials } from "@packages/utils/text";
+import { generateQrCode } from "@f-o-t/qrcode";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
@@ -168,6 +169,272 @@ function AvatarUploadSection({
 }
 
 // ============================================
+// Two-Factor Authentication Section
+// ============================================
+
+type TwoFactorStep =
+   | "idle"
+   | "enabling-confirm"
+   | "show-qr"
+   | "show-backup-codes"
+   | "disabling-confirm";
+
+function TwoFactorSection({
+   twoFactorEnabled,
+}: {
+   twoFactorEnabled: boolean;
+}) {
+   const [step, setStep] = useState<TwoFactorStep>("idle");
+   const [password, setPassword] = useState("");
+   const [totpCode, setTotpCode] = useState("");
+   const [totpUri, setTotpUri] = useState("");
+   const [backupCodes, setBackupCodes] = useState<string[]>([]);
+
+   const resetState = () => {
+      setStep("idle");
+      setPassword("");
+      setTotpCode("");
+      setTotpUri("");
+      setBackupCodes([]);
+   };
+
+   const enableMutation = useMutation({
+      mutationFn: async () => {
+         const result = await authClient.twoFactor.enable({ password });
+         if (result.error) throw new Error(result.error.message);
+         return result.data;
+      },
+      onSuccess: (data) => {
+         setTotpUri(data?.totpURI ?? "");
+         setBackupCodes(data?.backupCodes ?? []);
+         setPassword("");
+         setStep("show-qr");
+      },
+      onError: (error) => {
+         toast.error(
+            error instanceof Error ? error.message : "Senha incorreta",
+         );
+      },
+   });
+
+   const verifyMutation = useMutation({
+      mutationFn: async () => {
+         const result = await authClient.twoFactor.verifyTotp({ code: totpCode });
+         if (result.error) throw new Error(result.error.message);
+         return result.data;
+      },
+      onSuccess: () => {
+         setStep("show-backup-codes");
+      },
+      onError: (error) => {
+         toast.error(
+            error instanceof Error ? error.message : "Código inválido",
+         );
+      },
+   });
+
+   const disableMutation = useMutation({
+      mutationFn: async () => {
+         const result = await authClient.twoFactor.disable({ password });
+         if (result.error) throw new Error(result.error.message);
+         return result.data;
+      },
+      onSuccess: () => {
+         toast.success("2FA desativado com sucesso!");
+         resetState();
+      },
+      onError: (error) => {
+         toast.error(
+            error instanceof Error ? error.message : "Senha incorreta",
+         );
+      },
+   });
+
+   const qrSrc = totpUri
+      ? `data:image/png;base64,${btoa(String.fromCharCode(...generateQrCode(totpUri, { size: 180 })))}`
+      : "";
+
+   return (
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Autenticação de dois fatores</h2>
+            <p className="text-sm text-muted-foreground">
+               Adicione uma camada extra de segurança usando um aplicativo autenticador.
+            </p>
+         </div>
+
+         <div className="max-w-md space-y-4">
+            {step === "idle" && (
+               <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                     <span className="text-sm text-muted-foreground">Status:</span>
+                     {twoFactorEnabled ? (
+                        <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
+                           Ativado
+                        </Badge>
+                     ) : (
+                        <Badge variant="outline" className="text-muted-foreground">
+                           Desativado
+                        </Badge>
+                     )}
+                  </div>
+                  {twoFactorEnabled ? (
+                     <Button
+                        onClick={() => setStep("disabling-confirm")}
+                        size="sm"
+                        variant="destructive"
+                     >
+                        Desativar 2FA
+                     </Button>
+                  ) : (
+                     <Button
+                        onClick={() => setStep("enabling-confirm")}
+                        size="sm"
+                     >
+                        Ativar 2FA
+                     </Button>
+                  )}
+               </div>
+            )}
+
+            {step === "enabling-confirm" && (
+               <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                     Confirme sua senha para continuar.
+                  </p>
+                  <div className="space-y-1.5">
+                     <Label htmlFor="2fa-enable-password">Senha</Label>
+                     <PasswordInput
+                        id="2fa-enable-password"
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        value={password}
+                     />
+                  </div>
+                  <div className="flex gap-2">
+                     <Button
+                        disabled={password.length === 0 || enableMutation.isPending}
+                        onClick={() => enableMutation.mutate()}
+                        size="sm"
+                     >
+                        {enableMutation.isPending && (
+                           <Loader2 className="size-4 mr-2 animate-spin" />
+                        )}
+                        Continuar
+                     </Button>
+                     <Button onClick={resetState} size="sm" variant="outline">
+                        Cancelar
+                     </Button>
+                  </div>
+               </div>
+            )}
+
+            {step === "show-qr" && (
+               <div className="space-y-4">
+                  <div className="space-y-2">
+                     <p className="text-sm font-medium">
+                        1. Escaneie o QR code com seu aplicativo autenticador
+                     </p>
+                     <div className="p-4 bg-white rounded-lg inline-block">
+                        <img src={qrSrc} alt="QR Code" width={180} height={180} className="rounded" />
+                     </div>
+                  </div>
+                  <div className="space-y-1.5">
+                     <Label htmlFor="totp-code">
+                        2. Digite o código gerado pelo aplicativo
+                     </Label>
+                     <Input
+                        id="totp-code"
+                        inputMode="numeric"
+                        maxLength={6}
+                        onChange={(e) => setTotpCode(e.target.value)}
+                        placeholder="000000"
+                        value={totpCode}
+                     />
+                  </div>
+                  <div className="flex gap-2">
+                     <Button
+                        disabled={totpCode.length !== 6 || verifyMutation.isPending}
+                        onClick={() => verifyMutation.mutate()}
+                        size="sm"
+                     >
+                        {verifyMutation.isPending && (
+                           <Loader2 className="size-4 mr-2 animate-spin" />
+                        )}
+                        Verificar
+                     </Button>
+                     <Button onClick={resetState} size="sm" variant="outline">
+                        Cancelar
+                     </Button>
+                  </div>
+               </div>
+            )}
+
+            {step === "show-backup-codes" && (
+               <div className="space-y-3">
+                  <div className="p-4 border rounded-lg space-y-2 bg-muted/30">
+                     <p className="text-sm font-medium">
+                        2FA ativado! Guarde seus códigos de backup
+                     </p>
+                     <p className="text-xs text-muted-foreground">
+                        Use esses códigos se perder acesso ao seu aplicativo autenticador.
+                        Cada código só pode ser usado uma vez.
+                     </p>
+                     <div className="grid grid-cols-2 gap-1 mt-2">
+                        {backupCodes.map((code) => (
+                           <code
+                              key={code}
+                              className="text-xs font-mono bg-background border rounded px-2 py-1 text-center"
+                           >
+                              {code}
+                           </code>
+                        ))}
+                     </div>
+                  </div>
+                  <Button onClick={resetState} size="sm">
+                     Concluído
+                  </Button>
+               </div>
+            )}
+
+            {step === "disabling-confirm" && (
+               <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                     Confirme sua senha para desativar o 2FA.
+                  </p>
+                  <div className="space-y-1.5">
+                     <Label htmlFor="2fa-disable-password">Senha</Label>
+                     <PasswordInput
+                        id="2fa-disable-password"
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        value={password}
+                     />
+                  </div>
+                  <div className="flex gap-2">
+                     <Button
+                        disabled={password.length === 0 || disableMutation.isPending}
+                        onClick={() => disableMutation.mutate()}
+                        size="sm"
+                        variant="destructive"
+                     >
+                        {disableMutation.isPending && (
+                           <Loader2 className="size-4 mr-2 animate-spin" />
+                        )}
+                        Desativar
+                     </Button>
+                     <Button onClick={resetState} size="sm" variant="outline">
+                        Cancelar
+                     </Button>
+                  </div>
+               </div>
+            )}
+         </div>
+      </section>
+   );
+}
+
+// ============================================
 // Skeleton
 // ============================================
 
@@ -211,6 +478,12 @@ function ProfileSectionSkeleton() {
                <Skeleton className="h-14 w-full" />
                <Skeleton className="h-14 w-full" />
             </div>
+         </div>
+         <Skeleton className="h-px w-full" />
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-56" />
+            <Skeleton className="h-4 w-80" />
+            <Skeleton className="h-10 w-full max-w-md" />
          </div>
       </div>
    );
@@ -611,6 +884,10 @@ function ProfileSectionContent() {
                createdAt: user.createdAt,
             }}
          />
+
+         <Separator />
+
+         <TwoFactorSection twoFactorEnabled={user.twoFactorEnabled ?? false} />
       </div>
    );
 }
