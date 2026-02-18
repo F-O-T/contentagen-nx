@@ -135,6 +135,7 @@ function toAnalyticsFilters(conditions: Condition[]): Filter[] {
       )
          continue;
       if (typeof value === "string" && value.trim() === "") continue;
+      if (typeof value === "number" && Number.isNaN(value)) continue;
 
       result.push({
          property: field,

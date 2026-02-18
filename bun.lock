@@ -4,9 +4,6 @@
   "workspaces": {
     "": {
       "name": "contentta-nx",
-      "dependencies": {
-        "@f-o-t/condition-evaluator": "^2.0.7",
-      },
       "devDependencies": {
         "@biomejs/biome": "catalog:development",
         "@commitlint/cli": "20.4.1",
@@ -62,6 +59,7 @@
         "@dnd-kit/core": "catalog:dnd",
         "@dnd-kit/sortable": "catalog:dnd",
         "@dnd-kit/utilities": "catalog:dnd",
+        "@f-o-t/condition-evaluator": "catalog:fot",
         "@f-o-t/content-analysis": "catalog:fot",
         "@f-o-t/markdown": "catalog:fot",
         "@f-o-t/money": "catalog:fot",
@@ -255,6 +253,7 @@
       "name": "@packages/database",
       "version": "0.12.1",
       "dependencies": {
+        "@f-o-t/condition-evaluator": "catalog:fot",
         "@packages/utils": "workspace:*",
         "drizzle-orm": "catalog:database",
         "drizzle-zod": "catalog:database",
@@ -589,6 +588,7 @@
       "sharp": "^0.34.5",
     },
     "fot": {
+      "@f-o-t/condition-evaluator": "2.0.7",
       "@f-o-t/content-analysis": "1.0.7",
       "@f-o-t/markdown": "1.0.7",
       "@f-o-t/money": "1.2.6",
@@ -3184,7 +3184,7 @@
 
     "nice-try": ["nice-try@1.0.5", "", {}, "sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ=="],
 
-    "nitro": ["nitro-nightly@3.0.1-20260218-094553-50b3bc5b", "", { "dependencies": { "consola": "^3.4.2", "crossws": "^0.4.4", "db0": "^0.3.4", "h3": "^2.0.1-rc.14", "hookable": "^6.0.1", "nf3": "^0.3.10", "ofetch": "^2.0.0-alpha.3", "ohash": "^2.0.11", "rolldown": "^1.0.0-rc.4", "srvx": "^0.11.5", "unenv": "^2.0.0-rc.24", "unstorage": "^2.0.0-alpha.5" }, "peerDependencies": { "dotenv": "*", "giget": "*", "jiti": "^2.6.1", "rollup": "^4.57.1", "vite": "^7 || ^8 || >=8.0.0-0", "xml2js": "^0.6.2" }, "optionalPeers": ["dotenv", "giget", "jiti", "rollup", "vite", "xml2js"], "bin": { "nitro": "dist/cli/index.mjs" } }, "sha512-GEPU+tPR76etVpdSRfzyz95srU0PdEmFsE40ZhYUJW+QLVOw4ae04lVrvWktblumK2cK++ABDoHmN2m2xtygBA=="],
+    "nitro": ["nitro-nightly@3.0.1-20260218-103033-254ff340", "", { "dependencies": { "consola": "^3.4.2", "crossws": "^0.4.4", "db0": "^0.3.4", "h3": "^2.0.1-rc.14", "hookable": "^6.0.1", "nf3": "^0.3.10", "ofetch": "^2.0.0-alpha.3", "ohash": "^2.0.11", "rolldown": "^1.0.0-rc.4", "srvx": "^0.11.5", "unenv": "^2.0.0-rc.24", "unstorage": "^2.0.0-alpha.5" }, "peerDependencies": { "dotenv": "*", "giget": "*", "jiti": "^2.6.1", "rollup": "^4.57.1", "vite": "^7 || ^8 || >=8.0.0-0", "xml2js": "^0.6.2" }, "optionalPeers": ["dotenv", "giget", "jiti", "rollup", "vite", "xml2js"], "bin": { "nitro": "dist/cli/index.mjs" } }, "sha512-YULyFJjFHaJLDmbOYY4AWHT9yx0MVxFFHHac1Va3FV1yprX9OGvjkHpQpgkJBbpn72lcVSUAc4UPymL9QxzB4Q=="],
 
     "node-abort-controller": ["node-abort-controller@3.1.1", "", {}, "sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ=="],
 

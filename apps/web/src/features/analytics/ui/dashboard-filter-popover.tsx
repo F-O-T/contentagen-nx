@@ -57,8 +57,6 @@ const STRING_OPERATORS: Array<{
    { value: "neq", label: "≠" },
    { value: "contains", label: "contém" },
    { value: "not_contains", label: "não contém" },
-   { value: "starts_with", label: "começa com" },
-   { value: "ends_with", label: "termina com" },
    { value: "is_empty", label: "está vazio" },
    { value: "is_not_empty", label: "não está vazio" },
 ];

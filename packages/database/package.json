@@ -1,6 +1,6 @@
 {
    "dependencies": {
-      "@f-o-t/condition-evaluator": "*",
+      "@f-o-t/condition-evaluator": "catalog:fot",
       "@packages/utils": "workspace:*",
       "drizzle-orm": "catalog:database",
       "drizzle-zod": "catalog:database",

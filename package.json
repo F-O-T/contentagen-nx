@@ -282,6 +282,7 @@
             "@dnd-kit/utilities": "^3.2.2"
          },
          "fot": {
+            "@f-o-t/condition-evaluator": "2.0.7",
             "@f-o-t/content-analysis": "1.0.7",
             "@f-o-t/markdown": "1.0.7",
             "@f-o-t/money": "1.2.6",
@@ -297,8 +298,5 @@
    },
    "peerDependencies": {
       "quansync": "^0.2.11"
-   },
-   "dependencies": {
-      "@f-o-t/condition-evaluator": "^2.0.7"
    }
 }
