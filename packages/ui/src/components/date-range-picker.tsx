@@ -135,6 +135,10 @@ export function DateRangePicker({
          <div className="p-2">
             <Calendar
                captionLayout="dropdown"
+               classNames={{
+                  months: "flex gap-0 flex-col md:flex-row relative",
+                  month: "p-2 [&:not(:first-child)]:border-l",
+               }}
                components={{ Dropdown: CalendarDropdown }}
                fromYear={2020}
                mode="range"
