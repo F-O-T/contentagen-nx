@@ -14,7 +14,8 @@ export const Route = createFileRoute(
 });
 
 function AccessControlPageContent() {
-   const { teamId } = Route.useParams();
+   const { currentTeam } = Route.useRouteContext();
+   const teamId = currentTeam.id;
    const hasBoost = useHasAddon(ADDON_IDS.BOOST);
 
    if (hasBoost) {
