@@ -269,6 +269,16 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
       return preset?.label ?? dashboard.globalDateRange.value;
    }, [dashboard.globalDateRange]);
 
+   const absoluteDateRange = useMemo(() => {
+      if (dashboard.globalDateRange?.type !== "absolute") return null;
+      const parts = dashboard.globalDateRange.value.split(",");
+      if (parts.length !== 2) return null;
+      return {
+         from: new Date(`${parts[0].trim()}T00:00:00Z`),
+         to: new Date(`${parts[1].trim()}T23:59:59Z`),
+      };
+   }, [dashboard.globalDateRange]);
+
    return (
       <div className="flex items-center justify-between gap-3 border-t border-b py-2">
          <div className="flex items-center gap-1.5">
@@ -293,24 +303,13 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
                      heading="Período"
                      onPresetSelect={handleDateRangeChange}
                      onRangeSelect={handleAbsoluteRangeChange}
-                     presets={DATE_RANGE_PRESETS as unknown as { label: string; value: string }[]}
+                     presets={DATE_RANGE_PRESETS}
                      selectedPreset={
                         dashboard.globalDateRange?.type === "relative"
                            ? dashboard.globalDateRange.value
                            : null
                      }
-                     selectedRange={
-                        dashboard.globalDateRange?.type === "absolute"
-                           ? (() => {
-                                const parts = dashboard.globalDateRange.value.split(",");
-                                if (parts.length !== 2) return null;
-                                return {
-                                   from: new Date(`${parts[0].trim()}T00:00:00Z`),
-                                   to: new Date(`${parts[1].trim()}T23:59:59Z`),
-                                };
-                             })()
-                           : null
-                     }
+                     selectedRange={absoluteDateRange}
                   />
                   {dashboard.globalDateRange && (
                      <div className="border-t p-2">

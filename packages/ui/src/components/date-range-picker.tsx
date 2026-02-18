@@ -12,7 +12,7 @@ export interface DateRangePreset {
 }
 
 export interface DateRangePickerProps {
-   presets: DateRangePreset[];
+   presets: readonly DateRangePreset[];
    selectedPreset?: string | null;
    selectedRange?: { from: Date; to?: Date } | null;
    onPresetSelect: (value: string) => void;
