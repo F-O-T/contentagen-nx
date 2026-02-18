@@ -111,6 +111,37 @@ export const getLinkedAccounts = protectedProcedure.handler(
 );
 
 /**
+ * Set password for the first time (magic link users only).
+ * Uses Better Auth's setPassword endpoint which creates a credential account
+ * if one doesn't already exist.
+ */
+export const setPassword = protectedProcedure
+   .input(z.object({ newPassword: z.string().min(8) }))
+   .handler(async ({ context, input }) => {
+      const { auth, headers } = context;
+
+      try {
+         await auth.api.setPassword({
+            headers,
+            body: { newPassword: input.newPassword },
+         });
+         return { success: true };
+      } catch (error) {
+         if (error && typeof error === "object" && "message" in error) {
+            const msg = (error as { message: string }).message;
+            if (msg === "user already has a password") {
+               throw new ORPCError("BAD_REQUEST", {
+                  message: "Usuário já possui uma senha definida",
+               });
+            }
+         }
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Erro ao definir senha",
+         });
+      }
+   });
+
+/**
  * Generate presigned URL for user avatar upload
  */
 export const generateAvatarUploadUrl = protectedProcedure

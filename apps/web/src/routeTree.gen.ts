@@ -19,7 +19,6 @@ import { Route as AuthMagicLinkRouteImport } from './routes/auth/magic-link'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AuthEmailVerificationRouteImport } from './routes/auth/email-verification'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
-import { Route as AuthAnonymousRouteImport } from './routes/auth/anonymous'
 import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedSlugRouteImport } from './routes/_authenticated/$slug'
@@ -121,11 +120,6 @@ const AuthEmailVerificationRoute = AuthEmailVerificationRouteImport.update({
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthAnonymousRoute = AuthAnonymousRouteImport.update({
-  id: '/anonymous',
-  path: '/anonymous',
   getParentRoute: () => AuthRoute,
 } as any)
 const ApiSplatRoute = ApiSplatRouteImport.update({
@@ -480,7 +474,6 @@ export interface FileRoutesByFullPath {
   '/$slug': typeof AuthenticatedSlugRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/api/$': typeof ApiSplatRoute
-  '/auth/anonymous': typeof AuthAnonymousRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -543,7 +536,6 @@ export interface FileRoutesByTo {
   '/$slug': typeof AuthenticatedSlugRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/api/$': typeof ApiSplatRoute
-  '/auth/anonymous': typeof AuthAnonymousRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -605,7 +597,6 @@ export interface FileRoutesById {
   '/_authenticated/$slug': typeof AuthenticatedSlugRouteWithChildren
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/api/$': typeof ApiSplatRoute
-  '/auth/anonymous': typeof AuthAnonymousRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/email-verification': typeof AuthEmailVerificationRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -672,7 +663,6 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/onboarding'
     | '/api/$'
-    | '/auth/anonymous'
     | '/auth/callback'
     | '/auth/email-verification'
     | '/auth/forgot-password'
@@ -735,7 +725,6 @@ export interface FileRouteTypes {
     | '/$slug'
     | '/onboarding'
     | '/api/$'
-    | '/auth/anonymous'
     | '/auth/callback'
     | '/auth/email-verification'
     | '/auth/forgot-password'
@@ -796,7 +785,6 @@ export interface FileRouteTypes {
     | '/_authenticated/$slug'
     | '/_authenticated/onboarding'
     | '/api/$'
-    | '/auth/anonymous'
     | '/auth/callback'
     | '/auth/email-verification'
     | '/auth/forgot-password'
@@ -938,13 +926,6 @@ declare module '@tanstack/react-router' {
       path: '/callback'
       fullPath: '/auth/callback'
       preLoaderRoute: typeof AuthCallbackRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/auth/anonymous': {
-      id: '/auth/anonymous'
-      path: '/anonymous'
-      fullPath: '/auth/anonymous'
-      preLoaderRoute: typeof AuthAnonymousRouteImport
       parentRoute: typeof AuthRoute
     }
     '/api/$': {
@@ -1559,7 +1540,6 @@ const AuthSignInRouteWithChildren = AuthSignInRoute._addFileChildren(
 )
 
 interface AuthRouteChildren {
-  AuthAnonymousRoute: typeof AuthAnonymousRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthEmailVerificationRoute: typeof AuthEmailVerificationRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
@@ -1569,7 +1549,6 @@ interface AuthRouteChildren {
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
-  AuthAnonymousRoute: AuthAnonymousRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthEmailVerificationRoute: AuthEmailVerificationRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,

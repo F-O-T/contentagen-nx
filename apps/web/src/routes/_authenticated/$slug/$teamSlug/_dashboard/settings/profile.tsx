@@ -1,3 +1,4 @@
+import { generateQrCode } from "@f-o-t/qrcode";
 import {
    Avatar,
    AvatarFallback,
@@ -24,24 +25,17 @@ import { PasswordInput } from "@packages/ui/components/password-input";
 import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { getInitials } from "@packages/utils/text";
-import { generateQrCode } from "@f-o-t/qrcode";
 import { useForm } from "@tanstack/react-form";
-import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+   useMutation,
+   useQuery,
+   useQueryClient,
+   useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-   Loader2,
-   ShieldCheck,
-   Trash2,
-   User,
-} from "lucide-react";
-import {
-   type FormEvent,
-   Suspense,
-   useCallback,
-   useMemo,
-   useState,
-   useTransition,
-} from "react";
+import { Loader2, ShieldCheck, Trash2, User } from "lucide-react";
+import type React from "react";
+import { Suspense, useCallback, useMemo, useState, useTransition } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -77,11 +71,11 @@ function AvatarUploadSection({
 
    const handleSave = () => {
       if (!fileUpload.selectedFile) return;
+      const file = fileUpload.selectedFile;
       startTransition(async () => {
          try {
-            const fileExtension =
-               fileUpload.selectedFile!.name.split(".").pop() ?? "png";
-            const contentType = fileUpload.selectedFile!.type;
+            const fileExtension = file.name.split(".").pop() ?? "png";
+            const contentType = file.type;
 
             const uploadData = await orpc.account.generateAvatarUploadUrl.call({
                fileExtension,
@@ -89,11 +83,13 @@ function AvatarUploadSection({
 
             await presignedUpload.uploadToPresignedUrl(
                uploadData.presignedUrl,
-               fileUpload.selectedFile!,
+               file,
                contentType,
             );
 
-            const { error } = await authClient.updateUser({ image: uploadData.publicUrl });
+            const { error } = await authClient.updateUser({
+               image: uploadData.publicUrl,
+            });
             if (error) {
                toast.error(error.message ?? "Erro ao atualizar foto de perfil");
             } else {
@@ -121,22 +117,26 @@ function AvatarUploadSection({
                   src={fileUpload.filePreview || currentImage || undefined}
                />
                <AvatarFallback className="rounded-lg">
-                  {name ? (
-                     getInitials(name)
-                  ) : (
-                     <User className="size-6" />
-                  )}
+                  {name ? getInitials(name) : <User className="size-6" />}
                </AvatarFallback>
             </Avatar>
             <div className="flex-1 max-w-xs">
                <Dropzone
-                  accept={{ "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"] }}
+                  accept={{
+                     "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
+                  }}
                   className="h-20"
                   maxFiles={1}
                   maxSize={5 * 1024 * 1024}
-                  src={fileUpload.selectedFile ? [fileUpload.selectedFile] : undefined}
-                  onDrop={(files) => fileUpload.handleFileSelect(files, () => {})}
+                  onDrop={(files) =>
+                     fileUpload.handleFileSelect(files, () => { })
+                  }
                   onError={(err) => fileUpload.setError(err.message)}
+                  src={
+                     fileUpload.selectedFile
+                        ? [fileUpload.selectedFile]
+                        : undefined
+                  }
                >
                   <DropzoneEmptyState>
                      <p className="text-xs text-muted-foreground">
@@ -183,11 +183,7 @@ type TwoFactorStep =
    | "show-backup-codes"
    | "disabling-confirm";
 
-function TwoFactorSection({
-   twoFactorEnabled,
-}: {
-   twoFactorEnabled: boolean;
-}) {
+function TwoFactorSection({ twoFactorEnabled }: { twoFactorEnabled: boolean }) {
    const [step, setStep] = useState<TwoFactorStep>("idle");
    const [password, setPassword] = useState("");
    const [totpCode, setTotpCode] = useState("");
@@ -205,7 +201,9 @@ function TwoFactorSection({
 
    const handleEnable = () => {
       startTransition(async () => {
-         const { data, error } = await authClient.twoFactor.enable({ password });
+         const { data, error } = await authClient.twoFactor.enable({
+            password,
+         });
          if (error) {
             toast.error(error.message ?? "Senha incorreta");
             return;
@@ -219,7 +217,9 @@ function TwoFactorSection({
 
    const handleVerify = () => {
       startTransition(async () => {
-         const { error } = await authClient.twoFactor.verifyTotp({ code: totpCode });
+         const { error } = await authClient.twoFactor.verifyTotp({
+            code: totpCode,
+         });
          if (error) {
             toast.error(error.message ?? "Código inválido");
             return;
@@ -248,9 +248,12 @@ function TwoFactorSection({
    return (
       <section className="space-y-3">
          <div>
-            <h2 className="text-lg font-medium">Autenticação de dois fatores</h2>
+            <h2 className="text-lg font-medium">
+               Autenticação de dois fatores
+            </h2>
             <p className="text-sm text-muted-foreground">
-               Adicione uma camada extra de segurança usando um aplicativo autenticador.
+               Adicione uma camada extra de segurança usando um aplicativo
+               autenticador.
             </p>
          </div>
 
@@ -258,13 +261,18 @@ function TwoFactorSection({
             {step === "idle" && (
                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                     <span className="text-sm text-muted-foreground">Status:</span>
+                     <span className="text-sm text-muted-foreground">
+                        Status:
+                     </span>
                      {twoFactorEnabled ? (
                         <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
                            Ativado
                         </Badge>
                      ) : (
-                        <Badge variant="outline" className="text-muted-foreground">
+                        <Badge
+                           className="text-muted-foreground"
+                           variant="outline"
+                        >
                            Desativado
                         </Badge>
                      )}
@@ -327,7 +335,13 @@ function TwoFactorSection({
                         1. Escaneie o QR code com seu aplicativo autenticador
                      </p>
                      <div className="p-4 bg-white rounded-lg inline-block">
-                        <img src={qrSrc} alt="QR Code" width={180} height={180} className="rounded" />
+                        <img
+                           alt="QR Code"
+                           className="rounded"
+                           height={180}
+                           src={qrSrc}
+                           width={180}
+                        />
                      </div>
                   </div>
                   <div className="space-y-1.5">
@@ -368,14 +382,14 @@ function TwoFactorSection({
                         2FA ativado! Guarde seus códigos de backup
                      </p>
                      <p className="text-xs text-muted-foreground">
-                        Use esses códigos se perder acesso ao seu aplicativo autenticador.
-                        Cada código só pode ser usado uma vez.
+                        Use esses códigos se perder acesso ao seu aplicativo
+                        autenticador. Cada código só pode ser usado uma vez.
                      </p>
                      <div className="grid grid-cols-2 gap-1 mt-2">
                         {backupCodes.map((code) => (
                            <code
-                              key={code}
                               className="text-xs font-mono bg-background border rounded px-2 py-1 text-center"
+                              key={code}
                            >
                               {code}
                            </code>
@@ -446,7 +460,11 @@ function PasskeysSection() {
       startAddTransition(async () => {
          const result = await authClient.passkey.addPasskey();
          if (result?.error) {
-            if ((result.error as { code?: string }).code === "ERROR_CEREMONY_ABORTED") return;
+            if (
+               (result.error as { code?: string }).code ===
+               "ERROR_CEREMONY_ABORTED"
+            )
+               return;
             toast.error(result.error.message ?? "Erro ao adicionar passkey");
             return;
          }
@@ -473,7 +491,8 @@ function PasskeysSection() {
          <div>
             <h2 className="text-lg font-medium">Passkeys</h2>
             <p className="text-sm text-muted-foreground">
-               Gerencie suas passkeys para login sem senha usando biometria ou chave de segurança.
+               Gerencie suas passkeys para login sem senha usando biometria ou
+               chave de segurança.
             </p>
          </div>
 
@@ -486,8 +505,8 @@ function PasskeysSection() {
                <div className="space-y-2">
                   {passkeys.map((passkey: (typeof passkeys)[number]) => (
                      <div
-                        key={passkey.id}
                         className="flex items-center justify-between p-3 border rounded-lg bg-muted/30"
+                        key={passkey.id}
                      >
                         <div className="min-w-0">
                            <p className="text-sm font-medium truncate">
@@ -496,16 +515,18 @@ function PasskeysSection() {
                            {passkey.createdAt && (
                               <p className="text-xs text-muted-foreground">
                                  Adicionada em{" "}
-                                 {new Date(passkey.createdAt).toLocaleDateString("pt-BR")}
+                                 {new Date(
+                                    passkey.createdAt,
+                                 ).toLocaleDateString("pt-BR")}
                               </p>
                            )}
                         </div>
                         <Button
+                           className="text-destructive hover:text-destructive shrink-0"
                            disabled={deletingId === passkey.id}
                            onClick={() => handleDeletePasskey(passkey.id)}
                            size="icon"
                            variant="ghost"
-                           className="text-destructive hover:text-destructive shrink-0"
                         >
                            <Trash2 className="size-4" />
                         </Button>
@@ -520,9 +541,7 @@ function PasskeysSection() {
                size="sm"
                variant="outline"
             >
-               {isAdding && (
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-               )}
+               {isAdding && <Loader2 className="size-4 mr-2 animate-spin" />}
                Adicionar passkey
             </Button>
          </div>
@@ -642,10 +661,12 @@ function ProfileNameSection({ currentName }: { currentName: string }) {
    });
 
    const handleSubmit = useCallback(
-      (e: FormEvent) => {
+      (e: React.FormEvent<HTMLFormElement>) => {
          e.preventDefault();
          e.stopPropagation();
-         startTransition(async () => { await form.handleSubmit(); });
+         startTransition(async () => {
+            await form.handleSubmit();
+         });
       },
       [form, startTransition],
    );
@@ -662,7 +683,8 @@ function ProfileNameSection({ currentName }: { currentName: string }) {
             <FieldGroup>
                <form.Field name="name">
                   {(field) => {
-                     const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                     const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid;
                      return (
                         <Field data-invalid={isInvalid}>
                            <FieldLabel htmlFor={field.name}>Nome</FieldLabel>
@@ -671,11 +693,15 @@ function ProfileNameSection({ currentName }: { currentName: string }) {
                               id={field.name}
                               name={field.name}
                               onBlur={field.handleBlur}
-                              onChange={(e) => field.handleChange(e.target.value)}
+                              onChange={(e) =>
+                                 field.handleChange(e.target.value)
+                              }
                               placeholder="João Silva"
                               value={field.state.value}
                            />
-                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                           {isInvalid && (
+                              <FieldError errors={field.state.meta.errors} />
+                           )}
                         </Field>
                      );
                   }}
@@ -684,11 +710,15 @@ function ProfileNameSection({ currentName }: { currentName: string }) {
             <form.Subscribe>
                {(formState) => (
                   <Button
-                     disabled={!formState.isDirty || !formState.canSubmit || isPending}
+                     disabled={
+                        !formState.isDirty || !formState.canSubmit || isPending
+                     }
                      size="sm"
                      type="submit"
                   >
-                     {isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
+                     {isPending && (
+                        <Loader2 className="size-4 mr-2 animate-spin" />
+                     )}
                      Salvar nome
                   </Button>
                )}
@@ -714,7 +744,8 @@ function ProfileEmailSection({
    const { openAlertDialog } = useAlertDialog();
 
    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-   const hasChanged = isValidEmail && email.toLowerCase() !== currentEmail.toLowerCase();
+   const hasChanged =
+      isValidEmail && email.toLowerCase() !== currentEmail.toLowerCase();
 
    const handleConfirmSave = () => {
       startTransition(async () => {
@@ -773,7 +804,7 @@ function ProfileEmailSection({
                      value={email}
                   />
                   {email !== currentEmail && !isValidEmail && (
-                     <FieldError errors={["Email inválido"]} />
+                     <FieldError errors={[{ message: "Email inválido" }]} />
                   )}
                </Field>
             </FieldGroup>
@@ -797,12 +828,44 @@ function ProfileEmailSection({
 function ProfilePasswordSection({ hasPassword }: { hasPassword: boolean }) {
    const [isPending, startTransition] = useTransition();
 
+   const setPasswordMutation = useMutation(
+      orpc.account.setPassword.mutationOptions({
+         onSuccess: () => toast.success("Senha definida com sucesso!"),
+         onError: (error) =>
+            toast.error(error.message ?? "Erro ao definir senha"),
+      }),
+   );
+
+   const changePassword = useCallback(
+      async (currentPassword: string, newPassword: string) => {
+         const { error } = await authClient.changePassword(
+            {
+               currentPassword,
+               newPassword,
+               revokeOtherSessions: false,
+            },
+            {
+               onSuccess: () => {
+                  toast.success("Senha alterada com sucesso!");
+               },
+               onError: (ctx) => {
+                  toast.error(ctx.error.message ?? "Erro ao alterar senha");
+               },
+            },
+         );
+         return error;
+      },
+      [],
+   );
+
    const schema = z
       .object({
          currentPassword: hasPassword
             ? z.string().min(1, "Senha atual é obrigatória")
             : z.string(),
-         newPassword: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
+         newPassword: z
+            .string()
+            .min(8, "A senha deve ter pelo menos 8 caracteres"),
          confirmPassword: z.string(),
       })
       .refine((d) => d.newPassword === d.confirmPassword, {
@@ -817,28 +880,31 @@ function ProfilePasswordSection({ hasPassword }: { hasPassword: boolean }) {
          confirmPassword: "",
       },
       onSubmit: async ({ value, formApi }) => {
-         const { error } = await authClient.changePassword({
-            currentPassword: hasPassword ? value.currentPassword : "",
-            newPassword: value.newPassword,
-            revokeOtherSessions: false,
-         });
-         if (error) {
-            toast.error(
-               error.message ?? (hasPassword ? "Erro ao alterar senha" : "Erro ao definir senha"),
+         if (hasPassword) {
+            const error = await changePassword(
+               value.currentPassword,
+               value.newPassword,
             );
+            if (error) return;
+            formApi.reset();
             return;
          }
-         toast.success(hasPassword ? "Senha alterada com sucesso!" : "Senha definida com sucesso!");
+
+         await setPasswordMutation.mutateAsync({
+            newPassword: value.newPassword,
+         });
          formApi.reset();
       },
       validators: { onBlur: schema },
    });
 
    const handleSubmit = useCallback(
-      (e: FormEvent) => {
+      (e: React.FormEvent<HTMLFormElement>) => {
          e.preventDefault();
          e.stopPropagation();
-         startTransition(async () => { await form.handleSubmit(); });
+         startTransition(async () => {
+            await form.handleSubmit();
+         });
       },
       [form, startTransition],
    );
@@ -858,20 +924,28 @@ function ProfilePasswordSection({ hasPassword }: { hasPassword: boolean }) {
                {hasPassword && (
                   <form.Field name="currentPassword">
                      {(field) => {
-                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                        const isInvalid =
+                           field.state.meta.isTouched &&
+                           !field.state.meta.isValid;
                         return (
                            <Field data-invalid={isInvalid}>
-                              <FieldLabel htmlFor={field.name}>Senha Atual</FieldLabel>
+                              <FieldLabel htmlFor={field.name}>
+                                 Senha Atual
+                              </FieldLabel>
                               <PasswordInput
                                  aria-invalid={isInvalid}
                                  id={field.name}
                                  name={field.name}
                                  onBlur={field.handleBlur}
-                                 onChange={(e) => field.handleChange(e.target.value)}
+                                 onChange={(e) =>
+                                    field.handleChange(e.target.value)
+                                 }
                                  placeholder="••••••••"
                                  value={field.state.value}
                               />
-                              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                              {isInvalid && (
+                                 <FieldError errors={field.state.meta.errors} />
+                              )}
                            </Field>
                         );
                      }}
@@ -879,40 +953,54 @@ function ProfilePasswordSection({ hasPassword }: { hasPassword: boolean }) {
                )}
                <form.Field name="newPassword">
                   {(field) => {
-                     const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                     const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid;
                      return (
                         <Field data-invalid={isInvalid}>
-                           <FieldLabel htmlFor={field.name}>Nova Senha</FieldLabel>
+                           <FieldLabel htmlFor={field.name}>
+                              Nova Senha
+                           </FieldLabel>
                            <PasswordInput
                               aria-invalid={isInvalid}
                               id={field.name}
                               name={field.name}
                               onBlur={field.handleBlur}
-                              onChange={(e) => field.handleChange(e.target.value)}
+                              onChange={(e) =>
+                                 field.handleChange(e.target.value)
+                              }
                               placeholder="••••••••"
                               value={field.state.value}
                            />
-                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                           {isInvalid && (
+                              <FieldError errors={field.state.meta.errors} />
+                           )}
                         </Field>
                      );
                   }}
                </form.Field>
                <form.Field name="confirmPassword">
                   {(field) => {
-                     const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                     const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid;
                      return (
                         <Field data-invalid={isInvalid}>
-                           <FieldLabel htmlFor={field.name}>Confirmar Nova Senha</FieldLabel>
+                           <FieldLabel htmlFor={field.name}>
+                              Confirmar Nova Senha
+                           </FieldLabel>
                            <PasswordInput
                               aria-invalid={isInvalid}
                               id={field.name}
                               name={field.name}
                               onBlur={field.handleBlur}
-                              onChange={(e) => field.handleChange(e.target.value)}
+                              onChange={(e) =>
+                                 field.handleChange(e.target.value)
+                              }
                               placeholder="••••••••"
                               value={field.state.value}
                            />
-                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                           {isInvalid && (
+                              <FieldError errors={field.state.meta.errors} />
+                           )}
                         </Field>
                      );
                   }}
@@ -925,7 +1013,9 @@ function ProfilePasswordSection({ hasPassword }: { hasPassword: boolean }) {
                      size="sm"
                      type="submit"
                   >
-                     {isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
+                     {isPending && (
+                        <Loader2 className="size-4 mr-2 animate-spin" />
+                     )}
                      {hasPassword ? "Alterar senha" : "Definir senha"}
                   </Button>
                )}
