@@ -231,6 +231,11 @@ function ChangePasswordSheetContent({ onClose }: { onClose: () => void }) {
                   type="password"
                   value={currentPassword}
                />
+               {(newPassword.length > 0 || confirmPassword.length > 0) && currentPassword.length === 0 && (
+                  <p className="text-sm text-destructive">
+                     Senha atual é obrigatória
+                  </p>
+               )}
             </div>
 
             <div className="space-y-2">
