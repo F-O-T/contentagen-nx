@@ -22,6 +22,7 @@ import {
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { cn } from "@packages/ui/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ErrorBoundary } from "react-error-boundary";
 import { Suspense } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import {
@@ -281,9 +282,11 @@ function DashboardInsightContent({
    );
 
    return (
-      <Suspense fallback={<TileLoadingSkeleton />}>
-         <InsightPreview config={config} />
-      </Suspense>
+      <ErrorBoundary fallbackRender={({ error }) => <TileErrorState error={error} />}>
+         <Suspense fallback={<TileLoadingSkeleton />}>
+            <InsightPreview config={config} />
+         </Suspense>
+      </ErrorBoundary>
    );
 }
 

@@ -9,6 +9,7 @@ import type {
 } from "@packages/analytics/types";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { AlertCircle } from "lucide-react";
 import { useMemo } from "react";
 import { orpc } from "@/integrations/orpc/client";
 import { FunnelChart } from "../charts/funnel-chart";
@@ -30,6 +31,15 @@ export function InsightLoadingState() {
             <Skeleton className="h-3 w-20" />
             <Skeleton className="h-3 w-20" />
          </div>
+      </div>
+   );
+}
+
+export function InsightErrorState({ error }: { error: Error }) {
+   return (
+      <div className="flex flex-col items-center justify-center h-40 gap-2 text-muted-foreground">
+         <AlertCircle className="size-5 text-destructive/60" />
+         <p className="text-xs text-center">{error.message}</p>
       </div>
    );
 }
@@ -434,11 +444,7 @@ export function InsightPreview({ config }: InsightPreviewProps) {
    return (
       <div className="h-full">
          <div className="space-y-3">
-            {!data && config.type === "trends" && (
-               <EmptyTrendsChart config={config} />
-            )}
-            {data && (
-               <>
+            <>
                   {config.type === "trends" && (
                      <TrendsPreview
                         config={config}
@@ -458,7 +464,6 @@ export function InsightPreview({ config }: InsightPreviewProps) {
                      />
                   )}
                </>
-            )}
          </div>
       </div>
    );
