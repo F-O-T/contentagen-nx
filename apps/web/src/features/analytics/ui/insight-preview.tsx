@@ -61,6 +61,52 @@ function generatePlaceholderDates(
 }
 
 /**
+ * Returns the number of days to show on the empty chart placeholder
+ * based on the config's date range selection.
+ */
+function getPlaceholderDays(dateRange: TrendsConfig["dateRange"]): number {
+   if (!dateRange) return 30;
+   if (dateRange.type === "absolute") {
+      const start = new Date(dateRange.start);
+      const end = new Date(dateRange.end);
+      return Math.max(
+         1,
+         Math.ceil((end.getTime() - start.getTime()) / 86_400_000),
+      );
+   }
+   switch (dateRange.value) {
+      case "7d":
+         return 7;
+      case "14d":
+         return 14;
+      case "30d":
+         return 30;
+      case "90d":
+         return 90;
+      case "180d":
+         return 180;
+      case "12m":
+         return 365;
+      case "this_month":
+         return new Date().getDate();
+      case "this_quarter":
+         return 90;
+      case "this_year":
+         return Math.ceil(
+            (Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) /
+               86_400_000,
+         );
+      case "last_month": {
+         const d = new Date();
+         d.setDate(0); // last day of prev month
+         return d.getDate();
+      }
+      default:
+         return 30;
+   }
+}
+
+/**
  * Renders an empty chart with grid lines and date axis labels.
  * Matches PostHog behavior where charts show their skeleton even without data.
  */
@@ -88,7 +134,9 @@ function EmptyTrendsChart({ config }: { config: TrendsConfig }) {
    }
 
    // Generate empty data points with all series set to 0
-   const placeholderData = generatePlaceholderDates(30).map((point) => {
+   const placeholderData = generatePlaceholderDates(
+      getPlaceholderDays(config.dateRange),
+   ).map((point) => {
       const row: Record<string, unknown> = { ...point };
       for (const s of series) {
          row[s.key] = 0;
