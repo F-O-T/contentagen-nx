@@ -27,6 +27,7 @@ import { DashboardFilterPopover } from "@/features/analytics/ui/dashboard-filter
 import { EditableDashboardGrid } from "@/features/analytics/ui/editable-dashboard-grid";
 import { InlineEditableText } from "@/features/analytics/ui/inline-editable-text";
 import { orpc } from "@/integrations/orpc/client";
+import { DateRangePicker } from "@packages/ui/components/date-range-picker";
 
 // =============================================================================
 // Types
@@ -144,6 +145,7 @@ const DATE_RANGE_PRESETS = [
    { label: "Últimos 90 dias", value: "90d" },
    { label: "Este mês", value: "this_month" },
    { label: "Mês passado", value: "last_month" },
+   { label: "Este ano", value: "this_year" },
 ] as const;
 
 function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
@@ -228,6 +230,19 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
       setIsDateRangeOpen(false);
    };
 
+   const handleAbsoluteRangeChange = (range: { from: Date; to: Date }) => {
+      const fmt = (d: Date) => d.toISOString().split("T")[0];
+      const dateRange: DashboardDateRange = {
+         type: "absolute",
+         value: `${fmt(range.from)},${fmt(range.to)}`,
+      };
+      updateFiltersMutation.mutate({
+         dashboardId: dashboard.id,
+         globalDateRange: dateRange,
+      });
+      setIsDateRangeOpen(false);
+   };
+
    const handleFiltersSave = (filters: Condition[]) => {
       updateFiltersMutation.mutate({
          dashboardId: dashboard.id,
@@ -237,6 +252,17 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
 
    const dateRangeLabel = useMemo(() => {
       if (!dashboard.globalDateRange) return "Sem período global";
+      if (dashboard.globalDateRange.type === "absolute") {
+         const parts = dashboard.globalDateRange.value.split(",");
+         if (parts.length === 2) {
+            const fmt = (s: string) =>
+               new Date(`${s.trim()}T00:00:00Z`).toLocaleDateString("pt-BR", {
+                  day: "numeric",
+                  month: "short",
+               });
+            return `${fmt(parts[0])} – ${fmt(parts[1])}`;
+         }
+      }
       const preset = DATE_RANGE_PRESETS.find(
          (p) => p.value === dashboard.globalDateRange?.value,
       );
@@ -262,39 +288,43 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
                      {dateRangeLabel}
                   </Button>
                </PopoverTrigger>
-               <PopoverContent align="start" className="w-64 p-2">
-                  <div className="flex flex-col gap-1">
-                     {DATE_RANGE_PRESETS.map((preset) => (
+               <PopoverContent align="start" className="w-auto p-0">
+                  <DateRangePicker
+                     heading="Período"
+                     onPresetSelect={handleDateRangeChange}
+                     onRangeSelect={handleAbsoluteRangeChange}
+                     presets={DATE_RANGE_PRESETS as unknown as { label: string; value: string }[]}
+                     selectedPreset={
+                        dashboard.globalDateRange?.type === "relative"
+                           ? dashboard.globalDateRange.value
+                           : null
+                     }
+                     selectedRange={
+                        dashboard.globalDateRange?.type === "absolute"
+                           ? (() => {
+                                const parts = dashboard.globalDateRange.value.split(",");
+                                if (parts.length !== 2) return null;
+                                return {
+                                   from: new Date(`${parts[0].trim()}T00:00:00Z`),
+                                   to: new Date(`${parts[1].trim()}T23:59:59Z`),
+                                };
+                             })()
+                           : null
+                     }
+                  />
+                  {dashboard.globalDateRange && (
+                     <div className="border-t p-2">
                         <Button
-                           className="justify-start"
-                           key={preset.value}
-                           onClick={() => handleDateRangeChange(preset.value)}
+                           className="w-full justify-start text-destructive hover:text-destructive"
+                           onClick={handleRemoveDateRange}
                            size="sm"
-                           variant={
-                              dashboard.globalDateRange?.value === preset.value
-                                 ? "secondary"
-                                 : "ghost"
-                           }
+                           variant="ghost"
                         >
-                           {preset.label}
+                           <X className="size-3.5" />
+                           Remover período global
                         </Button>
-                     ))}
-
-                     {dashboard.globalDateRange && (
-                        <>
-                           <div className="my-1 border-t" />
-                           <Button
-                              className="justify-start text-destructive hover:text-destructive"
-                              onClick={handleRemoveDateRange}
-                              size="sm"
-                              variant="ghost"
-                           >
-                              <X className="size-3.5" />
-                              Remover período global
-                           </Button>
-                        </>
-                     )}
-                  </div>
+                     </div>
+                  )}
                </PopoverContent>
             </Popover>
 
