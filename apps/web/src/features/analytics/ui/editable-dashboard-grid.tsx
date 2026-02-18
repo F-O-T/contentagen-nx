@@ -387,6 +387,8 @@ export function EditableDashboardGrid({
             onReorder={handleReorder}
             renderTile={(tile) => (
                <DashboardTile
+                  globalDateRange={dashboard.globalDateRange ?? undefined}
+                  globalFilters={dashboard.globalFilters ?? undefined}
                   id={tile.insightId}
                   insightId={tile.insightId}
                   isEditing

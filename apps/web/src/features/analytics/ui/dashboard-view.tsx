@@ -1,9 +1,8 @@
+import type { Condition } from "@f-o-t/condition-evaluator";
 import type {
    Dashboard,
    DashboardDateRange,
-   DashboardFilter,
 } from "@packages/database/schemas/dashboards";
-import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import {
    Popover,
@@ -18,14 +17,13 @@ import {
    ArrowLeft,
    Calendar,
    Clock,
-   Filter,
    LayoutDashboard,
    Plus,
    RefreshCw,
    X,
 } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
-import { DashboardFilterSheet } from "@/features/analytics/ui/dashboard-filter-sheet";
+import { DashboardFilterPopover } from "@/features/analytics/ui/dashboard-filter-popover";
 import { EditableDashboardGrid } from "@/features/analytics/ui/editable-dashboard-grid";
 import { InlineEditableText } from "@/features/analytics/ui/inline-editable-text";
 import { orpc } from "@/integrations/orpc/client";
@@ -150,7 +148,6 @@ const DATE_RANGE_PRESETS = [
 
 function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
    const queryClient = useQueryClient();
-   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
    const [isDateRangeOpen, setIsDateRangeOpen] = useState(false);
 
    const { data: insights } = useQuery(
@@ -207,7 +204,6 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
                   input: { id: dashboard.id },
                }),
             });
-            setIsFilterSheetOpen(false);
          },
       }),
    );
@@ -232,7 +228,7 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
       setIsDateRangeOpen(false);
    };
 
-   const handleFiltersSave = (filters: DashboardFilter[]) => {
+   const handleFiltersSave = (filters: Condition[]) => {
       updateFiltersMutation.mutate({
          dashboardId: dashboard.id,
          globalFilters: filters,
@@ -247,129 +243,94 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
       return preset?.label ?? dashboard.globalDateRange.value;
    }, [dashboard.globalDateRange]);
 
-   const filterCount = dashboard.globalFilters?.length ?? 0;
-
    return (
-      <>
-         <div className="flex items-center justify-between gap-3 border-t border-b py-2">
-            <div className="flex items-center gap-1.5">
-               <Popover
-                  onOpenChange={setIsDateRangeOpen}
-                  open={isDateRangeOpen}
-               >
-                  <PopoverTrigger asChild>
-                     <Button
-                        className={cn(
-                           "h-7 text-xs gap-1.5",
-                           dashboard.globalDateRange
-                              ? "text-foreground"
-                              : "text-muted-foreground",
-                        )}
-                        size="sm"
-                        variant="outline"
-                     >
-                        <Calendar className="size-3.5" />
-                        {dateRangeLabel}
-                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent align="start" className="w-64 p-2">
-                     <div className="flex flex-col gap-1">
-                        {DATE_RANGE_PRESETS.map((preset) => (
-                           <Button
-                              className="justify-start"
-                              key={preset.value}
-                              onClick={() =>
-                                 handleDateRangeChange(preset.value)
-                              }
-                              size="sm"
-                              variant={
-                                 dashboard.globalDateRange?.value ===
-                                 preset.value
-                                    ? "secondary"
-                                    : "ghost"
-                              }
-                           >
-                              {preset.label}
-                           </Button>
-                        ))}
-
-                        {dashboard.globalDateRange && (
-                           <>
-                              <div className="my-1 border-t" />
-                              <Button
-                                 className="justify-start text-destructive hover:text-destructive"
-                                 onClick={handleRemoveDateRange}
-                                 size="sm"
-                                 variant="ghost"
-                              >
-                                 <X className="size-3.5" />
-                                 Remover período global
-                              </Button>
-                           </>
-                        )}
-                     </div>
-                  </PopoverContent>
-               </Popover>
-
-               <Button
-                  className={cn(
-                     "h-7 text-xs gap-1",
-                     filterCount > 0
-                        ? "text-foreground"
-                        : "text-muted-foreground",
-                  )}
-                  onClick={() => setIsFilterSheetOpen(true)}
-                  size="sm"
-                  variant="outline"
-               >
-                  <Filter className="size-3" />
-                  Filtros
-                  {filterCount > 0 && (
-                     <Badge
-                        className="ml-1 h-4 px-1 text-xs"
-                        variant="secondary"
-                     >
-                        {filterCount}
-                     </Badge>
-                  )}
-               </Button>
-            </div>
-
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-               {lastRefreshedTime && (
-                  <span className="hidden sm:inline-flex items-center gap-1">
-                     <Clock className="size-3" />
-                     Atualizado {lastRefreshedTime}
-                  </span>
-               )}
-               <Button
-                  className="h-7 text-xs gap-1.5"
-                  disabled={refreshMutation.isPending}
-                  onClick={() =>
-                     refreshMutation.mutate({ dashboardId: dashboard.id })
-                  }
-                  size="sm"
-                  variant="outline"
-               >
-                  <RefreshCw
+      <div className="flex items-center justify-between gap-3 border-t border-b py-2">
+         <div className="flex items-center gap-1.5">
+            <Popover onOpenChange={setIsDateRangeOpen} open={isDateRangeOpen}>
+               <PopoverTrigger asChild>
+                  <Button
                      className={cn(
-                        "size-3",
-                        refreshMutation.isPending && "animate-spin",
+                        "h-7 text-xs gap-1.5",
+                        dashboard.globalDateRange
+                           ? "text-foreground"
+                           : "text-muted-foreground",
                      )}
-                  />
-                  {refreshMutation.isPending ? "Atualizando..." : "Atualizar"}
-               </Button>
-            </div>
+                     size="sm"
+                     variant="outline"
+                  >
+                     <Calendar className="size-3.5" />
+                     {dateRangeLabel}
+                  </Button>
+               </PopoverTrigger>
+               <PopoverContent align="start" className="w-64 p-2">
+                  <div className="flex flex-col gap-1">
+                     {DATE_RANGE_PRESETS.map((preset) => (
+                        <Button
+                           className="justify-start"
+                           key={preset.value}
+                           onClick={() => handleDateRangeChange(preset.value)}
+                           size="sm"
+                           variant={
+                              dashboard.globalDateRange?.value === preset.value
+                                 ? "secondary"
+                                 : "ghost"
+                           }
+                        >
+                           {preset.label}
+                        </Button>
+                     ))}
+
+                     {dashboard.globalDateRange && (
+                        <>
+                           <div className="my-1 border-t" />
+                           <Button
+                              className="justify-start text-destructive hover:text-destructive"
+                              onClick={handleRemoveDateRange}
+                              size="sm"
+                              variant="ghost"
+                           >
+                              <X className="size-3.5" />
+                              Remover período global
+                           </Button>
+                        </>
+                     )}
+                  </div>
+               </PopoverContent>
+            </Popover>
+
+            <DashboardFilterPopover
+               dashboard={dashboard}
+               isPending={updateFiltersMutation.isPending}
+               onSave={handleFiltersSave}
+            />
          </div>
 
-         <DashboardFilterSheet
-            dashboard={dashboard}
-            isOpen={isFilterSheetOpen}
-            isPending={updateFiltersMutation.isPending}
-            onClose={() => setIsFilterSheetOpen(false)}
-            onSave={handleFiltersSave}
-         />
-      </>
+         <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            {lastRefreshedTime && (
+               <span className="hidden sm:inline-flex items-center gap-1">
+                  <Clock className="size-3" />
+                  Atualizado {lastRefreshedTime}
+               </span>
+            )}
+            <Button
+               className="h-7 text-xs gap-1.5"
+               disabled={refreshMutation.isPending}
+               onClick={() =>
+                  refreshMutation.mutate({ dashboardId: dashboard.id })
+               }
+               size="sm"
+               variant="outline"
+            >
+               <RefreshCw
+                  className={cn(
+                     "size-3",
+                     refreshMutation.isPending && "animate-spin",
+                  )}
+               />
+               {refreshMutation.isPending ? "Atualizando..." : "Atualizar"}
+            </Button>
+         </div>
+      </div>
    );
 }
 

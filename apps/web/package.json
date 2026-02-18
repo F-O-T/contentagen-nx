@@ -19,6 +19,7 @@
       "@dnd-kit/core": "catalog:dnd",
       "@dnd-kit/sortable": "catalog:dnd",
       "@dnd-kit/utilities": "catalog:dnd",
+      "@f-o-t/condition-evaluator": "catalog:fot",
       "@f-o-t/content-analysis": "catalog:fot",
       "@f-o-t/markdown": "catalog:fot",
       "@f-o-t/money": "catalog:fot",

@@ -1,3 +1,4 @@
+import { Condition } from "@f-o-t/condition-evaluator";
 import { relations, sql } from "drizzle-orm";
 import {
    boolean,
@@ -26,12 +27,9 @@ export const DashboardDateRangeSchema = z.object({
 
 export type DashboardDateRange = z.infer<typeof DashboardDateRangeSchema>;
 
-// Dashboard filter schema for JSONB
-export const DashboardFilterSchema = z.object({
-   property: z.string(),
-   operator: z.enum(["equals", "contains", "gt", "lt"]),
-   value: z.string(),
-});
+// Dashboard filter schema for JSONB — uses @f-o-t/condition-evaluator Condition type
+// Supports string, number, boolean, date, and array conditions with full operator sets.
+export const DashboardFilterSchema = Condition;
 
 export type DashboardFilter = z.infer<typeof DashboardFilterSchema>;
 

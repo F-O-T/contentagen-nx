@@ -59,6 +59,7 @@
         "@dnd-kit/core": "catalog:dnd",
         "@dnd-kit/sortable": "catalog:dnd",
         "@dnd-kit/utilities": "catalog:dnd",
+        "@f-o-t/condition-evaluator": "catalog:fot",
         "@f-o-t/content-analysis": "catalog:fot",
         "@f-o-t/markdown": "catalog:fot",
         "@f-o-t/money": "catalog:fot",
@@ -252,6 +253,7 @@
       "name": "@packages/database",
       "version": "0.12.1",
       "dependencies": {
+        "@f-o-t/condition-evaluator": "catalog:fot",
         "@packages/utils": "workspace:*",
         "drizzle-orm": "catalog:database",
         "drizzle-zod": "catalog:database",
@@ -586,6 +588,7 @@
       "sharp": "^0.34.5",
     },
     "fot": {
+      "@f-o-t/condition-evaluator": "2.0.7",
       "@f-o-t/content-analysis": "1.0.7",
       "@f-o-t/markdown": "1.0.7",
       "@f-o-t/money": "1.2.6",
@@ -1134,6 +1137,8 @@
     "@exodus/bytes": ["@exodus/bytes@1.14.1", "", { "peerDependencies": { "@noble/hashes": "^1.8.0 || ^2.0.0" }, "optionalPeers": ["@noble/hashes"] }, "sha512-OhkBFWI6GcRMUroChZiopRiSp2iAMvEBK47NhJooDqz1RERO4QuZIZnjP63TXX8GAiLABkYmX+fuQsdJ1dd2QQ=="],
 
     "@f-o-t/bigint": ["@f-o-t/bigint@1.0.4", "", { "dependencies": { "zod": "^4.3.6" }, "peerDependencies": { "@f-o-t/condition-evaluator": "^2.0.0" }, "optionalPeers": ["@f-o-t/condition-evaluator"] }, "sha512-F83pXIucQF8Ji6uhqv7JNKiOEJPcfeb/Ckn/1j5RPJO2eeCQDZY4wZD8xAPs2RNzixuK75ZmIFzaL8oWzx0ANg=="],
+
+    "@f-o-t/condition-evaluator": ["@f-o-t/condition-evaluator@2.0.7", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-Uu8S4JYFE9w1D3U2rYgS9tZDKCUWp1QsojcuwI4ratID9PuQILyBPJsOqAzQPGzi60UxZUs0rlYCvcWleSxXlA=="],
 
     "@f-o-t/content-analysis": ["@f-o-t/content-analysis@1.0.7", "", { "dependencies": { "@f-o-t/markdown": "^1.0.6" } }, "sha512-jBrGSUj+ysEiohEK3WOWaKJKGcOpETeTyAIyPJT4uDUzRNtprjEzM0uhZSplmckvLavmalOxbGwBkdBReq5OYg=="],
 
@@ -3179,7 +3184,7 @@
 
     "nice-try": ["nice-try@1.0.5", "", {}, "sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ=="],
 
-    "nitro": ["nitro-nightly@3.0.1-20260217-092337-b28fa21a", "", { "dependencies": { "consola": "^3.4.2", "crossws": "^0.4.4", "db0": "^0.3.4", "h3": "^2.0.1-rc.14", "hookable": "^6.0.1", "nf3": "^0.3.10", "ofetch": "^2.0.0-alpha.3", "ohash": "^2.0.11", "rolldown": "^1.0.0-rc.4", "srvx": "^0.11.5", "unenv": "^2.0.0-rc.24", "unstorage": "^2.0.0-alpha.5" }, "peerDependencies": { "dotenv": "*", "giget": "*", "jiti": "^2.6.1", "rollup": "^4.57.1", "vite": "^7 || ^8 || >=8.0.0-0", "xml2js": "^0.6.2" }, "optionalPeers": ["dotenv", "giget", "jiti", "rollup", "vite", "xml2js"], "bin": { "nitro": "dist/cli/index.mjs" } }, "sha512-TlJ2aISs/U7ZzDL9rC09NB8KCNtx0vE1SxQy8tRelzMWkObM3uOUf3joX+YXADrynMc4xVF1b7GpO0iX1VSyrQ=="],
+    "nitro": ["nitro-nightly@3.0.1-20260218-103033-254ff340", "", { "dependencies": { "consola": "^3.4.2", "crossws": "^0.4.4", "db0": "^0.3.4", "h3": "^2.0.1-rc.14", "hookable": "^6.0.1", "nf3": "^0.3.10", "ofetch": "^2.0.0-alpha.3", "ohash": "^2.0.11", "rolldown": "^1.0.0-rc.4", "srvx": "^0.11.5", "unenv": "^2.0.0-rc.24", "unstorage": "^2.0.0-alpha.5" }, "peerDependencies": { "dotenv": "*", "giget": "*", "jiti": "^2.6.1", "rollup": "^4.57.1", "vite": "^7 || ^8 || >=8.0.0-0", "xml2js": "^0.6.2" }, "optionalPeers": ["dotenv", "giget", "jiti", "rollup", "vite", "xml2js"], "bin": { "nitro": "dist/cli/index.mjs" } }, "sha512-YULyFJjFHaJLDmbOYY4AWHT9yx0MVxFFHHac1Va3FV1yprX9OGvjkHpQpgkJBbpn72lcVSUAc4UPymL9QxzB4Q=="],
 
     "node-abort-controller": ["node-abort-controller@3.1.1", "", {}, "sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ=="],
 
