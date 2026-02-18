@@ -437,24 +437,24 @@ function RetentionPreview({
 }
 
 export function InsightPreview({ config }: InsightPreviewProps) {
-   const { data, isLoading, error } = useQuery(
+   const { data, isFetching, error } = useQuery(
       orpc.analytics.query.queryOptions({
          input: { config },
       }),
    );
 
    // Show empty chart when no data instead of a generic empty state
-   const showEmptyChart = !isLoading && !error && !data;
+   const showEmptyChart = !isFetching && !error && !data;
 
    return (
       <div className="h-full">
          <div className="space-y-3">
-            {isLoading && <LoadingState />}
-            {error && <ErrorState error={error} />}
+            {isFetching && <LoadingState />}
+            {!isFetching && error && <ErrorState error={error} />}
             {showEmptyChart && config.type === "trends" && (
                <EmptyTrendsChart config={config} />
             )}
-            {!isLoading && !error && data && (
+            {!isFetching && !error && data && (
                <>
                   {config.type === "trends" && (
                      <TrendsPreview

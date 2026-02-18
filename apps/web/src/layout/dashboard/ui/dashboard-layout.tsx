@@ -9,7 +9,7 @@ import { cn } from "@packages/ui/lib/utils";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import type * as React from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { EarlyAccessProvider } from "@/hooks/use-early-access";
@@ -35,6 +35,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const queryClient = useQueryClient();
    const setTeamForOrgRef = useRef(new Set<string>());
    const { pathname } = useLocation();
+
+   // Sidebar state — start with SSR-safe default (true/expanded) to avoid hydration
+   // mismatch, then sync from localStorage after mount.
+   const [sidebarOpen, setSidebarOpen] = useState(true);
+   useEffect(() => {
+      setSidebarOpen(getSidebarDefaultOpen());
+   }, []);
+
+   const handleSidebarChange = (open: boolean) => {
+      setSidebarOpen(open);
+      persistSidebarState(open);
+   };
 
    // Fetch session for PostHog client-side identification
    const { data: session } = useSuspenseQuery(
@@ -133,8 +145,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
          <SidebarManagerProvider>
             <SidebarProvider
                className="h-svh"
-               defaultOpen={getSidebarDefaultOpen()}
-               onOpenChange={persistSidebarState}
+               open={sidebarOpen}
+               onOpenChange={handleSidebarChange}
             >
                <SidebarManager name="main">
                   <AppSidebar />
