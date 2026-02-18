@@ -14,7 +14,8 @@ export const Route = createFileRoute(
 });
 
 function ActivityLogsPageContent() {
-   const { teamId } = Route.useParams();
+   const { currentTeam } = Route.useRouteContext();
+   const teamId = currentTeam.id;
    const hasScale = useHasAddon(ADDON_IDS.SCALE);
 
    if (hasScale) {
