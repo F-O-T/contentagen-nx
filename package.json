@@ -287,6 +287,7 @@
             "@f-o-t/content-analysis": "1.0.7",
             "@f-o-t/markdown": "1.0.7",
             "@f-o-t/money": "1.2.6",
+            "@f-o-t/qrcode": "1.0.1",
             "@f-o-t/spelling": "1.0.6"
          }
       },

@@ -23,6 +23,7 @@
       "@f-o-t/content-analysis": "catalog:fot",
       "@f-o-t/markdown": "catalog:fot",
       "@f-o-t/money": "catalog:fot",
+      "@f-o-t/qrcode": "catalog:fot",
       "@f-o-t/spelling": "catalog:fot",
       "@faker-js/faker": "catalog:testing",
       "@lexical/code": "catalog:editor",

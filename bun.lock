@@ -64,6 +64,7 @@
         "@f-o-t/content-analysis": "catalog:fot",
         "@f-o-t/markdown": "catalog:fot",
         "@f-o-t/money": "catalog:fot",
+        "@f-o-t/qrcode": "catalog:fot",
         "@f-o-t/spelling": "catalog:fot",
         "@faker-js/faker": "catalog:testing",
         "@lexical/code": "catalog:editor",
@@ -595,6 +596,7 @@
       "@f-o-t/content-analysis": "1.0.7",
       "@f-o-t/markdown": "1.0.7",
       "@f-o-t/money": "1.2.6",
+      "@f-o-t/qrcode": "1.0.1",
       "@f-o-t/spelling": "1.0.6",
     },
     "logging": {
@@ -1150,6 +1152,8 @@
     "@f-o-t/markdown": ["@f-o-t/markdown@1.0.7", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-t07QEXoxzt1YkwmHwL3SYBpxItbNnbxJPdPxR+lcWiaCnYARGd8bqHsFwVTzAS1hHuB/2w0vIZVk9oAmIoa01Q=="],
 
     "@f-o-t/money": ["@f-o-t/money@1.2.6", "", { "dependencies": { "@f-o-t/bigint": "^1.0.4", "zod": "^4.3.6" }, "peerDependencies": { "@f-o-t/condition-evaluator": "^2.0.6" }, "optionalPeers": ["@f-o-t/condition-evaluator"] }, "sha512-CGKWv2lOQ2rc3LMR321Q+T6n54DvQQFgPHa1g/7I4jNfdZbOymqmj969yB2JIOpMPKpF2rakQBkSFznUnZn29g=="],
+
+    "@f-o-t/qrcode": ["@f-o-t/qrcode@1.0.1", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-lkRKJ8dCLXpp+fVUq2Je3pLAnXpponZjnRladKNrz/AmYwGV2GxYHR4EJko+8a0bRFVpqZoqjfrpqd14ncgu5Q=="],
 
     "@f-o-t/spelling": ["@f-o-t/spelling@1.0.6", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-mCcKxTHfDD8HF+IbWOxAnZYu1qektsvJzwcDLBVnlY268RsUAxcYN4Khp+NpFv0yFWdOqBvWWeRN57TlBNYoSg=="],
 
