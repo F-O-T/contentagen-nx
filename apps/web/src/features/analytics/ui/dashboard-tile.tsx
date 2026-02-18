@@ -149,25 +149,43 @@ function toAnalyticsFilters(conditions: Condition[]): Filter[] {
 
 /**
  * Converts a dashboard date range to an analytics DateRange.
- * Only relative ranges are supported from the dashboard picker.
+ * Supports both relative ranges and absolute date ranges.
  */
 function toAnalyticsDateRange(dr: DashboardDateRange): DateRange | undefined {
-   if (dr.type !== "relative") return undefined;
-   const validValues = [
-      "7d",
-      "14d",
-      "30d",
-      "90d",
-      "180d",
-      "12m",
-      "this_month",
-      "last_month",
-      "this_quarter",
-      "this_year",
-   ] as const;
-   type ValidValue = (typeof validValues)[number];
-   if (!validValues.includes(dr.value as ValidValue)) return undefined;
-   return { type: "relative", value: dr.value as ValidValue };
+   if (dr.type === "relative") {
+      const validValues = [
+         "7d",
+         "14d",
+         "30d",
+         "90d",
+         "180d",
+         "12m",
+         "this_month",
+         "last_month",
+         "this_quarter",
+         "this_year",
+      ] as const;
+      type ValidValue = (typeof validValues)[number];
+      if (!validValues.includes(dr.value as ValidValue)) return undefined;
+      return { type: "relative", value: dr.value as ValidValue };
+   }
+
+   if (dr.type === "absolute") {
+      const parts = dr.value.split(",");
+      if (parts.length !== 2) return undefined;
+      const startStr = parts[0].trim();
+      const endStr = parts[1].trim();
+      const start = new Date(`${startStr}T00:00:00.000Z`);
+      const end = new Date(`${endStr}T23:59:59.999Z`);
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return undefined;
+      return {
+         type: "absolute",
+         start: start.toISOString(),
+         end: end.toISOString(),
+      };
+   }
+
+   return undefined;
 }
 
 /**
