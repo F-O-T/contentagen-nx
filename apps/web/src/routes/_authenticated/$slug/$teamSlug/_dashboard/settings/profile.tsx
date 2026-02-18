@@ -134,7 +134,9 @@ function AvatarUploadSection({
                   className="h-20"
                   maxFiles={1}
                   maxSize={5 * 1024 * 1024}
+                  src={fileUpload.selectedFile ? [fileUpload.selectedFile] : undefined}
                   onDrop={(files) => fileUpload.handleFileSelect(files, () => {})}
+                  onError={(err) => fileUpload.setError(err.message)}
                >
                   <DropzoneEmptyState>
                      <p className="text-xs text-muted-foreground">
@@ -161,8 +163,10 @@ function AvatarUploadSection({
                Salvar foto
             </Button>
          )}
-         {fileUpload.error && (
-            <p className="text-sm text-destructive">{fileUpload.error}</p>
+         {(fileUpload.error || presignedUpload.error) && (
+            <p className="text-sm text-destructive">
+               {fileUpload.error || presignedUpload.error}
+            </p>
          )}
       </section>
    );
