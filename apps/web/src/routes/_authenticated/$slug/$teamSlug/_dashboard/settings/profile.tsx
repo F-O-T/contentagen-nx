@@ -18,12 +18,11 @@ import {
    ItemActions,
    ItemContent,
    ItemDescription,
-   ItemGroup,
    ItemMedia,
-   ItemSeparator,
    ItemTitle,
 } from "@packages/ui/components/item";
 import { Label } from "@packages/ui/components/label";
+import { Separator } from "@packages/ui/components/separator";
 import {
    SheetClose,
    SheetDescription,
@@ -74,80 +73,6 @@ function formatDate(date: Date | string | null): string {
       month: "long",
       year: "numeric",
    });
-}
-
-// ============================================
-// Change Name Sheet Content
-// ============================================
-
-function ChangeNameSheetContent({
-   currentName,
-   onClose,
-}: {
-   currentName: string;
-   onClose: () => void;
-}) {
-   const [name, setName] = useState(currentName);
-
-   const updateMutation = useMutation({
-      mutationFn: async () => {
-         return authClient.updateUser({ name });
-      },
-      onSuccess: () => {
-         toast.success("Nome atualizado com sucesso!");
-         onClose();
-      },
-      onError: () => {
-         toast.error("Erro ao atualizar nome");
-      },
-   });
-
-   const isValid = name.trim().length > 0 && name !== currentName;
-
-   return (
-      <div className="flex flex-col h-full">
-         <SheetHeader>
-            <SheetTitle>Alterar Nome</SheetTitle>
-            <SheetDescription>Atualize seu nome de exibição</SheetDescription>
-         </SheetHeader>
-
-         <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-            <Alert>
-               <Info className="size-4" />
-               <AlertTitle>Nome de Exibição</AlertTitle>
-               <AlertDescription>
-                  Este é o nome que aparecerá no seu perfil e em suas
-                  publicações.
-               </AlertDescription>
-            </Alert>
-
-            <div className="space-y-2">
-               <Label htmlFor="new-name">Nome</Label>
-               <Input
-                  id="new-name"
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="João Silva"
-                  value={name}
-               />
-            </div>
-         </div>
-
-         <SheetFooter>
-            <SheetClose asChild>
-               <Button variant="outline">Cancelar</Button>
-            </SheetClose>
-            <Button
-               disabled={!isValid || updateMutation.isPending}
-               onClick={() => updateMutation.mutate()}
-            >
-               {updateMutation.isPending && (
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-               )}
-               Salvar
-            </Button>
-         </SheetFooter>
-      </div>
-   );
 }
 
 // ============================================
@@ -255,23 +180,143 @@ function ChangeEmailSheetContent({
 }
 
 // ============================================
+// Change Password Sheet Content
+// ============================================
+
+function ChangePasswordSheetContent({ onClose }: { onClose: () => void }) {
+   const [currentPassword, setCurrentPassword] = useState("");
+   const [newPassword, setNewPassword] = useState("");
+   const [confirmPassword, setConfirmPassword] = useState("");
+
+   const changeMutation = useMutation({
+      mutationFn: async () => {
+         return authClient.changePassword({
+            currentPassword,
+            newPassword,
+            revokeOtherSessions: false,
+         });
+      },
+      onSuccess: () => {
+         toast.success("Senha alterada com sucesso!");
+         onClose();
+      },
+      onError: (error) => {
+         const errorMessage =
+            error instanceof Error ? error.message : "Erro ao alterar senha";
+         toast.error(errorMessage);
+      },
+   });
+
+   const isValid =
+      currentPassword.length > 0 &&
+      newPassword.length >= 8 &&
+      newPassword === confirmPassword;
+
+   return (
+      <div className="flex flex-col h-full">
+         <SheetHeader>
+            <SheetTitle>Alterar Senha</SheetTitle>
+            <SheetDescription>
+               Digite sua senha atual e a nova senha desejada
+            </SheetDescription>
+         </SheetHeader>
+
+         <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+            <div className="space-y-2">
+               <Label htmlFor="current-password">Senha Atual</Label>
+               <Input
+                  id="current-password"
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••"
+                  type="password"
+                  value={currentPassword}
+               />
+            </div>
+
+            <div className="space-y-2">
+               <Label htmlFor="new-password">Nova Senha</Label>
+               <Input
+                  id="new-password"
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  type="password"
+                  value={newPassword}
+               />
+               {newPassword.length > 0 && newPassword.length < 8 && (
+                  <p className="text-sm text-destructive">
+                     A senha deve ter pelo menos 8 caracteres
+                  </p>
+               )}
+            </div>
+
+            <div className="space-y-2">
+               <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
+               <Input
+                  id="confirm-password"
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  type="password"
+                  value={confirmPassword}
+               />
+               {confirmPassword.length > 0 && newPassword !== confirmPassword && (
+                  <p className="text-sm text-destructive">
+                     As senhas não coincidem
+                  </p>
+               )}
+            </div>
+         </div>
+
+         <SheetFooter>
+            <SheetClose asChild>
+               <Button variant="outline">Cancelar</Button>
+            </SheetClose>
+            <Button
+               disabled={!isValid || changeMutation.isPending}
+               onClick={() => changeMutation.mutate()}
+            >
+               {changeMutation.isPending && (
+                  <Loader2 className="size-4 mr-2 animate-spin" />
+               )}
+               Alterar Senha
+            </Button>
+         </SheetFooter>
+      </div>
+   );
+}
+
+// ============================================
 // Skeleton
 // ============================================
 
 function ProfileSectionSkeleton() {
    return (
-      <div className="space-y-6">
+      <div className="space-y-8">
          <div>
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-4 w-64 mt-1" />
+         </div>
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-10 w-80" />
             <Skeleton className="h-8 w-32" />
-            <Skeleton className="h-4 w-64 mt-2" />
          </div>
-         <div className="space-y-1">
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-16 w-full rounded-lg" />
+         <Skeleton className="h-px w-full" />
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-14 w-full max-w-md" />
          </div>
-         <div className="space-y-1">
-            <Skeleton className="h-16 w-full rounded-lg" />
+         <Skeleton className="h-px w-full" />
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-14 w-full max-w-md" />
+         </div>
+         <Skeleton className="h-px w-full" />
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-40" />
+            <div className="grid gap-4 sm:grid-cols-2">
+               <Skeleton className="h-14 w-full" />
+               <Skeleton className="h-14 w-full" />
+            </div>
          </div>
       </div>
    );
@@ -304,119 +349,150 @@ function ProfileSectionErrorFallback(props: FallbackProps) {
 }
 
 // ============================================
-// Profile Card Component
+// Profile Name Section
 // ============================================
 
-function ProfileCard({
-   user,
-   onChangeName,
+function ProfileNameSection({ currentName }: { currentName: string }) {
+   const [name, setName] = useState(currentName);
+
+   const updateMutation = useMutation({
+      mutationFn: async () => {
+         return authClient.updateUser({ name });
+      },
+      onSuccess: () => {
+         toast.success("Nome atualizado com sucesso!");
+      },
+      onError: () => {
+         toast.error("Erro ao atualizar nome");
+      },
+   });
+
+   const hasChanged = name.trim() !== currentName && name.trim().length > 0;
+
+   return (
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Nome de exibição</h2>
+            <p className="text-sm text-muted-foreground">
+               O nome que aparecerá no seu perfil e em suas publicações.
+            </p>
+         </div>
+         <div className="max-w-md space-y-3">
+            <Input
+               onChange={(e) => setName(e.target.value)}
+               placeholder="João Silva"
+               value={name}
+            />
+            <Button
+               disabled={!hasChanged || updateMutation.isPending}
+               onClick={() => updateMutation.mutate()}
+               size="sm"
+            >
+               {updateMutation.isPending && (
+                  <Loader2 className="size-4 mr-2 animate-spin" />
+               )}
+               Salvar nome
+            </Button>
+         </div>
+      </section>
+   );
+}
+
+// ============================================
+// Profile Email Section
+// ============================================
+
+function ProfileEmailSection({
+   email,
+   emailVerified,
    onChangeEmail,
 }: {
-   user: {
-      name: string | null;
-      email: string;
-      image: string | null;
-      emailVerified: boolean;
-   };
-   onChangeName: () => void;
+   email: string;
+   emailVerified: boolean;
    onChangeEmail: () => void;
 }) {
    return (
       <section className="space-y-3">
          <div>
-            <h2 className="text-lg font-medium">Informações Pessoais</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-               Gerencie seu nome, email e foto de perfil
+            <h2 className="text-lg font-medium">Email</h2>
+            <p className="text-sm text-muted-foreground">
+               Seu endereço de email para login e notificações.
             </p>
          </div>
-         <ItemGroup>
-            <Item variant="muted">
-               <ItemMedia variant="icon">
-                  <User className="size-4" />
-               </ItemMedia>
-               <ItemContent className="min-w-0">
-                  <ItemTitle>Nome</ItemTitle>
-                  <ItemDescription className="truncate">
-                     {user.name || "Não definido"}
-                  </ItemDescription>
-               </ItemContent>
-               <ItemActions>
-                  <Tooltip>
-                     <TooltipTrigger asChild>
-                        <Button
-                           onClick={onChangeName}
-                           size="icon"
-                           variant="ghost"
-                        >
-                           <Pencil className="size-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>Editar nome</TooltipContent>
-                  </Tooltip>
-               </ItemActions>
-            </Item>
+         <Item variant="muted" className="max-w-md">
+            <ItemMedia variant="icon">
+               <Mail className="size-4" />
+            </ItemMedia>
+            <ItemContent className="min-w-0">
+               <div className="flex items-center gap-2">
+                  <ItemTitle>Email</ItemTitle>
+                  {emailVerified && (
+                     <Badge
+                        className="bg-green-500/10 text-green-500 hover:bg-green-500/20"
+                        variant="outline"
+                     >
+                        <ShieldCheck className="size-3 mr-1" />
+                        Verificado
+                     </Badge>
+                  )}
+               </div>
+               <ItemDescription className="truncate">{email}</ItemDescription>
+            </ItemContent>
+            <ItemActions>
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button
+                        onClick={onChangeEmail}
+                        size="icon"
+                        variant="ghost"
+                     >
+                        <Pencil className="size-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Alterar email</TooltipContent>
+               </Tooltip>
+            </ItemActions>
+         </Item>
+      </section>
+   );
+}
 
-            <ItemSeparator />
+// ============================================
+// Profile Password Section
+// ============================================
 
-            <Item variant="muted">
-               <ItemMedia variant="icon">
-                  <Mail className="size-4" />
-               </ItemMedia>
-               <ItemContent className="min-w-0">
-                  <div className="flex items-center gap-2">
-                     <ItemTitle>Email</ItemTitle>
-                     {user.emailVerified && (
-                        <Badge
-                           className="bg-green-500/10 text-green-500 hover:bg-green-500/20"
-                           variant="outline"
-                        >
-                           <ShieldCheck className="size-3 mr-1" />
-                           Verificado
-                        </Badge>
-                     )}
-                  </div>
-                  <ItemDescription className="truncate">
-                     {user.email}
-                  </ItemDescription>
-               </ItemContent>
-               <ItemActions>
-                  <Tooltip>
-                     <TooltipTrigger asChild>
-                        <Button
-                           onClick={onChangeEmail}
-                           size="icon"
-                           variant="ghost"
-                        >
-                           <Pencil className="size-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>Alterar email</TooltipContent>
-                  </Tooltip>
-               </ItemActions>
-            </Item>
-
-            <ItemSeparator />
-
-            <Item variant="muted">
-               <ItemMedia variant="icon">
-                  <Lock className="size-4" />
-               </ItemMedia>
-               <ItemContent className="min-w-0">
-                  <ItemTitle>Senha</ItemTitle>
-                  <ItemDescription>••••••••</ItemDescription>
-               </ItemContent>
-               <ItemActions>
-                  <Tooltip>
-                     <TooltipTrigger asChild>
-                        <Button disabled size="icon" variant="ghost">
-                           <ChevronRight className="size-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>Em breve</TooltipContent>
-                  </Tooltip>
-               </ItemActions>
-            </Item>
-         </ItemGroup>
+function ProfilePasswordSection({ onChangePassword }: { onChangePassword: () => void }) {
+   return (
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Senha</h2>
+            <p className="text-sm text-muted-foreground">
+               Altere sua senha de acesso à conta.
+            </p>
+         </div>
+         <Item variant="muted" className="max-w-md">
+            <ItemMedia variant="icon">
+               <Lock className="size-4" />
+            </ItemMedia>
+            <ItemContent className="min-w-0">
+               <ItemTitle>Senha</ItemTitle>
+               <ItemDescription>••••••••</ItemDescription>
+            </ItemContent>
+            <ItemActions>
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button
+                        onClick={onChangePassword}
+                        size="icon"
+                        variant="ghost"
+                     >
+                        <ChevronRight className="size-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Alterar senha</TooltipContent>
+               </Tooltip>
+            </ItemActions>
+         </Item>
       </section>
    );
 }
@@ -439,11 +515,11 @@ function AccountSummarySection({
       <section className="space-y-3">
          <div>
             <h2 className="text-lg font-medium">Resumo da Conta</h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground">
                Visão geral do seu perfil
             </p>
          </div>
-         <ItemGroup>
+         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Item variant="muted">
                <ItemMedia>
                   <Avatar className="size-10">
@@ -466,20 +542,16 @@ function AccountSummarySection({
                </ItemContent>
             </Item>
 
-            <ItemSeparator />
-
             <Item variant="muted">
                <ItemMedia variant="icon">
                   <Calendar className="size-4" />
                </ItemMedia>
                <ItemContent>
                   <ItemTitle>Membro desde</ItemTitle>
-                  <ItemDescription>
-                     {formatDate(user.createdAt)}
-                  </ItemDescription>
+                  <ItemDescription>{formatDate(user.createdAt)}</ItemDescription>
                </ItemContent>
             </Item>
-         </ItemGroup>
+         </div>
       </section>
    );
 }
@@ -508,17 +580,6 @@ function ProfileSectionContent() {
       );
    }
 
-   const handleChangeName = () => {
-      openSheet({
-         children: (
-            <ChangeNameSheetContent
-               currentName={user.name || ""}
-               onClose={closeSheet}
-            />
-         ),
-      });
-   };
-
    const handleChangeEmail = () => {
       openSheet({
          children: (
@@ -530,9 +591,15 @@ function ProfileSectionContent() {
       });
    };
 
+   const handleChangePassword = () => {
+      openSheet({
+         children: <ChangePasswordSheetContent onClose={closeSheet} />,
+      });
+   };
+
    return (
       <TooltipProvider>
-         <div className="space-y-6">
+         <div className="space-y-8">
             <div>
                <h1 className="text-2xl font-semibold font-serif">Perfil</h1>
                <p className="text-sm text-muted-foreground mt-1">
@@ -540,22 +607,27 @@ function ProfileSectionContent() {
                </p>
             </div>
 
-            <ProfileCard
+            <ProfileNameSection currentName={user.name || ""} />
+
+            <Separator />
+
+            <ProfileEmailSection
+               email={user.email}
+               emailVerified={user.emailVerified}
                onChangeEmail={handleChangeEmail}
-               onChangeName={handleChangeName}
-               user={{
-                  name: user.name,
-                  email: user.email,
-                  image: user.image,
-                  emailVerified: user.emailVerified,
-               }}
             />
+
+            <Separator />
+
+            <ProfilePasswordSection onChangePassword={handleChangePassword} />
+
+            <Separator />
 
             <AccountSummarySection
                user={{
                   name: user.name,
                   email: user.email,
-                  image: user.image,
+                  image: user.image ?? null,
                   createdAt: user.createdAt,
                }}
             />
