@@ -1,3 +1,10 @@
+import { ORPCError } from "@orpc/server";
+import { env as serverEnv } from "@packages/environment/server";
+import {
+   generatePresignedPutUrl,
+   getMinioClient,
+} from "@packages/files/client";
+import { nanoid } from "nanoid";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -102,3 +109,40 @@ export const getLinkedAccounts = protectedProcedure.handler(
       }
    },
 );
+
+/**
+ * Generate presigned URL for user avatar upload
+ */
+export const generateAvatarUploadUrl = protectedProcedure
+   .input(
+      z.object({
+         fileExtension: z.string().regex(/^[a-zA-Z0-9]{1,10}$/, "Invalid file extension"),
+      }),
+   )
+   .handler(async ({ context, input }) => {
+      const { userId } = context;
+
+      try {
+         const minioClient = getMinioClient(serverEnv);
+         const bucketName = "user-avatars";
+         const fileName = `avatar-${userId}-${nanoid()}.${input.fileExtension}`;
+
+         const presignedUrl = await generatePresignedPutUrl(
+            fileName,
+            bucketName,
+            minioClient,
+            300, // 5 minutes
+         );
+
+         return {
+            presignedUrl,
+            fileName,
+            publicUrl: `/api/files/${bucketName}/${fileName}`,
+         };
+      } catch (error) {
+         console.error("Failed to generate avatar upload URL:", error);
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to generate upload URL",
+         });
+      }
+   });

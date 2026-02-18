@@ -1,9 +1,4 @@
 import {
-   Alert,
-   AlertDescription,
-   AlertTitle,
-} from "@packages/ui/components/alert";
-import {
    Avatar,
    AvatarFallback,
    AvatarImage,
@@ -11,52 +6,48 @@ import {
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Card, CardContent } from "@packages/ui/components/card";
+import {
+   Dropzone,
+   DropzoneContent,
+   DropzoneEmptyState,
+} from "@packages/ui/components/dropzone";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
+import {
+   Field,
+   FieldError,
+   FieldGroup,
+   FieldLabel,
+} from "@packages/ui/components/field";
 import { Input } from "@packages/ui/components/input";
-import {
-   Item,
-   ItemActions,
-   ItemContent,
-   ItemDescription,
-   ItemGroup,
-   ItemMedia,
-   ItemSeparator,
-   ItemTitle,
-} from "@packages/ui/components/item";
 import { Label } from "@packages/ui/components/label";
-import {
-   SheetClose,
-   SheetDescription,
-   SheetFooter,
-   SheetHeader,
-   SheetTitle,
-} from "@packages/ui/components/sheet";
+import { PasswordInput } from "@packages/ui/components/password-input";
+import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import {
-   Tooltip,
-   TooltipContent,
-   TooltipProvider,
-   TooltipTrigger,
-} from "@packages/ui/components/tooltip";
 import { getInitials } from "@packages/utils/text";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { generateQrCode } from "@f-o-t/qrcode";
+import { useForm } from "@tanstack/react-form";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
-   Calendar,
-   ChevronRight,
-   Info,
    Loader2,
-   Lock,
-   Mail,
-   Pencil,
    ShieldCheck,
+   Trash2,
    User,
 } from "lucide-react";
-import { Suspense, useState } from "react";
+import {
+   type FormEvent,
+   Suspense,
+   useCallback,
+   useMemo,
+   useState,
+   useTransition,
+} from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
+import { z } from "zod";
+import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
+import { usePresignedUpload } from "@/features/file-upload/lib/use-presigned-upload";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
-import { useSheet } from "@/hooks/use-sheet";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -66,191 +57,476 @@ export const Route = createFileRoute(
    component: ProfilePage,
 });
 
-function formatDate(date: Date | string | null): string {
-   if (!date) return "-";
-   const d = new Date(date);
-   return d.toLocaleDateString("pt-BR", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-   });
-}
-
 // ============================================
-// Change Name Sheet Content
+// Avatar Upload Section
 // ============================================
 
-function ChangeNameSheetContent({
-   currentName,
-   onClose,
+function AvatarUploadSection({
+   currentImage,
+   name,
 }: {
-   currentName: string;
-   onClose: () => void;
+   currentImage: string | null;
+   name: string | null;
 }) {
-   const [name, setName] = useState(currentName);
-
-   const updateMutation = useMutation({
-      mutationFn: async () => {
-         return authClient.updateUser({ name });
-      },
-      onSuccess: () => {
-         toast.success("Nome atualizado com sucesso!");
-         onClose();
-      },
-      onError: () => {
-         toast.error("Erro ao atualizar nome");
-      },
+   const fileUpload = useFileUpload({
+      acceptedTypes: ["image/*"],
+      maxSize: 5 * 1024 * 1024,
    });
+   const presignedUpload = usePresignedUpload();
+   const [isPending, startTransition] = useTransition();
 
-   const isValid = name.trim().length > 0 && name !== currentName;
+   const handleSave = () => {
+      if (!fileUpload.selectedFile) return;
+      startTransition(async () => {
+         try {
+            const fileExtension =
+               fileUpload.selectedFile!.name.split(".").pop() ?? "png";
+            const contentType = fileUpload.selectedFile!.type;
 
-   return (
-      <div className="flex flex-col h-full">
-         <SheetHeader>
-            <SheetTitle>Alterar Nome</SheetTitle>
-            <SheetDescription>Atualize seu nome de exibição</SheetDescription>
-         </SheetHeader>
+            const uploadData = await orpc.account.generateAvatarUploadUrl.call({
+               fileExtension,
+            });
 
-         <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-            <Alert>
-               <Info className="size-4" />
-               <AlertTitle>Nome de Exibição</AlertTitle>
-               <AlertDescription>
-                  Este é o nome que aparecerá no seu perfil e em suas
-                  publicações.
-               </AlertDescription>
-            </Alert>
+            await presignedUpload.uploadToPresignedUrl(
+               uploadData.presignedUrl,
+               fileUpload.selectedFile!,
+               contentType,
+            );
 
-            <div className="space-y-2">
-               <Label htmlFor="new-name">Nome</Label>
-               <Input
-                  id="new-name"
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="João Silva"
-                  value={name}
-               />
-            </div>
-         </div>
-
-         <SheetFooter>
-            <SheetClose asChild>
-               <Button variant="outline">Cancelar</Button>
-            </SheetClose>
-            <Button
-               disabled={!isValid || updateMutation.isPending}
-               onClick={() => updateMutation.mutate()}
-            >
-               {updateMutation.isPending && (
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-               )}
-               Salvar
-            </Button>
-         </SheetFooter>
-      </div>
-   );
-}
-
-// ============================================
-// Change Email Sheet Content
-// ============================================
-
-function ChangeEmailSheetContent({
-   currentEmail,
-   onClose,
-}: {
-   currentEmail: string;
-   onClose: () => void;
-}) {
-   const [email, setEmail] = useState("");
-   const { openAlertDialog } = useAlertDialog();
-
-   const changeMutation = useMutation({
-      mutationFn: async () => {
-         return authClient.changeEmail({
-            newEmail: email,
-            callbackURL: window.location.href,
-         });
-      },
-      onSuccess: () => {
-         toast.success("Email de verificação enviado para o novo endereço!");
-         onClose();
-      },
-      onError: (error) => {
-         const errorMessage =
-            error instanceof Error ? error.message : "Erro ao alterar email";
-         toast.error(errorMessage);
-      },
-   });
-
-   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-   const isValid =
-      isValidEmail && email.toLowerCase() !== currentEmail.toLowerCase();
-
-   const handleSubmit = () => {
-      openAlertDialog({
-         title: "Confirmar Alteração de Email",
-         description:
-            "Enviaremos um link de verificação para o novo endereço. Você precisará confirmá-lo para concluir a alteração.",
-         onAction: async () => {
-            await changeMutation.mutateAsync();
-         },
-         actionLabel: "Confirmar",
-         cancelLabel: "Cancelar",
-         variant: "default",
+            const { error } = await authClient.updateUser({ image: uploadData.publicUrl });
+            if (error) {
+               toast.error(error.message ?? "Erro ao atualizar foto de perfil");
+            } else {
+               toast.success("Foto de perfil atualizada!");
+               fileUpload.clearFile();
+            }
+         } catch {
+            toast.error("Erro ao atualizar foto de perfil");
+         }
       });
    };
 
    return (
-      <div className="flex flex-col h-full">
-         <SheetHeader>
-            <SheetTitle>Alterar Email</SheetTitle>
-            <SheetDescription>Atualize seu endereço de email</SheetDescription>
-         </SheetHeader>
-
-         <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-            <Alert>
-               <Info className="size-4" />
-               <AlertTitle>Verificação Necessária</AlertTitle>
-               <AlertDescription>
-                  Um link de verificação será enviado para o novo endereço de
-                  email.
-               </AlertDescription>
-            </Alert>
-
-            <div className="p-4 bg-secondary/50 rounded-lg">
-               <p className="text-sm text-muted-foreground">
-                  Email atual:{" "}
-                  <span className="font-medium">{currentEmail}</span>
-               </p>
-            </div>
-
-            <div className="space-y-2">
-               <Label htmlFor="new-email">Novo Email</Label>
-               <Input
-                  id="new-email"
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="novo@email.com"
-                  type="email"
-                  value={email}
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Foto de perfil</h2>
+            <p className="text-sm text-muted-foreground">
+               Sua foto de perfil visível para outros membros.
+            </p>
+         </div>
+         <div className="flex items-start gap-4">
+            <Avatar className="size-16 rounded-lg">
+               <AvatarImage
+                  alt={name || "Avatar"}
+                  src={fileUpload.filePreview || currentImage || undefined}
                />
-               {email && !isValidEmail && (
-                  <p className="text-sm text-destructive">Email inválido</p>
-               )}
+               <AvatarFallback className="rounded-lg">
+                  {name ? (
+                     getInitials(name)
+                  ) : (
+                     <User className="size-6" />
+                  )}
+               </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 max-w-xs">
+               <Dropzone
+                  accept={{ "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"] }}
+                  className="h-20"
+                  maxFiles={1}
+                  maxSize={5 * 1024 * 1024}
+                  src={fileUpload.selectedFile ? [fileUpload.selectedFile] : undefined}
+                  onDrop={(files) => fileUpload.handleFileSelect(files, () => {})}
+                  onError={(err) => fileUpload.setError(err.message)}
+               >
+                  <DropzoneEmptyState>
+                     <p className="text-xs text-muted-foreground">
+                        Clique ou arraste para enviar
+                     </p>
+                  </DropzoneEmptyState>
+                  <DropzoneContent>
+                     <p className="text-xs text-muted-foreground">
+                        Imagem selecionada
+                     </p>
+                  </DropzoneContent>
+               </Dropzone>
             </div>
          </div>
-
-         <SheetFooter>
-            <SheetClose asChild>
-               <Button variant="outline">Cancelar</Button>
-            </SheetClose>
+         {fileUpload.filePreview && (
             <Button
-               disabled={!isValid || changeMutation.isPending}
-               onClick={handleSubmit}
+               disabled={isPending || presignedUpload.isUploading}
+               onClick={handleSave}
+               size="sm"
             >
-               Enviar Verificação
+               {(isPending || presignedUpload.isUploading) && (
+                  <Loader2 className="size-4 mr-2 animate-spin" />
+               )}
+               Salvar foto
             </Button>
-         </SheetFooter>
-      </div>
+         )}
+         {(fileUpload.error || presignedUpload.error) && (
+            <p className="text-sm text-destructive">
+               {fileUpload.error || presignedUpload.error}
+            </p>
+         )}
+      </section>
+   );
+}
+
+// ============================================
+// Two-Factor Authentication Section
+// ============================================
+
+type TwoFactorStep =
+   | "idle"
+   | "enabling-confirm"
+   | "show-qr"
+   | "show-backup-codes"
+   | "disabling-confirm";
+
+function TwoFactorSection({
+   twoFactorEnabled,
+}: {
+   twoFactorEnabled: boolean;
+}) {
+   const [step, setStep] = useState<TwoFactorStep>("idle");
+   const [password, setPassword] = useState("");
+   const [totpCode, setTotpCode] = useState("");
+   const [totpUri, setTotpUri] = useState("");
+   const [backupCodes, setBackupCodes] = useState<string[]>([]);
+   const [isPending, startTransition] = useTransition();
+
+   const resetState = () => {
+      setStep("idle");
+      setPassword("");
+      setTotpCode("");
+      setTotpUri("");
+      setBackupCodes([]);
+   };
+
+   const handleEnable = () => {
+      startTransition(async () => {
+         const { data, error } = await authClient.twoFactor.enable({ password });
+         if (error) {
+            toast.error(error.message ?? "Senha incorreta");
+            return;
+         }
+         setTotpUri(data?.totpURI ?? "");
+         setBackupCodes(data?.backupCodes ?? []);
+         setPassword("");
+         setStep("show-qr");
+      });
+   };
+
+   const handleVerify = () => {
+      startTransition(async () => {
+         const { error } = await authClient.twoFactor.verifyTotp({ code: totpCode });
+         if (error) {
+            toast.error(error.message ?? "Código inválido");
+            return;
+         }
+         setStep("show-backup-codes");
+      });
+   };
+
+   const handleDisable = () => {
+      startTransition(async () => {
+         const { error } = await authClient.twoFactor.disable({ password });
+         if (error) {
+            toast.error(error.message ?? "Senha incorreta");
+            return;
+         }
+         toast.success("2FA desativado com sucesso!");
+         resetState();
+      });
+   };
+
+   const qrSrc = useMemo(() => {
+      if (!totpUri) return "";
+      return `data:image/png;base64,${btoa(String.fromCharCode(...generateQrCode(totpUri, { size: 180 })))}`;
+   }, [totpUri]);
+
+   return (
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Autenticação de dois fatores</h2>
+            <p className="text-sm text-muted-foreground">
+               Adicione uma camada extra de segurança usando um aplicativo autenticador.
+            </p>
+         </div>
+
+         <div className="max-w-md space-y-4">
+            {step === "idle" && (
+               <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                     <span className="text-sm text-muted-foreground">Status:</span>
+                     {twoFactorEnabled ? (
+                        <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
+                           Ativado
+                        </Badge>
+                     ) : (
+                        <Badge variant="outline" className="text-muted-foreground">
+                           Desativado
+                        </Badge>
+                     )}
+                  </div>
+                  {twoFactorEnabled ? (
+                     <Button
+                        onClick={() => setStep("disabling-confirm")}
+                        size="sm"
+                        variant="destructive"
+                     >
+                        Desativar 2FA
+                     </Button>
+                  ) : (
+                     <Button
+                        onClick={() => setStep("enabling-confirm")}
+                        size="sm"
+                     >
+                        Ativar 2FA
+                     </Button>
+                  )}
+               </div>
+            )}
+
+            {step === "enabling-confirm" && (
+               <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                     Confirme sua senha para continuar.
+                  </p>
+                  <div className="space-y-1.5">
+                     <Label htmlFor="2fa-enable-password">Senha</Label>
+                     <PasswordInput
+                        id="2fa-enable-password"
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        value={password}
+                     />
+                  </div>
+                  <div className="flex gap-2">
+                     <Button
+                        disabled={password.length === 0 || isPending}
+                        onClick={handleEnable}
+                        size="sm"
+                     >
+                        {isPending && (
+                           <Loader2 className="size-4 mr-2 animate-spin" />
+                        )}
+                        Continuar
+                     </Button>
+                     <Button onClick={resetState} size="sm" variant="outline">
+                        Cancelar
+                     </Button>
+                  </div>
+               </div>
+            )}
+
+            {step === "show-qr" && (
+               <div className="space-y-4">
+                  <div className="space-y-2">
+                     <p className="text-sm font-medium">
+                        1. Escaneie o QR code com seu aplicativo autenticador
+                     </p>
+                     <div className="p-4 bg-white rounded-lg inline-block">
+                        <img src={qrSrc} alt="QR Code" width={180} height={180} className="rounded" />
+                     </div>
+                  </div>
+                  <div className="space-y-1.5">
+                     <Label htmlFor="totp-code">
+                        2. Digite o código gerado pelo aplicativo
+                     </Label>
+                     <Input
+                        id="totp-code"
+                        inputMode="numeric"
+                        maxLength={6}
+                        onChange={(e) => setTotpCode(e.target.value)}
+                        placeholder="000000"
+                        value={totpCode}
+                     />
+                  </div>
+                  <div className="flex gap-2">
+                     <Button
+                        disabled={totpCode.length !== 6 || isPending}
+                        onClick={handleVerify}
+                        size="sm"
+                     >
+                        {isPending && (
+                           <Loader2 className="size-4 mr-2 animate-spin" />
+                        )}
+                        Verificar
+                     </Button>
+                     <Button onClick={resetState} size="sm" variant="outline">
+                        Cancelar
+                     </Button>
+                  </div>
+               </div>
+            )}
+
+            {step === "show-backup-codes" && (
+               <div className="space-y-3">
+                  <div className="p-4 border rounded-lg space-y-2 bg-muted/30">
+                     <p className="text-sm font-medium">
+                        2FA ativado! Guarde seus códigos de backup
+                     </p>
+                     <p className="text-xs text-muted-foreground">
+                        Use esses códigos se perder acesso ao seu aplicativo autenticador.
+                        Cada código só pode ser usado uma vez.
+                     </p>
+                     <div className="grid grid-cols-2 gap-1 mt-2">
+                        {backupCodes.map((code) => (
+                           <code
+                              key={code}
+                              className="text-xs font-mono bg-background border rounded px-2 py-1 text-center"
+                           >
+                              {code}
+                           </code>
+                        ))}
+                     </div>
+                  </div>
+                  <Button onClick={resetState} size="sm">
+                     Concluído
+                  </Button>
+               </div>
+            )}
+
+            {step === "disabling-confirm" && (
+               <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                     Confirme sua senha para desativar o 2FA.
+                  </p>
+                  <div className="space-y-1.5">
+                     <Label htmlFor="2fa-disable-password">Senha</Label>
+                     <PasswordInput
+                        id="2fa-disable-password"
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        value={password}
+                     />
+                  </div>
+                  <div className="flex gap-2">
+                     <Button
+                        disabled={password.length === 0 || isPending}
+                        onClick={handleDisable}
+                        size="sm"
+                        variant="destructive"
+                     >
+                        {isPending && (
+                           <Loader2 className="size-4 mr-2 animate-spin" />
+                        )}
+                        Desativar
+                     </Button>
+                     <Button onClick={resetState} size="sm" variant="outline">
+                        Cancelar
+                     </Button>
+                  </div>
+               </div>
+            )}
+         </div>
+      </section>
+   );
+}
+
+// ============================================
+// Passkeys Section
+// ============================================
+
+function PasskeysSection() {
+   const queryClient = useQueryClient();
+   const [deletingId, setDeletingId] = useState<string | null>(null);
+   const [isAdding, startAddTransition] = useTransition();
+
+   const { data: passkeys = [] } = useQuery({
+      queryKey: ["passkeys"],
+      queryFn: async () => {
+         const result = await authClient.passkey.listUserPasskeys();
+         return result.data ?? [];
+      },
+   });
+
+   const handleAddPasskey = () => {
+      startAddTransition(async () => {
+         const result = await authClient.passkey.addPasskey();
+         if (result?.error) {
+            if ((result.error as { code?: string }).code === "ERROR_CEREMONY_ABORTED") return;
+            toast.error(result.error.message ?? "Erro ao adicionar passkey");
+            return;
+         }
+         if (!result?.data) return; // user cancelled — silent no-op
+         toast.success("Passkey adicionada com sucesso!");
+         queryClient.invalidateQueries({ queryKey: ["passkeys"] });
+      });
+   };
+
+   const handleDeletePasskey = async (id: string) => {
+      setDeletingId(id);
+      const result = await authClient.passkey.deletePasskey({ id });
+      setDeletingId(null);
+      if (result?.error) {
+         toast.error(result.error.message ?? "Erro ao remover passkey");
+         return;
+      }
+      toast.success("Passkey removida!");
+      queryClient.invalidateQueries({ queryKey: ["passkeys"] });
+   };
+
+   return (
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Passkeys</h2>
+            <p className="text-sm text-muted-foreground">
+               Gerencie suas passkeys para login sem senha usando biometria ou chave de segurança.
+            </p>
+         </div>
+
+         <div className="max-w-md space-y-3">
+            {passkeys.length === 0 ? (
+               <p className="text-sm text-muted-foreground">
+                  Nenhuma passkey cadastrada.
+               </p>
+            ) : (
+               <div className="space-y-2">
+                  {passkeys.map((passkey: (typeof passkeys)[number]) => (
+                     <div
+                        key={passkey.id}
+                        className="flex items-center justify-between p-3 border rounded-lg bg-muted/30"
+                     >
+                        <div className="min-w-0">
+                           <p className="text-sm font-medium truncate">
+                              {passkey.name || "Passkey"}
+                           </p>
+                           {passkey.createdAt && (
+                              <p className="text-xs text-muted-foreground">
+                                 Adicionada em{" "}
+                                 {new Date(passkey.createdAt).toLocaleDateString("pt-BR")}
+                              </p>
+                           )}
+                        </div>
+                        <Button
+                           disabled={deletingId === passkey.id}
+                           onClick={() => handleDeletePasskey(passkey.id)}
+                           size="icon"
+                           variant="ghost"
+                           className="text-destructive hover:text-destructive shrink-0"
+                        >
+                           <Trash2 className="size-4" />
+                        </Button>
+                     </div>
+                  ))}
+               </div>
+            )}
+
+            <Button
+               disabled={isAdding}
+               onClick={handleAddPasskey}
+               size="sm"
+               variant="outline"
+            >
+               {isAdding && (
+                  <Loader2 className="size-4 mr-2 animate-spin" />
+               )}
+               Adicionar passkey
+            </Button>
+         </div>
+      </section>
    );
 }
 
@@ -260,18 +536,56 @@ function ChangeEmailSheetContent({
 
 function ProfileSectionSkeleton() {
    return (
-      <div className="space-y-6">
+      <div className="space-y-8">
          <div>
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-4 w-64 mt-1" />
+         </div>
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-36" />
+            <div className="flex items-start gap-4">
+               <Skeleton className="size-16 rounded-lg" />
+               <Skeleton className="h-20 w-64" />
+            </div>
+         </div>
+         <Skeleton className="h-px w-full" />
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-10 w-80" />
             <Skeleton className="h-8 w-32" />
-            <Skeleton className="h-4 w-64 mt-2" />
          </div>
-         <div className="space-y-1">
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-16 w-full rounded-lg" />
+         <Skeleton className="h-px w-full" />
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-10 w-full max-w-md" />
+            <Skeleton className="h-10 w-full max-w-md" />
+            <Skeleton className="h-10 w-full max-w-md" />
+            <Skeleton className="h-8 w-32" />
          </div>
-         <div className="space-y-1">
-            <Skeleton className="h-16 w-full rounded-lg" />
+         <Skeleton className="h-px w-full" />
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-14 w-full max-w-md" />
+         </div>
+         <Skeleton className="h-px w-full" />
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-40" />
+            <div className="grid gap-4 sm:grid-cols-2">
+               <Skeleton className="h-14 w-full" />
+               <Skeleton className="h-14 w-full" />
+            </div>
+         </div>
+         <Skeleton className="h-px w-full" />
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-56" />
+            <Skeleton className="h-4 w-80" />
+            <Skeleton className="h-10 w-full max-w-md" />
+         </div>
+         <Skeleton className="h-px w-full" />
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-28" />
+            <Skeleton className="h-4 w-80" />
+            <Skeleton className="h-8 w-40" />
          </div>
       </div>
    );
@@ -304,68 +618,144 @@ function ProfileSectionErrorFallback(props: FallbackProps) {
 }
 
 // ============================================
-// Profile Card Component
+// Profile Name Section
 // ============================================
 
-function ProfileCard({
-   user,
-   onChangeName,
-   onChangeEmail,
-}: {
-   user: {
-      name: string | null;
-      email: string;
-      image: string | null;
-      emailVerified: boolean;
-   };
-   onChangeName: () => void;
-   onChangeEmail: () => void;
-}) {
+const nameSchema = z.object({
+   name: z.string().min(1, "Nome é obrigatório"),
+});
+
+function ProfileNameSection({ currentName }: { currentName: string }) {
+   const [isPending, startTransition] = useTransition();
+
+   const form = useForm({
+      defaultValues: { name: currentName },
+      onSubmit: async ({ value }) => {
+         const { error } = await authClient.updateUser({ name: value.name });
+         if (error) {
+            toast.error(error.message ?? "Erro ao atualizar nome");
+            return;
+         }
+         toast.success("Nome atualizado com sucesso!");
+      },
+      validators: { onBlur: nameSchema },
+   });
+
+   const handleSubmit = useCallback(
+      (e: FormEvent) => {
+         e.preventDefault();
+         e.stopPropagation();
+         startTransition(async () => { await form.handleSubmit(); });
+      },
+      [form, startTransition],
+   );
+
    return (
       <section className="space-y-3">
          <div>
-            <h2 className="text-lg font-medium">Informações Pessoais</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-               Gerencie seu nome, email e foto de perfil
+            <h2 className="text-lg font-medium">Nome de exibição</h2>
+            <p className="text-sm text-muted-foreground">
+               O nome que aparecerá no seu perfil e em suas publicações.
             </p>
          </div>
-         <ItemGroup>
-            <Item variant="muted">
-               <ItemMedia variant="icon">
-                  <User className="size-4" />
-               </ItemMedia>
-               <ItemContent className="min-w-0">
-                  <ItemTitle>Nome</ItemTitle>
-                  <ItemDescription className="truncate">
-                     {user.name || "Não definido"}
-                  </ItemDescription>
-               </ItemContent>
-               <ItemActions>
-                  <Tooltip>
-                     <TooltipTrigger asChild>
-                        <Button
-                           onClick={onChangeName}
-                           size="icon"
-                           variant="ghost"
-                        >
-                           <Pencil className="size-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>Editar nome</TooltipContent>
-                  </Tooltip>
-               </ItemActions>
-            </Item>
+         <form className="max-w-md space-y-3" onSubmit={handleSubmit}>
+            <FieldGroup>
+               <form.Field name="name">
+                  {(field) => {
+                     const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                     return (
+                        <Field data-invalid={isInvalid}>
+                           <FieldLabel htmlFor={field.name}>Nome</FieldLabel>
+                           <Input
+                              aria-invalid={isInvalid}
+                              id={field.name}
+                              name={field.name}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="João Silva"
+                              value={field.state.value}
+                           />
+                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                        </Field>
+                     );
+                  }}
+               </form.Field>
+            </FieldGroup>
+            <form.Subscribe>
+               {(formState) => (
+                  <Button
+                     disabled={!formState.isDirty || !formState.canSubmit || isPending}
+                     size="sm"
+                     type="submit"
+                  >
+                     {isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
+                     Salvar nome
+                  </Button>
+               )}
+            </form.Subscribe>
+         </form>
+      </section>
+   );
+}
 
-            <ItemSeparator />
+// ============================================
+// Profile Email Section
+// ============================================
 
-            <Item variant="muted">
-               <ItemMedia variant="icon">
-                  <Mail className="size-4" />
-               </ItemMedia>
-               <ItemContent className="min-w-0">
+function ProfileEmailSection({
+   currentEmail,
+   emailVerified,
+}: {
+   currentEmail: string;
+   emailVerified: boolean;
+}) {
+   const [email, setEmail] = useState(currentEmail);
+   const [isPending, startTransition] = useTransition();
+   const { openAlertDialog } = useAlertDialog();
+
+   const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+   const hasChanged = isValidEmail && email.toLowerCase() !== currentEmail.toLowerCase();
+
+   const handleConfirmSave = () => {
+      startTransition(async () => {
+         const { error } = await authClient.changeEmail({
+            newEmail: email,
+            callbackURL: window.location.href,
+         });
+         if (error) {
+            toast.error(error.message ?? "Erro ao alterar email");
+            return;
+         }
+         toast.success("Email de verificação enviado para o novo endereço!");
+      });
+   };
+
+   const handleSave = () => {
+      openAlertDialog({
+         title: "Confirmar Alteração de Email",
+         description:
+            "Enviaremos um link de verificação para o novo endereço. Você precisará confirmá-lo para concluir a alteração.",
+         onAction: handleConfirmSave,
+         actionLabel: "Confirmar",
+         cancelLabel: "Cancelar",
+         variant: "default",
+      });
+   };
+
+   return (
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Email</h2>
+            <p className="text-sm text-muted-foreground">
+               Seu endereço de email para login e notificações.
+            </p>
+         </div>
+         <div className="max-w-md space-y-3">
+            <FieldGroup>
+               <Field data-invalid={email !== currentEmail && !isValidEmail}>
                   <div className="flex items-center gap-2">
-                     <ItemTitle>Email</ItemTitle>
-                     {user.emailVerified && (
+                     <FieldLabel htmlFor="profile-email">Email</FieldLabel>
+                     {emailVerified && (
                         <Badge
                            className="bg-green-500/10 text-green-500 hover:bg-green-500/20"
                            variant="outline"
@@ -375,111 +765,172 @@ function ProfileCard({
                         </Badge>
                      )}
                   </div>
-                  <ItemDescription className="truncate">
-                     {user.email}
-                  </ItemDescription>
-               </ItemContent>
-               <ItemActions>
-                  <Tooltip>
-                     <TooltipTrigger asChild>
-                        <Button
-                           onClick={onChangeEmail}
-                           size="icon"
-                           variant="ghost"
-                        >
-                           <Pencil className="size-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>Alterar email</TooltipContent>
-                  </Tooltip>
-               </ItemActions>
-            </Item>
-
-            <ItemSeparator />
-
-            <Item variant="muted">
-               <ItemMedia variant="icon">
-                  <Lock className="size-4" />
-               </ItemMedia>
-               <ItemContent className="min-w-0">
-                  <ItemTitle>Senha</ItemTitle>
-                  <ItemDescription>••••••••</ItemDescription>
-               </ItemContent>
-               <ItemActions>
-                  <Tooltip>
-                     <TooltipTrigger asChild>
-                        <Button disabled size="icon" variant="ghost">
-                           <ChevronRight className="size-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent>Em breve</TooltipContent>
-                  </Tooltip>
-               </ItemActions>
-            </Item>
-         </ItemGroup>
+                  <Input
+                     id="profile-email"
+                     onChange={(e) => setEmail(e.target.value)}
+                     placeholder="seu@email.com"
+                     type="email"
+                     value={email}
+                  />
+                  {email !== currentEmail && !isValidEmail && (
+                     <FieldError errors={["Email inválido"]} />
+                  )}
+               </Field>
+            </FieldGroup>
+            <Button
+               disabled={!hasChanged || isPending}
+               onClick={handleSave}
+               size="sm"
+            >
+               {isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
+               Salvar email
+            </Button>
+         </div>
       </section>
    );
 }
 
 // ============================================
-// Account Summary Section Component
+// Profile Password Section
 // ============================================
 
-function AccountSummarySection({
-   user,
-}: {
-   user: {
-      name: string | null;
-      email: string;
-      image: string | null;
-      createdAt: Date;
-   };
-}) {
+function ProfilePasswordSection({ hasPassword }: { hasPassword: boolean }) {
+   const [isPending, startTransition] = useTransition();
+
+   const schema = z
+      .object({
+         currentPassword: hasPassword
+            ? z.string().min(1, "Senha atual é obrigatória")
+            : z.string(),
+         newPassword: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
+         confirmPassword: z.string(),
+      })
+      .refine((d) => d.newPassword === d.confirmPassword, {
+         message: "As senhas não coincidem",
+         path: ["confirmPassword"],
+      });
+
+   const form = useForm({
+      defaultValues: {
+         currentPassword: "",
+         newPassword: "",
+         confirmPassword: "",
+      },
+      onSubmit: async ({ value, formApi }) => {
+         const { error } = await authClient.changePassword({
+            currentPassword: hasPassword ? value.currentPassword : "",
+            newPassword: value.newPassword,
+            revokeOtherSessions: false,
+         });
+         if (error) {
+            toast.error(
+               error.message ?? (hasPassword ? "Erro ao alterar senha" : "Erro ao definir senha"),
+            );
+            return;
+         }
+         toast.success(hasPassword ? "Senha alterada com sucesso!" : "Senha definida com sucesso!");
+         formApi.reset();
+      },
+      validators: { onBlur: schema },
+   });
+
+   const handleSubmit = useCallback(
+      (e: FormEvent) => {
+         e.preventDefault();
+         e.stopPropagation();
+         startTransition(async () => { await form.handleSubmit(); });
+      },
+      [form, startTransition],
+   );
+
    return (
       <section className="space-y-3">
          <div>
-            <h2 className="text-lg font-medium">Resumo da Conta</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-               Visão geral do seu perfil
+            <h2 className="text-lg font-medium">Senha</h2>
+            <p className="text-sm text-muted-foreground">
+               {hasPassword
+                  ? "Altere sua senha de acesso à conta."
+                  : "Defina uma senha para acessar sua conta além do magic link."}
             </p>
          </div>
-         <ItemGroup>
-            <Item variant="muted">
-               <ItemMedia>
-                  <Avatar className="size-10">
-                     <AvatarImage
-                        alt={user.name || "Avatar"}
-                        src={user.image || undefined}
-                     />
-                     <AvatarFallback>
-                        {user.name ? (
-                           getInitials(user.name)
-                        ) : (
-                           <User className="size-4" />
-                        )}
-                     </AvatarFallback>
-                  </Avatar>
-               </ItemMedia>
-               <ItemContent>
-                  <ItemTitle>{user.name || "Usuário"}</ItemTitle>
-                  <ItemDescription>{user.email}</ItemDescription>
-               </ItemContent>
-            </Item>
-
-            <ItemSeparator />
-
-            <Item variant="muted">
-               <ItemMedia variant="icon">
-                  <Calendar className="size-4" />
-               </ItemMedia>
-               <ItemContent>
-                  <ItemTitle>Membro desde</ItemTitle>
-                  <ItemDescription>
-                     {formatDate(user.createdAt)}
-                  </ItemDescription>
-               </ItemContent>
-            </Item>
-         </ItemGroup>
+         <form className="max-w-md space-y-3" onSubmit={handleSubmit}>
+            <FieldGroup>
+               {hasPassword && (
+                  <form.Field name="currentPassword">
+                     {(field) => {
+                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                        return (
+                           <Field data-invalid={isInvalid}>
+                              <FieldLabel htmlFor={field.name}>Senha Atual</FieldLabel>
+                              <PasswordInput
+                                 aria-invalid={isInvalid}
+                                 id={field.name}
+                                 name={field.name}
+                                 onBlur={field.handleBlur}
+                                 onChange={(e) => field.handleChange(e.target.value)}
+                                 placeholder="••••••••"
+                                 value={field.state.value}
+                              />
+                              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                           </Field>
+                        );
+                     }}
+                  </form.Field>
+               )}
+               <form.Field name="newPassword">
+                  {(field) => {
+                     const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                     return (
+                        <Field data-invalid={isInvalid}>
+                           <FieldLabel htmlFor={field.name}>Nova Senha</FieldLabel>
+                           <PasswordInput
+                              aria-invalid={isInvalid}
+                              id={field.name}
+                              name={field.name}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="••••••••"
+                              value={field.state.value}
+                           />
+                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                        </Field>
+                     );
+                  }}
+               </form.Field>
+               <form.Field name="confirmPassword">
+                  {(field) => {
+                     const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                     return (
+                        <Field data-invalid={isInvalid}>
+                           <FieldLabel htmlFor={field.name}>Confirmar Nova Senha</FieldLabel>
+                           <PasswordInput
+                              aria-invalid={isInvalid}
+                              id={field.name}
+                              name={field.name}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="••••••••"
+                              value={field.state.value}
+                           />
+                           {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                        </Field>
+                     );
+                  }}
+               </form.Field>
+            </FieldGroup>
+            <form.Subscribe>
+               {(formState) => (
+                  <Button
+                     disabled={!formState.canSubmit || isPending}
+                     size="sm"
+                     type="submit"
+                  >
+                     {isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
+                     {hasPassword ? "Alterar senha" : "Definir senha"}
+                  </Button>
+               )}
+            </form.Subscribe>
+         </form>
       </section>
    );
 }
@@ -489,9 +940,11 @@ function AccountSummarySection({
 // ============================================
 
 function ProfileSectionContent() {
-   const { openSheet, closeSheet } = useSheet();
    const { data: session } = useSuspenseQuery(
       orpc.session.getSession.queryOptions({}),
+   );
+   const { data: passwordStatus } = useSuspenseQuery(
+      orpc.account.hasPassword.queryOptions({}),
    );
 
    const user = session?.user;
@@ -508,59 +961,43 @@ function ProfileSectionContent() {
       );
    }
 
-   const handleChangeName = () => {
-      openSheet({
-         children: (
-            <ChangeNameSheetContent
-               currentName={user.name || ""}
-               onClose={closeSheet}
-            />
-         ),
-      });
-   };
-
-   const handleChangeEmail = () => {
-      openSheet({
-         children: (
-            <ChangeEmailSheetContent
-               currentEmail={user.email}
-               onClose={closeSheet}
-            />
-         ),
-      });
-   };
-
    return (
-      <TooltipProvider>
-         <div className="space-y-6">
-            <div>
-               <h1 className="text-2xl font-semibold font-serif">Perfil</h1>
-               <p className="text-sm text-muted-foreground mt-1">
-                  Gerencie suas informações pessoais e resumo da conta.
-               </p>
-            </div>
-
-            <ProfileCard
-               onChangeEmail={handleChangeEmail}
-               onChangeName={handleChangeName}
-               user={{
-                  name: user.name,
-                  email: user.email,
-                  image: user.image,
-                  emailVerified: user.emailVerified,
-               }}
-            />
-
-            <AccountSummarySection
-               user={{
-                  name: user.name,
-                  email: user.email,
-                  image: user.image,
-                  createdAt: user.createdAt,
-               }}
-            />
+      <div className="space-y-8">
+         <div>
+            <h1 className="text-2xl font-semibold font-serif">Perfil</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+               Gerencie suas informações pessoais.
+            </p>
          </div>
-      </TooltipProvider>
+
+         <AvatarUploadSection
+            currentImage={user.image ?? null}
+            name={user.name}
+         />
+
+         <Separator />
+
+         <ProfileNameSection currentName={user.name || ""} />
+
+         <Separator />
+
+         <ProfileEmailSection
+            currentEmail={user.email}
+            emailVerified={user.emailVerified}
+         />
+
+         <Separator />
+
+         <ProfilePasswordSection hasPassword={passwordStatus.hasPassword} />
+
+         <Separator />
+
+         <TwoFactorSection twoFactorEnabled={user.twoFactorEnabled ?? false} />
+
+         <Separator />
+
+         <PasskeysSection />
+      </div>
    );
 }
 

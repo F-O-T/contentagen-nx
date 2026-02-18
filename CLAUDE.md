@@ -340,6 +340,49 @@ authClient.organization.setActiveTeam({ teamId })
 
 Read-only org data (members list, active org with subscription) uses oRPC (`orpc.organization.*`) since those enrich with DB data (plans, credits, etc.).
 
+**Client-side authClient usage rules:**
+- **NEVER** wrap `authClient` calls inside `useMutation` — call them directly
+- Most authClient calls live inside TanStack Form's `onSubmit` handler
+- For loading state use `useTransition` — NOT `useState<boolean>`
+- `startTransition(async () => { ... })` wraps the async authClient call (React 19 supports async transitions)
+- `isPending` from `useTransition` drives button `disabled` and spinner
+
+```typescript
+// ✅ Correct — TanStack Form + useTransition
+const [isPending, startTransition] = useTransition();
+
+const form = useForm({
+   defaultValues: { name: "" },
+   onSubmit: async ({ value }) => {
+      const { error } = await authClient.updateUser({ name: value.name });
+      if (error) { toast.error(error.message ?? "Erro"); return; }
+      toast.success("Salvo!");
+   },
+   validators: { onBlur: schema },
+});
+
+const handleSubmit = useCallback((e: FormEvent) => {
+   e.preventDefault();
+   e.stopPropagation();
+   startTransition(async () => { await form.handleSubmit(); });
+}, [form, startTransition]);
+
+// Button uses isPending + form.Subscribe for canSubmit
+<form.Subscribe>
+   {(formState) => (
+      <Button disabled={!formState.canSubmit || isPending} type="submit">
+         {isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
+         Salvar
+      </Button>
+   )}
+</form.Subscribe>
+
+// ❌ Wrong — never wrap authClient in useMutation
+const mutation = useMutation({ mutationFn: () => authClient.updateUser({ name }) });
+```
+
+For simple button actions (no form): `startTransition(async () => { await authClient.method(...) })` directly in the onClick handler.
+
 ---
 
 ## Global UI Hooks (TanStack Store)
