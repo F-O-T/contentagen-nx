@@ -9,7 +9,7 @@ import {
    SelectTrigger,
    SelectValue,
 } from "@packages/ui/components/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { DateRange } from "react-day-picker";
 
 function CalendarDropdown({
@@ -78,6 +78,14 @@ export function DateRangePicker({
          ? { from: selectedRange.from, to: selectedRange.to }
          : undefined,
    );
+
+   useEffect(() => {
+      setPendingRange(
+         selectedRange
+            ? { from: selectedRange.from, to: selectedRange.to }
+            : undefined,
+      );
+   }, [selectedRange]);
 
    const handlePresetClick = (value: string) => {
       setPendingRange(undefined);
