@@ -15,6 +15,53 @@ import {
    getDefaultClassNames,
 } from "react-day-picker";
 
+// Computed once at module load — avoids ~70 repeated calls per calendar render
+const defaultClassNames = getDefaultClassNames();
+
+function CalendarChevron({
+   className,
+   orientation,
+   ...props
+}: React.ComponentProps<"svg"> & { orientation?: string }) {
+   if (orientation === "left") {
+      return <ChevronLeftIcon className={cn("size-4", className)} {...props} />;
+   }
+   if (orientation === "right") {
+      return (
+         <ChevronRightIcon className={cn("size-4", className)} {...props} />
+      );
+   }
+   return <ChevronDownIcon className={cn("size-4", className)} {...props} />;
+}
+
+function CalendarRoot({
+   className,
+   rootRef,
+   ...props
+}: React.ComponentProps<"div"> & { rootRef?: React.Ref<HTMLDivElement> }) {
+   return (
+      <div
+         className={cn(className)}
+         data-slot="calendar"
+         ref={rootRef}
+         {...props}
+      />
+   );
+}
+
+function CalendarWeekNumber({
+   children,
+   ...props
+}: React.ComponentProps<"td">) {
+   return (
+      <td {...props}>
+         <div className="flex size-(--cell-size) items-center justify-center text-center">
+            {children}
+         </div>
+      </td>
+   );
+}
+
 function Calendar({
    className,
    classNames,
@@ -27,8 +74,6 @@ function Calendar({
 }: React.ComponentProps<typeof DayPicker> & {
    buttonVariant?: React.ComponentProps<typeof Button>["variant"];
 }) {
-   const defaultClassNames = getDefaultClassNames();
-
    return (
       <DayPicker
          captionLayout={captionLayout}
@@ -129,52 +174,10 @@ function Calendar({
             ...classNames,
          }}
          components={{
-            Chevron: ({ className, orientation, ...props }) => {
-               if (orientation === "left") {
-                  return (
-                     <ChevronLeftIcon
-                        className={cn("size-4", className)}
-                        {...props}
-                     />
-                  );
-               }
-
-               if (orientation === "right") {
-                  return (
-                     <ChevronRightIcon
-                        className={cn("size-4", className)}
-                        {...props}
-                     />
-                  );
-               }
-
-               return (
-                  <ChevronDownIcon
-                     className={cn("size-4", className)}
-                     {...props}
-                  />
-               );
-            },
+            Chevron: CalendarChevron,
             DayButton: CalendarDayButton,
-            Root: ({ className, rootRef, ...props }) => {
-               return (
-                  <div
-                     className={cn(className)}
-                     data-slot="calendar"
-                     ref={rootRef}
-                     {...props}
-                  />
-               );
-            },
-            WeekNumber: ({ children, ...props }) => {
-               return (
-                  <td {...props}>
-                     <div className="flex size-(--cell-size) items-center justify-center text-center">
-                        {children}
-                     </div>
-                  </td>
-               );
-            },
+            Root: CalendarRoot,
+            WeekNumber: CalendarWeekNumber,
             ...components,
          }}
          formatters={{
@@ -193,8 +196,6 @@ function CalendarDayButton({
    modifiers,
    ...props
 }: React.ComponentProps<typeof DayButton>) {
-   const defaultClassNames = getDefaultClassNames();
-
    const ref = React.useRef<HTMLButtonElement>(null);
    React.useEffect(() => {
       if (modifiers.focused) ref.current?.focus();

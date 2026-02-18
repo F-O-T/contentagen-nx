@@ -298,7 +298,7 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
                      {dateRangeLabel}
                   </Button>
                </PopoverTrigger>
-               <PopoverContent align="start" className="w-auto p-0">
+               <PopoverContent align="start" className="w-auto p-0" forceMount>
                   <DateRangePicker
                      heading="Período"
                      onPresetSelect={handleDateRangeChange}

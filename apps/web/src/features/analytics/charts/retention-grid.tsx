@@ -1,5 +1,6 @@
 import { cn } from "@packages/ui/lib/utils";
 import { ArrowDown, ArrowUp } from "lucide-react";
+import { memo } from "react";
 
 interface RetentionGridProps {
    data: Array<{ cohort: string; size: number; values: number[] }>;
@@ -20,7 +21,7 @@ function getRetentionColor(percentage: number): string {
    return "bg-muted text-muted-foreground";
 }
 
-export function RetentionGrid({
+export const RetentionGrid = memo(function RetentionGrid({
    data,
    periods,
    comparisonCohorts,
@@ -61,7 +62,6 @@ export function RetentionGrid({
                            const percentage =
                               row.size > 0 ? (value / row.size) * 100 : 0;
 
-                           // Compare with previous period cohort
                            const compValue = compRow?.values[i];
                            const compPercentage =
                               compRow &&
@@ -107,4 +107,4 @@ export function RetentionGrid({
          </table>
       </div>
    );
-}
+});

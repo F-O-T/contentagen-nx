@@ -10,6 +10,7 @@ import type {
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle } from "lucide-react";
+import { useMemo } from "react";
 import { orpc } from "@/integrations/orpc/client";
 import { FunnelChart } from "../charts/funnel-chart";
 import { RetentionGrid } from "../charts/retention-grid";
@@ -111,20 +112,37 @@ function getPlaceholderDays(dateRange: TrendsConfig["dateRange"]): number {
  * Matches PostHog behavior where charts show their skeleton even without data.
  */
 function EmptyTrendsChart({ config }: { config: TrendsConfig }) {
-   const seriesGroups = new Map<
-      number,
-      { key: string; label: string; color: string }
-   >();
-   for (const s of config.series) {
-      const idx = config.series.indexOf(s);
-      seriesGroups.set(idx, {
-         key: s.event || `series_${idx}`,
-         label: s.label || s.event || `Series ${String.fromCharCode(65 + idx)}`,
-         color: `var(--chart-${idx + 1})`,
-      });
-   }
+   const series = useMemo(() => {
+      const groups = new Map<
+         number,
+         { key: string; label: string; color: string }
+      >();
+      for (const s of config.series) {
+         const idx = config.series.indexOf(s);
+         groups.set(idx, {
+            key: s.event || `series_${idx}`,
+            label:
+               s.label || s.event || `Series ${String.fromCharCode(65 + idx)}`,
+            color: `var(--chart-${idx + 1})`,
+         });
+      }
+      return Array.from(groups.values());
+   }, [config.series]);
 
-   const series = Array.from(seriesGroups.values());
+   const placeholderData = useMemo(
+      () =>
+         generatePlaceholderDates(getPlaceholderDays(config.dateRange)).map(
+            (point) => {
+               const row: Record<string, unknown> = { ...point };
+               for (const s of series) {
+                  row[s.key] = 0;
+               }
+               return row;
+            },
+         ),
+      [config.dateRange, series],
+   );
+
    if (series.length === 0) {
       return (
          <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
@@ -132,17 +150,6 @@ function EmptyTrendsChart({ config }: { config: TrendsConfig }) {
          </div>
       );
    }
-
-   // Generate empty data points with all series set to 0
-   const placeholderData = generatePlaceholderDates(
-      getPlaceholderDays(config.dateRange),
-   ).map((point) => {
-      const row: Record<string, unknown> = { ...point };
-      for (const s of series) {
-         row[s.key] = 0;
-      }
-      return row;
-   });
 
    const xAxisFormatter = (value: string) =>
       new Date(value).toLocaleDateString("pt-BR", {
@@ -182,64 +189,61 @@ function TrendsPreview({
    config: TrendsConfig;
    data: TrendsResult;
 }) {
-   const seriesGroups = new Map<
-      number,
-      { key: string; label: string; color: string }
-   >();
-   for (const s of config.series) {
-      const idx = config.series.indexOf(s);
-      seriesGroups.set(idx, {
-         key: s.event || `series_${idx}`,
-         label: s.label || s.event || `Series ${String.fromCharCode(65 + idx)}`,
-         color: `var(--chart-${idx + 1})`,
-      });
-   }
+   const seriesGroups = useMemo(() => {
+      const groups = new Map<
+         number,
+         { key: string; label: string; color: string }
+      >();
+      for (const s of config.series) {
+         const idx = config.series.indexOf(s);
+         groups.set(idx, {
+            key: s.event || `series_${idx}`,
+            label:
+               s.label || s.event || `Series ${String.fromCharCode(65 + idx)}`,
+            color: `var(--chart-${idx + 1})`,
+         });
+      }
+      return groups;
+   }, [config.series]);
 
-   const series = Array.from(seriesGroups.values());
-   if (series.length === 0) {
-      return (
-         <div className="flex items-center justify-center h-64 text-muted-foreground">
-            Adicione um evento para ver a prévia
-         </div>
-      );
-   }
+   const series = useMemo(
+      () => Array.from(seriesGroups.values()),
+      [seriesGroups],
+   );
 
    // Transform TrendsDataPoint[] into chart-friendly format grouped by intervalStart
-   const chartDataMap = new Map<string, Record<string, unknown>>();
-   for (const point of data.data) {
-      const existing = chartDataMap.get(point.intervalStart) ?? {
-         date: point.intervalStart,
-      };
-      const seriesInfo = seriesGroups.get(point.seriesIndex);
-      if (seriesInfo) {
-         existing[seriesInfo.key] = point.value;
-      }
-      chartDataMap.set(point.intervalStart, existing);
-   }
-
-   // Add formula data if present
-   if (data.formulaData) {
-      for (const point of data.formulaData) {
+   const chartData = useMemo(() => {
+      const chartDataMap = new Map<string, Record<string, unknown>>();
+      for (const point of data.data) {
          const existing = chartDataMap.get(point.intervalStart) ?? {
             date: point.intervalStart,
          };
-         existing.__formula = point.value;
+         const seriesInfo = seriesGroups.get(point.seriesIndex);
+         if (seriesInfo) {
+            existing[seriesInfo.key] = point.value;
+         }
          chartDataMap.set(point.intervalStart, existing);
       }
-   }
 
-   const chartData = Array.from(chartDataMap.values()).sort((a, b) =>
-      String(a.date).localeCompare(String(b.date)),
-   );
+      // Add formula data if present
+      if (data.formulaData) {
+         for (const point of data.formulaData) {
+            const existing = chartDataMap.get(point.intervalStart) ?? {
+               date: point.intervalStart,
+            };
+            existing.__formula = point.value;
+            chartDataMap.set(point.intervalStart, existing);
+         }
+      }
 
-   // If we have config but no data points, show empty chart with axes
-   if (chartData.length === 0) {
-      return <EmptyTrendsChart config={config} />;
-   }
+      return Array.from(chartDataMap.values()).sort((a, b) =>
+         String(a.date).localeCompare(String(b.date)),
+      );
+   }, [data.data, data.formulaData, seriesGroups]);
 
    // Build comparison data if available
-   let comparisonData: Array<Record<string, unknown>> | undefined;
-   if (data.comparison) {
+   const comparisonData = useMemo(() => {
+      if (!data.comparison) return undefined;
       const compMap = new Map<string, Record<string, unknown>>();
       for (const point of data.comparison.data) {
          const existing = compMap.get(point.intervalStart) ?? {
@@ -251,22 +255,39 @@ function TrendsPreview({
          }
          compMap.set(point.intervalStart, existing);
       }
-      comparisonData = Array.from(compMap.values()).sort((a, b) =>
+      return Array.from(compMap.values()).sort((a, b) =>
          String(a.date).localeCompare(String(b.date)),
+      );
+   }, [data.comparison, seriesGroups]);
+
+   // Build formula series entry if formula data exists
+   const allSeries = useMemo(
+      () =>
+         data.formulaData
+            ? [
+                 ...series,
+                 {
+                    key: "__formula",
+                    label: "Formula",
+                    color: "var(--chart-6)",
+                 },
+              ]
+            : series,
+      [data.formulaData, series],
+   );
+
+   if (series.length === 0) {
+      return (
+         <div className="flex items-center justify-center h-64 text-muted-foreground">
+            Adicione um evento para ver a prévia
+         </div>
       );
    }
 
-   // Build formula series entry if formula data exists
-   const allSeries = data.formulaData
-      ? [
-           ...series,
-           {
-              key: "__formula",
-              label: "Formula",
-              color: "var(--chart-6)",
-           },
-        ]
-      : series;
+   // If we have config but no data points, show empty chart with axes
+   if (chartData.length === 0) {
+      return <EmptyTrendsChart config={config} />;
+   }
 
    const xAxisFormatter = (value: string) =>
       new Date(value).toLocaleDateString("pt-BR", {
@@ -333,6 +354,26 @@ function FunnelsPreview({
    config: FunnelsConfig;
    data: FunnelsResult;
 }) {
+   const steps = useMemo(
+      () =>
+         data.steps.map((step) => ({
+            name: step.label || step.event,
+            count: step.count,
+         })),
+      [data.steps],
+   );
+
+   const comparisonSteps = useMemo(
+      () =>
+         data.comparison
+            ? data.comparison.steps.map((step) => ({
+                 name: step.label || step.event,
+                 count: step.count,
+              }))
+            : undefined,
+      [data.comparison],
+   );
+
    if (config.steps.length < 2) {
       return (
          <div className="flex items-center justify-center h-64 text-muted-foreground">
@@ -340,18 +381,6 @@ function FunnelsPreview({
          </div>
       );
    }
-
-   const steps = data.steps.map((step) => ({
-      name: step.label || step.event,
-      count: step.count,
-   }));
-
-   const comparisonSteps = data.comparison
-      ? data.comparison.steps.map((step) => ({
-           name: step.label || step.event,
-           count: step.count,
-        }))
-      : undefined;
 
    return <FunnelChart comparisonSteps={comparisonSteps} steps={steps} />;
 }
@@ -363,29 +392,40 @@ function RetentionPreview({
    config: RetentionConfig;
    data: RetentionResult;
 }) {
-   const gridData = data.cohorts.map((cohort) => ({
-      cohort: cohort.cohortLabel,
-      size: cohort.cohortSize,
-      values: cohort.retentionByPeriod.map((p) => p.retained),
-   }));
+   const gridData = useMemo(
+      () =>
+         data.cohorts.map((cohort) => ({
+            cohort: cohort.cohortLabel,
+            size: cohort.cohortSize,
+            values: cohort.retentionByPeriod.map((p) => p.retained),
+         })),
+      [data.cohorts],
+   );
 
-   const periodLabels = Array.from({ length: config.totalPeriods }, (_, i) => {
+   const periodLabels = useMemo(() => {
       const label =
          config.period === "day"
             ? "Day"
             : config.period === "week"
               ? "Week"
               : "Month";
-      return `${label} ${i + 1}`;
-   });
+      return Array.from(
+         { length: config.totalPeriods },
+         (_, i) => `${label} ${i + 1}`,
+      );
+   }, [config.period, config.totalPeriods]);
 
-   const comparisonCohorts = data.comparison
-      ? data.comparison.cohorts.map((cohort) => ({
-           cohort: cohort.cohortLabel,
-           size: cohort.cohortSize,
-           values: cohort.retentionByPeriod.map((p) => p.retained),
-        }))
-      : undefined;
+   const comparisonCohorts = useMemo(
+      () =>
+         data.comparison
+            ? data.comparison.cohorts.map((cohort) => ({
+                 cohort: cohort.cohortLabel,
+                 size: cohort.cohortSize,
+                 values: cohort.retentionByPeriod.map((p) => p.retained),
+              }))
+            : undefined,
+      [data.comparison],
+   );
 
    return (
       <RetentionGrid
