@@ -20,12 +20,19 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { orpc } from "@/integrations/orpc/client";
 
-
 type FeatureRequestFormProps = {
+   defaultValues?: {
+      feature?: string;
+      problem?: string;
+      priority?: number;
+   };
    onSuccess: () => void;
 };
 
-export function FeatureRequestForm({ onSuccess }: FeatureRequestFormProps) {
+export function FeatureRequestForm({
+   defaultValues,
+   onSuccess,
+}: FeatureRequestFormProps) {
    const featureRequestSchema = z.object({
       feature: z.string().min(1, "Descreva a funcionalidade desejada."),
       problem: z.string(),
@@ -45,7 +52,11 @@ export function FeatureRequestForm({ onSuccess }: FeatureRequestFormProps) {
    );
 
    const form = useForm({
-      defaultValues: { feature: "", problem: "", priority: 0 },
+      defaultValues: {
+         feature: defaultValues?.feature ?? "",
+         problem: defaultValues?.problem ?? "",
+         priority: defaultValues?.priority ?? 0,
+      },
       onSubmit: async ({ value }) => {
          await mutation.mutateAsync({
             feature: value.feature,
@@ -154,10 +165,11 @@ export function FeatureRequestForm({ onSuccess }: FeatureRequestFormProps) {
                                     type="button"
                                  >
                                     <Star
-                                       className={`size-6 ${value <= field.state.value
-                                          ? "fill-amber-400 text-amber-400"
-                                          : "text-muted-foreground"
-                                          }`}
+                                       className={`size-6 ${
+                                          value <= field.state.value
+                                             ? "fill-amber-400 text-amber-400"
+                                             : "text-muted-foreground"
+                                       }`}
                                     />
                                  </button>
                               ))}
@@ -171,7 +183,7 @@ export function FeatureRequestForm({ onSuccess }: FeatureRequestFormProps) {
                   </form.Field>
                </FieldGroup>
 
-               <form.Subscribe >
+               <form.Subscribe>
                   {(canSubmit) => (
                      <Button
                         className="w-full"
