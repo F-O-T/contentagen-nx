@@ -8,7 +8,7 @@ import type {
    TrendsResult,
 } from "@packages/analytics/types";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { AlertCircle } from "lucide-react";
 import { useMemo } from "react";
 import { orpc } from "@/integrations/orpc/client";
@@ -22,7 +22,7 @@ interface InsightPreviewProps {
    config: InsightConfig;
 }
 
-function LoadingState() {
+export function InsightLoadingState() {
    return (
       <div className="space-y-4">
          <Skeleton className="h-4 w-1/3" />
@@ -35,13 +35,11 @@ function LoadingState() {
    );
 }
 
-function ErrorState({ error }: { error: Error }) {
+export function InsightErrorState({ error }: { error: Error }) {
    return (
-      <div className="flex flex-col items-center justify-center h-64 gap-3 text-muted-foreground">
-         <AlertCircle className="size-8 text-destructive/60" />
-         <p className="text-sm text-center max-w-xs">
-            Erro ao carregar prévia: {error.message}
-         </p>
+      <div className="flex flex-col items-center justify-center h-40 gap-2 text-muted-foreground">
+         <AlertCircle className="size-5 text-destructive/60" />
+         <p className="text-xs text-center">{error.message}</p>
       </div>
    );
 }
@@ -437,25 +435,16 @@ function RetentionPreview({
 }
 
 export function InsightPreview({ config }: InsightPreviewProps) {
-   const { data, isLoading, error } = useQuery(
+   const { data } = useSuspenseQuery(
       orpc.analytics.query.queryOptions({
          input: { config },
       }),
    );
 
-   // Show empty chart when no data instead of a generic empty state
-   const showEmptyChart = !isLoading && !error && !data;
-
    return (
       <div className="h-full">
          <div className="space-y-3">
-            {isLoading && <LoadingState />}
-            {error && <ErrorState error={error} />}
-            {showEmptyChart && config.type === "trends" && (
-               <EmptyTrendsChart config={config} />
-            )}
-            {!isLoading && !error && data && (
-               <>
+            <>
                   {config.type === "trends" && (
                      <TrendsPreview
                         config={config}
@@ -475,7 +464,6 @@ export function InsightPreview({ config }: InsightPreviewProps) {
                      />
                   )}
                </>
-            )}
          </div>
       </div>
    );

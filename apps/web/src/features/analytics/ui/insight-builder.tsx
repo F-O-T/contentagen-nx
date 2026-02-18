@@ -5,6 +5,8 @@ import type {
    TrendsConfig,
    TrendsResult,
 } from "@packages/analytics/types";
+import { ErrorBoundary } from "react-error-boundary";
+import { Suspense } from "react";
 import { Button } from "@packages/ui/components/button";
 import { Card, CardContent } from "@packages/ui/components/card";
 import { cn } from "@packages/ui/lib/utils";
@@ -12,7 +14,7 @@ import type { InsightType } from "@/features/analytics/hooks/use-insight-config"
 import { FunnelsQueryBuilder } from "./funnels-query-builder";
 import { InsightFilterBar } from "./insight-filter-bar";
 import { InsightHeader } from "./insight-header";
-import { InsightPreview } from "./insight-preview";
+import { InsightErrorState, InsightLoadingState, InsightPreview } from "./insight-preview";
 import { InsightStatusLine } from "./insight-status-line";
 import { RetentionQueryBuilder } from "./retention-query-builder";
 import { TrendsQueryBuilder } from "./trends-query-builder";
@@ -155,7 +157,11 @@ export function InsightBuilder({
                               />
                            </div>
                            <div className="min-h-[400px] p-4">
-                              <InsightPreview config={config} />
+                              <ErrorBoundary fallbackRender={({ error }) => <InsightErrorState error={error} />}>
+                                 <Suspense fallback={<InsightLoadingState />}>
+                                    <InsightPreview config={config} />
+                                 </Suspense>
+                              </ErrorBoundary>
                            </div>
                         </CardContent>
                      </Card>
@@ -207,7 +213,11 @@ export function InsightBuilder({
                               />
                            </div>
                            <div className="min-h-[400px] p-4">
-                              <InsightPreview config={config} />
+                              <ErrorBoundary fallbackRender={({ error }) => <InsightErrorState error={error} />}>
+                                 <Suspense fallback={<InsightLoadingState />}>
+                                    <InsightPreview config={config} />
+                                 </Suspense>
+                              </ErrorBoundary>
                            </div>
                         </CardContent>
                      </Card>
@@ -252,7 +262,11 @@ export function InsightBuilder({
                               />
                            </div>
                            <div className="min-h-[400px] p-4">
-                              <InsightPreview config={config} />
+                              <ErrorBoundary fallbackRender={({ error }) => <InsightErrorState error={error} />}>
+                                 <Suspense fallback={<InsightLoadingState />}>
+                                    <InsightPreview config={config} />
+                                 </Suspense>
+                              </ErrorBoundary>
                            </div>
                         </CardContent>
                      </Card>

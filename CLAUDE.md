@@ -118,6 +118,8 @@ const mutation = useMutation(
 - Wrap suspense components in `<Suspense fallback={...}>` at route/layout level
 - NEVER dynamically import hooks (`await import("@tanstack/react-query")` breaks React rules)
 
+**Global cache invalidation:** `apps/web/src/integrations/tanstack-query/root-provider.tsx` configures a `MutationCache` with a global `onSuccess` that calls `queryClient.invalidateQueries()` (no filter) after **every** successful mutation. This invalidates all active queries automatically — per-mutation `invalidateQueries` calls are only needed when you need to invalidate queries that belong to a different component tree or before the mutation resolves. Do NOT report missing per-mutation invalidations as bugs.
+
 ---
 
 ## Code Style
