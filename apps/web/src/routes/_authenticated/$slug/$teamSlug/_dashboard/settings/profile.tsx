@@ -35,7 +35,7 @@ import {
    Trash2,
    User,
 } from "lucide-react";
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
 import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
@@ -255,9 +255,10 @@ function TwoFactorSection({
       },
    });
 
-   const qrSrc = totpUri
-      ? `data:image/png;base64,${btoa(String.fromCharCode(...generateQrCode(totpUri, { size: 180 })))}`
-      : "";
+   const qrSrc = useMemo(() => {
+      if (!totpUri) return "";
+      return `data:image/png;base64,${btoa(String.fromCharCode(...generateQrCode(totpUri, { size: 180 })))}`;
+   }, [totpUri]);
 
    return (
       <section className="space-y-3">
