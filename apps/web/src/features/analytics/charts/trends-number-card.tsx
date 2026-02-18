@@ -6,6 +6,7 @@ import {
 } from "@packages/ui/components/card";
 import { cn } from "@packages/ui/lib/utils";
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { memo } from "react";
 
 interface TrendsNumberCardProps {
    value: string | number;
@@ -18,7 +19,7 @@ function formatTrendValue(value: number): string {
    return `${sign}${value.toFixed(1)}%`;
 }
 
-export function TrendsNumberCard({
+export const TrendsNumberCard = memo(function TrendsNumberCard({
    value,
    label,
    trend,
@@ -62,4 +63,4 @@ export function TrendsNumberCard({
          </CardContent>
       </Card>
    );
-}
+});

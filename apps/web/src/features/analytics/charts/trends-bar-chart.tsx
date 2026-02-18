@@ -6,6 +6,7 @@ import {
    ChartTooltip,
    ChartTooltipContent,
 } from "@packages/ui/components/chart";
+import { memo, useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 interface TrendsBarChartProps {
@@ -17,7 +18,7 @@ interface TrendsBarChartProps {
    comparisonData?: Array<Record<string, unknown>>;
 }
 
-export function TrendsBarChart({
+export const TrendsBarChart = memo(function TrendsBarChart({
    data,
    series,
    xAxisKey,
@@ -25,24 +26,25 @@ export function TrendsBarChart({
    xAxisFormatter,
    comparisonData,
 }: TrendsBarChartProps) {
-   const chartConfig: ChartConfig = {};
-   for (const s of series) {
-      chartConfig[s.key] = { label: s.label, color: s.color };
-   }
-
-   if (comparisonData) {
+   const chartConfig = useMemo(() => {
+      const config: ChartConfig = {};
       for (const s of series) {
-         chartConfig[`${s.key}_comp`] = {
-            label: `${s.label} (prev)`,
-            color: s.color,
-         };
+         config[s.key] = { label: s.label, color: s.color };
       }
-   }
+      if (comparisonData) {
+         for (const s of series) {
+            config[`${s.key}_comp`] = {
+               label: `${s.label} (prev)`,
+               color: s.color,
+            };
+         }
+      }
+      return config;
+   }, [series, comparisonData]);
 
-   // Merge comparison data into main data by index alignment
-   let mergedData = data;
-   if (comparisonData) {
-      mergedData = data.map((point, i) => {
+   const mergedData = useMemo(() => {
+      if (!comparisonData) return data;
+      return data.map((point, i) => {
          const compPoint = comparisonData[i];
          if (!compPoint) return point;
          const merged: Record<string, unknown> = { ...point };
@@ -53,7 +55,7 @@ export function TrendsBarChart({
          }
          return merged;
       });
-   }
+   }, [data, comparisonData, series]);
 
    return (
       <ChartContainer
@@ -108,4 +110,4 @@ export function TrendsBarChart({
          </BarChart>
       </ChartContainer>
    );
-}
+});

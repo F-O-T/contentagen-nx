@@ -1,4 +1,5 @@
 import { cn } from "@packages/ui/lib/utils";
+import { memo } from "react";
 
 interface FunnelStep {
    name: string;
@@ -11,7 +12,10 @@ interface FunnelChartProps {
    comparisonSteps?: FunnelStep[];
 }
 
-export function FunnelChart({ steps, comparisonSteps }: FunnelChartProps) {
+export const FunnelChart = memo(function FunnelChart({
+   steps,
+   comparisonSteps,
+}: FunnelChartProps) {
    if (steps.length === 0) return null;
    const maxCount = Math.max(steps[0].count, comparisonSteps?.[0]?.count ?? 0);
 
@@ -102,4 +106,4 @@ export function FunnelChart({ steps, comparisonSteps }: FunnelChartProps) {
          })}
       </div>
    );
-}
+});

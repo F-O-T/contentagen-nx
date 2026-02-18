@@ -256,7 +256,12 @@ export function DashboardFilterPopover({
             </Button>
          </PopoverTrigger>
 
-         <PopoverContent align="start" className="w-[560px] p-0" sideOffset={6}>
+         <PopoverContent
+            align="start"
+            className="w-[560px] p-0"
+            forceMount
+            sideOffset={6}
+         >
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2.5 border-b">
                <span className="text-sm font-medium">Filtros do dashboard</span>

@@ -1,0 +1,149 @@
+"use client";
+
+import { Button } from "@packages/ui/components/button";
+import { Calendar } from "@packages/ui/components/calendar";
+import {
+   Select,
+   SelectContent,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from "@packages/ui/components/select";
+import { useEffect, useState } from "react";
+import type { DateRange } from "react-day-picker";
+
+function CalendarDropdown({
+   value,
+   onChange,
+   options,
+   components: _components,
+   classNames: _classNames,
+}: React.SelectHTMLAttributes<HTMLSelectElement> & {
+   components?: unknown;
+   classNames?: unknown;
+   options?: { value: number; label: string; disabled?: boolean }[];
+}) {
+   return (
+      <Select
+         onValueChange={(v) => {
+            const event = {
+               target: { value: v },
+            } as React.ChangeEvent<HTMLSelectElement>;
+            onChange?.(event);
+         }}
+         value={String(value)}
+      >
+         <SelectTrigger className="h-7 w-auto min-w-[70px] border-input text-sm font-medium gap-1 focus:ring-0 focus:ring-offset-0 shadow-none">
+            <SelectValue />
+         </SelectTrigger>
+         <SelectContent>
+            {options?.map((opt) => (
+               <SelectItem
+                  disabled={opt.disabled}
+                  key={opt.value}
+                  value={String(opt.value)}
+               >
+                  {opt.label}
+               </SelectItem>
+            ))}
+         </SelectContent>
+      </Select>
+   );
+}
+
+export interface DateRangePreset {
+   label: string;
+   value: string;
+}
+
+export interface DateRangePickerProps {
+   presets: readonly DateRangePreset[];
+   selectedPreset?: string | null;
+   selectedRange?: { from: Date; to?: Date } | null;
+   onPresetSelect: (value: string) => void;
+   onRangeSelect: (range: { from: Date; to: Date }) => void;
+   heading?: string;
+}
+
+export function DateRangePicker({
+   presets,
+   selectedPreset,
+   selectedRange,
+   onPresetSelect,
+   onRangeSelect,
+   heading = "Período",
+}: DateRangePickerProps) {
+   const [pendingRange, setPendingRange] = useState<DateRange | undefined>(
+      selectedRange
+         ? { from: selectedRange.from, to: selectedRange.to }
+         : undefined,
+   );
+
+   useEffect(() => {
+      setPendingRange(
+         selectedRange
+            ? { from: selectedRange.from, to: selectedRange.to }
+            : undefined,
+      );
+   }, [selectedRange]);
+
+   const handlePresetClick = (value: string) => {
+      setPendingRange(undefined);
+      onPresetSelect(value);
+   };
+
+   const handleCalendarSelect = (range: DateRange | undefined) => {
+      setPendingRange(range);
+      if (range?.from && range?.to) {
+         onRangeSelect({ from: range.from, to: range.to });
+      }
+   };
+
+   const calendarSelected: DateRange | undefined =
+      pendingRange ??
+      (selectedRange
+         ? { from: selectedRange.from, to: selectedRange.to }
+         : undefined);
+
+   return (
+      <div className="flex">
+         {/* Left: preset list */}
+         <div className="flex flex-col gap-1 p-2 min-w-[160px] border-r">
+            {heading && (
+               <p className="text-xs font-medium text-muted-foreground px-2 pb-1 pt-0.5 uppercase tracking-wide">
+                  {heading}
+               </p>
+            )}
+            {presets.map((preset) => {
+               const isActive =
+                  selectedPreset === preset.value && !pendingRange?.from;
+               return (
+                  <Button
+                     className="justify-start text-sm font-normal"
+                     key={preset.value}
+                     onClick={() => handlePresetClick(preset.value)}
+                     size="sm"
+                     variant={isActive ? "default" : "ghost"}
+                  >
+                     {preset.label}
+                  </Button>
+               );
+            })}
+         </div>
+
+         {/* Right: dual-month calendar */}
+         <div className="p-2">
+            <Calendar
+               captionLayout="dropdown"
+               components={{ Dropdown: CalendarDropdown }}
+               fromYear={2020}
+               mode="range"
+               numberOfMonths={2}
+               onSelect={handleCalendarSelect}
+               selected={calendarSelected}
+               toYear={new Date().getFullYear()}
+            />
+         </div>
+      </div>
+   );
+}

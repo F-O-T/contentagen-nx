@@ -6,6 +6,7 @@ import {
    ChartTooltip,
    ChartTooltipContent,
 } from "@packages/ui/components/chart";
+import { memo, useMemo } from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 interface TrendsLineChartProps {
@@ -18,7 +19,7 @@ interface TrendsLineChartProps {
    formulaData?: Array<{ date: string; value: number }>;
 }
 
-export function TrendsLineChart({
+export const TrendsLineChart = memo(function TrendsLineChart({
    data,
    series,
    xAxisKey,
@@ -27,53 +28,55 @@ export function TrendsLineChart({
    comparisonData,
    formulaData,
 }: TrendsLineChartProps) {
-   const chartConfig: ChartConfig = {};
-   for (const s of series) {
-      chartConfig[s.key] = { label: s.label, color: s.color };
-   }
-
-   // Add comparison entries to config
-   if (comparisonData) {
+   const chartConfig = useMemo(() => {
+      const config: ChartConfig = {};
       for (const s of series) {
-         chartConfig[`${s.key}_comp`] = {
-            label: `${s.label} (prev)`,
-            color: s.color,
+         config[s.key] = { label: s.label, color: s.color };
+      }
+      if (comparisonData) {
+         for (const s of series) {
+            config[`${s.key}_comp`] = {
+               label: `${s.label} (prev)`,
+               color: s.color,
+            };
+         }
+      }
+      if (formulaData) {
+         config.__formula_line = {
+            label: "Formula",
+            color: "var(--chart-6)",
          };
       }
-   }
+      return config;
+   }, [series, comparisonData, formulaData]);
 
-   // Add formula entry to config
-   if (formulaData) {
-      chartConfig.__formula_line = {
-         label: "Formula",
-         color: "var(--chart-6)",
-      };
-   }
+   const mergedData = useMemo(() => {
+      let merged = data;
 
-   // Merge comparison data into main data by index alignment
-   let mergedData = data;
-   if (comparisonData) {
-      mergedData = data.map((point, i) => {
-         const compPoint = comparisonData[i];
-         if (!compPoint) return point;
-         const merged: Record<string, unknown> = { ...point };
-         for (const s of series) {
-            if (compPoint[s.key] !== undefined) {
-               merged[`${s.key}_comp`] = compPoint[s.key];
+      if (comparisonData) {
+         merged = data.map((point, i) => {
+            const compPoint = comparisonData[i];
+            if (!compPoint) return point;
+            const result: Record<string, unknown> = { ...point };
+            for (const s of series) {
+               if (compPoint[s.key] !== undefined) {
+                  result[`${s.key}_comp`] = compPoint[s.key];
+               }
             }
-         }
-         return merged;
-      });
-   }
+            return result;
+         });
+      }
 
-   // Merge formula data
-   if (formulaData) {
-      const formulaMap = new Map(formulaData.map((p) => [p.date, p.value]));
-      mergedData = mergedData.map((point) => ({
-         ...point,
-         __formula_line: formulaMap.get(String(point[xAxisKey])) ?? null,
-      }));
-   }
+      if (formulaData) {
+         const formulaMap = new Map(formulaData.map((p) => [p.date, p.value]));
+         merged = merged.map((point) => ({
+            ...point,
+            __formula_line: formulaMap.get(String(point[xAxisKey])) ?? null,
+         }));
+      }
+
+      return merged;
+   }, [data, comparisonData, formulaData, series, xAxisKey]);
 
    return (
       <ChartContainer
@@ -158,4 +161,4 @@ export function TrendsLineChart({
          </LineChart>
       </ChartContainer>
    );
-}
+});
