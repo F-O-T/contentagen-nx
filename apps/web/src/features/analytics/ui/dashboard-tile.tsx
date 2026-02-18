@@ -346,7 +346,7 @@ function formatDateRange(value: string): string {
          const parts = value.split(",");
          if (parts.length === 2) {
             const fmt = (s: string) =>
-               new Date(`${s.trim()}T00:00:00Z`).toLocaleDateString("pt-BR", {
+               new Date(`${s.trim()}T00:00:00`).toLocaleDateString("pt-BR", {
                   day: "numeric",
                   month: "short",
                   year: "numeric",

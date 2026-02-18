@@ -257,7 +257,7 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
          const parts = dashboard.globalDateRange.value.split(",");
          if (parts.length === 2) {
             const fmt = (s: string) =>
-               new Date(`${s.trim()}T00:00:00Z`).toLocaleDateString("pt-BR", {
+               new Date(`${s.trim()}T00:00:00`).toLocaleDateString("pt-BR", {
                   day: "numeric",
                   month: "short",
                });
@@ -275,8 +275,8 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
       const parts = dashboard.globalDateRange.value.split(",");
       if (parts.length !== 2) return null;
       return {
-         from: new Date(`${parts[0].trim()}T00:00:00Z`),
-         to: new Date(`${parts[1].trim()}T23:59:59Z`),
+         from: new Date(`${parts[0].trim()}T00:00:00`),
+         to: new Date(`${parts[1].trim()}T23:59:59`),
       };
    }, [dashboard.globalDateRange]);
 
