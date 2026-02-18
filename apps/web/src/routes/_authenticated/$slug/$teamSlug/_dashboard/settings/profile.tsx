@@ -26,12 +26,13 @@ import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { getInitials } from "@packages/utils/text";
 import { generateQrCode } from "@f-o-t/qrcode";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
    Calendar,
    Loader2,
    ShieldCheck,
+   Trash2,
    User,
 } from "lucide-react";
 import { Suspense, useState } from "react";
@@ -439,6 +440,117 @@ function TwoFactorSection({
 }
 
 // ============================================
+// Passkeys Section
+// ============================================
+
+function PasskeysSection() {
+   const queryClient = useQueryClient();
+
+   const { data: passkeys = [] } = useQuery({
+      queryKey: ["passkeys"],
+      queryFn: async () => {
+         const result = await authClient.passkey.listUserPasskeys();
+         return result.data ?? [];
+      },
+   });
+
+   const addMutation = useMutation({
+      mutationFn: async () => {
+         const result = await authClient.passkey.addPasskey();
+         if (result?.error) throw new Error(result.error.message);
+         return result?.data;
+      },
+      onSuccess: () => {
+         toast.success("Passkey adicionada com sucesso!");
+         queryClient.invalidateQueries({ queryKey: ["passkeys"] });
+      },
+      onError: (error) => {
+         toast.error(
+            error instanceof Error ? error.message : "Erro ao adicionar passkey",
+         );
+      },
+   });
+
+   const deleteMutation = useMutation({
+      mutationFn: async (id: string) => {
+         const result = await authClient.passkey.deletePasskey({ id });
+         if (result?.error) throw new Error(result.error.message);
+         return result?.data;
+      },
+      onSuccess: () => {
+         toast.success("Passkey removida!");
+         queryClient.invalidateQueries({ queryKey: ["passkeys"] });
+      },
+      onError: (error) => {
+         toast.error(
+            error instanceof Error ? error.message : "Erro ao remover passkey",
+         );
+      },
+   });
+
+   return (
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Passkeys</h2>
+            <p className="text-sm text-muted-foreground">
+               Gerencie suas passkeys para login sem senha usando biometria ou chave de segurança.
+            </p>
+         </div>
+
+         <div className="max-w-md space-y-3">
+            {passkeys.length === 0 ? (
+               <p className="text-sm text-muted-foreground">
+                  Nenhuma passkey cadastrada.
+               </p>
+            ) : (
+               <div className="space-y-2">
+                  {passkeys.map((passkey: (typeof passkeys)[number]) => (
+                     <div
+                        key={passkey.id}
+                        className="flex items-center justify-between p-3 border rounded-lg bg-muted/30"
+                     >
+                        <div className="min-w-0">
+                           <p className="text-sm font-medium truncate">
+                              {passkey.name || "Passkey"}
+                           </p>
+                           {passkey.createdAt && (
+                              <p className="text-xs text-muted-foreground">
+                                 Adicionada em{" "}
+                                 {new Date(passkey.createdAt).toLocaleDateString("pt-BR")}
+                              </p>
+                           )}
+                        </div>
+                        <Button
+                           disabled={deleteMutation.isPending}
+                           onClick={() => deleteMutation.mutate(passkey.id)}
+                           size="icon"
+                           variant="ghost"
+                           className="text-destructive hover:text-destructive shrink-0"
+                        >
+                           <Trash2 className="size-4" />
+                        </Button>
+                     </div>
+                  ))}
+               </div>
+            )}
+
+            <Button
+               disabled={addMutation.isPending}
+               onClick={() => addMutation.mutate()}
+               size="sm"
+               variant="outline"
+            >
+               {addMutation.isPending && (
+                  <Loader2 className="size-4 mr-2 animate-spin" />
+               )}
+               Adicionar passkey
+            </Button>
+         </div>
+      </section>
+   );
+}
+
+// ============================================
 // Skeleton
 // ============================================
 
@@ -488,6 +600,12 @@ function ProfileSectionSkeleton() {
             <Skeleton className="h-6 w-56" />
             <Skeleton className="h-4 w-80" />
             <Skeleton className="h-10 w-full max-w-md" />
+         </div>
+         <Skeleton className="h-px w-full" />
+         <div className="space-y-3">
+            <Skeleton className="h-6 w-28" />
+            <Skeleton className="h-4 w-80" />
+            <Skeleton className="h-8 w-40" />
          </div>
       </div>
    );
@@ -892,6 +1010,10 @@ function ProfileSectionContent() {
          <Separator />
 
          <TwoFactorSection twoFactorEnabled={user.twoFactorEnabled ?? false} />
+
+         <Separator />
+
+         <PasskeysSection />
       </div>
    );
 }
