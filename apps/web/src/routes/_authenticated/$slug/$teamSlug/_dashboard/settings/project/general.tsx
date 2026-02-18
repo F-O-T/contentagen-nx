@@ -119,7 +119,8 @@ function ProjectGeneralErrorFallback({
 function ProjectGeneralContent() {
    const { openAlertDialog } = useAlertDialog();
    const queryClient = useQueryClient();
-   const { teamId } = Route.useParams();
+   const { currentTeam } = Route.useRouteContext();
+   const teamId = currentTeam.id;
 
    const { data: teamData } = useSuspenseQuery(
       orpc.team.get.queryOptions({ input: { teamId } }),
