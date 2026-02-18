@@ -8,8 +8,7 @@ import type {
    TrendsResult,
 } from "@packages/analytics/types";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { useQuery } from "@tanstack/react-query";
-import { AlertCircle } from "lucide-react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { orpc } from "@/integrations/orpc/client";
 import { FunnelChart } from "../charts/funnel-chart";
@@ -22,7 +21,7 @@ interface InsightPreviewProps {
    config: InsightConfig;
 }
 
-function LoadingState() {
+export function InsightLoadingState() {
    return (
       <div className="space-y-4">
          <Skeleton className="h-4 w-1/3" />
@@ -31,17 +30,6 @@ function LoadingState() {
             <Skeleton className="h-3 w-20" />
             <Skeleton className="h-3 w-20" />
          </div>
-      </div>
-   );
-}
-
-function ErrorState({ error }: { error: Error }) {
-   return (
-      <div className="flex flex-col items-center justify-center h-64 gap-3 text-muted-foreground">
-         <AlertCircle className="size-8 text-destructive/60" />
-         <p className="text-sm text-center max-w-xs">
-            Erro ao carregar prévia: {error.message}
-         </p>
       </div>
    );
 }
@@ -437,24 +425,19 @@ function RetentionPreview({
 }
 
 export function InsightPreview({ config }: InsightPreviewProps) {
-   const { data, isFetching, error } = useQuery(
+   const { data } = useSuspenseQuery(
       orpc.analytics.query.queryOptions({
          input: { config },
       }),
    );
 
-   // Show empty chart when no data instead of a generic empty state
-   const showEmptyChart = !isFetching && !error && !data;
-
    return (
       <div className="h-full">
          <div className="space-y-3">
-            {isFetching && <LoadingState />}
-            {!isFetching && error && <ErrorState error={error} />}
-            {showEmptyChart && config.type === "trends" && (
+            {!data && config.type === "trends" && (
                <EmptyTrendsChart config={config} />
             )}
-            {!isFetching && !error && data && (
+            {data && (
                <>
                   {config.type === "trends" && (
                      <TrendsPreview
