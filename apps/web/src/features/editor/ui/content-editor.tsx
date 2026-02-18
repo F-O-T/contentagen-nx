@@ -40,6 +40,7 @@ import { EditPlugin } from "../plugins/edit-plugin";
 import { FIMPlugin } from "../plugins/fim-plugin";
 import { FloatingToolbarPlugin } from "../plugins/floating-toolbar";
 import { MarkdownPastePlugin } from "../plugins/markdown-paste";
+import { SelectionContextPlugin } from "../plugins/selection-context-plugin";
 import type {
    EditChunk,
    EditorConfig,
@@ -308,6 +309,7 @@ export function ContentEditor({
             <InitialContentPlugin markdown={config.initialContent ?? ""} />
 
             {/* Custom plugins */}
+            <SelectionContextPlugin />
             <MarkdownPastePlugin enabled={editable} />
             <FloatingToolbarPlugin
                containerRef={containerRef}

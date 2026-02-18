@@ -263,3 +263,14 @@ html:active-view-transition-type(slide-right) {
 .ghost-text::selection {
    background: transparent !important;
 }
+
+/* AI inserted text highlight animation */
+@keyframes ai-insert-flash {
+  0%   { background-color: hsl(142 76% 36% / 0.25); }
+  100% { background-color: transparent; }
+}
+
+.ai-inserted {
+  animation: ai-insert-flash 1.5s ease-out forwards;
+  border-radius: 2px;
+}

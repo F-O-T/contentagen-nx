@@ -1,7 +1,7 @@
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { FlaskConical } from "lucide-react";
-import { useSheet } from "@/hooks/use-sheet";
+import { useCredenza } from "@/hooks/use-credenza";
 import { FeatureFeedbackForm } from "@/features/feedback/ui/feature-feedback-form";
 
 export type EarlyAccessBannerTemplate = {
@@ -17,23 +17,15 @@ export type EarlyAccessBannerProps = {
 };
 
 export function EarlyAccessBanner({ template }: EarlyAccessBannerProps) {
-   const { openSheet, closeSheet } = useSheet();
+   const { openCredenza, closeCredenza } = useCredenza();
 
    const handleCtaClick = () => {
-      openSheet({
+      openCredenza({
          children: (
-            <div className="space-y-4">
-               <div>
-                  <h3 className="text-lg font-semibold">Feedback</h3>
-                  <p className="text-sm text-muted-foreground">
-                     {template.message}
-                  </p>
-               </div>
-               <FeatureFeedbackForm
-                  featureName={template.badgeLabel}
-                  onSuccess={closeSheet}
-               />
-            </div>
+            <FeatureFeedbackForm
+               featureName={template.badgeLabel}
+               onSuccess={closeCredenza}
+            />
          ),
       });
    };

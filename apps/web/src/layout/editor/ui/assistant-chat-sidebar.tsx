@@ -8,15 +8,32 @@
 
 import {
    ComposerPrimitive,
+   MessagePartPrimitive,
    MessagePrimitive,
    ThreadPrimitive,
 } from "@assistant-ui/react";
+import type { TextMessagePartProps, ToolCallMessagePartProps } from "@assistant-ui/react";
 import { Button } from "@packages/ui/components/button";
 import { cn } from "@packages/ui/lib/utils";
 import { ArrowDown, GripVertical, Loader2, Send, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+   isEditorTool,
+   isFrontmatterTool,
+   isResearchTool,
+   isSEOTool,
+   isAgentTool,
+} from "@/features/content/lib/assistant-runtime-adapter";
+import { EditorToolCard } from "./chat/tool-cards/editor-tool-card";
+import { FrontmatterToolCard } from "./chat/tool-cards/frontmatter-tool-card";
+import { ResearchToolCard } from "./chat/tool-cards/research-tool-card";
+import { SeoToolCard } from "./chat/tool-cards/seo-tool-card";
+import { AgentDelegationCard } from "./chat/tool-cards/agent-delegation-card";
+import type { ToolStatus } from "./chat/tool-cards/tool-card-base";
 import { setChatSidebarWidth, useChatSidebar } from "../hooks/use-editor-state";
-import { TOOL_UIS } from "../lib/tool-ui-registry";
+import { useStore } from "@tanstack/react-store";
+import { editorContextStore } from "../stores/editor-context-store";
+import { EnhancedComposer } from "./enhanced-composer";
 
 // ============================================================================
 // Types
@@ -40,8 +57,66 @@ interface AssistantChatSidebarProps {
 }
 
 // ============================================================================
+// Tool Override Component
+// ============================================================================
+
+/**
+ * Catches ALL tool calls via MessagePrimitive.Content's components.tools.Override.
+ * Routes each call to the appropriate card component based on tool category.
+ */
+function ToolCallOverride({ toolName, args, result, status }: ToolCallMessagePartProps) {
+   const toolStatus: ToolStatus =
+      status.type === "complete" ? "complete"
+      : status.type === "running" ? "running"
+      : "error";
+   const resolvedArgs = args as Record<string, unknown>;
+
+   if (isEditorTool(toolName))
+      return <EditorToolCard toolName={toolName} args={resolvedArgs} result={result} status={toolStatus} />;
+   if (isFrontmatterTool(toolName))
+      return <FrontmatterToolCard toolName={toolName} args={resolvedArgs} result={result} status={toolStatus} />;
+   if (isResearchTool(toolName))
+      return <ResearchToolCard toolName={toolName} args={resolvedArgs} result={result} status={toolStatus} />;
+   if (isSEOTool(toolName))
+      return <SeoToolCard toolName={toolName} args={resolvedArgs} result={result} status={toolStatus} />;
+   if (isAgentTool(toolName))
+      return <AgentDelegationCard toolName={toolName} args={resolvedArgs} result={result} status={toolStatus} />;
+
+   return (
+      <div className="p-3 rounded-lg border bg-card text-card-foreground shadow-sm">
+         <div className="font-medium text-sm mb-2">{toolName}</div>
+         <pre className="text-xs text-muted-foreground p-2 rounded bg-muted overflow-x-auto">
+            {JSON.stringify(args, null, 2)}
+         </pre>
+         {result !== undefined && (
+            <pre className="mt-2 text-xs text-muted-foreground p-2 rounded bg-muted overflow-x-auto">
+               {JSON.stringify(result, null, 2)}
+            </pre>
+         )}
+      </div>
+   );
+}
+
+// ============================================================================
 // Message Components
 // ============================================================================
+
+/**
+ * Renders text content parts inside a bubble
+ */
+function TextBubble({ status }: TextMessagePartProps) {
+   const isStreaming = status.type === "running";
+   return (
+      <div
+         className={cn(
+            "rounded-lg px-3 py-2 text-sm bg-muted whitespace-pre-wrap break-words max-w-full",
+            isStreaming && "ring-2 ring-primary/20 animate-pulse transition-all",
+         )}
+      >
+         <MessagePartPrimitive.Text smooth />
+      </div>
+   );
+}
 
 /**
  * Custom user message component
@@ -61,22 +136,8 @@ function CustomUserMessage() {
 }
 
 /**
- * Animated typing indicator (three dots)
- */
-function TypingIndicator() {
-   return (
-      <div className="flex gap-1 items-center h-5">
-         <span className="size-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:-0.3s]" />
-         <span className="size-1.5 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:-0.15s]" />
-         <span className="size-1.5 rounded-full bg-muted-foreground/60 animate-bounce" />
-      </div>
-   );
-}
-
-/**
  * Custom assistant message component
- * Uses MessagePrimitive.Content to render text and tool calls
- * Tool calls are automatically rendered by registered TOOL_UIS
+ * Text content renders in its own bubble; tool calls render standalone.
  */
 function CustomAssistantMessage() {
    return (
@@ -84,8 +145,8 @@ function CustomAssistantMessage() {
          <div className="flex-shrink-0 size-6 rounded-full flex items-center justify-center text-xs bg-muted">
             <Sparkles className="size-3" />
          </div>
-         <div className="max-w-[85%] space-y-2">
-            {/* Show generation status if this is the last message and thread is running */}
+         <div className="flex-1 min-w-0 space-y-2">
+            {/* Loading state when no content yet */}
             <MessagePrimitive.If last>
                <ThreadPrimitive.If running>
                   <MessagePrimitive.If hasContent={false}>
@@ -97,35 +158,13 @@ function CustomAssistantMessage() {
                </ThreadPrimitive.If>
             </MessagePrimitive.If>
 
-            {/* Message content */}
-            <MessagePrimitive.If last>
-               <ThreadPrimitive.If running>
-                  <MessagePrimitive.If hasContent={false}>
-                     <div className="rounded-lg px-3 py-2 text-sm bg-muted ring-2 ring-primary/20 animate-pulse">
-                        <TypingIndicator />
-                     </div>
-                  </MessagePrimitive.If>
-                  <MessagePrimitive.If hasContent>
-                     <div className="rounded-lg px-3 py-2 text-sm bg-muted ring-2 ring-primary/20 animate-pulse transition-all">
-                        <MessagePrimitive.Content />
-                     </div>
-                  </MessagePrimitive.If>
-               </ThreadPrimitive.If>
-            </MessagePrimitive.If>
-
-            {/* Show normal content when not generating or not last message */}
-            <MessagePrimitive.If last={false}>
-               <div className="rounded-lg px-3 py-2 text-sm bg-muted">
-                  <MessagePrimitive.Content />
-               </div>
-            </MessagePrimitive.If>
-            <MessagePrimitive.If last>
-               <ThreadPrimitive.If running={false}>
-                  <div className="rounded-lg px-3 py-2 text-sm bg-muted">
-                     <MessagePrimitive.Content />
-                  </div>
-               </ThreadPrimitive.If>
-            </MessagePrimitive.If>
+            {/* Message parts — text in bubble, tools standalone */}
+            <MessagePrimitive.Content
+               components={{
+                  Text: TextBubble,
+                  tools: { Override: ToolCallOverride },
+               }}
+            />
          </div>
       </MessagePrimitive.Root>
    );
@@ -141,6 +180,7 @@ export function AssistantChatSidebar({
    className,
 }: AssistantChatSidebarProps) {
    const { open, width } = useChatSidebar();
+   const selectedText = useStore(editorContextStore, (s) => s.selectedText);
 
    // Resize state
    const [isResizing, setIsResizing] = useState(false);
@@ -203,11 +243,6 @@ export function AssistantChatSidebar({
 
          {/* Thread with messages */}
          <ThreadPrimitive.Root className="flex-1 flex flex-col min-h-0">
-            {/* Register tool UIs */}
-            {TOOL_UIS.map((ToolUI, index) => (
-               <ToolUI key={index} />
-            ))}
-
             <ThreadPrimitive.Viewport className="flex-1 overflow-y-auto">
                <ThreadPrimitive.Empty>
                   <EmptyState />
@@ -247,19 +282,20 @@ export function AssistantChatSidebar({
             </div>
          </ThreadPrimitive.If>
 
+         {/* Selection context banner */}
+         {selectedText && (
+            <div className="flex items-center gap-2 px-3 py-1.5 text-xs bg-primary/5 border-t border-primary/20 text-primary">
+               <span className="size-1.5 rounded-full bg-primary shrink-0" />
+               <span className="flex-1 truncate">
+                  Usando seleção: "{selectedText.slice(0, 50)}{selectedText.length > 50 ? "…" : ""}"
+               </span>
+            </div>
+         )}
+
          {/* Composer */}
          <ComposerPrimitive.Root className="p-2 border-t">
             <div className="flex gap-2">
-               <ComposerPrimitive.Input
-                  className={cn(
-                     "flex-1 px-3 py-2 text-sm rounded-lg resize-none",
-                     "bg-muted border-none",
-                     "focus:outline-none focus:ring-2 focus:ring-ring",
-                     "min-h-[60px] max-h-[120px]",
-                     "disabled:opacity-50 disabled:cursor-not-allowed",
-                  )}
-                  placeholder="Como posso ajudar com seu conteudo?"
-               />
+               <EnhancedComposer className="flex-1" />
                <ComposerPrimitive.Send asChild>
                   <Button className="self-end h-10 w-10" size="icon">
                      <ThreadPrimitive.If running>

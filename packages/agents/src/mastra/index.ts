@@ -1,12 +1,13 @@
 import { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
+import { PostgresStore } from "@mastra/pg";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
+import { env as serverEnv } from "@packages/environment/server";
 import type { ModelId } from "../models";
 import { pgVectorStore } from "../utils";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
-import { orchestratorAgent } from "./agents/orchestrator-agent";
-import { writerAgent } from "./agents/writer-agent";
+import { unifiedContentAgent } from "./agents/unified-content-agent";
 
 /**
  * Re-export RequestContext so consumers don't need to depend on @mastra/core directly.
@@ -22,14 +23,22 @@ export type CustomRequestContext = {
    writerInstructions?: InstructionMemoryItem[];
 };
 
+const mastraStorage = new PostgresStore({
+   id: "mastra-storage",
+   connectionString: serverEnv.PG_VECTOR_URL,
+});
+
 export const mastra: Mastra = new Mastra({
    agents: {
-      orchestratorAgent,
-      writerAgent,
+      // Unified content agent (combines all workflows)
+      unifiedContent: unifiedContentAgent,
+
+      // Specialized agents (kept separate)
       fimAgent,
       inlineEditAgent,
    },
    vectors: { pgVector: pgVectorStore },
+   storage: mastraStorage,
 });
 
 export function createRequestContext(context: CustomRequestContext) {

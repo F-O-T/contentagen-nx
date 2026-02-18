@@ -49,6 +49,7 @@ export const spellingConfig = {
    suggestionCacheSize: 1000, // Suggestion cache
    minWordLength: 3, // Ignore short words
    maxSuggestions: 5, // Suggestions to show
+   maxVisibleDecorations: 100, // Max decorations to render at once (performance)
 };
 
 /**

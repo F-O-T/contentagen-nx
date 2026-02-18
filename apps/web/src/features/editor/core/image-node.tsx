@@ -9,6 +9,8 @@
  */
 import {
    DecoratorNode,
+   type DOMConversionMap,
+   type DOMConversionOutput,
    type DOMExportOutput,
    type EditorConfig,
    type LexicalEditor,
@@ -120,6 +122,34 @@ export class ImageNode extends DecoratorNode<React.JSX.Element> {
             width={this.__width}
          />
       );
+   }
+
+   static importDOM(): DOMConversionMap {
+      return {
+         img: () => ({
+            conversion(element: HTMLElement): DOMConversionOutput | null {
+               const img = element as HTMLImageElement;
+               const src = img.getAttribute("src");
+               const alt = img.getAttribute("alt") ?? "";
+               if (!src) return null;
+               return { node: $createImageNode(src, alt) };
+            },
+            priority: 0,
+         }),
+         figure: () => ({
+            conversion(element: HTMLElement): DOMConversionOutput | null {
+               const img = element.querySelector("img");
+               if (!img) return null;
+               const src = img.getAttribute("src");
+               const alt = img.getAttribute("alt") ?? "";
+               if (!src) return null;
+               const figcaption = element.querySelector("figcaption");
+               const caption = figcaption?.textContent ?? undefined;
+               return { node: $createImageNode(src, alt, caption) };
+            },
+            priority: 1,
+         }),
+      };
    }
 
    exportDOM(): DOMExportOutput {
