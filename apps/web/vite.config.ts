@@ -13,6 +13,11 @@ const require = createRequire(import.meta.url);
 // failure when @peculiar/* (used by @simplewebauthn/server → @better-auth/passkey)
 // is bundled into an ESM .mjs by Nitro under Bun.
 const tslibEsm = require.resolve("tslib/tslib.es6.mjs");
+// Resolve the absolute path so Nitro's treeshake.moduleSideEffects recognizes
+// it by resolved-path prefix (Rollup provides absolute IDs to this function).
+const reflectMetadataDir = require
+   .resolve("reflect-metadata")
+   .replace(/Reflect\.js$/, "");
 
 const config = defineConfig({
    resolve: {
@@ -25,7 +30,15 @@ const config = defineConfig({
    },
    plugins: [
       devtools(),
-      nitro({ preset: "bun", alias: { tslib: tslibEsm } }),
+      nitro({
+         preset: "bun",
+         alias: { tslib: tslibEsm },
+         // reflect-metadata is a side-effect-only polyfill required by tsyringe
+         // (used via @peculiar/x509 → @simplewebauthn/server → @better-auth/passkey).
+         // Rollup's treeshake.moduleSideEffects receives the *resolved* (absolute)
+         // path, so we provide the directory prefix, not just the package name.
+         moduleSideEffects: [reflectMetadataDir],
+      }),
       // this is the plugin that enables path aliases
       viteTsConfigPaths({
          projects: ["./tsconfig.json"],
