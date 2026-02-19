@@ -1,4 +1,5 @@
 import { env } from "@packages/environment/client";
+
 import { PostHogWrapper, PosthogRouterTracker } from "@packages/posthog/client";
 import { Toaster } from "@packages/ui/components/sonner";
 import { ThemeProvider } from "@packages/ui/lib/theme-provider";
