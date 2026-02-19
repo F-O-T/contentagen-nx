@@ -26,14 +26,9 @@ import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { getInitials } from "@packages/utils/text";
 import { useForm } from "@tanstack/react-form";
-import {
-   useMutation,
-   useQuery,
-   useQueryClient,
-   useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Loader2, ShieldCheck, Trash2, User } from "lucide-react";
+import { Loader2, ShieldCheck, User } from "lucide-react";
 import type React from "react";
 import { Suspense, useCallback, useMemo, useState, useTransition } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
@@ -129,7 +124,7 @@ function AvatarUploadSection({
                   maxFiles={1}
                   maxSize={5 * 1024 * 1024}
                   onDrop={(files) =>
-                     fileUpload.handleFileSelect(files, () => { })
+                     fileUpload.handleFileSelect(files, () => {})
                   }
                   onError={(err) => fileUpload.setError(err.message)}
                   src={
@@ -434,116 +429,6 @@ function TwoFactorSection({ twoFactorEnabled }: { twoFactorEnabled: boolean }) {
                   </div>
                </div>
             )}
-         </div>
-      </section>
-   );
-}
-
-// ============================================
-// Passkeys Section
-// ============================================
-
-function PasskeysSection() {
-   const queryClient = useQueryClient();
-   const [deletingId, setDeletingId] = useState<string | null>(null);
-   const [isAdding, startAddTransition] = useTransition();
-
-   const { data: passkeys = [] } = useQuery({
-      queryKey: ["passkeys"],
-      queryFn: async () => {
-         const result = await authClient.passkey.listUserPasskeys();
-         return result.data ?? [];
-      },
-   });
-
-   const handleAddPasskey = () => {
-      startAddTransition(async () => {
-         const result = await authClient.passkey.addPasskey();
-         if (result?.error) {
-            if (
-               (result.error as { code?: string }).code ===
-               "ERROR_CEREMONY_ABORTED"
-            )
-               return;
-            toast.error(result.error.message ?? "Erro ao adicionar passkey");
-            return;
-         }
-         if (!result?.data) return; // user cancelled — silent no-op
-         toast.success("Passkey adicionada com sucesso!");
-         queryClient.invalidateQueries({ queryKey: ["passkeys"] });
-      });
-   };
-
-   const handleDeletePasskey = async (id: string) => {
-      setDeletingId(id);
-      const result = await authClient.passkey.deletePasskey({ id });
-      setDeletingId(null);
-      if (result?.error) {
-         toast.error(result.error.message ?? "Erro ao remover passkey");
-         return;
-      }
-      toast.success("Passkey removida!");
-      queryClient.invalidateQueries({ queryKey: ["passkeys"] });
-   };
-
-   return (
-      <section className="space-y-3">
-         <div>
-            <h2 className="text-lg font-medium">Passkeys</h2>
-            <p className="text-sm text-muted-foreground">
-               Gerencie suas passkeys para login sem senha usando biometria ou
-               chave de segurança.
-            </p>
-         </div>
-
-         <div className="max-w-md space-y-3">
-            {passkeys.length === 0 ? (
-               <p className="text-sm text-muted-foreground">
-                  Nenhuma passkey cadastrada.
-               </p>
-            ) : (
-               <div className="space-y-2">
-                  {passkeys.map((passkey: (typeof passkeys)[number]) => (
-                     <div
-                        className="flex items-center justify-between p-3 border rounded-lg bg-muted/30"
-                        key={passkey.id}
-                     >
-                        <div className="min-w-0">
-                           <p className="text-sm font-medium truncate">
-                              {passkey.name || "Passkey"}
-                           </p>
-                           {passkey.createdAt && (
-                              <p className="text-xs text-muted-foreground">
-                                 Adicionada em{" "}
-                                 {new Date(
-                                    passkey.createdAt,
-                                 ).toLocaleDateString("pt-BR")}
-                              </p>
-                           )}
-                        </div>
-                        <Button
-                           className="text-destructive hover:text-destructive shrink-0"
-                           disabled={deletingId === passkey.id}
-                           onClick={() => handleDeletePasskey(passkey.id)}
-                           size="icon"
-                           variant="ghost"
-                        >
-                           <Trash2 className="size-4" />
-                        </Button>
-                     </div>
-                  ))}
-               </div>
-            )}
-
-            <Button
-               disabled={isAdding}
-               onClick={handleAddPasskey}
-               size="sm"
-               variant="outline"
-            >
-               {isAdding && <Loader2 className="size-4 mr-2 animate-spin" />}
-               Adicionar passkey
-            </Button>
          </div>
       </section>
    );
@@ -1083,10 +968,6 @@ function ProfileSectionContent() {
          <Separator />
 
          <TwoFactorSection twoFactorEnabled={user.twoFactorEnabled ?? false} />
-
-         <Separator />
-
-         <PasskeysSection />
       </div>
    );
 }

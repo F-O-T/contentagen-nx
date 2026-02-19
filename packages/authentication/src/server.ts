@@ -1,5 +1,4 @@
 import { oauthProvider } from "@better-auth/oauth-provider";
-import { passkey } from "@better-auth/passkey";
 import { stripe as stripePlugin } from "@better-auth/stripe";
 import type { DatabaseInstance } from "@packages/database/client";
 import { findMemberByUserId } from "@packages/database/repositories/auth-repository";
@@ -232,7 +231,6 @@ export function createAuth(config: SimplifiedAuthConfig) {
             length: 10,
          },
       }),
-      passkey(),
       apiKey({
          enableSessionForAPIKeys: true,
          enableMetadata: true,
