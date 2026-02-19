@@ -22,6 +22,7 @@ import {
    enforceCreditBudget,
    trackCreditUsage,
 } from "@packages/events/credits";
+import { createSlug, generateRandomSuffix } from "@packages/utils/text";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -30,7 +31,7 @@ import { protectedProcedure } from "../server";
 // =============================================================================
 
 const createContentSchema = z.object({
-   meta: ContentMetaSchema,
+   title: z.string().min(1).default("Sem título"),
    body: z.string().optional(),
    draftOrigin: z.enum(["manual", "ai_generated"]).optional().default("manual"),
 });
@@ -97,8 +98,17 @@ export const create = protectedProcedure
          });
       }
 
+      // Auto-generate slug from title with a random suffix to ensure uniqueness
+      const slug = `${createSlug(input.title)}-${generateRandomSuffix()}`;
+
       const result = await createContent(db, {
-         ...input,
+         body: input.body,
+         draftOrigin: input.draftOrigin,
+         meta: {
+            title: input.title,
+            description: "",
+            slug,
+         },
          organizationId,
          teamId,
          createdByMemberId: members[0].id,
@@ -107,7 +117,7 @@ export const create = protectedProcedure
       try {
          await emitContentCreated(
             { db, posthog, organizationId, userId, teamId },
-            { contentId: result.id, title: input.meta.title ?? "" },
+            { contentId: result.id, title: input.title },
          );
       } catch {
          // Event emission must not break the main flow

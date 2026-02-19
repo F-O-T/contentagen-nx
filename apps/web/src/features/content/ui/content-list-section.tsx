@@ -167,11 +167,7 @@ export function ContentListSection() {
 
    const handleCreateNew = () => {
       createContentMutation.mutate({
-         meta: {
-            description: "Sem descricao",
-            title: "Sem titulo",
-            slug: "sem-slug",
-         },
+         title: "Sem título",
       });
    };
 
