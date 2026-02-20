@@ -9,41 +9,54 @@ import { defineConfig } from "vite";
 import viteTsConfigPaths from "vite-tsconfig-paths";
 
 /**
- * @lexical/code bundles prism language plugins that are IIFEs calling `})(Prism)`.
- * They reference `Prism` as a bare global variable that is expected to be set by
- * the main prismjs module. In the browser this works because `window.Prism` is set
- * by `import "prismjs"` before the lazy editor chunk loads.
+ * @lexical/code bundles a top-level diff-language IIFE that calls `})(Prism)`,
+ * expecting `Prism` to already be the fully-initialised global set by prismjs.
+ * In the browser `import "prismjs"` sets `window.Prism` eagerly. On the server
+ * the editor routes are `ssr: false`, but TanStack Router's generated route tree
+ * statically imports all route modules for metadata — so @lexical/code ends up
+ * in the Nitro SSR bundle and its top-level IIFE crashes at startup.
  *
- * On the server the editor routes are `ssr: false`, but the route tree still
- * statically imports the route modules for metadata, causing `@lexical/code` to
- * end up in the SSR bundle. When Nitro evaluates that bundle at module load time
- * it hits `})(Prism)` where `Prism` is undefined → ReferenceError.
+ * `require_prism` is defined earlier in the same chunk but is a lazy CommonJS
+ * factory that is never called at module-level — so `Prism` is undefined when
+ * the diff IIFE executes.
  *
- * Fix: inject `globalThis.Prism` and `globalThis.window` stubs as a banner before
- * the Nitro SSR chunk that contains prismjs so the language-plugin IIFEs can run
- * safely. The stubs are harmless because the editor never renders server-side.
+ * Fix: inject a call to `require_prism()` immediately after its factory
+ * definition closes (`}));`) and before the diff IIFE runs. This initialises
+ * the real Prism object (with `.languages`) via its own `global.Prism = Prism`
+ * assignment, making subsequent `(function(t){...})(Prism)` calls safe.
+ * The call is guarded by `typeof window === 'undefined'` so it only runs in
+ * SSR/Node/Bun contexts; the browser path is unchanged.
  */
 function prismSsrPolyfillRollupPlugin(): RollupPlugin {
+   // Marker that reliably appears at the end of the require_prism factory in
+   // the bundled output — right before @lexical/code's own top-level code begins.
+   const INJECTION_MARKER =
+      "if (typeof global !== 'undefined') global.Prism = Prism;\n}));";
+
    return {
       name: "prism-ssr-polyfill",
       renderChunk(code, chunk) {
          if (
             !chunk.fileName.includes("prismjs") ||
-            !code.includes("require_prism")
+            !code.includes("require_prism") ||
+            !code.includes(INJECTION_MARKER)
          ) {
             return null;
          }
 
-         // Stub `Prism` and `window` globals before the prism language-plugin
-         // IIFEs run (they call `})(Prism)` at the top level of the module).
-         const polyfill = [
-            "// Prism SSR polyfill - prevents ReferenceError in Bun/Node server context",
-            "if (typeof Prism === 'undefined') globalThis.Prism = globalThis.Prism || {};",
-            "if (typeof window === 'undefined') globalThis.window = globalThis;",
-            "",
-         ].join("\n");
+         // Eagerly initialise Prism in SSR so the top-level diff plugin IIFE
+         // `(function(t){ t.languages.diff = ... })(Prism)` finds a real Prism
+         // object with `.languages` instead of `undefined`.
+         const injection =
+            INJECTION_MARKER +
+            "\n// Prism SSR init - call require_prism() so global.Prism is set\n" +
+            "// before @lexical/code's top-level language-plugin IIFEs execute.\n" +
+            "if (typeof window === 'undefined') require_prism();\n";
 
-         return { code: polyfill + code, map: null };
+         return {
+            code: code.replace(INJECTION_MARKER, injection),
+            map: null,
+         };
       },
    };
 }
