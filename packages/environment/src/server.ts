@@ -41,9 +41,20 @@ export const env = createEnv({
 
       // AI Services (Optional)
       OPENROUTER_API_KEY: z.string().optional(),
-      TAVILY_API_KEYS: z.string().optional(), // Multiple keys: key1,key2,key3
+      TAVILY_API_KEYS: z.string().optional(),
       EXA_API_KEYS: z.string().optional(),
       FIRECRAWL_API_KEYS: z.string().optional(),
+
+      // Railway Fleet (Optional - SearXNG + Firecrawl self-hosted)
+      RAILWAY_API_TOKEN: z.string().optional(),
+      RAILWAY_PROJECT_ID: z.string().optional(),
+      RAILWAY_ENVIRONMENT_ID: z.string().optional(),
+      SEARXNG_MIN_INSTANCES: z.coerce.number().optional().default(2),
+      SEARXNG_MAX_INSTANCES: z.coerce.number().optional().default(5),
+      SEARXNG_SECRET_KEY: z.string().optional(),
+      FIRECRAWL_MIN_INSTANCES: z.coerce.number().optional().default(1),
+      FIRECRAWL_MAX_INSTANCES: z.coerce.number().optional().default(3),
+      FIRECRAWL_BULL_AUTH_KEY: z.string().optional(),
 
       // Security (Optional - Arcjet for rate limiting)
       ARCJET_KEY: z.string().optional(),
