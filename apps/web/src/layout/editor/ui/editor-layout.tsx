@@ -18,9 +18,9 @@ import {
    useCallback,
    useEffect,
    useMemo,
+   useRef,
    useState,
 } from "react";
-import { getEditorMarkdown } from "@/features/editor/ai/tool-executor";
 import type {
    EditChunk,
    EditRequest,
@@ -30,7 +30,10 @@ import type {
 import { useDiffState } from "@/features/editor/stores/diff-store";
 import { useEditState } from "@/features/editor/stores/edit-store";
 import { useFIMState } from "@/features/editor/stores/fim-store";
-import type { ContentEditorProps } from "@/features/editor/ui/content-editor";
+import type {
+   ContentEditorHandle,
+   ContentEditorProps,
+} from "@/features/editor/ui/content-editor";
 import { DiffView } from "@/features/editor/ui/diff-view";
 import { EditPanel, EditSelectionHint } from "@/features/editor/ui/edit-panel";
 import { EditorStatusline } from "@/features/editor/ui/editor-statusline";
@@ -131,6 +134,7 @@ export function EditorLayout({
    const [editorInstance, setEditorInstance] = useState<LexicalEditor | null>(
       null,
    );
+   const contentEditorRef = useRef<ContentEditorHandle | null>(null);
 
    // Create assistant-ui runtime with contentId for context
    const runtime = useContenttaRuntime({ contentId });
@@ -246,6 +250,9 @@ export function EditorLayout({
          <ToolExecutionBridgeWrapper
             editor={editorInstance}
             onFrontmatterUpdate={handleMetaUpdate}
+            onSetContent={(markdown) => {
+               contentEditorRef.current?.setContent(markdown);
+            }}
          />
 
          <div className={layoutClass}>
@@ -283,6 +290,7 @@ export function EditorLayout({
                                  namespace: "contentta-ide",
                                  initialContent: content.body || "",
                               }}
+                              contentRef={contentEditorRef}
                               editable={!isArchived}
                               editStream={
                                  resolvedFeatures.edit ? editStream : undefined
@@ -297,14 +305,11 @@ export function EditorLayout({
                                  resolvedFeatures.fim ? fimStream : undefined
                               }
                               key={contentId}
-                              onChange={(_, editor) => {
-                                 editor.read(() => {
-                                    const markdown = getEditorMarkdown(editor);
-                                    saveBody(markdown);
-                                    setEditorDocument(markdown);
-                                 });
-                              }}
                               onEditorReady={setEditorInstance}
+                              onMarkdownChange={(markdown) => {
+                                 saveBody(markdown);
+                                 setEditorDocument(markdown);
+                              }}
                               placeholder="Comece a escrever seu conteudo..."
                            >
                               {/* AI Panels rendered inside editor context */}
@@ -403,15 +408,19 @@ function DiffViewWrapper() {
 interface ToolExecutionBridgeWrapperProps {
    editor: LexicalEditor | null;
    onFrontmatterUpdate: (meta: Partial<ContentMeta>) => void;
+   /** Called when the agent-writer produces markdown content to load into editor */
+   onSetContent?: (markdown: string) => void;
 }
 
 function ToolExecutionBridgeWrapper({
    editor,
    onFrontmatterUpdate,
+   onSetContent,
 }: ToolExecutionBridgeWrapperProps) {
    useStreamingToolBridge({
       editor,
       onFrontmatterUpdate,
+      onSetContent,
    });
    return null;
 }

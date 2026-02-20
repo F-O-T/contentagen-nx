@@ -5,10 +5,12 @@
  * Provides a complete AI-powered editing experience.
  */
 
-import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { ListItemNode, ListNode } from "@lexical/list";
-import { $convertFromMarkdownString } from "@lexical/markdown";
+import {
+   $convertFromMarkdownString,
+   $convertToMarkdownString,
+} from "@lexical/markdown";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -25,7 +27,15 @@ import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import type { EditorState, LexicalEditor } from "lexical";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { $getRoot } from "lexical";
+import {
+   useCallback,
+   useEffect,
+   useImperativeHandle,
+   useMemo,
+   useRef,
+   useState,
+} from "react";
 import {
    createEditorConfig,
    createEditorFeatures,
@@ -55,13 +65,19 @@ import { SpellingErrorDecorator, SpellingPlugin } from "../spelling/plugin";
 import { cn } from "../utils";
 
 /**
+ * Imperative handle exposed via contentRef
+ */
+export interface ContentEditorHandle {
+   /** Replace the editor content with the given markdown string */
+   setContent: (markdown: string) => void;
+}
+
+/**
  * Lexical nodes used by the editor
  */
 const EDITOR_NODES = [
    HeadingNode,
    QuoteNode,
-   CodeNode,
-   CodeHighlightNode,
    LinkNode,
    AutoLinkNode,
    ListNode,
@@ -106,6 +122,13 @@ interface ContentEditorProps {
    onChange?: (editorState: EditorState, editor: LexicalEditor) => void;
 
    /**
+    * Callback when content changes, providing the markdown string directly.
+    * Prefer this over `onChange` when the caller only needs markdown — it keeps
+    * @lexical/markdown out of any static (SSR) import graph.
+    */
+   onMarkdownChange?: (markdown: string) => void;
+
+   /**
     * Callback when spelling errors are updated
     */
    onSpellingErrors?: (errors: SpellingError[]) => void;
@@ -125,6 +148,12 @@ interface ContentEditorProps {
     * Callback when the Lexical editor is ready
     */
    onEditorReady?: (editor: LexicalEditor) => void;
+
+   /**
+    * Imperative handle ref that exposes setContent(markdown) for callers
+    * outside the lazy chunk (e.g. tool bridge) so they never import @lexical/markdown.
+    */
+   contentRef?: React.RefObject<ContentEditorHandle | null>;
 
    /**
     * Additional CSS class for the container
@@ -203,6 +232,34 @@ function InitialContentPlugin({ markdown }: InitialContentPluginProps) {
 }
 
 /**
+ * Plugin that wires up an imperative handle ref so callers outside the lazy
+ * chunk can set content from a markdown string without importing @lexical/markdown.
+ */
+interface SetContentPluginProps {
+   contentRef?: React.RefObject<ContentEditorHandle | null>;
+}
+
+function SetContentPlugin({ contentRef }: SetContentPluginProps) {
+   const [editor] = useLexicalComposerContext();
+
+   useImperativeHandle(
+      contentRef,
+      () => ({
+         setContent: (markdown: string) => {
+            editor.update(() => {
+               const root = $getRoot();
+               root.clear();
+               $convertFromMarkdownString(markdown, EXTENDED_TRANSFORMERS);
+            });
+         },
+      }),
+      [editor],
+   );
+
+   return null;
+}
+
+/**
  * Content Editor Component
  *
  * A fully-featured AI-powered content editor built on Lexical.
@@ -214,9 +271,11 @@ export function ContentEditor({
    fimStream,
    editStream,
    onChange,
+   onMarkdownChange,
    onSpellingErrors,
    onDiagnostics,
    onEditorReady,
+   contentRef,
    className,
    contentClassName,
    placeholder,
@@ -272,8 +331,15 @@ export function ContentEditor({
    const handleChange = useCallback(
       (editorState: EditorState, editor: LexicalEditor) => {
          onChange?.(editorState, editor);
+         if (onMarkdownChange) {
+            editor.read(() => {
+               onMarkdownChange(
+                  $convertToMarkdownString(EXTENDED_TRANSFORMERS),
+               );
+            });
+         }
       },
-      [onChange],
+      [onChange, onMarkdownChange],
    );
 
    return (
@@ -349,6 +415,9 @@ export function ContentEditor({
             )}
 
             <EditorReadyPlugin onReady={onEditorReady} />
+
+            {/* Imperative handle for setting content from outside the lazy chunk */}
+            <SetContentPlugin contentRef={contentRef} />
 
             {/* Change listener */}
             <OnChangePlugin onChange={handleChange} />

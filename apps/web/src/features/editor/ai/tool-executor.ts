@@ -4,17 +4,12 @@
  * Executes agent tool calls on the Lexical editor.
  * Maps tool names to Lexical operations for local execution.
  */
-import { $createCodeNode } from "@lexical/code";
 import { $createLinkNode } from "@lexical/link";
 import {
    $createListItemNode,
    $createListNode,
    type ListType,
 } from "@lexical/list";
-import {
-   $convertFromMarkdownString,
-   $convertToMarkdownString,
-} from "@lexical/markdown";
 import { $createHeadingNode, type HeadingTagType } from "@lexical/rich-text";
 import {
    $createTableCellNode,
@@ -24,6 +19,7 @@ import {
 } from "@lexical/table";
 import type { LexicalEditor } from "lexical";
 import {
+   $createParagraphNode,
    $createTextNode,
    $getRoot,
    $getSelection,
@@ -32,7 +28,6 @@ import {
    type RootNode,
 } from "lexical";
 import { $createImageNode, type ImageWidth } from "../core/image-node";
-import { EXTENDED_TRANSFORMERS } from "../core/transformers";
 import type {
    ServerToolResult,
    ToolCall,
@@ -128,7 +123,10 @@ export async function executeEditorTool(
 }
 
 /**
- * Insert markdown text at a specific position
+ * Insert markdown text at a specific position.
+ * Since @lexical/markdown is not available in this module (it must remain
+ * outside the SSR-safe import graph), we append the raw text as plain paragraphs.
+ * The editor's MarkdownShortcutPlugin handles real-time markdown rendering.
  */
 function executeInsertText(
    editor: LexicalEditor,
@@ -140,46 +138,35 @@ function executeInsertText(
 
    editor.update(() => {
       const root = $getRoot();
+      const lines = String(text).split("\n");
 
-      switch (position) {
-         case "cursor": {
-            const existingMarkdown = $convertToMarkdownString(
-               EXTENDED_TRANSFORMERS,
-            );
-            root.clear();
-            const newMarkdown =
-               existingMarkdown + (existingMarkdown ? "\n\n" : "") + text;
-            $convertFromMarkdownString(newMarkdown, EXTENDED_TRANSFORMERS);
-            break;
+      const nodes = lines.map((line) => {
+         const p = $createParagraphNode();
+         if (line) p.append($createTextNode(line));
+         return p;
+      });
+
+      if (position === "start") {
+         // Insert before existing content
+         const firstChild = root.getFirstChild();
+         for (const node of nodes.reverse()) {
+            if (firstChild) {
+               firstChild.insertBefore(node);
+            } else {
+               root.append(node);
+            }
          }
-
-         case "start": {
-            const existingMarkdown = $convertToMarkdownString(
-               EXTENDED_TRANSFORMERS,
-            );
-            root.clear();
-            const newMarkdown =
-               text + (existingMarkdown ? "\n\n" : "") + existingMarkdown;
-            $convertFromMarkdownString(newMarkdown, EXTENDED_TRANSFORMERS);
-            break;
-         }
-
-         default: {
-            const existingMarkdown = $convertToMarkdownString(
-               EXTENDED_TRANSFORMERS,
-            );
-            root.clear();
-            const newMarkdown =
-               existingMarkdown + (existingMarkdown ? "\n\n" : "") + text;
-            $convertFromMarkdownString(newMarkdown, EXTENDED_TRANSFORMERS);
-            break;
+      } else {
+         // Default: append at end
+         for (const node of nodes) {
+            root.append(node);
          }
       }
    });
 
    return {
       success: true,
-      message: `Inserted markdown at ${position}`,
+      message: `Inserted text at ${position}`,
    };
 }
 
@@ -191,39 +178,9 @@ function executeInsertHeading(
    args: Record<string, unknown>,
    serverResult?: ServerToolResult,
 ): ToolExecutionResult {
-   const text = args.text as string;
+   const text = (serverResult?.markdown || args.text) as string;
    const level = args.level as number;
    const position = (args.position as string) || "end";
-
-   if (serverResult?.markdown) {
-      editor.update(() => {
-         const root = $getRoot();
-         const existingMarkdown = $convertToMarkdownString(
-            EXTENDED_TRANSFORMERS,
-         );
-
-         let newMarkdown: string;
-         if (position === "start") {
-            newMarkdown =
-               serverResult.markdown +
-               (existingMarkdown ? "\n\n" : "") +
-               existingMarkdown;
-         } else {
-            newMarkdown =
-               existingMarkdown +
-               (existingMarkdown ? "\n\n" : "") +
-               serverResult.markdown;
-         }
-
-         root.clear();
-         $convertFromMarkdownString(newMarkdown, EXTENDED_TRANSFORMERS);
-      });
-
-      return {
-         success: true,
-         message: `Inserted h${level} heading`,
-      };
-   }
 
    const headingTag = `h${Math.min(Math.max(level, 1), 6)}` as HeadingTagType;
 
@@ -272,22 +229,49 @@ function executeInsertList(
 }
 
 /**
- * Insert a code block
+ * Insert a code block as fenced markdown paragraphs.
+ * @lexical/code (and its Prism dependency) is excluded from this module to keep
+ * it out of the SSR bundle. We represent the code block as plain text lines
+ * that the editor's MarkdownShortcutPlugin can render.
  */
 function executeInsertCodeBlock(
    editor: LexicalEditor,
    args: Record<string, unknown>,
 ): ToolExecutionResult {
    const code = args.code as string;
-   const language = (args.language as string) || "plaintext";
+   const language = (args.language as string) || "";
    const position = (args.position as string) || "end";
 
    editor.update(() => {
       const root = $getRoot();
-      const codeNode = $createCodeNode(language);
-      codeNode.append($createTextNode(code));
 
-      insertNodeAtPosition(root, codeNode, position);
+      // Build fenced code block as individual paragraph nodes
+      const fencedLines = [
+         `\`\`\`${language}`,
+         ...String(code).split("\n"),
+         "```",
+      ];
+
+      const nodes = fencedLines.map((line) => {
+         const p = $createParagraphNode();
+         p.append($createTextNode(line));
+         return p;
+      });
+
+      if (position === "start") {
+         const firstChild = root.getFirstChild();
+         for (const node of nodes.reverse()) {
+            if (firstChild) {
+               firstChild.insertBefore(node);
+            } else {
+               root.append(node);
+            }
+         }
+      } else {
+         for (const node of nodes) {
+            root.append(node);
+         }
+      }
    });
 
    return {
@@ -568,16 +552,20 @@ export function getEditorContent(editor: LexicalEditor): string {
 }
 
 /**
- * Get the current editor content as markdown
+ * Get the current editor content as plain text.
+ * NOTE: Returns plain text, not markdown. For markdown conversion use the
+ * ContentEditor's `onMarkdownChange` prop or `contentRef.current.setContent()`.
+ * This function intentionally avoids @lexical/markdown to stay SSR-safe.
  */
 export function getEditorMarkdown(editor: LexicalEditor): string {
-   let markdown = "";
+   let text = "";
 
    editor.getEditorState().read(() => {
-      markdown = $convertToMarkdownString(EXTENDED_TRANSFORMERS);
+      const root = $getRoot();
+      text = root.getTextContent();
    });
 
-   return markdown;
+   return text;
 }
 
 /**
@@ -597,16 +585,23 @@ export function getSelectionText(editor: LexicalEditor): string {
 }
 
 /**
- * Set editor content from markdown
+ * Set editor content from plain text (one paragraph per line).
+ * For full markdown conversion, use ContentEditorHandle.setContent() via contentRef
+ * (which runs inside the lazy chunk and has access to @lexical/markdown).
  */
 export function setEditorFromMarkdown(
    editor: LexicalEditor,
-   markdown: string,
+   text: string,
 ): void {
    editor.update(() => {
       const root = $getRoot();
       root.clear();
-      $convertFromMarkdownString(markdown, EXTENDED_TRANSFORMERS);
+      const lines = String(text).split("\n");
+      for (const line of lines) {
+         const p = $createParagraphNode();
+         if (line) p.append($createTextNode(line));
+         root.append(p);
+      }
    });
 }
 

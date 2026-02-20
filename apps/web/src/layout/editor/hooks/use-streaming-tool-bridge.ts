@@ -39,6 +39,13 @@ interface UseStreamingToolBridgeOptions {
       slug?: string;
       keywords?: string[];
    }) => void;
+   /**
+    * Called when the agent-writer produces a full markdown body.
+    * This replaces `setEditorFromMarkdown` to keep @lexical/markdown out of
+    * the SSR import graph — the callback runs inside ContentEditorHandle.setContent()
+    * which lives in the lazy chunk.
+    */
+   onSetContent?: (markdown: string) => void;
    autoExecute?: boolean;
 }
 
@@ -83,6 +90,7 @@ function parseWriterResponse(text: string): {
 export function useStreamingToolBridge({
    editor,
    onFrontmatterUpdate,
+   onSetContent,
    autoExecute = true,
 }: UseStreamingToolBridgeOptions) {
    const executedTools = useRef(new Set<string>());
@@ -110,10 +118,15 @@ export function useStreamingToolBridge({
             if (chunk) {
                editor.update(() => {
                   const root = $getRoot();
-                  let target = root.getLastChild();
-                  if (!target || !$isElementNode(target)) {
+                  const lastChild = root.getLastChild();
+                  let target: ReturnType<typeof $createParagraphNode>;
+                  if (!lastChild || !$isElementNode(lastChild)) {
                      target = $createParagraphNode();
                      root.append(target);
+                  } else {
+                     target = lastChild as ReturnType<
+                        typeof $createParagraphNode
+                     >;
                   }
                   target.append($createTextNode(chunk));
                });
@@ -266,7 +279,14 @@ export function useStreamingToolBridge({
                   // Set full markdown body in editor (replaces any existing content)
                   // Guard against empty body to avoid wiping the editor when agent only returned frontmatter
                   if (parsed.body) {
-                     setEditorFromMarkdown(editor, parsed.body);
+                     // Use onSetContent callback (runs inside ContentEditorHandle.setContent
+                     // in the lazy chunk, which has access to @lexical/markdown).
+                     // Fallback: setEditorFromMarkdown inserts plain text.
+                     if (onSetContent) {
+                        onSetContent(parsed.body);
+                     } else {
+                        setEditorFromMarkdown(editor, parsed.body);
+                     }
                      flashHighlight();
                   }
                }
