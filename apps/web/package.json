@@ -26,6 +26,7 @@
       "@f-o-t/qrcode": "catalog:fot",
       "@f-o-t/spelling": "catalog:fot",
       "@faker-js/faker": "catalog:testing",
+      "@lexical/code": "catalog:editor",
       "@lexical/html": "catalog:editor",
       "@lexical/link": "catalog:editor",
       "@lexical/list": "catalog:editor",
