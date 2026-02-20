@@ -5,7 +5,6 @@
  */
 import {
    CHECK_LIST,
-   CODE,
    HEADING,
    LINK,
    ORDERED_LIST,
@@ -167,7 +166,6 @@ export const EXTENDED_TRANSFORMERS: Array<Transformer> = [
    // Block transformers
    HEADING,
    QUOTE,
-   CODE,
    UNORDERED_LIST,
    ORDERED_LIST,
    CHECK_LIST,

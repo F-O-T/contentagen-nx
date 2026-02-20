@@ -5,7 +5,6 @@
  * Provides a complete AI-powered editing experience.
  */
 
-import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { ListItemNode, ListNode } from "@lexical/list";
 import { $convertFromMarkdownString } from "@lexical/markdown";
@@ -60,8 +59,6 @@ import { cn } from "../utils";
 const EDITOR_NODES = [
    HeadingNode,
    QuoteNode,
-   CodeNode,
-   CodeHighlightNode,
    LinkNode,
    AutoLinkNode,
    ListNode,

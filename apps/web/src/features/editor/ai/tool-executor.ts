@@ -4,7 +4,6 @@
  * Executes agent tool calls on the Lexical editor.
  * Maps tool names to Lexical operations for local execution.
  */
-import { $createCodeNode } from "@lexical/code";
 import { $createLinkNode } from "@lexical/link";
 import {
    $createListItemNode,
@@ -284,10 +283,18 @@ function executeInsertCodeBlock(
 
    editor.update(() => {
       const root = $getRoot();
-      const codeNode = $createCodeNode(language);
-      codeNode.append($createTextNode(code));
+      const existingMarkdown = $convertToMarkdownString(EXTENDED_TRANSFORMERS);
+      const codeMarkdown = `\`\`\`${language}\n${code}\n\`\`\``;
 
-      insertNodeAtPosition(root, codeNode, position);
+      let newMarkdown: string;
+      if (position === "start") {
+         newMarkdown = codeMarkdown + (existingMarkdown ? "\n\n" : "") + existingMarkdown;
+      } else {
+         newMarkdown = existingMarkdown + (existingMarkdown ? "\n\n" : "") + codeMarkdown;
+      }
+
+      root.clear();
+      $convertFromMarkdownString(newMarkdown, EXTENDED_TRANSFORMERS);
    });
 
    return {
