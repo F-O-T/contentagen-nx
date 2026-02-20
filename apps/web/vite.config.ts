@@ -28,29 +28,25 @@ import viteTsConfigPaths from "vite-tsconfig-paths";
  * SSR/Node/Bun contexts; the browser path is unchanged.
  */
 function prismSsrPolyfillRollupPlugin(): RollupPlugin {
-   // Marker that reliably appears at the end of the require_prism factory in
-   // the bundled output — right before @lexical/code's own top-level code begins.
+   // Real newline character — matches actual bundled output
    const INJECTION_MARKER =
       "if (typeof global !== 'undefined') global.Prism = Prism;\n}));";
 
    return {
       name: "prism-ssr-polyfill",
-      renderChunk(code, chunk) {
+      renderChunk(code) {
+         // No filename check — Nitro produces a single SSR chunk in production
          if (
-            !chunk.fileName.includes("prismjs") ||
             !code.includes("require_prism") ||
             !code.includes(INJECTION_MARKER)
          ) {
             return null;
          }
 
-         // Eagerly initialise Prism in SSR so the top-level diff plugin IIFE
-         // `(function(t){ t.languages.diff = ... })(Prism)` finds a real Prism
-         // object with `.languages` instead of `undefined`.
          const injection =
             INJECTION_MARKER +
-            "\n// Prism SSR init - call require_prism() so global.Prism is set\n" +
-            "// before @lexical/code's top-level language-plugin IIFEs execute.\n" +
+            "\n// Prism SSR init — ensures global.Prism is set before\n" +
+            "// @lexical/code top-level language IIFEs execute.\n" +
             "if (typeof window === 'undefined') require_prism();\n";
 
          return {
