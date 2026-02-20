@@ -8,13 +8,21 @@
  */
 import { useAuiState } from "@assistant-ui/react";
 import type { LexicalEditor } from "lexical";
-import { $createParagraphNode, $createTextNode, $getRoot, $isElementNode } from "lexical";
+import {
+   $createParagraphNode,
+   $createTextNode,
+   $getRoot,
+   $isElementNode,
+} from "lexical";
 import { useCallback, useEffect, useRef } from "react";
 import {
    isEditorTool,
    isFrontmatterTool,
 } from "@/features/content/lib/assistant-runtime-adapter";
-import { executeEditorTool, setEditorFromMarkdown } from "@/features/editor";
+import {
+   executeEditorTool,
+   setEditorFromMarkdown,
+} from "@/features/editor/ai/tool-executor";
 
 const ANIMATION_CHARS_PER_TICK = 10;
 const ANIMATION_INTERVAL_MS = 30;
@@ -79,7 +87,9 @@ export function useStreamingToolBridge({
 }: UseStreamingToolBridgeOptions) {
    const executedTools = useRef(new Set<string>());
    const animatedTools = useRef(new Set<string>()); // tracks tools currently animating
-   const animationRefs = useRef(new Map<string, ReturnType<typeof setInterval>>());
+   const animationRefs = useRef(
+      new Map<string, ReturnType<typeof setInterval>>(),
+   );
 
    const messages = useAuiState((s) => s.thread.messages);
 
@@ -91,7 +101,10 @@ export function useStreamingToolBridge({
          let charIndex = 0;
 
          const interval = setInterval(() => {
-            const chunk = text.slice(charIndex, charIndex + ANIMATION_CHARS_PER_TICK);
+            const chunk = text.slice(
+               charIndex,
+               charIndex + ANIMATION_CHARS_PER_TICK,
+            );
             charIndex += ANIMATION_CHARS_PER_TICK;
 
             if (chunk) {
@@ -152,13 +165,15 @@ export function useStreamingToolBridge({
                if (typeof args.title === "string") updates.title = args.title;
                break;
             case "editDescription":
-               if (typeof args.description === "string") updates.description = args.description;
+               if (typeof args.description === "string")
+                  updates.description = args.description;
                break;
             case "editSlug":
                if (typeof args.slug === "string") updates.slug = args.slug;
                break;
             case "editKeywords":
-               if (Array.isArray(args.keywords)) updates.keywords = args.keywords as string[];
+               if (Array.isArray(args.keywords))
+                  updates.keywords = args.keywords as string[];
                break;
          }
          if (Object.keys(updates).length > 0) onFrontmatterUpdate(updates);
@@ -214,13 +229,20 @@ export function useStreamingToolBridge({
 
             if (isEditorTool(toolName) && editor) {
                // Always execute — streaming tools may have had animation interrupted
-               executeEditorTool(editor, { id: toolCallId, name: toolName, args });
+               executeEditorTool(editor, {
+                  id: toolCallId,
+                  name: toolName,
+                  args,
+               });
                flashHighlight();
             } else if (isFrontmatterTool(toolName)) {
                executeFrontmatter(toolName, args);
             } else if (toolName === "agent-writer" && editor) {
                const resultRecord = result as Record<string, unknown>;
-               const text = typeof resultRecord?.text === "string" ? resultRecord.text : null;
+               const text =
+                  typeof resultRecord?.text === "string"
+                     ? resultRecord.text
+                     : null;
                if (text) {
                   const parsed = parseWriterResponse(text);
 
@@ -233,10 +255,12 @@ export function useStreamingToolBridge({
                         keywords?: string[];
                      } = {};
                      if (parsed.title) updates.title = parsed.title;
-                     if (parsed.description) updates.description = parsed.description;
+                     if (parsed.description)
+                        updates.description = parsed.description;
                      if (parsed.slug) updates.slug = parsed.slug;
                      if (parsed.keywords) updates.keywords = parsed.keywords;
-                     if (Object.keys(updates).length > 0) onFrontmatterUpdate(updates);
+                     if (Object.keys(updates).length > 0)
+                        onFrontmatterUpdate(updates);
                   }
 
                   // Set full markdown body in editor (replaces any existing content)
@@ -249,7 +273,14 @@ export function useStreamingToolBridge({
             }
          }
       }
-   }, [messages, autoExecute, editor, animateTextInsertion, flashHighlight, executeFrontmatter]);
+   }, [
+      messages,
+      autoExecute,
+      editor,
+      animateTextInsertion,
+      flashHighlight,
+      executeFrontmatter,
+   ]);
 
    useEffect(() => {
       return () => {

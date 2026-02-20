@@ -20,22 +20,21 @@ import {
    useMemo,
    useState,
 } from "react";
-import {
-   DiffView,
-   type EditChunk,
-   EditorStatusline,
-   EditPanel,
-   type EditRequest,
-   EditSelectionHint,
-   type FIMChunk,
-   FIMPanel,
-   type FIMRequest,
-   getEditorMarkdown,
-   useDiffState,
-   useEditState,
-   useFIMState,
-} from "@/features/editor";
+import { getEditorMarkdown } from "@/features/editor/ai/tool-executor";
+import type {
+   EditChunk,
+   EditRequest,
+   FIMChunk,
+   FIMRequest,
+} from "@/features/editor/schemas";
+import { useDiffState } from "@/features/editor/stores/diff-store";
+import { useEditState } from "@/features/editor/stores/edit-store";
+import { useFIMState } from "@/features/editor/stores/fim-store";
 import type { ContentEditorProps } from "@/features/editor/ui/content-editor";
+import { DiffView } from "@/features/editor/ui/diff-view";
+import { EditPanel, EditSelectionHint } from "@/features/editor/ui/edit-panel";
+import { EditorStatusline } from "@/features/editor/ui/editor-statusline";
+import { FIMPanel } from "@/features/editor/ui/fim-panel";
 import { useContenttaRuntime } from "../hooks/use-contentta-runtime";
 import {
    resetEditorState,

@@ -4,7 +4,7 @@ import type {
    EditRequest,
    FIMChunk,
    FIMRequest,
-} from "@/features/editor";
+} from "@/features/editor/schemas";
 import { client } from "@/integrations/orpc/client";
 
 /**
