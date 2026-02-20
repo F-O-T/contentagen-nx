@@ -1,0 +1,91 @@
+## Síntese Atualizada — SearXNG + Firecrawl Self-hosted
+
+Obrigado pela especificação detalhada. Entendido que você quer **separar do worker atual** — um app dedicado para o fleet manager.
+
+### Proposta: Novo App `apps/fleet-manager/`
+
+Para manter separation of concerns e não acoplhar a lógica de orchestration ao worker existente, sugiro:
+
+```
+apps/
+├── fleet-manager/          # NOVO — BullMQ workers dedicados
+│   ├── src/
+│   │   ├── workers/
+│   │   │   ├── searxng-fleet-worker.ts    # ciclo de vida SearXNG
+│   │   │   ├── searxng-search-worker.ts   # load balancer search
+│   │   │   ├── firecrawl-fleet-worker.ts  # ciclo de vida Firecrawl
+│   │   │   └── firecrawl-crawl-worker.ts  # load balancer crawl
+│   │   ├── jobs/
+│   │   │   ├── searxng-provision.ts
+│   │   │   ├── searxng-teardown.ts
+│   │   │   ├── searxng-healthcheck.ts
+│   │   │   ├── firecrawl-provision.ts
+│   │   │   ├── firecrawl-teardown.ts
+│   │   │   └── firecrawl-healthcheck.ts
+│   │   ├── railway-client.ts
+│   │   ├── searxng-pool.ts
+│   │   ├── firecrawl-pool.ts
+│   │   └── index.ts
+│   ├── Dockerfile
+│   └── package.json
+├── web/
+├── sdk-server/
+└── worker/                 # Mantém jobs existentes (webhooks, etc)
+```
+
+### Por que separate app?
+
+1. **Escalabilidade independente** — o fleet manager pode escalar horizontalmente sem afectar o worker atual
+2. **Deploy separado** — CI/CD isolado, não rebuild de toda a aplicação
+3. **Recursos dedicados** — memory/CPU específicos para orchestration de instâncias
+4. **Shutdown graceful isolado** — não interfere com jobs existentes do worker
+
+### Command de desenvolvimento
+
+```bash
+bun dev:fleet     # Inicia apenas o fleet-manager
+bun dev:worker    # Mantém worker atual (webhooks, etc)
+bun dev:all       # Todos os apps
+```
+
+### Arquitetura Final
+
+```
+packages/search
+├── providers/
+│   ├── searxng-provider.ts     → enfileira em BullMQ
+│   └── firecrawl-provider.ts   → enfileira em BullMQ
+└── pool managers (estado Redis)
+
+        ↓ BullMQ
+
+apps/fleet-manager/ (NOVO)
+├── SearXNG Fleet Workers (search + lifecycle)
+└── Firecrawl Fleet Workers (crawl + lifecycle)
+
+        ↓ Railway API
+
+Railway — Instâncias dinâmicas
+├── SearXNG instances (N)
+└── Firecrawl self-hosted instances (N)
+```
+
+### Alterações Necessárias
+
+**Novo app:**
+- apps/fleet-manager/ — scaffold com Dockerfile, tsconfig, package.json
+- Jobs e workers conforme acima
+- Scheduler com crons para healthcheck + ensure-min-pool
+
+**Packages existentes:**
+- packages/search/ — providers enfileiram em vez de chamar APIs directas
+- packages/queue/ — constantes para as 4 novas filas
+- packages/environment/ — vars Railway + SearXNG + Firecrawl
+- apps/web/ — UI selector com opção searxng
+
+**Nx config:**
+- nx.json / project.json do fleet-manager — build, serve, deploy
+
+---
+
+Isso alinha com a visão de separar o fleet manager do worker principal? Posso começar o scaffold do novo app se aprovado.
