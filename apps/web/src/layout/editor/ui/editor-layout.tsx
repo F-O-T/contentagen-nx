@@ -10,11 +10,17 @@
 
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import type { ContentMeta } from "@packages/database/schemas/content";
-import { ClientOnly, useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import type { LexicalEditor } from "lexical";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-   ContentEditor,
+   lazy,
+   Suspense,
+   useCallback,
+   useEffect,
+   useMemo,
+   useState,
+} from "react";
+import {
    DiffView,
    type EditChunk,
    EditorStatusline,
@@ -29,6 +35,7 @@ import {
    useEditState,
    useFIMState,
 } from "@/features/editor";
+import type { ContentEditorProps } from "@/features/editor/ui/content-editor";
 import { useContenttaRuntime } from "../hooks/use-contentta-runtime";
 import {
    resetEditorState,
@@ -44,9 +51,9 @@ import {
    useEditorConfig,
    useSeoAuditSidebar,
 } from "../hooks/use-editor-state";
-import { setEditorDocument } from "../stores/editor-context-store";
 import { useManualSave } from "../hooks/use-manual-save";
 import { useStreamingToolBridge } from "../hooks/use-streaming-tool-bridge";
+import { setEditorDocument } from "../stores/editor-context-store";
 import { AssistantChatSidebar } from "./assistant-chat-sidebar";
 import { DiagnosticsPanel } from "./diagnostics-panel";
 import { EditorCommandPalette } from "./editor-command-palette";
@@ -54,6 +61,14 @@ import { EditorConfigPanel } from "./editor-config-panel";
 import { EditorNavBar } from "./editor-nav-bar";
 import { InlineFrontmatter } from "./inline-frontmatter";
 import { SeoAuditSidebar } from "./seo-audit-sidebar";
+
+/**
+ * Lazy-loaded ContentEditor — keeps @lexical/code and prismjs out of the
+ * static module graph so they never reach the Nitro SSR bundle.
+ */
+const ContentEditor = lazy(
+   () => import("@/features/editor/ui/content-editor-lazy"),
+) as React.LazyExoticComponent<React.ComponentType<ContentEditorProps>>;
 
 interface EditorLayoutProps {
    contentId: string;
@@ -262,7 +277,7 @@ export function EditorLayout({
                   {/* Main editor - centered */}
                   <div className="flex-1 overflow-auto">
                      <div className="max-w-7xl mx-auto p-4">
-                        <ClientOnly>
+                        <Suspense fallback={null}>
                            <ContentEditor
                               className="min-h-full"
                               config={{
@@ -299,7 +314,7 @@ export function EditorLayout({
                               <DiffViewWrapper />
                               <EditSelectionHint />
                            </ContentEditor>
-                        </ClientOnly>
+                        </Suspense>
                      </div>
                   </div>
 
