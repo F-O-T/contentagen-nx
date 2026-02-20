@@ -16,6 +16,10 @@ const config = defineConfig({
    optimizeDeps: {
       include: ["react", "react-dom"],
    },
+   ssr: {
+      external: ["@lexical/code", "@lexical/markdown", "prismjs"],
+   },
+
    plugins: [
       devtools(),
       nitro({
