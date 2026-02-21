@@ -50,8 +50,6 @@ import {
    RadioGroupItem,
 } from "@packages/ui/components/radio-group";
 import { Label } from "@packages/ui/components/label";
-import { toMajorUnitsString } from "@f-o-t/money";
-import { getImageGenerationPrice } from "@packages/events/pricing";
 import { useDropzone } from "react-dropzone";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
@@ -653,6 +651,12 @@ const IMAGE_MODEL_NAMES: Record<string, string> = {
    "bytedance-seed/seedream-4.5": "Seedream 4.5",
 };
 
+// Static display prices (BRL) — kept in sync with packages/events/src/utils.ts IMAGE_MODEL_PRICING
+const IMAGE_MODEL_DISPLAY_PRICES: Record<string, string> = {
+   "sourceful/riverflow-v2-pro": "0.90",
+   "bytedance-seed/seedream-4.5": "0.24",
+};
+
 const ASPECT_OPTIONS = [
    { value: "1:1" as const, label: "1:1" },
    { value: "16:9" as const, label: "16:9" },
@@ -689,7 +693,7 @@ function GenerateImageCredenzaContent({
    );
    const modelId =
       settings?.aiDefaults?.imageGenerationModel ?? "sourceful/riverflow-v2-pro";
-   const modelPrice = getImageGenerationPrice(modelId);
+   const modelPrice = IMAGE_MODEL_DISPLAY_PRICES[modelId] ?? "0.90";
    const modelName = IMAGE_MODEL_NAMES[modelId] ?? modelId;
 
    useEffect(() => {
@@ -784,7 +788,7 @@ function GenerateImageCredenzaContent({
             <CredenzaDescription>
                {phase === "done" && generatedAsset
                   ? `Gerado em ${elapsed}s`
-                  : `${modelName} · ~R$${toMajorUnitsString(modelPrice)} por imagem`}
+                  : `${modelName} · ~R$${modelPrice} por imagem`}
             </CredenzaDescription>
          </CredenzaHeader>
          <CredenzaBody>
