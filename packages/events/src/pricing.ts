@@ -170,7 +170,7 @@ export const EVENT_PRICING: EventPricing[] = [
    {
       eventName: AI_EVENTS["ai.image_generation"],
       category: EVENT_CATEGORIES.ai,
-      pricePerEvent: brl("0.500000"),
+      pricePerEvent: brl("0.900000"),
       freeTierLimit: 5,
       displayName: "AI Image Generation",
       description:
@@ -455,6 +455,8 @@ export const PLAN_CREDIT_BUDGETS: Record<
       platform: brl("50.000000"),
    },
 };
+
+export { IMAGE_MODEL_PRICING, getImageGenerationPrice } from "./utils";
 
 /**
  * Resolve which credit pool an event category belongs to.

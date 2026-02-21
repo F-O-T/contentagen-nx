@@ -13,8 +13,9 @@ import {
 } from "@packages/queue/webhook-delivery";
 import type { Queue } from "bullmq";
 
+import { AI_EVENTS } from "./ai";
 import type { EventCategory } from "./catalog";
-import { getEventPrice } from "./utils";
+import { getEventPrice, getImageGenerationPrice } from "./utils";
 
 export interface EmitEventParams {
    db: DatabaseInstance;
@@ -99,8 +100,11 @@ export async function emitEvent(params: EmitEventParams): Promise<void> {
    } = params;
 
    try {
-      // Look up pricing from the catalog
-      const price = await getEventPrice(db, eventName);
+      const price =
+         eventName === AI_EVENTS["ai.image_generation"] &&
+         typeof properties?.model === "string"
+            ? getImageGenerationPrice(properties.model)
+            : await getEventPrice(db, eventName);
 
       // 1. Store in PostgreSQL (billing source of truth)
       const [storedEvent] = await db

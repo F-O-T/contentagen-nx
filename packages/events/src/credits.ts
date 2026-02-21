@@ -174,24 +174,32 @@ export async function enforceCreditBudget(
 // Track Credit Usage (convenience wrapper)
 // ---------------------------------------------------------------------------
 
+export interface TrackCreditUsageOptions {
+   priceMinorUnits: number;
+}
+
 /**
  * Looks up the event price and increments the credit counter.
  * Safe to call when Redis is unavailable (no-op).
+ * When options.priceMinorUnits is provided, that value is used instead of catalog lookup.
  */
 export async function trackCreditUsage(
    db: DatabaseInstance,
    eventName: string,
    organizationId: string,
    pool: CreditPool,
+   options?: TrackCreditUsageOptions,
 ): Promise<void> {
    const redis = getRedisConnection();
    if (!redis) return;
 
-   const price = await getEventPrice(db, eventName);
+   const priceMinorUnits =
+      options?.priceMinorUnits ??
+      Number((await getEventPrice(db, eventName)).amount);
    await incrementCreditUsage(
       redis,
       organizationId,
       pool,
-      Number(price.amount),
+      priceMinorUnits,
    );
 }

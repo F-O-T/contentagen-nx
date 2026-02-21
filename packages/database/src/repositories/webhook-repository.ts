@@ -1,4 +1,3 @@
-import { randomBytes } from "node:crypto";
 import { AppError, propagateError } from "@packages/utils/errors";
 import { and, desc, eq, sql } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
@@ -13,7 +12,8 @@ import {
  * Generate a 32-byte hex signing secret for webhook endpoints.
  */
 export function generateWebhookSecret(): string {
-   return randomBytes(32).toString("hex");
+   const bytes = crypto.getRandomValues(new Uint8Array(32));
+   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 // ---------------------------------------------------------------------------
