@@ -244,3 +244,40 @@ export const dailyEventCounts = pgMaterializedView("daily_event_counts", {
 	WHERE timestamp >= CURRENT_DATE - INTERVAL '90 days'
 	GROUP BY organization_id, event_name, event_category, DATE(timestamp)
 `);
+
+// ---------------------------------------------------------------------------
+// experiment_daily_stats
+// ---------------------------------------------------------------------------
+
+export const experimentDailyStats = pgMaterializedView(
+   "experiment_daily_stats",
+   {
+      organizationId: uuid("organization_id").notNull(),
+      experimentId: uuid("experiment_id").notNull(),
+      variantId: text("variant_id").notNull(),
+      targetType: text("target_type").notNull(),
+      targetId: uuid("target_id"),
+      date: date("date").notNull(),
+      impressions: integer("impressions").notNull(),
+      conversions: integer("conversions").notNull(),
+   },
+).as(sql`
+   SELECT
+      organization_id,
+      (properties->>'experimentId')::uuid AS experiment_id,
+      properties->>'variantId' AS variant_id,
+      COALESCE(properties->>'targetType', 'content') AS target_type,
+      COALESCE(
+         (properties->>'targetId')::uuid,
+         (properties->>'contentId')::uuid
+      ) AS target_id,
+      DATE(timestamp) AS date,
+      COUNT(*) FILTER (WHERE event_name = 'experiment.started')::int AS impressions,
+      COUNT(*) FILTER (WHERE event_name = 'experiment.conversion')::int AS conversions
+   FROM events
+   WHERE event_category = 'experiment'
+      AND timestamp >= CURRENT_DATE - INTERVAL '90 days'
+      AND properties->>'experimentId' IS NOT NULL
+      AND properties->>'variantId' IS NOT NULL
+   GROUP BY organization_id, experiment_id, variant_id, target_type, target_id, DATE(timestamp)
+`);
