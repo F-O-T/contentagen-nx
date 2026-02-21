@@ -9,12 +9,6 @@ import {
    CredenzaTitle,
 } from "@packages/ui/components/credenza";
 import {
-   Tooltip,
-   TooltipContent,
-   TooltipProvider,
-   TooltipTrigger,
-} from "@packages/ui/components/tooltip";
-import {
    DropdownMenu,
    DropdownMenuContent,
    DropdownMenuItem,
@@ -23,6 +17,12 @@ import {
 import { Input } from "@packages/ui/components/input";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { Textarea } from "@packages/ui/components/textarea";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@packages/ui/components/tooltip";
 import {
    useMutation,
    useQueryClient,
@@ -158,36 +158,36 @@ function AssetCard({
       <div className="flex flex-col rounded-lg overflow-hidden border bg-muted">
          <div className="aspect-square overflow-hidden">
             {isImage ? (
-              <img
-                 alt={asset.alt ?? asset.filename}
-                 className="w-full h-full object-cover"
-                 src={asset.publicUrl}
-              />
+               <img
+                  alt={asset.alt ?? asset.filename}
+                  className="w-full h-full object-cover"
+                  src={asset.publicUrl}
+               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-2">
-                 <FileIcon className="size-8 text-muted-foreground" />
-                 <span className="text-xs text-muted-foreground truncate w-full text-center">
-                    {asset.filename}
-                 </span>
-              </div>
+               <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-2">
+                  <FileIcon className="size-8 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground truncate w-full text-center">
+                     {asset.filename}
+                  </span>
+               </div>
             )}
          </div>
          <TooltipProvider>
             <div className="flex items-center justify-center gap-1 border-t bg-background/80 px-1 py-1.5">
                {isImage && (
-                 <Tooltip>
-                    <TooltipTrigger asChild>
-                       <Button
-                          className="size-8 shrink-0"
-                          onClick={() => onView(asset)}
-                          size="icon"
-                          variant="ghost"
-                       >
-                          <Eye className="size-4" />
-                       </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Visualizar</TooltipContent>
-                 </Tooltip>
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <Button
+                           className="size-8 shrink-0"
+                           onClick={() => onView(asset)}
+                           size="icon"
+                           variant="ghost"
+                        >
+                           <Eye className="size-4" />
+                        </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Visualizar</TooltipContent>
+                  </Tooltip>
                )}
                <Tooltip>
                   <TooltipTrigger asChild>
@@ -310,7 +310,13 @@ function AssetDropzone({ teamId, onUploadComplete }: AssetDropzoneProps) {
             setIsUploading(false);
          }
       },
-      [teamId, generateUploadUrlMutation, completeUploadMutation, queryClient, onUploadComplete],
+      [
+         teamId,
+         generateUploadUrlMutation,
+         completeUploadMutation,
+         queryClient,
+         onUploadComplete,
+      ],
    );
 
    const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -427,7 +433,7 @@ function AssetRenameContent({
       if (!trimmed) return;
       const lastDot = asset.filename.lastIndexOf(".");
       const ext = lastDot >= 0 ? asset.filename.slice(lastDot) : "";
-      const base = ext ? (trimmed.lastIndexOf(".") >= 0 ? trimmed.slice(0, trimmed.lastIndexOf(".")) : trimmed) : trimmed;
+      const base = trimmed;
       const finalFilename = base + ext;
       if (finalFilename === asset.filename) {
          onClose();
@@ -555,7 +561,8 @@ function AssetsGrid({ teamId, search, page, onTotalChange }: AssetsGridProps) {
 
    const invalidateList = useCallback(() => {
       queryClient.invalidateQueries({
-         queryKey: orpc.assets.list.queryOptions({ input: { teamId } }).queryKey,
+         queryKey: orpc.assets.list.queryOptions({ input: { teamId } })
+            .queryKey,
       });
    }, [queryClient, teamId]);
 
@@ -648,7 +655,8 @@ function GenerateImageCredenzaContent({
          onSuccess: () => {
             toast.success("Imagem gerada com sucesso!");
             queryClient.invalidateQueries({
-               queryKey: orpc.assets.list.queryOptions({ input: { teamId } }).queryKey,
+               queryKey: orpc.assets.list.queryOptions({ input: { teamId } })
+                  .queryKey,
             });
             setPrompt("");
             onClose();
@@ -677,7 +685,7 @@ function GenerateImageCredenzaContent({
             </CredenzaDescription>
          </CredenzaHeader>
          <CredenzaBody>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                <Textarea
                   autoFocus
                   disabled={generateMutation.isPending}
@@ -799,8 +807,8 @@ function AssetBankContent() {
                      </DropdownMenuItem>
                   )}
                </DropdownMenuContent>
-         </DropdownMenu>
-            </div>
+            </DropdownMenu>
+         </div>
 
          {/* Search */}
          <div className="relative max-w-sm">
