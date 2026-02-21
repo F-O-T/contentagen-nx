@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/integrations/better-auth/auth-client";
 
@@ -16,12 +16,10 @@ interface UseSetActiveOrganizationOptions {
 export function useSetActiveOrganization(
    options?: UseSetActiveOrganizationOptions,
 ) {
-   const [isPending, setIsPending] = useState(false);
    const showToast = options?.showToast ?? true;
 
    const setActiveOrganization = useCallback(
       async (params: SetActiveOrganizationParams) => {
-         setIsPending(true);
          const toastId = showToast
             ? toast.loading("Switching organization...")
             : undefined;
@@ -43,7 +41,6 @@ export function useSetActiveOrganization(
             }
 
             options?.onSuccess?.();
-
             return result.data;
          } catch (error) {
             const errorMessage =
@@ -57,12 +54,10 @@ export function useSetActiveOrganization(
                error instanceof Error ? error : new Error(errorMessage),
             );
             throw error;
-         } finally {
-            setIsPending(false);
          }
       },
       [options, showToast],
    );
 
-   return { isPending, setActiveOrganization };
+   return { setActiveOrganization };
 }

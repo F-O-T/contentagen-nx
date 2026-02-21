@@ -25,7 +25,7 @@ import {
    useCallback,
    useEffect,
    useImperativeHandle,
-   useState,
+   useTransition,
 } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -52,7 +52,7 @@ interface WorkspaceStepProps {
 
 export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
    function WorkspaceStep({ onNext, onStateChange, onSlugChange }, ref) {
-      const [isPending, setIsPending] = useState(false);
+      const [isPending, startTransition] = useTransition();
 
       const fileUpload = useFileUpload({
          maxSize: MAX_FILE_SIZE,
@@ -131,7 +131,6 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
          },
          onSubmit: async ({ value }) => {
             try {
-               setIsPending(true);
                const slug = createSlug(value.workspaceName);
 
                const result = await authClient.organization.create({
@@ -150,7 +149,6 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
                   organizationId: orgId,
                });
 
-               // Upload logo if selected
                if (fileUpload.selectedFile) {
                   await saveMutation.mutateAsync();
                }
@@ -163,8 +161,6 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
                      ? error.message
                      : "Erro ao criar workspace.",
                );
-            } finally {
-               setIsPending(false);
             }
          },
          validators: { onBlur: workspaceSchema },
@@ -192,9 +188,11 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
          (e: FormEvent) => {
             e.preventDefault();
             e.stopPropagation();
-            form.handleSubmit();
+            startTransition(async () => {
+               await form.handleSubmit();
+            });
          },
-         [form],
+         [form, startTransition],
       );
 
       return (

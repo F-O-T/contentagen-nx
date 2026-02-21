@@ -19,11 +19,7 @@ import {
 } from "@packages/ui/components/item";
 import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import {
-   useMutation,
-   useQueryClient,
-   useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
    Building2,
@@ -35,7 +31,7 @@ import {
    Loader2,
    Users,
 } from "lucide-react";
-import { Suspense, useState } from "react";
+import { Suspense, useTransition, useState } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
 import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
@@ -72,27 +68,28 @@ function DisplayNameSection({
 }) {
    const [name, setName] = useState(currentName);
    const queryClient = useQueryClient();
+   const [isPending, startTransition] = useTransition();
 
-   const renameMutation = useMutation({
-      mutationFn: async () => {
-         await authClient.organization.update({
+   const hasChanged = name.trim() !== currentName && name.trim().length > 0;
+
+   function handleRename() {
+      if (!hasChanged) return;
+      startTransition(async () => {
+         const { error } = await authClient.organization.update({
             data: { name },
             organizationId,
          });
-      },
-      onSuccess: () => {
+         if (error) {
+            toast.error("Erro ao renomear organização");
+            return;
+         }
          toast.success("Organização renomeada com sucesso!");
          queryClient.invalidateQueries({
             queryKey: orpc.organization.getActiveOrganization.queryOptions({})
                .queryKey,
          });
-      },
-      onError: () => {
-         toast.error("Erro ao renomear organização");
-      },
-   });
-
-   const hasChanged = name.trim() !== currentName && name.trim().length > 0;
+      });
+   }
 
    return (
       <section className="space-y-3">
@@ -109,11 +106,11 @@ function DisplayNameSection({
                value={name}
             />
             <Button
-               disabled={!hasChanged || renameMutation.isPending}
-               onClick={() => renameMutation.mutate()}
+               disabled={!hasChanged || isPending}
+               onClick={handleRename}
                size="sm"
             >
-               {renameMutation.isPending && (
+               {isPending && (
                   <Loader2 className="size-4 mr-2 animate-spin" />
                )}
                Renomear organização

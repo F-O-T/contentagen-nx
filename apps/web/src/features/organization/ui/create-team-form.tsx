@@ -13,7 +13,7 @@ import { Textarea } from "@packages/ui/components/textarea";
 import { useForm } from "@tanstack/react-form";
 import { AlertTriangle } from "lucide-react";
 import type { FC, FormEvent } from "react";
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useTransition } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -52,7 +52,7 @@ function CreateTeamSkeleton() {
 const CreateTeamFormContent = () => {
    const { closeSheet } = useSheet();
    const { activeOrganization } = useActiveOrganization();
-   const [isPending, setIsPending] = useState(false);
+   const [isPending, startTransition] = useTransition();
 
    const createTeam = useCallback(
       async (data: {
@@ -60,27 +60,18 @@ const CreateTeamFormContent = () => {
          description?: string;
          organizationId?: string;
       }) => {
-         await authClient.organization.createTeam(
-            {
-               name: data.name,
-               organizationId: data.organizationId,
-            },
-            {
-               onRequest: () => {
-                  setIsPending(true);
-                  toast.loading("Creating team...");
-               },
-               onSuccess: () => {
-                  setIsPending(false);
-                  toast.success("Team created successfully");
-                  closeSheet();
-               },
-               onError: (ctx) => {
-                  setIsPending(false);
-                  toast.error(ctx.error.message || "Failed to create team");
-               },
-            },
-         );
+         toast.loading("Creating team...");
+         const result = await authClient.organization.createTeam({
+            name: data.name,
+            organizationId: data.organizationId,
+         });
+
+         if (result.error) {
+            toast.error(result.error.message || "Failed to create team");
+            return;
+         }
+         toast.success("Team created successfully");
+         closeSheet();
       },
       [closeSheet],
    );
@@ -120,7 +111,9 @@ const CreateTeamFormContent = () => {
    const handleSubmit = (e: FormEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      form.handleSubmit();
+      startTransition(async () => {
+         await form.handleSubmit();
+      });
    };
 
    return (
@@ -195,7 +188,11 @@ const CreateTeamFormContent = () => {
                         formState.isSubmitting ||
                         isPending
                      }
-                     onClick={() => form.handleSubmit()}
+                     onClick={() => {
+                        startTransition(async () => {
+                           await form.handleSubmit();
+                        });
+                     }}
                      type="submit"
                   >
                      {isPending ? "Creating..." : "Create Team"}
