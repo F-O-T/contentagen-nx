@@ -6,7 +6,7 @@ import {
    SidebarProvider,
 } from "@packages/ui/components/sidebar";
 import { cn } from "@packages/ui/lib/utils";
-import { useLocalStorage } from "@uidotdev/usehooks";
+import { useSafeLocalStorage } from "@/hooks/use-local-storage";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import type * as React from "react";
@@ -33,7 +33,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const setTeamForOrgRef = useRef(new Set<string>());
    const { pathname } = useLocation();
 
-   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage<boolean>(
+   const [sidebarCollapsed, setSidebarCollapsed] = useSafeLocalStorage<boolean>(
       "contentta:sidebar-collapsed",
       false,
    );
