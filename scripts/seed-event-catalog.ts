@@ -3,6 +3,7 @@ import * as path from "node:path";
 import { createDb } from "@packages/database/client";
 import { eventCatalog } from "@packages/database/schemas/event-catalog";
 import { AI_EVENTS } from "@packages/events/ai";
+import { ASSET_EVENTS } from "@packages/events/assets";
 import { EVENT_CATEGORIES } from "@packages/events/catalog";
 import { CONTENT_EVENTS } from "@packages/events/content";
 import { DASHBOARD_EVENTS } from "@packages/events/dashboard";
@@ -73,6 +74,10 @@ const EVENT_PRICING: EventPricing[] = [
    { eventName: INSIGHT_EVENTS["insight.created"], category: EVENT_CATEGORIES.insight, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Insight Created", description: "Fired when a new insight is created.", isBillable: false },
    { eventName: INSIGHT_EVENTS["insight.updated"], category: EVENT_CATEGORIES.insight, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Insight Updated", description: "Fired when an insight is updated.", isBillable: false },
    { eventName: INSIGHT_EVENTS["insight.deleted"], category: EVENT_CATEGORIES.insight, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Insight Deleted", description: "Fired when an insight is deleted.", isBillable: false },
+   // Assets
+   { eventName: ASSET_EVENTS["asset.upload_completed"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000500", freeTierLimit: 500, displayName: "Asset Uploaded", description: "Fired when a file asset is uploaded and processing completes.", isBillable: true },
+   { eventName: ASSET_EVENTS["asset.deleted"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Asset Deleted", description: "Fired when a file asset is permanently deleted.", isBillable: false },
+   { eventName: ASSET_EVENTS["asset.thumbnail_generated"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000100", freeTierLimit: 1_000, displayName: "Thumbnail Generated", description: "Fired when an image thumbnail is generated for an uploaded asset.", isBillable: true },
 ];
 
 function toSeedEntry(pricing: EventPricing) {
