@@ -28,7 +28,7 @@ import {
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertTriangle, Trash2 } from "lucide-react";
-import { useTransition, useState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";

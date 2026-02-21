@@ -48,7 +48,10 @@ export function FeatureStageBadgeShowcase() {
             <div className="flex items-center gap-4">
                <div className="w-32 text-sm font-medium">Disponível</div>
                <FeatureStageBadge stage="general-availability" />
-               <FeatureStageBadge showIcon={false} stage="general-availability" />
+               <FeatureStageBadge
+                  showIcon={false}
+                  stage="general-availability"
+               />
             </div>
          </div>
 

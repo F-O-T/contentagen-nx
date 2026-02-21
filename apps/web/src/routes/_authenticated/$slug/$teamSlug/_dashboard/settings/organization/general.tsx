@@ -31,7 +31,7 @@ import {
    Loader2,
    Users,
 } from "lucide-react";
-import { Suspense, useTransition, useState } from "react";
+import { Suspense, useState, useTransition } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
 import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
@@ -110,9 +110,7 @@ function DisplayNameSection({
                onClick={handleRename}
                size="sm"
             >
-               {isPending && (
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-               )}
+               {isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
                Renomear organização
             </Button>
          </div>

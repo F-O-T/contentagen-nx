@@ -27,7 +27,7 @@
    "scripts": {
       "build": "bun build --compile --minify-whitespace --minify-syntax --target bun --outfile sdk-server ./src/index.ts",
       "check": "bunx --bun biome check --write .",
-      "container-start": "podman-compose down && podman-compose up -d",
+      "container-start": "(command -v podman-compose > /dev/null 2>&1 && podman-compose -f ../web/docker-compose.yml down && podman-compose -f ../web/docker-compose.yml up -d) || (docker-compose -f ../web/docker-compose.yml down && docker-compose -f ../web/docker-compose.yml up -d)",
       "dev": "bun run container-start && bun run --watch src/index.ts",
       "format": "biome format",
       "start": "./sdk-server",
