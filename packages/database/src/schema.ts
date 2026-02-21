@@ -12,6 +12,8 @@ export * from "./schemas/auth";
 export * from "./schemas/chat";
 export * from "./schemas/content";
 export * from "./schemas/dashboards";
+// Discussions
+export * from "./schemas/discussions";
 // Data sources
 export * from "./schemas/data-sources";
 export * from "./schemas/event-catalog";

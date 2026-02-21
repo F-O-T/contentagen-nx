@@ -91,6 +91,9 @@ export function Comment(props: {
         return discussion;
       });
     editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
+    // Persist
+    const callbacks = editor.getOption(discussionPlugin, 'callbacks');
+    await callbacks.onResolveDiscussion?.(id);
   };
 
   const removeDiscussion = async (id: string) => {
@@ -98,6 +101,9 @@ export function Comment(props: {
       .getOption(discussionPlugin, 'discussions')
       .filter((discussion) => discussion.id !== id);
     editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
+    // Persist
+    const callbacks = editor.getOption(discussionPlugin, 'callbacks');
+    await callbacks.onRemoveDiscussion?.(id);
   };
 
   const updateComment = async (input: {
@@ -126,6 +132,9 @@ export function Comment(props: {
         return discussion;
       });
     editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
+    // Persist
+    const callbacks = editor.getOption(discussionPlugin, 'callbacks');
+    await callbacks.onUpdateComment?.(input.id, input.contentRich);
   };
 
   const { tf } = useEditorPlugin(CommentPlugin);
@@ -340,6 +349,10 @@ function CommentMoreDropdown(props: {
     // Save back to session storage
     editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
     onRemoveComment?.();
+
+    // Persist
+    const callbacks = editor.getOption(discussionPlugin, 'callbacks');
+    void callbacks.onDeleteComment?.(comment.id, comment.discussionId);
   }, [comment.discussionId, comment.id, editor, onRemoveComment]);
 
   const onEditComment = React.useCallback(() => {
@@ -470,6 +483,9 @@ export function CommentCreateForm({
           ...discussions,
           newDiscussion,
         ]);
+        // Persist
+        const cbA = editor.getOption(discussionPlugin, 'callbacks');
+        await cbA.onCreateDiscussion?.(newDiscussion);
         return;
       }
 
@@ -495,6 +511,9 @@ export function CommentCreateForm({
         .concat(updatedDiscussion);
 
       editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
+      // Persist
+      const cbB = editor.getOption(discussionPlugin, 'callbacks');
+      await cbB.onAddReply?.(discussionId, comment);
 
       return;
     }
@@ -533,6 +552,9 @@ export function CommentCreateForm({
       ...discussions,
       newDiscussion,
     ]);
+    // Persist
+    const cbC = editor.getOption(discussionPlugin, 'callbacks');
+    await cbC.onCreateDiscussion?.(newDiscussion);
 
     const id = newDiscussion.id;
 
