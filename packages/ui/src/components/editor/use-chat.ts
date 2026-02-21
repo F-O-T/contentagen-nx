@@ -12,7 +12,7 @@ import {
 import { getCommentKey, getTransientCommentKey } from '@platejs/comment';
 import { deserializeMd } from '@platejs/markdown';
 import { BlockSelectionPlugin } from '@platejs/selection/react';
-import { type UIMessage, DefaultChatTransport } from 'ai';
+import { type UIMessage, DefaultChatTransport, type ChatTransport } from 'ai';
 import { type TNode, KEYS, nanoid, NodeApi, TextApi } from 'platejs';
 import { type PlateEditor, useEditorRef, usePluginOption } from 'platejs/react';
 
@@ -63,11 +63,16 @@ export const useChat = () => {
     }
   };
 
+  // If a custom transport is provided via chatOptions, use it directly.
+  // This allows app-level plugins to inject an oRPC transport without
+  // needing an HTTP endpoint.
+  const customTransport = (options as { transport?: ChatTransport<ChatMessage> }).transport;
+
   const baseChat = useBaseChat<ChatMessage>({
     id: 'editor',
-    transport: new DefaultChatTransport({
+    transport: customTransport ?? new DefaultChatTransport({
       api: options.api || '/api/ai/command',
-      // Mock the API response. Remove it when you implement the route /api/ai/command
+      // Fallback: mock the API response when no real endpoint exists.
       fetch: (async (input, init) => {
         const bodyOptions = editor.getOptions(aiChatPlugin).chatOptions?.body;
 
