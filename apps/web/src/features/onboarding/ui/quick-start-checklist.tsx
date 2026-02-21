@@ -7,6 +7,7 @@ import {
    CardTitle,
 } from "@packages/ui/components/card";
 import { Progress } from "@packages/ui/components/progress";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import { useParams } from "@tanstack/react-router";
 import { ChevronDown, ChevronUp, Rocket, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
@@ -23,33 +24,6 @@ import { QuickStartTask } from "./quick-start-task";
 
 const CHECKLIST_HIDDEN_STORAGE_KEY = "contentta:checklist_hidden";
 
-function getChecklistHidden(slug: string): boolean {
-   try {
-      const stored = localStorage.getItem(CHECKLIST_HIDDEN_STORAGE_KEY);
-      if (!stored) return false;
-      const parsed = JSON.parse(stored) as Record<string, boolean>;
-      return parsed[slug] === true;
-   } catch {
-      return false;
-   }
-}
-
-function setChecklistHidden(slug: string): void {
-   try {
-      const stored = localStorage.getItem(CHECKLIST_HIDDEN_STORAGE_KEY);
-      const parsed = stored
-         ? (JSON.parse(stored) as Record<string, boolean>)
-         : {};
-      parsed[slug] = true;
-      localStorage.setItem(
-         CHECKLIST_HIDDEN_STORAGE_KEY,
-         JSON.stringify(parsed),
-      );
-   } catch {
-      // Silently fail if localStorage is not available
-   }
-}
-
 /**
  * Quick Start checklist card for the home page.
  * Shows onboarding tasks grouped by product with progress tracking.
@@ -60,9 +34,10 @@ export function QuickStartChecklist() {
    const completeTaskMutation = useCompleteTask();
    const { slug } = useParams({ strict: false });
    const [isCollapsed, setIsCollapsed] = useState(false);
-   const [isHidden, setIsHidden] = useState(() =>
-      getChecklistHidden(slug ?? ""),
-   );
+   const [hiddenBySlug, setHiddenBySlug] = useLocalStorage<
+      Record<string, boolean>
+   >(CHECKLIST_HIDDEN_STORAGE_KEY, {});
+   const isHidden = (slug && hiddenBySlug[slug]) === true;
 
    const tasks = useMemo(
       () => getTasksForProducts(status?.onboardingProducts ?? null),
@@ -145,10 +120,9 @@ export function QuickStartChecklist() {
 
    const handleHide = useCallback(() => {
       if (slug) {
-         setChecklistHidden(slug);
+         setHiddenBySlug((prev) => ({ ...prev, [slug]: true }));
       }
-      setIsHidden(true);
-   }, [slug]);
+   }, [slug, setHiddenBySlug]);
 
    // Determine visibility
    if (!status.onboardingCompleted) return null;

@@ -19,6 +19,7 @@ import {
 } from "@packages/ui/components/item";
 import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { useCopyToClipboard } from "@uidotdev/usehooks";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
@@ -31,7 +32,7 @@ import {
    Loader2,
    Users,
 } from "lucide-react";
-import { Suspense, useTransition, useState } from "react";
+import { Suspense, useTransition } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
 import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
@@ -301,13 +302,12 @@ function OrganizationDetailsSection({
    createdAt: Date | string | null;
    plan: string | null;
 }) {
-   const [copied, setCopied] = useState(false);
+   const [lastCopied, copy] = useCopyToClipboard();
+   const copied = lastCopied === slug;
 
    const handleCopySlug = () => {
-      navigator.clipboard.writeText(slug);
-      setCopied(true);
+      copy(slug);
       toast.success("Slug copiado!");
-      setTimeout(() => setCopied(false), 2000);
    };
 
    return (

@@ -62,6 +62,7 @@
       "@tanstack/react-table": "catalog:tanstack",
       "@tanstack/router-plugin": "catalog:tanstack",
       "@tanstack/store": "catalog:tanstack",
+      "@uidotdev/usehooks": "^2.4.1",
       "ai": "^6.0.97",
       "better-auth": "catalog:auth",
       "clsx": "catalog:ui",

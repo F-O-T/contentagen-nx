@@ -12,9 +12,10 @@ import {
 } from "@packages/ui/components/credenza";
 import { Input } from "@packages/ui/components/input";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { useDebounce } from "@uidotdev/usehooks";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { FileIcon, ImageIcon, Search, X } from "lucide-react";
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useState } from "react";
 import { orpc } from "@/integrations/orpc/client";
 
 // ============================================================
@@ -153,21 +154,15 @@ export function AssetBankModal({
 }: AssetBankModalProps) {
    const [open, setOpen] = useState(false);
    const [search, setSearch] = useState("");
-   const [debouncedSearch, setDebouncedSearch] = useState("");
+   const debouncedSearch = useDebounce(search, 300);
    const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
-   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
    const handleSearchChange = (value: string) => {
       setSearch(value);
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-         setDebouncedSearch(value);
-      }, 300);
    };
 
    const handleClearSearch = () => {
       setSearch("");
-      setDebouncedSearch("");
    };
 
    const handleSelect = (asset: Asset) => {
@@ -180,7 +175,6 @@ export function AssetBankModal({
       setOpen(false);
       setSelectedAsset(null);
       setSearch("");
-      setDebouncedSearch("");
    };
 
    const handleOpenChange = (next: boolean) => {
@@ -188,7 +182,6 @@ export function AssetBankModal({
       if (!next) {
          setSelectedAsset(null);
          setSearch("");
-         setDebouncedSearch("");
       }
    };
 

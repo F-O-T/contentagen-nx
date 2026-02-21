@@ -40,7 +40,7 @@ vi.mock("@/hooks/use-active-team", () => ({
 
 vi.mock("@/hooks/use-last-organization", () => ({
    useLastOrganization: () => ({
-      getLastSlug: vi.fn(),
+      lastSlug: null,
       setLastSlug: vi.fn(),
    }),
 }));
