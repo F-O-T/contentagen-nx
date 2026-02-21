@@ -43,9 +43,23 @@ import { useChat } from '@packages/ui/components/editor/use-chat';
  */
 export class ORPCChatTransport implements ChatTransport<UIMessage> {
   private contentId: string | undefined;
+  private writerId: string | undefined;
+  private model: string | undefined;
+  private language: string | undefined;
 
-  constructor(options?: { contentId?: string }) {
+  constructor(options?: { contentId?: string; writerId?: string; model?: string; language?: string }) {
     this.contentId = options?.contentId;
+    this.writerId = options?.writerId;
+    this.model = options?.model;
+    this.language = options?.language;
+  }
+
+  /** Dynamically inject per-content context (called from useEditorAIChat). */
+  setContext(options: { contentId?: string; writerId?: string; model?: string; language?: string }) {
+    this.contentId = options.contentId;
+    this.writerId = options.writerId;
+    this.model = options.model;
+    this.language = options.language;
   }
 
   async sendMessages({
@@ -64,6 +78,9 @@ export class ORPCChatTransport implements ChatTransport<UIMessage> {
     }
 
     const contentId = this.contentId;
+    const writerId = this.writerId;
+    const model = this.model;
+    const language = this.language;
 
     return new ReadableStream<UIMessageChunk>({
       async start(controller) {
@@ -77,6 +94,9 @@ export class ORPCChatTransport implements ChatTransport<UIMessage> {
           const stream = await client.agent.aiCommandStream({
             prompt,
             contentId,
+            writerId,
+            model,
+            language,
           });
 
           if (Symbol.asyncIterator in stream) {
@@ -118,7 +138,7 @@ export class ORPCChatTransport implements ChatTransport<UIMessage> {
 // Create a singleton transport instance. contentId can be injected when the
 // Plate editor is instantiated with a specific content context by creating a
 // new ORPCChatTransport({ contentId }) and passing it via chatOptions.transport.
-const orpcChatTransport = new ORPCChatTransport();
+export const orpcChatTransport = new ORPCChatTransport();
 
 // ---------------------------------------------------------------------------
 // Plugin config

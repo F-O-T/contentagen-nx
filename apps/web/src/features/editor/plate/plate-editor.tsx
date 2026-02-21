@@ -1,8 +1,11 @@
+'use client';
+
 /**
- * PlateEditor — minimal Plate.js editor component.
+ * PlateEditor — Plate.js editor component with AI and Copilot plugins.
  *
  * Runs alongside the existing Lexical editor during migration.
- * Provides basic rich-text editing with heading, marks, and list support.
+ * Provides rich-text editing with heading, marks, list support, AI chat
+ * (mod+j), and ghost-text copilot suggestions (Tab to accept).
  */
 
 import {
@@ -14,12 +17,21 @@ import type { Value } from "platejs";
 import { Plate, PlateContent, usePlateEditor } from "platejs/react";
 import { cn } from "@packages/ui/lib/utils";
 
+import { AIKit } from "./plugins/ai-kit";
+import { CopilotKit } from "./plugins/copilot-kit";
+import { useEditorAIChat } from "./hooks/use-editor-ai-chat";
+
 export interface PlateEditorProps {
    initialValue?: Value;
    onChange?: (value: Value) => void;
    placeholder?: string;
    editable?: boolean;
    className?: string;
+   /** Content-level context forwarded to the AI chat transport. */
+   contentId?: string;
+   writerId?: string;
+   model?: string;
+   language?: string;
 }
 
 export function PlateEditor({
@@ -28,9 +40,27 @@ export function PlateEditor({
    placeholder = "Start writing…",
    editable = true,
    className,
+   contentId,
+   writerId,
+   model,
+   language,
 }: PlateEditorProps) {
+   // Inject per-content context into the ORPCChatTransport singleton so every
+   // AI command carries the correct contentId / writerId / model / language.
+   useEditorAIChat({ contentId, writerId, model, language });
+
    const editor = usePlateEditor({
-      plugins: [BasicBlocksPlugin, BasicMarksPlugin, LinkPlugin],
+      plugins: [
+         BasicBlocksPlugin,
+         BasicMarksPlugin,
+         LinkPlugin,
+         // AIPlugin + AIChatPlugin wired to oRPC aiCommandStream.
+         // Includes CursorOverlayKit and MarkdownKit as dependencies.
+         ...AIKit,
+         // CopilotPlugin with ghost-text suggestions via oRPC copilotStream.
+         // Includes MarkdownKit as a dependency (de-duped by Plate).
+         ...CopilotKit,
+      ],
       value: initialValue,
    });
 
