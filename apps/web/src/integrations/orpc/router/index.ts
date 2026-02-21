@@ -10,6 +10,7 @@ import * as chatRouter from "./chat";
 import * as contentRouter from "./content";
 import * as contentAnalyticsRouter from "./content-analytics";
 import * as dashboardsRouter from "./dashboards";
+import * as discussionsRouter from "./discussions";
 import * as dataSourcesRouter from "./data-sources";
 import * as eventCatalogRouter from "./event-catalog";
 import * as feedbackRouter from "./feedback";
@@ -41,6 +42,7 @@ export default {
    content: contentRouter,
    contentAnalytics: contentAnalyticsRouter,
    dashboards: dashboardsRouter,
+   discussions: discussionsRouter,
    dataSources: dataSourcesRouter,
    eventCatalog: eventCatalogRouter,
    feedback: feedbackRouter,
