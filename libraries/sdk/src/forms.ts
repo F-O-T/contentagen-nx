@@ -201,7 +201,14 @@ export class ContenttaFormsClient {
 
 	// ── Public API ──────────────────────────────────────────────
 
-	async embedForm(formId: string, containerId: string): Promise<void> {
+	async embedForm(
+		formId: string,
+		containerId: string,
+		options?: {
+			experimentId?: string;
+			variantId?: string;
+		},
+	): Promise<void> {
 		const container = document.getElementById(containerId);
 		if (!container) {
 			console.error(
@@ -247,7 +254,19 @@ export class ContenttaFormsClient {
 			referrer: typeof document !== "undefined" ? document.referrer : "",
 		});
 
-		this.setupFormHandler(formId, container);
+		// Track experiment impression if this form is part of an A/B test
+		if (options?.experimentId) {
+			this.tracker.track("experiment.started", {
+				targetType: "form",
+				targetId: formId,
+				experimentId: options.experimentId,
+				variantId: options.variantId ?? "control",
+				visitorId: this.tracker.getVisitorId(),
+				sessionId: this.tracker.getSessionId(),
+			});
+		}
+
+		this.setupFormHandler(formId, container, options);
 	}
 
 	// ── Rendering ───────────────────────────────────────────────
@@ -372,7 +391,11 @@ export class ContenttaFormsClient {
 
 	// ── Form Submission ─────────────────────────────────────────
 
-	private setupFormHandler(formId: string, container: HTMLElement): void {
+	private setupFormHandler(
+		formId: string,
+		container: HTMLElement,
+		options?: { experimentId?: string; variantId?: string },
+	): void {
 		const formElement = container.querySelector<HTMLFormElement>(
 			".contentta-form__form",
 		);
@@ -417,6 +440,10 @@ export class ContenttaFormsClient {
 					referrer: typeof document !== "undefined" ? document.referrer : "",
 					url: typeof window !== "undefined" ? window.location.href : "",
 				},
+				...(options?.experimentId && {
+					experimentId: options.experimentId,
+					variantId: options.variantId ?? "control",
+				}),
 			};
 
 			// Use oRPC client to submit form
