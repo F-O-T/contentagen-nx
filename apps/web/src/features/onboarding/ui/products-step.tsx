@@ -13,6 +13,7 @@ import {
    useCallback,
    useEffect,
    useImperativeHandle,
+   useTransition,
    useState,
 } from "react";
 import { toast } from "sonner";
@@ -88,7 +89,7 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
       ref,
    ) {
       const [selected, setSelected] = useState<Product[]>([]);
-      const [isPending, setIsPending] = useState(false);
+      const [isPending, startTransition] = useTransition();
 
       const toggleProduct = useCallback((productId: Product) => {
          setSelected((prev) =>
@@ -98,31 +99,31 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
          );
       }, []);
 
-      const handleComplete = useCallback(async () => {
-         try {
-            setIsPending(true);
+      const handleComplete = useCallback(() => {
+         return new Promise<boolean>((resolve) => {
+            startTransition(async () => {
+               try {
+                  const result =
+                     await orpc.onboarding.completeOnboarding.call({
+                        products: selected,
+                     });
 
-            // Call oRPC procedure to complete onboarding (creates dashboard + insights)
-            const result = await orpc.onboarding.completeOnboarding.call({
-               products: selected,
+                  await authClient.organization.setActiveTeam({ teamId });
+
+                  toast.success("Onboarding concluído!");
+                  onComplete(result.slug, teamSlug);
+                  resolve(true);
+               } catch (error) {
+                  toast.error(
+                     error instanceof Error
+                        ? error.message
+                        : "Erro ao concluir onboarding.",
+                  );
+                  resolve(false);
+               }
             });
-
-            await authClient.organization.setActiveTeam({ teamId });
-
-            toast.success("Onboarding concluído!");
-            onComplete(result.slug, teamSlug);
-            return true;
-         } catch (error) {
-            toast.error(
-               error instanceof Error
-                  ? error.message
-                  : "Erro ao concluir onboarding.",
-            );
-            return false;
-         } finally {
-            setIsPending(false);
-         }
-      }, [selected, organizationId, teamId, teamSlug, onComplete]);
+         });
+      }, [selected, teamId, teamSlug, onComplete]);
 
       const canContinue = selected.length > 0;
 
