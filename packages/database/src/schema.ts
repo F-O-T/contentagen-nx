@@ -25,6 +25,8 @@ export * from "./schemas/events";
 export * from "./schemas/export-log";
 // Forms
 export * from "./schemas/forms";
+// Experiments
+export * from "./schemas/experiments";
 export * from "./schemas/insights";
 // Instruction memory schemas
 export * from "./schemas/instruction-memory";
