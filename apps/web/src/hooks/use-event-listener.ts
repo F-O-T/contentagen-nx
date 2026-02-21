@@ -1,5 +1,5 @@
 import type { RefObject } from "react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export function useEventListener<K extends keyof WindowEventMap>(
    eventName: K,
@@ -11,6 +11,9 @@ export function useEventListener<K extends keyof WindowEventMap>(
       typeof document !== "undefined" ? document : (null as Document | null);
    const defaultTarget = target ?? resolved;
 
+   const handlerRef = useRef(handler);
+   handlerRef.current = handler;
+
    useEffect(() => {
       const el =
          defaultTarget === null
@@ -19,8 +22,9 @@ export function useEventListener<K extends keyof WindowEventMap>(
                ? defaultTarget.current
                : defaultTarget;
       if (!el) return;
-      el.addEventListener(eventName, handler as EventListener, options);
+      const stableHandler = (e: WindowEventMap[K]) => handlerRef.current(e);
+      el.addEventListener(eventName, stableHandler as EventListener, options);
       return () =>
-         el.removeEventListener(eventName, handler as EventListener, options);
-   }, [eventName, handler, defaultTarget, options]);
+         el.removeEventListener(eventName, stableHandler as EventListener, options);
+   }, [eventName, defaultTarget, options]);
 }

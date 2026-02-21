@@ -47,7 +47,7 @@ export function EarlyAccessProvider({ children }: { children: ReactNode }) {
          .map((f) => f.flagKey)
          .filter((k): k is string => k !== null);
       setDismissedFlagsState(allFlagKeys);
-   }, [features]);
+   }, [features, setDismissedFlagsState]);
 
    const value = useMemo<EarlyAccessContextValue>(
       () => ({

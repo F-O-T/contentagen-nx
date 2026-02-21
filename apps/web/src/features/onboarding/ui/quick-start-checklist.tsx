@@ -122,7 +122,7 @@ export function QuickStartChecklist() {
       if (slug) {
          setHiddenBySlug((prev) => ({ ...prev, [slug]: true }));
       }
-   }, [slug]);
+   }, [slug, setHiddenBySlug]);
 
    // Determine visibility
    if (!status.onboardingCompleted) return null;

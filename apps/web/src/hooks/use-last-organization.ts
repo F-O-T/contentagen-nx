@@ -8,7 +8,7 @@ export function useLastOrganization() {
       null,
    );
    return {
-      getLastSlug: () => lastSlug,
+      lastSlug,
       setLastSlug: (slug: string) => setLastSlug(slug),
    };
 }
