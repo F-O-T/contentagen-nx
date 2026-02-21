@@ -432,6 +432,43 @@ import { AlertDialog } from "@packages/ui/components/alert-dialog";
 
 ---
 
+## SSR-Safe Browser Hooks
+
+`@uidotdev/usehooks` hooks that access browser APIs (`useMediaQuery`, `useLocalStorage`) crash on the server. Use project-local SSR-safe wrappers instead.
+
+**Wrappers:**
+- `useSafeMediaQuery(query)` → `@packages/ui/hooks/use-media-query`
+- `useSafeLocalStorage<T>(key, initialValue)` → `@/hooks/use-local-storage` (apps/web only)
+
+Both use `useIsomorphicLayoutEffect` from `@dnd-kit/utilities` (runs as `useLayoutEffect` on client, `useEffect` on server — eliminates flash between SSR value and real value).
+
+**Pattern rules:**
+```typescript
+// ✅ Viewport breakpoint checks → use useIsMobile() (single source of truth)
+import { useIsMobile } from "@packages/ui/hooks/use-mobile";
+const isMobile = useIsMobile();
+const isDesktop = !isMobile; // inverse of (max-width: 767px)
+
+// ✅ Non-breakpoint media queries (PWA display-mode, prefers-color-scheme, etc.)
+import { useSafeMediaQuery } from "@packages/ui/hooks/use-media-query";
+const isStandalone = useSafeMediaQuery("(display-mode: standalone)");
+
+// ✅ localStorage persistence
+import { useSafeLocalStorage } from "@/hooks/use-local-storage";
+const [value, setValue] = useSafeLocalStorage("my-key", defaultValue);
+
+// ❌ Never use these directly — SSR-unsafe
+import { useMediaQuery, useLocalStorage } from "@uidotdev/usehooks";
+```
+
+**Safe to use directly from `@uidotdev/usehooks`** (no browser APIs during render):
+- `useDebounce` — pure JS timing
+- `useCopyToClipboard` — only called in event handlers
+
+**Navigator/window checks in hooks:** wrap in `useIsomorphicLayoutEffect` from `@dnd-kit/utilities`, never in render body.
+
+---
+
 ## Events & Credits (packages/events/)
 
 File-per-category pattern: `content.ts`, `ai.ts`, `forms.ts`, `seo.ts`, `emit.ts`, `credits.ts`

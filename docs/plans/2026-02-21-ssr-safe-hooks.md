@@ -4,7 +4,7 @@
 
 **Goal:** Replace SSR-unsafe `@uidotdev/usehooks` hooks (`useMediaQuery`, `useLocalStorage`) with minimal in-project wrappers that return stable server-safe values, eliminating hydration mismatches.
 
-**Architecture:** Create two small hook files — `useSafeMediaQuery` in `packages/ui` and `useSafeLocalStorage` in `apps/web` — then update all 7 call sites. The safe versions start with a `false`/initial-value default on the server, then update on client mount via `useEffect`. This avoids any `window is not defined` crashes and eliminates hydration mismatches.
+**Architecture:** Create two small hook files — `useSafeMediaQuery` in `packages/ui` and `useSafeLocalStorage` in `apps/web` — then update all 7 call sites. The safe versions start with a `false`/initial-value default on the server, then update synchronously on client mount via `useIsomorphicLayoutEffect` (from `@dnd-kit/utilities`). Using `useIsomorphicLayoutEffect` instead of `useEffect` eliminates the flash between SSR and client values by running synchronously during the layout phase on the client.
 
 **Tech Stack:** React 19, TanStack Router (with `ClientOnly`), `@uidotdev/usehooks` (kept for safe hooks: `useDebounce`, `useCopyToClipboard`)
 
@@ -37,17 +37,18 @@
 ### Step 1: Write the file
 
 ```typescript
-import { useEffect, useState } from "react";
+import { useIsomorphicLayoutEffect } from "@dnd-kit/utilities";
+import { useState } from "react";
 
 /**
  * SSR-safe replacement for useMediaQuery.
  * Returns `false` on the server and during the first client render,
- * then updates to the real match after mount.
+ * then updates synchronously on client mount via useIsomorphicLayoutEffect.
  */
 export function useSafeMediaQuery(query: string): boolean {
    const [matches, setMatches] = useState(false);
 
-   useEffect(() => {
+   useIsomorphicLayoutEffect(() => {
       const media = window.matchMedia(query);
       setMatches(media.matches);
 
@@ -82,14 +83,16 @@ git commit -m "feat(ui): add SSR-safe useSafeMediaQuery hook"
 ### Step 1: Write the file
 
 ```typescript
-import { useCallback, useEffect, useState } from "react";
+import { useIsomorphicLayoutEffect } from "@dnd-kit/utilities";
+import { useCallback, useState } from "react";
 
 type SetValue<T> = (value: T | ((prev: T) => T)) => void;
 
 /**
  * SSR-safe replacement for useLocalStorage.
  * Returns initialValue on the server and during the first client render,
- * then syncs with localStorage after mount.
+ * then syncs with localStorage synchronously on client mount via
+ * useIsomorphicLayoutEffect (prevents flash between server and real value).
  */
 export function useSafeLocalStorage<T>(
    key: string,
@@ -97,7 +100,7 @@ export function useSafeLocalStorage<T>(
 ): [T, SetValue<T>] {
    const [storedValue, setStoredValue] = useState<T>(initialValue);
 
-   useEffect(() => {
+   useIsomorphicLayoutEffect(() => {
       try {
          const item = window.localStorage.getItem(key);
          if (item !== null) {
@@ -188,6 +191,8 @@ git commit -m "fix(ui): make useIsMobile SSR-safe"
 **Files:**
 - Modify: `packages/ui/src/components/credenza.tsx`
 
+`Credenza` uses `(min-width: 768px)` to decide desktop vs mobile — this is exactly the inverse of `useIsMobile()`. Use that instead of calling `useSafeMediaQuery` directly.
+
 ### Step 1: Replace the import
 
 Change line 21:
@@ -196,7 +201,7 @@ Change line 21:
 import { useMediaQuery } from "@uidotdev/usehooks";
 
 // After
-import { useSafeMediaQuery } from "@packages/ui/hooks/use-media-query";
+import { useIsMobile } from "@packages/ui/hooks/use-mobile";
 ```
 
 Change line 54:
@@ -205,7 +210,8 @@ Change line 54:
 const isDesktop = useMediaQuery("(min-width: 768px)");
 
 // After
-const isDesktop = useSafeMediaQuery("(min-width: 768px)");
+const isMobile = useIsMobile();
+const isDesktop = !isMobile;
 ```
 
 ### Step 2: Typecheck
@@ -217,7 +223,7 @@ Expected: no errors.
 ### Step 3: Commit
 ```bash
 git add packages/ui/src/components/credenza.tsx
-git commit -m "fix(ui): make Credenza SSR-safe via useSafeMediaQuery"
+git commit -m "fix(ui): make Credenza SSR-safe via useIsMobile"
 ```
 
 ---
@@ -251,8 +257,9 @@ export function useIsStandalone() {
 
 New content:
 ```typescript
+import { useIsomorphicLayoutEffect } from "@dnd-kit/utilities";
 import { useSafeMediaQuery } from "@packages/ui/hooks/use-media-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function useIsStandalone() {
    const isStandaloneMedia = useSafeMediaQuery("(display-mode: standalone)");
@@ -261,7 +268,7 @@ export function useIsStandalone() {
    );
    const [isIOSStandalone, setIsIOSStandalone] = useState(false);
 
-   useEffect(() => {
+   useIsomorphicLayoutEffect(() => {
       setIsIOSStandalone(
          (navigator as unknown as { standalone?: boolean }).standalone === true,
       );
@@ -473,7 +480,14 @@ If all clean, no commit needed. If issues found, fix them before marking done.
 - `useDebounce` (in emoji-node.tsx, use-insight-config.ts, etc.) is SSR-safe — pure JS timing. No changes needed.
 - `useCopyToClipboard` is only called in `onClick` handlers, never during render. No SSR issue. No changes needed.
 - `emoji-node.tsx` already has `"use client"` directive — doubly safe.
-- The `useSafeMediaQuery` returns `false` during SSR and on initial client paint, then updates after mount. This means:
-  - `useIsMobile()` → `false` on server → desktop layout rendered first → correct for most SSR use cases
-  - `Credenza` → `isDesktop = false` on server → Drawer rendered first → flips to Dialog on client if viewport ≥ 768px. This is a minor UX tradeoff but eliminates the crash/mismatch.
+- `useIsomorphicLayoutEffect` (from `@dnd-kit/utilities`) runs as `useLayoutEffect` on the client (synchronous, before paint) and falls back to `useEffect` on the server. This eliminates the flash between SSR default values and real browser values.
+- The `useSafeMediaQuery` returns `false` during SSR and on initial client paint, then updates synchronously before the first paint on the client.
+- **Pattern rule for `useMediaQuery` replacements:**
+  - If the query is a viewport width check (mobile/desktop breakpoint) → use `useIsMobile()` — single source of truth for the `767px` breakpoint.
+  - If the query is something else (PWA display-mode, prefers-color-scheme, etc.) → use `useSafeMediaQuery` directly.
+  - `credenza.tsx` uses `(min-width: 768px)` = inverse of `useIsMobile()` → `const isDesktop = !useIsMobile()`.
+  - `use-standalone.ts` uses `(display-mode: standalone)` / `(display-mode: window-controls-overlay)` — these are NOT mobile breakpoints → keep `useSafeMediaQuery` directly.
+- Server renders mobile-false (desktop) first:
+  - `useIsMobile()` → `false` on server → desktop layout first → correct for most SSR use cases.
+  - `Credenza` → `isDesktop = true` on server → Dialog rendered first → flips to Drawer on client if viewport < 768px. Minor flash on mobile, eliminates crash/mismatch.
 - If the flash is unacceptable for `Credenza`, wrapping it in `<ClientOnly>` from `@tanstack/react-router` is the alternative — but this is not needed for correctness.
