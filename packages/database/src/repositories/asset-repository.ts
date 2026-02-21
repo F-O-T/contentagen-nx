@@ -124,7 +124,9 @@ export async function updateAsset(
    db: DatabaseInstance,
    id: string,
    organizationId: string,
-   data: Partial<Pick<Asset, "alt" | "caption" | "tags" | "thumbnailKey" | "filename">>,
+   data: Partial<
+      Pick<Asset, "alt" | "caption" | "tags" | "thumbnailKey" | "filename">
+   >,
 ): Promise<Asset> {
    try {
       const result = await db

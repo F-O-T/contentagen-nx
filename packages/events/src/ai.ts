@@ -125,7 +125,9 @@ export const aiImageGenerationEventSchema = z.object({
    fileSizeBytes: z.number().int().nonnegative(),
    mimeType: z.string(),
 });
-export type AiImageGenerationEvent = z.infer<typeof aiImageGenerationEventSchema>;
+export type AiImageGenerationEvent = z.infer<
+   typeof aiImageGenerationEventSchema
+>;
 
 export function emitAiImageGeneration(
    ctx: Pick<
