@@ -15,17 +15,27 @@ export const EXPERIMENT_EVENTS = {
 export type ExperimentEventName =
    (typeof EXPERIMENT_EVENTS)[keyof typeof EXPERIMENT_EVENTS];
 
+export const EXPERIMENT_TARGET_TYPES = ["content", "form", "cluster"] as const;
+export type ExperimentTargetType = (typeof EXPERIMENT_TARGET_TYPES)[number];
+
 // ---------------------------------------------------------------------------
 // experiment.started
 // ---------------------------------------------------------------------------
 
 export const experimentStartedEventSchema = z.object({
-   contentId: z.uuid(),
+   // Target-agnostic fields (preferred)
+   targetType: z.enum(EXPERIMENT_TARGET_TYPES).optional(),
+   targetId: z.uuid().optional(),
+   // Legacy field — maps to targetType="content", kept for backwards compat
+   contentId: z.uuid().optional(),
    experimentId: z.uuid(),
    variantId: z.string(),
    sessionId: z.string().optional(),
    visitorId: z.string().optional(),
-});
+}).refine(
+   (d) => d.contentId != null || (d.targetType != null && d.targetId != null),
+   { message: "Either contentId or both targetType and targetId must be provided" },
+);
 export type ExperimentStartedEvent = z.infer<
    typeof experimentStartedEventSchema
 >;
@@ -47,14 +57,21 @@ export function emitExperimentStarted(
 // ---------------------------------------------------------------------------
 
 export const experimentConversionEventSchema = z.object({
-   contentId: z.uuid(),
+   // Target-agnostic fields (preferred)
+   targetType: z.enum(EXPERIMENT_TARGET_TYPES).optional(),
+   targetId: z.uuid().optional(),
+   // Legacy field — maps to targetType="content", kept for backwards compat
+   contentId: z.uuid().optional(),
    experimentId: z.uuid(),
    variantId: z.string(),
    goalName: z.string(),
    goalValue: z.number().nonnegative().optional(),
    sessionId: z.string().optional(),
    visitorId: z.string().optional(),
-});
+}).refine(
+   (d) => d.contentId != null || (d.targetType != null && d.targetId != null),
+   { message: "Either contentId or both targetType and targetId must be provided" },
+);
 export type ExperimentConversionEvent = z.infer<
    typeof experimentConversionEventSchema
 >;
