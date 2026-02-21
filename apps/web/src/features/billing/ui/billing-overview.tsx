@@ -26,6 +26,7 @@ import {
 } from "@packages/ui/components/empty";
 import { Progress } from "@packages/ui/components/progress";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { FeatureStageBadge } from "@packages/ui/components/feature-stage-badge";
 import {
    Tooltip,
    TooltipContent,
@@ -56,6 +57,7 @@ import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
+import { useEarlyAccess } from "@/hooks/use-early-access";
 import { orpc } from "@/integrations/orpc/client";
 
 // ============================================
@@ -119,6 +121,8 @@ const CATEGORY_CONFIG: Record<
       icon: <Webhook className="size-5" />,
    },
 };
+
+const BETA_CATEGORY_FLAGS: Record<string, string> = { form: "forms-beta" };
 
 // ============================================
 // Helpers
@@ -345,7 +349,13 @@ function OverviewProductSubItems({ category }: { category: string }) {
    );
 }
 
-function OverviewProductCard({ category }: { category: CategorySummary }) {
+function OverviewProductCard({
+   category,
+   isBeta,
+}: {
+   category: CategorySummary;
+   isBeta?: boolean;
+}) {
    const config = CATEGORY_CONFIG[category.category];
    if (!config) return null;
 
@@ -367,6 +377,7 @@ function OverviewProductCard({ category }: { category: CategorySummary }) {
                         </CardDescription>
                      </div>
                   </div>
+                  {isBeta && <FeatureStageBadge stage="beta" />}
                </div>
             </CardHeader>
 
@@ -636,6 +647,7 @@ export function BillingOverview() {
       orpc.billing.getCurrentUsage.queryOptions({}),
    );
    const { activeSubscription } = useActiveOrganization();
+   const { isEnrolled } = useEarlyAccess();
 
    const planName = activeSubscription
       ? (activeSubscription.plan as string).toLowerCase()
@@ -643,8 +655,11 @@ export function BillingOverview() {
 
    const plan = STRIPE_PLANS.find((p) => p.name.toLowerCase() === planName);
 
-   // All known categories that should always be displayed
-   const ALL_CATEGORIES = Object.keys(CATEGORY_CONFIG);
+   const ALL_CATEGORIES = Object.keys(CATEGORY_CONFIG).filter((cat) => {
+      const flag = BETA_CATEGORY_FLAGS[cat];
+      if (!flag) return true;
+      return isEnrolled(flag);
+   });
 
    // Merge API data with known categories — always show all cards
    const categoryDataMap = new Map(data.byCategory.map((c) => [c.category, c]));
@@ -711,7 +726,11 @@ export function BillingOverview() {
             <h2 className="text-lg font-semibold mb-4">Produtos</h2>
             <div className="space-y-4">
                {sortedCategories.map((cat) => (
-                  <OverviewProductCard category={cat} key={cat.category} />
+                  <OverviewProductCard
+                     category={cat}
+                     isBeta={BETA_CATEGORY_FLAGS[cat.category] !== undefined}
+                     key={cat.category}
+                  />
                ))}
             </div>
          </div>

@@ -3,7 +3,7 @@
    "private": true,
    "type": "module",
    "scripts": {
-      "container-start": "podman-compose down && podman-compose up -d",
+      "container-start": "docker-compose down && docker-compose up -d",
       "dev": "bun run container-start && bun --bun vite dev --port 3000",
       "build": "vite build",
       "start": "bun run .output/server/index.mjs",
