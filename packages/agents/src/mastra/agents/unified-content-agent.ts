@@ -38,6 +38,8 @@ import { optimizeMetaTool } from "../tools/editor/optimize-meta-tool";
 import { optimizeTitleTool } from "../tools/editor/optimize-title-tool";
 import { replaceTextTool } from "../tools/editor/replace-text-tool";
 import { suggestImagesTool } from "../tools/editor/suggest-images-tool";
+import { addEditorCommentTool } from "../tools/editor/add-editor-comment-tool";
+import { proposeSuggestionTool } from "../tools/editor/propose-suggestion-tool";
 // ─── Frontmatter Tools ───────────────────────────────────────────────────────
 import { editDescriptionTool } from "../tools/frontmatter/edit-description-tool";
 import { editKeywordsTool } from "../tools/frontmatter/edit-keywords-tool";
@@ -388,7 +390,9 @@ export const unifiedContentAgent: Agent = new Agent({
       editSlug: editSlugTool,
 
       // ─── Editor ───────────────────────────────────────────────────────────
+      addEditorComment: addEditorCommentTool,
       insertText: insertTextTool,
+      proposeSuggestion: proposeSuggestionTool,
       replaceText: replaceTextTool,
       deleteText: deleteTextTool,
       formatText: formatTextTool,
