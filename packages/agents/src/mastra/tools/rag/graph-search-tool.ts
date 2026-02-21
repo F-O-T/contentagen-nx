@@ -127,7 +127,10 @@ export const graphSearchTool = createTool({
          // Sort by depth (closer = more relevant), then by relevance
          results.sort((a, b) => {
             if (a.depth !== b.depth) return a.depth - b.depth;
-            return Number.parseInt(b.relevance) - Number.parseInt(a.relevance);
+            return (
+               Number.parseInt(b.relevance, 10) -
+               Number.parseInt(a.relevance, 10)
+            );
          });
 
          return {

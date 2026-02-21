@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * useEditorAIChat — injects per-content context into the ORPCChatTransport singleton.
@@ -12,21 +12,21 @@
  * context (i.e. a descendant of <Plate>).
  */
 
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
-import { orpcChatTransport } from '../plugins/ai-kit';
+import { orpcChatTransport } from "../plugins/ai-kit";
 
 export interface EditorAIChatOptions {
-  contentId?: string;
-  writerId?: string;
-  model?: string;
-  language?: string;
+   contentId?: string;
+   writerId?: string;
+   model?: string;
+   language?: string;
 }
 
 export function useEditorAIChat(options: EditorAIChatOptions) {
-  const { contentId, writerId, model, language } = options;
+   const { contentId, writerId, model, language } = options;
 
-  useEffect(() => {
-    orpcChatTransport.setContext({ contentId, writerId, model, language });
-  }, [contentId, writerId, model, language]);
+   useEffect(() => {
+      orpcChatTransport.setContext({ contentId, writerId, model, language });
+   }, [contentId, writerId, model, language]);
 }

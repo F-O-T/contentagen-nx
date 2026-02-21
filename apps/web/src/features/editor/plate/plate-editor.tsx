@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * PlateEditor — Plate.js editor component with AI, Copilot, Comment,
@@ -10,31 +10,37 @@
  * (mod+shift+m), tracked suggestions, and persistent discussion threads.
  */
 
+import { CommentKit } from "@packages/ui/components/editor/plugins/comment-kit";
+import {
+   type DiscussionCallbacks,
+   DiscussionKit,
+   type DiscussionUser,
+   discussionPlugin,
+   type TDiscussion,
+} from "@packages/ui/components/editor/plugins/discussion-kit";
+import { SuggestionKit } from "@packages/ui/components/editor/plugins/suggestion-kit";
+import { cn } from "@packages/ui/lib/utils";
 import {
    BasicBlocksPlugin,
    BasicMarksPlugin,
 } from "@platejs/basic-nodes/react";
 import { LinkPlugin } from "@platejs/link/react";
-import type { Value } from "platejs";
-import { Plate, PlateContent, useEditorRef, usePlateEditor } from "platejs/react";
-import { useEffect } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { cn } from "@packages/ui/lib/utils";
-import { CommentKit } from "@packages/ui/components/editor/plugins/comment-kit";
-import { SuggestionKit } from "@packages/ui/components/editor/plugins/suggestion-kit";
+import type { Value } from "platejs";
 import {
-   DiscussionKit,
-   discussionPlugin,
-   type DiscussionCallbacks,
-   type TDiscussion,
-   type DiscussionUser,
-} from "@packages/ui/components/editor/plugins/discussion-kit";
-
+   Plate,
+   PlateContent,
+   useEditorRef,
+   usePlateEditor,
+} from "platejs/react";
+import { useEffect } from "react";
+import { orpc } from "@/integrations/orpc/client";
+import { useEditorDiscussions } from "../hooks/use-editor-discussions";
+import { useEditorAIChat } from "./hooks/use-editor-ai-chat";
+import { useEditorUploadFile } from "./hooks/use-editor-upload-file";
 import { AIKit } from "./plugins/ai-kit";
 import { CopilotKit } from "./plugins/copilot-kit";
-import { useEditorAIChat } from "./hooks/use-editor-ai-chat";
-import { useEditorDiscussions } from "../hooks/use-editor-discussions";
-import { orpc } from "@/integrations/orpc/client";
+import { createMediaKit, UploadFileProvider } from "./plugins/media-kit";
 
 export interface PlateEditorProps {
    initialValue?: Value;
@@ -47,6 +53,8 @@ export interface PlateEditorProps {
    writerId?: string;
    model?: string;
    language?: string;
+   /** Team ID used to scope uploaded media assets. */
+   teamId?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -75,11 +83,17 @@ function EditorDiscussionSync({ contentId }: EditorDiscussionSyncProps) {
 
    // Map server users to DiscussionUser shape (server returns `image`, plugin expects `avatarUrl`)
    const mappedUsers: Record<string, DiscussionUser> = {};
-   for (const [id, u] of Object.entries(users as Record<string, { id: string; name: string; email: string; image: string }>)) {
+   for (const [id, u] of Object.entries(
+      users as Record<
+         string,
+         { id: string; name: string; email: string; image: string }
+      >,
+   )) {
       mappedUsers[id] = {
          id: u.id,
          name: u.name,
-         avatarUrl: u.image ?? `https://api.dicebear.com/9.x/glass/svg?seed=${u.id}`,
+         avatarUrl:
+            u.image ?? `https://api.dicebear.com/9.x/glass/svg?seed=${u.id}`,
       };
    }
 
@@ -91,7 +105,9 @@ function EditorDiscussionSync({ contentId }: EditorDiscussionSyncProps) {
          await mutations.create.mutateAsync({
             contentId,
             blockId: discussion.id,
-            contentRich: firstComment.contentRich as Array<Record<string, unknown>>,
+            contentRich: firstComment.contentRich as Array<
+               Record<string, unknown>
+            >,
             documentContent: discussion.documentContent,
          });
       },
@@ -125,20 +141,24 @@ function EditorDiscussionSync({ contentId }: EditorDiscussionSyncProps) {
 
    // Sync discussions into discussionPlugin
    useEffect(() => {
-      editor.setOption(discussionPlugin, "discussions", discussions as TDiscussion[]);
+      editor.setOption(
+         discussionPlugin,
+         "discussions",
+         discussions as TDiscussion[],
+      );
    }, [editor, discussions]);
 
    // Sync users into discussionPlugin
    useEffect(() => {
       editor.setOption(discussionPlugin, "users", mappedUsers);
-   // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [editor, users]);
 
    // Sync callbacks into discussionPlugin (stable reference per render is fine —
    // the callbacks close over mutation functions which are stable across renders)
    useEffect(() => {
       editor.setOption(discussionPlugin, "callbacks", callbacks);
-   // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [editor, contentId]);
 
    return null;
@@ -158,10 +178,18 @@ export function PlateEditor({
    writerId,
    model,
    language,
+   teamId,
 }: PlateEditorProps) {
    // Inject per-content context into the ORPCChatTransport singleton so every
    // AI command carries the correct contentId / writerId / model / language.
    useEditorAIChat({ contentId, writerId, model, language });
+
+   // Build the upload function once — stable across re-renders via useCallback.
+   const uploadFile = useEditorUploadFile({ teamId });
+
+   // Build the MediaKit plugin array — createMediaKit is pure (no hooks) so it
+   // is safe to call here inside usePlateEditor via the plugins array.
+   const MediaKit = createMediaKit(uploadFile);
 
    const editor = usePlateEditor({
       plugins: [
@@ -180,37 +208,45 @@ export function PlateEditor({
          ...SuggestionKit,
          // Discussion plugin — persistent threaded discussions per block.
          ...DiscussionKit,
+         // Media plugin — image / video / audio / file upload via MinIO.
+         ...MediaKit,
       ],
       value: initialValue,
    });
 
    return (
-      <Plate
-         editor={editor}
-         onValueChange={onChange ? ({ value }) => onChange(value) : undefined}
-         readOnly={!editable}
-      >
-         {/*
-          * EditorDiscussionSync renders inside <Plate> so it can call useEditorRef().
-          * It uses useSuspenseQuery internally; the parent route already wraps
-          * EditorPage in <Suspense>, so no additional boundary is needed here.
-          */}
-         <EditorDiscussionSync contentId={contentId} />
+      // UploadFileProvider makes the uploadFile fn available to
+      // MediaPlaceholderElement without prop drilling.
+      <UploadFileProvider value={uploadFile}>
+         <Plate
+            editor={editor}
+            onValueChange={
+               onChange ? ({ value }) => onChange(value) : undefined
+            }
+            readOnly={!editable}
+         >
+            {/*
+             * EditorDiscussionSync renders inside <Plate> so it can call useEditorRef().
+             * It uses useSuspenseQuery internally; the parent route already wraps
+             * EditorPage in <Suspense>, so no additional boundary is needed here.
+             */}
+            <EditorDiscussionSync contentId={contentId} />
 
-         <PlateContent
-            className={cn(
-               "min-h-[200px] w-full cursor-text rounded-md border border-input bg-background px-4 py-3 text-sm ring-offset-background",
-               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-               "prose prose-sm max-w-none dark:prose-invert",
-               "[&_h1]:text-3xl [&_h1]:font-bold",
-               "[&_h2]:text-2xl [&_h2]:font-semibold",
-               "[&_h3]:text-xl [&_h3]:font-medium",
-               "aria-disabled:cursor-not-allowed aria-disabled:opacity-50",
-               className,
-            )}
-            placeholder={placeholder}
-            disableDefaultStyles
-         />
-      </Plate>
+            <PlateContent
+               className={cn(
+                  "min-h-[200px] w-full cursor-text rounded-md border border-input bg-background px-4 py-3 text-sm ring-offset-background",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "prose prose-sm max-w-none dark:prose-invert",
+                  "[&_h1]:text-3xl [&_h1]:font-bold",
+                  "[&_h2]:text-2xl [&_h2]:font-semibold",
+                  "[&_h3]:text-xl [&_h3]:font-medium",
+                  "aria-disabled:cursor-not-allowed aria-disabled:opacity-50",
+                  className,
+               )}
+               disableDefaultStyles
+               placeholder={placeholder}
+            />
+         </Plate>
+      </UploadFileProvider>
    );
 }

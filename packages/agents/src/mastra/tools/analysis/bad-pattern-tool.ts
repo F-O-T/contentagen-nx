@@ -224,8 +224,7 @@ export const badPatternTool = createTool({
          if (paragraph.startsWith("```") || paragraph.startsWith("#")) continue;
          const wordCount = paragraph.split(/\s+/).filter(Boolean).length;
          if (wordCount > 100) {
-            const preview =
-               paragraph.slice(0, 50) + "..." + paragraph.slice(-30);
+            const preview = `${paragraph.slice(0, 50)}...${paragraph.slice(-30)}`;
             longParagraphs.push(`~${wordCount} words: "${preview}"`);
          }
       }

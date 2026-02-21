@@ -13,9 +13,7 @@ import { content } from "./content";
 export const discussions = pgTable(
    "discussions",
    {
-      id: uuid("id")
-         .default(sql`pg_catalog.gen_random_uuid()`)
-         .primaryKey(),
+      id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
       contentId: uuid("content_id")
          .notNull()
          .references(() => content.id, { onDelete: "cascade" }),
@@ -41,9 +39,7 @@ export const discussions = pgTable(
 export const discussionReplies = pgTable(
    "discussion_replies",
    {
-      id: uuid("id")
-         .default(sql`pg_catalog.gen_random_uuid()`)
-         .primaryKey(),
+      id: uuid("id").default(sql`pg_catalog.gen_random_uuid()`).primaryKey(),
       discussionId: uuid("discussion_id")
          .notNull()
          .references(() => discussions.id, { onDelete: "cascade" }),

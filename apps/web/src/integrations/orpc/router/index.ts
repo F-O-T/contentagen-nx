@@ -5,13 +5,14 @@ import * as agentRouter from "./agent";
 import * as analyticsRouter from "./analytics";
 import * as annotationsRouter from "./annotations";
 import * as apiKeysRouter from "./api-keys";
+import * as assetsRouter from "./assets";
 import * as billingRouter from "./billing";
 import * as chatRouter from "./chat";
 import * as contentRouter from "./content";
 import * as contentAnalyticsRouter from "./content-analytics";
 import * as dashboardsRouter from "./dashboards";
-import * as discussionsRouter from "./discussions";
 import * as dataSourcesRouter from "./data-sources";
+import * as discussionsRouter from "./discussions";
 import * as eventCatalogRouter from "./event-catalog";
 import * as feedbackRouter from "./feedback";
 import * as formsRouter from "./forms";
@@ -37,6 +38,7 @@ export default {
    analytics: analyticsRouter,
    annotations: annotationsRouter,
    apiKeys: apiKeysRouter,
+   assets: assetsRouter,
    billing: billingRouter,
    chat: chatRouter,
    content: contentRouter,

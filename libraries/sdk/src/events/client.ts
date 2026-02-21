@@ -1,5 +1,5 @@
 import { createSdk } from "../index.ts";
-import type { ContenttaSdkConfig, EventBatch, TrackedEvent } from "./types.ts";
+import type { ContenttaSdkConfig, TrackedEvent } from "./types.ts";
 
 const DEFAULT_BATCH_SIZE = 10;
 const DEFAULT_FLUSH_INTERVAL = 30_000;

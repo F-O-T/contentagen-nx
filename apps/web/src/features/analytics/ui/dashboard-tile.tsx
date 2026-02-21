@@ -22,8 +22,6 @@ import {
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { cn } from "@packages/ui/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ErrorBoundary } from "react-error-boundary";
-import { Suspense } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import {
    AlertCircle,
@@ -35,6 +33,8 @@ import {
    RefreshCw,
    Trash2,
 } from "lucide-react";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { orpc } from "@/integrations/orpc/client";
 import { InsightPreview } from "./insight-preview";
 
@@ -282,7 +282,9 @@ function DashboardInsightContent({
    );
 
    return (
-      <ErrorBoundary fallbackRender={({ error }) => <TileErrorState error={error} />}>
+      <ErrorBoundary
+         fallbackRender={({ error }) => <TileErrorState error={error} />}
+      >
          <Suspense fallback={<TileLoadingSkeleton />}>
             <InsightPreview config={config} />
          </Suspense>

@@ -1,15 +1,14 @@
-import * as React from 'react';
+import { cn } from "@packages/ui/lib/utils";
 
-import type { SlateElementProps } from 'platejs/static';
+import type { SlateElementProps } from "platejs/static";
 
-import { SlateElement } from 'platejs/static';
-
-import { cn } from '@packages/ui/lib/utils';
+import { SlateElement } from "platejs/static";
+import * as React from "react";
 
 export function ParagraphElementStatic(props: SlateElementProps) {
-  return (
-    <SlateElement {...props} className={cn('m-0 px-0 py-1')}>
-      {props.children}
-    </SlateElement>
-  );
+   return (
+      <SlateElement {...props} className={cn("m-0 px-0 py-1")}>
+         {props.children}
+      </SlateElement>
+   );
 }

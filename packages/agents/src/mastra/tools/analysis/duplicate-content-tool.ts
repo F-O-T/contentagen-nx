@@ -110,7 +110,7 @@ function extractBlocks(content: string): TextBlock[] {
          blockStartLine = i + 1;
       } else {
          // Continue building block
-         currentBlock += " " + trimmedLine;
+         currentBlock += ` ${trimmedLine}`;
       }
    }
 

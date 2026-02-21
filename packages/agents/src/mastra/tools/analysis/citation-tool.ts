@@ -138,7 +138,7 @@ function generateSearchQuery(statistic: string): string {
       .filter((w) => w.length > 3)
       .slice(0, 4);
 
-   return [...numbers.slice(0, 2), ...keywords].join(" ") + " source study";
+   return `${[...numbers.slice(0, 2), ...keywords].join(" ")} source study`;
 }
 
 function assessQuoteVerifiability(

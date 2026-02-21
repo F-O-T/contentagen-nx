@@ -444,26 +444,18 @@ export function InsightPreview({ config }: InsightPreviewProps) {
    return (
       <div className="h-full">
          <div className="space-y-3">
-            <>
-                  {config.type === "trends" && (
-                     <TrendsPreview
-                        config={config}
-                        data={data as TrendsResult}
-                     />
-                  )}
-                  {config.type === "funnels" && (
-                     <FunnelsPreview
-                        config={config}
-                        data={data as FunnelsResult}
-                     />
-                  )}
-                  {config.type === "retention" && (
-                     <RetentionPreview
-                        config={config}
-                        data={data as RetentionResult}
-                     />
-                  )}
-               </>
+            {config.type === "trends" && (
+               <TrendsPreview config={config} data={data as TrendsResult} />
+            )}
+            {config.type === "funnels" && (
+               <FunnelsPreview config={config} data={data as FunnelsResult} />
+            )}
+            {config.type === "retention" && (
+               <RetentionPreview
+                  config={config}
+                  data={data as RetentionResult}
+               />
+            )}
          </div>
       </div>
    );

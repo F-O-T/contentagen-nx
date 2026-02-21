@@ -158,7 +158,11 @@ export function useSearch(
                tabType: "dashboard" as const,
                icon: "LayoutDashboard",
                route: "/$slug/$teamSlug/analytics/dashboards/$dashboardId",
-               params: { slug: orgSlug, teamSlug: teamId, dashboardId: item.id },
+               params: {
+                  slug: orgSlug,
+                  teamSlug: teamId,
+                  dashboardId: item.id,
+               },
             }));
 
          if (dashboardResults.length > 0) {

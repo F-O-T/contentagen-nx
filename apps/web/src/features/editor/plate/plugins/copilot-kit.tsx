@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * CopilotKit — Plate.js CopilotPlugin wired to oRPC copilotStream.
@@ -8,16 +8,13 @@
  * in the format expected by `callCompletionApi` ({ text: string }).
  */
 
-import type { TElement } from 'platejs';
-
-import { CopilotPlugin } from '@platejs/ai/react';
-import { serializeMd, stripMarkdown } from '@platejs/markdown';
-
-import { GhostText } from '@packages/ui/components/ghost-text';
-import { MarkdownKit } from '@packages/ui/components/editor/plugins/markdown-kit';
-
-import { client } from '@/integrations/orpc/client';
-import type { FIMChunk } from '@/features/editor/schemas';
+import { MarkdownKit } from "@packages/ui/components/editor/plugins/markdown-kit";
+import { GhostText } from "@packages/ui/components/ghost-text";
+import { CopilotPlugin } from "@platejs/ai/react";
+import { serializeMd, stripMarkdown } from "@platejs/markdown";
+import type { TElement } from "platejs";
+import type { FIMChunk } from "@/features/editor/schemas";
+import { client } from "@/integrations/orpc/client";
 
 /**
  * Custom fetch for CopilotPlugin that calls oRPC copilotStream.
@@ -28,90 +25,91 @@ import type { FIMChunk } from '@/features/editor/schemas';
  */
 // biome-ignore lint/suspicious/noExplicitAny: custom fetch signature requires matching the global fetch type
 const copilotFetch: typeof fetch = async (_input, init) => {
-  let prefix = '';
-  let suffix: string | undefined;
+   let prefix = "";
+   let suffix: string | undefined;
 
-  try {
-    const body = JSON.parse((init?.body as string) ?? '{}');
-    // CopilotPlugin sends { prompt } where prompt is the serialized block text
-    prefix = body.prompt ?? '';
-    suffix = body.suffix;
-  } catch {
-    // ignore parse errors — prefix stays empty
-  }
+   try {
+      const body = JSON.parse((init?.body as string) ?? "{}");
+      // CopilotPlugin sends { prompt } where prompt is the serialized block text
+      prefix = body.prompt ?? "";
+      suffix = body.suffix;
+   } catch {
+      // ignore parse errors — prefix stays empty
+   }
 
-  try {
-    const stream = await client.agent.copilotStream({ prefix, suffix });
+   try {
+      const stream = await client.agent.copilotStream({ prefix, suffix });
 
-    let accumulated = '';
+      let accumulated = "";
 
-    if (Symbol.asyncIterator in stream) {
-      for await (const chunk of stream as AsyncIterable<FIMChunk>) {
-        if (!chunk.done && chunk.text) {
-          accumulated += chunk.text;
-        }
+      if (Symbol.asyncIterator in stream) {
+         for await (const chunk of stream as AsyncIterable<FIMChunk>) {
+            if (!chunk.done && chunk.text) {
+               accumulated += chunk.text;
+            }
+         }
       }
-    }
 
-    return new Response(JSON.stringify({ text: accumulated }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'copilotStream failed';
-    return new Response(message, { status: 500 });
-  }
+      return new Response(JSON.stringify({ text: accumulated }), {
+         status: 200,
+         headers: { "Content-Type": "application/json" },
+      });
+   } catch (err) {
+      const message =
+         err instanceof Error ? err.message : "copilotStream failed";
+      return new Response(message, { status: 500 });
+   }
 };
 
 export const CopilotKit = [
-  ...MarkdownKit,
-  CopilotPlugin.configure(({ api }) => ({
-    options: {
-      completeOptions: {
-        api: '/api/ai/copilot',
-        fetch: copilotFetch,
-        body: {},
-        onError: () => {
-          // Silently fail — the real errors surface via the oRPC stream
-        },
-        onFinish: (_prompt, completion) => {
-          if (completion === '0' || !completion) return;
+   ...MarkdownKit,
+   CopilotPlugin.configure(({ api }) => ({
+      options: {
+         completeOptions: {
+            api: "/api/ai/copilot",
+            fetch: copilotFetch,
+            body: {},
+            onError: () => {
+               // Silently fail — the real errors surface via the oRPC stream
+            },
+            onFinish: (_prompt, completion) => {
+               if (completion === "0" || !completion) return;
 
-          api.copilot.setBlockSuggestion({
-            text: stripMarkdown(completion),
-          });
-        },
-      },
-      debounceDelay: 500,
-      renderGhostText: GhostText,
-      getPrompt: ({ editor }) => {
-        const contextEntry = editor.api.block({ highest: true });
+               api.copilot.setBlockSuggestion({
+                  text: stripMarkdown(completion),
+               });
+            },
+         },
+         debounceDelay: 500,
+         renderGhostText: GhostText,
+         getPrompt: ({ editor }) => {
+            const contextEntry = editor.api.block({ highest: true });
 
-        if (!contextEntry) return '';
+            if (!contextEntry) return "";
 
-        const prompt = serializeMd(editor, {
-          value: [contextEntry[0] as TElement],
-        });
+            const prompt = serializeMd(editor, {
+               value: [contextEntry[0] as TElement],
+            });
 
-        return `Continue the text up to the next punctuation mark:
+            return `Continue the text up to the next punctuation mark:
 """
 ${prompt}
 """`;
+         },
       },
-    },
-    shortcuts: {
-      accept: {
-        keys: 'tab',
+      shortcuts: {
+         accept: {
+            keys: "tab",
+         },
+         acceptNextWord: {
+            keys: "mod+right",
+         },
+         reject: {
+            keys: "escape",
+         },
+         triggerSuggestion: {
+            keys: "ctrl+space",
+         },
       },
-      acceptNextWord: {
-        keys: 'mod+right',
-      },
-      reject: {
-        keys: 'escape',
-      },
-      triggerSuggestion: {
-        keys: 'ctrl+space',
-      },
-    },
-  })),
+   })),
 ];

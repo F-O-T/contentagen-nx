@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated")({
          session = await context.queryClient.fetchQuery(
             context.orpc.session.getSession.queryOptions({}),
          );
-      } catch (error) {
+      } catch (_error) {
          // If session fetch fails, redirect to sign in
          throw redirect({
             to: "/auth/sign-in",
@@ -37,9 +37,10 @@ export const Route = createFileRoute("/_authenticated")({
 
       // If has orgs, check if active org needs onboarding
       if (hasOrgs) {
-         const activeOrg = organizations.find(
-            (org) => org.id === session.session.activeOrganizationId,
-         ) ?? organizations[0];
+         const activeOrg =
+            organizations.find(
+               (org) => org.id === session.session.activeOrganizationId,
+            ) ?? organizations[0];
 
          if (
             activeOrg &&

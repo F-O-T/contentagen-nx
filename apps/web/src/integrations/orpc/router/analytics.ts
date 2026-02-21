@@ -80,7 +80,8 @@ export const getDefaultDashboard = protectedProcedure.handler(
          // Check if it's a not found error
          if (error instanceof Error && error.message.includes("not found")) {
             throw new ORPCError("NOT_FOUND", {
-               message: "Dashboard not found. Please complete onboarding first.",
+               message:
+                  "Dashboard not found. Please complete onboarding first.",
             });
          }
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -102,7 +103,11 @@ export const getDashboardInsights = protectedProcedure
 
       try {
          // Get dashboard to verify ownership and extract insight IDs
-         const dashboard = await fetchDefaultDashboard(db, organizationId, teamId);
+         const dashboard = await fetchDefaultDashboard(
+            db,
+            organizationId,
+            teamId,
+         );
 
          if (dashboard.id !== input.dashboardId) {
             throw new ORPCError("NOT_FOUND", {

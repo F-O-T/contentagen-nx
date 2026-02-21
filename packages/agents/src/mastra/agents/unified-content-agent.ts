@@ -20,6 +20,7 @@ import { titleMetaTool } from "../tools/analysis/title-meta-tool";
 import { toneAnalysisTool } from "../tools/analysis/tone-analysis-tool";
 // ─── Utility Tools ───────────────────────────────────────────────────────────
 import { dateTool } from "../tools/date-tool";
+import { addEditorCommentTool } from "../tools/editor/add-editor-comment-tool";
 // ─── Editor Tools ────────────────────────────────────────────────────────────
 import { addExternalLinksTool } from "../tools/editor/add-external-links-tool";
 import { addInternalLinksTool } from "../tools/editor/add-internal-links-tool";
@@ -36,10 +37,9 @@ import { insertTableTool } from "../tools/editor/insert-table-tool";
 import { insertTextTool } from "../tools/editor/insert-text-tool";
 import { optimizeMetaTool } from "../tools/editor/optimize-meta-tool";
 import { optimizeTitleTool } from "../tools/editor/optimize-title-tool";
+import { proposeSuggestionTool } from "../tools/editor/propose-suggestion-tool";
 import { replaceTextTool } from "../tools/editor/replace-text-tool";
 import { suggestImagesTool } from "../tools/editor/suggest-images-tool";
-import { addEditorCommentTool } from "../tools/editor/add-editor-comment-tool";
-import { proposeSuggestionTool } from "../tools/editor/propose-suggestion-tool";
 // ─── Frontmatter Tools ───────────────────────────────────────────────────────
 import { editDescriptionTool } from "../tools/frontmatter/edit-description-tool";
 import { editKeywordsTool } from "../tools/frontmatter/edit-keywords-tool";

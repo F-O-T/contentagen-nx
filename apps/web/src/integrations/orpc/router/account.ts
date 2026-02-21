@@ -147,7 +147,9 @@ export const setPassword = protectedProcedure
 export const generateAvatarUploadUrl = protectedProcedure
    .input(
       z.object({
-         fileExtension: z.string().regex(/^[a-zA-Z0-9]{1,10}$/, "Invalid file extension"),
+         fileExtension: z
+            .string()
+            .regex(/^[a-zA-Z0-9]{1,10}$/, "Invalid file extension"),
       }),
    )
    .handler(async ({ context, input }) => {

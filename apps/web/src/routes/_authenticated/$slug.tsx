@@ -65,7 +65,7 @@ export const Route = createFileRoute("/_authenticated/$slug")({
       return {
          organizations,
          currentOrganization,
-         organizationId: currentOrganization!.id,
+         organizationId: currentOrganization?.id,
       };
    },
    component: OrganizationLayout,

@@ -252,7 +252,6 @@ export function EditableDashboardGrid({
       setLocalTiles(dashboard.tiles);
    }
 
-
    const tilesChanged = useMemo(
       () => JSON.stringify(localTiles) !== dashboardTilesJson,
       [localTiles, dashboardTilesJson],
@@ -346,7 +345,6 @@ export function EditableDashboardGrid({
          externalOnOpenAddInsight(handleOpenAddInsight);
       }
    }, [externalOnOpenAddInsight, handleOpenAddInsight]);
-
 
    const handleSave = useCallback(() => {
       saveMutation.mutate({
