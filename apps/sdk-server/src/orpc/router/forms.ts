@@ -3,6 +3,7 @@ import { formSubmissions, forms } from "@packages/database/schemas/forms";
 import { EVENT_CATEGORIES } from "@packages/events/catalog";
 import { emitEvent } from "@packages/events/emit";
 import { FORM_EVENTS } from "@packages/events/forms";
+import { emitExperimentConversion } from "@packages/events/experiments";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { sdkProcedure } from "../server";
@@ -131,6 +132,8 @@ export const submit = sdkProcedure
                url: z.string().optional(),
             })
             .optional(),
+         experimentId: z.string().uuid().optional(),
+         variantId: z.string().optional(),
       }),
    )
    .handler(async ({ context, input }) => {
@@ -220,6 +223,22 @@ export const submit = sdkProcedure
          },
          userId: context.userId ?? undefined,
       });
+
+      // Emit experiment.conversion if this form is part of an A/B test
+      if (input.experimentId && input.variantId) {
+         emitExperimentConversion({
+            db: context.db,
+            posthog: context.posthog,
+            organizationId: context.organizationId,
+            userId: context.userId ?? undefined,
+         }, {
+            targetType: "form",
+            targetId: form.id,
+            experimentId: input.experimentId,
+            variantId: input.variantId,
+            goalName: "form.submit",
+         });
+      }
 
       return {
          success: true as const,
