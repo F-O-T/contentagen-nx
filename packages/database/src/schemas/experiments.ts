@@ -112,10 +112,11 @@ export const experimentsRelations = relations(experiments, ({ one, many }) => ({
       fields: [experiments.teamId],
       references: [team.id],
    }),
-   variants: many(experimentVariants),
+   variants: many(experimentVariants, { relationName: "experimentVariants" }),
    winner: one(experimentVariants, {
       fields: [experiments.winnerId],
       references: [experimentVariants.id],
+      relationName: "experimentWinner",
    }),
 }));
 
@@ -125,6 +126,7 @@ export const experimentVariantsRelations = relations(
       experiment: one(experiments, {
          fields: [experimentVariants.experimentId],
          references: [experiments.id],
+         relationName: "experimentVariants",
       }),
       content: one(content, {
          fields: [experimentVariants.contentId],

@@ -1,6 +1,6 @@
 "use client";
 
-import { useDebounce } from "@packages/ui/hooks/use-debounce";
+import { useDebounce } from "@uidotdev/usehooks";
 import { EmojiInlineIndexSearch, insertEmoji } from "@platejs/emoji";
 import { EmojiPlugin } from "@platejs/emoji/react";
 import type { PlateElementProps } from "platejs/react";
