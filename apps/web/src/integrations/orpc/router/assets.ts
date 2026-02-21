@@ -1,3 +1,4 @@
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { ORPCError } from "@orpc/server";
 import {
    createAsset,
@@ -6,22 +7,38 @@ import {
    listAssets,
    updateAsset,
 } from "@packages/database/repositories/asset-repository";
+import { getProductSettings } from "@packages/database/repositories/product-settings-repository";
 import { env as serverEnv } from "@packages/environment/server";
 import {
    emitAssetDeleted,
    emitAssetUploadCompleted,
 } from "@packages/events/assets";
-import { emitAiImageGeneration } from "@packages/events/ai";
-import { enforceCreditBudget } from "@packages/events/credits";
+import { AI_EVENTS, emitAiImageGeneration } from "@packages/events/ai";
+import { enforceCreditBudget, trackCreditUsage } from "@packages/events/credits";
+import { getImageGenerationPrice } from "@packages/events/pricing";
 import {
    deleteFile,
    generatePresignedPutUrl,
    getMinioClient,
    uploadFile,
 } from "@packages/files/client";
-import { nanoid } from "nanoid";
+import { generateImage as aiGenerateImage } from "ai";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
+
+const IMAGE_ASPECT_RATIOS = [
+   "1:1",
+   "16:9",
+   "9:16",
+   "3:2",
+] as const;
+const ASPECT_TO_SIZE: Record<(typeof IMAGE_ASPECT_RATIOS)[number], string> = {
+   "1:1": "1024x1024",
+   "16:9": "1920x1080",
+   "9:16": "1080x1920",
+   "3:2": "1536x1024",
+};
+const DEFAULT_IMAGE_MODEL = "sourceful/riverflow-v2-pro";
 
 export const generateUploadUrl = protectedProcedure
    .input(
@@ -42,8 +59,8 @@ export const generateUploadUrl = protectedProcedure
             ? input.filename.split(".").pop()
             : "";
          const fileKey = ext
-            ? `orgs/${organizationId}/assets/${nanoid()}.${ext}`
-            : `orgs/${organizationId}/assets/${nanoid()}`;
+            ? `orgs/${organizationId}/assets/${crypto.randomUUID()}.${ext}`
+            : `orgs/${organizationId}/assets/${crypto.randomUUID()}`;
 
          const presignedUrl = await generatePresignedPutUrl(
             fileKey,
@@ -218,16 +235,22 @@ export const generateImage = protectedProcedure
       z.object({
          prompt: z.string().min(1).max(1000),
          teamId: z.string().uuid().optional(),
+         model: z.string().optional(),
+         aspectRatio: z.enum(IMAGE_ASPECT_RATIOS).optional(),
       }),
    )
    .handler(async ({ context, input }) => {
-      const { db, organizationId, userId, posthog, teamId: contextTeamId } = context;
+      const { db, organizationId, userId, posthog, teamId: contextTeamId } =
+         context;
 
       try {
          await enforceCreditBudget(db, organizationId, "ai");
       } catch (error) {
          throw new ORPCError("FORBIDDEN", {
-            message: error instanceof Error ? error.message : "Créditos insuficientes para gerar imagem.",
+            message:
+               error instanceof Error
+                  ? error.message
+                  : "Créditos insuficientes para gerar imagem.",
          });
       }
 
@@ -237,57 +260,33 @@ export const generateImage = protectedProcedure
          });
       }
 
+      const teamId = input.teamId ?? contextTeamId;
+      const model =
+         input.model ??
+         (teamId
+            ? (await getProductSettings(db, teamId))?.aiDefaults
+                  ?.imageGenerationModel ?? DEFAULT_IMAGE_MODEL
+            : DEFAULT_IMAGE_MODEL);
+      const size = input.aspectRatio
+         ? ASPECT_TO_SIZE[input.aspectRatio]
+         : ASPECT_TO_SIZE["1:1"];
+
       const startedAt = Date.now();
+      const openrouter = createOpenRouter({
+         apiKey: serverEnv.OPENROUTER_API_KEY,
+      });
+      const imageModel = openrouter.imageModel(model);
 
-      const openrouterRes = await fetch("https://openrouter.ai/api/v1/images/generations", {
-         method: "POST",
-         headers: {
-            Authorization: `Bearer ${serverEnv.OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json",
-         },
-         body: JSON.stringify({
-            model: "sourceful/riverflow-v2-pro",
-            prompt: input.prompt,
-            n: 1,
-         }),
+      const { image } = await aiGenerateImage({
+         model: imageModel,
+         prompt: input.prompt,
+         size,
       });
 
-      if (!openrouterRes.ok) {
-         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-            message: "Falha ao gerar imagem. Tente novamente.",
-         });
-      }
-
-      const openrouterSchema = z.object({
-         data: z.array(z.object({ url: z.string() })),
-      });
-      const parsed = openrouterSchema.safeParse(await openrouterRes.json());
-      if (!parsed.success) {
-         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-            message: "Resposta inesperada do modelo.",
-         });
-      }
-      const imageUrl = parsed.data.data[0]?.url;
-
-      if (!imageUrl) {
-         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-            message: "Nenhuma imagem retornada pelo modelo.",
-         });
-      }
-
-      const imageRes = await fetch(imageUrl);
-
-      if (!imageRes.ok) {
-         throw new ORPCError("INTERNAL_SERVER_ERROR", {
-            message: "Nenhuma imagem retornada pelo modelo.",
-         });
-      }
-
-      const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
-      const rawContentType = imageRes.headers.get("content-type") ?? "image/png";
-      const mimeType = rawContentType.split(";")[0]?.trim() ?? "image/png";
-      const ext = mimeType.split("/")[1] ?? "png";
-      const filename = `ai-generated-${nanoid()}.${ext}`;
+      const imageBuffer = Buffer.from(image.uint8Array);
+      const mimeType = "image/png";
+      const ext = "png";
+      const filename = `ai-generated-${crypto.randomUUID()}.${ext}`;
       const fileKey = `orgs/${organizationId}/assets/${filename}`;
       const bucket = serverEnv.MINIO_BUCKET ?? "contentta";
       const minioClient = getMinioClient(serverEnv);
@@ -300,7 +299,7 @@ export const generateImage = protectedProcedure
 
          asset = await createAsset(db, {
             organizationId,
-            teamId: input.teamId ?? contextTeamId,
+            teamId,
             fileKey,
             bucket,
             filename,
@@ -320,15 +319,23 @@ export const generateImage = protectedProcedure
       }
 
       emitAiImageGeneration(
-         { db, posthog, organizationId, userId },
+         { db, posthog, organizationId, userId, teamId },
          {
             assetId: asset.id,
             prompt: input.prompt,
-            model: "sourceful/riverflow-v2-pro",
+            model,
             latencyMs: Date.now() - startedAt,
             fileSizeBytes: imageBuffer.length,
             mimeType,
          },
+      );
+
+      await trackCreditUsage(
+         db,
+         AI_EVENTS["ai.image_generation"],
+         organizationId,
+         "ai",
+         { priceMinorUnits: Number(getImageGenerationPrice(model).amount) },
       );
 
       return asset;

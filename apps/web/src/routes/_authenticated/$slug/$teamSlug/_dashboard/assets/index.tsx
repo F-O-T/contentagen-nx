@@ -25,9 +25,11 @@ import {
 } from "@packages/ui/components/tooltip";
 import {
    useMutation,
+   useQuery,
    useQueryClient,
    useSuspenseQuery,
 } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
    ChevronDown,
@@ -44,12 +46,17 @@ import {
    X,
 } from "lucide-react";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import {
+   RadioGroup,
+   RadioGroupItem,
+} from "@packages/ui/components/radio-group";
+import { Label } from "@packages/ui/components/label";
 import { useDropzone } from "react-dropzone";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { useCredenza } from "@/hooks/use-credenza";
-import { orpc } from "@/integrations/orpc/client";
+import { client, orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/assets/",
@@ -640,6 +647,24 @@ function AssetsGridSkeleton() {
    );
 }
 
+const IMAGE_MODEL_NAMES: Record<string, string> = {
+   "sourceful/riverflow-v2-pro": "Riverflow V2 Pro",
+   "bytedance-seed/seedream-4.5": "Seedream 4.5",
+};
+
+// Static display prices (BRL) — kept in sync with packages/events/src/utils.ts IMAGE_MODEL_PRICING
+const IMAGE_MODEL_DISPLAY_PRICES: Record<string, string> = {
+   "sourceful/riverflow-v2-pro": "0.90",
+   "bytedance-seed/seedream-4.5": "0.24",
+};
+
+const ASPECT_OPTIONS = [
+   { value: "1:1" as const, label: "1:1" },
+   { value: "16:9" as const, label: "16:9" },
+   { value: "9:16" as const, label: "9:16" },
+   { value: "3:2" as const, label: "3:2" },
+] as const;
+
 function GenerateImageCredenzaContent({
    teamId,
    onClose,
@@ -649,29 +674,110 @@ function GenerateImageCredenzaContent({
 }) {
    const queryClient = useQueryClient();
    const [prompt, setPrompt] = useState("");
+   const [aspectRatio, setAspectRatio] = useState<
+      "1:1" | "16:9" | "9:16" | "3:2"
+   >("1:1");
+   const [phase, setPhase] = useState<"idle" | "generating" | "done">("idle");
+   const [generatedAsset, setGeneratedAsset] = useState<{
+      id: string;
+      publicUrl: string;
+      filename: string;
+      size: number;
+      width: number | null;
+      height: number | null;
+   } | null>(null);
+   const [elapsed, setElapsed] = useState(0);
+   const abortControllerRef = useRef<AbortController | null>(null);
 
-   const generateMutation = useMutation(
-      orpc.assets.generateImage.mutationOptions({
-         onSuccess: () => {
-            toast.success("Imagem gerada com sucesso!");
-            queryClient.invalidateQueries({
-               queryKey: orpc.assets.list.queryOptions({ input: { teamId } })
-                  .queryKey,
+   const { data: settings } = useQuery(
+      orpc.productSettings.getSettings.queryOptions({ input: {} }),
+   );
+   const modelId =
+      settings?.aiDefaults?.imageGenerationModel ?? "sourceful/riverflow-v2-pro";
+   const modelPrice = IMAGE_MODEL_DISPLAY_PRICES[modelId] ?? "0.90";
+   const modelName = IMAGE_MODEL_NAMES[modelId] ?? modelId;
+
+   useEffect(() => {
+      if (phase !== "generating") return;
+      const id = setInterval(() => setElapsed((s) => s + 1), 1000);
+      return () => clearInterval(id);
+   }, [phase]);
+
+   const generateMutation = useMutation({
+      ...orpc.assets.generateImage.mutationOptions({
+         onSuccess: (asset) => {
+            setGeneratedAsset({
+               id: asset.id,
+               publicUrl: asset.publicUrl,
+               filename: asset.filename,
+               size: asset.size,
+               width: asset.width ?? null,
+               height: asset.height ?? null,
             });
-            setPrompt("");
-            onClose();
+            setPhase("done");
          },
          onError: (err) => {
+            if (err.name === "AbortError") return;
             toast.error(err.message ?? "Falha ao gerar imagem.");
+            setPhase("idle");
          },
       }),
-   );
+      mutationFn: async ({
+         prompt,
+         teamId,
+         aspectRatio,
+         signal,
+      }: {
+         prompt: string;
+         teamId: string;
+         aspectRatio: "1:1" | "16:9" | "9:16" | "3:2";
+         signal: AbortSignal;
+      }) =>
+         client.assets.generateImage(
+            { prompt, teamId, aspectRatio },
+            { signal },
+         ),
+   });
 
    const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
       if (!prompt.trim()) return;
-      generateMutation.mutate({ prompt: prompt.trim(), teamId });
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = new AbortController();
+      setElapsed(0);
+      setPhase("generating");
+      setGeneratedAsset(null);
+      generateMutation.mutate({
+         prompt: prompt.trim(),
+         teamId,
+         aspectRatio,
+         signal: abortControllerRef.current.signal,
+      });
    };
+
+   const handleSaveAndClose = useCallback(() => {
+      queryClient.invalidateQueries({
+         queryKey: orpc.assets.list.queryOptions({ input: { teamId } })
+            .queryKey,
+      });
+      toast.success("Imagem salva no banco.");
+      onClose();
+   }, [queryClient, teamId, onClose]);
+
+   const handleGenerateAgain = useCallback(() => {
+      setPhase("idle");
+      setGeneratedAsset(null);
+      setElapsed(0);
+   }, []);
+
+   const handleCancel = useCallback(() => {
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
+      setPhase("idle");
+      setGeneratedAsset(null);
+   }, []);
+
+   const isGenerating = phase === "generating" && generateMutation.isPending;
 
    return (
       <>
@@ -681,39 +787,127 @@ function GenerateImageCredenzaContent({
                Gerar Imagem com IA
             </CredenzaTitle>
             <CredenzaDescription>
-               Descreva a imagem que deseja criar com IA.
+               {phase === "done" && generatedAsset
+                  ? `Gerado em ${elapsed}s`
+                  : `${modelName} · ~R$${modelPrice} por imagem`}
             </CredenzaDescription>
          </CredenzaHeader>
          <CredenzaBody>
-            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-               <Textarea
-                  autoFocus
-                  disabled={generateMutation.isPending}
-                  maxLength={1000}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Descreva a imagem que você quer gerar..."
-                  rows={4}
-                  value={prompt}
-               />
-               <CredenzaFooter>
-                  <Button
-                     disabled={!prompt.trim() || generateMutation.isPending}
-                     type="submit"
-                  >
-                     {generateMutation.isPending ? (
-                        <>
-                           <Loader2 className="size-4 mr-2 animate-spin" />
-                           Gerando...
-                        </>
-                     ) : (
-                        <>
-                           <Sparkles className="size-4 mr-2" />
-                           Gerar
-                        </>
-                     )}
-                  </Button>
-               </CredenzaFooter>
-            </form>
+            {phase === "generating" && (
+               <div className="flex flex-col gap-4">
+                  <Skeleton className="aspect-square w-full max-w-sm mx-auto rounded-lg animate-pulse" />
+                  <p className="text-center text-sm text-muted-foreground">
+                     Gerando... {elapsed}s
+                  </p>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-primary/20">
+                     <div className="h-full w-full animate-pulse rounded-full bg-primary/50" />
+                  </div>
+                  <div className="flex justify-end">
+                     <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCancel}
+                     >
+                        Cancelar
+                     </Button>
+                  </div>
+               </div>
+            )}
+            {phase === "done" && generatedAsset && (
+               <div className="flex flex-col gap-4">
+                  <div className="relative aspect-square w-full max-w-sm mx-auto rounded-lg overflow-hidden bg-muted">
+                     <img
+                        alt={generatedAsset.filename}
+                        className="object-contain w-full h-full"
+                        src={generatedAsset.publicUrl}
+                     />
+                  </div>
+                  <p className="text-center text-sm text-muted-foreground">
+                     {generatedAsset.filename}
+                     {generatedAsset.width != null && generatedAsset.height != null
+                        ? ` · ${generatedAsset.width}×${generatedAsset.height}`
+                        : ""}{" "}
+                     · {(generatedAsset.size / 1024).toFixed(0)} KB
+                  </p>
+                  <CredenzaFooter className="flex gap-2 justify-end">
+                     <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleGenerateAgain}
+                     >
+                        Gerar novamente
+                     </Button>
+                     <Button type="button" onClick={handleSaveAndClose}>
+                        Salvar no banco
+                     </Button>
+                  </CredenzaFooter>
+               </div>
+            )}
+            {phase === "idle" && (
+               <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+                  <div className="space-y-2">
+                     <Textarea
+                        autoFocus
+                        disabled={isGenerating}
+                        maxLength={1000}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        placeholder="Descreva a imagem que você quer gerar..."
+                        rows={4}
+                        value={prompt}
+                     />
+                     <p className="text-right text-xs text-muted-foreground">
+                        {prompt.length}/1000
+                     </p>
+                  </div>
+                  <div className="space-y-2">
+                     <Label>Proporção</Label>
+                     <RadioGroup
+                        className="flex gap-4"
+                        onValueChange={(v) =>
+                           setAspectRatio(v as "1:1" | "16:9" | "9:16" | "3:2")
+                        }
+                        value={aspectRatio}
+                     >
+                        {ASPECT_OPTIONS.map((opt) => (
+                           <div
+                              className="flex items-center gap-2"
+                              key={opt.value}
+                           >
+                              <RadioGroupItem
+                                 id={`aspect-${opt.value}`}
+                                 value={opt.value}
+                              />
+                              <Label
+                                 className="font-normal cursor-pointer"
+                                 htmlFor={`aspect-${opt.value}`}
+                              >
+                                 {opt.label}
+                              </Label>
+                           </div>
+                        ))}
+                     </RadioGroup>
+                  </div>
+                  <CredenzaFooter>
+                     <Button
+                        disabled={!prompt.trim() || isGenerating}
+                        type="submit"
+                     >
+                        {isGenerating ? (
+                           <>
+                              <Loader2 className="size-4 mr-2 animate-spin" />
+                              Gerando...
+                           </>
+                        ) : (
+                           <>
+                              <Sparkles className="size-4 mr-2" />
+                              Gerar
+                           </>
+                        )}
+                     </Button>
+                  </CredenzaFooter>
+               </form>
+            )}
          </CredenzaBody>
       </>
    );
@@ -728,10 +922,10 @@ function AssetBankContent() {
    const teamId = currentTeam.id;
    const { closeCredenza, openCredenza } = useCredenza();
    const [search, setSearch] = useState("");
-   const [debouncedSearch, setDebouncedSearch] = useState("");
+   const debouncedSearch = useDebounce(search, 300);
    const [page, setPage] = useState(0);
    const [total, setTotal] = useState(0);
-   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 
    const { enabled: aiImageEnabled } = useFeatureFlag("ai-image-generation");
 
@@ -740,15 +934,10 @@ function AssetBankContent() {
    const handleSearchChange = (value: string) => {
       setSearch(value);
       setPage(0);
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-         setDebouncedSearch(value);
-      }, 300);
    };
 
    const handleClearSearch = () => {
       setSearch("");
-      setDebouncedSearch("");
       setPage(0);
    };
 

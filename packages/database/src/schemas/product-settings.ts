@@ -57,6 +57,12 @@ export const AIDefaultsSchema = z.object({
    ragEnabled: z.boolean().optional(),
    maxChatTokens: z.number().int().positive().optional(),
    maxReasoningSteps: z.number().int().positive().optional(),
+   imageGenerationModel: z
+      .enum([
+         "sourceful/riverflow-v2-pro",
+         "bytedance-seed/seedream-4.5",
+      ])
+      .optional(),
 });
 
 export type AIDefaults = z.infer<typeof AIDefaultsSchema>;

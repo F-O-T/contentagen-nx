@@ -7,7 +7,6 @@
  * Note: This is separate from the user-facing analytics (llm_* custom events).
  */
 
-import { randomUUID } from "node:crypto";
 import type { PostHog } from "posthog-node";
 
 export interface AIGenerationInput {
@@ -46,7 +45,7 @@ export interface CaptureAIGenerationParams {
  * Generate a unique trace ID for grouping related LLM events
  */
 export function generateTraceId(): string {
-   return randomUUID();
+   return crypto.randomUUID();
 }
 
 /**

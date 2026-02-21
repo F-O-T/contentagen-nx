@@ -59,11 +59,12 @@ function getInitials(value: string) {
 }
 
 function getOrgColor(name: string): string {
+   if (!name) return ORG_AVATAR_COLORS[0] ?? "";
    let hash = 0;
    for (const char of name) {
       hash = char.charCodeAt(0) + ((hash << 5) - hash);
    }
-   return ORG_AVATAR_COLORS[Math.abs(hash) % ORG_AVATAR_COLORS.length];
+   return ORG_AVATAR_COLORS[Math.abs(hash) % ORG_AVATAR_COLORS.length] ?? "";
 }
 
 function RoleBadge({ role }: { role: string }) {

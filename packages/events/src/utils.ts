@@ -10,6 +10,27 @@ import { eq } from "drizzle-orm";
 const PRICE_SCALE = 6;
 const CURRENCY = "BRL";
 
+// ---------------------------------------------------------------------------
+// Image Generation Pricing
+// ---------------------------------------------------------------------------
+
+export const IMAGE_MODEL_PRICING: Record<string, string> = {
+   "sourceful/riverflow-v2-pro": "0.900000",
+   "bytedance-seed/seedream-4.5": "0.240000",
+};
+
+export function getImageGenerationPrice(model: string): Money {
+   const amount =
+      IMAGE_MODEL_PRICING[model] ??
+      IMAGE_MODEL_PRICING["sourceful/riverflow-v2-pro"] ??
+      "0.900000";
+   return createMoney(
+      parseDecimalToMinorUnits(amount, PRICE_SCALE),
+      CURRENCY,
+      PRICE_SCALE,
+   );
+}
+
 /**
  * Looks up the price for a given event name from the event_catalog table.
  * Returns a Money object with 6-decimal precision matching the DB schema.
