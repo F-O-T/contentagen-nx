@@ -4,9 +4,6 @@
   "workspaces": {
     "": {
       "name": "contentta-nx",
-      "dependencies": {
-        "@platejs/link": "^52.0.11",
-      },
       "devDependencies": {
         "@biomejs/biome": "catalog:development",
         "@commitlint/cli": "20.4.1",
@@ -22,9 +19,6 @@
         "husky": "9.1.7",
         "nx": "22.5.1",
         "typescript": "catalog:development",
-      },
-      "peerDependencies": {
-        "quansync": "^0.2.11",
       },
     },
     "apps/sdk-server": {
@@ -95,6 +89,7 @@
         "@packages/ui": "workspace:*",
         "@packages/utils": "workspace:*",
         "@platejs/basic-nodes": "catalog:editor",
+        "@platejs/link": "catalog:editor",
         "@t3-oss/env-core": "catalog:enviroment",
         "@tailwindcss/vite": "catalog:vite",
         "@tanstack/match-sorter-utils": "catalog:tanstack",
@@ -581,6 +576,7 @@
       "@lexical/table": "^0.40.0",
       "@lexical/utils": "^0.40.0",
       "@platejs/basic-nodes": "52.0.11",
+      "@platejs/link": "^52.0.11",
       "lexical": "^0.40.0",
       "platejs": "52.0.17",
     },

@@ -52,6 +52,7 @@
       "@packages/ui": "workspace:*",
       "@packages/utils": "workspace:*",
       "@platejs/basic-nodes": "catalog:editor",
+      "@platejs/link": "catalog:editor",
       "@t3-oss/env-core": "catalog:enviroment",
       "@tailwindcss/vite": "catalog:vite",
       "@tanstack/match-sorter-utils": "catalog:tanstack",
