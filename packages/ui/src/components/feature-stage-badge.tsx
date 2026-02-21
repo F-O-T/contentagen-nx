@@ -1,5 +1,5 @@
 import { cn } from "@packages/ui/lib/utils";
-import { FlaskConical, Lightbulb, Sparkles } from "lucide-react";
+import { CheckCircle2, FlaskConical, Lightbulb, Sparkles } from "lucide-react";
 import type * as React from "react";
 import { Badge } from "./badge";
 
@@ -33,6 +33,12 @@ const STAGE_CONFIG = {
       label: "Preview",
       className:
          "border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-800/50 dark:bg-cyan-950/30 dark:text-cyan-400",
+   },
+   "general-availability": {
+      icon: CheckCircle2,
+      label: "Disponível",
+      className:
+         "border-green-200 bg-green-50 text-green-700 dark:border-green-800/50 dark:bg-green-950/30 dark:text-green-400",
    },
 } as const;
 
