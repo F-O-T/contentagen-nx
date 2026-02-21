@@ -67,7 +67,7 @@ export const navGroups: NavGroupDef[] = [
          },
          {
             id: "assets",
-            label: "Banco de Imagens",
+            label: "Imagens",
             icon: ImageIcon,
             route: "/$slug/$teamSlug/assets",
             earlyAccessFlag: "asset-bank",

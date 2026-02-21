@@ -1,7 +1,4 @@
 import { ORPCError } from "@orpc/server";
-import { deleteFile, generatePresignedPutUrl, getMinioClient } from "@packages/files/client";
-import { emitAssetDeleted, emitAssetUploadCompleted } from "@packages/events/assets";
-import { env as serverEnv } from "@packages/environment/server";
 import {
    createAsset,
    deleteAsset,
@@ -9,6 +6,16 @@ import {
    listAssets,
    updateAsset,
 } from "@packages/database/repositories/asset-repository";
+import { env as serverEnv } from "@packages/environment/server";
+import {
+   emitAssetDeleted,
+   emitAssetUploadCompleted,
+} from "@packages/events/assets";
+import {
+   deleteFile,
+   generatePresignedPutUrl,
+   getMinioClient,
+} from "@packages/files/client";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
@@ -70,7 +77,13 @@ export const completeUpload = protectedProcedure
       }),
    )
    .handler(async ({ context, input }) => {
-      const { db, organizationId, userId, posthog, teamId: contextTeamId } = context;
+      const {
+         db,
+         organizationId,
+         userId,
+         posthog,
+         teamId: contextTeamId,
+      } = context;
       const bucket = serverEnv.MINIO_BUCKET ?? "contentta";
 
       const asset = await createAsset(db, {
@@ -91,7 +104,13 @@ export const completeUpload = protectedProcedure
       });
 
       emitAssetUploadCompleted(
-         { db, posthog, organizationId, userId, teamId: input.teamId ?? contextTeamId },
+         {
+            db,
+            posthog,
+            organizationId,
+            userId,
+            teamId: input.teamId ?? contextTeamId,
+         },
          {
             assetId: asset.id,
             filename: asset.filename,
@@ -117,7 +136,7 @@ export const list = protectedProcedure
    .handler(async ({ context, input }) => {
       const { db, organizationId } = context;
 
-      return listAssets(db, {
+      const { items, total } = await listAssets(db, {
          organizationId,
          teamId: input.teamId,
          search: input.search,
@@ -125,6 +144,8 @@ export const list = protectedProcedure
          limit: input.limit,
          offset: input.offset,
       });
+
+      return { assets: items, total };
    });
 
 export const get = protectedProcedure
@@ -172,7 +193,10 @@ export const remove = protectedProcedure
          const minioClient = getMinioClient(serverEnv);
          await deleteFile(asset.fileKey, asset.bucket, minioClient);
       } catch (error) {
-         console.error("Failed to delete file from storage (best-effort):", error);
+         console.error(
+            "Failed to delete file from storage (best-effort):",
+            error,
+         );
       }
 
       await deleteAsset(db, input.id, organizationId);
