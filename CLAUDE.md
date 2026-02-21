@@ -322,9 +322,12 @@ organization({
 
 Field types: `"string"` (TEXT), `"boolean"` (BOOLEAN), `"number"` (INTEGER), `"string[]"` (TEXT[]), `"json"` (JSONB + Zod validator)
 
-**Organization operations** use the Better Auth client directly — do NOT wrap in oRPC procedures:
+**Query/Mutation split for Better Auth**
+- **Queries** (read operations) → always use oRPC (`orpc.organization.*`), even for Better Auth-owned data like members, teams, and invitations. oRPC procedures enrich the raw Better Auth data with DB fields (plans, credits, slugs, etc.) that the raw client cannot provide.
+- **Mutations** (write operations) → use `authClient` directly. Never wrap these in oRPC.
+
 ```typescript
-// Client-side (apps/web) — use authClient.organization.*
+// ✅ Mutations — authClient only
 authClient.organization.create({ name, slug })
 authClient.organization.update({ data: { name }, organizationId })
 authClient.organization.delete({ organizationId })
@@ -332,13 +335,22 @@ authClient.organization.inviteMember({ email, role, organizationId })
 authClient.organization.removeMember({ memberIdOrEmail, organizationId })
 authClient.organization.updateMemberRole({ memberId, role, organizationId })
 authClient.organization.cancelInvitation({ invitationId })
-authClient.organization.getInvitation({ id })
 authClient.organization.setActive({ organizationId })
 authClient.organization.createTeam({ name, organizationId })
 authClient.organization.setActiveTeam({ teamId })
+
+// ✅ Queries — always oRPC (even for Better Auth data)
+orpc.organization.getMembers.queryOptions({})
+orpc.organization.getOrganizationTeams.queryOptions({})
+orpc.organization.getActiveOrganization.queryOptions({})
+orpc.organization.getMemberTeams.queryOptions({ input: { userId } })
 ```
 
-Read-only org data (members list, active org with subscription) uses oRPC (`orpc.organization.*`) since those enrich with DB data (plans, credits, etc.).
+**member.id vs user.id**
+`member.id` (member record ID, PK of the member table) and `user.id` (user UUID) are different values and must never be used interchangeably.
+- Use `member.id` for Better Auth mutation APIs (`removeMember`, `updateMemberRole`).
+- Use `member.userId` for queries against user-keyed tables (`teamMember.userId`, isSelf checks).
+- `getMembers` must expose both: `id` (member record ID) and `userId` (user ID).
 
 **Client-side authClient usage rules:**
 - **NEVER** wrap `authClient` calls inside `useMutation` — call them directly

@@ -80,6 +80,7 @@ export const Route = createFileRoute(
 
 type MemberRow = {
    id: string;
+   userId: string;
    name: string;
    email: string;
    role: string;
@@ -335,7 +336,7 @@ function MemberExpandedRow({ member }: { member: MemberRow }) {
    // Get teams this member has access to
    const { data: memberTeams, isLoading } = useQuery(
       orpc.organization.getMemberTeams.queryOptions({
-         input: { userId: member.id },
+         input: { userId: member.userId },
       }),
    );
 
@@ -408,7 +409,7 @@ function MemberMobileCard({
    );
    const currentUserId = sessionData?.user?.id;
    const member = row.original;
-   const isSelf = member.id === currentUserId;
+   const isSelf = member.userId === currentUserId;
 
    return (
       <Card>
@@ -757,7 +758,7 @@ function MembersContent() {
             header: "",
             cell: ({ row }) => {
                const member = row.original;
-               const isSelf = member.id === currentUserId;
+               const isSelf = member.userId === currentUserId;
                const isOwner = member.role === "owner";
                const isDisabled = isSelf || isOwner;
 

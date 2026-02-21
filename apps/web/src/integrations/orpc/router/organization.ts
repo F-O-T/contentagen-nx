@@ -200,6 +200,7 @@ export const getMembers = protectedProcedure.handler(async ({ context }) => {
 
    return members.map((m) => ({
       id: m.id,
+      userId: m.userId,
       name: m.user.name,
       email: m.user.email,
       role: m.role,
