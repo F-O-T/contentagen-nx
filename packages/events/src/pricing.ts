@@ -456,16 +456,7 @@ export const PLAN_CREDIT_BUDGETS: Record<
    },
 };
 
-export const IMAGE_MODEL_PRICING: Record<string, string> = {
-   "sourceful/riverflow-v2-pro": "0.900000",
-   "bytedance-seed/seedream-4.5": "0.240000",
-};
-
-export function getImageGenerationPrice(model: string): Money {
-   const amount =
-      IMAGE_MODEL_PRICING[model] ?? IMAGE_MODEL_PRICING["sourceful/riverflow-v2-pro"] ?? "0.900000";
-   return brl(amount);
-}
+export { IMAGE_MODEL_PRICING, getImageGenerationPrice } from "./utils";
 
 /**
  * Resolve which credit pool an event category belongs to.

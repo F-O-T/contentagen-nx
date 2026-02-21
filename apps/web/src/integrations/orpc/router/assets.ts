@@ -23,7 +23,7 @@ import {
    uploadFile,
 } from "@packages/files/client";
 import { nanoid } from "nanoid";
-import { generateImage } from "ai";
+import { generateImage as aiGenerateImage } from "ai";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -278,7 +278,7 @@ export const generateImage = protectedProcedure
       });
       const imageModel = openrouter.imageModel(model);
 
-      const { image } = await generateImage({
+      const { image } = await aiGenerateImage({
          model: imageModel,
          prompt: input.prompt,
          size,

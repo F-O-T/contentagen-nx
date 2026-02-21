@@ -15,8 +15,7 @@ import type { Queue } from "bullmq";
 
 import { AI_EVENTS } from "./ai";
 import type { EventCategory } from "./catalog";
-import { getImageGenerationPrice } from "./pricing";
-import { getEventPrice } from "./utils";
+import { getEventPrice, getImageGenerationPrice } from "./utils";
 
 export interface EmitEventParams {
    db: DatabaseInstance;

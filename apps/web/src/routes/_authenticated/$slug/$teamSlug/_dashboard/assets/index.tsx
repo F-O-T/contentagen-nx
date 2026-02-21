@@ -57,7 +57,7 @@ import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { useCredenza } from "@/hooks/use-credenza";
-import { orpc } from "@/integrations/orpc/client";
+import { client, orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/assets/",
@@ -682,7 +682,7 @@ function GenerateImageCredenzaContent({
       height: number | null;
    } | null>(null);
    const [elapsed, setElapsed] = useState(0);
-   const cancelledRef = useRef(false);
+   const abortControllerRef = useRef<AbortController | null>(null);
 
    const { data: settings } = useQuery(
       orpc.productSettings.getSettings.queryOptions({ input: {} }),
@@ -698,10 +698,9 @@ function GenerateImageCredenzaContent({
       return () => clearInterval(id);
    }, [phase]);
 
-   const generateMutation = useMutation(
-      orpc.assets.generateImage.mutationOptions({
+   const generateMutation = useMutation({
+      ...orpc.assets.generateImage.mutationOptions({
          onSuccess: (asset) => {
-            if (cancelledRef.current) return;
             setGeneratedAsset({
                id: asset.id,
                publicUrl: asset.publicUrl,
@@ -713,17 +712,33 @@ function GenerateImageCredenzaContent({
             setPhase("done");
          },
          onError: (err) => {
-            if (cancelledRef.current) return;
+            if (err.name === "AbortError") return;
             toast.error(err.message ?? "Falha ao gerar imagem.");
             setPhase("idle");
          },
       }),
-   );
+      mutationFn: async ({
+         prompt,
+         teamId,
+         aspectRatio,
+         signal,
+      }: {
+         prompt: string;
+         teamId: string;
+         aspectRatio: "1:1" | "16:9" | "9:16" | "3:2";
+         signal: AbortSignal;
+      }) =>
+         client.assets.generateImage(
+            { prompt, teamId, aspectRatio },
+            { signal },
+         ),
+   });
 
    const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
       if (!prompt.trim()) return;
-      cancelledRef.current = false;
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = new AbortController();
       setElapsed(0);
       setPhase("generating");
       setGeneratedAsset(null);
@@ -731,6 +746,7 @@ function GenerateImageCredenzaContent({
          prompt: prompt.trim(),
          teamId,
          aspectRatio,
+         signal: abortControllerRef.current.signal,
       });
    };
 
@@ -750,7 +766,8 @@ function GenerateImageCredenzaContent({
    }, []);
 
    const handleCancel = useCallback(() => {
-      cancelledRef.current = true;
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
       setPhase("idle");
       setGeneratedAsset(null);
    }, []);
