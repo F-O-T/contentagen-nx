@@ -76,6 +76,10 @@
       "./reconcile": {
          "default": "./src/reconcile.ts",
          "types": "./dist/src/reconcile.d.ts"
+      },
+      "./assets": {
+         "default": "./src/assets.ts",
+         "types": "./dist/src/assets.d.ts"
       }
    },
    "files": [
