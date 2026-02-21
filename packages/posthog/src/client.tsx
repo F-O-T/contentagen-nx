@@ -272,13 +272,34 @@ export function usePageviewTracking() {
    return { trackPageview };
 }
 
+export type EarlyAccessStage =
+   | "alpha"
+   | "beta"
+   | "concept"
+   | "general-availability";
+
 export type EarlyAccessFeature = {
    name: string;
    description: string;
-   stage: "alpha" | "beta" | "concept";
+   stage: EarlyAccessStage;
    documentationUrl: string | null;
    flagKey: string | null;
 };
+
+function normalizeEarlyAccessStage(
+   raw: string | undefined,
+): EarlyAccessStage {
+   if (raw === "general availability / archived") return "general-availability";
+   if (
+      raw === "alpha" ||
+      raw === "beta" ||
+      raw === "concept" ||
+      raw === "general-availability"
+   ) {
+      return raw;
+   }
+   return "beta";
+}
 
 export function useEarlyAccessFeatures() {
    const posthogClient = usePostHog();
@@ -291,16 +312,20 @@ export function useEarlyAccessFeatures() {
    const loadFeatures = useCallback(() => {
       console.log("[DEBUG] Loading early access features...");
       posthogClient.getEarlyAccessFeatures(
-         (earlyAccessFeatures) => {
+         (rawFeatures: Array<EarlyAccessFeature & { stage?: string }>) => {
+            const features: EarlyAccessFeature[] = rawFeatures.map((f) => ({
+               ...f,
+               stage: normalizeEarlyAccessStage(f.stage),
+            }));
             console.log(
                "[DEBUG] Early access features loaded:",
-               earlyAccessFeatures,
+               features,
             );
-            setFeatures(earlyAccessFeatures);
+            setFeatures(features);
             setLoaded(true);
 
             const enrolled = new Set<string>();
-            for (const feature of earlyAccessFeatures) {
+            for (const feature of features) {
                if (feature.flagKey) {
                   const isEnabled = posthogClient.isFeatureEnabled(
                      feature.flagKey,

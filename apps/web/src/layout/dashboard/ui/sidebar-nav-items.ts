@@ -28,8 +28,8 @@ export type NavItemDef = {
    subPanel?: SubSidebarSection;
    /** PostHog early access flag key — if set, item is hidden when user is not enrolled */
    earlyAccessFlag?: string;
-   /** Stage of the early access feature, used to render the correct badge */
-   earlyAccessStage?: "alpha" | "beta" | "concept";
+   /** Stage of the early access feature, used to render the correct badge (override when PostHog feature is missing) */
+   earlyAccessStage?: "alpha" | "beta" | "concept" | "general-availability";
 };
 
 export type NavGroupDef = {

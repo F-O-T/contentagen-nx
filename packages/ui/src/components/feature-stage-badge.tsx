@@ -1,5 +1,5 @@
 import { cn } from "@packages/ui/lib/utils";
-import { FlaskConical, Lightbulb, Sparkles } from "lucide-react";
+import { CheckCircle2, FlaskConical, Lightbulb, Sparkles } from "lucide-react";
 import type * as React from "react";
 import { Badge } from "./badge";
 
@@ -8,31 +8,25 @@ const STAGE_CONFIG = {
       icon: Sparkles,
       label: "Alpha",
       className:
-         "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800/50 dark:bg-orange-950/30 dark:text-orange-400",
+         "border-chart-1 bg-chart-1/10 text-chart-1 dark:border-chart-1/50 dark:bg-chart-1/20 dark:text-chart-1",
    },
    beta: {
       icon: FlaskConical,
       label: "Beta",
       className:
-         "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800/50 dark:bg-blue-950/30 dark:text-blue-400",
+         "border-chart-2 bg-chart-2/10 text-chart-2 dark:border-chart-2/50 dark:bg-chart-2/20 dark:text-chart-2",
    },
    concept: {
       icon: Lightbulb,
       label: "Conceito",
       className:
-         "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800/50 dark:bg-purple-950/30 dark:text-purple-400",
+         "border-chart-4 bg-chart-4/10 text-chart-4 dark:border-chart-4/50 dark:bg-chart-4/20 dark:text-chart-4",
    },
-   experimental: {
-      icon: FlaskConical,
-      label: "Experimental",
+   "general-availability": {
+      icon: CheckCircle2,
+      label: "Disponível",
       className:
-         "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-400",
-   },
-   preview: {
-      icon: FlaskConical,
-      label: "Preview",
-      className:
-         "border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-800/50 dark:bg-cyan-950/30 dark:text-cyan-400",
+         "border-chart-6 bg-chart-6/10 text-chart-6 dark:border-chart-6/50 dark:bg-chart-6/20 dark:text-chart-6",
    },
 } as const;
 
