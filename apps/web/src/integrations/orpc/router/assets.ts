@@ -11,10 +11,13 @@ import {
    emitAssetDeleted,
    emitAssetUploadCompleted,
 } from "@packages/events/assets";
+import { emitAiImageGeneration } from "@packages/events/ai";
+import { enforceCreditBudget } from "@packages/events/credits";
 import {
    deleteFile,
    generatePresignedPutUrl,
    getMinioClient,
+   uploadFile,
 } from "@packages/files/client";
 import { nanoid } from "nanoid";
 import { z } from "zod";
@@ -207,4 +210,125 @@ export const remove = protectedProcedure
       );
 
       return { success: true };
+   });
+
+export const generateImage = protectedProcedure
+   .input(
+      z.object({
+         prompt: z.string().min(1).max(1000),
+         teamId: z.string().uuid().optional(),
+      }),
+   )
+   .handler(async ({ context, input }) => {
+      const { db, organizationId, userId, posthog, teamId: contextTeamId } = context;
+
+      try {
+         await enforceCreditBudget(db, organizationId, "ai");
+      } catch (error) {
+         throw new ORPCError("FORBIDDEN", {
+            message: error instanceof Error ? error.message : "Créditos insuficientes para gerar imagem.",
+         });
+      }
+
+      if (!serverEnv.OPENROUTER_API_KEY) {
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Geração de imagens não configurada",
+         });
+      }
+
+      const startedAt = Date.now();
+
+      const openrouterRes = await fetch("https://openrouter.ai/api/v1/images/generations", {
+         method: "POST",
+         headers: {
+            Authorization: `Bearer ${serverEnv.OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+         },
+         body: JSON.stringify({
+            model: "sourceful/riverflow-v2-pro",
+            prompt: input.prompt,
+            n: 1,
+         }),
+      });
+
+      if (!openrouterRes.ok) {
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Falha ao gerar imagem. Tente novamente.",
+         });
+      }
+
+      const openrouterSchema = z.object({
+         data: z.array(z.object({ url: z.string() })),
+      });
+      const parsed = openrouterSchema.safeParse(await openrouterRes.json());
+      if (!parsed.success) {
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Resposta inesperada do modelo.",
+         });
+      }
+      const imageUrl = parsed.data.data[0]?.url;
+
+      if (!imageUrl) {
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Nenhuma imagem retornada pelo modelo.",
+         });
+      }
+
+      const imageRes = await fetch(imageUrl);
+
+      if (!imageRes.ok) {
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Nenhuma imagem retornada pelo modelo.",
+         });
+      }
+
+      const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
+      const rawContentType = imageRes.headers.get("content-type") ?? "image/png";
+      const mimeType = rawContentType.split(";")[0]?.trim() ?? "image/png";
+      const ext = mimeType.split("/")[1] ?? "png";
+      const filename = `ai-generated-${nanoid()}.${ext}`;
+      const fileKey = `orgs/${organizationId}/assets/${filename}`;
+      const bucket = serverEnv.MINIO_BUCKET ?? "contentta";
+      const minioClient = getMinioClient(serverEnv);
+
+      let asset: Awaited<ReturnType<typeof createAsset>>;
+      try {
+         await uploadFile(fileKey, imageBuffer, mimeType, bucket, minioClient);
+
+         const publicUrl = `/api/files/${bucket}/${fileKey}`;
+
+         asset = await createAsset(db, {
+            organizationId,
+            teamId: input.teamId ?? contextTeamId,
+            fileKey,
+            bucket,
+            filename,
+            mimeType,
+            size: imageBuffer.length,
+            width: undefined,
+            height: undefined,
+            publicUrl,
+            uploaderId: userId,
+            tags: ["ai-generated"],
+         });
+      } catch (err) {
+         console.error("Failed to store generated image:", err);
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Falha ao salvar imagem gerada.",
+         });
+      }
+
+      emitAiImageGeneration(
+         { db, posthog, organizationId, userId },
+         {
+            assetId: asset.id,
+            prompt: input.prompt,
+            model: "sourceful/riverflow-v2-pro",
+            latencyMs: Date.now() - startedAt,
+            fileSizeBytes: imageBuffer.length,
+            mimeType,
+         },
+      );
+
+      return asset;
    });

@@ -11,6 +11,7 @@ export const AI_EVENTS = {
    "ai.completion": "ai.completion",
    "ai.chat_message": "ai.chat_message",
    "ai.agent_action": "ai.agent_action",
+   "ai.image_generation": "ai.image_generation",
 } as const;
 
 export type AiEventName = (typeof AI_EVENTS)[keyof typeof AI_EVENTS];
@@ -107,6 +108,35 @@ export function emitAiAgentAction(
    return emitEvent({
       ...ctx,
       eventName: AI_EVENTS["ai.agent_action"],
+      eventCategory: EVENT_CATEGORIES.ai,
+      properties,
+   });
+}
+
+// ---------------------------------------------------------------------------
+// ai.image_generation
+// ---------------------------------------------------------------------------
+
+export const aiImageGenerationEventSchema = z.object({
+   assetId: z.string().uuid(),
+   prompt: z.string(),
+   model: z.string(),
+   latencyMs: z.number().nonnegative(),
+   fileSizeBytes: z.number().int().nonnegative(),
+   mimeType: z.string(),
+});
+export type AiImageGenerationEvent = z.infer<typeof aiImageGenerationEventSchema>;
+
+export function emitAiImageGeneration(
+   ctx: Pick<
+      EmitEventParams,
+      "db" | "posthog" | "organizationId" | "userId" | "teamId"
+   >,
+   properties: AiImageGenerationEvent,
+) {
+   return emitEvent({
+      ...ctx,
+      eventName: AI_EVENTS["ai.image_generation"],
       eventCategory: EVENT_CATEGORIES.ai,
       properties,
    });

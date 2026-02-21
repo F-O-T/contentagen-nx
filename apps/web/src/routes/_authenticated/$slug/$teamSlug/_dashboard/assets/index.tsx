@@ -1,8 +1,16 @@
 import type { Asset } from "@packages/database/schemas/assets";
 import { useFeatureFlag } from "@packages/posthog/client";
 import { Button } from "@packages/ui/components/button";
+import {
+   Dialog,
+   DialogContent,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
+} from "@packages/ui/components/dialog";
 import { Input } from "@packages/ui/components/input";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { Textarea } from "@packages/ui/components/textarea";
 import {
    useMutation,
    useQueryClient,
@@ -408,6 +416,89 @@ function AssetsGridSkeleton() {
 }
 
 // ============================================================
+// Generate Image Dialog
+// ============================================================
+
+interface GenerateImageDialogProps {
+   open: boolean;
+   onOpenChange: (open: boolean) => void;
+   teamId: string;
+}
+
+function GenerateImageDialog({ open, onOpenChange, teamId }: GenerateImageDialogProps) {
+   const queryClient = useQueryClient();
+   const [prompt, setPrompt] = useState("");
+
+   const generateMutation = useMutation(
+      orpc.assets.generateImage.mutationOptions({
+         onSuccess: () => {
+            toast.success("Imagem gerada com sucesso!");
+            queryClient.invalidateQueries({
+               queryKey: orpc.assets.list.queryOptions({ input: { teamId } }).queryKey,
+            });
+            setPrompt("");
+            onOpenChange(false);
+         },
+         onError: (err) => {
+            toast.error(err.message ?? "Falha ao gerar imagem.");
+         },
+      }),
+   );
+
+   useEffect(() => {
+      if (!open) setPrompt("");
+   }, [open]);
+
+   const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!prompt.trim()) return;
+      generateMutation.mutate({ prompt: prompt.trim(), teamId });
+   };
+
+   return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+         <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+               <DialogTitle className="flex items-center gap-2">
+                  <Sparkles className="size-4 text-purple-500" />
+                  Gerar Imagem com IA
+               </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+               <Textarea
+                  autoFocus
+                  disabled={generateMutation.isPending}
+                  maxLength={1000}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="Descreva a imagem que você quer gerar..."
+                  rows={4}
+                  value={prompt}
+               />
+               <DialogFooter>
+                  <Button
+                     disabled={!prompt.trim() || generateMutation.isPending}
+                     type="submit"
+                  >
+                     {generateMutation.isPending ? (
+                        <>
+                           <Loader2 className="size-4 mr-2 animate-spin" />
+                           Gerando...
+                        </>
+                     ) : (
+                        <>
+                           <Sparkles className="size-4 mr-2" />
+                           Gerar
+                        </>
+                     )}
+                  </Button>
+               </DialogFooter>
+            </form>
+         </DialogContent>
+      </Dialog>
+   );
+}
+
+// ============================================================
 // Main content component (behind feature flag)
 // ============================================================
 
@@ -418,7 +509,10 @@ function AssetBankContent() {
    const [debouncedSearch, setDebouncedSearch] = useState("");
    const [page, setPage] = useState(0);
    const [total, setTotal] = useState(0);
+   const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+   const { enabled: aiImageEnabled } = useFeatureFlag("ai-image-generation");
 
    const hasNextPage = (page + 1) * PAGE_SIZE < total;
 
@@ -440,14 +534,34 @@ function AssetBankContent() {
    return (
       <main className="flex flex-col gap-6">
          {/* Header */}
-         <div className="flex flex-col gap-2">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-               Banco de Imagens
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
-               Gerencie e envie imagens, vídeos e arquivos do seu projeto
-            </p>
+         <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-2">
+               <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
+                  Banco de Imagens
+               </h1>
+               <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
+                  Gerencie e envie imagens, vídeos e arquivos do seu projeto
+               </p>
+            </div>
+            {aiImageEnabled && (
+               <Button
+                  className="shrink-0"
+                  onClick={() => setGenerateDialogOpen(true)}
+                  variant="outline"
+               >
+                  <Sparkles className="size-4 mr-2 text-purple-500" />
+                  Gerar com IA
+               </Button>
+            )}
          </div>
+
+         {aiImageEnabled && (
+            <GenerateImageDialog
+               open={generateDialogOpen}
+               onOpenChange={setGenerateDialogOpen}
+               teamId={teamId}
+            />
+         )}
 
          {/* Upload dropzone */}
          <AssetDropzone teamId={teamId} />
