@@ -1,5 +1,5 @@
 import { useEarlyAccessFeatures } from "@packages/posthog/client";
-import { useLocalStorage } from "@uidotdev/usehooks";
+import { useSafeLocalStorage } from "@/hooks/use-local-storage";
 import {
    createContext,
    type ReactNode,
@@ -26,7 +26,7 @@ export function EarlyAccessProvider({ children }: { children: ReactNode }) {
    const { features, enrolledFeatures, loaded, isEnrolled, updateEnrollment } =
       useEarlyAccessFeatures();
 
-   const [dismissedFlags, setDismissedFlagsState] = useLocalStorage<string[]>(
+   const [dismissedFlags, setDismissedFlagsState] = useSafeLocalStorage<string[]>(
       BANNER_DISMISSED_KEY,
       [],
    );
