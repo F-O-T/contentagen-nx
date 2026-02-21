@@ -26,7 +26,7 @@ import { cn } from "@packages/ui/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useLocation, useParams, useRouter } from "@tanstack/react-router";
 import { Check, Plus } from "lucide-react";
-import { Suspense, useCallback, useMemo, useState } from "react";
+import { Suspense, useCallback, useMemo, useState, useTransition } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useSetActiveOrganization } from "@/features/organization/hooks/use-set-active-organization";
 import { ManageOrganizationForm } from "@/features/organization/ui/manage-organization-form";
@@ -81,7 +81,8 @@ function CompactScopeSwitcherSkeleton() {
 function CompactScopeSwitcherContent() {
    const { activeOrganization } = useActiveOrganization();
    const { openSheet } = useSheet();
-   const { setActiveOrganization, isPending } = useSetActiveOrganization();
+   const { setActiveOrganization } = useSetActiveOrganization();
+   const [isPending, startTransition] = useTransition();
    const router = useRouter();
    const { pathname } = useLocation();
    const params = useParams({ strict: false }) as {
@@ -110,23 +111,25 @@ function CompactScopeSwitcherContent() {
    );
 
    const handleOrganizationSwitch = useCallback(
-      async (org: Organization) => {
+      (org: Organization) => {
          if (org.id === activeOrganization.id || isPending) {
             setOpen(false);
             return;
          }
 
-         await setActiveOrganization({
-            organizationId: org.id,
-            organizationSlug: org.slug,
+         startTransition(async () => {
+            await setActiveOrganization({
+               organizationId: org.id,
+               organizationSlug: org.slug,
+            });
+
+            const nextPath = pathname.startsWith(`/${currentSlug}`)
+               ? pathname.replace(`/${currentSlug}`, `/${org.slug}`)
+               : `/${org.slug}/${params.teamId ?? ""}/home`;
+
+            router.navigate({ to: nextPath });
+            setOpen(false);
          });
-
-         const nextPath = pathname.startsWith(`/${currentSlug}`)
-            ? pathname.replace(`/${currentSlug}`, `/${org.slug}`)
-            : `/${org.slug}/${params.teamId ?? ""}/home`;
-
-         router.navigate({ to: nextPath });
-         setOpen(false);
       },
       [
          activeOrganization.id,
@@ -136,6 +139,7 @@ function CompactScopeSwitcherContent() {
          pathname,
          router,
          setActiveOrganization,
+         startTransition,
       ],
    );
 

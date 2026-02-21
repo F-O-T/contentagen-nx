@@ -28,7 +28,7 @@ import {
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertTriangle, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useTransition, useState } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
@@ -118,15 +118,14 @@ function DeleteOrganizationDialog({
    const navigate = useNavigate();
    const [open, setOpen] = useState(false);
    const [confirmationText, setConfirmationText] = useState("");
-   const [isDeleting, setIsDeleting] = useState(false);
+   const [isDeleting, startTransition] = useTransition();
 
    const isConfirmed = confirmationText === organizationName;
 
-   async function handleDelete() {
+   function handleDelete() {
       if (!isConfirmed) return;
 
-      setIsDeleting(true);
-      try {
+      startTransition(async () => {
          const { error } = await authClient.organization.delete({
             organizationId,
          });
@@ -137,19 +136,13 @@ function DeleteOrganizationDialog({
                   error.message ||
                   "Ocorreu um erro inesperado. Tente novamente.",
             });
-            setIsDeleting(false);
             return;
          }
 
          toast.success("Organização deletada com sucesso");
          setOpen(false);
          navigate({ to: "/" });
-      } catch {
-         toast.error("Erro ao deletar organização", {
-            description: "Ocorreu um erro inesperado. Tente novamente.",
-         });
-         setIsDeleting(false);
-      }
+      });
    }
 
    return (

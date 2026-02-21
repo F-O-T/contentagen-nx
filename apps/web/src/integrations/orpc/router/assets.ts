@@ -169,6 +169,7 @@ export const update = protectedProcedure
    .input(
       z.object({
          id: z.string().uuid(),
+         filename: z.string().min(1).optional(),
          alt: z.string().optional(),
          caption: z.string().optional(),
          tags: z.array(z.string()).optional(),

@@ -80,15 +80,22 @@ interface ProductsStepProps {
    teamSlug: string;
    onComplete: (slug: string, teamSlug: string) => void;
    onStateChange: (state: StepState) => void;
+   isPending?: boolean;
 }
 
 export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
    function ProductsStep(
-      { organizationId, teamId, teamSlug, onComplete, onStateChange },
+      {
+         organizationId,
+         teamId,
+         teamSlug,
+         onComplete,
+         onStateChange,
+         isPending: isPendingProp = false,
+      },
       ref,
    ) {
       const [selected, setSelected] = useState<Product[]>([]);
-      const [isPending, setIsPending] = useState(false);
 
       const toggleProduct = useCallback((productId: Product) => {
          setSelected((prev) =>
@@ -100,12 +107,10 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
 
       const handleComplete = useCallback(async () => {
          try {
-            setIsPending(true);
-
-            // Call oRPC procedure to complete onboarding (creates dashboard + insights)
-            const result = await orpc.onboarding.completeOnboarding.call({
-               products: selected,
-            });
+            const result =
+               await orpc.onboarding.completeOnboarding.call({
+                  products: selected,
+               });
 
             await authClient.organization.setActiveTeam({ teamId });
 
@@ -119,10 +124,10 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
                   : "Erro ao concluir onboarding.",
             );
             return false;
-         } finally {
-            setIsPending(false);
          }
-      }, [selected, organizationId, teamId, teamSlug, onComplete]);
+      }, [selected, teamId, teamSlug, onComplete]);
+
+      const isPending = isPendingProp;
 
       const canContinue = selected.length > 0;
 
