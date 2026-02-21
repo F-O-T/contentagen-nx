@@ -9,6 +9,7 @@ import {
    BasicBlocksPlugin,
    BasicMarksPlugin,
 } from "@platejs/basic-nodes/react";
+import { LinkPlugin } from "@platejs/link/react";
 import type { Value } from "platejs";
 import { Plate, PlateContent, usePlateEditor } from "platejs/react";
 import { cn } from "@packages/ui/lib/utils";
@@ -29,7 +30,7 @@ export function PlateEditor({
    className,
 }: PlateEditorProps) {
    const editor = usePlateEditor({
-      plugins: [BasicBlocksPlugin, BasicMarksPlugin],
+      plugins: [BasicBlocksPlugin, BasicMarksPlugin, LinkPlugin],
       value: initialValue,
    });
 
