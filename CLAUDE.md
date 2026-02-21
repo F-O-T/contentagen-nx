@@ -421,7 +421,7 @@ const { openAlertDialog } = useAlertDialog();
 openAlertDialog({
    title: "Delete content?",
    description: "This action cannot be undone.",
-   onConfirm: () => deleteContent(id),
+   onAction: () => deleteContent(id),
 });
 
 // ❌ Wrong — never import and render these directly
