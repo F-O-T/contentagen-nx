@@ -1,9 +1,14 @@
+import type { Asset } from "@packages/database/schemas/assets";
+import { useFeatureFlag } from "@packages/posthog/client";
 import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { useFeatureFlag } from "@packages/posthog/client";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
+import {
+   useMutation,
+   useQueryClient,
+   useSuspenseQuery,
+} from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
    FileIcon,
    ImageIcon,
@@ -14,13 +19,11 @@ import {
    Upload,
    X,
 } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
 import { orpc } from "@/integrations/orpc/client";
-import type { Asset } from "@packages/database/schemas/assets";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/assets/",
@@ -89,11 +92,11 @@ function AssetBankUnenrolled() {
                Esta funcionalidade está em fase Alpha. Ative-a nas{" "}
                <Link
                   className="underline underline-offset-4 text-foreground font-medium"
-                  to="/$slug/$teamSlug/settings/feature-previews"
                   params={{
                      slug: params.slug,
                      teamSlug: params.teamSlug,
                   }}
+                  to="/$slug/$teamSlug/settings/feature-previews"
                >
                   Prévias de Funcionalidades
                </Link>{" "}
@@ -303,9 +306,10 @@ interface AssetsGridProps {
    teamId: string;
    search: string;
    page: number;
+   onTotalChange: (total: number) => void;
 }
 
-function AssetsGrid({ teamId, search, page }: AssetsGridProps) {
+function AssetsGrid({ teamId, search, page, onTotalChange }: AssetsGridProps) {
    const queryClient = useQueryClient();
    const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
@@ -319,6 +323,11 @@ function AssetsGrid({ teamId, search, page }: AssetsGridProps) {
          },
       }),
    );
+
+   // biome-ignore lint/correctness/useExhaustiveDependencies: onTotalChange is stable (setTotal from useState)
+   useEffect(() => {
+      onTotalChange(data.total ?? 0);
+   }, [data.total]);
 
    const removeMutation = useMutation(
       orpc.assets.remove.mutationOptions({
@@ -352,14 +361,16 @@ function AssetsGrid({ teamId, search, page }: AssetsGridProps) {
       [removeMutation],
    );
 
-   const assets: Asset[] = data?.assets ?? (Array.isArray(data) ? data : []);
+   const assets: Asset[] = data.assets ?? [];
 
    if (assets.length === 0) {
       return (
          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
             <ImageIcon className="size-12 text-muted-foreground/40" />
             <p className="text-sm text-muted-foreground">
-               {search ? "Nenhum arquivo encontrado para sua busca." : "Nenhum arquivo enviado ainda."}
+               {search
+                  ? "Nenhum arquivo encontrado para sua busca."
+                  : "Nenhum arquivo enviado ainda."}
             </p>
          </div>
       );
@@ -406,7 +417,10 @@ function AssetBankContent() {
    const [search, setSearch] = useState("");
    const [debouncedSearch, setDebouncedSearch] = useState("");
    const [page, setPage] = useState(0);
+   const [total, setTotal] = useState(0);
    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+   const hasNextPage = (page + 1) * PAGE_SIZE < total;
 
    const handleSearchChange = (value: string) => {
       setSearch(value);
@@ -462,6 +476,7 @@ function AssetBankContent() {
          <ErrorBoundary FallbackComponent={AssetsPageErrorFallback}>
             <Suspense fallback={<AssetsGridSkeleton />}>
                <AssetsGrid
+                  onTotalChange={setTotal}
                   page={page}
                   search={debouncedSearch}
                   teamId={teamId}
@@ -479,9 +494,10 @@ function AssetBankContent() {
                Anterior
             </Button>
             <span className="text-sm text-muted-foreground">
-               Página {page + 1}
+               Página {page + 1} de {Math.max(1, Math.ceil(total / PAGE_SIZE))}
             </span>
             <Button
+               disabled={!hasNextPage}
                onClick={() => setPage((p) => p + 1)}
                variant="outline"
             >
@@ -525,9 +541,16 @@ function getImageDimensions(
    file: File,
 ): Promise<{ width: number; height: number }> {
    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
       const img = new Image();
-      img.onload = () => resolve({ height: img.naturalHeight, width: img.naturalWidth });
-      img.onerror = reject;
-      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+         URL.revokeObjectURL(url);
+         resolve({ height: img.naturalHeight, width: img.naturalWidth });
+      };
+      img.onerror = (err) => {
+         URL.revokeObjectURL(url);
+         reject(err);
+      };
+      img.src = url;
    });
 }
