@@ -13,7 +13,6 @@ import {
    useCallback,
    useEffect,
    useImperativeHandle,
-   useTransition,
    useState,
 } from "react";
 import { toast } from "sonner";
@@ -81,15 +80,22 @@ interface ProductsStepProps {
    teamSlug: string;
    onComplete: (slug: string, teamSlug: string) => void;
    onStateChange: (state: StepState) => void;
+   isPending?: boolean;
 }
 
 export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
    function ProductsStep(
-      { organizationId, teamId, teamSlug, onComplete, onStateChange },
+      {
+         organizationId,
+         teamId,
+         teamSlug,
+         onComplete,
+         onStateChange,
+         isPending: isPendingProp = false,
+      },
       ref,
    ) {
       const [selected, setSelected] = useState<Product[]>([]);
-      const [isPending, startTransition] = useTransition();
 
       const toggleProduct = useCallback((productId: Product) => {
          setSelected((prev) =>
@@ -99,31 +105,29 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
          );
       }, []);
 
-      const handleComplete = useCallback(() => {
-         return new Promise<boolean>((resolve) => {
-            startTransition(async () => {
-               try {
-                  const result =
-                     await orpc.onboarding.completeOnboarding.call({
-                        products: selected,
-                     });
+      const handleComplete = useCallback(async () => {
+         try {
+            const result =
+               await orpc.onboarding.completeOnboarding.call({
+                  products: selected,
+               });
 
-                  await authClient.organization.setActiveTeam({ teamId });
+            await authClient.organization.setActiveTeam({ teamId });
 
-                  toast.success("Onboarding concluído!");
-                  onComplete(result.slug, teamSlug);
-                  resolve(true);
-               } catch (error) {
-                  toast.error(
-                     error instanceof Error
-                        ? error.message
-                        : "Erro ao concluir onboarding.",
-                  );
-                  resolve(false);
-               }
-            });
-         });
+            toast.success("Onboarding concluído!");
+            onComplete(result.slug, teamSlug);
+            return true;
+         } catch (error) {
+            toast.error(
+               error instanceof Error
+                  ? error.message
+                  : "Erro ao concluir onboarding.",
+            );
+            return false;
+         }
       }, [selected, teamId, teamSlug, onComplete]);
+
+      const isPending = isPendingProp;
 
       const canContinue = selected.length > 0;
 
