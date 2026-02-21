@@ -236,6 +236,8 @@
             "@types/node-cron": "^3.0.11"
          },
          "editor": {
+            "platejs": "52.0.17",
+            "@platejs/basic-nodes": "52.0.11",
             "lexical": "^0.40.0",
             "@lexical/code": "^0.40.0",
             "@lexical/html": "^0.40.0",
@@ -299,5 +301,5 @@
    },
    "peerDependencies": {
       "quansync": "^0.2.11"
-   }
+   },
 }
