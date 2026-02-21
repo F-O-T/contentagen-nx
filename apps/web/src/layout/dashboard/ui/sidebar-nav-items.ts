@@ -80,7 +80,7 @@ export const navGroups: NavGroupDef[] = [
             icon: FlaskConical,
             route: "/$slug/$teamSlug/experiments",
             quickAction: { type: "create", target: "sheet" },
-            earlyAccessFlag: "experiments-alpha",
+            earlyAccessFlag: "experiments",
             earlyAccessStage: "alpha" as const,
          },
       ],
