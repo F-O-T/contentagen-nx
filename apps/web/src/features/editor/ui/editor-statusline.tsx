@@ -23,7 +23,6 @@ import {
 } from "../diagnostics/plugin";
 import { useDiagnosticsState } from "../stores/diagnostics-store";
 import { useEditState } from "../stores/edit-store";
-import { useFIMState } from "../stores/fim-store";
 import { cn } from "../utils";
 
 interface EditorStatuslineProps {
@@ -265,20 +264,13 @@ export function EditorStatusline({
    className,
 }: EditorStatuslineProps): React.JSX.Element {
    const diagnostics = useDiagnosticsState();
-   const fimState = useFIMState();
    const editState = useEditState();
 
    // Determine AI status
    let aiStatus: string | null = null;
    let aiStatusColor = "text-muted-foreground";
 
-   if (fimState.isLoading) {
-      aiStatus = "Gerando...";
-      aiStatusColor = "text-blue-500";
-   } else if (fimState.isVisible && fimState.ghostText) {
-      aiStatus = "Tab para aceitar";
-      aiStatusColor = "text-green-500";
-   } else if (editState.phase === "prompting") {
+   if (editState.phase === "prompting") {
       aiStatus = "Aguardando instrução...";
       aiStatusColor = "text-yellow-500";
    } else if (editState.phase === "streaming") {

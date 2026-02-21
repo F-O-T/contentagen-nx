@@ -39,15 +39,12 @@ import {
 import {
    createEditorConfig,
    createEditorFeatures,
-   createFIMConfig,
 } from "../core/config";
-import { GhostTextNode } from "../core/ghost-text-node";
 import { ImageNode } from "../core/image-node";
 import { editorTheme } from "../core/theme";
 import { EXTENDED_TRANSFORMERS } from "../core/transformers";
 import { DiagnosticsPlugin } from "../diagnostics/plugin";
 import { EditPlugin } from "../plugins/edit-plugin";
-import { FIMPlugin } from "../plugins/fim-plugin";
 import { FloatingToolbarPlugin } from "../plugins/floating-toolbar";
 import { MarkdownPastePlugin } from "../plugins/markdown-paste";
 import { SelectionContextPlugin } from "../plugins/selection-context-plugin";
@@ -56,9 +53,6 @@ import type {
    EditorConfig,
    EditorFeatures,
    EditRequest,
-   FIMChunk,
-   FIMConfig,
-   FIMRequest,
    SpellingError,
 } from "../schemas";
 import { SpellingErrorDecorator, SpellingPlugin } from "../spelling/plugin";
@@ -86,7 +80,6 @@ const EDITOR_NODES = [
    TableCellNode,
    TableRowNode,
    HorizontalRuleNode,
-   GhostTextNode,
    ImageNode,
 ];
 
@@ -100,16 +93,6 @@ interface ContentEditorProps {
     * Feature flags
     */
    features?: Partial<EditorFeatures>;
-
-   /**
-    * FIM configuration
-    */
-   fimConfig?: Partial<FIMConfig>;
-
-   /**
-    * FIM streaming function
-    */
-   fimStream?: (request: FIMRequest) => AsyncIterable<FIMChunk>;
 
    /**
     * Edit streaming function
@@ -267,8 +250,6 @@ function SetContentPlugin({ contentRef }: SetContentPluginProps) {
 export function ContentEditor({
    config: configOverrides,
    features: featureOverrides,
-   fimConfig: fimConfigOverrides,
-   fimStream,
    editStream,
    onChange,
    onMarkdownChange,
@@ -292,10 +273,6 @@ export function ContentEditor({
    const features = useMemo(
       () => createEditorFeatures(featureOverrides),
       [featureOverrides],
-   );
-   const fimConfig = useMemo(
-      () => createFIMConfig(fimConfigOverrides),
-      [fimConfigOverrides],
    );
 
    /**
@@ -384,14 +361,6 @@ export function ContentEditor({
             />
 
             {/* AI plugins */}
-            {features.fim && fimStream && (
-               <FIMPlugin
-                  config={fimConfig}
-                  enabled={editable}
-                  streamFn={fimStream}
-               />
-            )}
-
             {features.edit && editStream && (
                <EditPlugin enabled={editable} streamFn={editStream} />
             )}

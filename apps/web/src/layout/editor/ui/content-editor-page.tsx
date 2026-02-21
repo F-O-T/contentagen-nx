@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { orpc } from "@/integrations/orpc/client";
-import { createEditStreamFn, createFIMStreamFn } from "../hooks/use-fim-stream";
+import { createEditStreamFn } from "../hooks/use-fim-stream";
 import { EditorLayout } from "./editor-layout";
 
 // ============================================================================
@@ -30,7 +30,7 @@ export function ContentEditorPage({
 
    // All features are available to all users (limited by credit budget)
    const editorFeatures = {
-      fim: true,
+      fim: false,
       edit: true,
       spelling: true,
       diagnostics: true,
@@ -52,7 +52,6 @@ export function ContentEditorPage({
    });
 
    // ORPC streaming functions (memoized)
-   const fimStream = useMemo(() => createFIMStreamFn(), []);
    const editStream = useMemo(() => createEditStreamFn(), []);
 
    // Update mutation
@@ -141,7 +140,6 @@ export function ContentEditorPage({
          contentId={contentId}
          editStream={editorFeatures.edit ? editStream : undefined}
          features={editorFeatures}
-         fimStream={editorFeatures.fim ? fimStream : undefined}
          isStandalone={isStandalone}
          onArchive={handleArchive}
          onDelete={handleDelete}

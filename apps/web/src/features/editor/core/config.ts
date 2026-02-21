@@ -3,7 +3,7 @@
  *
  * Default configuration values and factory functions for the editor.
  */
-import type { EditorConfig, EditorFeatures, FIMConfig } from "../schemas";
+import type { EditorConfig, EditorFeatures } from "../schemas";
 
 /**
  * Default editor configuration
@@ -27,19 +27,6 @@ export const defaultEditorFeatures: EditorFeatures = {
 };
 
 /**
- * Default FIM configuration with optimized timing
- */
-export const defaultFIMConfig: FIMConfig = {
-   debounceMs: 500, // Wait for typing pause
-   punctuationDelayMs: 150, // Fast after sentence end (. ! ?)
-   newlineDelayMs: 100, // Very fast after Enter
-   cursorMoveDelayMs: 400, // After selection change
-   editPredictionDelayMs: 700, // Intent-based trigger
-   confidenceThreshold: 0.7, // Minimum confidence to show
-   maxChainDepth: 5, // Max consecutive completions
-};
-
-/**
  * Spelling configuration
  */
 export const spellingConfig = {
@@ -58,14 +45,6 @@ export const spellingConfig = {
 export const diagnosticsConfig = {
    debounceMs: 150, // Near real-time counts
    wordsPerMinute: 200, // For reading time calculation
-};
-
-/**
- * FIM context configuration
- */
-export const fimContextConfig = {
-   maxPrefixChars: 4000, // Characters before cursor
-   maxSuffixChars: 2000, // Characters after cursor
 };
 
 /**
@@ -93,16 +72,6 @@ export function createEditorFeatures(
 }
 
 /**
- * Create FIM configuration with overrides
- */
-export function createFIMConfig(overrides?: Partial<FIMConfig>): FIMConfig {
-   return {
-      ...defaultFIMConfig,
-      ...overrides,
-   };
-}
-
-/**
  * Timing constants for various operations
  */
 export const timingConstants = {
@@ -111,9 +80,6 @@ export const timingConstants = {
 
    // Keystroke target
    keystrokeLatencyMs: 16, // 60fps
-
-   // FIM targets
-   fimAppearanceMs: 100, // Feels instant
 
    // Spell check targets
    spellCheckMs: 100, // For 5k words

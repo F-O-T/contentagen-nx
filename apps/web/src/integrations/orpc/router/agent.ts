@@ -27,7 +27,6 @@ import {
    type EditChunk,
    EditRequestSchema,
    type FIMChunk,
-   FIMRequestSchema,
 } from "@/features/editor/schemas";
 import { protectedProcedure } from "../server";
 
@@ -50,108 +49,6 @@ import { protectedProcedure } from "../server";
 //     preferredSearchProvider, requireAuthoritativeSources, minCredibility
 //   - Use these as defaults when parameters are not explicitly provided
 // =============================================================================
-
-/**
- * FIM (Fill-in-Middle) streaming completion
- * Uses Mastra's fimAgent to provide intelligent text completion
- */
-export const fimStream = protectedProcedure
-   .input(FIMRequestSchema)
-   .handler(async function* ({ context, input }) {
-      const { userId, db, organizationId, posthog, teamId, headers } = context;
-
-      await enforceCreditBudget(db, organizationId, "ai");
-
-      // Fetch product settings for AI configuration
-      const settings = await getProductSettings(db, teamId);
-      const aiDefaults = settings?.aiDefaults ?? {};
-
-      // Get the FIM agent from Mastra
-      const fimAgent = mastra.getAgent("fimAgent");
-
-      // Create request context for the agent with settings
-      const requestContext = createRequestContext({
-         userId,
-         language:
-            aiDefaults.defaultLanguage ??
-            getRequestLanguage(headers) ??
-            "pt-BR",
-         model:
-            aiDefaults.editModel ??
-            "openrouter/mistralai/mistral-small-creative",
-      } as CustomRequestContext);
-
-      // Build the prompt from FIM request
-      const prompt = buildFIMPrompt(input);
-
-      const startTime = Date.now();
-
-      try {
-         // Stream the agent response
-         const result = await fimAgent.stream(
-            [{ role: "user", content: prompt }],
-            {
-               requestContext: requestContext as RequestContext<unknown>,
-            } as unknown as Parameters<typeof fimAgent.stream>[1],
-         );
-
-         // Yield chunks as FIMChunk format
-         let _fullText = "";
-         for await (const chunk of result.textStream) {
-            _fullText += chunk;
-            yield {
-               text: chunk,
-               done: false,
-            } satisfies FIMChunk;
-         }
-
-         const latencyMs = Date.now() - startTime;
-
-         // Emit event and increment credit usage (failure-tolerant)
-         try {
-            await emitAiCompletion(
-               { db, posthog, organizationId, userId, teamId },
-               {
-                  model: "fimAgent",
-                  provider: "openrouter",
-                  promptTokens: 0,
-                  completionTokens: 0,
-                  totalTokens: 0,
-                  latencyMs,
-                  streamed: true,
-               },
-            );
-            await trackCreditUsage(
-               db,
-               AI_EVENTS["ai.completion"],
-               organizationId,
-               "ai",
-            );
-         } catch {
-            // Event tracking must not break the streaming flow
-         }
-
-         // Final chunk with metadata
-         yield {
-            text: "",
-            done: true,
-            metadata: {
-               stopReason: "natural",
-               latencyMs,
-            },
-         } satisfies FIMChunk;
-      } catch (_error) {
-         // Yield error chunk
-         yield {
-            text: "",
-            done: true,
-            metadata: {
-               stopReason: "stop_sequence",
-               latencyMs: Date.now() - startTime,
-            },
-         } satisfies FIMChunk;
-      }
-   });
 
 /**
  * Edit streaming completion (Ctrl+K)
@@ -645,47 +542,6 @@ export const executeUnifiedAgent = protectedProcedure
 // =============================================================================
 // Helper Functions
 // =============================================================================
-
-/**
- * Build FIM prompt from request
- */
-function buildFIMPrompt(request: z.infer<typeof FIMRequestSchema>): string {
-   const { prefix, suffix, cursorContext, editContext, recentText } = request;
-
-   let prompt = `Continue this text naturally:\n\n${prefix}`;
-
-   if (suffix) {
-      prompt += `\n\n[Text after cursor]:\n${suffix}`;
-   }
-
-   if (cursorContext) {
-      const contextHints: string[] = [];
-
-      if (cursorContext.isEndOfSentence) {
-         contextHints.push("cursor is at end of sentence");
-      }
-      if (cursorContext.isEndOfParagraph) {
-         contextHints.push("cursor is at end of paragraph");
-      }
-      if (cursorContext.isAfterPunctuation) {
-         contextHints.push("cursor follows punctuation");
-      }
-
-      if (contextHints.length > 0) {
-         prompt += `\n\n[Context: ${contextHints.join(", ")}]`;
-      }
-   }
-
-   if (editContext) {
-      prompt += `\n\n[Intent: ${editContext.intent}]`;
-   }
-
-   if (recentText) {
-      prompt += `\n\n[Recent edits]:\n${recentText}`;
-   }
-
-   return prompt;
-}
 
 /**
  * Build Edit prompt from request

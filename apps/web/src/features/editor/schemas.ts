@@ -28,23 +28,8 @@ export const EditorFeaturesSchema = z.object({
 export type EditorFeatures = z.infer<typeof EditorFeaturesSchema>;
 
 // ============================================================================
-// FIM (Fill-in-Middle) Schemas
+// FIM Chunk Schemas (kept for CopilotPlugin / copilotStream compatibility)
 // ============================================================================
-
-export const FIMModeSchema = z.enum(["idle", "copilot", "cursor-tab", "diff"]);
-export type FIMMode = z.infer<typeof FIMModeSchema>;
-
-export const FIMTriggerTypeSchema = z.enum([
-   "debounce",
-   "keystroke",
-   "cursor-move",
-   "punctuation",
-   "newline",
-   "chain",
-   "edit-prediction",
-   "manual",
-]);
-export type FIMTriggerType = z.infer<typeof FIMTriggerTypeSchema>;
 
 export const FIMStopReasonSchema = z.enum([
    "natural",
@@ -52,14 +37,6 @@ export const FIMStopReasonSchema = z.enum([
    "stop_sequence",
 ]);
 export type FIMStopReason = z.infer<typeof FIMStopReasonSchema>;
-
-export const EditIntentTypeSchema = z.enum([
-   "continuation",
-   "insertion",
-   "correction",
-   "completion",
-]);
-export type EditIntentType = z.infer<typeof EditIntentTypeSchema>;
 
 export const FIMConfidenceFactorsSchema = z.object({
    length: z.number().min(0).max(1),
@@ -69,26 +46,6 @@ export const FIMConfidenceFactorsSchema = z.object({
    repetition: z.number().min(0).max(1),
 });
 export type FIMConfidenceFactors = z.infer<typeof FIMConfidenceFactorsSchema>;
-
-export const FIMPositionSchema = z.object({
-   top: z.number(),
-   left: z.number(),
-   maxWidth: z.number().optional(),
-});
-export type FIMPosition = z.infer<typeof FIMPositionSchema>;
-
-export const FIMDiffSuggestionSchema = z.object({
-   type: z.enum(["insert", "replace"]),
-   original: z.string().optional(),
-   suggestion: z.string(),
-   replaceRange: z
-      .object({
-         start: z.number(),
-         end: z.number(),
-      })
-      .optional(),
-});
-export type FIMDiffSuggestion = z.infer<typeof FIMDiffSuggestionSchema>;
 
 export const FIMChunkMetadataSchema = z.object({
    stopReason: FIMStopReasonSchema.optional(),
@@ -105,69 +62,6 @@ export const FIMChunkSchema = z.object({
    metadata: FIMChunkMetadataSchema.optional(),
 });
 export type FIMChunk = z.infer<typeof FIMChunkSchema>;
-
-export const FIMConfigSchema = z.object({
-   debounceMs: z.number().default(500),
-   punctuationDelayMs: z.number().default(150),
-   newlineDelayMs: z.number().default(100),
-   cursorMoveDelayMs: z.number().default(400),
-   editPredictionDelayMs: z.number().default(700),
-   confidenceThreshold: z.number().default(0.7),
-   maxChainDepth: z.number().default(5),
-});
-export type FIMConfig = z.infer<typeof FIMConfigSchema>;
-
-export const EditContextSchema = z.object({
-   intent: EditIntentTypeSchema,
-   cursorDistanceFromEnd: z.number(),
-   isInEditingMode: z.boolean(),
-   isAfterIncomplete: z.boolean().optional(),
-   hasSentencePattern: z.boolean().optional(),
-});
-export type EditContext = z.infer<typeof EditContextSchema>;
-
-export const CursorContextSchema = z.object({
-   isEndOfParagraph: z.boolean(),
-   isEndOfSentence: z.boolean(),
-   isAfterPunctuation: z.boolean(),
-});
-export type CursorContext = z.infer<typeof CursorContextSchema>;
-
-export const FIMRequestSchema = z.object({
-   prefix: z.string(),
-   suffix: z.string().optional(),
-   contextType: z.enum(["document", "code"]).optional(),
-   maxTokens: z.number().optional(),
-   temperature: z.number().optional(),
-   stopSequences: z.array(z.string()).optional(),
-   triggerType: FIMTriggerTypeSchema.optional(),
-   recentText: z.string().optional(),
-   cursorContext: CursorContextSchema.optional(),
-   editContext: EditContextSchema.optional(),
-});
-export type FIMRequest = z.infer<typeof FIMRequestSchema>;
-
-export const FIMStateSchema = z.object({
-   mode: FIMModeSchema,
-   ghostText: z.string(),
-   isVisible: z.boolean(),
-   isLoading: z.boolean(),
-   position: FIMPositionSchema.nullable(),
-   completionId: z.string().nullable(),
-   triggerType: FIMTriggerTypeSchema.nullable(),
-   isManualTrigger: z.boolean(),
-   confidenceScore: z.number().nullable(),
-   confidenceFactors: FIMConfidenceFactorsSchema.nullable(),
-   shouldShow: z.boolean(),
-   diffSuggestion: FIMDiffSuggestionSchema.nullable(),
-   chainDepth: z.number(),
-   lastAcceptPosition: z.number().nullable(),
-   isPreFetching: z.boolean(),
-   prefetchedSuggestion: z.string().nullable(),
-   lastLatencyMs: z.number().nullable(),
-   lastStopReason: z.string().nullable(),
-});
-export type FIMState = z.infer<typeof FIMStateSchema>;
 
 // ============================================================================
 // Edit Schemas

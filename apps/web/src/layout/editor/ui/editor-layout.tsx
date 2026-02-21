@@ -24,12 +24,9 @@ import {
 import type {
    EditChunk,
    EditRequest,
-   FIMChunk,
-   FIMRequest,
 } from "@/features/editor/schemas";
 import { useDiffState } from "@/features/editor/stores/diff-store";
 import { useEditState } from "@/features/editor/stores/edit-store";
-import { useFIMState } from "@/features/editor/stores/fim-store";
 import type {
    ContentEditorHandle,
    ContentEditorProps,
@@ -37,7 +34,6 @@ import type {
 import { DiffView } from "@/features/editor/ui/diff-view";
 import { EditPanel, EditSelectionHint } from "@/features/editor/ui/edit-panel";
 import { EditorStatusline } from "@/features/editor/ui/editor-statusline";
-import { FIMPanel } from "@/features/editor/ui/fim-panel";
 import { useContenttaRuntime } from "../hooks/use-contentta-runtime";
 import {
    resetEditorState,
@@ -95,7 +91,6 @@ interface EditorLayoutProps {
       diagnostics: boolean;
    };
    // Stream functions
-   fimStream?: (request: FIMRequest) => AsyncIterable<FIMChunk>;
    editStream?: (request: EditRequest) => AsyncIterable<EditChunk>;
    // Standalone mode (nova rota)
    isStandalone?: boolean;
@@ -113,7 +108,6 @@ export function EditorLayout({
    onArchive,
    onDelete,
    features,
-   fimStream,
    editStream,
    isStandalone = false,
 }: EditorLayoutProps) {
@@ -296,14 +290,6 @@ export function EditorLayout({
                                  resolvedFeatures.edit ? editStream : undefined
                               }
                               features={resolvedFeatures}
-                              fimConfig={{
-                                 debounceMs: editorConfig.fimDebounceMs,
-                                 confidenceThreshold:
-                                    editorConfig.fimConfidenceThreshold,
-                              }}
-                              fimStream={
-                                 resolvedFeatures.fim ? fimStream : undefined
-                              }
                               key={contentId}
                               onEditorReady={setEditorInstance}
                               onMarkdownChange={(markdown) => {
@@ -314,7 +300,6 @@ export function EditorLayout({
                            >
                               {/* AI Panels rendered inside editor context */}
                               <EditPanelWrapper />
-                              <FIMPanelWrapper />
                               <DiffViewWrapper />
                               <EditSelectionHint />
                            </ContentEditor>
@@ -387,12 +372,6 @@ function EditPanelWrapper() {
    const editState = useEditState();
    if (editState.phase === "idle") return null;
    return <EditPanel />;
-}
-
-function FIMPanelWrapper() {
-   const fimState = useFIMState();
-   if (!fimState.isVisible || !fimState.ghostText) return null;
-   return <FIMPanel showConfidence />;
 }
 
 function DiffViewWrapper() {
