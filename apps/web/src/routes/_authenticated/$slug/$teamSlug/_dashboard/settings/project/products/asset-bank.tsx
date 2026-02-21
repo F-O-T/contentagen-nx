@@ -1,5 +1,5 @@
 import { toMajorUnitsString } from "@f-o-t/money";
-import { getImageGenerationPrice } from "@packages/events/pricing";
+import { getImageGenerationPrice } from "@packages/events/ai";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Label } from "@packages/ui/components/label";
@@ -27,14 +27,12 @@ const IMAGE_MODELS = [
       name: "Riverflow V2 Pro",
       description:
          "Melhor controle e renderização de texto. $0.15/imagem (1K/2K) · $0.33/imagem (4K).",
-      price: getImageGenerationPrice("sourceful/riverflow-v2-pro"),
    },
    {
       id: "bytedance-seed/seedream-4.5",
       name: "Seedream 4.5",
       description:
          "Modelo ByteDance com foco em precisão artística e texto. $0.04/imagem.",
-      price: getImageGenerationPrice("bytedance-seed/seedream-4.5"),
    },
 ] as const;
 
@@ -113,7 +111,7 @@ function ImageGenerationModelSection({
                      >
                         {m.name}
                         <Badge variant="secondary" className="font-normal">
-                           ~R${toMajorUnitsString(m.price)}
+                           ~R${toMajorUnitsString(getImageGenerationPrice(m.id))}
                         </Badge>
                      </Label>
                      <p className="text-sm text-muted-foreground">

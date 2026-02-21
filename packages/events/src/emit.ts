@@ -13,9 +13,9 @@ import {
 } from "@packages/queue/webhook-delivery";
 import type { Queue } from "bullmq";
 
-import { AI_EVENTS } from "./ai";
-import type { EventCategory } from "./catalog";
-import { getEventPrice, getImageGenerationPrice } from "./utils";
+import type { Money } from "@f-o-t/money";
+import type { EventCategory, EmitFn } from "./catalog";
+import { getEventPrice } from "./utils";
 
 export interface EmitEventParams {
    db: DatabaseInstance;
@@ -28,6 +28,14 @@ export interface EmitEventParams {
    teamId?: string;
    ipAddress?: string;
    userAgent?: string;
+   priceOverride?: Money;
+}
+
+export function createEmitFn(
+   db: DatabaseInstance,
+   posthog?: PostHog,
+): EmitFn {
+   return (params) => emitEvent({ ...params, db, posthog });
 }
 
 export interface EmitEventBatchParams {
@@ -100,11 +108,7 @@ export async function emitEvent(params: EmitEventParams): Promise<void> {
    } = params;
 
    try {
-      const price =
-         eventName === AI_EVENTS["ai.image_generation"] &&
-         typeof properties?.model === "string"
-            ? getImageGenerationPrice(properties.model)
-            : await getEventPrice(db, eventName);
+      const price = params.priceOverride ?? await getEventPrice(db, eventName);
 
       // 1. Store in PostgreSQL (billing source of truth)
       const [storedEvent] = await db

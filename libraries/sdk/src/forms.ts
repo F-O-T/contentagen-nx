@@ -255,12 +255,12 @@ export class ContenttaFormsClient {
 		});
 
 		// Track experiment impression if this form is part of an A/B test
-		if (options?.experimentId) {
+		if (options?.experimentId && options?.variantId) {
 			this.tracker.track("experiment.started", {
 				targetType: "form",
 				targetId: formId,
 				experimentId: options.experimentId,
-				variantId: options.variantId ?? "control",
+				variantId: options.variantId,
 				visitorId: this.tracker.getVisitorId(),
 				sessionId: this.tracker.getSessionId(),
 			});
@@ -440,9 +440,9 @@ export class ContenttaFormsClient {
 					referrer: typeof document !== "undefined" ? document.referrer : "",
 					url: typeof window !== "undefined" ? window.location.href : "",
 				},
-				...(options?.experimentId && {
+				...(options?.experimentId && options?.variantId && {
 					experimentId: options.experimentId,
-					variantId: options.variantId ?? "control",
+					variantId: options.variantId,
 				}),
 			};
 

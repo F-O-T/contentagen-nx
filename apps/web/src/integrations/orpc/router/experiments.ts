@@ -9,8 +9,10 @@ import {
    removeVariant,
    updateExperiment,
 } from "@packages/database/repositories/experiments-repository";
+import { content } from "@packages/database/schemas/content";
 import { experimentDailyStats } from "@packages/database/schemas/event-views";
 import { experimentVariants } from "@packages/database/schemas/experiments";
+import { forms } from "@packages/database/schemas/forms";
 import { EXPERIMENT_TARGET_TYPES } from "@packages/events/experiments";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -157,6 +159,11 @@ export const conclude = protectedProcedure
             message: "Experiment is already concluded",
          });
       }
+      if (input.winnerId && !existing.variants.some((v) => v.id === input.winnerId)) {
+         throw new ORPCError("UNPROCESSABLE_ENTITY", {
+            message: "Winner must be a variant of this experiment",
+         });
+      }
       return updateExperiment(db, input.id, {
          status: "concluded",
          concludedAt: new Date(),
@@ -177,6 +184,38 @@ export const addVariantToExperiment = protectedProcedure
             message: "Cannot add variants to a running experiment",
          });
       }
+
+      // Validate targetType vs provided IDs
+      if (experiment.targetType === "content") {
+         if (!input.contentId || input.formId) {
+            throw new ORPCError("BAD_REQUEST", {
+               message: "contentId is required and formId must not be set for content experiments",
+            });
+         }
+         const [row] = await db
+            .select({ id: content.id })
+            .from(content)
+            .where(and(eq(content.id, input.contentId), eq(content.organizationId, organizationId)))
+            .limit(1);
+         if (!row) {
+            throw new ORPCError("NOT_FOUND", { message: "Content not found" });
+         }
+      } else if (experiment.targetType === "form") {
+         if (!input.formId || input.contentId) {
+            throw new ORPCError("BAD_REQUEST", {
+               message: "formId is required and contentId must not be set for form experiments",
+            });
+         }
+         const [row] = await db
+            .select({ id: forms.id })
+            .from(forms)
+            .where(and(eq(forms.id, input.formId), eq(forms.organizationId, organizationId)))
+            .limit(1);
+         if (!row) {
+            throw new ORPCError("NOT_FOUND", { message: "Form not found" });
+         }
+      }
+
       return addVariant(db, input);
    });
 

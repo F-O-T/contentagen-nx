@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-import { EVENT_CATEGORIES } from "./catalog";
-import { type EmitEventParams, emitEvent } from "./emit";
+import { EVENT_CATEGORIES, type EmitFn } from "./catalog";
 
 // ---------------------------------------------------------------------------
 // SEO Event Names
@@ -13,6 +12,15 @@ export const SEO_EVENTS = {
 } as const;
 
 export type SeoEventName = (typeof SEO_EVENTS)[keyof typeof SEO_EVENTS];
+
+// ---------------------------------------------------------------------------
+// SEO Pricing
+// ---------------------------------------------------------------------------
+
+export const SEO_PRICING: Record<string, string> = {
+   "seo.analyzed": "0.001000",
+   "seo.indexed": "0.000100",
+};
 
 // ---------------------------------------------------------------------------
 // seo.analyzed
@@ -37,10 +45,11 @@ export const seoAnalyzedEventSchema = z.object({
 export type SeoAnalyzedEvent = z.infer<typeof seoAnalyzedEventSchema>;
 
 export function emitSeoAnalyzed(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string },
    properties: SeoAnalyzedEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: SEO_EVENTS["seo.analyzed"],
       eventCategory: EVENT_CATEGORIES.seo,
@@ -61,10 +70,11 @@ export const seoIndexedEventSchema = z.object({
 export type SeoIndexedEvent = z.infer<typeof seoIndexedEventSchema>;
 
 export function emitSeoIndexed(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string },
    properties: SeoIndexedEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: SEO_EVENTS["seo.indexed"],
       eventCategory: EVENT_CATEGORIES.seo,

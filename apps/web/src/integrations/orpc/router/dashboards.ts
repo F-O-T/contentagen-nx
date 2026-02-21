@@ -12,6 +12,7 @@ import {
    DashboardDateRangeSchema,
    DashboardFilterSchema,
 } from "@packages/database/schemas/dashboards";
+import { createEmitFn } from "@packages/events/emit";
 import {
    emitDashboardCreated,
    emitDashboardDeleted,
@@ -59,7 +60,8 @@ export const create = protectedProcedure
 
       try {
          await emitDashboardCreated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { dashboardId: dashboard.id, name: input.name },
          );
       } catch {
@@ -117,7 +119,8 @@ export const update = protectedProcedure
             (k) => updateData[k as keyof typeof updateData] !== undefined,
          );
          await emitDashboardUpdated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { dashboardId: input.id, changedFields },
          );
       } catch {
@@ -160,7 +163,8 @@ export const updateTiles = protectedProcedure
          try {
             const changedFields = Object.keys(metadataUpdate);
             await emitDashboardUpdated(
-               { db, posthog, organizationId, userId, teamId },
+               createEmitFn(db, posthog),
+               { organizationId, userId, teamId },
                { dashboardId: input.id, changedFields },
             );
          } catch {
@@ -200,7 +204,8 @@ export const remove = protectedProcedure
 
       try {
          await emitDashboardDeleted(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { dashboardId: input.id },
          );
       } catch {
@@ -254,7 +259,8 @@ export const updateGlobalFilters = protectedProcedure
       try {
          const changedFields = Object.keys(updateData);
          await emitDashboardUpdated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { dashboardId: input.dashboardId, changedFields },
          );
       } catch {
@@ -289,7 +295,8 @@ export const setAsHome = protectedProcedure
 
       try {
          await emitDashboardUpdated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { dashboardId: input.id, changedFields: ["isDefault"] },
          );
       } catch {

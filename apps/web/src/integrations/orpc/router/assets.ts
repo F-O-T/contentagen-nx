@@ -15,7 +15,8 @@ import {
 } from "@packages/events/assets";
 import { AI_EVENTS, emitAiImageGeneration } from "@packages/events/ai";
 import { enforceCreditBudget, trackCreditUsage } from "@packages/events/credits";
-import { getImageGenerationPrice } from "@packages/events/pricing";
+import { createEmitFn } from "@packages/events/emit";
+import { getImageGenerationPrice } from "@packages/events/ai";
 import {
    deleteFile,
    generatePresignedPutUrl,
@@ -319,7 +320,8 @@ export const generateImage = protectedProcedure
       }
 
       emitAiImageGeneration(
-         { db, posthog, organizationId, userId, teamId },
+         createEmitFn(db, posthog),
+         { organizationId, userId, teamId },
          {
             assetId: asset.id,
             prompt: input.prompt,

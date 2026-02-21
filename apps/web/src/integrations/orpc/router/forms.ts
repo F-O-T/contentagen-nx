@@ -8,6 +8,7 @@ import {
    listFormsByTeam,
    updateForm,
 } from "@packages/database/repositories/form-repository";
+import { createEmitFn } from "@packages/events/emit";
 import {
    emitFormCreated,
    emitFormDeleted,
@@ -75,7 +76,8 @@ export const create = protectedProcedure
 
       try {
          await emitFormCreated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { formId: form.id, name: input.name },
          );
       } catch {
@@ -145,7 +147,8 @@ export const update = protectedProcedure
             (k) => updateData[k as keyof typeof updateData] !== undefined,
          );
          await emitFormUpdated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { formId: input.id, changedFields },
          );
       } catch {
@@ -179,7 +182,8 @@ export const remove = protectedProcedure
 
       try {
          await emitFormDeleted(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { formId: input.id },
          );
       } catch {

@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-import { EVENT_CATEGORIES } from "./catalog";
-import { type EmitEventParams, emitEvent } from "./emit";
+import { EVENT_CATEGORIES, type EmitFn } from "./catalog";
 
 // ---------------------------------------------------------------------------
 // Experiment Event Names
@@ -17,6 +16,15 @@ export type ExperimentEventName =
 
 export const EXPERIMENT_TARGET_TYPES = ["content", "form", "cluster"] as const;
 export type ExperimentTargetType = (typeof EXPERIMENT_TARGET_TYPES)[number];
+
+// ---------------------------------------------------------------------------
+// Experiment Pricing
+// ---------------------------------------------------------------------------
+
+export const EXPERIMENT_PRICING: Record<string, string> = {
+   "experiment.started": "0.001000",
+   "experiment.conversion": "0.000100",
+};
 
 // ---------------------------------------------------------------------------
 // experiment.started
@@ -47,10 +55,11 @@ export type ExperimentStartedEvent = z.infer<
 >;
 
 export function emitExperimentStarted(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string },
    properties: ExperimentStartedEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: EXPERIMENT_EVENTS["experiment.started"],
       eventCategory: EVENT_CATEGORIES.experiment,
@@ -89,10 +98,11 @@ export type ExperimentConversionEvent = z.infer<
 >;
 
 export function emitExperimentConversion(
-   ctx: Pick<EmitEventParams, "db" | "posthog" | "organizationId" | "userId">,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string },
    properties: ExperimentConversionEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: EXPERIMENT_EVENTS["experiment.conversion"],
       eventCategory: EVENT_CATEGORIES.experiment,

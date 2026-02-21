@@ -1,4 +1,9 @@
-import { createMoney, greaterThanOrEqual } from "@f-o-t/money";
+import {
+   createMoney,
+   greaterThanOrEqual,
+   type Money,
+   parseDecimalToMinorUnits,
+} from "@f-o-t/money";
 import { ORPCError } from "@orpc/server";
 import type { DatabaseInstance } from "@packages/database/client";
 import { subscription } from "@packages/database/schemas/auth";
@@ -6,15 +11,79 @@ import { getRedisConnection } from "@packages/redis/connection";
 import { PlanName } from "@packages/stripe/constants";
 import { and, eq, or } from "drizzle-orm";
 import type { Redis } from "ioredis";
-import { type CreditPool, PLAN_CREDIT_BUDGETS } from "./pricing";
+import { EVENT_CATEGORIES, type EventCategory } from "./catalog";
 import { getEventPrice } from "./utils";
+
+// ---------------------------------------------------------------------------
+// Credit Pools & Budgets
+// ---------------------------------------------------------------------------
+
+export type CreditPool = "ai" | "platform";
+
+const PRICE_SCALE = 6;
+const CURRENCY = "BRL";
+
+function brl(amount: string): Money {
+   return createMoney(
+      parseDecimalToMinorUnits(amount, PRICE_SCALE),
+      CURRENCY,
+      PRICE_SCALE,
+   );
+}
+
+/**
+ * Maps each credit pool to the event categories it covers.
+ */
+export const POOL_CATEGORIES: Record<CreditPool, EventCategory[]> = {
+   ai: [EVENT_CATEGORIES.ai],
+   platform: [
+      EVENT_CATEGORIES.content,
+      EVENT_CATEGORIES.form,
+      EVENT_CATEGORIES.seo,
+      EVENT_CATEGORIES.experiment,
+      EVENT_CATEGORIES.dashboard,
+      EVENT_CATEGORIES.insight,
+      EVENT_CATEGORIES.webhook,
+   ],
+};
+
+/**
+ * Monthly credit budget per plan per pool.
+ * Values are in BRL with micro-precision (6 decimal places).
+ */
+export const PLAN_CREDIT_BUDGETS: Record<PlanName, Record<CreditPool, Money>> =
+   {
+      [PlanName.FREE]: {
+         ai: brl("2.500000"),
+         platform: brl("2.500000"),
+      },
+      [PlanName.LITE]: {
+         ai: brl("25.000000"),
+         platform: brl("25.000000"),
+      },
+      [PlanName.PRO]: {
+         ai: brl("50.000000"),
+         platform: brl("50.000000"),
+      },
+   };
+
+/**
+ * Resolve which credit pool an event category belongs to.
+ *
+ * @returns The pool name, or `undefined` for non-billable categories.
+ */
+export function getCreditPool(category: EventCategory): CreditPool | undefined {
+   for (const [pool, categories] of Object.entries(POOL_CATEGORIES)) {
+      if (categories.includes(category)) {
+         return pool as CreditPool;
+      }
+   }
+   return undefined;
+}
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-
-const PRICE_SCALE = 6;
-const CURRENCY = "BRL";
 
 const POOL_DISPLAY_NAMES: Record<CreditPool, string> = {
    ai: "IA",

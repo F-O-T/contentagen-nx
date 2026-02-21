@@ -5,6 +5,8 @@
  * (content.ts, ai.ts, forms.ts, seo.ts, experiments.ts).
  */
 
+import type { Money } from "@f-o-t/money";
+
 export const EVENT_CATEGORIES = {
    content: "content",
    ai: "ai",
@@ -19,6 +21,16 @@ export const EVENT_CATEGORIES = {
 
 export type EventCategory =
    (typeof EVENT_CATEGORIES)[keyof typeof EVENT_CATEGORIES];
+
+export type EmitFn = (params: {
+   organizationId: string;
+   eventName: string;
+   eventCategory: EventCategory;
+   properties: Record<string, unknown>;
+   userId?: string;
+   teamId?: string;
+   priceOverride?: Money;
+}) => Promise<void>;
 
 const categorySet = new Set<string>(Object.values(EVENT_CATEGORIES));
 

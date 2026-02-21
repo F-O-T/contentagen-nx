@@ -2,10 +2,92 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { createDb } from "@packages/database/client";
 import { eventCatalog } from "@packages/database/schemas/event-catalog";
-import { EVENT_PRICING, toSeedEntry } from "@packages/events/pricing";
+import { AI_EVENTS } from "@packages/events/ai";
+import { EVENT_CATEGORIES } from "@packages/events/catalog";
+import { CONTENT_EVENTS } from "@packages/events/content";
+import { DASHBOARD_EVENTS } from "@packages/events/dashboard";
+import { EXPERIMENT_EVENTS } from "@packages/events/experiments";
+import { FORM_EVENTS } from "@packages/events/forms";
+import { INSIGHT_EVENTS } from "@packages/events/insight";
+import { SEO_EVENTS } from "@packages/events/seo";
+import { WEBHOOK_EVENTS } from "@packages/events/webhook";
 import chalk from "chalk";
 import { Command } from "commander";
 import { config } from "dotenv";
+
+// ---------------------------------------------------------------------------
+// Event catalog seed data
+// ---------------------------------------------------------------------------
+
+interface EventPricing {
+   eventName: string;
+   category: string;
+   pricePerEvent: string; // decimal string, e.g. "0.001000"
+   freeTierLimit: number;
+   displayName: string;
+   description: string;
+   isBillable: boolean;
+}
+
+const EVENT_PRICING: EventPricing[] = [
+   // Content
+   { eventName: CONTENT_EVENTS["content.page.view"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000020", freeTierLimit: 10_000, displayName: "Page View", description: "Tracks a single page view on published content.", isBillable: true },
+   { eventName: CONTENT_EVENTS["content.page.published"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.001000", freeTierLimit: 100, displayName: "Content Published", description: "Fired when a piece of content transitions to published status.", isBillable: true },
+   { eventName: CONTENT_EVENTS["content.page.updated"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000500", freeTierLimit: 500, displayName: "Content Updated", description: "Fired when published content is updated.", isBillable: true },
+   { eventName: CONTENT_EVENTS["content.created"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Content Created", description: "Fired when a new content draft is created.", isBillable: false },
+   { eventName: CONTENT_EVENTS["content.deleted"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Content Deleted", description: "Fired when content is permanently deleted.", isBillable: false },
+   { eventName: CONTENT_EVENTS["content.scroll.milestone"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Scroll Milestone", description: "Tracks when a reader reaches a scroll depth milestone (25%, 50%, 75%, 100%).", isBillable: false },
+   { eventName: CONTENT_EVENTS["content.time.spent"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Time Spent", description: "Records cumulative time a reader spends on content.", isBillable: false },
+   { eventName: CONTENT_EVENTS["content.cta.click"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "CTA Click", description: "Fired when a reader clicks a call-to-action element.", isBillable: false },
+   { eventName: CONTENT_EVENTS["content.exported"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.001000", freeTierLimit: 100, displayName: "Content Exported", description: "Fired when content is exported to an external format.", isBillable: true },
+   { eventName: CONTENT_EVENTS["content.archived"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Content Archived", description: "Fired when content is archived.", isBillable: false },
+   // AI
+   { eventName: AI_EVENTS["ai.completion"], category: EVENT_CATEGORIES.ai, pricePerEvent: "0.003000", freeTierLimit: 100, displayName: "AI Completion (FIM)", description: "Tracks a single AI fill-in-the-middle completion.", isBillable: true },
+   { eventName: AI_EVENTS["ai.chat_message"], category: EVENT_CATEGORIES.ai, pricePerEvent: "0.020000", freeTierLimit: 50, displayName: "AI Chat Message", description: "Tracks a single AI chat message exchange.", isBillable: true },
+   { eventName: AI_EVENTS["ai.agent_action"], category: EVENT_CATEGORIES.ai, pricePerEvent: "0.040000", freeTierLimit: 20, displayName: "AI Agent Action", description: "Tracks a discrete action performed by an AI agent (planning, research, editing).", isBillable: true },
+   { eventName: AI_EVENTS["ai.image_generation"], category: EVENT_CATEGORIES.ai, pricePerEvent: "0.900000", freeTierLimit: 5, displayName: "AI Image Generation", description: "Tracks a single AI image generation request via OpenRouter.", isBillable: true },
+   // Forms
+   { eventName: FORM_EVENTS["form.impression"], category: EVENT_CATEGORIES.form, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Form Impression", description: "Fired when a form is rendered and visible to a user.", isBillable: false },
+   { eventName: FORM_EVENTS["form.submitted"], category: EVENT_CATEGORIES.form, pricePerEvent: "0.002000", freeTierLimit: 500, displayName: "Form Submitted", description: "Fired when a form is successfully submitted.", isBillable: true },
+   { eventName: FORM_EVENTS["form.field_error"], category: EVENT_CATEGORIES.form, pricePerEvent: "0.000100", freeTierLimit: 1_000, displayName: "Form Field Error", description: "Tracks a field-level validation error on a form.", isBillable: true },
+   { eventName: FORM_EVENTS["form.conversion"], category: EVENT_CATEGORIES.form, pricePerEvent: "0.000100", freeTierLimit: 500, displayName: "Form Conversion", description: "Fired when a form submission is attributed as a conversion.", isBillable: true },
+   { eventName: FORM_EVENTS["form.created"], category: EVENT_CATEGORIES.form, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Form Created", description: "Fired when a new form is created.", isBillable: false },
+   { eventName: FORM_EVENTS["form.updated"], category: EVENT_CATEGORIES.form, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Form Updated", description: "Fired when a form is updated.", isBillable: false },
+   { eventName: FORM_EVENTS["form.deleted"], category: EVENT_CATEGORIES.form, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Form Deleted", description: "Fired when a form is deleted.", isBillable: false },
+   // SEO
+   { eventName: SEO_EVENTS["seo.analyzed"], category: EVENT_CATEGORIES.seo, pricePerEvent: "0.001000", freeTierLimit: 500, displayName: "SEO Analysis", description: "Fired when an SEO analysis pass is run against content.", isBillable: true },
+   { eventName: SEO_EVENTS["seo.indexed"], category: EVENT_CATEGORIES.seo, pricePerEvent: "0.000100", freeTierLimit: 1_000, displayName: "SEO Indexed", description: "Fired when content is confirmed indexed by a search engine.", isBillable: true },
+   // Experiments
+   { eventName: EXPERIMENT_EVENTS["experiment.started"], category: EVENT_CATEGORIES.experiment, pricePerEvent: "0.001000", freeTierLimit: 1_000, displayName: "Experiment Started", description: "Fired when an A/B experiment is activated.", isBillable: true },
+   { eventName: EXPERIMENT_EVENTS["experiment.conversion"], category: EVENT_CATEGORIES.experiment, pricePerEvent: "0.000100", freeTierLimit: 1_000, displayName: "Experiment Conversion", description: "Fired when a conversion is recorded for an active experiment.", isBillable: true },
+   // Webhooks
+   { eventName: WEBHOOK_EVENTS["webhook.endpoint.created"], category: EVENT_CATEGORIES.webhook, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Webhook Endpoint Created", description: "Fired when a webhook endpoint is created.", isBillable: false },
+   { eventName: WEBHOOK_EVENTS["webhook.endpoint.updated"], category: EVENT_CATEGORIES.webhook, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Webhook Endpoint Updated", description: "Fired when a webhook endpoint configuration is updated.", isBillable: false },
+   { eventName: WEBHOOK_EVENTS["webhook.endpoint.deleted"], category: EVENT_CATEGORIES.webhook, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Webhook Endpoint Deleted", description: "Fired when a webhook endpoint is deleted.", isBillable: false },
+   { eventName: WEBHOOK_EVENTS["webhook.delivered"], category: EVENT_CATEGORIES.webhook, pricePerEvent: "0.000500", freeTierLimit: 500, displayName: "Webhook Delivered", description: "Fired when a webhook payload is delivered to an endpoint.", isBillable: true },
+   // Dashboards
+   { eventName: DASHBOARD_EVENTS["dashboard.created"], category: EVENT_CATEGORIES.dashboard, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Dashboard Created", description: "Fired when a new dashboard is created.", isBillable: false },
+   { eventName: DASHBOARD_EVENTS["dashboard.updated"], category: EVENT_CATEGORIES.dashboard, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Dashboard Updated", description: "Fired when a dashboard configuration is updated.", isBillable: false },
+   { eventName: DASHBOARD_EVENTS["dashboard.deleted"], category: EVENT_CATEGORIES.dashboard, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Dashboard Deleted", description: "Fired when a dashboard is deleted.", isBillable: false },
+   // Insights
+   { eventName: INSIGHT_EVENTS["insight.created"], category: EVENT_CATEGORIES.insight, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Insight Created", description: "Fired when a new insight is created.", isBillable: false },
+   { eventName: INSIGHT_EVENTS["insight.updated"], category: EVENT_CATEGORIES.insight, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Insight Updated", description: "Fired when an insight is updated.", isBillable: false },
+   { eventName: INSIGHT_EVENTS["insight.deleted"], category: EVENT_CATEGORIES.insight, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Insight Deleted", description: "Fired when an insight is deleted.", isBillable: false },
+];
+
+function toSeedEntry(pricing: EventPricing) {
+   return {
+      eventName: pricing.eventName,
+      category: pricing.category,
+      pricePerEvent: pricing.pricePerEvent,
+      freeTierLimit: pricing.freeTierLimit,
+      displayName: pricing.displayName,
+      description: pricing.description,
+      isBillable: pricing.isBillable,
+   };
+}
+
+// ---------------------------------------------------------------------------
 
 const program = new Command();
 
