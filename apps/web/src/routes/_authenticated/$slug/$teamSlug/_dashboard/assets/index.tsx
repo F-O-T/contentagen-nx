@@ -2,15 +2,27 @@ import type { Asset } from "@packages/database/schemas/assets";
 import { useFeatureFlag } from "@packages/posthog/client";
 import { Button } from "@packages/ui/components/button";
 import {
-   Dialog,
-   DialogContent,
-   DialogFooter,
-   DialogHeader,
-   DialogTitle,
-} from "@packages/ui/components/dialog";
+   CredenzaBody,
+   CredenzaDescription,
+   CredenzaFooter,
+   CredenzaHeader,
+   CredenzaTitle,
+} from "@packages/ui/components/credenza";
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+} from "@packages/ui/components/dropdown-menu";
 import { Input } from "@packages/ui/components/input";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { Textarea } from "@packages/ui/components/textarea";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@packages/ui/components/tooltip";
 import {
    useMutation,
    useQueryClient,
@@ -19,9 +31,13 @@ import {
 import { useDebounce } from "@uidotdev/usehooks";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+   ChevronDown,
+   Eye,
    FileIcon,
    ImageIcon,
    Loader2,
+   Pencil,
+   Plus,
    Search,
    Sparkles,
    Trash2,
@@ -32,6 +48,8 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
+import { useAlertDialog } from "@/hooks/use-alert-dialog";
+import { useCredenza } from "@/hooks/use-credenza";
 import { orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
@@ -123,55 +141,88 @@ function AssetBankUnenrolled() {
 interface AssetCardProps {
    asset: Asset;
    onDelete: (id: string) => void;
+   onRename: (asset: Asset) => void;
+   onView: (asset: Asset) => void;
    isDeleting: boolean;
 }
 
-function AssetCard({ asset, onDelete, isDeleting }: AssetCardProps) {
-   const [hovered, setHovered] = useState(false);
+function AssetCard({
+   asset,
+   onDelete,
+   onRename,
+   onView,
+   isDeleting,
+}: AssetCardProps) {
    const isImage = asset.mimeType.startsWith("image/");
 
    return (
-      <div
-         className="relative aspect-square rounded-lg overflow-hidden border bg-muted group cursor-default"
-         onMouseEnter={() => setHovered(true)}
-         onMouseLeave={() => setHovered(false)}
-      >
-         {isImage ? (
-            <img
-               alt={asset.alt ?? asset.filename}
-               className="w-full h-full object-cover"
-               src={asset.publicUrl}
-            />
-         ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-2">
-               <FileIcon className="size-8 text-muted-foreground" />
-               <span className="text-xs text-muted-foreground truncate w-full text-center">
-                  {asset.filename}
-               </span>
+      <div className="flex flex-col rounded-lg overflow-hidden border bg-muted">
+         <div className="aspect-square overflow-hidden">
+            {isImage ? (
+               <img
+                  alt={asset.alt ?? asset.filename}
+                  className="w-full h-full object-cover"
+                  src={asset.publicUrl}
+               />
+            ) : (
+               <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-2">
+                  <FileIcon className="size-8 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground truncate w-full text-center">
+                     {asset.filename}
+                  </span>
+               </div>
+            )}
+         </div>
+         <TooltipProvider>
+            <div className="flex items-center justify-center gap-1 border-t bg-background/80 px-1 py-1.5">
+               {isImage && (
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <Button
+                           className="size-8 shrink-0"
+                           onClick={() => onView(asset)}
+                           size="icon"
+                           variant="ghost"
+                        >
+                           <Eye className="size-4" />
+                        </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Visualizar</TooltipContent>
+                  </Tooltip>
+               )}
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button
+                        className="size-8 shrink-0"
+                        onClick={() => onRename(asset)}
+                        size="icon"
+                        variant="ghost"
+                     >
+                        <Pencil className="size-4" />
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Renomear</TooltipContent>
+               </Tooltip>
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button
+                        className="size-8 shrink-0 text-destructive hover:text-destructive"
+                        disabled={isDeleting}
+                        onClick={() => onDelete(asset.id)}
+                        size="icon"
+                        variant="ghost"
+                     >
+                        {isDeleting ? (
+                           <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                           <Trash2 className="size-4" />
+                        )}
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Excluir</TooltipContent>
+               </Tooltip>
             </div>
-         )}
-
-         {/* Hover overlay */}
-         {hovered && (
-            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2 p-2">
-               <p className="text-xs text-white font-medium truncate w-full text-center">
-                  {asset.filename}
-               </p>
-               <Button
-                  className="size-8 text-destructive-foreground bg-destructive hover:bg-destructive/90"
-                  disabled={isDeleting}
-                  onClick={() => onDelete(asset.id)}
-                  size="icon"
-                  variant="destructive"
-               >
-                  {isDeleting ? (
-                     <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                     <Trash2 className="size-4" />
-                  )}
-               </Button>
-            </div>
-         )}
+         </TooltipProvider>
       </div>
    );
 }
@@ -182,9 +233,10 @@ function AssetCard({ asset, onDelete, isDeleting }: AssetCardProps) {
 
 interface AssetDropzoneProps {
    teamId: string;
+   onUploadComplete?: () => void;
 }
 
-function AssetDropzone({ teamId }: AssetDropzoneProps) {
+function AssetDropzone({ teamId, onUploadComplete }: AssetDropzoneProps) {
    const queryClient = useQueryClient();
    const [isUploading, setIsUploading] = useState(false);
 
@@ -252,13 +304,20 @@ function AssetDropzone({ teamId }: AssetDropzoneProps) {
                   input: { teamId },
                }).queryKey,
             });
+            onUploadComplete?.();
          } catch {
             toast.error("Falha ao enviar o arquivo. Tente novamente.");
          } finally {
             setIsUploading(false);
          }
       },
-      [teamId, generateUploadUrlMutation, completeUploadMutation, queryClient],
+      [
+         teamId,
+         generateUploadUrlMutation,
+         completeUploadMutation,
+         queryClient,
+         onUploadComplete,
+      ],
    );
 
    const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -305,6 +364,118 @@ function AssetDropzone({ teamId }: AssetDropzoneProps) {
    );
 }
 
+function AssetUploadCredenzaContent({
+   teamId,
+   onClose,
+}: {
+   teamId: string;
+   onClose: () => void;
+}) {
+   return (
+      <>
+         <CredenzaHeader>
+            <CredenzaTitle>Upload de imagem</CredenzaTitle>
+            <CredenzaDescription>
+               Envie imagens, vídeos e PDFs de até 50MB.
+            </CredenzaDescription>
+         </CredenzaHeader>
+         <CredenzaBody>
+            <AssetDropzone onUploadComplete={onClose} teamId={teamId} />
+         </CredenzaBody>
+      </>
+   );
+}
+
+function AssetViewContent({ asset }: { asset: Asset }) {
+   return (
+      <>
+         <CredenzaHeader>
+            <CredenzaTitle>Visualizar arquivo</CredenzaTitle>
+            <CredenzaDescription>{asset.filename}</CredenzaDescription>
+         </CredenzaHeader>
+         <CredenzaBody>
+            <div className="flex flex-col items-center gap-2">
+               <img
+                  alt={asset.alt ?? asset.filename}
+                  className="max-h-[70vh] w-auto max-w-full object-contain"
+                  src={asset.publicUrl}
+               />
+            </div>
+         </CredenzaBody>
+      </>
+   );
+}
+
+function AssetRenameContent({
+   asset,
+   onClose,
+   onSuccess,
+}: {
+   asset: Asset;
+   onClose: () => void;
+   onSuccess: () => void;
+}) {
+   const [filename, setFilename] = useState(asset.filename);
+
+   const updateMutation = useMutation(
+      orpc.assets.update.mutationOptions({
+         onSuccess: () => {
+            toast.success("Arquivo renomeado.");
+            onClose();
+            onSuccess();
+         },
+         onError: () => toast.error("Falha ao renomear. Tente novamente."),
+      }),
+   );
+
+   const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      const trimmed = filename.trim();
+      if (!trimmed) return;
+      const lastDot = asset.filename.lastIndexOf(".");
+      const ext = lastDot >= 0 ? asset.filename.slice(lastDot) : "";
+      const base = trimmed;
+      const finalFilename = base + ext;
+      if (finalFilename === asset.filename) {
+         onClose();
+         return;
+      }
+      updateMutation.mutate({ id: asset.id, filename: finalFilename });
+   };
+
+   return (
+      <>
+         <CredenzaHeader>
+            <CredenzaTitle>Renomear arquivo</CredenzaTitle>
+            <CredenzaDescription>
+               Altere o nome do arquivo selecionado.
+            </CredenzaDescription>
+         </CredenzaHeader>
+         <CredenzaBody>
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+               <Input
+                  disabled={updateMutation.isPending}
+                  onChange={(e) => setFilename(e.target.value)}
+                  value={filename}
+               />
+               <CredenzaFooter>
+                  <Button
+                     disabled={!filename.trim() || updateMutation.isPending}
+                     type="submit"
+                  >
+                     {updateMutation.isPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                     ) : (
+                        "Salvar"
+                     )}
+                  </Button>
+               </CredenzaFooter>
+            </form>
+         </CredenzaBody>
+      </>
+   );
+}
+
 // ============================================================
 // Assets grid (suspense boundary)
 // ============================================================
@@ -320,6 +491,8 @@ interface AssetsGridProps {
 
 function AssetsGrid({ teamId, search, page, onTotalChange }: AssetsGridProps) {
    const queryClient = useQueryClient();
+   const { closeCredenza, openCredenza } = useCredenza();
+   const { openAlertDialog } = useAlertDialog();
    const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
    const { data } = useSuspenseQuery(
@@ -353,7 +526,7 @@ function AssetsGrid({ teamId, search, page, onTotalChange }: AssetsGridProps) {
       }),
    );
 
-   const handleDelete = useCallback(
+   const executeDelete = useCallback(
       async (id: string) => {
          setDeletingIds((prev) => new Set(prev).add(id));
          try {
@@ -368,6 +541,56 @@ function AssetsGrid({ teamId, search, page, onTotalChange }: AssetsGridProps) {
          }
       },
       [removeMutation],
+   );
+
+   const handleDelete = useCallback(
+      (id: string) => {
+         openAlertDialog({
+            title: "Excluir arquivo?",
+            description:
+               "Esta ação não pode ser desfeita. O arquivo será removido permanentemente.",
+            actionLabel: "Excluir",
+            cancelLabel: "Cancelar",
+            variant: "destructive",
+            onAction: async () => {
+               await executeDelete(id);
+            },
+         });
+      },
+      [openAlertDialog, executeDelete],
+   );
+
+   const invalidateList = useCallback(() => {
+      queryClient.invalidateQueries({
+         queryKey: orpc.assets.list.queryOptions({ input: { teamId } })
+            .queryKey,
+      });
+   }, [queryClient, teamId]);
+
+   const handleView = useCallback(
+      (asset: Asset) => {
+         openCredenza({
+            className: "max-w-[90vw] max-h-[90vh] p-2",
+            children: <AssetViewContent asset={asset} />,
+         });
+      },
+      [openCredenza],
+   );
+
+   const handleRename = useCallback(
+      (asset: Asset) => {
+         openCredenza({
+            className: "sm:max-w-md",
+            children: (
+               <AssetRenameContent
+                  asset={asset}
+                  onClose={closeCredenza}
+                  onSuccess={invalidateList}
+               />
+            ),
+         });
+      },
+      [openCredenza, closeCredenza, invalidateList],
    );
 
    const assets: Asset[] = data.assets ?? [];
@@ -393,6 +616,8 @@ function AssetsGrid({ teamId, search, page, onTotalChange }: AssetsGridProps) {
                isDeleting={deletingIds.has(asset.id)}
                key={asset.id}
                onDelete={handleDelete}
+               onRename={handleRename}
+               onView={handleView}
             />
          ))}
       </div>
@@ -416,17 +641,13 @@ function AssetsGridSkeleton() {
    );
 }
 
-// ============================================================
-// Generate Image Dialog
-// ============================================================
-
-interface GenerateImageDialogProps {
-   open: boolean;
-   onOpenChange: (open: boolean) => void;
+function GenerateImageCredenzaContent({
+   teamId,
+   onClose,
+}: {
    teamId: string;
-}
-
-function GenerateImageDialog({ open, onOpenChange, teamId }: GenerateImageDialogProps) {
+   onClose: () => void;
+}) {
    const queryClient = useQueryClient();
    const [prompt, setPrompt] = useState("");
 
@@ -435,20 +656,17 @@ function GenerateImageDialog({ open, onOpenChange, teamId }: GenerateImageDialog
          onSuccess: () => {
             toast.success("Imagem gerada com sucesso!");
             queryClient.invalidateQueries({
-               queryKey: orpc.assets.list.queryOptions({ input: { teamId } }).queryKey,
+               queryKey: orpc.assets.list.queryOptions({ input: { teamId } })
+                  .queryKey,
             });
             setPrompt("");
-            onOpenChange(false);
+            onClose();
          },
          onError: (err) => {
             toast.error(err.message ?? "Falha ao gerar imagem.");
          },
       }),
    );
-
-   useEffect(() => {
-      if (!open) setPrompt("");
-   }, [open]);
 
    const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
@@ -457,15 +675,18 @@ function GenerateImageDialog({ open, onOpenChange, teamId }: GenerateImageDialog
    };
 
    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-         <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-               <DialogTitle className="flex items-center gap-2">
-                  <Sparkles className="size-4 text-purple-500" />
-                  Gerar Imagem com IA
-               </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <>
+         <CredenzaHeader>
+            <CredenzaTitle className="flex items-center gap-2">
+               <Sparkles className="size-4 text-purple-500" />
+               Gerar Imagem com IA
+            </CredenzaTitle>
+            <CredenzaDescription>
+               Descreva a imagem que deseja criar com IA.
+            </CredenzaDescription>
+         </CredenzaHeader>
+         <CredenzaBody>
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                <Textarea
                   autoFocus
                   disabled={generateMutation.isPending}
@@ -475,7 +696,7 @@ function GenerateImageDialog({ open, onOpenChange, teamId }: GenerateImageDialog
                   rows={4}
                   value={prompt}
                />
-               <DialogFooter>
+               <CredenzaFooter>
                   <Button
                      disabled={!prompt.trim() || generateMutation.isPending}
                      type="submit"
@@ -492,10 +713,10 @@ function GenerateImageDialog({ open, onOpenChange, teamId }: GenerateImageDialog
                         </>
                      )}
                   </Button>
-               </DialogFooter>
+               </CredenzaFooter>
             </form>
-         </DialogContent>
-      </Dialog>
+         </CredenzaBody>
+      </>
    );
 }
 
@@ -506,6 +727,7 @@ function GenerateImageDialog({ open, onOpenChange, teamId }: GenerateImageDialog
 function AssetBankContent() {
    const { currentTeam } = Route.useRouteContext();
    const teamId = currentTeam.id;
+   const { closeCredenza, openCredenza } = useCredenza();
    const [search, setSearch] = useState("");
    const debouncedSearch = useDebounce(search, 300);
    const [page, setPage] = useState(0);
@@ -528,7 +750,6 @@ function AssetBankContent() {
 
    return (
       <main className="flex flex-col gap-6">
-         {/* Header */}
          <div className="flex items-start justify-between gap-4">
             <div className="flex flex-col gap-2">
                <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
@@ -538,28 +759,52 @@ function AssetBankContent() {
                   Gerencie e envie imagens, vídeos e arquivos do seu projeto
                </p>
             </div>
-            {aiImageEnabled && (
-               <Button
-                  className="shrink-0"
-                  onClick={() => setGenerateDialogOpen(true)}
-                  variant="outline"
-               >
-                  <Sparkles className="size-4 mr-2 text-purple-500" />
-                  Gerar com IA
-               </Button>
-            )}
+            <DropdownMenu>
+               <DropdownMenuTrigger asChild>
+                  <Button className="shrink-0" variant="outline">
+                     <Plus className="size-4 mr-2" />
+                     Adicionar imagem
+                     <ChevronDown className="size-4 ml-2" />
+                  </Button>
+               </DropdownMenuTrigger>
+               <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                     onClick={() =>
+                        openCredenza({
+                           className: "sm:max-w-md",
+                           children: (
+                              <AssetUploadCredenzaContent
+                                 onClose={closeCredenza}
+                                 teamId={teamId}
+                              />
+                           ),
+                        })
+                     }
+                  >
+                     <Upload className="size-4 mr-2" />
+                     Upload de imagem
+                  </DropdownMenuItem>
+                  {aiImageEnabled && (
+                     <DropdownMenuItem
+                        onClick={() =>
+                           openCredenza({
+                              className: "sm:max-w-md",
+                              children: (
+                                 <GenerateImageCredenzaContent
+                                    onClose={closeCredenza}
+                                    teamId={teamId}
+                                 />
+                              ),
+                           })
+                        }
+                     >
+                        <Sparkles className="size-4 mr-2 text-purple-500" />
+                        Gerar com IA
+                     </DropdownMenuItem>
+                  )}
+               </DropdownMenuContent>
+            </DropdownMenu>
          </div>
-
-         {aiImageEnabled && (
-            <GenerateImageDialog
-               open={generateDialogOpen}
-               onOpenChange={setGenerateDialogOpen}
-               teamId={teamId}
-            />
-         )}
-
-         {/* Upload dropzone */}
-         <AssetDropzone teamId={teamId} />
 
          {/* Search */}
          <div className="relative max-w-sm">
