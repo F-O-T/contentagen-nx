@@ -103,24 +103,21 @@ export const experimentVariants = pgTable(
 // Relations
 // ---------------------------------------------------------------------------
 
-export const experimentsRelations = relations(
-   experiments,
-   ({ one, many }) => ({
-      organization: one(organization, {
-         fields: [experiments.organizationId],
-         references: [organization.id],
-      }),
-      team: one(team, {
-         fields: [experiments.teamId],
-         references: [team.id],
-      }),
-      variants: many(experimentVariants),
-      winner: one(experimentVariants, {
-         fields: [experiments.winnerId],
-         references: [experimentVariants.id],
-      }),
+export const experimentsRelations = relations(experiments, ({ one, many }) => ({
+   organization: one(organization, {
+      fields: [experiments.organizationId],
+      references: [organization.id],
    }),
-);
+   team: one(team, {
+      fields: [experiments.teamId],
+      references: [team.id],
+   }),
+   variants: many(experimentVariants),
+   winner: one(experimentVariants, {
+      fields: [experiments.winnerId],
+      references: [experimentVariants.id],
+   }),
+}));
 
 export const experimentVariantsRelations = relations(
    experimentVariants,
