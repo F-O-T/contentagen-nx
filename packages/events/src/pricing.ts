@@ -173,7 +173,8 @@ export const EVENT_PRICING: EventPricing[] = [
       pricePerEvent: brl("0.500000"),
       freeTierLimit: 5,
       displayName: "AI Image Generation",
-      description: "Tracks a single AI image generation request via OpenRouter.",
+      description:
+         "Tracks a single AI image generation request via OpenRouter.",
       isBillable: true,
    },
 
