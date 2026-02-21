@@ -257,8 +257,16 @@ export const generateImage = protectedProcedure
          });
       }
 
-      const openrouterData = (await openrouterRes.json()) as { data: Array<{ url: string }> };
-      const imageUrl = openrouterData.data[0]?.url;
+      const openrouterSchema = z.object({
+         data: z.array(z.object({ url: z.string() })),
+      });
+      const parsed = openrouterSchema.safeParse(await openrouterRes.json());
+      if (!parsed.success) {
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Resposta inesperada do modelo.",
+         });
+      }
+      const imageUrl = parsed.data.data[0]?.url;
 
       if (!imageUrl) {
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -275,40 +283,45 @@ export const generateImage = protectedProcedure
       }
 
       const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
-      const mimeType = imageRes.headers.get("content-type") ?? "image/png";
+      const rawContentType = imageRes.headers.get("content-type") ?? "image/png";
+      const mimeType = rawContentType.split(";")[0]?.trim() ?? "image/png";
       const ext = mimeType.split("/")[1] ?? "png";
       const filename = `ai-generated-${nanoid()}.${ext}`;
       const fileKey = `orgs/${organizationId}/assets/${filename}`;
       const bucket = serverEnv.MINIO_BUCKET ?? "contentta";
       const minioClient = getMinioClient(serverEnv);
 
-      await uploadFile(fileKey, imageBuffer, mimeType, bucket, minioClient);
-
-      const publicUrl = `/api/files/${bucket}/${fileKey}`;
-
-      const asset = await createAsset(db, {
-         organizationId,
-         teamId: input.teamId ?? contextTeamId,
-         fileKey,
-         bucket,
-         filename,
-         mimeType,
-         size: imageBuffer.length,
-         width: undefined,
-         height: undefined,
-         publicUrl,
-         uploaderId: userId,
-         tags: ["ai-generated"],
-      });
-
+      let asset: Awaited<ReturnType<typeof createAsset>>;
       try {
-         await emitAiCompletion(
-            { db, posthog, organizationId, userId },
-            { promptTokens: 0, completionTokens: 0, latencyMs: Date.now() - startedAt },
-         );
-      } catch {
-         // non-blocking
+         await uploadFile(fileKey, imageBuffer, mimeType, bucket, minioClient);
+
+         const publicUrl = `/api/files/${bucket}/${fileKey}`;
+
+         asset = await createAsset(db, {
+            organizationId,
+            teamId: input.teamId ?? contextTeamId,
+            fileKey,
+            bucket,
+            filename,
+            mimeType,
+            size: imageBuffer.length,
+            width: undefined,
+            height: undefined,
+            publicUrl,
+            uploaderId: userId,
+            tags: ["ai-generated"],
+         });
+      } catch (err) {
+         console.error("Failed to store generated image:", err);
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Falha ao salvar imagem gerada.",
+         });
       }
+
+      emitAiCompletion(
+         { db, posthog, organizationId, userId },
+         { promptTokens: 0, completionTokens: 0, latencyMs: Date.now() - startedAt },
+      );
 
       return asset;
    });
