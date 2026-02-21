@@ -48,9 +48,7 @@ const addVariantSchema = z.object({
 // Procedures
 // =============================================================================
 
-export const list = protectedProcedure
-   .input(z.object({}))
-   .handler(async ({ context }) => {
+export const list = protectedProcedure.handler(async ({ context }) => {
       const { db, teamId } = context;
       return listExperimentsByTeam(db, teamId);
    });
