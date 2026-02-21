@@ -732,7 +732,7 @@ function AssetBankContent() {
    const debouncedSearch = useDebounce(search, 300);
    const [page, setPage] = useState(0);
    const [total, setTotal] = useState(0);
-   const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
+
 
    const { enabled: aiImageEnabled } = useFeatureFlag("ai-image-generation");
 
