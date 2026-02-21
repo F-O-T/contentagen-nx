@@ -262,9 +262,12 @@ export async function trackCreditUsage(
    const redis = getRedisConnection();
    if (!redis) return;
 
-   const priceMinorUnits =
-      options?.priceMinorUnits ??
-      Number((await getEventPrice(db, eventName)).amount);
+   const { price, isBillable } = await getEventPrice(db, eventName);
+   // When a caller provides an explicit priceMinorUnits override, honour it regardless of
+   // catalog billability (used for agent-priced events). Otherwise, skip non-billable events.
+   if (!options?.priceMinorUnits && !isBillable) return;
+
+   const priceMinorUnits = options?.priceMinorUnits ?? Number(price.amount);
    await incrementCreditUsage(
       redis,
       organizationId,

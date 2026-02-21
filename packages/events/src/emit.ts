@@ -108,7 +108,9 @@ export async function emitEvent(params: EmitEventParams): Promise<void> {
    } = params;
 
    try {
-      const price = params.priceOverride ?? await getEventPrice(db, eventName);
+      const { price, isBillable } = params.priceOverride
+         ? { price: params.priceOverride, isBillable: true }
+         : await getEventPrice(db, eventName);
 
       // 1. Store in PostgreSQL (billing source of truth)
       const [storedEvent] = await db
@@ -120,7 +122,7 @@ export async function emitEvent(params: EmitEventParams): Promise<void> {
             properties,
             userId: userId ?? "",
             teamId: teamId ?? "",
-            isBillable: true,
+            isBillable,
             pricePerEvent: toMajorUnitsString(price),
             ipAddress,
             userAgent,
@@ -214,28 +216,31 @@ export async function emitEventBatch(
    try {
       // Look up prices for all unique event names
       const uniqueNames = [...new Set(eventList.map((e) => e.eventName))];
-      const priceMap = new Map<string, string>();
+      const billingMap = new Map<string, { priceStr: string; isBillable: boolean }>();
 
       await Promise.all(
          uniqueNames.map(async (name) => {
-            const price = await getEventPrice(db, name);
-            priceMap.set(name, toMajorUnitsString(price));
+            const { price, isBillable } = await getEventPrice(db, name);
+            billingMap.set(name, { priceStr: toMajorUnitsString(price), isBillable });
          }),
       );
 
       // 1. Bulk insert into PostgreSQL
-      const rows = eventList.map((evt) => ({
-         organizationId: evt.organizationId,
-         eventName: evt.eventName,
-         eventCategory: evt.eventCategory,
-         properties: evt.properties,
-         userId: evt.userId ?? "",
-         teamId: evt.teamId ?? "",
-         isBillable: true as const,
-         pricePerEvent: priceMap.get(evt.eventName) ?? "0",
-         ipAddress: evt.ipAddress,
-         userAgent: evt.userAgent,
-      }));
+      const rows = eventList.map((evt) => {
+         const billing = billingMap.get(evt.eventName) ?? { priceStr: "0", isBillable: false };
+         return {
+            organizationId: evt.organizationId,
+            eventName: evt.eventName,
+            eventCategory: evt.eventCategory,
+            properties: evt.properties,
+            userId: evt.userId ?? "",
+            teamId: evt.teamId ?? "",
+            isBillable: billing.isBillable,
+            pricePerEvent: billing.priceStr,
+            ipAddress: evt.ipAddress,
+            userAgent: evt.userAgent,
+         };
+      });
 
       await db.insert(events).values(rows);
 
