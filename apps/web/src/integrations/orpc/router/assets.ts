@@ -22,7 +22,6 @@ import {
    getMinioClient,
    uploadFile,
 } from "@packages/files/client";
-import { nanoid } from "nanoid";
 import { generateImage as aiGenerateImage } from "ai";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
@@ -60,8 +59,8 @@ export const generateUploadUrl = protectedProcedure
             ? input.filename.split(".").pop()
             : "";
          const fileKey = ext
-            ? `orgs/${organizationId}/assets/${nanoid()}.${ext}`
-            : `orgs/${organizationId}/assets/${nanoid()}`;
+            ? `orgs/${organizationId}/assets/${crypto.randomUUID()}.${ext}`
+            : `orgs/${organizationId}/assets/${crypto.randomUUID()}`;
 
          const presignedUrl = await generatePresignedPutUrl(
             fileKey,
@@ -287,7 +286,7 @@ export const generateImage = protectedProcedure
       const imageBuffer = Buffer.from(image.uint8Array);
       const mimeType = "image/png";
       const ext = "png";
-      const filename = `ai-generated-${nanoid()}.${ext}`;
+      const filename = `ai-generated-${crypto.randomUUID()}.${ext}`;
       const fileKey = `orgs/${organizationId}/assets/${filename}`;
       const bucket = serverEnv.MINIO_BUCKET ?? "contentta";
       const minioClient = getMinioClient(serverEnv);

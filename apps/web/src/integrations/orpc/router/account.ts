@@ -4,7 +4,6 @@ import {
    generatePresignedPutUrl,
    getMinioClient,
 } from "@packages/files/client";
-import { nanoid } from "nanoid";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -158,7 +157,7 @@ export const generateAvatarUploadUrl = protectedProcedure
       try {
          const minioClient = getMinioClient(serverEnv);
          const bucketName = "user-avatars";
-         const fileName = `avatar-${userId}-${nanoid()}.${input.fileExtension}`;
+         const fileName = `avatar-${userId}-${crypto.randomUUID()}.${input.fileExtension}`;
 
          const presignedUrl = await generatePresignedPutUrl(
             fileName,
