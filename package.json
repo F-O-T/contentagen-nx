@@ -237,6 +237,7 @@
          },
          "editor": {
             "platejs": "52.0.17",
+            "@platejs/ai": "52.0.11",
             "@platejs/basic-nodes": "52.0.11",
             "@platejs/link": "^52.0.11",
             "lexical": "^0.40.0",

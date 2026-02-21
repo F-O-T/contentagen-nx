@@ -14,6 +14,7 @@
       "check": "biome check"
    },
    "dependencies": {
+      "@ai-sdk/react": "^3.0.99",
       "@assistant-ui/react": "catalog:editor",
       "@assistant-ui/react-markdown": "catalog:editor",
       "@dnd-kit/core": "catalog:dnd",
@@ -51,6 +52,7 @@
       "@packages/stripe": "workspace:*",
       "@packages/ui": "workspace:*",
       "@packages/utils": "workspace:*",
+      "@platejs/ai": "catalog:editor",
       "@platejs/basic-nodes": "catalog:editor",
       "@platejs/link": "catalog:editor",
       "@t3-oss/env-core": "catalog:enviroment",
@@ -68,6 +70,7 @@
       "@tanstack/react-table": "catalog:tanstack",
       "@tanstack/router-plugin": "catalog:tanstack",
       "@tanstack/store": "catalog:tanstack",
+      "ai": "^6.0.97",
       "better-auth": "catalog:auth",
       "clsx": "catalog:ui",
       "drizzle-orm": "catalog:database",
