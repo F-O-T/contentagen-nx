@@ -1,31 +1,14 @@
-import { useEffect, useState } from "react";
+import { useIsClient, useMediaQuery } from "@uidotdev/usehooks";
 
 export function useIsStandalone() {
-   const [isStandalone, setIsStandalone] = useState(false);
-
-   useEffect(() => {
-      const checkStandalone = () => {
-         const isIOSStandalone =
-            (navigator as unknown as { standalone?: boolean }).standalone ===
-            true;
-         const isStandaloneMedia = window.matchMedia(
-            "(display-mode: standalone)",
-         ).matches;
-         const isWindowControlsOverlay = window.matchMedia(
-            "(display-mode: window-controls-overlay)",
-         ).matches;
-
-         return isIOSStandalone || isStandaloneMedia || isWindowControlsOverlay;
-      };
-
-      setIsStandalone(checkStandalone());
-
-      const mediaQuery = window.matchMedia("(display-mode: standalone)");
-      const handler = () => setIsStandalone(checkStandalone());
-      mediaQuery.addEventListener("change", handler);
-
-      return () => mediaQuery.removeEventListener("change", handler);
-   }, []);
-
-   return isStandalone;
+   const isClient = useIsClient();
+   const isStandaloneMedia = useMediaQuery("(display-mode: standalone)");
+   const isWindowControlsOverlay = useMediaQuery(
+      "(display-mode: window-controls-overlay)",
+   );
+   const isIOSStandalone =
+      isClient &&
+      (typeof navigator !== "undefined" &&
+         (navigator as unknown as { standalone?: boolean }).standalone === true);
+   return isIOSStandalone || isStandaloneMedia || isWindowControlsOverlay;
 }

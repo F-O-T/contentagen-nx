@@ -16,6 +16,7 @@ import {
    useQueryClient,
    useSuspenseQuery,
 } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
    FileIcon,
@@ -27,7 +28,7 @@ import {
    Upload,
    X,
 } from "lucide-react";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
@@ -506,11 +507,10 @@ function AssetBankContent() {
    const { currentTeam } = Route.useRouteContext();
    const teamId = currentTeam.id;
    const [search, setSearch] = useState("");
-   const [debouncedSearch, setDebouncedSearch] = useState("");
+   const debouncedSearch = useDebounce(search, 300);
    const [page, setPage] = useState(0);
    const [total, setTotal] = useState(0);
    const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
-   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
    const { enabled: aiImageEnabled } = useFeatureFlag("ai-image-generation");
 
@@ -519,15 +519,10 @@ function AssetBankContent() {
    const handleSearchChange = (value: string) => {
       setSearch(value);
       setPage(0);
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-         setDebouncedSearch(value);
-      }, 300);
    };
 
    const handleClearSearch = () => {
       setSearch("");
-      setDebouncedSearch("");
       setPage(0);
    };
 

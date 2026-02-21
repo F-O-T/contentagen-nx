@@ -4,7 +4,8 @@ import type {
    RetentionConfig,
    TrendsConfig,
 } from "@packages/analytics/types";
-import { useCallback, useRef, useState } from "react";
+import { useDebounce } from "@uidotdev/usehooks";
+import { useCallback, useEffect, useState } from "react";
 
 export type InsightType = "trends" | "funnels" | "retention";
 
@@ -43,7 +44,16 @@ const DEFAULT_RETENTION_CONFIG: RetentionConfig = {
 export function useInsightConfig(initialType: InsightType = "trends") {
    const [type, setType] = useState<InsightType>(initialType);
    const [config, setConfig] = useState<InsightConfig>(DEFAULT_TRENDS_CONFIG);
-   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+   const [pendingUpdates, setPendingUpdates] =
+      useState<Partial<InsightConfig>>({});
+   const debouncedUpdates = useDebounce(pendingUpdates, 500);
+
+   useEffect(() => {
+      if (Object.keys(debouncedUpdates).length > 0) {
+         setConfig((c) => ({ ...c, ...debouncedUpdates }));
+         setPendingUpdates({});
+      }
+   }, [debouncedUpdates]);
 
    const handleTypeChange = useCallback((newType: InsightType) => {
       setType(newType);
@@ -61,12 +71,7 @@ export function useInsightConfig(initialType: InsightType = "trends") {
    }, []);
 
    const updateConfig = useCallback((updates: Partial<InsightConfig>) => {
-      if (debounceRef.current) {
-         clearTimeout(debounceRef.current);
-      }
-      debounceRef.current = setTimeout(() => {
-         setConfig((prev) => ({ ...prev, ...updates }));
-      }, 500);
+      setPendingUpdates((prev) => ({ ...prev, ...updates }));
    }, []);
 
    const updateConfigImmediate = useCallback(

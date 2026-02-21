@@ -17,6 +17,7 @@ import {
    TooltipProvider,
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
+import { useEventListener } from "@packages/ui/hooks/use-event-listener";
 import { useIsMobile } from "@packages/ui/hooks/use-mobile";
 import { cn } from "@packages/ui/lib/utils";
 import { Slot } from "@radix-ui/react-slot";
@@ -225,9 +226,8 @@ function SidebarProvider({
          : setOpen((open) => !open);
    }, [isMobile, setOpen, setOpenMobile]);
 
-   // Adds a keyboard shortcut to toggle the sidebar.
-   React.useEffect(() => {
-      const handleKeyDown = (event: KeyboardEvent) => {
+   const handleKeyDown = React.useCallback(
+      (event: KeyboardEvent) => {
          if (
             event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
             (event.metaKey || event.ctrlKey)
@@ -235,11 +235,15 @@ function SidebarProvider({
             event.preventDefault();
             toggleSidebar();
          }
-      };
+      },
+      [toggleSidebar],
+   );
 
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-   }, [toggleSidebar]);
+   useEventListener(
+      "keydown",
+      handleKeyDown,
+      typeof window !== "undefined" ? window : null,
+   );
 
    // We add a state so that we can do data-state="expanded" or "collapsed".
    // This makes it easier to style the sidebar with Tailwind classes.

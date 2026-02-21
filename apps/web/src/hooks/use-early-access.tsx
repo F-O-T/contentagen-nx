@@ -1,11 +1,11 @@
 import { useEarlyAccessFeatures } from "@packages/posthog/client";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import {
    createContext,
    type ReactNode,
    useCallback,
    useContext,
    useMemo,
-   useState,
 } from "react";
 
 type EarlyAccessContextValue = {
@@ -20,31 +20,16 @@ type EarlyAccessContextValue = {
 
 const BANNER_DISMISSED_KEY = "contentta:early-access-banner-dismissed";
 
-function getDismissedFlags(): string[] {
-   try {
-      const stored = localStorage.getItem(BANNER_DISMISSED_KEY);
-      return stored ? JSON.parse(stored) : [];
-   } catch {
-      return [];
-   }
-}
-
-function setDismissedFlags(flags: string[]) {
-   try {
-      localStorage.setItem(BANNER_DISMISSED_KEY, JSON.stringify(flags));
-   } catch {
-      // Silent fail on quota/unavailability
-   }
-}
-
 const EarlyAccessContext = createContext<EarlyAccessContextValue | null>(null);
 
 export function EarlyAccessProvider({ children }: { children: ReactNode }) {
    const { features, enrolledFeatures, loaded, isEnrolled, updateEnrollment } =
       useEarlyAccessFeatures();
 
-   const [dismissedFlags, setDismissedFlagsState] =
-      useState<string[]>(getDismissedFlags);
+   const [dismissedFlags, setDismissedFlagsState] = useLocalStorage<string[]>(
+      BANNER_DISMISSED_KEY,
+      [],
+   );
 
    const isBannerVisible = useMemo(() => {
       if (!loaded || features.length === 0) return false;
@@ -62,7 +47,6 @@ export function EarlyAccessProvider({ children }: { children: ReactNode }) {
          .map((f) => f.flagKey)
          .filter((k): k is string => k !== null);
       setDismissedFlagsState(allFlagKeys);
-      setDismissedFlags(allFlagKeys);
    }, [features]);
 
    const value = useMemo<EarlyAccessContextValue>(

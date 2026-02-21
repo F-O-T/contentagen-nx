@@ -7,8 +7,8 @@ import {
    CredenzaTitle,
 } from "@packages/ui/components/credenza";
 import { Input } from "@packages/ui/components/input";
+import { useCopyToClipboard } from "@uidotdev/usehooks";
 import { AlertTriangle, Check, Copy } from "lucide-react";
-import { useState } from "react";
 
 interface KeyRevealDialogProps {
    label: string;
@@ -21,17 +21,8 @@ export function KeyRevealDialog({
    plaintextKey,
    onClose,
 }: KeyRevealDialogProps) {
-   const [copied, setCopied] = useState(false);
-
-   async function handleCopy() {
-      try {
-         await navigator.clipboard.writeText(plaintextKey);
-         setCopied(true);
-         setTimeout(() => setCopied(false), 2000);
-      } catch {
-         // Fallback for environments where clipboard API isn't available
-      }
-   }
+   const [lastCopied, copy] = useCopyToClipboard();
+   const copied = lastCopied === plaintextKey;
 
    return (
       <>
@@ -49,7 +40,11 @@ export function KeyRevealDialog({
                   readOnly
                   value={plaintextKey}
                />
-               <Button onClick={handleCopy} size="icon" variant="outline">
+               <Button
+                  onClick={() => copy(plaintextKey)}
+                  size="icon"
+                  variant="outline"
+               >
                   {copied ? (
                      <Check className="size-4 text-green-600" />
                   ) : (

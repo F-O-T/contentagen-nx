@@ -6,10 +6,11 @@ import {
    SidebarProvider,
 } from "@packages/ui/components/sidebar";
 import { cn } from "@packages/ui/lib/utils";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import type * as React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { FeedbackFab } from "@/features/feedback/ui/feedback-fab";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
@@ -18,10 +19,6 @@ import { useLastOrganization } from "@/hooks/use-last-organization";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
 import { setActiveSection } from "../hooks/use-sidebar-nav";
-import {
-   getSidebarDefaultOpen,
-   persistSidebarState,
-} from "../hooks/use-sidebar-persistence";
 import { useTabKeyboardShortcuts } from "../hooks/use-tab-keyboard-shortcuts";
 import { useTabRouterSync } from "../hooks/use-tab-router-sync";
 import { AppSidebar } from "./app-sidebar";
@@ -36,16 +33,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const setTeamForOrgRef = useRef(new Set<string>());
    const { pathname } = useLocation();
 
-   // Sidebar state — start with SSR-safe default (true/expanded) to avoid hydration
-   // mismatch, then sync from localStorage after mount.
-   const [sidebarOpen, setSidebarOpen] = useState(true);
-   useEffect(() => {
-      setSidebarOpen(getSidebarDefaultOpen());
-   }, []);
-
+   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage<boolean>(
+      "contentta:sidebar-collapsed",
+      false,
+   );
+   const sidebarOpen = !sidebarCollapsed;
    const handleSidebarChange = (open: boolean) => {
-      setSidebarOpen(open);
-      persistSidebarState(open);
+      setSidebarCollapsed(!open);
    };
 
    // Fetch session for PostHog client-side identification
