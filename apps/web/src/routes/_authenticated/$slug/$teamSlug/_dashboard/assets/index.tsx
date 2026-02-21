@@ -2,12 +2,25 @@ import type { Asset } from "@packages/database/schemas/assets";
 import { useFeatureFlag } from "@packages/posthog/client";
 import { Button } from "@packages/ui/components/button";
 import {
+   Credenza,
+   CredenzaBody,
+   CredenzaContent,
+   CredenzaHeader,
+   CredenzaTitle,
+} from "@packages/ui/components/credenza";
+import {
    Dialog,
    DialogContent,
    DialogFooter,
    DialogHeader,
    DialogTitle,
 } from "@packages/ui/components/dialog";
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+} from "@packages/ui/components/dropdown-menu";
 import { Input } from "@packages/ui/components/input";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { Textarea } from "@packages/ui/components/textarea";
@@ -18,9 +31,13 @@ import {
 } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
+   ChevronDown,
+   Eye,
    FileIcon,
    ImageIcon,
    Loader2,
+   Pencil,
+   Plus,
    Search,
    Sparkles,
    Trash2,
@@ -122,55 +139,71 @@ function AssetBankUnenrolled() {
 interface AssetCardProps {
    asset: Asset;
    onDelete: (id: string) => void;
+   onRename: (asset: Asset) => void;
+   onView: (asset: Asset) => void;
    isDeleting: boolean;
 }
 
-function AssetCard({ asset, onDelete, isDeleting }: AssetCardProps) {
-   const [hovered, setHovered] = useState(false);
+function AssetCard({
+   asset,
+   onDelete,
+   onRename,
+   onView,
+   isDeleting,
+}: AssetCardProps) {
    const isImage = asset.mimeType.startsWith("image/");
 
    return (
-      <div
-         className="relative aspect-square rounded-lg overflow-hidden border bg-muted group cursor-default"
-         onMouseEnter={() => setHovered(true)}
-         onMouseLeave={() => setHovered(false)}
-      >
-         {isImage ? (
-            <img
-               alt={asset.alt ?? asset.filename}
-               className="w-full h-full object-cover"
-               src={asset.publicUrl}
-            />
-         ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-2">
-               <FileIcon className="size-8 text-muted-foreground" />
-               <span className="text-xs text-muted-foreground truncate w-full text-center">
-                  {asset.filename}
-               </span>
-            </div>
-         )}
-
-         {/* Hover overlay */}
-         {hovered && (
-            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2 p-2">
-               <p className="text-xs text-white font-medium truncate w-full text-center">
-                  {asset.filename}
-               </p>
-               <Button
-                  className="size-8 text-destructive-foreground bg-destructive hover:bg-destructive/90"
-                  disabled={isDeleting}
-                  onClick={() => onDelete(asset.id)}
-                  size="icon"
-                  variant="destructive"
-               >
-                  {isDeleting ? (
-                     <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                     <Trash2 className="size-4" />
-                  )}
-               </Button>
-            </div>
-         )}
+      <div className="flex flex-col rounded-lg overflow-hidden border bg-muted">
+         <div className="aspect-square overflow-hidden">
+            {isImage ? (
+              <img
+                 alt={asset.alt ?? asset.filename}
+                 className="w-full h-full object-cover"
+                 src={asset.publicUrl}
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-2">
+                 <FileIcon className="size-8 text-muted-foreground" />
+                 <span className="text-xs text-muted-foreground truncate w-full text-center">
+                    {asset.filename}
+                 </span>
+              </div>
+            )}
+         </div>
+         <div className="flex items-center justify-center gap-1 border-t bg-background/80 px-1 py-1.5">
+            {isImage && (
+              <Button
+                 className="size-8 shrink-0"
+                 onClick={() => onView(asset)}
+                 size="icon"
+                 variant="ghost"
+              >
+                 <Eye className="size-4" />
+              </Button>
+            )}
+            <Button
+               className="size-8 shrink-0"
+               onClick={() => onRename(asset)}
+               size="icon"
+               variant="ghost"
+            >
+               <Pencil className="size-4" />
+            </Button>
+            <Button
+               className="size-8 shrink-0 text-destructive hover:text-destructive"
+               disabled={isDeleting}
+               onClick={() => onDelete(asset.id)}
+               size="icon"
+               variant="ghost"
+            >
+               {isDeleting ? (
+                  <Loader2 className="size-4 animate-spin" />
+               ) : (
+                  <Trash2 className="size-4" />
+               )}
+            </Button>
+         </div>
       </div>
    );
 }
@@ -181,9 +214,10 @@ function AssetCard({ asset, onDelete, isDeleting }: AssetCardProps) {
 
 interface AssetDropzoneProps {
    teamId: string;
+   onUploadComplete?: () => void;
 }
 
-function AssetDropzone({ teamId }: AssetDropzoneProps) {
+function AssetDropzone({ teamId, onUploadComplete }: AssetDropzoneProps) {
    const queryClient = useQueryClient();
    const [isUploading, setIsUploading] = useState(false);
 
@@ -251,13 +285,14 @@ function AssetDropzone({ teamId }: AssetDropzoneProps) {
                   input: { teamId },
                }).queryKey,
             });
+            onUploadComplete?.();
          } catch {
             toast.error("Falha ao enviar o arquivo. Tente novamente.");
          } finally {
             setIsUploading(false);
          }
       },
-      [teamId, generateUploadUrlMutation, completeUploadMutation, queryClient],
+      [teamId, generateUploadUrlMutation, completeUploadMutation, queryClient, onUploadComplete],
    );
 
    const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -304,6 +339,126 @@ function AssetDropzone({ teamId }: AssetDropzoneProps) {
    );
 }
 
+function AssetUploadCredenza({
+   open,
+   onOpenChange,
+   teamId,
+}: {
+   open: boolean;
+   onOpenChange: (open: boolean) => void;
+   teamId: string;
+}) {
+   return (
+      <Credenza onOpenChange={onOpenChange} open={open}>
+         <CredenzaContent className="sm:max-w-md">
+            <CredenzaHeader>
+               <CredenzaTitle>Upload de imagem</CredenzaTitle>
+            </CredenzaHeader>
+            <CredenzaBody>
+               <AssetDropzone
+                  onUploadComplete={() => onOpenChange(false)}
+                  teamId={teamId}
+               />
+            </CredenzaBody>
+         </CredenzaContent>
+      </Credenza>
+   );
+}
+
+function AssetViewModal({
+   asset,
+   open,
+   onOpenChange,
+}: {
+   asset: Asset | null;
+   open: boolean;
+   onOpenChange: (open: boolean) => void;
+}) {
+   if (!asset || !asset.mimeType.startsWith("image/")) return null;
+   return (
+      <Dialog onOpenChange={onOpenChange} open={open}>
+         <DialogContent className="max-w-[90vw] max-h-[90vh] p-2">
+            <img
+               alt={asset.alt ?? asset.filename}
+               className="max-h-[85vh] w-auto max-w-full object-contain"
+               src={asset.publicUrl}
+            />
+            <p className="text-center text-sm text-muted-foreground truncate px-2">
+               {asset.filename}
+            </p>
+         </DialogContent>
+      </Dialog>
+   );
+}
+
+function AssetRenameDialog({
+   asset,
+   open,
+   onOpenChange,
+   onSuccess,
+}: {
+   asset: Asset | null;
+   open: boolean;
+   onOpenChange: (open: boolean) => void;
+   onSuccess: () => void;
+}) {
+   const [filename, setFilename] = useState(asset?.filename ?? "");
+   useEffect(() => {
+      if (open && asset) setFilename(asset.filename);
+   }, [open, asset]);
+
+   const updateMutation = useMutation(
+      orpc.assets.update.mutationOptions({
+         onSuccess: () => {
+            toast.success("Arquivo renomeado.");
+            onOpenChange(false);
+            onSuccess();
+         },
+         onError: () => toast.error("Falha ao renomear. Tente novamente."),
+      }),
+   );
+
+   const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!asset || !filename.trim()) return;
+      if (filename === asset.filename) {
+         onOpenChange(false);
+         return;
+      }
+      updateMutation.mutate({ id: asset.id, filename: filename.trim() });
+   };
+
+   if (!asset) return null;
+   return (
+      <Dialog onOpenChange={onOpenChange} open={open}>
+         <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+               <DialogTitle>Renomear arquivo</DialogTitle>
+            </DialogHeader>
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+               <Input
+                  disabled={updateMutation.isPending}
+                  onChange={(e) => setFilename(e.target.value)}
+                  value={filename}
+               />
+               <DialogFooter>
+                  <Button
+                     disabled={!filename.trim() || updateMutation.isPending}
+                     type="submit"
+                  >
+                     {updateMutation.isPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                     ) : (
+                        "Salvar"
+                     )}
+                  </Button>
+               </DialogFooter>
+            </form>
+         </DialogContent>
+      </Dialog>
+   );
+}
+
 // ============================================================
 // Assets grid (suspense boundary)
 // ============================================================
@@ -320,6 +475,8 @@ interface AssetsGridProps {
 function AssetsGrid({ teamId, search, page, onTotalChange }: AssetsGridProps) {
    const queryClient = useQueryClient();
    const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+   const [viewAsset, setViewAsset] = useState<Asset | null>(null);
+   const [renameAsset, setRenameAsset] = useState<Asset | null>(null);
 
    const { data } = useSuspenseQuery(
       orpc.assets.list.queryOptions({
@@ -369,6 +526,12 @@ function AssetsGrid({ teamId, search, page, onTotalChange }: AssetsGridProps) {
       [removeMutation],
    );
 
+   const invalidateList = useCallback(() => {
+      queryClient.invalidateQueries({
+         queryKey: orpc.assets.list.queryOptions({ input: { teamId } }).queryKey,
+      });
+   }, [queryClient, teamId]);
+
    const assets: Asset[] = data.assets ?? [];
 
    if (assets.length === 0) {
@@ -385,16 +548,31 @@ function AssetsGrid({ teamId, search, page, onTotalChange }: AssetsGridProps) {
    }
 
    return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-         {assets.map((asset) => (
-            <AssetCard
-               asset={asset}
-               isDeleting={deletingIds.has(asset.id)}
-               key={asset.id}
-               onDelete={handleDelete}
-            />
-         ))}
-      </div>
+      <>
+         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {assets.map((asset) => (
+               <AssetCard
+                  asset={asset}
+                  isDeleting={deletingIds.has(asset.id)}
+                  key={asset.id}
+                  onDelete={handleDelete}
+                  onRename={setRenameAsset}
+                  onView={setViewAsset}
+               />
+            ))}
+         </div>
+         <AssetViewModal
+            asset={viewAsset}
+            onOpenChange={(open) => !open && setViewAsset(null)}
+            open={!!viewAsset}
+         />
+         <AssetRenameDialog
+            asset={renameAsset}
+            onOpenChange={(open) => !open && setRenameAsset(null)}
+            onSuccess={invalidateList}
+            open={!!renameAsset}
+         />
+      </>
    );
 }
 
@@ -510,6 +688,7 @@ function AssetBankContent() {
    const [page, setPage] = useState(0);
    const [total, setTotal] = useState(0);
    const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
+   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
    const { enabled: aiImageEnabled } = useFeatureFlag("ai-image-generation");
@@ -533,7 +712,6 @@ function AssetBankContent() {
 
    return (
       <main className="flex flex-col gap-6">
-         {/* Header */}
          <div className="flex items-start justify-between gap-4">
             <div className="flex flex-col gap-2">
                <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
@@ -543,16 +721,27 @@ function AssetBankContent() {
                   Gerencie e envie imagens, vídeos e arquivos do seu projeto
                </p>
             </div>
-            {aiImageEnabled && (
-               <Button
-                  className="shrink-0"
-                  onClick={() => setGenerateDialogOpen(true)}
-                  variant="outline"
-               >
-                  <Sparkles className="size-4 mr-2 text-purple-500" />
-                  Gerar com IA
-               </Button>
-            )}
+            <DropdownMenu>
+               <DropdownMenuTrigger asChild>
+                  <Button className="shrink-0" variant="outline">
+                     <Plus className="size-4 mr-2" />
+                     Adicionar imagem
+                     <ChevronDown className="size-4 ml-2" />
+                  </Button>
+               </DropdownMenuTrigger>
+               <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setUploadDialogOpen(true)}>
+                     <Upload className="size-4 mr-2" />
+                     Upload de imagem
+                  </DropdownMenuItem>
+                  {aiImageEnabled && (
+                     <DropdownMenuItem onClick={() => setGenerateDialogOpen(true)}>
+                        <Sparkles className="size-4 mr-2 text-purple-500" />
+                        Gerar com IA
+                     </DropdownMenuItem>
+                  )}
+               </DropdownMenuContent>
+            </DropdownMenu>
          </div>
 
          {aiImageEnabled && (
@@ -563,8 +752,11 @@ function AssetBankContent() {
             />
          )}
 
-         {/* Upload dropzone */}
-         <AssetDropzone teamId={teamId} />
+         <AssetUploadCredenza
+            onOpenChange={setUploadDialogOpen}
+            open={uploadDialogOpen}
+            teamId={teamId}
+         />
 
          {/* Search */}
          <div className="relative max-w-sm">
