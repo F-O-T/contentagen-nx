@@ -4,7 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { orpc } from "@/integrations/orpc/client";
-import { ContentEditorPage } from "@/layout/editor/ui/content-editor-page";
+import { EditorPage } from "@/features/editor/ui/editor-page";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_editor/$contentId",
@@ -99,7 +99,7 @@ function EditorRoute() {
    return (
       <ErrorBoundary FallbackComponent={EditorErrorFallback}>
          <Suspense fallback={<EditorSkeleton />}>
-            <ContentEditorPage contentId={contentId} isStandalone />
+            <EditorPage contentId={contentId} />
          </Suspense>
       </ErrorBoundary>
    );
