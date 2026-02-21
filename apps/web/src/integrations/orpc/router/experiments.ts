@@ -119,6 +119,11 @@ export const start = protectedProcedure
             message: "Only draft or paused experiments can be started",
          });
       }
+      if (existing.variants.length < 2) {
+         throw new ORPCError("FORBIDDEN", {
+            message: "Experiment needs at least 2 variants to start",
+         });
+      }
       return updateExperiment(db, input.id, {
          status: "running",
          startedAt: existing.startedAt ?? new Date(),
