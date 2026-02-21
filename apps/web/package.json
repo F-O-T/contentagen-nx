@@ -25,6 +25,7 @@
       "@f-o-t/qrcode": "catalog:fot",
       "@f-o-t/spelling": "catalog:fot",
       "@faker-js/faker": "catalog:testing",
+      "@openrouter/ai-sdk-provider": "^2.2.3",
       "@orpc/client": "catalog:orpc",
       "@orpc/json-schema": "catalog:orpc",
       "@orpc/server": "catalog:orpc",

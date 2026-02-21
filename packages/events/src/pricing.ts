@@ -170,7 +170,7 @@ export const EVENT_PRICING: EventPricing[] = [
    {
       eventName: AI_EVENTS["ai.image_generation"],
       category: EVENT_CATEGORIES.ai,
-      pricePerEvent: brl("0.500000"),
+      pricePerEvent: brl("0.900000"),
       freeTierLimit: 5,
       displayName: "AI Image Generation",
       description:
@@ -455,6 +455,17 @@ export const PLAN_CREDIT_BUDGETS: Record<
       platform: brl("50.000000"),
    },
 };
+
+export const IMAGE_MODEL_PRICING: Record<string, string> = {
+   "sourceful/riverflow-v2-pro": "0.900000",
+   "bytedance-seed/seedream-4.5": "0.240000",
+};
+
+export function getImageGenerationPrice(model: string): Money {
+   const amount =
+      IMAGE_MODEL_PRICING[model] ?? IMAGE_MODEL_PRICING["sourceful/riverflow-v2-pro"] ?? "0.900000";
+   return brl(amount);
+}
 
 /**
  * Resolve which credit pool an event category belongs to.
