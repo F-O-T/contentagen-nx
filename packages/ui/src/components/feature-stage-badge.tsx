@@ -22,18 +22,6 @@ const STAGE_CONFIG = {
       className:
          "border-chart-4 bg-chart-4/10 text-chart-4 dark:border-chart-4/50 dark:bg-chart-4/20 dark:text-chart-4",
    },
-   experimental: {
-      icon: FlaskConical,
-      label: "Experimental",
-      className:
-         "border-chart-5 bg-chart-5/10 text-chart-5 dark:border-chart-5/50 dark:bg-chart-5/20 dark:text-chart-5",
-   },
-   preview: {
-      icon: FlaskConical,
-      label: "Preview",
-      className:
-         "border-primary bg-primary/10 text-primary dark:border-primary/50 dark:bg-primary/20 dark:text-primary",
-   },
    "general-availability": {
       icon: CheckCircle2,
       label: "Disponível",
