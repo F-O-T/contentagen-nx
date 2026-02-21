@@ -5,6 +5,7 @@ import {
    Database,
    FileText,
    House,
+   ImageIcon,
    LayoutDashboard,
    Lightbulb,
 } from "lucide-react";
@@ -27,6 +28,8 @@ export type NavItemDef = {
    subPanel?: SubSidebarSection;
    /** PostHog early access flag key — if set, item is hidden when user is not enrolled */
    earlyAccessFlag?: string;
+   /** Stage of the early access feature, used to render the correct badge */
+   earlyAccessStage?: "alpha" | "beta" | "concept";
 };
 
 export type NavGroupDef = {
@@ -61,6 +64,14 @@ export const navGroups: NavGroupDef[] = [
             route: "/$slug/$teamSlug/forms",
             quickAction: { type: "create", target: "navigate" },
             earlyAccessFlag: "forms-beta",
+         },
+         {
+            id: "assets",
+            label: "Banco de Imagens",
+            icon: ImageIcon,
+            route: "/$slug/$teamSlug/assets",
+            earlyAccessFlag: "asset-bank",
+            earlyAccessStage: "alpha",
          },
       ],
    },
