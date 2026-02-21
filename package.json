@@ -239,20 +239,7 @@
             "platejs": "52.0.17",
             "@platejs/ai": "52.0.11",
             "@platejs/basic-nodes": "52.0.11",
-            "@platejs/link": "^52.0.11",
-            "lexical": "^0.40.0",
-            "@lexical/code": "^0.40.0",
-            "@lexical/html": "^0.40.0",
-            "@lexical/link": "^0.40.0",
-            "@lexical/list": "^0.40.0",
-            "@lexical/markdown": "^0.40.0",
-            "@lexical/react": "^0.40.0",
-            "@lexical/rich-text": "^0.40.0",
-            "@lexical/selection": "^0.40.0",
-            "@lexical/table": "^0.40.0",
-            "@lexical/utils": "^0.40.0",
-            "@assistant-ui/react": "^0.12.10",
-            "@assistant-ui/react-markdown": "^0.12.3"
+            "@platejs/link": "^52.0.11"
          },
          "orpc": {
             "@orpc/client": "^1.13.5",
