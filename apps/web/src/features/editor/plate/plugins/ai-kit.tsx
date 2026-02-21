@@ -27,7 +27,6 @@ import { MarkdownKit } from '@packages/ui/components/editor/plugins/markdown-kit
 
 import { client } from '@/integrations/orpc/client';
 import type { ChatChunk } from '@/features/editor/schemas';
-import { useChat } from '@packages/ui/components/editor/use-chat';
 
 // ---------------------------------------------------------------------------
 // oRPC Chat Transport
@@ -161,8 +160,6 @@ export const aiChatPlugin = AIChatPlugin.extend({
   },
   shortcuts: { show: { keys: 'mod+j' } },
   useHooks: ({ editor, getOption }) => {
-    useChat();
-
     const mode = usePluginOption(AIChatPlugin, 'mode');
     const toolName = usePluginOption(AIChatPlugin, 'toolName');
     useChatChunk({
