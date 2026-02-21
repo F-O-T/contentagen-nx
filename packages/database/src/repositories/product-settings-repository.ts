@@ -1,5 +1,5 @@
 import { AppError, propagateError } from "@packages/utils/errors";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
 import {
    type AIDefaults,

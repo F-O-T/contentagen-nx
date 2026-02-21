@@ -1,11 +1,10 @@
-import { BaseColumnItemPlugin, BaseColumnPlugin } from '@platejs/layout';
-
 import {
-  ColumnElementStatic,
-  ColumnGroupElementStatic,
-} from '@packages/ui/components/column-node-static';
+   ColumnElementStatic,
+   ColumnGroupElementStatic,
+} from "@packages/ui/components/column-node-static";
+import { BaseColumnItemPlugin, BaseColumnPlugin } from "@platejs/layout";
 
 export const BaseColumnKit = [
-  BaseColumnPlugin.withComponent(ColumnGroupElementStatic),
-  BaseColumnItemPlugin.withComponent(ColumnElementStatic),
+   BaseColumnPlugin.withComponent(ColumnGroupElementStatic),
+   BaseColumnItemPlugin.withComponent(ColumnElementStatic),
 ];

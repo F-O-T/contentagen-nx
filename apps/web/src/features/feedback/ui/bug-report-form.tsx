@@ -27,7 +27,6 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { orpc } from "@/integrations/orpc/client";
 
-
 type BugReportFormProps = {
    onSuccess: () => void;
 };
@@ -155,7 +154,7 @@ export function BugReportForm({ onSuccess }: BugReportFormProps) {
                   </form.Field>
                </FieldGroup>
 
-               <form.Subscribe >
+               <form.Subscribe>
                   {(canSubmit) => (
                      <Button
                         className="w-full"

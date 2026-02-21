@@ -25,7 +25,9 @@ function ReauthContent({ onSuccess, onCancel }: ReauthContentProps) {
          onSuccess();
       },
       onError: (error) => {
-         toast.error(error instanceof Error ? error.message : "Senha incorreta");
+         toast.error(
+            error instanceof Error ? error.message : "Senha incorreta",
+         );
       },
    });
 
@@ -44,7 +46,8 @@ function ReauthContent({ onSuccess, onCancel }: ReauthContentProps) {
                id="reauth-password"
                onChange={(e) => setPassword(e.target.value)}
                onKeyDown={(e) => {
-                  if (e.key === "Enter" && password.length > 0) verifyMutation.mutate();
+                  if (e.key === "Enter" && password.length > 0)
+                     verifyMutation.mutate();
                }}
                placeholder="••••••••"
                value={password}

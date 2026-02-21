@@ -22,10 +22,7 @@ import {
 } from "@packages/events/credits";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import {
-   type ChatChunk,
-   type FIMChunk,
-} from "@/features/editor/schemas";
+import type { ChatChunk, FIMChunk } from "@/features/editor/schemas";
 import { protectedProcedure } from "../server";
 
 // =============================================================================
@@ -47,7 +44,6 @@ import { protectedProcedure } from "../server";
 //     preferredSearchProvider, requireAuthoritativeSources, minCredibility
 //   - Use these as defaults when parameters are not explicitly provided
 // =============================================================================
-
 
 /**
  * Copilot ghost text streaming completion
@@ -447,7 +443,6 @@ export const executeUnifiedAgent = protectedProcedure
 // =============================================================================
 // Helper Functions
 // =============================================================================
-
 
 /**
  * Build Copilot prompt from prefix and optional suffix

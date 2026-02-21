@@ -1,5 +1,15 @@
 import { AppError, propagateError } from "@packages/utils/errors";
-import { and, arrayContains, count, desc, eq, ilike, isNull, or, type SQL } from "drizzle-orm";
+import {
+   and,
+   arrayContains,
+   count,
+   desc,
+   eq,
+   ilike,
+   isNull,
+   or,
+   type SQL,
+} from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
 import { type Asset, type AssetInsert, assets } from "../schemas/assets";
 
@@ -22,7 +32,9 @@ export async function createAsset(
       return result[0]!;
    } catch (err) {
       propagateError(err);
-      throw AppError.database(`Failed to create asset: ${(err as Error).message}`);
+      throw AppError.database(
+         `Failed to create asset: ${(err as Error).message}`,
+      );
    }
 }
 
@@ -35,7 +47,9 @@ export async function getAssetById(
       const result = await db
          .select()
          .from(assets)
-         .where(and(eq(assets.id, id), eq(assets.organizationId, organizationId)))
+         .where(
+            and(eq(assets.id, id), eq(assets.organizationId, organizationId)),
+         )
          .limit(1);
       return result[0];
    } catch (err) {
@@ -91,10 +105,7 @@ export async function listAssets(
             .orderBy(desc(assets.createdAt))
             .limit(limit)
             .offset(offset),
-         db
-            .select({ count: count() })
-            .from(assets)
-            .where(where),
+         db.select({ count: count() }).from(assets).where(where),
       ]);
 
       return {
@@ -103,7 +114,9 @@ export async function listAssets(
       };
    } catch (err) {
       propagateError(err);
-      throw AppError.database(`Failed to list assets: ${(err as Error).message}`);
+      throw AppError.database(
+         `Failed to list assets: ${(err as Error).message}`,
+      );
    }
 }
 
@@ -117,7 +130,9 @@ export async function updateAsset(
       const result = await db
          .update(assets)
          .set({ ...data, updatedAt: new Date() })
-         .where(and(eq(assets.id, id), eq(assets.organizationId, organizationId)))
+         .where(
+            and(eq(assets.id, id), eq(assets.organizationId, organizationId)),
+         )
          .returning();
 
       if (!result.length) {
@@ -127,7 +142,9 @@ export async function updateAsset(
       return result[0]!;
    } catch (err) {
       propagateError(err);
-      throw AppError.database(`Failed to update asset: ${(err as Error).message}`);
+      throw AppError.database(
+         `Failed to update asset: ${(err as Error).message}`,
+      );
    }
 }
 
@@ -139,7 +156,9 @@ export async function deleteAsset(
    try {
       const result = await db
          .delete(assets)
-         .where(and(eq(assets.id, id), eq(assets.organizationId, organizationId)))
+         .where(
+            and(eq(assets.id, id), eq(assets.organizationId, organizationId)),
+         )
          .returning();
 
       if (!result.length) {
@@ -149,6 +168,8 @@ export async function deleteAsset(
       return result[0]!;
    } catch (err) {
       propagateError(err);
-      throw AppError.database(`Failed to delete asset: ${(err as Error).message}`);
+      throw AppError.database(
+         `Failed to delete asset: ${(err as Error).message}`,
+      );
    }
 }

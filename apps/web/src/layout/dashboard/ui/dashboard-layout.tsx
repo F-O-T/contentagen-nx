@@ -10,13 +10,13 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import type * as React from "react";
 import { useEffect, useRef, useState } from "react";
+import { FeedbackFab } from "@/features/feedback/ui/feedback-fab";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { EarlyAccessProvider } from "@/hooks/use-early-access";
 import { useLastOrganization } from "@/hooks/use-last-organization";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
-import { FeedbackFab } from "@/features/feedback/ui/feedback-fab";
 import { setActiveSection } from "../hooks/use-sidebar-nav";
 import {
    getSidebarDefaultOpen,
@@ -145,8 +145,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
          <SidebarManagerProvider>
             <SidebarProvider
                className="h-svh"
-               open={sidebarOpen}
                onOpenChange={handleSidebarChange}
+               open={sidebarOpen}
             >
                <SidebarManager name="main">
                   <AppSidebar />

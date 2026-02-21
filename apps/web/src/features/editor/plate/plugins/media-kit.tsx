@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * MediaKit — Plate.js plugin array for image / video / audio / file upload.
@@ -16,26 +16,24 @@
  * <Plate> tree — this is done in PlateEditor.
  */
 
-import { KEYS } from 'platejs';
+import { AudioElement } from "@packages/ui/components/media-audio-node";
+import { FileElement } from "@packages/ui/components/media-file-node";
+import { ImageElement } from "@packages/ui/components/media-image-node";
+import { VideoElement } from "@packages/ui/components/media-video-node";
+import { CaptionPlugin } from "@platejs/caption/react";
 import {
-  AudioPlugin,
-  FilePlugin,
-  ImagePlugin,
-  PlaceholderPlugin,
-  VideoPlugin,
-} from '@platejs/media/react';
-import { CaptionPlugin } from '@platejs/caption/react';
-
-import { ImageElement } from '@packages/ui/components/media-image-node';
-import { VideoElement } from '@packages/ui/components/media-video-node';
-import { AudioElement } from '@packages/ui/components/media-audio-node';
-import { FileElement } from '@packages/ui/components/media-file-node';
-
+   AudioPlugin,
+   FilePlugin,
+   ImagePlugin,
+   PlaceholderPlugin,
+   VideoPlugin,
+} from "@platejs/media/react";
+import { KEYS } from "platejs";
+import type { UploadedFile } from "../hooks/use-editor-upload-file";
 import {
-  MediaPlaceholderElement,
-  UploadFileProvider,
-} from '../ui/media-placeholder-element';
-import type { UploadedFile } from '../hooks/use-editor-upload-file';
+   MediaPlaceholderElement,
+   UploadFileProvider,
+} from "../ui/media-placeholder-element";
 
 type UploadFileFn = (file: File) => Promise<UploadedFile>;
 
@@ -56,66 +54,66 @@ type UploadFileFn = (file: File) => Promise<UploadedFile>;
  */
 // biome-ignore lint/correctness/noUnusedVariables: uploadFile is consumed by MediaPlaceholderElement via UploadFileContext — must be passed to PlateEditor to wire up uploads
 export function createMediaKit(_uploadFile: UploadFileFn) {
-  return [
-    ImagePlugin.withComponent(ImageElement),
-    VideoPlugin.withComponent(VideoElement),
-    AudioPlugin.withComponent(AudioElement),
-    FilePlugin.withComponent(FileElement),
+   return [
+      ImagePlugin.withComponent(ImageElement),
+      VideoPlugin.withComponent(VideoElement),
+      AudioPlugin.withComponent(AudioElement),
+      FilePlugin.withComponent(FileElement),
 
-    CaptionPlugin.configure({
-      options: {
-        query: {
-          allow: [KEYS.img, KEYS.video, KEYS.audio, KEYS.file],
-        },
-      },
-    }),
+      CaptionPlugin.configure({
+         options: {
+            query: {
+               allow: [KEYS.img, KEYS.video, KEYS.audio, KEYS.file],
+            },
+         },
+      }),
 
-    PlaceholderPlugin.configure({
-      render: {
-        node: MediaPlaceholderElement,
-      },
-      options: {
-        uploadConfig: {
-          audio: {
-            maxFileCount: 1,
-            maxFileSize: '16MB',
-            mediaType: KEYS.audio,
-            minFileCount: 1,
-          },
-          blob: {
-            maxFileCount: 1,
-            maxFileSize: '64MB',
-            mediaType: KEYS.file,
-            minFileCount: 1,
-          },
-          image: {
-            maxFileCount: 5,
-            maxFileSize: '16MB',
-            mediaType: KEYS.img,
-            minFileCount: 1,
-          },
-          pdf: {
-            maxFileCount: 1,
-            maxFileSize: '32MB',
-            mediaType: KEYS.file,
-            minFileCount: 1,
-          },
-          text: {
-            maxFileCount: 1,
-            maxFileSize: '4MB',
-            mediaType: KEYS.file,
-            minFileCount: 1,
-          },
-          video: {
-            maxFileCount: 1,
-            maxFileSize: '128MB',
-            mediaType: KEYS.video,
-            minFileCount: 1,
-          },
-        },
-      },
-    }),
-  ] as const;
+      PlaceholderPlugin.configure({
+         render: {
+            node: MediaPlaceholderElement,
+         },
+         options: {
+            uploadConfig: {
+               audio: {
+                  maxFileCount: 1,
+                  maxFileSize: "16MB",
+                  mediaType: KEYS.audio,
+                  minFileCount: 1,
+               },
+               blob: {
+                  maxFileCount: 1,
+                  maxFileSize: "64MB",
+                  mediaType: KEYS.file,
+                  minFileCount: 1,
+               },
+               image: {
+                  maxFileCount: 5,
+                  maxFileSize: "16MB",
+                  mediaType: KEYS.img,
+                  minFileCount: 1,
+               },
+               pdf: {
+                  maxFileCount: 1,
+                  maxFileSize: "32MB",
+                  mediaType: KEYS.file,
+                  minFileCount: 1,
+               },
+               text: {
+                  maxFileCount: 1,
+                  maxFileSize: "4MB",
+                  mediaType: KEYS.file,
+                  minFileCount: 1,
+               },
+               video: {
+                  maxFileCount: 1,
+                  maxFileSize: "128MB",
+                  mediaType: KEYS.video,
+                  minFileCount: 1,
+               },
+            },
+         },
+      }),
+   ] as const;
 }
 
 // Re-export UploadFileProvider so PlateEditor can import it from one place

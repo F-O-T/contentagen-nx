@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * ImageElement — scaffold that wraps the base ImageElement from @packages/ui.
@@ -8,4 +8,4 @@
  * is built to inject a bank picker toolbar or context-aware actions.
  */
 
-export { ImageElement } from '@packages/ui/components/media-image-node';
+export { ImageElement } from "@packages/ui/components/media-image-node";

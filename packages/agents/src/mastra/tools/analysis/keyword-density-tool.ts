@@ -91,7 +91,7 @@ export const keywordDensityTool = createTool({
          const locations: z.infer<typeof KeywordAnalysisSchema>["locations"] =
             [];
 
-         if (title && title.toLowerCase().includes(keywordLower)) {
+         if (title?.toLowerCase().includes(keywordLower)) {
             locations.push({ type: "title" });
          }
 

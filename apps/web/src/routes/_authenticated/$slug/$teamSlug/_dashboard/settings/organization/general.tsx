@@ -139,8 +139,14 @@ function LogoSection({
    // DEBUG: Check what's available in orpc.organization
    console.log("[DEBUG] orpc keys:", Object.keys(orpc));
    console.log("[DEBUG] orpc.organization:", orpc.organization);
-   console.log("[DEBUG] orpc.organization keys:", Object.keys(orpc.organization));
-   console.log("[DEBUG] orpc.organization.generateLogoUploadUrl:", orpc.organization.generateLogoUploadUrl);
+   console.log(
+      "[DEBUG] orpc.organization keys:",
+      Object.keys(orpc.organization),
+   );
+   console.log(
+      "[DEBUG] orpc.organization.generateLogoUploadUrl:",
+      orpc.organization.generateLogoUploadUrl,
+   );
    console.log("[DEBUG] Type:", typeof orpc.organization.generateLogoUploadUrl);
 
    const queryClient = useQueryClient();
@@ -159,7 +165,8 @@ function LogoSection({
          }
 
          // Get file extension and content type
-         const fileExtension = fileUpload.selectedFile.name.split(".").pop() ?? "png";
+         const fileExtension =
+            fileUpload.selectedFile.name.split(".").pop() ?? "png";
          const contentType = fileUpload.selectedFile.type;
 
          console.log("[Logo Upload] File details:", {
@@ -176,7 +183,7 @@ function LogoSection({
             contentType,
          });
          console.log("[Logo Upload] Got presigned URL:", {
-            presignedUrl: uploadData.presignedUrl.substring(0, 100) + "...",
+            presignedUrl: `${uploadData.presignedUrl.substring(0, 100)}...`,
             publicUrl: uploadData.publicUrl,
          });
 
@@ -190,7 +197,10 @@ function LogoSection({
          console.log("[Logo Upload] MinIO upload complete");
 
          // Update organization with logo path
-         console.log("[Logo Upload] Updating organization with logo URL:", uploadData.publicUrl);
+         console.log(
+            "[Logo Upload] Updating organization with logo URL:",
+            uploadData.publicUrl,
+         );
          await orpc.organization.updateLogo.call({
             logoUrl: uploadData.publicUrl,
          });

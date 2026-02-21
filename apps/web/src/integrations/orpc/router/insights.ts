@@ -10,12 +10,12 @@ import {
    updateInsight,
 } from "@packages/database/repositories/insight-repository";
 import { insights } from "@packages/database/schemas/insights";
-import { eq } from "drizzle-orm";
 import {
    emitInsightCreated,
    emitInsightDeleted,
    emitInsightUpdated,
 } from "@packages/events/insight";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 

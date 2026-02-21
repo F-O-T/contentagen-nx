@@ -17,9 +17,7 @@ export const proposeSuggestionTool = createTool({
          .describe(
             "The exact current text to be replaced (verbatim from the document).",
          ),
-      suggestedText: z
-         .string()
-         .describe("The proposed replacement text."),
+      suggestedText: z.string().describe("The proposed replacement text."),
       reason: z
          .string()
          .describe(
@@ -35,7 +33,9 @@ export const proposeSuggestionTool = createTool({
       reason: z.string(),
    }),
    execute: async (input) => {
-      const normalizedSuggestion = normalizeMarkdownEmphasis(input.suggestedText);
+      const normalizedSuggestion = normalizeMarkdownEmphasis(
+         input.suggestedText,
+      );
       return {
          success: true,
          suggestionId: crypto.randomUUID(),

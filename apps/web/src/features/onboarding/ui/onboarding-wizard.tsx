@@ -126,8 +126,8 @@ export function OnboardingWizard({
 
    return (
       <Stepper.Provider
-         variant="line"
          className="mx-auto flex min-h-screen max-w-6xl flex-col"
+         variant="line"
       >
          {({ methods }) => {
             const isFirstStep = methods.state.isFirst;
@@ -158,8 +158,8 @@ export function OnboardingWizard({
                               src="/favicon.svg"
                            />
                            <Badge
-                              variant="outline"
                               className="bg-muted text-muted-foreground"
+                              variant="outline"
                            >
                               app.contentta.co
                               {workspaceSlug ? `/${workspaceSlug}` : ""}
@@ -178,34 +178,34 @@ export function OnboardingWizard({
                         {methods.flow.switch({
                            ...(needsProfile
                               ? {
-                                 profile: () => (
-                                    <ProfileStep
-                                       defaultName={session.user.name ?? ""}
-                                       onNext={() =>
-                                          handleProfileComplete(methods)
-                                       }
-                                       onStateChange={handleStepStateChange}
-                                       ref={stepRef}
-                                    />
-                                 ),
-                              }
+                                   profile: () => (
+                                      <ProfileStep
+                                         defaultName={session.user.name ?? ""}
+                                         onNext={() =>
+                                            handleProfileComplete(methods)
+                                         }
+                                         onStateChange={handleStepStateChange}
+                                         ref={stepRef}
+                                      />
+                                   ),
+                                }
                               : {}),
                            ...(needsWorkspace
                               ? {
-                                 workspace: () => (
-                                    <WorkspaceStep
-                                       onNext={(org) =>
-                                          handleWorkspaceComplete(
-                                             org,
-                                             methods,
-                                          )
-                                       }
-                                       onSlugChange={setWorkspaceSlug}
-                                       onStateChange={handleStepStateChange}
-                                       ref={stepRef}
-                                    />
-                                 ),
-                              }
+                                   workspace: () => (
+                                      <WorkspaceStep
+                                         onNext={(org) =>
+                                            handleWorkspaceComplete(
+                                               org,
+                                               methods,
+                                            )
+                                         }
+                                         onSlugChange={setWorkspaceSlug}
+                                         onStateChange={handleStepStateChange}
+                                         ref={stepRef}
+                                      />
+                                   ),
+                                }
                               : {}),
                            project: () => (
                               <ProjectStep

@@ -77,10 +77,11 @@ export function FeatureFeedbackForm({
                   <div className="flex items-center justify-between gap-1">
                      {EMOJI_SCALE.map((emoji, index) => (
                         <button
-                           className={`rounded-lg p-2 text-2xl transition-all ${rating === index + 1
+                           className={`rounded-lg p-2 text-2xl transition-all ${
+                              rating === index + 1
                                  ? "bg-muted ring-2 ring-primary scale-110"
                                  : "hover:bg-muted/50"
-                              }`}
+                           }`}
                            key={`emoji-${index + 1}`}
                            onClick={() => setRating(index + 1)}
                            type="button"

@@ -155,7 +155,7 @@ function generateAlternatives(
       (language === "pt" ? prefixes?.pt : prefixes?.en) ?? [];
    for (const prefix of stylePrefixList.slice(0, 2)) {
       const withPrefix = prefix.includes("X")
-         ? prefix.replace("X", "10") + " " + keyword
+         ? `${prefix.replace("X", "10")} ${keyword}`
          : `${prefix} ${keyword}`;
 
       if (withPrefix.length <= 65) {
@@ -228,11 +228,11 @@ export const optimizeTitleTool = createTool({
             // Find a natural break point
             const shortened = afterKeyword.slice(1).trim();
             const words = shortened.split(" ");
-            let result = primaryKeyword + ":";
+            let result = `${primaryKeyword}:`;
 
             for (const word of words) {
-               if ((result + " " + word).length <= 60) {
-                  result += " " + word;
+               if (`${result} ${word}`.length <= 60) {
+                  result += ` ${word}`;
                } else {
                   break;
                }

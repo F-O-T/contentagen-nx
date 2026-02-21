@@ -2,10 +2,10 @@ import { AppError, propagateError } from "@packages/utils/errors";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
 import {
-   type NewDiscussion,
-   type NewDiscussionReply,
    discussionReplies,
    discussions,
+   type NewDiscussion,
+   type NewDiscussionReply,
 } from "../schemas/discussions";
 
 // ─── Discussions ─────────────────────────────────────────────────────────────
@@ -15,7 +15,10 @@ export async function createDiscussion(
    data: Omit<NewDiscussion, "id" | "createdAt" | "updatedAt">,
 ) {
    try {
-      const [discussion] = await db.insert(discussions).values(data).returning();
+      const [discussion] = await db
+         .insert(discussions)
+         .values(data)
+         .returning();
       return discussion;
    } catch (err) {
       propagateError(err);

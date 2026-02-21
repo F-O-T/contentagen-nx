@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * PlateEditor — Plate.js editor component with AI, Copilot, Comment,
@@ -10,33 +10,37 @@
  * (mod+shift+m), tracked suggestions, and persistent discussion threads.
  */
 
+import { CommentKit } from "@packages/ui/components/editor/plugins/comment-kit";
+import {
+   type DiscussionCallbacks,
+   DiscussionKit,
+   type DiscussionUser,
+   discussionPlugin,
+   type TDiscussion,
+} from "@packages/ui/components/editor/plugins/discussion-kit";
+import { SuggestionKit } from "@packages/ui/components/editor/plugins/suggestion-kit";
+import { cn } from "@packages/ui/lib/utils";
 import {
    BasicBlocksPlugin,
    BasicMarksPlugin,
 } from "@platejs/basic-nodes/react";
 import { LinkPlugin } from "@platejs/link/react";
-import type { Value } from "platejs";
-import { Plate, PlateContent, useEditorRef, usePlateEditor } from "platejs/react";
-import { useEffect } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { cn } from "@packages/ui/lib/utils";
-import { CommentKit } from "@packages/ui/components/editor/plugins/comment-kit";
-import { SuggestionKit } from "@packages/ui/components/editor/plugins/suggestion-kit";
+import type { Value } from "platejs";
 import {
-   DiscussionKit,
-   discussionPlugin,
-   type DiscussionCallbacks,
-   type TDiscussion,
-   type DiscussionUser,
-} from "@packages/ui/components/editor/plugins/discussion-kit";
-
+   Plate,
+   PlateContent,
+   useEditorRef,
+   usePlateEditor,
+} from "platejs/react";
+import { useEffect } from "react";
+import { orpc } from "@/integrations/orpc/client";
+import { useEditorDiscussions } from "../hooks/use-editor-discussions";
+import { useEditorAIChat } from "./hooks/use-editor-ai-chat";
+import { useEditorUploadFile } from "./hooks/use-editor-upload-file";
 import { AIKit } from "./plugins/ai-kit";
 import { CopilotKit } from "./plugins/copilot-kit";
 import { createMediaKit, UploadFileProvider } from "./plugins/media-kit";
-import { useEditorAIChat } from "./hooks/use-editor-ai-chat";
-import { useEditorUploadFile } from "./hooks/use-editor-upload-file";
-import { useEditorDiscussions } from "../hooks/use-editor-discussions";
-import { orpc } from "@/integrations/orpc/client";
 
 export interface PlateEditorProps {
    initialValue?: Value;
@@ -79,11 +83,17 @@ function EditorDiscussionSync({ contentId }: EditorDiscussionSyncProps) {
 
    // Map server users to DiscussionUser shape (server returns `image`, plugin expects `avatarUrl`)
    const mappedUsers: Record<string, DiscussionUser> = {};
-   for (const [id, u] of Object.entries(users as Record<string, { id: string; name: string; email: string; image: string }>)) {
+   for (const [id, u] of Object.entries(
+      users as Record<
+         string,
+         { id: string; name: string; email: string; image: string }
+      >,
+   )) {
       mappedUsers[id] = {
          id: u.id,
          name: u.name,
-         avatarUrl: u.image ?? `https://api.dicebear.com/9.x/glass/svg?seed=${u.id}`,
+         avatarUrl:
+            u.image ?? `https://api.dicebear.com/9.x/glass/svg?seed=${u.id}`,
       };
    }
 
@@ -95,7 +105,9 @@ function EditorDiscussionSync({ contentId }: EditorDiscussionSyncProps) {
          await mutations.create.mutateAsync({
             contentId,
             blockId: discussion.id,
-            contentRich: firstComment.contentRich as Array<Record<string, unknown>>,
+            contentRich: firstComment.contentRich as Array<
+               Record<string, unknown>
+            >,
             documentContent: discussion.documentContent,
          });
       },
@@ -129,20 +141,24 @@ function EditorDiscussionSync({ contentId }: EditorDiscussionSyncProps) {
 
    // Sync discussions into discussionPlugin
    useEffect(() => {
-      editor.setOption(discussionPlugin, "discussions", discussions as TDiscussion[]);
+      editor.setOption(
+         discussionPlugin,
+         "discussions",
+         discussions as TDiscussion[],
+      );
    }, [editor, discussions]);
 
    // Sync users into discussionPlugin
    useEffect(() => {
       editor.setOption(discussionPlugin, "users", mappedUsers);
-   // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [editor, users]);
 
    // Sync callbacks into discussionPlugin (stable reference per render is fine —
    // the callbacks close over mutation functions which are stable across renders)
    useEffect(() => {
       editor.setOption(discussionPlugin, "callbacks", callbacks);
-   // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [editor, contentId]);
 
    return null;
@@ -204,7 +220,9 @@ export function PlateEditor({
       <UploadFileProvider value={uploadFile}>
          <Plate
             editor={editor}
-            onValueChange={onChange ? ({ value }) => onChange(value) : undefined}
+            onValueChange={
+               onChange ? ({ value }) => onChange(value) : undefined
+            }
             readOnly={!editable}
          >
             {/*
@@ -225,8 +243,8 @@ export function PlateEditor({
                   "aria-disabled:cursor-not-allowed aria-disabled:opacity-50",
                   className,
                )}
-               placeholder={placeholder}
                disableDefaultStyles
+               placeholder={placeholder}
             />
          </Plate>
       </UploadFileProvider>

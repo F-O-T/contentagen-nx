@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * MediaPlaceholderElement — renders the in-editor upload placeholder.
@@ -11,23 +11,19 @@
  * a spinner / progress bar.
  */
 
-import * as React from 'react';
-import { useEffect, useRef } from 'react';
-import { KEYS } from 'platejs';
+import { cn } from "@packages/ui/lib/utils";
 import {
-  PlateElement,
-  useEditorRef,
-  useElement,
-} from 'platejs/react';
-import type { PlateElementProps } from 'platejs/react';
-import {
-  PlaceholderPlugin,
-  usePlaceholderElementState,
-  usePlaceholderSet,
-  PlaceholderProvider,
-} from '@platejs/media/react';
-import { cn } from '@packages/ui/lib/utils';
-import type { UploadedFile } from '../hooks/use-editor-upload-file';
+   PlaceholderPlugin,
+   PlaceholderProvider,
+   usePlaceholderElementState,
+   usePlaceholderSet,
+} from "@platejs/media/react";
+import { KEYS } from "platejs";
+import type { PlateElementProps } from "platejs/react";
+import { PlateElement, useEditorRef, useElement } from "platejs/react";
+import * as React from "react";
+import { useEffect, useRef } from "react";
+import type { UploadedFile } from "../hooks/use-editor-upload-file";
 
 // ---------------------------------------------------------------------------
 // Context — the uploadFile fn is passed down from MediaKit
@@ -44,106 +40,114 @@ export const UploadFileProvider = UploadFileContext.Provider;
 // ---------------------------------------------------------------------------
 
 function MediaPlaceholderInner(props: PlateElementProps) {
-  const editor = useEditorRef();
-  const element = useElement(KEYS.placeholder);
-  const { progressing, mediaType, progresses, focused, selected } =
-    usePlaceholderElementState();
-  const setIsUploading = usePlaceholderSet('isUploading');
-  const setProgresses = usePlaceholderSet('progresses');
-  const setUpdatedFiles = usePlaceholderSet('updatedFiles');
+   const editor = useEditorRef();
+   const element = useElement(KEYS.placeholder);
+   const { progressing, mediaType, progresses, focused, selected } =
+      usePlaceholderElementState();
+   const setIsUploading = usePlaceholderSet("isUploading");
+   const setProgresses = usePlaceholderSet("progresses");
+   const setUpdatedFiles = usePlaceholderSet("updatedFiles");
 
-  const uploadFile = React.useContext(UploadFileContext);
-  const uploadedRef = useRef(false);
+   const uploadFile = React.useContext(UploadFileContext);
+   const uploadedRef = useRef(false);
 
-  const { id } = element as unknown as { id: string; mediaType: string };
+   const { id } = element as unknown as { id: string; mediaType: string };
 
-  // Retrieve the File that PlaceholderPlugin stored when the node was created
-  useEffect(() => {
-    if (uploadedRef.current || !uploadFile) return;
+   // Retrieve the File that PlaceholderPlugin stored when the node was created
+   useEffect(() => {
+      if (uploadedRef.current || !uploadFile) return;
 
-    const file = editor.getApi(PlaceholderPlugin).placeholder.getUploadingFile(id);
-    if (!file) return;
+      const file = editor
+         .getApi(PlaceholderPlugin)
+         .placeholder.getUploadingFile(id);
+      if (!file) return;
 
-    uploadedRef.current = true;
-    setIsUploading(true);
-    setUpdatedFiles([file]);
+      uploadedRef.current = true;
+      setIsUploading(true);
+      setUpdatedFiles([file]);
 
-    (async () => {
-      try {
-        // Fake progress while upload runs
-        setProgresses({ [id]: 0 });
+      (async () => {
+         try {
+            // Fake progress while upload runs
+            setProgresses({ [id]: 0 });
 
-        const result = await uploadFile(file);
+            const result = await uploadFile(file);
 
-        setProgresses({ [id]: 100 });
+            setProgresses({ [id]: 100 });
 
-        // Replace placeholder node with the real media node
-        editor.tf.withoutSaving(() => {
-          const path = editor.api.findPath(element);
-          if (!path) return;
+            // Replace placeholder node with the real media node
+            editor.tf.withoutSaving(() => {
+               const path = editor.api.findPath(element);
+               if (!path) return;
 
-          let nodeType: string;
-          if (mediaType === KEYS.img) nodeType = KEYS.img;
-          else if (mediaType === KEYS.video) nodeType = KEYS.video;
-          else if (mediaType === KEYS.audio) nodeType = KEYS.audio;
-          else nodeType = KEYS.file;
+               let nodeType: string;
+               if (mediaType === KEYS.img) nodeType = KEYS.img;
+               else if (mediaType === KEYS.video) nodeType = KEYS.video;
+               else if (mediaType === KEYS.audio) nodeType = KEYS.audio;
+               else nodeType = KEYS.file;
 
-          editor.tf.removeNodes({ at: path });
-          editor.tf.insertNodes(
-            {
-              type: nodeType,
-              url: result.url,
-              name: result.name,
-              children: [{ text: '' }],
-            },
-            { at: path },
-          );
-        });
-      } catch {
-        // On failure, remove the placeholder node so the editor doesn't get stuck
-        const path = editor.api.findPath(element);
-        if (path) editor.tf.removeNodes({ at: path });
-      } finally {
-        editor.getApi(PlaceholderPlugin).placeholder.removeUploadingFile(id);
-        setIsUploading(false);
-        setUpdatedFiles([]);
-      }
-    })();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+               editor.tf.removeNodes({ at: path });
+               editor.tf.insertNodes(
+                  {
+                     type: nodeType,
+                     url: result.url,
+                     name: result.name,
+                     children: [{ text: "" }],
+                  },
+                  { at: path },
+               );
+            });
+         } catch {
+            // On failure, remove the placeholder node so the editor doesn't get stuck
+            const path = editor.api.findPath(element);
+            if (path) editor.tf.removeNodes({ at: path });
+         } finally {
+            editor
+               .getApi(PlaceholderPlugin)
+               .placeholder.removeUploadingFile(id);
+            setIsUploading(false);
+            setUpdatedFiles([]);
+         }
+      })();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, []);
 
-  const label = mediaType === KEYS.img
-    ? 'Uploading image…'
-    : mediaType === KEYS.video
-      ? 'Uploading video…'
-      : mediaType === KEYS.audio
-        ? 'Uploading audio…'
-        : 'Uploading file…';
+   const label =
+      mediaType === KEYS.img
+         ? "Uploading image…"
+         : mediaType === KEYS.video
+           ? "Uploading video…"
+           : mediaType === KEYS.audio
+             ? "Uploading audio…"
+             : "Uploading file…";
 
-  const progress = progresses[id] ?? 0;
+   const progress = progresses[id] ?? 0;
 
-  return (
-    <PlateElement
-      {...props}
-      className={cn(
-        'relative my-2 flex h-16 w-full select-none items-center justify-center rounded-md border border-dashed border-input bg-muted/30 text-sm text-muted-foreground',
-        focused && selected && 'ring-2 ring-ring ring-offset-2',
-      )}
-    >
-      <div className="flex flex-col items-center gap-1" contentEditable={false}>
-        <span>{label}</span>
-        {progressing && (
-          <div className="h-1 w-32 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full bg-primary transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        )}
-      </div>
-      {props.children}
-    </PlateElement>
-  );
+   return (
+      <PlateElement
+         {...props}
+         className={cn(
+            "relative my-2 flex h-16 w-full select-none items-center justify-center rounded-md border border-dashed border-input bg-muted/30 text-sm text-muted-foreground",
+            focused && selected && "ring-2 ring-ring ring-offset-2",
+         )}
+      >
+         <div
+            className="flex flex-col items-center gap-1"
+            contentEditable={false}
+         >
+            <span>{label}</span>
+            {progressing && (
+               <div className="h-1 w-32 overflow-hidden rounded-full bg-muted">
+                  <div
+                     className="h-full bg-primary transition-all duration-300"
+                     style={{ width: `${progress}%` }}
+                  />
+               </div>
+            )}
+         </div>
+         {props.children}
+      </PlateElement>
+   );
 }
 
 // ---------------------------------------------------------------------------
@@ -151,12 +155,12 @@ function MediaPlaceholderInner(props: PlateElementProps) {
 // ---------------------------------------------------------------------------
 
 export const MediaPlaceholderElement = React.forwardRef<
-  HTMLDivElement,
-  PlateElementProps
+   HTMLDivElement,
+   PlateElementProps
 >((props, _ref) => (
-  <PlaceholderProvider>
-    <MediaPlaceholderInner {...props} />
-  </PlaceholderProvider>
+   <PlaceholderProvider>
+      <MediaPlaceholderInner {...props} />
+   </PlaceholderProvider>
 ));
 
-MediaPlaceholderElement.displayName = 'MediaPlaceholderElement';
+MediaPlaceholderElement.displayName = "MediaPlaceholderElement";

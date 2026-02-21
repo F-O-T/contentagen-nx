@@ -1,3 +1,4 @@
+import type { Asset } from "@packages/database/schemas/assets";
 import { Button } from "@packages/ui/components/button";
 import {
    Credenza,
@@ -11,10 +12,9 @@ import {
 } from "@packages/ui/components/credenza";
 import { Input } from "@packages/ui/components/input";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import type { Asset } from "@packages/database/schemas/assets";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { FileIcon, ImageIcon, Search, X } from "lucide-react";
-import { useRef, useState, Suspense } from "react";
+import { Suspense, useRef, useState } from "react";
 import { orpc } from "@/integrations/orpc/client";
 
 // ============================================================
@@ -44,9 +44,10 @@ function AssetGridItem({ asset, isSelected, onSelect }: AssetGridItemProps) {
       <button
          className={`
             relative aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer
-            ${isSelected
-               ? "border-primary ring-2 ring-primary ring-offset-2"
-               : "border-transparent hover:border-muted-foreground/50"
+            ${
+               isSelected
+                  ? "border-primary ring-2 ring-primary ring-offset-2"
+                  : "border-transparent hover:border-muted-foreground/50"
             }
             bg-muted
          `}
@@ -260,10 +261,7 @@ export function AssetBankModal({
                <CredenzaClose asChild>
                   <Button variant="outline">Cancelar</Button>
                </CredenzaClose>
-               <Button
-                  disabled={!selectedAsset}
-                  onClick={handleInsert}
-               >
+               <Button disabled={!selectedAsset} onClick={handleInsert}>
                   Inserir imagem
                </Button>
             </CredenzaFooter>

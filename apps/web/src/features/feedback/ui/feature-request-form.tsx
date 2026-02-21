@@ -11,10 +11,10 @@ import {
    FieldGroup,
    FieldLabel,
 } from "@packages/ui/components/field";
+import { Rating, RatingButton } from "@packages/ui/components/rating";
 import { Textarea } from "@packages/ui/components/textarea";
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
-import { Rating, RatingButton } from "@packages/ui/components/rating";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { type FormEvent, useCallback } from "react";
 import { toast } from "sonner";
@@ -169,8 +169,8 @@ export function FeatureRequestForm({
                         <Field>
                            <FieldLabel>Qual a prioridade para você?</FieldLabel>
                            <Rating
-                              value={field.state.value}
                               onValueChange={(v) => field.handleChange(v)}
+                              value={field.state.value}
                            >
                               <RatingButton />
                               <RatingButton />

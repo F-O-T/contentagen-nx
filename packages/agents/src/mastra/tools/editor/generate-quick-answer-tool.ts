@@ -121,7 +121,7 @@ function generateTLDR(
       // Clean and shorten
       const shortened =
          statement.length > 80
-            ? statement.slice(0, statement.lastIndexOf(" ", 80)) + "..."
+            ? `${statement.slice(0, statement.lastIndexOf(" ", 80))}...`
             : statement;
 
       // Avoid repetition
