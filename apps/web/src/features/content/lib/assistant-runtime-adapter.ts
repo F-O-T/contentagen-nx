@@ -1,7 +1,7 @@
 /**
  * Assistant Runtime Adapter
  *
- * Bridges ORPC chatStream backend to assistant-ui ChatModelAdapter.
+ * Bridges ORPC aiCommandStream backend to assistant-ui ChatModelAdapter.
  * Converts ORPC ChatChunk events to assistant-ui content parts.
  */
 
@@ -164,9 +164,9 @@ export function createContenttaAdapter(contentId?: string): ChatModelAdapter {
                ? `${messageText}\n\n${contextParts.join("\n\n")}`
                : messageText;
 
-         // Call ORPC chatStream
-         const stream = await client.agent.chatStream({
-            message: enrichedMessage,
+         // Call ORPC aiCommandStream
+         const stream = await client.agent.aiCommandStream({
+            prompt: enrichedMessage,
             contentId,
          });
 

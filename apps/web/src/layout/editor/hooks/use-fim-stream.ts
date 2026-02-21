@@ -1,5 +1,4 @@
 import type {
-   ChatChunk,
    EditChunk,
    EditRequest,
    FIMChunk,
@@ -40,25 +39,6 @@ export function createEditStreamFn() {
       // Handle both direct iteration and array results
       if (Symbol.asyncIterator in result) {
          for await (const chunk of result as AsyncIterable<EditChunk>) {
-            yield chunk;
-         }
-      }
-   };
-}
-
-/**
- * Create Chat stream function for the ChatSidebar
- * Returns an async generator that yields ChatChunk objects
- */
-export function createChatStreamFn(contentId?: string) {
-   return async function* chatStream(
-      message: string,
-   ): AsyncIterable<ChatChunk> {
-      const result = await client.agent.chatStream({ message, contentId });
-
-      // Handle both direct iteration and array results
-      if (Symbol.asyncIterator in result) {
-         for await (const chunk of result as AsyncIterable<ChatChunk>) {
             yield chunk;
          }
       }
