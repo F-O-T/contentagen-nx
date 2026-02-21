@@ -18,7 +18,7 @@ import {
    DrawerTitle,
    DrawerTrigger,
 } from "@packages/ui/components/drawer";
-import { useMediaQuery } from "@packages/ui/hooks/use-media-query";
+import { useMediaQuery } from "@uidotdev/usehooks";
 import { cn } from "@packages/ui/lib/utils";
 import { createContext, useContext } from "react";
 

@@ -18,6 +18,7 @@ import {
    TooltipProvider,
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
+import { useCopyToClipboard } from "@uidotdev/usehooks";
 import {
    useMutation,
    useQueryClient,
@@ -130,7 +131,10 @@ function ProjectGeneralContent() {
       orpc.team.getPublicApiKey.queryOptions({ input: { teamId } }),
    );
 
-   const [apiKeyCopied, setApiKeyCopied] = useState(false);
+   const [lastCopied, copy] = useCopyToClipboard();
+   const apiKeyCopied =
+      (publicKeyData.publicApiKey &&
+         lastCopied === publicKeyData.publicApiKey) === true;
    const [newDomain, setNewDomain] = useState("");
 
    // ── Mutations ──────────────────────────────────────────────────────
@@ -139,7 +143,7 @@ function ProjectGeneralContent() {
       orpc.team.regeneratePublicApiKey.mutationOptions({
          onSuccess: (data) => {
             if (data.publicApiKey) {
-               navigator.clipboard.writeText(data.publicApiKey);
+               copy(data.publicApiKey);
                toast.success(
                   "Chave de API regenerada e copiada para a área de transferência!",
                );
@@ -177,10 +181,8 @@ function ProjectGeneralContent() {
    const handleCopyApiKey = () => {
       const key = publicKeyData.publicApiKey;
       if (!key) return;
-      navigator.clipboard.writeText(key);
-      setApiKeyCopied(true);
+      copy(key);
       toast.success("Chave de API copiada!");
-      setTimeout(() => setApiKeyCopied(false), 2000);
    };
 
    const handleRegenerateApiKey = () => {

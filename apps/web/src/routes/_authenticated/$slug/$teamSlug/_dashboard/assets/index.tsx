@@ -29,6 +29,7 @@ import {
    useQueryClient,
    useSuspenseQuery,
 } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
    ChevronDown,
@@ -921,10 +922,10 @@ function AssetBankContent() {
    const teamId = currentTeam.id;
    const { closeCredenza, openCredenza } = useCredenza();
    const [search, setSearch] = useState("");
-   const [debouncedSearch, setDebouncedSearch] = useState("");
+   const debouncedSearch = useDebounce(search, 300);
    const [page, setPage] = useState(0);
    const [total, setTotal] = useState(0);
-   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 
    const { enabled: aiImageEnabled } = useFeatureFlag("ai-image-generation");
 
@@ -933,15 +934,10 @@ function AssetBankContent() {
    const handleSearchChange = (value: string) => {
       setSearch(value);
       setPage(0);
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-         setDebouncedSearch(value);
-      }, 300);
    };
 
    const handleClearSearch = () => {
       setSearch("");
-      setDebouncedSearch("");
       setPage(0);
    };
 
