@@ -24,8 +24,6 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import {
    type ChatChunk,
-   type EditChunk,
-   EditRequestSchema,
    type FIMChunk,
 } from "@/features/editor/schemas";
 import { protectedProcedure } from "../server";
@@ -50,99 +48,6 @@ import { protectedProcedure } from "../server";
 //   - Use these as defaults when parameters are not explicitly provided
 // =============================================================================
 
-/**
- * Edit streaming completion (Ctrl+K)
- * Uses Mastra's inlineEditAgent for text transformations
- */
-export const editStream = protectedProcedure
-   .input(EditRequestSchema)
-   .handler(async function* ({ context, input }) {
-      const { userId, db, organizationId, posthog, teamId, headers } = context;
-
-      await enforceCreditBudget(db, organizationId, "ai");
-
-      // Fetch product settings for AI configuration
-      const settings = await getProductSettings(db, teamId);
-      const aiDefaults = settings?.aiDefaults ?? {};
-
-      // Get the inline edit agent from Mastra
-      const editAgent = mastra.getAgent("inlineEditAgent");
-
-      // Create request context with settings
-      const requestContext = createRequestContext({
-         userId,
-         language:
-            aiDefaults.defaultLanguage ??
-            getRequestLanguage(headers) ??
-            "pt-BR",
-         model:
-            aiDefaults.editModel ??
-            "openrouter/mistralai/mistral-small-creative",
-      } as CustomRequestContext);
-
-      // Build the prompt from edit request
-      const prompt = buildEditPrompt(input);
-
-      const startTime = Date.now();
-
-      try {
-         // Stream the agent response
-         const result = await editAgent.stream(
-            [{ role: "user", content: prompt }],
-            {
-               requestContext: requestContext as RequestContext<unknown>,
-            } as unknown as Parameters<typeof editAgent.stream>[1],
-         );
-
-         // Yield chunks as EditChunk format
-         let _fullText = "";
-         for await (const chunk of result.textStream) {
-            _fullText += chunk;
-            yield {
-               text: chunk,
-               done: false,
-            } satisfies EditChunk;
-         }
-
-         const latencyMs = Date.now() - startTime;
-
-         // Emit event and increment credit usage (failure-tolerant)
-         try {
-            await emitAiCompletion(
-               { db, posthog, organizationId, userId, teamId },
-               {
-                  model: "inlineEditAgent",
-                  provider: "openrouter",
-                  promptTokens: 0,
-                  completionTokens: 0,
-                  totalTokens: 0,
-                  latencyMs,
-                  streamed: true,
-               },
-            );
-            await trackCreditUsage(
-               db,
-               AI_EVENTS["ai.completion"],
-               organizationId,
-               "ai",
-            );
-         } catch {
-            // Event tracking must not break the streaming flow
-         }
-
-         // Final chunk
-         yield {
-            text: "",
-            done: true,
-         } satisfies EditChunk;
-      } catch (_error) {
-         // Yield error indication
-         yield {
-            text: "",
-            done: true,
-         } satisfies EditChunk;
-      }
-   });
 
 /**
  * Copilot ghost text streaming completion
@@ -543,26 +448,6 @@ export const executeUnifiedAgent = protectedProcedure
 // Helper Functions
 // =============================================================================
 
-/**
- * Build Edit prompt from request
- */
-function buildEditPrompt(request: z.infer<typeof EditRequestSchema>): string {
-   const { selectedText, instruction, contextBefore, contextAfter } = request;
-
-   let prompt = "";
-
-   if (contextBefore) {
-      prompt += `CONTEXT BEFORE:\n${contextBefore}\n\n`;
-   }
-
-   prompt += `SELECTED TEXT:\n${selectedText}\n\nINSTRUCTION: ${instruction}`;
-
-   if (contextAfter) {
-      prompt += `\n\nCONTEXT AFTER:\n${contextAfter}`;
-   }
-
-   return prompt;
-}
 
 /**
  * Build Copilot prompt from prefix and optional suffix
