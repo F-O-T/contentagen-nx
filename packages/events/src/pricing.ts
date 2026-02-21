@@ -167,6 +167,15 @@ export const EVENT_PRICING: EventPricing[] = [
          "Tracks a discrete action performed by an AI agent (planning, research, editing).",
       isBillable: true,
    },
+   {
+      eventName: AI_EVENTS["ai.image_generation"],
+      category: EVENT_CATEGORIES.ai,
+      pricePerEvent: brl("0.500000"),
+      freeTierLimit: 5,
+      displayName: "AI Image Generation",
+      description: "Tracks a single AI image generation request via OpenRouter.",
+      isBillable: true,
+   },
 
    // -------------------------------------------------------------------------
    // Form events (4)

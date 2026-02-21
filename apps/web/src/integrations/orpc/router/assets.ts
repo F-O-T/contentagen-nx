@@ -11,7 +11,7 @@ import {
    emitAssetDeleted,
    emitAssetUploadCompleted,
 } from "@packages/events/assets";
-import { emitAiCompletion } from "@packages/events/ai";
+import { emitAiImageGeneration } from "@packages/events/ai";
 import { enforceCreditBudget } from "@packages/events/credits";
 import {
    deleteFile,
@@ -318,9 +318,16 @@ export const generateImage = protectedProcedure
          });
       }
 
-      emitAiCompletion(
+      emitAiImageGeneration(
          { db, posthog, organizationId, userId },
-         { promptTokens: 0, completionTokens: 0, latencyMs: Date.now() - startedAt },
+         {
+            assetId: asset.id,
+            prompt: input.prompt,
+            model: "sourceful/riverflow-v2-pro",
+            latencyMs: Date.now() - startedAt,
+            fileSizeBytes: imageBuffer.length,
+            mimeType,
+         },
       );
 
       return asset;
