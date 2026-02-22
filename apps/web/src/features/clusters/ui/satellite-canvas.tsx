@@ -70,7 +70,9 @@ function SortableSatelliteCard({
          style={style}
       >
          <button
+            aria-label="Reordenar"
             className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing transition-colors"
+            title="Reordenar"
             type="button"
             {...attributes}
             {...listeners}
@@ -101,9 +103,11 @@ function SortableSatelliteCard({
          </Button>
 
          <Button
+            aria-label="Remover satélite"
             disabled={isRemoving}
             onClick={() => onRemove(item.contentId)}
             size="sm"
+            title="Remover satélite"
             variant="ghost"
          >
             <X className="size-4 text-muted-foreground hover:text-destructive" />
