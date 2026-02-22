@@ -7,10 +7,15 @@ import {
    EmptyMedia,
    EmptyTitle,
 } from "@packages/ui/components/empty";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from "@packages/ui/components/tooltip";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowRight, FlaskConical, Plus } from "lucide-react";
+import { Eye, FlaskConical, Plus } from "lucide-react";
 import { orpc } from "@/integrations/orpc/client";
 import { ExperimentStatusBadge } from "./experiment-status-badge";
 
@@ -76,16 +81,28 @@ function useExperimentColumns(
          id: "actions",
          header: "",
          cell: ({ row }) => (
-            <div className="flex justify-end">
-               <Button asChild size="sm" variant="ghost">
-                  <Link
-                     params={{ slug, teamSlug, experimentId: row.original.id }}
-                     to="/$slug/$teamSlug/experiments/$experimentId"
-                  >
-                     Ver detalhes
-                     <ArrowRight className="ml-2 size-4" />
-                  </Link>
-               </Button>
+            <div
+               className="flex items-center justify-end gap-1"
+               onClick={(e) => e.stopPropagation()}
+            >
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <Button asChild size="icon" variant="ghost">
+                        <Link
+                           params={{
+                              slug,
+                              teamSlug,
+                              experimentId: row.original.id,
+                           }}
+                           to="/$slug/$teamSlug/experiments/$experimentId"
+                        >
+                           <Eye className="size-4" />
+                           <span className="sr-only">Ver detalhes</span>
+                        </Link>
+                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Ver detalhes</TooltipContent>
+               </Tooltip>
             </div>
          ),
       },

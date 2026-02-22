@@ -17,6 +17,8 @@ All tables use `DataTable` from `@packages/ui/components/data-table` with this r
 3. **All other actions** → inside `renderSubComponent` as labeled `size="sm"` buttons
 4. **Destructive actions** (delete, revoke) → always in the expandable, never on the main row
 5. **Mobile card** → replicate the icon buttons pattern inline; no dropdowns
+6. **Tooltips** → every primary action icon button MUST be wrapped in `<Tooltip><TooltipTrigger asChild>...</TooltipTrigger><TooltipContent>Label</TooltipContent></Tooltip>`
+7. **Expandable actions** → secondary/destructive actions are normal buttons: `<Button size="sm" variant="outline|ghost">` with **icon + text** (e.g. `<Trash2 className="size-3 mr-2" /> Excluir`), never icon-only in the expandable
 
 ## Action Classification
 
@@ -151,6 +153,8 @@ onClick={(e) => { e.stopPropagation(); onEdit(row.original); }}
 | No `renderMobileCard` | Always provide mobile card renderer — DataTable doesn't auto-collapse on mobile |
 | Too many icon buttons (>3) | Move anything beyond top 2 to expandable |
 | No `sr-only` span on icon button | Always add `<span className="sr-only">Action label</span>` for accessibility |
+| No tooltip on icon button | Wrap in `<Tooltip>` + `<TooltipTrigger asChild>` + `<TooltipContent>Label</TooltipContent>` |
+| Icon-only in expandable | Use normal buttons with icon + text (e.g. `<Trash2 className="size-3 mr-2" /> Excluir`) |
 
 ## Reference Files
 

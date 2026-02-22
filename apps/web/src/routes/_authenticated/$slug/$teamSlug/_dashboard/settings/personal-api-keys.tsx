@@ -12,12 +12,7 @@ import {
 } from "@packages/ui/components/empty";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import {
-   Tooltip,
-   TooltipContent,
-   TooltipProvider,
-   TooltipTrigger,
-} from "@packages/ui/components/tooltip";
+import { TooltipProvider } from "@packages/ui/components/tooltip";
 import {
    useMutation,
    useQueryClient,
@@ -270,30 +265,8 @@ function KeysTable({
                </span>
             ),
          },
-         {
-            id: "actions",
-            header: "",
-            cell: ({ row }) => (
-               <Tooltip>
-                  <TooltipTrigger asChild>
-                     <Button
-                        disabled={isRevoking}
-                        onClick={(event) => {
-                           event.stopPropagation();
-                           onRevoke(row.original);
-                        }}
-                        size="icon"
-                        variant="ghost"
-                     >
-                        <Trash2 className="size-4 text-destructive" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Revogar chave</TooltipContent>
-               </Tooltip>
-            ),
-         },
       ],
-      [isRevoking, onRevoke],
+      [],
    );
 
    return (
@@ -368,6 +341,19 @@ function KeysTable({
                            </Badge>
                         ))}
                      </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap border-t pt-4">
+                     <Button
+                        disabled={isRevoking}
+                        size="sm"
+                        variant="ghost"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => onRevoke(key)}
+                     >
+                        <Trash2 className="size-3 mr-2" />
+                        Revogar chave
+                     </Button>
                   </div>
                </div>
             );

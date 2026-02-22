@@ -5,29 +5,12 @@ import {
 } from "@packages/ui/components/announcement";
 import { Button } from "@packages/ui/components/button";
 import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuItem,
-   DropdownMenuSeparator,
-   DropdownMenuTrigger,
-} from "@packages/ui/components/dropdown-menu";
-import {
    Tooltip,
    TooltipContent,
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-   Archive,
-   Check,
-   Eye,
-   FileText,
-   Globe,
-   MoreHorizontal,
-   PenLine,
-   Share2,
-   Trash2,
-} from "lucide-react";
+import { Archive, Check, Eye, Globe, PenLine } from "lucide-react";
 import type { ReactNode } from "react";
 
 export type ContentItem = {
@@ -75,7 +58,7 @@ interface CreateContentColumnsOptions {
 export function createContentColumns(
    options: CreateContentColumnsOptions = {},
 ): ColumnDef<ContentItem>[] {
-   const { onView, onPublish, onArchive, onDelete, onToggleShare } = options;
+   const { onView } = options;
 
    return [
       {
@@ -146,68 +129,26 @@ export function createContentColumns(
          header: "",
          cell: ({ row }) => {
             const content = row.original;
-            const isDraft = content.status === "draft";
-            const isPublished = content.status === "published";
-            const isShared = content.shareStatus === "shared";
-
+            if (!onView) return null;
             return (
-               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                     <Button
-                        className="size-8"
-                        onClick={(e) => e.stopPropagation()}
-                        size="icon"
-                        variant="ghost"
-                     >
-                        <MoreHorizontal className="size-4" />
-                        <span className="sr-only">Abrir menu</span>
-                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                     {onView && (
-                        <DropdownMenuItem onClick={() => onView(content)}>
-                           <Eye className="mr-2 size-4" />
-                           Ver detalhes
-                        </DropdownMenuItem>
-                     )}
-
-                     {isDraft && onPublish && (
-                        <DropdownMenuItem onClick={() => onPublish(content)}>
-                           <FileText className="mr-2 size-4" />
-                           Publicar
-                        </DropdownMenuItem>
-                     )}
-
-                     {isPublished && onArchive && (
-                        <DropdownMenuItem onClick={() => onArchive(content)}>
-                           <Archive className="mr-2 size-4" />
-                           Arquivar
-                        </DropdownMenuItem>
-                     )}
-
-                     {onToggleShare && (
-                        <DropdownMenuItem
-                           onClick={() => onToggleShare(content)}
+               <div
+                  className="flex items-center justify-end gap-1"
+                  onClick={(e) => e.stopPropagation()}
+               >
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <Button
+                           size="icon"
+                           variant="ghost"
+                           onClick={() => onView(content)}
                         >
-                           <Share2 className="mr-2 size-4" />
-                           {isShared ? "Tornar privado" : "Compartilhar"}
-                        </DropdownMenuItem>
-                     )}
-
-                     {onDelete && (
-                        <>
-                           <DropdownMenuSeparator />
-                           <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => onDelete(content)}
-                           >
-                              <Trash2 className="mr-2 size-4" />
-                              Excluir
-                           </DropdownMenuItem>
-                        </>
-                     )}
-                  </DropdownMenuContent>
-               </DropdownMenu>
+                           <Eye className="size-4" />
+                           <span className="sr-only">Ver detalhes</span>
+                        </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Ver detalhes</TooltipContent>
+                  </Tooltip>
+               </div>
             );
          },
       },

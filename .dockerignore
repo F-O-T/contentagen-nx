@@ -1,0 +1,12 @@
+**/node_modules
+**/.output
+**/.git
+**/.nx/cache
+**/dist
+**/*.log
+**/.env*
+!**/.env.example
+**/coverage
+**/__tests__
+**/*.test.ts
+**/*.spec.ts

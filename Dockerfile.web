@@ -1,0 +1,56 @@
+FROM oven/bun:alpine AS builder
+
+ARG VITE_POSTHOG_HOST
+ARG VITE_POSTHOG_KEY
+
+WORKDIR /app
+
+# Copy workspace manifests first for layer caching
+COPY bun.lock package.json ./
+
+COPY tooling/typescript/package.json ./tooling/typescript/
+
+COPY packages/agents/package.json ./packages/agents/
+COPY packages/analytics/package.json ./packages/analytics/
+COPY packages/arcjet/package.json ./packages/arcjet/
+COPY packages/authentication/package.json ./packages/authentication/
+COPY packages/database/package.json ./packages/database/
+COPY packages/environment/package.json ./packages/environment/
+COPY packages/events/package.json ./packages/events/
+COPY packages/feedback/package.json ./packages/feedback/
+COPY packages/files/package.json ./packages/files/
+COPY packages/logging/package.json ./packages/logging/
+COPY packages/posthog/package.json ./packages/posthog/
+COPY packages/queue/package.json ./packages/queue/
+COPY packages/redis/package.json ./packages/redis/
+COPY packages/search/package.json ./packages/search/
+COPY packages/stripe/package.json ./packages/stripe/
+COPY packages/transactional/package.json ./packages/transactional/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/utils/package.json ./packages/utils/
+
+COPY apps/web/package.json ./apps/web/
+COPY apps/sdk-server/package.json ./apps/sdk-server/
+COPY apps/worker/package.json ./apps/worker/
+
+COPY libraries/sdk/package.json ./libraries/sdk/
+
+RUN bun install
+
+COPY . .
+
+ENV VITE_POSTHOG_HOST=$VITE_POSTHOG_HOST
+ENV VITE_POSTHOG_KEY=$VITE_POSTHOG_KEY
+
+WORKDIR /app/apps/web
+RUN bun run build
+
+FROM oven/bun:alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --from=builder /app/apps/web/.output ./
+
+EXPOSE 3000
+CMD ["bun", "run", "server/index.mjs"]
