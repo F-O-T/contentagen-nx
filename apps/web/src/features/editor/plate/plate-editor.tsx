@@ -24,7 +24,7 @@ import {
    BasicBlocksPlugin,
    BasicMarksPlugin,
 } from "@platejs/basic-nodes/react";
-import { LinkPlugin } from "@platejs/link/react";
+import { LinkKit } from "./plugins/link-kit";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { Value } from "platejs";
 import {
@@ -195,7 +195,7 @@ export function PlateEditor({
       plugins: [
          BasicBlocksPlugin,
          BasicMarksPlugin,
-         LinkPlugin,
+         ...LinkKit,
          // AIPlugin + AIChatPlugin wired to oRPC aiCommandStream.
          // Includes CursorOverlayKit and MarkdownKit as dependencies.
          ...AIKit,
