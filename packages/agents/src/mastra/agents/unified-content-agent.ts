@@ -1,5 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
+import { DEFAULT_CONTENT_MODEL_ID } from "../../models";
 import {
    buildLanguageInstruction,
    compileInstructionMemories,
@@ -338,10 +339,10 @@ export const unifiedContentAgent: Agent = new Agent({
       "Agente unificado para planejamento, pesquisa, escrita, SEO e revisão de conteúdo. Combina todos os workflows em um único agente com acesso direto a 40+ ferramentas especializadas.",
 
    model: ({ requestContext }) => {
-      return (
-         (requestContext?.get("model") as string) ??
-         "openrouter/moonshotai/kimi-k2.5"
-      );
+      const maybeModel = requestContext?.get("model");
+      return typeof maybeModel === "string" && maybeModel.length > 0
+         ? maybeModel
+         : DEFAULT_CONTENT_MODEL_ID;
    },
 
    instructions: ({ requestContext }) => {

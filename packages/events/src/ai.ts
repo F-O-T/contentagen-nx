@@ -26,8 +26,21 @@ const PRICE_SCALE = 6;
 const CURRENCY = "BRL";
 
 export const IMAGE_MODEL_PRICING: Record<string, string> = {
+   // Sourceful Riverflow
    "sourceful/riverflow-v2-pro": "0.900000",
+   "sourceful/riverflow-v2-fast": "0.120000",
+   // ByteDance
    "bytedance-seed/seedream-4.5": "0.240000",
+   // Black Forest Labs FLUX.2
+   "black-forest-labs/flux.2-klein-4b": "0.083000",
+   "black-forest-labs/flux.2-pro": "0.177000",
+   "black-forest-labs/flux.2-flex": "0.354000",
+   "black-forest-labs/flux.2-max": "0.413000",
+   // Google Gemini image models
+   "google/gemini-2.5-flash-image": "0.236000",
+   "google/gemini-3-pro-image-preview": "0.708000",
+   // OpenAI
+   "openai/gpt-5-image": "0.236000",
 };
 
 export function getImageGenerationPrice(model: string): Money {
@@ -40,6 +53,19 @@ export function getImageGenerationPrice(model: string): Money {
       CURRENCY,
       PRICE_SCALE,
    );
+}
+
+/**
+ * Returns the price of an image generation model as an integer in minor units
+ * (i.e. scaled by 10^PRICE_SCALE). Use this for numeric comparisons to avoid
+ * floating-point precision issues.
+ */
+export function getImageGenerationPriceMinorUnits(model: string): number {
+   const amount =
+      IMAGE_MODEL_PRICING[model] ??
+      IMAGE_MODEL_PRICING["sourceful/riverflow-v2-pro"] ??
+      "0.900000";
+   return Number(parseDecimalToMinorUnits(amount, PRICE_SCALE));
 }
 
 // ---------------------------------------------------------------------------

@@ -46,7 +46,6 @@ import {
    ImageIcon,
    Loader2,
    Pencil,
-   Plus,
    Search,
    Sparkles,
    Trash2,
@@ -530,7 +529,6 @@ function AssetsGrid({ teamId, search, page, onTotalChange }: AssetsGridProps) {
       }),
    );
 
-   // biome-ignore lint/correctness/useExhaustiveDependencies: onTotalChange is stable (setTotal from useState)
    useEffect(() => {
       onTotalChange(data.total ?? 0);
    }, [data.total]);
@@ -666,8 +664,21 @@ function AssetsGridSkeleton() {
 }
 
 const IMAGE_MODEL_NAMES: Record<string, string> = {
+   // Sourceful Riverflow
    "sourceful/riverflow-v2-pro": "Riverflow V2 Pro",
+   "sourceful/riverflow-v2-fast": "Riverflow V2 Fast",
+   // Black Forest Labs FLUX.2
+   "black-forest-labs/flux.2-klein-4b": "FLUX.2 Klein 4B",
+   "black-forest-labs/flux.2-pro": "FLUX.2 Pro",
+   "black-forest-labs/flux.2-flex": "FLUX.2 Flex",
+   "black-forest-labs/flux.2-max": "FLUX.2 Max",
+   // Google Gemini
+   "google/gemini-2.5-flash-image": "Gemini 2.5 Flash Image",
+   "google/gemini-3-pro-image-preview": "Gemini 3 Pro Image",
+   // ByteDance
    "bytedance-seed/seedream-4.5": "Seedream 4.5",
+   // OpenAI
+   "openai/gpt-5-image": "GPT-5 Image",
 };
 
 const ASPECT_OPTIONS = [
@@ -972,8 +983,7 @@ function AssetBankContent() {
             </div>
             <DropdownMenu>
                <DropdownMenuTrigger asChild>
-                  <Button className="shrink-0" variant="outline">
-                     <Plus className="size-4 mr-2" />
+                  <Button className="shrink-0">
                      Adicionar imagem
                      <ChevronDown className="size-4 ml-2" />
                   </Button>

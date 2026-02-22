@@ -23,7 +23,6 @@ import { client } from "@/integrations/orpc/client";
  * the POST body, then expects the response to be JSON: { text: string }.
  * We call the oRPC generator, accumulate all text chunks, and return that JSON.
  */
-// biome-ignore lint/suspicious/noExplicitAny: custom fetch signature requires matching the global fetch type
 const copilotFetch: typeof fetch = async (_input, init) => {
    let prefix = "";
    let suffix: string | undefined;

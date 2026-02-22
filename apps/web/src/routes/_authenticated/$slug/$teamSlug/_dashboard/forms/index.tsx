@@ -1,6 +1,8 @@
+import { Button } from "@packages/ui/components/button";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { FormsList } from "@/features/forms/ui/forms-list";
@@ -21,49 +23,45 @@ function FormsPageErrorFallback(props: FallbackProps) {
 
 function FormsPageSkeleton() {
    return (
-      <main className="flex flex-col gap-4">
-         <div className="flex flex-col gap-2">
-            <Skeleton className="h-9 w-48" />
-            <Skeleton className="h-5 w-80" />
-         </div>
-
-         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-               <Skeleton className="h-[160px]" key={`form-skeleton-${i + 1}`} />
-            ))}
-         </div>
-      </main>
-   );
-}
-
-function FormsPageHeader() {
-   return (
-      <div className="flex flex-col gap-2">
-         <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-            Formulários
-         </h1>
-         <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
-            Crie e gerencie formulários para coletar dados dos visitantes
-         </p>
+      <div className="space-y-2">
+         <Skeleton className="h-12 w-full" />
+         <Skeleton className="h-12 w-full" />
+         <Skeleton className="h-12 w-full" />
+         <Skeleton className="h-12 w-full" />
+         <Skeleton className="h-12 w-full" />
       </div>
    );
 }
 
-function FormsPageContent() {
+function FormsPage() {
+   const { slug, teamSlug } = Route.useParams();
+
    return (
       <main className="flex flex-col gap-4">
-         <FormsPageHeader />
-         <FormsList />
+         <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2">
+               <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
+                  Formulários
+               </h1>
+               <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
+                  Crie e gerencie formulários para coletar dados dos visitantes
+               </p>
+            </div>
+            <Button asChild>
+               <Link
+                  params={{ slug, teamSlug, formId: "new" }}
+                  to="/$slug/$teamSlug/forms/$formId"
+               >
+                  <Plus className="size-4 mr-1" />
+                  Novo formulário
+               </Link>
+            </Button>
+         </div>
+         <ErrorBoundary FallbackComponent={FormsPageErrorFallback}>
+            <Suspense fallback={<FormsPageSkeleton />}>
+               <FormsList />
+            </Suspense>
+         </ErrorBoundary>
       </main>
-   );
-}
-
-function FormsPage() {
-   return (
-      <ErrorBoundary FallbackComponent={FormsPageErrorFallback}>
-         <Suspense fallback={<FormsPageSkeleton />}>
-            <FormsPageContent />
-         </Suspense>
-      </ErrorBoundary>
    );
 }

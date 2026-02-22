@@ -3,7 +3,7 @@ import { getMinioClient } from "@packages/files/client";
 import { createFileRoute } from "@tanstack/react-router";
 
 async function handle({
-   request,
+   request: _request,
    params,
 }: {
    request: Request;

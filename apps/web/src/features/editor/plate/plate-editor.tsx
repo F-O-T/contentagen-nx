@@ -10,6 +10,7 @@
  * (mod+shift+m), tracked suggestions, and persistent discussion threads.
  */
 
+import type { ContentMeta } from "@packages/database/schemas/content";
 import { CommentKit } from "@packages/ui/components/editor/plugins/comment-kit";
 import {
    type DiscussionCallbacks,
@@ -24,7 +25,6 @@ import {
    BasicBlocksPlugin,
    BasicMarksPlugin,
 } from "@platejs/basic-nodes/react";
-import { LinkPlugin } from "@platejs/link/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { Value } from "platejs";
 import {
@@ -36,11 +36,15 @@ import {
 import { useEffect } from "react";
 import { orpc } from "@/integrations/orpc/client";
 import { useEditorDiscussions } from "../hooks/use-editor-discussions";
+import { EditorFixedToolbar } from "../ui/editor-fixed-toolbar";
+import { FrontmatterSection } from "../ui/frontmatter-section";
 import { useEditorAIChat } from "./hooks/use-editor-ai-chat";
 import { useEditorUploadFile } from "./hooks/use-editor-upload-file";
 import { AIKit } from "./plugins/ai-kit";
 import { CopilotKit } from "./plugins/copilot-kit";
+import { LinkKit } from "./plugins/link-kit";
 import { createMediaKit, UploadFileProvider } from "./plugins/media-kit";
+import { InternalLinksSidebar } from "./ui/internal-links-sidebar";
 
 export interface PlateEditorProps {
    initialValue?: Value;
@@ -55,6 +59,18 @@ export interface PlateEditorProps {
    language?: string;
    /** Team ID used to scope uploaded media assets. */
    teamId?: string;
+   // NEW: frontmatter
+   meta?: ContentMeta;
+   onMetaChange?: (meta: ContentMeta) => void;
+   // NEW: toolbar
+   status?: string;
+   isSaving?: boolean;
+   onSave?: () => void;
+   onBack?: () => void;
+   onStatusChange?: (status: "draft" | "published" | "archived") => void;
+   onToggleSidebar?: () => void;
+   // NEW: sidebar
+   showLinksSidebar?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -179,6 +195,15 @@ export function PlateEditor({
    model,
    language,
    teamId,
+   meta,
+   onMetaChange,
+   status,
+   isSaving,
+   onSave,
+   onBack,
+   onStatusChange,
+   onToggleSidebar,
+   showLinksSidebar,
 }: PlateEditorProps) {
    // Inject per-content context into the ORPCChatTransport singleton so every
    // AI command carries the correct contentId / writerId / model / language.
@@ -195,7 +220,7 @@ export function PlateEditor({
       plugins: [
          BasicBlocksPlugin,
          BasicMarksPlugin,
-         LinkPlugin,
+         ...LinkKit,
          // AIPlugin + AIChatPlugin wired to oRPC aiCommandStream.
          // Includes CursorOverlayKit and MarkdownKit as dependencies.
          ...AIKit,
@@ -232,20 +257,52 @@ export function PlateEditor({
              */}
             <EditorDiscussionSync contentId={contentId} />
 
-            <PlateContent
-               className={cn(
-                  "min-h-[200px] w-full cursor-text rounded-md border border-input bg-background px-4 py-3 text-sm ring-offset-background",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                  "prose prose-sm max-w-none dark:prose-invert",
-                  "[&_h1]:text-3xl [&_h1]:font-bold",
-                  "[&_h2]:text-2xl [&_h2]:font-semibold",
-                  "[&_h3]:text-xl [&_h3]:font-medium",
-                  "aria-disabled:cursor-not-allowed aria-disabled:opacity-50",
-                  className,
-               )}
-               disableDefaultStyles
-               placeholder={placeholder}
+            {/* Fixed toolbar — INSIDE <Plate> so useEditorRef() works */}
+            <EditorFixedToolbar
+               isSaving={isSaving}
+               onBack={onBack}
+               onSave={onSave}
+               onStatusChange={onStatusChange}
+               onToggleSidebar={onToggleSidebar}
+               showSidebar={showLinksSidebar}
+               status={status as "draft" | "published" | "archived" | undefined}
             />
+
+            {/* Frontmatter section */}
+            {meta !== undefined && onMetaChange !== undefined && (
+               <FrontmatterSection
+                  meta={meta}
+                  onChange={onMetaChange}
+                  readOnly={!editable}
+               />
+            )}
+
+            {/* Content area + optional sidebar */}
+            <div className="flex flex-1 overflow-hidden">
+               <div className="flex-1 overflow-auto">
+                  <PlateContent
+                     className={cn(
+                        "min-h-[calc(100vh-8rem)] max-w-3xl mx-auto px-6 py-8",
+                        "text-sm ring-offset-background focus-visible:outline-none",
+                        "prose prose-sm max-w-none dark:prose-invert",
+                        "[&_h1]:text-3xl [&_h1]:font-bold",
+                        "[&_h2]:text-2xl [&_h2]:font-semibold",
+                        "[&_h3]:text-xl [&_h3]:font-medium",
+                        "aria-disabled:cursor-not-allowed aria-disabled:opacity-50",
+                        className,
+                     )}
+                     disableDefaultStyles
+                     placeholder={placeholder}
+                  />
+               </div>
+
+               {showLinksSidebar && contentId && (
+                  <InternalLinksSidebar
+                     contentId={contentId}
+                     onClose={onToggleSidebar}
+                  />
+               )}
+            </div>
          </Plate>
       </UploadFileProvider>
    );

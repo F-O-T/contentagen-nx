@@ -16,6 +16,9 @@ export type TabType =
    | "data-management"
    | "billing"
    | "plans"
+   | "clusters"
+   | "assets"
+   | "experiments"
    | "generic";
 
 export type Tab = {

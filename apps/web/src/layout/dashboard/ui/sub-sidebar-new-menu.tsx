@@ -80,7 +80,7 @@ export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
                <Plus className="size-4" />
             </Button>
          </DropdownMenuTrigger>
-         <DropdownMenuContent align="start" sideOffset={4}>
+         <DropdownMenuContent align="start" className="z-[1100]" sideOffset={4}>
             {section === "dashboards" ? (
                <DashboardMenuItems
                   isPending={createDashboardMutation.isPending}

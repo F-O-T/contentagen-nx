@@ -31,6 +31,7 @@ export type SettingsNavItemDef = {
    external?: boolean;
    danger?: boolean;
    earlyAccessFlag?: string;
+   earlyAccessStage?: "alpha" | "beta" | "concept" | "general-availability";
    children?: SettingsNavItemDef[];
 };
 
@@ -86,7 +87,7 @@ export const settingsNavSections: SettingsNavSection[] = [
                },
                {
                   id: "product-asset-bank",
-                  title: "Banco de Imagens",
+                  title: "Imagens",
                   href: "/$slug/$teamSlug/settings/project/products/asset-bank",
                   icon: Images,
                   earlyAccessFlag: "asset-bank",

@@ -24,6 +24,7 @@ import { orpc } from "@/integrations/orpc/client";
 import { FieldPalette, type FieldType } from "./field-palette";
 import { FormCanvas, type FormField } from "./form-canvas";
 import { FormPreview } from "./form-preview";
+import { SubmissionsTable } from "./submissions-table";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -327,6 +328,9 @@ export function FormBuilder({ formId }: FormBuilderProps) {
             <TabsList>
                <TabsTrigger value="builder">Construtor</TabsTrigger>
                <TabsTrigger value="preview">Visualizar</TabsTrigger>
+               {!isCreateMode && (
+                  <TabsTrigger value="submissions">Submissões</TabsTrigger>
+               )}
             </TabsList>
 
             <TabsContent value="builder">
@@ -363,6 +367,12 @@ export function FormBuilder({ formId }: FormBuilderProps) {
                   name={name}
                />
             </TabsContent>
+
+            {!isCreateMode && (
+               <TabsContent value="submissions">
+                  <SubmissionsTable formId={formId} />
+               </TabsContent>
+            )}
          </Tabs>
       </div>
    );

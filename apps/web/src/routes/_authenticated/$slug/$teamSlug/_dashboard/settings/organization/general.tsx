@@ -128,7 +128,7 @@ function DisplayNameSection({
 // ============================================
 
 function LogoSection({
-   organizationId,
+   organizationId: _organizationId,
    currentLogo,
    organizationName,
 }: {

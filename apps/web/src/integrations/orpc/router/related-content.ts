@@ -6,11 +6,13 @@ import {
    removeRelatedContent,
    updateRelatedContentOrder,
 } from "@packages/database/repositories/related-content-repository";
+import { relatedContent as relatedContentTable } from "@packages/database/schemas/related-content";
 import {
    emitClusterSatelliteAdded,
    emitClusterSatelliteRemoved,
 } from "@packages/events/clusters";
 import { createEmitFn } from "@packages/events/emit";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -146,4 +148,109 @@ export const reorderSatellites = protectedProcedure
          input.pillarId,
          input.orderedSatelliteIds,
       );
+   });
+
+/**
+ * Get internal link suggestions for a given content piece.
+ * Returns role + suggestion list based on cluster membership.
+ *
+ * Note: When content appears as a satellite in multiple clusters,
+ * only the first cluster's pillar and siblings are returned.
+ */
+export const getSuggestions = protectedProcedure
+   .input(z.object({ contentId: z.string().uuid() }))
+   .handler(async ({ context, input }) => {
+      const { db, organizationId } = context;
+
+      const content = await getContentById(db, input.contentId);
+      if (!content || content.organizationId !== organizationId) {
+         throw new ORPCError("NOT_FOUND", { message: "Content not found." });
+      }
+
+      // Check if this content is a pillar (has satellites)
+      const satellites = await getRelatedContentBySourceId(db, input.contentId);
+
+      if (satellites.length > 0) {
+         // This content is a pillar
+         const suggestions = satellites
+            .filter((s) => s.targetContent !== null)
+            .map((s) => {
+               const tc = s.targetContent;
+               const meta = tc.meta as { title?: string; slug?: string } | null;
+               const slug = meta?.slug;
+               return {
+                  id: tc.id,
+                  title: meta?.title ?? "",
+                  slug: slug ?? "",
+                  status: tc.status,
+                  url: `/conteudo/${slug || tc.id}`,
+               };
+            });
+
+         return { role: "pillar" as const, suggestions };
+      }
+
+      // Check if this content is a satellite (appears as a target in some cluster)
+      const asSatellite = await db.query.relatedContent.findMany({
+         where: eq(relatedContentTable.targetContentId, input.contentId),
+         with: { sourceContent: true },
+      });
+
+      if (asSatellite.length > 0) {
+         // This content is a satellite — include the pillar + sibling satellites
+         const pillarId = asSatellite[0].sourceContentId;
+
+         // Get pillar info
+         const pillar = await getContentById(db, pillarId);
+
+         // Get sibling satellites (all satellites of the same pillar)
+         const siblings = await getRelatedContentBySourceId(db, pillarId);
+
+         const suggestions: Array<{
+            id: string;
+            title: string;
+            slug: string;
+            status: string;
+            url: string;
+         }> = [];
+
+         // Add pillar as a suggestion
+         if (pillar && pillar.organizationId === organizationId) {
+            const pillarMeta = pillar.meta as {
+               title?: string;
+               slug?: string;
+            } | null;
+            const pillarSlug = pillarMeta?.slug;
+            suggestions.push({
+               id: pillar.id,
+               title: pillarMeta?.title ?? "",
+               slug: pillarSlug ?? "",
+               status: pillar.status,
+               url: `/conteudo/${pillarSlug || pillar.id}`,
+            });
+         }
+
+         // Add sibling satellites (exclude self)
+         for (const sibling of siblings) {
+            if (sibling.targetContent === null) continue;
+            if (sibling.targetContentId === input.contentId) continue;
+            if (sibling.targetContent.organizationId !== organizationId)
+               continue;
+            const tc = sibling.targetContent;
+            const meta = tc.meta as { title?: string; slug?: string } | null;
+            const slug = meta?.slug;
+            suggestions.push({
+               id: tc.id,
+               title: meta?.title ?? "",
+               slug: slug ?? "",
+               status: tc.status,
+               url: `/conteudo/${slug || tc.id}`,
+            });
+         }
+
+         return { role: "satellite" as const, suggestions };
+      }
+
+      // Not in any cluster
+      return { role: "standalone" as const, suggestions: [] };
    });

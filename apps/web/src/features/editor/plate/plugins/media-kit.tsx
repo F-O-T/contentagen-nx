@@ -52,7 +52,6 @@ type UploadFileFn = (file: File) => Promise<UploadedFile>;
  * Wrap the editor in <UploadFileProvider value={uploadFile}> so the
  * MediaPlaceholderElement can access it. PlateEditor does this automatically.
  */
-// biome-ignore lint/correctness/noUnusedVariables: uploadFile is consumed by MediaPlaceholderElement via UploadFileContext — must be passed to PlateEditor to wire up uploads
 export function createMediaKit(_uploadFile: UploadFileFn) {
    return [
       ImagePlugin.withComponent(ImageElement),
