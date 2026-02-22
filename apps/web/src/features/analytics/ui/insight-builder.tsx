@@ -86,7 +86,6 @@ export function InsightBuilder({
             onDuplicate={onDuplicate}
             onNameChange={onNameChange}
             onSave={onSave}
-            type={type}
          />
 
          {/* Tab bar */}

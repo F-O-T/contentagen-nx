@@ -1,6 +1,7 @@
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { PageHeader } from "@/components/page-header";
 import {
    Table,
    TableBody,
@@ -158,27 +159,21 @@ function InsightsListPage() {
 
    return (
       <main className="flex flex-col gap-6">
-         {/* Header */}
-         <div className="flex items-center justify-between">
-            <div>
-               <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-                  Insights
-               </h1>
-               <p className="text-sm text-muted-foreground mt-1">
-                  Analise eventos, funis e retenção com consultas
-                  personalizadas.
-               </p>
-            </div>
-            <Button asChild>
-               <Link
-                  params={{ slug, teamSlug }}
-                  to="/$slug/$teamSlug/analytics/insights/new"
-               >
-                  <Plus className="size-4" />
-                  Novo insight
-               </Link>
-            </Button>
-         </div>
+         <PageHeader
+            title="Insights"
+            description="Analise eventos, funis e retenção com consultas personalizadas."
+            actions={
+               <Button asChild>
+                  <Link
+                     params={{ slug, teamSlug }}
+                     to="/$slug/$teamSlug/analytics/insights/new"
+                  >
+                     <Plus className="size-4" />
+                     Novo insight
+                  </Link>
+               </Button>
+            }
+         />
 
          {/* Content */}
          {isLoading && <ListSkeleton />}

@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ArrowDownToLine, Search } from "lucide-react";
 import { useMemo, useState } from "react";
+import { PageHeader } from "@/components/page-header";
 import { orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
@@ -153,12 +154,10 @@ function SourcesPage() {
 
    return (
       <div className="flex flex-col gap-6">
-         <div>
-            <h2 className="text-2xl font-bold tracking-tight">Fontes</h2>
-            <p className="text-muted-foreground">
-               Origens de dados que enviam eventos para o sistema
-            </p>
-         </div>
+         <PageHeader
+            title="Fontes"
+            description="Origens de dados que enviam eventos para o sistema"
+         />
 
          <div className="grid gap-4 sm:grid-cols-3">
             <Card>

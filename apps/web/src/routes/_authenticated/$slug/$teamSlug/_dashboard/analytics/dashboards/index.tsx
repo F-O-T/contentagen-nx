@@ -4,6 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { LayoutDashboard, Plus } from "lucide-react";
 import { Suspense } from "react";
+import { PageHeader } from "@/components/page-header";
 import { DashboardListCard } from "@/features/analytics/ui/dashboard-list-card";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -72,20 +73,16 @@ function DashboardsList() {
 function DashboardsPage() {
    return (
       <main className="flex flex-col gap-4">
-         <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-2">
-               <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-                  Dashboards
-               </h1>
-               <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
-                  Painéis personalizados com seus insights
-               </p>
-            </div>
-            <Button>
-               <Plus className="size-4 mr-1" />
-               Novo dashboard
-            </Button>
-         </div>
+         <PageHeader
+            title="Dashboards"
+            description="Painéis personalizados com seus insights"
+            actions={
+               <Button>
+                  <Plus className="size-4 mr-1" />
+                  Novo dashboard
+               </Button>
+            }
+         />
          <Suspense fallback={<DashboardsPageSkeleton />}>
             <DashboardsList />
          </Suspense>

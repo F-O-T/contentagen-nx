@@ -5,6 +5,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import { PageHeader } from "@/components/page-header";
 import { FormsList } from "@/features/forms/ui/forms-list";
 
 export const Route = createFileRoute(
@@ -38,25 +39,21 @@ function FormsPage() {
 
    return (
       <main className="flex flex-col gap-4">
-         <div className="flex items-center justify-between">
-            <div className="flex flex-col gap-2">
-               <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-                  Formulários
-               </h1>
-               <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
-                  Crie e gerencie formulários para coletar dados dos visitantes
-               </p>
-            </div>
-            <Button asChild>
-               <Link
-                  params={{ slug, teamSlug, formId: "new" }}
-                  to="/$slug/$teamSlug/forms/$formId"
-               >
-                  <Plus className="size-4 mr-1" />
-                  Novo formulário
-               </Link>
-            </Button>
-         </div>
+         <PageHeader
+            title="Formulários"
+            description="Crie e gerencie formulários para coletar dados dos visitantes"
+            actions={
+               <Button asChild>
+                  <Link
+                     params={{ slug, teamSlug, formId: "new" }}
+                     to="/$slug/$teamSlug/forms/$formId"
+                  >
+                     <Plus className="size-4 mr-1" />
+                     Novo formulário
+                  </Link>
+               </Button>
+            }
+         />
          <ErrorBoundary FallbackComponent={FormsPageErrorFallback}>
             <Suspense fallback={<FormsPageSkeleton />}>
                <FormsList />

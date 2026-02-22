@@ -3,6 +3,7 @@ import { Skeleton } from "@packages/ui/components/skeleton";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import { PageHeader } from "@/components/page-header";
 import { ExperimentsListSection } from "@/features/experiments/ui/experiments-list-section";
 
 export const Route = createFileRoute(
@@ -34,14 +35,10 @@ function ExperimentsPageSkeleton() {
 function ExperimentsPageContent() {
    return (
       <main className="flex flex-col gap-4">
-         <div className="flex flex-col gap-2">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-               Experimentos
-            </h1>
-            <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
-               Compare variantes de conteúdos e formulários com testes A/B
-            </p>
-         </div>
+         <PageHeader
+            title="Experimentos"
+            description="Compare variantes de conteúdos e formulários com testes A/B"
+         />
          <ExperimentsListSection />
       </main>
    );

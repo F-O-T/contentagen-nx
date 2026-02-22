@@ -10,7 +10,6 @@ import { Link } from "@tanstack/react-router";
 import {
    ArrowLeft,
    Ellipsis,
-   FlaskConical,
    Loader2,
    Pause,
    Play,
@@ -18,7 +17,7 @@ import {
    Trash2,
    Trophy,
 } from "lucide-react";
-import { InlineEditableText } from "@/features/analytics/ui/inline-editable-text";
+import { PageHeader } from "@/components/page-header";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import type { ExperimentStatus } from "../hooks/use-experiment-config";
 
@@ -101,27 +100,22 @@ export function ExperimentBuilderHeader({
    return (
       <div className="border-b bg-background sticky top-0 z-10">
          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-start justify-between gap-4">
-               <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3">
-                     <Link
-                        className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
-                        params={backTo as never}
-                        to="/$slug/$teamSlug/experiments"
-                     >
-                        <ArrowLeft className="size-5" />
-                     </Link>
-                     <FlaskConical className="size-5 flex-shrink-0 text-muted-foreground" />
-                     <InlineEditableText
-                        className="text-2xl font-semibold"
-                        onSave={onNameChange}
-                        placeholder="Nome do experimento"
-                        value={name}
-                     />
-                  </div>
-               </div>
-
-               <div className="flex items-center gap-2 flex-shrink-0">
+            <PageHeader
+               editable
+               leading={
+                  <Link
+                     className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+                     params={backTo as never}
+                     to="/$slug/$teamSlug/experiments"
+                  >
+                     <ArrowLeft className="size-5" />
+                  </Link>
+               }
+               onTitleChange={onNameChange}
+               title={name}
+               titlePlaceholder="Nome do experimento"
+               actions={
+                  <>
                   {(isCreateMode ||
                      status === "draft" ||
                      status === "paused") && (
@@ -216,8 +210,9 @@ export function ExperimentBuilderHeader({
                         </DropdownMenuContent>
                      </DropdownMenu>
                   )}
-               </div>
-            </div>
+                  </>
+               }
+            />
          </div>
       </div>
    );
