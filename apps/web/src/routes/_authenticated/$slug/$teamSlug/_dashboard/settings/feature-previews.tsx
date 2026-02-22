@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import {
    Collapsible,
    CollapsibleContent,
@@ -18,6 +17,7 @@ import {
 import { Switch } from "@packages/ui/components/switch";
 import { createFileRoute } from "@tanstack/react-router";
 import { ChevronDown, FlaskConical, ImageIcon, Lightbulb } from "lucide-react";
+import { Fragment } from "react";
 import { useEarlyAccess } from "@/hooks/use-early-access";
 
 export const Route = createFileRoute(
@@ -100,7 +100,10 @@ function FeaturePreviewsPage() {
                      <Fragment key={feature.flagKey}>
                         {index > 0 && <ItemSeparator />}
 
-                        <Collapsible defaultOpen={true} className="flex flex-col">
+                        <Collapsible
+                           className="flex flex-col"
+                           defaultOpen={true}
+                        >
                            <Item variant="muted">
                               <ItemMedia variant="icon">
                                  <Icon className="size-4" />

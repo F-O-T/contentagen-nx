@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/server";
+import { createRequestContext, mastra } from "@packages/agents";
 import {
    createContent,
    getContentById,
@@ -7,7 +8,6 @@ import {
 } from "@packages/database/repositories/content-repository";
 import { addRelatedContent } from "@packages/database/repositories/related-content-repository";
 import { ClusterConfigSchema } from "@packages/database/schemas/content";
-import { createRequestContext, mastra } from "@packages/agents";
 import { emitClusterCreated } from "@packages/events/clusters";
 import { createEmitFn } from "@packages/events/emit";
 import { createSlug, generateRandomSuffix } from "@packages/utils/text";
@@ -49,8 +49,13 @@ export const getById = protectedProcedure
       if (!pillar || pillar.organizationId !== organizationId) {
          throw new ORPCError("NOT_FOUND", { message: "Cluster not found." });
       }
-      if (!pillar.clusterConfig || Object.keys(pillar.clusterConfig).length === 0) {
-         throw new ORPCError("NOT_FOUND", { message: "Content is not a cluster pillar." });
+      if (
+         !pillar.clusterConfig ||
+         Object.keys(pillar.clusterConfig).length === 0
+      ) {
+         throw new ORPCError("NOT_FOUND", {
+            message: "Content is not a cluster pillar.",
+         });
       }
       return pillar;
    });
@@ -68,7 +73,9 @@ export const promote = protectedProcedure
       if (!existing || existing.organizationId !== organizationId) {
          throw new ORPCError("NOT_FOUND", { message: "Content not found." });
       }
-      return updateContent(db, input.contentId, { clusterConfig: input.clusterConfig });
+      return updateContent(db, input.contentId, {
+         clusterConfig: input.clusterConfig,
+      });
    });
 
 export const updateConfig = protectedProcedure
@@ -84,7 +91,10 @@ export const updateConfig = protectedProcedure
       if (!pillar || pillar.organizationId !== organizationId) {
          throw new ORPCError("NOT_FOUND", { message: "Cluster not found." });
       }
-      const merged = { ...(pillar.clusterConfig ?? {}), ...input.clusterConfig };
+      const merged = {
+         ...(pillar.clusterConfig ?? {}),
+         ...input.clusterConfig,
+      };
       return updateContent(db, input.id, { clusterConfig: merged });
    });
 

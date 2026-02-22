@@ -61,7 +61,9 @@ function ClustersProductContent() {
 
          <section className="space-y-4">
             <div>
-               <h2 className="text-lg font-medium">Como funcionam os clusters</h2>
+               <h2 className="text-lg font-medium">
+                  Como funcionam os clusters
+               </h2>
                <p className="text-sm text-muted-foreground">
                   Um cluster de conteúdo é composto por um post pillar (conteúdo
                   principal, abrangente) e vários posts satélite (conteúdos
