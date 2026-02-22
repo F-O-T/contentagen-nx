@@ -1,32 +1,8 @@
 "use client";
 
-import { Component, type ReactNode, Suspense } from "react";
-
-class SuggestionsErrorBoundary extends Component<
-   { children: ReactNode },
-   { hasError: boolean }
-> {
-   constructor(props: { children: ReactNode }) {
-      super(props);
-      this.state = { hasError: false };
-   }
-   static getDerivedStateFromError() {
-      return { hasError: true };
-   }
-   render() {
-      if (this.state.hasError) {
-         return (
-            <div className="flex flex-col items-center gap-2 py-6 px-4 text-center">
-               <p className="text-xs text-muted-foreground">
-                  Não foi possível carregar.
-               </p>
-            </div>
-         );
-      }
-      return this.props.children;
-   }
-}
-
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { ScrollArea } from "@packages/ui/components/scroll-area";
@@ -86,6 +62,12 @@ const ROLE_COLORS: Record<string, string> = {
    satellite: "text-sky-500 dark:text-sky-400",
    standalone: "text-muted-foreground",
 };
+
+const SuggestionsErrorFallback = createErrorFallback({
+   errorTitle: "Erro ao carregar sugestões",
+   errorDescription: "Não foi possível carregar os links do cluster.",
+   retryText: "Tentar novamente",
+});
 
 function SuggestionsTable({
    suggestions,
@@ -153,7 +135,7 @@ function SuggestionsTable({
                   <TableHead className="h-7 px-2 text-[10px] font-medium text-muted-foreground/60 whitespace-nowrap">
                      Status
                   </TableHead>
-                  <TableHead className="h-7 w-[72px]" />
+                  <TableHead className="h-7 w-[76px]" />
                </TableRow>
             </TableHeader>
             <TableBody>
@@ -162,17 +144,18 @@ function SuggestionsTable({
                      key={suggestion.id}
                      className="group border-b border-border/30 hover:bg-accent/50 cursor-default"
                   >
-                     {/* Title */}
+                     {/* Title — max-w-0 enables CSS truncation inside a table cell */}
                      <TableCell className="px-3 py-2.5 max-w-0">
-                        <button
+                        <Button
                            type="button"
+                           variant="link"
+                           className="h-auto w-full justify-start p-0 text-xs font-medium text-foreground hover:text-foreground"
                            onClick={() => handleNavigate(suggestion)}
-                           className="w-full text-left"
                         >
-                           <span className="block text-xs font-medium truncate hover:underline leading-snug">
+                           <span className="truncate block w-full">
                               {suggestion.title || "Sem título"}
                            </span>
-                        </button>
+                        </Button>
                      </TableCell>
 
                      {/* Status */}
@@ -186,7 +169,7 @@ function SuggestionsTable({
                      </TableCell>
 
                      {/* Actions */}
-                     <TableCell className="px-2 py-2.5">
+                     <TableCell className="px-1.5 py-2.5">
                         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                            <Tooltip>
                               <TooltipTrigger asChild>
@@ -199,25 +182,31 @@ function SuggestionsTable({
                                     <Pencil className="size-3" />
                                  </Button>
                               </TooltipTrigger>
-                              <TooltipContent side="left">Editar conteúdo</TooltipContent>
+                              <TooltipContent side="left">
+                                 Editar conteúdo
+                              </TooltipContent>
                            </Tooltip>
 
                            <Tooltip>
                               <TooltipTrigger asChild>
-                                 <a
-                                    href={`/${params.slug}/${params.teamSlug}/content/${suggestion.id}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={cn(
-                                       "inline-flex size-6 items-center justify-center rounded",
-                                       "transition-colors hover:bg-accent hover:text-accent-foreground",
-                                       "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                                    )}
+                                 <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="size-6 rounded"
+                                    asChild
                                  >
-                                    <ExternalLink className="size-3" />
-                                 </a>
+                                    <a
+                                       href={`/${params.slug}/${params.teamSlug}/content/${suggestion.id}`}
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                    >
+                                       <ExternalLink className="size-3" />
+                                    </a>
+                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent side="left">Abrir em nova aba</TooltipContent>
+                              <TooltipContent side="left">
+                                 Abrir em nova aba
+                              </TooltipContent>
                            </Tooltip>
 
                            <Tooltip>
@@ -231,7 +220,9 @@ function SuggestionsTable({
                                     <Link2 className="size-3" />
                                  </Button>
                               </TooltipTrigger>
-                              <TooltipContent side="left">Inserir link</TooltipContent>
+                              <TooltipContent side="left">
+                                 Inserir link
+                              </TooltipContent>
                            </Tooltip>
                         </div>
                      </TableCell>
@@ -278,7 +269,9 @@ export function InternalLinksSidebar({
             {/* Header */}
             <div className="flex items-center gap-2 px-3 py-2.5 border-b">
                <Link2 className="size-3.5 text-muted-foreground/60 shrink-0" />
-               <span className="text-sm font-semibold flex-1">Links do Cluster</span>
+               <span className="text-sm font-semibold flex-1">
+                  Links do Cluster
+               </span>
                {onClose && (
                   <Button
                      type="button"
@@ -293,7 +286,7 @@ export function InternalLinksSidebar({
             </div>
 
             <ScrollArea className="flex-1">
-               <SuggestionsErrorBoundary>
+               <ErrorBoundary FallbackComponent={SuggestionsErrorFallback}>
                   <Suspense
                      fallback={
                         <div className="flex flex-col gap-1.5 p-3">
@@ -308,7 +301,7 @@ export function InternalLinksSidebar({
                   >
                      <SuggestionsList contentId={contentId} />
                   </Suspense>
-               </SuggestionsErrorBoundary>
+               </ErrorBoundary>
             </ScrollArea>
          </div>
       </TooltipProvider>

@@ -2,6 +2,7 @@
 
 import type { ContentMeta } from "@packages/database/schemas/content";
 import { Badge } from "@packages/ui/components/badge";
+import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
 import { ChevronDown, ChevronRight, Link, Lock, Unlock, X } from "lucide-react";
 import {
@@ -94,10 +95,11 @@ export function FrontmatterSection({
    return (
       <div className="border-b bg-background">
          {/* Header row with toggle */}
-         <button
-            className="flex w-full items-center gap-2 px-4 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors group"
+         <Button
+            className="flex w-full h-auto items-center gap-2 px-4 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors justify-start rounded-none font-normal"
             onClick={() => setIsOpen((v) => !v)}
             type="button"
+            variant="ghost"
          >
             {isOpen ? (
                <ChevronDown className="size-3 shrink-0" />
@@ -112,7 +114,7 @@ export function FrontmatterSection({
                   {meta.title}
                </span>
             )}
-         </button>
+         </Button>
 
          {isOpen && (
             <div className="px-4 pb-4 space-y-2.5">
@@ -148,22 +150,24 @@ export function FrontmatterSection({
                      value={meta.slug ?? ""}
                   />
                   {!readOnly && (
-                     <button
-                        className="shrink-0 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                     <Button
+                        className="shrink-0 size-5 text-muted-foreground/40 hover:text-muted-foreground"
                         onClick={() => setSlugLocked((v) => !v)}
+                        size="icon"
                         title={
                            slugLocked
                               ? "Desbloquear slug (auto-gerado do título)"
                               : "Bloquear slug (edição manual)"
                         }
                         type="button"
+                        variant="ghost"
                      >
                         {slugLocked ? (
                            <Lock className="size-3" />
                         ) : (
                            <Unlock className="size-3" />
                         )}
-                     </button>
+                     </Button>
                   )}
                </div>
 
@@ -177,13 +181,15 @@ export function FrontmatterSection({
                      >
                         {kw}
                         {!readOnly && (
-                           <button
-                              className="hover:text-destructive ml-0.5 transition-colors"
+                           <Button
+                              className="size-3.5 ml-0.5 p-0 text-muted-foreground hover:text-destructive hover:bg-transparent"
                               onClick={() => handleRemoveKeyword(kw)}
+                              size="icon"
                               type="button"
+                              variant="ghost"
                            >
                               <X className="size-2.5" />
-                           </button>
+                           </Button>
                         )}
                      </Badge>
                   ))}
