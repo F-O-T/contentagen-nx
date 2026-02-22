@@ -8,8 +8,8 @@ import {
 import { Separator } from "@packages/ui/components/separator";
 import { Tooltip, TooltipTrigger } from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
-import * as ToolbarPrimitive from "@radix-ui/react-toolbar";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+import { Toolbar as ToolbarPrimitive, Tooltip as TooltipPrimitive } from "radix-ui";
+
 import { cva, type VariantProps } from "class-variance-authority";
 import { ChevronDown } from "lucide-react";
 import * as React from "react";

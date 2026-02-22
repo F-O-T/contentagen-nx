@@ -1,6 +1,6 @@
 import { Button } from "@packages/ui/components/button";
 import { cn } from "@packages/ui/lib/utils";
-import { Slot } from "@radix-ui/react-slot";
+import { Slot as SlotPrimitive } from "radix-ui";
 import * as Stepperize from "@stepperize/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
@@ -50,7 +50,7 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
       steps: definedSteps,
       Stepper: {
          Controls: ({ children, className, asChild, ...props }) => {
-            const Comp = asChild ? Slot : "div";
+            const Comp = asChild ? SlotPrimitive.Slot : "div";
             return (
                <Comp
                   className={cn("flex justify-end gap-4", className)}
@@ -124,7 +124,7 @@ const defineStepper = <const Steps extends Stepperize.Step[]>(
             );
          },
          Panel: ({ children, asChild, ...props }) => {
-            const Comp = asChild ? Slot : "div";
+            const Comp = asChild ? SlotPrimitive.Slot : "div";
             const { tracking } = useStepperProvider();
 
             return (
@@ -331,7 +331,7 @@ const Title = ({
    asChild,
    ...props
 }: React.ComponentProps<"h4"> & { asChild?: boolean }) => {
-   const Comp = asChild ? Slot : "h4";
+   const Comp = asChild ? SlotPrimitive.Slot : "h4";
 
    return (
       <Comp
@@ -350,7 +350,7 @@ const Description = ({
    asChild,
    ...props
 }: React.ComponentProps<"p"> & { asChild?: boolean }) => {
-   const Comp = asChild ? Slot : "p";
+   const Comp = asChild ? SlotPrimitive.Slot : "p";
 
    return (
       <Comp

@@ -16,10 +16,7 @@ import {
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
-import type {
-   DropdownMenuItemProps,
-   DropdownMenuProps,
-} from "@radix-ui/react-dropdown-menu";
+import { type DropdownMenuItemProps, type DropdownMenuProps } from "radix-ui";
 import { useComposedRef } from "@udecode/cn";
 import debounce from "lodash/debounce.js";
 import { EraserIcon, PlusIcon } from "lucide-react";

@@ -23,7 +23,7 @@ import {
    type UseEmojiPickerType,
    useEmojiDropdownMenuState,
 } from "@platejs/emoji/react";
-import * as Popover from "@radix-ui/react-popover";
+import { Popover as Popover } from "radix-ui";
 import {
    AppleIcon,
    ClockIcon,

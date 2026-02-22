@@ -27,8 +27,8 @@ import {
    useTableElement,
    useTableMergeState,
 } from "@platejs/table/react";
-import type * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import { PopoverAnchor } from "@radix-ui/react-popover";
+import { type DropdownMenu as DropdownMenuPrimitive, PopoverAnchor } from "radix-ui";
+
 import { cva } from "class-variance-authority";
 import {
    ArrowDown,
