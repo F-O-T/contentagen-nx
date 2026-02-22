@@ -3,9 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Network, Plus } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { useSheet } from "@/hooks/use-sheet";
 import { ClustersListSection } from "@/features/clusters/ui/clusters-list-section";
 import { CreateClusterSheet } from "@/features/clusters/ui/create-cluster-sheet";
+import { useSheet } from "@/hooks/use-sheet";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/clusters/",

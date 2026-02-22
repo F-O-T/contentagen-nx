@@ -6,7 +6,7 @@ import { createSdk } from "./index.ts";
 interface ChangelogEntry {
 	id: string;
 	title: string;
-	description: string;
+	description?: string | null;
 	createdAt: string;
 }
 
@@ -14,6 +14,20 @@ interface EmbedConfig {
 	theme?: "light" | "dark" | "auto";
 	label?: string;
 	accentColor?: string;
+}
+
+// Minimal type for the clusters portion of the SDK router used by this client.
+// Avoids a cross-package dependency on sdk-server while keeping type safety.
+interface SdkClustersClient {
+	getEmbed(input: { pillarId: string }): Promise<{
+		config: EmbedConfig;
+		pillarTitle: string;
+		entries: ChangelogEntry[];
+	}>;
+}
+
+interface SdkWithClusters {
+	clusters: SdkClustersClient;
 }
 
 // ── CSS ─────────────────────────────────────────────────────────
@@ -117,7 +131,7 @@ function formatDate(iso: string): string {
 // ── Client class ─────────────────────────────────────────────────
 
 export class ContenttaChangelogClient {
-	private sdk: ReturnType<typeof createSdk>;
+	private sdk: ReturnType<typeof createSdk> & SdkWithClusters;
 	private clusterId: string;
 	private config: EmbedConfig;
 	private containerId: string | null;
@@ -134,7 +148,8 @@ export class ContenttaChangelogClient {
 			containerId?: string;
 		},
 	) {
-		this.sdk = createSdk(sdkConfig);
+		this.sdk = createSdk(sdkConfig) as ReturnType<typeof createSdk> &
+			SdkWithClusters;
 		this.clusterId = opts.clusterId;
 		this.containerId = opts.containerId ?? null;
 		this.config = {
@@ -209,7 +224,10 @@ export class ContenttaChangelogClient {
 		});
 
 		document.addEventListener("click", (e) => {
-			if (!badge.contains(e.target as Node) && !popover.contains(e.target as Node)) {
+			if (
+				!badge.contains(e.target as Node) &&
+				!popover.contains(e.target as Node)
+			) {
 				popover.style.display = "none";
 				badge.setAttribute("aria-expanded", "false");
 			}
@@ -224,20 +242,20 @@ export class ContenttaChangelogClient {
 		return `
       <div class="ctt-changelog-popover__header">${escapeHtml(label)}</div>
       ${
-			entries.length === 0
-				? '<p style="padding:1rem 1.25rem;font-size:0.875rem;color:#9ca3af;">Nenhuma entrada ainda.</p>'
-				: entries
-						.map(
-							(e) => `
+				entries.length === 0
+					? '<p style="padding:1rem 1.25rem;font-size:0.875rem;color:#9ca3af;">Nenhuma entrada ainda.</p>'
+					: entries
+							.map(
+								(e) => `
         <div class="ctt-changelog-entry" data-entry-id="${escapeHtml(e.id)}">
           <p class="ctt-changelog-entry__title">${escapeHtml(e.title)}</p>
           <p class="ctt-changelog-entry__date">${formatDate(e.createdAt)}</p>
           ${e.description ? `<p class="ctt-changelog-entry__desc">${escapeHtml(e.description)}</p>` : ""}
         </div>
       `,
-						)
-						.join("")
-		}
+							)
+							.join("")
+			}
     `;
 	}
 }
