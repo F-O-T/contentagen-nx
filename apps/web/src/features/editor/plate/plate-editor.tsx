@@ -43,6 +43,7 @@ import { useEditorUploadFile } from "./hooks/use-editor-upload-file";
 import { AIKit } from "./plugins/ai-kit";
 import { BlockMenuKit } from "./plugins/block-menu-kit";
 import { CopilotKit } from "./plugins/copilot-kit";
+import { DndKit } from "./plugins/dnd-kit";
 import { LinkKit } from "./plugins/link-kit";
 import { createMediaKit, UploadFileProvider } from "./plugins/media-kit";
 import { SlashKit } from "./plugins/slash-kit";
