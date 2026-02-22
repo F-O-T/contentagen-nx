@@ -8,6 +8,7 @@ import * as apiKeysRouter from "./api-keys";
 import * as assetsRouter from "./assets";
 import * as billingRouter from "./billing";
 import * as chatRouter from "./chat";
+import * as clustersRouter from "./clusters";
 import * as contentRouter from "./content";
 import * as contentAnalyticsRouter from "./content-analytics";
 import * as dashboardsRouter from "./dashboards";
@@ -23,6 +24,7 @@ import * as organizationRouter from "./organization";
 import * as personalApiKeyRouter from "./personal-api-key";
 import * as productSettingsRouter from "./product-settings";
 import * as propertyDefinitionsRouter from "./property-definitions";
+import * as relatedContentRouter from "./related-content";
 import * as rolesRouter from "./roles";
 import * as sdkUsageRouter from "./sdk-usage";
 import * as sessionRouter from "./session";
@@ -42,6 +44,7 @@ export default {
    assets: assetsRouter,
    billing: billingRouter,
    chat: chatRouter,
+   clusters: clustersRouter,
    content: contentRouter,
    contentAnalytics: contentAnalyticsRouter,
    dashboards: dashboardsRouter,
@@ -56,6 +59,7 @@ export default {
    personalApiKey: personalApiKeyRouter,
    productSettings: productSettingsRouter,
    propertyDefinitions: propertyDefinitionsRouter,
+   relatedContent: relatedContentRouter,
    roles: rolesRouter,
    sdkUsage: sdkUsageRouter,
    session: sessionRouter,
