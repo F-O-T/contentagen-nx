@@ -1,6 +1,33 @@
 "use client";
 
-import { Suspense } from "react";
+import { Component, Suspense, type ReactNode } from "react";
+
+class SuggestionsErrorBoundary extends Component<
+   { children: ReactNode },
+   { hasError: boolean }
+> {
+   constructor(props: { children: ReactNode }) {
+      super(props);
+      this.state = { hasError: false };
+   }
+
+   static getDerivedStateFromError() {
+      return { hasError: true };
+   }
+
+   render() {
+      if (this.state.hasError) {
+         return (
+            <div className="flex flex-col items-center gap-2 py-6 px-4 text-center">
+               <p className="text-sm text-muted-foreground">
+                  Não foi possível carregar as sugestões.
+               </p>
+            </div>
+         );
+      }
+      return this.props.children;
+   }
+}
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { ScrollArea } from "@packages/ui/components/scroll-area";
@@ -59,6 +86,11 @@ function SuggestionItem({
    const editor = useEditorRef();
 
    function handleInsertLink() {
+      // insertLink requires an active selection in the editor.
+      // If no selection exists, focus the editor first so insertLink can place the node.
+      if (!editor.selection) {
+         editor.tf.focus();
+      }
       insertLink(editor, {
          url: suggestion.url,
          text: suggestion.title,
@@ -191,20 +223,22 @@ export function InternalLinksSidebar({
 
             <ScrollArea className="flex-1">
                <div className="p-2">
-                  <Suspense
-                     fallback={
-                        <div className="flex flex-col gap-2 p-2">
-                           {Array.from({ length: 3 }, (_, i) => (
-                              <div
-                                 key={`skeleton-${i + 1}`}
-                                 className="h-14 rounded-md bg-accent/50 animate-pulse"
-                              />
-                           ))}
-                        </div>
-                     }
-                  >
-                     <SuggestionsList contentId={contentId} />
-                  </Suspense>
+                  <SuggestionsErrorBoundary>
+                     <Suspense
+                        fallback={
+                           <div className="flex flex-col gap-2 p-2">
+                              {Array.from({ length: 3 }, (_, i) => (
+                                 <div
+                                    key={`skeleton-${i + 1}`}
+                                    className="h-14 rounded-md bg-accent/50 animate-pulse"
+                                 />
+                              ))}
+                           </div>
+                        }
+                     >
+                        <SuggestionsList contentId={contentId} />
+                     </Suspense>
+                  </SuggestionsErrorBoundary>
                </div>
             </ScrollArea>
          </div>
