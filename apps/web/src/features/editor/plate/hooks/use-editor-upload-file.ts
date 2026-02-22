@@ -104,7 +104,6 @@ export function useEditorUploadFile({
 
          return { url: asset.publicUrl, name: asset.filename };
       },
-      // biome-ignore lint/correctness/useExhaustiveDependencies: mutation fns are stable
       [teamId, generateUrl.mutateAsync, completeUpload.mutateAsync],
    );
 }

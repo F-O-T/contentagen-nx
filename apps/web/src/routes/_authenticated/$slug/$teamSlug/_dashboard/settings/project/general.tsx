@@ -90,7 +90,7 @@ function ProjectGeneralSkeleton() {
 // ============================================
 
 function ProjectGeneralErrorFallback({
-   error,
+   error: _error,
    resetErrorBoundary,
 }: FallbackProps) {
    return (

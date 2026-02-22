@@ -13,7 +13,7 @@ import { protectedProcedure } from "../server";
 export const verifyPassword = protectedProcedure
    .input(z.object({ password: z.string() }))
    .handler(async ({ context, input }) => {
-      const { auth, headers, userId } = context;
+      const { auth, headers } = context;
 
       try {
          // Use Better Auth's verify password endpoint

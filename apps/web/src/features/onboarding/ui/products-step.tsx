@@ -86,7 +86,7 @@ interface ProductsStepProps {
 export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
    function ProductsStep(
       {
-         organizationId,
+         organizationId: _organizationId,
          teamId,
          teamSlug,
          onComplete,

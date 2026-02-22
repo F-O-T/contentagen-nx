@@ -296,7 +296,8 @@ export const getDailyUsage = protectedProcedure
                   countByCategory: new Map(),
                });
             }
-            const entry = dateMap.get(dateStr)!;
+            const entry = dateMap.get(dateStr);
+            if (!entry) continue;
             const cost = Number(row.totalCost);
             const count = row.eventCount;
             entry.total += cost;

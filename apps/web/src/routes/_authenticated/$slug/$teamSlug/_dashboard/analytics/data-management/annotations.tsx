@@ -192,6 +192,7 @@ function AnnotationsPage() {
             <div className="relative flex-1">
                <span className="absolute left-2.5 top-2.5 size-4 text-muted-foreground pointer-events-none flex items-center">
                   <svg
+                     aria-hidden="true"
                      fill="none"
                      height="16"
                      stroke="currentColor"

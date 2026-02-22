@@ -247,7 +247,7 @@ export function SearchPage() {
 
 function SearchResults({
    groups,
-   allItems,
+   allItems: _allItems,
    selectedIndex,
    onSelect,
 }: {

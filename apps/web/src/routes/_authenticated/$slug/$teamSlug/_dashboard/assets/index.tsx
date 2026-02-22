@@ -529,7 +529,6 @@ function AssetsGrid({ teamId, search, page, onTotalChange }: AssetsGridProps) {
       }),
    );
 
-   // biome-ignore lint/correctness/useExhaustiveDependencies: onTotalChange is stable (setTotal from useState)
    useEffect(() => {
       onTotalChange(data.total ?? 0);
    }, [data.total]);
