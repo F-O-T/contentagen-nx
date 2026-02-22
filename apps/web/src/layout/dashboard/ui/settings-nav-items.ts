@@ -87,7 +87,7 @@ export const settingsNavSections: SettingsNavSection[] = [
                },
                {
                   id: "product-asset-bank",
-                  title: "Banco de Imagens",
+                  title: "Imagens",
                   href: "/$slug/$teamSlug/settings/project/products/asset-bank",
                   icon: Images,
                   earlyAccessFlag: "asset-bank",
