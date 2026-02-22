@@ -6,7 +6,16 @@ import { createSdk } from "./index.ts";
 
 interface FormField {
 	id: string;
-	type: "text" | "email" | "textarea" | "checkbox" | "select";
+	type:
+		| "text"
+		| "email"
+		| "textarea"
+		| "checkbox"
+		| "select"
+		| "number"
+		| "date"
+		| "rating"
+		| "file";
 	label: string;
 	placeholder?: string;
 	required: boolean;
@@ -22,6 +31,11 @@ interface FormDefinition {
 		successMessage?: string;
 		redirectUrl?: string;
 	};
+	title?: string;
+	subtitle?: string;
+	icon?: string;
+	buttonText?: string;
+	layout?: "card" | "inline" | "banner";
 }
 
 // ── Helpers ─────────────────────────────────────────────────────
@@ -38,20 +52,52 @@ function escapeHtml(str: string): string {
 // ── CSS ─────────────────────────────────────────────────────────
 
 const FORM_STYLES = `
-<style>
 .contentta-form {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	--cf-bg: var(--background, #fff);
+	--cf-fg: var(--foreground, #09090b);
+	--cf-muted: var(--muted, #f4f4f5);
+	--cf-muted-fg: var(--muted-foreground, #71717a);
+	--cf-border: var(--border, #e4e4e7);
+	--cf-radius: var(--radius, 0.5rem);
+	--cf-primary: var(--primary, #18181b);
+	--cf-primary-fg: var(--primary-foreground, #fafafa);
+	--cf-ring: var(--ring, #18181b);
+	--cf-destructive: var(--destructive, #ef4444);
+
+	font-family: inherit;
 	max-width: 480px;
 	margin: 0 auto;
+	background: var(--cf-bg);
+	color: var(--cf-fg);
+	border-radius: var(--cf-radius);
+}
+.contentta-form__cta {
+	margin-bottom: 1.25rem;
+}
+.contentta-form__cta-icon {
+	font-size: 1.75rem;
+	margin-bottom: 0.375rem;
+}
+.contentta-form__cta-title {
+	font-size: 1.25rem;
+	font-weight: 600;
+	margin: 0 0 0.25rem;
+	color: var(--cf-fg);
+}
+.contentta-form__cta-subtitle {
+	font-size: 0.875rem;
+	color: var(--cf-muted-fg);
+	margin: 0;
 }
 .contentta-form__title {
 	font-size: 1.25rem;
 	font-weight: 600;
 	margin: 0 0 0.25rem;
+	color: var(--cf-fg);
 }
 .contentta-form__description {
 	font-size: 0.875rem;
-	color: #6b7280;
+	color: var(--cf-muted-fg);
 	margin: 0 0 1.25rem;
 }
 .contentta-form__field {
@@ -62,9 +108,10 @@ const FORM_STYLES = `
 	font-size: 0.875rem;
 	font-weight: 500;
 	margin-bottom: 0.375rem;
+	color: var(--cf-fg);
 }
 .contentta-form__required {
-	color: #ef4444;
+	color: var(--cf-destructive);
 	margin-left: 0.125rem;
 }
 .contentta-form__input,
@@ -75,18 +122,20 @@ const FORM_STYLES = `
 	padding: 0.5rem 0.75rem;
 	font-size: 0.875rem;
 	line-height: 1.5;
-	border: 1px solid #d1d5db;
-	border-radius: 0.375rem;
-	background: #fff;
+	border: 1px solid var(--cf-border);
+	border-radius: calc(var(--cf-radius) - 2px);
+	background: var(--cf-bg);
+	color: var(--cf-fg);
 	box-sizing: border-box;
 	transition: border-color 0.15s ease;
+	font-family: inherit;
 }
 .contentta-form__input:focus,
 .contentta-form__textarea:focus,
 .contentta-form__select:focus {
 	outline: none;
-	border-color: #3b82f6;
-	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+	border-color: var(--cf-ring);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--cf-ring) 20%, transparent);
 }
 .contentta-form__textarea {
 	min-height: 5rem;
@@ -99,10 +148,29 @@ const FORM_STYLES = `
 }
 .contentta-form__checkbox {
 	margin-top: 0.25rem;
+	accent-color: var(--cf-primary);
+}
+.contentta-form__rating {
+	display: flex;
+	gap: 0.375rem;
+}
+.contentta-form__star {
+	font-size: 1.5rem;
+	cursor: pointer;
+	color: var(--cf-border);
+	transition: color 0.1s ease;
+	background: none;
+	border: none;
+	padding: 0;
+	line-height: 1;
+}
+.contentta-form__star:hover,
+.contentta-form__star--active {
+	color: #eab308;
 }
 .contentta-form__error {
 	font-size: 0.75rem;
-	color: #ef4444;
+	color: var(--cf-destructive);
 	margin-top: 0.25rem;
 	min-height: 0;
 }
@@ -113,15 +181,16 @@ const FORM_STYLES = `
 	padding: 0.5rem 1.25rem;
 	font-size: 0.875rem;
 	font-weight: 500;
-	color: #fff;
-	background: #3b82f6;
+	color: var(--cf-primary-fg);
+	background: var(--cf-primary);
 	border: none;
-	border-radius: 0.375rem;
+	border-radius: calc(var(--cf-radius) - 2px);
 	cursor: pointer;
-	transition: background 0.15s ease;
+	transition: opacity 0.15s ease;
+	font-family: inherit;
 }
 .contentta-form__submit:hover {
-	background: #2563eb;
+	opacity: 0.9;
 }
 .contentta-form__submit:disabled {
 	opacity: 0.6;
@@ -130,12 +199,12 @@ const FORM_STYLES = `
 .contentta-form__success {
 	padding: 1rem;
 	font-size: 0.875rem;
-	color: #065f46;
-	background: #d1fae5;
-	border-radius: 0.375rem;
+	color: var(--cf-fg);
+	background: color-mix(in srgb, var(--cf-primary) 8%, var(--cf-bg));
+	border: 1px solid color-mix(in srgb, var(--cf-primary) 20%, transparent);
+	border-radius: var(--cf-radius);
 	text-align: center;
 }
-</style>
 `;
 
 // ── Forms Client ────────────────────────────────────────────────
@@ -176,7 +245,7 @@ function injectFormStyles(): void {
 
 	const style = document.createElement("style");
 	style.setAttribute("data-contentta-forms", "");
-	style.textContent = FORM_STYLES.replace(/<\/?style>/g, "");
+	style.textContent = FORM_STYLES;
 	document.head.appendChild(style);
 	stylesInjected = true;
 }
@@ -272,23 +341,32 @@ export class ContenttaFormsClient {
 	// ── Rendering ───────────────────────────────────────────────
 
 	private renderForm(form: FormDefinition): string {
-		const titleHtml = `<h3 class="contentta-form__title">${escapeHtml(form.name)}</h3>`;
+		// Prefer CTA title/subtitle over name/description for display
+		const displayTitle = form.title || form.name;
+		const displaySubtitle = form.subtitle || form.description;
 
-		const descriptionHtml = form.description
-			? `<p class="contentta-form__description">${escapeHtml(form.description)}</p>`
-			: "";
+		const ctaHtml =
+			form.icon || displayTitle || displaySubtitle
+				? `
+<div class="contentta-form__cta">
+	${form.icon ? `<div class="contentta-form__cta-icon">${escapeHtml(form.icon)}</div>` : ""}
+	${displayTitle ? `<h3 class="contentta-form__cta-title">${escapeHtml(displayTitle)}</h3>` : ""}
+	${displaySubtitle ? `<p class="contentta-form__cta-subtitle">${escapeHtml(displaySubtitle)}</p>` : ""}
+</div>`
+				: "";
 
 		const fieldsHtml = form.fields
 			.map((field) => this.renderField(field))
 			.join("\n");
 
+		const buttonText = form.buttonText || "Enviar";
+
 		return `
 <div class="contentta-form">
-	${titleHtml}
-	${descriptionHtml}
+	${ctaHtml}
 	<form class="contentta-form__form" novalidate>
 		${fieldsHtml}
-		<button type="submit" class="contentta-form__submit">Submit</button>
+		<button type="submit" class="contentta-form__submit">${escapeHtml(buttonText)}</button>
 	</form>
 </div>`;
 	}
@@ -356,18 +434,65 @@ export class ContenttaFormsClient {
 					class="contentta-form__select"
 					${requiredAttr}
 				>
-					<option value="">${escapedPlaceholder || "Select an option"}</option>
+					<option value="">${escapedPlaceholder || "Selecione uma opção"}</option>
 					${optionsHtml}
 				</select>`;
 				break;
 			}
 
+			case "number":
+				inputHtml = `<input
+					type="number"
+					id="contentta-field-${escapedId}"
+					name="${escapedId}"
+					class="contentta-form__input"
+					placeholder="${escapedPlaceholder}"
+					${requiredAttr}
+				/>`;
+				break;
+
+			case "date":
+				inputHtml = `<input
+					type="date"
+					id="contentta-field-${escapedId}"
+					name="${escapedId}"
+					class="contentta-form__input"
+					${requiredAttr}
+				/>`;
+				break;
+
+			case "rating": {
+				const stars = [1, 2, 3, 4, 5]
+					.map(
+						(n) =>
+							`<button type="button" class="contentta-form__star" data-rating="${n}" aria-label="${n} estrela${n > 1 ? "s" : ""}">★</button>`,
+					)
+					.join("");
+				inputHtml = `<div class="contentta-form__rating" id="contentta-field-${escapedId}" data-field-id="${escapedId}">
+					<input type="hidden" name="${escapedId}" id="contentta-rating-input-${escapedId}" />
+					${stars}
+				</div>`;
+				break;
+			}
+
+			case "file":
+				inputHtml = `<input
+					type="file"
+					id="contentta-field-${escapedId}"
+					name="${escapedId}"
+					class="contentta-form__input"
+					${requiredAttr}
+				/>`;
+				break;
+
 			default: {
-				const _exhaustive: never = field.type;
+				// Fallback for unknown field types — render as text input
+				const _type: string = field.type;
 				inputHtml = `<input
 					type="text"
-					id="contentta-field-${_exhaustive}"
+					id="contentta-field-${escapedId}"
 					name="${escapedId}"
+					data-field-type="${escapeHtml(_type)}"
 					class="contentta-form__input"
 					placeholder="${escapedPlaceholder}"
 					${requiredAttr}
@@ -401,6 +526,32 @@ export class ContenttaFormsClient {
 		);
 		if (!formElement) {
 			return;
+		}
+
+		// Setup star rating fields
+		const ratingContainers = container.querySelectorAll<HTMLDivElement>(
+			".contentta-form__rating",
+		);
+		for (const ratingContainer of ratingContainers) {
+			const fieldId = ratingContainer.getAttribute("data-field-id");
+			if (!fieldId) continue;
+			const stars = ratingContainer.querySelectorAll<HTMLButtonElement>(
+				".contentta-form__star",
+			);
+			const hiddenInput = container.querySelector<HTMLInputElement>(
+				`#contentta-rating-input-${CSS.escape(fieldId)}`,
+			);
+
+			for (const [i, star] of stars.entries()) {
+				star.addEventListener("click", () => {
+					const value = i + 1;
+					if (hiddenInput) hiddenInput.value = String(value);
+					// Update star visual state
+					for (const [j, s] of stars.entries()) {
+						s.classList.toggle("contentta-form__star--active", j <= i);
+					}
+				});
+			}
 		}
 
 		formElement.addEventListener("submit", (event: Event) => {
@@ -477,7 +628,7 @@ export class ContenttaFormsClient {
 
 						const successMessage =
 							result.settings?.successMessage ??
-							"Thank you! Your submission has been received.";
+							"Obrigado! Sua resposta foi recebida.";
 						const redirectUrl = result.settings?.redirectUrl;
 
 						if (redirectUrl) {

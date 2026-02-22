@@ -353,7 +353,8 @@ export function FormBuilder({ formId }: FormBuilderProps) {
          title: "Excluir formulário?",
          description:
             "Esta ação não pode ser desfeita. Todas as submissões também serão excluídas.",
-         onConfirm: () => deleteMutation.mutate({ id: formId }),
+         onAction: () => deleteMutation.mutate({ id: formId }),
+         variant: "destructive",
       });
    }, [openAlertDialog, deleteMutation, formId]);
 
