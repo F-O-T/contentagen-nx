@@ -1,11 +1,5 @@
+// apps/web/src/features/experiments/ui/experiment-variants-tab.tsx
 import { Button } from "@packages/ui/components/button";
-import {
-   CredenzaBody,
-   CredenzaDescription,
-   CredenzaFooter,
-   CredenzaHeader,
-   CredenzaTitle,
-} from "@packages/ui/components/credenza";
 import { Input } from "@packages/ui/components/input";
 import { Label } from "@packages/ui/components/label";
 import {
@@ -17,11 +11,10 @@ import {
 } from "@packages/ui/components/select";
 import { Switch } from "@packages/ui/components/switch";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { Crown, Loader2, Plus, Trash2 } from "lucide-react";
+import { Crown, Loader2, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
-import { useCredenza } from "@/hooks/use-credenza";
 import { orpc } from "@/integrations/orpc/client";
 
 type ExperimentStatus = "draft" | "running" | "paused" | "concluded";
@@ -33,15 +26,17 @@ interface ExperimentVariantsTabProps {
    winnerId: string | null;
 }
 
-function AddVariantForm({
-   experimentId,
-   targetType,
-   onClose,
-}: {
+interface InlineAddVariantFormProps {
    experimentId: string;
    targetType: "content" | "form" | "cluster";
    onClose: () => void;
-}) {
+}
+
+function InlineAddVariantForm({
+   experimentId,
+   targetType,
+   onClose,
+}: InlineAddVariantFormProps) {
    const [name, setName] = useState("");
    const [isControl, setIsControl] = useState(false);
    const [linkedId, setLinkedId] = useState("");
@@ -77,71 +72,89 @@ function AddVariantForm({
    };
 
    return (
-      <>
-         <CredenzaHeader>
-            <CredenzaTitle>Nova variante</CredenzaTitle>
-            <CredenzaDescription>
-               Adicione uma variante ao experimento
-            </CredenzaDescription>
-         </CredenzaHeader>
-         <CredenzaBody>
-            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      <div className="rounded-lg border bg-muted/30 p-4">
+         <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium">Nova variante</h3>
+            <Button
+               className="size-7"
+               onClick={onClose}
+               size="icon"
+               type="button"
+               variant="ghost"
+            >
+               <X className="size-4" />
+            </Button>
+         </div>
+         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+            <div className="flex flex-col gap-2">
+               <Label htmlFor="inline-variant-name">Nome da variante</Label>
+               <Input
+                  autoFocus
+                  id="inline-variant-name"
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ex: Variante A"
+                  value={name}
+               />
+            </div>
+
+            {targetType === "content" && (
                <div className="flex flex-col gap-2">
-                  <Label htmlFor="variant-name">Nome da variante</Label>
-                  <Input
-                     autoFocus
-                     id="variant-name"
-                     onChange={(e) => setName(e.target.value)}
-                     placeholder="Ex: Variante A"
-                     value={name}
-                  />
-               </div>
-
-               {targetType === "content" && (
-                  <div className="flex flex-col gap-2">
-                     <Label htmlFor="variant-content">Conteúdo vinculado</Label>
-                     <Select onValueChange={setLinkedId} value={linkedId}>
-                        <SelectTrigger id="variant-content">
-                           <SelectValue placeholder="Selecione um conteúdo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                           {contentList?.items?.map(
-                              (item: { id: string; title?: string | null }) => (
-                                 <SelectItem key={item.id} value={item.id}>
-                                    {item.title ?? "Sem título"}
-                                 </SelectItem>
-                              ),
-                           )}
-                        </SelectContent>
-                     </Select>
-                  </div>
-               )}
-
-               <div className="flex items-center gap-3">
-                  <Switch
-                     checked={isControl}
-                     id="variant-control"
-                     onCheckedChange={setIsControl}
-                  />
-                  <Label className="cursor-pointer" htmlFor="variant-control">
-                     Variante de controle
+                  <Label htmlFor="inline-variant-content">
+                     Conteúdo vinculado
                   </Label>
+                  <Select onValueChange={setLinkedId} value={linkedId}>
+                     <SelectTrigger id="inline-variant-content">
+                        <SelectValue placeholder="Selecione um conteúdo" />
+                     </SelectTrigger>
+                     <SelectContent>
+                        {contentList?.items?.map(
+                           (item: { id: string; title?: string | null }) => (
+                              <SelectItem key={item.id} value={item.id}>
+                                 {item.title ?? "Sem título"}
+                              </SelectItem>
+                           ),
+                        )}
+                     </SelectContent>
+                  </Select>
                </div>
+            )}
 
-               <CredenzaFooter>
-                  <Button
-                     disabled={!name.trim() || addMutation.isPending}
-                     type="submit"
-                  >
-                     {addMutation.isPending && (
-                        <Loader2 className="mr-2 size-4 animate-spin" />
-                     )}
-                     Adicionar variante
-                  </Button>
-               </CredenzaFooter>
-            </form>
-         </CredenzaBody>
-      </>
+            <div className="flex items-center gap-3">
+               <Switch
+                  checked={isControl}
+                  id="inline-variant-control"
+                  onCheckedChange={setIsControl}
+               />
+               <Label
+                  className="cursor-pointer"
+                  htmlFor="inline-variant-control"
+               >
+                  Variante de controle
+               </Label>
+            </div>
+
+            <div className="flex items-center gap-2 justify-end">
+               <Button
+                  onClick={onClose}
+                  size="sm"
+                  type="button"
+                  variant="ghost"
+               >
+                  Cancelar
+               </Button>
+               <Button
+                  disabled={!name.trim() || addMutation.isPending}
+                  size="sm"
+                  type="submit"
+               >
+                  {addMutation.isPending && (
+                     <Loader2 className="mr-2 size-4 animate-spin" />
+                  )}
+                  Adicionar
+               </Button>
+            </div>
+         </form>
+      </div>
    );
 }
 
@@ -151,7 +164,7 @@ export function ExperimentVariantsTab({
    targetType,
    winnerId,
 }: ExperimentVariantsTabProps) {
-   const { openCredenza, closeCredenza } = useCredenza();
+   const [showAddForm, setShowAddForm] = useState(false);
    const { openAlertDialog } = useAlertDialog();
 
    const { data: experiment } = useSuspenseQuery(
@@ -169,6 +182,8 @@ export function ExperimentVariantsTab({
    );
 
    const canEdit = status === "draft" || status === "paused";
+   const variants = experiment.variants ?? [];
+   const needsMoreVariants = variants.length < 2;
 
    const handleRemove = (variantId: string, variantName: string) => {
       openAlertDialog({
@@ -184,44 +199,40 @@ export function ExperimentVariantsTab({
       });
    };
 
-   const handleAddVariant = () => {
-      openCredenza({
-         className: "sm:max-w-md",
-         children: (
-            <AddVariantForm
-               experimentId={experimentId}
-               onClose={closeCredenza}
-               targetType={targetType}
-            />
-         ),
-      });
-   };
-
-   const variants = experiment.variants ?? [];
-
    return (
       <div className="flex flex-col gap-4">
          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-               {variants.length} variante{variants.length !== 1 ? "s" : ""}{" "}
-               configurada{variants.length !== 1 ? "s" : ""}
-            </p>
-            {canEdit && (
-               <Button onClick={handleAddVariant} size="sm" variant="outline">
+            <div className="flex items-center gap-3">
+               <p className="text-sm text-muted-foreground">
+                  {variants.length} variante{variants.length !== 1 ? "s" : ""}{" "}
+                  configurada{variants.length !== 1 ? "s" : ""}
+               </p>
+               {needsMoreVariants && canEdit && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                     Mínimo de 2 variantes para iniciar
+                  </p>
+               )}
+            </div>
+            {canEdit && !showAddForm && (
+               <Button
+                  onClick={() => setShowAddForm(true)}
+                  size="sm"
+                  variant="outline"
+               >
                   <Plus className="mr-2 size-4" />
                   Adicionar variante
                </Button>
             )}
          </div>
 
-         {variants.length === 0 ? (
+         {variants.length === 0 && !showAddForm ? (
             <div className="flex flex-col items-center justify-center py-12 gap-3 text-center border rounded-lg border-dashed">
                <p className="text-sm text-muted-foreground">
                   Nenhuma variante configurada ainda.
                </p>
                {canEdit && (
                   <Button
-                     onClick={handleAddVariant}
+                     onClick={() => setShowAddForm(true)}
                      size="sm"
                      variant="outline"
                   >
@@ -287,6 +298,14 @@ export function ExperimentVariantsTab({
                   </div>
                ))}
             </div>
+         )}
+
+         {showAddForm && (
+            <InlineAddVariantForm
+               experimentId={experimentId}
+               onClose={() => setShowAddForm(false)}
+               targetType={targetType}
+            />
          )}
 
          {!canEdit && status === "running" && (
