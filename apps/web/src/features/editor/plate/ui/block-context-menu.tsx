@@ -8,7 +8,7 @@ import {
 	ContextMenuTrigger,
 } from "@packages/ui/components/context-menu";
 import { AIChatPlugin } from "@platejs/ai/react";
-import { BlockMenuPlugin, BlockSelectionPlugin } from "@platejs/selection/react";
+import { BlockMenuPlugin, duplicateBlockSelectionNodes, removeBlockSelectionNodes } from "@platejs/selection/react";
 import { Copy, Sparkles, Trash2, WandSparkles } from "lucide-react";
 import type React from "react";
 import { useEditorPlugin, useEditorRef } from "platejs/react";
@@ -22,18 +22,18 @@ export function BlockContextMenu({ children }: BlockContextMenuProps) {
 	const { api: blockMenuApi } = useEditorPlugin(BlockMenuPlugin);
 
 	const handleDuplicate = () => {
-		editor.getTransforms(BlockSelectionPlugin).blockSelection.duplicate();
+		duplicateBlockSelectionNodes(editor);
 		blockMenuApi.blockMenu.hide();
 	};
 
 	const handleDelete = () => {
-		editor.getTransforms(BlockSelectionPlugin).blockSelection.removeNodes();
+		removeBlockSelectionNodes(editor);
 		blockMenuApi.blockMenu.hide();
 	};
 
 	const handleAIAction = (prompt: string) => {
 		editor.getApi(AIChatPlugin).aiChat.show();
-		editor.getApi(AIChatPlugin).aiChat.submit(prompt, { mode: "insert" });
+		editor.getApi(AIChatPlugin).aiChat.submit(prompt, { mode: "chat" });
 		blockMenuApi.blockMenu.hide();
 	};
 
