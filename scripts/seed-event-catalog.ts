@@ -213,24 +213,56 @@ program
 
 program
    .command("check")
-   .description("Check required configuration for seeding")
+   .description("Diff EVENT_PRICING code definitions against the live event_catalog table. Exits non-zero on drift.")
    .option(
       "-e, --env <environment>",
       "Environment to use (local, production, etc.)",
       "local",
    )
-   .action((options) => {
+   .action(async (options) => {
       loadEnv(options.env);
-      const databaseUrl = process.env.DATABASE_URL;
+      const databaseUrl = requireDatabaseUrl();
 
-      console.log(colors.blue("🔍 Checking configuration...\n"));
+      console.log(colors.blue("🔍 Checking event catalog drift...\n"));
 
-      if (!databaseUrl) {
-         console.log(colors.red("❌ DATABASE_URL is not set"));
+      try {
+         const db = createDb({ databaseUrl });
+
+         const rows = await db
+            .select({ eventName: eventCatalog.eventName })
+            .from(eventCatalog);
+
+         const dbNames = new Set(rows.map((r) => r.eventName));
+         const codeNames = new Set(EVENT_PRICING.map((e) => e.eventName));
+
+         const missingInDb = [...codeNames].filter((n) => !dbNames.has(n));
+         const extraInDb = [...dbNames].filter((n) => !codeNames.has(n));
+
+         if (missingInDb.length > 0) {
+            console.log(colors.red(`❌ ${missingInDb.length} event(s) defined in code but missing from DB catalog:`));
+            for (const name of missingInDb) {
+               console.log(colors.red(`   - ${name}`));
+            }
+         }
+
+         if (extraInDb.length > 0) {
+            console.log(colors.yellow(`⚠️  ${extraInDb.length} event(s) in DB catalog but not defined in code (stale rows):`));
+            for (const name of extraInDb) {
+               console.log(colors.yellow(`   - ${name}`));
+            }
+         }
+
+         if (missingInDb.length === 0 && extraInDb.length === 0) {
+            console.log(colors.green(`✅ Catalog is in sync. ${codeNames.size} events match.`));
+            process.exit(0);
+         } else {
+            console.log(colors.red("\n❌ Catalog drift detected. Run: bun run seed:events run"));
+            process.exit(1);
+         }
+      } catch (err) {
+         console.error(colors.red("❌ Failed to connect to database or query event_catalog:"), err);
          process.exit(1);
       }
-
-      console.log(colors.green("✅ DATABASE_URL is set"));
    });
 
 program.parse();
