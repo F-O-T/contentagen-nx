@@ -97,7 +97,7 @@ function ExperimentBuilderEditContent({
             | "time_on_page"
             | "form_submit",
       });
-      // biome-ignore lint/react-hooks/exhaustive-deps: only run on first load
+      // intentional: only run on first load (experiment.id as stable dep)
    }, [experiment.id]);
 
    const status = experiment.status as ExperimentStatus;
