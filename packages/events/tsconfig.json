@@ -3,6 +3,9 @@
   "include": [
     "src"
   ],
+  "compilerOptions": {
+    "disableSourceOfProjectReferenceRedirect": true
+  },
   "references": [
     {
       "path": "../redis"
