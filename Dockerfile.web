@@ -55,7 +55,7 @@ ARG VITE_POSTHOG_KEY
 ENV VITE_POSTHOG_HOST=$VITE_POSTHOG_HOST
 ENV VITE_POSTHOG_KEY=$VITE_POSTHOG_KEY
 
-RUN cd apps/web && bun run build
+RUN bun run --filter=web build
 
 # ---- Runner ----
 FROM oven/bun:latest AS runner
