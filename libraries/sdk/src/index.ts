@@ -66,3 +66,5 @@ export function createSdk(config: SdkConfig) {
 
 // Re-export types
 export type { SdkRouter } from "./types";
+
+export { ContenttaChangelogClient } from "./changelog.ts";
