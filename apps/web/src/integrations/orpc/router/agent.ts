@@ -5,7 +5,15 @@ import {
    mastra,
    type RequestContext,
 } from "@packages/agents";
-import type { ModelId } from "@packages/agents/models";
+import {
+   AUTOCOMPLETE_MODELS,
+   type AutocompleteModelId,
+   CONTENT_MODELS,
+   type ContentModelId,
+   DEFAULT_AUTOCOMPLETE_MODEL_ID,
+   DEFAULT_CONTENT_MODEL_ID,
+   getModelPreset,
+} from "@packages/agents/models";
 import { getProductSettings } from "@packages/database/repositories/product-settings-repository";
 import { teamMember } from "@packages/database/schemas/auth";
 import { content } from "@packages/database/schemas/content";
@@ -70,6 +78,15 @@ export const copilotStream = protectedProcedure
       // Get the FIM agent from Mastra
       const fimAgent = mastra.getAgent("fimAgent");
 
+      // Get autocomplete model and its preset
+      const autocompleteModelId = (aiDefaults.autocompleteModel ??
+         DEFAULT_AUTOCOMPLETE_MODEL_ID) as AutocompleteModelId;
+      const autocompletePreset = getModelPreset(
+         AUTOCOMPLETE_MODELS,
+         autocompleteModelId,
+         DEFAULT_AUTOCOMPLETE_MODEL_ID,
+      );
+
       // Create request context for the agent with settings
       const requestContext = createRequestContext({
          userId,
@@ -77,9 +94,13 @@ export const copilotStream = protectedProcedure
             aiDefaults.defaultLanguage ??
             getRequestLanguage(headers) ??
             "pt-BR",
-         model:
-            aiDefaults.editModel ??
-            "openrouter/mistralai/mistral-small-creative",
+         model: autocompleteModelId,
+         // Use user override if set, otherwise fall back to model preset
+         temperature:
+            aiDefaults.autocompleteTemperature ??
+            autocompletePreset.temperature,
+         topP: autocompletePreset.topP,
+         maxTokens: autocompletePreset.maxTokens,
       } as CustomRequestContext);
 
       // Build the copilot prompt
@@ -181,6 +202,15 @@ export const aiCommandStream = protectedProcedure
       // Get the unified content agent from Mastra
       const unifiedAgent = mastra.getAgent("unifiedContent");
 
+      const contentModelId = (input.model ??
+         aiDefaults.contentModel ??
+         DEFAULT_CONTENT_MODEL_ID) as ContentModelId;
+      const contentPreset = getModelPreset(
+         CONTENT_MODELS,
+         contentModelId,
+         DEFAULT_CONTENT_MODEL_ID,
+      );
+
       // Create request context with settings, falling back to product defaults
       const requestContext = createRequestContext({
          userId,
@@ -191,10 +221,13 @@ export const aiCommandStream = protectedProcedure
             aiDefaults.defaultLanguage ??
             getRequestLanguage(headers) ??
             "pt-BR",
-         model:
-            (input.model as ModelId) ??
-            aiDefaults.contentModel ??
-            "openrouter/moonshotai/kimi-k2.5",
+         model: contentModelId,
+         temperature:
+            aiDefaults.contentTemperature ?? contentPreset.temperature,
+         topP: contentPreset.topP,
+         maxTokens: aiDefaults.contentMaxTokens ?? contentPreset.maxTokens,
+         frequencyPenalty: contentPreset.frequencyPenalty,
+         presencePenalty: contentPreset.presencePenalty,
       } as CustomRequestContext);
 
       let stepIndex = 0;
@@ -351,6 +384,10 @@ export const executeUnifiedAgent = protectedProcedure
       const { teamId, contentId, prompt, brandId, writerId, model } = input;
       const { userId, db, organizationId, posthog } = context;
 
+      // Fetch product settings for AI configuration
+      const settings = await getProductSettings(db, teamId);
+      const aiDefaults = settings?.aiDefaults ?? {};
+
       // Verify team membership
       const membership = await db.query.teamMember.findFirst({
          where: and(
@@ -388,14 +425,29 @@ export const executeUnifiedAgent = protectedProcedure
       // Enforce credit budget
       await enforceCreditBudget(db, organizationId, "ai");
 
+      const contentModelId = (model ??
+         aiDefaults.contentModel ??
+         DEFAULT_CONTENT_MODEL_ID) as ContentModelId;
+      const contentPreset = getModelPreset(
+         CONTENT_MODELS,
+         contentModelId,
+         DEFAULT_CONTENT_MODEL_ID,
+      );
+
       // Create request context
       const requestContext = createRequestContext({
          userId,
          brandId,
          writerId,
-         model: (model as ModelId) ?? "openrouter/moonshotai/kimi-k2.5",
-         language: "pt-BR",
+         model: contentModelId,
+         language: aiDefaults.defaultLanguage ?? "pt-BR",
          writerInstructions,
+         temperature:
+            aiDefaults.contentTemperature ?? contentPreset.temperature,
+         topP: contentPreset.topP,
+         maxTokens: aiDefaults.contentMaxTokens ?? contentPreset.maxTokens,
+         frequencyPenalty: contentPreset.frequencyPenalty,
+         presencePenalty: contentPreset.presencePenalty,
       } as CustomRequestContext);
 
       const startTime = Date.now();
@@ -417,7 +469,7 @@ export const executeUnifiedAgent = protectedProcedure
                agentId: "unified-content-agent",
                contentId,
                action: "generate",
-               model: model ?? "openrouter/moonshotai/kimi-k2.5",
+               model: contentModelId,
                provider: "openrouter",
                promptTokens: result.usage?.inputTokens ?? 0,
                completionTokens: result.usage?.outputTokens ?? 0,
