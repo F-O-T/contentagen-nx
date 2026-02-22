@@ -57,4 +57,72 @@ function FeatureStageBadge({
    );
 }
 
-export { FeatureStageBadge, STAGE_CONFIG };
+export type FeatureStageChipProps = {
+   stage: FeatureStage;
+   count?: number;
+   isActive?: boolean;
+   onClick?: () => void;
+   className?: string;
+};
+
+/**
+ * FeatureStageChip - Um chip clicável para usar como filtro de estágio
+ * - Mostra a badge com o nome do estágio
+ * - Opcionalmente mostra uma contagem
+ * - Suporta estado ativo/inativo
+ * - Pode ser clicável para alternar filtros
+ */
+function FeatureStageChip({
+   stage,
+   count,
+   isActive = true,
+   onClick,
+   className,
+}: FeatureStageChipProps) {
+   const config = STAGE_CONFIG[stage];
+   const Icon = config.icon;
+
+   const content = (
+      <>
+         <Icon className="size-3.5" />
+         <span>{config.label}</span>
+         {count !== undefined && (
+            <span className="ml-1 text-muted-foreground">({count})</span>
+         )}
+      </>
+   );
+
+   if (onClick) {
+      return (
+         <button
+            className={cn(
+               "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+               "border focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+               isActive
+                  ? config.className
+                  : "border-muted bg-muted/50 text-muted-foreground opacity-50",
+               "hover:opacity-80",
+               className,
+            )}
+            onClick={onClick}
+            type="button"
+         >
+            {content}
+         </button>
+      );
+   }
+
+   return (
+      <span
+         className={cn(
+            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium",
+            isActive ? config.className : "opacity-50",
+            className,
+         )}
+      >
+         {content}
+      </span>
+   );
+}
+
+export { FeatureStageBadge, FeatureStageChip, STAGE_CONFIG };
