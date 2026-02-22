@@ -10,6 +10,7 @@ import {
    LayoutDashboard,
    Library,
    Lightbulb,
+   Network,
 } from "lucide-react";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
 
@@ -75,6 +76,13 @@ export const navGroups: NavGroupDef[] = [
             quickAction: { type: "create", target: "sheet" },
             earlyAccessFlag: "experiments",
             earlyAccessStage: "alpha" as const,
+         },
+         {
+            id: "clusters",
+            label: "Clusters",
+            icon: Network,
+            route: "/$slug/$teamSlug/clusters",
+            quickAction: { type: "create", target: "sheet" } as const,
          },
       ],
    },
