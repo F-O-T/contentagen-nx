@@ -1,4 +1,3 @@
-import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
@@ -18,7 +17,7 @@ import {
    SelectValue,
 } from "@packages/ui/components/select";
 import { Textarea } from "@packages/ui/components/textarea";
-import { Eye } from "lucide-react";
+import { Eye, Star } from "lucide-react";
 import type { FormField } from "./form-canvas";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -28,6 +27,11 @@ import type { FormField } from "./form-canvas";
 interface FormPreviewProps {
    name: string;
    description: string;
+   title: string;
+   subtitle: string;
+   icon: string;
+   buttonText: string;
+   layout: "card" | "inline" | "banner";
    fields: FormField[];
 }
 
@@ -121,6 +125,66 @@ function PreviewSelectField({ field }: { field: FormField }) {
    );
 }
 
+function PreviewNumberField({ field }: { field: FormField }) {
+   return (
+      <div className="space-y-2">
+         <Label htmlFor={`preview-${field.id}`}>
+            {field.label}
+            {field.required && <span className="text-destructive ml-1">*</span>}
+         </Label>
+         <Input
+            id={`preview-${field.id}`}
+            placeholder={field.placeholder}
+            readOnly
+            type="number"
+         />
+      </div>
+   );
+}
+
+function PreviewDateField({ field }: { field: FormField }) {
+   return (
+      <div className="space-y-2">
+         <Label htmlFor={`preview-${field.id}`}>
+            {field.label}
+            {field.required && <span className="text-destructive ml-1">*</span>}
+         </Label>
+         <Input id={`preview-${field.id}`} readOnly type="date" />
+      </div>
+   );
+}
+
+function PreviewRatingField({ field }: { field: FormField }) {
+   return (
+      <div className="space-y-2">
+         <Label>
+            {field.label}
+            {field.required && <span className="text-destructive ml-1">*</span>}
+         </Label>
+         <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+               <Star
+                  className="size-6 text-muted-foreground/40 fill-muted-foreground/10"
+                  key={`star-${star}`}
+               />
+            ))}
+         </div>
+      </div>
+   );
+}
+
+function PreviewFileField({ field }: { field: FormField }) {
+   return (
+      <div className="space-y-2">
+         <Label htmlFor={`preview-${field.id}`}>
+            {field.label}
+            {field.required && <span className="text-destructive ml-1">*</span>}
+         </Label>
+         <Input id={`preview-${field.id}`} readOnly type="file" />
+      </div>
+   );
+}
+
 const FIELD_RENDERERS: Record<
    FormField["type"],
    React.ComponentType<{ field: FormField }>
@@ -130,6 +194,10 @@ const FIELD_RENDERERS: Record<
    textarea: PreviewTextareaField,
    checkbox: PreviewCheckboxField,
    select: PreviewSelectField,
+   number: PreviewNumberField,
+   date: PreviewDateField,
+   rating: PreviewRatingField,
+   file: PreviewFileField,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -153,21 +221,32 @@ function PreviewEmptyState() {
 // Form Preview
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function FormPreview({ name, description, fields }: FormPreviewProps) {
+export function FormPreview({
+   name,
+   description,
+   title,
+   subtitle,
+   icon,
+   buttonText,
+   fields,
+}: FormPreviewProps) {
+   const displayTitle = title || name || "Sem título";
+   const displaySubtitle = subtitle || description;
+
    return (
-      <div className="max-w-2xl mx-auto">
-         <Card>
+      <div className="max-w-2xl mx-auto space-y-3">
+         {/* Mirror the SDK embed appearance */}
+         <p className="text-xs text-muted-foreground text-center">
+            Este preview representa exatamente como o formulário aparece no blog
+         </p>
+         <Card className="border-2">
             <CardHeader>
-               <div className="flex items-center justify-between gap-3">
-                  <div className="space-y-1">
-                     <CardTitle className="text-xl">
-                        {name || "Sem título"}
-                     </CardTitle>
-                     {description && (
-                        <CardDescription>{description}</CardDescription>
-                     )}
-                  </div>
-                  <Badge variant="secondary">Visualização</Badge>
+               <div className="space-y-1">
+                  {icon && <span className="text-2xl">{icon}</span>}
+                  <CardTitle className="text-xl">{displayTitle}</CardTitle>
+                  {displaySubtitle && (
+                     <CardDescription>{displaySubtitle}</CardDescription>
+                  )}
                </div>
             </CardHeader>
 
@@ -183,7 +262,7 @@ export function FormPreview({ name, description, fields }: FormPreviewProps) {
 
                      <div className="pt-2">
                         <Button disabled type="button">
-                           Enviar
+                           {buttonText || "Enviar"}
                         </Button>
                      </div>
                   </div>
