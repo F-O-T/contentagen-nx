@@ -21,7 +21,7 @@ import {
 	deleteForm,
 	getFormById,
 	getFormSubmissions,
-	listForms,
+	listFormsByTeam,
 	updateForm,
 } from "@packages/database/repositories/form-repository";
 import {
@@ -80,6 +80,7 @@ describe("create", () => {
 		await call(formsRouter.create, input, { context: ctx });
 
 		expect(emitFormCreated).toHaveBeenCalledWith(
+			expect.anything(), // EmitFn
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -112,12 +113,12 @@ describe("list", () => {
 	it("returns forms for organization", async () => {
 		const forms = [makeForm(), makeForm({ id: "form-2", name: "Signup Form" })];
 		// biome-ignore lint/suspicious/noExplicitAny: mock doesn't include submissionCount projection
-		vi.mocked(listForms).mockResolvedValueOnce(forms as any);
+		vi.mocked(listFormsByTeam).mockResolvedValueOnce(forms as any);
 
 		const ctx = createTestContext();
 		const result = await call(formsRouter.list, undefined, { context: ctx });
 
-		expect(listForms).toHaveBeenCalledWith(expect.anything(), TEST_ORG_ID);
+		expect(listFormsByTeam).toHaveBeenCalledWith(expect.anything(), TEST_TEAM_ID);
 		expect(result).toHaveLength(2);
 	});
 });
@@ -212,6 +213,7 @@ describe("update", () => {
 		await call(formsRouter.update, input, { context: ctx });
 
 		expect(emitFormUpdated).toHaveBeenCalledWith(
+			expect.anything(), // EmitFn
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -253,6 +255,7 @@ describe("remove", () => {
 		await call(formsRouter.remove, { id: FORM_ID }, { context: ctx });
 
 		expect(emitFormDeleted).toHaveBeenCalledWith(
+			expect.anything(), // EmitFn
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,

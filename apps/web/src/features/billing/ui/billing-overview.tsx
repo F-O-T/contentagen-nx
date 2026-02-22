@@ -143,6 +143,7 @@ const EARLY_ACCESS_CATEGORY_GATES: Record<
    string,
    { flag: string; fallbackStage: FeatureStage }
 > = {
+   content: { flag: "content", fallbackStage: "alpha" },
    form: { flag: "forms-beta", fallbackStage: "beta" },
    experiment: { flag: "experiments", fallbackStage: "alpha" },
    cluster: { flag: "content-clusters", fallbackStage: "alpha" },

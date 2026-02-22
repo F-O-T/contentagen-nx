@@ -587,5 +587,9 @@ Stage is resolved from PostHog's early access feature config at runtime (`featur
 | Feature | Flag key | Stage |
 |---------|----------|-------|
 | Banco de Imagens | `asset-bank` | alpha |
+| Conteúdo | `content` | alpha |
 | Experimentos | `experiments` | alpha |
 | Formulários | `forms-beta` | beta |
+| Dashboards | `dashboards` | beta |
+| Insights | `insights` | beta |
+| Dados | `data-management` | beta |

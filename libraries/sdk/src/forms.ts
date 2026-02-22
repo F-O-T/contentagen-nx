@@ -4,6 +4,25 @@ import { createSdk } from "./index.ts";
 
 // ── Type Definitions ────────────────────────────────────────────
 
+/** Minimal typed interface for the forms-related SDK calls used internally. */
+interface FormsSubmitResult {
+	success: boolean;
+	submissionId: string;
+	settings: { successMessage?: string; redirectUrl?: string };
+}
+
+interface FormsApiClient {
+	forms: {
+		get: (input: { formId: string }) => Promise<FormDefinition>;
+		submit: (input: {
+			formId: string;
+			data: Record<string, unknown>;
+			experimentId?: string;
+			variantId?: string;
+		}) => Promise<FormsSubmitResult>;
+	};
+}
+
 interface FormField {
 	id: string;
 	type:
@@ -254,7 +273,7 @@ export class ContenttaFormsClient {
 	private config: ContenttaSdkConfig;
 	private tracker: ContenttaEventTracker;
 	private apiUrl: string;
-	private readonly sdk: any;
+	private readonly sdk: FormsApiClient;
 
 	constructor(config: ContenttaSdkConfig, tracker: ContenttaEventTracker) {
 		this.config = config;
@@ -265,7 +284,7 @@ export class ContenttaFormsClient {
 		this.sdk = createSdk({
 			apiKey: this.config.apiKey,
 			host: this.apiUrl,
-		}) as any;
+		}) as unknown as FormsApiClient;
 	}
 
 	// ── Public API ──────────────────────────────────────────────
@@ -601,56 +620,46 @@ export class ContenttaFormsClient {
 			// Use oRPC client to submit form
 			this.sdk.forms
 				.submit(submissionData)
-				.then(
-					(result: {
-						success: boolean;
-						submissionId: string;
-						settings: { successMessage?: string; redirectUrl?: string };
-					}) => {
-						this.tracker.track("form.submitted", {
-							formId,
-							pageUrl:
-								typeof window !== "undefined" ? window.location.href : "",
-							referrer:
-								typeof document !== "undefined" ? document.referrer : "",
+				.then((result: FormsSubmitResult) => {
+					this.tracker.track("form.submitted", {
+						formId,
+						pageUrl: typeof window !== "undefined" ? window.location.href : "",
+						referrer: typeof document !== "undefined" ? document.referrer : "",
+					});
+
+					if (options?.experimentId && options?.variantId) {
+						this.tracker.track("experiment.conversion", {
+							targetType: "form",
+							targetId: formId,
+							experimentId: options.experimentId,
+							variantId: options.variantId,
+							visitorId: this.tracker.getVisitorId(),
+							sessionId: this.tracker.getSessionId(),
 						});
+					}
 
-						if (options?.experimentId && options?.variantId) {
-							this.tracker.track("experiment.conversion", {
-								targetType: "form",
-								targetId: formId,
-								experimentId: options.experimentId,
-								variantId: options.variantId,
-								visitorId: this.tracker.getVisitorId(),
-								sessionId: this.tracker.getSessionId(),
-							});
-						}
+					const successMessage =
+						result.settings?.successMessage ??
+						"Obrigado! Sua resposta foi recebida.";
+					const redirectUrl = result.settings?.redirectUrl;
 
-						const successMessage =
-							result.settings?.successMessage ??
-							"Obrigado! Sua resposta foi recebida.";
-						const redirectUrl = result.settings?.redirectUrl;
-
-						if (redirectUrl) {
-							if (isSafeRedirectUrl(redirectUrl)) {
-								window.location.href = redirectUrl;
-							} else {
-								console.error(
-									`[ContenttaForms] Unsafe redirect URL: ${redirectUrl}`,
-								);
-							}
+					if (redirectUrl) {
+						if (isSafeRedirectUrl(redirectUrl)) {
+							window.location.href = redirectUrl;
 						} else {
-							this.showSuccess(container, successMessage);
+							console.error(
+								`[ContenttaForms] Unsafe redirect URL: ${redirectUrl}`,
+							);
 						}
-					},
-				)
-				.catch((error: any) => {
-					// Handle validation errors (ORPCError with UNPROCESSABLE_ENTITY)
-					if (error?.cause?.errors && typeof error.cause.errors === "object") {
-						this.showErrors(
-							formElement,
-							error.cause.errors as Record<string, string>,
-						);
+					} else {
+						this.showSuccess(container, successMessage);
+					}
+				})
+				.catch((error: unknown) => {
+					// Handle validation errors (ORPCError with UNPROCESSABLE_CONTENT)
+					const err = error as { cause?: { errors?: Record<string, string> } };
+					if (err?.cause?.errors && typeof err.cause.errors === "object") {
+						this.showErrors(formElement, err.cause.errors);
 					} else {
 						const errorMessage =
 							error instanceof Error ? error.message : "Unknown error";

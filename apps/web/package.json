@@ -11,6 +11,7 @@
       "test": "vitest run --passWithNoTests",
       "format": "biome format",
       "lint": "biome lint",
+      "typecheck": "tsgo",
       "check": "biome check --write"
    },
    "dependencies": {

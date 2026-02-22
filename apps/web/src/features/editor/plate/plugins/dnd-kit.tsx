@@ -1,7 +1,7 @@
 import { DndPlugin } from "@platejs/dnd";
 
 export const DndKit = [
-	DndPlugin.configure({
-		options: { enableScroller: true },
-	}),
+   DndPlugin.configure({
+      options: { enableScroller: true },
+   }),
 ] as const;
