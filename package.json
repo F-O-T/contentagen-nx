@@ -36,7 +36,7 @@
       "db:push:prod": "nx run database:db-push-prod",
       "db:studio:local": "nx run database:db-studio-local",
       "db:studio:prod": "nx run database:db-studio-prod",
-      "dev": "bun run scripts/seed-event-catalog.ts run --env local && nx run-many -t dev --parallel=3 -p web",
+      "dev": "cd apps/web && bun run container-start && cd ../.. && bun run scripts/seed-event-catalog.ts run --env local && nx run-many -t dev --parallel=3 -p web",
       "dev:all": "bun run scripts/seed-event-catalog.ts run --env local && nx run-many -t dev --parallel=6",
       "dev:blog": "nx run-many -t dev --parallel=1 -p  blog ",
       "dev:content-apps": "nx run-many -t dev --parallel=3 -p  landing-page blog docs",
