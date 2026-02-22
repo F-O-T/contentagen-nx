@@ -158,13 +158,13 @@ export function FormBuilder({ formId }: FormBuilderProps) {
       if (existingForm && !hasInitialized) {
          setName(existingForm.name);
          setDescription(existingForm.description ?? "");
-         // biome-ignore lint/suspicious/noExplicitAny: CTA columns not yet typed on client query result
-         const form = existingForm as any;
-         setTitle(form.title ?? "");
-         setSubtitle(form.subtitle ?? "");
-         setIcon(form.icon ?? "");
-         setButtonText(form.buttonText ?? "Enviar");
-         setLayout((form.layout as "card" | "inline" | "banner") ?? "card");
+         setTitle(existingForm.title ?? "");
+         setSubtitle(existingForm.subtitle ?? "");
+         setIcon(existingForm.icon ?? "");
+         setButtonText(existingForm.buttonText ?? "Enviar");
+         setLayout(
+            (existingForm.layout as "card" | "inline" | "banner") ?? "card",
+         );
          setSuccessMessage(
             (existingForm.settings as { successMessage?: string })
                ?.successMessage ?? "",

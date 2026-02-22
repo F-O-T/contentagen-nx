@@ -276,7 +276,9 @@ export function PlateEditor({
                   onStatusChange={onStatusChange}
                   onToggleSidebar={onToggleSidebar}
                   showSidebar={showLinksSidebar}
-                  status={status as "draft" | "published" | "archived" | undefined}
+                  status={
+                     status as "draft" | "published" | "archived" | undefined
+                  }
                />
 
                {/* Frontmatter section */}
