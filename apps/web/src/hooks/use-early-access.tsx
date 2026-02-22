@@ -13,6 +13,9 @@ type EarlyAccessContextValue = {
    enrolledFeatures: Set<string>;
    features: ReturnType<typeof useEarlyAccessFeatures>["features"];
    isEnrolled: (flagKey: string) => boolean;
+   getFeatureStage: (
+      flagKey: string,
+   ) => "alpha" | "beta" | "concept" | "general-availability" | null;
    updateEnrollment: (flagKey: string, isEnrolled: boolean) => void;
    isBannerVisible: boolean;
    dismissBanner: () => void;
@@ -48,12 +51,21 @@ export function EarlyAccessProvider({ children }: { children: ReactNode }) {
       setDismissedFlagsState(allFlagKeys);
    }, [features, setDismissedFlagsState]);
 
+   const getFeatureStage = useCallback(
+      (flagKey: string) => {
+         const feature = features.find((f) => f.flagKey === flagKey);
+         return feature?.stage ?? null;
+      },
+      [features],
+   );
+
    const value = useMemo<EarlyAccessContextValue>(
       () => ({
          loaded,
          enrolledFeatures,
          features,
          isEnrolled,
+         getFeatureStage,
          updateEnrollment,
          isBannerVisible,
          dismissBanner,
@@ -63,6 +75,7 @@ export function EarlyAccessProvider({ children }: { children: ReactNode }) {
          enrolledFeatures,
          features,
          isEnrolled,
+         getFeatureStage,
          updateEnrollment,
          isBannerVisible,
          dismissBanner,
