@@ -315,7 +315,9 @@ function ModelSelectionSection({
                   <Slider
                      max={2}
                      min={0}
-                     onValueChange={([value]) => setContentTemp(value ?? 0)}
+                     onValueChange={([value]) => {
+                        if (value !== undefined) setContentTemp(value);
+                     }}
                      step={0.05}
                      value={[contentTemp]}
                   />
@@ -384,9 +386,9 @@ function ModelSelectionSection({
                   <Slider
                      max={2}
                      min={0}
-                     onValueChange={([value]) =>
-                        setAutocompleteTemp(value ?? 0)
-                     }
+                     onValueChange={([value]) => {
+                        if (value !== undefined) setAutocompleteTemp(value);
+                     }}
                      step={0.05}
                      value={[autocompleteTemp]}
                   />
@@ -431,7 +433,9 @@ function ModelSelectionSection({
                   <Slider
                      max={2}
                      min={0}
-                     onValueChange={([value]) => setEditTemp(value ?? 0)}
+                     onValueChange={([value]) => {
+                        if (value !== undefined) setEditTemp(value);
+                     }}
                      step={0.05}
                      value={[editTemp]}
                   />
@@ -1135,7 +1139,7 @@ function AiAgentsContent() {
             }
             currentMinCredibility={settings?.aiDefaults?.minCredibility}
             currentPreferredSearchProvider={
-               settings?.aiDefaults?.preferredSearchProvider
+               settings?.aiDefaults?.preferredSearchProvider ?? undefined
             }
             currentRequireAuthoritativeSources={
                settings?.aiDefaults?.requireAuthoritativeSources
