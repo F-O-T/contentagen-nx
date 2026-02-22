@@ -63,6 +63,10 @@ export const addInternalLinksTool = createTool({
 
       const postsToInsert = relatedPosts.slice(0, maxLinks);
 
+      // Track cumulative offset delta to account for characters added by previous inline insertions.
+      // Each inline insertion shifts all subsequent paragraph indices.
+      let offsetDelta = 0;
+
       for (let i = 0; i < postsToInsert.length; i++) {
          const post = postsToInsert[i];
          if (!post) continue;
@@ -73,13 +77,16 @@ export const addInternalLinksTool = createTool({
             // Insert inline after first sentence end ". "
             const sentenceEnd = paragraph.text.indexOf(". ");
             if (sentenceEnd > 20) {
-               const insertOffset = paragraph.index + sentenceEnd + 2;
+               // Adjust for characters added by previous insertions
+               const insertOffset = paragraph.index + offsetDelta + sentenceEnd + 2;
                const anchor = `[${post.title}](/conteudo/${post.slug})`;
                modifiedContent =
                   modifiedContent.slice(0, insertOffset) +
                   anchor +
                   " " +
                   modifiedContent.slice(insertOffset);
+               // anchor.length + 1 for the trailing space
+               offsetDelta += anchor.length + 1;
                linksAdded.push({
                   title: post.title,
                   slug: post.slug,
