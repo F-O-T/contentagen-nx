@@ -464,6 +464,17 @@ export class ContenttaFormsClient {
 								typeof document !== "undefined" ? document.referrer : "",
 						});
 
+						if (options?.experimentId && options?.variantId) {
+							this.tracker.track("experiment.conversion", {
+								targetType: "form",
+								targetId: formId,
+								experimentId: options.experimentId,
+								variantId: options.variantId,
+								visitorId: this.tracker.getVisitorId(),
+								sessionId: this.tracker.getSessionId(),
+							});
+						}
+
 						const successMessage =
 							result.settings?.successMessage ??
 							"Thank you! Your submission has been received.";
