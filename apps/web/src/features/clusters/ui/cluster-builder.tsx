@@ -400,6 +400,12 @@ function ClusterBuilderEdit({ clusterId, backTo }: ClusterBuilderEditProps) {
       }),
    );
 
+   const updateTitleMutation = useMutation(
+      orpc.content.update.mutationOptions({
+         onError: () => toast.error("Erro ao salvar título"),
+      }),
+   );
+
    const removeMutation = useMutation(
       orpc.relatedContent.removeSatellite.mutationOptions({
          onSuccess: () => {
@@ -421,7 +427,21 @@ function ClusterBuilderEdit({ clusterId, backTo }: ClusterBuilderEditProps) {
          id: clusterId,
          clusterConfig: { mode },
       });
-   }, [clusterId, mode, updateMutation]);
+
+      if (pillarTitle !== cluster.meta.title) {
+         updateTitleMutation.mutate({
+            id: clusterId,
+            data: { meta: { title: pillarTitle } },
+         });
+      }
+   }, [
+      clusterId,
+      mode,
+      pillarTitle,
+      cluster.meta.title,
+      updateMutation,
+      updateTitleMutation,
+   ]);
 
    const handleDelete = useCallback(() => {
       openAlertDialog({
@@ -476,7 +496,7 @@ function ClusterBuilderEdit({ clusterId, backTo }: ClusterBuilderEditProps) {
          <ClusterBuilderHeader
             backTo={{ slug, teamSlug }}
             isNew={false}
-            isSaving={updateMutation.isPending}
+            isSaving={updateMutation.isPending || updateTitleMutation.isPending}
             onDelete={handleDelete}
             onSave={handleSave}
             onTitleChange={setPillarTitle}
