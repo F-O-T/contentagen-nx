@@ -81,6 +81,31 @@ function validateSubmission(
                `${field.label} must be one of the allowed options.`;
          }
       }
+
+      // Number validation
+      if (
+         field.type === "number" &&
+         value !== undefined &&
+         value !== null &&
+         value !== ""
+      ) {
+         if (typeof value !== "string" || Number.isNaN(Number(value))) {
+            errors[field.id] = `${field.label} must be a valid number.`;
+         }
+      }
+
+      // Rating validation (1-5)
+      if (
+         field.type === "rating" &&
+         value !== undefined &&
+         value !== null &&
+         value !== ""
+      ) {
+         const num = Number(value);
+         if (Number.isNaN(num) || num < 1 || num > 5) {
+            errors[field.id] = `${field.label} must be between 1 and 5.`;
+         }
+      }
    }
 
    return Object.keys(errors).length > 0 ? errors : null;
@@ -107,6 +132,11 @@ export const get = sdkProcedure
             description: forms.description,
             fields: forms.fields,
             settings: forms.settings,
+            title: forms.title,
+            subtitle: forms.subtitle,
+            icon: forms.icon,
+            buttonText: forms.buttonText,
+            layout: forms.layout,
          })
          .from(forms)
          .where(

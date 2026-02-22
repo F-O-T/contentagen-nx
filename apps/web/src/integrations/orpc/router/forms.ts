@@ -23,7 +23,17 @@ import { protectedProcedure } from "../server";
 
 const fieldSchema = z.object({
    id: z.string(),
-   type: z.enum(["text", "email", "textarea", "checkbox", "select"]),
+   type: z.enum([
+      "text",
+      "email",
+      "textarea",
+      "checkbox",
+      "select",
+      "number",
+      "date",
+      "rating",
+      "file",
+   ]),
    label: z.string(),
    placeholder: z.string().optional(),
    required: z.boolean(),
@@ -42,6 +52,11 @@ const createFormSchema = z.object({
    description: z.string().optional(),
    fields: z.array(fieldSchema).min(1),
    settings: settingsSchema.optional(),
+   title: z.string().optional(),
+   subtitle: z.string().optional(),
+   icon: z.string().optional(),
+   buttonText: z.string().optional(),
+   layout: z.enum(["card", "inline", "banner"]).optional(),
 });
 
 const updateFormSchema = z.object({
@@ -51,6 +66,11 @@ const updateFormSchema = z.object({
    fields: z.array(fieldSchema).min(1).optional(),
    settings: settingsSchema.optional(),
    isActive: z.boolean().optional(),
+   title: z.string().optional(),
+   subtitle: z.string().optional(),
+   icon: z.string().optional(),
+   buttonText: z.string().optional(),
+   layout: z.enum(["card", "inline", "banner"]).optional(),
 });
 
 // =============================================================================
@@ -72,6 +92,11 @@ export const create = protectedProcedure
          description: input.description,
          fields: input.fields,
          settings: input.settings ?? {},
+         title: input.title,
+         subtitle: input.subtitle,
+         icon: input.icon,
+         buttonText: input.buttonText,
+         layout: input.layout,
       });
 
       try {
