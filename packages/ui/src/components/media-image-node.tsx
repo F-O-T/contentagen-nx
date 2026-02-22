@@ -7,7 +7,6 @@ import { ResizableProvider, useResizableValue } from "@platejs/resizable";
 import type { TImageElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, withHOC } from "platejs/react";
-import * as React from "react";
 
 import { Caption, CaptionTextarea } from "./caption";
 import { MediaToolbar } from "./media-toolbar";

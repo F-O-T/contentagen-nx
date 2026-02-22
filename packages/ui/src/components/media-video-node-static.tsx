@@ -2,7 +2,6 @@ import type { TCaptionElement, TResizableProps, TVideoElement } from "platejs";
 import { NodeApi } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
-import * as React from "react";
 
 export function VideoElementStatic(
    props: SlateElementProps<TVideoElement & TCaptionElement & TResizableProps>,
@@ -16,12 +15,13 @@ export function VideoElementStatic(
                className="group relative m-0 inline-block cursor-default"
                style={{ width }}
             >
+               {/* biome-ignore lint/a11y/useMediaCaption: video player for user-uploaded content */}
                <video
                   className="w-full max-w-full rounded-sm object-cover px-0"
                   controls
                   src={url}
                />
-               {caption && caption[0] && (
+               {caption?.[0] && (
                   <figcaption>{NodeApi.string(caption[0])}</figcaption>
                )}
             </figure>

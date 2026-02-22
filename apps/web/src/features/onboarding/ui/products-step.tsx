@@ -107,10 +107,9 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
 
       const handleComplete = useCallback(async () => {
          try {
-            const result =
-               await orpc.onboarding.completeOnboarding.call({
-                  products: selected,
-               });
+            const result = await orpc.onboarding.completeOnboarding.call({
+               products: selected,
+            });
 
             await authClient.organization.setActiveTeam({ teamId });
 
@@ -171,6 +170,7 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
                      const Icon = product.icon;
 
                      return (
+                        // biome-ignore lint/a11y/useSemanticElements: div with block-level children cannot use button element
                         <div
                            className={cn(
                               "flex w-full cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-all",

@@ -7,10 +7,10 @@ import {
    CardTitle,
 } from "@packages/ui/components/card";
 import { Progress } from "@packages/ui/components/progress";
-import { useSafeLocalStorage } from "@/hooks/use-local-storage";
 import { useParams } from "@tanstack/react-router";
 import { ChevronDown, ChevronUp, Rocket, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import { useSafeLocalStorage } from "@/hooks/use-local-storage";
 import { useCompleteTask } from "../hooks/use-complete-task";
 import { useOnboardingStatus } from "../hooks/use-onboarding-status";
 import {

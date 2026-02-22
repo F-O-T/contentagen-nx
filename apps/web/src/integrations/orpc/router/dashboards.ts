@@ -12,12 +12,12 @@ import {
    DashboardDateRangeSchema,
    DashboardFilterSchema,
 } from "@packages/database/schemas/dashboards";
-import { createEmitFn } from "@packages/events/emit";
 import {
    emitDashboardCreated,
    emitDashboardDeleted,
    emitDashboardUpdated,
 } from "@packages/events/dashboard";
+import { createEmitFn } from "@packages/events/emit";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 

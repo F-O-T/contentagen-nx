@@ -51,9 +51,9 @@ const addVariantSchema = z.object({
 // =============================================================================
 
 export const list = protectedProcedure.handler(async ({ context }) => {
-      const { db, teamId } = context;
-      return listExperimentsByTeam(db, teamId);
-   });
+   const { db, teamId } = context;
+   return listExperimentsByTeam(db, teamId);
+});
 
 export const getById = protectedProcedure
    .input(z.object({ id: z.string().uuid() }))
@@ -164,7 +164,10 @@ export const conclude = protectedProcedure
             message: "Experiment is already concluded",
          });
       }
-      if (input.winnerId && !existing.variants.some((v) => v.id === input.winnerId)) {
+      if (
+         input.winnerId &&
+         !existing.variants.some((v) => v.id === input.winnerId)
+      ) {
          throw new ORPCError("UNPROCESSABLE_ENTITY", {
             message: "Winner must be a variant of this experiment",
          });
@@ -194,27 +197,43 @@ export const addVariantToExperiment = protectedProcedure
       if (experiment.targetType === "content") {
          if (!input.contentId || input.formId) {
             throw new ORPCError("BAD_REQUEST", {
-               message: "contentId is required and formId must not be set for content experiments",
+               message:
+                  "contentId is required and formId must not be set for content experiments",
             });
          }
          const [row] = await db
             .select({ id: content.id })
             .from(content)
-            .where(and(eq(content.id, input.contentId), eq(content.organizationId, organizationId)))
+            .where(
+               and(
+                  eq(content.id, input.contentId),
+                  eq(content.organizationId, organizationId),
+               ),
+            )
             .limit(1);
          if (!row) {
             throw new ORPCError("NOT_FOUND", { message: "Content not found" });
          }
+      } else if (experiment.targetType === "cluster") {
+         throw new ORPCError("BAD_REQUEST", {
+            message: "Cluster experiments are not yet supported",
+         });
       } else if (experiment.targetType === "form") {
          if (!input.formId || input.contentId) {
             throw new ORPCError("BAD_REQUEST", {
-               message: "formId is required and contentId must not be set for form experiments",
+               message:
+                  "formId is required and contentId must not be set for form experiments",
             });
          }
          const [row] = await db
             .select({ id: forms.id })
             .from(forms)
-            .where(and(eq(forms.id, input.formId), eq(forms.organizationId, organizationId)))
+            .where(
+               and(
+                  eq(forms.id, input.formId),
+                  eq(forms.organizationId, organizationId),
+               ),
+            )
             .limit(1);
          if (!row) {
             throw new ORPCError("NOT_FOUND", { message: "Form not found" });

@@ -51,6 +51,8 @@ export function EquationElement(props: PlateElementProps<TEquationElement>) {
       <PlateElement className="my-1" {...props}>
          <Popover modal={false} onOpenChange={setOpen} open={open}>
             <PopoverTrigger asChild>
+               {/* biome-ignore lint/a11y/useFocusableInteractive: Plate.js editor element */}
+               {/* biome-ignore lint/a11y/useSemanticElements: Plate.js editor element with block content */}
                <div
                   className={cn(
                      "group flex cursor-pointer select-none items-center justify-center rounded-sm hover:bg-primary/10 data-[selected=true]:bg-primary/10",

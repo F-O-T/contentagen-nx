@@ -17,6 +17,11 @@ import {
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
 import { Input } from "@packages/ui/components/input";
+import { Label } from "@packages/ui/components/label";
+import {
+   RadioGroup,
+   RadioGroupItem,
+} from "@packages/ui/components/radio-group";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { Textarea } from "@packages/ui/components/textarea";
 import {
@@ -31,8 +36,8 @@ import {
    useQueryClient,
    useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useDebounce } from "@uidotdev/usehooks";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useDebounce } from "@uidotdev/usehooks";
 import {
    ChevronDown,
    Eye,
@@ -48,11 +53,6 @@ import {
    X,
 } from "lucide-react";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import {
-   RadioGroup,
-   RadioGroupItem,
-} from "@packages/ui/components/radio-group";
-import { Label } from "@packages/ui/components/label";
 import { useDropzone } from "react-dropzone";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
@@ -654,7 +654,6 @@ const IMAGE_MODEL_NAMES: Record<string, string> = {
    "bytedance-seed/seedream-4.5": "Seedream 4.5",
 };
 
-
 const ASPECT_OPTIONS = [
    { value: "1:1" as const, label: "1:1" },
    { value: "16:9" as const, label: "16:9" },
@@ -690,7 +689,8 @@ function GenerateImageCredenzaContent({
       orpc.productSettings.getSettings.queryOptions({ input: {} }),
    );
    const modelId =
-      settings?.aiDefaults?.imageGenerationModel ?? "sourceful/riverflow-v2-pro";
+      settings?.aiDefaults?.imageGenerationModel ??
+      "sourceful/riverflow-v2-pro";
    const modelPrice = toMajorUnitsString(getImageGenerationPrice(modelId));
    const modelName = IMAGE_MODEL_NAMES[modelId] ?? modelId;
 
@@ -801,10 +801,10 @@ function GenerateImageCredenzaContent({
                   </div>
                   <div className="flex justify-end">
                      <Button
+                        onClick={handleCancel}
+                        size="sm"
                         type="button"
                         variant="ghost"
-                        size="sm"
-                        onClick={handleCancel}
                      >
                         Cancelar
                      </Button>
@@ -822,20 +822,21 @@ function GenerateImageCredenzaContent({
                   </div>
                   <p className="text-center text-sm text-muted-foreground">
                      {generatedAsset.filename}
-                     {generatedAsset.width != null && generatedAsset.height != null
+                     {generatedAsset.width != null &&
+                     generatedAsset.height != null
                         ? ` · ${generatedAsset.width}×${generatedAsset.height}`
                         : ""}{" "}
                      · {(generatedAsset.size / 1024).toFixed(0)} KB
                   </p>
                   <CredenzaFooter className="flex gap-2 justify-end">
                      <Button
+                        onClick={handleGenerateAgain}
                         type="button"
                         variant="outline"
-                        onClick={handleGenerateAgain}
                      >
                         Gerar novamente
                      </Button>
-                     <Button type="button" onClick={handleSaveAndClose}>
+                     <Button onClick={handleSaveAndClose} type="button">
                         Salvar no banco
                      </Button>
                   </CredenzaFooter>
@@ -922,7 +923,6 @@ function AssetBankContent() {
    const debouncedSearch = useDebounce(search, 300);
    const [page, setPage] = useState(0);
    const [total, setTotal] = useState(0);
-
 
    const { enabled: aiImageEnabled } = useFeatureFlag("ai-image-generation");
 

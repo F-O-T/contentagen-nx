@@ -116,6 +116,7 @@ export function BlockSuggestionCard({
    const [editingId, setEditingId] = React.useState<string | null>(null);
 
    return (
+      // biome-ignore lint/a11y/noStaticElementInteractions: hover tracking on container
       <div
          className="relative"
          key={`${suggestion.suggestionId}-${idx}`}

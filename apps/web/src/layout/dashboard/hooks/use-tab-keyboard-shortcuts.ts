@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+import { useEventListener } from "@/hooks/use-event-listener";
 import {
    closeTab,
    focusTab,
@@ -5,8 +7,6 @@ import {
    getPreviousTabId,
    tabStore,
 } from "@/hooks/use-tab-store";
-import { useEventListener } from "@/hooks/use-event-listener";
-import { useCallback } from "react";
 
 export function useTabKeyboardShortcuts({
    onNewTab,

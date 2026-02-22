@@ -231,6 +231,9 @@ export function ToolbarSplitButtonSecondary({
 }: React.ComponentPropsWithoutRef<"span"> &
    VariantProps<typeof dropdownArrowVariants>) {
    return (
+      // biome-ignore lint/a11y/useFocusableInteractive: Plate.js toolbar dropdown arrow
+      // biome-ignore lint/a11y/useKeyWithClickEvents: Plate.js toolbar pattern
+      // biome-ignore lint/a11y/useSemanticElements: Plate.js toolbar dropdown arrow
       <span
          className={cn(
             dropdownArrowVariants({

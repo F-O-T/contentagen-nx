@@ -7,7 +7,6 @@ import {
    RadioGroup,
    RadioGroupItem,
 } from "@packages/ui/components/radio-group";
-import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import {
    useMutation,
@@ -94,24 +93,25 @@ function ImageGenerationModelSection({
             </p>
          </div>
          <RadioGroup
+            className="flex flex-col gap-4"
             onValueChange={setModel}
             value={model}
-            className="flex flex-col gap-4"
          >
             {IMAGE_MODELS.map((m) => (
                <div
                   className="flex items-start gap-3 rounded-lg border p-4"
                   key={m.id}
                >
-                  <RadioGroupItem id={m.id} value={m.id} className="mt-0.5" />
+                  <RadioGroupItem className="mt-0.5" id={m.id} value={m.id} />
                   <div className="flex-1 space-y-1">
                      <Label
-                        htmlFor={m.id}
                         className="flex cursor-pointer items-center gap-2 font-medium"
+                        htmlFor={m.id}
                      >
                         {m.name}
-                        <Badge variant="secondary" className="font-normal">
-                           ~R${toMajorUnitsString(getImageGenerationPrice(m.id))}
+                        <Badge className="font-normal" variant="secondary">
+                           ~R$
+                           {toMajorUnitsString(getImageGenerationPrice(m.id))}
                         </Badge>
                      </Label>
                      <p className="text-sm text-muted-foreground">

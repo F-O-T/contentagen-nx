@@ -228,6 +228,7 @@ function ColumnFloatingToolbar({ children }: React.PropsWithChildren) {
 }
 
 const DoubleColumnOutlined = (props: LucideProps) => (
+   // biome-ignore lint/a11y/noSvgWithoutTitle: decorative icon
    <svg
       fill="none"
       height="16"
@@ -246,6 +247,7 @@ const DoubleColumnOutlined = (props: LucideProps) => (
 );
 
 const ThreeColumnOutlined = (props: LucideProps) => (
+   // biome-ignore lint/a11y/noSvgWithoutTitle: decorative icon
    <svg
       fill="none"
       height="16"
@@ -264,6 +266,7 @@ const ThreeColumnOutlined = (props: LucideProps) => (
 );
 
 const RightSideDoubleColumnOutlined = (props: LucideProps) => (
+   // biome-ignore lint/a11y/noSvgWithoutTitle: decorative icon
    <svg
       fill="none"
       height="16"
@@ -282,6 +285,7 @@ const RightSideDoubleColumnOutlined = (props: LucideProps) => (
 );
 
 const LeftSideDoubleColumnOutlined = (props: LucideProps) => (
+   // biome-ignore lint/a11y/noSvgWithoutTitle: decorative icon
    <svg
       fill="none"
       height="16"
@@ -300,6 +304,7 @@ const LeftSideDoubleColumnOutlined = (props: LucideProps) => (
 );
 
 const DoubleSideDoubleColumnOutlined = (props: LucideProps) => (
+   // biome-ignore lint/a11y/noSvgWithoutTitle: decorative icon
    <svg
       fill="none"
       height="16"

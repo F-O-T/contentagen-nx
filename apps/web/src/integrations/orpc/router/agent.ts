@@ -11,7 +11,6 @@ import { teamMember } from "@packages/database/schemas/auth";
 import { content } from "@packages/database/schemas/content";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { writer } from "@packages/database/schemas/writer";
-import { createEmitFn } from "@packages/events/emit";
 import {
    AI_EVENTS,
    emitAiAgentAction,
@@ -21,6 +20,7 @@ import {
    enforceCreditBudget,
    trackCreditUsage,
 } from "@packages/events/credits";
+import { createEmitFn } from "@packages/events/emit";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { ChatChunk, FIMChunk } from "@/features/editor/schemas";

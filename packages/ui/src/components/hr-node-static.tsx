@@ -3,7 +3,6 @@ import { cn } from "@packages/ui/lib/utils";
 import type { SlateElementProps } from "platejs/static";
 
 import { SlateElement } from "platejs/static";
-import * as React from "react";
 
 export function HrElementStatic(props: SlateElementProps) {
    return (

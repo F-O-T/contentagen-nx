@@ -555,7 +555,9 @@ function VolumeFeatureCard({
                         {config.icon}
                      </div>
                      <div className="min-w-0">
-                        <CardTitle className="text-base">{config.label}</CardTitle>
+                        <CardTitle className="text-base">
+                           {config.label}
+                        </CardTitle>
                         <CardDescription className="text-xs mt-0.5">
                            {config.description}
                         </CardDescription>

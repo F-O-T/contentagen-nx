@@ -43,7 +43,7 @@ export const aiChatPlugin = AIChatPlugin.extend({
                      },
                      {
                         at: PathApi.next(
-                           editor.selection!.focus.path.slice(0, 1),
+                           editor.selection?.focus.path.slice(0, 1),
                         ),
                      },
                   );

@@ -44,8 +44,9 @@ const DEFAULT_RETENTION_CONFIG: RetentionConfig = {
 export function useInsightConfig(initialType: InsightType = "trends") {
    const [type, setType] = useState<InsightType>(initialType);
    const [config, setConfig] = useState<InsightConfig>(DEFAULT_TRENDS_CONFIG);
-   const [pendingUpdates, setPendingUpdates] =
-      useState<Partial<InsightConfig>>({});
+   const [pendingUpdates, setPendingUpdates] = useState<Partial<InsightConfig>>(
+      {},
+   );
    const debouncedUpdates = useDebounce(pendingUpdates, 500);
 
    useEffect(() => {

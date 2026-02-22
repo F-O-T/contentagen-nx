@@ -125,12 +125,17 @@ export const getCurrentUsage = protectedProcedure.handler(
                .select()
                .from(currentMonthUsageByCategory)
                .where(
-                  eq(currentMonthUsageByCategory.organizationId, organizationId),
+                  eq(
+                     currentMonthUsageByCategory.organizationId,
+                     organizationId,
+                  ),
                ),
             db
                .select()
                .from(currentMonthStorageCost)
-               .where(eq(currentMonthStorageCost.organizationId, organizationId)),
+               .where(
+                  eq(currentMonthStorageCost.organizationId, organizationId),
+               ),
          ]);
 
          const byCategory = rows.map((row) => ({
