@@ -20,7 +20,7 @@ function ClustersPage() {
       <div className="space-y-6 p-6">
          <PageHeader
             title="Clusters"
-            description="Organize conteúdo em estruturas pilar + satélite para SEO"
+            description="Organize conteúdos relacionados em grupos temáticos"
             actions={
                <Button
                   onClick={() =>
