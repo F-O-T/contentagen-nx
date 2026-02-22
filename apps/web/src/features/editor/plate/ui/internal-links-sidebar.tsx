@@ -31,6 +31,14 @@ import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { ScrollArea } from "@packages/ui/components/scroll-area";
 import {
+   Table,
+   TableBody,
+   TableCell,
+   TableHead,
+   TableHeader,
+   TableRow,
+} from "@packages/ui/components/table";
+import {
    Tooltip,
    TooltipContent,
    TooltipProvider,
@@ -40,7 +48,7 @@ import { cn } from "@packages/ui/lib/utils";
 import { insertLink } from "@platejs/link";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { ExternalLink, Link2, Link2Off, Network, X } from "lucide-react";
+import { ExternalLink, Link2, Link2Off, Pencil, X } from "lucide-react";
 import { useEditorRef } from "platejs/react";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -50,10 +58,6 @@ interface Suggestion {
    slug: string;
    status: string;
    url: string;
-}
-
-interface SuggestionsListProps {
-   contentId: string;
 }
 
 const STATUS_VARIANT: Record<
@@ -78,12 +82,18 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const ROLE_COLORS: Record<string, string> = {
-   pillar: "text-violet-600 dark:text-violet-400",
-   satellite: "text-sky-600 dark:text-sky-400",
+   pillar: "text-violet-500 dark:text-violet-400",
+   satellite: "text-sky-500 dark:text-sky-400",
    standalone: "text-muted-foreground",
 };
 
-function SuggestionItem({ suggestion }: { suggestion: Suggestion }) {
+function SuggestionsTable({
+   suggestions,
+   role,
+}: {
+   suggestions: Suggestion[];
+   role: string;
+}) {
    const editor = useEditorRef();
    const navigate = useNavigate();
    const params = useParams({ strict: false }) as {
@@ -91,7 +101,7 @@ function SuggestionItem({ suggestion }: { suggestion: Suggestion }) {
       teamSlug: string;
    };
 
-   function handleInsertLink() {
+   function handleInsertLink(suggestion: Suggestion) {
       if (!editor.selection) {
          editor.tf.focus();
          editor.tf.select(editor.api.end([]));
@@ -99,92 +109,141 @@ function SuggestionItem({ suggestion }: { suggestion: Suggestion }) {
       insertLink(editor, { url: suggestion.url, text: suggestion.title });
    }
 
-   function handleNavigate() {
+   function handleNavigate(suggestion: Suggestion) {
       navigate({
          to: `/${params.slug}/${params.teamSlug}/content/${suggestion.id}`,
       });
    }
 
+   if (suggestions.length === 0) {
+      return (
+         <div className="flex flex-col items-center gap-3 py-10 px-4 text-center">
+            <Link2Off className="size-7 text-muted-foreground/30" />
+            <p className="text-xs text-muted-foreground/60 leading-relaxed">
+               Adicione este conteúdo a um cluster para ver sugestões de links
+               internos.
+            </p>
+         </div>
+      );
+   }
+
    return (
-      <div className="group relative flex items-center gap-2 rounded-md px-2 py-2.5 hover:bg-accent/60 transition-colors cursor-default overflow-hidden">
-         {/* Content — must have min-w-0 to allow truncation inside flex */}
-         <div className="flex-1 min-w-0 overflow-hidden">
-            <button
-               className="block w-full text-left min-w-0"
-               onClick={handleNavigate}
-               type="button"
+      <div className="flex flex-col">
+         {/* Role label */}
+         <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50">
+            <span
+               className={cn(
+                  "text-[11px] font-semibold uppercase tracking-widest",
+                  ROLE_COLORS[role] ?? "text-muted-foreground",
+               )}
             >
-               <p className="text-sm font-medium leading-snug truncate hover:underline">
-                  {suggestion.title || "Sem título"}
-               </p>
-            </button>
-            <div className="flex items-center gap-1.5 mt-1 min-w-0">
-               <Badge
-                  className="text-[10px] h-4 px-1.5 font-normal shrink-0"
-                  variant={STATUS_VARIANT[suggestion.status] ?? "outline"}
-               >
-                  {STATUS_LABELS[suggestion.status] ?? suggestion.status}
-               </Badge>
-               <span className="text-[10px] text-muted-foreground/50 truncate font-mono min-w-0">
-                  /{suggestion.slug}
-               </span>
-            </div>
+               {ROLE_LABELS[role] ?? role}
+            </span>
+            <span className="text-[11px] text-muted-foreground/40">
+               {suggestions.length}
+            </span>
          </div>
 
-         {/* Actions — always shrink-0, slide in on hover */}
-         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-            <Tooltip>
-               <TooltipTrigger asChild>
-                  <Button
-                     className="size-6 rounded"
-                     onClick={handleNavigate}
-                     size="icon"
-                     variant="ghost"
+         <Table>
+            <TableHeader>
+               <TableRow className="hover:bg-transparent border-b border-border/40">
+                  <TableHead className="h-7 px-3 text-[10px] font-medium text-muted-foreground/60 w-full">
+                     Título
+                  </TableHead>
+                  <TableHead className="h-7 px-2 text-[10px] font-medium text-muted-foreground/60 whitespace-nowrap">
+                     Status
+                  </TableHead>
+                  <TableHead className="h-7 w-[72px]" />
+               </TableRow>
+            </TableHeader>
+            <TableBody>
+               {suggestions.map((suggestion) => (
+                  <TableRow
+                     key={suggestion.id}
+                     className="group border-b border-border/30 hover:bg-accent/50 cursor-default"
                   >
-                     <Network className="size-3" />
-                  </Button>
-               </TooltipTrigger>
-               <TooltipContent side="left">Editar conteúdo</TooltipContent>
-            </Tooltip>
+                     {/* Title */}
+                     <TableCell className="px-3 py-2.5 max-w-0">
+                        <button
+                           type="button"
+                           onClick={() => handleNavigate(suggestion)}
+                           className="w-full text-left"
+                        >
+                           <span className="block text-xs font-medium truncate hover:underline leading-snug">
+                              {suggestion.title || "Sem título"}
+                           </span>
+                        </button>
+                     </TableCell>
 
-            <Tooltip>
-               <TooltipTrigger asChild>
-                  <a
-                     className={cn(
-                        "inline-flex size-6 items-center justify-center rounded",
-                        "text-xs ring-offset-background transition-colors",
-                        "hover:bg-accent hover:text-accent-foreground",
-                        "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                     )}
-                     href={`/${params.slug}/${params.teamSlug}/content/${suggestion.id}`}
-                     rel="noopener noreferrer"
-                     target="_blank"
-                  >
-                     <ExternalLink className="size-3" />
-                  </a>
-               </TooltipTrigger>
-               <TooltipContent side="left">Abrir em nova aba</TooltipContent>
-            </Tooltip>
+                     {/* Status */}
+                     <TableCell className="px-2 py-2.5 whitespace-nowrap">
+                        <Badge
+                           variant={STATUS_VARIANT[suggestion.status] ?? "outline"}
+                           className="text-[10px] h-4 px-1.5 font-normal"
+                        >
+                           {STATUS_LABELS[suggestion.status] ?? suggestion.status}
+                        </Badge>
+                     </TableCell>
 
-            <Tooltip>
-               <TooltipTrigger asChild>
-                  <Button
-                     className="size-6 rounded"
-                     onClick={handleInsertLink}
-                     size="icon"
-                     variant="ghost"
-                  >
-                     <Link2 className="size-3" />
-                  </Button>
-               </TooltipTrigger>
-               <TooltipContent side="left">Inserir link</TooltipContent>
-            </Tooltip>
-         </div>
+                     {/* Actions */}
+                     <TableCell className="px-2 py-2.5">
+                        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                           <Tooltip>
+                              <TooltipTrigger asChild>
+                                 <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="size-6 rounded"
+                                    onClick={() => handleNavigate(suggestion)}
+                                 >
+                                    <Pencil className="size-3" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="left">Editar conteúdo</TooltipContent>
+                           </Tooltip>
+
+                           <Tooltip>
+                              <TooltipTrigger asChild>
+                                 <a
+                                    href={`/${params.slug}/${params.teamSlug}/content/${suggestion.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={cn(
+                                       "inline-flex size-6 items-center justify-center rounded",
+                                       "transition-colors hover:bg-accent hover:text-accent-foreground",
+                                       "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                                    )}
+                                 >
+                                    <ExternalLink className="size-3" />
+                                 </a>
+                              </TooltipTrigger>
+                              <TooltipContent side="left">Abrir em nova aba</TooltipContent>
+                           </Tooltip>
+
+                           <Tooltip>
+                              <TooltipTrigger asChild>
+                                 <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="size-6 rounded"
+                                    onClick={() => handleInsertLink(suggestion)}
+                                 >
+                                    <Link2 className="size-3" />
+                                 </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="left">Inserir link</TooltipContent>
+                           </Tooltip>
+                        </div>
+                     </TableCell>
+                  </TableRow>
+               ))}
+            </TableBody>
+         </Table>
       </div>
    );
 }
 
-function SuggestionsList({ contentId }: SuggestionsListProps) {
+function SuggestionsList({ contentId }: { contentId: string }) {
    const { data } = useSuspenseQuery(
       orpc.relatedContent.getSuggestions.queryOptions({
          input: { contentId },
@@ -194,40 +253,7 @@ function SuggestionsList({ contentId }: SuggestionsListProps) {
 
    const { role, suggestions } = data;
 
-   return (
-      <div className="flex flex-col gap-0.5">
-         {/* Role header */}
-         <div className="flex items-center gap-2 px-2 py-2">
-            <span
-               className={cn(
-                  "text-xs font-semibold uppercase tracking-wider",
-                  ROLE_COLORS[role] ?? "text-muted-foreground",
-               )}
-            >
-               {ROLE_LABELS[role] ?? role}
-            </span>
-            <span className="text-xs text-muted-foreground/50">
-               · {suggestions.length}{" "}
-               {suggestions.length === 1 ? "link" : "links"}
-            </span>
-         </div>
-
-         {suggestions.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-8 px-4 text-center">
-               <Link2Off className="size-6 text-muted-foreground/30" />
-               <p className="text-xs text-muted-foreground/60">
-                  Adicione este conteúdo a um cluster para ver sugestões.
-               </p>
-            </div>
-         ) : (
-            <div className="flex flex-col">
-               {suggestions.map((suggestion) => (
-                  <SuggestionItem key={suggestion.id} suggestion={suggestion} />
-               ))}
-            </div>
-         )}
-      </div>
-   );
+   return <SuggestionsTable suggestions={suggestions} role={role} />;
 }
 
 interface InternalLinksSidebarProps {
@@ -245,46 +271,44 @@ export function InternalLinksSidebar({
       <TooltipProvider>
          <div
             className={cn(
-               "flex h-full min-w-72 flex-col border-l bg-background shrink-0 overflow-hidden",
+               "flex h-full w-72 flex-col border-l bg-background shrink-0",
                className,
             )}
          >
             {/* Header */}
             <div className="flex items-center gap-2 px-3 py-2.5 border-b">
                <Link2 className="size-3.5 text-muted-foreground/60 shrink-0" />
-               <span className="text-sm font-semibold flex-1">
-                  Links do Cluster
-               </span>
+               <span className="text-sm font-semibold flex-1">Links do Cluster</span>
                {onClose && (
-                  <button
-                     className="size-6 flex items-center justify-center rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-                     onClick={onClose}
+                  <Button
                      type="button"
+                     variant="ghost"
+                     size="icon"
+                     className="size-6 rounded text-muted-foreground"
+                     onClick={onClose}
                   >
                      <X className="size-3.5" />
-                  </button>
+                  </Button>
                )}
             </div>
 
             <ScrollArea className="flex-1">
-               <div className="p-1">
-                  <SuggestionsErrorBoundary>
-                     <Suspense
-                        fallback={
-                           <div className="flex flex-col gap-1.5 p-2">
-                              {Array.from({ length: 3 }, (_, i) => (
-                                 <div
-                                    className="h-10 rounded bg-accent/30 animate-pulse"
-                                    key={`skeleton-${i + 1}`}
-                                 />
-                              ))}
-                           </div>
-                        }
-                     >
-                        <SuggestionsList contentId={contentId} />
-                     </Suspense>
-                  </SuggestionsErrorBoundary>
-               </div>
+               <SuggestionsErrorBoundary>
+                  <Suspense
+                     fallback={
+                        <div className="flex flex-col gap-1.5 p-3">
+                           {Array.from({ length: 3 }, (_, i) => (
+                              <div
+                                 key={`skeleton-${i + 1}`}
+                                 className="h-10 rounded bg-accent/30 animate-pulse"
+                              />
+                           ))}
+                        </div>
+                     }
+                  >
+                     <SuggestionsList contentId={contentId} />
+                  </Suspense>
+               </SuggestionsErrorBoundary>
             </ScrollArea>
          </div>
       </TooltipProvider>
