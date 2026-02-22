@@ -1,4 +1,11 @@
-import { AVAILABLE_MODELS } from "@packages/agents/models";
+import {
+   AUTOCOMPLETE_MODELS,
+   type AutocompleteModelId,
+   CONTENT_MODELS,
+   type ContentModelId,
+   EDIT_MODELS,
+   type EditModelId,
+} from "@packages/agents/models";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -17,6 +24,7 @@ import {
 } from "@packages/ui/components/select";
 import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { Slider } from "@packages/ui/components/slider";
 import { Switch } from "@packages/ui/components/switch";
 import {
    useMutation,
@@ -33,6 +41,7 @@ import {
    Search,
    Settings,
    ShieldCheck,
+   Zap,
 } from "lucide-react";
 import { Suspense, useState } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
@@ -177,27 +186,42 @@ function DefaultLanguageSection({
 
 function ModelSelectionSection({
    currentContentModel,
+   currentAutocompleteModel,
    currentEditModel,
+   currentContentTemperature,
+   currentAutocompleteTemperature,
+   currentEditTemperature,
+   currentContentMaxTokens,
 }: {
-   currentContentModel:
-      | "openrouter/x-ai/grok-4.1-fast"
-      | "openrouter/minimax/minimax-m2.1"
-      | undefined;
-   currentEditModel:
-      | "openrouter/mistralai/mistral-small-creative"
-      | "openrouter/x-ai/grok-4.1-fast"
-      | undefined;
+   currentContentModel: string | undefined;
+   currentAutocompleteModel: string | undefined;
+   currentEditModel: string | undefined;
+   currentContentTemperature: number | undefined;
+   currentAutocompleteTemperature: number | undefined;
+   currentEditTemperature: number | undefined;
+   currentContentMaxTokens: number | undefined;
 }) {
-   const [contentModel, setContentModel] = useState<
-      | "openrouter/x-ai/grok-4.1-fast"
-      | "openrouter/minimax/minimax-m2.1"
-      | undefined
-   >(currentContentModel);
-   const [editModel, setEditModel] = useState<
-      | "openrouter/mistralai/mistral-small-creative"
-      | "openrouter/x-ai/grok-4.1-fast"
-      | undefined
-   >(currentEditModel);
+   const initialContentTemp = currentContentTemperature ?? 0.7;
+   const initialAutocompleteTemp = currentAutocompleteTemperature ?? 0.2;
+   const initialEditTemp = currentEditTemperature ?? 0.4;
+
+   const [contentModel, setContentModel] = useState<string | undefined>(
+      currentContentModel,
+   );
+   const [autocompleteModel, setAutocompleteModel] = useState<
+      string | undefined
+   >(currentAutocompleteModel);
+   const [editModel, setEditModel] = useState<string | undefined>(
+      currentEditModel,
+   );
+   const [contentTemp, setContentTemp] = useState(initialContentTemp);
+   const [autocompleteTemp, setAutocompleteTemp] = useState(
+      initialAutocompleteTemp,
+   );
+   const [editTemp, setEditTemp] = useState(initialEditTemp);
+   const [contentMaxTokens, setContentMaxTokens] = useState<number | undefined>(
+      currentContentMaxTokens,
+   );
    const queryClient = useQueryClient();
 
    const saveMutation = useMutation(
@@ -217,7 +241,27 @@ function ModelSelectionSection({
    );
 
    const hasChanged =
-      contentModel !== currentContentModel || editModel !== currentEditModel;
+      contentModel !== currentContentModel ||
+      autocompleteModel !== currentAutocompleteModel ||
+      editModel !== currentEditModel ||
+      contentTemp !== initialContentTemp ||
+      autocompleteTemp !== initialAutocompleteTemp ||
+      editTemp !== initialEditTemp ||
+      contentMaxTokens !== currentContentMaxTokens;
+
+   const contentDescription =
+      contentModel && contentModel in CONTENT_MODELS
+         ? CONTENT_MODELS[contentModel as ContentModelId].description
+         : "Selecione um modelo para geração de conteúdo.";
+   const autocompleteDescription =
+      autocompleteModel && autocompleteModel in AUTOCOMPLETE_MODELS
+         ? AUTOCOMPLETE_MODELS[autocompleteModel as AutocompleteModelId]
+              .description
+         : "Selecione um modelo para autocomplete.";
+   const editDescription =
+      editModel && editModel in EDIT_MODELS
+         ? EDIT_MODELS[editModel as EditModelId].description
+         : "Selecione um modelo para edição de conteúdo.";
 
    return (
       <section className="space-y-3">
@@ -232,77 +276,189 @@ function ModelSelectionSection({
                </p>
             </div>
          </div>
-         <div className="space-y-4">
-            <div className="space-y-2">
-               <Label>Modelo de criação de conteúdo</Label>
-               <Select
-                  onValueChange={(value) =>
-                     setContentModel(
-                        value as
-                           | "openrouter/x-ai/grok-4.1-fast"
-                           | "openrouter/minimax/minimax-m2.1",
-                     )
-                  }
-                  value={contentModel}
-               >
-                  <SelectTrigger>
-                     <SelectValue placeholder="Selecione o modelo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                     <SelectItem value="openrouter/x-ai/grok-4.1-fast">
-                        {
-                           AVAILABLE_MODELS["openrouter/x-ai/grok-4.1-fast"]
-                              .label
-                        }
-                     </SelectItem>
-                     <SelectItem value="openrouter/minimax/minimax-m2.1">
-                        {
-                           AVAILABLE_MODELS["openrouter/minimax/minimax-m2.1"]
-                              .label
-                        }
-                     </SelectItem>
-                  </SelectContent>
-               </Select>
+         <div className="space-y-6 pl-[52px]">
+            <div className="space-y-4">
+               <h3 className="text-sm font-medium">Conteúdo</h3>
+               <div className="space-y-2">
+                  <Label>Modelo de criação de conteúdo</Label>
+                  <Select
+                     onValueChange={(value) => setContentModel(value)}
+                     value={contentModel}
+                  >
+                     <SelectTrigger>
+                        <SelectValue placeholder="Selecione o modelo" />
+                     </SelectTrigger>
+                     <SelectContent>
+                        {Object.entries(CONTENT_MODELS).map(
+                           ([modelId, model]) => (
+                              <SelectItem key={modelId} value={modelId}>
+                                 {model.label}
+                              </SelectItem>
+                           ),
+                        )}
+                     </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                     {contentDescription}
+                  </p>
+               </div>
+               <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                     <Label>Temperatura</Label>
+                     <span className="text-sm text-muted-foreground tabular-nums">
+                        {contentTemp.toFixed(2)}
+                     </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                     Baixa = consistente · Alta = criativo
+                  </p>
+                  <Slider
+                     max={2}
+                     min={0}
+                     onValueChange={([value]) => setContentTemp(value ?? 0)}
+                     step={0.05}
+                     value={[contentTemp]}
+                  />
+               </div>
+               <div className="space-y-2">
+                  <Label>Máx. tokens de saída</Label>
+                  <p className="text-xs text-muted-foreground">
+                     Comprimento máximo da resposta gerada
+                  </p>
+                  <Input
+                     max={32768}
+                     min={512}
+                     onChange={(e) => {
+                        const val = Number.parseInt(e.target.value, 10);
+                        setContentMaxTokens(
+                           Number.isNaN(val) ? undefined : val,
+                        );
+                     }}
+                     placeholder="Padrão do modelo"
+                     type="number"
+                     value={contentMaxTokens ?? ""}
+                  />
+               </div>
             </div>
-            <div className="space-y-2">
-               <Label>Modelo de edição</Label>
-               <Select
-                  onValueChange={(value) =>
-                     setEditModel(
-                        value as
-                           | "openrouter/mistralai/mistral-small-creative"
-                           | "openrouter/x-ai/grok-4.1-fast",
-                     )
-                  }
-                  value={editModel}
-               >
-                  <SelectTrigger>
-                     <SelectValue placeholder="Selecione o modelo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                     <SelectItem value="openrouter/mistralai/mistral-small-creative">
-                        {
-                           AVAILABLE_MODELS[
-                              "openrouter/mistralai/mistral-small-creative"
-                           ].label
-                        }
-                     </SelectItem>
-                     <SelectItem value="openrouter/x-ai/grok-4.1-fast">
-                        {
-                           AVAILABLE_MODELS["openrouter/x-ai/grok-4.1-fast"]
-                              .label
-                        }
-                     </SelectItem>
-                  </SelectContent>
-               </Select>
+
+            <Separator />
+
+            <div className="space-y-4">
+               <h3 className="text-sm font-medium flex items-center gap-2">
+                  <Zap className="size-4" />
+                  Autocomplete
+               </h3>
+               <div className="space-y-2">
+                  <Label>Modelo de autocomplete</Label>
+                  <Select
+                     onValueChange={(value) => setAutocompleteModel(value)}
+                     value={autocompleteModel}
+                  >
+                     <SelectTrigger>
+                        <SelectValue placeholder="Selecione o modelo" />
+                     </SelectTrigger>
+                     <SelectContent>
+                        {Object.entries(AUTOCOMPLETE_MODELS).map(
+                           ([modelId, model]) => (
+                              <SelectItem key={modelId} value={modelId}>
+                                 {model.label}
+                              </SelectItem>
+                           ),
+                        )}
+                     </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                     {autocompleteDescription}
+                  </p>
+               </div>
+               <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                     <Label>Temperatura</Label>
+                     <span className="text-sm text-muted-foreground tabular-nums">
+                        {autocompleteTemp.toFixed(2)}
+                     </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                     Baixa = consistente · Alta = criativo
+                  </p>
+                  <Slider
+                     max={2}
+                     min={0}
+                     onValueChange={([value]) =>
+                        setAutocompleteTemp(value ?? 0)
+                     }
+                     step={0.05}
+                     value={[autocompleteTemp]}
+                  />
+               </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+               <h3 className="text-sm font-medium">Edição</h3>
+               <div className="space-y-2">
+                  <Label>Modelo de edição</Label>
+                  <Select
+                     onValueChange={(value) => setEditModel(value)}
+                     value={editModel}
+                  >
+                     <SelectTrigger>
+                        <SelectValue placeholder="Selecione o modelo" />
+                     </SelectTrigger>
+                     <SelectContent>
+                        {Object.entries(EDIT_MODELS).map(([modelId, model]) => (
+                           <SelectItem key={modelId} value={modelId}>
+                              {model.label}
+                           </SelectItem>
+                        ))}
+                     </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                     {editDescription}
+                  </p>
+               </div>
+               <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                     <Label>Temperatura</Label>
+                     <span className="text-sm text-muted-foreground tabular-nums">
+                        {editTemp.toFixed(2)}
+                     </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                     Baixa = consistente · Alta = criativo
+                  </p>
+                  <Slider
+                     max={2}
+                     min={0}
+                     onValueChange={([value]) => setEditTemp(value ?? 0)}
+                     step={0.05}
+                     value={[editTemp]}
+                  />
+               </div>
             </div>
          </div>
          <Button
             disabled={!hasChanged || saveMutation.isPending}
             onClick={() =>
                saveMutation.mutate({
-                  contentModel,
-                  editModel,
+                  contentModel:
+                     contentModel && contentModel in CONTENT_MODELS
+                        ? (contentModel as ContentModelId)
+                        : undefined,
+                  autocompleteModel:
+                     autocompleteModel &&
+                     autocompleteModel in AUTOCOMPLETE_MODELS
+                        ? (autocompleteModel as AutocompleteModelId)
+                        : undefined,
+                  editModel:
+                     editModel && editModel in EDIT_MODELS
+                        ? (editModel as EditModelId)
+                        : undefined,
+                  contentTemperature: contentTemp,
+                  autocompleteTemperature: autocompleteTemp,
+                  editTemperature: editTemp,
+                  contentMaxTokens,
                })
             }
             size="sm"
@@ -339,12 +495,7 @@ function WebSearchConfigSection({
       | "year"
       | "all"
       | undefined;
-   currentPreferredSearchProvider:
-      | "tavily"
-      | "exa"
-      | "firecrawl"
-      | null
-      | undefined;
+   currentPreferredSearchProvider: "tavily" | "exa" | "firecrawl" | undefined;
    currentRequireAuthoritativeSources: boolean | undefined;
    currentMinCredibility: "high" | "medium" | "low" | undefined;
 }) {
@@ -361,7 +512,7 @@ function WebSearchConfigSection({
       "day" | "week" | "month" | "year" | "all" | undefined
    >(currentSearchTimeRange);
    const [preferredSearchProvider, setPreferredSearchProvider] = useState<
-      "tavily" | "exa" | "firecrawl" | null | undefined
+      "tavily" | "exa" | "firecrawl" | undefined
    >(currentPreferredSearchProvider);
    const [requireAuthoritativeSources, setRequireAuthoritativeSources] =
       useState<boolean | undefined>(currentRequireAuthoritativeSources);
@@ -527,7 +678,7 @@ function WebSearchConfigSection({
                   onValueChange={(value) =>
                      setPreferredSearchProvider(
                         value === "none"
-                           ? null
+                           ? undefined
                            : (value as "tavily" | "exa" | "firecrawl"),
                      )
                   }
@@ -965,8 +1116,15 @@ function AiAgentsContent() {
          <Separator />
 
          <ModelSelectionSection
+            currentAutocompleteModel={settings?.aiDefaults?.autocompleteModel}
+            currentAutocompleteTemperature={
+               settings?.aiDefaults?.autocompleteTemperature
+            }
+            currentContentMaxTokens={settings?.aiDefaults?.contentMaxTokens}
             currentContentModel={settings?.aiDefaults?.contentModel}
+            currentContentTemperature={settings?.aiDefaults?.contentTemperature}
             currentEditModel={settings?.aiDefaults?.editModel}
+            currentEditTemperature={settings?.aiDefaults?.editTemperature}
          />
 
          <Separator />
