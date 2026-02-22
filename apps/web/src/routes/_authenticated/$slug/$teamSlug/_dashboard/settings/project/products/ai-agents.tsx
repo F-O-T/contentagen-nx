@@ -100,9 +100,9 @@ function DefaultLanguageSection({
 }: {
    current: "pt-BR" | "en-US" | "es" | undefined;
 }) {
-   const [language, setLanguage] = useState<
-      "pt-BR" | "en-US" | "es" | undefined
-   >(current);
+   const [language, setLanguage] = useState<"pt-BR" | "en-US" | "es" | "">(
+      current ?? "",
+   );
    const queryClient = useQueryClient();
 
    const saveMutation = useMutation(
@@ -205,15 +205,13 @@ function ModelSelectionSection({
    const initialAutocompleteTemp = currentAutocompleteTemperature ?? 0.2;
    const initialEditTemp = currentEditTemperature ?? 0.4;
 
-   const [contentModel, setContentModel] = useState<string | undefined>(
-      currentContentModel,
+   const [contentModel, setContentModel] = useState<string>(
+      currentContentModel ?? "",
    );
-   const [autocompleteModel, setAutocompleteModel] = useState<
-      string | undefined
-   >(currentAutocompleteModel);
-   const [editModel, setEditModel] = useState<string | undefined>(
-      currentEditModel,
+   const [autocompleteModel, setAutocompleteModel] = useState<string>(
+      currentAutocompleteModel ?? "",
    );
+   const [editModel, setEditModel] = useState<string>(currentEditModel ?? "");
    const [contentTemp, setContentTemp] = useState(initialContentTemp);
    const [autocompleteTemp, setAutocompleteTemp] = useState(
       initialAutocompleteTemp,
@@ -241,9 +239,9 @@ function ModelSelectionSection({
    );
 
    const hasChanged =
-      contentModel !== currentContentModel ||
-      autocompleteModel !== currentAutocompleteModel ||
-      editModel !== currentEditModel ||
+      (contentModel || undefined) !== currentContentModel ||
+      (autocompleteModel || undefined) !== currentAutocompleteModel ||
+      (editModel || undefined) !== currentEditModel ||
       contentTemp !== initialContentTemp ||
       autocompleteTemp !== initialAutocompleteTemp ||
       editTemp !== initialEditTemp ||
