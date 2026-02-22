@@ -9,7 +9,6 @@ import { team } from "./auth";
  */
 export const ContentDefaultsSchema = z.object({
    defaultWriterId: z.string().uuid().optional(),
-   defaultLayout: z.enum(["tutorial", "article", "changelog"]).optional(),
    autoGenerateSlug: z.boolean().optional(),
    defaultShareStatus: z.enum(["private", "shared"]).optional(),
 });
