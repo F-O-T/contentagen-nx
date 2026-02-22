@@ -34,7 +34,6 @@ import { protectedProcedure } from "../server";
 const createContentSchema = z.object({
    title: z.string().min(1).default("Sem título"),
    body: z.string().optional(),
-   draftOrigin: z.enum(["manual", "ai_generated"]).optional().default("manual"),
 });
 
 const updateContentSchema = z.object({
@@ -104,7 +103,6 @@ export const create = protectedProcedure
 
       const result = await createContent(db, {
          body: input.body,
-         draftOrigin: input.draftOrigin,
          meta: {
             title: input.title,
             description: "",
