@@ -41,6 +41,10 @@ import { useEditorUploadFile } from "./hooks/use-editor-upload-file";
 import { AIKit } from "./plugins/ai-kit";
 import { CopilotKit } from "./plugins/copilot-kit";
 import { createMediaKit, UploadFileProvider } from "./plugins/media-kit";
+import type { ContentMeta } from "@packages/database/schemas/content";
+import { EditorFixedToolbar } from "../ui/editor-fixed-toolbar";
+import { FrontmatterSection } from "../ui/frontmatter-section";
+import { InternalLinksSidebar } from "./ui/internal-links-sidebar";
 
 export interface PlateEditorProps {
    initialValue?: Value;
@@ -55,6 +59,17 @@ export interface PlateEditorProps {
    language?: string;
    /** Team ID used to scope uploaded media assets. */
    teamId?: string;
+   // NEW: frontmatter
+   meta?: ContentMeta;
+   onMetaChange?: (meta: ContentMeta) => void;
+   // NEW: toolbar
+   title?: string;
+   status?: string;
+   isSaving?: boolean;
+   onSave?: () => void;
+   onBack?: () => void;
+   // NEW: sidebar
+   showLinksSidebar?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -179,6 +194,14 @@ export function PlateEditor({
    model,
    language,
    teamId,
+   meta,
+   onMetaChange,
+   title,
+   status,
+   isSaving,
+   onSave,
+   onBack,
+   showLinksSidebar,
 }: PlateEditorProps) {
    // Inject per-content context into the ORPCChatTransport singleton so every
    // AI command carries the correct contentId / writerId / model / language.
@@ -232,20 +255,47 @@ export function PlateEditor({
              */}
             <EditorDiscussionSync contentId={contentId} />
 
-            <PlateContent
-               className={cn(
-                  "min-h-[200px] w-full cursor-text rounded-md border border-input bg-background px-4 py-3 text-sm ring-offset-background",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                  "prose prose-sm max-w-none dark:prose-invert",
-                  "[&_h1]:text-3xl [&_h1]:font-bold",
-                  "[&_h2]:text-2xl [&_h2]:font-semibold",
-                  "[&_h3]:text-xl [&_h3]:font-medium",
-                  "aria-disabled:cursor-not-allowed aria-disabled:opacity-50",
-                  className,
-               )}
-               disableDefaultStyles
-               placeholder={placeholder}
+            {/* Fixed toolbar — INSIDE <Plate> so useEditorRef() works */}
+            <EditorFixedToolbar
+               title={title}
+               status={status}
+               isSaving={isSaving}
+               onSave={onSave}
+               onBack={onBack}
             />
+
+            {/* Frontmatter section */}
+            {meta !== undefined && onMetaChange !== undefined && (
+               <FrontmatterSection
+                  meta={meta}
+                  onChange={onMetaChange}
+                  readOnly={!editable}
+               />
+            )}
+
+            {/* Content area + optional sidebar */}
+            <div className="flex flex-1 overflow-hidden">
+               <div className="flex-1 overflow-auto">
+                  <PlateContent
+                     className={cn(
+                        "min-h-[calc(100vh-8rem)] max-w-3xl mx-auto px-6 py-8",
+                        "text-sm ring-offset-background focus-visible:outline-none",
+                        "prose prose-sm max-w-none dark:prose-invert",
+                        "[&_h1]:text-3xl [&_h1]:font-bold",
+                        "[&_h2]:text-2xl [&_h2]:font-semibold",
+                        "[&_h3]:text-xl [&_h3]:font-medium",
+                        "aria-disabled:cursor-not-allowed aria-disabled:opacity-50",
+                        className,
+                     )}
+                     disableDefaultStyles
+                     placeholder={placeholder}
+                  />
+               </div>
+
+               {showLinksSidebar && contentId && (
+                  <InternalLinksSidebar contentId={contentId} />
+               )}
+            </div>
          </Plate>
       </UploadFileProvider>
    );
