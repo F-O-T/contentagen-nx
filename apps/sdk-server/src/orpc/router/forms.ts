@@ -1,7 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import { formSubmissions, forms } from "@packages/database/schemas/forms";
 import { EVENT_CATEGORIES } from "@packages/events/catalog";
-import { emitEvent } from "@packages/events/emit";
+import { createEmitFn, emitEvent } from "@packages/events/emit";
 import { emitExperimentConversion } from "@packages/events/experiments";
 import { FORM_EVENTS } from "@packages/events/forms";
 import { and, eq } from "drizzle-orm";
@@ -226,10 +226,10 @@ export const submit = sdkProcedure
 
       // Emit experiment.conversion if this form is part of an A/B test
       if (input.experimentId && input.variantId) {
+         const emit = createEmitFn(context.db, context.posthog);
          emitExperimentConversion(
+            emit,
             {
-               db: context.db,
-               posthog: context.posthog,
                organizationId: context.organizationId,
                userId: context.userId ?? undefined,
             },

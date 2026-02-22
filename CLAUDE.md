@@ -8,9 +8,13 @@ AI-powered CMS built as an Nx monorepo with Bun. Provides AI-assisted content cr
 
 ```bash
 # Development
-bun dev              # Start web, sdk-server, worker in parallel
+bun dev              # Seed event catalog (local) then start web app
 bun dev:all          # Start all apps and packages
 bun dev:worker       # Worker only
+
+# ⚠️ bun dev seeds the event catalog on every start (--env local).
+# If seeding fails, the dev server won't launch. Run the seed manually to debug:
+# bun run scripts/seed-event-catalog.ts run --env local
 
 # Build & Quality
 bun run build        # Build all (Nx cached)
@@ -479,6 +483,30 @@ File-per-category pattern: `content.ts`, `ai.ts`, `forms.ts`, `seo.ts`, `emit.ts
 
 ---
 
+## Testing
+
+Tests live at `apps/web/__tests__/integrations/orpc/router/`. Run with Vitest.
+
+```bash
+bun run test                          # Run all tests (Nx parallelized)
+npx vitest run apps/web/__tests__/integrations/orpc/router/content.test.ts  # Single file
+```
+
+**Gotcha — Better Auth tables need explicit `createdAt`:**
+`member` and `team` tables don't have `.defaultNow()` on `createdAt`. Tests that insert into these tables MUST provide `createdAt: new Date()` explicitly or the insert will fail.
+
+```typescript
+// ✅ Correct
+await db.insert(member).values({ ...memberData, createdAt: new Date() });
+
+// ❌ Will fail — createdAt has no DB default
+await db.insert(member).values(memberData);
+```
+
+Use the `orpc-testing` skill when writing new oRPC procedure tests.
+
+---
+
 ## Scripts
 
 All scripts go in root `scripts/` directory. NEVER in `packages/*/` or `apps/*/`.
@@ -516,3 +544,48 @@ Procedures in `apps/web/src/integrations/orpc/router/onboarding.ts`.
 | PRO | R$100 |
 
 Credit tracking: Redis real-time, materialized views reconcile hourly (worker cron).
+
+---
+
+## Billing Page — Early Access Feature Cards
+
+`apps/web/src/features/billing/ui/billing-overview.tsx`
+
+The billing overview renders product cards driven by two config objects. **Adding a new early access feature = one entry in the right config.**
+
+### Event-based categories (usage from API)
+
+```typescript
+// EARLY_ACCESS_CATEGORY_GATES: Record<categoryKey, { flag, fallbackStage }>
+// Category must also exist in CATEGORY_CONFIG.
+// When enrolled → card visible + stage badge shown.
+// When not enrolled → card hidden entirely.
+experiment: { flag: "experiments", fallbackStage: "alpha" },
+form:        { flag: "forms-beta", fallbackStage: "beta"  },
+```
+
+### Volume-based features (non-event, e.g. storage)
+
+```typescript
+// VOLUME_FEATURE_CONFIG: Record<flagKey, { label, description, icon, priceLabel, unit, fallbackStage }>
+// Renders a VolumeFeatureCard showing per-unit pricing.
+// Visible only when isEnrolled(flagKey).
+"asset-bank": {
+   label: "Banco de Imagens",
+   priceLabel: "R$ 1,50",   // Railway cost: $0.15/GB — charged at R$ 1,50/GB
+   unit: "GB/mês",
+   fallbackStage: "alpha",
+},
+```
+
+### Stage resolution
+
+Stage is resolved from PostHog's early access feature config at runtime (`features.find(f => f.flagKey === key)?.stage`), falling back to `fallbackStage` in the local config. No manual sync needed — PostHog is the source of truth.
+
+### Flag keys (from sidebar-nav-items.ts)
+
+| Feature | Flag key | Stage |
+|---------|----------|-------|
+| Banco de Imagens | `asset-bank` | alpha |
+| Experimentos | `experiments` | alpha |
+| Formulários | `forms-beta` | beta |

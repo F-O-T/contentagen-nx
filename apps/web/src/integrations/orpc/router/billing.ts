@@ -1,5 +1,6 @@
 import { ORPCError } from "@orpc/server";
 import {
+   currentMonthStorageCost,
    currentMonthUsageByCategory,
    currentMonthUsageByEvent,
    dailyUsageByEvent,
@@ -119,12 +120,18 @@ export const getCurrentUsage = protectedProcedure.handler(
       const { db, organizationId } = context;
 
       try {
-         const rows = await db
-            .select()
-            .from(currentMonthUsageByCategory)
-            .where(
-               eq(currentMonthUsageByCategory.organizationId, organizationId),
-            );
+         const [rows, storageRows] = await Promise.all([
+            db
+               .select()
+               .from(currentMonthUsageByCategory)
+               .where(
+                  eq(currentMonthUsageByCategory.organizationId, organizationId),
+               ),
+            db
+               .select()
+               .from(currentMonthStorageCost)
+               .where(eq(currentMonthStorageCost.organizationId, organizationId)),
+         ]);
 
          const byCategory = rows.map((row) => ({
             category: row.eventCategory,
@@ -133,19 +140,48 @@ export const getCurrentUsage = protectedProcedure.handler(
             projectedCost: Number(row.projectedCost),
          }));
 
-         const monthToDate = byCategory.reduce(
-            (sum, c) => sum + c.monthToDateCost,
-            0,
-         );
-         const projected = byCategory.reduce(
-            (sum, c) => sum + c.projectedCost,
-            0,
-         );
+         const storageRow = storageRows[0];
+         const storageMonthToDate = Number(storageRow?.monthToDateCost ?? 0);
+         const storageProjected = Number(storageRow?.projectedCost ?? 0);
+
+         const monthToDate =
+            byCategory.reduce((sum, c) => sum + c.monthToDateCost, 0) +
+            storageMonthToDate;
+         const projected =
+            byCategory.reduce((sum, c) => sum + c.projectedCost, 0) +
+            storageProjected;
 
          return { monthToDate, projected, byCategory };
       } catch (_error) {
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "Failed to fetch current usage",
+         });
+      }
+   },
+);
+
+/**
+ * Get current month storage usage and cost for the organization
+ */
+export const getStorageUsage = protectedProcedure.handler(
+   async ({ context }) => {
+      const { db, organizationId } = context;
+
+      try {
+         const rows = await db
+            .select()
+            .from(currentMonthStorageCost)
+            .where(eq(currentMonthStorageCost.organizationId, organizationId));
+
+         const row = rows[0];
+         return {
+            currentBytes: Number(row?.currentBytes ?? 0),
+            monthToDateCost: Number(row?.monthToDateCost ?? 0),
+            projectedCost: Number(row?.projectedCost ?? 0),
+         };
+      } catch (_error) {
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to fetch storage usage",
          });
       }
    },
