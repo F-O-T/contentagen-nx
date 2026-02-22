@@ -8,6 +8,7 @@ import {
    House,
    ImageIcon,
    LayoutDashboard,
+   Library,
    Lightbulb,
 } from "lucide-react";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
@@ -67,14 +68,6 @@ export const navGroups: NavGroupDef[] = [
             earlyAccessFlag: "forms-beta",
          },
          {
-            id: "assets",
-            label: "Imagens",
-            icon: ImageIcon,
-            route: "/$slug/$teamSlug/assets",
-            earlyAccessFlag: "asset-bank",
-            earlyAccessStage: "alpha",
-         },
-         {
             id: "experiments",
             label: "Experimentos",
             icon: FlaskConical,
@@ -82,6 +75,21 @@ export const navGroups: NavGroupDef[] = [
             quickAction: { type: "create", target: "sheet" },
             earlyAccessFlag: "experiments",
             earlyAccessStage: "alpha" as const,
+         },
+      ],
+   },
+   {
+      id: "biblioteca",
+      label: "Biblioteca",
+      icon: Library,
+      items: [
+         {
+            id: "assets",
+            label: "Imagens",
+            icon: ImageIcon,
+            route: "/$slug/$teamSlug/assets",
+            earlyAccessFlag: "asset-bank",
+            earlyAccessStage: "alpha",
          },
       ],
    },

@@ -8,8 +8,9 @@ import {
    EmptyTitle,
 } from "@packages/ui/components/empty";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { Link, useParams } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
-import { FlaskConical, Plus } from "lucide-react";
+import { ArrowRight, FlaskConical, Plus } from "lucide-react";
 import { useSheet } from "@/hooks/use-sheet";
 import { orpc } from "@/integrations/orpc/client";
 import { CreateExperimentSheet } from "./create-experiment-sheet";
@@ -39,7 +40,10 @@ const GOAL_LABELS: Record<string, string> = {
    form_submit: "Envio de formulário",
 };
 
-function useExperimentColumns(): ColumnDef<ExperimentRow>[] {
+function useExperimentColumns(
+   slug: string,
+   teamSlug: string,
+): ColumnDef<ExperimentRow>[] {
    return [
       {
          accessorKey: "name",
@@ -70,16 +74,41 @@ function useExperimentColumns(): ColumnDef<ExperimentRow>[] {
          cell: ({ row }) =>
             new Date(row.original.createdAt).toLocaleDateString("pt-BR"),
       },
+      {
+         id: "actions",
+         header: "",
+         cell: ({ row }) => (
+            <div className="flex justify-end">
+               <Button
+                  asChild
+                  size="sm"
+                  variant="ghost"
+               >
+                  <Link
+                     params={{ slug, teamSlug, experimentId: row.original.id }}
+                     to="/$slug/$teamSlug/experiments/$experimentId"
+                  >
+                     Ver detalhes
+                     <ArrowRight className="ml-2 size-4" />
+                  </Link>
+               </Button>
+            </div>
+         ),
+      },
    ];
 }
 
 export function ExperimentsListSection() {
    const { openSheet, closeSheet } = useSheet();
+   const { slug, teamSlug } = useParams({ strict: false }) as {
+      slug: string;
+      teamSlug: string;
+   };
    const { data: experiments } = useSuspenseQuery(
       orpc.experiments.list.queryOptions({}),
    );
 
-   const columns = useExperimentColumns();
+   const columns = useExperimentColumns(slug, teamSlug);
 
    const handleOpenCreateSheet = () => {
       openSheet({
