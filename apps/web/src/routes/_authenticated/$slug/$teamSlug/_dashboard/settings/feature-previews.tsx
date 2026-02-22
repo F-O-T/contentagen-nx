@@ -109,6 +109,7 @@ function FeaturePreviewsPage() {
                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span>Filtrar por estágio:</span>
                   <Button
+                     className="px-0"
                      onClick={() =>
                         setSelectedStages(
                            new Set([
@@ -119,7 +120,6 @@ function FeaturePreviewsPage() {
                            ]),
                         )
                      }
-                     className="px-0"
                      size="sm"
                      variant="link"
                   >
@@ -271,7 +271,7 @@ function FeaturePreviewsPage() {
                                                          ) =>
                                                             updateEnrollment(
                                                                child.flagKey ??
-                                                               "",
+                                                                  "",
                                                                checked,
                                                             )
                                                          }

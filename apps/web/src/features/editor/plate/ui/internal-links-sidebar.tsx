@@ -23,7 +23,7 @@ import {
 import { cn } from "@packages/ui/lib/utils";
 import { insertLink } from "@platejs/link";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useRouter, useParams } from "@tanstack/react-router";
 import { ExternalLink, Link2, Link2Off, Pencil, X } from "lucide-react";
 import { useEditorRef } from "platejs/react";
 import { orpc } from "@/integrations/orpc/client";
@@ -77,12 +77,8 @@ function SuggestionsTable({
    role: string;
 }) {
    const editor = useEditorRef();
-   const navigate = useNavigate();
-   const params = useParams({ strict: false }) as {
-      slug: string;
-      teamSlug: string;
-   };
-
+   const { navigate } = useRouter();
+   const params = useParams({ from: "/_authenticated/$slug/$teamSlug/_editor/$contentId" })
    function handleInsertLink(suggestion: Suggestion) {
       if (!editor.selection) {
          editor.tf.focus();
@@ -92,8 +88,15 @@ function SuggestionsTable({
    }
 
    function handleNavigate(suggestion: Suggestion) {
-      navigate({
-         to: `/${params.slug}/${params.teamSlug}/content/${suggestion.id}`,
+      const { slug, teamSlug } = params
+      return navigate({
+         to: "/$slug/$teamSlug/$contentId",
+         params: {
+            slug, teamSlug,
+            contentId: suggestion.id
+
+
+         }
       });
    }
 
@@ -142,14 +145,14 @@ function SuggestionsTable({
                {suggestions.map((suggestion) => (
                   <TableRow
                      key={suggestion.id}
-                     className="group border-b border-border/30 hover:bg-accent/50 cursor-default"
+                     className="border-b border-border/30 hover:bg-accent/50 cursor-default"
                   >
                      {/* Title — max-w-0 enables CSS truncation inside a table cell */}
-                     <TableCell className="px-3 py-2.5 max-w-0">
+                     <TableCell className="px-3 py-3 max-w-0">
                         <Button
                            type="button"
                            variant="link"
-                           className="h-auto w-full justify-start p-0 text-xs font-medium text-foreground hover:text-foreground"
+                           className="h-auto w-full justify-start p-0 text-sm font-medium text-foreground hover:text-foreground"
                            onClick={() => handleNavigate(suggestion)}
                         >
                            <span className="truncate block w-full">
@@ -159,27 +162,27 @@ function SuggestionsTable({
                      </TableCell>
 
                      {/* Status */}
-                     <TableCell className="px-2 py-2.5 whitespace-nowrap">
+                     <TableCell className="px-2 py-3 whitespace-nowrap">
                         <Badge
                            variant={STATUS_VARIANT[suggestion.status] ?? "outline"}
-                           className="text-[10px] h-4 px-1.5 font-normal"
+                           className="text-xs h-5 px-2 font-normal"
                         >
                            {STATUS_LABELS[suggestion.status] ?? suggestion.status}
                         </Badge>
                      </TableCell>
 
                      {/* Actions */}
-                     <TableCell className="px-1.5 py-2.5">
-                        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                     <TableCell className="px-1.5 py-3">
+                        <div className="flex items-center gap-0.5">
                            <Tooltip>
                               <TooltipTrigger asChild>
                                  <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="size-6 rounded"
+                                    className="size-7 rounded"
                                     onClick={() => handleNavigate(suggestion)}
                                  >
-                                    <Pencil className="size-3" />
+                                    <Pencil className="size-3.5" />
                                  </Button>
                               </TooltipTrigger>
                               <TooltipContent side="left">
@@ -192,7 +195,7 @@ function SuggestionsTable({
                                  <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="size-6 rounded"
+                                    className="size-7 rounded"
                                     asChild
                                  >
                                     <a
@@ -200,7 +203,7 @@ function SuggestionsTable({
                                        target="_blank"
                                        rel="noopener noreferrer"
                                     >
-                                       <ExternalLink className="size-3" />
+                                       <ExternalLink className="size-3.5" />
                                     </a>
                                  </Button>
                               </TooltipTrigger>
@@ -214,10 +217,10 @@ function SuggestionsTable({
                                  <Button
                                     size="icon"
                                     variant="ghost"
-                                    className="size-6 rounded"
+                                    className="size-7 rounded"
                                     onClick={() => handleInsertLink(suggestion)}
                                  >
-                                    <Link2 className="size-3" />
+                                    <Link2 className="size-3.5" />
                                  </Button>
                               </TooltipTrigger>
                               <TooltipContent side="left">

@@ -216,7 +216,10 @@ export const getSuggestions = protectedProcedure
 
          // Add pillar as a suggestion
          if (pillar && pillar.organizationId === organizationId) {
-            const pillarMeta = pillar.meta as { title?: string; slug?: string } | null;
+            const pillarMeta = pillar.meta as {
+               title?: string;
+               slug?: string;
+            } | null;
             const pillarSlug = pillarMeta?.slug;
             suggestions.push({
                id: pillar.id,
@@ -231,7 +234,8 @@ export const getSuggestions = protectedProcedure
          for (const sibling of siblings) {
             if (sibling.targetContent === null) continue;
             if (sibling.targetContentId === input.contentId) continue;
-            if (sibling.targetContent.organizationId !== organizationId) continue;
+            if (sibling.targetContent.organizationId !== organizationId)
+               continue;
             const tc = sibling.targetContent;
             const meta = tc.meta as { title?: string; slug?: string } | null;
             const slug = meta?.slug;

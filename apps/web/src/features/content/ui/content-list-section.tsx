@@ -1,11 +1,11 @@
 import { Button } from "@packages/ui/components/button";
 import {
    Card,
-   CardContent,
    CardDescription,
    CardHeader,
    CardTitle,
 } from "@packages/ui/components/card";
+
 import { DataTable } from "@packages/ui/components/data-table";
 import {
    Empty,
@@ -189,6 +189,25 @@ export function ContentListSection() {
    if (!hasContent) {
       return (
          <div className="space-y-4">
+            {/* Page header */}
+            <div className="flex items-start justify-between">
+               <div className="flex flex-col gap-2">
+                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
+                     Conteúdo
+                  </h1>
+                  <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
+                     Gerencie e crie conteúdo para seu site
+                  </p>
+               </div>
+               <Button
+                  disabled={createContentMutation.isPending}
+                  onClick={handleCreateNew}
+               >
+                  <Plus className="mr-2 size-4" />
+                  Novo
+               </Button>
+            </div>
+
             {/* Stats placeholder */}
             <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
                <Card>
@@ -218,29 +237,25 @@ export function ContentListSection() {
             </div>
 
             {/* Empty state */}
-            <Card>
-               <CardContent className="py-12">
-                  <Empty>
-                     <EmptyContent>
-                        <EmptyMedia variant="icon">
-                           <FileText className="size-12" />
-                        </EmptyMedia>
-                        <EmptyTitle>Nenhum Conteúdo Ainda</EmptyTitle>
-                        <EmptyDescription>
-                           Comece criando seu primeiro conteúdo com IA
-                        </EmptyDescription>
-                        <Button
-                           className="mt-4"
-                           disabled={createContentMutation.isPending}
-                           onClick={handleCreateNew}
-                        >
-                           <Plus className="mr-2 size-4" />
-                           Criar Conteúdo
-                        </Button>
-                     </EmptyContent>
-                  </Empty>
-               </CardContent>
-            </Card>
+            <Empty>
+               <EmptyContent>
+                  <EmptyMedia variant="icon">
+                     <FileText className="size-12" />
+                  </EmptyMedia>
+                  <EmptyTitle>Nenhum Conteúdo Ainda</EmptyTitle>
+                  <EmptyDescription>
+                     Comece criando seu primeiro conteúdo com IA
+                  </EmptyDescription>
+                  <Button
+                     className="mt-4"
+                     disabled={createContentMutation.isPending}
+                     onClick={handleCreateNew}
+                  >
+                     <Plus className="mr-2 size-4" />
+                     Criar Conteúdo
+                  </Button>
+               </EmptyContent>
+            </Empty>
          </div>
       );
    }
@@ -256,6 +271,25 @@ export function ContentListSection() {
 
    return (
       <div className="space-y-4">
+         {/* Page header */}
+         <div className="flex items-start justify-between">
+            <div className="flex flex-col gap-2">
+               <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
+                  Conteúdo
+               </h1>
+               <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
+                  Gerencie e crie conteúdo para seu site
+               </p>
+            </div>
+            <Button
+               disabled={createContentMutation.isPending}
+               onClick={handleCreateNew}
+            >
+               <Plus className="mr-2 size-4" />
+               Novo
+            </Button>
+         </div>
+
          {/* Stats cards */}
          <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
             <Card>
@@ -313,58 +347,46 @@ export function ContentListSection() {
                   </Button>
                ))}
             </div>
-
-            <Button
-               disabled={createContentMutation.isPending}
-               onClick={handleCreateNew}
-            >
-               <Plus className="mr-2 size-4" />
-               Novo
-            </Button>
          </div>
 
          {/* Data table */}
-         <Card>
-            <CardContent className="p-6">
-               {hasFilteredContent ? (
-                  <DataTable
-                     columns={columns}
-                     data={filteredContent}
-                     enableRowSelection={false}
-                     getRowId={(row) => row.id}
-                     pagination={{
-                        currentPage,
-                        onPageChange: setCurrentPage,
-                        onPageSizeChange: setPageSize,
-                        pageSize,
-                        totalCount: data.total,
-                        totalPages: data.totalPages,
-                     }}
-                     renderMobileCard={({ row }) => (
-                        <ContentMobileCard
-                           content={row.original}
-                           onArchive={handleArchive}
-                           onDelete={handleDelete}
-                           onPublish={handlePublish}
-                           onView={handleView}
-                        />
-                     )}
+         {hasFilteredContent ? (
+            <DataTable
+               columns={columns}
+               data={filteredContent}
+               enableRowSelection={false}
+               getRowId={(row) => row.id}
+               pagination={{
+                  currentPage,
+                  onPageChange: setCurrentPage,
+                  onPageSizeChange: setPageSize,
+                  pageSize,
+                  totalCount: data.total,
+                  totalPages: data.totalPages,
+               }}
+               renderMobileCard={({ row }) => (
+                  <ContentMobileCard
+                     content={row.original}
+                     onArchive={handleArchive}
+                     onDelete={handleDelete}
+                     onPublish={handlePublish}
+                     onView={handleView}
                   />
-               ) : (
-                  <Empty>
-                     <EmptyContent>
-                        <EmptyMedia variant="icon">
-                           <Search className="size-12" />
-                        </EmptyMedia>
-                        <EmptyTitle>Nenhum Resultado Encontrado</EmptyTitle>
-                        <EmptyDescription>
-                           Tente ajustar seus filtros ou termos de busca
-                        </EmptyDescription>
-                     </EmptyContent>
-                  </Empty>
                )}
-            </CardContent>
-         </Card>
+            />
+         ) : (
+            <Empty>
+               <EmptyContent>
+                  <EmptyMedia variant="icon">
+                     <Search className="size-12" />
+                  </EmptyMedia>
+                  <EmptyTitle>Nenhum Resultado Encontrado</EmptyTitle>
+                  <EmptyDescription>
+                     Tente ajustar seus filtros ou termos de busca
+                  </EmptyDescription>
+               </EmptyContent>
+            </Empty>
+         )}
       </div>
    );
 }

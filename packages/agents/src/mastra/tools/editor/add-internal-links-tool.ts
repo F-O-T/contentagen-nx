@@ -44,12 +44,17 @@ export const addInternalLinksTool = createTool({
             success: false,
             modifiedContent: content,
             linksAdded: [],
-            message: "No related posts provided. Run searchPreviousContent first.",
+            message:
+               "No related posts provided. Run searchPreviousContent first.",
          };
       }
 
       let modifiedContent = content;
-      const linksAdded: Array<{ title: string; slug: string; insertedAt: string }> = [];
+      const linksAdded: Array<{
+         title: string;
+         slug: string;
+         insertedAt: string;
+      }> = [];
 
       // Find paragraphs (prose text lines, not headings/blockquotes/lists)
       // A paragraph is a non-empty line not starting with #, >, -, *, or digits followed by .
@@ -78,7 +83,8 @@ export const addInternalLinksTool = createTool({
             const sentenceEnd = paragraph.text.indexOf(". ");
             if (sentenceEnd > 20) {
                // Adjust for characters added by previous insertions
-               const insertOffset = paragraph.index + offsetDelta + sentenceEnd + 2;
+               const insertOffset =
+                  paragraph.index + offsetDelta + sentenceEnd + 2;
                const anchor = `[${post.title}](/conteudo/${post.slug})`;
                modifiedContent =
                   modifiedContent.slice(0, insertOffset) +

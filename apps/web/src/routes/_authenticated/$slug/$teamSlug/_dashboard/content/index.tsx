@@ -22,9 +22,12 @@ function ContentPageErrorFallback(props: FallbackProps) {
 function ContentPageSkeleton() {
    return (
       <main className="flex flex-col gap-4">
-         <div className="flex flex-col gap-2">
-            <Skeleton className="h-9 w-48" />
-            <Skeleton className="h-5 w-80" />
+         <div className="flex items-start justify-between">
+            <div className="flex flex-col gap-2">
+               <Skeleton className="h-9 w-48" />
+               <Skeleton className="h-5 w-80" />
+            </div>
+            <Skeleton className="h-9 w-24" />
          </div>
 
          {/* Stats cards skeleton */}
@@ -40,23 +43,9 @@ function ContentPageSkeleton() {
    );
 }
 
-function ContentPageHeader() {
-   return (
-      <div className="flex flex-col gap-2">
-         <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-            Conteúdo
-         </h1>
-         <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
-            Gerencie e crie conteúdo para seu site
-         </p>
-      </div>
-   );
-}
-
 function ContentPageContent() {
    return (
       <main className="flex flex-col gap-4">
-         <ContentPageHeader />
          <ContentListSection />
       </main>
    );

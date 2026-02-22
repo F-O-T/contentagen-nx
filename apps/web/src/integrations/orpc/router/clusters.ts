@@ -128,11 +128,18 @@ export const create = protectedProcedure
       const { pillar, satelliteResults } = await db.transaction(async (tx) => {
          const pillarSlug = `${createSlug(input.pillarTitle)}-${generateRandomSuffix()}`;
          const pillar = await createContent(tx, {
-            meta: { title: input.pillarTitle, description: "", slug: pillarSlug },
+            meta: {
+               title: input.pillarTitle,
+               description: "",
+               slug: pillarSlug,
+            },
             organizationId,
             teamId,
             createdByMemberId: memberId,
-            clusterConfig: { mode: input.mode, embedEnabled: input.embedEnabled },
+            clusterConfig: {
+               mode: input.mode,
+               embedEnabled: input.embedEnabled,
+            },
          });
 
          const satelliteResults = await Promise.all(
@@ -210,7 +217,10 @@ Suggest 3–6 satellite posts. Be specific and actionable. Do not include markdo
          );
          return parsed;
       } catch (err) {
-         console.error("[clusters] Failed to parse AI response", { error: err, raw: result.text });
+         console.error("[clusters] Failed to parse AI response", {
+            error: err,
+            raw: result.text,
+         });
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "AI returned an invalid structure. Please try again.",
          });
