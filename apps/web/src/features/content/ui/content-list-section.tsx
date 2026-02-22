@@ -7,6 +7,7 @@ import {
 } from "@packages/ui/components/card";
 
 import { DataTable } from "@packages/ui/components/data-table";
+import { PageHeader } from "@/components/page-header";
 import {
    Empty,
    EmptyContent,
@@ -189,24 +190,19 @@ export function ContentListSection() {
    if (!hasContent) {
       return (
          <div className="space-y-4">
-            {/* Page header */}
-            <div className="flex items-start justify-between">
-               <div className="flex flex-col gap-2">
-                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-                     Conteúdo
-                  </h1>
-                  <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
-                     Gerencie e crie conteúdo para seu site
-                  </p>
-               </div>
-               <Button
-                  disabled={createContentMutation.isPending}
-                  onClick={handleCreateNew}
-               >
-                  <Plus className="mr-2 size-4" />
-                  Novo
-               </Button>
-            </div>
+            <PageHeader
+               title="Conteúdo"
+               description="Gerencie e crie conteúdo para seu site"
+               actions={
+                  <Button
+                     disabled={createContentMutation.isPending}
+                     onClick={handleCreateNew}
+                  >
+                     <Plus className="mr-2 size-4" />
+                     Novo
+                  </Button>
+               }
+            />
 
             {/* Stats placeholder */}
             <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
@@ -271,24 +267,19 @@ export function ContentListSection() {
 
    return (
       <div className="space-y-4">
-         {/* Page header */}
-         <div className="flex items-start justify-between">
-            <div className="flex flex-col gap-2">
-               <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-                  Conteúdo
-               </h1>
-               <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
-                  Gerencie e crie conteúdo para seu site
-               </p>
-            </div>
-            <Button
-               disabled={createContentMutation.isPending}
-               onClick={handleCreateNew}
-            >
-               <Plus className="mr-2 size-4" />
-               Novo
-            </Button>
-         </div>
+         <PageHeader
+            title="Conteúdo"
+            description="Gerencie e crie conteúdo para seu site"
+            actions={
+               <Button
+                  disabled={createContentMutation.isPending}
+                  onClick={handleCreateNew}
+               >
+                  <Plus className="mr-2 size-4" />
+                  Novo
+               </Button>
+            }
+         />
 
          {/* Stats cards */}
          <div className="grid gap-4 grid-cols-2 md:grid-cols-4">

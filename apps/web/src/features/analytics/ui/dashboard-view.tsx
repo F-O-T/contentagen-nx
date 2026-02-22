@@ -14,16 +14,9 @@ import { cn } from "@packages/ui/lib/utils";
 import { formatRelativeTime } from "@packages/utils/date";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import {
-   ArrowLeft,
-   Calendar,
-   Clock,
-   LayoutDashboard,
-   Plus,
-   RefreshCw,
-   X,
-} from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Plus, RefreshCw, X } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
+import { PageHeader } from "@/components/page-header";
 import { DashboardFilterPopover } from "@/features/analytics/ui/dashboard-filter-popover";
 import { EditableDashboardGrid } from "@/features/analytics/ui/editable-dashboard-grid";
 import { InlineEditableText } from "@/features/analytics/ui/inline-editable-text";
@@ -92,11 +85,11 @@ function DashboardHeader({
    );
 
    return (
-      <div className="flex flex-col gap-0">
-         {/* Title row */}
-         <div className="flex items-center justify-between gap-4 pb-1">
-            <div className="flex items-center gap-2 min-w-0">
-               {backTo && (
+      <div className="flex flex-col gap-2">
+         <PageHeader
+            editable
+            leading={
+               backTo ? (
                   <Link
                      params={backTo as never}
                      to={"/$slug/$teamSlug/analytics/dashboards" as never}
@@ -105,24 +98,18 @@ function DashboardHeader({
                         <ArrowLeft className="size-4" />
                      </Button>
                   </Link>
-               )}
-               <LayoutDashboard className="size-5 text-muted-foreground shrink-0" />
-               <InlineEditableText
-                  className="text-lg font-semibold tracking-tight"
-                  onSave={handleNameSave}
-                  placeholder="Nome do dashboard"
-                  value={dashboard.name}
-               />
-            </div>
-            <div className="flex items-center gap-1.5 shrink-0">
+               ) : undefined
+            }
+            onTitleChange={handleNameSave}
+            title={dashboard.name}
+            titlePlaceholder="Nome do dashboard"
+            actions={
                <Button onClick={onAddInsight} size="sm">
                   <Plus className="size-3.5" />
                   Adicionar insight
                </Button>
-            </div>
-         </div>
-
-         {/* Description — always visible, inline editable */}
+            }
+         />
          <div className={cn("pb-3", backTo && "pl-10")}>
             <InlineEditableText
                className="text-sm text-muted-foreground"

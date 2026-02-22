@@ -192,12 +192,10 @@ export function SearchPage() {
 
    return (
       <div className="mx-auto flex h-full w-full max-w-2xl flex-col items-center px-4 pt-[15vh]">
-         {/* Search header */}
-         <div className="mb-8 flex flex-col items-center gap-3">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10">
-               <Search className="size-6 text-primary" />
-            </div>
-            <h1 className="text-2xl font-semibold tracking-tight">Pesquisar</h1>
+         <div className="mb-8 flex flex-col items-center gap-2">
+            <h1 className="text-2xl font-semibold font-serif leading-tight">
+               Pesquisar
+            </h1>
          </div>
 
          {/* Search input */}

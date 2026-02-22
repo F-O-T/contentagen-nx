@@ -56,6 +56,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/page-header";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { useCredenza } from "@/hooks/use-credenza";
 import { client, orpc } from "@/integrations/orpc/client";
@@ -972,15 +973,10 @@ function AssetBankContent() {
 
    return (
       <main className="flex flex-col gap-6">
-         <div className="flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-2">
-               <h1 className="text-3xl md:text-4xl font-bold tracking-tight font-serif leading-tight">
-                  Banco de Imagens
-               </h1>
-               <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
-                  Gerencie e envie imagens do seu projeto
-               </p>
-            </div>
+         <PageHeader
+            title="Banco de Imagens"
+            description="Gerencie e envie imagens do seu projeto"
+            actions={
             <DropdownMenu>
                <DropdownMenuTrigger asChild>
                   <Button className="shrink-0">
@@ -1025,7 +1021,8 @@ function AssetBankContent() {
                   )}
                </DropdownMenuContent>
             </DropdownMenu>
-         </div>
+            }
+         />
 
          {/* Search */}
          <div className="relative max-w-sm">
