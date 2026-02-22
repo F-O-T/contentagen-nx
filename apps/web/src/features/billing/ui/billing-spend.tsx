@@ -164,7 +164,6 @@ export function BillingSpend() {
    });
 
    // Build columns dynamically based on dates
-   // biome-ignore lint/correctness/useExhaustiveDependencies: columns depend on allDates which changes with data
    const columns = useMemo<ColumnDef<SpendRow>[]>(() => {
       const cols: ColumnDef<SpendRow>[] = [
          {

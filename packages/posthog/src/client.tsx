@@ -272,13 +272,32 @@ export function usePageviewTracking() {
    return { trackPageview };
 }
 
+export type EarlyAccessStage =
+   | "alpha"
+   | "beta"
+   | "concept"
+   | "general-availability";
+
 export type EarlyAccessFeature = {
    name: string;
    description: string;
-   stage: "alpha" | "beta" | "concept";
+   stage: EarlyAccessStage;
    documentationUrl: string | null;
    flagKey: string | null;
 };
+
+function normalizeEarlyAccessStage(raw: string | undefined): EarlyAccessStage {
+   if (raw === "general availability / archived") return "general-availability";
+   if (
+      raw === "alpha" ||
+      raw === "beta" ||
+      raw === "concept" ||
+      raw === "general-availability"
+   ) {
+      return raw;
+   }
+   return "beta";
+}
 
 export function useEarlyAccessFeatures() {
    const posthogClient = usePostHog();
@@ -290,32 +309,37 @@ export function useEarlyAccessFeatures() {
 
    const loadFeatures = useCallback(() => {
       console.log("[DEBUG] Loading early access features...");
-      posthogClient.getEarlyAccessFeatures((earlyAccessFeatures) => {
-         console.log(
-            "[DEBUG] Early access features loaded:",
-            earlyAccessFeatures,
-         );
-         setFeatures(earlyAccessFeatures);
-         setLoaded(true);
+      posthogClient.getEarlyAccessFeatures(
+         (rawFeatures: Array<EarlyAccessFeature & { stage?: string }>) => {
+            const features: EarlyAccessFeature[] = rawFeatures.map((f) => ({
+               ...f,
+               stage: normalizeEarlyAccessStage(f.stage),
+            }));
+            console.log("[DEBUG] Early access features loaded:", features);
+            setFeatures(features);
+            setLoaded(true);
 
-         const enrolled = new Set<string>();
-         for (const feature of earlyAccessFeatures) {
-            if (feature.flagKey) {
-               const isEnabled = posthogClient.isFeatureEnabled(
-                  feature.flagKey,
-               );
-               console.log(
-                  `[DEBUG] Feature ${feature.flagKey} enabled:`,
-                  isEnabled,
-               );
-               if (isEnabled) {
-                  enrolled.add(feature.flagKey);
+            const enrolled = new Set<string>();
+            for (const feature of features) {
+               if (feature.flagKey) {
+                  const isEnabled = posthogClient.isFeatureEnabled(
+                     feature.flagKey,
+                  );
+                  console.log(
+                     `[DEBUG] Feature ${feature.flagKey} enabled:`,
+                     isEnabled,
+                  );
+                  if (isEnabled) {
+                     enrolled.add(feature.flagKey);
+                  }
                }
             }
-         }
-         console.log("[DEBUG] Enrolled features:", Array.from(enrolled));
-         setEnrolledFeatures(enrolled);
-      }, true);
+            console.log("[DEBUG] Enrolled features:", Array.from(enrolled));
+            setEnrolledFeatures(enrolled);
+         },
+         true,
+         ["alpha", "beta", "concept", "general-availability"],
+      );
    }, [posthogClient]);
 
    useEffect(() => {

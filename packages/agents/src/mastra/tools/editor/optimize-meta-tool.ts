@@ -173,7 +173,7 @@ function generateMeta(
       // Truncate at last complete word before 155 chars
       meta = meta.slice(0, 155);
       const lastSpace = meta.lastIndexOf(" ");
-      meta = meta.slice(0, lastSpace) + "...";
+      meta = `${meta.slice(0, lastSpace)}...`;
    }
 
    return meta.charAt(0).toUpperCase() + meta.slice(1);
@@ -220,7 +220,7 @@ function improveMeta(
    } else if (improved.length > 165) {
       improved = improved.slice(0, 155);
       const lastSpace = improved.lastIndexOf(" ");
-      improved = improved.slice(0, lastSpace) + "...";
+      improved = `${improved.slice(0, lastSpace)}...`;
       changes.push("Shortened to fit within 160 characters");
    }
 
@@ -251,7 +251,7 @@ function generateAlternatives(
       if (meta.length > 160) {
          meta = meta.slice(0, 155);
          const lastSpace = meta.lastIndexOf(" ");
-         meta = meta.slice(0, lastSpace) + "...";
+         meta = `${meta.slice(0, lastSpace)}...`;
       }
 
       alternatives.push(meta.charAt(0).toUpperCase() + meta.slice(1));

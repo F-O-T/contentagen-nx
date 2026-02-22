@@ -9,7 +9,6 @@ import {
 } from "@packages/files/client";
 import { getEffectiveProjectLimit } from "@packages/stripe/constants";
 import { eq } from "drizzle-orm";
-import { nanoid } from "nanoid";
 import { z } from "zod";
 import { authenticatedProcedure, protectedProcedure } from "../server";
 
@@ -200,6 +199,7 @@ export const getMembers = protectedProcedure.handler(async ({ context }) => {
 
    return members.map((m) => ({
       id: m.id,
+      userId: m.userId,
       name: m.user.name,
       email: m.user.email,
       role: m.role,
@@ -297,8 +297,8 @@ export const generateLogoUploadUrl = protectedProcedure
          const minioClient = getMinioClient(serverEnv);
          const bucketName = "organization-logos";
 
-         // Generate unique filename: org-{orgId}-{nanoid}.{ext}
-         const fileName = `org-${organizationId}-${nanoid()}.${input.fileExtension}`;
+         // Generate unique filename: org-{orgId}-{uuid}.{ext}
+         const fileName = `org-${organizationId}-${crypto.randomUUID()}.${input.fileExtension}`;
 
          const presignedUrl = await generatePresignedPutUrl(
             fileName,

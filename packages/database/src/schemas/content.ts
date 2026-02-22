@@ -62,6 +62,23 @@ export const ContentStatsSchema = z.object({
 
 export type ContentStats = z.infer<typeof ContentStatsSchema>;
 
+// Zod schema for cluster configuration (set when content is a cluster pillar)
+export const ClusterEmbedSettingsSchema = z.object({
+   theme: z.enum(["light", "dark", "auto"]).optional(),
+   position: z.enum(["bottom-right", "bottom-left", "inline"]).optional(),
+   accentColor: z.string().optional(),
+   label: z.string().optional(),
+});
+
+export const ClusterConfigSchema = z.object({
+   mode: z.string().optional(),
+   embedEnabled: z.boolean().optional(),
+   embedSettings: ClusterEmbedSettingsSchema.optional(),
+});
+
+export type ClusterConfig = z.infer<typeof ClusterConfigSchema>;
+export type ClusterEmbedSettings = z.infer<typeof ClusterEmbedSettingsSchema>;
+
 export const content = pgTable(
    "content",
    {
@@ -88,6 +105,10 @@ export const content = pgTable(
       meta: jsonb("meta").$type<ContentMeta>().notNull(),
       request: jsonb("request").$type<ContentRequest>(),
       stats: jsonb("stats").$type<ContentStats>(),
+      clusterConfig: jsonb("cluster_config")
+         .$type<ClusterConfig>()
+         .default({})
+         .notNull(),
       createdAt: timestamp("created_at").defaultNow().notNull(),
       updatedAt: timestamp("updated_at")
          .defaultNow()

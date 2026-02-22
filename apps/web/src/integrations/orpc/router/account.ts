@@ -4,7 +4,6 @@ import {
    generatePresignedPutUrl,
    getMinioClient,
 } from "@packages/files/client";
-import { nanoid } from "nanoid";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -14,11 +13,11 @@ import { protectedProcedure } from "../server";
 export const verifyPassword = protectedProcedure
    .input(z.object({ password: z.string() }))
    .handler(async ({ context, input }) => {
-      const { auth, headers, userId } = context;
+      const { auth, headers } = context;
 
       try {
          // Use Better Auth's verify password endpoint
-         const _result = await auth.api.verifyPassword({
+         await auth.api.verifyPassword({
             headers,
             body: { password: input.password },
          });
@@ -35,7 +34,7 @@ export const hasPassword = protectedProcedure.handler(async ({ context }) => {
    const { auth, headers } = context;
 
    try {
-      const accounts = await auth.api.listAccounts({ headers });
+      const accounts = await auth.api.listUserAccounts({ headers });
       const hasCredential = accounts.some(
          (account) => account.providerId === "credential",
       );
@@ -74,7 +73,7 @@ export const getLinkedAccounts = protectedProcedure.handler(
       const { auth, headers } = context;
 
       try {
-         const accounts = await auth.api.listAccounts({ headers });
+         const accounts = await auth.api.listUserAccounts({ headers });
          return accounts.map((account) => ({
             providerId: account.providerId,
             accountId: account.accountId,
@@ -147,7 +146,9 @@ export const setPassword = protectedProcedure
 export const generateAvatarUploadUrl = protectedProcedure
    .input(
       z.object({
-         fileExtension: z.string().regex(/^[a-zA-Z0-9]{1,10}$/, "Invalid file extension"),
+         fileExtension: z
+            .string()
+            .regex(/^[a-zA-Z0-9]{1,10}$/, "Invalid file extension"),
       }),
    )
    .handler(async ({ context, input }) => {
@@ -156,7 +157,7 @@ export const generateAvatarUploadUrl = protectedProcedure
       try {
          const minioClient = getMinioClient(serverEnv);
          const bucketName = "user-avatars";
-         const fileName = `avatar-${userId}-${nanoid()}.${input.fileExtension}`;
+         const fileName = `avatar-${userId}-${crypto.randomUUID()}.${input.fileExtension}`;
 
          const presignedUrl = await generatePresignedPutUrl(
             fileName,

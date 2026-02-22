@@ -1,31 +1,19 @@
-import { useEffect, useState } from "react";
+import { useIsomorphicLayoutEffect } from "@dnd-kit/utilities";
+import { useSafeMediaQuery } from "@packages/ui/hooks/use-media-query";
+import { useState } from "react";
 
 export function useIsStandalone() {
-   const [isStandalone, setIsStandalone] = useState(false);
+   const isStandaloneMedia = useSafeMediaQuery("(display-mode: standalone)");
+   const isWindowControlsOverlay = useSafeMediaQuery(
+      "(display-mode: window-controls-overlay)",
+   );
+   const [isIOSStandalone, setIsIOSStandalone] = useState(false);
 
-   useEffect(() => {
-      const checkStandalone = () => {
-         const isIOSStandalone =
-            (navigator as unknown as { standalone?: boolean }).standalone ===
-            true;
-         const isStandaloneMedia = window.matchMedia(
-            "(display-mode: standalone)",
-         ).matches;
-         const isWindowControlsOverlay = window.matchMedia(
-            "(display-mode: window-controls-overlay)",
-         ).matches;
-
-         return isIOSStandalone || isStandaloneMedia || isWindowControlsOverlay;
-      };
-
-      setIsStandalone(checkStandalone());
-
-      const mediaQuery = window.matchMedia("(display-mode: standalone)");
-      const handler = () => setIsStandalone(checkStandalone());
-      mediaQuery.addEventListener("change", handler);
-
-      return () => mediaQuery.removeEventListener("change", handler);
+   useIsomorphicLayoutEffect(() => {
+      setIsIOSStandalone(
+         (navigator as unknown as { standalone?: boolean }).standalone === true,
+      );
    }, []);
 
-   return isStandalone;
+   return isIOSStandalone || isStandaloneMedia || isWindowControlsOverlay;
 }

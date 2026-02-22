@@ -3,6 +3,7 @@ import {
    CollapsibleContent,
    CollapsibleTrigger,
 } from "@packages/ui/components/collapsible";
+import { FeatureStageBadge } from "@packages/ui/components/feature-stage-badge";
 import {
    SidebarGroup,
    SidebarGroupContent,
@@ -55,7 +56,7 @@ function NavItem({
    teamSlug: string;
    pathname: string;
 }) {
-   const { isEnrolled } = useEarlyAccess();
+   const { isEnrolled, getFeatureStage } = useEarlyAccess();
    const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
    const resolvedHref = item.href
       .replace("$slug", slug)
@@ -104,6 +105,11 @@ function NavItem({
                            .replace("$slug", slug)
                            .replace("$teamSlug", teamSlug);
                         const childActive = pathname === childResolved;
+                        const earlyStage =
+                           child.earlyAccessFlag &&
+                           isEnrolled(child.earlyAccessFlag)
+                              ? getFeatureStage(child.earlyAccessFlag)
+                              : null;
                         return (
                            <SidebarMenuSubItem key={child.id}>
                               <SidebarMenuSubButton
@@ -117,6 +123,14 @@ function NavItem({
                                     to={child.href}
                                  >
                                     <span>{child.title}</span>
+                                    {earlyStage && (
+                                       <FeatureStageBadge
+                                          aria-hidden="true"
+                                          className="ml-auto text-[10px] px-1 py-0"
+                                          showIcon={false}
+                                          stage={earlyStage}
+                                       />
+                                    )}
                                  </Link>
                               </SidebarMenuSubButton>
                            </SidebarMenuSubItem>

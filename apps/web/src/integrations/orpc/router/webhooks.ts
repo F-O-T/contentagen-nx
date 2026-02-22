@@ -8,6 +8,7 @@ import {
    listWebhookEndpoints,
    updateWebhookEndpoint,
 } from "@packages/database/repositories/webhook-repository";
+import { createEmitFn } from "@packages/events/emit";
 import {
    emitWebhookEndpointCreated,
    emitWebhookEndpointDeleted,
@@ -97,7 +98,8 @@ export const create = protectedProcedure
 
          try {
             await emitWebhookEndpointCreated(
-               { db, posthog, organizationId, userId, teamId },
+               createEmitFn(db, posthog),
+               { organizationId, userId, teamId },
                { endpointId: endpoint.id, url: input.url },
             );
          } catch {
@@ -234,9 +236,8 @@ export const update = protectedProcedure
             (k) => updateData[k as keyof typeof updateData] !== undefined,
          );
          await emitWebhookEndpointUpdated(
+            createEmitFn(db, posthog),
             {
-               db,
-               posthog,
                organizationId: endpoint.organizationId,
                userId,
                teamId,
@@ -278,9 +279,8 @@ export const remove = protectedProcedure
 
          try {
             await emitWebhookEndpointDeleted(
+               createEmitFn(db, posthog),
                {
-                  db,
-                  posthog,
                   organizationId: endpoint.organizationId,
                   userId,
                   teamId,

@@ -25,6 +25,7 @@ import {
    useSuspenseQuery,
 } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useCopyToClipboard } from "@uidotdev/usehooks";
 import {
    Building2,
    Calendar,
@@ -35,7 +36,7 @@ import {
    Loader2,
    Users,
 } from "lucide-react";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useTransition } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
 import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
@@ -72,27 +73,28 @@ function DisplayNameSection({
 }) {
    const [name, setName] = useState(currentName);
    const queryClient = useQueryClient();
+   const [isPending, startTransition] = useTransition();
 
-   const renameMutation = useMutation({
-      mutationFn: async () => {
-         await authClient.organization.update({
+   const hasChanged = name.trim() !== currentName && name.trim().length > 0;
+
+   function handleRename() {
+      if (!hasChanged) return;
+      startTransition(async () => {
+         const { error } = await authClient.organization.update({
             data: { name },
             organizationId,
          });
-      },
-      onSuccess: () => {
+         if (error) {
+            toast.error("Erro ao renomear organização");
+            return;
+         }
          toast.success("Organização renomeada com sucesso!");
          queryClient.invalidateQueries({
             queryKey: orpc.organization.getActiveOrganization.queryOptions({})
                .queryKey,
          });
-      },
-      onError: () => {
-         toast.error("Erro ao renomear organização");
-      },
-   });
-
-   const hasChanged = name.trim() !== currentName && name.trim().length > 0;
+      });
+   }
 
    return (
       <section className="space-y-3">
@@ -109,13 +111,11 @@ function DisplayNameSection({
                value={name}
             />
             <Button
-               disabled={!hasChanged || renameMutation.isPending}
-               onClick={() => renameMutation.mutate()}
+               disabled={!hasChanged || isPending}
+               onClick={handleRename}
                size="sm"
             >
-               {renameMutation.isPending && (
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-               )}
+               {isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
                Renomear organização
             </Button>
          </div>
@@ -128,7 +128,7 @@ function DisplayNameSection({
 // ============================================
 
 function LogoSection({
-   organizationId,
+   organizationId: _organizationId,
    currentLogo,
    organizationName,
 }: {
@@ -139,8 +139,14 @@ function LogoSection({
    // DEBUG: Check what's available in orpc.organization
    console.log("[DEBUG] orpc keys:", Object.keys(orpc));
    console.log("[DEBUG] orpc.organization:", orpc.organization);
-   console.log("[DEBUG] orpc.organization keys:", Object.keys(orpc.organization));
-   console.log("[DEBUG] orpc.organization.generateLogoUploadUrl:", orpc.organization.generateLogoUploadUrl);
+   console.log(
+      "[DEBUG] orpc.organization keys:",
+      Object.keys(orpc.organization),
+   );
+   console.log(
+      "[DEBUG] orpc.organization.generateLogoUploadUrl:",
+      orpc.organization.generateLogoUploadUrl,
+   );
    console.log("[DEBUG] Type:", typeof orpc.organization.generateLogoUploadUrl);
 
    const queryClient = useQueryClient();
@@ -159,7 +165,8 @@ function LogoSection({
          }
 
          // Get file extension and content type
-         const fileExtension = fileUpload.selectedFile.name.split(".").pop() ?? "png";
+         const fileExtension =
+            fileUpload.selectedFile.name.split(".").pop() ?? "png";
          const contentType = fileUpload.selectedFile.type;
 
          console.log("[Logo Upload] File details:", {
@@ -176,7 +183,7 @@ function LogoSection({
             contentType,
          });
          console.log("[Logo Upload] Got presigned URL:", {
-            presignedUrl: uploadData.presignedUrl.substring(0, 100) + "...",
+            presignedUrl: `${uploadData.presignedUrl.substring(0, 100)}...`,
             publicUrl: uploadData.publicUrl,
          });
 
@@ -190,7 +197,10 @@ function LogoSection({
          console.log("[Logo Upload] MinIO upload complete");
 
          // Update organization with logo path
-         console.log("[Logo Upload] Updating organization with logo URL:", uploadData.publicUrl);
+         console.log(
+            "[Logo Upload] Updating organization with logo URL:",
+            uploadData.publicUrl,
+         );
          await orpc.organization.updateLogo.call({
             logoUrl: uploadData.publicUrl,
          });
@@ -294,13 +304,12 @@ function OrganizationDetailsSection({
    createdAt: Date | string | null;
    plan: string | null;
 }) {
-   const [copied, setCopied] = useState(false);
+   const [lastCopied, copy] = useCopyToClipboard();
+   const copied = lastCopied === slug;
 
    const handleCopySlug = () => {
-      navigator.clipboard.writeText(slug);
-      setCopied(true);
+      copy(slug);
       toast.success("Slug copiado!");
-      setTimeout(() => setCopied(false), 2000);
    };
 
    return (

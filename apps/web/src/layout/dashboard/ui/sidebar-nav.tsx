@@ -43,6 +43,11 @@ function NavItem({
    onMainItemClick: () => void;
 }) {
    const Icon = item.icon;
+   const { features } = useEarlyAccess();
+   const feature = item.earlyAccessFlag
+      ? features.find((f) => f.flagKey === item.earlyAccessFlag)
+      : undefined;
+   const stage = feature?.stage ?? item.earlyAccessStage ?? "beta";
 
    const handleClick = useCallback(
       (e: React.MouseEvent) => {
@@ -69,11 +74,11 @@ function NavItem({
                   <span>{item.label}</span>
                   {item.earlyAccessFlag && (
                      <FeatureStageBadge
-                        className="ml-1.5 group-data-[collapsible=icon]:hidden"
-                        stage="beta"
+                        className="ml-auto group-data-[collapsible=icon]:hidden"
+                        stage={stage}
                      />
                   )}
-                  <ChevronRight className="ml-auto size-3.5 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+                  <ChevronRight className="size-3.5 text-muted-foreground group-data-[collapsible=icon]:hidden" />
                </>
             ) : (
                <Link
@@ -86,8 +91,8 @@ function NavItem({
                   <span>{item.label}</span>
                   {item.earlyAccessFlag && (
                      <FeatureStageBadge
-                        className="ml-1.5 group-data-[collapsible=icon]:hidden"
-                        stage="beta"
+                        className="ml-auto group-data-[collapsible=icon]:hidden"
+                        stage={stage}
                      />
                   )}
                </Link>

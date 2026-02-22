@@ -105,7 +105,9 @@ export const TrendsBarChart = memo(function TrendsBarChart({
                   radius={[4, 4, 0, 0]}
                />
             ))}
-            <ChartTooltip content={<ChartTooltipContent />} />
+            <ChartTooltip
+               content={(props) => <ChartTooltipContent {...props} />}
+            />
             <ChartLegend content={<ChartLegendContent />} />
          </BarChart>
       </ChartContainer>

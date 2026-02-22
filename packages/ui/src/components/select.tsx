@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@packages/ui/lib/utils";
-import * as SelectPrimitive from "@radix-ui/react-select";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { Select as SelectPrimitive } from "radix-ui";
 import type * as React from "react";
 
 function Select({
@@ -52,12 +52,14 @@ function SelectTrigger({
 function SelectContent({
    className,
    children,
-   position = "popper",
+   position = "item-aligned",
+   align = "center",
    ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
    return (
       <SelectPrimitive.Portal>
          <SelectPrimitive.Content
+            align={align}
             className={cn(
                "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-(--radix-select-content-available-height) min-w-[8rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border shadow-md",
                position === "popper" &&
@@ -111,7 +113,10 @@ function SelectItem({
          data-slot="select-item"
          {...props}
       >
-         <span className="absolute right-2 flex size-3.5 items-center justify-center">
+         <span
+            className="absolute right-2 flex size-3.5 items-center justify-center"
+            data-slot="select-item-indicator"
+         >
             <SelectPrimitive.ItemIndicator>
                <CheckIcon className="size-4" />
             </SelectPrimitive.ItemIndicator>

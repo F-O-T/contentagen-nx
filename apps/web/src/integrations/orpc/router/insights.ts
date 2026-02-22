@@ -10,12 +10,13 @@ import {
    updateInsight,
 } from "@packages/database/repositories/insight-repository";
 import { insights } from "@packages/database/schemas/insights";
-import { eq } from "drizzle-orm";
+import { createEmitFn } from "@packages/events/emit";
 import {
    emitInsightCreated,
    emitInsightDeleted,
    emitInsightUpdated,
 } from "@packages/events/insight";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -53,7 +54,8 @@ export const create = protectedProcedure
 
       try {
          await emitInsightCreated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { insightId: insight.id, name: input.name },
          );
       } catch {
@@ -119,7 +121,8 @@ export const update = protectedProcedure
             (k) => updateData[k as keyof typeof updateData] !== undefined,
          );
          await emitInsightUpdated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { insightId: input.id, changedFields },
          );
       } catch {
@@ -149,7 +152,8 @@ export const remove = protectedProcedure
 
       try {
          await emitInsightDeleted(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { insightId: input.id },
          );
       } catch {

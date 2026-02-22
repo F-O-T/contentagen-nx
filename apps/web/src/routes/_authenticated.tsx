@@ -2,13 +2,14 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated")({
    beforeLoad: async ({ context, location }) => {
+      // biome-ignore lint/suspicious/noImplicitAnyLet: assigned inside try-catch
       let session;
 
       try {
          session = await context.queryClient.fetchQuery(
             context.orpc.session.getSession.queryOptions({}),
          );
-      } catch (error) {
+      } catch (_error) {
          // If session fetch fails, redirect to sign in
          throw redirect({
             to: "/auth/sign-in",
@@ -37,9 +38,10 @@ export const Route = createFileRoute("/_authenticated")({
 
       // If has orgs, check if active org needs onboarding
       if (hasOrgs) {
-         const activeOrg = organizations.find(
-            (org) => org.id === session.session.activeOrganizationId,
-         ) ?? organizations[0];
+         const activeOrg =
+            organizations.find(
+               (org) => org.id === session.session.activeOrganizationId,
+            ) ?? organizations[0];
 
          if (
             activeOrg &&

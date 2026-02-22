@@ -17,7 +17,10 @@ export function IntegrationFeedbackCard() {
    const handleCtaClick = () => {
       openCredenza({
          children: (
-            <FeatureRequestForm context="integration" onSuccess={closeCredenza} />
+            <FeatureRequestForm
+               context="integration"
+               onSuccess={closeCredenza}
+            />
          ),
       });
    };

@@ -1,3 +1,4 @@
+import type { InsightConfig } from "@packages/analytics/types";
 import { Button } from "@packages/ui/components/button";
 import {
    DropdownMenu,
@@ -127,7 +128,7 @@ export function SubSidebarContextMenu({
                <MoreHorizontal className="size-3.5" />
             </Button>
          </DropdownMenuTrigger>
-         <DropdownMenuContent align="start" sideOffset={4}>
+         <DropdownMenuContent align="start" className="z-[1100]" sideOffset={4}>
             <DropdownMenuItem onClick={handleRename}>
                <Pencil className="size-4" />
                Renomear
@@ -157,7 +158,7 @@ export function SubSidebarContextMenu({
                      duplicateInsightMutation.mutate({
                         name: newName,
                         type: "trends",
-                        config: {},
+                        config: {} as InsightConfig,
                      });
                   }
                }}

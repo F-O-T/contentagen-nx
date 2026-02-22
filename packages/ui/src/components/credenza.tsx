@@ -18,7 +18,7 @@ import {
    DrawerTitle,
    DrawerTrigger,
 } from "@packages/ui/components/drawer";
-import { useMediaQuery } from "@packages/ui/hooks/use-media-query";
+import { useIsMobile } from "@packages/ui/hooks/use-mobile";
 import { cn } from "@packages/ui/lib/utils";
 import { createContext, useContext } from "react";
 
@@ -51,7 +51,8 @@ const useCredenzaContext = () => {
 };
 
 const Credenza = ({ children, ...props }: RootCredenzaProps) => {
-   const isDesktop = useMediaQuery("(min-width: 768px)");
+   const isMobile = useIsMobile();
+   const isDesktop = !isMobile;
    const CredenzaComponent = isDesktop ? Dialog : Drawer;
 
    return (

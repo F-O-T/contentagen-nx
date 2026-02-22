@@ -1,7 +1,9 @@
 {
-   "extends": "@tooling/typescript/typecheck.json",
-   "include": ["src"],
-   "references": [
+  "extends": "@tooling/typescript/typecheck.json",
+  "include": [
+    "src"
+  ],
+  "references": [
     {
       "path": "../redis"
     },

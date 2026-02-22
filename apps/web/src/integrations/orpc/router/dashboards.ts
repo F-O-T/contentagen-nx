@@ -11,12 +11,14 @@ import {
 import {
    DashboardDateRangeSchema,
    DashboardFilterSchema,
+   type NewDashboard,
 } from "@packages/database/schemas/dashboards";
 import {
    emitDashboardCreated,
    emitDashboardDeleted,
    emitDashboardUpdated,
 } from "@packages/events/dashboard";
+import { createEmitFn } from "@packages/events/emit";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -59,7 +61,8 @@ export const create = protectedProcedure
 
       try {
          await emitDashboardCreated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { dashboardId: dashboard.id, name: input.name },
          );
       } catch {
@@ -117,7 +120,8 @@ export const update = protectedProcedure
             (k) => updateData[k as keyof typeof updateData] !== undefined,
          );
          await emitDashboardUpdated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { dashboardId: input.id, changedFields },
          );
       } catch {
@@ -160,7 +164,8 @@ export const updateTiles = protectedProcedure
          try {
             const changedFields = Object.keys(metadataUpdate);
             await emitDashboardUpdated(
-               { db, posthog, organizationId, userId, teamId },
+               createEmitFn(db, posthog),
+               { organizationId, userId, teamId },
                { dashboardId: input.id, changedFields },
             );
          } catch {
@@ -200,7 +205,8 @@ export const remove = protectedProcedure
 
       try {
          await emitDashboardDeleted(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { dashboardId: input.id },
          );
       } catch {
@@ -235,10 +241,8 @@ export const updateGlobalFilters = protectedProcedure
       }
 
       // Build update object
-      const updateData: {
-         globalDateRange?: unknown;
-         globalFilters?: unknown;
-      } = {};
+      const updateData: Parameters<typeof updateDashboard>[2] &
+         Partial<Pick<NewDashboard, "globalDateRange" | "globalFilters">> = {};
 
       if (input.globalDateRange !== undefined) {
          updateData.globalDateRange = input.globalDateRange;
@@ -254,7 +258,8 @@ export const updateGlobalFilters = protectedProcedure
       try {
          const changedFields = Object.keys(updateData);
          await emitDashboardUpdated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { dashboardId: input.dashboardId, changedFields },
          );
       } catch {
@@ -289,7 +294,8 @@ export const setAsHome = protectedProcedure
 
       try {
          await emitDashboardUpdated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { dashboardId: input.id, changedFields: ["isDefault"] },
          );
       } catch {

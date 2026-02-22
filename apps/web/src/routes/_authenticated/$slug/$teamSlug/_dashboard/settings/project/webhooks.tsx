@@ -14,7 +14,10 @@ import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
 import { WebhookForm } from "@/features/webhooks/ui/webhook-form";
 import { WebhookSecretDialog } from "@/features/webhooks/ui/webhook-secret-dialog";
-import { WebhooksTable } from "@/features/webhooks/ui/webhooks-table";
+import {
+   type WebhookEndpoint,
+   WebhooksTable,
+} from "@/features/webhooks/ui/webhooks-table";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { useCredenza } from "@/hooks/use-credenza";
 import { useSheet } from "@/hooks/use-sheet";
@@ -106,7 +109,7 @@ function WebhooksContent() {
       });
    }
 
-   function handleEditWebhook(webhook: (typeof webhooks)[number]) {
+   function handleEditWebhook(webhook: WebhookEndpoint) {
       openSheet({
          children: (
             <WebhookForm
@@ -119,7 +122,7 @@ function WebhooksContent() {
       });
    }
 
-   function handleDeleteWebhook(webhook: (typeof webhooks)[number]) {
+   function handleDeleteWebhook(webhook: WebhookEndpoint) {
       openAlertDialog({
          title: "Excluir webhook",
          description: `Tem certeza que deseja excluir o endpoint ${webhook.url}? Esta ação não pode ser desfeita.`,

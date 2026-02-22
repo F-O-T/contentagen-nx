@@ -8,6 +8,7 @@ import {
    listFormsByTeam,
    updateForm,
 } from "@packages/database/repositories/form-repository";
+import { createEmitFn } from "@packages/events/emit";
 import {
    emitFormCreated,
    emitFormDeleted,
@@ -22,7 +23,17 @@ import { protectedProcedure } from "../server";
 
 const fieldSchema = z.object({
    id: z.string(),
-   type: z.enum(["text", "email", "textarea", "checkbox", "select"]),
+   type: z.enum([
+      "text",
+      "email",
+      "textarea",
+      "checkbox",
+      "select",
+      "number",
+      "date",
+      "rating",
+      "file",
+   ]),
    label: z.string(),
    placeholder: z.string().optional(),
    required: z.boolean(),
@@ -41,6 +52,11 @@ const createFormSchema = z.object({
    description: z.string().optional(),
    fields: z.array(fieldSchema).min(1),
    settings: settingsSchema.optional(),
+   title: z.string().optional(),
+   subtitle: z.string().optional(),
+   icon: z.string().optional(),
+   buttonText: z.string().optional(),
+   layout: z.enum(["card", "inline", "banner"]).optional(),
 });
 
 const updateFormSchema = z.object({
@@ -50,6 +66,11 @@ const updateFormSchema = z.object({
    fields: z.array(fieldSchema).min(1).optional(),
    settings: settingsSchema.optional(),
    isActive: z.boolean().optional(),
+   title: z.string().optional(),
+   subtitle: z.string().optional(),
+   icon: z.string().optional(),
+   buttonText: z.string().optional(),
+   layout: z.enum(["card", "inline", "banner"]).optional(),
 });
 
 // =============================================================================
@@ -71,11 +92,17 @@ export const create = protectedProcedure
          description: input.description,
          fields: input.fields,
          settings: input.settings ?? {},
+         title: input.title,
+         subtitle: input.subtitle,
+         icon: input.icon,
+         buttonText: input.buttonText,
+         layout: input.layout,
       });
 
       try {
          await emitFormCreated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { formId: form.id, name: input.name },
          );
       } catch {
@@ -145,7 +172,8 @@ export const update = protectedProcedure
             (k) => updateData[k as keyof typeof updateData] !== undefined,
          );
          await emitFormUpdated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { formId: input.id, changedFields },
          );
       } catch {
@@ -179,7 +207,8 @@ export const remove = protectedProcedure
 
       try {
          await emitFormDeleted(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { formId: input.id },
          );
       } catch {

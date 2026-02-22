@@ -10,6 +10,7 @@ import { Progress } from "@packages/ui/components/progress";
 import { useParams } from "@tanstack/react-router";
 import { ChevronDown, ChevronUp, Rocket, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import { useSafeLocalStorage } from "@/hooks/use-local-storage";
 import { useCompleteTask } from "../hooks/use-complete-task";
 import { useOnboardingStatus } from "../hooks/use-onboarding-status";
 import {
@@ -23,33 +24,6 @@ import { QuickStartTask } from "./quick-start-task";
 
 const CHECKLIST_HIDDEN_STORAGE_KEY = "contentta:checklist_hidden";
 
-function getChecklistHidden(slug: string): boolean {
-   try {
-      const stored = localStorage.getItem(CHECKLIST_HIDDEN_STORAGE_KEY);
-      if (!stored) return false;
-      const parsed = JSON.parse(stored) as Record<string, boolean>;
-      return parsed[slug] === true;
-   } catch {
-      return false;
-   }
-}
-
-function setChecklistHidden(slug: string): void {
-   try {
-      const stored = localStorage.getItem(CHECKLIST_HIDDEN_STORAGE_KEY);
-      const parsed = stored
-         ? (JSON.parse(stored) as Record<string, boolean>)
-         : {};
-      parsed[slug] = true;
-      localStorage.setItem(
-         CHECKLIST_HIDDEN_STORAGE_KEY,
-         JSON.stringify(parsed),
-      );
-   } catch {
-      // Silently fail if localStorage is not available
-   }
-}
-
 /**
  * Quick Start checklist card for the home page.
  * Shows onboarding tasks grouped by product with progress tracking.
@@ -60,16 +34,23 @@ export function QuickStartChecklist() {
    const completeTaskMutation = useCompleteTask();
    const { slug } = useParams({ strict: false });
    const [isCollapsed, setIsCollapsed] = useState(false);
-   const [isHidden, setIsHidden] = useState(() =>
-      getChecklistHidden(slug ?? ""),
-   );
+   const [hiddenBySlug, setHiddenBySlug] = useSafeLocalStorage<
+      Record<string, boolean>
+   >(CHECKLIST_HIDDEN_STORAGE_KEY, {});
+   const isHidden = (slug && hiddenBySlug[slug]) === true;
 
    const tasks = useMemo(
-      () => getTasksForProducts(status?.onboardingProducts ?? null),
-      [status?.onboardingProducts],
+      () =>
+         getTasksForProducts(
+            (status?.project?.onboardingProducts as
+               | string[]
+               | null
+               | undefined) ?? null,
+         ),
+      [status?.project?.onboardingProducts],
    );
 
-   const tasksMap = status?.tasks ?? {};
+   const tasksMap = (status?.project?.tasks ?? {}) as Record<string, boolean>;
 
    // Check if an SDK install task is completed - treat as linked
    const isTaskCompleted = useCallback(
@@ -145,13 +126,12 @@ export function QuickStartChecklist() {
 
    const handleHide = useCallback(() => {
       if (slug) {
-         setChecklistHidden(slug);
+         setHiddenBySlug((prev) => ({ ...prev, [slug]: true }));
       }
-      setIsHidden(true);
-   }, [slug]);
+   }, [slug, setHiddenBySlug]);
 
    // Determine visibility
-   if (!status.onboardingCompleted) return null;
+   if (!status?.project?.onboardingCompleted) return null;
    if (isHidden) return null;
    if (allDone) return null;
 

@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-import { EVENT_CATEGORIES } from "./catalog";
-import { type EmitEventParams, emitEvent } from "./emit";
+import { type EmitFn, EVENT_CATEGORIES } from "./catalog";
 
 // ---------------------------------------------------------------------------
 // Content Event Names
@@ -22,6 +21,23 @@ export const CONTENT_EVENTS = {
 
 export type ContentEventName =
    (typeof CONTENT_EVENTS)[keyof typeof CONTENT_EVENTS];
+
+// ---------------------------------------------------------------------------
+// Content Pricing
+// ---------------------------------------------------------------------------
+
+export const CONTENT_PRICING: Record<string, string> = {
+   "content.page.view": "0.000020",
+   "content.page.published": "0.001000",
+   "content.page.updated": "0.000500",
+   "content.created": "0.000000",
+   "content.deleted": "0.000000",
+   "content.scroll.milestone": "0.000000",
+   "content.time.spent": "0.000000",
+   "content.cta.click": "0.000000",
+   "content.exported": "0.001000",
+   "content.archived": "0.000000",
+};
 
 // ---------------------------------------------------------------------------
 // Shared enums
@@ -65,13 +81,11 @@ export const pageViewEventSchema = z.object({
 export type PageViewEvent = z.infer<typeof pageViewEventSchema>;
 
 export function emitContentPageView(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: PageViewEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: CONTENT_EVENTS["content.page.view"],
       eventCategory: EVENT_CATEGORIES.content,
@@ -93,13 +107,11 @@ export const contentPublishedEventSchema = z.object({
 export type ContentPublishedEvent = z.infer<typeof contentPublishedEventSchema>;
 
 export function emitContentPublished(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: ContentPublishedEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: CONTENT_EVENTS["content.page.published"],
       eventCategory: EVENT_CATEGORIES.content,
@@ -120,13 +132,11 @@ export const contentUpdatedEventSchema = z.object({
 export type ContentUpdatedEvent = z.infer<typeof contentUpdatedEventSchema>;
 
 export function emitContentUpdated(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: ContentUpdatedEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: CONTENT_EVENTS["content.page.updated"],
       eventCategory: EVENT_CATEGORIES.content,
@@ -146,13 +156,11 @@ export const contentCreatedEventSchema = z.object({
 export type ContentCreatedEvent = z.infer<typeof contentCreatedEventSchema>;
 
 export function emitContentCreated(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: ContentCreatedEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: CONTENT_EVENTS["content.created"],
       eventCategory: EVENT_CATEGORIES.content,
@@ -170,13 +178,11 @@ export const contentDeletedEventSchema = z.object({
 export type ContentDeletedEvent = z.infer<typeof contentDeletedEventSchema>;
 
 export function emitContentDeleted(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: ContentDeletedEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: CONTENT_EVENTS["content.deleted"],
       eventCategory: EVENT_CATEGORIES.content,
@@ -197,13 +203,11 @@ export const scrollMilestoneEventSchema = z.object({
 export type ScrollMilestoneEvent = z.infer<typeof scrollMilestoneEventSchema>;
 
 export function emitScrollMilestone(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: ScrollMilestoneEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: CONTENT_EVENTS["content.scroll.milestone"],
       eventCategory: EVENT_CATEGORIES.content,
@@ -224,13 +228,11 @@ export const timeSpentEventSchema = z.object({
 export type TimeSpentEvent = z.infer<typeof timeSpentEventSchema>;
 
 export function emitTimeSpent(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: TimeSpentEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: CONTENT_EVENTS["content.time.spent"],
       eventCategory: EVENT_CATEGORIES.content,
@@ -253,13 +255,11 @@ export const ctaClickEventSchema = z.object({
 export type CtaClickEvent = z.infer<typeof ctaClickEventSchema>;
 
 export function emitCtaClick(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: CtaClickEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: CONTENT_EVENTS["content.cta.click"],
       eventCategory: EVENT_CATEGORIES.content,
@@ -279,13 +279,11 @@ export const contentExportedEventSchema = z.object({
 export type ContentExportedEvent = z.infer<typeof contentExportedEventSchema>;
 
 export function emitContentExported(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: ContentExportedEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: CONTENT_EVENTS["content.exported"],
       eventCategory: EVENT_CATEGORIES.content,
@@ -303,13 +301,11 @@ export const contentArchivedEventSchema = z.object({
 export type ContentArchivedEvent = z.infer<typeof contentArchivedEventSchema>;
 
 export function emitContentArchived(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: ContentArchivedEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: CONTENT_EVENTS["content.archived"],
       eventCategory: EVENT_CATEGORIES.content,

@@ -39,7 +39,7 @@ import {
    useRouter,
 } from "@tanstack/react-router";
 import { Check, ChevronDown, Plus } from "lucide-react";
-import { Suspense, useCallback, useMemo, useState } from "react";
+import { Suspense, useCallback, useMemo, useState, useTransition } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useSetActiveOrganization } from "@/features/organization/hooks/use-set-active-organization";
 import { CreateTeamForm } from "@/features/organization/ui/create-team-form";
@@ -82,11 +82,12 @@ function getInitials(value: string) {
 }
 
 function getOrgColor(name: string): string {
+   if (!name) return ORG_AVATAR_COLORS[0] ?? "";
    let hash = 0;
    for (const char of name) {
       hash = char.charCodeAt(0) + ((hash << 5) - hash);
    }
-   return ORG_AVATAR_COLORS[Math.abs(hash) % ORG_AVATAR_COLORS.length];
+   return ORG_AVATAR_COLORS[Math.abs(hash) % ORG_AVATAR_COLORS.length] ?? "";
 }
 
 function RoleBadge({ role }: { role: string }) {
@@ -116,7 +117,8 @@ function SidebarScopeSwitcherContent() {
    const { activeTeam, teams } = useActiveTeam();
    const { openSheet } = useSheet();
    const { openCredenza, closeCredenza } = useCredenza();
-   const { setActiveOrganization, isPending } = useSetActiveOrganization();
+   const { setActiveOrganization } = useSetActiveOrganization();
+   const [isPending, startTransition] = useTransition();
    const queryClient = useQueryClient();
    const router = useRouter();
    const { pathname } = useLocation();
@@ -154,23 +156,25 @@ function SidebarScopeSwitcherContent() {
    );
 
    const handleOrganizationSwitch = useCallback(
-      async (org: Organization) => {
+      (org: Organization) => {
          if (org.id === activeOrganization.id || isPending) {
             setOrgOpen(false);
             return;
          }
 
-         await setActiveOrganization({
-            organizationId: org.id,
-            organizationSlug: org.slug,
+         startTransition(async () => {
+            await setActiveOrganization({
+               organizationId: org.id,
+               organizationSlug: org.slug,
+            });
+
+            const nextPath = pathname.startsWith(`/${currentSlug}`)
+               ? pathname.replace(`/${currentSlug}`, `/${org.slug}`)
+               : `/${org.slug}/${params.teamSlug ?? ""}/home`;
+
+            router.navigate({ to: nextPath });
+            setOrgOpen(false);
          });
-
-         const nextPath = pathname.startsWith(`/${currentSlug}`)
-            ? pathname.replace(`/${currentSlug}`, `/${org.slug}`)
-            : `/${org.slug}/${params.teamSlug ?? ""}/home`;
-
-         router.navigate({ to: nextPath });
-         setOrgOpen(false);
       },
       [
          activeOrganization.id,
@@ -180,6 +184,7 @@ function SidebarScopeSwitcherContent() {
          pathname,
          router,
          setActiveOrganization,
+         startTransition,
       ],
    );
 

@@ -13,7 +13,7 @@ import {
    useCallback,
    useEffect,
    useImperativeHandle,
-   useState,
+   useTransition,
 } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -38,18 +38,16 @@ export const ProjectStep = forwardRef<StepHandle, ProjectStepProps>(
       { organizationId, onNext, onStateChange, onSlugChange },
       ref,
    ) {
-      const [isPending, setIsPending] = useState(false);
+      const [isPending, startTransition] = useTransition();
 
       const form = useForm({
          defaultValues: { projectName: "" },
          onSubmit: async ({ value }) => {
             try {
-               setIsPending(true);
                const slug = createSlug(value.projectName);
 
                const result = await authClient.organization.createTeam({
                   name: value.projectName,
-                  slug,
                   organizationId,
                });
 
@@ -59,19 +57,16 @@ export const ProjectStep = forwardRef<StepHandle, ProjectStepProps>(
 
                const teamId = result.data.id;
 
-               // Get current user session
                const session = await authClient.getSession();
                if (!session?.data?.user?.id) {
                   throw new Error("No active session");
                }
 
-               // Add the creator as a team member
                await authClient.organization.addTeamMember({
                   teamId,
                   userId: session.data.user.id,
                });
 
-               // Set the newly created team as active
                await authClient.organization.setActiveTeam({ teamId });
 
                toast.success("Projeto criado com sucesso!");
@@ -82,8 +77,6 @@ export const ProjectStep = forwardRef<StepHandle, ProjectStepProps>(
                      ? error.message
                      : "Erro ao criar projeto.",
                );
-            } finally {
-               setIsPending(false);
             }
          },
          validators: { onBlur: projectSchema },
@@ -110,9 +103,11 @@ export const ProjectStep = forwardRef<StepHandle, ProjectStepProps>(
          (e: FormEvent) => {
             e.preventDefault();
             e.stopPropagation();
-            form.handleSubmit();
+            startTransition(async () => {
+               await form.handleSubmit();
+            });
          },
-         [form],
+         [form, startTransition],
       );
 
       return (

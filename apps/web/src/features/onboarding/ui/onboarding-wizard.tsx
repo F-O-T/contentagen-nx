@@ -3,7 +3,7 @@ import { Button } from "@packages/ui/components/button";
 import { Spinner } from "@packages/ui/components/spinner";
 import { defineStepper } from "@packages/ui/components/stepper";
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useTransition } from "react";
 import type { Session } from "@/integrations/better-auth/auth-client";
 import { ProductsStep } from "./products-step";
 import { ProfileStep } from "./profile-step";
@@ -67,6 +67,7 @@ export function OnboardingWizard({
    const [projectSlug, setProjectSlug] = useState<string | null>(null);
 
    const stepRef = useRef<StepHandle>(null);
+   const [submitPending, startTransition] = useTransition();
 
    const [stepState, setStepState] = useState<StepState>({
       canContinue: true,
@@ -126,15 +127,17 @@ export function OnboardingWizard({
 
    return (
       <Stepper.Provider
-         variant="line"
          className="mx-auto flex min-h-screen max-w-6xl flex-col"
+         variant="line"
       >
          {({ methods }) => {
             const isFirstStep = methods.state.isFirst;
             const isLastStep = methods.state.isLast;
 
-            const handleContinue = async () => {
-               await stepRef.current?.submit();
+            const handleContinue = () => {
+               startTransition(async () => {
+                  await stepRef.current?.submit();
+               });
             };
 
             const handleBack = () => {
@@ -158,8 +161,8 @@ export function OnboardingWizard({
                               src="/favicon.svg"
                            />
                            <Badge
-                              variant="outline"
                               className="bg-muted text-muted-foreground"
+                              variant="outline"
                            >
                               app.contentta.co
                               {workspaceSlug ? `/${workspaceSlug}` : ""}
@@ -178,34 +181,34 @@ export function OnboardingWizard({
                         {methods.flow.switch({
                            ...(needsProfile
                               ? {
-                                 profile: () => (
-                                    <ProfileStep
-                                       defaultName={session.user.name ?? ""}
-                                       onNext={() =>
-                                          handleProfileComplete(methods)
-                                       }
-                                       onStateChange={handleStepStateChange}
-                                       ref={stepRef}
-                                    />
-                                 ),
-                              }
+                                   profile: () => (
+                                      <ProfileStep
+                                         defaultName={session.user.name ?? ""}
+                                         onNext={() =>
+                                            handleProfileComplete(methods)
+                                         }
+                                         onStateChange={handleStepStateChange}
+                                         ref={stepRef}
+                                      />
+                                   ),
+                                }
                               : {}),
                            ...(needsWorkspace
                               ? {
-                                 workspace: () => (
-                                    <WorkspaceStep
-                                       onNext={(org) =>
-                                          handleWorkspaceComplete(
-                                             org,
-                                             methods,
-                                          )
-                                       }
-                                       onSlugChange={setWorkspaceSlug}
-                                       onStateChange={handleStepStateChange}
-                                       ref={stepRef}
-                                    />
-                                 ),
-                              }
+                                   workspace: () => (
+                                      <WorkspaceStep
+                                         onNext={(org) =>
+                                            handleWorkspaceComplete(
+                                               org,
+                                               methods,
+                                            )
+                                         }
+                                         onSlugChange={setWorkspaceSlug}
+                                         onStateChange={handleStepStateChange}
+                                         ref={stepRef}
+                                      />
+                                   ),
+                                }
                               : {}),
                            project: () => (
                               <ProjectStep
@@ -222,6 +225,7 @@ export function OnboardingWizard({
                            ),
                            products: () => (
                               <ProductsStep
+                                 isPending={submitPending}
                                  onComplete={handleOnboardingComplete}
                                  onStateChange={handleStepStateChange}
                                  organizationId={

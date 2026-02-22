@@ -16,7 +16,7 @@ import { Textarea } from "@packages/ui/components/textarea";
 import { createSlug } from "@packages/utils/text";
 import { useForm } from "@tanstack/react-form";
 import { Building } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useTransition } from "react";
 import { toast } from "sonner";
 import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
 import { useSetActiveOrganization } from "@/features/organization/hooks/use-set-active-organization";
@@ -39,8 +39,7 @@ export function ManageOrganizationForm({
 }: ManageOrganizationFormProps) {
    const { closeSheet } = useSheet();
    const isEditMode = !!organization;
-   const [isCreatePending, setIsCreatePending] = useState(false);
-   const [isUpdatePending, setIsUpdatePending] = useState(false);
+   const [isPending, startTransition] = useTransition();
 
    const modeTexts = useMemo(() => {
       const createTexts = {
@@ -67,73 +66,52 @@ export function ManageOrganizationForm({
 
    const createOrganization = useCallback(
       async (data: { name: string; slug: string; description?: string }) => {
-         await authClient.organization.create(
-            {
-               name: data.name,
-               slug: data.slug,
-            },
-            {
-               onRequest: () => {
-                  setIsCreatePending(true);
-                  toast.loading("Creating organization...");
-               },
-               onSuccess: async (ctx) => {
-                  setIsCreatePending(false);
-                  toast.success("Organization created successfully");
-                  if (ctx.data?.id) {
-                     await setActiveOrganization({
-                        organizationId: ctx.data.id,
-                     });
+         toast.loading("Creating organization...");
+         const result = await authClient.organization.create({
+            name: data.name,
+            slug: data.slug,
+         });
 
-                     // Create a default project for the new organization
-                     await authClient.organization.createTeam({
-                        name: "Default",
-                        organizationId: ctx.data.id,
-                     });
-                  }
-                  fileUpload.clearFile();
-                  closeSheet();
-               },
-               onError: (ctx) => {
-                  setIsCreatePending(false);
-                  toast.error(
-                     ctx.error.message || "Failed to create organization",
-                  );
-               },
-            },
-         );
+         if (result.error) {
+            toast.error(
+               result.error.message || "Failed to create organization",
+            );
+            return;
+         }
+
+         toast.success("Organization created successfully");
+         if (result.data?.id) {
+            await setActiveOrganization({
+               organizationId: result.data.id,
+            });
+            await authClient.organization.createTeam({
+               name: "Default",
+               organizationId: result.data.id,
+            });
+         }
+         fileUpload.clearFile();
+         closeSheet();
       },
       [closeSheet, fileUpload, setActiveOrganization],
    );
 
    const updateOrganization = useCallback(
       async (data: { organizationId: string; name?: string }) => {
-         await authClient.organization.update(
-            {
-               data: {
-                  name: data.name,
-               },
-               organizationId: data.organizationId,
-            },
-            {
-               onRequest: () => {
-                  setIsUpdatePending(true);
-                  toast.loading("Updating organization...");
-               },
-               onSuccess: () => {
-                  setIsUpdatePending(false);
-                  toast.success("Organization updated successfully");
-                  fileUpload.clearFile();
-                  closeSheet();
-               },
-               onError: (ctx) => {
-                  setIsUpdatePending(false);
-                  toast.error(
-                     ctx.error.message || "Failed to update organization",
-                  );
-               },
-            },
-         );
+         toast.loading("Updating organization...");
+         const result = await authClient.organization.update({
+            data: { name: data.name },
+            organizationId: data.organizationId,
+         });
+
+         if (result.error) {
+            toast.error(
+               result.error.message || "Failed to update organization",
+            );
+            return;
+         }
+         toast.success("Organization updated successfully");
+         fileUpload.clearFile();
+         closeSheet();
       },
       [closeSheet, fileUpload],
    );
@@ -164,7 +142,6 @@ export function ManageOrganizationForm({
                   slug: createSlug(value.name),
                });
             }
-
             formApi.reset();
          } catch (error) {
             console.error(
@@ -181,7 +158,9 @@ export function ManageOrganizationForm({
          onSubmit={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            form.handleSubmit();
+            startTransition(async () => {
+               await form.handleSubmit();
+            });
          }}
       >
          <SheetHeader>
@@ -315,14 +294,11 @@ export function ManageOrganizationForm({
                   <Button
                      className="w-full"
                      disabled={
-                        !state.canSubmit ||
-                        state.isSubmitting ||
-                        isCreatePending ||
-                        isUpdatePending
+                        !state.canSubmit || state.isSubmitting || isPending
                      }
                      type="submit"
                   >
-                     {state.isSubmitting
+                     {state.isSubmitting || isPending
                         ? isEditMode
                            ? "Saving..."
                            : "Creating..."

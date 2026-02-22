@@ -7,7 +7,8 @@ export const Route = createFileRoute(
 )({
    server: {
       handlers: {
-         GET: () => oauthProviderAuthServerMetadata(getAuth()),
+         GET: ({ request }) =>
+            oauthProviderAuthServerMetadata(getAuth())(request),
       },
    },
 });

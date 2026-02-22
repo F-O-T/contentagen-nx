@@ -1,5 +1,5 @@
 import { cn } from "@packages/ui/lib/utils";
-import { FlaskConical, Lightbulb, Sparkles } from "lucide-react";
+import { CheckCircle2, FlaskConical, Lightbulb, Sparkles } from "lucide-react";
 import type * as React from "react";
 import { Badge } from "./badge";
 
@@ -7,32 +7,22 @@ const STAGE_CONFIG = {
    alpha: {
       icon: Sparkles,
       label: "Alpha",
-      className:
-         "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800/50 dark:bg-orange-950/30 dark:text-orange-400",
+      className: "border-chart-1 bg-chart-1/30 text-foreground ",
    },
    beta: {
       icon: FlaskConical,
       label: "Beta",
-      className:
-         "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800/50 dark:bg-blue-950/30 dark:text-blue-400",
+      className: "border-chart-2 bg-chart-2/30 text-foreground ",
    },
    concept: {
       icon: Lightbulb,
       label: "Conceito",
-      className:
-         "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800/50 dark:bg-purple-950/30 dark:text-purple-400",
+      className: "border-chart-4 bg-chart-4/30 text-foreground ",
    },
-   experimental: {
-      icon: FlaskConical,
-      label: "Experimental",
-      className:
-         "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-400",
-   },
-   preview: {
-      icon: FlaskConical,
-      label: "Preview",
-      className:
-         "border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-800/50 dark:bg-cyan-950/30 dark:text-cyan-400",
+   "general-availability": {
+      icon: CheckCircle2,
+      label: "Disponível",
+      className: "border-chart-6 bg-chart-6/30 text-foreground ",
    },
 } as const;
 
@@ -63,4 +53,72 @@ function FeatureStageBadge({
    );
 }
 
-export { FeatureStageBadge, STAGE_CONFIG };
+export type FeatureStageChipProps = {
+   stage: FeatureStage;
+   count?: number;
+   isActive?: boolean;
+   onClick?: () => void;
+   className?: string;
+};
+
+/**
+ * FeatureStageChip - Um chip clicável para usar como filtro de estágio
+ * - Mostra a badge com o nome do estágio
+ * - Opcionalmente mostra uma contagem
+ * - Suporta estado ativo/inativo
+ * - Pode ser clicável para alternar filtros
+ */
+function FeatureStageChip({
+   stage,
+   count,
+   isActive = true,
+   onClick,
+   className,
+}: FeatureStageChipProps) {
+   const config = STAGE_CONFIG[stage];
+   const Icon = config.icon;
+
+   const content = (
+      <>
+         <Icon className="size-3.5" />
+         <span>{config.label}</span>
+         {count !== undefined && (
+            <span className="ml-1 text-muted-foreground">({count})</span>
+         )}
+      </>
+   );
+
+   if (onClick) {
+      return (
+         <button
+            className={cn(
+               "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+               "border focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+               isActive
+                  ? config.className
+                  : "border-muted bg-muted/50 text-muted-foreground opacity-50",
+               "hover:opacity-80",
+               className,
+            )}
+            onClick={onClick}
+            type="button"
+         >
+            {content}
+         </button>
+      );
+   }
+
+   return (
+      <span
+         className={cn(
+            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium",
+            isActive ? config.className : "opacity-50",
+            className,
+         )}
+      >
+         {content}
+      </span>
+   );
+}
+
+export { FeatureStageBadge, FeatureStageChip, STAGE_CONFIG };

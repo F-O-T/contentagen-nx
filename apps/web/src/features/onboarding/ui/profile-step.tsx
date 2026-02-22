@@ -12,7 +12,7 @@ import {
    useCallback,
    useEffect,
    useImperativeHandle,
-   useState,
+   useTransition,
 } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -31,13 +31,12 @@ interface ProfileStepProps {
 
 export const ProfileStep = forwardRef<StepHandle, ProfileStepProps>(
    function ProfileStep({ defaultName, onNext, onStateChange }, ref) {
-      const [isPending, setIsPending] = useState(false);
+      const [isPending, startTransition] = useTransition();
 
       const form = useForm({
          defaultValues: { userName: defaultName },
          onSubmit: async ({ value }) => {
             try {
-               setIsPending(true);
                await authClient.updateUser({ name: value.userName });
                toast.success("Nome atualizado!");
                onNext();
@@ -47,8 +46,6 @@ export const ProfileStep = forwardRef<StepHandle, ProfileStepProps>(
                      ? error.message
                      : "Erro ao atualizar nome.",
                );
-            } finally {
-               setIsPending(false);
             }
          },
          validators: { onBlur: profileSchema },
@@ -75,9 +72,11 @@ export const ProfileStep = forwardRef<StepHandle, ProfileStepProps>(
          (e: FormEvent) => {
             e.preventDefault();
             e.stopPropagation();
-            form.handleSubmit();
+            startTransition(async () => {
+               await form.handleSubmit();
+            });
          },
-         [form],
+         [form, startTransition],
       );
 
       return (

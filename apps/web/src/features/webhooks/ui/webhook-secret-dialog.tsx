@@ -7,8 +7,8 @@ import {
    CredenzaTitle,
 } from "@packages/ui/components/credenza";
 import { Input } from "@packages/ui/components/input";
+import { useCopyToClipboard } from "@uidotdev/usehooks";
 import { AlertTriangle, Check, Copy } from "lucide-react";
-import { useState } from "react";
 
 interface WebhookSecretDialogProps {
    url: string;
@@ -21,17 +21,8 @@ export function WebhookSecretDialog({
    plaintextSecret,
    onClose,
 }: WebhookSecretDialogProps) {
-   const [copied, setCopied] = useState(false);
-
-   async function handleCopy() {
-      try {
-         await navigator.clipboard.writeText(plaintextSecret);
-         setCopied(true);
-         setTimeout(() => setCopied(false), 2000);
-      } catch {
-         // Fallback for environments where clipboard API isn't available
-      }
-   }
+   const [lastCopied, copy] = useCopyToClipboard();
+   const copied = lastCopied === plaintextSecret;
 
    return (
       <>
@@ -49,7 +40,11 @@ export function WebhookSecretDialog({
                   readOnly
                   value={plaintextSecret}
                />
-               <Button onClick={handleCopy} size="icon" variant="outline">
+               <Button
+                  onClick={() => copy(plaintextSecret)}
+                  size="icon"
+                  variant="outline"
+               >
                   {copied ? (
                      <Check className="size-4 text-green-600" />
                   ) : (

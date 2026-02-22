@@ -21,7 +21,7 @@ import {
 	deleteForm,
 	getFormById,
 	getFormSubmissions,
-	listForms,
+	listFormsByTeam,
 	updateForm,
 } from "@packages/database/repositories/form-repository";
 import {
@@ -80,6 +80,7 @@ describe("create", () => {
 		await call(formsRouter.create, input, { context: ctx });
 
 		expect(emitFormCreated).toHaveBeenCalledWith(
+			expect.anything(), // EmitFn
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -111,12 +112,13 @@ describe("create", () => {
 describe("list", () => {
 	it("returns forms for organization", async () => {
 		const forms = [makeForm(), makeForm({ id: "form-2", name: "Signup Form" })];
-		vi.mocked(listForms).mockResolvedValueOnce(forms);
+		// biome-ignore lint/suspicious/noExplicitAny: mock doesn't include submissionCount projection
+		vi.mocked(listFormsByTeam).mockResolvedValueOnce(forms as any);
 
 		const ctx = createTestContext();
 		const result = await call(formsRouter.list, undefined, { context: ctx });
 
-		expect(listForms).toHaveBeenCalledWith(expect.anything(), TEST_ORG_ID);
+		expect(listFormsByTeam).toHaveBeenCalledWith(expect.anything(), TEST_TEAM_ID);
 		expect(result).toHaveLength(2);
 	});
 });
@@ -142,12 +144,13 @@ describe("getById", () => {
 	});
 
 	it("throws NOT_FOUND when form does not exist", async () => {
-		vi.mocked(getFormById).mockResolvedValueOnce(null);
+		// biome-ignore lint/suspicious/noExplicitAny: mock returns null to simulate not found
+		vi.mocked(getFormById).mockResolvedValueOnce(null as any);
 
 		const ctx = createTestContext();
 		await expect(
 			call(formsRouter.getById, { id: FORM_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<any, any>) => e.code === "NOT_FOUND");
 	});
 
 	it("throws NOT_FOUND when form belongs to different org", async () => {
@@ -157,7 +160,7 @@ describe("getById", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(formsRouter.getById, { id: FORM_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<any, any>) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -199,7 +202,7 @@ describe("update", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(formsRouter.update, input, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<any, any>) => e.code === "NOT_FOUND");
 	});
 
 	it("emits formUpdated event with changedFields", async () => {
@@ -210,6 +213,7 @@ describe("update", () => {
 		await call(formsRouter.update, input, { context: ctx });
 
 		expect(emitFormUpdated).toHaveBeenCalledWith(
+			expect.anything(), // EmitFn
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -251,6 +255,7 @@ describe("remove", () => {
 		await call(formsRouter.remove, { id: FORM_ID }, { context: ctx });
 
 		expect(emitFormDeleted).toHaveBeenCalledWith(
+			expect.anything(), // EmitFn
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -274,7 +279,8 @@ describe("getSubmissions", () => {
 			{ id: "sub-1", formId: FORM_ID, data: { Name: "Alice" } },
 			{ id: "sub-2", formId: FORM_ID, data: { Name: "Bob" } },
 		];
-		vi.mocked(getFormSubmissions).mockResolvedValueOnce(mockSubmissions);
+		// biome-ignore lint/suspicious/noExplicitAny: partial mock object for submission shape
+		vi.mocked(getFormSubmissions).mockResolvedValueOnce(mockSubmissions as any);
 		vi.mocked(countFormSubmissions).mockResolvedValueOnce(2);
 
 		const ctx = createTestContext();
@@ -311,6 +317,6 @@ describe("getSubmissions", () => {
 				{ formId: FORM_ID, page: 1, limit: 50 },
 				{ context: ctx },
 			),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<any, any>) => e.code === "NOT_FOUND");
 	});
 });

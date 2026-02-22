@@ -37,7 +37,7 @@ export const insertHeadingTool = createTool({
       // Normalize markdown to fix LLM escaping issues (e.g., \*\* → **)
       const normalizedText = normalizeMarkdownEmphasis(inputData.text);
 
-      const levelNum = Number.parseInt(inputData.level.replace("h", "")) as
+      const levelNum = Number.parseInt(inputData.level.replace("h", ""), 10) as
          | 1
          | 2
          | 3

@@ -8,7 +8,7 @@ import { dataManagementNavSections } from "./data-management-nav-items";
 
 export function DataManagementMobileNav() {
    const { activeOrganization } = useActiveOrganization();
-   const { teamId } = useParams({ strict: false });
+   const { teamSlug } = useParams({ strict: false });
    const navigate = useNavigate();
    const [search, setSearch] = useState("");
 
@@ -43,6 +43,7 @@ export function DataManagementMobileNav() {
                   <div className="grid gap-2">
                      {filtered.map((item) => (
                         <QuickAccessCard
+                           description=""
                            icon={
                               item.icon ? (
                                  <item.icon className="size-4" />
@@ -53,7 +54,7 @@ export function DataManagementMobileNav() {
                               navigate({
                                  params: {
                                     slug: activeOrganization.slug,
-                                    teamId: teamId ?? "",
+                                    teamSlug: teamSlug ?? "",
                                  },
                                  to: item.href,
                               })

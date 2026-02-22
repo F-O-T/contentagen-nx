@@ -1,8 +1,8 @@
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { FlaskConical } from "lucide-react";
-import { useCredenza } from "@/hooks/use-credenza";
 import { FeatureFeedbackForm } from "@/features/feedback/ui/feature-feedback-form";
+import { useCredenza } from "@/hooks/use-credenza";
 
 export type EarlyAccessBannerTemplate = {
    badgeLabel: string;

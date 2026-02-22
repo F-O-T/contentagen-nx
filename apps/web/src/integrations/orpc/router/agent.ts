@@ -5,36 +5,33 @@ import {
    mastra,
    type RequestContext,
 } from "@packages/agents";
-import type { ModelId } from "@packages/agents/models";
 import {
-   addChatMessage,
-   getOrCreateChatSession,
-} from "@packages/database/repositories/chat-repository";
+   AUTOCOMPLETE_MODELS,
+   type AutocompleteModelId,
+   CONTENT_MODELS,
+   type ContentModelId,
+   DEFAULT_AUTOCOMPLETE_MODEL_ID,
+   DEFAULT_CONTENT_MODEL_ID,
+   getModelPreset,
+} from "@packages/agents/models";
 import { getProductSettings } from "@packages/database/repositories/product-settings-repository";
 import { teamMember } from "@packages/database/schemas/auth";
-import type { StoredToolCall } from "@packages/database/schemas/chat";
 import { content } from "@packages/database/schemas/content";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { writer } from "@packages/database/schemas/writer";
 import {
    AI_EVENTS,
    emitAiAgentAction,
-   emitAiChatMessage,
    emitAiCompletion,
 } from "@packages/events/ai";
 import {
    enforceCreditBudget,
    trackCreditUsage,
 } from "@packages/events/credits";
+import { createEmitFn } from "@packages/events/emit";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import {
-   type ChatChunk,
-   type EditChunk,
-   EditRequestSchema,
-   type FIMChunk,
-   FIMRequestSchema,
-} from "@/features/editor/schemas";
+import type { ChatChunk, FIMChunk } from "@/features/editor/schemas";
 import { protectedProcedure } from "../server";
 
 // =============================================================================
@@ -58,11 +55,17 @@ import { protectedProcedure } from "../server";
 // =============================================================================
 
 /**
- * FIM (Fill-in-Middle) streaming completion
- * Uses Mastra's fimAgent to provide intelligent text completion
+ * Copilot ghost text streaming completion
+ * Lightweight completion for CopilotPlugin using fimAgent
  */
-export const fimStream = protectedProcedure
-   .input(FIMRequestSchema)
+export const copilotStream = protectedProcedure
+   .input(
+      z.object({
+         prefix: z.string(),
+         suffix: z.string().optional(),
+         contentId: z.string().optional(),
+      }),
+   )
    .handler(async function* ({ context, input }) {
       const { userId, db, organizationId, posthog, teamId, headers } = context;
 
@@ -75,6 +78,15 @@ export const fimStream = protectedProcedure
       // Get the FIM agent from Mastra
       const fimAgent = mastra.getAgent("fimAgent");
 
+      // Get autocomplete model and its preset
+      const autocompleteModelId = (aiDefaults.autocompleteModel ??
+         DEFAULT_AUTOCOMPLETE_MODEL_ID) as AutocompleteModelId;
+      const autocompletePreset = getModelPreset(
+         AUTOCOMPLETE_MODELS,
+         autocompleteModelId,
+         DEFAULT_AUTOCOMPLETE_MODEL_ID,
+      );
+
       // Create request context for the agent with settings
       const requestContext = createRequestContext({
          userId,
@@ -82,13 +94,17 @@ export const fimStream = protectedProcedure
             aiDefaults.defaultLanguage ??
             getRequestLanguage(headers) ??
             "pt-BR",
-         model:
-            aiDefaults.editModel ??
-            "openrouter/mistralai/mistral-small-creative",
+         model: autocompleteModelId,
+         // Use user override if set, otherwise fall back to model preset
+         temperature:
+            aiDefaults.autocompleteTemperature ??
+            autocompletePreset.temperature,
+         topP: autocompletePreset.topP,
+         maxTokens: autocompletePreset.maxTokens,
       } as CustomRequestContext);
 
-      // Build the prompt from FIM request
-      const prompt = buildFIMPrompt(input);
+      // Build the copilot prompt
+      const prompt = buildCopilotPrompt(input.prefix, input.suffix);
 
       const startTime = Date.now();
 
@@ -116,7 +132,8 @@ export const fimStream = protectedProcedure
          // Emit event and increment credit usage (failure-tolerant)
          try {
             await emitAiCompletion(
-               { db, posthog, organizationId, userId, teamId },
+               createEmitFn(db, posthog),
+               { organizationId, userId, teamId },
                {
                   model: "fimAgent",
                   provider: "openrouter",
@@ -146,13 +163,13 @@ export const fimStream = protectedProcedure
                latencyMs,
             },
          } satisfies FIMChunk;
-      } catch (_error) {
-         // Yield error chunk
+      } catch (error) {
+         console.error("[copilotStream] FIM agent error:", error);
          yield {
             text: "",
             done: true,
             metadata: {
-               stopReason: "stop_sequence",
+               stopReason: "error",
                latencyMs: Date.now() - startTime,
             },
          } satisfies FIMChunk;
@@ -160,111 +177,17 @@ export const fimStream = protectedProcedure
    });
 
 /**
- * Edit streaming completion (Ctrl+K)
- * Uses Mastra's inlineEditAgent for text transformations
+ * AI Command streaming
+ * Executes AI commands using unifiedContent agent, yields ChatChunk events
  */
-export const editStream = protectedProcedure
-   .input(EditRequestSchema)
-   .handler(async function* ({ context, input }) {
-      const { userId, db, organizationId, posthog, teamId, headers } = context;
-
-      await enforceCreditBudget(db, organizationId, "ai");
-
-      // Fetch product settings for AI configuration
-      const settings = await getProductSettings(db, teamId);
-      const aiDefaults = settings?.aiDefaults ?? {};
-
-      // Get the inline edit agent from Mastra
-      const editAgent = mastra.getAgent("inlineEditAgent");
-
-      // Create request context with settings
-      const requestContext = createRequestContext({
-         userId,
-         language:
-            aiDefaults.defaultLanguage ??
-            getRequestLanguage(headers) ??
-            "pt-BR",
-         model:
-            aiDefaults.editModel ??
-            "openrouter/mistralai/mistral-small-creative",
-      } as CustomRequestContext);
-
-      // Build the prompt from edit request
-      const prompt = buildEditPrompt(input);
-
-      const startTime = Date.now();
-
-      try {
-         // Stream the agent response
-         const result = await editAgent.stream(
-            [{ role: "user", content: prompt }],
-            {
-               requestContext: requestContext as RequestContext<unknown>,
-            } as unknown as Parameters<typeof editAgent.stream>[1],
-         );
-
-         // Yield chunks as EditChunk format
-         let _fullText = "";
-         for await (const chunk of result.textStream) {
-            _fullText += chunk;
-            yield {
-               text: chunk,
-               done: false,
-            } satisfies EditChunk;
-         }
-
-         const latencyMs = Date.now() - startTime;
-
-         // Emit event and increment credit usage (failure-tolerant)
-         try {
-            await emitAiCompletion(
-               { db, posthog, organizationId, userId, teamId },
-               {
-                  model: "inlineEditAgent",
-                  provider: "openrouter",
-                  promptTokens: 0,
-                  completionTokens: 0,
-                  totalTokens: 0,
-                  latencyMs,
-                  streamed: true,
-               },
-            );
-            await trackCreditUsage(
-               db,
-               AI_EVENTS["ai.completion"],
-               organizationId,
-               "ai",
-            );
-         } catch {
-            // Event tracking must not break the streaming flow
-         }
-
-         // Final chunk
-         yield {
-            text: "",
-            done: true,
-         } satisfies EditChunk;
-      } catch (_error) {
-         // Yield error indication
-         yield {
-            text: "",
-            done: true,
-         } satisfies EditChunk;
-      }
-   });
-
-/**
- * Chat streaming completion
- * Uses Mastra's unified content agent for chat conversations
- * Yields full stream events including tool calls
- * Saves messages to database for persistence
- */
-export const chatStream = protectedProcedure
+export const aiCommandStream = protectedProcedure
    .input(
       z.object({
-         message: z.string(),
-         contentId: z.string().uuid().optional(),
-         sessionId: z.string().optional(),
+         prompt: z.string(),
+         contentId: z.string().optional(),
+         writerId: z.string().optional(),
+         model: z.string().optional(),
+         language: z.string().optional(),
       }),
    )
    .handler(async function* ({ context, input }) {
@@ -276,48 +199,44 @@ export const chatStream = protectedProcedure
       const settings = await getProductSettings(db, teamId);
       const aiDefaults = settings?.aiDefaults ?? {};
 
-      // Get or create chat session
-      let session: Awaited<ReturnType<typeof getOrCreateChatSession>> | null =
-         null;
-      if (input.contentId) {
-         session = await getOrCreateChatSession(
-            db,
-            input.contentId,
-            organizationId,
-         );
-      }
-
-      // Save user message to database
-      if (session) {
-         await addChatMessage(db, session.id, "user", input.message);
-      }
-
-      // Get the unified content agent from Mastra for chat
+      // Get the unified content agent from Mastra
       const unifiedAgent = mastra.getAgent("unifiedContent");
 
-      // Create request context with settings
+      const contentModelId = (input.model ??
+         aiDefaults.contentModel ??
+         DEFAULT_CONTENT_MODEL_ID) as ContentModelId;
+      const contentPreset = getModelPreset(
+         CONTENT_MODELS,
+         contentModelId,
+         DEFAULT_CONTENT_MODEL_ID,
+      );
+
+      // Create request context with settings, falling back to product defaults
       const requestContext = createRequestContext({
          userId,
          contentId: input.contentId,
+         writerId: input.writerId,
          language:
+            input.language ??
             aiDefaults.defaultLanguage ??
             getRequestLanguage(headers) ??
             "pt-BR",
-         model: aiDefaults.contentModel ?? "openrouter/moonshotai/kimi-k2.5",
+         model: contentModelId,
+         temperature:
+            aiDefaults.contentTemperature ?? contentPreset.temperature,
+         topP: contentPreset.topP,
+         maxTokens: aiDefaults.contentMaxTokens ?? contentPreset.maxTokens,
+         frequencyPenalty: contentPreset.frequencyPenalty,
+         presencePenalty: contentPreset.presencePenalty,
       } as CustomRequestContext);
 
       let stepIndex = 0;
-
-      // Collect assistant message data during streaming
-      let assistantText = "";
-      const toolCalls: StoredToolCall[] = [];
-
       const startTime = Date.now();
 
       try {
          // Stream the agent response
          const result = await unifiedAgent.stream(
-            [{ role: "user", content: input.message }],
+            [{ role: "user", content: input.prompt }],
             {
                requestContext: requestContext as RequestContext<unknown>,
             } as unknown as Parameters<typeof unifiedAgent.stream>[1],
@@ -348,7 +267,6 @@ export const chatStream = protectedProcedure
                   };
                   const textDelta = chunk.textDelta ?? payload?.textDelta;
                   if (!textDelta) break;
-                  assistantText += textDelta;
                   yield {
                      type: "text",
                      text: textDelta,
@@ -362,14 +280,6 @@ export const chatStream = protectedProcedure
                   const toolName = chunk.toolName ?? chunk.payload?.toolName;
                   const args = chunk.args ?? chunk.payload?.args;
                   if (!toolCallId || !toolName || !args) break;
-
-                  // Add to tool calls collection
-                  toolCalls.push({
-                     id: toolCallId,
-                     name: toolName,
-                     args,
-                     status: "completed" as const,
-                  });
 
                   yield {
                      type: "tool_call_start",
@@ -386,21 +296,14 @@ export const chatStream = protectedProcedure
                   const toolCallId =
                      chunk.toolCallId ?? chunk.payload?.toolCallId;
                   const toolName = chunk.toolName ?? chunk.payload?.toolName;
-                  const result = chunk.result ?? chunk.payload?.result;
+                  const resultValue = chunk.result ?? chunk.payload?.result;
                   if (!toolCallId || !toolName) break;
-
-                  // Update tool call with result
-                  const toolCall = toolCalls.find((tc) => tc.id === toolCallId);
-                  if (toolCall) {
-                     toolCall.result = result;
-                     toolCall.executedAt = Date.now();
-                  }
 
                   yield {
                      type: "tool_call_complete",
                      toolCallId,
                      toolName,
-                     result,
+                     result: resultValue,
                   } satisfies ChatChunk;
                   break;
                }
@@ -422,63 +325,29 @@ export const chatStream = protectedProcedure
             }
          }
 
-         // Save assistant message to database with tool calls
-         if (session) {
-            await addChatMessage(
-               db,
-               session.id,
-               "assistant",
-               assistantText,
-               undefined, // selectionContext
-               toolCalls.length > 0 ? toolCalls : undefined,
-            );
-         }
-
          const latencyMs = Date.now() - startTime;
 
          // Emit event and increment credit usage (failure-tolerant)
          try {
-            if (session) {
-               await emitAiChatMessage(
-                  { db, posthog, organizationId, userId, teamId },
-                  {
-                     chatId: session.id,
-                     contentId: input.contentId,
-                     model: "unifiedContent",
-                     provider: "openrouter",
-                     role: "assistant",
-                     promptTokens: 0,
-                     completionTokens: 0,
-                     totalTokens: 0,
-                     latencyMs,
-                  },
-               );
-               await trackCreditUsage(
-                  db,
-                  AI_EVENTS["ai.chat_message"],
-                  organizationId,
-                  "ai",
-               );
-            } else {
-               await emitAiCompletion(
-                  { db, posthog, organizationId, userId, teamId },
-                  {
-                     model: "unifiedContent",
-                     provider: "openrouter",
-                     promptTokens: 0,
-                     completionTokens: 0,
-                     totalTokens: 0,
-                     latencyMs,
-                     streamed: true,
-                  },
-               );
-               await trackCreditUsage(
-                  db,
-                  AI_EVENTS["ai.completion"],
-                  organizationId,
-                  "ai",
-               );
-            }
+            await emitAiCompletion(
+               createEmitFn(db, posthog),
+               { organizationId, userId, teamId },
+               {
+                  model: "unifiedContent",
+                  provider: "openrouter",
+                  promptTokens: 0,
+                  completionTokens: 0,
+                  totalTokens: 0,
+                  latencyMs,
+                  streamed: true,
+               },
+            );
+            await trackCreditUsage(
+               db,
+               AI_EVENTS["ai.completion"],
+               organizationId,
+               "ai",
+            );
          } catch {
             // Event tracking must not break the streaming flow
          }
@@ -506,14 +375,17 @@ export const executeUnifiedAgent = protectedProcedure
          teamId: z.string().uuid(),
          contentId: z.string().uuid(),
          prompt: z.string().min(1).max(10000),
-         brandId: z.string().uuid().optional(),
          writerId: z.string().uuid().optional(),
          model: z.string().optional(),
       }),
    )
    .handler(async ({ context, input }) => {
-      const { teamId, contentId, prompt, brandId, writerId, model } = input;
+      const { teamId, contentId, prompt, writerId, model } = input;
       const { userId, db, organizationId, posthog } = context;
+
+      // Fetch product settings for AI configuration
+      const settings = await getProductSettings(db, teamId);
+      const aiDefaults = settings?.aiDefaults ?? {};
 
       // Verify team membership
       const membership = await db.query.teamMember.findFirst({
@@ -552,14 +424,28 @@ export const executeUnifiedAgent = protectedProcedure
       // Enforce credit budget
       await enforceCreditBudget(db, organizationId, "ai");
 
+      const contentModelId = (model ??
+         aiDefaults.contentModel ??
+         DEFAULT_CONTENT_MODEL_ID) as ContentModelId;
+      const contentPreset = getModelPreset(
+         CONTENT_MODELS,
+         contentModelId,
+         DEFAULT_CONTENT_MODEL_ID,
+      );
+
       // Create request context
       const requestContext = createRequestContext({
          userId,
-         brandId,
          writerId,
-         model: (model as ModelId) ?? "openrouter/moonshotai/kimi-k2.5",
-         language: "pt-BR",
+         model: contentModelId,
+         language: aiDefaults.defaultLanguage ?? "pt-BR",
          writerInstructions,
+         temperature:
+            aiDefaults.contentTemperature ?? contentPreset.temperature,
+         topP: contentPreset.topP,
+         maxTokens: aiDefaults.contentMaxTokens ?? contentPreset.maxTokens,
+         frequencyPenalty: contentPreset.frequencyPenalty,
+         presencePenalty: contentPreset.presencePenalty,
       } as CustomRequestContext);
 
       const startTime = Date.now();
@@ -575,12 +461,13 @@ export const executeUnifiedAgent = protectedProcedure
       // Emit agent event and track credits (failure-tolerant)
       try {
          await emitAiAgentAction(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             {
                agentId: "unified-content-agent",
                contentId,
                action: "generate",
-               model: model ?? "openrouter/moonshotai/kimi-k2.5",
+               model: contentModelId,
                provider: "openrouter",
                promptTokens: result.usage?.inputTokens ?? 0,
                completionTokens: result.usage?.outputTokens ?? 0,
@@ -612,62 +499,13 @@ export const executeUnifiedAgent = protectedProcedure
 // =============================================================================
 
 /**
- * Build FIM prompt from request
+ * Build Copilot prompt from prefix and optional suffix
  */
-function buildFIMPrompt(request: z.infer<typeof FIMRequestSchema>): string {
-   const { prefix, suffix, cursorContext, editContext, recentText } = request;
-
-   let prompt = `Continue this text naturally:\n\n${prefix}`;
+function buildCopilotPrompt(prefix: string, suffix?: string): string {
+   let prompt = `Complete the following text naturally and concisely:\n\n${prefix}`;
 
    if (suffix) {
       prompt += `\n\n[Text after cursor]:\n${suffix}`;
-   }
-
-   if (cursorContext) {
-      const contextHints: string[] = [];
-
-      if (cursorContext.isEndOfSentence) {
-         contextHints.push("cursor is at end of sentence");
-      }
-      if (cursorContext.isEndOfParagraph) {
-         contextHints.push("cursor is at end of paragraph");
-      }
-      if (cursorContext.isAfterPunctuation) {
-         contextHints.push("cursor follows punctuation");
-      }
-
-      if (contextHints.length > 0) {
-         prompt += `\n\n[Context: ${contextHints.join(", ")}]`;
-      }
-   }
-
-   if (editContext) {
-      prompt += `\n\n[Intent: ${editContext.intent}]`;
-   }
-
-   if (recentText) {
-      prompt += `\n\n[Recent edits]:\n${recentText}`;
-   }
-
-   return prompt;
-}
-
-/**
- * Build Edit prompt from request
- */
-function buildEditPrompt(request: z.infer<typeof EditRequestSchema>): string {
-   const { selectedText, instruction, contextBefore, contextAfter } = request;
-
-   let prompt = "";
-
-   if (contextBefore) {
-      prompt += `CONTEXT BEFORE:\n${contextBefore}\n\n`;
-   }
-
-   prompt += `SELECTED TEXT:\n${selectedText}\n\nINSTRUCTION: ${instruction}`;
-
-   if (contextAfter) {
-      prompt += `\n\nCONTEXT AFTER:\n${contextAfter}`;
    }
 
    return prompt;

@@ -26,79 +26,6 @@ export const Route = createFileRoute(
 });
 
 // ============================================
-// Default Layout Section
-// ============================================
-
-function DefaultLayoutSection({
-   current,
-}: {
-   current: "tutorial" | "article" | "changelog" | undefined;
-}) {
-   const [layout, setLayout] = useState<
-      "tutorial" | "article" | "changelog" | undefined
-   >(current);
-   const queryClient = useQueryClient();
-
-   const saveMutation = useMutation(
-      orpc.productSettings.updateContentDefaults.mutationOptions({
-         onSuccess: () => {
-            toast.success("Layout padrão atualizado com sucesso!");
-            queryClient.invalidateQueries({
-               queryKey: orpc.productSettings.getSettings.queryOptions({
-                  input: {},
-               }).queryKey,
-            });
-         },
-         onError: () => {
-            toast.error("Erro ao atualizar layout padrão");
-         },
-      }),
-   );
-
-   const hasChanged = layout !== current;
-
-   return (
-      <section className="space-y-3">
-         <div>
-            <h2 className="text-lg font-medium">Layout padrão</h2>
-            <p className="text-sm text-muted-foreground">
-               Escolha o layout aplicado automaticamente a novos conteúdos.
-            </p>
-         </div>
-         <RadioGroup
-            onValueChange={(value) =>
-               setLayout(value as "tutorial" | "article" | "changelog")
-            }
-            value={layout}
-         >
-            <div className="flex items-center space-x-2">
-               <RadioGroupItem id="layout-tutorial" value="tutorial" />
-               <Label htmlFor="layout-tutorial">Tutorial</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-               <RadioGroupItem id="layout-article" value="article" />
-               <Label htmlFor="layout-article">Artigo</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-               <RadioGroupItem id="layout-changelog" value="changelog" />
-               <Label htmlFor="layout-changelog">Changelog</Label>
-            </div>
-         </RadioGroup>
-         <Button
-            disabled={!hasChanged || saveMutation.isPending}
-            onClick={() => saveMutation.mutate({ defaultLayout: layout })}
-            size="sm"
-         >
-            {saveMutation.isPending && (
-               <Loader2 className="size-4 mr-2 animate-spin" />
-            )}
-            Salvar
-         </Button>
-      </section>
-   );
-}
-
-// ============================================
 // Default Share Status Section
 // ============================================
 
@@ -287,12 +214,6 @@ function ContentProductContent() {
                Configurações padrão para criação de conteúdo neste projeto.
             </p>
          </div>
-
-         <DefaultLayoutSection
-            current={settings?.contentDefaults?.defaultLayout}
-         />
-
-         <Separator />
 
          <DefaultShareStatusSection
             current={settings?.contentDefaults?.defaultShareStatus}

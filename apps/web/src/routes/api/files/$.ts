@@ -2,7 +2,13 @@ import { env } from "@packages/environment/server";
 import { getMinioClient } from "@packages/files/client";
 import { createFileRoute } from "@tanstack/react-router";
 
-async function handle({ request, params }: { request: Request; params: { _splat?: string } }) {
+async function handle({
+   request: _request,
+   params,
+}: {
+   request: Request;
+   params: { _splat?: string };
+}) {
    try {
       const path = params._splat || "";
       const [bucketName, ...fileNameParts] = path.split("/");
@@ -39,7 +45,8 @@ async function handle({ request, params }: { request: Request; params: { _splat?
       // Return file with appropriate headers
       return new Response(webStream, {
          headers: {
-            "Content-Type": stat.metaData?.["content-type"] || "application/octet-stream",
+            "Content-Type":
+               stat.metaData?.["content-type"] || "application/octet-stream",
             "Content-Length": stat.size.toString(),
             "Cache-Control": "public, max-age=31536000, immutable",
          },

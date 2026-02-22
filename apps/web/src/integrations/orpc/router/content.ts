@@ -6,6 +6,7 @@ import {
    deleteContent,
    getContentById,
    listContentsByTeam,
+   markContentAsDraft,
    publishContent,
    updateContent,
 } from "@packages/database/repositories/content-repository";
@@ -22,6 +23,7 @@ import {
    enforceCreditBudget,
    trackCreditUsage,
 } from "@packages/events/credits";
+import { createEmitFn } from "@packages/events/emit";
 import { createSlug, generateRandomSuffix } from "@packages/utils/text";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
@@ -33,7 +35,6 @@ import { protectedProcedure } from "../server";
 const createContentSchema = z.object({
    title: z.string().min(1).default("Sem título"),
    body: z.string().optional(),
-   draftOrigin: z.enum(["manual", "ai_generated"]).optional().default("manual"),
 });
 
 const updateContentSchema = z.object({
@@ -103,7 +104,6 @@ export const create = protectedProcedure
 
       const result = await createContent(db, {
          body: input.body,
-         draftOrigin: input.draftOrigin,
          meta: {
             title: input.title,
             description: "",
@@ -116,7 +116,8 @@ export const create = protectedProcedure
 
       try {
          await emitContentCreated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { contentId: result.id, title: input.title },
          );
       } catch {
@@ -176,7 +177,8 @@ export const update = protectedProcedure
          }
 
          await emitContentUpdated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { contentId: input.id, changedFields },
          );
          await trackCreditUsage(
@@ -212,7 +214,8 @@ export const remove = protectedProcedure
 
       try {
          await emitContentDeleted(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { contentId: input.id },
          );
       } catch {
@@ -247,7 +250,8 @@ export const publish = protectedProcedure
             existing.body?.split(/\s+/).filter(Boolean).length ?? 0;
 
          await emitContentPublished(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             {
                contentId: input.id,
                title: existing.meta?.title ?? "",
@@ -288,7 +292,8 @@ export const archive = protectedProcedure
 
       try {
          await emitContentArchived(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { contentId: input.id },
          );
       } catch {
@@ -296,6 +301,24 @@ export const archive = protectedProcedure
       }
 
       return result;
+   });
+
+/**
+ * Move published/archived content back to draft
+ */
+export const moveToDraft = protectedProcedure
+   .input(z.object({ id: z.string().uuid() }))
+   .handler(async ({ context, input }) => {
+      const { organizationId, db } = context;
+
+      const existing = await getContentById(db, input.id);
+      if (!existing || existing.organizationId !== organizationId) {
+         throw new ORPCError("NOT_FOUND", {
+            message: "Conteudo nao encontrado.",
+         });
+      }
+
+      return markContentAsDraft(db, input.id);
    });
 
 /**

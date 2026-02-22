@@ -15,12 +15,17 @@ import { unifiedContentAgent } from "./agents/unified-content-agent";
 export type { RequestContext };
 
 export type CustomRequestContext = {
-   brandId?: string;
    userId: string;
    writerId?: string;
    model?: ModelId;
    language?: string;
    writerInstructions?: InstructionMemoryItem[];
+   // Generation parameter overrides (from model preset or user setting)
+   temperature?: number;
+   topP?: number;
+   maxTokens?: number;
+   frequencyPenalty?: number;
+   presencePenalty?: number;
 };
 
 const mastraStorage = new PostgresStore({
@@ -45,14 +50,26 @@ export function createRequestContext(context: CustomRequestContext) {
    const requestContext = new RequestContext<CustomRequestContext>();
    requestContext.set("userId", context.userId);
 
-   if (context.brandId) {
-      requestContext.set("brandId", context.brandId);
-   }
    if (context.writerId) {
       requestContext.set("writerId", context.writerId);
    }
    if (context.model) {
       requestContext.set("model", context.model);
+   }
+   if (context.temperature !== undefined) {
+      requestContext.set("temperature", context.temperature);
+   }
+   if (context.topP !== undefined) {
+      requestContext.set("topP", context.topP);
+   }
+   if (context.maxTokens !== undefined) {
+      requestContext.set("maxTokens", context.maxTokens);
+   }
+   if (context.frequencyPenalty !== undefined) {
+      requestContext.set("frequencyPenalty", context.frequencyPenalty);
+   }
+   if (context.presencePenalty !== undefined) {
+      requestContext.set("presencePenalty", context.presencePenalty);
    }
    if (context.language) {
       requestContext.set("language", context.language);

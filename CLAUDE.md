@@ -8,9 +8,13 @@ AI-powered CMS built as an Nx monorepo with Bun. Provides AI-assisted content cr
 
 ```bash
 # Development
-bun dev              # Start web, sdk-server, worker in parallel
+bun dev              # Seed event catalog (local) then start web app
 bun dev:all          # Start all apps and packages
 bun dev:worker       # Worker only
+
+# ⚠️ bun dev seeds the event catalog on every start (--env local).
+# If seeding fails, the dev server won't launch. Run the seed manually to debug:
+# bun run scripts/seed-event-catalog.ts run --env local
 
 # Build & Quality
 bun run build        # Build all (Nx cached)
@@ -322,9 +326,12 @@ organization({
 
 Field types: `"string"` (TEXT), `"boolean"` (BOOLEAN), `"number"` (INTEGER), `"string[]"` (TEXT[]), `"json"` (JSONB + Zod validator)
 
-**Organization operations** use the Better Auth client directly — do NOT wrap in oRPC procedures:
+**Query/Mutation split for Better Auth**
+- **Queries** (read operations) → always use oRPC (`orpc.organization.*`), even for Better Auth-owned data like members, teams, and invitations. oRPC procedures enrich the raw Better Auth data with DB fields (plans, credits, slugs, etc.) that the raw client cannot provide.
+- **Mutations** (write operations) → use `authClient` directly. Never wrap these in oRPC.
+
 ```typescript
-// Client-side (apps/web) — use authClient.organization.*
+// ✅ Mutations — authClient only
 authClient.organization.create({ name, slug })
 authClient.organization.update({ data: { name }, organizationId })
 authClient.organization.delete({ organizationId })
@@ -332,13 +339,22 @@ authClient.organization.inviteMember({ email, role, organizationId })
 authClient.organization.removeMember({ memberIdOrEmail, organizationId })
 authClient.organization.updateMemberRole({ memberId, role, organizationId })
 authClient.organization.cancelInvitation({ invitationId })
-authClient.organization.getInvitation({ id })
 authClient.organization.setActive({ organizationId })
 authClient.organization.createTeam({ name, organizationId })
 authClient.organization.setActiveTeam({ teamId })
+
+// ✅ Queries — always oRPC (even for Better Auth data)
+orpc.organization.getMembers.queryOptions({})
+orpc.organization.getOrganizationTeams.queryOptions({})
+orpc.organization.getActiveOrganization.queryOptions({})
+orpc.organization.getMemberTeams.queryOptions({ input: { userId } })
 ```
 
-Read-only org data (members list, active org with subscription) uses oRPC (`orpc.organization.*`) since those enrich with DB data (plans, credits, etc.).
+**member.id vs user.id**
+`member.id` (member record ID, PK of the member table) and `user.id` (user UUID) are different values and must never be used interchangeably.
+- Use `member.id` for Better Auth mutation APIs (`removeMember`, `updateMemberRole`).
+- Use `member.userId` for queries against user-keyed tables (`teamMember.userId`, isSelf checks).
+- `getMembers` must expose both: `id` (member record ID) and `userId` (user ID).
 
 **Client-side authClient usage rules:**
 - **NEVER** wrap `authClient` calls inside `useMutation` — call them directly
@@ -393,10 +409,67 @@ For simple button actions (no form): `startTransition(async () => { await authCl
 | `useCredenza` | Modal (desktop) / Drawer (mobile) | Selecting agents, export formats |
 | `useAlertDialog` | Destructive confirmations | Deleting content, revoking access |
 
+**⚠️ ALWAYS use these hooks — NEVER import Credenza, Dialog, Sheet, Drawer, or AlertDialog components manually.**
+
+These hooks are backed by a global TanStack Store and render portals at the root layout. Using them ensures correct z-index stacking, consistent animations, and mobile responsiveness without any local component state.
+
 ```typescript
+// ✅ Correct — use the global hook
+const { openCredenza } = useCredenza();
+openCredenza({ children: <SelectAgentForm /> });
+
 const { openSheet, closeSheet } = useSheet();
 openSheet({ children: <CreateContentForm onSuccess={closeSheet} /> });
+
+const { openAlertDialog } = useAlertDialog();
+openAlertDialog({
+   title: "Delete content?",
+   description: "This action cannot be undone.",
+   onAction: () => deleteContent(id),
+});
+
+// ❌ Wrong — never import and render these directly
+import { Credenza, CredenzaContent } from "@packages/ui/components/credenza";
+import { Sheet, SheetContent } from "@packages/ui/components/sheet";
+import { AlertDialog } from "@packages/ui/components/alert-dialog";
 ```
+
+---
+
+## SSR-Safe Browser Hooks
+
+`@uidotdev/usehooks` hooks that access browser APIs (`useMediaQuery`, `useLocalStorage`) crash on the server. Use project-local SSR-safe wrappers instead.
+
+**Wrappers:**
+- `useSafeMediaQuery(query)` → `@packages/ui/hooks/use-media-query`
+- `useSafeLocalStorage<T>(key, initialValue)` → `@/hooks/use-local-storage` (apps/web only)
+
+Both use `useIsomorphicLayoutEffect` from `@dnd-kit/utilities` (runs as `useLayoutEffect` on client, `useEffect` on server — eliminates flash between SSR value and real value).
+
+**Pattern rules:**
+```typescript
+// ✅ Viewport breakpoint checks → use useIsMobile() (single source of truth)
+import { useIsMobile } from "@packages/ui/hooks/use-mobile";
+const isMobile = useIsMobile();
+const isDesktop = !isMobile; // inverse of (max-width: 767px)
+
+// ✅ Non-breakpoint media queries (PWA display-mode, prefers-color-scheme, etc.)
+import { useSafeMediaQuery } from "@packages/ui/hooks/use-media-query";
+const isStandalone = useSafeMediaQuery("(display-mode: standalone)");
+
+// ✅ localStorage persistence
+import { useSafeLocalStorage } from "@/hooks/use-local-storage";
+const [value, setValue] = useSafeLocalStorage("my-key", defaultValue);
+
+// ❌ Never use these directly — SSR-unsafe
+import { useMediaQuery, useLocalStorage } from "@uidotdev/usehooks";
+```
+
+**Safe to use directly from `@uidotdev/usehooks`** (no browser APIs during render):
+- `useDebounce` — pure JS timing
+- `useCopyToClipboard` — only called in event handlers
+
+**Navigator/window checks in hooks:** wrap in `useIsomorphicLayoutEffect` from `@dnd-kit/utilities`, never in render body.
 
 ---
 
@@ -407,6 +480,30 @@ File-per-category pattern: `content.ts`, `ai.ts`, `forms.ts`, `seo.ts`, `emit.ts
 - `emitEvent()` is non-throwing (inner try-catch)
 - `enforceCreditBudget()` throws plain Error — wrap as `ORPCError("FORBIDDEN")` in routers
 - In generators, emit/track BEFORE final yield (post-yield code may not run)
+
+---
+
+## Testing
+
+Tests live at `apps/web/__tests__/integrations/orpc/router/`. Run with Vitest.
+
+```bash
+bun run test                          # Run all tests (Nx parallelized)
+npx vitest run apps/web/__tests__/integrations/orpc/router/content.test.ts  # Single file
+```
+
+**Gotcha — Better Auth tables need explicit `createdAt`:**
+`member` and `team` tables don't have `.defaultNow()` on `createdAt`. Tests that insert into these tables MUST provide `createdAt: new Date()` explicitly or the insert will fail.
+
+```typescript
+// ✅ Correct
+await db.insert(member).values({ ...memberData, createdAt: new Date() });
+
+// ❌ Will fail — createdAt has no DB default
+await db.insert(member).values(memberData);
+```
+
+Use the `orpc-testing` skill when writing new oRPC procedure tests.
 
 ---
 
@@ -447,3 +544,52 @@ Procedures in `apps/web/src/integrations/orpc/router/onboarding.ts`.
 | PRO | R$100 |
 
 Credit tracking: Redis real-time, materialized views reconcile hourly (worker cron).
+
+---
+
+## Billing Page — Early Access Feature Cards
+
+`apps/web/src/features/billing/ui/billing-overview.tsx`
+
+The billing overview renders product cards driven by two config objects. **Adding a new early access feature = one entry in the right config.**
+
+### Event-based categories (usage from API)
+
+```typescript
+// EARLY_ACCESS_CATEGORY_GATES: Record<categoryKey, { flag, fallbackStage }>
+// Category must also exist in CATEGORY_CONFIG.
+// When enrolled → card visible + stage badge shown.
+// When not enrolled → card hidden entirely.
+experiment: { flag: "experiments", fallbackStage: "alpha" },
+form:        { flag: "forms-beta", fallbackStage: "beta"  },
+```
+
+### Volume-based features (non-event, e.g. storage)
+
+```typescript
+// VOLUME_FEATURE_CONFIG: Record<flagKey, { label, description, icon, priceLabel, unit, fallbackStage }>
+// Renders a VolumeFeatureCard showing per-unit pricing.
+// Visible only when isEnrolled(flagKey).
+"asset-bank": {
+   label: "Banco de Imagens",
+   priceLabel: "R$ 1,50",   // Railway cost: $0.15/GB — charged at R$ 1,50/GB
+   unit: "GB/mês",
+   fallbackStage: "alpha",
+},
+```
+
+### Stage resolution
+
+Stage is resolved from PostHog's early access feature config at runtime (`features.find(f => f.flagKey === key)?.stage`), falling back to `fallbackStage` in the local config. No manual sync needed — PostHog is the source of truth.
+
+### Flag keys (from sidebar-nav-items.ts)
+
+| Feature | Flag key | Stage |
+|---------|----------|-------|
+| Banco de Imagens | `asset-bank` | alpha |
+| Conteúdo | `content` | alpha |
+| Experimentos | `experiments` | alpha |
+| Formulários | `forms-beta` | beta |
+| Dashboards | `dashboards` | beta |
+| Insights | `insights` | beta |
+| Dados | `data-management` | beta |

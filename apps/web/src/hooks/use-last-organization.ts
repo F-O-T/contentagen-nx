@@ -1,25 +1,14 @@
-import { useCallback } from "react";
+import { useSafeLocalStorage } from "@/hooks/use-local-storage";
 
 const STORAGE_KEY = "contentta:last-organization-slug";
 
 export function useLastOrganization() {
-   const getLastSlug = useCallback((): string | null => {
-      if (typeof window === "undefined") return null;
-      try {
-         return localStorage.getItem(STORAGE_KEY);
-      } catch {
-         return null;
-      }
-   }, []);
-
-   const setLastSlug = useCallback((slug: string) => {
-      if (typeof window === "undefined") return;
-      try {
-         localStorage.setItem(STORAGE_KEY, slug);
-      } catch {
-         // localStorage not available
-      }
-   }, []);
-
-   return { getLastSlug, setLastSlug };
+   const [lastSlug, setLastSlug] = useSafeLocalStorage<string | null>(
+      STORAGE_KEY,
+      null,
+   );
+   return {
+      lastSlug,
+      setLastSlug: (slug: string) => setLastSlug(slug),
+   };
 }

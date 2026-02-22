@@ -1,5 +1,6 @@
 import { Agent } from "@mastra/core/agent";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
+import { DEFAULT_CONTENT_MODEL_ID } from "../../models";
 import {
    buildLanguageInstruction,
    compileInstructionMemories,
@@ -20,6 +21,7 @@ import { titleMetaTool } from "../tools/analysis/title-meta-tool";
 import { toneAnalysisTool } from "../tools/analysis/tone-analysis-tool";
 // ─── Utility Tools ───────────────────────────────────────────────────────────
 import { dateTool } from "../tools/date-tool";
+import { addEditorCommentTool } from "../tools/editor/add-editor-comment-tool";
 // ─── Editor Tools ────────────────────────────────────────────────────────────
 import { addExternalLinksTool } from "../tools/editor/add-external-links-tool";
 import { addInternalLinksTool } from "../tools/editor/add-internal-links-tool";
@@ -36,6 +38,7 @@ import { insertTableTool } from "../tools/editor/insert-table-tool";
 import { insertTextTool } from "../tools/editor/insert-text-tool";
 import { optimizeMetaTool } from "../tools/editor/optimize-meta-tool";
 import { optimizeTitleTool } from "../tools/editor/optimize-title-tool";
+import { proposeSuggestionTool } from "../tools/editor/propose-suggestion-tool";
 import { replaceTextTool } from "../tools/editor/replace-text-tool";
 import { suggestImagesTool } from "../tools/editor/suggest-images-tool";
 // ─── Frontmatter Tools ───────────────────────────────────────────────────────
@@ -336,10 +339,10 @@ export const unifiedContentAgent: Agent = new Agent({
       "Agente unificado para planejamento, pesquisa, escrita, SEO e revisão de conteúdo. Combina todos os workflows em um único agente com acesso direto a 40+ ferramentas especializadas.",
 
    model: ({ requestContext }) => {
-      return (
-         (requestContext?.get("model") as string) ??
-         "openrouter/moonshotai/kimi-k2.5"
-      );
+      const maybeModel = requestContext?.get("model");
+      return typeof maybeModel === "string" && maybeModel.length > 0
+         ? maybeModel
+         : DEFAULT_CONTENT_MODEL_ID;
    },
 
    instructions: ({ requestContext }) => {
@@ -388,7 +391,9 @@ export const unifiedContentAgent: Agent = new Agent({
       editSlug: editSlugTool,
 
       // ─── Editor ───────────────────────────────────────────────────────────
+      addEditorComment: addEditorCommentTool,
       insertText: insertTextTool,
+      proposeSuggestion: proposeSuggestionTool,
       replaceText: replaceTextTool,
       deleteText: deleteTextTool,
       formatText: formatTextTool,

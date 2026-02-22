@@ -1,6 +1,7 @@
 import { Button } from "@packages/ui/components/button";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useEventListener } from "@/hooks/use-event-listener";
 import {
    closeAllTabs,
    closeOtherTabs,
@@ -32,17 +33,15 @@ export function TabBar({ onTabFocus, onTabClose, onNewTab }: TabBarProps) {
       setShowRightShadow(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
    }, []);
 
+   useEventListener("scroll", updateShadows, scrollRef, { passive: true });
+
    useEffect(() => {
       const el = scrollRef.current;
       if (!el) return;
       updateShadows();
-      el.addEventListener("scroll", updateShadows, { passive: true });
       const observer = new ResizeObserver(updateShadows);
       observer.observe(el);
-      return () => {
-         el.removeEventListener("scroll", updateShadows);
-         observer.disconnect();
-      };
+      return () => observer.disconnect();
    }, [updateShadows]);
 
    // Recalculate shadows when tabs change

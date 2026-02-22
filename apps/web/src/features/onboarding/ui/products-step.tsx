@@ -80,15 +80,22 @@ interface ProductsStepProps {
    teamSlug: string;
    onComplete: (slug: string, teamSlug: string) => void;
    onStateChange: (state: StepState) => void;
+   isPending?: boolean;
 }
 
 export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
    function ProductsStep(
-      { organizationId, teamId, teamSlug, onComplete, onStateChange },
+      {
+         organizationId: _organizationId,
+         teamId,
+         teamSlug,
+         onComplete,
+         onStateChange,
+         isPending: isPendingProp = false,
+      },
       ref,
    ) {
       const [selected, setSelected] = useState<Product[]>([]);
-      const [isPending, setIsPending] = useState(false);
 
       const toggleProduct = useCallback((productId: Product) => {
          setSelected((prev) =>
@@ -100,9 +107,6 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
 
       const handleComplete = useCallback(async () => {
          try {
-            setIsPending(true);
-
-            // Call oRPC procedure to complete onboarding (creates dashboard + insights)
             const result = await orpc.onboarding.completeOnboarding.call({
                products: selected,
             });
@@ -119,10 +123,10 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
                   : "Erro ao concluir onboarding.",
             );
             return false;
-         } finally {
-            setIsPending(false);
          }
-      }, [selected, organizationId, teamId, teamSlug, onComplete]);
+      }, [selected, teamId, teamSlug, onComplete]);
+
+      const isPending = isPendingProp;
 
       const canContinue = selected.length > 0;
 
@@ -166,6 +170,7 @@ export const ProductsStep = forwardRef<StepHandle, ProductsStepProps>(
                      const Icon = product.icon;
 
                      return (
+                        // biome-ignore lint/a11y/useSemanticElements: div with block-level children cannot use button element
                         <div
                            className={cn(
                               "flex w-full cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-all",

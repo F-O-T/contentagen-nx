@@ -24,6 +24,10 @@ import {
    EmptyMedia,
    EmptyTitle,
 } from "@packages/ui/components/empty";
+import {
+   type FeatureStage,
+   FeatureStageBadge,
+} from "@packages/ui/components/feature-stage-badge";
 import { Progress } from "@packages/ui/components/progress";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import {
@@ -44,7 +48,9 @@ import {
    ExternalLink,
    FileInput,
    Globe,
+   HardDrive,
    HelpCircle,
+   Network,
    Package,
    Receipt,
    Search,
@@ -56,6 +62,7 @@ import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
+import { useEarlyAccess } from "@/hooks/use-early-access";
 import { orpc } from "@/integrations/orpc/client";
 
 // ============================================
@@ -113,10 +120,56 @@ const CATEGORY_CONFIG: Record<
       description: "Testes A/B e experimentos de conteudo",
       icon: <Globe className="size-5" />,
    },
+   cluster: {
+      label: "Clusters de Conteudo",
+      description: "Posts pillar, posts satelite e embeds de changelog",
+      icon: <Network className="size-5" />,
+   },
    webhook: {
       label: "Webhooks",
       description: "Entregas de webhook e notificacoes externas",
       icon: <Webhook className="size-5" />,
+   },
+};
+
+// ---------------------------------------------------------------------------
+// Early Access Gating
+// ---------------------------------------------------------------------------
+
+// Event-based categories gated by early access flag.
+// To add a new gated category: add one entry here (flag key + fallback stage).
+// The category must also exist in CATEGORY_CONFIG above.
+const EARLY_ACCESS_CATEGORY_GATES: Record<
+   string,
+   { flag: string; fallbackStage: FeatureStage }
+> = {
+   content: { flag: "content", fallbackStage: "alpha" },
+   form: { flag: "forms-beta", fallbackStage: "beta" },
+   experiment: { flag: "experiments", fallbackStage: "alpha" },
+   cluster: { flag: "content-clusters", fallbackStage: "alpha" },
+};
+
+// Volume-based (non-event) early access features.
+// To add a new one: add one entry here — it shows up automatically when enrolled.
+const VOLUME_FEATURE_CONFIG: Record<
+   string,
+   {
+      label: string;
+      description: string;
+      icon: ReactNode;
+      priceLabel: string;
+      unit: string;
+      fallbackStage: FeatureStage;
+   }
+> = {
+   // Asset storage: Railway cost $0.15/GB — charged at R$ 1,50/GB/mês.
+   "asset-bank": {
+      label: "Banco de Imagens",
+      description: "Armazenamento de imagens e mídia",
+      icon: <HardDrive className="size-5" />,
+      priceLabel: "R$ 1,50",
+      unit: "GB/mês",
+      fallbackStage: "alpha",
    },
 };
 
@@ -198,7 +251,9 @@ function PlanBanner({
    planName: string;
    planDisplayName: string;
 }) {
-   const { slug } = useParams({ strict: false }) as { slug: string };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard/billing",
+   });
    const isPro = planName === PlanName.PRO;
    const isFree = planName === PlanName.FREE;
    const PlanIcon = isPro ? Crown : Zap;
@@ -224,11 +279,7 @@ function PlanBanner({
          </div>
          {isFree && (
             <Button asChild size="sm" variant="default">
-               <Link
-                  params={{ slug }}
-                  search={{ success: undefined }}
-                  to="/$slug/plans"
-               >
+               <Link params={{ slug, teamSlug }} to="/$slug/$teamSlug/plans">
                   Ver planos
                </Link>
             </Button>
@@ -291,6 +342,7 @@ function OverviewProductSubItems({ category }: { category: string }) {
                | "seo"
                | "experiment"
                | "webhook"
+               | "cluster"
                | "system",
          },
       }),
@@ -345,12 +397,23 @@ function OverviewProductSubItems({ category }: { category: string }) {
    );
 }
 
-function OverviewProductCard({ category }: { category: CategorySummary }) {
+function OverviewProductCard({
+   category,
+   stage,
+   enrolled = true,
+}: {
+   category: CategorySummary;
+   stage?: FeatureStage;
+   enrolled?: boolean;
+}) {
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard/billing",
+   });
    const config = CATEGORY_CONFIG[category.category];
    if (!config) return null;
 
    return (
-      <Card>
+      <Card className={!enrolled ? "opacity-70" : ""}>
          <Collapsible>
             <CardHeader className="pb-3">
                <div className="flex items-start justify-between gap-4">
@@ -367,83 +430,222 @@ function OverviewProductCard({ category }: { category: CategorySummary }) {
                         </CardDescription>
                      </div>
                   </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                     {stage && <FeatureStageBadge stage={stage} />}
+                     {!enrolled && (
+                        <Button asChild size="sm" variant="outline">
+                           <Link
+                              params={{ slug, teamSlug }}
+                              to="/$slug/$teamSlug/settings/feature-previews"
+                           >
+                              Ativar
+                           </Link>
+                        </Button>
+                     )}
+                  </div>
                </div>
             </CardHeader>
 
-            <CardContent className="space-y-4">
-               {/* Usage bar + stats row */}
-               <div className="flex items-center gap-4">
-                  <CollapsibleTrigger className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors shrink-0">
-                     <ChevronRight className="size-4 transition-transform [[data-state=open]_&]:rotate-90" />
-                  </CollapsibleTrigger>
+            {enrolled && (
+               <CardContent className="space-y-4">
+                  {/* Usage bar + stats row */}
+                  <div className="flex items-center gap-4">
+                     <CollapsibleTrigger className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors shrink-0">
+                        <ChevronRight className="size-4 transition-transform [[data-state=open]_&]:rotate-90" />
+                     </CollapsibleTrigger>
 
-                  <div className="flex-1 flex items-center gap-6">
-                     {/* Current usage */}
-                     <div className="text-sm">
-                        <span className="text-muted-foreground">Atual</span>
-                        <p className="font-medium tabular-nums">
-                           {category.eventCount.toLocaleString("pt-BR")}
-                        </p>
-                     </div>
+                     <div className="flex-1 flex items-center gap-6">
+                        {/* Current usage */}
+                        <div className="text-sm">
+                           <span className="text-muted-foreground">Atual</span>
+                           <p className="font-medium tabular-nums">
+                              {category.eventCount.toLocaleString("pt-BR")}
+                           </p>
+                        </div>
 
-                     {/* Progress bar area */}
-                     <div className="flex-1">
-                        <Progress
-                           className="h-2"
-                           value={
-                              category.projectedCost > 0
-                                 ? Math.min(
-                                      (category.monthToDateCost /
-                                         category.projectedCost) *
+                        {/* Progress bar area */}
+                        <div className="flex-1">
+                           <Progress
+                              className="h-2"
+                              value={
+                                 category.projectedCost > 0
+                                    ? Math.min(
+                                         (category.monthToDateCost /
+                                            category.projectedCost) *
+                                            100,
                                          100,
-                                      100,
-                                   )
-                                 : 0
-                           }
-                        />
-                     </div>
+                                      )
+                                    : 0
+                              }
+                           />
+                        </div>
 
-                     {/* Costs */}
-                     <div className="flex items-center gap-6 shrink-0">
-                        <div className="text-right">
-                           <span className="text-lg font-semibold tabular-nums">
-                              {formatCurrency(category.monthToDateCost)}
-                           </span>
-                           <p className="text-xs text-muted-foreground">
-                              No mes
-                           </p>
-                        </div>
-                        <div className="text-right">
-                           <span className="text-lg font-semibold tabular-nums">
-                              {formatCurrency(category.projectedCost)}
-                           </span>
-                           <p className="text-xs text-muted-foreground">
-                              Projetado
-                           </p>
+                        {/* Costs */}
+                        <div className="flex items-center gap-6 shrink-0">
+                           <div className="text-right">
+                              <span className="text-lg font-semibold tabular-nums">
+                                 {formatCurrency(category.monthToDateCost)}
+                              </span>
+                              <p className="text-xs text-muted-foreground">
+                                 No mes
+                              </p>
+                           </div>
+                           <div className="text-right">
+                              <span className="text-lg font-semibold tabular-nums">
+                                 {formatCurrency(category.projectedCost)}
+                              </span>
+                              <p className="text-xs text-muted-foreground">
+                                 Projetado
+                              </p>
+                           </div>
                         </div>
                      </div>
+                  </div>
+
+                  {/* Expandable sub-items */}
+                  <CollapsibleContent>
+                     <div className="border-t">
+                        <ErrorBoundary
+                           fallback={
+                              <p className="text-sm text-destructive py-3">
+                                 Erro ao carregar detalhes
+                              </p>
+                           }
+                        >
+                           <Suspense fallback={<OverviewProductCardSkeleton />}>
+                              <OverviewProductSubItems
+                                 category={category.category}
+                              />
+                           </Suspense>
+                        </ErrorBoundary>
+                     </div>
+                  </CollapsibleContent>
+               </CardContent>
+            )}
+         </Collapsible>
+      </Card>
+   );
+}
+
+// ============================================
+// Volume Feature Card (non-event, e.g. storage)
+// ============================================
+
+function StorageUsageContent() {
+   const { data, isLoading } = useQuery(
+      orpc.billing.getStorageUsage.queryOptions({}),
+   );
+
+   if (isLoading) {
+      return <OverviewProductCardSkeleton />;
+   }
+
+   const currentGB = (data?.currentBytes ?? 0) / 1_073_741_824;
+
+   return (
+      <div className="space-y-3 pt-4">
+         <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Armazenamento atual</span>
+            <span className="tabular-nums font-medium">
+               {currentGB.toFixed(3)} GB
+            </span>
+         </div>
+         <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Custo no mês</span>
+            <span className="tabular-nums font-medium">
+               {formatCurrency(data?.monthToDateCost ?? 0)}
+            </span>
+         </div>
+         <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Projetado</span>
+            <span className="tabular-nums font-medium">
+               {formatCurrency(data?.projectedCost ?? 0)}
+            </span>
+         </div>
+      </div>
+   );
+}
+
+function VolumeFeatureCard({
+   config,
+   stage,
+   enrolled = true,
+}: {
+   config: (typeof VOLUME_FEATURE_CONFIG)[string];
+   stage: FeatureStage;
+   enrolled?: boolean;
+}) {
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard/billing",
+   });
+   return (
+      <Card className={!enrolled ? "opacity-70" : ""}>
+         <Collapsible>
+            <CardHeader className="pb-3">
+               <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                     <div className="flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground shrink-0">
+                        {config.icon}
+                     </div>
+                     <div className="min-w-0">
+                        <CardTitle className="text-base">
+                           {config.label}
+                        </CardTitle>
+                        <CardDescription className="text-xs mt-0.5">
+                           {config.description}
+                        </CardDescription>
+                     </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                     <FeatureStageBadge stage={stage} />
+                     {!enrolled && (
+                        <Button asChild size="sm" variant="outline">
+                           <Link
+                              params={{ slug, teamSlug }}
+                              to="/$slug/$teamSlug/settings/feature-previews"
+                           >
+                              Ativar
+                           </Link>
+                        </Button>
+                     )}
                   </div>
                </div>
-
-               {/* Expandable sub-items */}
-               <CollapsibleContent>
-                  <div className="border-t">
-                     <ErrorBoundary
-                        fallback={
-                           <p className="text-sm text-destructive py-3">
-                              Erro ao carregar detalhes
+            </CardHeader>
+            {enrolled && (
+               <CardContent>
+                  <div className="flex items-center gap-4">
+                     <CollapsibleTrigger className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors shrink-0">
+                        <ChevronRight className="size-4 transition-transform [[data-state=open]_&]:rotate-90" />
+                     </CollapsibleTrigger>
+                     <div className="flex-1 flex items-center gap-6">
+                        <div className="flex-1" />
+                        <div className="text-right shrink-0">
+                           <span className="text-lg font-semibold tabular-nums">
+                              {config.priceLabel}
+                           </span>
+                           <p className="text-xs text-muted-foreground">
+                              por {config.unit}
                            </p>
-                        }
-                     >
-                        <Suspense fallback={<OverviewProductCardSkeleton />}>
-                           <OverviewProductSubItems
-                              category={category.category}
-                           />
-                        </Suspense>
-                     </ErrorBoundary>
+                        </div>
+                     </div>
                   </div>
-               </CollapsibleContent>
-            </CardContent>
+                  <CollapsibleContent>
+                     <div className="border-t">
+                        <ErrorBoundary
+                           fallback={
+                              <p className="text-sm text-destructive py-3">
+                                 Erro ao carregar detalhes
+                              </p>
+                           }
+                        >
+                           <Suspense fallback={<OverviewProductCardSkeleton />}>
+                              <StorageUsageContent />
+                           </Suspense>
+                        </ErrorBoundary>
+                     </div>
+                  </CollapsibleContent>
+               </CardContent>
+            )}
          </Collapsible>
       </Card>
    );
@@ -631,11 +833,14 @@ function InvoicesPreviewContent() {
 // ============================================
 
 export function BillingOverview() {
-   const { slug } = useParams({ strict: false }) as { slug: string };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard/billing",
+   });
    const { data } = useSuspenseQuery(
       orpc.billing.getCurrentUsage.queryOptions({}),
    );
    const { activeSubscription } = useActiveOrganization();
+   const { features, isEnrolled } = useEarlyAccess();
 
    const planName = activeSubscription
       ? (activeSubscription.plan as string).toLowerCase()
@@ -643,13 +848,24 @@ export function BillingOverview() {
 
    const plan = STRIPE_PLANS.find((p) => p.name.toLowerCase() === planName);
 
-   // All known categories that should always be displayed
-   const ALL_CATEGORIES = Object.keys(CATEGORY_CONFIG);
+   // Derive stage from PostHog feature config, fall back to local config.
+   function resolveStage(
+      flagKey: string,
+      fallback: FeatureStage,
+   ): FeatureStage {
+      const posthogStage = features.find((f) => f.flagKey === flagKey)?.stage as
+         | FeatureStage
+         | undefined;
+      return posthogStage ?? fallback;
+   }
 
-   // Merge API data with known categories — always show all cards
+   // Show all categories — gated ones appear with an enroll CTA when not enrolled.
+   const visibleCategories = Object.keys(CATEGORY_CONFIG);
+
+   // Merge API data with known categories — always show all visible cards.
    const categoryDataMap = new Map(data.byCategory.map((c) => [c.category, c]));
 
-   const allCategories: CategorySummary[] = ALL_CATEGORIES.map((cat) => {
+   const allCategories: CategorySummary[] = visibleCategories.map((cat) => {
       const existing = categoryDataMap.get(cat);
       return (
          existing ?? {
@@ -664,6 +880,9 @@ export function BillingOverview() {
    const sortedCategories = allCategories.sort(
       (a, b) => b.monthToDateCost - a.monthToDateCost,
    );
+
+   // Volume-based features: always show, enrolled state passed to card.
+   const allVolumeFeatures = Object.entries(VOLUME_FEATURE_CONFIG);
 
    return (
       <div className="space-y-6">
@@ -683,11 +902,7 @@ export function BillingOverview() {
 
          {/* Manage card link */}
          <Button asChild size="sm" variant="outline">
-            <Link
-               params={{ slug }}
-               search={{ success: undefined }}
-               to="/$slug/plans"
-            >
+            <Link params={{ slug, teamSlug }} to="/$slug/$teamSlug/plans">
                <CreditCard className="size-4 mr-1.5" />
                Gerenciar plano e faturas
                <ExternalLink className="size-3 ml-1" />
@@ -706,12 +921,33 @@ export function BillingOverview() {
                ))}
             </div>
          </div>
+
          {/* Products section */}
          <div>
             <h2 className="text-lg font-semibold mb-4">Produtos</h2>
             <div className="space-y-4">
-               {sortedCategories.map((cat) => (
-                  <OverviewProductCard category={cat} key={cat.category} />
+               {sortedCategories.map((cat) => {
+                  const gate = EARLY_ACCESS_CATEGORY_GATES[cat.category];
+                  const stage = gate
+                     ? resolveStage(gate.flag, gate.fallbackStage)
+                     : undefined;
+                  const enrolled = gate ? isEnrolled(gate.flag) : true;
+                  return (
+                     <OverviewProductCard
+                        category={cat}
+                        enrolled={enrolled}
+                        key={cat.category}
+                        stage={stage}
+                     />
+                  );
+               })}
+               {allVolumeFeatures.map(([flagKey, config]) => (
+                  <VolumeFeatureCard
+                     config={config}
+                     enrolled={isEnrolled(flagKey)}
+                     key={flagKey}
+                     stage={resolveStage(flagKey, config.fallbackStage)}
+                  />
                ))}
             </div>
          </div>

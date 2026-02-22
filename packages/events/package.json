@@ -33,6 +33,10 @@
          "default": "./src/refresh-views.ts",
          "types": "./dist/src/refresh-views.d.ts"
       },
+      "./clusters": {
+         "default": "./src/clusters.ts",
+         "types": "./dist/src/clusters.d.ts"
+      },
       "./content": {
          "default": "./src/content.ts",
          "types": "./dist/src/content.d.ts"
@@ -65,10 +69,6 @@
          "default": "./src/insight.ts",
          "types": "./dist/src/insight.d.ts"
       },
-      "./pricing": {
-         "default": "./src/pricing.ts",
-         "types": "./dist/src/pricing.d.ts"
-      },
       "./credits": {
          "default": "./src/credits.ts",
          "types": "./dist/src/credits.d.ts"
@@ -76,6 +76,10 @@
       "./reconcile": {
          "default": "./src/reconcile.ts",
          "types": "./dist/src/reconcile.d.ts"
+      },
+      "./assets": {
+         "default": "./src/assets.ts",
+         "types": "./dist/src/assets.d.ts"
       }
    },
    "files": [

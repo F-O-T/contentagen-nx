@@ -1,7 +1,8 @@
 import { ORPCError } from "@orpc/server";
 import { formSubmissions, forms } from "@packages/database/schemas/forms";
 import { EVENT_CATEGORIES } from "@packages/events/catalog";
-import { emitEvent } from "@packages/events/emit";
+import { createEmitFn, emitEvent } from "@packages/events/emit";
+import { emitExperimentConversion } from "@packages/events/experiments";
 import { FORM_EVENTS } from "@packages/events/forms";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -17,7 +18,16 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function validateSubmission(
    fields: Array<{
       id: string;
-      type: "text" | "email" | "textarea" | "checkbox" | "select";
+      type:
+         | "text"
+         | "email"
+         | "textarea"
+         | "checkbox"
+         | "select"
+         | "number"
+         | "date"
+         | "rating"
+         | "file";
       label: string;
       required: boolean;
       options?: string[];
@@ -71,6 +81,31 @@ function validateSubmission(
                `${field.label} must be one of the allowed options.`;
          }
       }
+
+      // Number validation
+      if (
+         field.type === "number" &&
+         value !== undefined &&
+         value !== null &&
+         value !== ""
+      ) {
+         if (typeof value !== "string" || Number.isNaN(Number(value))) {
+            errors[field.id] = `${field.label} must be a valid number.`;
+         }
+      }
+
+      // Rating validation (1-5)
+      if (
+         field.type === "rating" &&
+         value !== undefined &&
+         value !== null &&
+         value !== ""
+      ) {
+         const num = Number(value);
+         if (Number.isNaN(num) || num < 1 || num > 5) {
+            errors[field.id] = `${field.label} must be between 1 and 5.`;
+         }
+      }
    }
 
    return Object.keys(errors).length > 0 ? errors : null;
@@ -97,6 +132,11 @@ export const get = sdkProcedure
             description: forms.description,
             fields: forms.fields,
             settings: forms.settings,
+            title: forms.title,
+            subtitle: forms.subtitle,
+            icon: forms.icon,
+            buttonText: forms.buttonText,
+            layout: forms.layout,
          })
          .from(forms)
          .where(
@@ -131,6 +171,8 @@ export const submit = sdkProcedure
                url: z.string().optional(),
             })
             .optional(),
+         experimentId: z.string().uuid().optional(),
+         variantId: z.string().optional(),
       }),
    )
    .handler(async ({ context, input }) => {
@@ -220,6 +262,25 @@ export const submit = sdkProcedure
          },
          userId: context.userId ?? undefined,
       });
+
+      // Emit experiment.conversion if this form is part of an A/B test
+      if (input.experimentId && input.variantId) {
+         const emit = createEmitFn(context.db, context.posthog);
+         emitExperimentConversion(
+            emit,
+            {
+               organizationId: context.organizationId,
+               userId: context.userId ?? undefined,
+            },
+            {
+               targetType: "form",
+               targetId: form.id,
+               experimentId: input.experimentId,
+               variantId: input.variantId,
+               goalName: "form.submit",
+            },
+         );
+      }
 
       return {
          success: true as const,

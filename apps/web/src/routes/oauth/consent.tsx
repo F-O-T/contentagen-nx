@@ -10,7 +10,7 @@ import {
 import { Separator } from "@packages/ui/components/separator";
 import { createFileRoute } from "@tanstack/react-router";
 import { Shield, ShieldCheck } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { authClient } from "@/integrations/better-auth/auth-client";
@@ -46,14 +46,14 @@ function ConsentPage() {
    const { client_id, scope } = Route.useSearch();
 
    const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
-   const [isLoading, setIsLoading] = useState(true);
+   const [isLoadPending, startLoadTransition] = useTransition();
+   const [isSubmitPending, startSubmitTransition] = useTransition();
    const [error, setError] = useState<string | null>(null);
-   const [isSubmitting, setIsSubmitting] = useState(false);
 
    const scopes = scope ? scope.split(" ").filter(Boolean) : [];
 
    useEffect(() => {
-      async function fetchClient() {
+      startLoadTransition(async () => {
          try {
             const response = await authClient.oauth2.publicClient({
                query: { client_id },
@@ -71,18 +71,13 @@ function ConsentPage() {
             });
          } catch {
             setError("Erro ao carregar informacoes do aplicativo.");
-         } finally {
-            setIsLoading(false);
          }
-      }
-
-      fetchClient();
+      });
    }, [client_id]);
 
    const handleConsent = useCallback(
-      async (accept: boolean) => {
-         setIsSubmitting(true);
-         try {
+      (accept: boolean) => {
+         startSubmitTransition(async () => {
             const response = await authClient.oauth2.consent({
                accept,
                scope,
@@ -90,23 +85,18 @@ function ConsentPage() {
 
             if (response.error) {
                toast.error("Erro ao processar sua resposta. Tente novamente.");
-               setIsSubmitting(false);
                return;
             }
 
-            // The consent endpoint returns a redirect URI
-            if (response.data?.redirect_uri) {
-               window.location.href = response.data.redirect_uri;
+            if (response.data?.redirect && response.data?.uri) {
+               window.location.href = response.data.uri;
             }
-         } catch {
-            toast.error("Erro ao processar sua resposta. Tente novamente.");
-            setIsSubmitting(false);
-         }
+         });
       },
-      [scope],
+      [scope, startSubmitTransition],
    );
 
-   if (isLoading) {
+   if (isLoadPending || (!clientInfo && !error)) {
       return (
          <div className="flex min-h-screen items-center justify-center bg-background px-4">
             <Card className="w-full max-w-md">
@@ -203,7 +193,7 @@ function ConsentPage() {
             <CardFooter className="flex gap-3">
                <Button
                   className="flex-1"
-                  disabled={isSubmitting}
+                  disabled={isSubmitPending}
                   onClick={() => handleConsent(false)}
                   variant="outline"
                >
@@ -211,7 +201,7 @@ function ConsentPage() {
                </Button>
                <Button
                   className="flex-1"
-                  disabled={isSubmitting}
+                  disabled={isSubmitPending}
                   onClick={() => handleConsent(true)}
                >
                   Permitir

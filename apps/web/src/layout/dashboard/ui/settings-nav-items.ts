@@ -6,6 +6,7 @@ import {
    FileText,
    FlaskConical,
    Globe,
+   Images,
    Key,
    LayoutGrid,
    Lock,
@@ -30,6 +31,7 @@ export type SettingsNavItemDef = {
    external?: boolean;
    danger?: boolean;
    earlyAccessFlag?: string;
+   earlyAccessStage?: "alpha" | "beta" | "concept" | "general-availability";
    children?: SettingsNavItemDef[];
 };
 
@@ -82,6 +84,13 @@ export const settingsNavSections: SettingsNavSection[] = [
                   title: "Agentes IA",
                   href: "/$slug/$teamSlug/settings/project/products/ai-agents",
                   icon: Sparkles,
+               },
+               {
+                  id: "product-asset-bank",
+                  title: "Imagens",
+                  href: "/$slug/$teamSlug/settings/project/products/asset-bank",
+                  icon: Images,
+                  earlyAccessFlag: "asset-bank",
                },
             ],
          },

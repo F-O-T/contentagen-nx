@@ -157,7 +157,6 @@ export function BillingUsage() {
    });
 
    // Build columns dynamically based on dates
-   // biome-ignore lint/correctness/useExhaustiveDependencies: columns depend on allDates which changes with data
    const columns = useMemo<ColumnDef<UsageRow>[]>(() => {
       const cols: ColumnDef<UsageRow>[] = [
          {

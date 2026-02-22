@@ -4,18 +4,17 @@ import {
    AvatarImage,
 } from "@packages/ui/components/avatar";
 import {
+   Dropzone,
+   DropzoneContent,
+   DropzoneEmptyState,
+} from "@packages/ui/components/dropzone";
+import {
    Field,
    FieldError,
    FieldGroup,
    FieldLabel,
 } from "@packages/ui/components/field";
-import {
-   Dropzone,
-   DropzoneContent,
-   DropzoneEmptyState,
-} from "@packages/ui/components/dropzone";
 import { Input } from "@packages/ui/components/input";
-import { cn } from "@packages/ui/lib/utils";
 import { createSlug } from "@packages/utils/text";
 import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
@@ -26,13 +25,13 @@ import {
    useCallback,
    useEffect,
    useImperativeHandle,
-   useState,
+   useTransition,
 } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { authClient } from "@/integrations/better-auth/auth-client";
 import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
 import { usePresignedUpload } from "@/features/file-upload/lib/use-presigned-upload";
+import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
 import type { StepHandle, StepState } from "./step-handle";
 
@@ -53,7 +52,7 @@ interface WorkspaceStepProps {
 
 export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
    function WorkspaceStep({ onNext, onStateChange, onSlugChange }, ref) {
-      const [isPending, setIsPending] = useState(false);
+      const [isPending, startTransition] = useTransition();
 
       const fileUpload = useFileUpload({
          maxSize: MAX_FILE_SIZE,
@@ -73,7 +72,8 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
             }
 
             // Get file extension and content type
-            const fileExtension = fileUpload.selectedFile.name.split(".").pop() ?? "png";
+            const fileExtension =
+               fileUpload.selectedFile.name.split(".").pop() ?? "png";
             const contentType = fileUpload.selectedFile.type;
 
             console.log("[Logo Upload] File details:", {
@@ -85,12 +85,13 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
 
             // Generate presigned URL for MinIO upload
             console.log("[Logo Upload] Requesting presigned URL...");
-            const uploadData = await orpc.organization.generateLogoUploadUrl.call({
-               fileExtension,
-               contentType,
-            });
+            const uploadData =
+               await orpc.organization.generateLogoUploadUrl.call({
+                  fileExtension,
+                  contentType,
+               });
             console.log("[Logo Upload] Got presigned URL:", {
-               presignedUrl: uploadData.presignedUrl.substring(0, 100) + "...",
+               presignedUrl: `${uploadData.presignedUrl.substring(0, 100)}...`,
                publicUrl: uploadData.publicUrl,
             });
 
@@ -104,7 +105,10 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
             console.log("[Logo Upload] MinIO upload complete");
 
             // Update organization with logo path
-            console.log("[Logo Upload] Updating organization with logo URL:", uploadData.publicUrl);
+            console.log(
+               "[Logo Upload] Updating organization with logo URL:",
+               uploadData.publicUrl,
+            );
             await orpc.organization.updateLogo.call({
                logoUrl: uploadData.publicUrl,
             });
@@ -113,7 +117,8 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
          onError: (error) => {
             console.error("[Logo Upload] Failed:", {
                error,
-               message: error instanceof Error ? error.message : "Unknown error",
+               message:
+                  error instanceof Error ? error.message : "Unknown error",
                stack: error instanceof Error ? error.stack : undefined,
             });
             toast.error("Workspace criado, mas falha ao fazer upload do logo.");
@@ -126,7 +131,6 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
          },
          onSubmit: async ({ value }) => {
             try {
-               setIsPending(true);
                const slug = createSlug(value.workspaceName);
 
                const result = await authClient.organization.create({
@@ -145,7 +149,6 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
                   organizationId: orgId,
                });
 
-               // Upload logo if selected
                if (fileUpload.selectedFile) {
                   await saveMutation.mutateAsync();
                }
@@ -158,8 +161,6 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
                      ? error.message
                      : "Erro ao criar workspace.",
                );
-            } finally {
-               setIsPending(false);
             }
          },
          validators: { onBlur: workspaceSchema },
@@ -187,9 +188,11 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
          (e: FormEvent) => {
             e.preventDefault();
             e.stopPropagation();
-            form.handleSubmit();
+            startTransition(async () => {
+               await form.handleSubmit();
+            });
          },
-         [form],
+         [form, startTransition],
       );
 
       return (
@@ -243,7 +246,9 @@ export const WorkspaceStep = forwardRef<StepHandle, WorkspaceStepProps>(
                      </DropzoneContent>
                   </Dropzone>
                   {fileUpload.error && (
-                     <p className="text-xs text-destructive">{fileUpload.error}</p>
+                     <p className="text-xs text-destructive">
+                        {fileUpload.error}
+                     </p>
                   )}
                </div>
 

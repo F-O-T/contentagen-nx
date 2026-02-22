@@ -1,6 +1,7 @@
 import type { DatabaseInstance } from "@packages/database/client";
 import {
    contentTrafficSources,
+   currentMonthStorageCost,
    currentMonthUsageByCategory,
    currentMonthUsageByEvent,
    dailyContentAnalytics,
@@ -30,6 +31,7 @@ export async function refreshUsageViews(db: DatabaseInstance): Promise<void> {
          db.refreshMaterializedView(monthlySdkUsage).concurrently(),
          db.refreshMaterializedView(monthlyAiUsage).concurrently(),
          db.refreshMaterializedView(dailyEventCounts).concurrently(),
+         db.refreshMaterializedView(currentMonthStorageCost).concurrently(),
       ]);
 
       const duration = Date.now() - startTime;

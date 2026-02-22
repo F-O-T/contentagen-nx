@@ -10,7 +10,7 @@ import {
 import { cn } from "@packages/ui/lib/utils";
 import { Command as CommandPrimitive } from "cmdk";
 import { SearchIcon } from "lucide-react";
-import * as React from "react";
+import type * as React from "react";
 
 function Command({
    className,
@@ -81,10 +81,10 @@ function CommandInput({
    );
 }
 
-const CommandList = React.forwardRef<
-   React.ElementRef<typeof CommandPrimitive.List>,
-   React.ComponentProps<typeof CommandPrimitive.List>
->(({ className, ...props }, ref) => {
+function CommandList({
+   className,
+   ...props
+}: React.ComponentProps<typeof CommandPrimitive.List>) {
    return (
       <CommandPrimitive.List
          className={cn(
@@ -92,12 +92,10 @@ const CommandList = React.forwardRef<
             className,
          )}
          data-slot="command-list"
-         ref={ref}
          {...props}
       />
    );
-});
-CommandList.displayName = "CommandList";
+}
 
 function CommandEmpty({
    ...props

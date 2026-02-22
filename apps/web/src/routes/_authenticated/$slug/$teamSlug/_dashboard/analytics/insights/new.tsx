@@ -1,3 +1,4 @@
+import type { InsightConfig } from "@packages/analytics/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
    createFileRoute,
@@ -55,7 +56,7 @@ function NewInsightPage() {
          name: insightName.trim(),
          description: insightDescription.trim() || undefined,
          type,
-         config: config as Record<string, unknown>,
+         config: config as InsightConfig,
       });
    }, [insightName, insightDescription, type, config, createMutation]);
 
