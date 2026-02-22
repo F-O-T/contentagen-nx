@@ -1,10 +1,11 @@
+import { Button } from "@packages/ui/components/button";
 import {
    Collapsible,
    CollapsibleContent,
    CollapsibleTrigger,
 } from "@packages/ui/components/collapsible";
-import type { FeatureStage } from "@packages/ui/components/feature-stage-badge";
 import {
+   type FeatureStage,
    FeatureStageBadge,
    FeatureStageChip,
 } from "@packages/ui/components/feature-stage-badge";
@@ -104,11 +105,10 @@ function FeaturePreviewsPage() {
             </p>
 
             {/* Filter Bar */}
-            <div className="mt-4 space-y-2">
+            <div className=" space-y-2">
                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span>Filtrar por estágio:</span>
-                  <button
-                     className="hover:text-foreground underline"
+                  <Button
                      onClick={() =>
                         setSelectedStages(
                            new Set([
@@ -119,9 +119,12 @@ function FeaturePreviewsPage() {
                            ]),
                         )
                      }
+                     className="px-0"
+                     size="sm"
+                     variant="link"
                   >
                      Mostrar todos
-                  </button>
+                  </Button>
                </div>
                <div className="flex flex-wrap gap-2">
                   <FeatureStageChip
@@ -268,7 +271,7 @@ function FeaturePreviewsPage() {
                                                          ) =>
                                                             updateEnrollment(
                                                                child.flagKey ??
-                                                                  "",
+                                                               "",
                                                                checked,
                                                             )
                                                          }

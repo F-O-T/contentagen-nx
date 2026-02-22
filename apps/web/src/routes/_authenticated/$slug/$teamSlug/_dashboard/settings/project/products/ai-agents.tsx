@@ -168,7 +168,9 @@ function DefaultLanguageSection({
          </Select>
          <Button
             disabled={!hasChanged || saveMutation.isPending}
-            onClick={() => saveMutation.mutate({ defaultLanguage: language })}
+            onClick={() =>
+               saveMutation.mutate({ defaultLanguage: language || undefined })
+            }
             size="sm"
          >
             {saveMutation.isPending && (
