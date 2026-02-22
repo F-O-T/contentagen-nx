@@ -16,6 +16,9 @@ const config = defineConfig({
    optimizeDeps: {
       include: ["react", "react-dom"],
    },
+   ssr: {
+      noExternal: true,
+   },
 
    plugins: [
       devtools(),
