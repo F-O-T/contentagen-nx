@@ -1,10 +1,13 @@
 import { Agent } from "@mastra/core/agent";
+import { DEFAULT_EDIT_MODEL_ID } from "../../models";
 
 export const inlineEditAgent: Agent = new Agent({
    id: "inline-edit-agent",
    name: "Inline Edit Agent",
 
-   model: "openrouter/mistralai/mistral-small-creative",
+   model: ({ requestContext }) => {
+      return (requestContext?.get("model") as string) ?? DEFAULT_EDIT_MODEL_ID;
+   },
 
    instructions: () => `
 You are a precise text editor. Transform the selected text according to the user's instruction.

@@ -1,10 +1,16 @@
 import { Agent } from "@mastra/core/agent";
+import { DEFAULT_AUTOCOMPLETE_MODEL_ID } from "../../models";
 
 export const fimAgent: Agent = new Agent({
    id: "fim-agent",
    name: "FIM Completion Agent",
 
-   model: "openrouter/mistralai/mistral-small-creative",
+   model: ({ requestContext }) => {
+      return (
+         (requestContext?.get("model") as string) ??
+         DEFAULT_AUTOCOMPLETE_MODEL_ID
+      );
+   },
    instructions: () => `
 You are an expert writing assistant. Your ONLY job is to continue text naturally and seamlessly.
 
