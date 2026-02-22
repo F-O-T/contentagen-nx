@@ -50,6 +50,7 @@ import {
    Globe,
    HardDrive,
    HelpCircle,
+   Network,
    Package,
    Receipt,
    Search,
@@ -119,6 +120,11 @@ const CATEGORY_CONFIG: Record<
       description: "Testes A/B e experimentos de conteudo",
       icon: <Globe className="size-5" />,
    },
+   cluster: {
+      label: "Clusters de Conteudo",
+      description: "Posts pillar, posts satelite e embeds de changelog",
+      icon: <Network className="size-5" />,
+   },
    webhook: {
       label: "Webhooks",
       description: "Entregas de webhook e notificacoes externas",
@@ -139,6 +145,7 @@ const EARLY_ACCESS_CATEGORY_GATES: Record<
 > = {
    form: { flag: "forms-beta", fallbackStage: "beta" },
    experiment: { flag: "experiments", fallbackStage: "alpha" },
+   cluster: { flag: "content-clusters", fallbackStage: "alpha" },
 };
 
 // Volume-based (non-event) early access features.
@@ -334,6 +341,7 @@ function OverviewProductSubItems({ category }: { category: string }) {
                | "seo"
                | "experiment"
                | "webhook"
+               | "cluster"
                | "system",
          },
       }),
@@ -391,15 +399,20 @@ function OverviewProductSubItems({ category }: { category: string }) {
 function OverviewProductCard({
    category,
    stage,
+   enrolled = true,
 }: {
    category: CategorySummary;
    stage?: FeatureStage;
+   enrolled?: boolean;
 }) {
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard/billing",
+   });
    const config = CATEGORY_CONFIG[category.category];
    if (!config) return null;
 
    return (
-      <Card>
+      <Card className={!enrolled ? "opacity-70" : ""}>
          <Collapsible>
             <CardHeader className="pb-3">
                <div className="flex items-start justify-between gap-4">
@@ -416,84 +429,98 @@ function OverviewProductCard({
                         </CardDescription>
                      </div>
                   </div>
-                  {stage && <FeatureStageBadge stage={stage} />}
+                  <div className="flex items-center gap-2 shrink-0">
+                     {stage && <FeatureStageBadge stage={stage} />}
+                     {!enrolled && (
+                        <Button asChild size="sm" variant="outline">
+                           <Link
+                              params={{ slug, teamSlug }}
+                              to="/$slug/$teamSlug/settings/feature-previews"
+                           >
+                              Ativar
+                           </Link>
+                        </Button>
+                     )}
+                  </div>
                </div>
             </CardHeader>
 
-            <CardContent className="space-y-4">
-               {/* Usage bar + stats row */}
-               <div className="flex items-center gap-4">
-                  <CollapsibleTrigger className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors shrink-0">
-                     <ChevronRight className="size-4 transition-transform [[data-state=open]_&]:rotate-90" />
-                  </CollapsibleTrigger>
+            {enrolled && (
+               <CardContent className="space-y-4">
+                  {/* Usage bar + stats row */}
+                  <div className="flex items-center gap-4">
+                     <CollapsibleTrigger className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors shrink-0">
+                        <ChevronRight className="size-4 transition-transform [[data-state=open]_&]:rotate-90" />
+                     </CollapsibleTrigger>
 
-                  <div className="flex-1 flex items-center gap-6">
-                     {/* Current usage */}
-                     <div className="text-sm">
-                        <span className="text-muted-foreground">Atual</span>
-                        <p className="font-medium tabular-nums">
-                           {category.eventCount.toLocaleString("pt-BR")}
-                        </p>
-                     </div>
+                     <div className="flex-1 flex items-center gap-6">
+                        {/* Current usage */}
+                        <div className="text-sm">
+                           <span className="text-muted-foreground">Atual</span>
+                           <p className="font-medium tabular-nums">
+                              {category.eventCount.toLocaleString("pt-BR")}
+                           </p>
+                        </div>
 
-                     {/* Progress bar area */}
-                     <div className="flex-1">
-                        <Progress
-                           className="h-2"
-                           value={
-                              category.projectedCost > 0
-                                 ? Math.min(
-                                      (category.monthToDateCost /
-                                         category.projectedCost) *
+                        {/* Progress bar area */}
+                        <div className="flex-1">
+                           <Progress
+                              className="h-2"
+                              value={
+                                 category.projectedCost > 0
+                                    ? Math.min(
+                                         (category.monthToDateCost /
+                                            category.projectedCost) *
+                                            100,
                                          100,
-                                      100,
-                                   )
-                                 : 0
-                           }
-                        />
-                     </div>
-
-                     {/* Costs */}
-                     <div className="flex items-center gap-6 shrink-0">
-                        <div className="text-right">
-                           <span className="text-lg font-semibold tabular-nums">
-                              {formatCurrency(category.monthToDateCost)}
-                           </span>
-                           <p className="text-xs text-muted-foreground">
-                              No mes
-                           </p>
-                        </div>
-                        <div className="text-right">
-                           <span className="text-lg font-semibold tabular-nums">
-                              {formatCurrency(category.projectedCost)}
-                           </span>
-                           <p className="text-xs text-muted-foreground">
-                              Projetado
-                           </p>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-
-               {/* Expandable sub-items */}
-               <CollapsibleContent>
-                  <div className="border-t">
-                     <ErrorBoundary
-                        fallback={
-                           <p className="text-sm text-destructive py-3">
-                              Erro ao carregar detalhes
-                           </p>
-                        }
-                     >
-                        <Suspense fallback={<OverviewProductCardSkeleton />}>
-                           <OverviewProductSubItems
-                              category={category.category}
+                                      )
+                                    : 0
+                              }
                            />
-                        </Suspense>
-                     </ErrorBoundary>
+                        </div>
+
+                        {/* Costs */}
+                        <div className="flex items-center gap-6 shrink-0">
+                           <div className="text-right">
+                              <span className="text-lg font-semibold tabular-nums">
+                                 {formatCurrency(category.monthToDateCost)}
+                              </span>
+                              <p className="text-xs text-muted-foreground">
+                                 No mes
+                              </p>
+                           </div>
+                           <div className="text-right">
+                              <span className="text-lg font-semibold tabular-nums">
+                                 {formatCurrency(category.projectedCost)}
+                              </span>
+                              <p className="text-xs text-muted-foreground">
+                                 Projetado
+                              </p>
+                           </div>
+                        </div>
+                     </div>
                   </div>
-               </CollapsibleContent>
-            </CardContent>
+
+                  {/* Expandable sub-items */}
+                  <CollapsibleContent>
+                     <div className="border-t">
+                        <ErrorBoundary
+                           fallback={
+                              <p className="text-sm text-destructive py-3">
+                                 Erro ao carregar detalhes
+                              </p>
+                           }
+                        >
+                           <Suspense fallback={<OverviewProductCardSkeleton />}>
+                              <OverviewProductSubItems
+                                 category={category.category}
+                              />
+                           </Suspense>
+                        </ErrorBoundary>
+                     </div>
+                  </CollapsibleContent>
+               </CardContent>
+            )}
          </Collapsible>
       </Card>
    );
@@ -541,12 +568,17 @@ function StorageUsageContent() {
 function VolumeFeatureCard({
    config,
    stage,
+   enrolled = true,
 }: {
    config: (typeof VOLUME_FEATURE_CONFIG)[string];
    stage: FeatureStage;
+   enrolled?: boolean;
 }) {
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard/billing",
+   });
    return (
-      <Card>
+      <Card className={!enrolled ? "opacity-70" : ""}>
          <Collapsible>
             <CardHeader className="pb-3">
                <div className="flex items-start justify-between gap-4">
@@ -563,42 +595,56 @@ function VolumeFeatureCard({
                         </CardDescription>
                      </div>
                   </div>
-                  <FeatureStageBadge stage={stage} />
+                  <div className="flex items-center gap-2 shrink-0">
+                     <FeatureStageBadge stage={stage} />
+                     {!enrolled && (
+                        <Button asChild size="sm" variant="outline">
+                           <Link
+                              params={{ slug, teamSlug }}
+                              to="/$slug/$teamSlug/settings/feature-previews"
+                           >
+                              Ativar
+                           </Link>
+                        </Button>
+                     )}
+                  </div>
                </div>
             </CardHeader>
-            <CardContent>
-               <div className="flex items-center gap-4">
-                  <CollapsibleTrigger className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors shrink-0">
-                     <ChevronRight className="size-4 transition-transform [[data-state=open]_&]:rotate-90" />
-                  </CollapsibleTrigger>
-                  <div className="flex-1 flex items-center gap-6">
-                     <div className="flex-1" />
-                     <div className="text-right shrink-0">
-                        <span className="text-lg font-semibold tabular-nums">
-                           {config.priceLabel}
-                        </span>
-                        <p className="text-xs text-muted-foreground">
-                           por {config.unit}
-                        </p>
+            {enrolled && (
+               <CardContent>
+                  <div className="flex items-center gap-4">
+                     <CollapsibleTrigger className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors shrink-0">
+                        <ChevronRight className="size-4 transition-transform [[data-state=open]_&]:rotate-90" />
+                     </CollapsibleTrigger>
+                     <div className="flex-1 flex items-center gap-6">
+                        <div className="flex-1" />
+                        <div className="text-right shrink-0">
+                           <span className="text-lg font-semibold tabular-nums">
+                              {config.priceLabel}
+                           </span>
+                           <p className="text-xs text-muted-foreground">
+                              por {config.unit}
+                           </p>
+                        </div>
                      </div>
                   </div>
-               </div>
-               <CollapsibleContent>
-                  <div className="border-t">
-                     <ErrorBoundary
-                        fallback={
-                           <p className="text-sm text-destructive py-3">
-                              Erro ao carregar detalhes
-                           </p>
-                        }
-                     >
-                        <Suspense fallback={<OverviewProductCardSkeleton />}>
-                           <StorageUsageContent />
-                        </Suspense>
-                     </ErrorBoundary>
-                  </div>
-               </CollapsibleContent>
-            </CardContent>
+                  <CollapsibleContent>
+                     <div className="border-t">
+                        <ErrorBoundary
+                           fallback={
+                              <p className="text-sm text-destructive py-3">
+                                 Erro ao carregar detalhes
+                              </p>
+                           }
+                        >
+                           <Suspense fallback={<OverviewProductCardSkeleton />}>
+                              <StorageUsageContent />
+                           </Suspense>
+                        </ErrorBoundary>
+                     </div>
+                  </CollapsibleContent>
+               </CardContent>
+            )}
          </Collapsible>
       </Card>
    );
@@ -812,12 +858,8 @@ export function BillingOverview() {
       return posthogStage ?? fallback;
    }
 
-   // Event-based categories: gate by early access flag when configured.
-   const visibleCategories = Object.keys(CATEGORY_CONFIG).filter((cat) => {
-      const gate = EARLY_ACCESS_CATEGORY_GATES[cat];
-      if (!gate) return true;
-      return isEnrolled(gate.flag);
-   });
+   // Show all categories — gated ones appear with an enroll CTA when not enrolled.
+   const visibleCategories = Object.keys(CATEGORY_CONFIG);
 
    // Merge API data with known categories — always show all visible cards.
    const categoryDataMap = new Map(data.byCategory.map((c) => [c.category, c]));
@@ -838,10 +880,8 @@ export function BillingOverview() {
       (a, b) => b.monthToDateCost - a.monthToDateCost,
    );
 
-   // Volume-based features (e.g. storage): only show when enrolled.
-   const activeVolumeFeatures = Object.entries(VOLUME_FEATURE_CONFIG).filter(
-      ([flagKey]) => isEnrolled(flagKey),
-   );
+   // Volume-based features: always show, enrolled state passed to card.
+   const allVolumeFeatures = Object.entries(VOLUME_FEATURE_CONFIG);
 
    return (
       <div className="space-y-6">
@@ -890,17 +930,20 @@ export function BillingOverview() {
                   const stage = gate
                      ? resolveStage(gate.flag, gate.fallbackStage)
                      : undefined;
+                  const enrolled = gate ? isEnrolled(gate.flag) : true;
                   return (
                      <OverviewProductCard
                         category={cat}
+                        enrolled={enrolled}
                         key={cat.category}
                         stage={stage}
                      />
                   );
                })}
-               {activeVolumeFeatures.map(([flagKey, config]) => (
+               {allVolumeFeatures.map(([flagKey, config]) => (
                   <VolumeFeatureCard
                      config={config}
+                     enrolled={isEnrolled(flagKey)}
                      key={flagKey}
                      stage={resolveStage(flagKey, config.fallbackStage)}
                   />

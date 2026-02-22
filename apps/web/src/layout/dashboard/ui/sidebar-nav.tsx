@@ -74,11 +74,11 @@ function NavItem({
                   <span>{item.label}</span>
                   {item.earlyAccessFlag && (
                      <FeatureStageBadge
-                        className="ml-1.5 group-data-[collapsible=icon]:hidden"
+                        className="ml-auto group-data-[collapsible=icon]:hidden"
                         stage={stage}
                      />
                   )}
-                  <ChevronRight className="ml-auto size-3.5 text-muted-foreground group-data-[collapsible=icon]:hidden" />
+                  <ChevronRight className="size-3.5 text-muted-foreground group-data-[collapsible=icon]:hidden" />
                </>
             ) : (
                <Link
@@ -91,7 +91,7 @@ function NavItem({
                   <span>{item.label}</span>
                   {item.earlyAccessFlag && (
                      <FeatureStageBadge
-                        className="ml-1.5 group-data-[collapsible=icon]:hidden"
+                        className="ml-auto group-data-[collapsible=icon]:hidden"
                         stage={stage}
                      />
                   )}

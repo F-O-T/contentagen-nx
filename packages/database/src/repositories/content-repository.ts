@@ -1,5 +1,5 @@
 import { AppError, propagateError } from "@packages/utils/errors";
-import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
 import {
    type ContentInsert,
@@ -508,5 +508,37 @@ export async function countContentsByOrganization(
       throw AppError.database(
          `Failed to count contents: ${(err as Error).message}`,
       );
+   }
+}
+
+/**
+ * List all cluster pillars (content with non-empty clusterConfig) for a team.
+ */
+export async function listClustersByTeam(
+   db: DatabaseInstance,
+   teamId: string,
+   opts: { limit?: number; page?: number } = {},
+) {
+   const { limit = 20, page = 1 } = opts;
+   const offset = (page - 1) * limit;
+
+   try {
+      const rows = await db
+         .select()
+         .from(content)
+         .where(
+            and(
+               eq(content.teamId, teamId),
+               isNotNull(content.clusterConfig),
+               ne(sql`(${content.clusterConfig})::text`, "{}"),
+            ),
+         )
+         .orderBy(desc(content.createdAt))
+         .limit(limit)
+         .offset(offset);
+      return rows;
+   } catch (err) {
+      propagateError(err);
+      throw AppError.database("Failed to list clusters");
    }
 }
