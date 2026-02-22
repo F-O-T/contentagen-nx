@@ -31,6 +31,7 @@ export type SettingsNavItemDef = {
    external?: boolean;
    danger?: boolean;
    earlyAccessFlag?: string;
+   earlyAccessStage?: "alpha" | "beta" | "concept" | "general-availability";
    children?: SettingsNavItemDef[];
 };
 
