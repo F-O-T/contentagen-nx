@@ -46,7 +46,6 @@ import {
    ImageIcon,
    Loader2,
    Pencil,
-   Plus,
    Search,
    Sparkles,
    Trash2,
@@ -985,8 +984,7 @@ function AssetBankContent() {
             </div>
             <DropdownMenu>
                <DropdownMenuTrigger asChild>
-                  <Button className="shrink-0" variant="outline">
-                     <Plus className="size-4 mr-2" />
+                  <Button className="shrink-0">
                      Adicionar imagem
                      <ChevronDown className="size-4 ml-2" />
                   </Button>

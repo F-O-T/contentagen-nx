@@ -113,6 +113,56 @@ const ROUTE_TAB_MAPPINGS: RouteTabMapping[] = [
       labelFn: () => "Formularios",
    },
 
+   // Clusters
+   {
+      pattern: /\/clusters\/[^/]+$/,
+      type: "clusters",
+      icon: "Network",
+      labelFn: () => "Cluster",
+   },
+   {
+      pattern: /\/clusters$/,
+      type: "clusters",
+      icon: "Network",
+      labelFn: () => "Clusters",
+   },
+
+   // Assets
+   {
+      pattern: /\/assets$/,
+      type: "assets",
+      icon: "ImageIcon",
+      labelFn: () => "Imagens",
+   },
+
+   // Experiments
+   {
+      pattern: /\/experiments\/[^/]+$/,
+      type: "experiments",
+      icon: "FlaskConical",
+      labelFn: () => "Experimento",
+   },
+   {
+      pattern: /\/experiments$/,
+      type: "experiments",
+      icon: "FlaskConical",
+      labelFn: () => "Experimentos",
+   },
+
+   // Analytics — Data Management sub-pages
+   {
+      pattern: /\/analytics\/data-management\/annotations$/,
+      type: "data-management",
+      icon: "Database",
+      labelFn: () => "Anotacoes",
+   },
+   {
+      pattern: /\/analytics\/data-management\/property-definitions$/,
+      type: "data-management",
+      icon: "Database",
+      labelFn: () => "Definicoes de propriedades",
+   },
+
    // Settings (all settings sub-routes map to a single "Settings" tab type)
    {
       pattern: /\/settings/,
@@ -199,6 +249,12 @@ export function pathnameToRoutePath(
    }
    if (params.formId) {
       route = route.replace(`/${params.formId}`, "/$formId");
+   }
+   if (params.clusterId) {
+      route = route.replace(`/${params.clusterId}`, "/$clusterId");
+   }
+   if (params.experimentId) {
+      route = route.replace(`/${params.experimentId}`, "/$experimentId");
    }
 
    return route;

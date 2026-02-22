@@ -127,7 +127,7 @@ export function SubSidebarContextMenu({
                <MoreHorizontal className="size-3.5" />
             </Button>
          </DropdownMenuTrigger>
-         <DropdownMenuContent align="start" sideOffset={4}>
+         <DropdownMenuContent align="start" className="z-[1100]" sideOffset={4}>
             <DropdownMenuItem onClick={handleRename}>
                <Pencil className="size-4" />
                Renomear

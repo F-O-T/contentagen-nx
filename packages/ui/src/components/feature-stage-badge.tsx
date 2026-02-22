@@ -7,26 +7,22 @@ const STAGE_CONFIG = {
    alpha: {
       icon: Sparkles,
       label: "Alpha",
-      className:
-         "border-chart-1 bg-chart-1/10 text-chart-1 dark:border-chart-1/50 dark:bg-chart-1/20 dark:text-chart-1",
+      className: "border-chart-1 bg-chart-1/30 text-foreground ",
    },
    beta: {
       icon: FlaskConical,
       label: "Beta",
-      className:
-         "border-chart-2 bg-chart-2/10 text-chart-2 dark:border-chart-2/50 dark:bg-chart-2/20 dark:text-chart-2",
+      className: "border-chart-2 bg-chart-2/30 text-foreground ",
    },
    concept: {
       icon: Lightbulb,
       label: "Conceito",
-      className:
-         "border-chart-4 bg-chart-4/10 text-chart-4 dark:border-chart-4/50 dark:bg-chart-4/20 dark:text-chart-4",
+      className: "border-chart-4 bg-chart-4/30 text-foreground ",
    },
    "general-availability": {
       icon: CheckCircle2,
       label: "Disponível",
-      className:
-         "border-chart-6 bg-chart-6/10 text-chart-6 dark:border-chart-6/50 dark:bg-chart-6/20 dark:text-chart-6",
+      className: "border-chart-6 bg-chart-6/30 text-foreground ",
    },
 } as const;
 
