@@ -83,6 +83,7 @@ export async function getRelatedContentBySourceId(
                   imageUrl: true,
                   status: true,
                   createdAt: true,
+                  organizationId: true,
                },
             },
          },

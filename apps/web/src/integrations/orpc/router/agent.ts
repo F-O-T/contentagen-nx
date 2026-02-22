@@ -375,13 +375,12 @@ export const executeUnifiedAgent = protectedProcedure
          teamId: z.string().uuid(),
          contentId: z.string().uuid(),
          prompt: z.string().min(1).max(10000),
-         brandId: z.string().uuid().optional(),
          writerId: z.string().uuid().optional(),
          model: z.string().optional(),
       }),
    )
    .handler(async ({ context, input }) => {
-      const { teamId, contentId, prompt, brandId, writerId, model } = input;
+      const { teamId, contentId, prompt, writerId, model } = input;
       const { userId, db, organizationId, posthog } = context;
 
       // Fetch product settings for AI configuration
@@ -437,7 +436,6 @@ export const executeUnifiedAgent = protectedProcedure
       // Create request context
       const requestContext = createRequestContext({
          userId,
-         brandId,
          writerId,
          model: contentModelId,
          language: aiDefaults.defaultLanguage ?? "pt-BR",

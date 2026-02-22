@@ -48,23 +48,15 @@ const createCtx = (
       params,
    ) as any as RequestContext<CustomRequestContext>;
 
+// Use .all to read the typed context object and avoid bun:test overload resolution
+// issues with RequestContext.get()'s generic return type.
+const all = (ctx: RequestContext<CustomRequestContext>): CustomRequestContext =>
+   ctx.all as CustomRequestContext;
+
 describe("createRequestContext", () => {
    test("sets userId on the request context", () => {
       const ctx = createCtx({ userId: "user-123" });
-      expect(ctx.get("userId")).toBe("user-123");
-   });
-
-   test("does NOT set brandId when not provided", () => {
-      const ctx = createCtx({ userId: "user-123" });
-      expect(ctx.get("brandId")).toBeUndefined();
-   });
-
-   test("sets brandId when provided", () => {
-      const ctx = createCtx({
-         userId: "user-123",
-         brandId: "brand-abc",
-      });
-      expect(ctx.get("brandId")).toBe("brand-abc");
+      expect(all(ctx).userId).toBe("user-123");
    });
 
    test("sets writerId when provided", () => {
@@ -72,7 +64,7 @@ describe("createRequestContext", () => {
          userId: "user-123",
          writerId: "writer-xyz",
       });
-      expect(ctx.get("writerId")).toBe("writer-xyz");
+      expect(all(ctx).writerId).toBe("writer-xyz");
    });
 
    test("sets model when provided", () => {
@@ -80,17 +72,17 @@ describe("createRequestContext", () => {
          userId: "user-123",
          model: "openrouter/x-ai/grok-4.1-fast",
       });
-      expect(ctx.get("model")).toBe("openrouter/x-ai/grok-4.1-fast");
+      expect(all(ctx).model).toBe("openrouter/x-ai/grok-4.1-fast");
    });
 
    test("does NOT set temperature when not provided", () => {
       const ctx = createCtx({ userId: "user-123" });
-      expect(ctx.get("temperature")).toBeUndefined();
+      expect(all(ctx).temperature).toBeUndefined();
    });
 
    test("sets temperature = 0 when explicitly provided (allows falsy zero)", () => {
       const ctx = createCtx({ userId: "user-123", temperature: 0 });
-      expect(ctx.get("temperature")).toBe(0);
+      expect(all(ctx).temperature).toBe(0);
    });
 
    test("sets temperature = 0.7 when provided", () => {
@@ -98,17 +90,17 @@ describe("createRequestContext", () => {
          userId: "user-123",
          temperature: 0.7,
       });
-      expect(ctx.get("temperature")).toBe(0.7);
+      expect(all(ctx).temperature).toBe(0.7);
    });
 
    test("sets topP when provided", () => {
       const ctx = createCtx({ userId: "user-123", topP: 0.95 });
-      expect(ctx.get("topP")).toBe(0.95);
+      expect(all(ctx).topP).toBe(0.95);
    });
 
    test("sets maxTokens when provided", () => {
       const ctx = createCtx({ userId: "user-123", maxTokens: 4096 });
-      expect(ctx.get("maxTokens")).toBe(4096);
+      expect(all(ctx).maxTokens).toBe(4096);
    });
 
    test("sets frequencyPenalty = 0 when explicitly provided", () => {
@@ -116,7 +108,7 @@ describe("createRequestContext", () => {
          userId: "user-123",
          frequencyPenalty: 0,
       });
-      expect(ctx.get("frequencyPenalty")).toBe(0);
+      expect(all(ctx).frequencyPenalty).toBe(0);
    });
 
    test("sets frequencyPenalty = 0.3 when provided", () => {
@@ -124,7 +116,7 @@ describe("createRequestContext", () => {
          userId: "user-123",
          frequencyPenalty: 0.3,
       });
-      expect(ctx.get("frequencyPenalty")).toBe(0.3);
+      expect(all(ctx).frequencyPenalty).toBe(0.3);
    });
 
    test("sets presencePenalty when provided", () => {
@@ -132,12 +124,12 @@ describe("createRequestContext", () => {
          userId: "user-123",
          presencePenalty: 0.1,
       });
-      expect(ctx.get("presencePenalty")).toBe(0.1);
+      expect(all(ctx).presencePenalty).toBe(0.1);
    });
 
    test("does NOT set presencePenalty when not provided", () => {
       const ctx = createCtx({ userId: "user-123" });
-      expect(ctx.get("presencePenalty")).toBeUndefined();
+      expect(all(ctx).presencePenalty).toBeUndefined();
    });
 
    test("sets language when provided", () => {
@@ -145,7 +137,7 @@ describe("createRequestContext", () => {
          userId: "user-123",
          language: "pt-BR",
       });
-      expect(ctx.get("language")).toBe("pt-BR");
+      expect(all(ctx).language).toBe("pt-BR");
    });
 
    test("sets writerInstructions when provided", () => {
@@ -155,7 +147,7 @@ describe("createRequestContext", () => {
          userId: "user-123",
          writerInstructions: instructions,
       });
-      expect(ctx.get("writerInstructions")).toEqual(instructions);
+      expect(all(ctx).writerInstructions).toEqual(instructions);
    });
 
    test("sets all generation params at once from a model preset", () => {
@@ -168,10 +160,11 @@ describe("createRequestContext", () => {
          frequencyPenalty: 0.3,
          presencePenalty: 0.1,
       });
-      expect(ctx.get("temperature")).toBe(0.7);
-      expect(ctx.get("topP")).toBe(0.95);
-      expect(ctx.get("maxTokens")).toBe(8192);
-      expect(ctx.get("frequencyPenalty")).toBe(0.3);
-      expect(ctx.get("presencePenalty")).toBe(0.1);
+      const values = all(ctx);
+      expect(values.temperature).toBe(0.7);
+      expect(values.topP).toBe(0.95);
+      expect(values.maxTokens).toBe(8192);
+      expect(values.frequencyPenalty).toBe(0.3);
+      expect(values.presencePenalty).toBe(0.1);
    });
 });

@@ -15,7 +15,6 @@ import { unifiedContentAgent } from "./agents/unified-content-agent";
 export type { RequestContext };
 
 export type CustomRequestContext = {
-   brandId?: string;
    userId: string;
    writerId?: string;
    model?: ModelId;
@@ -51,9 +50,6 @@ export function createRequestContext(context: CustomRequestContext) {
    const requestContext = new RequestContext<CustomRequestContext>();
    requestContext.set("userId", context.userId);
 
-   if (context.brandId) {
-      requestContext.set("brandId", context.brandId);
-   }
    if (context.writerId) {
       requestContext.set("writerId", context.writerId);
    }
