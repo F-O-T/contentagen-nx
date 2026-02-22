@@ -1,21 +1,19 @@
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { DataTable } from "@packages/ui/components/data-table";
-import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuItem,
-   DropdownMenuSeparator,
-   DropdownMenuTrigger,
-} from "@packages/ui/components/dropdown-menu";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from "@packages/ui/components/tooltip";
 import {
    useMutation,
    useQueryClient,
    useSuspenseQuery,
 } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { EllipsisVertical, Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { Suspense, useMemo, useState } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
@@ -166,31 +164,23 @@ function OrganizationRolesContent() {
                if (role.isDefault) return null;
 
                return (
-                  <div className="flex justify-end">
-                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                           <Button size="icon" variant="ghost">
-                              <EllipsisVertical className="size-4" />
-                              <span className="sr-only">Ações</span>
-                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                           <DropdownMenuItem
+                  <div
+                     className="flex items-center justify-end gap-1"
+                     onClick={(e) => e.stopPropagation()}
+                  >
+                     <Tooltip>
+                        <TooltipTrigger asChild>
+                           <Button
+                              size="icon"
+                              variant="ghost"
                               onClick={() => handleEditRole(role)}
                            >
-                              <Pencil className="size-4 mr-2" />
-                              Editar função
-                           </DropdownMenuItem>
-                           <DropdownMenuSeparator />
-                           <DropdownMenuItem
-                              className="text-destructive focus:text-destructive"
-                              onClick={() => handleDeleteRole(role)}
-                           >
-                              <Trash2 className="size-4 mr-2" />
-                              Remover função
-                           </DropdownMenuItem>
-                        </DropdownMenuContent>
-                     </DropdownMenu>
+                              <Pencil className="size-4" />
+                              <span className="sr-only">Editar função</span>
+                           </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Editar função</TooltipContent>
+                     </Tooltip>
                   </div>
                );
             },
@@ -214,7 +204,30 @@ function OrganizationRolesContent() {
             </Button>
          </div>
 
-         <DataTable columns={columns} data={roles} getRowId={(row) => row.id} />
+         <DataTable
+            columns={columns}
+            data={roles}
+            getRowId={(row) => row.id}
+            renderSubComponent={({ row }) => {
+               const role = row.original;
+               if (role.isDefault) return null;
+               return (
+                  <div className="px-4 py-4">
+                     <div className="flex items-center gap-2 flex-wrap">
+                        <Button
+                           size="sm"
+                           variant="ghost"
+                           className="text-destructive hover:text-destructive"
+                           onClick={() => handleDeleteRole(role)}
+                        >
+                           <Trash2 className="size-3 mr-2" />
+                           Remover função
+                        </Button>
+                     </div>
+                  </div>
+               );
+            }}
+         />
 
          <RoleFormDialog
             onOpenChange={setDialogOpen}

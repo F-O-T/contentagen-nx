@@ -11,13 +11,6 @@ import {
    type MobileCardRenderProps,
 } from "@packages/ui/components/data-table";
 import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuItem,
-   DropdownMenuSeparator,
-   DropdownMenuTrigger,
-} from "@packages/ui/components/dropdown-menu";
-import {
    Empty,
    EmptyDescription,
    EmptyHeader,
@@ -40,6 +33,11 @@ import {
    SheetTitle,
 } from "@packages/ui/components/sheet";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from "@packages/ui/components/tooltip";
 import { Spinner } from "@packages/ui/components/spinner";
 import { getInitials } from "@packages/utils/text";
 import {
@@ -52,7 +50,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
    ChevronDown,
-   EllipsisVertical,
    FolderKanban,
    Mail,
    Search,
@@ -328,12 +325,17 @@ function InviteMemberSheetContent({
 // Member Expandable Row
 // ============================================
 
-function MemberExpandedRow({ member }: { member: MemberRow }) {
+function MemberExpandedRow({
+   member,
+   onRemove,
+}: {
+   member: MemberRow;
+   onRemove: (member: MemberRow) => void;
+}) {
    const { data: teams } = useSuspenseQuery(
       orpc.organization.getOrganizationTeams.queryOptions({}),
    );
 
-   // Get teams this member has access to
    const { data: memberTeams, isLoading } = useQuery(
       orpc.organization.getMemberTeams.queryOptions({
          input: { userId: member.userId },
@@ -390,6 +392,17 @@ function MemberExpandedRow({ member }: { member: MemberRow }) {
                )}
             </div>
          </div>
+         <div className="flex items-center gap-2 flex-wrap border-t pt-4">
+            <Button
+               size="sm"
+               variant="ghost"
+               className="text-destructive hover:text-destructive"
+               onClick={() => onRemove(member)}
+            >
+               <UserMinus className="size-3 mr-2" />
+               Remover membro
+            </Button>
+         </div>
       </div>
    );
 }
@@ -403,13 +416,22 @@ function MemberMobileCard({
    isExpanded,
    toggleExpanded,
    canExpand,
-}: MobileCardRenderProps<MemberRow>) {
+   onUpdateRole,
+}: MobileCardRenderProps<MemberRow> & {
+   onUpdateRole?: (member: MemberRow, newRole: string) => void;
+}) {
    const { data: sessionData } = useSuspenseQuery(
       orpc.session.getSession.queryOptions({}),
    );
    const currentUserId = sessionData?.user?.id;
    const member = row.original;
    const isSelf = member.userId === currentUserId;
+   const isOwner = member.role === "owner";
+   const isDisabled = isSelf || isOwner;
+   const roleLabel =
+      member.role === "admin"
+         ? "Alterar para membro"
+         : "Alterar para administrador";
 
    return (
       <Card>
@@ -445,15 +467,42 @@ function MemberMobileCard({
                      </span>
                   </div>
                </div>
-               {canExpand && (
-                  <Button onClick={toggleExpanded} size="icon" variant="ghost">
-                     <ChevronDown
-                        className={`size-4 transition-transform ${
-                           isExpanded ? "rotate-180" : ""
-                        }`}
-                     />
-                  </Button>
-               )}
+               <div className="flex items-center gap-1">
+                  {onUpdateRole && (
+                     <Tooltip>
+                        <TooltipTrigger asChild>
+                           <Button
+                              disabled={isDisabled}
+                              size="icon"
+                              variant="ghost"
+                              onClick={() =>
+                                 onUpdateRole(
+                                    member,
+                                    member.role === "admin" ? "member" : "admin",
+                                 )
+                              }
+                           >
+                              <ShieldCheck className="size-4" />
+                              <span className="sr-only">{roleLabel}</span>
+                           </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{roleLabel}</TooltipContent>
+                     </Tooltip>
+                  )}
+                  {canExpand && (
+                     <Button
+                        onClick={toggleExpanded}
+                        size="icon"
+                        variant="ghost"
+                     >
+                        <ChevronDown
+                           className={`size-4 transition-transform ${
+                              isExpanded ? "rotate-180" : ""
+                           }`}
+                        />
+                     </Button>
+                  )}
+               </div>
             </div>
          </CardContent>
       </Card>
@@ -761,22 +810,22 @@ function MembersContent() {
                const isSelf = member.userId === currentUserId;
                const isOwner = member.role === "owner";
                const isDisabled = isSelf || isOwner;
+               const roleLabel =
+                  member.role === "admin"
+                     ? "Alterar para membro"
+                     : "Alterar para administrador";
 
                return (
-                  <div className="flex justify-end">
-                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                  <div
+                     className="flex items-center justify-end gap-1"
+                     onClick={(e) => e.stopPropagation()}
+                  >
+                     <Tooltip>
+                        <TooltipTrigger asChild>
                            <Button
                               disabled={isDisabled}
                               size="icon"
                               variant="ghost"
-                           >
-                              <EllipsisVertical className="size-4" />
-                              <span className="sr-only">Ações</span>
-                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                           <DropdownMenuItem
                               onClick={() =>
                                  handleUpdateRole(
                                     member,
@@ -786,21 +835,12 @@ function MembersContent() {
                                  )
                               }
                            >
-                              <ShieldCheck className="size-4 mr-2" />
-                              {member.role === "admin"
-                                 ? "Alterar para membro"
-                                 : "Alterar para administrador"}
-                           </DropdownMenuItem>
-                           <DropdownMenuSeparator />
-                           <DropdownMenuItem
-                              className="text-destructive focus:text-destructive"
-                              onClick={() => handleRemoveMember(member)}
-                           >
-                              <UserMinus className="size-4 mr-2" />
-                              Remover membro
-                           </DropdownMenuItem>
-                        </DropdownMenuContent>
-                     </DropdownMenu>
+                              <ShieldCheck className="size-4" />
+                              <span className="sr-only">{roleLabel}</span>
+                           </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{roleLabel}</TooltipContent>
+                     </Tooltip>
                   </div>
                );
             },
@@ -858,9 +898,17 @@ function MembersContent() {
                columns={columns}
                data={filteredMembers}
                getRowId={(row) => row.id}
-               renderMobileCard={MemberMobileCard}
+               renderMobileCard={(props) => (
+                  <MemberMobileCard
+                     {...props}
+                     onUpdateRole={handleUpdateRole}
+                  />
+               )}
                renderSubComponent={({ row }) => (
-                  <MemberExpandedRow member={row.original} />
+                  <MemberExpandedRow
+                     member={row.original}
+                     onRemove={handleRemoveMember}
+                  />
                )}
             />
          </section>

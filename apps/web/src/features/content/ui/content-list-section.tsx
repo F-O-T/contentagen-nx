@@ -16,8 +16,9 @@ import {
 } from "@packages/ui/components/empty";
 import { Input } from "@packages/ui/components/input";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import type { Row } from "@tanstack/react-table";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { FileText, Plus, Search } from "lucide-react";
+import { Archive, FileText, Plus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { orpc } from "@/integrations/orpc/client";
@@ -182,6 +183,47 @@ export function ContentListSection() {
          }),
       [],
    );
+
+   function ContentRowExpanded({ row }: { row: Row<ContentItem> }) {
+      const content = row.original;
+      const isDraft = content.status === "draft";
+      const isPublished = content.status === "published";
+      return (
+         <div className="px-4 py-4 space-y-4">
+            <div className="flex items-center gap-2 flex-wrap">
+               {isDraft && (
+                  <Button
+                     size="sm"
+                     variant="outline"
+                     onClick={() => handlePublish(content)}
+                  >
+                     <FileText className="size-3 mr-2" />
+                     Publicar
+                  </Button>
+               )}
+               {isPublished && (
+                  <Button
+                     size="sm"
+                     variant="outline"
+                     onClick={() => handleArchive(content)}
+                  >
+                     <Archive className="size-3 mr-2" />
+                     Arquivar
+                  </Button>
+               )}
+               <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => handleDelete(content)}
+               >
+                  <Trash2 className="size-3 mr-2" />
+                  Excluir
+               </Button>
+            </div>
+         </div>
+      );
+   }
 
    const hasContent = data.items.length > 0;
    const hasFilteredContent = filteredContent.length > 0;
@@ -364,14 +406,20 @@ export function ContentListSection() {
                   totalCount: data.total,
                   totalPages: data.totalPages,
                }}
-               renderMobileCard={({ row }) => (
+               renderMobileCard={({ row, toggleExpanded, isExpanded, canExpand }) => (
                   <ContentMobileCard
                      content={row.original}
                      onArchive={handleArchive}
                      onDelete={handleDelete}
                      onPublish={handlePublish}
                      onView={handleView}
+                     canExpand={canExpand}
+                     isExpanded={isExpanded}
+                     toggleExpanded={toggleExpanded}
                   />
+               )}
+               renderSubComponent={({ row }) => (
+                  <ContentRowExpanded row={row} />
                )}
             />
          ) : (

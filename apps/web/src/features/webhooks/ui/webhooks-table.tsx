@@ -1,13 +1,6 @@
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { DataTable } from "@packages/ui/components/data-table";
-import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuItem,
-   DropdownMenuSeparator,
-   DropdownMenuTrigger,
-} from "@packages/ui/components/dropdown-menu";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import {
    Tooltip,
@@ -17,7 +10,7 @@ import {
 import { cn } from "@packages/ui/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Activity, Edit, MoreHorizontal, Trash2, Zap } from "lucide-react";
+import { Activity, Edit, Trash2, Zap } from "lucide-react";
 import { useMemo } from "react";
 import { orpc } from "@/integrations/orpc/client";
 import { WebhookDeliveriesTable } from "./webhook-deliveries-table";
@@ -207,33 +200,24 @@ export function WebhooksTable({
             id: "actions",
             header: "",
             cell: ({ row }) => (
-               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                     <Button
-                        className="size-8"
-                        onClick={(e) => e.stopPropagation()}
-                        size="icon"
-                        variant="ghost"
-                     >
-                        <MoreHorizontal className="size-4" />
-                        <span className="sr-only">Abrir menu</span>
-                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                     <DropdownMenuItem onClick={() => onEdit(row.original)}>
-                        <Edit className="mr-2 size-4" />
-                        Editar
-                     </DropdownMenuItem>
-                     <DropdownMenuSeparator />
-                     <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => onDelete(row.original)}
-                     >
-                        <Trash2 className="mr-2 size-4" />
-                        Excluir
-                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-               </DropdownMenu>
+               <div
+                  className="flex items-center justify-end gap-1"
+                  onClick={(e) => e.stopPropagation()}
+               >
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <Button
+                           size="icon"
+                           variant="ghost"
+                           onClick={() => onEdit(row.original)}
+                        >
+                          <Edit className="size-4" />
+                          <span className="sr-only">Editar</span>
+                        </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Editar</TooltipContent>
+                  </Tooltip>
+               </div>
             ),
          },
       ],
@@ -270,10 +254,23 @@ export function WebhooksTable({
             </div>
          )}
          renderSubComponent={({ row }) => (
-            <WebhookDeliveriesPanel
-               isExpanded={row.getIsExpanded()}
-               webhookId={row.original.id}
-            />
+            <div className="space-y-4">
+               <div className="px-4 pt-4 flex items-center gap-2 flex-wrap border-b pb-4">
+                  <Button
+                     size="sm"
+                     variant="ghost"
+                     className="text-destructive hover:text-destructive"
+                     onClick={() => onDelete(row.original)}
+                  >
+                     <Trash2 className="size-3 mr-2" />
+                     Excluir
+                  </Button>
+               </div>
+               <WebhookDeliveriesPanel
+                  isExpanded={row.getIsExpanded()}
+                  webhookId={row.original.id}
+               />
+            </div>
          )}
       />
    );
