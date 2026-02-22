@@ -1,3 +1,5 @@
+"use client";
+
 import { triggerFloatingLink } from "@platejs/link/react";
 import { Button } from "@packages/ui/components/button";
 import { Separator } from "@packages/ui/components/separator";
