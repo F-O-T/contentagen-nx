@@ -130,11 +130,18 @@ export function InsightBuilder({
                                  chartType={(config as TrendsConfig).chartType}
                                  compare={config.compare}
                                  dateRange={
-                                    (config as TrendsConfig).dateRange.value
+                                    (config as { dateRange: { value: string } })
+                                       .dateRange.value
                                  }
                                  interval={(config as TrendsConfig).interval}
                                  onChartTypeChange={(v) =>
-                                    onConfigUpdate({ chartType: v })
+                                    onConfigUpdate({
+                                       chartType: v as
+                                          | "number"
+                                          | "area"
+                                          | "line"
+                                          | "bar",
+                                    })
                                  }
                                  onCompareChange={(v) =>
                                     onConfigUpdate({ compare: v })
@@ -143,12 +150,28 @@ export function InsightBuilder({
                                     onConfigUpdate({
                                        dateRange: {
                                           type: "relative",
-                                          value: v,
+                                          value: v as
+                                             | "7d"
+                                             | "14d"
+                                             | "30d"
+                                             | "90d"
+                                             | "180d"
+                                             | "12m"
+                                             | "this_month"
+                                             | "last_month"
+                                             | "this_quarter"
+                                             | "this_year",
                                        },
                                     })
                                  }
                                  onIntervalChange={(v) =>
-                                    onConfigUpdate({ interval: v })
+                                    onConfigUpdate({
+                                       interval: v as
+                                          | "month"
+                                          | "day"
+                                          | "week"
+                                          | "hour",
+                                    })
                                  }
                                  type="trends"
                               />
@@ -163,7 +186,7 @@ export function InsightBuilder({
                            <div className="min-h-[400px] p-4">
                               <ErrorBoundary
                                  fallbackRender={({ error }) => (
-                                    <InsightErrorState error={error} />
+                                    <InsightErrorState error={error as Error} />
                                  )}
                               >
                                  <Suspense fallback={<InsightLoadingState />}>
@@ -201,12 +224,25 @@ export function InsightBuilder({
                         <CardContent className="p-0">
                            <div className="px-4">
                               <InsightFilterBar
-                                 dateRange={config.dateRange.value}
+                                 dateRange={
+                                    (config as { dateRange: { value: string } })
+                                       .dateRange.value
+                                 }
                                  onDateRangeChange={(v) =>
                                     onConfigUpdate({
                                        dateRange: {
                                           type: "relative",
-                                          value: v,
+                                          value: v as
+                                             | "7d"
+                                             | "14d"
+                                             | "30d"
+                                             | "90d"
+                                             | "180d"
+                                             | "12m"
+                                             | "this_month"
+                                             | "last_month"
+                                             | "this_quarter"
+                                             | "this_year",
                                        },
                                     })
                                  }
@@ -223,7 +259,7 @@ export function InsightBuilder({
                            <div className="min-h-[400px] p-4">
                               <ErrorBoundary
                                  fallbackRender={({ error }) => (
-                                    <InsightErrorState error={error} />
+                                    <InsightErrorState error={error as Error} />
                                  )}
                               >
                                  <Suspense fallback={<InsightLoadingState />}>
@@ -254,12 +290,25 @@ export function InsightBuilder({
                         <CardContent className="p-0">
                            <div className="px-4">
                               <InsightFilterBar
-                                 dateRange={config.dateRange.value}
+                                 dateRange={
+                                    (config as { dateRange: { value: string } })
+                                       .dateRange.value
+                                 }
                                  onDateRangeChange={(v) =>
                                     onConfigUpdate({
                                        dateRange: {
                                           type: "relative",
-                                          value: v,
+                                          value: v as
+                                             | "7d"
+                                             | "14d"
+                                             | "30d"
+                                             | "90d"
+                                             | "180d"
+                                             | "12m"
+                                             | "this_month"
+                                             | "last_month"
+                                             | "this_quarter"
+                                             | "this_year",
                                        },
                                     })
                                  }
@@ -276,7 +325,7 @@ export function InsightBuilder({
                            <div className="min-h-[400px] p-4">
                               <ErrorBoundary
                                  fallbackRender={({ error }) => (
-                                    <InsightErrorState error={error} />
+                                    <InsightErrorState error={error as Error} />
                                  )}
                               >
                                  <Suspense fallback={<InsightLoadingState />}>

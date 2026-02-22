@@ -181,6 +181,7 @@ export function openTab(tabData: Omit<Tab, "id" | "openedAt">): string {
    };
 
    tabStore.setState((state) => ({
+      ...state,
       tabs: [...state.tabs, newTab],
       activeTabId: newTab.id,
    }));
@@ -219,7 +220,8 @@ export function closeTab(tabId: string) {
       }
    }
 
-   tabStore.setState(() => ({
+   tabStore.setState((state) => ({
+      ...state,
       tabs: newTabs,
       activeTabId: newActiveId,
    }));
@@ -284,6 +286,7 @@ export function unpinTab(tabId: string) {
 /** Close all tabs except the given one. Keeps pinned tabs. */
 export function closeOtherTabs(keepTabId: string) {
    tabStore.setState((state) => ({
+      ...state,
       tabs: state.tabs.filter((t) => t.id === keepTabId || t.isPinned),
       activeTabId: keepTabId,
    }));
@@ -295,6 +298,7 @@ export function closeAllTabs() {
    tabStore.setState((state) => {
       const pinned = state.tabs.filter((t) => t.isPinned);
       return {
+         ...state,
          tabs: pinned,
          activeTabId: pinned.length > 0 ? pinned[0].id : null,
       };

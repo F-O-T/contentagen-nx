@@ -41,7 +41,7 @@ export function SubSidebarItemList({
          fallbackRender={({ error }) => (
             <div className="flex-1 flex items-center justify-center p-4">
                <p className="text-sm text-destructive text-center">
-                  Erro ao carregar lista: {error.message}
+                  Erro ao carregar lista: {(error as Error).message}
                </p>
             </div>
          )}

@@ -11,6 +11,7 @@ import {
 import {
    DashboardDateRangeSchema,
    DashboardFilterSchema,
+   type NewDashboard,
 } from "@packages/database/schemas/dashboards";
 import {
    emitDashboardCreated,
@@ -240,10 +241,8 @@ export const updateGlobalFilters = protectedProcedure
       }
 
       // Build update object
-      const updateData: {
-         globalDateRange?: unknown;
-         globalFilters?: unknown;
-      } = {};
+      const updateData: Parameters<typeof updateDashboard>[2] &
+         Partial<Pick<NewDashboard, "globalDateRange" | "globalFilters">> = {};
 
       if (input.globalDateRange !== undefined) {
          updateData.globalDateRange = input.globalDateRange;

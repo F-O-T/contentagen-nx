@@ -3,7 +3,7 @@
    "private": true,
    "type": "module",
    "scripts": {
-      "container-start": "if command -v podman-compose > /dev/null 2>&1; then podman-compose ps --quiet 2>/dev/null | grep -q . && echo 'Containers already running, skipping.' || podman-compose up -d; else docker-compose ps --quiet 2>/dev/null | grep -q . && echo 'Containers already running, skipping.' || docker-compose up -d; fi",
+      "container-start": "if command -v podman-compose > /dev/null 2>&1; then podman ps -q --filter 'label=com.docker.compose.project=web' 2>/dev/null | grep -q . && echo 'Containers already running, skipping.' || podman-compose up -d; else docker ps -q --filter 'label=com.docker.compose.project=web' 2>/dev/null | grep -q . && echo 'Containers already running, skipping.' || docker-compose up -d; fi",
       "dev": "bun --bun vite dev --port 3000",
       "build": "vite build",
       "start": "bun run .output/server/index.mjs",

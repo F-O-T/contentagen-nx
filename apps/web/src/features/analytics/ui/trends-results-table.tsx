@@ -25,7 +25,7 @@ export function TrendsResultsTable({
       if (!dataMap.has(point.seriesIndex)) {
          dataMap.set(point.seriesIndex, new Map());
       }
-      dataMap.get(point.seriesIndex)?.set(point.intervalStart, point.count);
+      dataMap.get(point.seriesIndex)?.set(point.intervalStart, point.value);
    }
 
    // Format date for display

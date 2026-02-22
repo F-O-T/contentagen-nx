@@ -126,7 +126,7 @@ function EditInsightPage() {
          id: insightId,
          name: insightName.trim(),
          description: insightDescription.trim() || undefined,
-         config: config as Record<string, unknown>,
+         config: config as InsightConfig,
       });
    }, [insightId, insightName, insightDescription, config, updateMutation]);
 
@@ -135,8 +135,8 @@ function EditInsightPage() {
          title: "Deletar insight",
          description:
             "Tem certeza que deseja deletar este insight? Esta ação não pode ser desfeita.",
-         confirmLabel: "Deletar",
-         onConfirm: () => deleteMutation.mutate({ id: insightId }),
+         actionLabel: "Deletar",
+         onAction: () => deleteMutation.mutate({ id: insightId }),
       });
    }, [insightId, deleteMutation, openAlertDialog]);
 
@@ -145,8 +145,8 @@ function EditInsightPage() {
       duplicateMutation.mutate({
          name: `${insight.name} (cópia)`,
          description: insight.description ?? undefined,
-         type: insight.type,
-         config: insight.config as Record<string, unknown>,
+         type: insight.type as "trends" | "funnels" | "retention",
+         config: insight.config as InsightConfig,
       });
    }, [insight, duplicateMutation]);
 

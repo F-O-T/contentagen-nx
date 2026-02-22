@@ -5,7 +5,8 @@ import { getAuth } from "@/integrations/better-auth/auth-server";
 export const Route = createFileRoute("/.well-known/openid-configuration")({
    server: {
       handlers: {
-         GET: () => oauthProviderOpenIdConfigMetadata(getAuth()),
+         GET: ({ request }) =>
+            oauthProviderOpenIdConfigMetadata(getAuth())(request),
       },
    },
 });

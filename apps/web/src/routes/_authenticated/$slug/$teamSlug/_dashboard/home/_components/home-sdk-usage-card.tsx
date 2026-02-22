@@ -68,10 +68,10 @@ export function HomeSDKUsageCard({ className }: { className?: string }) {
    );
 
    const totalEndpointRequests =
-      currentMonth.byEndpoint.author +
-      currentMonth.byEndpoint.list +
-      currentMonth.byEndpoint.content +
-      currentMonth.byEndpoint.image;
+      currentMonth.authorRequests +
+      currentMonth.listRequests +
+      currentMonth.contentRequests +
+      currentMonth.imageRequests;
 
    // Generate placeholder data for last 6 months if no data exists
    const generatePlaceholderData = () => {
@@ -94,21 +94,21 @@ export function HomeSDKUsageCard({ className }: { className?: string }) {
       monthlyData.length > 0 &&
       monthlyData.some(
          (m) =>
-            m.byEndpoint.author > 0 ||
-            m.byEndpoint.list > 0 ||
-            m.byEndpoint.content > 0 ||
-            m.byEndpoint.image > 0,
+            m.authorRequests > 0 ||
+            m.listRequests > 0 ||
+            m.contentRequests > 0 ||
+            m.imageRequests > 0,
       );
 
    const chartData = hasApiData
       ? monthlyData.map((month) => ({
-           month: new Date(month.period).toLocaleDateString("pt-BR", {
+           month: new Date(month.month).toLocaleDateString("pt-BR", {
               month: "short",
            }),
-           author: month.byEndpoint.author,
-           list: month.byEndpoint.list,
-           content: month.byEndpoint.content,
-           image: month.byEndpoint.image,
+           author: month.authorRequests,
+           list: month.listRequests,
+           content: month.contentRequests,
+           image: month.imageRequests,
         }))
       : generatePlaceholderData();
 
@@ -182,7 +182,9 @@ export function HomeSDKUsageCard({ className }: { className?: string }) {
                         strokeWidth={2}
                         type="monotone"
                      />
-                     <ChartTooltip content={<ChartTooltipContent />} />
+                     <ChartTooltip
+                        content={(props) => <ChartTooltipContent {...props} />}
+                     />
                      <ChartLegend content={<ChartLegendContent />} />
                   </LineChart>
                </ChartContainer>
@@ -221,7 +223,7 @@ export function HomeSDKUsageCard({ className }: { className?: string }) {
                   </ItemMedia>
                   <ItemContent>
                      <ItemTitle className="text-xl font-bold tabular-nums">
-                        {Math.round(currentMonth.performance.avgLatencyMs)}ms
+                        {Math.round(0)}ms
                      </ItemTitle>
                      <ItemDescription>Latência Média</ItemDescription>
                   </ItemContent>
@@ -233,7 +235,7 @@ export function HomeSDKUsageCard({ className }: { className?: string }) {
                   </ItemMedia>
                   <ItemContent>
                      <ItemTitle className="text-xl font-bold tabular-nums">
-                        {currentMonth.errors.total.toLocaleString("pt-BR")}
+                        {currentMonth.errors.toLocaleString("pt-BR")}
                      </ItemTitle>
                      <ItemDescription>Erros</ItemDescription>
                   </ItemContent>

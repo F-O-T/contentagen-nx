@@ -94,7 +94,9 @@ export function HomeContentStatsCard({ className }: { className?: string }) {
                >
                   <PieChart>
                      <ChartTooltip
-                        content={<ChartTooltipContent hideLabel />}
+                        content={(props) => (
+                           <ChartTooltipContent {...props} hideLabel />
+                        )}
                      />
                      <Pie
                         data={statusData}

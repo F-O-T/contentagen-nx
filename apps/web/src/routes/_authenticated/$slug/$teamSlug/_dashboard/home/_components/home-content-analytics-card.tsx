@@ -72,12 +72,31 @@ export function HomeContentAnalyticsCard({
       return days;
    };
 
-   const { dailyStats = [] } = data;
+   const dailyStats = data;
+   const totalViews = dailyStats.reduce((sum, d) => sum + d.views, 0);
+   const uniqueVisitors = dailyStats.reduce(
+      (sum, d) => sum + d.uniqueVisitors,
+      0,
+   );
+   const avgTimeSeconds =
+      dailyStats.length > 0
+         ? dailyStats.reduce(
+              (sum, d) => sum + Number(d.avgTimeSpentSeconds ?? 0),
+              0,
+           ) / dailyStats.length
+         : 0;
+   const conversionRate =
+      totalViews > 0
+         ? (dailyStats.reduce((sum, d) => sum + d.ctaConversions, 0) /
+              totalViews) *
+           100
+         : 0;
+
    const chartData =
       dailyStats.length > 0
          ? dailyStats.map((day) => ({
               date: day.date,
-              views: day.totalViews,
+              views: day.views,
               visitors: day.uniqueVisitors,
            }))
          : generatePlaceholderData();
@@ -144,7 +163,9 @@ export function HomeContentAnalyticsCard({
                         strokeWidth={2}
                         type="monotone"
                      />
-                     <ChartTooltip content={<ChartTooltipContent />} />
+                     <ChartTooltip
+                        content={(props) => <ChartTooltipContent {...props} />}
+                     />
                      <ChartLegend content={<ChartLegendContent />} />
                   </LineChart>
                </ChartContainer>
@@ -157,7 +178,7 @@ export function HomeContentAnalyticsCard({
                   </ItemMedia>
                   <ItemContent>
                      <ItemTitle className="text-xl font-bold tabular-nums">
-                        {data.totalViews.toLocaleString("pt-BR")}
+                        {totalViews.toLocaleString("pt-BR")}
                      </ItemTitle>
                      <ItemDescription>Total de Visualizações</ItemDescription>
                   </ItemContent>
@@ -169,7 +190,7 @@ export function HomeContentAnalyticsCard({
                   </ItemMedia>
                   <ItemContent>
                      <ItemTitle className="text-xl font-bold tabular-nums">
-                        {data.uniqueVisitors.toLocaleString("pt-BR")}
+                        {uniqueVisitors.toLocaleString("pt-BR")}
                      </ItemTitle>
                      <ItemDescription>Visitantes Únicos</ItemDescription>
                   </ItemContent>
@@ -181,7 +202,7 @@ export function HomeContentAnalyticsCard({
                   </ItemMedia>
                   <ItemContent>
                      <ItemTitle className="text-xl font-bold tabular-nums">
-                        {formatDuration(data.avgTimeSeconds)}
+                        {formatDuration(avgTimeSeconds)}
                      </ItemTitle>
                      <ItemDescription>Tempo Médio</ItemDescription>
                   </ItemContent>
@@ -193,7 +214,7 @@ export function HomeContentAnalyticsCard({
                   </ItemMedia>
                   <ItemContent>
                      <ItemTitle className="text-xl font-bold tabular-nums">
-                        {data.conversionRate.toFixed(1)}%
+                        {conversionRate.toFixed(1)}%
                      </ItemTitle>
                      <ItemDescription>Taxa de Conversão</ItemDescription>
                   </ItemContent>

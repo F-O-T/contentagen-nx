@@ -88,8 +88,8 @@ function ConsentPage() {
                return;
             }
 
-            if (response.data?.redirect_uri) {
-               window.location.href = response.data.redirect_uri;
+            if (response.data?.redirect && response.data?.uri) {
+               window.location.href = response.data.uri;
             }
          });
       },

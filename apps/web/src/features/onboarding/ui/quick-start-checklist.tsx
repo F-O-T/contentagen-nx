@@ -40,11 +40,17 @@ export function QuickStartChecklist() {
    const isHidden = (slug && hiddenBySlug[slug]) === true;
 
    const tasks = useMemo(
-      () => getTasksForProducts(status?.onboardingProducts ?? null),
-      [status?.onboardingProducts],
+      () =>
+         getTasksForProducts(
+            (status?.project?.onboardingProducts as
+               | string[]
+               | null
+               | undefined) ?? null,
+         ),
+      [status?.project?.onboardingProducts],
    );
 
-   const tasksMap = status?.tasks ?? {};
+   const tasksMap = (status?.project?.tasks ?? {}) as Record<string, boolean>;
 
    // Check if an SDK install task is completed - treat as linked
    const isTaskCompleted = useCallback(
@@ -125,7 +131,7 @@ export function QuickStartChecklist() {
    }, [slug, setHiddenBySlug]);
 
    // Determine visibility
-   if (!status.onboardingCompleted) return null;
+   if (!status?.project?.onboardingCompleted) return null;
    if (isHidden) return null;
    if (allDone) return null;
 

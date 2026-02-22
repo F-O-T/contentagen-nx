@@ -1,3 +1,4 @@
+import type { InsightConfig } from "@packages/analytics/types";
 import { Button } from "@packages/ui/components/button";
 import {
    DropdownMenu,
@@ -157,7 +158,7 @@ export function SubSidebarContextMenu({
                      duplicateInsightMutation.mutate({
                         name: newName,
                         type: "trends",
-                        config: {},
+                        config: {} as InsightConfig,
                      });
                   }
                }}

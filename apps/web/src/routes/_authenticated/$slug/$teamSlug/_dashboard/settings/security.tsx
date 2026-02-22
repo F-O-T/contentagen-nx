@@ -394,7 +394,7 @@ function SecuritySectionContent() {
                currentSessionId={currentSessionId}
                currentSessionLoginMethod={currentSessionLoginMethod}
                openSheet={openSheet}
-               sessions={sessions}
+               sessions={sessions as SessionType[]}
             />
 
             <SecurityActionsSection

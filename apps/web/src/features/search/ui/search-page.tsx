@@ -320,7 +320,6 @@ function QuickActionsGrid({
          </h3>
          <div className="grid grid-cols-2 gap-2">
             {actions.map((action) => {
-               const _Icon = action.icon;
                return (
                   <button
                      className="flex items-center gap-2.5 rounded-lg border border-border/50 bg-card px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"

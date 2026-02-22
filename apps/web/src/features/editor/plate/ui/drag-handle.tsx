@@ -21,11 +21,13 @@ export function DragHandle({ element, children, className }: DragHandleProps) {
    const { dropLine } = useDropLine({ id: element.id as string });
 
    const composedRef = (node: HTMLDivElement | null) => {
-      if (typeof previewRef === "function") previewRef(node);
+      if (typeof previewRef === "function")
+         (previewRef as (n: HTMLDivElement | null) => void)(node);
       else if (previewRef)
          (previewRef as React.MutableRefObject<HTMLDivElement | null>).current =
             node;
-      if (typeof nodeRef === "function") nodeRef(node);
+      if (typeof nodeRef === "function")
+         (nodeRef as (n: HTMLDivElement | null) => void)(node);
       else if (nodeRef)
          (nodeRef as React.MutableRefObject<HTMLDivElement | null>).current =
             node;

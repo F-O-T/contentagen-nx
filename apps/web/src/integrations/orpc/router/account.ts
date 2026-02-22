@@ -17,7 +17,7 @@ export const verifyPassword = protectedProcedure
 
       try {
          // Use Better Auth's verify password endpoint
-         const _result = await auth.api.verifyPassword({
+         await auth.api.verifyPassword({
             headers,
             body: { password: input.password },
          });
@@ -34,7 +34,7 @@ export const hasPassword = protectedProcedure.handler(async ({ context }) => {
    const { auth, headers } = context;
 
    try {
-      const accounts = await auth.api.listAccounts({ headers });
+      const accounts = await auth.api.listUserAccounts({ headers });
       const hasCredential = accounts.some(
          (account) => account.providerId === "credential",
       );
@@ -73,7 +73,7 @@ export const getLinkedAccounts = protectedProcedure.handler(
       const { auth, headers } = context;
 
       try {
-         const accounts = await auth.api.listAccounts({ headers });
+         const accounts = await auth.api.listUserAccounts({ headers });
          return accounts.map((account) => ({
             providerId: account.providerId,
             accountId: account.accountId,

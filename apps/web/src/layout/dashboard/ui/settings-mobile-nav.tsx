@@ -58,6 +58,7 @@ export function SettingsMobileNav() {
                   <div className="grid gap-2">
                      {filtered.map((item) => (
                         <QuickAccessCard
+                           description=""
                            icon={
                               item.icon ? (
                                  <item.icon className="size-4" />
