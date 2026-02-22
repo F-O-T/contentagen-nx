@@ -125,32 +125,36 @@ export const create = protectedProcedure
       }
       const memberId = members[0].id;
 
-      const pillarSlug = `${createSlug(input.pillarTitle)}-${generateRandomSuffix()}`;
-      const pillar = await createContent(db, {
-         meta: { title: input.pillarTitle, description: "", slug: pillarSlug },
-         organizationId,
-         teamId,
-         createdByMemberId: memberId,
-         clusterConfig: { mode: input.mode, embedEnabled: input.embedEnabled },
-      });
+      const { pillar, satelliteResults } = await db.transaction(async (tx) => {
+         const pillarSlug = `${createSlug(input.pillarTitle)}-${generateRandomSuffix()}`;
+         const pillar = await createContent(tx, {
+            meta: { title: input.pillarTitle, description: "", slug: pillarSlug },
+            organizationId,
+            teamId,
+            createdByMemberId: memberId,
+            clusterConfig: { mode: input.mode, embedEnabled: input.embedEnabled },
+         });
 
-      const satelliteResults = await Promise.all(
-         input.satellites.map(async (s) => {
-            const satSlug = `${createSlug(s.title)}-${generateRandomSuffix()}`;
-            const sat = await createContent(db, {
-               meta: { title: s.title, description: "", slug: satSlug },
-               organizationId,
-               teamId,
-               createdByMemberId: memberId,
-            });
-            await addRelatedContent(db, {
-               sourceContentId: pillar.id,
-               targetContentId: sat.id,
-               relationType: "manual",
-            });
-            return sat;
-         }),
-      );
+         const satelliteResults = await Promise.all(
+            input.satellites.map(async (s) => {
+               const satSlug = `${createSlug(s.title)}-${generateRandomSuffix()}`;
+               const sat = await createContent(tx, {
+                  meta: { title: s.title, description: "", slug: satSlug },
+                  organizationId,
+                  teamId,
+                  createdByMemberId: memberId,
+               });
+               await addRelatedContent(tx, {
+                  sourceContentId: pillar.id,
+                  targetContentId: sat.id,
+                  relationType: "manual",
+               });
+               return sat;
+            }),
+         );
+
+         return { pillar, satelliteResults };
+      });
 
       try {
          await emitClusterCreated(
@@ -182,7 +186,7 @@ A Content Cluster consists of:
 2. Multiple **satellite posts** — subtopics or related entries that link back to the pillar.
 
 The user described their goal as:
-"${input.description}"
+<user_input>${input.description}</user_input>
 
 Respond ONLY with a valid JSON object matching this exact shape:
 {
@@ -205,7 +209,8 @@ Suggest 3–6 satellite posts. Be specific and actionable. Do not include markdo
             JSON.parse(result.text),
          );
          return parsed;
-      } catch {
+      } catch (err) {
+         console.error("[clusters] Failed to parse AI response", { error: err, raw: result.text });
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "AI returned an invalid structure. Please try again.",
          });

@@ -40,11 +40,15 @@ export const addSatellite = protectedProcedure
          throw new ORPCError("NOT_FOUND", { message: "Satellite not found." });
       }
 
-      const result = await addRelatedContent(db, {
+      const { data, created } = await addRelatedContent(db, {
          sourceContentId: input.pillarId,
          targetContentId: input.satelliteId,
          relationType: input.relationType,
       });
+
+      if (!created) {
+         return data;
+      }
 
       try {
          await emitClusterSatelliteAdded(
@@ -60,7 +64,7 @@ export const addSatellite = protectedProcedure
          // Event emission must not break the main flow
       }
 
-      return result;
+      return data;
    });
 
 /**

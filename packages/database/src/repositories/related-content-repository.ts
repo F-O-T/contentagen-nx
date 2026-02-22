@@ -27,14 +27,14 @@ export async function addRelatedContent(
       });
 
       if (existing) {
-         return existing; // Already related, return existing
+         return { data: existing, created: false };
       }
 
       const result = await dbClient
          .insert(relatedContent)
          .values(data)
          .returning();
-      return result[0];
+      return { data: result[0], created: true };
    } catch (err) {
       propagateError(err);
       throw AppError.database(

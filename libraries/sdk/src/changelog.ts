@@ -137,6 +137,7 @@ export class ContenttaChangelogClient {
 	private containerId: string | null;
 	private popoverEl: HTMLElement | null = null;
 	private badgeEl: HTMLElement | null = null;
+	private outsideClickHandler: ((e: MouseEvent) => void) | null = null;
 
 	constructor(
 		sdkConfig: ContenttaSdkConfig,
@@ -223,7 +224,7 @@ export class ContenttaChangelogClient {
 			badge.setAttribute("aria-expanded", String(!isOpen));
 		});
 
-		document.addEventListener("click", (e) => {
+		this.outsideClickHandler = (e: MouseEvent) => {
 			if (
 				!badge.contains(e.target as Node) &&
 				!popover.contains(e.target as Node)
@@ -231,7 +232,19 @@ export class ContenttaChangelogClient {
 				popover.style.display = "none";
 				badge.setAttribute("aria-expanded", "false");
 			}
-		});
+		};
+		document.addEventListener("click", this.outsideClickHandler);
+	}
+
+	destroy(): void {
+		if (this.outsideClickHandler) {
+			document.removeEventListener("click", this.outsideClickHandler);
+			this.outsideClickHandler = null;
+		}
+		this.badgeEl?.remove();
+		this.popoverEl?.remove();
+		this.badgeEl = null;
+		this.popoverEl = null;
 	}
 
 	private buildPopoverHTML(
