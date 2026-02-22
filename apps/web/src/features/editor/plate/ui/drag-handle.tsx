@@ -20,10 +20,20 @@ export function DragHandle({ element, children, className }: DragHandleProps) {
 
 	const { dropLine } = useDropLine({ id: element.id as string });
 
+	const composedRef = (node: HTMLDivElement | null) => {
+		if (typeof previewRef === "function") previewRef(node);
+		else if (previewRef)
+			(previewRef as React.MutableRefObject<HTMLDivElement | null>).current =
+				node;
+		if (typeof nodeRef === "function") nodeRef(node);
+		else if (nodeRef)
+			(nodeRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+	};
+
 	return (
 		<div
 			className={cn("relative group", isDragging && "opacity-50", className)}
-			ref={previewRef}
+			ref={composedRef}
 		>
 			{/* Drop line indicator */}
 			{dropLine && (
@@ -43,7 +53,7 @@ export function DragHandle({ element, children, className }: DragHandleProps) {
 				<GripVertical className="size-4 text-muted-foreground" />
 			</div>
 
-			<div ref={nodeRef}>{children}</div>
+			{children}
 		</div>
 	);
 }
