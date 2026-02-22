@@ -1,3 +1,5 @@
+"use client";
+
 import { TocElement } from "@packages/ui/components/toc-node";
 import { TocPlugin } from "@platejs/toc/react";
 
