@@ -5,6 +5,7 @@ import { Input } from "@packages/ui/components/input";
 import {
    Tooltip,
    TooltipContent,
+   TooltipProvider,
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
 import {
@@ -83,7 +84,10 @@ function EditLinkToolbar() {
 
                <Tooltip>
                   <TooltipTrigger asChild>
-                     <LinkOpenButton className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                     <LinkOpenButton
+                        aria-label="Abrir link em nova aba"
+                        className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                     >
                         <ExternalLink className="size-4" />
                      </LinkOpenButton>
                   </TooltipTrigger>
@@ -111,9 +115,9 @@ function EditLinkToolbar() {
 
 export function LinkFloatingToolbar() {
    return (
-      <>
+      <TooltipProvider>
          <InsertLinkToolbar />
          <EditLinkToolbar />
-      </>
+      </TooltipProvider>
    );
 }
