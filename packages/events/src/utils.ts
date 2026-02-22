@@ -10,38 +10,20 @@ import { eq } from "drizzle-orm";
 const PRICE_SCALE = 6;
 const CURRENCY = "BRL";
 
-// ---------------------------------------------------------------------------
-// Image Generation Pricing
-// ---------------------------------------------------------------------------
-
-export const IMAGE_MODEL_PRICING: Record<string, string> = {
-   "sourceful/riverflow-v2-pro": "0.900000",
-   "bytedance-seed/seedream-4.5": "0.240000",
-};
-
-export function getImageGenerationPrice(model: string): Money {
-   const amount =
-      IMAGE_MODEL_PRICING[model] ??
-      IMAGE_MODEL_PRICING["sourceful/riverflow-v2-pro"] ??
-      "0.900000";
-   return createMoney(
-      parseDecimalToMinorUnits(amount, PRICE_SCALE),
-      CURRENCY,
-      PRICE_SCALE,
-   );
-}
-
 /**
- * Looks up the price for a given event name from the event_catalog table.
+ * Looks up the price and billability for a given event name from the event_catalog table.
  * Returns a Money object with 6-decimal precision matching the DB schema.
- * Returns $0.000000 if the event is not found in the catalog.
+ * Returns { price: $0, isBillable: false } if the event is not found in the catalog.
  */
 export async function getEventPrice(
    db: DatabaseInstance,
    eventName: string,
-): Promise<Money> {
+): Promise<{ price: Money; isBillable: boolean }> {
    const [catalogEntry] = await db
-      .select({ pricePerEvent: eventCatalog.pricePerEvent })
+      .select({
+         pricePerEvent: eventCatalog.pricePerEvent,
+         isBillable: eventCatalog.isBillable,
+      })
       .from(eventCatalog)
       .where(eq(eventCatalog.eventName, eventName))
       .limit(1);
@@ -50,14 +32,20 @@ export async function getEventPrice(
       console.warn(
          `[Events] Event not found in catalog: ${eventName}, defaulting to $0`,
       );
-      return createMoney(0n, CURRENCY, PRICE_SCALE);
+      return {
+         price: createMoney(0n, CURRENCY, PRICE_SCALE),
+         isBillable: false,
+      };
    }
 
-   return createMoney(
-      parseDecimalToMinorUnits(catalogEntry.pricePerEvent, PRICE_SCALE),
-      CURRENCY,
-      PRICE_SCALE,
-   );
+   return {
+      price: createMoney(
+         parseDecimalToMinorUnits(catalogEntry.pricePerEvent, PRICE_SCALE),
+         CURRENCY,
+         PRICE_SCALE,
+      ),
+      isBillable: catalogEntry.isBillable,
+   };
 }
 
 /**

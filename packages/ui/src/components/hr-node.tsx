@@ -10,7 +10,6 @@ import {
    useReadOnly,
    useSelected,
 } from "platejs/react";
-import * as React from "react";
 
 export function HrElement(props: PlateElementProps) {
    const readOnly = useReadOnly();

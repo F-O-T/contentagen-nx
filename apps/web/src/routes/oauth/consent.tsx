@@ -10,7 +10,7 @@ import {
 import { Separator } from "@packages/ui/components/separator";
 import { createFileRoute } from "@tanstack/react-router";
 import { Shield, ShieldCheck } from "lucide-react";
-import { useCallback, useEffect, useTransition, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { authClient } from "@/integrations/better-auth/auth-client";

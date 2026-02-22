@@ -22,6 +22,7 @@ import {
    enforceCreditBudget,
    trackCreditUsage,
 } from "@packages/events/credits";
+import { createEmitFn } from "@packages/events/emit";
 import { createSlug, generateRandomSuffix } from "@packages/utils/text";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
@@ -116,7 +117,8 @@ export const create = protectedProcedure
 
       try {
          await emitContentCreated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { contentId: result.id, title: input.title },
          );
       } catch {
@@ -176,7 +178,8 @@ export const update = protectedProcedure
          }
 
          await emitContentUpdated(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { contentId: input.id, changedFields },
          );
          await trackCreditUsage(
@@ -212,7 +215,8 @@ export const remove = protectedProcedure
 
       try {
          await emitContentDeleted(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { contentId: input.id },
          );
       } catch {
@@ -247,7 +251,8 @@ export const publish = protectedProcedure
             existing.body?.split(/\s+/).filter(Boolean).length ?? 0;
 
          await emitContentPublished(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             {
                contentId: input.id,
                title: existing.meta?.title ?? "",
@@ -288,7 +293,8 @@ export const archive = protectedProcedure
 
       try {
          await emitContentArchived(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             { contentId: input.id },
          );
       } catch {

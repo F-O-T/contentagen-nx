@@ -6,7 +6,6 @@ import { FileUp } from "lucide-react";
 import type { TFileElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useReadOnly, withHOC } from "platejs/react";
-import * as React from "react";
 
 import { Caption, CaptionTextarea } from "./caption";
 
@@ -18,6 +17,7 @@ export const FileElement = withHOC(
 
       return (
          <PlateElement className="my-px rounded-sm" {...props}>
+            {/* biome-ignore lint/a11y/useSemanticElements: anchor with download behavior */}
             <a
                className="group relative m-0 flex cursor-pointer items-center rounded px-0.5 py-[3px] hover:bg-muted"
                contentEditable={false}

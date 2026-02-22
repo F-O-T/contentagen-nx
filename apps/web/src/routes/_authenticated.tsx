@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated")({
    beforeLoad: async ({ context, location }) => {
+      // biome-ignore lint/suspicious/noImplicitAnyLet: assigned inside try-catch
       let session;
 
       try {

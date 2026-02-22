@@ -1,4 +1,6 @@
+import { toMajorUnitsString } from "@f-o-t/money";
 import type { Asset } from "@packages/database/schemas/assets";
+import { getImageGenerationPrice } from "@packages/events/ai";
 import { useFeatureFlag } from "@packages/posthog/client";
 import { Button } from "@packages/ui/components/button";
 import {
@@ -15,6 +17,11 @@ import {
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
 import { Input } from "@packages/ui/components/input";
+import { Label } from "@packages/ui/components/label";
+import {
+   RadioGroup,
+   RadioGroupItem,
+} from "@packages/ui/components/radio-group";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { Textarea } from "@packages/ui/components/textarea";
 import {
@@ -29,10 +36,11 @@ import {
    useQueryClient,
    useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useDebounce } from "@uidotdev/usehooks";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useDebounce } from "@uidotdev/usehooks";
 import {
    ChevronDown,
+   Download,
    Eye,
    FileIcon,
    ImageIcon,
@@ -46,11 +54,6 @@ import {
    X,
 } from "lucide-react";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import {
-   RadioGroup,
-   RadioGroupItem,
-} from "@packages/ui/components/radio-group";
-import { Label } from "@packages/ui/components/label";
 import { useDropzone } from "react-dropzone";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
@@ -196,6 +199,23 @@ function AssetCard({
                      <TooltipContent>Visualizar</TooltipContent>
                   </Tooltip>
                )}
+               {isImage && (
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <Button
+                           asChild
+                           className="size-8 shrink-0"
+                           size="icon"
+                           variant="ghost"
+                        >
+                           <a download={asset.filename} href={asset.publicUrl}>
+                              <Download className="size-4" />
+                           </a>
+                        </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Baixar</TooltipContent>
+                  </Tooltip>
+               )}
                <Tooltip>
                   <TooltipTrigger asChild>
                      <Button
@@ -302,7 +322,7 @@ function AssetDropzone({ teamId, onUploadComplete }: AssetDropzoneProps) {
             toast.success(
                files.length === 1
                   ? "Imagem enviada com sucesso!"
-                  : `${files.length} arquivos enviados com sucesso!`,
+                  : `${files.length} imagens enviadas com sucesso!`,
             );
 
             queryClient.invalidateQueries({
@@ -329,8 +349,6 @@ function AssetDropzone({ teamId, onUploadComplete }: AssetDropzoneProps) {
    const { getRootProps, getInputProps, isDragActive } = useDropzone({
       accept: {
          "image/*": [],
-         "application/pdf": [],
-         "video/*": [],
       },
       disabled: isUploading,
       maxSize: 50 * 1024 * 1024, // 50MB
@@ -363,7 +381,7 @@ function AssetDropzone({ teamId, onUploadComplete }: AssetDropzoneProps) {
                     : "Arraste arquivos ou clique para enviar"}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-               Imagens, vídeos e PDFs — até 50MB cada
+               PNG, JPG, GIF, WebP, SVG — até 50MB cada
             </p>
          </div>
       </div>
@@ -382,7 +400,7 @@ function AssetUploadCredenzaContent({
          <CredenzaHeader>
             <CredenzaTitle>Upload de imagem</CredenzaTitle>
             <CredenzaDescription>
-               Envie imagens, vídeos e PDFs de até 50MB.
+               Envie imagens de até 50MB (PNG, JPG, GIF, WebP, SVG).
             </CredenzaDescription>
          </CredenzaHeader>
          <CredenzaBody>
@@ -652,12 +670,6 @@ const IMAGE_MODEL_NAMES: Record<string, string> = {
    "bytedance-seed/seedream-4.5": "Seedream 4.5",
 };
 
-// Static display prices (BRL) — kept in sync with packages/events/src/utils.ts IMAGE_MODEL_PRICING
-const IMAGE_MODEL_DISPLAY_PRICES: Record<string, string> = {
-   "sourceful/riverflow-v2-pro": "0.90",
-   "bytedance-seed/seedream-4.5": "0.24",
-};
-
 const ASPECT_OPTIONS = [
    { value: "1:1" as const, label: "1:1" },
    { value: "16:9" as const, label: "16:9" },
@@ -693,9 +705,11 @@ function GenerateImageCredenzaContent({
       orpc.productSettings.getSettings.queryOptions({ input: {} }),
    );
    const modelId =
-      settings?.aiDefaults?.imageGenerationModel ?? "sourceful/riverflow-v2-pro";
-   const modelPrice = IMAGE_MODEL_DISPLAY_PRICES[modelId] ?? "0.90";
+      settings?.aiDefaults?.imageGenerationModel ??
+      "sourceful/riverflow-v2-pro";
+   const modelPrice = toMajorUnitsString(getImageGenerationPrice(modelId));
    const modelName = IMAGE_MODEL_NAMES[modelId] ?? modelId;
+   const isSeedream = modelId.includes("seedream");
 
    useEffect(() => {
       if (phase !== "generating") return;
@@ -804,10 +818,10 @@ function GenerateImageCredenzaContent({
                   </div>
                   <div className="flex justify-end">
                      <Button
+                        onClick={handleCancel}
+                        size="sm"
                         type="button"
                         variant="ghost"
-                        size="sm"
-                        onClick={handleCancel}
                      >
                         Cancelar
                      </Button>
@@ -825,20 +839,21 @@ function GenerateImageCredenzaContent({
                   </div>
                   <p className="text-center text-sm text-muted-foreground">
                      {generatedAsset.filename}
-                     {generatedAsset.width != null && generatedAsset.height != null
+                     {generatedAsset.width != null &&
+                     generatedAsset.height != null
                         ? ` · ${generatedAsset.width}×${generatedAsset.height}`
                         : ""}{" "}
                      · {(generatedAsset.size / 1024).toFixed(0)} KB
                   </p>
                   <CredenzaFooter className="flex gap-2 justify-end">
                      <Button
+                        onClick={handleGenerateAgain}
                         type="button"
                         variant="outline"
-                        onClick={handleGenerateAgain}
                      >
                         Gerar novamente
                      </Button>
-                     <Button type="button" onClick={handleSaveAndClose}>
+                     <Button onClick={handleSaveAndClose} type="button">
                         Salvar no banco
                      </Button>
                   </CredenzaFooter>
@@ -860,34 +875,38 @@ function GenerateImageCredenzaContent({
                         {prompt.length}/1000
                      </p>
                   </div>
-                  <div className="space-y-2">
-                     <Label>Proporção</Label>
-                     <RadioGroup
-                        className="flex gap-4"
-                        onValueChange={(v) =>
-                           setAspectRatio(v as "1:1" | "16:9" | "9:16" | "3:2")
-                        }
-                        value={aspectRatio}
-                     >
-                        {ASPECT_OPTIONS.map((opt) => (
-                           <div
-                              className="flex items-center gap-2"
-                              key={opt.value}
-                           >
-                              <RadioGroupItem
-                                 id={`aspect-${opt.value}`}
-                                 value={opt.value}
-                              />
-                              <Label
-                                 className="font-normal cursor-pointer"
-                                 htmlFor={`aspect-${opt.value}`}
+                  {!isSeedream && (
+                     <div className="space-y-2">
+                        <Label>Proporção</Label>
+                        <RadioGroup
+                           className="flex gap-4"
+                           onValueChange={(v) =>
+                              setAspectRatio(
+                                 v as "1:1" | "16:9" | "9:16" | "3:2",
+                              )
+                           }
+                           value={aspectRatio}
+                        >
+                           {ASPECT_OPTIONS.map((opt) => (
+                              <div
+                                 className="flex items-center gap-2"
+                                 key={opt.value}
                               >
-                                 {opt.label}
-                              </Label>
-                           </div>
-                        ))}
-                     </RadioGroup>
-                  </div>
+                                 <RadioGroupItem
+                                    id={`aspect-${opt.value}`}
+                                    value={opt.value}
+                                 />
+                                 <Label
+                                    className="font-normal cursor-pointer"
+                                    htmlFor={`aspect-${opt.value}`}
+                                 >
+                                    {opt.label}
+                                 </Label>
+                              </div>
+                           ))}
+                        </RadioGroup>
+                     </div>
+                  )}
                   <CredenzaFooter>
                      <Button
                         disabled={!prompt.trim() || isGenerating}
@@ -926,7 +945,6 @@ function AssetBankContent() {
    const [page, setPage] = useState(0);
    const [total, setTotal] = useState(0);
 
-
    const { enabled: aiImageEnabled } = useFeatureFlag("ai-image-generation");
 
    const hasNextPage = (page + 1) * PAGE_SIZE < total;
@@ -949,7 +967,7 @@ function AssetBankContent() {
                   Banco de Imagens
                </h1>
                <p className="text-base md:text-lg text-muted-foreground font-sans leading-relaxed">
-                  Gerencie e envie imagens, vídeos e arquivos do seu projeto
+                  Gerencie e envie imagens do seu projeto
                </p>
             </div>
             <DropdownMenu>

@@ -1,7 +1,46 @@
+import {
+   createMoney,
+   type Money,
+   parseDecimalToMinorUnits,
+} from "@f-o-t/money";
 import { z } from "zod";
 
-import { EVENT_CATEGORIES } from "./catalog";
-import { type EmitEventParams, emitEvent } from "./emit";
+import { type EmitFn, EVENT_CATEGORIES } from "./catalog";
+
+// ---------------------------------------------------------------------------
+// AI Pricing
+// ---------------------------------------------------------------------------
+
+export const AI_PRICING: Record<string, string> = {
+   "ai.completion": "0.003000",
+   "ai.chat_message": "0.020000",
+   "ai.agent_action": "0.040000",
+   // ai.image_generation price is model-dependent — see IMAGE_MODEL_PRICING
+};
+
+// ---------------------------------------------------------------------------
+// Image Generation Pricing
+// ---------------------------------------------------------------------------
+
+const PRICE_SCALE = 6;
+const CURRENCY = "BRL";
+
+export const IMAGE_MODEL_PRICING: Record<string, string> = {
+   "sourceful/riverflow-v2-pro": "0.900000",
+   "bytedance-seed/seedream-4.5": "0.240000",
+};
+
+export function getImageGenerationPrice(model: string): Money {
+   const amount =
+      IMAGE_MODEL_PRICING[model] ??
+      IMAGE_MODEL_PRICING["sourceful/riverflow-v2-pro"] ??
+      "0.900000";
+   return createMoney(
+      parseDecimalToMinorUnits(amount, PRICE_SCALE),
+      CURRENCY,
+      PRICE_SCALE,
+   );
+}
 
 // ---------------------------------------------------------------------------
 // AI Event Names
@@ -34,13 +73,11 @@ export const aiCompletionEventSchema = z.object({
 export type AiCompletionEvent = z.infer<typeof aiCompletionEventSchema>;
 
 export function emitAiCompletion(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: AiCompletionEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: AI_EVENTS["ai.completion"],
       eventCategory: EVENT_CATEGORIES.ai,
@@ -67,13 +104,11 @@ export const aiChatMessageEventSchema = z.object({
 export type AiChatMessageEvent = z.infer<typeof aiChatMessageEventSchema>;
 
 export function emitAiChatMessage(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: AiChatMessageEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: AI_EVENTS["ai.chat_message"],
       eventCategory: EVENT_CATEGORIES.ai,
@@ -99,13 +134,11 @@ export const aiAgentActionEventSchema = z.object({
 export type AiAgentActionEvent = z.infer<typeof aiAgentActionEventSchema>;
 
 export function emitAiAgentAction(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: AiAgentActionEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: AI_EVENTS["ai.agent_action"],
       eventCategory: EVENT_CATEGORIES.ai,
@@ -130,16 +163,15 @@ export type AiImageGenerationEvent = z.infer<
 >;
 
 export function emitAiImageGeneration(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: AiImageGenerationEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: AI_EVENTS["ai.image_generation"],
       eventCategory: EVENT_CATEGORIES.ai,
       properties,
+      priceOverride: getImageGenerationPrice(properties.model),
    });
 }

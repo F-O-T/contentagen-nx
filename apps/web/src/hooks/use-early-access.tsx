@@ -1,5 +1,4 @@
 import { useEarlyAccessFeatures } from "@packages/posthog/client";
-import { useLocalStorage } from "@uidotdev/usehooks";
 import {
    createContext,
    type ReactNode,
@@ -7,6 +6,7 @@ import {
    useContext,
    useMemo,
 } from "react";
+import { useSafeLocalStorage } from "@/hooks/use-local-storage";
 
 type EarlyAccessContextValue = {
    loaded: boolean;
@@ -26,10 +26,9 @@ export function EarlyAccessProvider({ children }: { children: ReactNode }) {
    const { features, enrolledFeatures, loaded, isEnrolled, updateEnrollment } =
       useEarlyAccessFeatures();
 
-   const [dismissedFlags, setDismissedFlagsState] = useLocalStorage<string[]>(
-      BANNER_DISMISSED_KEY,
-      [],
-   );
+   const [dismissedFlags, setDismissedFlagsState] = useSafeLocalStorage<
+      string[]
+   >(BANNER_DISMISSED_KEY, []);
 
    const isBannerVisible = useMemo(() => {
       if (!loaded || features.length === 0) return false;

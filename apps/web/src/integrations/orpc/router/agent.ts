@@ -20,6 +20,7 @@ import {
    enforceCreditBudget,
    trackCreditUsage,
 } from "@packages/events/credits";
+import { createEmitFn } from "@packages/events/emit";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import type { ChatChunk, FIMChunk } from "@/features/editor/schemas";
@@ -110,7 +111,8 @@ export const copilotStream = protectedProcedure
          // Emit event and increment credit usage (failure-tolerant)
          try {
             await emitAiCompletion(
-               { db, posthog, organizationId, userId, teamId },
+               createEmitFn(db, posthog),
+               { organizationId, userId, teamId },
                {
                   model: "fimAgent",
                   provider: "openrouter",
@@ -295,7 +297,8 @@ export const aiCommandStream = protectedProcedure
          // Emit event and increment credit usage (failure-tolerant)
          try {
             await emitAiCompletion(
-               { db, posthog, organizationId, userId, teamId },
+               createEmitFn(db, posthog),
+               { organizationId, userId, teamId },
                {
                   model: "unifiedContent",
                   provider: "openrouter",
@@ -408,7 +411,8 @@ export const executeUnifiedAgent = protectedProcedure
       // Emit agent event and track credits (failure-tolerant)
       try {
          await emitAiAgentAction(
-            { db, posthog, organizationId, userId, teamId },
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
             {
                agentId: "unified-content-agent",
                contentId,

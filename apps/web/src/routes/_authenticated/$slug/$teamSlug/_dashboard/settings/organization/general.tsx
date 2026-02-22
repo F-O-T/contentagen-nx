@@ -19,9 +19,13 @@ import {
 } from "@packages/ui/components/item";
 import { Separator } from "@packages/ui/components/separator";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { useCopyToClipboard } from "@uidotdev/usehooks";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+   useMutation,
+   useQueryClient,
+   useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useCopyToClipboard } from "@uidotdev/usehooks";
 import {
    Building2,
    Calendar,
@@ -32,7 +36,7 @@ import {
    Loader2,
    Users,
 } from "lucide-react";
-import { Suspense, useTransition } from "react";
+import { Suspense, useState, useTransition } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
 import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
@@ -111,9 +115,7 @@ function DisplayNameSection({
                onClick={handleRename}
                size="sm"
             >
-               {isPending && (
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-               )}
+               {isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
                Renomear organização
             </Button>
          </div>

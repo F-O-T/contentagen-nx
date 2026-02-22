@@ -5,7 +5,6 @@ import { useToggleButton, useToggleButtonState } from "@platejs/toggle/react";
 import { ChevronRight } from "lucide-react";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
-import * as React from "react";
 
 export function ToggleElement(props: PlateElementProps) {
    const element = props.element;

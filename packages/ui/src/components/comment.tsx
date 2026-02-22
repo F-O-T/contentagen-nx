@@ -184,6 +184,7 @@ export function Comment(props: {
    const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
    return (
+      // biome-ignore lint/a11y/noStaticElementInteractions: hover tracking on container
       <div
          onMouseEnter={() => setHovering(true)}
          onMouseLeave={() => setHovering(false)}

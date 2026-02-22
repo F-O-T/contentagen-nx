@@ -1,5 +1,5 @@
-import { useMediaQuery } from "@uidotdev/usehooks";
+import { useSafeMediaQuery } from "@packages/ui/hooks/use-media-query";
 
 export function useIsMobile() {
-   return useMediaQuery("(max-width: 767px)");
+   return useSafeMediaQuery("(max-width: 767px)");
 }

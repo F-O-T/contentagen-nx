@@ -4,7 +4,6 @@ import { RadicalIcon } from "lucide-react";
 import type { TEquationElement } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
-import * as React from "react";
 
 export function EquationElementStatic(
    props: SlateElementProps<TEquationElement>,

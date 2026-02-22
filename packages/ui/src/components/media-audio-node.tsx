@@ -5,7 +5,6 @@ import { ResizableProvider } from "@platejs/resizable";
 import type { TAudioElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, withHOC } from "platejs/react";
-import * as React from "react";
 
 import { Caption, CaptionTextarea } from "./caption";
 
@@ -21,6 +20,7 @@ export const AudioElement = withHOC(
                contentEditable={false}
             >
                <div className="h-16">
+                  {/* biome-ignore lint/a11y/useMediaCaption: audio player for user-uploaded content */}
                   <audio className="size-full" controls src={unsafeUrl} />
                </div>
 

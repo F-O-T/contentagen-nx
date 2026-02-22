@@ -6,7 +6,6 @@ import {
    SidebarProvider,
 } from "@packages/ui/components/sidebar";
 import { cn } from "@packages/ui/lib/utils";
-import { useLocalStorage } from "@uidotdev/usehooks";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import type * as React from "react";
@@ -16,6 +15,7 @@ import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { EarlyAccessProvider } from "@/hooks/use-early-access";
 import { useLastOrganization } from "@/hooks/use-last-organization";
+import { useSafeLocalStorage } from "@/hooks/use-local-storage";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
 import { setActiveSection } from "../hooks/use-sidebar-nav";
@@ -33,7 +33,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const setTeamForOrgRef = useRef(new Set<string>());
    const { pathname } = useLocation();
 
-   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage<boolean>(
+   const [sidebarCollapsed, setSidebarCollapsed] = useSafeLocalStorage<boolean>(
       "contentta:sidebar-collapsed",
       false,
    );

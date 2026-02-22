@@ -479,3 +479,48 @@ Procedures in `apps/web/src/integrations/orpc/router/onboarding.ts`.
 | PRO | R$100 |
 
 Credit tracking: Redis real-time, materialized views reconcile hourly (worker cron).
+
+---
+
+## Billing Page — Early Access Feature Cards
+
+`apps/web/src/features/billing/ui/billing-overview.tsx`
+
+The billing overview renders product cards driven by two config objects. **Adding a new early access feature = one entry in the right config.**
+
+### Event-based categories (usage from API)
+
+```typescript
+// EARLY_ACCESS_CATEGORY_GATES: Record<categoryKey, { flag, fallbackStage }>
+// Category must also exist in CATEGORY_CONFIG.
+// When enrolled → card visible + stage badge shown.
+// When not enrolled → card hidden entirely.
+experiment: { flag: "experiments", fallbackStage: "alpha" },
+form:        { flag: "forms-beta", fallbackStage: "beta"  },
+```
+
+### Volume-based features (non-event, e.g. storage)
+
+```typescript
+// VOLUME_FEATURE_CONFIG: Record<flagKey, { label, description, icon, priceLabel, unit, fallbackStage }>
+// Renders a VolumeFeatureCard showing per-unit pricing.
+// Visible only when isEnrolled(flagKey).
+"asset-bank": {
+   label: "Banco de Imagens",
+   priceLabel: "R$ 1,50",   // Railway cost: $0.15/GB — charged at R$ 1,50/GB
+   unit: "GB/mês",
+   fallbackStage: "alpha",
+},
+```
+
+### Stage resolution
+
+Stage is resolved from PostHog's early access feature config at runtime (`features.find(f => f.flagKey === key)?.stage`), falling back to `fallbackStage` in the local config. No manual sync needed — PostHog is the source of truth.
+
+### Flag keys (from sidebar-nav-items.ts)
+
+| Feature | Flag key | Stage |
+|---------|----------|-------|
+| Banco de Imagens | `asset-bank` | alpha |
+| Experimentos | `experiments` | alpha |
+| Formulários | `forms-beta` | beta |

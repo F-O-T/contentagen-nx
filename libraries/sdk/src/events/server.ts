@@ -71,12 +71,20 @@ export class ContenttaServerClient {
 	}
 
 	async trackConversion(params: {
-		contentId: string;
+		contentId?: string;
+		// Keep in sync with ExperimentTargetType in packages/events/src/experiments.ts
+		targetType?: "content" | "form" | "cluster";
+		targetId?: string;
 		experimentId: string;
 		variantId: string;
 		goalName: string;
 		goalValue?: number;
 	}): Promise<void> {
+		if (!params.contentId && !(params.targetType && params.targetId)) {
+			throw new Error(
+				"Contentta SDK: trackConversion requires either contentId or both targetType and targetId",
+			);
+		}
 		return this.emitEvent("experiment.conversion", params);
 	}
 

@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-import { EVENT_CATEGORIES } from "./catalog";
-import { type EmitEventParams, emitEvent } from "./emit";
+import { type EmitFn, EVENT_CATEGORIES } from "./catalog";
 
 // ---------------------------------------------------------------------------
 // Webhook Event Names
@@ -18,6 +17,17 @@ export type WebhookEventName =
    (typeof WEBHOOK_EVENTS)[keyof typeof WEBHOOK_EVENTS];
 
 // ---------------------------------------------------------------------------
+// Webhook Pricing
+// ---------------------------------------------------------------------------
+
+export const WEBHOOK_PRICING: Record<string, string> = {
+   "webhook.endpoint.created": "0.000000",
+   "webhook.endpoint.updated": "0.000000",
+   "webhook.endpoint.deleted": "0.000000",
+   "webhook.delivered": "0.000500",
+};
+
+// ---------------------------------------------------------------------------
 // webhook.endpoint.created
 // ---------------------------------------------------------------------------
 
@@ -30,13 +40,11 @@ export type WebhookEndpointCreatedEvent = z.infer<
 >;
 
 export function emitWebhookEndpointCreated(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: WebhookEndpointCreatedEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: WEBHOOK_EVENTS["webhook.endpoint.created"],
       eventCategory: EVENT_CATEGORIES.webhook,
@@ -57,13 +65,11 @@ export type WebhookEndpointUpdatedEvent = z.infer<
 >;
 
 export function emitWebhookEndpointUpdated(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: WebhookEndpointUpdatedEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: WEBHOOK_EVENTS["webhook.endpoint.updated"],
       eventCategory: EVENT_CATEGORIES.webhook,
@@ -83,13 +89,11 @@ export type WebhookEndpointDeletedEvent = z.infer<
 >;
 
 export function emitWebhookEndpointDeleted(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: WebhookEndpointDeletedEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: WEBHOOK_EVENTS["webhook.endpoint.deleted"],
       eventCategory: EVENT_CATEGORIES.webhook,
@@ -109,13 +113,11 @@ export const webhookDeliveredEventSchema = z.object({
 export type WebhookDeliveredEvent = z.infer<typeof webhookDeliveredEventSchema>;
 
 export function emitWebhookDelivered(
-   ctx: Pick<
-      EmitEventParams,
-      "db" | "posthog" | "organizationId" | "userId" | "teamId"
-   >,
+   emit: EmitFn,
+   ctx: { organizationId: string; userId?: string; teamId?: string },
    properties: WebhookDeliveredEvent,
 ) {
-   return emitEvent({
+   return emit({
       ...ctx,
       eventName: WEBHOOK_EVENTS["webhook.delivered"],
       eventCategory: EVENT_CATEGORIES.webhook,

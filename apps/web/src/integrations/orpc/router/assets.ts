@@ -10,12 +10,19 @@ import {
 import { getProductSettings } from "@packages/database/repositories/product-settings-repository";
 import { env as serverEnv } from "@packages/environment/server";
 import {
+   AI_EVENTS,
+   emitAiImageGeneration,
+   getImageGenerationPrice,
+} from "@packages/events/ai";
+import {
    emitAssetDeleted,
    emitAssetUploadCompleted,
 } from "@packages/events/assets";
-import { AI_EVENTS, emitAiImageGeneration } from "@packages/events/ai";
-import { enforceCreditBudget, trackCreditUsage } from "@packages/events/credits";
-import { getImageGenerationPrice } from "@packages/events/pricing";
+import {
+   enforceCreditBudget,
+   trackCreditUsage,
+} from "@packages/events/credits";
+import { createEmitFn } from "@packages/events/emit";
 import {
    deleteFile,
    generatePresignedPutUrl,
@@ -26,13 +33,11 @@ import { generateImage as aiGenerateImage } from "ai";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
-const IMAGE_ASPECT_RATIOS = [
-   "1:1",
-   "16:9",
-   "9:16",
-   "3:2",
-] as const;
-const ASPECT_TO_SIZE: Record<(typeof IMAGE_ASPECT_RATIOS)[number], string> = {
+const IMAGE_ASPECT_RATIOS = ["1:1", "16:9", "9:16", "3:2"] as const;
+const ASPECT_TO_SIZE: Record<
+   (typeof IMAGE_ASPECT_RATIOS)[number],
+   `${number}x${number}`
+> = {
    "1:1": "1024x1024",
    "16:9": "1920x1080",
    "9:16": "1080x1920",
@@ -43,7 +48,7 @@ const DEFAULT_IMAGE_MODEL = "sourceful/riverflow-v2-pro";
 export const generateUploadUrl = protectedProcedure
    .input(
       z.object({
-         teamId: z.string().uuid().optional(),
+         teamId: z.uuid().optional(),
          filename: z.string(),
          mimeType: z.string(),
          size: z.number().int().positive(),
@@ -83,7 +88,7 @@ export const generateUploadUrl = protectedProcedure
 export const completeUpload = protectedProcedure
    .input(
       z.object({
-         teamId: z.string().uuid().optional(),
+         teamId: z.uuid().optional(),
          fileKey: z.string(),
          publicUrl: z.string(),
          filename: z.string(),
@@ -146,7 +151,7 @@ export const completeUpload = protectedProcedure
 export const list = protectedProcedure
    .input(
       z.object({
-         teamId: z.string().uuid().nullable().optional(),
+         teamId: z.uuid().nullable().optional(),
          search: z.string().optional(),
          tags: z.array(z.string()).optional(),
          limit: z.number().int().min(1).max(100).default(24),
@@ -169,7 +174,7 @@ export const list = protectedProcedure
    });
 
 export const get = protectedProcedure
-   .input(z.object({ id: z.string().uuid() }))
+   .input(z.object({ id: z.uuid() }))
    .handler(async ({ context, input }) => {
       const { db, organizationId } = context;
 
@@ -185,7 +190,7 @@ export const get = protectedProcedure
 export const update = protectedProcedure
    .input(
       z.object({
-         id: z.string().uuid(),
+         id: z.uuid(),
          filename: z.string().min(1).optional(),
          alt: z.string().optional(),
          caption: z.string().optional(),
@@ -200,7 +205,7 @@ export const update = protectedProcedure
    });
 
 export const remove = protectedProcedure
-   .input(z.object({ id: z.string().uuid() }))
+   .input(z.object({ id: z.uuid() }))
    .handler(async ({ context, input }) => {
       const { db, organizationId, userId, posthog, teamId } = context;
 
@@ -234,25 +239,28 @@ export const generateImage = protectedProcedure
    .input(
       z.object({
          prompt: z.string().min(1).max(1000),
-         teamId: z.string().uuid().optional(),
+         teamId: z.uuid().optional(),
          model: z.string().optional(),
          aspectRatio: z.enum(IMAGE_ASPECT_RATIOS).optional(),
       }),
    )
    .handler(async ({ context, input }) => {
-      const { db, organizationId, userId, posthog, teamId: contextTeamId } =
-         context;
+      const {
+         db,
+         organizationId,
+         userId,
+         posthog,
+         teamId: contextTeamId,
+      } = context;
 
-      try {
-         await enforceCreditBudget(db, organizationId, "ai");
-      } catch (error) {
+      await enforceCreditBudget(db, organizationId, "ai").catch((error) => {
          throw new ORPCError("FORBIDDEN", {
             message:
                error instanceof Error
                   ? error.message
                   : "Créditos insuficientes para gerar imagem.",
          });
-      }
+      });
 
       if (!serverEnv.OPENROUTER_API_KEY) {
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
@@ -261,12 +269,11 @@ export const generateImage = protectedProcedure
       }
 
       const teamId = input.teamId ?? contextTeamId;
-      const model =
-         input.model ??
-         (teamId
-            ? (await getProductSettings(db, teamId))?.aiDefaults
-                  ?.imageGenerationModel ?? DEFAULT_IMAGE_MODEL
-            : DEFAULT_IMAGE_MODEL);
+      const teamDefaultModel = teamId
+         ? (await getProductSettings(db, teamId))?.aiDefaults
+              ?.imageGenerationModel
+         : undefined;
+      const model = input.model ?? teamDefaultModel ?? DEFAULT_IMAGE_MODEL;
       const size = input.aspectRatio
          ? ASPECT_TO_SIZE[input.aspectRatio]
          : ASPECT_TO_SIZE["1:1"];
@@ -275,51 +282,65 @@ export const generateImage = protectedProcedure
       const openrouter = createOpenRouter({
          apiKey: serverEnv.OPENROUTER_API_KEY,
       });
-      const imageModel = openrouter.imageModel(model);
 
+      const isSeedream = model.includes("seedream");
       const { image } = await aiGenerateImage({
-         model: imageModel,
+         model: openrouter.imageModel(model, {
+            extraBody: { modalities: ["image"] },
+         }),
          prompt: input.prompt,
-         size,
+         ...(isSeedream ? {} : { size }),
+      }).catch((err) => {
+         console.error("Image generation failed:", err);
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Falha ao gerar imagem. Tente novamente.",
+         });
       });
 
       const imageBuffer = Buffer.from(image.uint8Array);
       const mimeType = "image/png";
-      const ext = "png";
-      const filename = `ai-generated-${crypto.randomUUID()}.${ext}`;
+      const filename = `ai-generated-${crypto.randomUUID()}.png`;
       const fileKey = `orgs/${organizationId}/assets/${filename}`;
       const bucket = serverEnv.MINIO_BUCKET ?? "contentta";
       const minioClient = getMinioClient(serverEnv);
+      const publicUrl = `/api/files/${bucket}/${fileKey}`;
 
-      let asset: Awaited<ReturnType<typeof createAsset>>;
-      try {
-         await uploadFile(fileKey, imageBuffer, mimeType, bucket, minioClient);
-
-         const publicUrl = `/api/files/${bucket}/${fileKey}`;
-
-         asset = await createAsset(db, {
-            organizationId,
-            teamId,
-            fileKey,
-            bucket,
-            filename,
-            mimeType,
-            size: imageBuffer.length,
-            width: undefined,
-            height: undefined,
-            publicUrl,
-            uploaderId: userId,
-            tags: ["ai-generated"],
-         });
-      } catch (err) {
+      await uploadFile(
+         fileKey,
+         imageBuffer,
+         mimeType,
+         bucket,
+         minioClient,
+      ).catch((err) => {
          console.error("Failed to store generated image:", err);
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "Falha ao salvar imagem gerada.",
          });
-      }
+      });
+
+      const asset = await createAsset(db, {
+         organizationId,
+         teamId,
+         fileKey,
+         bucket,
+         filename,
+         mimeType,
+         size: imageBuffer.length,
+         width: undefined,
+         height: undefined,
+         publicUrl,
+         uploaderId: userId,
+         tags: ["ai-generated"],
+      }).catch((err) => {
+         console.error("Failed to store generated image:", err);
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Falha ao salvar imagem gerada.",
+         });
+      });
 
       emitAiImageGeneration(
-         { db, posthog, organizationId, userId, teamId },
+         createEmitFn(db, posthog),
+         { organizationId, userId, teamId },
          {
             assetId: asset.id,
             prompt: input.prompt,

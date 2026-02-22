@@ -14,6 +14,7 @@ import * as dashboardsRouter from "./dashboards";
 import * as dataSourcesRouter from "./data-sources";
 import * as discussionsRouter from "./discussions";
 import * as eventCatalogRouter from "./event-catalog";
+import * as experimentsRouter from "./experiments";
 import * as feedbackRouter from "./feedback";
 import * as formsRouter from "./forms";
 import * as insightsRouter from "./insights";
@@ -47,6 +48,7 @@ export default {
    discussions: discussionsRouter,
    dataSources: dataSourcesRouter,
    eventCatalog: eventCatalogRouter,
+   experiments: experimentsRouter,
    feedback: feedbackRouter,
    forms: formsRouter,
    insights: insightsRouter,

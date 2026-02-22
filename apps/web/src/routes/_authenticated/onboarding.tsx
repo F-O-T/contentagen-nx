@@ -3,6 +3,7 @@ import { OnboardingWizard } from "@/features/onboarding/ui/onboarding-wizard";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
    beforeLoad: async ({ context }) => {
+      // biome-ignore lint/suspicious/noImplicitAnyLet: assigned inside try-catch
       let session;
 
       try {

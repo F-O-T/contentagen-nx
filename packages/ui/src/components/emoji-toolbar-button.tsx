@@ -377,7 +377,6 @@ function EmojiPickerSearchBar({
             <input
                aria-label="Search"
                autoComplete="off"
-               autoFocus
                className="block w-full appearance-none rounded-full border-0 bg-muted px-10 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:outline-none"
                onChange={(event) => setSearch(event.target.value)}
                placeholder={i18n.search}
@@ -548,6 +547,7 @@ const emojiCategoryIcons: Record<
 > = {
    activity: {
       outline: (
+         // biome-ignore lint/a11y/noSvgWithoutTitle: decorative icon
          <svg
             className="size-full"
             fill="none"
@@ -565,6 +565,7 @@ const emojiCategoryIcons: Record<
          </svg>
       ),
       solid: (
+         // biome-ignore lint/a11y/noSvgWithoutTitle: decorative icon
          <svg
             className="size-full"
             fill="none"

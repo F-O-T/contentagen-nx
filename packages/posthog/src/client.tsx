@@ -286,9 +286,7 @@ export type EarlyAccessFeature = {
    flagKey: string | null;
 };
 
-function normalizeEarlyAccessStage(
-   raw: string | undefined,
-): EarlyAccessStage {
+function normalizeEarlyAccessStage(raw: string | undefined): EarlyAccessStage {
    if (raw === "general availability / archived") return "general-availability";
    if (
       raw === "alpha" ||
@@ -317,10 +315,7 @@ export function useEarlyAccessFeatures() {
                ...f,
                stage: normalizeEarlyAccessStage(f.stage),
             }));
-            console.log(
-               "[DEBUG] Early access features loaded:",
-               features,
-            );
+            console.log("[DEBUG] Early access features loaded:", features);
             setFeatures(features);
             setLoaded(true);
 

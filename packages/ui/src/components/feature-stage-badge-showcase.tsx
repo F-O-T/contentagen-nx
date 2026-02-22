@@ -34,21 +34,12 @@ export function FeatureStageBadgeShowcase() {
             </div>
 
             <div className="flex items-center gap-4">
-               <div className="w-32 text-sm font-medium">Experimental</div>
-               <FeatureStageBadge stage="experimental" />
-               <FeatureStageBadge showIcon={false} stage="experimental" />
-            </div>
-
-            <div className="flex items-center gap-4">
-               <div className="w-32 text-sm font-medium">Preview</div>
-               <FeatureStageBadge stage="preview" />
-               <FeatureStageBadge showIcon={false} stage="preview" />
-            </div>
-
-            <div className="flex items-center gap-4">
                <div className="w-32 text-sm font-medium">Disponível</div>
                <FeatureStageBadge stage="general-availability" />
-               <FeatureStageBadge showIcon={false} stage="general-availability" />
+               <FeatureStageBadge
+                  showIcon={false}
+                  stage="general-availability"
+               />
             </div>
          </div>
 
@@ -71,7 +62,7 @@ export function FeatureStageBadgeShowcase() {
                   <span className="text-foreground">
                      Real-time Collaboration
                   </span>
-                  <FeatureStageBadge stage="preview" />
+                  <FeatureStageBadge stage="beta" />
                </div>
             </div>
          </div>

@@ -65,10 +65,6 @@
          "default": "./src/insight.ts",
          "types": "./dist/src/insight.d.ts"
       },
-      "./pricing": {
-         "default": "./src/pricing.ts",
-         "types": "./dist/src/pricing.d.ts"
-      },
       "./credits": {
          "default": "./src/credits.ts",
          "types": "./dist/src/credits.d.ts"

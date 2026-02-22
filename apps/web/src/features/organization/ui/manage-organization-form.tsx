@@ -294,9 +294,7 @@ export function ManageOrganizationForm({
                   <Button
                      className="w-full"
                      disabled={
-                        !state.canSubmit ||
-                        state.isSubmitting ||
-                        isPending
+                        !state.canSubmit || state.isSubmitting || isPending
                      }
                      type="submit"
                   >

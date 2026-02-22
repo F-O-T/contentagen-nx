@@ -22,6 +22,8 @@ export * from "./schemas/event-catalog";
 export * from "./schemas/event-views";
 // Events
 export * from "./schemas/events";
+// Experiments
+export * from "./schemas/experiments";
 export * from "./schemas/export-log";
 // Forms
 export * from "./schemas/forms";

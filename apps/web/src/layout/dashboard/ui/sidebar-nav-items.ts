@@ -4,9 +4,11 @@ import {
    ClipboardList,
    Database,
    FileText,
+   FlaskConical,
    House,
    ImageIcon,
    LayoutDashboard,
+   Library,
    Lightbulb,
 } from "lucide-react";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
@@ -65,6 +67,22 @@ export const navGroups: NavGroupDef[] = [
             quickAction: { type: "create", target: "navigate" },
             earlyAccessFlag: "forms-beta",
          },
+         {
+            id: "experiments",
+            label: "Experimentos",
+            icon: FlaskConical,
+            route: "/$slug/$teamSlug/experiments",
+            quickAction: { type: "create", target: "sheet" },
+            earlyAccessFlag: "experiments",
+            earlyAccessStage: "alpha" as const,
+         },
+      ],
+   },
+   {
+      id: "biblioteca",
+      label: "Biblioteca",
+      icon: Library,
+      items: [
          {
             id: "assets",
             label: "Imagens",

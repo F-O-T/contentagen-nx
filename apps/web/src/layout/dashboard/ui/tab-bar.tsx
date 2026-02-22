@@ -1,7 +1,7 @@
 import { Button } from "@packages/ui/components/button";
-import { useEventListener } from "@/hooks/use-event-listener";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useEventListener } from "@/hooks/use-event-listener";
 import {
    closeAllTabs,
    closeOtherTabs,

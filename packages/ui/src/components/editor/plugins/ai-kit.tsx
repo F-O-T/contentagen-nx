@@ -43,7 +43,8 @@ export const aiChatPlugin = AIChatPlugin.extend({
                      },
                      {
                         at: PathApi.next(
-                           editor.selection?.focus.path.slice(0, 1),
+                           // biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: selection is guaranteed when mode === "insert" and isFirst
+                           editor.selection?.focus.path.slice(0, 1)!,
                         ),
                      },
                   );

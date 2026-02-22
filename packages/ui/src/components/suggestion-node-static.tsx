@@ -3,7 +3,6 @@ import { BaseSuggestionPlugin } from "@platejs/suggestion";
 import type { TSuggestionText } from "platejs";
 import type { SlateLeafProps } from "platejs/static";
 import { SlateLeaf } from "platejs/static";
-import * as React from "react";
 
 export function SuggestionLeafStatic(props: SlateLeafProps<TSuggestionText>) {
    const { editor, leaf } = props;

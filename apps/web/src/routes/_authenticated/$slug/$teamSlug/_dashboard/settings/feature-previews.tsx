@@ -1,3 +1,8 @@
+import {
+   Collapsible,
+   CollapsibleContent,
+   CollapsibleTrigger,
+} from "@packages/ui/components/collapsible";
 import { FeatureStageBadge } from "@packages/ui/components/feature-stage-badge";
 import {
    Item,
@@ -8,11 +13,6 @@ import {
    ItemMedia,
    ItemTitle,
 } from "@packages/ui/components/item";
-import {
-   Collapsible,
-   CollapsibleContent,
-   CollapsibleTrigger,
-} from "@packages/ui/components/collapsible";
 import { Switch } from "@packages/ui/components/switch";
 import { createFileRoute } from "@tanstack/react-router";
 import { ChevronDown, FlaskConical, ImageIcon, Lightbulb } from "lucide-react";
@@ -89,9 +89,9 @@ function FeaturePreviewsPage() {
 
                   return (
                      <Collapsible
-                        key={feature.flagKey}
-                        defaultOpen={hasChildren}
                         className="flex flex-col"
+                        defaultOpen={hasChildren}
+                        key={feature.flagKey}
                      >
                         <Item variant="muted">
                            <ItemMedia variant="icon">
@@ -132,16 +132,15 @@ function FeaturePreviewsPage() {
                                        ? isEnrolled(child.flagKey)
                                        : false;
                                     return (
-                                       <Item
-                                          key={child?.name}
-                                          variant="muted"
-                                       >
+                                       <Item key={child?.name} variant="muted">
                                           <ItemMedia variant="icon">
                                              <Lightbulb className="size-4 text-purple-500" />
                                           </ItemMedia>
                                           <ItemContent>
                                              <div className="flex items-center gap-2">
-                                                <ItemTitle>{child?.name}</ItemTitle>
+                                                <ItemTitle>
+                                                   {child?.name}
+                                                </ItemTitle>
                                                 <FeatureStageBadge
                                                    className="text-xs"
                                                    stage="concept"

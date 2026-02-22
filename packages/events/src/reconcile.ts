@@ -2,7 +2,7 @@ import { parseDecimalToMinorUnits } from "@f-o-t/money";
 import type { DatabaseInstance } from "@packages/database/client";
 import { currentMonthUsageByCategory } from "@packages/database/schema";
 import type { Redis } from "ioredis";
-import { type CreditPool, POOL_CATEGORIES } from "./pricing";
+import { type CreditPool, POOL_CATEGORIES } from "./credits";
 
 const PRICE_SCALE = 6;
 
