@@ -29,7 +29,16 @@ export const forms = pgTable(
          .$type<
             Array<{
                id: string;
-               type: "text" | "email" | "textarea" | "checkbox" | "select";
+               type:
+                  | "text"
+                  | "email"
+                  | "textarea"
+                  | "checkbox"
+                  | "select"
+                  | "number"
+                  | "date"
+                  | "rating"
+                  | "file";
                label: string;
                placeholder?: string;
                required: boolean;
@@ -46,6 +55,13 @@ export const forms = pgTable(
          }>()
          .default({})
          .notNull(),
+      title: text("title"),
+      subtitle: text("subtitle"),
+      icon: text("icon"),
+      buttonText: text("button_text").notNull().default("Enviar"),
+      layout: text("layout", { enum: ["card", "inline", "banner"] })
+         .notNull()
+         .default("card"),
       isActive: boolean("is_active").default(true).notNull(),
       createdAt: timestamp("created_at").defaultNow().notNull(),
       updatedAt: timestamp("updated_at")
@@ -126,3 +142,4 @@ export type Form = typeof forms.$inferSelect;
 export type NewForm = typeof forms.$inferInsert;
 export type FormSubmission = typeof formSubmissions.$inferSelect;
 export type NewFormSubmission = typeof formSubmissions.$inferInsert;
+export type FormLayout = "card" | "inline" | "banner";

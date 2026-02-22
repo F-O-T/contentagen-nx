@@ -18,7 +18,16 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function validateSubmission(
    fields: Array<{
       id: string;
-      type: "text" | "email" | "textarea" | "checkbox" | "select";
+      type:
+         | "text"
+         | "email"
+         | "textarea"
+         | "checkbox"
+         | "select"
+         | "number"
+         | "date"
+         | "rating"
+         | "file";
       label: string;
       required: boolean;
       options?: string[];
