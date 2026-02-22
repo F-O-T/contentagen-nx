@@ -107,6 +107,8 @@ export const addInternalLinksTool = createTool({
                modifiedContent.slice(0, insertPoint) +
                insertText +
                modifiedContent.slice(insertPoint);
+            // Update delta in case subsequent inline insertions target paragraphs after this point
+            offsetDelta += insertText.length;
             linksAdded.push({
                title: post.title,
                slug: post.slug,
