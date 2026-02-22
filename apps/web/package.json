@@ -3,7 +3,7 @@
    "private": true,
    "type": "module",
    "scripts": {
-      "container-start": "if command -v podman-compose > /dev/null 2>&1; then podman-compose ps --quiet 2>/dev/null | grep -q . && echo 'Containers already running, skipping.' || podman-compose up -d; else docker-compose ps --quiet 2>/dev/null | grep -q . && echo 'Containers already running, skipping.' || docker-compose up -d; fi",
+      "container-start": "if command -v podman-compose > /dev/null 2>&1; then podman ps -q --filter 'label=com.docker.compose.project=web' 2>/dev/null | grep -q . && echo 'Containers already running, skipping.' || podman-compose up -d; else docker ps -q --filter 'label=com.docker.compose.project=web' 2>/dev/null | grep -q . && echo 'Containers already running, skipping.' || docker-compose up -d; fi",
       "dev": "bun --bun vite dev --port 3000",
       "build": "vite build",
       "start": "bun run .output/server/index.mjs",
@@ -11,6 +11,7 @@
       "test": "vitest run --passWithNoTests",
       "format": "biome format",
       "lint": "biome lint",
+      "typecheck": "tsgo",
       "check": "biome check --write"
    },
    "dependencies": {
@@ -46,8 +47,13 @@
       "@platejs/caption": "^52.0.11",
       "@platejs/dnd": "^52.0.11",
       "@platejs/link": "catalog:editor",
+      "@platejs/list": "^52.0.11",
       "@platejs/media": "^52.0.11",
       "@platejs/resizable": "^52.0.11",
+      "@platejs/selection": "^52.0.11",
+      "@platejs/slash-command": "^52.0.11",
+      "@platejs/table": "^52.0.11",
+      "@platejs/toc": "^52.0.11",
       "@t3-oss/env-core": "catalog:enviroment",
       "@tailwindcss/vite": "catalog:vite",
       "@tanstack/match-sorter-utils": "catalog:tanstack",

@@ -33,6 +33,7 @@ const updateExperimentSchema = z.object({
    id: z.string().uuid(),
    name: z.string().min(1).optional(),
    hypothesis: z.string().optional(),
+   targetType: z.enum(EXPERIMENT_TARGET_TYPES).optional(),
    goal: z
       .enum(["conversion", "ctr", "time_on_page", "form_submit"])
       .optional(),

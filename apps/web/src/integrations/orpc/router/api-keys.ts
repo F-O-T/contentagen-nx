@@ -64,7 +64,7 @@ export const get = protectedProcedure
 
       try {
          const key = await auth.api.getApiKey({
-            query: { keyId: input.keyId },
+            query: { id: input.keyId },
             headers,
          });
 

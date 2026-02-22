@@ -51,7 +51,7 @@ export function useInsightConfig(initialType: InsightType = "trends") {
 
    useEffect(() => {
       if (Object.keys(debouncedUpdates).length > 0) {
-         setConfig((c) => ({ ...c, ...debouncedUpdates }));
+         setConfig((c) => ({ ...c, ...debouncedUpdates }) as InsightConfig);
          setPendingUpdates({});
       }
    }, [debouncedUpdates]);
@@ -77,7 +77,7 @@ export function useInsightConfig(initialType: InsightType = "trends") {
 
    const updateConfigImmediate = useCallback(
       (updates: Partial<InsightConfig>) => {
-         setConfig((prev) => ({ ...prev, ...updates }));
+         setConfig((prev) => ({ ...prev, ...updates }) as InsightConfig);
       },
       [],
    );

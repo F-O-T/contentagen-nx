@@ -21,27 +21,20 @@ export function useCompleteTask() {
             const previous = queryClient.getQueryData(queryKey);
 
             // Optimistically update the tasks map
-            queryClient.setQueryData(
-               queryKey,
-               (
-                  old:
-                     | {
-                          onboardingCompleted: boolean;
-                          onboardingProducts: string[] | null;
-                          tasks: Record<string, boolean> | null;
-                       }
-                     | undefined,
-               ) => {
-                  if (!old) return old;
-                  return {
-                     ...old,
+            // biome-ignore lint/suspicious/noExplicitAny: onboarding tasks type is opaque from Better Auth
+            queryClient.setQueryData(queryKey, (old: any) => {
+               if (!old) return old;
+               return {
+                  ...old,
+                  project: {
+                     ...old.project,
                      tasks: {
-                        ...(old.tasks ?? {}),
+                        ...(old.project.tasks ?? {}),
                         [variables.taskId]: true,
                      },
-                  };
-               },
-            );
+                  },
+               };
+            });
 
             return { previous };
          },

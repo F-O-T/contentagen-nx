@@ -22,10 +22,14 @@ import { Textarea } from "@packages/ui/components/textarea";
 import { cn } from "@packages/ui/lib/utils";
 import {
    AlignLeft,
+   Calendar,
    CheckSquare,
    ChevronDown,
    GripVertical,
+   Hash,
    Mail,
+   Paperclip,
+   Star,
    Trash2,
    Type,
 } from "lucide-react";
@@ -38,15 +42,33 @@ import type { FieldType } from "./field-palette";
 
 export interface FormField {
    id: string;
-   type: FieldType;
+   type:
+      | "text"
+      | "email"
+      | "textarea"
+      | "checkbox"
+      | "select"
+      | "number"
+      | "date"
+      | "rating"
+      | "file";
    label: string;
    placeholder?: string;
    required: boolean;
    options?: string[];
 }
 
+export interface FormCtaConfig {
+   title: string;
+   subtitle: string;
+   icon: string;
+   buttonText: string;
+   layout: "card" | "inline" | "banner";
+}
+
 interface FormCanvasProps {
    fields: FormField[];
+   ctaConfig?: FormCtaConfig;
    onFieldsReorder: (fields: FormField[]) => void;
    onFieldUpdate: (id: string, updates: Partial<FormField>) => void;
    onFieldRemove: (id: string) => void;
@@ -63,6 +85,10 @@ const FIELD_ICONS: Record<FieldType, React.ReactNode> = {
    textarea: <AlignLeft className="size-3.5" />,
    checkbox: <CheckSquare className="size-3.5" />,
    select: <ChevronDown className="size-3.5" />,
+   number: <Hash className="size-3.5" />,
+   date: <Calendar className="size-3.5" />,
+   rating: <Star className="size-3.5" />,
+   file: <Paperclip className="size-3.5" />,
 };
 
 const FIELD_TYPE_LABELS: Record<FieldType, string> = {
@@ -71,6 +97,10 @@ const FIELD_TYPE_LABELS: Record<FieldType, string> = {
    textarea: "Texto longo",
    checkbox: "Checkbox",
    select: "Seleção",
+   number: "Número",
+   date: "Data",
+   rating: "Avaliação",
+   file: "Arquivo",
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -272,6 +302,7 @@ function CanvasEmptyState({ isDragOver }: { isDragOver: boolean }) {
 
 export function FormCanvas({
    fields,
+   ctaConfig,
    onFieldsReorder,
    onFieldUpdate,
    onFieldRemove,
@@ -326,33 +357,63 @@ export function FormCanvas({
          onDragOver={handleNativeDragOver}
          onDrop={handleNativeDrop}
       >
-         {fields.length === 0 ? (
-            <CanvasEmptyState isDragOver={false} />
-         ) : (
-            <DndContext
-               collisionDetection={closestCenter}
-               onDragEnd={handleDragEnd}
-               sensors={sensors}
-            >
-               <SortableContext
-                  items={fieldIds}
-                  strategy={verticalListSortingStrategy}
+         <div className="space-y-3">
+            {ctaConfig && (ctaConfig.title || ctaConfig.subtitle) && (
+               <div className="rounded-lg border bg-muted/30 p-4 space-y-1">
+                  {ctaConfig.icon && (
+                     <span className="text-2xl">{ctaConfig.icon}</span>
+                  )}
+                  {ctaConfig.title && (
+                     <p className="font-semibold text-lg">{ctaConfig.title}</p>
+                  )}
+                  {ctaConfig.subtitle && (
+                     <p className="text-sm text-muted-foreground">
+                        {ctaConfig.subtitle}
+                     </p>
+                  )}
+               </div>
+            )}
+
+            {fields.length === 0 ? (
+               <CanvasEmptyState isDragOver={false} />
+            ) : (
+               <DndContext
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                  sensors={sensors}
                >
-                  <div className="flex flex-col gap-3">
-                     {fields.map((field) => (
-                        <SortableFieldCard
-                           field={field}
-                           key={field.id}
-                           onRemove={() => onFieldRemove(field.id)}
-                           onUpdate={(updates) =>
-                              onFieldUpdate(field.id, updates)
-                           }
-                        />
-                     ))}
-                  </div>
-               </SortableContext>
-            </DndContext>
-         )}
+                  <SortableContext
+                     items={fieldIds}
+                     strategy={verticalListSortingStrategy}
+                  >
+                     <div className="flex flex-col gap-3">
+                        {fields.map((field) => (
+                           <SortableFieldCard
+                              field={field}
+                              key={field.id}
+                              onRemove={() => onFieldRemove(field.id)}
+                              onUpdate={(updates) =>
+                                 onFieldUpdate(field.id, updates)
+                              }
+                           />
+                        ))}
+                     </div>
+                  </SortableContext>
+               </DndContext>
+            )}
+
+            {fields.length > 0 && ctaConfig?.buttonText && (
+               <div className="pt-2">
+                  <button
+                     className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground opacity-60 cursor-default"
+                     disabled
+                     type="button"
+                  >
+                     {ctaConfig.buttonText}
+                  </button>
+               </div>
+            )}
+         </div>
       </div>
    );
 }

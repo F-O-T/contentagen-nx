@@ -7,10 +7,10 @@ export default defineConfig({
    },
    resolve: {
       alias: {
-         "@": fileURLToPath(new URL("./apps/web/src", import.meta.url)),
+         "@": fileURLToPath(new URL("./src", import.meta.url)),
       },
    },
    test: {
-      include: ["apps/web/__tests__/**/*.test.{ts,tsx}"],
+      include: ["./__tests__/**/*.test.{ts,tsx}"],
    },
 });

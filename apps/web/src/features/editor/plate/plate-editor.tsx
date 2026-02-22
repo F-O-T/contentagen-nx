@@ -34,6 +34,8 @@ import {
    usePlateEditor,
 } from "platejs/react";
 import { useEffect } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import { orpc } from "@/integrations/orpc/client";
 import { useEditorDiscussions } from "../hooks/use-editor-discussions";
 import { EditorFixedToolbar } from "../ui/editor-fixed-toolbar";
@@ -41,9 +43,13 @@ import { FrontmatterSection } from "../ui/frontmatter-section";
 import { useEditorAIChat } from "./hooks/use-editor-ai-chat";
 import { useEditorUploadFile } from "./hooks/use-editor-upload-file";
 import { AIKit } from "./plugins/ai-kit";
+import { BlockMenuKit } from "./plugins/block-menu-kit";
 import { CopilotKit } from "./plugins/copilot-kit";
+import { DndKit } from "./plugins/dnd-kit";
 import { LinkKit } from "./plugins/link-kit";
 import { createMediaKit, UploadFileProvider } from "./plugins/media-kit";
+import { SlashKit } from "./plugins/slash-kit";
+import { TocKit } from "./plugins/toc-kit";
 import { InternalLinksSidebar } from "./ui/internal-links-sidebar";
 
 export interface PlateEditorProps {
@@ -235,6 +241,10 @@ export function PlateEditor({
          ...DiscussionKit,
          // Media plugin — image / video / audio / file upload via MinIO.
          ...MediaKit,
+         ...DndKit,
+         ...BlockMenuKit,
+         ...SlashKit,
+         ...TocKit,
       ],
       value: initialValue,
    });
@@ -243,67 +253,71 @@ export function PlateEditor({
       // UploadFileProvider makes the uploadFile fn available to
       // MediaPlaceholderElement without prop drilling.
       <UploadFileProvider value={uploadFile}>
-         <Plate
-            editor={editor}
-            onValueChange={
-               onChange ? ({ value }) => onChange(value) : undefined
-            }
-            readOnly={!editable}
-         >
-            {/*
-             * EditorDiscussionSync renders inside <Plate> so it can call useEditorRef().
-             * It uses useSuspenseQuery internally; the parent route already wraps
-             * EditorPage in <Suspense>, so no additional boundary is needed here.
-             */}
-            <EditorDiscussionSync contentId={contentId} />
+         <DndProvider backend={HTML5Backend}>
+            <Plate
+               editor={editor}
+               onValueChange={
+                  onChange ? ({ value }) => onChange(value) : undefined
+               }
+               readOnly={!editable}
+            >
+               {/*
+                * EditorDiscussionSync renders inside <Plate> so it can call useEditorRef().
+                * It uses useSuspenseQuery internally; the parent route already wraps
+                * EditorPage in <Suspense>, so no additional boundary is needed here.
+                */}
+               <EditorDiscussionSync contentId={contentId} />
 
-            {/* Fixed toolbar — INSIDE <Plate> so useEditorRef() works */}
-            <EditorFixedToolbar
-               isSaving={isSaving}
-               onBack={onBack}
-               onSave={onSave}
-               onStatusChange={onStatusChange}
-               onToggleSidebar={onToggleSidebar}
-               showSidebar={showLinksSidebar}
-               status={status as "draft" | "published" | "archived" | undefined}
-            />
-
-            {/* Frontmatter section */}
-            {meta !== undefined && onMetaChange !== undefined && (
-               <FrontmatterSection
-                  meta={meta}
-                  onChange={onMetaChange}
-                  readOnly={!editable}
+               {/* Fixed toolbar — INSIDE <Plate> so useEditorRef() works */}
+               <EditorFixedToolbar
+                  isSaving={isSaving}
+                  onBack={onBack}
+                  onSave={onSave}
+                  onStatusChange={onStatusChange}
+                  onToggleSidebar={onToggleSidebar}
+                  showSidebar={showLinksSidebar}
+                  status={
+                     status as "draft" | "published" | "archived" | undefined
+                  }
                />
-            )}
 
-            {/* Content area + optional sidebar */}
-            <div className="flex flex-1 overflow-hidden">
-               <div className="flex-1 overflow-auto">
-                  <PlateContent
-                     className={cn(
-                        "min-h-[calc(100vh-8rem)] max-w-3xl mx-auto px-6 py-8",
-                        "text-sm ring-offset-background focus-visible:outline-none",
-                        "prose prose-sm max-w-none dark:prose-invert",
-                        "[&_h1]:text-3xl [&_h1]:font-bold",
-                        "[&_h2]:text-2xl [&_h2]:font-semibold",
-                        "[&_h3]:text-xl [&_h3]:font-medium",
-                        "aria-disabled:cursor-not-allowed aria-disabled:opacity-50",
-                        className,
-                     )}
-                     disableDefaultStyles
-                     placeholder={placeholder}
-                  />
-               </div>
-
-               {showLinksSidebar && contentId && (
-                  <InternalLinksSidebar
-                     contentId={contentId}
-                     onClose={onToggleSidebar}
+               {/* Frontmatter section */}
+               {meta !== undefined && onMetaChange !== undefined && (
+                  <FrontmatterSection
+                     meta={meta}
+                     onChange={onMetaChange}
+                     readOnly={!editable}
                   />
                )}
-            </div>
-         </Plate>
+
+               {/* Content area + optional sidebar */}
+               <div className="flex flex-1 overflow-hidden">
+                  <div className="flex-1 overflow-auto">
+                     <PlateContent
+                        className={cn(
+                           "min-h-[calc(100vh-8rem)] max-w-3xl mx-auto px-6 py-8",
+                           "text-sm ring-offset-background focus-visible:outline-none",
+                           "prose prose-sm max-w-none dark:prose-invert",
+                           "[&_h1]:text-3xl [&_h1]:font-bold",
+                           "[&_h2]:text-2xl [&_h2]:font-semibold",
+                           "[&_h3]:text-xl [&_h3]:font-medium",
+                           "aria-disabled:cursor-not-allowed aria-disabled:opacity-50",
+                           className,
+                        )}
+                        disableDefaultStyles
+                        placeholder={placeholder}
+                     />
+                  </div>
+
+                  {showLinksSidebar && contentId && (
+                     <InternalLinksSidebar
+                        contentId={contentId}
+                        onClose={onToggleSidebar}
+                     />
+                  )}
+               </div>
+            </Plate>
+         </DndProvider>
       </UploadFileProvider>
    );
 }

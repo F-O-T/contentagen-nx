@@ -116,7 +116,6 @@ export function WebhookForm({
             url: payload.url,
             description: payload.description || undefined,
             eventPatterns: payload.eventPatterns,
-            isActive: payload.isActive,
          });
          return;
       }

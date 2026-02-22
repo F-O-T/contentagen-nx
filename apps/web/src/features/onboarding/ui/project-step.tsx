@@ -48,7 +48,6 @@ export const ProjectStep = forwardRef<StepHandle, ProjectStepProps>(
 
                const result = await authClient.organization.createTeam({
                   name: value.projectName,
-                  slug,
                   organizationId,
                });
 

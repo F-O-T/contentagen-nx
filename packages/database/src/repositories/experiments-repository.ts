@@ -69,6 +69,7 @@ export async function updateExperiment(
          Experiment,
          | "name"
          | "hypothesis"
+         | "targetType"
          | "goal"
          | "status"
          | "startedAt"

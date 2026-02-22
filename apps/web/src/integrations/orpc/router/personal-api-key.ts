@@ -12,6 +12,8 @@ import type {
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
+declare const Bun: { password: { hash(pw: string): Promise<string> } };
+
 // =============================================================================
 // Constants
 // =============================================================================

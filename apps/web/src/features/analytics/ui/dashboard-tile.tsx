@@ -283,7 +283,9 @@ function DashboardInsightContent({
 
    return (
       <ErrorBoundary
-         fallbackRender={({ error }) => <TileErrorState error={error} />}
+         fallbackRender={({ error }) => (
+            <TileErrorState error={error as Error} />
+         )}
       >
          <Suspense fallback={<TileLoadingSkeleton />}>
             <InsightPreview config={config} />

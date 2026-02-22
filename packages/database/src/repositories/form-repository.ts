@@ -128,7 +128,19 @@ export async function updateForm(
    db: DatabaseInstance,
    formId: string,
    data: Partial<
-      Pick<NewForm, "name" | "description" | "fields" | "settings" | "isActive">
+      Pick<
+         NewForm,
+         | "name"
+         | "description"
+         | "fields"
+         | "settings"
+         | "isActive"
+         | "title"
+         | "subtitle"
+         | "icon"
+         | "buttonText"
+         | "layout"
+      >
    >,
 ) {
    try {

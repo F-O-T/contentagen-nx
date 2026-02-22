@@ -82,6 +82,8 @@ export const navGroups: NavGroupDef[] = [
             icon: FileText,
             route: "/$slug/$teamSlug/content",
             quickAction: { type: "create", target: "navigate" },
+            earlyAccessFlag: "content",
+            earlyAccessStage: "alpha" as const,
          },
          {
             id: "clusters",
@@ -121,6 +123,8 @@ export const navGroups: NavGroupDef[] = [
             route: "/$slug/$teamSlug/analytics/dashboards",
             quickAction: { type: "create", target: "sub-menu" },
             subPanel: "dashboards",
+            earlyAccessFlag: "dashboards",
+            earlyAccessStage: "beta" as const,
          },
          {
             id: "insights",
@@ -129,6 +133,8 @@ export const navGroups: NavGroupDef[] = [
             route: "/$slug/$teamSlug/analytics/insights",
             quickAction: { type: "create", target: "sub-menu" },
             subPanel: "insights",
+            earlyAccessFlag: "insights",
+            earlyAccessStage: "beta" as const,
          },
          {
             id: "data-management",
@@ -137,6 +143,8 @@ export const navGroups: NavGroupDef[] = [
             route: "/$slug/$teamSlug/analytics/data-management",
             quickAction: { type: "create", target: "sub-menu" },
             subPanel: "data-management",
+            earlyAccessFlag: "data-management",
+            earlyAccessStage: "beta" as const,
          },
       ],
    },

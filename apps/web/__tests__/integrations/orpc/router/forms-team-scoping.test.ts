@@ -21,7 +21,6 @@ describe("Forms Team Scoping", () => {
 	let teamAId: string;
 	let teamBId: string;
 	let sessionToken: string;
-	let memberId: string;
 
 	beforeEach(async () => {
 		db = createDb({ databaseUrl: process.env.DATABASE_URL! });
@@ -49,7 +48,7 @@ describe("Forms Team Scoping", () => {
 		testOrgId = testOrg.id;
 
 		// Create member
-		const [createdMember] = await db
+		await db
 			.insert(member)
 			.values({
 				userId: testUserId,
@@ -58,13 +57,13 @@ describe("Forms Team Scoping", () => {
 				createdAt: new Date(),
 			})
 			.returning();
-		memberId = createdMember.id;
 
 		// Create Team A
 		const [createdTeamA] = await db
 			.insert(team)
 			.values({
 				name: "Team A",
+				slug: `team-a-forms-${crypto.randomUUID()}`,
 				organizationId: testOrgId,
 				createdAt: new Date(),
 			})
@@ -81,6 +80,7 @@ describe("Forms Team Scoping", () => {
 			.insert(team)
 			.values({
 				name: "Team B",
+				slug: `team-b-forms-${crypto.randomUUID()}`,
 				organizationId: testOrgId,
 				createdAt: new Date(),
 			})
@@ -135,8 +135,9 @@ describe("Forms Team Scoping", () => {
 	it("should create form scoped to active team", async () => {
 		const context = createMockContext(teamAId);
 
-		const created = await call(formsRouter.create, {
-			input: {
+		const created = await call(
+			formsRouter.create,
+			{
 				name: "Team A Form",
 				description: "Form for team A",
 				fields: [
@@ -148,8 +149,8 @@ describe("Forms Team Scoping", () => {
 					},
 				],
 			},
-			context,
-		});
+			{ context },
+		);
 
 		expect(created.teamId).toBe(teamAId);
 		expect(created.organizationId).toBe(testOrgId);
@@ -188,10 +189,7 @@ describe("Forms Team Scoping", () => {
 		});
 
 		const context = createMockContext(teamAId);
-		const results = await call(formsRouter.list, {
-			input: undefined,
-			context,
-		});
+		const results = await call(formsRouter.list, undefined, { context });
 
 		// Should only see Team A form (active team)
 		expect(results).toHaveLength(1);
@@ -218,16 +216,13 @@ describe("Forms Team Scoping", () => {
 
 		// Query with Team A active
 		let context = createMockContext(teamAId);
-		let results = await call(formsRouter.list, {
-			input: undefined,
-			context,
-		});
+		let results = await call(formsRouter.list, undefined, { context });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Form A");
 
 		// Query with Team B active
 		context = createMockContext(teamBId);
-		results = await call(formsRouter.list, { input: undefined, context });
+		results = await call(formsRouter.list, undefined, { context });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Form B");
 	});
@@ -248,10 +243,7 @@ describe("Forms Team Scoping", () => {
 		const context = createMockContext(teamBId);
 
 		await expect(
-			call(formsRouter.getById, {
-				input: { id: formA.id },
-				context,
-			}),
+			call(formsRouter.getById, { id: formA.id }, { context }),
 		).rejects.toThrow("Form not found");
 	});
 
@@ -295,20 +287,18 @@ describe("Forms Team Scoping", () => {
 
 		// Team A should only see their submissions
 		const contextA = createMockContext(teamAId);
-		const submissionsA = await call(formsRouter.getSubmissions, {
-			input: { formId: formA.id },
-			context: contextA,
-		});
+		const submissionsA = await call(
+			formsRouter.getSubmissions,
+			{ formId: formA.id },
+			{ context: contextA },
+		);
 		expect(submissionsA.submissions).toHaveLength(1);
 		expect(submissionsA.submissions[0].teamId).toBe(teamAId);
 
 		// Team B should not be able to access Team A's submissions
 		const contextB = createMockContext(teamBId);
 		await expect(
-			call(formsRouter.getSubmissions, {
-				input: { formId: formA.id },
-				context: contextB,
-			}),
+			call(formsRouter.getSubmissions, { formId: formA.id }, { context: contextB }),
 		).rejects.toThrow("Form not found");
 	});
 
@@ -328,13 +318,14 @@ describe("Forms Team Scoping", () => {
 		const context = createMockContext(teamBId);
 
 		await expect(
-			call(formsRouter.update, {
-				input: {
+			call(
+				formsRouter.update,
+				{
 					id: formA.id,
 					name: "Hacked Form",
 				},
-				context,
-			}),
+				{ context },
+			),
 		).rejects.toThrow("Form not found");
 	});
 
@@ -354,10 +345,7 @@ describe("Forms Team Scoping", () => {
 		const context = createMockContext(teamBId);
 
 		await expect(
-			call(formsRouter.remove, {
-				input: { id: formA.id },
-				context,
-			}),
+			call(formsRouter.remove, { id: formA.id }, { context }),
 		).rejects.toThrow("Form not found");
 
 		// Verify form still exists
