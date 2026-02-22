@@ -45,6 +45,7 @@ export function ClusterBuilderHeader({
             <div className="flex items-center justify-between gap-4">
                <div className="flex items-center gap-3 flex-1 min-w-0">
                   <Link
+                     aria-label="Voltar para clusters"
                      className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
                      params={backTo as never}
                      to="/$slug/$teamSlug/clusters"
@@ -75,10 +76,14 @@ export function ClusterBuilderHeader({
                      )}
                   </Button>
 
-                  {!isNew && (
+                  {!isNew && (onPromote || onDelete) && (
                      <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                           <Button size="icon" variant="outline">
+                           <Button
+                              aria-label="Mais ações"
+                              size="icon"
+                              variant="outline"
+                           >
                               <Ellipsis className="size-4" />
                            </Button>
                         </DropdownMenuTrigger>
