@@ -1,12 +1,14 @@
 "use client";
 
+import type { ContentMeta } from "@packages/database/schemas/content";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { useCallback, useRef, useState } from "react";
 import type { Value } from "platejs";
+import { useCallback, useRef, useState } from "react";
 import { orpc } from "@/integrations/orpc/client";
 import { PlateEditor } from "../plate/plate-editor";
-import type { ContentMeta } from "@packages/database/schemas/content";
+
+type ContentStatus = "draft" | "published" | "archived";
 
 interface EditorPageProps {
    contentId: string;
@@ -27,10 +29,20 @@ export function EditorPage({ contentId }: EditorPageProps) {
       () => content.meta ?? { title: "", description: "", slug: "" },
    );
    const [isSaving, setIsSaving] = useState(false);
+   const [showSidebar, setShowSidebar] = useState(true);
 
    const editorValueRef = useRef<Value | undefined>(undefined);
 
    const updateMutation = useMutation(orpc.content.update.mutationOptions({}));
+   const publishMutation = useMutation(
+      orpc.content.publish.mutationOptions({}),
+   );
+   const archiveMutation = useMutation(
+      orpc.content.archive.mutationOptions({}),
+   );
+   const moveToDraftMutation = useMutation(
+      orpc.content.moveToDraft.mutationOptions({}),
+   );
 
    const handleSave = useCallback(async () => {
       setIsSaving(true);
@@ -44,6 +56,19 @@ export function EditorPage({ contentId }: EditorPageProps) {
       }
    }, [contentId, meta, updateMutation]);
 
+   const handleStatusChange = useCallback(
+      async (newStatus: ContentStatus) => {
+         if (newStatus === "published") {
+            await publishMutation.mutateAsync({ id: contentId });
+         } else if (newStatus === "archived") {
+            await archiveMutation.mutateAsync({ id: contentId });
+         } else {
+            await moveToDraftMutation.mutateAsync({ id: contentId });
+         }
+      },
+      [contentId, publishMutation, archiveMutation, moveToDraftMutation],
+   );
+
    const handleBack = useCallback(() => {
       navigate({ to: `/${params.slug}/${params.teamSlug}/content` });
    }, [navigate, params.slug, params.teamSlug]);
@@ -53,19 +78,20 @@ export function EditorPage({ contentId }: EditorPageProps) {
          <PlateEditor
             contentId={contentId}
             editable={content.status !== "archived"}
-            key={contentId}
-            writerId={content.writerId ?? undefined}
-            meta={meta}
-            onMetaChange={setMeta}
-            title={meta.title || "Sem título"}
-            status={content.status}
             isSaving={isSaving}
-            onSave={handleSave}
+            key={contentId}
+            meta={meta}
             onBack={handleBack}
-            showLinksSidebar
             onChange={(value) => {
                editorValueRef.current = value;
             }}
+            onMetaChange={setMeta}
+            onSave={handleSave}
+            onStatusChange={handleStatusChange}
+            onToggleSidebar={() => setShowSidebar((v) => !v)}
+            showLinksSidebar={showSidebar}
+            status={content.status as ContentStatus}
+            writerId={content.writerId ?? undefined}
          />
       </div>
    );

@@ -25,15 +25,18 @@ function InsertLinkToolbar() {
    useFloatingLinkEscape();
 
    const insertState = useFloatingLinkInsertState();
-   const { hidden, props: floatingProps, ref } =
-      useFloatingLinkInsert(insertState);
+   const {
+      hidden,
+      props: floatingProps,
+      ref,
+   } = useFloatingLinkInsert(insertState);
 
    if (hidden) return null;
 
    return (
       <div
+         className="flex w-[330px] max-w-[calc(100vw-1rem)] items-center gap-1 rounded-md border bg-popover p-1 shadow-md z-50"
          ref={ref}
-         className="flex w-[330px] items-center gap-1 rounded-md border bg-popover p-1 shadow-md"
          style={floatingProps.style}
       >
          <FloatingLinkUrlInput asChild>
@@ -51,8 +54,12 @@ function EditLinkToolbar() {
    useFloatingLinkEscape();
 
    const editState = useFloatingLinkEditState();
-   const { editButtonProps, props: floatingProps, ref, unlinkButtonProps } =
-      useFloatingLinkEdit(editState);
+   const {
+      editButtonProps,
+      props: floatingProps,
+      ref,
+      unlinkButtonProps,
+   } = useFloatingLinkEdit(editState);
 
    const { isEditing, isOpen } = editState;
 
@@ -60,8 +67,8 @@ function EditLinkToolbar() {
 
    return (
       <div
+         className="flex w-[330px] max-w-[calc(100vw-1rem)] items-center gap-1 rounded-md border bg-popover p-1 shadow-md z-50"
          ref={ref}
-         className="flex w-[330px] items-center gap-1 rounded-md border bg-popover p-1 shadow-md"
          style={floatingProps.style}
       >
          {isEditing ? (
@@ -74,9 +81,9 @@ function EditLinkToolbar() {
          ) : (
             <>
                <Button
+                  className="h-7 flex-1 justify-start truncate px-2 text-sm font-normal"
                   size="sm"
                   variant="ghost"
-                  className="h-7 flex-1 justify-start truncate px-2 text-sm font-normal"
                   {...editButtonProps}
                >
                   Editar link
@@ -97,9 +104,9 @@ function EditLinkToolbar() {
                <Tooltip>
                   <TooltipTrigger asChild>
                      <Button
+                        className="size-7 shrink-0"
                         size="icon"
                         variant="ghost"
-                        className="size-7 shrink-0"
                         {...unlinkButtonProps}
                      >
                         <Link2Off className="size-4" />

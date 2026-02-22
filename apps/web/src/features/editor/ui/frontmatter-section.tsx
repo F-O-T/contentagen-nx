@@ -3,117 +3,202 @@
 import type { ContentMeta } from "@packages/database/schemas/content";
 import { Badge } from "@packages/ui/components/badge";
 import { Input } from "@packages/ui/components/input";
-import { Separator } from "@packages/ui/components/separator";
-import { X } from "lucide-react";
-import { type KeyboardEvent, useCallback, useState } from "react";
+import { ChevronDown, ChevronRight, Link, Lock, Unlock, X } from "lucide-react";
+import {
+   type KeyboardEvent,
+   useCallback,
+   useEffect,
+   useRef,
+   useState,
+} from "react";
 
 interface FrontmatterSectionProps {
-	meta: ContentMeta;
-	onChange: (meta: ContentMeta) => void;
-	readOnly?: boolean;
+   meta: ContentMeta;
+   onChange: (meta: ContentMeta) => void;
+   readOnly?: boolean;
+}
+
+function toSlug(title: string): string {
+   return title
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
 }
 
 export function FrontmatterSection({
-	meta,
-	onChange,
-	readOnly = false,
+   meta,
+   onChange,
+   readOnly = false,
 }: FrontmatterSectionProps) {
-	const [keywordInput, setKeywordInput] = useState("");
+   const [isOpen, setIsOpen] = useState(true);
+   const [keywordInput, setKeywordInput] = useState("");
+   const [slugLocked, setSlugLocked] = useState(!!meta.slug);
 
-	const handleField = useCallback(
-		(field: keyof ContentMeta, value: string | string[]) => {
-			onChange({ ...meta, [field]: value });
-		},
-		[meta, onChange],
-	);
+   const prevTitleRef = useRef(meta.title ?? "");
 
-	const handleAddKeyword = useCallback(
-		(e: KeyboardEvent<HTMLInputElement>) => {
-			if (e.key === "Enter" || e.key === ",") {
-				e.preventDefault();
-				const kw = keywordInput.trim().replace(/,$/, "");
-				if (kw && !(meta.keywords ?? []).includes(kw)) {
-					handleField("keywords", [...(meta.keywords ?? []), kw]);
-				}
-				setKeywordInput("");
-			}
-		},
-		[keywordInput, meta.keywords, handleField],
-	);
+   // Auto-generate slug from title when not locked
+   useEffect(() => {
+      if (slugLocked) return;
+      if (meta.title === prevTitleRef.current) return;
+      prevTitleRef.current = meta.title ?? "";
+      const generated = toSlug(meta.title ?? "");
+      if (generated !== (meta.slug ?? "")) {
+         onChange({ ...meta, slug: generated });
+      }
+   }, [meta.title, slugLocked]);
 
-	const handleRemoveKeyword = useCallback(
-		(kw: string) => {
-			handleField(
-				"keywords",
-				(meta.keywords ?? []).filter((k) => k !== kw),
-			);
-		},
-		[meta.keywords, handleField],
-	);
+   const handleField = useCallback(
+      (field: keyof ContentMeta, value: string | string[]) => {
+         onChange({ ...meta, [field]: value });
+      },
+      [meta, onChange],
+   );
 
-	return (
-		<div className="border-b bg-muted/20 px-6 py-4 space-y-3">
-			{/* Title */}
-			<Input
-				className="text-2xl font-bold h-auto border-0 bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/40"
-				placeholder="Título do post"
-				value={meta.title ?? ""}
-				readOnly={readOnly}
-				onChange={(e) => handleField("title", e.target.value)}
-			/>
+   const handleSlugChange = useCallback(
+      (value: string) => {
+         setSlugLocked(true);
+         handleField("slug", value);
+      },
+      [handleField],
+   );
 
-			{/* Description */}
-			<Input
-				className="h-auto border-0 bg-transparent p-0 text-sm text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/30"
-				placeholder="Meta description…"
-				value={meta.description ?? ""}
-				readOnly={readOnly}
-				onChange={(e) => handleField("description", e.target.value)}
-			/>
+   const handleAddKeyword = useCallback(
+      (e: KeyboardEvent<HTMLInputElement>) => {
+         if (e.key === "Enter" || e.key === ",") {
+            e.preventDefault();
+            const kw = keywordInput.trim().replace(/,$/, "");
+            if (kw && !(meta.keywords ?? []).includes(kw)) {
+               handleField("keywords", [...(meta.keywords ?? []), kw]);
+            }
+            setKeywordInput("");
+         }
+      },
+      [keywordInput, meta.keywords, handleField],
+   );
 
-			{/* Slug + Keywords row */}
-			<div className="flex items-center gap-3 flex-wrap">
-				<div className="flex items-center gap-1 text-sm text-muted-foreground">
-					<span className="shrink-0">/conteudo/</span>
-					<Input
-						className="h-auto w-40 border-0 bg-transparent p-0 text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/30"
-						placeholder="meu-slug"
-						value={meta.slug ?? ""}
-						readOnly={readOnly}
-						onChange={(e) => handleField("slug", e.target.value)}
-					/>
-				</div>
-				<Separator orientation="vertical" className="h-4" />
-				<div className="flex items-center gap-1.5 flex-wrap">
-					{(meta.keywords ?? []).map((kw) => (
-						<Badge
-							key={kw}
-							variant="secondary"
-							className="gap-1 pl-2 pr-1 h-5 text-[10px]"
-						>
-							{kw}
-							{!readOnly && (
-								<button
-									type="button"
-									onClick={() => handleRemoveKeyword(kw)}
-									className="hover:text-destructive ml-0.5"
-								>
-									<X className="size-2.5" />
-								</button>
-							)}
-						</Badge>
-					))}
-					{!readOnly && (
-						<Input
-							className="h-auto w-24 border-0 bg-transparent p-0 text-xs text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/30"
-							placeholder="+ keyword"
-							value={keywordInput}
-							onChange={(e) => setKeywordInput(e.target.value)}
-							onKeyDown={handleAddKeyword}
-						/>
-					)}
-				</div>
-			</div>
-		</div>
-	);
+   const handleRemoveKeyword = useCallback(
+      (kw: string) => {
+         handleField(
+            "keywords",
+            (meta.keywords ?? []).filter((k) => k !== kw),
+         );
+      },
+      [meta.keywords, handleField],
+   );
+
+   return (
+      <div className="border-b bg-background">
+         {/* Header row with toggle */}
+         <button
+            className="flex w-full items-center gap-2 px-4 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors group"
+            onClick={() => setIsOpen((v) => !v)}
+            type="button"
+         >
+            {isOpen ? (
+               <ChevronDown className="size-3 shrink-0" />
+            ) : (
+               <ChevronRight className="size-3 shrink-0" />
+            )}
+            <span className="font-medium tracking-wide uppercase">
+               Metadados
+            </span>
+            {!isOpen && meta.title && (
+               <span className="ml-2 truncate text-foreground/70 normal-case font-normal">
+                  {meta.title}
+               </span>
+            )}
+         </button>
+
+         {isOpen && (
+            <div className="px-4 pb-4 space-y-2.5">
+               {/* Title */}
+               <Input
+                  className="text-xl font-semibold h-auto border-0 border-b border-border/50 rounded-none bg-transparent px-0 py-1.5 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-foreground/30 placeholder:text-muted-foreground/30 transition-colors"
+                  onChange={(e) => handleField("title", e.target.value)}
+                  placeholder="Título do conteúdo"
+                  readOnly={readOnly}
+                  value={meta.title ?? ""}
+               />
+
+               {/* Description */}
+               <Input
+                  className="h-auto border-0 border-b border-border/40 rounded-none bg-transparent px-0 py-1 text-sm text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-foreground/20 placeholder:text-muted-foreground/25 transition-colors"
+                  onChange={(e) => handleField("description", e.target.value)}
+                  placeholder="Meta description (SEO)…"
+                  readOnly={readOnly}
+                  value={meta.description ?? ""}
+               />
+
+               {/* Slug row */}
+               <div className="flex items-center gap-1.5">
+                  <Link className="size-3 text-muted-foreground/50 shrink-0" />
+                  <span className="text-xs text-muted-foreground/60 shrink-0">
+                     /conteudo/
+                  </span>
+                  <Input
+                     className="h-auto min-w-0 flex-1 border-0 bg-transparent p-0 text-xs text-muted-foreground font-mono focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/25"
+                     onChange={(e) => handleSlugChange(e.target.value)}
+                     placeholder="slug-do-conteudo"
+                     readOnly={readOnly}
+                     value={meta.slug ?? ""}
+                  />
+                  {!readOnly && (
+                     <button
+                        className="shrink-0 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+                        onClick={() => setSlugLocked((v) => !v)}
+                        title={
+                           slugLocked
+                              ? "Desbloquear slug (auto-gerado do título)"
+                              : "Bloquear slug (edição manual)"
+                        }
+                        type="button"
+                     >
+                        {slugLocked ? (
+                           <Lock className="size-3" />
+                        ) : (
+                           <Unlock className="size-3" />
+                        )}
+                     </button>
+                  )}
+               </div>
+
+               {/* Keywords */}
+               <div className="flex items-center gap-1.5 flex-wrap min-h-[1.5rem]">
+                  {(meta.keywords ?? []).map((kw) => (
+                     <Badge
+                        className="gap-1 pl-2 pr-1 h-5 text-[10px] font-normal"
+                        key={kw}
+                        variant="secondary"
+                     >
+                        {kw}
+                        {!readOnly && (
+                           <button
+                              className="hover:text-destructive ml-0.5 transition-colors"
+                              onClick={() => handleRemoveKeyword(kw)}
+                              type="button"
+                           >
+                              <X className="size-2.5" />
+                           </button>
+                        )}
+                     </Badge>
+                  ))}
+                  {!readOnly && (
+                     <Input
+                        className="h-5 w-24 border-0 bg-transparent p-0 text-[10px] text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/25"
+                        onChange={(e) => setKeywordInput(e.target.value)}
+                        onKeyDown={handleAddKeyword}
+                        placeholder="+ keyword"
+                        value={keywordInput}
+                     />
+                  )}
+               </div>
+            </div>
+         )}
+      </div>
+   );
 }

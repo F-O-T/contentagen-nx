@@ -6,6 +6,7 @@ import {
    deleteContent,
    getContentById,
    listContentsByTeam,
+   markContentAsDraft,
    publishContent,
    updateContent,
 } from "@packages/database/repositories/content-repository";
@@ -300,6 +301,24 @@ export const archive = protectedProcedure
       }
 
       return result;
+   });
+
+/**
+ * Move published/archived content back to draft
+ */
+export const moveToDraft = protectedProcedure
+   .input(z.object({ id: z.string().uuid() }))
+   .handler(async ({ context, input }) => {
+      const { organizationId, db } = context;
+
+      const existing = await getContentById(db, input.id);
+      if (!existing || existing.organizationId !== organizationId) {
+         throw new ORPCError("NOT_FOUND", {
+            message: "Conteudo nao encontrado.",
+         });
+      }
+
+      return markContentAsDraft(db, input.id);
    });
 
 /**

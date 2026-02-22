@@ -10,6 +10,7 @@
  * (mod+shift+m), tracked suggestions, and persistent discussion threads.
  */
 
+import type { ContentMeta } from "@packages/database/schemas/content";
 import { CommentKit } from "@packages/ui/components/editor/plugins/comment-kit";
 import {
    type DiscussionCallbacks,
@@ -24,7 +25,6 @@ import {
    BasicBlocksPlugin,
    BasicMarksPlugin,
 } from "@platejs/basic-nodes/react";
-import { LinkKit } from "./plugins/link-kit";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { Value } from "platejs";
 import {
@@ -36,14 +36,14 @@ import {
 import { useEffect } from "react";
 import { orpc } from "@/integrations/orpc/client";
 import { useEditorDiscussions } from "../hooks/use-editor-discussions";
+import { EditorFixedToolbar } from "../ui/editor-fixed-toolbar";
+import { FrontmatterSection } from "../ui/frontmatter-section";
 import { useEditorAIChat } from "./hooks/use-editor-ai-chat";
 import { useEditorUploadFile } from "./hooks/use-editor-upload-file";
 import { AIKit } from "./plugins/ai-kit";
 import { CopilotKit } from "./plugins/copilot-kit";
+import { LinkKit } from "./plugins/link-kit";
 import { createMediaKit, UploadFileProvider } from "./plugins/media-kit";
-import type { ContentMeta } from "@packages/database/schemas/content";
-import { EditorFixedToolbar } from "../ui/editor-fixed-toolbar";
-import { FrontmatterSection } from "../ui/frontmatter-section";
 import { InternalLinksSidebar } from "./ui/internal-links-sidebar";
 
 export interface PlateEditorProps {
@@ -63,11 +63,12 @@ export interface PlateEditorProps {
    meta?: ContentMeta;
    onMetaChange?: (meta: ContentMeta) => void;
    // NEW: toolbar
-   title?: string;
    status?: string;
    isSaving?: boolean;
    onSave?: () => void;
    onBack?: () => void;
+   onStatusChange?: (status: "draft" | "published" | "archived") => void;
+   onToggleSidebar?: () => void;
    // NEW: sidebar
    showLinksSidebar?: boolean;
 }
@@ -196,11 +197,12 @@ export function PlateEditor({
    teamId,
    meta,
    onMetaChange,
-   title,
    status,
    isSaving,
    onSave,
    onBack,
+   onStatusChange,
+   onToggleSidebar,
    showLinksSidebar,
 }: PlateEditorProps) {
    // Inject per-content context into the ORPCChatTransport singleton so every
@@ -257,11 +259,13 @@ export function PlateEditor({
 
             {/* Fixed toolbar — INSIDE <Plate> so useEditorRef() works */}
             <EditorFixedToolbar
-               title={title}
-               status={status}
                isSaving={isSaving}
-               onSave={onSave}
                onBack={onBack}
+               onSave={onSave}
+               onStatusChange={onStatusChange}
+               onToggleSidebar={onToggleSidebar}
+               showSidebar={showLinksSidebar}
+               status={status as "draft" | "published" | "archived" | undefined}
             />
 
             {/* Frontmatter section */}
@@ -293,7 +297,10 @@ export function PlateEditor({
                </div>
 
                {showLinksSidebar && contentId && (
-                  <InternalLinksSidebar contentId={contentId} />
+                  <InternalLinksSidebar
+                     contentId={contentId}
+                     onClose={onToggleSidebar}
+                  />
                )}
             </div>
          </Plate>
