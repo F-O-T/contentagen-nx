@@ -48,6 +48,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NODE_ENV=production
+ENV PATH="/app/node_modules/.bin:${PATH}"
 
 # VITE_ vars are baked in at build time
 ARG VITE_POSTHOG_HOST
