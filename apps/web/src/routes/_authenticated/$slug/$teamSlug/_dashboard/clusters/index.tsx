@@ -1,11 +1,9 @@
 import { Button } from "@packages/ui/components/button";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Network, Plus } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { ClustersListSection } from "@/features/clusters/ui/clusters-list-section";
-import { CreateClusterSheet } from "@/features/clusters/ui/create-cluster-sheet";
-import { useSheet } from "@/hooks/use-sheet";
 
 export const Route = createFileRoute(
    "/_authenticated/$slug/$teamSlug/_dashboard/clusters/",
@@ -14,7 +12,8 @@ export const Route = createFileRoute(
 });
 
 function ClustersPage() {
-   const { openSheet } = useSheet();
+   const navigate = useNavigate();
+   const { slug, teamSlug } = Route.useParams();
 
    return (
       <div className="space-y-6 p-6">
@@ -29,7 +28,12 @@ function ClustersPage() {
                </p>
             </div>
             <Button
-               onClick={() => openSheet({ children: <CreateClusterSheet /> })}
+               onClick={() =>
+                  navigate({
+                     to: "/$slug/$teamSlug/clusters/new",
+                     params: { slug, teamSlug },
+                  } as never)
+               }
             >
                <Plus className="size-4 mr-2" />
                Novo cluster

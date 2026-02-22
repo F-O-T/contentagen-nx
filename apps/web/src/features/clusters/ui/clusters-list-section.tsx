@@ -9,17 +9,14 @@ import {
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { Network } from "lucide-react";
 import { useMemo } from "react";
-import { useSheet } from "@/hooks/use-sheet";
 import { useClusters } from "../hooks/use-clusters";
 import { createClustersColumns } from "./clusters-table-columns";
-import { CreateClusterSheet } from "./create-cluster-sheet";
 
 export function ClustersListSection() {
    const navigate = useNavigate();
    const { slug, teamSlug } = useParams({
       from: "/_authenticated/$slug/$teamSlug/_dashboard/clusters/",
    });
-   const { openSheet } = useSheet();
    const { data } = useClusters();
 
    const columns = useMemo(
@@ -49,7 +46,12 @@ export function ClustersListSection() {
             </EmptyContent>
             <button
                className="text-sm underline text-primary"
-               onClick={() => openSheet({ children: <CreateClusterSheet /> })}
+               onClick={() =>
+                  navigate({
+                     to: "/$slug/$teamSlug/clusters/new",
+                     params: { slug, teamSlug },
+                  } as never)
+               }
                type="button"
             >
                Criar cluster
