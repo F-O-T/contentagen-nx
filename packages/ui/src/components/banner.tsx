@@ -1,6 +1,6 @@
 "use client";
 
-import { useControllableState } from "radix-ui";
+import { useControllableState } from "radix-ui/internal";
 import { type LucideIcon, XIcon } from "lucide-react";
 import {
    type ComponentProps,
@@ -18,7 +18,7 @@ type BannerContextProps = {
 };
 
 export const BannerContext = createContext<BannerContextProps>({
-   setShow: () => {},
+   setShow: () => { },
    show: true,
 });
 
