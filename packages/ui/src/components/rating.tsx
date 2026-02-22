@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@packages/ui/lib/utils";
-import { useControllableState } from "@radix-ui/react-use-controllable-state";
+import { useControllableState } from "radix-ui/internal";
 import { type LucideProps, StarIcon } from "lucide-react";
 import type { KeyboardEvent, MouseEvent, ReactElement, ReactNode } from "react";
 import {
