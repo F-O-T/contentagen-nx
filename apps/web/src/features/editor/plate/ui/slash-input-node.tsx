@@ -114,10 +114,7 @@ const SLASH_ITEMS: SlashCommandItem[] = [
       label: "Separador",
       value: "Separador",
       onSelect: (editor) => {
-         editor.tf.setNodes(
-            { type: KEYS.hr },
-            { match: (n) => editor.api.isBlock(n) },
-         );
+         editor.tf.insertNodes({ type: KEYS.hr, children: [{ text: "" }] });
       },
    },
    // Lista
@@ -236,8 +233,8 @@ export function SlashInputElement(props: PlateElementProps) {
 
                         {groupItems.map((item) => (
                            <InlineComboboxItem
-                              key={item.value}
                               group={item.group}
+                              key={item.value}
                               keywords={item.keywords}
                               label={item.label}
                               onClick={() => item.onSelect(editor)}
