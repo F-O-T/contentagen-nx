@@ -34,6 +34,8 @@ import {
    usePlateEditor,
 } from "platejs/react";
 import { useEffect } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import { orpc } from "@/integrations/orpc/client";
 import { useEditorDiscussions } from "../hooks/use-editor-discussions";
 import { EditorFixedToolbar } from "../ui/editor-fixed-toolbar";
@@ -49,8 +51,6 @@ import { createMediaKit, UploadFileProvider } from "./plugins/media-kit";
 import { SlashKit } from "./plugins/slash-kit";
 import { TocKit } from "./plugins/toc-kit";
 import { InternalLinksSidebar } from "./ui/internal-links-sidebar";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 
 export interface PlateEditorProps {
    initialValue?: Value;
@@ -241,13 +241,9 @@ export function PlateEditor({
          ...DiscussionKit,
          // Media plugin — image / video / audio / file upload via MinIO.
          ...MediaKit,
-         // DnD plugin — drag-and-drop block reordering.
          ...DndKit,
-         // Block menu plugin — right-click / slash-triggered block menu.
          ...BlockMenuKit,
-         // Slash commands plugin — / command menu.
          ...SlashKit,
-         // Table of contents plugin — TOC sidebar / inline TOC.
          ...TocKit,
       ],
       value: initialValue,
