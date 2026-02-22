@@ -23,7 +23,7 @@ import { client } from "@/integrations/orpc/client";
  * the POST body, then expects the response to be JSON: { text: string }.
  * We call the oRPC generator, accumulate all text chunks, and return that JSON.
  */
-const copilotFetch: typeof fetch = async (_input, init) => {
+const copilotFetch = async (_input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
    let prefix = "";
    let suffix: string | undefined;
 

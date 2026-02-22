@@ -1,18 +1,14 @@
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { orpc } from "@/integrations/orpc/client";
 
 export function useEditorDiscussions(contentId: string | undefined) {
-   const { data } = useSuspenseQuery(
-      contentId
-         ? orpc.discussions.getByContent.queryOptions({
-              input: { contentId },
-              staleTime: 30_000,
-           })
-         : {
-              queryKey: ["discussions-empty"],
-              queryFn: () => ({ discussions: [], users: {} }),
-           },
-   );
+   const { data } = useQuery({
+      ...orpc.discussions.getByContent.queryOptions({
+         input: { contentId: contentId! },
+         staleTime: 30_000,
+      }),
+      enabled: !!contentId,
+   });
 
    const createMutation = useMutation(
       orpc.discussions.create.mutationOptions(),

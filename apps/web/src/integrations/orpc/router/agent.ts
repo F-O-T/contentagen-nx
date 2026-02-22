@@ -163,13 +163,13 @@ export const copilotStream = protectedProcedure
                latencyMs,
             },
          } satisfies FIMChunk;
-      } catch (_error) {
-         // Yield error chunk
+      } catch (error) {
+         console.error("[copilotStream] FIM agent error:", error);
          yield {
             text: "",
             done: true,
             metadata: {
-               stopReason: "stop_sequence",
+               stopReason: "error",
                latencyMs: Date.now() - startTime,
             },
          } satisfies FIMChunk;

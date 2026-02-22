@@ -33,7 +33,7 @@ import {
    useEditorRef,
    usePlateEditor,
 } from "platejs/react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { orpc } from "@/integrations/orpc/client";
@@ -104,23 +104,26 @@ function EditorDiscussionSync({ contentId }: EditorDiscussionSyncProps) {
    const { discussions, users, mutations } = useEditorDiscussions(contentId);
 
    // Map server users to DiscussionUser shape (server returns `image`, plugin expects `avatarUrl`)
-   const mappedUsers: Record<string, DiscussionUser> = {};
-   for (const [id, u] of Object.entries(
-      users as Record<
-         string,
-         { id: string; name: string; email: string; image: string }
-      >,
-   )) {
-      mappedUsers[id] = {
-         id: u.id,
-         name: u.name,
-         avatarUrl:
-            u.image ?? `https://api.dicebear.com/9.x/glass/svg?seed=${u.id}`,
-      };
-   }
+   const mappedUsers = useMemo(() => {
+      const result: Record<string, DiscussionUser> = {};
+      for (const [id, u] of Object.entries(
+         users as Record<
+            string,
+            { id: string; name: string; email: string; image: string }
+         >,
+      )) {
+         result[id] = {
+            id: u.id,
+            name: u.name,
+            avatarUrl:
+               u.image ?? `https://api.dicebear.com/9.x/glass/svg?seed=${u.id}`,
+         };
+      }
+      return result;
+   }, [users]);
 
    // Build persistence callbacks that delegate to oRPC mutations
-   const callbacks: DiscussionCallbacks = {
+   const callbacks: DiscussionCallbacks = useMemo(() => ({
       onCreateDiscussion: async (discussion: TDiscussion) => {
          const firstComment = discussion.comments[0];
          if (!firstComment || !contentId) return;
@@ -154,7 +157,7 @@ function EditorDiscussionSync({ contentId }: EditorDiscussionSyncProps) {
       onDeleteComment: async (commentId: string, _discussionId: string) => {
          await mutations.removeReply.mutateAsync({ replyId: commentId });
       },
-   };
+   }), [contentId, mutations.create, mutations.addReply, mutations.resolve, mutations.remove, mutations.updateReply, mutations.removeReply]);
 
    // Sync currentUserId into discussionPlugin
    useEffect(() => {
@@ -173,15 +176,13 @@ function EditorDiscussionSync({ contentId }: EditorDiscussionSyncProps) {
    // Sync users into discussionPlugin
    useEffect(() => {
       editor.setOption(discussionPlugin, "users", mappedUsers);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-   }, [editor, users]);
+   }, [editor, mappedUsers]);
 
    // Sync callbacks into discussionPlugin (stable reference per render is fine —
    // the callbacks close over mutation functions which are stable across renders)
    useEffect(() => {
       editor.setOption(discussionPlugin, "callbacks", callbacks);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-   }, [editor, contentId]);
+   }, [editor, callbacks]);
 
    return null;
 }

@@ -49,7 +49,7 @@ export function EditorPage({ contentId }: EditorPageProps) {
       try {
          await updateMutation.mutateAsync({
             id: contentId,
-            data: { meta },
+            data: { meta, body: JSON.stringify(editorValueRef.current) },
          });
       } finally {
          setIsSaving(false);
@@ -78,6 +78,7 @@ export function EditorPage({ contentId }: EditorPageProps) {
          <PlateEditor
             contentId={contentId}
             editable={content.status !== "archived"}
+            initialValue={content.body as Value}
             isSaving={isSaving}
             key={contentId}
             meta={meta}
@@ -91,6 +92,7 @@ export function EditorPage({ contentId }: EditorPageProps) {
             onToggleSidebar={() => setShowSidebar((v) => !v)}
             showLinksSidebar={showSidebar}
             status={content.status as ContentStatus}
+            teamId={content.teamId ?? undefined}
             writerId={content.writerId ?? undefined}
          />
       </div>
