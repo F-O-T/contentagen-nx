@@ -76,6 +76,7 @@ import { Route as AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementEvent
 import { Route as AuthenticatedSlugTeamSlugDashboardAnalyticsDashboardsDashboardIdRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/analytics/dashboards/$dashboardId'
 import { Route as AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsFormsRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/forms'
 import { Route as AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsContentRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/content'
+import { Route as AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/clusters'
 import { Route as AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/asset-bank'
 import { Route as AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAiAgentsRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/ai-agents'
 
@@ -494,6 +495,14 @@ const AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsContentRoute =
       getParentRoute: () => AuthenticatedSlugTeamSlugDashboardSettingsRoute,
     } as any,
   )
+const AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRoute =
+  AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRouteImport.update(
+    {
+      id: '/project/products/clusters',
+      path: '/project/products/clusters',
+      getParentRoute: () => AuthenticatedSlugTeamSlugDashboardSettingsRoute,
+    } as any,
+  )
 const AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRoute =
   AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRouteImport.update(
     {
@@ -576,6 +585,7 @@ export interface FileRoutesByFullPath {
   '/$slug/$teamSlug/analytics/insights/': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsIndexRoute
   '/$slug/$teamSlug/settings/project/products/ai-agents': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAiAgentsRoute
   '/$slug/$teamSlug/settings/project/products/asset-bank': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRoute
+  '/$slug/$teamSlug/settings/project/products/clusters': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRoute
   '/$slug/$teamSlug/settings/project/products/content': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsContentRoute
   '/$slug/$teamSlug/settings/project/products/forms': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsFormsRoute
 }
@@ -641,6 +651,7 @@ export interface FileRoutesByTo {
   '/$slug/$teamSlug/analytics/insights': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsIndexRoute
   '/$slug/$teamSlug/settings/project/products/ai-agents': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAiAgentsRoute
   '/$slug/$teamSlug/settings/project/products/asset-bank': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRoute
+  '/$slug/$teamSlug/settings/project/products/clusters': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRoute
   '/$slug/$teamSlug/settings/project/products/content': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsContentRoute
   '/$slug/$teamSlug/settings/project/products/forms': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsFormsRoute
 }
@@ -713,6 +724,7 @@ export interface FileRoutesById {
   '/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsIndexRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/ai-agents': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAiAgentsRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/asset-bank': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRoute
+  '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/clusters': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/content': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsContentRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/forms': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsFormsRoute
 }
@@ -783,6 +795,7 @@ export interface FileRouteTypes {
     | '/$slug/$teamSlug/analytics/insights/'
     | '/$slug/$teamSlug/settings/project/products/ai-agents'
     | '/$slug/$teamSlug/settings/project/products/asset-bank'
+    | '/$slug/$teamSlug/settings/project/products/clusters'
     | '/$slug/$teamSlug/settings/project/products/content'
     | '/$slug/$teamSlug/settings/project/products/forms'
   fileRoutesByTo: FileRoutesByTo
@@ -848,6 +861,7 @@ export interface FileRouteTypes {
     | '/$slug/$teamSlug/analytics/insights'
     | '/$slug/$teamSlug/settings/project/products/ai-agents'
     | '/$slug/$teamSlug/settings/project/products/asset-bank'
+    | '/$slug/$teamSlug/settings/project/products/clusters'
     | '/$slug/$teamSlug/settings/project/products/content'
     | '/$slug/$teamSlug/settings/project/products/forms'
   id:
@@ -919,6 +933,7 @@ export interface FileRouteTypes {
     | '/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/'
     | '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/ai-agents'
     | '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/asset-bank'
+    | '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/clusters'
     | '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/content'
     | '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/forms'
   fileRoutesById: FileRoutesById
@@ -1407,6 +1422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsContentRouteImport
       parentRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsRoute
     }
+    '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/clusters': {
+      id: '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/clusters'
+      path: '/project/products/clusters'
+      fullPath: '/$slug/$teamSlug/settings/project/products/clusters'
+      preLoaderRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRouteImport
+      parentRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsRoute
+    }
     '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/asset-bank': {
       id: '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/products/asset-bank'
       path: '/project/products/asset-bank'
@@ -1446,6 +1468,7 @@ interface AuthenticatedSlugTeamSlugDashboardSettingsRouteChildren {
   AuthenticatedSlugTeamSlugDashboardSettingsProjectWebhooksRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectWebhooksRoute
   AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAiAgentsRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAiAgentsRoute
   AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRoute
+  AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRoute
   AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsContentRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsContentRoute
   AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsFormsRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsFormsRoute
 }
@@ -1494,6 +1517,8 @@ const AuthenticatedSlugTeamSlugDashboardSettingsRouteChildren: AuthenticatedSlug
       AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAiAgentsRoute,
     AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRoute:
       AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRoute,
+    AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRoute:
+      AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRoute,
     AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsContentRoute:
       AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsContentRoute,
     AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsFormsRoute:
