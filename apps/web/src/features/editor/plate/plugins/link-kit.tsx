@@ -1,7 +1,7 @@
 "use client";
 
 import { LinkPlugin } from "@platejs/link/react";
-import { LinkElement } from "../ui/link-element";
+import { LinkElement } from "@packages/ui/components/link-node";
 import { LinkFloatingToolbar } from "../ui/link-floating-toolbar";
 
 function isValidUrl(text: string): boolean {
@@ -25,4 +25,4 @@ export const LinkKit = [
       node: LinkElement,
     },
   }),
-];
+] as const;
