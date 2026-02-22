@@ -2,5 +2,13 @@
   "extends": "@tooling/typescript/typecheck.json",
   "include": [
     "src"
+  ],
+  "references": [
+    {
+      "path": "../redis"
+    },
+    {
+      "path": "../queue"
+    }
   ]
 }

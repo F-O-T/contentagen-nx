@@ -78,7 +78,18 @@ export const AIDefaultsSchema = z.object({
    maxChatTokens: z.number().int().positive().optional(),
    maxReasoningSteps: z.number().int().positive().optional(),
    imageGenerationModel: z
-      .enum(["sourceful/riverflow-v2-pro", "bytedance-seed/seedream-4.5"])
+      .enum([
+         "sourceful/riverflow-v2-pro",
+         "sourceful/riverflow-v2-fast",
+         "bytedance-seed/seedream-4.5",
+         "black-forest-labs/flux.2-klein-4b",
+         "black-forest-labs/flux.2-pro",
+         "black-forest-labs/flux.2-flex",
+         "black-forest-labs/flux.2-max",
+         "google/gemini-2.5-flash-image",
+         "google/gemini-3-pro-image-preview",
+         "openai/gpt-5-image",
+      ])
       .optional(),
 });
 
