@@ -154,7 +154,7 @@ const withTelemetry = withOrganization.use(async ({ context, path, next }) => {
                captureError(posthog, {
                   code: "INTERNAL_SERVER_ERROR",
                   errorId,
-                  input: sanitizeData(undefined),
+                  input: sanitizeData(input),
                   message: error.message,
                   organizationId: organizationId || undefined,
                   path: path.join("."),
