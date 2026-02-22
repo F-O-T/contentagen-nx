@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import {
    Collapsible,
    CollapsibleContent,
@@ -11,6 +12,7 @@ import {
    ItemDescription,
    ItemGroup,
    ItemMedia,
+   ItemSeparator,
    ItemTitle,
 } from "@packages/ui/components/item";
 import { Switch } from "@packages/ui/components/switch";
@@ -39,8 +41,15 @@ const FEATURE_ICONS: Record<string, React.ElementType> = {
 function FeaturePreviewsPage() {
    const { features, loaded, isEnrolled, updateEnrollment } = useEarlyAccess();
 
-   const parentFeatures = features.filter((f) => f.stage !== "concept");
-   const conceptFeatures = features.filter((f) => f.stage === "concept");
+   // Names explicitly listed as children under a parent — always shown nested.
+   const childNames = new Set(Object.values(CONCEPT_CHILDREN).flat());
+
+   // Top-level: has a flagKey AND is not a named child of another feature.
+   const parentFeatures = features.filter(
+      (f) => f.flagKey !== null && !childNames.has(f.name),
+   );
+   // Children: by name, regardless of flagKey.
+   const conceptFeatures = features.filter((f) => childNames.has(f.name));
 
    const conceptByName = new Map(conceptFeatures.map((f) => [f.name, f]));
 
@@ -76,7 +85,7 @@ function FeaturePreviewsPage() {
 
          {loaded && parentFeatures.length > 0 && (
             <ItemGroup>
-               {parentFeatures.map((feature) => {
+               {parentFeatures.map((feature, index) => {
                   if (!feature.flagKey) return null;
                   const enrolled = isEnrolled(feature.flagKey);
                   const Icon = FEATURE_ICONS[feature.flagKey] ?? FlaskConical;
@@ -88,88 +97,111 @@ function FeaturePreviewsPage() {
                   const hasChildren = children.length > 0;
 
                   return (
-                     <Collapsible
-                        className="flex flex-col"
-                        defaultOpen={hasChildren}
-                        key={feature.flagKey}
-                     >
-                        <Item variant="muted">
-                           <ItemMedia variant="icon">
-                              <Icon className="size-4" />
-                           </ItemMedia>
-                           <ItemContent>
-                              <div className="flex items-center gap-2">
-                                 <ItemTitle>{feature.name}</ItemTitle>
-                                 <FeatureStageBadge
-                                    className="text-xs"
-                                    stage={feature.stage}
-                                 />
-                              </div>
-                              <ItemDescription>
-                                 {feature.description}
-                              </ItemDescription>
-                           </ItemContent>
-                           <ItemActions className="flex items-center gap-2">
-                              <Switch
-                                 checked={enrolled}
-                                 onCheckedChange={(checked) =>
-                                    updateEnrollment(feature.flagKey!, checked)
-                                 }
-                              />
-                              {hasChildren && (
-                                 <CollapsibleTrigger className="rounded p-1 text-muted-foreground hover:text-foreground transition-colors [&[data-state=open]>svg]:rotate-180">
-                                    <ChevronDown className="size-4 transition-transform duration-200" />
-                                 </CollapsibleTrigger>
-                              )}
-                           </ItemActions>
-                        </Item>
+                     <Fragment key={feature.flagKey}>
+                        {index > 0 && <ItemSeparator />}
 
-                        {hasChildren && (
-                           <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                              <div className="ml-6 mt-1 flex flex-col border-l border-dashed border-muted-foreground/20 pl-4 pb-2">
-                                 {children.map((child) => {
-                                    const childEnrolled = child?.flagKey
-                                       ? isEnrolled(child.flagKey)
-                                       : false;
-                                    return (
-                                       <Item key={child?.name} variant="muted">
-                                          <ItemMedia variant="icon">
-                                             <Lightbulb className="size-4 text-purple-500" />
-                                          </ItemMedia>
-                                          <ItemContent>
-                                             <div className="flex items-center gap-2">
-                                                <ItemTitle>
-                                                   {child?.name}
-                                                </ItemTitle>
-                                                <FeatureStageBadge
-                                                   className="text-xs"
-                                                   stage="concept"
-                                                />
-                                             </div>
-                                             <ItemDescription>
-                                                {child?.description}
-                                             </ItemDescription>
-                                          </ItemContent>
-                                          {child?.flagKey && (
-                                             <ItemActions>
-                                                <Switch
-                                                   checked={childEnrolled}
-                                                   onCheckedChange={(checked) =>
-                                                      updateEnrollment(
-                                                         child.flagKey!,
-                                                         checked,
-                                                      )
-                                                   }
-                                                />
-                                             </ItemActions>
-                                          )}
-                                       </Item>
-                                    );
-                                 })}
-                              </div>
-                           </CollapsibleContent>
-                        )}
-                     </Collapsible>
+                        <Collapsible defaultOpen={true} className="flex flex-col">
+                           <Item variant="muted">
+                              <ItemMedia variant="icon">
+                                 <Icon className="size-4" />
+                              </ItemMedia>
+                              <ItemContent>
+                                 <div className="flex items-center gap-2">
+                                    <ItemTitle>{feature.name}</ItemTitle>
+                                    <FeatureStageBadge
+                                       className="text-xs"
+                                       stage={feature.stage}
+                                    />
+                                 </div>
+                                 <ItemDescription>
+                                    {feature.description}
+                                 </ItemDescription>
+                              </ItemContent>
+                              <ItemActions>
+                                 <Switch
+                                    checked={enrolled}
+                                    onCheckedChange={(checked) => {
+                                       updateEnrollment(
+                                          feature.flagKey ?? "",
+                                          checked,
+                                       );
+                                       if (!checked) {
+                                          for (const child of children) {
+                                             if (child?.flagKey) {
+                                                updateEnrollment(
+                                                   child.flagKey,
+                                                   false,
+                                                );
+                                             }
+                                          }
+                                       }
+                                    }}
+                                 />
+                                 {hasChildren && (
+                                    <CollapsibleTrigger className="rounded p-1 text-muted-foreground hover:text-foreground transition-colors [&[data-state=open]>svg]:rotate-180">
+                                       <ChevronDown className="size-4 transition-transform duration-200" />
+                                    </CollapsibleTrigger>
+                                 )}
+                              </ItemActions>
+                           </Item>
+
+                           {hasChildren && (
+                              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+                                 <ItemSeparator />
+                                 <ItemGroup className="ml-10">
+                                    {children.map((child, childIndex) => {
+                                       const childEnrolled = child?.flagKey
+                                          ? isEnrolled(child.flagKey)
+                                          : false;
+                                       return (
+                                          <Fragment key={child?.name}>
+                                             {childIndex > 0 && (
+                                                <ItemSeparator />
+                                             )}
+                                             <Item variant="muted">
+                                                <ItemMedia variant="icon">
+                                                   <Lightbulb className="size-4 text-purple-500" />
+                                                </ItemMedia>
+                                                <ItemContent>
+                                                   <div className="flex items-center gap-2">
+                                                      <ItemTitle>
+                                                         {child?.name}
+                                                      </ItemTitle>
+                                                      <FeatureStageBadge
+                                                         className="text-xs"
+                                                         stage="concept"
+                                                      />
+                                                   </div>
+                                                   <ItemDescription>
+                                                      {child?.description}
+                                                   </ItemDescription>
+                                                </ItemContent>
+                                                {child?.flagKey && (
+                                                   <ItemActions>
+                                                      <Switch
+                                                         checked={childEnrolled}
+                                                         disabled={!enrolled}
+                                                         onCheckedChange={(
+                                                            checked,
+                                                         ) =>
+                                                            updateEnrollment(
+                                                               child.flagKey ??
+                                                                  "",
+                                                               checked,
+                                                            )
+                                                         }
+                                                      />
+                                                   </ItemActions>
+                                                )}
+                                             </Item>
+                                          </Fragment>
+                                       );
+                                    })}
+                                 </ItemGroup>
+                              </CollapsibleContent>
+                           )}
+                        </Collapsible>
+                     </Fragment>
                   );
                })}
             </ItemGroup>

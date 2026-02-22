@@ -205,6 +205,7 @@ export const getCategoryUsage = protectedProcedure
             "seo",
             "experiment",
             "webhook",
+            "cluster",
             "system",
          ]),
       }),
