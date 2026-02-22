@@ -9,7 +9,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import {
    ArrowLeft,
-   ChevronDown,
+   Ellipsis,
    FlaskConical,
    Loader2,
    Pause,
@@ -99,7 +99,7 @@ export function ExperimentBuilderHeader({
    };
 
    return (
-      <div className="border-b bg-background">
+      <div className="border-b bg-background sticky top-0 z-10">
          <div className="container mx-auto px-4 py-4">
             <div className="flex items-start justify-between gap-4">
                <div className="flex-1 min-w-0">
@@ -183,7 +183,7 @@ export function ExperimentBuilderHeader({
                               size="icon"
                               variant="outline"
                            >
-                              <ChevronDown className="size-4" />
+                              <Ellipsis className="size-4" />
                            </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">

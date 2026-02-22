@@ -154,6 +154,7 @@ function ExperimentBuilderEditContent({
          id: experimentId,
          name: config.name.trim(),
          hypothesis: config.hypothesis || undefined,
+         targetType: config.targetType,
          goal: config.goal,
       });
    }, [config, experimentId, updateMutation]);

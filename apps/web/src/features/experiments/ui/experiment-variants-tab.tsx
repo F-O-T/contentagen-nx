@@ -45,6 +45,14 @@ function InlineAddVariantForm({
       orpc.content.listAllContent.queryOptions({ input: { limit: 100 } }),
    );
 
+   const { data: formsList } = useSuspenseQuery(
+      orpc.forms.list.queryOptions({}),
+   );
+
+   const { data: clustersList } = useSuspenseQuery(
+      orpc.clusters.list.queryOptions({ input: { limit: 100, page: 1 } }),
+   );
+
    const addMutation = useMutation(
       orpc.experiments.addVariantToExperiment.mutationOptions({
          onSuccess: () => {
@@ -68,6 +76,9 @@ function InlineAddVariantForm({
             ? { contentId: linkedId }
             : {}),
          ...(targetType === "form" && linkedId ? { formId: linkedId } : {}),
+         ...(targetType === "cluster" && linkedId
+            ? { contentId: linkedId }
+            : {}),
       });
    };
 
@@ -111,6 +122,53 @@ function InlineAddVariantForm({
                            (item: { id: string; title?: string | null }) => (
                               <SelectItem key={item.id} value={item.id}>
                                  {item.title ?? "Sem título"}
+                              </SelectItem>
+                           ),
+                        )}
+                     </SelectContent>
+                  </Select>
+               </div>
+            )}
+
+            {targetType === "form" && (
+               <div className="flex flex-col gap-2">
+                  <Label htmlFor="inline-variant-form">
+                     Formulário vinculado
+                  </Label>
+                  <Select onValueChange={setLinkedId} value={linkedId}>
+                     <SelectTrigger id="inline-variant-form">
+                        <SelectValue placeholder="Selecione um formulário" />
+                     </SelectTrigger>
+                     <SelectContent>
+                        {formsList?.map(
+                           (form: { id: string; name?: string | null }) => (
+                              <SelectItem key={form.id} value={form.id}>
+                                 {form.name ?? "Sem nome"}
+                              </SelectItem>
+                           ),
+                        )}
+                     </SelectContent>
+                  </Select>
+               </div>
+            )}
+
+            {targetType === "cluster" && (
+               <div className="flex flex-col gap-2">
+                  <Label htmlFor="inline-variant-cluster">
+                     Cluster vinculado
+                  </Label>
+                  <Select onValueChange={setLinkedId} value={linkedId}>
+                     <SelectTrigger id="inline-variant-cluster">
+                        <SelectValue placeholder="Selecione um cluster" />
+                     </SelectTrigger>
+                     <SelectContent>
+                        {clustersList?.map(
+                           (cluster: {
+                              id: string;
+                              meta?: { title?: string | null } | null;
+                           }) => (
+                              <SelectItem key={cluster.id} value={cluster.id}>
+                                 {cluster.meta?.title ?? "Sem título"}
                               </SelectItem>
                            ),
                         )}
