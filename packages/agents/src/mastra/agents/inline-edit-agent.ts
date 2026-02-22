@@ -6,7 +6,10 @@ export const inlineEditAgent: Agent = new Agent({
    name: "Inline Edit Agent",
 
    model: ({ requestContext }) => {
-      return (requestContext?.get("model") as string) ?? DEFAULT_EDIT_MODEL_ID;
+      const maybeModel = requestContext?.get("model");
+      return typeof maybeModel === "string" && maybeModel.length > 0
+         ? maybeModel
+         : DEFAULT_EDIT_MODEL_ID;
    },
 
    instructions: () => `

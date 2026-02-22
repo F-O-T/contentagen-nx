@@ -6,10 +6,10 @@ export const fimAgent: Agent = new Agent({
    name: "FIM Completion Agent",
 
    model: ({ requestContext }) => {
-      return (
-         (requestContext?.get("model") as string) ??
-         DEFAULT_AUTOCOMPLETE_MODEL_ID
-      );
+      const maybeModel = requestContext?.get("model");
+      return typeof maybeModel === "string" && maybeModel.length > 0
+         ? maybeModel
+         : DEFAULT_AUTOCOMPLETE_MODEL_ID;
    },
    instructions: () => `
 You are an expert writing assistant. Your ONLY job is to continue text naturally and seamlessly.

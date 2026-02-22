@@ -127,14 +127,15 @@ export function EarlyAccessProvider({ children }: { children: ReactNode }) {
          updateEnrollment(flagKey, isEnrolledValue);
          setEnrolledCache((prev) => {
             const existing = prev[flagKey];
-            if (!existing) return prev;
+            const stage = existing?.stage ?? getFeatureStage(flagKey) ?? "beta";
+            const name = existing?.name ?? "";
             return {
                ...prev,
-               [flagKey]: { ...existing, enrolled: isEnrolledValue },
+               [flagKey]: { enrolled: isEnrolledValue, stage, name },
             };
          });
       },
-      [updateEnrollment, setEnrolledCache],
+      [updateEnrollment, setEnrolledCache, getFeatureStage],
    );
 
    const value = useMemo<EarlyAccessContextValue>(
