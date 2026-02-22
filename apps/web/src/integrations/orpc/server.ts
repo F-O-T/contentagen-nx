@@ -168,7 +168,7 @@ const withTelemetry = withOrganization.use(async ({ context, path, next }) => {
                properties: {
                   durationMs,
                   endAt: new Date().toISOString(),
-                  input: sanitizeData(undefined),
+                  input: sanitizeData(input),
                   path: path.join("."),
                   rootPath,
                   startAt: startDate.toISOString(),
