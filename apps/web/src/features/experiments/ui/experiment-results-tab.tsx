@@ -95,8 +95,8 @@ export function ExperimentResultsTab({
             />
             <StatCard
                label="Taxa geral"
-               value={formatRate(overallRate)}
                sub="Média ponderada"
+               value={formatRate(overallRate)}
             />
          </div>
 

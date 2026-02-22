@@ -1,3 +1,11 @@
+import { Button } from "@packages/ui/components/button";
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuSeparator,
+   DropdownMenuTrigger,
+} from "@packages/ui/components/dropdown-menu";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import {
@@ -15,20 +23,12 @@ import {
    Loader2,
    Pause,
    Play,
-   Trophy,
    Trash2,
+   Trophy,
 } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
-import { Button } from "@packages/ui/components/button";
-import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuItem,
-   DropdownMenuSeparator,
-   DropdownMenuTrigger,
-} from "@packages/ui/components/dropdown-menu";
 import { ExperimentResultsTab } from "@/features/experiments/ui/experiment-results-tab";
 import { ExperimentStatusBadge } from "@/features/experiments/ui/experiment-status-badge";
 import { ExperimentVariantsTab } from "@/features/experiments/ui/experiment-variants-tab";
