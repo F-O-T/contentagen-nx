@@ -44,24 +44,23 @@ function MarkButton({
 	const { props } = useMarkToolbarButton(state);
 
 	return (
-		<TooltipProvider>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<Button
-						variant="ghost"
-						size="icon"
-						className={cn(
-							"size-8",
-							state.pressed && "bg-accent text-accent-foreground",
-						)}
-						{...props}
-					>
-						{icon}
-					</Button>
-				</TooltipTrigger>
-				<TooltipContent>{tooltip}</TooltipContent>
-			</Tooltip>
-		</TooltipProvider>
+		<Tooltip>
+			<TooltipTrigger asChild>
+				<Button
+					type="button"
+					variant="ghost"
+					size="icon"
+					className={cn(
+						"size-8",
+						state.pressed && "bg-accent text-accent-foreground",
+					)}
+					{...props}
+				>
+					{icon}
+				</Button>
+			</TooltipTrigger>
+			<TooltipContent>{tooltip}</TooltipContent>
+		</Tooltip>
 	);
 }
 
@@ -79,12 +78,13 @@ export function EditorFixedToolbar({
 	};
 
 	return (
-		<div className="flex items-center gap-2 border-b px-4 py-2 bg-background sticky top-0 z-10">
-			{/* Back button */}
-			<TooltipProvider>
+		<TooltipProvider>
+			<div className="flex items-center gap-2 border-b px-4 py-2 bg-background sticky top-0 z-10">
+				{/* Back button */}
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button
+							type="button"
 							variant="ghost"
 							size="icon"
 							className="size-8 shrink-0"
@@ -95,43 +95,46 @@ export function EditorFixedToolbar({
 					</TooltipTrigger>
 					<TooltipContent>Voltar</TooltipContent>
 				</Tooltip>
-			</TooltipProvider>
 
-			<Separator orientation="vertical" className="h-5" />
+				<Separator orientation="vertical" className="h-5" />
 
-			{/* Title + status */}
-			<div className="flex items-center gap-2 min-w-0 flex-1">
-				{title && (
-					<span className="truncate max-w-xs text-sm font-medium">{title}</span>
-				)}
-				{status && (
-					<span className="text-xs text-muted-foreground shrink-0">{status}</span>
-				)}
-			</div>
+				{/* Title + status */}
+				<div className="flex items-center gap-2 min-w-0 flex-1">
+					{title && (
+						<span className="truncate max-w-xs text-sm font-medium">
+							{title}
+						</span>
+					)}
+					{status && (
+						<span className="text-xs text-muted-foreground shrink-0">
+							{status}
+						</span>
+					)}
+				</div>
 
-			{/* Formatting marks */}
-			<div className="flex items-center gap-0.5">
-				<MarkButton
-					nodeType="bold"
-					icon={<Bold className="size-4" />}
-					tooltip="Negrito Ctrl+B"
-				/>
-				<MarkButton
-					nodeType="italic"
-					icon={<Italic className="size-4" />}
-					tooltip="Itálico Ctrl+I"
-				/>
-				<MarkButton
-					nodeType="underline"
-					icon={<Underline className="size-4" />}
-					tooltip="Sublinhado Ctrl+U"
-				/>
+				{/* Formatting marks + link */}
+				<div className="flex items-center gap-0.5">
+					<MarkButton
+						nodeType="bold"
+						icon={<Bold className="size-4" />}
+						tooltip="Negrito Ctrl+B"
+					/>
+					<MarkButton
+						nodeType="italic"
+						icon={<Italic className="size-4" />}
+						tooltip="Itálico Ctrl+I"
+					/>
+					<MarkButton
+						nodeType="underline"
+						icon={<Underline className="size-4" />}
+						tooltip="Sublinhado Ctrl+U"
+					/>
 
-				{/* Link button */}
-				<TooltipProvider>
+					{/* Link button */}
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Button
+								type="button"
 								variant="ghost"
 								size="icon"
 								className="size-8"
@@ -142,16 +145,15 @@ export function EditorFixedToolbar({
 						</TooltipTrigger>
 						<TooltipContent>Inserir link Ctrl+K</TooltipContent>
 					</Tooltip>
-				</TooltipProvider>
-			</div>
+				</div>
 
-			<Separator orientation="vertical" className="h-5" />
+				<Separator orientation="vertical" className="h-5" />
 
-			{/* Save button */}
-			<TooltipProvider>
+				{/* Save button */}
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button
+							type="button"
 							variant="default"
 							size="sm"
 							className="gap-1.5"
@@ -168,7 +170,7 @@ export function EditorFixedToolbar({
 					</TooltipTrigger>
 					<TooltipContent>Ctrl+S</TooltipContent>
 				</Tooltip>
-			</TooltipProvider>
-		</div>
+			</div>
+		</TooltipProvider>
 	);
 }
