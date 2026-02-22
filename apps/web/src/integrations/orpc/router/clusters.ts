@@ -8,6 +8,8 @@ import {
 import { addRelatedContent } from "@packages/database/repositories/related-content-repository";
 import { ClusterConfigSchema } from "@packages/database/schemas/content";
 import { createRequestContext, mastra } from "@packages/agents";
+import { emitClusterCreated } from "@packages/events/clusters";
+import { createEmitFn } from "@packages/events/emit";
 import { createSlug, generateRandomSuffix } from "@packages/utils/text";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
@@ -99,7 +101,7 @@ export const create = protectedProcedure
       }),
    )
    .handler(async ({ context, input }) => {
-      const { db, organizationId, teamId, session } = context;
+      const { db, organizationId, teamId, userId, posthog, session } = context;
 
       const members = await db.query.member.findMany({
          where: (m, { eq, and }) =>
@@ -139,6 +141,21 @@ export const create = protectedProcedure
             return sat;
          }),
       );
+
+      try {
+         await emitClusterCreated(
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
+            {
+               clusterId: pillar.id,
+               pillarTitle: input.pillarTitle,
+               satelliteCount: satelliteResults.length,
+               mode: input.mode,
+            },
+         );
+      } catch {
+         // Event emission must not break the main flow
+      }
 
       return { pillar, satellites: satelliteResults };
    });

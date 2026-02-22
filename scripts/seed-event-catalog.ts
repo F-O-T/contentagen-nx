@@ -5,6 +5,7 @@ import { eventCatalog } from "@packages/database/schemas/event-catalog";
 import { AI_EVENTS } from "@packages/events/ai";
 import { ASSET_EVENTS } from "@packages/events/assets";
 import { EVENT_CATEGORIES } from "@packages/events/catalog";
+import { CLUSTER_EVENTS } from "@packages/events/clusters";
 import { CONTENT_EVENTS } from "@packages/events/content";
 import { DASHBOARD_EVENTS } from "@packages/events/dashboard";
 import { EXPERIMENT_EVENTS } from "@packages/events/experiments";
@@ -42,6 +43,10 @@ const EVENT_PRICING: EventPricing[] = [
    { eventName: CONTENT_EVENTS["content.cta.click"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "CTA Click", description: "Fired when a reader clicks a call-to-action element.", isBillable: false },
    { eventName: CONTENT_EVENTS["content.exported"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.001000", freeTierLimit: 100, displayName: "Content Exported", description: "Fired when content is exported to an external format.", isBillable: true },
    { eventName: CONTENT_EVENTS["content.archived"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Content Archived", description: "Fired when content is archived.", isBillable: false },
+   // Clusters
+   { eventName: CLUSTER_EVENTS["cluster.created"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Cluster Created", description: "Fired when a new content cluster (pillar + satellites) is created.", isBillable: false },
+   { eventName: CLUSTER_EVENTS["cluster.satellite.added"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Satellite Added", description: "Fired when a satellite post is linked to a cluster pillar.", isBillable: false },
+   { eventName: CLUSTER_EVENTS["cluster.satellite.removed"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Satellite Removed", description: "Fired when a satellite post is unlinked from a cluster pillar.", isBillable: false },
    // AI
    { eventName: AI_EVENTS["ai.completion"], category: EVENT_CATEGORIES.ai, pricePerEvent: "0.003000", freeTierLimit: 100, displayName: "AI Completion (FIM)", description: "Tracks a single AI fill-in-the-middle completion.", isBillable: true },
    { eventName: AI_EVENTS["ai.chat_message"], category: EVENT_CATEGORIES.ai, pricePerEvent: "0.020000", freeTierLimit: 50, displayName: "AI Chat Message", description: "Tracks a single AI chat message exchange.", isBillable: true },

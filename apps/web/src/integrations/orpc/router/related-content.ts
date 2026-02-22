@@ -6,6 +6,8 @@ import {
 	updateRelatedContentOrder,
 } from "@packages/database/repositories/related-content-repository";
 import { getContentById } from "@packages/database/repositories/content-repository";
+import { emitClusterSatelliteAdded, emitClusterSatelliteRemoved } from "@packages/events/clusters";
+import { createEmitFn } from "@packages/events/emit";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
@@ -21,7 +23,7 @@ export const addSatellite = protectedProcedure
 		}),
 	)
 	.handler(async ({ context, input }) => {
-		const { db, organizationId } = context;
+		const { db, organizationId, userId, teamId, posthog } = context;
 
 		const [pillar, satellite] = await Promise.all([
 			getContentById(db, input.pillarId),
@@ -35,11 +37,27 @@ export const addSatellite = protectedProcedure
 			throw new ORPCError("NOT_FOUND", { message: "Satellite not found." });
 		}
 
-		return addRelatedContent(db, {
+		const result = await addRelatedContent(db, {
 			sourceContentId: input.pillarId,
 			targetContentId: input.satelliteId,
 			relationType: input.relationType,
 		});
+
+		try {
+			await emitClusterSatelliteAdded(
+				createEmitFn(db, posthog),
+				{ organizationId, userId, teamId },
+				{
+					clusterId: input.pillarId,
+					satelliteId: input.satelliteId,
+					relationType: input.relationType,
+				},
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
+
+		return result;
 	});
 
 /**
@@ -53,14 +71,29 @@ export const removeSatellite = protectedProcedure
 		}),
 	)
 	.handler(async ({ context, input }) => {
-		const { db, organizationId } = context;
+		const { db, organizationId, userId, teamId, posthog } = context;
 
 		const pillar = await getContentById(db, input.pillarId);
 		if (!pillar || pillar.organizationId !== organizationId) {
 			throw new ORPCError("NOT_FOUND", { message: "Pillar not found." });
 		}
 
-		return removeRelatedContent(db, input.pillarId, input.satelliteId);
+		const result = await removeRelatedContent(db, input.pillarId, input.satelliteId);
+
+		try {
+			await emitClusterSatelliteRemoved(
+				createEmitFn(db, posthog),
+				{ organizationId, userId, teamId },
+				{
+					clusterId: input.pillarId,
+					satelliteId: input.satelliteId,
+				},
+			);
+		} catch {
+			// Event emission must not break the main flow
+		}
+
+		return result;
 	});
 
 /**
