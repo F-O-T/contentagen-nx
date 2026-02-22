@@ -5,7 +5,7 @@ import {
 } from "@f-o-t/money";
 import { z } from "zod";
 
-import { EVENT_CATEGORIES, type EmitFn } from "./catalog";
+import { type EmitFn, EVENT_CATEGORIES } from "./catalog";
 
 // ---------------------------------------------------------------------------
 // AI Pricing

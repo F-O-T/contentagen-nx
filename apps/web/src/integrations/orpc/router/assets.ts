@@ -278,11 +278,20 @@ export const generateImage = protectedProcedure
       });
       const imageModel = openrouter.imageModel(model);
 
-      const { image } = await aiGenerateImage({
-         model: imageModel,
-         prompt: input.prompt,
-         size,
-      });
+      let image: Awaited<ReturnType<typeof aiGenerateImage>>["image"];
+      try {
+         const result = await aiGenerateImage({
+            model: imageModel,
+            prompt: input.prompt,
+            size,
+         });
+         image = result.image;
+      } catch (err) {
+         console.error("Image generation failed:", err);
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Falha ao gerar imagem. Tente novamente.",
+         });
+      }
 
       const imageBuffer = Buffer.from(image.uint8Array);
       const mimeType = "image/png";

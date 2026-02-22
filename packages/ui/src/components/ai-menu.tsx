@@ -89,7 +89,7 @@ export function AIMenu() {
       if (streaming) {
          const anchor = api.aiChat.node({ anchor: true });
          setTimeout(() => {
-            const anchorDom = editor.api.toDOMNode(anchor?.[0])!;
+            const anchorDom = editor.api.toDOMNode(anchor![0])!;
             setAnchorElement(anchorDom);
          }, 0);
       }
@@ -111,7 +111,7 @@ export function AIMenu() {
 
    useEditorChat({
       onOpenBlockSelection: (blocks: NodeEntry[]) => {
-         show(editor.api.toDOMNode(blocks.at(-1)?.[0])!);
+         show(editor.api.toDOMNode(blocks.at(-1)![0])!);
       },
       onOpenChange: (open) => {
          if (!open) {
@@ -131,7 +131,7 @@ export function AIMenu() {
          show(editor.api.toDOMNode(ancestor)!);
       },
       onOpenSelection: () => {
-         show(editor.api.toDOMNode(editor.api.blocks().at(-1)?.[0])!);
+         show(editor.api.toDOMNode(editor.api.blocks().at(-1)![0])!);
       },
    });
 

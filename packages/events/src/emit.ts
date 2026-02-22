@@ -1,3 +1,4 @@
+import type { Money } from "@f-o-t/money";
 import { toMajorUnitsString } from "@f-o-t/money";
 import type { DatabaseInstance } from "@packages/database/client";
 import {
@@ -12,9 +13,7 @@ import {
    type WebhookDeliveryJobData,
 } from "@packages/queue/webhook-delivery";
 import type { Queue } from "bullmq";
-
-import type { Money } from "@f-o-t/money";
-import type { EventCategory, EmitFn } from "./catalog";
+import type { EmitFn, EventCategory } from "./catalog";
 import { getEventPrice } from "./utils";
 
 export interface EmitEventParams {
@@ -31,10 +30,7 @@ export interface EmitEventParams {
    priceOverride?: Money;
 }
 
-export function createEmitFn(
-   db: DatabaseInstance,
-   posthog?: PostHog,
-): EmitFn {
+export function createEmitFn(db: DatabaseInstance, posthog?: PostHog): EmitFn {
    return (params) => emitEvent({ ...params, db, posthog });
 }
 
@@ -216,18 +212,27 @@ export async function emitEventBatch(
    try {
       // Look up prices for all unique event names
       const uniqueNames = [...new Set(eventList.map((e) => e.eventName))];
-      const billingMap = new Map<string, { priceStr: string; isBillable: boolean }>();
+      const billingMap = new Map<
+         string,
+         { priceStr: string; isBillable: boolean }
+      >();
 
       await Promise.all(
          uniqueNames.map(async (name) => {
             const { price, isBillable } = await getEventPrice(db, name);
-            billingMap.set(name, { priceStr: toMajorUnitsString(price), isBillable });
+            billingMap.set(name, {
+               priceStr: toMajorUnitsString(price),
+               isBillable,
+            });
          }),
       );
 
       // 1. Bulk insert into PostgreSQL
       const rows = eventList.map((evt) => {
-         const billing = billingMap.get(evt.eventName) ?? { priceStr: "0", isBillable: false };
+         const billing = billingMap.get(evt.eventName) ?? {
+            priceStr: "0",
+            isBillable: false,
+         };
          return {
             organizationId: evt.organizationId,
             eventName: evt.eventName,

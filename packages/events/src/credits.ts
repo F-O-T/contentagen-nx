@@ -51,21 +51,23 @@ export const POOL_CATEGORIES: Record<CreditPool, EventCategory[]> = {
  * Monthly credit budget per plan per pool.
  * Values are in BRL with micro-precision (6 decimal places).
  */
-export const PLAN_CREDIT_BUDGETS: Record<PlanName, Record<CreditPool, Money>> =
-   {
-      [PlanName.FREE]: {
-         ai: brl("2.500000"),
-         platform: brl("2.500000"),
-      },
-      [PlanName.LITE]: {
-         ai: brl("25.000000"),
-         platform: brl("25.000000"),
-      },
-      [PlanName.PRO]: {
-         ai: brl("50.000000"),
-         platform: brl("50.000000"),
-      },
-   };
+export const PLAN_CREDIT_BUDGETS: Record<
+   PlanName,
+   Record<CreditPool, Money>
+> = {
+   [PlanName.FREE]: {
+      ai: brl("2.500000"),
+      platform: brl("2.500000"),
+   },
+   [PlanName.LITE]: {
+      ai: brl("25.000000"),
+      platform: brl("25.000000"),
+   },
+   [PlanName.PRO]: {
+      ai: brl("50.000000"),
+      platform: brl("50.000000"),
+   },
+};
 
 /**
  * Resolve which credit pool an event category belongs to.
@@ -268,10 +270,5 @@ export async function trackCreditUsage(
    if (!options?.priceMinorUnits && !isBillable) return;
 
    const priceMinorUnits = options?.priceMinorUnits ?? Number(price.amount);
-   await incrementCreditUsage(
-      redis,
-      organizationId,
-      pool,
-      priceMinorUnits,
-   );
+   await incrementCreditUsage(redis, organizationId, pool, priceMinorUnits);
 }

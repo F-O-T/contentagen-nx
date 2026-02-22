@@ -440,10 +440,11 @@ export class ContenttaFormsClient {
 					referrer: typeof document !== "undefined" ? document.referrer : "",
 					url: typeof window !== "undefined" ? window.location.href : "",
 				},
-				...(options?.experimentId && options?.variantId && {
-					experimentId: options.experimentId,
-					variantId: options.variantId,
-				}),
+				...(options?.experimentId &&
+					options?.variantId && {
+						experimentId: options.experimentId,
+						variantId: options.variantId,
+					}),
 			};
 
 			// Use oRPC client to submit form

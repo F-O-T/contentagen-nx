@@ -292,8 +292,14 @@ export const currentMonthStorageCost = pgMaterializedView(
    {
       organizationId: uuid("organization_id").notNull(),
       currentBytes: bigint("current_bytes", { mode: "bigint" }).notNull(),
-      monthToDateCost: decimal("month_to_date_cost", { precision: 10, scale: 6 }).notNull(),
-      projectedCost: decimal("projected_cost", { precision: 10, scale: 6 }).notNull(),
+      monthToDateCost: decimal("month_to_date_cost", {
+         precision: 10,
+         scale: 6,
+      }).notNull(),
+      projectedCost: decimal("projected_cost", {
+         precision: 10,
+         scale: 6,
+      }).notNull(),
    },
 ).as(sql`
    SELECT

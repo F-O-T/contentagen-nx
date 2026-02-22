@@ -32,7 +32,10 @@ export async function getEventPrice(
       console.warn(
          `[Events] Event not found in catalog: ${eventName}, defaulting to $0`,
       );
-      return { price: createMoney(0n, CURRENCY, PRICE_SCALE), isBillable: false };
+      return {
+         price: createMoney(0n, CURRENCY, PRICE_SCALE),
+         isBillable: false,
+      };
    }
 
    return {

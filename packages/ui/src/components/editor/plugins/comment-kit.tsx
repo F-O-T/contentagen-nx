@@ -84,7 +84,7 @@ export const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, {
             setOption("activeId", getDraftCommentKey());
             setOption(
                "commentingBlock",
-               editor.selection?.focus.path.slice(0, 1),
+               editor.selection?.focus.path.slice(0, 1) ?? null,
             );
          },
       }),
