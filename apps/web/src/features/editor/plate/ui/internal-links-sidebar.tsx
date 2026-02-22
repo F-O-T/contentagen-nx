@@ -87,9 +87,11 @@ function SuggestionItem({
 
    function handleInsertLink() {
       // insertLink requires an active selection in the editor.
-      // If no selection exists, focus the editor first so insertLink can place the node.
+      // If no selection exists, focus the editor and select the document end
+      // so that insertLink has a valid cursor position to work with.
       if (!editor.selection) {
          editor.tf.focus();
+         editor.tf.select(editor.api.end([]));
       }
       insertLink(editor, {
          url: suggestion.url,
