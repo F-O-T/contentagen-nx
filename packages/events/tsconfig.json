@@ -2,16 +2,5 @@
   "extends": "@tooling/typescript/typecheck.json",
   "include": [
     "src"
-  ],
-  "compilerOptions": {
-    "disableSourceOfProjectReferenceRedirect": true
-  },
-  "references": [
-    {
-      "path": "../redis"
-    },
-    {
-      "path": "../queue"
-    }
   ]
 }

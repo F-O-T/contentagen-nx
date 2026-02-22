@@ -231,6 +231,7 @@ export const getSuggestions = protectedProcedure
          for (const sibling of siblings) {
             if (sibling.targetContent === null) continue;
             if (sibling.targetContentId === input.contentId) continue;
+            if (sibling.targetContent.organizationId !== organizationId) continue;
             const tc = sibling.targetContent;
             const meta = tc.meta as { title?: string; slug?: string } | null;
             const slug = meta?.slug;
