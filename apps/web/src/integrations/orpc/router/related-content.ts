@@ -153,6 +153,9 @@ export const reorderSatellites = protectedProcedure
 /**
  * Get internal link suggestions for a given content piece.
  * Returns role + suggestion list based on cluster membership.
+ *
+ * Note: When content appears as a satellite in multiple clusters,
+ * only the first cluster's pillar and siblings are returned.
  */
 export const getSuggestions = protectedProcedure
    .input(z.object({ contentId: z.string().uuid() }))
