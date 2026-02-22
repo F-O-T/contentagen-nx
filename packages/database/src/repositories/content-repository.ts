@@ -530,10 +530,7 @@ export async function listClustersByTeam(
             and(
                eq(content.teamId, teamId),
                isNotNull(content.clusterConfig),
-               ne(
-                  sql`(${content.clusterConfig})::text`,
-                  "{}",
-               ),
+               ne(sql`(${content.clusterConfig})::text`, "{}"),
             ),
          )
          .orderBy(desc(content.createdAt))

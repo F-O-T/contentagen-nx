@@ -54,13 +54,6 @@ export const navGroups: NavGroupDef[] = [
             route: "/$slug/$teamSlug/home",
          },
          {
-            id: "content",
-            label: "Conteudos",
-            icon: FileText,
-            route: "/$slug/$teamSlug/content",
-            quickAction: { type: "create", target: "navigate" },
-         },
-         {
             id: "forms",
             label: "Formularios",
             icon: ClipboardList,
@@ -77,12 +70,27 @@ export const navGroups: NavGroupDef[] = [
             earlyAccessFlag: "experiments",
             earlyAccessStage: "alpha" as const,
          },
+      ],
+   },
+   {
+      id: "conteudo",
+      label: "Conteudo",
+      items: [
+         {
+            id: "content",
+            label: "Conteudos",
+            icon: FileText,
+            route: "/$slug/$teamSlug/content",
+            quickAction: { type: "create", target: "navigate" },
+         },
          {
             id: "clusters",
             label: "Clusters",
             icon: Network,
             route: "/$slug/$teamSlug/clusters",
             quickAction: { type: "create", target: "sheet" } as const,
+            earlyAccessFlag: "content-clusters",
+            earlyAccessStage: "alpha" as const,
          },
       ],
    },

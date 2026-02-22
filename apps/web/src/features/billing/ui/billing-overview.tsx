@@ -50,6 +50,7 @@ import {
    Globe,
    HardDrive,
    HelpCircle,
+   Network,
    Package,
    Receipt,
    Search,
@@ -119,6 +120,11 @@ const CATEGORY_CONFIG: Record<
       description: "Testes A/B e experimentos de conteudo",
       icon: <Globe className="size-5" />,
    },
+   cluster: {
+      label: "Clusters de Conteudo",
+      description: "Posts pillar, posts satelite e embeds de changelog",
+      icon: <Network className="size-5" />,
+   },
    webhook: {
       label: "Webhooks",
       description: "Entregas de webhook e notificacoes externas",
@@ -139,6 +145,7 @@ const EARLY_ACCESS_CATEGORY_GATES: Record<
 > = {
    form: { flag: "forms-beta", fallbackStage: "beta" },
    experiment: { flag: "experiments", fallbackStage: "alpha" },
+   cluster: { flag: "content-clusters", fallbackStage: "alpha" },
 };
 
 // Volume-based (non-event) early access features.
@@ -334,6 +341,7 @@ function OverviewProductSubItems({ category }: { category: string }) {
                | "seo"
                | "experiment"
                | "webhook"
+               | "cluster"
                | "system",
          },
       }),

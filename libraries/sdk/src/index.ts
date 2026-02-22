@@ -64,7 +64,6 @@ export function createSdk(config: SdkConfig) {
 	return createORPCClient(link);
 }
 
+export { ContenttaChangelogClient } from "./changelog.ts";
 // Re-export types
 export type { SdkRouter } from "./types";
-
-export { ContenttaChangelogClient } from "./changelog.ts";
