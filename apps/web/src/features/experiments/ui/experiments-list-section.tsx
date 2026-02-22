@@ -8,12 +8,10 @@ import {
    EmptyTitle,
 } from "@packages/ui/components/empty";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useParams } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowRight, FlaskConical, Plus } from "lucide-react";
-import { useSheet } from "@/hooks/use-sheet";
 import { orpc } from "@/integrations/orpc/client";
-import { CreateExperimentSheet } from "./create-experiment-sheet";
 import { ExperimentStatusBadge } from "./experiment-status-badge";
 
 type ExperimentStatus = "draft" | "running" | "paused" | "concluded";
@@ -95,7 +93,7 @@ function useExperimentColumns(
 }
 
 export function ExperimentsListSection() {
-   const { openSheet, closeSheet } = useSheet();
+   const navigate = useNavigate();
    const { slug, teamSlug } = useParams({ strict: false }) as {
       slug: string;
       teamSlug: string;
@@ -107,9 +105,10 @@ export function ExperimentsListSection() {
    const columns = useExperimentColumns(slug, teamSlug);
 
    const handleOpenCreateSheet = () => {
-      openSheet({
-         children: <CreateExperimentSheet onSuccess={closeSheet} />,
-      });
+      navigate({
+         to: "/$slug/$teamSlug/experiments/new",
+         params: { slug, teamSlug },
+      } as never);
    };
 
    if (!experiments.length) {
