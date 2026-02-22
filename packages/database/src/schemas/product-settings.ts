@@ -35,15 +35,36 @@ export const AIDefaultsSchema = z.object({
    contentModel: z
       .enum([
          "openrouter/x-ai/grok-4.1-fast",
-         "openrouter/minimax/minimax-m2.1",
+         "openrouter/google/gemini-3-flash-preview",
+         "openrouter/openai/gpt-oss-120b",
+         "openrouter/openai/gpt-oss-20b",
+         "openrouter/moonshotai/kimi-k2.5",
+         "openrouter/minimax/minimax-m2.5",
+         "openrouter/z-ai/glm-5",
+         "openrouter/bytedance-seed/seed-1.6-flash",
+         "openrouter/liquid/lfm2-8b-a1b",
+      ])
+      .optional(),
+   autocompleteModel: z
+      .enum([
+         "openrouter/openai/gpt-oss-20b",
+         "openrouter/liquid/lfm2-8b-a1b",
+         "openrouter/liquid/lfm-2.2-6b",
+         "openrouter/google/gemini-2.5-flash-lite",
+         "openrouter/stepfun/step-3.5-flash",
       ])
       .optional(),
    editModel: z
       .enum([
-         "openrouter/mistralai/mistral-small-creative",
+         "openrouter/openai/gpt-oss-20b",
+         "openrouter/z-ai/glm-4.7-flash",
          "openrouter/x-ai/grok-4.1-fast",
       ])
       .optional(),
+   contentTemperature: z.number().min(0).max(2).optional(),
+   contentMaxTokens: z.number().int().positive().optional(),
+   autocompleteTemperature: z.number().min(0).max(2).optional(),
+   editTemperature: z.number().min(0).max(2).optional(),
    searchDepth: z.enum(["basic", "advanced"]).optional(),
    searchMaxResults: z.number().int().positive().optional(),
    includeSearchAnswer: z.boolean().optional(),
