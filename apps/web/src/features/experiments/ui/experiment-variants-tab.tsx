@@ -163,7 +163,8 @@ export function ExperimentVariantsTab({
    const removeMutation = useMutation(
       orpc.experiments.removeVariantFromExperiment.mutationOptions({
          onSuccess: () => toast.success("Variante removida"),
-         onError: (err) => toast.error(err.message ?? "Erro ao remover variante"),
+         onError: (err) =>
+            toast.error(err.message ?? "Erro ao remover variante"),
       }),
    );
 
@@ -270,7 +271,9 @@ export function ExperimentVariantsTab({
                         <Button
                            className="size-8 text-destructive hover:text-destructive"
                            disabled={removeMutation.isPending}
-                           onClick={() => handleRemove(variant.id, variant.name)}
+                           onClick={() =>
+                              handleRemove(variant.id, variant.name)
+                           }
                            size="icon"
                            variant="ghost"
                         >
@@ -288,8 +291,8 @@ export function ExperimentVariantsTab({
 
          {!canEdit && status === "running" && (
             <p className="text-xs text-muted-foreground text-center">
-               Variantes não podem ser modificadas enquanto o experimento está em
-               execução.
+               Variantes não podem ser modificadas enquanto o experimento está
+               em execução.
             </p>
          )}
       </div>

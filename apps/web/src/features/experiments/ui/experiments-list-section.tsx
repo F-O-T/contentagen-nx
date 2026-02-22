@@ -79,11 +79,7 @@ function useExperimentColumns(
          header: "",
          cell: ({ row }) => (
             <div className="flex justify-end">
-               <Button
-                  asChild
-                  size="sm"
-                  variant="ghost"
-               >
+               <Button asChild size="sm" variant="ghost">
                   <Link
                      params={{ slug, teamSlug, experimentId: row.original.id }}
                      to="/$slug/$teamSlug/experiments/$experimentId"

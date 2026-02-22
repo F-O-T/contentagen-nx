@@ -81,7 +81,10 @@ function TabContentSkeleton() {
    return (
       <div className="flex flex-col gap-3 pt-2">
          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton className="h-16 w-full rounded-lg" key={`tab-sk-${i + 1}`} />
+            <Skeleton
+               className="h-16 w-full rounded-lg"
+               key={`tab-sk-${i + 1}`}
+            />
          ))}
       </div>
    );
@@ -136,7 +139,10 @@ function ExperimentHeaderActions({
       orpc.experiments.remove.mutationOptions({
          onSuccess: () => {
             toast.success("Experimento excluído");
-            navigate({ to: "/$slug/$teamSlug/experiments", params: { slug, teamSlug } });
+            navigate({
+               to: "/$slug/$teamSlug/experiments",
+               params: { slug, teamSlug },
+            });
          },
          onError: (err) => toast.error(err.message ?? "Erro ao excluir"),
       }),
@@ -224,11 +230,7 @@ function ExperimentHeaderActions({
          {/* Secondary actions */}
          <DropdownMenu>
             <DropdownMenuTrigger asChild>
-               <Button
-                  disabled={isAnyPending}
-                  size="sm"
-                  variant="outline"
-               >
+               <Button disabled={isAnyPending} size="sm" variant="outline">
                   <ChevronDown className="size-4" />
                </Button>
             </DropdownMenuTrigger>
@@ -252,10 +254,7 @@ function ExperimentHeaderActions({
                   </DropdownMenuItem>
                )}
                {status === "running" && (
-                  <DropdownMenuItem
-                     className="text-muted-foreground"
-                     disabled
-                  >
+                  <DropdownMenuItem className="text-muted-foreground" disabled>
                      <Trash2 className="mr-2 size-4" />
                      Pause primeiro para excluir
                   </DropdownMenuItem>
@@ -375,15 +374,16 @@ function ExperimentDetailContent() {
             </TabsList>
 
             <TabsContent className="pt-4" value="variants">
-               <ErrorBoundary
-                  FallbackComponent={ExperimentDetailErrorFallback}
-               >
+               <ErrorBoundary FallbackComponent={ExperimentDetailErrorFallback}>
                   <Suspense fallback={<TabContentSkeleton />}>
                      <ExperimentVariantsTab
                         experimentId={experimentId}
                         status={status}
                         targetType={
-                           experiment.targetType as "content" | "form" | "cluster"
+                           experiment.targetType as
+                              | "content"
+                              | "form"
+                              | "cluster"
                         }
                         winnerId={experiment.winnerId ?? null}
                      />
@@ -392,9 +392,7 @@ function ExperimentDetailContent() {
             </TabsContent>
 
             <TabsContent className="pt-4" value="results">
-               <ErrorBoundary
-                  FallbackComponent={ExperimentDetailErrorFallback}
-               >
+               <ErrorBoundary FallbackComponent={ExperimentDetailErrorFallback}>
                   <Suspense fallback={<TabContentSkeleton />}>
                      <ExperimentResultsTab experimentId={experimentId} />
                   </Suspense>

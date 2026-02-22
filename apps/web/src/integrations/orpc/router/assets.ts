@@ -285,7 +285,9 @@ export const generateImage = protectedProcedure
 
       const isSeedream = model.includes("seedream");
       const { image } = await aiGenerateImage({
-         model: openrouter.imageModel(model, { extraBody: { modalities: ["image"] } }),
+         model: openrouter.imageModel(model, {
+            extraBody: { modalities: ["image"] },
+         }),
          prompt: input.prompt,
          ...(isSeedream ? {} : { size }),
       }).catch((err) => {

@@ -208,10 +208,7 @@ function AssetCard({
                            size="icon"
                            variant="ghost"
                         >
-                           <a
-                              download={asset.filename}
-                              href={asset.publicUrl}
-                           >
+                           <a download={asset.filename} href={asset.publicUrl}>
                               <Download className="size-4" />
                            </a>
                         </Button>
