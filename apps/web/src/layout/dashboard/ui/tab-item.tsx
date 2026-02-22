@@ -12,7 +12,10 @@ import {
    CreditCard,
    Database,
    FileText,
+   FlaskConical,
    House,
+   Image,
+   Layers,
    LayoutDashboard,
    Lightbulb,
    Pin,
@@ -39,6 +42,9 @@ const TAB_ICON_MAP: Record<string, typeof House> = {
    Sparkles,
    Database,
    BarChart3,
+   FlaskConical,
+   Layers,
+   Image,
 };
 
 const TAB_TYPE_ICON: Record<TabType, string> = {
@@ -56,6 +62,9 @@ const TAB_TYPE_ICON: Record<TabType, string> = {
    billing: "CreditCard",
    plans: "Sparkles",
    generic: "FileText",
+   experiments: "FlaskConical",
+   clusters: "Layers",
+   assets: "Image",
 };
 
 function getTabIcon(type: TabType, iconOverride?: string) {
