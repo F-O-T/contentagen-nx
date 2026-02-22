@@ -16,8 +16,8 @@ import {
 } from "@packages/ui/components/empty";
 import { Input } from "@packages/ui/components/input";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import type { Row } from "@tanstack/react-table";
 import { useNavigate, useParams } from "@tanstack/react-router";
+import type { Row } from "@tanstack/react-table";
 import { Archive, FileText, Plus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -181,7 +181,7 @@ export function ContentListSection() {
             onArchive: handleArchive,
             onDelete: handleDelete,
          }),
-      [],
+      [handleView, handlePublish, handleArchive, handleDelete],
    );
 
    function ContentRowExpanded({ row }: { row: Row<ContentItem> }) {
@@ -193,9 +193,9 @@ export function ContentListSection() {
             <div className="flex items-center gap-2 flex-wrap">
                {isDraft && (
                   <Button
+                     onClick={() => handlePublish(content)}
                      size="sm"
                      variant="outline"
-                     onClick={() => handlePublish(content)}
                   >
                      <FileText className="size-3 mr-2" />
                      Publicar
@@ -203,19 +203,19 @@ export function ContentListSection() {
                )}
                {isPublished && (
                   <Button
+                     onClick={() => handleArchive(content)}
                      size="sm"
                      variant="outline"
-                     onClick={() => handleArchive(content)}
                   >
                      <Archive className="size-3 mr-2" />
                      Arquivar
                   </Button>
                )}
                <Button
-                  size="sm"
-                  variant="ghost"
                   className="text-destructive hover:text-destructive"
                   onClick={() => handleDelete(content)}
+                  size="sm"
+                  variant="ghost"
                >
                   <Trash2 className="size-3 mr-2" />
                   Excluir
@@ -406,15 +406,20 @@ export function ContentListSection() {
                   totalCount: data.total,
                   totalPages: data.totalPages,
                }}
-               renderMobileCard={({ row, toggleExpanded, isExpanded, canExpand }) => (
+               renderMobileCard={({
+                  row,
+                  toggleExpanded,
+                  isExpanded,
+                  canExpand,
+               }) => (
                   <ContentMobileCard
+                     canExpand={canExpand}
                      content={row.original}
+                     isExpanded={isExpanded}
                      onArchive={handleArchive}
                      onDelete={handleDelete}
                      onPublish={handlePublish}
                      onView={handleView}
-                     canExpand={canExpand}
-                     isExpanded={isExpanded}
                      toggleExpanded={toggleExpanded}
                   />
                )}
