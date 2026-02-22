@@ -1,10 +1,8 @@
 "use client";
 
-import { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
-import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
+import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { ScrollArea } from "@packages/ui/components/scroll-area";
 import {
    Table,
@@ -23,9 +21,11 @@ import {
 import { cn } from "@packages/ui/lib/utils";
 import { insertLink } from "@platejs/link";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouter, useParams } from "@tanstack/react-router";
+import { useParams, useRouter } from "@tanstack/react-router";
 import { ExternalLink, Link2, Link2Off, Pencil, X } from "lucide-react";
 import { useEditorRef } from "platejs/react";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { orpc } from "@/integrations/orpc/client";
 
 interface Suggestion {
@@ -78,7 +78,9 @@ function SuggestionsTable({
 }) {
    const editor = useEditorRef();
    const { navigate } = useRouter();
-   const params = useParams({ from: "/_authenticated/$slug/$teamSlug/_editor/$contentId" })
+   const params = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_editor/$contentId",
+   });
    function handleInsertLink(suggestion: Suggestion) {
       if (!editor.selection) {
          editor.tf.focus();
@@ -88,15 +90,14 @@ function SuggestionsTable({
    }
 
    function handleNavigate(suggestion: Suggestion) {
-      const { slug, teamSlug } = params
+      const { slug, teamSlug } = params;
       return navigate({
          to: "/$slug/$teamSlug/$contentId",
          params: {
-            slug, teamSlug,
-            contentId: suggestion.id
-
-
-         }
+            slug,
+            teamSlug,
+            contentId: suggestion.id,
+         },
       });
    }
 
@@ -144,16 +145,16 @@ function SuggestionsTable({
             <TableBody>
                {suggestions.map((suggestion) => (
                   <TableRow
-                     key={suggestion.id}
                      className="border-b border-border/30 hover:bg-accent/50 cursor-default"
+                     key={suggestion.id}
                   >
                      {/* Title — max-w-0 enables CSS truncation inside a table cell */}
                      <TableCell className="px-3 py-3 max-w-0">
                         <Button
-                           type="button"
-                           variant="link"
                            className="h-auto w-full justify-start p-0 text-sm font-medium text-foreground hover:text-foreground"
                            onClick={() => handleNavigate(suggestion)}
+                           type="button"
+                           variant="link"
                         >
                            <span className="truncate block w-full">
                               {suggestion.title || "Sem título"}
@@ -164,10 +165,13 @@ function SuggestionsTable({
                      {/* Status */}
                      <TableCell className="px-2 py-3 whitespace-nowrap">
                         <Badge
-                           variant={STATUS_VARIANT[suggestion.status] ?? "outline"}
                            className="text-xs h-5 px-2 font-normal"
+                           variant={
+                              STATUS_VARIANT[suggestion.status] ?? "outline"
+                           }
                         >
-                           {STATUS_LABELS[suggestion.status] ?? suggestion.status}
+                           {STATUS_LABELS[suggestion.status] ??
+                              suggestion.status}
                         </Badge>
                      </TableCell>
 
@@ -177,10 +181,10 @@ function SuggestionsTable({
                            <Tooltip>
                               <TooltipTrigger asChild>
                                  <Button
-                                    size="icon"
-                                    variant="ghost"
                                     className="size-7 rounded"
                                     onClick={() => handleNavigate(suggestion)}
+                                    size="icon"
+                                    variant="ghost"
                                  >
                                     <Pencil className="size-3.5" />
                                  </Button>
@@ -193,15 +197,15 @@ function SuggestionsTable({
                            <Tooltip>
                               <TooltipTrigger asChild>
                                  <Button
+                                    asChild
+                                    className="size-7 rounded"
                                     size="icon"
                                     variant="ghost"
-                                    className="size-7 rounded"
-                                    asChild
                                  >
                                     <a
                                        href={`/${params.slug}/${params.teamSlug}/content/${suggestion.id}`}
-                                       target="_blank"
                                        rel="noopener noreferrer"
+                                       target="_blank"
                                     >
                                        <ExternalLink className="size-3.5" />
                                     </a>
@@ -215,10 +219,10 @@ function SuggestionsTable({
                            <Tooltip>
                               <TooltipTrigger asChild>
                                  <Button
-                                    size="icon"
-                                    variant="ghost"
                                     className="size-7 rounded"
                                     onClick={() => handleInsertLink(suggestion)}
+                                    size="icon"
+                                    variant="ghost"
                                  >
                                     <Link2 className="size-3.5" />
                                  </Button>
@@ -247,7 +251,7 @@ function SuggestionsList({ contentId }: { contentId: string }) {
 
    const { role, suggestions } = data;
 
-   return <SuggestionsTable suggestions={suggestions} role={role} />;
+   return <SuggestionsTable role={role} suggestions={suggestions} />;
 }
 
 interface InternalLinksSidebarProps {
@@ -277,11 +281,11 @@ export function InternalLinksSidebar({
                </span>
                {onClose && (
                   <Button
-                     type="button"
-                     variant="ghost"
-                     size="icon"
                      className="size-6 rounded text-muted-foreground"
                      onClick={onClose}
+                     size="icon"
+                     type="button"
+                     variant="ghost"
                   >
                      <X className="size-3.5" />
                   </Button>
@@ -295,8 +299,8 @@ export function InternalLinksSidebar({
                         <div className="flex flex-col gap-1.5 p-3">
                            {Array.from({ length: 3 }, (_, i) => (
                               <div
-                                 key={`skeleton-${i + 1}`}
                                  className="h-10 rounded bg-accent/30 animate-pulse"
+                                 key={`skeleton-${i + 1}`}
                               />
                            ))}
                         </div>

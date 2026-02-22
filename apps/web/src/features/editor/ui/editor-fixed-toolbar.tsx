@@ -212,23 +212,33 @@ export function EditorFixedToolbar({
                         type="button"
                         variant="ghost"
                      >
-                        <cfg.Icon className={cn("size-3.5 shrink-0", cfg.text)} />
+                        <cfg.Icon
+                           className={cn("size-3.5 shrink-0", cfg.text)}
+                        />
                         <span className={cn(cfg.text)}>{cfg.label}</span>
                         <ChevronDown className="size-3.5 text-muted-foreground" />
                      </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-44">
-                     {(["draft", "published", "archived"] as ContentStatus[]).map((s) => {
+                     {(
+                        ["draft", "published", "archived"] as ContentStatus[]
+                     ).map((s) => {
                         const item = STATUS_CONFIG[s];
                         return (
                            <DropdownMenuItem
-                              key={s}
                               className="gap-2.5 text-sm py-2"
+                              key={s}
                               onClick={() => onStatusChange(s)}
                            >
-                              <item.Icon className={cn("size-4 shrink-0", item.text)} />
-                              <span className={cn("flex-1", item.text)}>{item.label}</span>
-                              {status === s && <Check className="size-3.5 text-muted-foreground" />}
+                              <item.Icon
+                                 className={cn("size-4 shrink-0", item.text)}
+                              />
+                              <span className={cn("flex-1", item.text)}>
+                                 {item.label}
+                              </span>
+                              {status === s && (
+                                 <Check className="size-3.5 text-muted-foreground" />
+                              )}
                            </DropdownMenuItem>
                         );
                      })}

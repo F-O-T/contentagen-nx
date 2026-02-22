@@ -33,7 +33,11 @@ function clampStyle(
    if (typeof window === "undefined" || !style) return style;
    const raw = style.left;
    const left =
-      typeof raw === "number" ? raw : typeof raw === "string" ? parseFloat(raw) : Number.NaN;
+      typeof raw === "number"
+         ? raw
+         : typeof raw === "string"
+           ? parseFloat(raw)
+           : Number.NaN;
    if (Number.isNaN(left)) return style;
    const max = window.innerWidth - reservedWidth - 8;
    return { ...style, left: Math.max(0, Math.min(left, max)) };
@@ -44,14 +48,18 @@ function InsertLinkToolbar() {
    useFloatingLinkEscape();
 
    const insertState = useFloatingLinkInsertState();
-   const { hidden, props: floatingProps, ref } = useFloatingLinkInsert(insertState);
+   const {
+      hidden,
+      props: floatingProps,
+      ref,
+   } = useFloatingLinkInsert(insertState);
 
    if (hidden) return null;
 
    return (
       <div
-         ref={ref}
          className="flex w-80 items-center gap-1 rounded-md border bg-popover p-1 shadow-md z-50"
+         ref={ref}
          style={clampStyle(floatingProps.style)}
       >
          <FloatingLinkUrlInput asChild>
@@ -69,8 +77,12 @@ function EditLinkToolbar() {
    useFloatingLinkEscape();
 
    const editState = useFloatingLinkEditState();
-   const { editButtonProps, props: floatingProps, ref, unlinkButtonProps } =
-      useFloatingLinkEdit(editState);
+   const {
+      editButtonProps,
+      props: floatingProps,
+      ref,
+      unlinkButtonProps,
+   } = useFloatingLinkEdit(editState);
 
    const { isEditing, isOpen } = editState;
 
@@ -78,8 +90,8 @@ function EditLinkToolbar() {
 
    return (
       <div
-         ref={ref}
          className="flex w-80 items-center gap-1 rounded-md border bg-popover p-1 shadow-md z-50"
+         ref={ref}
          style={clampStyle(floatingProps.style)}
       >
          {isEditing ? (
