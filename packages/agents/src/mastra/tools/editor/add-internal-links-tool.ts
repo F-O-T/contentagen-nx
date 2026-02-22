@@ -33,7 +33,7 @@ const AddInternalLinksOutputSchema = z.object({
 export const addInternalLinksTool = createTool({
    id: "addInternalLinks",
    description:
-      "Insert internal links into content using related posts from searchPreviousContent. Use this after searching for related content.",
+      "Insert internal links into content using related posts from searchPreviousContent. Uses /conteudo/ URL prefix and inserts inline markdown links within paragraph text. Use this after searching for related content.",
    inputSchema: AddInternalLinksInputSchema,
    outputSchema: AddInternalLinksOutputSchema,
    execute: async (input) => {
@@ -44,68 +44,74 @@ export const addInternalLinksTool = createTool({
             success: false,
             modifiedContent: content,
             linksAdded: [],
-            message:
-               "No related posts provided. Run searchPreviousContent first.",
+            message: "No related posts provided. Run searchPreviousContent first.",
          };
       }
 
       let modifiedContent = content;
-      const linksAdded: Array<{
-         title: string;
-         slug: string;
-         insertedAt: string;
-      }> = [];
+      const linksAdded: Array<{ title: string; slug: string; insertedAt: string }> = [];
 
-      // Find all H2 headings for insertion points
-      const h2Headings = modifiedContent.match(/^## [^\n]+$/gm) || [];
+      // Find paragraphs (prose text lines, not headings/blockquotes/lists)
+      // A paragraph is a non-empty line not starting with #, >, -, *, or digits followed by .
+      const paragraphPattern = /^(?!#|>|-|\*|\d+\.)(.{80,})/gm;
+      const paragraphs: Array<{ text: string; index: number }> = [];
+      let match: RegExpExecArray | null;
+      // biome-ignore lint/suspicious/noAssignInExpressions: regex exec loop pattern
+      while ((match = paragraphPattern.exec(modifiedContent)) !== null) {
+         paragraphs.push({ text: match[0], index: match.index });
+      }
 
-      for (let i = 0; i < Math.min(relatedPosts.length, maxLinks); i++) {
-         const post = relatedPosts[i];
+      const postsToInsert = relatedPosts.slice(0, maxLinks);
+
+      for (let i = 0; i < postsToInsert.length; i++) {
+         const post = postsToInsert[i];
          if (!post) continue;
 
-         // Create link markdown - use blockquote style for visibility
-         const linkMarkdown = `\n\n> **Leia também:** [${post.title}](/blog/${post.slug})\n`;
+         const paragraph = paragraphs[i * 2]; // space out links across paragraphs
 
-         const nextHeading = h2Headings[i + 1];
-         if (nextHeading) {
-            // Insert before the next heading (after current section)
-            const headingPos = modifiedContent.indexOf(nextHeading);
-            if (headingPos > 0) {
+         if (paragraph) {
+            // Insert inline after first sentence end ". "
+            const sentenceEnd = paragraph.text.indexOf(". ");
+            if (sentenceEnd > 20) {
+               const insertOffset = paragraph.index + sentenceEnd + 2;
+               const anchor = `[${post.title}](/conteudo/${post.slug})`;
                modifiedContent =
-                  modifiedContent.slice(0, headingPos) +
-                  linkMarkdown +
-                  modifiedContent.slice(headingPos);
+                  modifiedContent.slice(0, insertOffset) +
+                  anchor +
+                  " " +
+                  modifiedContent.slice(insertOffset);
                linksAdded.push({
                   title: post.title,
                   slug: post.slug,
-                  insertedAt: `before "${nextHeading}"`,
+                  insertedAt: `inline in paragraph ${i + 1}`,
                });
+               continue;
             }
+         }
+
+         // Fallback: insert before conclusion or at end
+         const conclusionMatch = modifiedContent.match(
+            /^## (?:Conclusão|Resumo|Considerações|Conclusion|Summary)/m,
+         );
+         const insertText = `\n[${post.title}](/conteudo/${post.slug})\n\n`;
+         if (conclusionMatch) {
+            const insertPoint = modifiedContent.indexOf(conclusionMatch[0]);
+            modifiedContent =
+               modifiedContent.slice(0, insertPoint) +
+               insertText +
+               modifiedContent.slice(insertPoint);
+            linksAdded.push({
+               title: post.title,
+               slug: post.slug,
+               insertedAt: "before conclusion",
+            });
          } else {
-            // Insert before conclusion or at the end
-            const conclusionMatch = modifiedContent.match(
-               /^## (?:Conclusão|Resumo|Considerações|Conclusion|Summary)/m,
-            );
-            if (conclusionMatch) {
-               const insertPoint = modifiedContent.indexOf(conclusionMatch[0]);
-               modifiedContent =
-                  modifiedContent.slice(0, insertPoint) +
-                  linkMarkdown +
-                  modifiedContent.slice(insertPoint);
-               linksAdded.push({
-                  title: post.title,
-                  slug: post.slug,
-                  insertedAt: "before conclusion",
-               });
-            } else {
-               // Add at the end if no conclusion found
-               modifiedContent = modifiedContent + linkMarkdown;
-               linksAdded.push({
-                  title: post.title,
-                  slug: post.slug,
-                  insertedAt: "end of content",
-               });
-            }
+            modifiedContent += insertText;
+            linksAdded.push({
+               title: post.title,
+               slug: post.slug,
+               insertedAt: "end of content",
+            });
          }
       }
 
@@ -115,7 +121,7 @@ export const addInternalLinksTool = createTool({
          linksAdded,
          message:
             linksAdded.length > 0
-               ? `Added ${linksAdded.length} internal links`
+               ? `Added ${linksAdded.length} internal links inline`
                : "No suitable insertion points found",
       };
    },
