@@ -21,9 +21,13 @@ import {
    useMarkToolbarButtonState,
 } from "@platejs/utils/react";
 import {
+   Archive,
    ArrowLeft,
    Bold,
+   Check,
    ChevronDown,
+   FileText,
+   Globe,
    Italic,
    Link2,
    Link2Off,
@@ -47,22 +51,25 @@ interface EditorFixedToolbarProps {
 
 const STATUS_CONFIG: Record<
    ContentStatus,
-   { label: string; dot: string; text: string }
+   { label: string; dot: string; text: string; Icon: React.ElementType }
 > = {
    draft: {
       label: "Rascunho",
       dot: "bg-amber-400",
       text: "text-amber-600 dark:text-amber-400",
+      Icon: FileText,
    },
    published: {
       label: "Publicado",
       dot: "bg-emerald-500",
       text: "text-emerald-600 dark:text-emerald-400",
+      Icon: Globe,
    },
    archived: {
       label: "Arquivado",
       dot: "bg-muted-foreground",
       text: "text-muted-foreground",
+      Icon: Archive,
    },
 };
 
@@ -83,7 +90,7 @@ function MarkButton({
          <TooltipTrigger asChild>
             <Button
                className={cn(
-                  "size-7 rounded",
+                  "size-8 rounded",
                   state.pressed && "bg-accent text-accent-foreground",
                )}
                size="icon"
@@ -117,12 +124,12 @@ export function EditorFixedToolbar({
 
    return (
       <TooltipProvider>
-         <div className="flex h-11 items-center gap-1.5 border-b px-3 bg-background sticky top-0 z-10">
+         <div className="flex h-12 items-center gap-1.5 border-b px-3 bg-background sticky top-0 z-10">
             {/* Back */}
             <Tooltip>
                <TooltipTrigger asChild>
                   <Button
-                     className="size-7 shrink-0 rounded"
+                     className="size-8 shrink-0 rounded"
                      onClick={onBack}
                      size="icon"
                      type="button"
@@ -139,17 +146,17 @@ export function EditorFixedToolbar({
             {/* Formatting marks */}
             <div className="flex items-center gap-0.5">
                <MarkButton
-                  icon={<Bold className="size-3.5" />}
+                  icon={<Bold className="size-4" />}
                   nodeType="bold"
                   tooltip="Negrito ⌘B"
                />
                <MarkButton
-                  icon={<Italic className="size-3.5" />}
+                  icon={<Italic className="size-4" />}
                   nodeType="italic"
                   tooltip="Itálico ⌘I"
                />
                <MarkButton
-                  icon={<Underline className="size-3.5" />}
+                  icon={<Underline className="size-4" />}
                   nodeType="underline"
                   tooltip="Sublinhado ⌘U"
                />
@@ -157,13 +164,13 @@ export function EditorFixedToolbar({
                <Tooltip>
                   <TooltipTrigger asChild>
                      <Button
-                        className="size-7 rounded"
+                        className="size-8 rounded"
                         onClick={handleLinkClick}
                         size="icon"
                         type="button"
                         variant="ghost"
                      >
-                        <Link2 className="size-3.5" />
+                        <Link2 className="size-4" />
                      </Button>
                   </TooltipTrigger>
                   <TooltipContent>Link ⌘K</TooltipContent>
@@ -178,7 +185,7 @@ export function EditorFixedToolbar({
                   <TooltipTrigger asChild>
                      <Button
                         className={cn(
-                           "size-7 rounded",
+                           "size-8 rounded",
                            showSidebar && "bg-accent text-accent-foreground",
                         )}
                         onClick={onToggleSidebar}
@@ -186,7 +193,7 @@ export function EditorFixedToolbar({
                         type="button"
                         variant="ghost"
                      >
-                        <Link2Off className="size-3.5" />
+                        <Link2Off className="size-4" />
                      </Button>
                   </TooltipTrigger>
                   <TooltipContent>Links do cluster</TooltipContent>
@@ -201,42 +208,30 @@ export function EditorFixedToolbar({
                <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                      <Button
-                        className="h-7 gap-1.5 rounded px-2 text-xs font-medium"
+                        className="h-8 gap-2 rounded px-3 text-sm font-medium"
                         type="button"
                         variant="ghost"
                      >
-                        <span
-                           className={cn(
-                              "size-1.5 rounded-full shrink-0",
-                              cfg.dot,
-                           )}
-                        />
+                        <cfg.Icon className={cn("size-3.5 shrink-0", cfg.text)} />
                         <span className={cn(cfg.text)}>{cfg.label}</span>
-                        <ChevronDown className="size-3 text-muted-foreground" />
+                        <ChevronDown className="size-3.5 text-muted-foreground" />
                      </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
-                     <DropdownMenuItem
-                        className="gap-2 text-xs"
-                        onClick={() => onStatusChange("draft")}
-                     >
-                        <span className="size-1.5 rounded-full bg-amber-400 shrink-0" />
-                        Rascunho
-                     </DropdownMenuItem>
-                     <DropdownMenuItem
-                        className="gap-2 text-xs"
-                        onClick={() => onStatusChange("published")}
-                     >
-                        <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
-                        Publicado
-                     </DropdownMenuItem>
-                     <DropdownMenuItem
-                        className="gap-2 text-xs"
-                        onClick={() => onStatusChange("archived")}
-                     >
-                        <span className="size-1.5 rounded-full bg-muted-foreground shrink-0" />
-                        Arquivado
-                     </DropdownMenuItem>
+                  <DropdownMenuContent align="end" className="w-44">
+                     {(["draft", "published", "archived"] as ContentStatus[]).map((s) => {
+                        const item = STATUS_CONFIG[s];
+                        return (
+                           <DropdownMenuItem
+                              key={s}
+                              className="gap-2.5 text-sm py-2"
+                              onClick={() => onStatusChange(s)}
+                           >
+                              <item.Icon className={cn("size-4 shrink-0", item.text)} />
+                              <span className={cn("flex-1", item.text)}>{item.label}</span>
+                              {status === s && <Check className="size-3.5 text-muted-foreground" />}
+                           </DropdownMenuItem>
+                        );
+                     })}
                   </DropdownMenuContent>
                </DropdownMenu>
             )}
@@ -245,7 +240,7 @@ export function EditorFixedToolbar({
 
             {/* Save */}
             <Button
-               className="h-7 gap-1.5 rounded px-3 text-xs"
+               className="h-8 gap-2 rounded px-4 text-sm"
                disabled={isSaving}
                onClick={onSave}
                size="sm"
@@ -253,9 +248,9 @@ export function EditorFixedToolbar({
                variant="default"
             >
                {isSaving ? (
-                  <Loader2 className="size-3.5 animate-spin" />
+                  <Loader2 className="size-4 animate-spin" />
                ) : (
-                  <Save className="size-3.5" />
+                  <Save className="size-4" />
                )}
                Salvar
             </Button>

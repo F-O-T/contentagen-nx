@@ -106,40 +106,42 @@ function SuggestionItem({ suggestion }: { suggestion: Suggestion }) {
    }
 
    return (
-      <div className="group relative flex items-start gap-2 rounded-md px-2 py-2 hover:bg-accent/60 transition-colors cursor-default">
-         <div className="flex-1 min-w-0">
+      <div className="group relative flex items-center gap-2 rounded-md px-2 py-2.5 hover:bg-accent/60 transition-colors cursor-default overflow-hidden">
+         {/* Content — must have min-w-0 to allow truncation inside flex */}
+         <div className="flex-1 min-w-0 overflow-hidden">
             <button
-               className="block w-full text-left"
+               className="block w-full text-left min-w-0"
                onClick={handleNavigate}
                type="button"
             >
-               <p className="text-xs font-medium leading-tight truncate hover:underline">
+               <p className="text-sm font-medium leading-snug truncate hover:underline">
                   {suggestion.title || "Sem título"}
                </p>
             </button>
-            <div className="flex items-center gap-1 mt-1">
+            <div className="flex items-center gap-1.5 mt-1 min-w-0">
                <Badge
-                  className="text-[9px] h-3.5 px-1 font-normal"
+                  className="text-[10px] h-4 px-1.5 font-normal shrink-0"
                   variant={STATUS_VARIANT[suggestion.status] ?? "outline"}
                >
                   {STATUS_LABELS[suggestion.status] ?? suggestion.status}
                </Badge>
-               <span className="text-[9px] text-muted-foreground/60 truncate font-mono">
+               <span className="text-[10px] text-muted-foreground/50 truncate font-mono min-w-0">
                   /{suggestion.slug}
                </span>
             </div>
          </div>
 
+         {/* Actions — always shrink-0, slide in on hover */}
          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
             <Tooltip>
                <TooltipTrigger asChild>
                   <Button
-                     className="size-5 rounded"
+                     className="size-6 rounded"
                      onClick={handleNavigate}
                      size="icon"
                      variant="ghost"
                   >
-                     <Network className="size-2.5" />
+                     <Network className="size-3" />
                   </Button>
                </TooltipTrigger>
                <TooltipContent side="left">Editar conteúdo</TooltipContent>
@@ -149,7 +151,7 @@ function SuggestionItem({ suggestion }: { suggestion: Suggestion }) {
                <TooltipTrigger asChild>
                   <a
                      className={cn(
-                        "inline-flex size-5 items-center justify-center rounded",
+                        "inline-flex size-6 items-center justify-center rounded",
                         "text-xs ring-offset-background transition-colors",
                         "hover:bg-accent hover:text-accent-foreground",
                         "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
@@ -158,7 +160,7 @@ function SuggestionItem({ suggestion }: { suggestion: Suggestion }) {
                      rel="noopener noreferrer"
                      target="_blank"
                   >
-                     <ExternalLink className="size-2.5" />
+                     <ExternalLink className="size-3" />
                   </a>
                </TooltipTrigger>
                <TooltipContent side="left">Abrir em nova aba</TooltipContent>
@@ -167,12 +169,12 @@ function SuggestionItem({ suggestion }: { suggestion: Suggestion }) {
             <Tooltip>
                <TooltipTrigger asChild>
                   <Button
-                     className="size-5 rounded"
+                     className="size-6 rounded"
                      onClick={handleInsertLink}
                      size="icon"
                      variant="ghost"
                   >
-                     <Link2 className="size-2.5" />
+                     <Link2 className="size-3" />
                   </Button>
                </TooltipTrigger>
                <TooltipContent side="left">Inserir link</TooltipContent>
@@ -195,16 +197,16 @@ function SuggestionsList({ contentId }: SuggestionsListProps) {
    return (
       <div className="flex flex-col gap-0.5">
          {/* Role header */}
-         <div className="flex items-center gap-1.5 px-2 py-1.5">
+         <div className="flex items-center gap-2 px-2 py-2">
             <span
                className={cn(
-                  "text-[10px] font-semibold uppercase tracking-wider",
+                  "text-xs font-semibold uppercase tracking-wider",
                   ROLE_COLORS[role] ?? "text-muted-foreground",
                )}
             >
                {ROLE_LABELS[role] ?? role}
             </span>
-            <span className="text-[10px] text-muted-foreground/50">
+            <span className="text-xs text-muted-foreground/50">
                · {suggestions.length}{" "}
                {suggestions.length === 1 ? "link" : "links"}
             </span>
@@ -243,23 +245,23 @@ export function InternalLinksSidebar({
       <TooltipProvider>
          <div
             className={cn(
-               "flex h-full w-56 flex-col border-l bg-background shrink-0",
+               "flex h-full min-w-72 flex-col border-l bg-background shrink-0 overflow-hidden",
                className,
             )}
          >
             {/* Header */}
-            <div className="flex items-center gap-2 px-2 py-2 border-b">
-               <Link2 className="size-3 text-muted-foreground/60 shrink-0" />
-               <span className="text-xs font-semibold flex-1">
+            <div className="flex items-center gap-2 px-3 py-2.5 border-b">
+               <Link2 className="size-3.5 text-muted-foreground/60 shrink-0" />
+               <span className="text-sm font-semibold flex-1">
                   Links do Cluster
                </span>
                {onClose && (
                   <button
-                     className="size-5 flex items-center justify-center rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                     className="size-6 flex items-center justify-center rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                      onClick={onClose}
                      type="button"
                   >
-                     <X className="size-3" />
+                     <X className="size-3.5" />
                   </button>
                )}
             </div>
