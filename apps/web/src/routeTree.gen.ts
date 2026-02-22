@@ -69,7 +69,6 @@ import { Route as AuthenticatedSlugTeamSlugDashboardSettingsOrganizationMembersR
 import { Route as AuthenticatedSlugTeamSlugDashboardSettingsOrganizationGeneralRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings/organization/general'
 import { Route as AuthenticatedSlugTeamSlugDashboardSettingsOrganizationDangerZoneRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings/organization/danger-zone'
 import { Route as AuthenticatedSlugTeamSlugDashboardSettingsOrganizationAuthenticationRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings/organization/authentication'
-import { Route as AuthenticatedSlugTeamSlugDashboardFormsFormIdSubmissionsRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/forms/$formId.submissions'
 import { Route as AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsNewRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/new'
 import { Route as AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsInsightIdRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/$insightId'
 import { Route as AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementSourcesRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management/sources'
@@ -447,12 +446,6 @@ const AuthenticatedSlugTeamSlugDashboardSettingsOrganizationAuthenticationRoute 
       getParentRoute: () => AuthenticatedSlugTeamSlugDashboardSettingsRoute,
     } as any,
   )
-const AuthenticatedSlugTeamSlugDashboardFormsFormIdSubmissionsRoute =
-  AuthenticatedSlugTeamSlugDashboardFormsFormIdSubmissionsRouteImport.update({
-    id: '/submissions',
-    path: '/submissions',
-    getParentRoute: () => AuthenticatedSlugTeamSlugDashboardFormsFormIdRoute,
-  } as any)
 const AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsNewRoute =
   AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsNewRouteImport.update({
     id: '/analytics/insights/new',
@@ -599,7 +592,7 @@ export interface FileRoutesByFullPath {
   '/$slug/$teamSlug/analytics/data-management': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRouteWithChildren
   '/$slug/$teamSlug/clusters/$clusterId': typeof AuthenticatedSlugTeamSlugDashboardClustersClusterIdRoute
   '/$slug/$teamSlug/experiments/$experimentId': typeof AuthenticatedSlugTeamSlugDashboardExperimentsExperimentIdRoute
-  '/$slug/$teamSlug/forms/$formId': typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdRouteWithChildren
+  '/$slug/$teamSlug/forms/$formId': typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdRoute
   '/$slug/$teamSlug/settings/customization': typeof AuthenticatedSlugTeamSlugDashboardSettingsCustomizationRoute
   '/$slug/$teamSlug/settings/danger-zone': typeof AuthenticatedSlugTeamSlugDashboardSettingsDangerZoneRoute
   '/$slug/$teamSlug/settings/feature-previews': typeof AuthenticatedSlugTeamSlugDashboardSettingsFeaturePreviewsRoute
@@ -622,7 +615,6 @@ export interface FileRoutesByFullPath {
   '/$slug/$teamSlug/analytics/data-management/sources': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementSourcesRoute
   '/$slug/$teamSlug/analytics/insights/$insightId': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsInsightIdRoute
   '/$slug/$teamSlug/analytics/insights/new': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsNewRoute
-  '/$slug/$teamSlug/forms/$formId/submissions': typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdSubmissionsRoute
   '/$slug/$teamSlug/settings/organization/authentication': typeof AuthenticatedSlugTeamSlugDashboardSettingsOrganizationAuthenticationRoute
   '/$slug/$teamSlug/settings/organization/danger-zone': typeof AuthenticatedSlugTeamSlugDashboardSettingsOrganizationDangerZoneRoute
   '/$slug/$teamSlug/settings/organization/general': typeof AuthenticatedSlugTeamSlugDashboardSettingsOrganizationGeneralRoute
@@ -670,7 +662,7 @@ export interface FileRoutesByTo {
   '/$slug/$teamSlug/$contentId': typeof AuthenticatedSlugTeamSlugEditorContentIdRoute
   '/$slug/$teamSlug/clusters/$clusterId': typeof AuthenticatedSlugTeamSlugDashboardClustersClusterIdRoute
   '/$slug/$teamSlug/experiments/$experimentId': typeof AuthenticatedSlugTeamSlugDashboardExperimentsExperimentIdRoute
-  '/$slug/$teamSlug/forms/$formId': typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdRouteWithChildren
+  '/$slug/$teamSlug/forms/$formId': typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdRoute
   '/$slug/$teamSlug/settings/customization': typeof AuthenticatedSlugTeamSlugDashboardSettingsCustomizationRoute
   '/$slug/$teamSlug/settings/danger-zone': typeof AuthenticatedSlugTeamSlugDashboardSettingsDangerZoneRoute
   '/$slug/$teamSlug/settings/feature-previews': typeof AuthenticatedSlugTeamSlugDashboardSettingsFeaturePreviewsRoute
@@ -693,7 +685,6 @@ export interface FileRoutesByTo {
   '/$slug/$teamSlug/analytics/data-management/sources': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementSourcesRoute
   '/$slug/$teamSlug/analytics/insights/$insightId': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsInsightIdRoute
   '/$slug/$teamSlug/analytics/insights/new': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsNewRoute
-  '/$slug/$teamSlug/forms/$formId/submissions': typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdSubmissionsRoute
   '/$slug/$teamSlug/settings/organization/authentication': typeof AuthenticatedSlugTeamSlugDashboardSettingsOrganizationAuthenticationRoute
   '/$slug/$teamSlug/settings/organization/danger-zone': typeof AuthenticatedSlugTeamSlugDashboardSettingsOrganizationDangerZoneRoute
   '/$slug/$teamSlug/settings/organization/general': typeof AuthenticatedSlugTeamSlugDashboardSettingsOrganizationGeneralRoute
@@ -748,7 +739,7 @@ export interface FileRoutesById {
   '/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRouteWithChildren
   '/_authenticated/$slug/$teamSlug/_dashboard/clusters/$clusterId': typeof AuthenticatedSlugTeamSlugDashboardClustersClusterIdRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/experiments/$experimentId': typeof AuthenticatedSlugTeamSlugDashboardExperimentsExperimentIdRoute
-  '/_authenticated/$slug/$teamSlug/_dashboard/forms/$formId': typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdRouteWithChildren
+  '/_authenticated/$slug/$teamSlug/_dashboard/forms/$formId': typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/customization': typeof AuthenticatedSlugTeamSlugDashboardSettingsCustomizationRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/danger-zone': typeof AuthenticatedSlugTeamSlugDashboardSettingsDangerZoneRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/feature-previews': typeof AuthenticatedSlugTeamSlugDashboardSettingsFeaturePreviewsRoute
@@ -771,7 +762,6 @@ export interface FileRoutesById {
   '/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management/sources': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementSourcesRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/$insightId': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsInsightIdRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/new': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsNewRoute
-  '/_authenticated/$slug/$teamSlug/_dashboard/forms/$formId/submissions': typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdSubmissionsRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/organization/authentication': typeof AuthenticatedSlugTeamSlugDashboardSettingsOrganizationAuthenticationRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/organization/danger-zone': typeof AuthenticatedSlugTeamSlugDashboardSettingsOrganizationDangerZoneRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/organization/general': typeof AuthenticatedSlugTeamSlugDashboardSettingsOrganizationGeneralRoute
@@ -847,7 +837,6 @@ export interface FileRouteTypes {
     | '/$slug/$teamSlug/analytics/data-management/sources'
     | '/$slug/$teamSlug/analytics/insights/$insightId'
     | '/$slug/$teamSlug/analytics/insights/new'
-    | '/$slug/$teamSlug/forms/$formId/submissions'
     | '/$slug/$teamSlug/settings/organization/authentication'
     | '/$slug/$teamSlug/settings/organization/danger-zone'
     | '/$slug/$teamSlug/settings/organization/general'
@@ -918,7 +907,6 @@ export interface FileRouteTypes {
     | '/$slug/$teamSlug/analytics/data-management/sources'
     | '/$slug/$teamSlug/analytics/insights/$insightId'
     | '/$slug/$teamSlug/analytics/insights/new'
-    | '/$slug/$teamSlug/forms/$formId/submissions'
     | '/$slug/$teamSlug/settings/organization/authentication'
     | '/$slug/$teamSlug/settings/organization/danger-zone'
     | '/$slug/$teamSlug/settings/organization/general'
@@ -995,7 +983,6 @@ export interface FileRouteTypes {
     | '/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management/sources'
     | '/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/$insightId'
     | '/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/new'
-    | '/_authenticated/$slug/$teamSlug/_dashboard/forms/$formId/submissions'
     | '/_authenticated/$slug/$teamSlug/_dashboard/settings/organization/authentication'
     | '/_authenticated/$slug/$teamSlug/_dashboard/settings/organization/danger-zone'
     | '/_authenticated/$slug/$teamSlug/_dashboard/settings/organization/general'
@@ -1453,13 +1440,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsOrganizationAuthenticationRouteImport
       parentRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsRoute
     }
-    '/_authenticated/$slug/$teamSlug/_dashboard/forms/$formId/submissions': {
-      id: '/_authenticated/$slug/$teamSlug/_dashboard/forms/$formId/submissions'
-      path: '/submissions'
-      fullPath: '/$slug/$teamSlug/forms/$formId/submissions'
-      preLoaderRoute: typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdSubmissionsRouteImport
-      parentRoute: typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdRoute
-    }
     '/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/new': {
       id: '/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/new'
       path: '/analytics/insights/new'
@@ -1678,21 +1658,6 @@ const AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRouteWithChildren
     AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRouteChildren,
   )
 
-interface AuthenticatedSlugTeamSlugDashboardFormsFormIdRouteChildren {
-  AuthenticatedSlugTeamSlugDashboardFormsFormIdSubmissionsRoute: typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdSubmissionsRoute
-}
-
-const AuthenticatedSlugTeamSlugDashboardFormsFormIdRouteChildren: AuthenticatedSlugTeamSlugDashboardFormsFormIdRouteChildren =
-  {
-    AuthenticatedSlugTeamSlugDashboardFormsFormIdSubmissionsRoute:
-      AuthenticatedSlugTeamSlugDashboardFormsFormIdSubmissionsRoute,
-  }
-
-const AuthenticatedSlugTeamSlugDashboardFormsFormIdRouteWithChildren =
-  AuthenticatedSlugTeamSlugDashboardFormsFormIdRoute._addFileChildren(
-    AuthenticatedSlugTeamSlugDashboardFormsFormIdRouteChildren,
-  )
-
 interface AuthenticatedSlugTeamSlugDashboardRouteChildren {
   AuthenticatedSlugTeamSlugDashboardBillingRoute: typeof AuthenticatedSlugTeamSlugDashboardBillingRoute
   AuthenticatedSlugTeamSlugDashboardPlansRoute: typeof AuthenticatedSlugTeamSlugDashboardPlansRoute
@@ -1701,7 +1666,7 @@ interface AuthenticatedSlugTeamSlugDashboardRouteChildren {
   AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRoute: typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRouteWithChildren
   AuthenticatedSlugTeamSlugDashboardClustersClusterIdRoute: typeof AuthenticatedSlugTeamSlugDashboardClustersClusterIdRoute
   AuthenticatedSlugTeamSlugDashboardExperimentsExperimentIdRoute: typeof AuthenticatedSlugTeamSlugDashboardExperimentsExperimentIdRoute
-  AuthenticatedSlugTeamSlugDashboardFormsFormIdRoute: typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdRouteWithChildren
+  AuthenticatedSlugTeamSlugDashboardFormsFormIdRoute: typeof AuthenticatedSlugTeamSlugDashboardFormsFormIdRoute
   AuthenticatedSlugTeamSlugDashboardAssetsIndexRoute: typeof AuthenticatedSlugTeamSlugDashboardAssetsIndexRoute
   AuthenticatedSlugTeamSlugDashboardClustersIndexRoute: typeof AuthenticatedSlugTeamSlugDashboardClustersIndexRoute
   AuthenticatedSlugTeamSlugDashboardContentIndexRoute: typeof AuthenticatedSlugTeamSlugDashboardContentIndexRoute
@@ -1732,7 +1697,7 @@ const AuthenticatedSlugTeamSlugDashboardRouteChildren: AuthenticatedSlugTeamSlug
     AuthenticatedSlugTeamSlugDashboardExperimentsExperimentIdRoute:
       AuthenticatedSlugTeamSlugDashboardExperimentsExperimentIdRoute,
     AuthenticatedSlugTeamSlugDashboardFormsFormIdRoute:
-      AuthenticatedSlugTeamSlugDashboardFormsFormIdRouteWithChildren,
+      AuthenticatedSlugTeamSlugDashboardFormsFormIdRoute,
     AuthenticatedSlugTeamSlugDashboardAssetsIndexRoute:
       AuthenticatedSlugTeamSlugDashboardAssetsIndexRoute,
     AuthenticatedSlugTeamSlugDashboardClustersIndexRoute:

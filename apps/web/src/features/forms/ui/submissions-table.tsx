@@ -25,8 +25,7 @@ import {
    TableRow,
 } from "@packages/ui/components/table";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, ChevronLeft, ChevronRight, Eye, Inbox } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Inbox } from "lucide-react";
 import { useState } from "react";
 import { useCredenza } from "@/hooks/use-credenza";
 import { orpc } from "@/integrations/orpc/client";
@@ -285,10 +284,6 @@ interface SubmissionsTableProps {
 }
 
 export function SubmissionsTable({ formId }: SubmissionsTableProps) {
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-   };
    const { openCredenza } = useCredenza();
    const [page, setPage] = useState(1);
 
@@ -329,34 +324,6 @@ export function SubmissionsTable({ formId }: SubmissionsTableProps) {
 
    return (
       <div className="flex flex-col gap-6">
-         {/* Page header */}
-         <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-               <Button asChild className="size-8" size="icon" variant="ghost">
-                  <Link
-                     params={{ slug: slug || "", teamSlug: teamSlug || "" }}
-                     to="/$slug/$teamSlug/forms"
-                  >
-                     <ArrowLeft className="size-4" />
-                     <span className="sr-only">Voltar</span>
-                  </Link>
-               </Button>
-               <div>
-                  <h1 className="text-2xl font-bold tracking-tight font-serif">
-                     {form?.name ?? "Submissões"}
-                  </h1>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                     Visualize e gerencie as submissões do formulário
-                  </p>
-               </div>
-            </div>
-            {total > 0 && (
-               <Badge variant="secondary">
-                  {total} {total === 1 ? "submissão" : "submissões"}
-               </Badge>
-            )}
-         </div>
-
          {/* Empty state */}
          {submissions.length === 0 && !isLoading ? (
             <SubmissionsEmptyState />
