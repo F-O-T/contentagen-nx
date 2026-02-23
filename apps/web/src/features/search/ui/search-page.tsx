@@ -1,6 +1,6 @@
 import { Input } from "@packages/ui/components/input";
 import { cn } from "@packages/ui/lib/utils";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate, useParams, useRouter } from "@tanstack/react-router";
 import {
    ClipboardList,
    FileText,
@@ -48,27 +48,27 @@ type QuickAction = {
    route: string;
 };
 
-function getQuickActions(slug: string, teamId: string): QuickAction[] {
+function getQuickActions(): QuickAction[] {
    return [
       {
          label: "Novo conteudo",
          icon: FileText,
-         route: `/${slug}/${teamId}/content`,
+         route: "/$slug/$teamSlug/content",
       },
       {
          label: "Novo dashboard",
          icon: LayoutDashboard,
-         route: `/${slug}/${teamId}/analytics/dashboards`,
+         route: "/$slug/$teamSlug/analytics/dashboards",
       },
       {
          label: "Novo insight",
          icon: Lightbulb,
-         route: `/${slug}/${teamId}/analytics/insights/new`,
+         route: "/$slug/$teamSlug/analytics/insights/new",
       },
       {
          label: "Novo formulario",
          icon: ClipboardList,
-         route: `/${slug}/${teamId}/forms`,
+         route: "/$slug/$teamSlug/forms",
       },
    ];
 }
@@ -76,11 +76,11 @@ function getQuickActions(slug: string, teamId: string): QuickAction[] {
 // ── Component ────────────────────────────────────────────────────────────────
 
 export function SearchPage() {
-   const params = useParams({ strict: false }) as {
-      slug: string;
-      teamId: string;
-   };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const navigate = useNavigate();
+   const router = useRouter();
    const inputRef = useRef<HTMLInputElement>(null);
    const [selectedIndex, setSelectedIndex] = useState(-1);
    const { isEnrolled } = useEarlyAccess();
@@ -102,19 +102,19 @@ export function SearchPage() {
    }, [isEnrolled]);
 
    const { query, setQuery, results, hasResults, hasQuery } = useSearch(
-      params.slug,
-      params.teamId,
+      slug,
+      teamSlug,
       { hiddenTypes: hiddenSearchTypes },
    );
 
    const quickActions = useMemo(() => {
-      const actions = getQuickActions(params.slug, params.teamId);
+      const actions = getQuickActions();
       return actions.filter((a) => {
          if (a.route.includes("/forms") && !isEnrolled("forms-beta"))
             return false;
          return true;
       });
-   }, [params.slug, params.teamId, isEnrolled]);
+   }, [isEnrolled]);
 
    // Auto-focus the input on mount
    useEffect(() => {
@@ -130,13 +130,10 @@ export function SearchPage() {
 
    const navigateToResult = useCallback(
       (item: SearchResultItem) => {
-         // Build the resolved path
-         let resolvedPath = item.route;
-         for (const [key, value] of Object.entries(item.params)) {
-            resolvedPath = resolvedPath.replace(`$${key}`, value);
-         }
-
-         // Update the current tab to the destination
+         const { pathname: resolvedPath } = router.buildLocation({
+            to: item.route,
+            params: item.params,
+         });
          const metadata = resolveTabMetadata(resolvedPath, item.params);
          replaceCurrentTab({
             route: item.route,
@@ -146,16 +143,16 @@ export function SearchPage() {
             type: metadata.type,
          });
 
-         navigate({ to: resolvedPath });
+         navigate({ to: item.route, params: item.params });
       },
-      [navigate],
+      [navigate, router],
    );
 
    const navigateToQuickAction = useCallback(
       (route: string) => {
-         navigate({ to: route });
+         navigate({ to: route, params: { slug, teamSlug } });
       },
-      [navigate],
+      [navigate, slug, teamSlug],
    );
 
    // ── Keyboard navigation ──────────────────────────────────────────────────

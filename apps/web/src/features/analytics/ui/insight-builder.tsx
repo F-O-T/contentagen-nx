@@ -41,7 +41,6 @@ interface InsightBuilderProps {
    onConfigUpdate: (updates: Partial<InsightConfig>) => void;
    onSave: () => void;
    isSaving: boolean;
-   backTo: { slug: string; teamSlug: string };
    onDuplicate?: () => void;
    onDelete?: () => void;
    lastComputedAt?: Date | null;
@@ -61,7 +60,6 @@ export function InsightBuilder({
    onConfigUpdate,
    onSave,
    isSaving,
-   backTo,
    onDuplicate,
    onDelete,
    lastComputedAt,
@@ -74,10 +72,9 @@ export function InsightBuilder({
    const isRetention = type === "retention";
 
    return (
-      <div className="flex flex-col gap-0 h-full">
+      <main className="flex flex-col gap-0">
          {/* Header */}
          <InsightHeader
-            backTo={backTo}
             description={description}
             isSaving={isSaving}
             name={name}
@@ -89,31 +86,26 @@ export function InsightBuilder({
          />
 
          {/* Tab bar */}
-         <div className="border-b bg-background">
-            <div className="container mx-auto px-4">
-               <div className="flex items-center gap-0">
-                  {INSIGHT_TABS.map((tab) => (
-                     <Button
-                        className={cn(
-                           "px-4 py-2.5 h-auto rounded-none border-b-2 text-sm font-medium",
-                           type === tab.value
-                              ? "border-primary text-primary"
-                              : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/50",
-                        )}
-                        key={tab.value}
-                        onClick={() => onTypeChange(tab.value)}
-                        variant="ghost"
-                     >
-                        {tab.label}
-                     </Button>
-                  ))}
-               </div>
-            </div>
+         <div className="flex items-center border-t border-b py-1">
+            {INSIGHT_TABS.map((tab) => (
+               <Button
+                  className={cn(
+                     "px-4 py-2 h-auto rounded-none border-b-2 text-sm font-medium",
+                     type === tab.value
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/50",
+                  )}
+                  key={tab.value}
+                  onClick={() => onTypeChange(tab.value)}
+                  variant="ghost"
+               >
+                  {tab.label}
+               </Button>
+            ))}
          </div>
 
          {/* Content */}
-         <div className="flex-1 overflow-auto">
-            <div className="container mx-auto px-4 py-6 flex flex-col gap-4">
+         <div className="flex flex-col gap-4 pt-4">
                {/* TRENDS — full-width vertical flow */}
                {isTrends && (
                   <>
@@ -336,8 +328,7 @@ export function InsightBuilder({
                      </Card>
                   </div>
                )}
-            </div>
          </div>
-      </div>
+      </main>
    );
 }

@@ -7,9 +7,10 @@ import {
 } from "@packages/ui/components/sidebar";
 import { cn } from "@packages/ui/lib/utils";
 import { Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
    type SubSidebarSection,
+   setActiveSection,
    useSidebarNav,
 } from "../hooks/use-sidebar-nav";
 import { SubSidebarItemList } from "./sub-sidebar-item-list";
@@ -46,6 +47,11 @@ function SubPanelSidebar({
          ? "calc(var(--sidebar-width-icon) - 1px)"
          : "calc(var(--sidebar-width) - 1px)";
    const [searchQuery, setSearchQuery] = useState("");
+
+   const handleItemClick = useCallback(() => {
+      setOpen(false);
+      setActiveSection(null);
+   }, [setOpen]);
 
    // Reset search when section changes
    useEffect(() => {
@@ -87,7 +93,10 @@ function SubPanelSidebar({
                   </h2>
                   <div className="flex items-center gap-0.5">
                      {activeSection !== "data-management" && (
-                        <SubSidebarNewMenu section={activeSection} />
+                        <SubSidebarNewMenu
+                           onAction={handleItemClick}
+                           section={activeSection}
+                        />
                      )}
                      <button
                         aria-label="Fechar painel"
@@ -115,6 +124,7 @@ function SubPanelSidebar({
             {/* Item List */}
             <div className="flex-1 overflow-y-auto">
                <SubSidebarItemList
+                  onItemClick={handleItemClick}
                   searchQuery={searchQuery}
                   section={activeSection}
                />

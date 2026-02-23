@@ -89,8 +89,7 @@ const withOrganization = withAuth.use(async ({ context, next }) => {
    }
 
    // Extract team/project ID (now required)
-   // biome-ignore lint/suspicious/noExplicitAny: Better Auth session type needs extension
-   const teamId = (session.session as any).activeTeamId;
+   const teamId = session.session.activeTeamId;
 
    if (!teamId) {
       throw new ORPCError("FORBIDDEN", {
@@ -154,7 +153,7 @@ const withTelemetry = withOrganization.use(async ({ context, path, next }) => {
                captureError(posthog, {
                   code: "INTERNAL_SERVER_ERROR",
                   errorId,
-                  input: sanitizeData(input),
+                  input: sanitizeData(oninput),
                   message: error.message,
                   organizationId: organizationId || undefined,
                   path: path.join("."),
@@ -168,7 +167,7 @@ const withTelemetry = withOrganization.use(async ({ context, path, next }) => {
                properties: {
                   durationMs,
                   endAt: new Date().toISOString(),
-                  input: sanitizeData(input),
+                  input: sanitizeData(oninput),
                   path: path.join("."),
                   rootPath,
                   startAt: startDate.toISOString(),

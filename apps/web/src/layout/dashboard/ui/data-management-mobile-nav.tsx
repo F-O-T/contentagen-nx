@@ -8,7 +8,9 @@ import { dataManagementNavSections } from "./data-management-nav-items";
 
 export function DataManagementMobileNav() {
    const { activeOrganization } = useActiveOrganization();
-   const { teamSlug } = useParams({ strict: false });
+   const { teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const navigate = useNavigate();
    const [search, setSearch] = useState("");
 

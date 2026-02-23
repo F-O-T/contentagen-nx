@@ -27,7 +27,7 @@ function ClustersPage() {
                      navigate({
                         to: "/$slug/$teamSlug/clusters/new",
                         params: { slug, teamSlug },
-                     } as never)
+                     })
                   }
                >
                   <Plus className="size-4 mr-2" />

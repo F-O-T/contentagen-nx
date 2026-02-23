@@ -15,7 +15,6 @@ import {
    createFileRoute,
    Link,
    useNavigate,
-   useParams,
 } from "@tanstack/react-router";
 import {
    AlertCircle,
@@ -117,10 +116,7 @@ function EmptyState({ slug, teamSlug }: { slug: string; teamSlug: string }) {
 
 function InsightsListPage() {
    const navigate = useNavigate();
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug: string;
-      teamSlug: string;
-   };
+   const { slug, teamSlug } = Route.useParams();
    const queryClient = useQueryClient();
    const { openAlertDialog } = useAlertDialog();
 
@@ -216,7 +212,7 @@ function InsightsListPage() {
                                        teamSlug,
                                        insightId: insight.id,
                                     },
-                                 } as never)
+                                 })
                               }
                            >
                               <TableCell>
@@ -265,7 +261,7 @@ function InsightsListPage() {
                                                 teamSlug,
                                                 insightId: insight.id,
                                              },
-                                          } as never)
+                                          })
                                        }
                                        size="icon"
                                        title="Editar"

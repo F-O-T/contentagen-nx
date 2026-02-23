@@ -91,7 +91,7 @@ function EditInsightPage() {
             navigate({
                to: "/$slug/$teamSlug/analytics/insights",
                params: { slug, teamSlug },
-            } as never);
+            });
          },
          onError: () => {
             toast.error("Erro ao deletar insight");
@@ -109,7 +109,7 @@ function EditInsightPage() {
             navigate({
                to: "/$slug/$teamSlug/analytics/insights/$insightId",
                params: { slug, teamSlug, insightId: data.id },
-            } as never);
+            });
          },
          onError: () => {
             toast.error("Erro ao duplicar insight");
@@ -190,7 +190,6 @@ function EditInsightPage() {
 
    return (
       <InsightBuilder
-         backTo={{ slug, teamSlug }}
          config={config}
          description={insightDescription}
          isSaving={updateMutation.isPending}

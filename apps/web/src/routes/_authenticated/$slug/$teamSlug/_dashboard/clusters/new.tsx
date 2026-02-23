@@ -1,4 +1,4 @@
-import { createFileRoute, useParams } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { ClusterBuilder } from "@/features/clusters/ui/cluster-builder";
 
 export const Route = createFileRoute(
@@ -8,10 +8,5 @@ export const Route = createFileRoute(
 });
 
 function NewClusterPage() {
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug: string;
-      teamSlug: string;
-   };
-
-   return <ClusterBuilder backTo={{ slug, teamSlug }} />;
+   return <ClusterBuilder />;
 }

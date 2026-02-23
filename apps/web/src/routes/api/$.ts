@@ -7,6 +7,8 @@ import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { createFileRoute } from "@tanstack/react-router";
 
 import router from "@/integrations/orpc/router";
+import type { ORPCContextWithAuth } from "@/integrations/orpc/server";
+import { auth, db, posthog } from "@/integrations/orpc/server-instances";
 
 const handler = new RPCHandler(router, {
    interceptors: [
@@ -25,9 +27,24 @@ const handler = new RPCHandler(router, {
 });
 
 async function handle({ request }: { request: Request }) {
+   const headers = new Headers(request.headers);
+   let session: ORPCContextWithAuth["session"] = null;
+   try {
+      session = await auth.api.getSession({ headers });
+   } catch {
+      session = null;
+   }
+
    const { response } = await handler.handle(request, {
       prefix: "/api",
-      context: {} as any,
+      context: {
+         headers,
+         request,
+         auth,
+         db,
+         session,
+         posthog,
+      } satisfies ORPCContextWithAuth,
    });
 
    return response ?? new Response("Not Found", { status: 404 });

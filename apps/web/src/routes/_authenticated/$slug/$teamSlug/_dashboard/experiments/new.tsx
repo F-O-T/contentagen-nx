@@ -17,10 +17,9 @@ export const Route = createFileRoute(
 
 function NewExperimentPage() {
    const navigate = useNavigate();
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug: string;
-      teamSlug: string;
-   };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
 
    const createMutation = useMutation(
       orpc.experiments.create.mutationOptions({
@@ -29,7 +28,7 @@ function NewExperimentPage() {
             navigate({
                to: "/$slug/$teamSlug/experiments/$experimentId",
                params: { slug, teamSlug, experimentId: data.id },
-            } as never);
+            });
          },
          onError: (err) => {
             toast.error(err.message ?? "Erro ao criar experimento");
@@ -39,7 +38,6 @@ function NewExperimentPage() {
 
    return (
       <ExperimentBuilder
-         backTo={{ slug, teamSlug }}
          isCreating={createMutation.isPending}
          onCreate={(config) =>
             createMutation.mutate({

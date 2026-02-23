@@ -37,7 +37,7 @@ const STATUS_FILTER_OPTIONS = [
 export function ContentListSection() {
    const navigate = useNavigate();
    const { slug, teamSlug } = useParams({
-      from: "/_authenticated/$slug/$teamSlug/_dashboard/content/",
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    const [searchQuery, setSearchQuery] = useState("");
    const [statusFilter, setStatusFilter] = useState<string>("all");

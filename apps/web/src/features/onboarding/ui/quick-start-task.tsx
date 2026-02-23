@@ -22,17 +22,13 @@ export function QuickStartTask({
    onComplete,
 }: QuickStartTaskProps) {
    const navigate = useNavigate();
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-   };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
 
    const handleClick = useCallback(() => {
       if (isLocked || isCompleted) return;
-      const resolvedRoute = task.route
-         .replace("$slug", slug ?? "")
-         .replace("$teamSlug", teamSlug ?? "");
-      navigate({ to: resolvedRoute });
+      navigate({ to: task.route, params: { slug, teamSlug } });
    }, [isLocked, isCompleted, navigate, slug, teamSlug, task.route]);
 
    const handleKeyDown = useCallback(

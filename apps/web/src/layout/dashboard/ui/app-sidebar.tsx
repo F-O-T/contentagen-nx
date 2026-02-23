@@ -50,31 +50,29 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 }
 
 function SidebarSearchButton() {
-   const params = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-   };
+   const params = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const slug = params.slug ?? "";
    const teamSlug = params.teamSlug ?? "";
    const navigate = useNavigate();
 
    const handleSearch = useCallback(() => {
-      const searchRoute = `/$slug/$teamSlug/search`;
-      const searchParams = { slug, teamSlug };
-      const searchPath = `/${slug}/${teamSlug}/search`;
+      const route = "/$slug/$teamSlug/search";
+      const params = { slug, teamSlug };
 
       // Replace current tab with search (don't open a new tab)
       if (tabStore.state.activeTabId) {
          replaceCurrentTab({
-            route: searchRoute,
-            params: searchParams,
+            route,
+            params,
             label: "Pesquisar",
             icon: "Search",
             type: "search",
          });
       }
 
-      navigate({ to: searchPath });
+      navigate({ to: route, params });
    }, [navigate, slug, teamSlug]);
 
    return (
@@ -94,10 +92,9 @@ function SidebarSearchButton() {
 }
 
 function SidebarFooterContent() {
-   const params = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-   };
+   const params = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const slug = params.slug ?? "";
    const teamSlug = params.teamSlug ?? "";
    const { toggleSidebar, state } = useSidebar();

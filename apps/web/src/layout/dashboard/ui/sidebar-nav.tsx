@@ -10,7 +10,12 @@ import {
    SidebarMenuItem,
    useSidebarManager,
 } from "@packages/ui/components/sidebar";
-import { Link, useLocation, useParams } from "@tanstack/react-router";
+import {
+   Link,
+   useLocation,
+   useParams,
+   useRouter,
+} from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { useCallback } from "react";
 import { useActiveTeam } from "@/hooks/use-active-team";
@@ -83,9 +88,8 @@ function NavItem({
             ) : (
                <Link
                   onClick={onMainItemClick}
-                  to={item.route
-                     .replace("$slug", slug)
-                     .replace("$teamSlug", teamSlug ?? "")}
+                  params={{ slug, teamSlug: teamSlug ?? "" }}
+                  to={item.route}
                >
                   <Icon />
                   <span>{item.label}</span>
@@ -101,7 +105,7 @@ function NavItem({
 
          {/* Action buttons — hidden when sidebar is collapsed */}
          <div className="group-data-[collapsible=icon]:hidden">
-            <SidebarItemActions item={item} slug={slug} teamSlug={teamSlug} />
+            <SidebarItemActions item={item} />
          </div>
       </SidebarMenuItem>
    );
@@ -155,14 +159,14 @@ function NavGroup({
 
 export function SidebarNav() {
    const { pathname, searchStr } = useLocation();
-   const params = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-   };
+   const params = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const slug = params.slug ?? pathname.split("/")[1] ?? "";
    const { activeTeamId } = useActiveTeam();
    const teamSlug = params.teamSlug ?? activeTeamId ?? null;
    const { activeSection } = useSidebarNav();
+   const router = useRouter();
    const manager = useSidebarManager();
 
    const handleSubPanelToggle = useCallback(
@@ -195,20 +199,20 @@ export function SidebarNav() {
 
    const isItemActive = useCallback(
       (item: NavItemDef) => {
-         const resolvedRoute = item.route
-            .replace("$slug", slug)
-            .replace("$teamSlug", teamSlug ?? "");
+         const { pathname: routePath } = router.buildLocation({
+            to: item.route,
+            params: { slug, teamSlug: teamSlug ?? undefined },
+         });
 
          if (item.subPanel) {
             return (
-               activeSection === item.subPanel ||
-               pathname.startsWith(resolvedRoute)
+               activeSection === item.subPanel || pathname.startsWith(routePath)
             );
          }
 
-         return pathname.startsWith(resolvedRoute) && !searchStr;
+         return pathname.startsWith(routePath) && !searchStr;
       },
-      [slug, teamSlug, pathname, searchStr, activeSection],
+      [router, slug, teamSlug, pathname, searchStr, activeSection],
    );
 
    return (

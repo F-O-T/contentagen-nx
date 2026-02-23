@@ -27,100 +27,130 @@ import {
 } from "@packages/ui/components/sidebar";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useParams, useRouter } from "@tanstack/react-router";
+import { Link, useParams, useRouter } from "@tanstack/react-router";
+import type { LucideIcon } from "lucide-react";
 import { BadgeCheck, CreditCard, LogOut, Sparkles } from "lucide-react";
 import { Suspense, useCallback } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
-import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { useCredenza } from "@/hooks/use-credenza";
 import { authClient } from "@/integrations/better-auth/auth-client";
-import { orpc } from "@/integrations/orpc/client";
+import { type Outputs, orpc } from "@/integrations/orpc/client";
 import { LanguageCommand } from "./language-command";
 import { ThemeSwitcher } from "./theme-switcher";
 
-type Session = {
-   user: {
-      id: string;
-      name: string;
-      email: string;
-      image?: string | null;
-   };
+type NavLinkItem = {
+   to: string;
+   icon: LucideIcon;
+   label: string;
 };
+
+const UPGRADE_LINKS: NavLinkItem[] = [
+   {
+      to: "/$slug/$teamSlug/billing",
+      icon: Sparkles,
+      label: "Atualizar para Pro",
+   },
+];
+
+const ACCOUNT_LINKS: NavLinkItem[] = [
+   {
+      to: "/$slug/$teamSlug/settings/profile",
+      icon: BadgeCheck,
+      label: "Conta",
+   },
+   {
+      to: "/$slug/$teamSlug/billing",
+      icon: CreditCard,
+      label: "Cobrança",
+   },
+];
+
+function UserAvatar({
+   name,
+   image,
+   size = "sm",
+}: {
+   name: string;
+   image?: string | null;
+   size?: "sm" | "lg";
+}) {
+   return (
+      <Avatar className={size === "lg" ? "h-8 w-8 rounded-lg" : "size-4"}>
+         <AvatarImage alt={name} src={image ?? ""} />
+         <AvatarFallback
+            className={`rounded-lg ${size === "sm" ? "text-[10px]" : ""}`}
+         >
+            {name.charAt(0) || "?"}
+         </AvatarFallback>
+      </Avatar>
+   );
+}
 
 function NavUserCredenza({
    session,
-   activeOrganization,
-   teamId,
+   params,
    onNavigate,
    onLogout,
 }: {
-   session: Session;
-   activeOrganization: { slug: string };
-   teamId: string;
+   session: Outputs["session"]["getSession"];
+   params: { slug: string; teamSlug: string };
    onNavigate: () => void;
    onLogout: () => void;
 }) {
    return (
       <>
          <CredenzaHeader>
-            <CredenzaTitle>{"Olá, {{name}}"}</CredenzaTitle>
+            <CredenzaTitle>{session?.user.name ?? ""}</CredenzaTitle>
             <CredenzaDescription className="truncate">
-               {session.user.email}
+               {session?.user.email ?? ""}
             </CredenzaDescription>
          </CredenzaHeader>
 
          <CredenzaBody className="space-y-4">
-            <Button
-               asChild
-               className="w-full justify-start gap-2"
-               onClick={onNavigate}
-               variant="outline"
-            >
-               <a href={`/${activeOrganization.slug}/${teamId}/billing`}>
-                  <Sparkles className="size-4" />
-                  {"Atualizar para Pro"}
-               </a>
-            </Button>
+            {UPGRADE_LINKS.map((link) => (
+               <Button
+                  asChild
+                  className="w-full justify-start gap-2"
+                  key={link.label}
+                  onClick={onNavigate}
+                  variant="outline"
+               >
+                  <Link params={params} to={link.to}>
+                     <link.icon className="size-4" />
+                     {link.label}
+                  </Link>
+               </Button>
+            ))}
 
             <div className="space-y-2">
-               <Button
-                  asChild
-                  className="w-full justify-start gap-2"
-                  onClick={onNavigate}
-                  variant="outline"
-               >
-                  <a
-                     href={`/${activeOrganization.slug}/${teamId}/settings/profile`}
+               {ACCOUNT_LINKS.map((link) => (
+                  <Button
+                     asChild
+                     className="w-full justify-start gap-2"
+                     key={link.label}
+                     onClick={onNavigate}
+                     variant="outline"
                   >
-                     <BadgeCheck className="size-4" />
-                     {"Conta"}
-                  </a>
-               </Button>
-               <Button
-                  asChild
-                  className="w-full justify-start gap-2"
-                  onClick={onNavigate}
-                  variant="outline"
-               >
-                  <a href={`/${activeOrganization.slug}/${teamId}/billing`}>
-                     <CreditCard className="size-4" />
-                     {"Cobrança"}
-                  </a>
-               </Button>
+                     <Link params={params} to={link.to}>
+                        <link.icon className="size-4" />
+                        {link.label}
+                     </Link>
+                  </Button>
+               ))}
             </div>
 
             <div className="space-y-3">
                <span className="text-sm font-medium text-muted-foreground">
-                  {"Preferencias"}
+                  Preferencias
                </span>
                <div className="flex items-center justify-between">
-                  <span className="text-sm">{"Tema"}</span>
+                  <span className="text-sm">Tema</span>
                   <ThemeSwitcher />
                </div>
                <div className="flex items-center justify-between gap-8">
-                  <span className="text-sm">{"Idioma"}</span>
+                  <span className="text-sm">Idioma</span>
                   <LanguageCommand />
                </div>
             </div>
@@ -133,7 +163,7 @@ function NavUserCredenza({
                variant="destructive"
             >
                <LogOut className="size-4" />
-               {"Sair"}
+               Sair
             </Button>
          </CredenzaFooter>
       </>
@@ -163,15 +193,12 @@ function NavUserSkeleton() {
 }
 
 function NavUserContent() {
-   const { activeOrganization } = useActiveOrganization();
    const { isMobile, setOpenMobile } = useSidebar();
    const router = useRouter();
    const queryClient = useQueryClient();
-   const params = useParams({ strict: false }) as {
-      slug?: string;
-      teamId?: string;
-   };
-   const teamId = params.teamId ?? "";
+   const params = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const { openCredenza, closeCredenza } = useCredenza();
    const { openAlertDialog } = useAlertDialog();
    const { data: session } = useSuspenseQuery(
@@ -191,9 +218,7 @@ function NavUserContent() {
                await queryClient.invalidateQueries({
                   queryKey: orpc.session.getSession.queryKey({}),
                });
-               router.navigate({
-                  to: "/auth/sign-in",
-               });
+               router.navigate({ to: "/auth/sign-in" });
                toast.success("Você saiu com sucesso", { id: "logout" });
             },
          },
@@ -219,63 +244,41 @@ function NavUserContent() {
    }, [closeCredenza, setOpenMobile]);
 
    const handleOpenCredenza = useCallback(() => {
-      if (!session) return;
-      const currentSession = session;
       openCredenza({
          children: (
             <NavUserCredenza
-               activeOrganization={activeOrganization}
                onLogout={handleLogoutClick}
                onNavigate={handleNavigate}
-               session={currentSession}
-               teamId={teamId}
+               params={params}
+               session={session}
             />
          ),
       });
-   }, [
-      openCredenza,
-      session,
-      activeOrganization,
-      teamId,
-      handleNavigate,
-      handleLogoutClick,
-   ]);
+   }, [openCredenza, session, params, handleNavigate, handleLogoutClick]);
 
-   // Mobile: Use Credenza
    if (isMobile) {
       return (
          <SidebarMenuItem>
             <SidebarMenuButton onClick={handleOpenCredenza} tooltip="Account">
-               <Avatar className="size-4">
-                  <AvatarImage
-                     alt={session?.user.name}
-                     src={session?.user.image ?? ""}
-                  />
-                  <AvatarFallback className="rounded-lg text-[10px]">
-                     {session?.user.name?.charAt(0) || "?"}
-                  </AvatarFallback>
-               </Avatar>
+               <UserAvatar
+                  image={session?.user.image}
+                  name={session?.user.name ?? ""}
+               />
                <span className="truncate">{session?.user.name}</span>
             </SidebarMenuButton>
          </SidebarMenuItem>
       );
    }
 
-   // Desktop: Use DropdownMenu
    return (
       <SidebarMenuItem>
          <DropdownMenu>
             <DropdownMenuTrigger asChild>
                <SidebarMenuButton tooltip="Account">
-                  <Avatar className="size-4">
-                     <AvatarImage
-                        alt={session?.user.name}
-                        src={session?.user.image ?? ""}
-                     />
-                     <AvatarFallback className="rounded-lg text-[10px]">
-                        {session?.user.name?.charAt(0) || "?"}
-                     </AvatarFallback>
-                  </Avatar>
+                  <UserAvatar
+                     image={session?.user.image}
+                     name={session?.user.name ?? ""}
+                  />
                   <span className="truncate">{session?.user.name}</span>
                </SidebarMenuButton>
             </DropdownMenuTrigger>
@@ -285,18 +288,13 @@ function NavUserContent() {
                side="right"
                sideOffset={8}
             >
-               {/* Header */}
                <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                     <Avatar className="h-8 w-8 rounded-lg">
-                        <AvatarImage
-                           alt={session?.user.name}
-                           src={session?.user.image ?? ""}
-                        />
-                        <AvatarFallback className="rounded-lg">
-                           {session?.user.name?.charAt(0) || "?"}
-                        </AvatarFallback>
-                     </Avatar>
+                     <UserAvatar
+                        image={session?.user.image}
+                        name={session?.user.name ?? ""}
+                        size="lg"
+                     />
                      <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-medium">
                            {session?.user.name}
@@ -309,54 +307,46 @@ function NavUserContent() {
                </DropdownMenuLabel>
                <DropdownMenuSeparator />
 
-               {/* Upgrade */}
                <DropdownMenuGroup>
-                  <DropdownMenuItem asChild>
-                     <a href={`/${activeOrganization.slug}/${teamId}/billing`}>
-                        <Sparkles />
-                        {"Atualizar para Pro"}
-                     </a>
-                  </DropdownMenuItem>
+                  {UPGRADE_LINKS.map((link) => (
+                     <DropdownMenuItem asChild key={link.label}>
+                        <Link params={params} to={link.to}>
+                           <link.icon />
+                           {link.label}
+                        </Link>
+                     </DropdownMenuItem>
+                  ))}
                </DropdownMenuGroup>
                <DropdownMenuSeparator />
 
-               {/* Navigation */}
                <DropdownMenuGroup>
-                  <DropdownMenuItem asChild>
-                     <a
-                        href={`/${activeOrganization.slug}/${teamId}/settings/profile`}
-                     >
-                        <BadgeCheck />
-                        {"Conta"}
-                     </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                     <a href={`/${activeOrganization.slug}/${teamId}/billing`}>
-                        <CreditCard />
-                        {"Cobrança"}
-                     </a>
-                  </DropdownMenuItem>
+                  {ACCOUNT_LINKS.map((link) => (
+                     <DropdownMenuItem asChild key={link.label}>
+                        <Link params={params} to={link.to}>
+                           <link.icon />
+                           {link.label}
+                        </Link>
+                     </DropdownMenuItem>
+                  ))}
                </DropdownMenuGroup>
                <DropdownMenuSeparator />
 
-               {/* Preferences */}
-               <DropdownMenuLabel>{"Preferencias"}</DropdownMenuLabel>
+               <DropdownMenuLabel>Preferencias</DropdownMenuLabel>
                <div className="px-2 py-1.5 space-y-2">
                   <div className="flex items-center justify-between">
-                     <span className="text-sm">{"Tema"}</span>
+                     <span className="text-sm">Tema</span>
                      <ThemeSwitcher />
                   </div>
                   <div className="flex items-center justify-between">
-                     <span className="text-sm">{"Idioma"}</span>
+                     <span className="text-sm">Idioma</span>
                      <LanguageCommand />
                   </div>
                </div>
                <DropdownMenuSeparator />
 
-               {/* Logout */}
                <DropdownMenuItem onClick={handleLogoutClick}>
                   <LogOut />
-                  {"Sair"}
+                  Sair
                </DropdownMenuItem>
             </DropdownMenuContent>
          </DropdownMenu>

@@ -7,7 +7,7 @@ import {
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { cn } from "@packages/ui/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useLocation, useParams } from "@tanstack/react-router";
+import { Link, useLocation, useParams, useRouter } from "@tanstack/react-router";
 import {
    ChevronDown,
    GitBranch,
@@ -30,11 +30,13 @@ import { SubSidebarContextMenu } from "./sub-sidebar-context-menu";
 interface SubSidebarItemListProps {
    section: SubSidebarSection;
    searchQuery: string;
+   onItemClick?: () => void;
 }
 
 export function SubSidebarItemList({
    section,
    searchQuery,
+   onItemClick,
 }: SubSidebarItemListProps) {
    return (
       <ErrorBoundary
@@ -47,7 +49,11 @@ export function SubSidebarItemList({
          )}
       >
          <Suspense fallback={<ItemListSkeleton />}>
-            <ItemListContent searchQuery={searchQuery} section={section} />
+            <ItemListContent
+               onItemClick={onItemClick}
+               searchQuery={searchQuery}
+               section={section}
+            />
          </Suspense>
       </ErrorBoundary>
    );
@@ -66,14 +72,25 @@ function ItemListSkeleton() {
    );
 }
 
-function ItemListContent({ section, searchQuery }: SubSidebarItemListProps) {
+function ItemListContent({
+   section,
+   searchQuery,
+   onItemClick,
+}: SubSidebarItemListProps) {
    if (section === "dashboards") {
-      return <DashboardList searchQuery={searchQuery} />;
+      return (
+         <DashboardList onItemClick={onItemClick} searchQuery={searchQuery} />
+      );
    }
    if (section === "data-management") {
-      return <DataManagementItemList searchQuery={searchQuery} />;
+      return (
+         <DataManagementItemList
+            onItemClick={onItemClick}
+            searchQuery={searchQuery}
+         />
+      );
    }
-   return <InsightList searchQuery={searchQuery} />;
+   return <InsightList onItemClick={onItemClick} searchQuery={searchQuery} />;
 }
 
 const INSIGHT_ICONS: Record<string, typeof Lightbulb> = {
@@ -86,14 +103,16 @@ function getInsightIcon(type: string) {
    return INSIGHT_ICONS[type] ?? Lightbulb;
 }
 
-function DashboardList({ searchQuery }: { searchQuery: string }) {
-   const params = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-      dashboardId?: string;
-   };
-   const slug = params.slug ?? "";
-   const teamSlug = params.teamSlug ?? "";
+function DashboardList({
+   searchQuery,
+   onItemClick,
+}: {
+   searchQuery: string;
+   onItemClick?: () => void;
+}) {
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
 
    const { data: dashboards } = useSuspenseQuery(
       orpc.dashboards.list.queryOptions({}),
@@ -123,22 +142,19 @@ function DashboardList({ searchQuery }: { searchQuery: string }) {
                   <div
                      className={cn(
                         "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
-                        params.dashboardId === dashboard.id
-                           ? "bg-primary/10 text-primary"
-                           : "text-foreground hover:bg-accent",
+                        "text-foreground hover:bg-accent",
                      )}
                   >
                      <Link
                         className="flex items-center gap-2 min-w-0 flex-1"
-                        params={
-                           {
-                              slug,
-                              teamSlug,
-                              dashboardId: dashboard.id,
-                           } as never
-                        }
+                        onClick={onItemClick}
+                        params={{
+                           slug,
+                           teamSlug,
+                           dashboardId: dashboard.id,
+                        }}
                         to={
-                           "/$slug/$teamSlug/analytics/dashboards/$dashboardId" as never
+                           "/$slug/$teamSlug/analytics/dashboards/$dashboardId"
                         }
                      >
                         <LayoutDashboard className="size-4 flex-shrink-0" />
@@ -159,14 +175,16 @@ function DashboardList({ searchQuery }: { searchQuery: string }) {
    );
 }
 
-function InsightList({ searchQuery }: { searchQuery: string }) {
-   const params = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-      insightId?: string;
-   };
-   const slug = params.slug ?? "";
-   const teamSlug = params.teamSlug ?? "";
+function InsightList({
+   searchQuery,
+   onItemClick,
+}: {
+   searchQuery: string;
+   onItemClick?: () => void;
+}) {
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
 
    const { data: insights } = useSuspenseQuery(
       orpc.insights.list.queryOptions({}),
@@ -198,23 +216,18 @@ function InsightList({ searchQuery }: { searchQuery: string }) {
                      <div
                         className={cn(
                            "flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors",
-                           params.insightId === insight.id
-                              ? "bg-primary/10 text-primary"
-                              : "text-foreground hover:bg-accent",
+                           "text-foreground hover:bg-accent",
                         )}
                      >
                         <Link
                            className="flex items-center gap-2 min-w-0 flex-1"
-                           params={
-                              {
-                                 slug,
-                                 teamSlug,
-                                 insightId: insight.id,
-                              } as never
-                           }
-                           to={
-                              "/$slug/$teamSlug/analytics/insights/$insightId" as never
-                           }
+                           onClick={onItemClick}
+                           params={{
+                              slug,
+                              teamSlug,
+                              insightId: insight.id,
+                           }}
+                           to={"/$slug/$teamSlug/analytics/insights/$insightId"}
                         >
                            <Icon className="size-4 flex-shrink-0" />
                            <span className="truncate">{insight.name}</span>
@@ -246,13 +259,16 @@ function filterSection(
    return { ...section, items: filteredItems };
 }
 
-function DataManagementItemList({ searchQuery }: { searchQuery: string }) {
-   const params = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-   };
-   const slug = params.slug ?? "";
-   const teamSlug = params.teamSlug ?? "";
+function DataManagementItemList({
+   searchQuery,
+   onItemClick,
+}: {
+   searchQuery: string;
+   onItemClick?: () => void;
+}) {
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const { pathname } = useLocation();
 
    const filteredSections = useMemo(
@@ -283,6 +299,7 @@ function DataManagementItemList({ searchQuery }: { searchQuery: string }) {
             <DataManagementSection
                forceOpen={searchQuery.length > 0}
                key={section.id}
+               onItemClick={onItemClick}
                pathname={pathname}
                section={section}
                slug={slug}
@@ -299,12 +316,14 @@ function DataManagementSection({
    teamSlug,
    pathname,
    forceOpen,
+   onItemClick,
 }: {
    section: SettingsNavSection;
    slug: string;
    teamSlug: string;
    pathname: string;
    forceOpen: boolean;
+   onItemClick?: () => void;
 }) {
    const [isOpen, setIsOpen] = useState(section.defaultOpen);
    const effectiveOpen = forceOpen || isOpen;
@@ -330,6 +349,7 @@ function DataManagementSection({
                   <DataManagementNavItem
                      item={item}
                      key={item.id}
+                     onItemClick={onItemClick}
                      pathname={pathname}
                      slug={slug}
                      teamSlug={teamSlug}
@@ -346,15 +366,19 @@ function DataManagementNavItem({
    slug,
    teamSlug,
    pathname,
+   onItemClick,
 }: {
    item: SettingsNavItemDef;
    slug: string;
    teamSlug: string;
    pathname: string;
+   onItemClick?: () => void;
 }) {
-   const resolvedHref = item.href
-      .replace("$slug", slug)
-      .replace("$teamSlug", teamSlug);
+   const router = useRouter();
+   const { pathname: resolvedHref } = router.buildLocation({
+      to: item.href,
+      params: { slug, teamSlug },
+   });
    const isActive = pathname === resolvedHref;
 
    return (
@@ -366,6 +390,7 @@ function DataManagementNavItem({
                   ? "bg-primary/10 text-primary"
                   : "text-foreground hover:bg-accent",
             )}
+            onClick={onItemClick}
             params={{ slug, teamSlug }}
             to={item.href}
          >
@@ -386,8 +411,9 @@ function EmptyState({
    slug: string;
 }) {
    const label = section === "dashboards" ? "dashboard" : "insight";
-   const params = useParams({ strict: false }) as { teamSlug?: string };
-   const teamSlug = params.teamSlug ?? "";
+   const { teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const teamSegment = teamSlug ? `/${teamSlug}` : "";
    const listRoute =
       section === "dashboards"

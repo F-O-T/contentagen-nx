@@ -111,10 +111,9 @@ function useExperimentColumns(
 
 export function ExperimentsListSection() {
    const navigate = useNavigate();
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug: string;
-      teamSlug: string;
-   };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const { data: experiments } = useSuspenseQuery(
       orpc.experiments.list.queryOptions({}),
    );
@@ -125,7 +124,7 @@ export function ExperimentsListSection() {
       navigate({
          to: "/$slug/$teamSlug/experiments/new",
          params: { slug, teamSlug },
-      } as never);
+      });
    };
 
    if (!experiments.length) {

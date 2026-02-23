@@ -15,7 +15,12 @@ import {
    SidebarMenuSubItem,
 } from "@packages/ui/components/sidebar";
 import { cn } from "@packages/ui/lib/utils";
-import { Link, useLocation, useParams } from "@tanstack/react-router";
+import {
+   Link,
+   useLocation,
+   useParams,
+   useRouter,
+} from "@tanstack/react-router";
 import { ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
@@ -57,10 +62,12 @@ function NavItem({
    pathname: string;
 }) {
    const { isEnrolled, getFeatureStage } = useEarlyAccess();
+   const router = useRouter();
    const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
-   const resolvedHref = item.href
-      .replace("$slug", slug)
-      .replace("$teamSlug", teamSlug);
+   const { pathname: resolvedHref } = router.buildLocation({
+      to: item.href,
+      params: { slug, teamSlug },
+   });
    const isActive = pathname === resolvedHref;
 
    // Filter children based on early access enrollment
@@ -74,7 +81,8 @@ function NavItem({
    const isChildActive = visibleChildren?.some(
       (child) =>
          pathname ===
-         child.href.replace("$slug", slug).replace("$teamSlug", teamSlug),
+         router.buildLocation({ to: child.href, params: { slug, teamSlug } })
+            .pathname,
    );
 
    if (hasChildren) {
@@ -101,10 +109,12 @@ function NavItem({
                <CollapsibleContent>
                   <SidebarMenuSub>
                      {visibleChildren?.map((child) => {
-                        const childResolved = child.href
-                           .replace("$slug", slug)
-                           .replace("$teamSlug", teamSlug);
-                        const childActive = pathname === childResolved;
+                        const childActive =
+                           pathname ===
+                           router.buildLocation({
+                              to: child.href,
+                              params: { slug, teamSlug },
+                           }).pathname;
                         const earlyStage =
                            child.earlyAccessFlag &&
                            isEnrolled(child.earlyAccessFlag)
@@ -229,7 +239,9 @@ function NavSection({
 
 export function SettingsSidebar({ search }: { search: string }) {
    const { activeOrganization } = useActiveOrganization();
-   const { teamSlug } = useParams({ strict: false });
+   const { teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const { pathname } = useLocation();
 
    const filteredSections = settingsNavSections.map((section) =>

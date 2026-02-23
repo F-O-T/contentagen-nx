@@ -15,7 +15,7 @@ import { createClustersColumns } from "./clusters-table-columns";
 export function ClustersListSection() {
    const navigate = useNavigate();
    const { slug, teamSlug } = useParams({
-      from: "/_authenticated/$slug/$teamSlug/_dashboard/clusters/",
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    const { data } = useClusters();
 
@@ -50,7 +50,7 @@ export function ClustersListSection() {
                   navigate({
                      to: "/$slug/$teamSlug/clusters/new",
                      params: { slug, teamSlug },
-                  } as never)
+                  })
                }
                type="button"
             >

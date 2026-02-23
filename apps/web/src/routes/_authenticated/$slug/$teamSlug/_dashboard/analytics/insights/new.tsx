@@ -19,10 +19,9 @@ export const Route = createFileRoute(
 
 function NewInsightPage() {
    const navigate = useNavigate();
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug: string;
-      teamSlug: string;
-   };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const queryClient = useQueryClient();
 
    const { type, config, setType, updateConfigImmediate } = useInsightConfig();
@@ -39,7 +38,7 @@ function NewInsightPage() {
             navigate({
                to: "/$slug/$teamSlug/analytics/insights/$insightId",
                params: { slug, teamSlug, insightId: data.id },
-            } as never);
+            });
          },
          onError: () => {
             toast.error("Erro ao criar insight");
@@ -66,7 +65,6 @@ function NewInsightPage() {
 
    return (
       <InsightBuilder
-         backTo={{ slug, teamSlug }}
          config={config}
          description={insightDescription}
          isSaving={createMutation.isPending}

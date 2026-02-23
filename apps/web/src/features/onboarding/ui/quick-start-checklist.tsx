@@ -32,7 +32,9 @@ const CHECKLIST_HIDDEN_STORAGE_KEY = "contentta:checklist_hidden";
 export function QuickStartChecklist() {
    const { data: status } = useOnboardingStatus();
    const completeTaskMutation = useCompleteTask();
-   const { slug } = useParams({ strict: false });
+   const { slug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const [isCollapsed, setIsCollapsed] = useState(false);
    const [hiddenBySlug, setHiddenBySlug] = useSafeLocalStorage<
       Record<string, boolean>
