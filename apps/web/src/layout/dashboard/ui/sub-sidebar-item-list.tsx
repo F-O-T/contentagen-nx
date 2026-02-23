@@ -7,7 +7,12 @@ import {
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { cn } from "@packages/ui/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useLocation, useParams, useRouter } from "@tanstack/react-router";
+import {
+   Link,
+   useLocation,
+   useParams,
+   useRouter,
+} from "@tanstack/react-router";
 import {
    ChevronDown,
    GitBranch,

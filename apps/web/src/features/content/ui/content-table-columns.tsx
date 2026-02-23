@@ -131,16 +131,18 @@ export function createContentColumns(
             const content = row.original;
             if (!onView) return null;
             return (
+               // biome-ignore lint/a11y/noStaticElementInteractions: stopPropagation wrapper for table row click
                <div
                   className="flex items-center justify-end gap-1"
                   onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
                >
                   <Tooltip>
                      <TooltipTrigger asChild>
                         <Button
+                           onClick={() => onView(content)}
                            size="icon"
                            variant="ghost"
-                           onClick={() => onView(content)}
                         >
                            <Eye className="size-4" />
                            <span className="sr-only">Ver detalhes</span>

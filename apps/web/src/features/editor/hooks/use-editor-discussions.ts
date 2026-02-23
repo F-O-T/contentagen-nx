@@ -4,7 +4,7 @@ import { orpc } from "@/integrations/orpc/client";
 export function useEditorDiscussions(contentId: string | undefined) {
    const { data } = useQuery({
       ...orpc.discussions.getByContent.queryOptions({
-         input: { contentId: contentId! },
+         input: { contentId: contentId as string },
          staleTime: 30_000,
       }),
       enabled: !!contentId,

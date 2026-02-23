@@ -10,14 +10,7 @@ import {
    TooltipContent,
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
-import {
-   Archive,
-   Check,
-   ChevronDown,
-   Eye,
-   Globe,
-   PenLine,
-} from "lucide-react";
+import { Archive, Check, ChevronDown, Eye, Globe, PenLine } from "lucide-react";
 import type { ReactNode } from "react";
 import type { ContentItem } from "./content-table-columns";
 
@@ -105,9 +98,9 @@ export function ContentMobileCard({
                         <TooltipTrigger asChild>
                            <Button
                               className="flex-shrink-0"
+                              onClick={() => onView(content)}
                               size="icon"
                               variant="ghost"
-                              onClick={() => onView(content)}
                            >
                               <Eye className="size-4" />
                               <span className="sr-only">Ver detalhes</span>
@@ -118,9 +111,9 @@ export function ContentMobileCard({
                   )}
                   {canExpand && toggleExpanded && (
                      <Button
+                        onClick={toggleExpanded}
                         size="icon"
                         variant="ghost"
-                        onClick={toggleExpanded}
                      >
                         <ChevronDown
                            className={`size-4 transition-transform ${

@@ -11,7 +11,5 @@ export const Route = createFileRoute(
 function ExperimentDetailPage() {
    const { experimentId } = Route.useParams();
 
-   return (
-      <ExperimentBuilder experimentId={experimentId} />
-   );
+   return <ExperimentBuilder experimentId={experimentId} />;
 }

@@ -97,28 +97,24 @@ export function ExperimentBuilderHeader({
       <div className="border-b bg-background sticky top-0 z-10">
          <div className="container mx-auto px-4 py-4">
             <PageHeader
-               editable
-               onTitleChange={onNameChange}
-               title={name}
-               titlePlaceholder="Nome do experimento"
                actions={
                   <>
                      {(isCreateMode ||
                         status === "draft" ||
                         status === "paused") && (
-                           <Button
-                              disabled={isAnyPending || !name.trim()}
-                              onClick={onSave}
-                              variant="outline"
-                           >
-                              {isSaving ? (
-                                 <Loader2 className="size-4 mr-2 animate-spin" />
-                              ) : (
-                                 <Save className="size-4 mr-2" />
-                              )}
-                              Salvar
-                           </Button>
-                        )}
+                        <Button
+                           disabled={isAnyPending || !name.trim()}
+                           onClick={onSave}
+                           variant="outline"
+                        >
+                           {isSaving ? (
+                              <Loader2 className="size-4 mr-2 animate-spin" />
+                           ) : (
+                              <Save className="size-4 mr-2" />
+                           )}
+                           Salvar
+                        </Button>
+                     )}
 
                      {canStart && (
                         <Button disabled={isAnyPending} onClick={onStart}>
@@ -199,6 +195,10 @@ export function ExperimentBuilderHeader({
                      )}
                   </>
                }
+               editable
+               onTitleChange={onNameChange}
+               title={name}
+               titlePlaceholder="Nome do experimento"
             />
          </div>
       </div>

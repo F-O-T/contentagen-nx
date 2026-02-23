@@ -1,7 +1,6 @@
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { PageHeader } from "@/components/page-header";
 import {
    Table,
    TableBody,
@@ -11,11 +10,7 @@ import {
    TableRow,
 } from "@packages/ui/components/table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-   createFileRoute,
-   Link,
-   useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
    AlertCircle,
    GitBranch,
@@ -27,6 +22,7 @@ import {
    TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/page-header";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -156,8 +152,6 @@ function InsightsListPage() {
    return (
       <main className="flex flex-col gap-6">
          <PageHeader
-            title="Insights"
-            description="Analise eventos, funis e retenção com consultas personalizadas."
             actions={
                <Button asChild>
                   <Link
@@ -169,6 +163,8 @@ function InsightsListPage() {
                   </Link>
                </Button>
             }
+            description="Analise eventos, funis e retenção com consultas personalizadas."
+            title="Insights"
          />
 
          {/* Content */}

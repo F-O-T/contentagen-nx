@@ -41,10 +41,6 @@ export function ClusterBuilderHeader({
       <div className="border-b bg-background sticky top-0 z-10">
          <div className="container mx-auto px-4 py-4">
             <PageHeader
-               editable
-               titlePlaceholder="Nome do cluster"
-               onTitleChange={onTitleChange}
-               title={pillarTitle}
                actions={
                   <>
                      <Button disabled={isSaving} onClick={onSave}>
@@ -101,6 +97,10 @@ export function ClusterBuilderHeader({
                      )}
                   </>
                }
+               editable
+               onTitleChange={onTitleChange}
+               title={pillarTitle}
+               titlePlaceholder="Nome do cluster"
             />
          </div>
       </div>

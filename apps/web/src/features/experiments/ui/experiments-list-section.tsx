@@ -81,9 +81,11 @@ function useExperimentColumns(
          id: "actions",
          header: "",
          cell: ({ row }) => (
+            // biome-ignore lint/a11y/noStaticElementInteractions: stopPropagation wrapper for table row click
             <div
                className="flex items-center justify-end gap-1"
                onClick={(e) => e.stopPropagation()}
+               onKeyDown={(e) => e.stopPropagation()}
             >
                <Tooltip>
                   <TooltipTrigger asChild>

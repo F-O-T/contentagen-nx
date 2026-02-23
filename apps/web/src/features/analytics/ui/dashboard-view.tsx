@@ -81,20 +81,20 @@ function DashboardHeader({
 
    return (
       <PageHeader
-         className="pb-3"
-         editable
-         onTitleChange={handleNameSave}
-         onDescriptionChange={handleDescriptionSave}
-         title={dashboard.name}
-         description={dashboard.description ?? ""}
-         titlePlaceholder="Nome do dashboard"
-         descriptionPlaceholder="Adicionar descrição (opcional)"
          actions={
             <Button onClick={onAddInsight} size="sm">
                <Plus className="size-3.5" />
                Adicionar insight
             </Button>
          }
+         className="pb-3"
+         description={dashboard.description ?? ""}
+         descriptionPlaceholder="Adicionar descrição (opcional)"
+         editable
+         onDescriptionChange={handleDescriptionSave}
+         onTitleChange={handleNameSave}
+         title={dashboard.name}
+         titlePlaceholder="Nome do dashboard"
       />
    );
 }
@@ -352,10 +352,7 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
 // Main Component
 // =============================================================================
 
-export function DashboardView({
-   dashboard,
-   children,
-}: DashboardViewProps) {
+export function DashboardView({ dashboard, children }: DashboardViewProps) {
    const addInsightRef = useRef<(() => void) | null>(null);
 
    return (

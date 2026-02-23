@@ -974,40 +974,21 @@ function AssetBankContent() {
    return (
       <main className="flex flex-col gap-6">
          <PageHeader
-            title="Banco de Imagens"
-            description="Gerencie e envie imagens do seu projeto"
             actions={
-            <DropdownMenu>
-               <DropdownMenuTrigger asChild>
-                  <Button className="shrink-0">
-                     Adicionar imagem
-                     <ChevronDown className="size-4 ml-2" />
-                  </Button>
-               </DropdownMenuTrigger>
-               <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                     onClick={() =>
-                        openCredenza({
-                           className: "sm:max-w-md",
-                           children: (
-                              <AssetUploadCredenzaContent
-                                 onClose={closeCredenza}
-                                 teamId={teamId}
-                              />
-                           ),
-                        })
-                     }
-                  >
-                     <Upload className="size-4 mr-2" />
-                     Upload de imagem
-                  </DropdownMenuItem>
-                  {aiImageEnabled && (
+               <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                     <Button className="shrink-0">
+                        Adicionar imagem
+                        <ChevronDown className="size-4 ml-2" />
+                     </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
                      <DropdownMenuItem
                         onClick={() =>
                            openCredenza({
                               className: "sm:max-w-md",
                               children: (
-                                 <GenerateImageCredenzaContent
+                                 <AssetUploadCredenzaContent
                                     onClose={closeCredenza}
                                     teamId={teamId}
                                  />
@@ -1015,13 +996,32 @@ function AssetBankContent() {
                            })
                         }
                      >
-                        <Sparkles className="size-4 mr-2 text-purple-500" />
-                        Gerar com IA
+                        <Upload className="size-4 mr-2" />
+                        Upload de imagem
                      </DropdownMenuItem>
-                  )}
-               </DropdownMenuContent>
-            </DropdownMenu>
+                     {aiImageEnabled && (
+                        <DropdownMenuItem
+                           onClick={() =>
+                              openCredenza({
+                                 className: "sm:max-w-md",
+                                 children: (
+                                    <GenerateImageCredenzaContent
+                                       onClose={closeCredenza}
+                                       teamId={teamId}
+                                    />
+                                 ),
+                              })
+                           }
+                        >
+                           <Sparkles className="size-4 mr-2 text-purple-500" />
+                           Gerar com IA
+                        </DropdownMenuItem>
+                     )}
+                  </DropdownMenuContent>
+               </DropdownMenu>
             }
+            description="Gerencie e envie imagens do seu projeto"
+            title="Banco de Imagens"
          />
 
          {/* Search */}

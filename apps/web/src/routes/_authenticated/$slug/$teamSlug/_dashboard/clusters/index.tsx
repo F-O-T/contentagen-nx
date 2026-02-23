@@ -19,8 +19,6 @@ function ClustersPage() {
    return (
       <div className="space-y-6 p-6">
          <PageHeader
-            title="Clusters"
-            description="Organize conteúdos relacionados em grupos temáticos"
             actions={
                <Button
                   onClick={() =>
@@ -34,6 +32,8 @@ function ClustersPage() {
                   Novo cluster
                </Button>
             }
+            description="Organize conteúdos relacionados em grupos temáticos"
+            title="Clusters"
          />
          <ErrorBoundary
             fallback={

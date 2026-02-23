@@ -85,12 +85,12 @@ function InlineEditableText({
       return (
          <div className={cn("flex items-center gap-1.5", textClassName)}>
             <Input
-               ref={inputRef}
                className="h-auto text-[length:inherit] font-[inherit] leading-[inherit]"
-               onChange={(e) => setDraft(e.target.value)}
                onBlur={commit}
+               onChange={(e) => setDraft(e.target.value)}
                onKeyDown={handleKeyDown}
                placeholder={placeholder}
+               ref={inputRef}
                value={draft}
             />
             <Tooltip>
@@ -109,8 +109,8 @@ function InlineEditableText({
             <Tooltip>
                <TooltipTrigger asChild>
                   <Button
-                     onMouseDown={(e) => e.preventDefault()}
                      onClick={discard}
+                     onMouseDown={(e) => e.preventDefault()}
                      size="icon-sm"
                      type="button"
                      variant="outline"
@@ -185,9 +185,9 @@ export function PageHeader({
             >
                {editable && onTitleChange ? (
                   <InlineEditableText
-                     textClassName={TITLE_CLASS}
                      onSave={onTitleChange}
                      placeholder={titlePlaceholder}
+                     textClassName={TITLE_CLASS}
                      value={title}
                   />
                ) : (
@@ -195,9 +195,9 @@ export function PageHeader({
                )}
                {hasEditableDescription ? (
                   <InlineEditableText
-                     textClassName={DESCRIPTION_CLASS}
                      onSave={onDescriptionChange}
                      placeholder={descriptionPlaceholder}
+                     textClassName={DESCRIPTION_CLASS}
                      value={typeof description === "string" ? description : ""}
                   />
                ) : description != null ? (

@@ -243,9 +243,9 @@ function ExperimentBuilderEditContent({
                            status={status}
                            targetType={
                               experiment.targetType as
-                              | "content"
-                              | "form"
-                              | "cluster"
+                                 | "content"
+                                 | "form"
+                                 | "cluster"
                            }
                            winnerId={experiment.winnerId ?? null}
                         />
@@ -417,7 +417,7 @@ export function ExperimentBuilder({
       <ExperimentBuilderCreateContent
          activeTab={activeTab}
          isCreating={isCreating}
-         onCreate={onCreate ?? (() => { })}
+         onCreate={onCreate ?? (() => {})}
          onTabChange={setActiveTab}
       />
    );

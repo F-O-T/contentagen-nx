@@ -36,8 +36,8 @@ function ExperimentsPageContent() {
    return (
       <main className="flex flex-col gap-4">
          <PageHeader
-            title="Experimentos"
             description="Compare variantes de conteúdos e formulários com testes A/B"
+            title="Experimentos"
          />
          <ExperimentsListSection />
       </main>

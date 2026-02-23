@@ -16,11 +16,11 @@ import {
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
-import { type DropdownMenuItemProps, type DropdownMenuProps } from "radix-ui";
 import { useComposedRef } from "@udecode/cn";
 import debounce from "lodash/debounce.js";
 import { EraserIcon, PlusIcon } from "lucide-react";
 import { useEditorRef, useEditorSelector } from "platejs/react";
+import type { DropdownMenuItemProps, DropdownMenuProps } from "radix-ui";
 import React from "react";
 
 import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";

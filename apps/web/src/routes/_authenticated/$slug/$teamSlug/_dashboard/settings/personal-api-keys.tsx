@@ -345,11 +345,11 @@ function KeysTable({
 
                   <div className="flex items-center gap-2 flex-wrap border-t pt-4">
                      <Button
+                        className="text-destructive hover:text-destructive"
                         disabled={isRevoking}
+                        onClick={() => onRevoke(key)}
                         size="sm"
                         variant="ghost"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => onRevoke(key)}
                      >
                         <Trash2 className="size-3 mr-2" />
                         Revogar chave

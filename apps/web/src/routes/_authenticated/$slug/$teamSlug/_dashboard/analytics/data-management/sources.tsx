@@ -155,8 +155,8 @@ function SourcesPage() {
    return (
       <div className="flex flex-col gap-6">
          <PageHeader
-            title="Fontes"
             description="Origens de dados que enviam eventos para o sistema"
+            title="Fontes"
          />
 
          <div className="grid gap-4 sm:grid-cols-3">

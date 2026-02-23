@@ -27,8 +27,6 @@ import {
    useTableElement,
    useTableMergeState,
 } from "@platejs/table/react";
-import { type DropdownMenu as DropdownMenuPrimitive, PopoverAnchor } from "radix-ui";
-
 import { cva } from "class-variance-authority";
 import {
    ArrowDown,
@@ -68,6 +66,10 @@ import {
    useSelected,
    withHOC,
 } from "platejs/react";
+import {
+   type DropdownMenu as DropdownMenuPrimitive,
+   PopoverAnchor,
+} from "radix-ui";
 import * as React from "react";
 
 import { blockSelectionVariants } from "./block-selection";

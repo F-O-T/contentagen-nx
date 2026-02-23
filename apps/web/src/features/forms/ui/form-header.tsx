@@ -6,14 +6,7 @@ import {
    DropdownMenuSeparator,
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
-import {
-   Copy,
-   Ellipsis,
-   Loader2,
-   Power,
-   Save,
-   Trash2,
-} from "lucide-react";
+import { Copy, Ellipsis, Loader2, Power, Save, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -51,13 +44,6 @@ export function FormHeader({
 }: FormHeaderProps) {
    return (
       <PageHeader
-         className="pb-3"
-         editable
-         onTitleChange={onNameChange}
-         onDescriptionChange={onDescriptionChange}
-         title={name}
-         description={description}
-         titlePlaceholder="Nome do formulário"
          actions={
             <>
                <Button disabled={isSaving} onClick={onSave}>
@@ -108,6 +94,13 @@ export function FormHeader({
                </DropdownMenu>
             </>
          }
+         className="pb-3"
+         description={description}
+         editable
+         onDescriptionChange={onDescriptionChange}
+         onTitleChange={onNameChange}
+         title={name}
+         titlePlaceholder="Nome do formulário"
       />
    );
 }

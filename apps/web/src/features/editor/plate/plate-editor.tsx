@@ -123,41 +123,52 @@ function EditorDiscussionSync({ contentId }: EditorDiscussionSyncProps) {
    }, [users]);
 
    // Build persistence callbacks that delegate to oRPC mutations
-   const callbacks: DiscussionCallbacks = useMemo(() => ({
-      onCreateDiscussion: async (discussion: TDiscussion) => {
-         const firstComment = discussion.comments[0];
-         if (!firstComment || !contentId) return;
-         await mutations.create.mutateAsync({
-            contentId,
-            blockId: discussion.id,
-            contentRich: firstComment.contentRich as Array<
-               Record<string, unknown>
-            >,
-            documentContent: discussion.documentContent,
-         });
-      },
-      onAddReply: async (discussionId: string, reply) => {
-         await mutations.addReply.mutateAsync({
-            discussionId,
-            contentRich: reply.contentRich as Array<Record<string, unknown>>,
-         });
-      },
-      onResolveDiscussion: async (discussionId: string) => {
-         await mutations.resolve.mutateAsync({ discussionId });
-      },
-      onRemoveDiscussion: async (discussionId: string) => {
-         await mutations.remove.mutateAsync({ discussionId });
-      },
-      onUpdateComment: async (commentId: string, contentRich: Value) => {
-         await mutations.updateReply.mutateAsync({
-            replyId: commentId,
-            contentRich: contentRich as Array<Record<string, unknown>>,
-         });
-      },
-      onDeleteComment: async (commentId: string, _discussionId: string) => {
-         await mutations.removeReply.mutateAsync({ replyId: commentId });
-      },
-   }), [contentId, mutations.create, mutations.addReply, mutations.resolve, mutations.remove, mutations.updateReply, mutations.removeReply]);
+   const callbacks: DiscussionCallbacks = useMemo(
+      () => ({
+         onCreateDiscussion: async (discussion: TDiscussion) => {
+            const firstComment = discussion.comments[0];
+            if (!firstComment || !contentId) return;
+            await mutations.create.mutateAsync({
+               contentId,
+               blockId: discussion.id,
+               contentRich: firstComment.contentRich as Array<
+                  Record<string, unknown>
+               >,
+               documentContent: discussion.documentContent,
+            });
+         },
+         onAddReply: async (discussionId: string, reply) => {
+            await mutations.addReply.mutateAsync({
+               discussionId,
+               contentRich: reply.contentRich as Array<Record<string, unknown>>,
+            });
+         },
+         onResolveDiscussion: async (discussionId: string) => {
+            await mutations.resolve.mutateAsync({ discussionId });
+         },
+         onRemoveDiscussion: async (discussionId: string) => {
+            await mutations.remove.mutateAsync({ discussionId });
+         },
+         onUpdateComment: async (commentId: string, contentRich: Value) => {
+            await mutations.updateReply.mutateAsync({
+               replyId: commentId,
+               contentRich: contentRich as Array<Record<string, unknown>>,
+            });
+         },
+         onDeleteComment: async (commentId: string, _discussionId: string) => {
+            await mutations.removeReply.mutateAsync({ replyId: commentId });
+         },
+      }),
+      [
+         contentId,
+         mutations.create,
+         mutations.addReply,
+         mutations.resolve,
+         mutations.remove,
+         mutations.updateReply,
+         mutations.removeReply,
+      ],
+   );
 
    // Sync currentUserId into discussionPlugin
    useEffect(() => {

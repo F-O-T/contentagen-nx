@@ -32,13 +32,6 @@ export function InsightHeader({
 }: InsightHeaderProps) {
    return (
       <PageHeader
-         className="pb-3"
-         editable
-         onTitleChange={onNameChange}
-         onDescriptionChange={onDescriptionChange}
-         title={name}
-         description={description}
-         titlePlaceholder="Nome do insight"
          actions={
             <>
                <Button disabled={isSaving} onClick={onSave}>
@@ -83,6 +76,13 @@ export function InsightHeader({
                </DropdownMenu>
             </>
          }
+         className="pb-3"
+         description={description}
+         editable
+         onDescriptionChange={onDescriptionChange}
+         onTitleChange={onNameChange}
+         title={name}
+         titlePlaceholder="Nome do insight"
       />
    );
 }
