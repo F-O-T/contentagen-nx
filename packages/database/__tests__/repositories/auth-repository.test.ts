@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { DatabaseInstance } from "../../src/client";
 import * as authRepository from "../../src/repositories/auth-repository";
-import { dashboards } from "../../src/schemas/dashboards";
-import { insights } from "../../src/schemas/insights";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -37,60 +35,6 @@ vi.mock("../../src/schemas/auth", () => ({
 		userId: "userId",
 		createdAt: "createdAt",
 	},
-}));
-
-vi.mock("../../src/schemas/dashboards", () => ({
-	dashboards: {
-		organizationId: "organizationId",
-		teamId: "teamId",
-		createdBy: "createdBy",
-		name: "name",
-		description: "description",
-		isDefault: "isDefault",
-		tiles: "tiles",
-		createdAt: "createdAt",
-	},
-}));
-
-vi.mock("../../src/schemas/insights", () => ({
-	insights: {
-		id: "id",
-		organizationId: "organizationId",
-		teamId: "teamId",
-		createdBy: "createdBy",
-		name: "name",
-		description: "description",
-		type: "type",
-		config: "config",
-		defaultSize: "defaultSize",
-		createdAt: "createdAt",
-	},
-}));
-
-vi.mock("../../src/default-insights", () => ({
-	DEFAULT_INSIGHTS: [
-		{
-			name: "Page Views",
-			description: "Daily page views",
-			type: "trends",
-			config: { series: [{ event: "page.view" }] },
-			defaultSize: "large",
-		},
-		{
-			name: "Unique Visitors",
-			description: "Daily unique visitors",
-			type: "trends",
-			config: { series: [{ event: "page.view", math: "dau" }] },
-			defaultSize: "large",
-		},
-		{
-			name: "Content Created",
-			description: "Content created this month",
-			type: "trends",
-			config: { series: [{ event: "content.created" }] },
-			defaultSize: "small",
-		},
-	],
 }));
 
 vi.mock("@packages/utils/text", () => ({
@@ -152,7 +96,7 @@ beforeEach(() => {
 // =============================================================================
 
 describe("createDefaultOrganization", () => {
-	it("creates organization with default team, insights, and dashboard", async () => {
+	it("creates organization with default team and team member", async () => {
 		const userId = "user-123";
 		const userName = "John Doe";
 
@@ -172,24 +116,9 @@ describe("createDefaultOrganization", () => {
 			createdAt: expect.any(Date),
 		};
 
-		const mockInsights = [
-			{ id: "insight-1" },
-			{ id: "insight-2" },
-			{ id: "insight-3" },
-		];
-
-		// Mock organization insert
+		// Only org and team inserts call .returning()
 		mocks.mockReturning.mockResolvedValueOnce([mockOrg]);
-		// Mock member insert
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
-		// Mock team insert
 		mocks.mockReturning.mockResolvedValueOnce([mockTeam]);
-		// Mock team member insert
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
-		// Mock insights insert
-		mocks.mockReturning.mockResolvedValueOnce(mockInsights);
-		// Mock dashboard insert
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
 
 		const result = await authRepository.createDefaultOrganization(
 			mocks.db,
@@ -200,18 +129,16 @@ describe("createDefaultOrganization", () => {
 		// Verify organization was created
 		expect(result).toEqual(mockOrg);
 
-		// Verify insert calls
-		expect(mocks.mockInsert).toHaveBeenCalledTimes(5); // org, member, team, teamMember, insights, dashboard (6 total)
+		// Verify insert calls: org, member, team, teamMember (4 total)
+		expect(mocks.mockInsert).toHaveBeenCalledTimes(4);
 
-		// Verify values were called with correct data structures
+		// Verify org values
 		expect(mocks.mockValues).toHaveBeenCalledWith(
 			expect.objectContaining({
 				name: "John Doe1234",
 				slug: "john-doe1234",
 				context: "personal",
 				onboardingCompleted: false,
-				onboardingTasks: {},
-				onboardingProducts: null,
 			}),
 		);
 
@@ -224,105 +151,6 @@ describe("createDefaultOrganization", () => {
 		);
 	});
 
-	it("creates default insights with teamId", async () => {
-		const userId = "user-123";
-		const userName = "Jane Smith";
-
-		const mockOrg = { id: "org-456" };
-		const mockTeam = { id: "team-456" };
-		const mockInsights = [{ id: "insight-1" }];
-
-		// Mock all inserts
-		mocks.mockReturning.mockResolvedValueOnce([mockOrg]);
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
-		mocks.mockReturning.mockResolvedValueOnce([mockTeam]);
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
-		mocks.mockReturning.mockResolvedValueOnce(mockInsights);
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
-
-		await authRepository.createDefaultOrganization(
-			mocks.db,
-			userId,
-			userName,
-		);
-
-		// Find the insights insert call
-		const insightsCall = mocks.mockValues.mock.calls.find((call) =>
-			Array.isArray(call[0]),
-		);
-
-		expect(insightsCall).toBeDefined();
-		expect(insightsCall?.[0]).toEqual(
-			expect.arrayContaining([
-				expect.objectContaining({
-					organizationId: "org-456",
-					teamId: "team-456",
-					createdBy: userId,
-					name: "Page Views",
-				}),
-				expect.objectContaining({
-					organizationId: "org-456",
-					teamId: "team-456",
-					createdBy: userId,
-					name: "Unique Visitors",
-				}),
-				expect.objectContaining({
-					organizationId: "org-456",
-					teamId: "team-456",
-					createdBy: userId,
-					name: "Content Created",
-				}),
-			]),
-		);
-	});
-
-	it("creates default dashboard with teamId and tiles", async () => {
-		const userId = "user-123";
-		const userName = "Test User";
-
-		const mockOrg = { id: "org-789" };
-		const mockTeam = { id: "team-789" };
-		const mockInsights = [
-			{ id: "insight-1" },
-			{ id: "insight-2" },
-			{ id: "insight-3" },
-		];
-
-		// Mock all inserts
-		mocks.mockReturning.mockResolvedValueOnce([mockOrg]);
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
-		mocks.mockReturning.mockResolvedValueOnce([mockTeam]);
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
-		mocks.mockReturning.mockResolvedValueOnce(mockInsights);
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
-
-		await authRepository.createDefaultOrganization(
-			mocks.db,
-			userId,
-			userName,
-		);
-
-		// Find the dashboard insert call
-		const dashboardCall = mocks.mockValues.mock.calls[mocks.mockValues.mock.calls.length - 1];
-
-		expect(dashboardCall).toBeDefined();
-		expect(dashboardCall?.[0]).toEqual(
-			expect.objectContaining({
-				organizationId: "org-789",
-				teamId: "team-789",
-				createdBy: userId,
-				name: "Home",
-				description: "Default dashboard",
-				isDefault: true,
-				tiles: [
-					{ insightId: "insight-1", size: "large", order: 0 },
-					{ insightId: "insight-2", size: "large", order: 1 },
-					{ insightId: "insight-3", size: "small", order: 2 },
-				],
-			}),
-		);
-	});
-
 	it("adds user to team as team member", async () => {
 		const userId = "user-999";
 		const userName = "Member User";
@@ -330,13 +158,9 @@ describe("createDefaultOrganization", () => {
 		const mockOrg = { id: "org-999" };
 		const mockTeam = { id: "team-999" };
 
-		// Mock all inserts
+		// Only org and team inserts call .returning()
 		mocks.mockReturning.mockResolvedValueOnce([mockOrg]);
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
 		mocks.mockReturning.mockResolvedValueOnce([mockTeam]);
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
-		mocks.mockReturning.mockResolvedValueOnce([{ id: "insight-1" }]);
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
 
 		await authRepository.createDefaultOrganization(
 			mocks.db,
@@ -368,12 +192,9 @@ describe("createDefaultOrganization", () => {
 			slug: "workspace1234",
 		};
 
+		// Only org and team inserts call .returning()
 		mocks.mockReturning.mockResolvedValueOnce([mockOrg]);
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
 		mocks.mockReturning.mockResolvedValueOnce([{ id: "team-1" }]);
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
-		mocks.mockReturning.mockResolvedValueOnce([{ id: "insight-1" }]);
-		mocks.mockReturning.mockResolvedValueOnce([{}]);
 
 		const result = await authRepository.createDefaultOrganization(
 			mocks.db,

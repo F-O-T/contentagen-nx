@@ -252,7 +252,7 @@ function PlanBanner({
    planDisplayName: string;
 }) {
    const { slug, teamSlug } = useParams({
-      from: "/_authenticated/$slug/$teamSlug/_dashboard/billing",
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    const isPro = planName === PlanName.PRO;
    const isFree = planName === PlanName.FREE;
@@ -407,7 +407,7 @@ function OverviewProductCard({
    enrolled?: boolean;
 }) {
    const { slug, teamSlug } = useParams({
-      from: "/_authenticated/$slug/$teamSlug/_dashboard/billing",
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    const config = CATEGORY_CONFIG[category.category];
    if (!config) return null;
@@ -576,7 +576,7 @@ function VolumeFeatureCard({
    enrolled?: boolean;
 }) {
    const { slug, teamSlug } = useParams({
-      from: "/_authenticated/$slug/$teamSlug/_dashboard/billing",
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    return (
       <Card className={!enrolled ? "opacity-70" : ""}>
@@ -834,7 +834,7 @@ function InvoicesPreviewContent() {
 
 export function BillingOverview() {
    const { slug, teamSlug } = useParams({
-      from: "/_authenticated/$slug/$teamSlug/_dashboard/billing",
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    const { data } = useSuspenseQuery(
       orpc.billing.getCurrentUsage.queryOptions({}),

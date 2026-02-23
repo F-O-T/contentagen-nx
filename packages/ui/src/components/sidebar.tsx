@@ -20,9 +20,9 @@ import {
 import { useEventListener } from "@packages/ui/hooks/use-event-listener";
 import { useIsMobile } from "@packages/ui/hooks/use-mobile";
 import { cn } from "@packages/ui/lib/utils";
-import { Slot as SlotPrimitive } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";
 import { ChevronLeft, ChevronRight, MenuIcon } from "lucide-react";
+import { Slot as SlotPrimitive } from "radix-ui";
 import * as React from "react";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";

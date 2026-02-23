@@ -3,7 +3,7 @@ import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { cn } from "@packages/ui/lib/utils";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
@@ -69,16 +69,17 @@ interface ExperimentBuilderEditContentProps {
    experimentId: string;
    activeTab: TabValue;
    onTabChange: (tab: TabValue) => void;
-   backTo: { slug: string; teamSlug: string };
 }
 
 function ExperimentBuilderEditContent({
    experimentId,
    activeTab,
    onTabChange,
-   backTo,
 }: ExperimentBuilderEditContentProps) {
    const navigate = useNavigate();
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const { config, updateConfig, setName } = useExperimentConfig();
 
    const { data: experiment } = useSuspenseQuery(
@@ -138,7 +139,7 @@ function ExperimentBuilderEditContent({
             toast.success("Experimento excluído");
             navigate({
                to: "/$slug/$teamSlug/experiments",
-               params: backTo as never,
+               params: { slug, teamSlug },
             });
          },
          onError: (err) => toast.error(err.message ?? "Erro ao excluir"),
@@ -162,7 +163,6 @@ function ExperimentBuilderEditContent({
    return (
       <div className="flex flex-col gap-0 h-full">
          <ExperimentBuilderHeader
-            backTo={backTo}
             isConcluding={concludeMutation.isPending}
             isDeleting={removeMutation.isPending}
             isPausing={pauseMutation.isPending}
@@ -283,7 +283,6 @@ function ExperimentBuilderEditContent({
 interface ExperimentBuilderCreateContentProps {
    activeTab: TabValue;
    onTabChange: (tab: TabValue) => void;
-   backTo: { slug: string; teamSlug: string };
    onCreate: (config: {
       name: string;
       hypothesis?: string;
@@ -296,7 +295,6 @@ interface ExperimentBuilderCreateContentProps {
 function ExperimentBuilderCreateContent({
    activeTab,
    onTabChange,
-   backTo,
    onCreate,
    isCreating,
 }: ExperimentBuilderCreateContentProps) {
@@ -318,7 +316,6 @@ function ExperimentBuilderCreateContent({
    return (
       <div className="flex flex-col gap-0 h-full">
          <ExperimentBuilderHeader
-            backTo={backTo}
             isSaving={isCreating}
             name={config.name}
             onNameChange={setName}
@@ -375,7 +372,6 @@ function ExperimentBuilderCreateContent({
 
 export interface ExperimentBuilderProps {
    experimentId?: string;
-   backTo: { slug: string; teamSlug: string };
    // Provided by parent in create mode
    onCreate?: (config: {
       name: string;
@@ -389,7 +385,6 @@ export interface ExperimentBuilderProps {
 
 export function ExperimentBuilder({
    experimentId,
-   backTo,
    onCreate,
    isCreating = false,
    initialTab = "config",
@@ -410,7 +405,6 @@ export function ExperimentBuilder({
             <Suspense fallback={<ExperimentBuilderSkeleton />}>
                <ExperimentBuilderEditContent
                   activeTab={activeTab}
-                  backTo={backTo}
                   experimentId={experimentId}
                   onTabChange={setActiveTab}
                />
@@ -422,7 +416,6 @@ export function ExperimentBuilder({
    return (
       <ExperimentBuilderCreateContent
          activeTab={activeTab}
-         backTo={backTo}
          isCreating={isCreating}
          onCreate={onCreate ?? (() => {})}
          onTabChange={setActiveTab}

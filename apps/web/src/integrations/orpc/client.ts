@@ -1,22 +1,18 @@
 import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
 import { BatchLinkPlugin } from "@orpc/client/plugins";
-import type { RouterClient } from "@orpc/server";
+import type {
+   InferRouterInputs,
+   InferRouterOutputs,
+   RouterClient,
+} from "@orpc/server";
 import { createRouterClient } from "@orpc/server";
 import { createTanstackQueryUtils } from "@orpc/tanstack-query";
-import { createAuth } from "@packages/authentication/server";
-import { createDb } from "@packages/database/client";
-import { env } from "@packages/environment/server";
-import { getElysiaPosthogConfig } from "@packages/posthog/server";
 import { createIsomorphicFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import router from "./router";
 import type { ORPCContextWithAuth } from "./server";
-
-// Create singleton instances for server-side
-const db = createDb({ databaseUrl: env.DATABASE_URL });
-const auth = createAuth({ db, env });
-const posthog = getElysiaPosthogConfig(env);
+import { auth, db, posthog } from "./server-instances";
 
 const getORPCClient = createIsomorphicFn()
    .server(() =>
@@ -65,3 +61,5 @@ const getORPCClient = createIsomorphicFn()
 export const client: RouterClient<typeof router> = getORPCClient();
 
 export const orpc = createTanstackQueryUtils(client);
+export type Inputs = InferRouterInputs<typeof router>;
+export type Outputs = InferRouterOutputs<typeof router>;

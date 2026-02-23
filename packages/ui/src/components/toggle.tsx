@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@packages/ui/lib/utils";
-import { Toggle as TogglePrimitive } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Toggle as TogglePrimitive } from "radix-ui";
 import type * as React from "react";
 
 const toggleVariants = cva(

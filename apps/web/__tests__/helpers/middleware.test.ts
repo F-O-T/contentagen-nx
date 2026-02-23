@@ -1,5 +1,19 @@
 import { ORPCError, call } from "@orpc/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@packages/environment/server", () => ({
+	env: {
+		MINIO_ENDPOINT: "http://localhost:9000",
+		MINIO_ACCESS_KEY: "test",
+		MINIO_SECRET_KEY: "test",
+	},
+}));
+vi.mock("@packages/files/client", () => ({
+	getMinioClient: vi.fn(),
+	generatePresignedPutUrl: vi.fn(),
+}));
+vi.mock("@packages/database/repositories/auth-repository");
+
 import { getOrganizationTeams } from "@/integrations/orpc/router/organization";
 import {
 	createNoOrgContext,
@@ -13,7 +27,7 @@ describe("oRPC middleware chain", () => {
 
 		await expect(
 			call(getOrganizationTeams, undefined, { context }),
-		).rejects.toSatisfy((error: ORPCError) => {
+		).rejects.toSatisfy((error: ORPCError<string, unknown>) => {
 			expect(error.code).toBe("UNAUTHORIZED");
 			expect(error.message).toBe(
 				"You must be logged in to access this resource",
@@ -27,7 +41,7 @@ describe("oRPC middleware chain", () => {
 
 		await expect(
 			call(getOrganizationTeams, undefined, { context }),
-		).rejects.toSatisfy((error: ORPCError) => {
+		).rejects.toSatisfy((error: ORPCError<string, unknown>) => {
 			expect(error.code).toBe("FORBIDDEN");
 			expect(error.message).toBe("No active organization selected");
 			return true;

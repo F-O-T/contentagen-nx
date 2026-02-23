@@ -223,6 +223,7 @@ describe("create", () => {
 		await call(webhooksRouter.create, input, { context: ctx });
 
 		expect(emitWebhookEndpointCreated).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -457,6 +458,7 @@ describe("update", () => {
 		await call(webhooksRouter.update, input, { context: ctx });
 
 		expect(emitWebhookEndpointUpdated).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -520,6 +522,7 @@ describe("remove", () => {
 		);
 
 		expect(emitWebhookEndpointDeleted).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,

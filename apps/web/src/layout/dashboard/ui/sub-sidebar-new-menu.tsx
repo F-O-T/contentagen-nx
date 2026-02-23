@@ -20,16 +20,17 @@ import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
 
 interface SubSidebarNewMenuProps {
    section: SubSidebarSection;
+   onAction?: () => void;
 }
 
-export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
+export function SubSidebarNewMenu({
+   section,
+   onAction,
+}: SubSidebarNewMenuProps) {
    const navigate = useNavigate();
-   const params = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-   };
-   const slug = params.slug ?? "";
-   const teamSlug = params.teamSlug ?? "";
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const queryClient = useQueryClient();
 
    const createDashboardMutation = useMutation(
@@ -41,7 +42,8 @@ export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
             navigate({
                to: "/$slug/$teamSlug/analytics/dashboards/$dashboardId",
                params: { slug, teamSlug, dashboardId: data.id },
-            } as never);
+            });
+            onAction?.();
          },
          onError: () => {
             toast.error("Erro ao criar dashboard");
@@ -65,7 +67,8 @@ export function SubSidebarNewMenu({ section }: SubSidebarNewMenuProps) {
       navigate({
          to: "/$slug/$teamSlug/analytics/insights/new",
          params: { slug, teamSlug },
-      } as never);
+      });
+      onAction?.();
    };
 
    return (

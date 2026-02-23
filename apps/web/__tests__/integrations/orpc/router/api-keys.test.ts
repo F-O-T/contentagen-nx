@@ -1,4 +1,4 @@
-import { ORPCError, call } from "@orpc/server";
+import { call } from "@orpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	TEST_ORG_ID,
@@ -126,7 +126,7 @@ describe("get", () => {
 
 		expect(result).toEqual(key);
 		expect(mockAuth.api.getApiKey).toHaveBeenCalledWith({
-			query: { keyId: "key-1" },
+			query: { id: "key-1" },
 			headers: ctx.headers,
 		});
 	});

@@ -82,6 +82,9 @@
          }
       }
    },
+   "sync": {
+      "disabledTaskSyncGenerators": ["@nx/js:typescript-sync"]
+   },
    "tui": {
       "enabled": true
    },

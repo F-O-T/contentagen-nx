@@ -23,10 +23,9 @@ import {
 } from "./form-table-columns";
 
 export function FormsList() {
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-   };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const { openAlertDialog } = useAlertDialog();
 
    const { data: forms, refetch } = useSuspenseQuery(

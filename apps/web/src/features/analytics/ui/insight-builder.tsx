@@ -41,7 +41,6 @@ interface InsightBuilderProps {
    onConfigUpdate: (updates: Partial<InsightConfig>) => void;
    onSave: () => void;
    isSaving: boolean;
-   backTo: { slug: string; teamSlug: string };
    onDuplicate?: () => void;
    onDelete?: () => void;
    lastComputedAt?: Date | null;
@@ -61,7 +60,6 @@ export function InsightBuilder({
    onConfigUpdate,
    onSave,
    isSaving,
-   backTo,
    onDuplicate,
    onDelete,
    lastComputedAt,
@@ -74,10 +72,9 @@ export function InsightBuilder({
    const isRetention = type === "retention";
 
    return (
-      <div className="flex flex-col gap-0 h-full">
+      <main className="flex flex-col gap-0">
          {/* Header */}
          <InsightHeader
-            backTo={backTo}
             description={description}
             isSaving={isSaving}
             name={name}
@@ -89,255 +86,249 @@ export function InsightBuilder({
          />
 
          {/* Tab bar */}
-         <div className="border-b bg-background">
-            <div className="container mx-auto px-4">
-               <div className="flex items-center gap-0">
-                  {INSIGHT_TABS.map((tab) => (
-                     <Button
-                        className={cn(
-                           "px-4 py-2.5 h-auto rounded-none border-b-2 text-sm font-medium",
-                           type === tab.value
-                              ? "border-primary text-primary"
-                              : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/50",
-                        )}
-                        key={tab.value}
-                        onClick={() => onTypeChange(tab.value)}
-                        variant="ghost"
-                     >
-                        {tab.label}
-                     </Button>
-                  ))}
-               </div>
-            </div>
+         <div className="flex items-center border-t border-b py-1">
+            {INSIGHT_TABS.map((tab) => (
+               <Button
+                  className={cn(
+                     "px-4 py-2 h-auto rounded-none border-b-2 text-sm font-medium",
+                     type === tab.value
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/50",
+                  )}
+                  key={tab.value}
+                  onClick={() => onTypeChange(tab.value)}
+                  variant="ghost"
+               >
+                  {tab.label}
+               </Button>
+            ))}
          </div>
 
          {/* Content */}
-         <div className="flex-1 overflow-auto">
-            <div className="container mx-auto px-4 py-6 flex flex-col gap-4">
-               {/* TRENDS — full-width vertical flow */}
-               {isTrends && (
-                  <>
-                     <TrendsQueryBuilder
+         <div className="flex flex-col gap-4 pt-4">
+            {/* TRENDS — full-width vertical flow */}
+            {isTrends && (
+               <>
+                  <TrendsQueryBuilder
+                     config={config as TrendsConfig}
+                     onUpdate={onConfigUpdate}
+                  />
+
+                  <Card>
+                     <CardContent className="p-0">
+                        <div className="px-4">
+                           <InsightFilterBar
+                              chartType={(config as TrendsConfig).chartType}
+                              compare={config.compare}
+                              dateRange={
+                                 (config as { dateRange: { value: string } })
+                                    .dateRange.value
+                              }
+                              interval={(config as TrendsConfig).interval}
+                              onChartTypeChange={(v) =>
+                                 onConfigUpdate({
+                                    chartType: v as
+                                       | "number"
+                                       | "area"
+                                       | "line"
+                                       | "bar",
+                                 })
+                              }
+                              onCompareChange={(v) =>
+                                 onConfigUpdate({ compare: v })
+                              }
+                              onDateRangeChange={(v) =>
+                                 onConfigUpdate({
+                                    dateRange: {
+                                       type: "relative",
+                                       value: v as
+                                          | "7d"
+                                          | "14d"
+                                          | "30d"
+                                          | "90d"
+                                          | "180d"
+                                          | "12m"
+                                          | "this_month"
+                                          | "last_month"
+                                          | "this_quarter"
+                                          | "this_year",
+                                    },
+                                 })
+                              }
+                              onIntervalChange={(v) =>
+                                 onConfigUpdate({
+                                    interval: v as
+                                       | "month"
+                                       | "day"
+                                       | "week"
+                                       | "hour",
+                                 })
+                              }
+                              type="trends"
+                           />
+                        </div>
+                        <div className="px-4">
+                           <InsightStatusLine
+                              isRefreshing={isRefreshing}
+                              lastComputedAt={lastComputedAt}
+                              onRefresh={onRefresh}
+                           />
+                        </div>
+                        <div className="min-h-[400px] p-4">
+                           <ErrorBoundary
+                              fallbackRender={({ error }) => (
+                                 <InsightErrorState error={error as Error} />
+                              )}
+                           >
+                              <Suspense fallback={<InsightLoadingState />}>
+                                 <InsightPreview config={config} />
+                              </Suspense>
+                           </ErrorBoundary>
+                        </div>
+                     </CardContent>
+                  </Card>
+
+                  {queryResult && (
+                     <TrendsResultsTable
                         config={config as TrendsConfig}
-                        onUpdate={onConfigUpdate}
+                        result={queryResult as TrendsResult}
                      />
+                  )}
+               </>
+            )}
 
-                     <Card>
-                        <CardContent className="p-0">
-                           <div className="px-4">
-                              <InsightFilterBar
-                                 chartType={(config as TrendsConfig).chartType}
-                                 compare={config.compare}
-                                 dateRange={
-                                    (config as { dateRange: { value: string } })
-                                       .dateRange.value
-                                 }
-                                 interval={(config as TrendsConfig).interval}
-                                 onChartTypeChange={(v) =>
-                                    onConfigUpdate({
-                                       chartType: v as
-                                          | "number"
-                                          | "area"
-                                          | "line"
-                                          | "bar",
-                                    })
-                                 }
-                                 onCompareChange={(v) =>
-                                    onConfigUpdate({ compare: v })
-                                 }
-                                 onDateRangeChange={(v) =>
-                                    onConfigUpdate({
-                                       dateRange: {
-                                          type: "relative",
-                                          value: v as
-                                             | "7d"
-                                             | "14d"
-                                             | "30d"
-                                             | "90d"
-                                             | "180d"
-                                             | "12m"
-                                             | "this_month"
-                                             | "last_month"
-                                             | "this_quarter"
-                                             | "this_year",
-                                       },
-                                    })
-                                 }
-                                 onIntervalChange={(v) =>
-                                    onConfigUpdate({
-                                       interval: v as
-                                          | "month"
-                                          | "day"
-                                          | "week"
-                                          | "hour",
-                                    })
-                                 }
-                                 type="trends"
-                              />
-                           </div>
-                           <div className="px-4">
-                              <InsightStatusLine
-                                 isRefreshing={isRefreshing}
-                                 lastComputedAt={lastComputedAt}
-                                 onRefresh={onRefresh}
-                              />
-                           </div>
-                           <div className="min-h-[400px] p-4">
-                              <ErrorBoundary
-                                 fallbackRender={({ error }) => (
-                                    <InsightErrorState error={error as Error} />
-                                 )}
-                              >
-                                 <Suspense fallback={<InsightLoadingState />}>
-                                    <InsightPreview config={config} />
-                                 </Suspense>
-                              </ErrorBoundary>
-                           </div>
-                        </CardContent>
-                     </Card>
-
-                     {queryResult && (
-                        <TrendsResultsTable
-                           config={config as TrendsConfig}
-                           result={queryResult as TrendsResult}
-                        />
-                     )}
-                  </>
-               )}
-
-               {/* FUNNELS — sidebar layout */}
-               {isFunnels && (
-                  <div className="flex gap-4">
-                     <div className="w-[400px] shrink-0">
-                        <Card className="sticky top-4">
-                           <CardContent className="p-6">
-                              <FunnelsQueryBuilder
-                                 config={config as FunnelsConfig}
-                                 onUpdate={onConfigUpdate}
-                              />
-                           </CardContent>
-                        </Card>
-                     </div>
-
-                     <Card className="flex-1 min-w-0">
-                        <CardContent className="p-0">
-                           <div className="px-4">
-                              <InsightFilterBar
-                                 dateRange={
-                                    (config as { dateRange: { value: string } })
-                                       .dateRange.value
-                                 }
-                                 onDateRangeChange={(v) =>
-                                    onConfigUpdate({
-                                       dateRange: {
-                                          type: "relative",
-                                          value: v as
-                                             | "7d"
-                                             | "14d"
-                                             | "30d"
-                                             | "90d"
-                                             | "180d"
-                                             | "12m"
-                                             | "this_month"
-                                             | "last_month"
-                                             | "this_quarter"
-                                             | "this_year",
-                                       },
-                                    })
-                                 }
-                                 type={type}
-                              />
-                           </div>
-                           <div className="px-4">
-                              <InsightStatusLine
-                                 isRefreshing={isRefreshing}
-                                 lastComputedAt={lastComputedAt}
-                                 onRefresh={onRefresh}
-                              />
-                           </div>
-                           <div className="min-h-[400px] p-4">
-                              <ErrorBoundary
-                                 fallbackRender={({ error }) => (
-                                    <InsightErrorState error={error as Error} />
-                                 )}
-                              >
-                                 <Suspense fallback={<InsightLoadingState />}>
-                                    <InsightPreview config={config} />
-                                 </Suspense>
-                              </ErrorBoundary>
-                           </div>
+            {/* FUNNELS — sidebar layout */}
+            {isFunnels && (
+               <div className="flex gap-4">
+                  <div className="w-[400px] shrink-0">
+                     <Card className="sticky top-4">
+                        <CardContent className="p-6">
+                           <FunnelsQueryBuilder
+                              config={config as FunnelsConfig}
+                              onUpdate={onConfigUpdate}
+                           />
                         </CardContent>
                      </Card>
                   </div>
-               )}
 
-               {/* RETENTION — sidebar layout */}
-               {isRetention && (
-                  <div className="flex gap-4">
-                     <div className="w-[400px] shrink-0">
-                        <Card className="sticky top-4">
-                           <CardContent className="p-6">
-                              <RetentionQueryBuilder
-                                 config={config as RetentionConfig}
-                                 onUpdate={onConfigUpdate}
-                              />
-                           </CardContent>
-                        </Card>
-                     </div>
+                  <Card className="flex-1 min-w-0">
+                     <CardContent className="p-0">
+                        <div className="px-4">
+                           <InsightFilterBar
+                              dateRange={
+                                 (config as { dateRange: { value: string } })
+                                    .dateRange.value
+                              }
+                              onDateRangeChange={(v) =>
+                                 onConfigUpdate({
+                                    dateRange: {
+                                       type: "relative",
+                                       value: v as
+                                          | "7d"
+                                          | "14d"
+                                          | "30d"
+                                          | "90d"
+                                          | "180d"
+                                          | "12m"
+                                          | "this_month"
+                                          | "last_month"
+                                          | "this_quarter"
+                                          | "this_year",
+                                    },
+                                 })
+                              }
+                              type={type}
+                           />
+                        </div>
+                        <div className="px-4">
+                           <InsightStatusLine
+                              isRefreshing={isRefreshing}
+                              lastComputedAt={lastComputedAt}
+                              onRefresh={onRefresh}
+                           />
+                        </div>
+                        <div className="min-h-[400px] p-4">
+                           <ErrorBoundary
+                              fallbackRender={({ error }) => (
+                                 <InsightErrorState error={error as Error} />
+                              )}
+                           >
+                              <Suspense fallback={<InsightLoadingState />}>
+                                 <InsightPreview config={config} />
+                              </Suspense>
+                           </ErrorBoundary>
+                        </div>
+                     </CardContent>
+                  </Card>
+               </div>
+            )}
 
-                     <Card className="flex-1 min-w-0">
-                        <CardContent className="p-0">
-                           <div className="px-4">
-                              <InsightFilterBar
-                                 dateRange={
-                                    (config as { dateRange: { value: string } })
-                                       .dateRange.value
-                                 }
-                                 onDateRangeChange={(v) =>
-                                    onConfigUpdate({
-                                       dateRange: {
-                                          type: "relative",
-                                          value: v as
-                                             | "7d"
-                                             | "14d"
-                                             | "30d"
-                                             | "90d"
-                                             | "180d"
-                                             | "12m"
-                                             | "this_month"
-                                             | "last_month"
-                                             | "this_quarter"
-                                             | "this_year",
-                                       },
-                                    })
-                                 }
-                                 type={type}
-                              />
-                           </div>
-                           <div className="px-4">
-                              <InsightStatusLine
-                                 isRefreshing={isRefreshing}
-                                 lastComputedAt={lastComputedAt}
-                                 onRefresh={onRefresh}
-                              />
-                           </div>
-                           <div className="min-h-[400px] p-4">
-                              <ErrorBoundary
-                                 fallbackRender={({ error }) => (
-                                    <InsightErrorState error={error as Error} />
-                                 )}
-                              >
-                                 <Suspense fallback={<InsightLoadingState />}>
-                                    <InsightPreview config={config} />
-                                 </Suspense>
-                              </ErrorBoundary>
-                           </div>
+            {/* RETENTION — sidebar layout */}
+            {isRetention && (
+               <div className="flex gap-4">
+                  <div className="w-[400px] shrink-0">
+                     <Card className="sticky top-4">
+                        <CardContent className="p-6">
+                           <RetentionQueryBuilder
+                              config={config as RetentionConfig}
+                              onUpdate={onConfigUpdate}
+                           />
                         </CardContent>
                      </Card>
                   </div>
-               )}
-            </div>
+
+                  <Card className="flex-1 min-w-0">
+                     <CardContent className="p-0">
+                        <div className="px-4">
+                           <InsightFilterBar
+                              dateRange={
+                                 (config as { dateRange: { value: string } })
+                                    .dateRange.value
+                              }
+                              onDateRangeChange={(v) =>
+                                 onConfigUpdate({
+                                    dateRange: {
+                                       type: "relative",
+                                       value: v as
+                                          | "7d"
+                                          | "14d"
+                                          | "30d"
+                                          | "90d"
+                                          | "180d"
+                                          | "12m"
+                                          | "this_month"
+                                          | "last_month"
+                                          | "this_quarter"
+                                          | "this_year",
+                                    },
+                                 })
+                              }
+                              type={type}
+                           />
+                        </div>
+                        <div className="px-4">
+                           <InsightStatusLine
+                              isRefreshing={isRefreshing}
+                              lastComputedAt={lastComputedAt}
+                              onRefresh={onRefresh}
+                           />
+                        </div>
+                        <div className="min-h-[400px] p-4">
+                           <ErrorBoundary
+                              fallbackRender={({ error }) => (
+                                 <InsightErrorState error={error as Error} />
+                              )}
+                           >
+                              <Suspense fallback={<InsightLoadingState />}>
+                                 <InsightPreview config={config} />
+                              </Suspense>
+                           </ErrorBoundary>
+                        </div>
+                     </CardContent>
+                  </Card>
+               </div>
+            )}
          </div>
-      </div>
+      </main>
    );
 }

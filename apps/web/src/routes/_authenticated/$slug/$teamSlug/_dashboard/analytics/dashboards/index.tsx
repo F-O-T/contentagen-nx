@@ -74,14 +74,14 @@ function DashboardsPage() {
    return (
       <main className="flex flex-col gap-4">
          <PageHeader
-            title="Dashboards"
-            description="Painéis personalizados com seus insights"
             actions={
                <Button>
                   <Plus className="size-4 mr-1" />
                   Novo dashboard
                </Button>
             }
+            description="Painéis personalizados com seus insights"
+            title="Dashboards"
          />
          <Suspense fallback={<DashboardsPageSkeleton />}>
             <DashboardsList />

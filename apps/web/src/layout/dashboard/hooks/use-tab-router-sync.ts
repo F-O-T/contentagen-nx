@@ -23,7 +23,9 @@ import { pathnameToRoutePath, resolveTabMetadata } from "../utils/route-to-tab";
  */
 export function useTabRouterSync(orgSlug: string, teamId: string) {
    const { pathname } = useLocation();
-   const params = useParams({ strict: false }) as Record<string, string>;
+   const params = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const navigate = useNavigate();
    const { activeTab } = useTabStore();
 
@@ -37,7 +39,7 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
    // ── Initialize tabs on mount / scope change ─────────────────────────────
 
    useEffect(() => {
-      const homeRoute = `/${orgSlug}/${teamId}/home`;
+      const homeRoute = "/$slug/$teamSlug/home";
       const homeParams = { slug: orgSlug, teamSlug: teamId };
       initializeTabs(orgSlug, teamId, homeRoute, homeParams);
    }, [orgSlug, teamId]);
@@ -106,7 +108,7 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
          const tab = tabStore.state.tabs.find((t) => t.id === tabId);
          if (!tab) return;
 
-         // Build the resolved path from the tab's route + params
+         // Build resolved path for comparison with current pathname
          let resolvedPath = tab.route;
          for (const [key, value] of Object.entries(tab.params)) {
             resolvedPath = resolvedPath.replace(`$${key}`, value);
@@ -120,7 +122,7 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
 
          isTabNavigatingRef.current = true;
          focusTab(tabId);
-         navigate({ to: resolvedPath });
+         navigate({ to: tab.route, params: tab.params });
       },
       [navigate, pathname],
    );
@@ -145,7 +147,7 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
 
                if (resolvedPath !== pathname) {
                   isTabNavigatingRef.current = true;
-                  navigate({ to: resolvedPath });
+                  navigate({ to: newTab.route, params: newTab.params });
                }
             }
          } else {
@@ -153,7 +155,10 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
             const searchPath = `/${orgSlug}/${teamId}/search`;
             if (searchPath !== pathname) {
                isTabNavigatingRef.current = true;
-               navigate({ to: searchPath });
+               navigate({
+                  to: "/$slug/$teamSlug/search",
+                  params: { slug: orgSlug, teamSlug: teamId },
+               });
             }
          }
       },
@@ -163,39 +168,37 @@ export function useTabRouterSync(orgSlug: string, teamId: string) {
    // ── Open search as new tab ──────────────────────────────────────────────
 
    const openNewSearchTab = useCallback(() => {
-      const searchRoute = `/$slug/$teamSlug/search`;
-      const searchParams = { slug: orgSlug, teamSlug: teamId };
-      const searchPath = `/${orgSlug}/${teamId}/search`;
+      const route = "/$slug/$teamSlug/search";
+      const params = { slug: orgSlug, teamSlug: teamId };
 
       openTab({
-         route: searchRoute,
-         params: searchParams,
+         route,
+         params,
          label: "Pesquisar",
          icon: "Search",
          type: "search",
       });
 
       isTabNavigatingRef.current = true;
-      navigate({ to: searchPath });
+      navigate({ to: route, params });
    }, [navigate, orgSlug, teamId]);
 
    // ── Replace current tab with search ─────────────────────────────────────
 
    const replaceWithSearch = useCallback(() => {
-      const searchRoute = `/$slug/$teamSlug/search`;
-      const searchParams = { slug: orgSlug, teamSlug: teamId };
-      const searchPath = `/${orgSlug}/${teamId}/search`;
+      const route = "/$slug/$teamSlug/search";
+      const params = { slug: orgSlug, teamSlug: teamId };
 
       replaceCurrentTab({
-         route: searchRoute,
-         params: searchParams,
+         route,
+         params,
          label: "Pesquisar",
          icon: "Search",
          type: "search",
       });
 
       isTabNavigatingRef.current = true;
-      navigate({ to: searchPath });
+      navigate({ to: route, params });
    }, [navigate, orgSlug, teamId]);
 
    return {

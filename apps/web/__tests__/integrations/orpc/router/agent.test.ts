@@ -19,8 +19,23 @@ vi.mock("@packages/agents", () => ({
 	createRequestContext: vi.fn().mockReturnValue({}),
 }));
 
+vi.mock("@packages/agents/models", () => ({
+	AUTOCOMPLETE_MODELS: {},
+	CONTENT_MODELS: {},
+	DEFAULT_AUTOCOMPLETE_MODEL_ID: "test-autocomplete-model",
+	DEFAULT_CONTENT_MODEL_ID: "test-content-model",
+	getModelPreset: vi.fn().mockReturnValue({
+		temperature: 0.7,
+		topP: 1,
+		maxTokens: 4096,
+		frequencyPenalty: 0,
+		presencePenalty: 0,
+	}),
+}));
+
 vi.mock("@packages/events/ai");
 vi.mock("@packages/events/credits");
+vi.mock("@packages/database/repositories/product-settings-repository");
 
 import { mastra } from "@packages/agents";
 import { emitAiCompletion } from "@packages/events/ai";
@@ -60,7 +75,7 @@ function createMockFullStream(
 function setupAgentMock(streamResult: unknown) {
 	vi.mocked(mastra.getAgent).mockReturnValue({
 		stream: vi.fn().mockResolvedValue(streamResult),
-	} as ReturnType<typeof mastra.getAgent>);
+	} as unknown as ReturnType<typeof mastra.getAgent>);
 }
 
 const CONTENT_ID = "a0a0a0a0-b1b1-4c2c-9d3d-e4e4e4e4e4e4";
@@ -131,7 +146,7 @@ describe("copilotStream", () => {
 		);
 
 		expect(error).toBeInstanceOf(ORPCError);
-		expect((error as ORPCError).code).toBe("FORBIDDEN");
+		expect((error as ORPCError<string, unknown>).code).toBe("FORBIDDEN");
 
 		expect(enforceCreditBudget).toHaveBeenCalledWith(
 			expect.anything(),
@@ -163,8 +178,8 @@ describe("copilotStream", () => {
 		const lastChunk = chunks.at(-1) as Record<string, unknown>;
 		expect(lastChunk.done).toBe(true);
 		expect(lastChunk.metadata).toBeDefined();
-		expect(lastChunk.metadata.stopReason).toBe("natural");
-		expect(lastChunk.metadata.latencyMs).toBeTypeOf("number");
+		expect((lastChunk.metadata as any).stopReason).toBe("natural");
+		expect((lastChunk.metadata as any).latencyMs).toBeTypeOf("number");
 	});
 
 	it("emits AI completion event with teamId before final yield", async () => {
@@ -175,6 +190,7 @@ describe("copilotStream", () => {
 		await collectChunks(iterable);
 
 		expect(emitAiCompletion).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -207,19 +223,12 @@ describe("aiCommandStream", () => {
 		);
 
 		const ctx = createTestContext();
-		const iterable = await call(
-			agentRouter.aiCommandStream,
-			{ prompt: "Hello" },
-			{ context: ctx },
+		const error = await expectIterationToThrow(
+			call(agentRouter.aiCommandStream, { prompt: "Hello" }, { context: ctx }),
 		);
-		const chunks = await collectChunks(iterable);
 
-		// On credit failure the handler catches and yields an error chunk
-		const errorChunk = chunks.find(
-			(c: Record<string, unknown>) => c.type === "error",
-		) as Record<string, unknown> | undefined;
-		expect(errorChunk).toBeDefined();
-		expect(errorChunk?.type).toBe("error");
+		expect(error).toBeInstanceOf(ORPCError);
+		expect((error as ORPCError<string, unknown>).code).toBe("FORBIDDEN");
 
 		expect(enforceCreditBudget).toHaveBeenCalledWith(
 			expect.anything(),

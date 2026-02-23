@@ -22,19 +22,17 @@ import {
 } from "@packages/database/repositories/personal-api-key-repository";
 
 // Mock Bun.password.hash since vitest runs in Node, not Bun
-const originalBun = globalThis.Bun;
+const originalBun = (globalThis as any).Bun;
 beforeAll(() => {
-	Object.assign(globalThis, {
-		Bun: {
-			...globalThis.Bun,
-			password: {
-				hash: vi.fn().mockResolvedValue("hashed_key_value"),
-			},
+	(globalThis as any).Bun = {
+		...originalBun,
+		password: {
+			hash: vi.fn().mockResolvedValue("hashed_key_value"),
 		},
-	});
+	};
 });
 afterAll(() => {
-	Object.assign(globalThis, { Bun: originalBun });
+	(globalThis as any).Bun = originalBun;
 });
 
 import * as personalApiKeyRouter from "@/integrations/orpc/router/personal-api-key";
@@ -171,12 +169,12 @@ describe("revoke", () => {
 	});
 
 	it("throws NOT_FOUND when key does not exist or wrong owner", async () => {
-		vi.mocked(revokeKey).mockResolvedValueOnce(null);
+		vi.mocked(revokeKey).mockResolvedValueOnce(null as any);
 
 		const ctx = createTestContext();
 		await expect(
 			call(personalApiKeyRouter.revoke, { id: KEY_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });
 

@@ -1,5 +1,5 @@
 import { useIsMobile } from "@packages/ui/hooks/use-mobile";
-import { createFileRoute, Navigate, useParams } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { SettingsMobileNav } from "@/layout/dashboard/ui/settings-mobile-nav";
 
 export const Route = createFileRoute(
@@ -10,10 +10,7 @@ export const Route = createFileRoute(
 
 function SettingsIndexRoute() {
    const isMobile = useIsMobile();
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug: string;
-      teamSlug: string;
-   };
+   const { slug, teamSlug } = Route.useParams();
 
    if (!isMobile) {
       return (

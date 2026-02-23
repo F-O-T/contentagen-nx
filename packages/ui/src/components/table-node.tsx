@@ -10,7 +10,11 @@ import {
    DropdownMenuPortal,
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
-import { Popover, PopoverContent } from "@packages/ui/components/popover";
+import {
+   Popover,
+   PopoverAnchor,
+   PopoverContent,
+} from "@packages/ui/components/popover";
 import { cn } from "@packages/ui/lib/utils";
 import { useDraggable, useDropLine } from "@platejs/dnd";
 import {
@@ -27,8 +31,6 @@ import {
    useTableElement,
    useTableMergeState,
 } from "@platejs/table/react";
-import { type DropdownMenu as DropdownMenuPrimitive, PopoverAnchor } from "radix-ui";
-
 import { cva } from "class-variance-authority";
 import {
    ArrowDown,
@@ -294,7 +296,7 @@ function TableFloatingToolbar({
 }
 
 function TableBordersDropdownMenuContent(
-   props: React.ComponentProps<typeof DropdownMenuPrimitive.Content>,
+   props: React.ComponentProps<typeof DropdownMenuContent>,
 ) {
    const editor = useEditorRef();
    const {

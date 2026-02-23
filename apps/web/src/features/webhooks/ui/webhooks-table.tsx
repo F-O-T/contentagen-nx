@@ -200,19 +200,21 @@ export function WebhooksTable({
             id: "actions",
             header: "",
             cell: ({ row }) => (
+               // biome-ignore lint/a11y/noStaticElementInteractions: stopPropagation wrapper for table row click
                <div
                   className="flex items-center justify-end gap-1"
                   onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
                >
                   <Tooltip>
                      <TooltipTrigger asChild>
                         <Button
+                           onClick={() => onEdit(row.original)}
                            size="icon"
                            variant="ghost"
-                           onClick={() => onEdit(row.original)}
                         >
-                          <Edit className="size-4" />
-                          <span className="sr-only">Editar</span>
+                           <Edit className="size-4" />
+                           <span className="sr-only">Editar</span>
                         </Button>
                      </TooltipTrigger>
                      <TooltipContent>Editar</TooltipContent>
@@ -257,10 +259,10 @@ export function WebhooksTable({
             <div className="space-y-4">
                <div className="px-4 pt-4 flex items-center gap-2 flex-wrap border-b pb-4">
                   <Button
-                     size="sm"
-                     variant="ghost"
                      className="text-destructive hover:text-destructive"
                      onClick={() => onDelete(row.original)}
+                     size="sm"
+                     variant="ghost"
                   >
                      <Trash2 className="size-3 mr-2" />
                      Excluir

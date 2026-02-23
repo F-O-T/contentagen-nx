@@ -7,7 +7,6 @@ import {
 } from "@packages/ui/components/card";
 
 import { DataTable } from "@packages/ui/components/data-table";
-import { PageHeader } from "@/components/page-header";
 import {
    Empty,
    EmptyContent,
@@ -22,6 +21,7 @@ import type { Row } from "@tanstack/react-table";
 import { Archive, FileText, Plus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/page-header";
 import { orpc } from "@/integrations/orpc/client";
 import { ContentMobileCard } from "./content-mobile-card";
 import type { ContentItem } from "./content-table-columns";
@@ -37,7 +37,7 @@ const STATUS_FILTER_OPTIONS = [
 export function ContentListSection() {
    const navigate = useNavigate();
    const { slug, teamSlug } = useParams({
-      from: "/_authenticated/$slug/$teamSlug/_dashboard/content/",
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    const [searchQuery, setSearchQuery] = useState("");
    const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -233,8 +233,6 @@ export function ContentListSection() {
       return (
          <div className="space-y-4">
             <PageHeader
-               title="Conteúdo"
-               description="Gerencie e crie conteúdo para seu site"
                actions={
                   <Button
                      disabled={createContentMutation.isPending}
@@ -244,6 +242,8 @@ export function ContentListSection() {
                      Novo
                   </Button>
                }
+               description="Gerencie e crie conteúdo para seu site"
+               title="Conteúdo"
             />
 
             {/* Stats placeholder */}
@@ -310,8 +310,6 @@ export function ContentListSection() {
    return (
       <div className="space-y-4">
          <PageHeader
-            title="Conteúdo"
-            description="Gerencie e crie conteúdo para seu site"
             actions={
                <Button
                   disabled={createContentMutation.isPending}
@@ -321,6 +319,8 @@ export function ContentListSection() {
                   Novo
                </Button>
             }
+            description="Gerencie e crie conteúdo para seu site"
+            title="Conteúdo"
          />
 
          {/* Stats cards */}

@@ -1,7 +1,7 @@
 import { Separator } from "@packages/ui/components/separator";
 import { cn } from "@packages/ui/lib/utils";
-import { Slot as SlotPrimitive } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Slot as SlotPrimitive } from "radix-ui";
 import type * as React from "react";
 
 function ItemGroup({ className, ...props }: React.ComponentProps<"ul">) {

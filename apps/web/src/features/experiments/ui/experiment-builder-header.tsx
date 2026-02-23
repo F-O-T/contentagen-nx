@@ -6,9 +6,7 @@ import {
    DropdownMenuSeparator,
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
-import { Link } from "@tanstack/react-router";
 import {
-   ArrowLeft,
    Ellipsis,
    Loader2,
    Pause,
@@ -26,7 +24,6 @@ export interface ExperimentBuilderHeaderProps {
    onNameChange: (name: string) => void;
    status: ExperimentStatus | null;
    variantCount: number;
-   backTo: { slug: string; teamSlug: string };
    onSave: () => void;
    isSaving: boolean;
    onStart?: () => void;
@@ -46,7 +43,6 @@ export function ExperimentBuilderHeader({
    onNameChange,
    status,
    variantCount,
-   backTo,
    onSave,
    isSaving,
    onStart,
@@ -101,117 +97,108 @@ export function ExperimentBuilderHeader({
       <div className="border-b bg-background sticky top-0 z-10">
          <div className="container mx-auto px-4 py-4">
             <PageHeader
-               editable
-               leading={
-                  <Link
-                     className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
-                     params={backTo as never}
-                     to="/$slug/$teamSlug/experiments"
-                  >
-                     <ArrowLeft className="size-5" />
-                  </Link>
+               actions={
+                  <>
+                     {(isCreateMode ||
+                        status === "draft" ||
+                        status === "paused") && (
+                        <Button
+                           disabled={isAnyPending || !name.trim()}
+                           onClick={onSave}
+                           variant="outline"
+                        >
+                           {isSaving ? (
+                              <Loader2 className="size-4 mr-2 animate-spin" />
+                           ) : (
+                              <Save className="size-4 mr-2" />
+                           )}
+                           Salvar
+                        </Button>
+                     )}
+
+                     {canStart && (
+                        <Button disabled={isAnyPending} onClick={onStart}>
+                           {isStarting ? (
+                              <Loader2 className="size-4 mr-2 animate-spin" />
+                           ) : (
+                              <Play className="size-4 mr-2" />
+                           )}
+                           {status === "paused" ? "Retomar" : "Iniciar"}
+                        </Button>
+                     )}
+
+                     {canStartButNeedsMore && !isCreateMode && (
+                        <Button
+                           disabled
+                           title="Adicione pelo menos 2 variantes para iniciar"
+                        >
+                           <Play className="size-4 mr-2" />
+                           Iniciar
+                        </Button>
+                     )}
+
+                     {isRunning && (
+                        <Button
+                           disabled={isAnyPending}
+                           onClick={onPause}
+                           variant="outline"
+                        >
+                           {isPausing ? (
+                              <Loader2 className="size-4 mr-2 animate-spin" />
+                           ) : (
+                              <Pause className="size-4 mr-2" />
+                           )}
+                           Pausar
+                        </Button>
+                     )}
+
+                     {!isCreateMode && !isConcluded && (
+                        <DropdownMenu>
+                           <DropdownMenuTrigger asChild>
+                              <Button
+                                 disabled={isAnyPending}
+                                 size="icon"
+                                 variant="outline"
+                              >
+                                 <Ellipsis className="size-4" />
+                              </Button>
+                           </DropdownMenuTrigger>
+                           <DropdownMenuContent align="end">
+                              {(isRunning || status === "paused") && (
+                                 <>
+                                    <DropdownMenuItem onClick={handleConclude}>
+                                       <Trophy className="size-4 mr-2" />
+                                       Concluir experimento
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                 </>
+                              )}
+                              {isRunning ? (
+                                 <DropdownMenuItem
+                                    className="text-muted-foreground"
+                                    disabled
+                                 >
+                                    <Trash2 className="size-4 mr-2" />
+                                    Pause primeiro para excluir
+                                 </DropdownMenuItem>
+                              ) : (
+                                 <DropdownMenuItem
+                                    className="text-destructive focus:text-destructive"
+                                    onClick={handleDelete}
+                                 >
+                                    <Trash2 className="size-4 mr-2" />
+                                    Excluir experimento
+                                 </DropdownMenuItem>
+                              )}
+                           </DropdownMenuContent>
+                        </DropdownMenu>
+                     )}
+                  </>
                }
+               editable
                onTitleChange={onNameChange}
                title={name}
                titlePlaceholder="Nome do experimento"
-               actions={
-                  <>
-                  {(isCreateMode ||
-                     status === "draft" ||
-                     status === "paused") && (
-                     <Button
-                        disabled={isAnyPending || !name.trim()}
-                        onClick={onSave}
-                        variant="outline"
-                     >
-                        {isSaving ? (
-                           <Loader2 className="size-4 mr-2 animate-spin" />
-                        ) : (
-                           <Save className="size-4 mr-2" />
-                        )}
-                        Salvar
-                     </Button>
-                  )}
-
-                  {canStart && (
-                     <Button disabled={isAnyPending} onClick={onStart}>
-                        {isStarting ? (
-                           <Loader2 className="size-4 mr-2 animate-spin" />
-                        ) : (
-                           <Play className="size-4 mr-2" />
-                        )}
-                        {status === "paused" ? "Retomar" : "Iniciar"}
-                     </Button>
-                  )}
-
-                  {canStartButNeedsMore && !isCreateMode && (
-                     <Button
-                        disabled
-                        title="Adicione pelo menos 2 variantes para iniciar"
-                     >
-                        <Play className="size-4 mr-2" />
-                        Iniciar
-                     </Button>
-                  )}
-
-                  {isRunning && (
-                     <Button
-                        disabled={isAnyPending}
-                        onClick={onPause}
-                        variant="outline"
-                     >
-                        {isPausing ? (
-                           <Loader2 className="size-4 mr-2 animate-spin" />
-                        ) : (
-                           <Pause className="size-4 mr-2" />
-                        )}
-                        Pausar
-                     </Button>
-                  )}
-
-                  {!isCreateMode && !isConcluded && (
-                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                           <Button
-                              disabled={isAnyPending}
-                              size="icon"
-                              variant="outline"
-                           >
-                              <Ellipsis className="size-4" />
-                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                           {(isRunning || status === "paused") && (
-                              <>
-                                 <DropdownMenuItem onClick={handleConclude}>
-                                    <Trophy className="size-4 mr-2" />
-                                    Concluir experimento
-                                 </DropdownMenuItem>
-                                 <DropdownMenuSeparator />
-                              </>
-                           )}
-                           {isRunning ? (
-                              <DropdownMenuItem
-                                 className="text-muted-foreground"
-                                 disabled
-                              >
-                                 <Trash2 className="size-4 mr-2" />
-                                 Pause primeiro para excluir
-                              </DropdownMenuItem>
-                           ) : (
-                              <DropdownMenuItem
-                                 className="text-destructive focus:text-destructive"
-                                 onClick={handleDelete}
-                              >
-                                 <Trash2 className="size-4 mr-2" />
-                                 Excluir experimento
-                              </DropdownMenuItem>
-                           )}
-                        </DropdownMenuContent>
-                     </DropdownMenu>
-                  )}
-                  </>
-               }
             />
          </div>
       </div>

@@ -15,10 +15,9 @@ interface EditorPageProps {
 }
 
 export function EditorPage({ contentId }: EditorPageProps) {
-   const params = useParams({ strict: false }) as {
-      slug: string;
-      teamSlug: string;
-   };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const navigate = useNavigate();
 
    const { data: content } = useSuspenseQuery(
@@ -70,15 +69,20 @@ export function EditorPage({ contentId }: EditorPageProps) {
    );
 
    const handleBack = useCallback(() => {
-      navigate({ to: `/${params.slug}/${params.teamSlug}/content` });
-   }, [navigate, params.slug, params.teamSlug]);
+      navigate({
+         to: "/$slug/$teamSlug/content",
+         params: { slug, teamSlug },
+      });
+   }, [navigate, slug, teamSlug]);
 
    return (
       <div className="flex h-screen flex-col overflow-hidden bg-background">
          <PlateEditor
             contentId={contentId}
             editable={content.status !== "archived"}
-            initialValue={content.body as Value}
+            initialValue={
+               content?.body ? (JSON.parse(content.body) as Value) : undefined
+            }
             isSaving={isSaving}
             key={contentId}
             meta={meta}

@@ -164,16 +164,18 @@ function OrganizationRolesContent() {
                if (role.isDefault) return null;
 
                return (
+                  // biome-ignore lint/a11y/noStaticElementInteractions: stopPropagation wrapper for table row click
                   <div
                      className="flex items-center justify-end gap-1"
                      onClick={(e) => e.stopPropagation()}
+                     onKeyDown={(e) => e.stopPropagation()}
                   >
                      <Tooltip>
                         <TooltipTrigger asChild>
                            <Button
+                              onClick={() => handleEditRole(role)}
                               size="icon"
                               variant="ghost"
-                              onClick={() => handleEditRole(role)}
                            >
                               <Pencil className="size-4" />
                               <span className="sr-only">Editar função</span>
@@ -215,10 +217,10 @@ function OrganizationRolesContent() {
                   <div className="px-4 py-4">
                      <div className="flex items-center gap-2 flex-wrap">
                         <Button
-                           size="sm"
-                           variant="ghost"
                            className="text-destructive hover:text-destructive"
                            onClick={() => handleDeleteRole(role)}
+                           size="sm"
+                           variant="ghost"
                         >
                            <Trash2 className="size-3 mr-2" />
                            Remover função

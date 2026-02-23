@@ -156,10 +156,9 @@ function OverviewTab({
    onAiApply,
 }: OverviewTabProps) {
    const navigate = useNavigate();
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug: string;
-      teamSlug: string;
-   };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
 
    return (
       <div className="space-y-6 max-w-2xl">
@@ -353,14 +352,15 @@ function SatellitesTab({
 
 interface ClusterBuilderEditProps {
    clusterId: string;
-   backTo: { slug: string; teamSlug: string };
 }
 
-function ClusterBuilderEdit({ clusterId, backTo }: ClusterBuilderEditProps) {
+function ClusterBuilderEdit({ clusterId }: ClusterBuilderEditProps) {
    const queryClient = useQueryClient();
    const { openAlertDialog } = useAlertDialog();
    const navigate = useNavigate();
-   const { slug, teamSlug } = backTo;
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
 
    const { data: cluster, refetch } = useSuspenseQuery(
       orpc.clusters.getById.queryOptions({ input: { id: clusterId } }),
@@ -454,7 +454,7 @@ function ClusterBuilderEdit({ clusterId, backTo }: ClusterBuilderEditProps) {
             navigate({
                to: "/$slug/$teamSlug/clusters",
                params: { slug, teamSlug },
-            } as never);
+            });
          },
       });
    }, [openAlertDialog, navigate, slug, teamSlug]);
@@ -494,7 +494,6 @@ function ClusterBuilderEdit({ clusterId, backTo }: ClusterBuilderEditProps) {
    return (
       <div className="flex flex-col h-full">
          <ClusterBuilderHeader
-            backTo={{ slug, teamSlug }}
             isNew={false}
             isSaving={updateMutation.isPending || updateTitleMutation.isPending}
             onDelete={handleDelete}
@@ -582,13 +581,11 @@ function ClusterBuilderEdit({ clusterId, backTo }: ClusterBuilderEditProps) {
 
 // ─── Cluster Builder (Create Mode) ───────────────────────────────────────────
 
-interface ClusterBuilderNewProps {
-   backTo: { slug: string; teamSlug: string };
-}
-
-function ClusterBuilderNew({ backTo }: ClusterBuilderNewProps) {
+function ClusterBuilderNew() {
    const navigate = useNavigate();
-   const { slug, teamSlug } = backTo;
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const queryClient = useQueryClient();
 
    const [pillarTitle, setPillarTitle] = useState("");
@@ -607,7 +604,7 @@ function ClusterBuilderNew({ backTo }: ClusterBuilderNewProps) {
             navigate({
                to: "/$slug/$teamSlug/clusters/$clusterId",
                params: { slug, teamSlug, clusterId: data.pillar.id },
-            } as never);
+            });
          },
          onError: () => toast.error("Erro ao criar cluster"),
       }),
@@ -643,7 +640,6 @@ function ClusterBuilderNew({ backTo }: ClusterBuilderNewProps) {
    return (
       <div className="flex flex-col h-full">
          <ClusterBuilderHeader
-            backTo={{ slug, teamSlug }}
             isNew={true}
             isSaving={createMutation.isPending}
             onSave={handleSave}
@@ -718,12 +714,11 @@ function ClusterBuilderNew({ backTo }: ClusterBuilderNewProps) {
 
 interface ClusterBuilderProps {
    clusterId?: string;
-   backTo: { slug: string; teamSlug: string };
 }
 
-export function ClusterBuilder({ clusterId, backTo }: ClusterBuilderProps) {
+export function ClusterBuilder({ clusterId }: ClusterBuilderProps) {
    if (clusterId) {
-      return <ClusterBuilderEdit backTo={backTo} clusterId={clusterId} />;
+      return <ClusterBuilderEdit clusterId={clusterId} />;
    }
-   return <ClusterBuilderNew backTo={backTo} />;
+   return <ClusterBuilderNew />;
 }

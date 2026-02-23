@@ -6,9 +6,7 @@ import {
    DropdownMenuSeparator,
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
-import { Link } from "@tanstack/react-router";
 import {
-   ArrowLeft,
    Code2,
    Ellipsis,
    Loader2,
@@ -27,7 +25,6 @@ interface ClusterBuilderHeaderProps {
    onDelete?: () => void;
    onPromote?: () => void;
    onOpenEmbed?: () => void;
-   backTo: { slug: string; teamSlug: string };
 }
 
 export function ClusterBuilderHeader({
@@ -39,26 +36,11 @@ export function ClusterBuilderHeader({
    onDelete,
    onPromote,
    onOpenEmbed,
-   backTo,
 }: ClusterBuilderHeaderProps) {
    return (
       <div className="border-b bg-background sticky top-0 z-10">
          <div className="container mx-auto px-4 py-4">
             <PageHeader
-               editable
-               titlePlaceholder="Nome do cluster"
-               leading={
-                  <Link
-                     aria-label="Voltar para clusters"
-                     className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
-                     params={backTo as never}
-                     to="/$slug/$teamSlug/clusters"
-                  >
-                     <ArrowLeft className="size-5" />
-                  </Link>
-               }
-               onTitleChange={onTitleChange}
-               title={pillarTitle}
                actions={
                   <>
                      <Button disabled={isSaving} onClick={onSave}>
@@ -115,6 +97,10 @@ export function ClusterBuilderHeader({
                      )}
                   </>
                }
+               editable
+               onTitleChange={onTitleChange}
+               title={pillarTitle}
+               titlePlaceholder="Nome do cluster"
             />
          </div>
       </div>

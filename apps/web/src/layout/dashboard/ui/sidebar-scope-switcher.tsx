@@ -122,10 +122,9 @@ function SidebarScopeSwitcherContent() {
    const queryClient = useQueryClient();
    const router = useRouter();
    const { pathname } = useLocation();
-   const params = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-   };
+   const params = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const currentSlug = params.slug ?? activeOrganization.slug;
    const { data: organizations } = useSuspenseQuery(
       orpc.organization.getOrganizations.queryOptions({}),

@@ -10,7 +10,7 @@ export const Route = createFileRoute(
 });
 
 function ClusterDetailPage() {
-   const { clusterId, slug, teamSlug } = Route.useParams();
+   const { clusterId } = Route.useParams();
 
    return (
       <ErrorBoundary
@@ -27,7 +27,7 @@ function ClusterDetailPage() {
                </p>
             }
          >
-            <ClusterBuilder backTo={{ slug, teamSlug }} clusterId={clusterId} />
+            <ClusterBuilder clusterId={clusterId} />
          </Suspense>
       </ErrorBoundary>
    );

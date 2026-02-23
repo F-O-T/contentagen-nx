@@ -24,20 +24,35 @@ const CONTENT_ID = "a0a0a0a0-b1b1-4c2c-9d3d-e4e4e4e4e4e4";
 function makeChatSession(overrides = {}) {
 	return {
 		id: "session-1",
+		contentId: "content-1",
+		organizationId: TEST_ORG_ID,
+		mode: null as "plan" | "writer" | null,
+		createdAt: new Date("2026-01-01"),
+		updatedAt: new Date("2026-01-01"),
 		messages: [
 			{
 				id: "msg-1",
-				role: "user",
+				sessionId: "session-1",
+				role: "user" as const,
 				content: "Hello",
+				messageType: "text" as const,
+				sourceMode: null,
+				selectionContext: null,
 				createdAt: new Date("2026-01-01"),
 				toolCalls: null,
+				planSteps: null,
 			},
 			{
 				id: "msg-2",
-				role: "assistant",
+				sessionId: "session-1",
+				role: "assistant" as const,
 				content: "Hi there!",
+				messageType: "text" as const,
+				sourceMode: null,
+				selectionContext: null,
 				createdAt: new Date("2026-01-01"),
 				toolCalls: [],
+				planSteps: null,
 			},
 		],
 		...overrides,
@@ -69,7 +84,7 @@ beforeEach(() => {
 
 describe("getChatHistory", () => {
 	it("returns empty messages when no session exists", async () => {
-		vi.mocked(getChatSessionWithMessages).mockResolvedValueOnce(null);
+		vi.mocked(getChatSessionWithMessages).mockResolvedValueOnce(undefined);
 
 		const ctx = createChatContext();
 		const result = await call(
@@ -95,10 +110,15 @@ describe("getChatHistory", () => {
 			messages: [
 				{
 					id: "msg-1",
-					role: "user",
+					sessionId: "session-1",
+					role: "user" as const,
 					content: "Hello",
+					messageType: "text" as const,
+					sourceMode: null,
+					selectionContext: null,
 					createdAt: new Date("2026-01-01"),
 					toolCalls: null,
+					planSteps: null,
 				},
 			],
 		});
@@ -126,10 +146,15 @@ describe("getChatHistory", () => {
 			messages: [
 				{
 					id: "msg-2",
-					role: "assistant",
+					sessionId: "session-1",
+					role: "assistant" as const,
 					content: "Hi there!",
+					messageType: "text" as const,
+					sourceMode: null,
+					selectionContext: null,
 					createdAt: new Date("2026-01-01"),
 					toolCalls: [],
+					planSteps: null,
 				},
 			],
 		});
@@ -157,8 +182,12 @@ describe("getChatHistory", () => {
 			messages: [
 				{
 					id: "msg-3",
-					role: "assistant",
+					sessionId: "session-1",
+					role: "assistant" as const,
 					content: "Let me search that for you.",
+					messageType: "text" as const,
+					sourceMode: null,
+					selectionContext: null,
 					createdAt: new Date("2026-01-01"),
 					toolCalls: [
 						{
@@ -168,6 +197,7 @@ describe("getChatHistory", () => {
 							result: { results: ["found it"] },
 						},
 					],
+					planSteps: null,
 				},
 			],
 		});

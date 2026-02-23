@@ -129,10 +129,9 @@ export function SatelliteCanvas({
    onRemove,
    isRemoving,
 }: SatelliteCanvasProps) {
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug: string;
-      teamSlug: string;
-   };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
 
    const sensors = useSensors(
       useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),

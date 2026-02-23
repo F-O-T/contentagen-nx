@@ -23,7 +23,6 @@ import {
    type UseEmojiPickerType,
    useEmojiDropdownMenuState,
 } from "@platejs/emoji/react";
-import { Popover as Popover } from "radix-ui";
 import {
    AppleIcon,
    ClockIcon,
@@ -37,6 +36,7 @@ import {
    StarIcon,
    XIcon,
 } from "lucide-react";
+import { Popover } from "radix-ui";
 import * as React from "react";
 
 export function EmojiToolbarButton({

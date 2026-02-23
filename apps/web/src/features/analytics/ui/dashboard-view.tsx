@@ -13,13 +13,11 @@ import {
 import { cn } from "@packages/ui/lib/utils";
 import { formatRelativeTime } from "@packages/utils/date";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Calendar, Clock, Plus, RefreshCw, X } from "lucide-react";
+import { Calendar, Clock, Plus, RefreshCw, X } from "lucide-react";
 import { type ReactNode, useCallback, useMemo, useRef, useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { DashboardFilterPopover } from "@/features/analytics/ui/dashboard-filter-popover";
 import { EditableDashboardGrid } from "@/features/analytics/ui/editable-dashboard-grid";
-import { InlineEditableText } from "@/features/analytics/ui/inline-editable-text";
 import { orpc } from "@/integrations/orpc/client";
 
 // =============================================================================
@@ -28,7 +26,6 @@ import { orpc } from "@/integrations/orpc/client";
 
 interface DashboardViewProps {
    dashboard: Dashboard;
-   backTo?: { slug: string; teamSlug: string };
    children?: ReactNode;
 }
 
@@ -38,11 +35,9 @@ interface DashboardViewProps {
 
 function DashboardHeader({
    dashboard,
-   backTo,
    onAddInsight,
 }: {
    dashboard: Dashboard;
-   backTo?: { slug: string; teamSlug: string };
    onAddInsight: () => void;
 }) {
    const queryClient = useQueryClient();
@@ -85,40 +80,22 @@ function DashboardHeader({
    );
 
    return (
-      <div className="flex flex-col gap-2">
-         <PageHeader
-            editable
-            leading={
-               backTo ? (
-                  <Link
-                     params={backTo as never}
-                     to={"/$slug/$teamSlug/analytics/dashboards" as never}
-                  >
-                     <Button className="size-7" size="icon" variant="ghost">
-                        <ArrowLeft className="size-4" />
-                     </Button>
-                  </Link>
-               ) : undefined
-            }
-            onTitleChange={handleNameSave}
-            title={dashboard.name}
-            titlePlaceholder="Nome do dashboard"
-            actions={
-               <Button onClick={onAddInsight} size="sm">
-                  <Plus className="size-3.5" />
-                  Adicionar insight
-               </Button>
-            }
-         />
-         <div className={cn("pb-3", backTo && "pl-10")}>
-            <InlineEditableText
-               className="text-sm text-muted-foreground"
-               onSave={handleDescriptionSave}
-               placeholder="Adicionar descrição (opcional)"
-               value={dashboard.description ?? ""}
-            />
-         </div>
-      </div>
+      <PageHeader
+         actions={
+            <Button onClick={onAddInsight} size="sm">
+               <Plus className="size-3.5" />
+               Adicionar insight
+            </Button>
+         }
+         className="pb-3"
+         description={dashboard.description ?? ""}
+         descriptionPlaceholder="Adicionar descrição (opcional)"
+         editable
+         onDescriptionChange={handleDescriptionSave}
+         onTitleChange={handleNameSave}
+         title={dashboard.name}
+         titlePlaceholder="Nome do dashboard"
+      />
    );
 }
 
@@ -375,17 +352,12 @@ function DashboardFilterBar({ dashboard }: { dashboard: Dashboard }) {
 // Main Component
 // =============================================================================
 
-export function DashboardView({
-   dashboard,
-   backTo,
-   children,
-}: DashboardViewProps) {
+export function DashboardView({ dashboard, children }: DashboardViewProps) {
    const addInsightRef = useRef<(() => void) | null>(null);
 
    return (
       <main className="flex flex-col gap-0">
          <DashboardHeader
-            backTo={backTo}
             dashboard={dashboard}
             onAddInsight={() => addInsightRef.current?.()}
          />

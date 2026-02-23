@@ -10,6 +10,17 @@ import {
 // Mocks — must be declared before any import that touches the modules
 // ---------------------------------------------------------------------------
 
+vi.mock("@packages/environment/server", () => ({
+	env: {
+		MINIO_ENDPOINT: "http://localhost:9000",
+		MINIO_ACCESS_KEY: "test",
+		MINIO_SECRET_KEY: "test",
+	},
+}));
+vi.mock("@packages/files/client", () => ({
+	getMinioClient: vi.fn(),
+	generatePresignedPutUrl: vi.fn(),
+}));
 vi.mock("@packages/database/repositories/auth-repository");
 vi.mock("@packages/events/credits");
 vi.mock("@packages/database/schemas/auth", () => ({
@@ -115,7 +126,7 @@ describe("getActiveOrganization", () => {
 			{ id: "team-1" },
 			{ id: "team-2" },
 		]);
-		vi.mocked(resolveOrganizationPlan).mockResolvedValueOnce("pro");
+		vi.mocked(resolveOrganizationPlan).mockResolvedValueOnce("pro" as any);
 		vi.mocked(getEffectiveProjectLimit).mockReturnValueOnce(10);
 
 		const ctx = createOrgContext();
@@ -143,7 +154,7 @@ describe("getActiveOrganization", () => {
 
 		await expect(
 			call(orgRouter.getActiveOrganization, undefined, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "FORBIDDEN");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "FORBIDDEN");
 
 		expect(mockAuth.api.getFullOrganization).not.toHaveBeenCalled();
 	});
@@ -170,7 +181,7 @@ describe("getActiveOrganization", () => {
 			{ id: "sub_1", status: "canceled", plan: "pro" },
 		]);
 		mockAuth.api.listOrganizationTeams.mockResolvedValueOnce([]);
-		vi.mocked(resolveOrganizationPlan).mockResolvedValueOnce("free");
+		vi.mocked(resolveOrganizationPlan).mockResolvedValueOnce("free" as any);
 		vi.mocked(getEffectiveProjectLimit).mockReturnValueOnce(3);
 
 		const ctx = createOrgContext();

@@ -9,12 +9,7 @@ export const Route = createFileRoute(
 });
 
 function ExperimentDetailPage() {
-   const { experimentId, slug, teamSlug } = Route.useParams();
+   const { experimentId } = Route.useParams();
 
-   return (
-      <ExperimentBuilder
-         backTo={{ slug, teamSlug }}
-         experimentId={experimentId}
-      />
-   );
+   return <ExperimentBuilder experimentId={experimentId} />;
 }

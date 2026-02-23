@@ -19,21 +19,21 @@ function ClustersPage() {
    return (
       <div className="space-y-6 p-6">
          <PageHeader
-            title="Clusters"
-            description="Organize conteúdos relacionados em grupos temáticos"
             actions={
                <Button
                   onClick={() =>
                      navigate({
                         to: "/$slug/$teamSlug/clusters/new",
                         params: { slug, teamSlug },
-                     } as never)
+                     })
                   }
                >
                   <Plus className="size-4 mr-2" />
                   Novo cluster
                </Button>
             }
+            description="Organize conteúdos relacionados em grupos temáticos"
+            title="Clusters"
          />
          <ErrorBoundary
             fallback={

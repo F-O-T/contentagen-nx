@@ -25,7 +25,7 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
    const isMobile = useIsMobile();
    const { pathname } = useLocation();
    const { teamSlug } = useParams({
-      from: "/_authenticated/$slug/$teamSlug/_dashboard/settings",
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    const { activeOrganization } = useActiveOrganization();
    const [search, setSearch] = useState("");

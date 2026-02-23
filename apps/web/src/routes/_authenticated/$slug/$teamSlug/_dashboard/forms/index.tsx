@@ -40,8 +40,6 @@ function FormsPage() {
    return (
       <main className="flex flex-col gap-4">
          <PageHeader
-            title="Formulários"
-            description="Crie e gerencie formulários para coletar dados dos visitantes"
             actions={
                <Button asChild>
                   <Link
@@ -53,6 +51,8 @@ function FormsPage() {
                   </Link>
                </Button>
             }
+            description="Crie e gerencie formulários para coletar dados dos visitantes"
+            title="Formulários"
          />
          <ErrorBoundary FallbackComponent={FormsPageErrorFallback}>
             <Suspense fallback={<FormsPageSkeleton />}>

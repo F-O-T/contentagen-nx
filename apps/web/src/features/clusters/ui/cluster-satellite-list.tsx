@@ -13,7 +13,7 @@ interface Props {
 export function ClusterSatelliteList({ pillarId }: Props) {
    const navigate = useNavigate();
    const { slug, teamSlug } = useParams({
-      from: "/_authenticated/$slug/$teamSlug/_dashboard/clusters/$clusterId",
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    const { data: satellites, refetch } = useClusterSatellites(pillarId);
 

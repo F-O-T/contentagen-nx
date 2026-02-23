@@ -81,9 +81,11 @@ function useExperimentColumns(
          id: "actions",
          header: "",
          cell: ({ row }) => (
+            // biome-ignore lint/a11y/noStaticElementInteractions: stopPropagation wrapper for table row click
             <div
                className="flex items-center justify-end gap-1"
                onClick={(e) => e.stopPropagation()}
+               onKeyDown={(e) => e.stopPropagation()}
             >
                <Tooltip>
                   <TooltipTrigger asChild>
@@ -111,10 +113,9 @@ function useExperimentColumns(
 
 export function ExperimentsListSection() {
    const navigate = useNavigate();
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug: string;
-      teamSlug: string;
-   };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const { data: experiments } = useSuspenseQuery(
       orpc.experiments.list.queryOptions({}),
    );
@@ -125,7 +126,7 @@ export function ExperimentsListSection() {
       navigate({
          to: "/$slug/$teamSlug/experiments/new",
          params: { slug, teamSlug },
-      } as never);
+      });
    };
 
    if (!experiments.length) {

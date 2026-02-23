@@ -33,12 +33,12 @@ import {
    SheetTitle,
 } from "@packages/ui/components/sheet";
 import { Skeleton } from "@packages/ui/components/skeleton";
+import { Spinner } from "@packages/ui/components/spinner";
 import {
    Tooltip,
    TooltipContent,
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
-import { Spinner } from "@packages/ui/components/spinner";
 import { getInitials } from "@packages/utils/text";
 import {
    useMutation,
@@ -394,10 +394,10 @@ function MemberExpandedRow({
          </div>
          <div className="flex items-center gap-2 flex-wrap border-t pt-4">
             <Button
-               size="sm"
-               variant="ghost"
                className="text-destructive hover:text-destructive"
                onClick={() => onRemove(member)}
+               size="sm"
+               variant="ghost"
             >
                <UserMinus className="size-3 mr-2" />
                Remover membro
@@ -473,14 +473,16 @@ function MemberMobileCard({
                         <TooltipTrigger asChild>
                            <Button
                               disabled={isDisabled}
-                              size="icon"
-                              variant="ghost"
                               onClick={() =>
                                  onUpdateRole(
                                     member,
-                                    member.role === "admin" ? "member" : "admin",
+                                    member.role === "admin"
+                                       ? "member"
+                                       : "admin",
                                  )
                               }
+                              size="icon"
+                              variant="ghost"
                            >
                               <ShieldCheck className="size-4" />
                               <span className="sr-only">{roleLabel}</span>
@@ -816,16 +818,16 @@ function MembersContent() {
                      : "Alterar para administrador";
 
                return (
+                  // biome-ignore lint/a11y/noStaticElementInteractions: stopPropagation wrapper for table row click
                   <div
                      className="flex items-center justify-end gap-1"
                      onClick={(e) => e.stopPropagation()}
+                     onKeyDown={(e) => e.stopPropagation()}
                   >
                      <Tooltip>
                         <TooltipTrigger asChild>
                            <Button
                               disabled={isDisabled}
-                              size="icon"
-                              variant="ghost"
                               onClick={() =>
                                  handleUpdateRole(
                                     member,
@@ -834,6 +836,8 @@ function MembersContent() {
                                        : "admin",
                                  )
                               }
+                              size="icon"
+                              variant="ghost"
                            >
                               <ShieldCheck className="size-4" />
                               <span className="sr-only">{roleLabel}</span>

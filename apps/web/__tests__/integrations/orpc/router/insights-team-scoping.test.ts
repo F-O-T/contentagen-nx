@@ -1,331 +1,208 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { createDb } from "@packages/database/client";
-import {
-	team,
-	teamMember,
-	organization,
-	member,
-	user,
-	session,
-} from "@packages/database/schemas/auth";
-import { insights } from "@packages/database/schemas/insights";
 import { call } from "@orpc/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	TEST_ORG_ID,
+	TEST_USER_ID,
+	createTestContext,
+} from "../../../helpers/create-test-context";
+import { makeInsight } from "../../../helpers/mock-factories";
+
+// ---------------------------------------------------------------------------
+// Mocks
+// ---------------------------------------------------------------------------
+
+vi.mock("@packages/database/repositories/insight-repository");
+vi.mock("@packages/events/insight");
+
+import {
+	createInsight,
+	deleteInsight,
+	getInsightById,
+	listInsightsByTeam,
+} from "@packages/database/repositories/insight-repository";
+import {
+	emitInsightCreated,
+	emitInsightDeleted,
+	emitInsightUpdated,
+} from "@packages/events/insight";
+
 import * as insightsRouter from "@/integrations/orpc/router/insights";
-import type { ORPCContextWithAuth } from "@/integrations/orpc/server";
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const TEAM_A_ID = "team-a-00000000-0000-0000-0000-000000000001";
+const TEAM_B_ID = "team-b-00000000-0000-0000-0000-000000000002";
+
+function createTeamContext(teamId: string) {
+	return createTestContext({
+		teamId,
+		session: {
+			user: { id: TEST_USER_ID },
+			session: { activeOrganizationId: TEST_ORG_ID, activeTeamId: teamId },
+		},
+	});
+}
+
+// ---------------------------------------------------------------------------
+// Setup
+// ---------------------------------------------------------------------------
+
+beforeEach(() => {
+	vi.clearAllMocks();
+	vi.mocked(emitInsightCreated).mockResolvedValue(undefined);
+	vi.mocked(emitInsightUpdated).mockResolvedValue(undefined);
+	vi.mocked(emitInsightDeleted).mockResolvedValue(undefined);
+});
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 describe("Insights Team Scoping", () => {
-	let db: ReturnType<typeof createDb>;
-	let testUserId: string;
-	let testOrgId: string;
-	let teamAId: string;
-	let teamBId: string;
-	let sessionToken: string;
-	let memberId: string;
-
-	beforeEach(async () => {
-		db = createDb({ databaseUrl: process.env.DATABASE_URL! });
-
-		// Create test user
-		const [testUser] = await db
-			.insert(user)
-			.values({
-				email: `test-insights-scoping-${crypto.randomUUID()}@example.com`,
-				name: "Test User",
-			})
-			.returning();
-		testUserId = testUser.id;
-
-		// Create organization
-		const [testOrg] = await db
-			.insert(organization)
-			.values({
-				name: "Test Org",
-				slug: `test-org-insights-scoping-${crypto.randomUUID()}`,
-				createdAt: new Date(),
-				onboardingCompleted: true,
-			})
-			.returning();
-		testOrgId = testOrg.id;
-
-		// Create member
-		const [createdMember] = await db
-			.insert(member)
-			.values({
-				userId: testUserId,
-				organizationId: testOrgId,
-				role: "owner",
-				createdAt: new Date(),
-			})
-			.returning();
-		memberId = createdMember.id;
-
-		// Create Team A
-		const [createdTeamA] = await db
-			.insert(team)
-			.values({
-				name: "Team A",
-				organizationId: testOrgId,
-				createdAt: new Date(),
-			})
-			.returning();
-		teamAId = createdTeamA.id;
-
-		await db.insert(teamMember).values({
-			userId: testUserId,
-			teamId: teamAId,
-		});
-
-		// Create Team B
-		const [createdTeamB] = await db
-			.insert(team)
-			.values({
-				name: "Team B",
-				organizationId: testOrgId,
-				createdAt: new Date(),
-			})
-			.returning();
-		teamBId = createdTeamB.id;
-
-		await db.insert(teamMember).values({
-			userId: testUserId,
-			teamId: teamBId,
-		});
-
-		// Create session with Team A active
-		const [createdSession] = await db
-			.insert(session)
-			.values({
-				userId: testUserId,
-				activeOrganizationId: testOrgId,
-				activeTeamId: teamAId,
-				expiresAt: new Date(Date.now() + 86400000),
-				token: `test-token-${Date.now()}`,
-			})
-			.returning();
-		sessionToken = createdSession.token;
-	});
-
-	// Helper to create mock context
-	function createMockContext(activeTeamId: string): ORPCContextWithAuth {
-		return {
-			auth: { api: {} },
-			db,
-			headers: new Headers({ Authorization: `Bearer ${sessionToken}` }),
-			request: new Request("http://localhost"),
-			session: {
-				user: { id: testUserId },
-				session: {
-					activeOrganizationId: testOrgId,
-					activeTeamId,
-				},
-			},
-			organizationId: testOrgId,
-			teamId: activeTeamId,
-			userId: testUserId,
-			posthog: {
-				capture: () => {},
-				identify: () => {},
-				groupIdentify: () => {},
-				shutdown: async () => {},
-			},
-		} as unknown as ORPCContextWithAuth;
-	}
-
 	it("should create insight scoped to active team", async () => {
-		const context = createMockContext(teamAId);
+		const insight = makeInsight({
+			teamId: TEAM_A_ID,
+			name: "Team A Insight",
+			type: "trends",
+		});
+		vi.mocked(createInsight).mockResolvedValueOnce(insight);
 
-		const created = await call(insightsRouter.create, {
-			input: {
+		const context = createTeamContext(TEAM_A_ID);
+		const created = await call(
+			insightsRouter.create,
+			{
 				name: "Team A Insight",
 				description: "Test insight",
 				type: "trends",
-				config: { series: [] },
+				config: {
+					type: "trends",
+					series: [{ event: "test_event" }],
+					dateRange: { type: "relative" as const, value: "7d" as const },
+				},
 			},
-			context,
-		});
+			{ context },
+		);
 
-		expect(created.teamId).toBe(teamAId);
-		expect(created.organizationId).toBe(testOrgId);
+		expect(created.teamId).toBe(TEAM_A_ID);
+		expect(created.organizationId).toBe(TEST_ORG_ID);
 		expect(created.name).toBe("Team A Insight");
 	});
 
 	it("should only see insights from active team", async () => {
-		// Create insight in Team A
-		await db.insert(insights).values({
-			teamId: teamAId,
-			organizationId: testOrgId,
-			createdBy: testUserId,
+		const teamAInsight = makeInsight({
+			id: "i1",
+			teamId: TEAM_A_ID,
 			name: "Team A Insight",
-			type: "trends",
-			config: { series: [] },
 		});
 
-		// Create insight in Team B
-		await db.insert(insights).values({
-			teamId: teamBId,
-			organizationId: testOrgId,
-			createdBy: testUserId,
-			name: "Team B Insight",
-			type: "trends",
-			config: { series: [] },
-		});
+		vi.mocked(listInsightsByTeam).mockResolvedValueOnce([teamAInsight]);
 
-		const context = createMockContext(teamAId);
-		const results = await call(insightsRouter.list, {
-			context,
-		});
+		const context = createTeamContext(TEAM_A_ID);
+		const results = await call(insightsRouter.list, undefined, { context });
 
-		// Should only see Team A insight (active team)
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Team A Insight");
-		expect(results[0].teamId).toBe(teamAId);
+		expect(results[0].teamId).toBe(TEAM_A_ID);
+		expect(listInsightsByTeam).toHaveBeenCalledWith(
+			expect.anything(),
+			TEAM_A_ID,
+			undefined,
+		);
 	});
 
 	it("should isolate insights when switching teams", async () => {
-		// Create insights in both teams
-		await db.insert(insights).values([
-			{
-				teamId: teamAId,
-				organizationId: testOrgId,
-				createdBy: testUserId,
-				name: "Insight A",
-				type: "trends",
-				config: { series: [] },
-			},
-			{
-				teamId: teamBId,
-				organizationId: testOrgId,
-				createdBy: testUserId,
-				name: "Insight B",
-				type: "trends",
-				config: { series: [] },
-			},
-		]);
+		const insightA = makeInsight({ id: "i1", teamId: TEAM_A_ID, name: "Insight A" });
+		const insightB = makeInsight({ id: "i2", teamId: TEAM_B_ID, name: "Insight B" });
 
-		// Query with Team A active
-		let context = createMockContext(teamAId);
-		let results = await call(insightsRouter.list, { context });
+		// Team A active
+		vi.mocked(listInsightsByTeam).mockResolvedValueOnce([insightA]);
+		let context = createTeamContext(TEAM_A_ID);
+		let results = await call(insightsRouter.list, undefined, { context });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Insight A");
 
-		// Query with Team B active
-		context = createMockContext(teamBId);
-		results = await call(insightsRouter.list, { context });
+		// Team B active
+		vi.mocked(listInsightsByTeam).mockResolvedValueOnce([insightB]);
+		context = createTeamContext(TEAM_B_ID);
+		results = await call(insightsRouter.list, undefined, { context });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Insight B");
 	});
 
 	it("should not allow access to insight from different team", async () => {
-		// Create insight in Team A
-		const [insight] = await db
-			.insert(insights)
-			.values({
-				teamId: teamAId,
-				organizationId: testOrgId,
-				createdBy: testUserId,
-				name: "Team A Insight",
-				type: "trends",
-				config: { series: [] },
-			})
-			.returning();
+		const insight = makeInsight({ teamId: TEAM_A_ID });
+		vi.mocked(getInsightById).mockResolvedValueOnce(insight);
 
-		// Try to access with Team B context
-		const context = createMockContext(teamBId);
+		const context = createTeamContext(TEAM_B_ID);
 
 		await expect(
-			call(insightsRouter.getById, {
-				input: { id: insight.id },
-				context,
-			}),
+			call(insightsRouter.getById, { id: insight.id }, { context }),
 		).rejects.toThrow("Insight not found");
 	});
 
 	it("should not allow updating insight from different team", async () => {
-		// Create insight in Team A
-		const [insight] = await db
-			.insert(insights)
-			.values({
-				teamId: teamAId,
-				organizationId: testOrgId,
-				createdBy: testUserId,
-				name: "Team A Insight",
-				type: "trends",
-				config: { series: [] },
-			})
-			.returning();
+		const insight = makeInsight({ teamId: TEAM_A_ID });
+		vi.mocked(getInsightById).mockResolvedValueOnce(insight);
 
-		// Try to update with Team B context
-		const context = createMockContext(teamBId);
+		const context = createTeamContext(TEAM_B_ID);
 
 		await expect(
-			call(insightsRouter.update, {
-				input: { id: insight.id, name: "Updated" },
-				context,
-			}),
+			call(
+				insightsRouter.update,
+				{ id: insight.id, name: "Updated" },
+				{ context },
+			),
 		).rejects.toThrow("Insight not found");
 	});
 
 	it("should not allow deleting insight from different team", async () => {
-		// Create insight in Team A
-		const [insight] = await db
-			.insert(insights)
-			.values({
-				teamId: teamAId,
-				organizationId: testOrgId,
-				createdBy: testUserId,
-				name: "Team A Insight",
-				type: "trends",
-				config: { series: [] },
-			})
-			.returning();
+		const insight = makeInsight({ teamId: TEAM_A_ID });
+		vi.mocked(getInsightById).mockResolvedValueOnce(insight);
 
-		// Try to delete with Team B context
-		const context = createMockContext(teamBId);
+		const context = createTeamContext(TEAM_B_ID);
 
 		await expect(
-			call(insightsRouter.remove, {
-				input: { id: insight.id },
-				context,
-			}),
+			call(insightsRouter.remove, { id: insight.id }, { context }),
 		).rejects.toThrow("Insight not found");
+
+		expect(deleteInsight).not.toHaveBeenCalled();
 	});
 
 	it("should filter insights by type within active team", async () => {
-		// Create different types of insights in Team A
-		await db.insert(insights).values([
-			{
-				teamId: teamAId,
-				organizationId: testOrgId,
-				createdBy: testUserId,
-				name: "Trends Insight",
-				type: "trends",
-				config: { series: [] },
-			},
-			{
-				teamId: teamAId,
-				organizationId: testOrgId,
-				createdBy: testUserId,
-				name: "Funnel Insight",
-				type: "funnels",
-				config: { series: [] },
-			},
-		]);
+		const trendsInsight = makeInsight({
+			id: "i1",
+			teamId: TEAM_A_ID,
+			name: "Trends Insight",
+			type: "trends",
+		});
+		const funnelInsight = makeInsight({
+			id: "i2",
+			teamId: TEAM_A_ID,
+			name: "Funnel Insight",
+			type: "funnels",
+		});
 
-		const context = createMockContext(teamAId);
+		const context = createTeamContext(TEAM_A_ID);
 
 		// Query only trends
-		const trendsResults = await call(insightsRouter.list, {
-			input: { type: "trends" },
-			context,
-		});
+		vi.mocked(listInsightsByTeam).mockResolvedValueOnce([trendsInsight]);
+		const trendsResults = await call(
+			insightsRouter.list,
+			{ type: "trends" },
+			{ context },
+		);
 		expect(trendsResults).toHaveLength(1);
 		expect(trendsResults[0].type).toBe("trends");
 
 		// Query only funnels
-		const funnelsResults = await call(insightsRouter.list, {
-			input: { type: "funnels" },
-			context,
-		});
+		vi.mocked(listInsightsByTeam).mockResolvedValueOnce([funnelInsight]);
+		const funnelsResults = await call(
+			insightsRouter.list,
+			{ type: "funnels" },
+			{ context },
+		);
 		expect(funnelsResults).toHaveLength(1);
 		expect(funnelsResults[0].type).toBe("funnels");
 	});

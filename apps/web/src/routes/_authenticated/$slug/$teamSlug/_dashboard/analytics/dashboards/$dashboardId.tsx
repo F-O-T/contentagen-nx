@@ -32,12 +32,12 @@ function DashboardSkeleton() {
 }
 
 function DashboardViewPageContent() {
-   const { slug, teamSlug, dashboardId } = Route.useParams();
+   const { dashboardId } = Route.useParams();
    const { data: dashboard } = useSuspenseQuery(
       orpc.dashboards.getById.queryOptions({ input: { id: dashboardId } }),
    );
 
-   return <DashboardView backTo={{ slug, teamSlug }} dashboard={dashboard} />;
+   return <DashboardView dashboard={dashboard} />;
 }
 
 function DashboardViewPage() {

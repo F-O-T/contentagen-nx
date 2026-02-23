@@ -1,358 +1,196 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { createDb } from "@packages/database/client";
-import {
-	team,
-	teamMember,
-	organization,
-	member,
-	user,
-	session,
-} from "@packages/database/schemas/auth";
-import { forms, formSubmissions } from "@packages/database/schemas/forms";
-import { eq } from "drizzle-orm";
 import { call } from "@orpc/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	TEST_ORG_ID,
+	TEST_USER_ID,
+	createTestContext,
+} from "../../../helpers/create-test-context";
+import { makeForm } from "../../../helpers/mock-factories";
+
+// ---------------------------------------------------------------------------
+// Mocks
+// ---------------------------------------------------------------------------
+
+vi.mock("@packages/database/repositories/form-repository");
+vi.mock("@packages/events/forms");
+
+import {
+	countFormSubmissions,
+	createForm,
+	deleteForm,
+	getFormById,
+	getFormSubmissions,
+	listFormsByTeam,
+} from "@packages/database/repositories/form-repository";
+import {
+	emitFormCreated,
+	emitFormDeleted,
+	emitFormUpdated,
+} from "@packages/events/forms";
+
 import * as formsRouter from "@/integrations/orpc/router/forms";
-import type { ORPCContextWithAuth } from "@/integrations/orpc/server";
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const TEAM_A_ID = "team-a-00000000-0000-0000-0000-000000000001";
+const TEAM_B_ID = "team-b-00000000-0000-0000-0000-000000000002";
+const FORM_A_ID = "f0f0a0a0-b1b1-4c2c-9d3d-000000000001";
+
+function createTeamContext(teamId: string) {
+	return createTestContext({
+		teamId,
+		session: {
+			user: { id: TEST_USER_ID },
+			session: { activeOrganizationId: TEST_ORG_ID, activeTeamId: teamId },
+		},
+	});
+}
+
+// ---------------------------------------------------------------------------
+// Setup
+// ---------------------------------------------------------------------------
+
+beforeEach(() => {
+	vi.clearAllMocks();
+	vi.mocked(emitFormCreated).mockResolvedValue(undefined);
+	vi.mocked(emitFormUpdated).mockResolvedValue(undefined);
+	vi.mocked(emitFormDeleted).mockResolvedValue(undefined);
+});
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 describe("Forms Team Scoping", () => {
-	let db: ReturnType<typeof createDb>;
-	let testUserId: string;
-	let testOrgId: string;
-	let teamAId: string;
-	let teamBId: string;
-	let sessionToken: string;
-
-	beforeEach(async () => {
-		db = createDb({ databaseUrl: process.env.DATABASE_URL! });
-
-		// Create test user
-		const [testUser] = await db
-			.insert(user)
-			.values({
-				email: `test-forms-team-scoping-${crypto.randomUUID()}@example.com`,
-				name: "Test User",
-			})
-			.returning();
-		testUserId = testUser.id;
-
-		// Create organization
-		const [testOrg] = await db
-			.insert(organization)
-			.values({
-				name: "Test Org Forms",
-				slug: `test-org-forms-team-scoping-${crypto.randomUUID()}`,
-				createdAt: new Date(),
-				onboardingCompleted: true,
-			})
-			.returning();
-		testOrgId = testOrg.id;
-
-		// Create member
-		await db
-			.insert(member)
-			.values({
-				userId: testUserId,
-				organizationId: testOrgId,
-				role: "owner",
-				createdAt: new Date(),
-			})
-			.returning();
-
-		// Create Team A
-		const [createdTeamA] = await db
-			.insert(team)
-			.values({
-				name: "Team A",
-				slug: `team-a-forms-${crypto.randomUUID()}`,
-				organizationId: testOrgId,
-				createdAt: new Date(),
-			})
-			.returning();
-		teamAId = createdTeamA.id;
-
-		await db.insert(teamMember).values({
-			userId: testUserId,
-			teamId: teamAId,
-		});
-
-		// Create Team B
-		const [createdTeamB] = await db
-			.insert(team)
-			.values({
-				name: "Team B",
-				slug: `team-b-forms-${crypto.randomUUID()}`,
-				organizationId: testOrgId,
-				createdAt: new Date(),
-			})
-			.returning();
-		teamBId = createdTeamB.id;
-
-		await db.insert(teamMember).values({
-			userId: testUserId,
-			teamId: teamBId,
-		});
-
-		// Create session with Team A active
-		const [createdSession] = await db
-			.insert(session)
-			.values({
-				userId: testUserId,
-				activeOrganizationId: testOrgId,
-				activeTeamId: teamAId,
-				expiresAt: new Date(Date.now() + 86400000),
-				token: `test-token-forms-${Date.now()}`,
-			})
-			.returning();
-		sessionToken = createdSession.token;
-	});
-
-	// Helper to create mock context
-	function createMockContext(activeTeamId: string): ORPCContextWithAuth {
-		return {
-			auth: { api: {} },
-			db,
-			headers: new Headers({ Authorization: `Bearer ${sessionToken}` }),
-			request: new Request("http://localhost"),
-			session: {
-				user: { id: testUserId },
-				session: {
-					activeOrganizationId: testOrgId,
-					activeTeamId,
-				},
-			},
-			organizationId: testOrgId,
-			teamId: activeTeamId,
-			userId: testUserId,
-			posthog: {
-				capture: () => {},
-				identify: () => {},
-				groupIdentify: () => {},
-				shutdown: async () => {},
-			},
-		} as unknown as ORPCContextWithAuth;
-	}
-
 	it("should create form scoped to active team", async () => {
-		const context = createMockContext(teamAId);
+		const form = makeForm({ teamId: TEAM_A_ID, name: "Team A Form" });
+		vi.mocked(createForm).mockResolvedValueOnce(form);
 
+		const context = createTeamContext(TEAM_A_ID);
 		const created = await call(
 			formsRouter.create,
 			{
 				name: "Team A Form",
 				description: "Form for team A",
-				fields: [
-					{
-						id: "name",
-						type: "text",
-						label: "Name",
-						required: true,
-					},
-				],
+				fields: [{ id: "name", type: "text" as const, label: "Name", required: true }],
 			},
 			{ context },
 		);
 
-		expect(created.teamId).toBe(teamAId);
-		expect(created.organizationId).toBe(testOrgId);
+		expect(created.teamId).toBe(TEAM_A_ID);
+		expect(created.organizationId).toBe(TEST_ORG_ID);
 		expect(created.name).toBe("Team A Form");
 	});
 
 	it("should only see forms from active team", async () => {
-		// Create form in Team A
-		await db.insert(forms).values({
-			teamId: teamAId,
-			organizationId: testOrgId,
+		const teamAForm = makeForm({
+			id: "f1",
+			teamId: TEAM_A_ID,
 			name: "Team A Form",
-			fields: [
-				{
-					id: "email",
-					type: "email",
-					label: "Email",
-					required: true,
-				},
-			],
 		});
 
-		// Create form in Team B
-		await db.insert(forms).values({
-			teamId: teamBId,
-			organizationId: testOrgId,
-			name: "Team B Form",
-			fields: [
-				{
-					id: "phone",
-					type: "text",
-					label: "Phone",
-					required: false,
-				},
-			],
-		});
+		vi.mocked(listFormsByTeam).mockResolvedValueOnce([{ ...teamAForm, submissionCount: 0 }]);
 
-		const context = createMockContext(teamAId);
+		const context = createTeamContext(TEAM_A_ID);
 		const results = await call(formsRouter.list, undefined, { context });
 
-		// Should only see Team A form (active team)
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Team A Form");
-		expect(results[0].teamId).toBe(teamAId);
+		expect(results[0].teamId).toBe(TEAM_A_ID);
+		expect(listFormsByTeam).toHaveBeenCalledWith(expect.anything(), TEAM_A_ID);
 	});
 
 	it("should isolate forms when switching teams", async () => {
-		// Create forms in both teams
-		await db.insert(forms).values([
-			{
-				teamId: teamAId,
-				organizationId: testOrgId,
-				name: "Form A",
-				fields: [{ id: "a", type: "text", label: "A", required: true }],
-			},
-			{
-				teamId: teamBId,
-				organizationId: testOrgId,
-				name: "Form B",
-				fields: [{ id: "b", type: "text", label: "B", required: true }],
-			},
-		]);
+		const formA = makeForm({ id: "f1", teamId: TEAM_A_ID, name: "Form A" });
+		const formB = makeForm({ id: "f2", teamId: TEAM_B_ID, name: "Form B" });
 
-		// Query with Team A active
-		let context = createMockContext(teamAId);
+		// Team A active
+		vi.mocked(listFormsByTeam).mockResolvedValueOnce([{ ...formA, submissionCount: 0 }]);
+		let context = createTeamContext(TEAM_A_ID);
 		let results = await call(formsRouter.list, undefined, { context });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Form A");
 
-		// Query with Team B active
-		context = createMockContext(teamBId);
+		// Team B active
+		vi.mocked(listFormsByTeam).mockResolvedValueOnce([{ ...formB, submissionCount: 0 }]);
+		context = createTeamContext(TEAM_B_ID);
 		results = await call(formsRouter.list, undefined, { context });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Form B");
 	});
 
 	it("should prevent accessing form from different team", async () => {
-		// Create form in Team A
-		const [formA] = await db
-			.insert(forms)
-			.values({
-				teamId: teamAId,
-				organizationId: testOrgId,
-				name: "Team A Form",
-				fields: [{ id: "x", type: "text", label: "X", required: true }],
-			})
-			.returning();
+		// Form belongs to Team A
+		const form = makeForm({ teamId: TEAM_A_ID });
+		vi.mocked(getFormById).mockResolvedValueOnce(form);
 
-		// Try to access with Team B context
-		const context = createMockContext(teamBId);
+		// Access with Team B context
+		const context = createTeamContext(TEAM_B_ID);
 
 		await expect(
-			call(formsRouter.getById, { id: formA.id }, { context }),
+			call(formsRouter.getById, { id: form.id }, { context }),
 		).rejects.toThrow("Form not found");
 	});
 
 	it("should isolate form submissions by team", async () => {
-		// Create forms in both teams
-		const [formA] = await db
-			.insert(forms)
-			.values({
-				teamId: teamAId,
-				organizationId: testOrgId,
-				name: "Form A",
-				fields: [{ id: "name", type: "text", label: "Name", required: true }],
-			})
-			.returning();
+		const formA = makeForm({ id: FORM_A_ID, teamId: TEAM_A_ID, name: "Form A" });
 
-		const [formB] = await db
-			.insert(forms)
-			.values({
-				teamId: teamBId,
-				organizationId: testOrgId,
-				name: "Form B",
-				fields: [{ id: "email", type: "email", label: "Email", required: true }],
-			})
-			.returning();
-
-		// Create submissions for both forms
-		await db.insert(formSubmissions).values([
+		// Team A accessing own form — should work
+		vi.mocked(getFormById).mockResolvedValueOnce(formA);
+		vi.mocked(getFormSubmissions).mockResolvedValueOnce([
 			{
-				formId: formA.id,
-				organizationId: testOrgId,
-				teamId: teamAId,
+				id: "sub-1",
+				formId: FORM_A_ID,
+				organizationId: TEST_ORG_ID,
+				teamId: TEAM_A_ID,
 				data: { name: "John" },
-			},
-			{
-				formId: formB.id,
-				organizationId: testOrgId,
-				teamId: teamBId,
-				data: { email: "john@example.com" },
+				metadata: null,
+				submittedAt: new Date(),
 			},
 		]);
+		vi.mocked(countFormSubmissions).mockResolvedValueOnce(1);
 
-		// Team A should only see their submissions
-		const contextA = createMockContext(teamAId);
+		const contextA = createTeamContext(TEAM_A_ID);
 		const submissionsA = await call(
 			formsRouter.getSubmissions,
-			{ formId: formA.id },
+			{ formId: FORM_A_ID },
 			{ context: contextA },
 		);
 		expect(submissionsA.submissions).toHaveLength(1);
-		expect(submissionsA.submissions[0].teamId).toBe(teamAId);
+		expect(submissionsA.submissions[0].teamId).toBe(TEAM_A_ID);
 
-		// Team B should not be able to access Team A's submissions
-		const contextB = createMockContext(teamBId);
+		// Team B trying to access Team A's form — should fail
+		vi.mocked(getFormById).mockResolvedValueOnce(formA);
+		const contextB = createTeamContext(TEAM_B_ID);
 		await expect(
-			call(formsRouter.getSubmissions, { formId: formA.id }, { context: contextB }),
+			call(formsRouter.getSubmissions, { formId: FORM_A_ID }, { context: contextB }),
 		).rejects.toThrow("Form not found");
 	});
 
 	it("should prevent updating form from different team", async () => {
-		// Create form in Team A
-		const [formA] = await db
-			.insert(forms)
-			.values({
-				teamId: teamAId,
-				organizationId: testOrgId,
-				name: "Team A Form",
-				fields: [{ id: "x", type: "text", label: "X", required: true }],
-			})
-			.returning();
+		const form = makeForm({ teamId: TEAM_A_ID });
+		vi.mocked(getFormById).mockResolvedValueOnce(form);
 
-		// Try to update with Team B context
-		const context = createMockContext(teamBId);
+		const context = createTeamContext(TEAM_B_ID);
 
 		await expect(
-			call(
-				formsRouter.update,
-				{
-					id: formA.id,
-					name: "Hacked Form",
-				},
-				{ context },
-			),
+			call(formsRouter.update, { id: form.id, name: "Hacked Form" }, { context }),
 		).rejects.toThrow("Form not found");
 	});
 
 	it("should prevent deleting form from different team", async () => {
-		// Create form in Team A
-		const [formA] = await db
-			.insert(forms)
-			.values({
-				teamId: teamAId,
-				organizationId: testOrgId,
-				name: "Team A Form",
-				fields: [{ id: "x", type: "text", label: "X", required: true }],
-			})
-			.returning();
+		const form = makeForm({ teamId: TEAM_A_ID });
+		vi.mocked(getFormById).mockResolvedValueOnce(form);
 
-		// Try to delete with Team B context
-		const context = createMockContext(teamBId);
+		const context = createTeamContext(TEAM_B_ID);
 
 		await expect(
-			call(formsRouter.remove, { id: formA.id }, { context }),
+			call(formsRouter.remove, { id: form.id }, { context }),
 		).rejects.toThrow("Form not found");
 
-		// Verify form still exists
-		const [stillExists] = await db
-			.select()
-			.from(forms)
-			.where(eq(forms.id, formA.id));
-		expect(stillExists).toBeDefined();
+		// deleteForm should NOT have been called
+		expect(deleteForm).not.toHaveBeenCalled();
 	});
 });

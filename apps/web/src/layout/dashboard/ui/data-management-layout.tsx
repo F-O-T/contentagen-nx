@@ -14,7 +14,9 @@ export function DataManagementLayout({ children }: DataManagementLayoutProps) {
    const isMobile = useIsMobile();
    const { pathname } = useLocation();
    const { activeOrganization } = useActiveOrganization();
-   const { teamSlug } = useParams({ strict: false });
+   const { teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
 
    const isIndexRoute = pathname.endsWith("/data-management");
 

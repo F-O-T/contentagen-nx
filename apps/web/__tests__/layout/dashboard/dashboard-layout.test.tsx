@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import type React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { DashboardLayout } from "@/layout/dashboard/ui/dashboard-layout";
@@ -18,6 +18,11 @@ if (!window.matchMedia) {
       removeEventListener: () => undefined,
    })) as typeof window.matchMedia;
 }
+
+vi.mock("@packages/posthog/client", () => ({
+   identifyClient: vi.fn(),
+   setClientGroup: vi.fn(),
+}));
 
 vi.mock("@/hooks/use-active-organization", () => ({
    useActiveOrganization: () => ({
@@ -45,6 +50,20 @@ vi.mock("@/hooks/use-last-organization", () => ({
    }),
 }));
 
+vi.mock("@/hooks/use-local-storage", () => ({
+   useSafeLocalStorage: () => [false, vi.fn()],
+}));
+
+vi.mock("@/hooks/use-early-access", () => ({
+   EarlyAccessProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+   ),
+}));
+
+vi.mock("@/features/feedback/ui/feedback-fab", () => ({
+   FeedbackFab: () => null,
+}));
+
 vi.mock("@/integrations/better-auth/auth-client", () => ({
    authClient: {
       organization: {
@@ -57,6 +76,13 @@ vi.mock("@/integrations/orpc/client", () => ({
    orpc: {
       session: {
          getSession: {
+            queryOptions: () => ({
+               queryKey: ["session.getSession"],
+               queryFn: async () => ({
+                  user: { id: "user-1", email: "test@example.com", name: "Test" },
+                  session: { activeOrganizationId: "org-1" },
+               }),
+            }),
             queryKey: () => ["session.getSession"],
          },
       },
@@ -74,14 +100,31 @@ vi.mock("@/layout/dashboard/hooks/use-sidebar-nav", () => ({
    }),
    openSubSidebar: vi.fn(),
    closeSubSidebar: vi.fn(),
+   setActiveSection: vi.fn(),
 }));
 
-vi.mock("@/layout/dashboard/icon-rail", () => ({
-   IconRail: () => null,
+vi.mock("@/layout/dashboard/hooks/use-tab-router-sync", () => ({
+   useTabRouterSync: () => ({
+      navigateToTab: vi.fn(),
+      handleCloseTab: vi.fn(),
+      openNewSearchTab: vi.fn(),
+   }),
 }));
 
-vi.mock("@/layout/dashboard/sub-sidebar", () => ({
-   SubSidebar: () => null,
+vi.mock("@/layout/dashboard/hooks/use-tab-keyboard-shortcuts", () => ({
+   useTabKeyboardShortcuts: vi.fn(),
+}));
+
+vi.mock("@/layout/dashboard/ui/app-sidebar", () => ({
+   AppSidebar: () => null,
+}));
+
+vi.mock("@/layout/dashboard/ui/sidebar-sub-panel", () => ({
+   SidebarSubPanel: () => null,
+}));
+
+vi.mock("@/layout/dashboard/ui/tab-bar", () => ({
+   TabBar: () => null,
 }));
 
 vi.mock("@packages/ui/components/tooltip", () => ({
@@ -101,6 +144,12 @@ function renderWithClient() {
             retry: false,
          },
       },
+   });
+
+   // Pre-seed the session query so useSuspenseQuery resolves immediately
+   queryClient.setQueryData(["session.getSession"], {
+      user: { id: "user-1", email: "test@example.com", name: "Test" },
+      session: { activeOrganizationId: "org-1" },
    });
 
    return render(
@@ -123,12 +172,9 @@ describe("DashboardLayout", () => {
       });
    });
 
-   it("keeps collapse trigger visible and toggles", () => {
+   it("renders child content", () => {
       renderWithClient();
 
-      const trigger = screen.getByLabelText(/ocultar|abrir/i);
-      fireEvent.click(trigger);
-
-      expect(trigger).toBeTruthy();
+      expect(screen.getAllByText("Child content").length).toBeGreaterThan(0);
    });
 });

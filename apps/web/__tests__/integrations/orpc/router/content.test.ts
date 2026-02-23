@@ -18,12 +18,10 @@ vi.mock("@packages/events/credits");
 
 import {
 	archiveContent,
-	countContentsByOrganization,
 	countContentsByTeam,
 	createContent,
 	deleteContent,
 	getContentById,
-	listContentsByOrganization,
 	listContentsByTeam,
 	publishContent,
 	updateContent,
@@ -73,12 +71,12 @@ describe("getById", () => {
 	});
 
 	it("throws NOT_FOUND when content does not exist", async () => {
-		vi.mocked(getContentById).mockResolvedValueOnce(null);
+		vi.mocked(getContentById).mockResolvedValueOnce(null as any);
 
 		const ctx = createTestContext();
 		await expect(
 			call(contentRouter.getById, { id: CONTENT_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 
 	it("throws NOT_FOUND when content belongs to different org", async () => {
@@ -88,7 +86,7 @@ describe("getById", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(contentRouter.getById, { id: CONTENT_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -98,7 +96,7 @@ describe("getById", () => {
 
 describe("create", () => {
 	const input = {
-		meta: { title: "New Post", description: "A post", slug: "new-post" },
+		title: "New Post",
 		body: "Body text",
 	};
 
@@ -145,7 +143,7 @@ describe("create", () => {
 
 		await expect(
 			call(contentRouter.create, input, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "FORBIDDEN");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "FORBIDDEN");
 	});
 
 	it("emits contentCreated event with teamId", async () => {
@@ -156,6 +154,7 @@ describe("create", () => {
 		await call(contentRouter.create, input, { context: ctx });
 
 		expect(emitContentCreated).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -211,7 +210,7 @@ describe("update", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(contentRouter.update, input, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 
 	it("calls enforceCreditBudget with platform pool", async () => {
@@ -237,7 +236,7 @@ describe("update", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(contentRouter.update, input, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "FORBIDDEN");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "FORBIDDEN");
 	});
 
 	it("emits contentUpdated event with teamId and changedFields", async () => {
@@ -248,6 +247,7 @@ describe("update", () => {
 		await call(contentRouter.update, input, { context: ctx });
 
 		expect(emitContentUpdated).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -300,7 +300,7 @@ describe("remove", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(contentRouter.remove, { id: CONTENT_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 
 	it("emits contentDeleted event with teamId", async () => {
@@ -311,6 +311,7 @@ describe("remove", () => {
 		await call(contentRouter.remove, { id: CONTENT_ID }, { context: ctx });
 
 		expect(emitContentDeleted).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -335,6 +336,7 @@ describe("publish", () => {
 
 		expect(publishContent).toHaveBeenCalledWith(expect.anything(), CONTENT_ID);
 		expect(emitContentPublished).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -359,7 +361,7 @@ describe("publish", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(contentRouter.publish, { id: CONTENT_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "FORBIDDEN");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "FORBIDDEN");
 
 		// publishContent should not have been called
 		expect(publishContent).not.toHaveBeenCalled();
@@ -380,6 +382,7 @@ describe("archive", () => {
 
 		expect(archiveContent).toHaveBeenCalledWith(expect.anything(), CONTENT_ID);
 		expect(emitContentArchived).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,

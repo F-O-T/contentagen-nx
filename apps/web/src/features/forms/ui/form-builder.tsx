@@ -122,10 +122,9 @@ interface FormBuilderProps {
 export function FormBuilder({ formId }: FormBuilderProps) {
    const isCreateMode = formId === "new";
    const navigate = useNavigate();
-   const { slug, teamSlug } = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-   };
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const queryClient = useQueryClient();
    const { openAlertDialog } = useAlertDialog();
 
@@ -397,7 +396,6 @@ export function FormBuilder({ formId }: FormBuilderProps) {
    return (
       <div className="flex flex-col h-full">
          <FormHeader
-            backTo={{ slug: slug ?? "", teamSlug: teamSlug ?? "" }}
             description={description}
             isActive={true}
             isSaving={isSaving}

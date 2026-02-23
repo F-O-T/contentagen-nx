@@ -11,12 +11,9 @@ import { useEarlyAccess } from "@/hooks/use-early-access";
 
 export function EarlyAccessSidebarBanner() {
    const { isBannerVisible, dismissBanner } = useEarlyAccess();
-   const params = useParams({ strict: false }) as {
-      slug?: string;
-      teamSlug?: string;
-   };
-   const slug = params.slug ?? "";
-   const teamSlug = params.teamSlug ?? "";
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
 
    if (!isBannerVisible) return null;
 
