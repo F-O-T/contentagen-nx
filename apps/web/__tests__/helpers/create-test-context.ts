@@ -15,7 +15,7 @@ export const TEST_TEAM_ID = "test-team-00000000-0000-0000-0000-000000000001";
 
 type MockContextOverrides = {
 	[K in keyof ORPCContextWithAuth]?: unknown;
-};
+} & Record<string, unknown>;
 
 // =============================================================================
 // Helpers

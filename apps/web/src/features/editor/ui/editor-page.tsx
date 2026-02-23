@@ -80,7 +80,9 @@ export function EditorPage({ contentId }: EditorPageProps) {
          <PlateEditor
             contentId={contentId}
             editable={content.status !== "archived"}
-            initialValue={content?.body ? (JSON.parse(content.body) as Value) : undefined}
+            initialValue={
+               content?.body ? (JSON.parse(content.body) as Value) : undefined
+            }
             isSaving={isSaving}
             key={contentId}
             meta={meta}

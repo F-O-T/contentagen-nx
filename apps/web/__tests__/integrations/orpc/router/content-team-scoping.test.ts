@@ -1,201 +1,142 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { createDb } from "@packages/database/client";
-import {
-	team,
-	teamMember,
-	organization,
-	member,
-	user,
-	session,
-} from "@packages/database/schemas/auth";
-import { content } from "@packages/database/schemas/content";
 import { call } from "@orpc/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	TEST_ORG_ID,
+	TEST_USER_ID,
+	createTestContext,
+} from "../../../helpers/create-test-context";
+import { makeContent } from "../../../helpers/mock-factories";
+
+// ---------------------------------------------------------------------------
+// Mocks
+// ---------------------------------------------------------------------------
+
+vi.mock("@packages/database/repositories/content-repository");
+vi.mock("@packages/events/content");
+vi.mock("@packages/events/credits");
+
+import {
+	countContentsByTeam,
+	createContent,
+	listContentsByTeam,
+} from "@packages/database/repositories/content-repository";
+import { emitContentCreated } from "@packages/events/content";
+import {
+	enforceCreditBudget,
+	trackCreditUsage,
+} from "@packages/events/credits";
+
 import * as contentRouter from "@/integrations/orpc/router/content";
-import type { ORPCContextWithAuth } from "@/integrations/orpc/server";
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const TEAM_A_ID = "team-a-00000000-0000-0000-0000-000000000001";
+const TEAM_B_ID = "team-b-00000000-0000-0000-0000-000000000002";
+
+function createTeamContext(teamId: string, extra: Record<string, unknown> = {}) {
+	return createTestContext({
+		teamId,
+		session: {
+			user: { id: TEST_USER_ID },
+			session: { activeOrganizationId: TEST_ORG_ID, activeTeamId: teamId },
+		},
+		...extra,
+	});
+}
+
+// ---------------------------------------------------------------------------
+// Setup
+// ---------------------------------------------------------------------------
+
+beforeEach(() => {
+	vi.clearAllMocks();
+	vi.mocked(enforceCreditBudget).mockResolvedValue(undefined);
+	vi.mocked(trackCreditUsage).mockResolvedValue(undefined);
+	vi.mocked(emitContentCreated).mockResolvedValue(undefined);
+});
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 describe("Content Team Scoping", () => {
-	let db: ReturnType<typeof createDb>;
-	let testUserId: string;
-	let testOrgId: string;
-	let teamAId: string;
-	let teamBId: string;
-	let sessionToken: string;
-	let memberId: string;
+	it("should create content scoped to active team", async () => {
+		const created = makeContent({ teamId: TEAM_A_ID, organizationId: TEST_ORG_ID });
+		vi.mocked(createContent).mockResolvedValueOnce(created);
 
-	beforeEach(async () => {
-		db = createDb({ databaseUrl: process.env.DATABASE_URL! });
-
-		// Create test user
-		const [testUser] = await db
-			.insert(user)
-			.values({
-				email: `test-team-scoping-${crypto.randomUUID()}@example.com`,
-				name: "Test User",
-			})
-			.returning();
-		testUserId = testUser.id;
-
-		// Create organization
-		const [testOrg] = await db
-			.insert(organization)
-			.values({
-				name: "Test Org",
-				slug: `test-org-team-scoping-${crypto.randomUUID()}`,
-				createdAt: new Date(),
-				onboardingCompleted: true,
-			})
-			.returning();
-		testOrgId = testOrg.id;
-
-		// Create member
-		const [createdMember] = await db
-			.insert(member)
-			.values({
-				userId: testUserId,
-				organizationId: testOrgId,
-				role: "owner",
-				createdAt: new Date(),
-			})
-			.returning();
-		memberId = createdMember.id;
-
-		// Create Team A
-		const [createdTeamA] = await db
-			.insert(team)
-			.values({
-				name: "Team A",
-				slug: `team-a-${crypto.randomUUID()}`,
-				organizationId: testOrgId,
-				createdAt: new Date(),
-			})
-			.returning();
-		teamAId = createdTeamA.id;
-
-		await db.insert(teamMember).values({
-			userId: testUserId,
-			teamId: teamAId,
-		});
-
-		// Create Team B
-		const [createdTeamB] = await db
-			.insert(team)
-			.values({
-				name: "Team B",
-				slug: `team-b-${crypto.randomUUID()}`,
-				organizationId: testOrgId,
-				createdAt: new Date(),
-			})
-			.returning();
-		teamBId = createdTeamB.id;
-
-		await db.insert(teamMember).values({
-			userId: testUserId,
-			teamId: teamBId,
-		});
-
-		// Create session with Team A active
-		const [createdSession] = await db
-			.insert(session)
-			.values({
-				userId: testUserId,
-				activeOrganizationId: testOrgId,
-				activeTeamId: teamAId,
-				expiresAt: new Date(Date.now() + 86400000),
-				token: `test-token-${Date.now()}`,
-			})
-			.returning();
-		sessionToken = createdSession.token;
-	});
-
-	// Helper to create mock context
-	function createMockContext(activeTeamId: string): ORPCContextWithAuth {
-		return {
-			auth: { api: {} },
-			db,
-			headers: new Headers({ Authorization: `Bearer ${sessionToken}` }),
-			request: new Request("http://localhost"),
-			session: {
-				user: { id: testUserId },
-				session: {
-					activeOrganizationId: testOrgId,
-					activeTeamId,
+		const context = createTeamContext(TEAM_A_ID, {
+			db: {
+				query: {
+					member: {
+						findMany: vi.fn().mockResolvedValue([{ id: "member-1" }]),
+					},
 				},
 			},
-			organizationId: testOrgId,
-			teamId: activeTeamId,
-			userId: testUserId,
-			posthog: {
-				capture: () => {},
-				identify: () => {},
-				groupIdentify: () => {},
-				shutdown: async () => {},
-			},
-		} as unknown as ORPCContextWithAuth;
-	}
+		});
 
-	it("should create content scoped to active team", async () => {
-		const context = createMockContext(teamAId);
+		const result = await call(
+			contentRouter.create,
+			{ title: "Team A Content", body: "Content for team A" },
+			{ context },
+		);
 
-		const created = await call(contentRouter.create, {
-				title: "Team A Content",
-				body: "Content for team A",
-			}, { context });
-
-		expect(created.teamId).toBe(teamAId);
-		expect(created.organizationId).toBe(testOrgId);
+		expect(result.teamId).toBe(TEAM_A_ID);
+		expect(result.organizationId).toBe(TEST_ORG_ID);
 	});
 
 	it("should only see content from active team", async () => {
-		// Create content in Team A
-		await db.insert(content).values({
-			teamId: teamAId,
-			organizationId: testOrgId,
-			createdByMemberId: memberId,
+		const teamAContent = makeContent({
+			id: "c1",
+			teamId: TEAM_A_ID,
 			meta: { title: "Team A", description: "", slug: "a" },
 		});
 
-		// Create content in Team B
-		await db.insert(content).values({
-			teamId: teamBId,
-			organizationId: testOrgId,
-			createdByMemberId: memberId,
-			meta: { title: "Team B", description: "", slug: "b" },
-		});
+		vi.mocked(countContentsByTeam).mockResolvedValueOnce(1);
+		vi.mocked(listContentsByTeam).mockResolvedValueOnce([teamAContent]);
 
-		const context = createMockContext(teamAId);
+		const context = createTeamContext(TEAM_A_ID);
 		const results = await call(contentRouter.listAllContent, {}, { context });
 
-		// Should only see Team A content (active team)
 		expect(results.items).toHaveLength(1);
 		expect(results.items[0].meta.title).toBe("Team A");
-		expect(results.items[0].teamId).toBe(teamAId);
+		expect(results.items[0].teamId).toBe(TEAM_A_ID);
+
+		// Verify the repository was called with the correct team ID
+		expect(listContentsByTeam).toHaveBeenCalledWith(
+			expect.anything(),
+			TEAM_A_ID,
+			expect.objectContaining({ limit: 20, offset: 0 }),
+		);
 	});
 
 	it("should isolate content when switching teams", async () => {
-		// Create content in both teams
-		await db.insert(content).values([
-			{
-				teamId: teamAId,
-				organizationId: testOrgId,
-				createdByMemberId: memberId,
-				meta: { title: "A", description: "", slug: "a" },
-			},
-			{
-				teamId: teamBId,
-				organizationId: testOrgId,
-				createdByMemberId: memberId,
-				meta: { title: "B", description: "", slug: "b" },
-			},
-		]);
+		const teamAContent = makeContent({
+			id: "c1",
+			teamId: TEAM_A_ID,
+			meta: { title: "A", description: "", slug: "a" },
+		});
+		const teamBContent = makeContent({
+			id: "c2",
+			teamId: TEAM_B_ID,
+			meta: { title: "B", description: "", slug: "b" },
+		});
 
-		// Query with Team A active
-		let context = createMockContext(teamAId);
+		// First call: Team A active
+		vi.mocked(countContentsByTeam).mockResolvedValueOnce(1);
+		vi.mocked(listContentsByTeam).mockResolvedValueOnce([teamAContent]);
+
+		let context = createTeamContext(TEAM_A_ID);
 		let results = await call(contentRouter.listAllContent, {}, { context });
 		expect(results.items).toHaveLength(1);
 		expect(results.items[0].meta.title).toBe("A");
 
-		// Query with Team B active
-		context = createMockContext(teamBId);
+		// Second call: Team B active
+		vi.mocked(countContentsByTeam).mockResolvedValueOnce(1);
+		vi.mocked(listContentsByTeam).mockResolvedValueOnce([teamBContent]);
+
+		context = createTeamContext(TEAM_B_ID);
 		results = await call(contentRouter.listAllContent, {}, { context });
 		expect(results.items).toHaveLength(1);
 		expect(results.items[0].meta.title).toBe("B");

@@ -10,7 +10,11 @@ import {
    DropdownMenuPortal,
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
-import { Popover, PopoverAnchor, PopoverContent } from "@packages/ui/components/popover";
+import {
+   Popover,
+   PopoverAnchor,
+   PopoverContent,
+} from "@packages/ui/components/popover";
 import { cn } from "@packages/ui/lib/utils";
 import { useDraggable, useDropLine } from "@platejs/dnd";
 import {
