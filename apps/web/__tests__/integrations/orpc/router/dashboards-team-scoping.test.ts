@@ -20,7 +20,6 @@ describe("Dashboards Team Scoping", () => {
 	let teamAId: string;
 	let teamBId: string;
 	let sessionToken: string;
-	let memberId: string;
 
 	beforeEach(async () => {
 		db = createDb({ databaseUrl: process.env.DATABASE_URL! });
@@ -48,22 +47,21 @@ describe("Dashboards Team Scoping", () => {
 		testOrgId = testOrg.id;
 
 		// Create member
-		const [createdMember] = await db
+		await db
 			.insert(member)
 			.values({
 				userId: testUserId,
 				organizationId: testOrgId,
 				role: "owner",
 				createdAt: new Date(),
-			})
-			.returning();
-		memberId = createdMember.id;
+			});
 
 		// Create Team A
 		const [createdTeamA] = await db
 			.insert(team)
 			.values({
 				name: "Team A",
+				slug: `team-a-${crypto.randomUUID()}`,
 				organizationId: testOrgId,
 				createdAt: new Date(),
 			})
@@ -80,6 +78,7 @@ describe("Dashboards Team Scoping", () => {
 			.insert(team)
 			.values({
 				name: "Team B",
+				slug: `team-b-${crypto.randomUUID()}`,
 				organizationId: testOrgId,
 				createdAt: new Date(),
 			})
@@ -135,12 +134,9 @@ describe("Dashboards Team Scoping", () => {
 		const context = createMockContext(teamAId);
 
 		const created = await call(dashboardsRouter.create, {
-			input: {
 				name: "Team A Dashboard",
 				description: "Test dashboard",
-			},
-			context,
-		});
+			}, { context });
 
 		expect(created.teamId).toBe(teamAId);
 		expect(created.organizationId).toBe(testOrgId);
@@ -165,9 +161,7 @@ describe("Dashboards Team Scoping", () => {
 		});
 
 		const context = createMockContext(teamAId);
-		const results = await call(dashboardsRouter.list, {
-			context,
-		});
+		const results = await call(dashboardsRouter.list, undefined, { context });
 
 		// Should only see Team A dashboard (active team)
 		expect(results).toHaveLength(1);
@@ -194,13 +188,13 @@ describe("Dashboards Team Scoping", () => {
 
 		// Query with Team A active
 		let context = createMockContext(teamAId);
-		let results = await call(dashboardsRouter.list, { context });
+		let results = await call(dashboardsRouter.list, undefined, { context });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Dashboard A");
 
 		// Query with Team B active
 		context = createMockContext(teamBId);
-		results = await call(dashboardsRouter.list, { context });
+		results = await call(dashboardsRouter.list, undefined, { context });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Dashboard B");
 	});
@@ -221,10 +215,7 @@ describe("Dashboards Team Scoping", () => {
 		const context = createMockContext(teamBId);
 
 		await expect(
-			call(dashboardsRouter.getById, {
-				input: { id: dashboard.id },
-				context,
-			}),
+			call(dashboardsRouter.getById, { id: dashboard.id }, { context }),
 		).rejects.toThrow("Dashboard not found");
 	});
 
@@ -244,10 +235,7 @@ describe("Dashboards Team Scoping", () => {
 		const context = createMockContext(teamBId);
 
 		await expect(
-			call(dashboardsRouter.update, {
-				input: { id: dashboard.id, name: "Updated" },
-				context,
-			}),
+			call(dashboardsRouter.update, { id: dashboard.id, name: "Updated" }, { context }),
 		).rejects.toThrow("Dashboard not found");
 	});
 
@@ -267,10 +255,7 @@ describe("Dashboards Team Scoping", () => {
 		const context = createMockContext(teamBId);
 
 		await expect(
-			call(dashboardsRouter.remove, {
-				input: { id: dashboard.id },
-				context,
-			}),
+			call(dashboardsRouter.remove, { id: dashboard.id }, { context }),
 		).rejects.toThrow("Dashboard not found");
 	});
 });

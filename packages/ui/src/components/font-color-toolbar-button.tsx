@@ -20,7 +20,6 @@ import { useComposedRef } from "@udecode/cn";
 import debounce from "lodash/debounce.js";
 import { EraserIcon, PlusIcon } from "lucide-react";
 import { useEditorRef, useEditorSelector } from "platejs/react";
-import type { DropdownMenuItemProps, DropdownMenuProps } from "radix-ui";
 import React from "react";
 
 import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
@@ -32,7 +31,7 @@ export function FontColorToolbarButton({
 }: {
    nodeType: string;
    tooltip?: string;
-} & DropdownMenuProps) {
+} & React.ComponentProps<typeof DropdownMenu>) {
    const editor = useEditorRef();
 
    const selectionDefined = useEditorSelector(
@@ -320,7 +319,7 @@ function ColorDropdownMenuItem({
    value: string;
    updateColor: (color: string) => void;
    name?: string;
-} & DropdownMenuItemProps) {
+} & React.ComponentProps<typeof DropdownMenuItem>) {
    const content = (
       <DropdownMenuItem
          className={cn(

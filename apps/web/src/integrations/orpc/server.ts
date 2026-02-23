@@ -109,7 +109,7 @@ const withOrganization = withAuth.use(async ({ context, next }) => {
 /**
  * Telemetry middleware - captures request metrics and identifies users
  */
-const withTelemetry = withOrganization.use(async ({ context, path, next }) => {
+const withTelemetry = withOrganization.use(async ({ context, path, next }, input) => {
    const startDate = new Date();
    const { posthog } = context;
    const userId = context.session?.user?.id;

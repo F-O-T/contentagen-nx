@@ -124,12 +124,12 @@ describe("getById", () => {
 	});
 
 	it("throws NOT_FOUND when action does not exist", async () => {
-		vi.mocked(getAction).mockResolvedValueOnce(null);
+		vi.mocked(getAction).mockResolvedValueOnce(null as any);
 
 		const ctx = createTestContext();
 		await expect(
 			call(actionsRouter.getById, { id: ACTION_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 
 	it("throws NOT_FOUND when action belongs to different org", async () => {
@@ -139,7 +139,7 @@ describe("getById", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(actionsRouter.getById, { id: ACTION_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -184,7 +184,7 @@ describe("update", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(actionsRouter.update, input, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -219,6 +219,6 @@ describe("remove", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(actionsRouter.remove, { id: ACTION_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });

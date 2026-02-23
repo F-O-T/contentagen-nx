@@ -1,18 +1,30 @@
 import { call } from "@orpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-	TEST_USER_ID,
 	createTestContext,
 } from "../../../helpers/create-test-context";
 
 // ---------------------------------------------------------------------------
-// Mocks
+// Mocks — must be declared before any import that touches the modules
 // ---------------------------------------------------------------------------
+
+vi.mock("@packages/environment/server", () => ({
+	env: {
+		MINIO_ENDPOINT: "http://localhost:9000",
+		MINIO_ACCESS_KEY: "test",
+		MINIO_SECRET_KEY: "test",
+	},
+}));
+
+vi.mock("@packages/files/client", () => ({
+	getMinioClient: vi.fn(),
+	generatePresignedPutUrl: vi.fn(),
+}));
 
 const mockAuth = {
 	api: {
 		verifyPassword: vi.fn(),
-		listAccounts: vi.fn(),
+		listUserAccounts: vi.fn(),
 	},
 };
 
@@ -71,7 +83,7 @@ describe("verifyPassword", () => {
 
 describe("hasPassword", () => {
 	it("returns { hasPassword: true } when credential account exists", async () => {
-		mockAuth.api.listAccounts.mockResolvedValueOnce([
+		mockAuth.api.listUserAccounts.mockResolvedValueOnce([
 			{ providerId: "credential", accountId: "acc-1" },
 			{ providerId: "google", accountId: "acc-2" },
 		]);
@@ -80,13 +92,13 @@ describe("hasPassword", () => {
 		const result = await call(accountRouter.hasPassword, undefined, { context: ctx });
 
 		expect(result).toEqual({ hasPassword: true });
-		expect(mockAuth.api.listAccounts).toHaveBeenCalledWith({
+		expect(mockAuth.api.listUserAccounts).toHaveBeenCalledWith({
 			headers: ctx.headers,
 		});
 	});
 
 	it("returns { hasPassword: false } when only OAuth accounts", async () => {
-		mockAuth.api.listAccounts.mockResolvedValueOnce([
+		mockAuth.api.listUserAccounts.mockResolvedValueOnce([
 			{ providerId: "google", accountId: "acc-1" },
 			{ providerId: "github", accountId: "acc-2" },
 		]);
@@ -105,7 +117,7 @@ describe("hasPassword", () => {
 describe("getLinkedAccounts", () => {
 	it("returns mapped accounts list", async () => {
 		const now = new Date("2026-01-15");
-		mockAuth.api.listAccounts.mockResolvedValueOnce([
+		mockAuth.api.listUserAccounts.mockResolvedValueOnce([
 			{ providerId: "google", accountId: "google-123", createdAt: now, extra: "ignored" },
 			{ providerId: "github", accountId: "github-456", createdAt: now, extra: "also-ignored" },
 		]);
@@ -120,7 +132,7 @@ describe("getLinkedAccounts", () => {
 	});
 
 	it("returns empty array when auth throws", async () => {
-		mockAuth.api.listAccounts.mockRejectedValueOnce(new Error("Auth service unavailable"));
+		mockAuth.api.listUserAccounts.mockRejectedValueOnce(new Error("Auth service unavailable"));
 
 		const ctx = createAccountContext();
 		const result = await call(accountRouter.getLinkedAccounts, undefined, { context: ctx });

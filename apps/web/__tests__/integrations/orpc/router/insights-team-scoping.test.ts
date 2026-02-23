@@ -20,7 +20,6 @@ describe("Insights Team Scoping", () => {
 	let teamAId: string;
 	let teamBId: string;
 	let sessionToken: string;
-	let memberId: string;
 
 	beforeEach(async () => {
 		db = createDb({ databaseUrl: process.env.DATABASE_URL! });
@@ -48,22 +47,21 @@ describe("Insights Team Scoping", () => {
 		testOrgId = testOrg.id;
 
 		// Create member
-		const [createdMember] = await db
+		await db
 			.insert(member)
 			.values({
 				userId: testUserId,
 				organizationId: testOrgId,
 				role: "owner",
 				createdAt: new Date(),
-			})
-			.returning();
-		memberId = createdMember.id;
+			});
 
 		// Create Team A
 		const [createdTeamA] = await db
 			.insert(team)
 			.values({
 				name: "Team A",
+				slug: `team-a-${crypto.randomUUID()}`,
 				organizationId: testOrgId,
 				createdAt: new Date(),
 			})
@@ -80,6 +78,7 @@ describe("Insights Team Scoping", () => {
 			.insert(team)
 			.values({
 				name: "Team B",
+				slug: `team-b-${crypto.randomUUID()}`,
 				organizationId: testOrgId,
 				createdAt: new Date(),
 			})
@@ -135,14 +134,15 @@ describe("Insights Team Scoping", () => {
 		const context = createMockContext(teamAId);
 
 		const created = await call(insightsRouter.create, {
-			input: {
 				name: "Team A Insight",
 				description: "Test insight",
 				type: "trends",
-				config: { series: [] },
-			},
-			context,
-		});
+				config: {
+					type: "trends",
+					series: [{ event: "test_event" }],
+					dateRange: { type: "relative", value: "7d" },
+				},
+			}, { context });
 
 		expect(created.teamId).toBe(teamAId);
 		expect(created.organizationId).toBe(testOrgId);
@@ -171,9 +171,7 @@ describe("Insights Team Scoping", () => {
 		});
 
 		const context = createMockContext(teamAId);
-		const results = await call(insightsRouter.list, {
-			context,
-		});
+		const results = await call(insightsRouter.list, undefined, { context });
 
 		// Should only see Team A insight (active team)
 		expect(results).toHaveLength(1);
@@ -204,13 +202,13 @@ describe("Insights Team Scoping", () => {
 
 		// Query with Team A active
 		let context = createMockContext(teamAId);
-		let results = await call(insightsRouter.list, { context });
+		let results = await call(insightsRouter.list, undefined, { context });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Insight A");
 
 		// Query with Team B active
 		context = createMockContext(teamBId);
-		results = await call(insightsRouter.list, { context });
+		results = await call(insightsRouter.list, undefined, { context });
 		expect(results).toHaveLength(1);
 		expect(results[0].name).toBe("Insight B");
 	});
@@ -233,10 +231,7 @@ describe("Insights Team Scoping", () => {
 		const context = createMockContext(teamBId);
 
 		await expect(
-			call(insightsRouter.getById, {
-				input: { id: insight.id },
-				context,
-			}),
+			call(insightsRouter.getById, { id: insight.id }, { context }),
 		).rejects.toThrow("Insight not found");
 	});
 
@@ -258,10 +253,7 @@ describe("Insights Team Scoping", () => {
 		const context = createMockContext(teamBId);
 
 		await expect(
-			call(insightsRouter.update, {
-				input: { id: insight.id, name: "Updated" },
-				context,
-			}),
+			call(insightsRouter.update, { id: insight.id, name: "Updated" }, { context }),
 		).rejects.toThrow("Insight not found");
 	});
 
@@ -283,10 +275,7 @@ describe("Insights Team Scoping", () => {
 		const context = createMockContext(teamBId);
 
 		await expect(
-			call(insightsRouter.remove, {
-				input: { id: insight.id },
-				context,
-			}),
+			call(insightsRouter.remove, { id: insight.id }, { context }),
 		).rejects.toThrow("Insight not found");
 	});
 
@@ -314,18 +303,12 @@ describe("Insights Team Scoping", () => {
 		const context = createMockContext(teamAId);
 
 		// Query only trends
-		const trendsResults = await call(insightsRouter.list, {
-			input: { type: "trends" },
-			context,
-		});
+		const trendsResults = await call(insightsRouter.list, { type: "trends" }, { context });
 		expect(trendsResults).toHaveLength(1);
 		expect(trendsResults[0].type).toBe("trends");
 
 		// Query only funnels
-		const funnelsResults = await call(insightsRouter.list, {
-			input: { type: "funnels" },
-			context,
-		});
+		const funnelsResults = await call(insightsRouter.list, { type: "funnels" }, { context });
 		expect(funnelsResults).toHaveLength(1);
 		expect(funnelsResults[0].type).toBe("funnels");
 	});

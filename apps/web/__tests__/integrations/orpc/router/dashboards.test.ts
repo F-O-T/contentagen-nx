@@ -22,7 +22,7 @@ import {
 	createDashboard,
 	deleteDashboard,
 	getDashboardById,
-	listDashboards,
+	listDashboardsByTeam,
 	updateDashboard,
 	updateDashboardTiles,
 } from "@packages/database/repositories/dashboard-repository";
@@ -84,6 +84,7 @@ describe("create", () => {
 		await call(dashboardsRouter.create, input, { context: ctx });
 
 		expect(emitDashboardCreated).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -122,16 +123,16 @@ describe("list", () => {
 			makeDashboard(),
 			makeDashboard({ id: "dashboard-2", name: "Second Dashboard" }),
 		];
-		vi.mocked(listDashboards).mockResolvedValueOnce(dashboards);
+		vi.mocked(listDashboardsByTeam).mockResolvedValueOnce(dashboards);
 
 		const ctx = createTestContext();
 		const result = await call(dashboardsRouter.list, undefined, {
 			context: ctx,
 		});
 
-		expect(listDashboards).toHaveBeenCalledWith(
+		expect(listDashboardsByTeam).toHaveBeenCalledWith(
 			expect.anything(),
-			TEST_ORG_ID,
+			TEST_TEAM_ID,
 		);
 		expect(result).toHaveLength(2);
 	});
@@ -161,7 +162,7 @@ describe("getById", () => {
 	});
 
 	it("throws NOT_FOUND when dashboard does not exist", async () => {
-		vi.mocked(getDashboardById).mockResolvedValueOnce(null);
+		vi.mocked(getDashboardById).mockResolvedValueOnce(null as any);
 
 		const ctx = createTestContext();
 		await expect(
@@ -170,7 +171,7 @@ describe("getById", () => {
 				{ id: DASHBOARD_ID },
 				{ context: ctx },
 			),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 
 	it("throws NOT_FOUND when dashboard belongs to different org", async () => {
@@ -184,7 +185,7 @@ describe("getById", () => {
 				{ id: DASHBOARD_ID },
 				{ context: ctx },
 			),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -226,12 +227,12 @@ describe("update", () => {
 	});
 
 	it("throws NOT_FOUND when dashboard does not exist", async () => {
-		vi.mocked(getDashboardById).mockResolvedValueOnce(null);
+		vi.mocked(getDashboardById).mockResolvedValueOnce(null as any);
 
 		const ctx = createTestContext();
 		await expect(
 			call(dashboardsRouter.update, input, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 
 	it("emits dashboard.updated with correct changedFields", async () => {
@@ -246,6 +247,7 @@ describe("update", () => {
 		await call(dashboardsRouter.update, input, { context: ctx });
 
 		expect(emitDashboardUpdated).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -279,13 +281,11 @@ describe("updateTiles", () => {
 	};
 
 	it("updates tiles successfully", async () => {
-		vi.mocked(getDashboardById).mockResolvedValueOnce(
-			makeDashboard(),
-		);
-		const tilesResult = { success: true };
-		vi.mocked(updateDashboardTiles).mockResolvedValueOnce(
-			tilesResult,
-		);
+		const dashboard = makeDashboard();
+		// First call: ownership check, second call: return updated dashboard
+		vi.mocked(getDashboardById).mockResolvedValueOnce(dashboard);
+		vi.mocked(updateDashboardTiles).mockResolvedValueOnce(undefined as any);
+		vi.mocked(getDashboardById).mockResolvedValueOnce(dashboard);
 
 		const ctx = createTestContext();
 		const result = await call(dashboardsRouter.updateTiles, input, {
@@ -297,16 +297,16 @@ describe("updateTiles", () => {
 			DASHBOARD_ID,
 			input.tiles,
 		);
-		expect(result).toEqual(tilesResult);
+		expect(result).toEqual(dashboard);
 	});
 
 	it("throws NOT_FOUND when dashboard does not exist", async () => {
-		vi.mocked(getDashboardById).mockResolvedValueOnce(null);
+		vi.mocked(getDashboardById).mockResolvedValueOnce(null as any);
 
 		const ctx = createTestContext();
 		await expect(
 			call(dashboardsRouter.updateTiles, input, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -335,6 +335,7 @@ describe("remove", () => {
 		expect(result).toEqual({ success: true });
 
 		expect(emitDashboardDeleted).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -347,7 +348,7 @@ describe("remove", () => {
 	});
 
 	it("throws NOT_FOUND when dashboard does not exist", async () => {
-		vi.mocked(getDashboardById).mockResolvedValueOnce(null);
+		vi.mocked(getDashboardById).mockResolvedValueOnce(null as any);
 
 		const ctx = createTestContext();
 		await expect(
@@ -356,6 +357,6 @@ describe("remove", () => {
 				{ id: DASHBOARD_ID },
 				{ context: ctx },
 			),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });

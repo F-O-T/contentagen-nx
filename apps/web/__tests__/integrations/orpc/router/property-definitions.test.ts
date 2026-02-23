@@ -120,12 +120,12 @@ describe("getById", () => {
 	});
 
 	it("throws NOT_FOUND when property definition does not exist", async () => {
-		vi.mocked(getPropertyDefinition).mockResolvedValueOnce(null);
+		vi.mocked(getPropertyDefinition).mockResolvedValueOnce(null as any);
 
 		const ctx = createTestContext();
 		await expect(
 			call(propertyDefinitionsRouter.getById, { id: PROP_DEF_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 
 	it("throws NOT_FOUND when property definition belongs to different org", async () => {
@@ -135,7 +135,7 @@ describe("getById", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(propertyDefinitionsRouter.getById, { id: PROP_DEF_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -180,7 +180,7 @@ describe("update", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(propertyDefinitionsRouter.update, input, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -215,6 +215,6 @@ describe("remove", () => {
 		const ctx = createTestContext();
 		await expect(
 			call(propertyDefinitionsRouter.remove, { id: PROP_DEF_ID }, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });

@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createDb } from "@packages/database/client";
 import {
-	content,
 	team,
 	teamMember,
 	organization,
@@ -9,7 +8,7 @@ import {
 	user,
 	session,
 } from "@packages/database/schemas/auth";
-import { eq } from "drizzle-orm";
+import { content } from "@packages/database/schemas/content";
 import { call } from "@orpc/server";
 import * as contentRouter from "@/integrations/orpc/router/content";
 import type { ORPCContextWithAuth } from "@/integrations/orpc/server";
@@ -65,6 +64,7 @@ describe("Content Team Scoping", () => {
 			.insert(team)
 			.values({
 				name: "Team A",
+				slug: `team-a-${crypto.randomUUID()}`,
 				organizationId: testOrgId,
 				createdAt: new Date(),
 			})
@@ -81,6 +81,7 @@ describe("Content Team Scoping", () => {
 			.insert(team)
 			.values({
 				name: "Team B",
+				slug: `team-b-${crypto.randomUUID()}`,
 				organizationId: testOrgId,
 				createdAt: new Date(),
 			})
@@ -136,16 +137,9 @@ describe("Content Team Scoping", () => {
 		const context = createMockContext(teamAId);
 
 		const created = await call(contentRouter.create, {
-			input: {
-				meta: {
-					title: "Team A Content",
-					description: "Test",
-					slug: "team-a-content",
-				},
+				title: "Team A Content",
 				body: "Content for team A",
-			},
-			context,
-		});
+			}, { context });
 
 		expect(created.teamId).toBe(teamAId);
 		expect(created.organizationId).toBe(testOrgId);
@@ -169,10 +163,7 @@ describe("Content Team Scoping", () => {
 		});
 
 		const context = createMockContext(teamAId);
-		const results = await call(contentRouter.listAllContent, {
-			input: {},
-			context,
-		});
+		const results = await call(contentRouter.listAllContent, {}, { context });
 
 		// Should only see Team A content (active team)
 		expect(results.items).toHaveLength(1);
@@ -199,16 +190,13 @@ describe("Content Team Scoping", () => {
 
 		// Query with Team A active
 		let context = createMockContext(teamAId);
-		let results = await call(contentRouter.listAllContent, {
-			input: {},
-			context,
-		});
+		let results = await call(contentRouter.listAllContent, {}, { context });
 		expect(results.items).toHaveLength(1);
 		expect(results.items[0].meta.title).toBe("A");
 
 		// Query with Team B active
 		context = createMockContext(teamBId);
-		results = await call(contentRouter.listAllContent, { input: {}, context });
+		results = await call(contentRouter.listAllContent, {}, { context });
 		expect(results.items).toHaveLength(1);
 		expect(results.items[0].meta.title).toBe("B");
 	});

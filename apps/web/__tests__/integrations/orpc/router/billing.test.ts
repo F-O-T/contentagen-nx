@@ -1,8 +1,6 @@
 import { ORPCError, call } from "@orpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-	TEST_ORG_ID,
-	TEST_USER_ID,
 	createTestContext,
 } from "../../../helpers/create-test-context";
 
@@ -15,6 +13,12 @@ vi.mock("@packages/database/schema", () => ({
 		organizationId: "organizationId",
 		eventCategory: "eventCategory",
 		eventCount: "eventCount",
+		monthToDateCost: "monthToDateCost",
+		projectedCost: "projectedCost",
+	},
+	currentMonthStorageCost: {
+		organizationId: "organizationId",
+		currentBytes: "currentBytes",
 		monthToDateCost: "monthToDateCost",
 		projectedCost: "projectedCost",
 	},
@@ -155,7 +159,7 @@ describe("getInvoices", () => {
 
 		await expect(
 			call(billingRouter.getInvoices, undefined, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "INTERNAL_SERVER_ERROR");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "INTERNAL_SERVER_ERROR");
 	});
 });
 
@@ -240,7 +244,9 @@ describe("getUpcomingInvoice", () => {
 
 describe("getCurrentUsage", () => {
 	it("returns aggregated usage with monthToDate and projected totals", async () => {
-		mockWhere.mockResolvedValueOnce([
+		// getCurrentUsage does Promise.all with two db.select() chains
+		// First call: categories, second call: storage
+		const mockWhere1 = vi.fn().mockResolvedValueOnce([
 			{
 				eventCategory: "content",
 				eventCount: 100,
@@ -254,6 +260,14 @@ describe("getCurrentUsage", () => {
 				projectedCost: "5.00",
 			},
 		]);
+		const mockFrom1 = vi.fn().mockReturnValue({ where: mockWhere1 });
+
+		const mockWhere2 = vi.fn().mockResolvedValueOnce([]);
+		const mockFrom2 = vi.fn().mockReturnValue({ where: mockWhere2 });
+
+		mockSelect
+			.mockReturnValueOnce({ from: mockFrom1 })
+			.mockReturnValueOnce({ from: mockFrom2 });
 
 		const ctx = createBillingContext();
 		const result = await call(billingRouter.getCurrentUsage, undefined, { context: ctx });
@@ -279,7 +293,16 @@ describe("getCurrentUsage", () => {
 	});
 
 	it("returns zeros when no usage rows", async () => {
-		mockWhere.mockResolvedValueOnce([]);
+		// First call: categories (empty), second call: storage (empty)
+		const mockWhere1 = vi.fn().mockResolvedValueOnce([]);
+		const mockFrom1 = vi.fn().mockReturnValue({ where: mockWhere1 });
+
+		const mockWhere2 = vi.fn().mockResolvedValueOnce([]);
+		const mockFrom2 = vi.fn().mockReturnValue({ where: mockWhere2 });
+
+		mockSelect
+			.mockReturnValueOnce({ from: mockFrom1 })
+			.mockReturnValueOnce({ from: mockFrom2 });
 
 		const ctx = createBillingContext();
 		const result = await call(billingRouter.getCurrentUsage, undefined, { context: ctx });

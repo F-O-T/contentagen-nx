@@ -114,7 +114,7 @@ describe("annotations router", () => {
 		});
 
 		it("throws NOT_FOUND when annotation does not exist", async () => {
-			vi.mocked(getAnnotation).mockResolvedValue(null);
+			vi.mocked(getAnnotation).mockResolvedValue(null as any);
 
 			const ctx = createTestContext();
 			await expect(
@@ -123,7 +123,7 @@ describe("annotations router", () => {
 					{ id: ANNOTATION_ID },
 					{ context: ctx },
 				),
-			).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+			).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 		});
 
 		it("throws NOT_FOUND when annotation belongs to different organization", async () => {
@@ -139,7 +139,7 @@ describe("annotations router", () => {
 					{ id: ANNOTATION_ID },
 					{ context: ctx },
 				),
-			).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+			).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 		});
 	});
 
@@ -194,7 +194,7 @@ describe("annotations router", () => {
 					},
 					{ context: ctx },
 				),
-			).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+			).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 		});
 	});
 
@@ -234,7 +234,7 @@ describe("annotations router", () => {
 					{ id: ANNOTATION_ID },
 					{ context: ctx },
 				),
-			).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+			).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 		});
 	});
 });

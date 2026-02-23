@@ -6,7 +6,6 @@ import {
 	organization,
 	member,
 	user,
-	session,
 } from "@packages/database/schemas/auth";
 import { writer } from "@packages/database/schemas/writer";
 import { eq } from "drizzle-orm";
@@ -24,7 +23,6 @@ describe("Writer Team Scoping", () => {
 	let testOrgId: string;
 	let teamAId: string;
 	let teamBId: string;
-	let memberId: string;
 
 	beforeEach(async () => {
 		db = createDb({ databaseUrl: process.env.DATABASE_URL! });
@@ -52,22 +50,21 @@ describe("Writer Team Scoping", () => {
 		testOrgId = testOrg.id;
 
 		// Create member
-		const [createdMember] = await db
+		await db
 			.insert(member)
 			.values({
 				userId: testUserId,
 				organizationId: testOrgId,
 				role: "owner",
 				createdAt: new Date(),
-			})
-			.returning();
-		memberId = createdMember.id;
+			});
 
 		// Create Team A
 		const [createdTeamA] = await db
 			.insert(team)
 			.values({
 				name: "Team A",
+				slug: `team-a-${crypto.randomUUID()}`,
 				organizationId: testOrgId,
 				createdAt: new Date(),
 			})
@@ -84,6 +81,7 @@ describe("Writer Team Scoping", () => {
 			.insert(team)
 			.values({
 				name: "Team B",
+				slug: `team-b-${crypto.randomUUID()}`,
 				organizationId: testOrgId,
 				createdAt: new Date(),
 			})

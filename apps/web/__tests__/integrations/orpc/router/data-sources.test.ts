@@ -104,7 +104,7 @@ describe("data-sources router", () => {
 		});
 
 		it("throws NOT_FOUND when data source does not exist", async () => {
-			vi.mocked(getDataSource).mockResolvedValue(null);
+			vi.mocked(getDataSource).mockResolvedValue(null as any);
 
 			const ctx = createTestContext();
 			await expect(
@@ -113,7 +113,7 @@ describe("data-sources router", () => {
 					{ id: DATA_SOURCE_ID },
 					{ context: ctx },
 				),
-			).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+			).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 		});
 
 		it("throws NOT_FOUND when data source belongs to different organization", async () => {
@@ -129,7 +129,7 @@ describe("data-sources router", () => {
 					{ id: DATA_SOURCE_ID },
 					{ context: ctx },
 				),
-			).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+			).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 		});
 	});
 
@@ -184,7 +184,7 @@ describe("data-sources router", () => {
 					},
 					{ context: ctx },
 				),
-			).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+			).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 		});
 	});
 
@@ -224,7 +224,7 @@ describe("data-sources router", () => {
 					{ id: DATA_SOURCE_ID },
 					{ context: ctx },
 				),
-			).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+			).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 		});
 	});
 });

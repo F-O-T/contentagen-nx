@@ -19,7 +19,7 @@ import {
 	createInsight,
 	deleteInsight,
 	getInsightById,
-	listInsights,
+	listInsightsByTeam,
 	updateInsight,
 } from "@packages/database/repositories/insight-repository";
 import {
@@ -50,7 +50,11 @@ describe("create", () => {
 		name: "My Insight",
 		description: "Test insight",
 		type: "trends" as const,
-		config: { metric: "pageViews" },
+		config: {
+			type: "trends" as const,
+			series: [{ event: "content.page.viewed" }],
+			dateRange: { type: "relative" as const, value: "30d" as const },
+		},
 	};
 
 	it("creates insight and returns data", async () => {
@@ -66,11 +70,13 @@ describe("create", () => {
 			expect.anything(),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
+				teamId: TEST_TEAM_ID,
 				createdBy: TEST_USER_ID,
 				name: input.name,
 				description: input.description,
 				type: input.type,
-				config: input.config,
+				config: expect.objectContaining({ type: "trends" }),
+				defaultSize: "md",
 			}),
 		);
 		expect(result).toEqual(insight);
@@ -84,6 +90,7 @@ describe("create", () => {
 		await call(insightsRouter.create, input, { context: ctx });
 
 		expect(emitInsightCreated).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -107,30 +114,30 @@ describe("list", () => {
 			makeInsight(),
 			makeInsight({ id: "insight-2", name: "Second Insight" }),
 		];
-		vi.mocked(listInsights).mockResolvedValueOnce(insights);
+		vi.mocked(listInsightsByTeam).mockResolvedValueOnce(insights);
 
 		const ctx = createTestContext();
 		const result = await call(insightsRouter.list, undefined, {
 			context: ctx,
 		});
 
-		expect(listInsights).toHaveBeenCalledWith(
+		expect(listInsightsByTeam).toHaveBeenCalledWith(
 			expect.anything(),
-			TEST_ORG_ID,
+			TEST_TEAM_ID,
 			undefined,
 		);
 		expect(result).toHaveLength(2);
 	});
 
 	it("passes type filter when provided", async () => {
-		vi.mocked(listInsights).mockResolvedValueOnce([]);
+		vi.mocked(listInsightsByTeam).mockResolvedValueOnce([]);
 
 		const ctx = createTestContext();
 		await call(insightsRouter.list, { type: "funnels" }, { context: ctx });
 
-		expect(listInsights).toHaveBeenCalledWith(
+		expect(listInsightsByTeam).toHaveBeenCalledWith(
 			expect.anything(),
-			TEST_ORG_ID,
+			TEST_TEAM_ID,
 			"funnels",
 		);
 	});
@@ -160,7 +167,7 @@ describe("getById", () => {
 	});
 
 	it("throws NOT_FOUND when insight does not exist", async () => {
-		vi.mocked(getInsightById).mockResolvedValueOnce(null);
+		vi.mocked(getInsightById).mockResolvedValueOnce(null as any);
 
 		const ctx = createTestContext();
 		await expect(
@@ -169,7 +176,7 @@ describe("getById", () => {
 				{ id: INSIGHT_ID },
 				{ context: ctx },
 			),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 
 	it("throws NOT_FOUND when insight belongs to different org", async () => {
@@ -183,7 +190,7 @@ describe("getById", () => {
 				{ id: INSIGHT_ID },
 				{ context: ctx },
 			),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -224,6 +231,7 @@ describe("update", () => {
 		expect(result).toEqual(updated);
 
 		expect(emitInsightUpdated).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -240,12 +248,12 @@ describe("update", () => {
 	});
 
 	it("throws NOT_FOUND when insight does not exist", async () => {
-		vi.mocked(getInsightById).mockResolvedValueOnce(null);
+		vi.mocked(getInsightById).mockResolvedValueOnce(null as any);
 
 		const ctx = createTestContext();
 		await expect(
 			call(insightsRouter.update, input, { context: ctx }),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });
 
@@ -274,6 +282,7 @@ describe("remove", () => {
 		expect(result).toEqual({ success: true });
 
 		expect(emitInsightDeleted).toHaveBeenCalledWith(
+			expect.any(Function),
 			expect.objectContaining({
 				organizationId: TEST_ORG_ID,
 				userId: TEST_USER_ID,
@@ -286,7 +295,7 @@ describe("remove", () => {
 	});
 
 	it("throws NOT_FOUND when insight does not exist", async () => {
-		vi.mocked(getInsightById).mockResolvedValueOnce(null);
+		vi.mocked(getInsightById).mockResolvedValueOnce(null as any);
 
 		const ctx = createTestContext();
 		await expect(
@@ -295,6 +304,6 @@ describe("remove", () => {
 				{ id: INSIGHT_ID },
 				{ context: ctx },
 			),
-		).rejects.toSatisfy((e: ORPCError) => e.code === "NOT_FOUND");
+		).rejects.toSatisfy((e: ORPCError<string, unknown>) => e.code === "NOT_FOUND");
 	});
 });
