@@ -1,13 +1,19 @@
 import { Badge } from "@packages/ui/components/badge";
+import { Button } from "@packages/ui/components/button";
+import type { MobileCardRenderProps } from "@packages/ui/components/data-table";
+import { DataTable } from "@packages/ui/components/data-table";
+import type { ContentMeta, ContentStatus } from "@packages/database/schemas/content";
 import { useNavigate, useParams } from "@tanstack/react-router";
+import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { FileText } from "lucide-react";
+import { useMemo } from "react";
 
 interface ContentItem {
    id: string;
-   meta: Record<string, unknown> | null;
-   status: string | null;
+   meta: ContentMeta | null;
+   status: ContentStatus | null;
    createdAt: Date | string | null;
 }
 
@@ -16,19 +22,64 @@ interface WriterContentSectionProps {
    contentCount: number;
 }
 
-const STATUS_LABELS: Record<string, string> = {
+const STATUS_LABELS: Record<ContentStatus, string> = {
    draft: "Rascunho",
    published: "Publicado",
    archived: "Arquivado",
-   review: "Em revisão",
 };
 
-const STATUS_VARIANTS: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+const STATUS_VARIANTS: Record<ContentStatus, "default" | "secondary" | "outline" | "destructive"> = {
    draft: "secondary",
    published: "default",
    archived: "outline",
-   review: "secondary",
 };
+
+function formatDate(value: Date | string | null) {
+   if (!value) return "—";
+   return format(new Date(value), "d MMM yyyy", { locale: ptBR });
+}
+
+function ContentMobileCard({
+   row,
+   isExpanded: _isExpanded,
+   toggleExpanded: _toggleExpanded,
+   onRowClick,
+}: MobileCardRenderProps<ContentItem> & {
+   onRowClick: (id: string) => void;
+}) {
+   const item = row.original;
+   const title = item.meta?.title ?? "Sem título";
+   const statusLabel = item.status ? (STATUS_LABELS[item.status] ?? item.status) : "—";
+   const statusVariant = item.status ? (STATUS_VARIANTS[item.status] ?? "secondary") : "secondary";
+
+   return (
+      <div className="rounded-lg border bg-background p-4">
+         <div className="flex items-center gap-3">
+            <FileText className="size-4 text-muted-foreground shrink-0" />
+            <div className="flex-1 min-w-0">
+               <p className="font-medium truncate text-sm">{title}</p>
+               <p className="text-xs text-muted-foreground">{formatDate(item.createdAt)}</p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+               <Badge variant={statusVariant as "default" | "secondary" | "outline" | "destructive"}>
+                  {statusLabel}
+               </Badge>
+               <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={(e) => {
+                     e.stopPropagation();
+                     onRowClick(item.id);
+                  }}
+               >
+                  <FileText className="size-4" />
+                  <span className="sr-only">Ver conteúdo</span>
+               </Button>
+            </div>
+         </div>
+      </div>
+   );
+}
 
 export function WriterContentSection({ recentContent, contentCount }: WriterContentSectionProps) {
    const { slug, teamSlug } = useParams({ from: "/_authenticated/$slug/$teamSlug/_dashboard" });
@@ -40,6 +91,74 @@ export function WriterContentSection({ recentContent, contentCount }: WriterCont
          params: { slug, teamSlug, contentId },
       });
    }
+
+   const columns = useMemo<ColumnDef<ContentItem>[]>(
+      () => [
+         {
+            id: "title",
+            header: "Título",
+            accessorFn: (row) => row.meta?.title ?? "Sem título",
+            cell: ({ row }) => (
+               <div className="flex items-center gap-2">
+                  <FileText className="size-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm font-medium truncate">
+                     {row.original.meta?.title ?? "Sem título"}
+                  </span>
+               </div>
+            ),
+         },
+         {
+            id: "status",
+            header: "Status",
+            accessorFn: (row) => row.status,
+            cell: ({ row }) => {
+               const status = row.original.status;
+               if (!status) return <span className="text-sm text-muted-foreground">—</span>;
+               return (
+                  <Badge variant={STATUS_VARIANTS[status] ?? "secondary"}>
+                     {STATUS_LABELS[status] ?? status}
+                  </Badge>
+               );
+            },
+         },
+         {
+            id: "createdAt",
+            header: "Data",
+            accessorFn: (row) => row.createdAt,
+            cell: ({ row }) => (
+               <span className="text-sm text-muted-foreground">
+                  {formatDate(row.original.createdAt)}
+               </span>
+            ),
+         },
+         {
+            id: "actions",
+            header: "",
+            cell: ({ row }) => (
+               // biome-ignore lint/a11y/noStaticElementInteractions: stopPropagation wrapper for table row click
+               <div
+                  className="flex items-center justify-end gap-1"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+               >
+                  <Button
+                     size="icon"
+                     variant="ghost"
+                     onClick={(e) => {
+                        e.stopPropagation();
+                        handleRowClick(row.original.id);
+                     }}
+                  >
+                     <FileText className="size-4" />
+                     <span className="sr-only">Ver conteúdo</span>
+                  </Button>
+               </div>
+            ),
+         },
+      ],
+      // biome-ignore lint/correctness/useExhaustiveDependencies: handleRowClick is stable within render
+      [slug, teamSlug],
+   );
 
    if (recentContent.length === 0) {
       return (
@@ -66,39 +185,18 @@ export function WriterContentSection({ recentContent, contentCount }: WriterCont
             <h2 className="text-lg font-semibold">Conteúdos gerados</h2>
             <p className="text-sm text-muted-foreground">
                {contentCount} conteúdos gerados por este escritor
-               {contentCount > 10 && " — mostrando os 10 mais recentes"}
+               {recentContent.length < contentCount && ` — mostrando os ${recentContent.length} mais recentes`}
             </p>
          </div>
 
-         <div className="border rounded-lg overflow-hidden divide-y">
-            {recentContent.map((item) => {
-               const title = (item.meta as { title?: string } | null)?.title ?? "Sem título";
-               const statusLabel = item.status ? (STATUS_LABELS[item.status] ?? item.status) : "—";
-               const statusVariant = item.status ? (STATUS_VARIANTS[item.status] ?? "secondary") : "secondary";
-               const formattedDate = item.createdAt
-                  ? format(new Date(item.createdAt), "d MMM yyyy", { locale: ptBR })
-                  : "—";
-
-               return (
-                  <div
-                     className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/40 transition-colors"
-                     key={item.id}
-                     onClick={() => handleRowClick(item.id)}
-                  >
-                     <FileText className="size-4 text-muted-foreground shrink-0" />
-                     <span className="flex-1 min-w-0 text-sm font-medium truncate">
-                        {title}
-                     </span>
-                     <Badge className="shrink-0" variant={statusVariant}>
-                        {statusLabel}
-                     </Badge>
-                     <span className="text-xs text-muted-foreground shrink-0">
-                        {formattedDate}
-                     </span>
-                  </div>
-               );
-            })}
-         </div>
+         <DataTable
+            columns={columns}
+            data={recentContent}
+            getRowId={(row) => row.id}
+            renderMobileCard={(props) => (
+               <ContentMobileCard onRowClick={handleRowClick} {...props} />
+            )}
+         />
       </div>
    );
 }
