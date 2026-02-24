@@ -234,8 +234,7 @@ export const toggleInstruction = protectedProcedure
 export const generatePhotoUploadUrl = protectedProcedure
    .input(z.object({
       writerId: z.string().uuid(),
-      fileExtension: z.string().min(1).max(10),
-      contentType: z.string().min(1),
+      fileExtension: z.string().regex(/^[a-zA-Z0-9]{1,10}$/, "Invalid file extension"),
    }))
    .handler(async ({ context, input }) => {
       const { db, organizationId } = context;
@@ -245,19 +244,27 @@ export const generatePhotoUploadUrl = protectedProcedure
          throw new ORPCError("NOT_FOUND", { message: "Writer not found" });
       }
 
-      const minioClient = getMinioClient(serverEnv);
-      const fileName = `writer-${input.writerId}-${crypto.randomUUID()}.${input.fileExtension}`;
+      const bucketName = "writer-photos";
+      try {
+         const minioClient = getMinioClient(serverEnv);
+         const fileName = `writer-${input.writerId}-${crypto.randomUUID()}.${input.fileExtension}`;
 
-      const presignedUrl = await generatePresignedPutUrl(
-         fileName,
-         "writer-photos",
-         minioClient,
-         300,
-      );
+         const presignedUrl = await generatePresignedPutUrl(
+            fileName,
+            bucketName,
+            minioClient,
+            300,
+         );
 
-      return {
-         presignedUrl,
-         fileName,
-         publicUrl: `/api/files/writer-photos/${fileName}`,
-      };
+         return {
+            presignedUrl,
+            fileName,
+            publicUrl: `/api/files/${bucketName}/${fileName}`,
+         };
+      } catch (error) {
+         console.error("Failed to generate writer photo upload URL:", error);
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to generate upload URL",
+         });
+      }
    });
