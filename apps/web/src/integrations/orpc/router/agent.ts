@@ -211,11 +211,23 @@ export const aiCommandStream = protectedProcedure
          DEFAULT_CONTENT_MODEL_ID,
       );
 
+      // Fetch writer instructions if a writerId is provided
+      let writerInstructions: InstructionMemoryItem[] | undefined;
+      if (input.writerId) {
+         const writerRecord = await db.query.writer.findFirst({
+            where: and(eq(writer.id, input.writerId), eq(writer.teamId, teamId)),
+         });
+         if (writerRecord?.instructionMemories) {
+            writerInstructions = (writerRecord.instructionMemories as InstructionMemoryItem[]).slice(0, 10);
+         }
+      }
+
       // Create request context with settings, falling back to product defaults
       const requestContext = createRequestContext({
          userId,
          contentId: input.contentId,
          writerId: input.writerId,
+         writerInstructions,
          language:
             input.language ??
             aiDefaults.defaultLanguage ??
