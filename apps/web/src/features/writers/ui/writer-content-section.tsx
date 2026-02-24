@@ -1,8 +1,11 @@
+import type {
+   ContentMeta,
+   ContentStatus,
+} from "@packages/database/schemas/content";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
 import type { MobileCardRenderProps } from "@packages/ui/components/data-table";
 import { DataTable } from "@packages/ui/components/data-table";
-import type { ContentMeta, ContentStatus } from "@packages/database/schemas/content";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
@@ -28,7 +31,10 @@ const STATUS_LABELS: Record<ContentStatus, string> = {
    archived: "Arquivado",
 };
 
-const STATUS_VARIANTS: Record<ContentStatus, "default" | "secondary" | "outline" | "destructive"> = {
+const STATUS_VARIANTS: Record<
+   ContentStatus,
+   "default" | "secondary" | "outline" | "destructive"
+> = {
    draft: "secondary",
    published: "default",
    archived: "outline",
@@ -49,8 +55,12 @@ function ContentMobileCard({
 }) {
    const item = row.original;
    const title = item.meta?.title ?? "Sem título";
-   const statusLabel = item.status ? (STATUS_LABELS[item.status] ?? item.status) : "—";
-   const statusVariant = item.status ? (STATUS_VARIANTS[item.status] ?? "secondary") : "secondary";
+   const statusLabel = item.status
+      ? (STATUS_LABELS[item.status] ?? item.status)
+      : "—";
+   const statusVariant = item.status
+      ? (STATUS_VARIANTS[item.status] ?? "secondary")
+      : "secondary";
 
    return (
       <div className="rounded-lg border bg-background p-4">
@@ -58,19 +68,29 @@ function ContentMobileCard({
             <FileText className="size-4 text-muted-foreground shrink-0" />
             <div className="flex-1 min-w-0">
                <p className="font-medium truncate text-sm">{title}</p>
-               <p className="text-xs text-muted-foreground">{formatDate(item.createdAt)}</p>
+               <p className="text-xs text-muted-foreground">
+                  {formatDate(item.createdAt)}
+               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-               <Badge variant={statusVariant as "default" | "secondary" | "outline" | "destructive"}>
+               <Badge
+                  variant={
+                     statusVariant as
+                        | "default"
+                        | "secondary"
+                        | "outline"
+                        | "destructive"
+                  }
+               >
                   {statusLabel}
                </Badge>
                <Button
-                  size="icon"
-                  variant="ghost"
                   onClick={(e) => {
                      e.stopPropagation();
                      onRowClick(item.id);
                   }}
+                  size="icon"
+                  variant="ghost"
                >
                   <FileText className="size-4" />
                   <span className="sr-only">Ver conteúdo</span>
@@ -81,8 +101,13 @@ function ContentMobileCard({
    );
 }
 
-export function WriterContentSection({ recentContent, contentCount }: WriterContentSectionProps) {
-   const { slug, teamSlug } = useParams({ from: "/_authenticated/$slug/$teamSlug/_dashboard" });
+export function WriterContentSection({
+   recentContent,
+   contentCount,
+}: WriterContentSectionProps) {
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
    const navigate = useNavigate();
 
    function handleRowClick(contentId: string) {
@@ -113,7 +138,10 @@ export function WriterContentSection({ recentContent, contentCount }: WriterCont
             accessorFn: (row) => row.status,
             cell: ({ row }) => {
                const status = row.original.status;
-               if (!status) return <span className="text-sm text-muted-foreground">—</span>;
+               if (!status)
+                  return (
+                     <span className="text-sm text-muted-foreground">—</span>
+                  );
                return (
                   <Badge variant={STATUS_VARIANTS[status] ?? "secondary"}>
                      {STATUS_LABELS[status] ?? status}
@@ -142,12 +170,12 @@ export function WriterContentSection({ recentContent, contentCount }: WriterCont
                   onKeyDown={(e) => e.stopPropagation()}
                >
                   <Button
-                     size="icon"
-                     variant="ghost"
                      onClick={(e) => {
                         e.stopPropagation();
                         handleRowClick(row.original.id);
                      }}
+                     size="icon"
+                     variant="ghost"
                   >
                      <FileText className="size-4" />
                      <span className="sr-only">Ver conteúdo</span>
@@ -156,7 +184,6 @@ export function WriterContentSection({ recentContent, contentCount }: WriterCont
             ),
          },
       ],
-      // biome-ignore lint/correctness/useExhaustiveDependencies: handleRowClick is stable within render
       [slug, teamSlug],
    );
 
@@ -174,9 +201,12 @@ export function WriterContentSection({ recentContent, contentCount }: WriterCont
                   <FileText className="size-5" />
                </div>
                <div className="text-center space-y-0.5">
-                  <p className="text-sm font-medium text-foreground">Nenhum conteúdo ainda</p>
+                  <p className="text-sm font-medium text-foreground">
+                     Nenhum conteúdo ainda
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                     Selecione este escritor ao criar um conteúdo para ele aparecer aqui.
+                     Selecione este escritor ao criar um conteúdo para ele
+                     aparecer aqui.
                   </p>
                </div>
             </div>
@@ -189,8 +219,10 @@ export function WriterContentSection({ recentContent, contentCount }: WriterCont
          <div className="space-y-0.5">
             <h2 className="text-base font-semibold">Conteúdos gerados</h2>
             <p className="text-sm text-muted-foreground">
-               {contentCount} conteúdo{contentCount !== 1 ? "s" : ""} gerado{contentCount !== 1 ? "s" : ""} por este escritor
-               {recentContent.length < contentCount && ` — mostrando os ${recentContent.length} mais recentes`}
+               {contentCount} conteúdo{contentCount !== 1 ? "s" : ""} gerado
+               {contentCount !== 1 ? "s" : ""} por este escritor
+               {recentContent.length < contentCount &&
+                  ` — mostrando os ${recentContent.length} mais recentes`}
             </p>
          </div>
 

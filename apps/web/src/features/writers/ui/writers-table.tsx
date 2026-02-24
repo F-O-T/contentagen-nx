@@ -7,8 +7,8 @@ import { Button } from "@packages/ui/components/button";
 import type { MobileCardRenderProps } from "@packages/ui/components/data-table";
 import { DataTable } from "@packages/ui/components/data-table";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import type { ColumnDef, Row } from "@tanstack/react-table";
 import { getInitials } from "@packages/utils/text";
+import type { ColumnDef, Row } from "@tanstack/react-table";
 import { ChevronDown, Pencil, Trash2 } from "lucide-react";
 import { useMemo } from "react";
 

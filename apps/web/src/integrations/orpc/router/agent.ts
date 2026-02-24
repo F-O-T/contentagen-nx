@@ -215,7 +215,10 @@ export const aiCommandStream = protectedProcedure
       let writerInstructions: InstructionMemoryItem[] | undefined;
       if (input.writerId) {
          const writerRecord = await db.query.writer.findFirst({
-            where: and(eq(writer.id, input.writerId), eq(writer.teamId, teamId)),
+            where: and(
+               eq(writer.id, input.writerId),
+               eq(writer.teamId, teamId),
+            ),
          });
          if (writerRecord?.instructionMemories) {
             writerInstructions = writerRecord.instructionMemories.slice(0, 10);

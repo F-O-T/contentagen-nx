@@ -1,9 +1,10 @@
 import { ORPCError } from "@orpc/server";
-import { env as serverEnv } from "@packages/environment/server";
 import {
-   generatePresignedPutUrl,
-   getMinioClient,
-} from "@packages/files/client";
+   addWriterInstruction,
+   deleteWriterInstruction,
+   getWriterInstructions,
+   toggleWriterInstructionEnabled,
+} from "@packages/database/repositories/writer-instructions-repository";
 import {
    createWriter,
    deleteWriter,
@@ -11,18 +12,17 @@ import {
    getWritersByTeamId,
    updateWriter,
 } from "@packages/database/repositories/writer-repository";
-import {
-   addWriterInstruction,
-   deleteWriterInstruction,
-   getWriterInstructions,
-   toggleWriterInstructionEnabled,
-} from "@packages/database/repositories/writer-instructions-repository";
 import { content } from "@packages/database/schemas/content";
 import { CreateInstructionMemorySchema } from "@packages/database/schemas/instruction-memory";
 import {
    PersonaMetadataSchema,
    WriterConfigSchema,
 } from "@packages/database/schemas/writer";
+import { env as serverEnv } from "@packages/environment/server";
+import {
+   generatePresignedPutUrl,
+   getMinioClient,
+} from "@packages/files/client";
 import { count, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
@@ -77,13 +77,21 @@ export const getById = protectedProcedure
       }
 
       const [countResult, recentContent] = await Promise.all([
-         db.select({ count: count() }).from(content).where(eq(content.writerId, input.id)),
-         db.select({
-            id: content.id,
-            meta: content.meta,
-            status: content.status,
-            createdAt: content.createdAt,
-         }).from(content).where(eq(content.writerId, input.id)).orderBy(desc(content.createdAt)).limit(10),
+         db
+            .select({ count: count() })
+            .from(content)
+            .where(eq(content.writerId, input.id)),
+         db
+            .select({
+               id: content.id,
+               meta: content.meta,
+               status: content.status,
+               createdAt: content.createdAt,
+            })
+            .from(content)
+            .where(eq(content.writerId, input.id))
+            .orderBy(desc(content.createdAt))
+            .limit(10),
       ]);
 
       return {
@@ -167,10 +175,12 @@ export const getInstructions = protectedProcedure
    });
 
 export const addInstruction = protectedProcedure
-   .input(z.object({
-      writerId: z.string().uuid(),
-      instruction: CreateInstructionMemorySchema,
-   }))
+   .input(
+      z.object({
+         writerId: z.string().uuid(),
+         instruction: CreateInstructionMemorySchema,
+      }),
+   )
    .handler(async ({ context, input }) => {
       const { db, organizationId } = context;
       const writerRecord = await getWriterById(db, input.writerId);
@@ -181,10 +191,12 @@ export const addInstruction = protectedProcedure
    });
 
 export const deleteInstruction = protectedProcedure
-   .input(z.object({
-      writerId: z.string().uuid(),
-      instructionId: z.string().uuid(),
-   }))
+   .input(
+      z.object({
+         writerId: z.string().uuid(),
+         instructionId: z.string().uuid(),
+      }),
+   )
    .handler(async ({ context, input }) => {
       const { db, organizationId } = context;
       const writerRecord = await getWriterById(db, input.writerId);
@@ -195,17 +207,23 @@ export const deleteInstruction = protectedProcedure
    });
 
 export const toggleInstruction = protectedProcedure
-   .input(z.object({
-      writerId: z.string().uuid(),
-      instructionId: z.string().uuid(),
-   }))
+   .input(
+      z.object({
+         writerId: z.string().uuid(),
+         instructionId: z.string().uuid(),
+      }),
+   )
    .handler(async ({ context, input }) => {
       const { db, organizationId } = context;
       const writerRecord = await getWriterById(db, input.writerId);
       if (!writerRecord || writerRecord.organizationId !== organizationId) {
          throw new ORPCError("NOT_FOUND", { message: "Writer not found" });
       }
-      return toggleWriterInstructionEnabled(db, input.writerId, input.instructionId);
+      return toggleWriterInstructionEnabled(
+         db,
+         input.writerId,
+         input.instructionId,
+      );
    });
 
 // =============================================================================
@@ -213,10 +231,14 @@ export const toggleInstruction = protectedProcedure
 // =============================================================================
 
 export const generatePhotoUploadUrl = protectedProcedure
-   .input(z.object({
-      writerId: z.string().uuid(),
-      fileExtension: z.string().regex(/^[a-zA-Z0-9]{1,10}$/, "Invalid file extension"),
-   }))
+   .input(
+      z.object({
+         writerId: z.string().uuid(),
+         fileExtension: z
+            .string()
+            .regex(/^[a-zA-Z0-9]{1,10}$/, "Invalid file extension"),
+      }),
+   )
    .handler(async ({ context, input }) => {
       const { db, organizationId } = context;
 

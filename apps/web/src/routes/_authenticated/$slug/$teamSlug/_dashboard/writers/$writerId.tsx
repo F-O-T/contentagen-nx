@@ -1,5 +1,5 @@
-import { Skeleton } from "@packages/ui/components/skeleton";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
+import { Skeleton } from "@packages/ui/components/skeleton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
@@ -25,9 +25,7 @@ function EditWriterPage() {
       data: writer,
       isLoading,
       error,
-   } = useQuery(
-      orpc.writer.getById.queryOptions({ input: { id: writerId } }),
-   );
+   } = useQuery(orpc.writer.getById.queryOptions({ input: { id: writerId } }));
 
    const [name, setName] = useState("");
    const [description, setDescription] = useState("");
@@ -89,7 +87,9 @@ function EditWriterPage() {
          personaConfig: {
             metadata: {
                name: name.trim(),
-               ...(description.trim() ? { description: description.trim() } : {}),
+               ...(description.trim()
+                  ? { description: description.trim() }
+                  : {}),
             },
          },
       });
@@ -132,7 +132,8 @@ function EditWriterPage() {
 
    if (!writer) return null;
 
-   const instructions = (writer.instructionMemories ?? []) as InstructionMemoryItem[];
+   const instructions = (writer.instructionMemories ??
+      []) as InstructionMemoryItem[];
 
    return (
       <WriterBuilder

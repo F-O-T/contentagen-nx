@@ -1,12 +1,19 @@
+import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { Button } from "@packages/ui/components/button";
 import { Input } from "@packages/ui/components/input";
 import { Label } from "@packages/ui/components/label";
 import { Switch } from "@packages/ui/components/switch";
 import { Textarea } from "@packages/ui/components/textarea";
 import { cn } from "@packages/ui/lib/utils";
-import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { useMutation } from "@tanstack/react-query";
-import { BookOpen, CheckCircle2, Loader2, Plus, Trash2, XCircle } from "lucide-react";
+import {
+   BookOpen,
+   CheckCircle2,
+   Loader2,
+   Plus,
+   Trash2,
+   XCircle,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
@@ -46,7 +53,10 @@ function AddInstructionForm({ writerId }: { writerId: string }) {
    function handleSubmit(e: React.FormEvent) {
       e.preventDefault();
       if (!canSubmit) return;
-      mutation.mutate({ writerId, instruction: { title, content, enabled: true } });
+      mutation.mutate({
+         writerId,
+         instruction: { title, content, enabled: true },
+      });
    }
 
    return (
@@ -104,7 +114,10 @@ function AddInstructionForm({ writerId }: { writerId: string }) {
             </p>
             <div className="space-y-1.5">
                {TIPS.map((item, i) => (
-                  <div className="flex items-start gap-1.5" key={`tip-${i + 1}`}>
+                  <div
+                     className="flex items-start gap-1.5"
+                     key={`tip-${i + 1}`}
+                  >
                      {item.type === "good" ? (
                         <CheckCircle2 className="size-3 shrink-0 text-emerald-500 self-start translate-y-0.5" />
                      ) : (
@@ -129,7 +142,10 @@ function AddInstructionForm({ writerId }: { writerId: string }) {
    );
 }
 
-export function WriterInstructionsSection({ writerId, instructions }: WriterInstructionsSectionProps) {
+export function WriterInstructionsSection({
+   writerId,
+   instructions,
+}: WriterInstructionsSectionProps) {
    const { openAlertDialog } = useAlertDialog();
 
    const toggleMutation = useMutation(
@@ -159,7 +175,10 @@ export function WriterInstructionsSection({ writerId, instructions }: WriterInst
          cancelLabel: "Cancelar",
          variant: "destructive",
          onAction: async () => {
-            await deleteMutation.mutateAsync({ writerId, instructionId: instruction.id });
+            await deleteMutation.mutateAsync({
+               writerId,
+               instructionId: instruction.id,
+            });
          },
       });
    }
@@ -179,7 +198,8 @@ export function WriterInstructionsSection({ writerId, instructions }: WriterInst
             </div>
             {sorted.length > 0 && (
                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide shrink-0 pt-0.5">
-                  {activeCount} ativa{activeCount !== 1 ? "s" : ""} · {sorted.length} total
+                  {activeCount} ativa{activeCount !== 1 ? "s" : ""} ·{" "}
+                  {sorted.length} total
                </p>
             )}
          </div>
@@ -194,7 +214,9 @@ export function WriterInstructionsSection({ writerId, instructions }: WriterInst
                         <BookOpen className="size-5" />
                      </div>
                      <div className="text-center space-y-0.5">
-                        <p className="text-sm font-medium text-foreground">Nenhuma instrução ainda</p>
+                        <p className="text-sm font-medium text-foreground">
+                           Nenhuma instrução ainda
+                        </p>
                         <p className="text-xs text-muted-foreground">
                            Use o formulário para criar a primeira instrução.
                         </p>
@@ -211,16 +233,26 @@ export function WriterInstructionsSection({ writerId, instructions }: WriterInst
                               aria-label={`${instruction.enabled ? "Desativar" : "Ativar"} instrução "${instruction.title}"`}
                               checked={instruction.enabled}
                               className="shrink-0 self-start translate-y-0.5"
-                              disabled={toggleMutation.isPending && toggleMutation.variables?.instructionId === instruction.id}
+                              disabled={
+                                 toggleMutation.isPending &&
+                                 toggleMutation.variables?.instructionId ===
+                                    instruction.id
+                              }
                               onCheckedChange={() =>
-                                 toggleMutation.mutate({ writerId, instructionId: instruction.id })
+                                 toggleMutation.mutate({
+                                    writerId,
+                                    instructionId: instruction.id,
+                                 })
                               }
                            />
                            <div className="flex-1 min-w-0 space-y-1">
-                              <p className={cn(
-                                 "text-sm font-medium leading-snug",
-                                 !instruction.enabled && "text-muted-foreground",
-                              )}>
+                              <p
+                                 className={cn(
+                                    "text-sm font-medium leading-snug",
+                                    !instruction.enabled &&
+                                       "text-muted-foreground",
+                                 )}
+                              >
                                  {instruction.title}
                               </p>
                               <p className="text-xs text-muted-foreground">

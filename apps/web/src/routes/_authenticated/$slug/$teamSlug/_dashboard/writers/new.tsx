@@ -53,7 +53,9 @@ function NewWriterPage() {
          personaConfig: {
             metadata: {
                name: name.trim(),
-               ...(description.trim() ? { description: description.trim() } : {}),
+               ...(description.trim()
+                  ? { description: description.trim() }
+                  : {}),
             },
          },
       });

@@ -5,7 +5,11 @@ import {
    useQueryClient,
    useSuspenseQuery,
 } from "@tanstack/react-query";
-import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
+import {
+   createFileRoute,
+   useNavigate,
+   useParams,
+} from "@tanstack/react-router";
 import { Loader2, Plus } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -26,7 +30,8 @@ export const Route = createFileRoute(
 
 const WritersErrorFallback = createErrorFallback({
    errorTitle: "Não foi possível carregar escritores",
-   errorDescription: "Ocorreu um erro ao buscar os perfis de escritor. Tente novamente.",
+   errorDescription:
+      "Ocorreu um erro ao buscar os perfis de escritor. Tente novamente.",
    retryText: "Tentar novamente",
 });
 
@@ -114,7 +119,8 @@ function WritersContent() {
             <div>
                <h1 className="text-2xl font-semibold font-serif">Escritores</h1>
                <p className="text-sm text-muted-foreground mt-1">
-                  Gerencie os perfis de escritor que guiam a geração de conteúdo.
+                  Gerencie os perfis de escritor que guiam a geração de
+                  conteúdo.
                </p>
             </div>
             <Button

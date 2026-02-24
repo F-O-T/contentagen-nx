@@ -1,3 +1,4 @@
+import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import {
    Avatar,
    AvatarFallback,
@@ -14,13 +15,15 @@ import { Input } from "@packages/ui/components/input";
 import { Label } from "@packages/ui/components/label";
 import { Textarea } from "@packages/ui/components/textarea";
 import { cn } from "@packages/ui/lib/utils";
-import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { getInitials } from "@packages/utils/text";
 import { Ellipsis, Loader2, Save, Trash2 } from "lucide-react";
 import { useState } from "react";
+import {
+   type ContentItem,
+   WriterContentSection,
+} from "./writer-content-section";
 import { WriterInstructionsSection } from "./writer-instructions-section";
 import { WriterPhotoUpload } from "./writer-photo-upload";
-import { WriterContentSection, type ContentItem } from "./writer-content-section";
 
 type WriterTab = "identidade" | "memoria" | "conteudo";
 
@@ -61,7 +64,8 @@ export function WriterBuilder({
       ...(writerId ? [{ id: "conteudo" as const, label: "Conteúdo" }] : []),
    ];
 
-   const activeInstructionCount = instructions?.filter((i) => i.enabled).length ?? 0;
+   const activeInstructionCount =
+      instructions?.filter((i) => i.enabled).length ?? 0;
 
    return (
       <main className="flex flex-col">
@@ -75,9 +79,14 @@ export function WriterBuilder({
                   </AvatarFallback>
                </Avatar>
                <div className="flex-1 min-w-0">
-                  {name && <p className="text-sm font-semibold truncate">{name}</p>}
+                  {name && (
+                     <p className="text-sm font-semibold truncate">{name}</p>
+                  )}
                   <p className="text-xs text-muted-foreground">
-                     {activeInstructionCount} {activeInstructionCount !== 1 ? "instruções" : "instrução"} ativas · {contentCount ?? 0} conteúdo{(contentCount ?? 0) !== 1 ? "s" : ""}
+                     {activeInstructionCount}{" "}
+                     {activeInstructionCount !== 1 ? "instruções" : "instrução"}{" "}
+                     ativas · {contentCount ?? 0} conteúdo
+                     {(contentCount ?? 0) !== 1 ? "s" : ""}
                   </p>
                </div>
             </div>
@@ -91,26 +100,39 @@ export function WriterBuilder({
                   {/* Identity */}
                   <div className="flex flex-col items-center gap-3 text-center">
                      <Avatar className="size-20 rounded-xl">
-                        <AvatarImage alt={name} src={profilePhotoUrl ?? undefined} />
+                        <AvatarImage
+                           alt={name}
+                           src={profilePhotoUrl ?? undefined}
+                        />
                         <AvatarFallback className="rounded-xl text-base font-semibold">
                            {getInitials(name)}
                         </AvatarFallback>
                      </Avatar>
                      {name && (
-                        <p className="text-sm font-medium truncate w-full">{name}</p>
+                        <p className="text-sm font-medium truncate w-full">
+                           {name}
+                        </p>
                      )}
                   </div>
 
                   {/* Stats */}
                   <div className="border-t pt-4 space-y-2.5">
                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs text-muted-foreground">Instruções ativas</span>
-                        <span className="text-xs font-medium tabular-nums">{activeInstructionCount}</span>
+                        <span className="text-xs text-muted-foreground">
+                           Instruções ativas
+                        </span>
+                        <span className="text-xs font-medium tabular-nums">
+                           {activeInstructionCount}
+                        </span>
                      </div>
                      {contentCount !== undefined && (
                         <div className="flex items-center justify-between gap-2">
-                           <span className="text-xs text-muted-foreground">Conteúdos gerados</span>
-                           <span className="text-xs font-medium tabular-nums">{contentCount}</span>
+                           <span className="text-xs text-muted-foreground">
+                              Conteúdos gerados
+                           </span>
+                           <span className="text-xs font-medium tabular-nums">
+                              {contentCount}
+                           </span>
                         </div>
                      )}
                   </div>
@@ -126,7 +148,10 @@ export function WriterBuilder({
                      writerId && "md:pl-4",
                   )}
                >
-                  <div className="flex items-center overflow-x-auto flex-1 min-w-0" role="tablist">
+                  <div
+                     className="flex items-center overflow-x-auto flex-1 min-w-0"
+                     role="tablist"
+                  >
                      {tabs.map((tab) => (
                         <Button
                            aria-selected={activeTab === tab.id}
@@ -183,21 +208,34 @@ export function WriterBuilder({
                {/* Tab content */}
                <div className={cn(writerId && "md:px-4")}>
                   {activeTab === "identidade" && (
-                     <div aria-labelledby="tab-identidade" id="tabpanel-identidade" role="tabpanel" tabIndex={0}>
+                     <div
+                        aria-labelledby="tab-identidade"
+                        id="tabpanel-identidade"
+                        role="tabpanel"
+                        // biome-ignore lint/a11y/noNoninteractiveTabindex: tabpanels require tabIndex={0} per WAI-ARIA authoring practices
+                        tabIndex={0}
+                     >
                         {writerId ? (
                            /* Single column on mobile/tablet, two-column on lg+ */
                            <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-x-10">
                               <div className="col-span-1 lg:col-span-2 divide-y">
                                  <section className="space-y-3 py-4">
                                     <div className="space-y-0.5">
-                                       <Label className="text-sm font-medium" htmlFor="writer-name">Nome</Label>
+                                       <Label
+                                          className="text-sm font-medium"
+                                          htmlFor="writer-name"
+                                       >
+                                          Nome
+                                       </Label>
                                        <p className="text-xs text-muted-foreground">
                                           Nome público do escritor.
                                        </p>
                                     </div>
                                     <Input
                                        id="writer-name"
-                                       onChange={(e) => onNameChange(e.target.value)}
+                                       onChange={(e) =>
+                                          onNameChange(e.target.value)
+                                       }
                                        placeholder="Ex: Rafael Técnico"
                                        value={name}
                                     />
@@ -205,15 +243,25 @@ export function WriterBuilder({
 
                                  <section className="space-y-3 py-4">
                                     <div className="space-y-0.5">
-                                       <Label className="text-sm font-medium" htmlFor="writer-description">Persona</Label>
+                                       <Label
+                                          className="text-sm font-medium"
+                                          htmlFor="writer-description"
+                                       >
+                                          Persona
+                                       </Label>
                                        <p className="text-xs text-muted-foreground">
-                                          Descreva quem é este escritor: audiência, expertise, estilo, o que ele evita. Injetada em cada geração como contexto de identidade.
+                                          Descreva quem é este escritor:
+                                          audiência, expertise, estilo, o que
+                                          ele evita. Injetada em cada geração
+                                          como contexto de identidade.
                                        </p>
                                     </div>
                                     <Textarea
                                        className="min-h-[160px] resize-none"
                                        id="writer-description"
-                                       onChange={(e) => onDescriptionChange(e.target.value)}
+                                       onChange={(e) =>
+                                          onDescriptionChange(e.target.value)
+                                       }
                                        placeholder="Ex: Rafael é um DevRel sênior escrevendo para desenvolvedores intermediários. Usa exemplos em TypeScript. Prefere frases curtas e nunca usa voz passiva. Cita documentação oficial quando possível."
                                        value={description}
                                     />
@@ -223,9 +271,12 @@ export function WriterBuilder({
                               {/* Photo upload — stacks below on mobile, right column on lg+ */}
                               <div className="py-4 space-y-3 border-t lg:border-t-0 lg:border-l lg:pl-4">
                                  <div className="space-y-0.5">
-                                    <p className="text-sm font-medium">Foto de perfil</p>
+                                    <p className="text-sm font-medium">
+                                       Foto de perfil
+                                    </p>
                                     <p className="text-xs text-muted-foreground">
-                                       Aparece nos seletores de escritor. PNG, JPG, WEBP — máx. 5 MB.
+                                       Aparece nos seletores de escritor. PNG,
+                                       JPG, WEBP — máx. 5 MB.
                                     </p>
                                  </div>
                                  <WriterPhotoUpload
@@ -240,7 +291,12 @@ export function WriterBuilder({
                            <div className="divide-y">
                               <section className="space-y-3 py-4">
                                  <div className="space-y-0.5">
-                                    <Label className="text-sm font-medium" htmlFor="writer-name">Nome</Label>
+                                    <Label
+                                       className="text-sm font-medium"
+                                       htmlFor="writer-name"
+                                    >
+                                       Nome
+                                    </Label>
                                     <p className="text-xs text-muted-foreground">
                                        Nome público do escritor.
                                     </p>
@@ -248,7 +304,9 @@ export function WriterBuilder({
                                  <Input
                                     className="max-w-md"
                                     id="writer-name"
-                                    onChange={(e) => onNameChange(e.target.value)}
+                                    onChange={(e) =>
+                                       onNameChange(e.target.value)
+                                    }
                                     placeholder="Ex: Rafael Técnico"
                                     value={name}
                                  />
@@ -256,15 +314,25 @@ export function WriterBuilder({
 
                               <section className="space-y-3 py-4">
                                  <div className="space-y-0.5">
-                                    <Label className="text-sm font-medium" htmlFor="writer-description">Persona</Label>
+                                    <Label
+                                       className="text-sm font-medium"
+                                       htmlFor="writer-description"
+                                    >
+                                       Persona
+                                    </Label>
                                     <p className="text-xs text-muted-foreground">
-                                       Descreva quem é este escritor: audiência, expertise, estilo, o que ele evita. Injetada em cada geração como contexto de identidade.
+                                       Descreva quem é este escritor: audiência,
+                                       expertise, estilo, o que ele evita.
+                                       Injetada em cada geração como contexto de
+                                       identidade.
                                     </p>
                                  </div>
                                  <Textarea
                                     className="max-w-2xl min-h-[140px] resize-none"
                                     id="writer-description"
-                                    onChange={(e) => onDescriptionChange(e.target.value)}
+                                    onChange={(e) =>
+                                       onDescriptionChange(e.target.value)
+                                    }
                                     placeholder="Ex: Rafael é um DevRel sênior escrevendo para desenvolvedores intermediários. Usa exemplos em TypeScript. Prefere frases curtas e nunca usa voz passiva. Cita documentação oficial quando possível."
                                     value={description}
                                  />
@@ -275,7 +343,13 @@ export function WriterBuilder({
                   )}
 
                   {activeTab === "memoria" && writerId && (
-                     <div aria-labelledby="tab-memoria" id="tabpanel-memoria" role="tabpanel" tabIndex={0}>
+                     <div
+                        aria-labelledby="tab-memoria"
+                        id="tabpanel-memoria"
+                        role="tabpanel"
+                        // biome-ignore lint/a11y/noNoninteractiveTabindex: tabpanels require tabIndex={0} per WAI-ARIA authoring practices
+                        tabIndex={0}
+                     >
                         <WriterInstructionsSection
                            instructions={instructions ?? []}
                            writerId={writerId}
@@ -284,7 +358,13 @@ export function WriterBuilder({
                   )}
 
                   {activeTab === "conteudo" && writerId && (
-                     <div aria-labelledby="tab-conteudo" id="tabpanel-conteudo" role="tabpanel" tabIndex={0}>
+                     <div
+                        aria-labelledby="tab-conteudo"
+                        id="tabpanel-conteudo"
+                        role="tabpanel"
+                        // biome-ignore lint/a11y/noNoninteractiveTabindex: tabpanels require tabIndex={0} per WAI-ARIA authoring practices
+                        tabIndex={0}
+                     >
                         <WriterContentSection
                            contentCount={contentCount ?? 0}
                            recentContent={recentContent ?? []}
