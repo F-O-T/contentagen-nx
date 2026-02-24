@@ -4,6 +4,7 @@ import {
    AvatarImage,
 } from "@packages/ui/components/avatar";
 import { Button } from "@packages/ui/components/button";
+import { getInitials } from "@packages/utils/text";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Upload, X } from "lucide-react";
 import { useRef, useTransition } from "react";
@@ -18,14 +19,6 @@ interface WriterPhotoUploadProps {
    writerName: string;
 }
 
-function getInitials(name: string): string {
-   return name
-      .split(" ")
-      .slice(0, 2)
-      .map((w) => w[0]?.toUpperCase() ?? "")
-      .join("");
-}
-
 export function WriterPhotoUpload({
    writerId,
    currentPhotoUrl,
@@ -38,9 +31,11 @@ export function WriterPhotoUpload({
    });
    const presignedUpload = usePresignedUpload();
    const queryClient = useQueryClient();
-   const [isPending, startTransition] = useTransition();
+   const [isSaving, startSaveTransition] = useTransition();
+   const [isRemoving, startRemoveTransition] = useTransition();
 
-   const isLoading = isPending || presignedUpload.isUploading;
+   const isSaveLoading = isSaving || presignedUpload.isUploading;
+   const isRemoveLoading = isRemoving;
 
    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files ? Array.from(e.target.files) : null;
@@ -53,7 +48,8 @@ export function WriterPhotoUpload({
       if (!fileUpload.selectedFile) return;
       const file = fileUpload.selectedFile;
 
-      startTransition(async () => {
+      presignedUpload.reset();
+      startSaveTransition(async () => {
          try {
             const fileExtension = file.name.split(".").pop() ?? "jpg";
 
@@ -86,7 +82,7 @@ export function WriterPhotoUpload({
    };
 
    const handleRemove = () => {
-      startTransition(async () => {
+      startRemoveTransition(async () => {
          try {
             await orpc.writer.update.call({
                id: writerId,
@@ -105,6 +101,7 @@ export function WriterPhotoUpload({
    };
 
    const handleCancel = () => {
+      presignedUpload.reset();
       fileUpload.clearFile();
    };
 
@@ -124,17 +121,17 @@ export function WriterPhotoUpload({
             {hasSelectedFile ? (
                <div className="flex items-center gap-2">
                   <Button
-                     disabled={isLoading}
+                     disabled={isSaveLoading}
                      onClick={handleSave}
                      size="sm"
                   >
-                     {isLoading && (
+                     {isSaveLoading && (
                         <Loader2 className="size-4 mr-2 animate-spin" />
                      )}
                      Salvar foto
                   </Button>
                   <Button
-                     disabled={isLoading}
+                     disabled={isSaveLoading}
                      onClick={handleCancel}
                      size="sm"
                      variant="outline"
@@ -146,7 +143,7 @@ export function WriterPhotoUpload({
             ) : (
                <div className="flex items-center gap-2">
                   <Button
-                     disabled={isLoading}
+                     disabled={isRemoveLoading}
                      onClick={() => fileInputRef.current?.click()}
                      size="sm"
                      variant="outline"
@@ -156,12 +153,12 @@ export function WriterPhotoUpload({
                   </Button>
                   {currentPhotoUrl && (
                      <Button
-                        disabled={isLoading}
+                        disabled={isRemoveLoading}
                         onClick={handleRemove}
                         size="sm"
                         variant="ghost"
                      >
-                        {isLoading && (
+                        {isRemoveLoading && (
                            <Loader2 className="size-4 mr-2 animate-spin" />
                         )}
                         Remover
@@ -173,6 +170,7 @@ export function WriterPhotoUpload({
 
          <input
             accept="image/*"
+            aria-label="Selecionar foto do escritor"
             className="hidden"
             onChange={handleFileChange}
             ref={fileInputRef}
