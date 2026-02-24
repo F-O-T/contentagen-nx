@@ -23,6 +23,12 @@ import {
    generatePresignedPutUrl,
    getMinioClient,
 } from "@packages/files/client";
+import { createEmitFn } from "@packages/events/emit";
+import {
+   emitWriterCreated,
+   emitWriterDeleted,
+   emitWriterUpdated,
+} from "@packages/events/writer";
 import { count, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
@@ -107,7 +113,7 @@ export const getById = protectedProcedure
 export const create = protectedProcedure
    .input(createWriterSchema)
    .handler(async ({ context, input }) => {
-      const { db, organizationId, teamId } = context;
+      const { db, organizationId, teamId, userId, posthog } = context;
 
       const newWriter = await createWriter(db, {
          organizationId,
@@ -115,6 +121,14 @@ export const create = protectedProcedure
          personaConfig: input.personaConfig,
          profilePhotoUrl: input.profilePhotoUrl ?? null,
       });
+
+      try {
+         await emitWriterCreated(
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
+            { writerId: newWriter.id, name: input.personaConfig.metadata.name },
+         );
+      } catch { /* never break main flow */ }
 
       return newWriter;
    });
@@ -125,7 +139,7 @@ export const create = protectedProcedure
 export const update = protectedProcedure
    .input(updateWriterSchema)
    .handler(async ({ context, input }) => {
-      const { db, organizationId } = context;
+      const { db, organizationId, userId, teamId, posthog } = context;
 
       const existing = await getWriterById(db, input.id);
 
@@ -137,6 +151,14 @@ export const update = protectedProcedure
 
       const updated = await updateWriter(db, id, updates);
 
+      try {
+         await emitWriterUpdated(
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
+            { writerId: id, changedFields: Object.keys(updates) },
+         );
+      } catch { /* never break main flow */ }
+
       return updated;
    });
 
@@ -146,7 +168,7 @@ export const update = protectedProcedure
 export const remove = protectedProcedure
    .input(z.object({ id: z.string().uuid() }))
    .handler(async ({ context, input }) => {
-      const { db, organizationId } = context;
+      const { db, organizationId, userId, teamId, posthog } = context;
 
       const existing = await getWriterById(db, input.id);
 
@@ -155,6 +177,14 @@ export const remove = protectedProcedure
       }
 
       const deleted = await deleteWriter(db, input.id);
+
+      try {
+         await emitWriterDeleted(
+            createEmitFn(db, posthog),
+            { organizationId, userId, teamId },
+            { writerId: input.id },
+         );
+      } catch { /* never break main flow */ }
 
       return deleted;
    });

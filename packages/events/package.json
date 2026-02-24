@@ -80,6 +80,10 @@
       "./assets": {
          "default": "./src/assets.ts",
          "types": "./dist/src/assets.d.ts"
+      },
+      "./writer": {
+         "default": "./src/writer.ts",
+         "types": "./dist/src/writer.d.ts"
       }
    },
    "files": [

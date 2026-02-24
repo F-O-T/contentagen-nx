@@ -17,6 +17,7 @@ export const EVENT_CATEGORIES = {
    dashboard: "dashboard",
    insight: "insight",
    system: "system",
+   writer: "writer",
 } as const;
 
 export type EventCategory =

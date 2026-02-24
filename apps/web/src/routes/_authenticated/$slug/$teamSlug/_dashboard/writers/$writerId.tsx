@@ -132,8 +132,7 @@ function EditWriterPage() {
 
    if (!writer) return null;
 
-   const instructions = (writer.instructionMemories ??
-      []) as InstructionMemoryItem[];
+   const instructions = writer.instructionMemories ?? [];
 
    return (
       <WriterBuilder
