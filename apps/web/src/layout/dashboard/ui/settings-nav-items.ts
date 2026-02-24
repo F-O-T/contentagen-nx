@@ -12,6 +12,7 @@ import {
    Lock,
    Network,
    Palette,
+   PenLine,
    ScrollText,
    Settings2,
    Shield,
@@ -59,6 +60,12 @@ export const settingsNavSections: SettingsNavSection[] = [
             title: "Webhooks",
             href: "/$slug/$teamSlug/settings/project/webhooks",
             icon: Webhook,
+         },
+         {
+            id: "project-writers",
+            title: "Escritores",
+            href: "/$slug/$teamSlug/settings/project/writers",
+            icon: PenLine,
          },
          {
             id: "project-products",

@@ -126,7 +126,7 @@ export function WriterPhotoUpload({
                      size="sm"
                   >
                      {isSaveLoading && (
-                        <Loader2 className="size-4 mr-2 animate-spin" />
+                        <Loader2 className="size-4 animate-spin" />
                      )}
                      Salvar foto
                   </Button>
@@ -136,7 +136,7 @@ export function WriterPhotoUpload({
                      size="sm"
                      variant="outline"
                   >
-                     <X className="size-4 mr-2" />
+                     <X className="size-4" />
                      Cancelar
                   </Button>
                </div>
@@ -148,7 +148,7 @@ export function WriterPhotoUpload({
                      size="sm"
                      variant="outline"
                   >
-                     <Upload className="size-4 mr-2" />
+                     <Upload className="size-4" />
                      {currentPhotoUrl ? "Trocar foto" : "Enviar foto"}
                   </Button>
                   {currentPhotoUrl && (
@@ -159,7 +159,7 @@ export function WriterPhotoUpload({
                         variant="ghost"
                      >
                         {isRemoveLoading && (
-                           <Loader2 className="size-4 mr-2 animate-spin" />
+                           <Loader2 className="size-4 animate-spin" />
                         )}
                         Remover
                      </Button>

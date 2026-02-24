@@ -32,6 +32,7 @@ import * as ssoRouter from "./sso";
 import * as teamRouter from "./team";
 import * as usageRouter from "./usage";
 import * as webhooksRouter from "./webhooks";
+import * as writerRouter from "./writer";
 
 export default {
    account: accountRouter,
@@ -68,4 +69,5 @@ export default {
    organization: organizationRouter,
    usage: usageRouter,
    webhooks: webhooksRouter,
+   writer: writerRouter,
 };

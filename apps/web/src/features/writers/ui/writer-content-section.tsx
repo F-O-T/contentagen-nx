@@ -162,29 +162,34 @@ export function WriterContentSection({ recentContent, contentCount }: WriterCont
 
    if (recentContent.length === 0) {
       return (
-         <div className="space-y-4">
-            <div>
-               <h2 className="text-lg font-semibold">Conteúdos gerados</h2>
+         <div className="space-y-4 py-4">
+            <div className="space-y-0.5">
+               <h2 className="text-base font-semibold">Conteúdos gerados</h2>
                <p className="text-sm text-muted-foreground">
                   Conteúdos criados com este escritor.
                </p>
             </div>
-            <div className="border border-dashed rounded-lg p-8 text-center flex flex-col items-center gap-3">
-               <FileText className="size-8 text-muted-foreground/50" />
-               <p className="text-sm text-muted-foreground">
-                  Nenhum conteúdo gerado por este escritor ainda.
-               </p>
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
+               <div className="size-10 rounded-full bg-muted flex items-center justify-center">
+                  <FileText className="size-5" />
+               </div>
+               <div className="text-center space-y-0.5">
+                  <p className="text-sm font-medium text-foreground">Nenhum conteúdo ainda</p>
+                  <p className="text-xs text-muted-foreground">
+                     Selecione este escritor ao criar um conteúdo para ele aparecer aqui.
+                  </p>
+               </div>
             </div>
          </div>
       );
    }
 
    return (
-      <div className="space-y-4">
-         <div>
-            <h2 className="text-lg font-semibold">Conteúdos gerados</h2>
+      <div className="space-y-4 py-4">
+         <div className="space-y-0.5">
+            <h2 className="text-base font-semibold">Conteúdos gerados</h2>
             <p className="text-sm text-muted-foreground">
-               {contentCount} conteúdos gerados por este escritor
+               {contentCount} conteúdo{contentCount !== 1 ? "s" : ""} gerado{contentCount !== 1 ? "s" : ""} por este escritor
                {recentContent.length < contentCount && ` — mostrando os ${recentContent.length} mais recentes`}
             </p>
          </div>

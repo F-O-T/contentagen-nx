@@ -16,13 +16,9 @@ import {
    deleteWriterInstruction,
    getWriterInstructions,
    toggleWriterInstructionEnabled,
-   updateWriterInstruction,
 } from "@packages/database/repositories/writer-instructions-repository";
 import { content } from "@packages/database/schemas/content";
-import {
-   CreateInstructionMemorySchema,
-   UpdateInstructionMemorySchema,
-} from "@packages/database/schemas/instruction-memory";
+import { CreateInstructionMemorySchema } from "@packages/database/schemas/instruction-memory";
 import {
    PersonaMetadataSchema,
    WriterConfigSchema,
@@ -40,7 +36,7 @@ const createWriterSchema = z.object({
       metadata: PersonaMetadataSchema,
       instructions: WriterConfigSchema.optional(),
    }),
-   profilePhotoUrl: z.string().url().optional(),
+   profilePhotoUrl: z.string().optional(),
 });
 
 const updateWriterSchema = z.object({
@@ -51,7 +47,7 @@ const updateWriterSchema = z.object({
          instructions: WriterConfigSchema.optional(),
       })
       .optional(),
-   profilePhotoUrl: z.string().url().nullable().optional(),
+   profilePhotoUrl: z.string().nullable().optional(),
 });
 
 // =============================================================================
@@ -182,21 +178,6 @@ export const addInstruction = protectedProcedure
          throw new ORPCError("NOT_FOUND", { message: "Writer not found" });
       }
       return addWriterInstruction(db, input.writerId, input.instruction);
-   });
-
-export const updateInstruction = protectedProcedure
-   .input(z.object({
-      writerId: z.string().uuid(),
-      instructionId: z.string().uuid(),
-      data: UpdateInstructionMemorySchema,
-   }))
-   .handler(async ({ context, input }) => {
-      const { db, organizationId } = context;
-      const writerRecord = await getWriterById(db, input.writerId);
-      if (!writerRecord || writerRecord.organizationId !== organizationId) {
-         throw new ORPCError("NOT_FOUND", { message: "Writer not found" });
-      }
-      return updateWriterInstruction(db, input.writerId, input.instructionId, input.data);
    });
 
 export const deleteInstruction = protectedProcedure

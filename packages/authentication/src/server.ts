@@ -34,6 +34,16 @@ import { createBetterAuthStorage } from "./cache";
 
 export const ORGANIZATION_LIMIT = 3;
 
+// Dev-only: stores magic link URLs in memory so the frontend can auto-redirect.
+// Never populated in production (isProduction is true), so always empty there.
+const devMagicLinkStore = new Map<string, string>();
+
+export function getDevMagicLink(email: string): string | undefined {
+   const url = devMagicLinkStore.get(email);
+   devMagicLinkStore.delete(email);
+   return url;
+}
+
 export interface SimplifiedAuthConfig {
    db: DatabaseInstance;
    env: ServerEnv;
@@ -81,22 +91,23 @@ export function createAuth(config: SimplifiedAuthConfig) {
       magicLink({
          expiresIn: 60 * 15, // 15 minutes
          async sendMagicLink({ email, url }) {
-            if (resendClient) {
+            if (isProduction && resendClient) {
                await sendMagicLinkEmail(resendClient, {
                   email,
                   magicLinkUrl: url,
                });
             } else {
                console.log(`[DEV] Magic link for ${email}: ${url}`);
+               devMagicLinkStore.set(email, url);
             }
          },
       }),
       emailOTP({
          expiresIn: 60 * 10,
          otpLength: 6,
-         sendVerificationOnSignUp: true,
+         sendVerificationOnSignUp: isProduction,
          async sendVerificationOTP({ email, otp, type }: SendEmailOTPOptions) {
-            if (resendClient) {
+            if (isProduction && resendClient) {
                await sendEmailOTP(resendClient, { email, otp, type });
             } else {
                console.log(`[DEV] OTP for ${email} (${type}): ${otp}`);
@@ -195,7 +206,7 @@ export function createAuth(config: SimplifiedAuthConfig) {
          },
          async sendInvitationEmail(data) {
             const inviteLink = `${getDomain()}/callback/organization/invitation/${data.id}`;
-            if (resendClient) {
+            if (isProduction && resendClient) {
                await sendOrganizationInvitation(resendClient, {
                   email: data.email,
                   invitedByEmail: data.inviter.user.email,
@@ -453,11 +464,11 @@ export function createAuth(config: SimplifiedAuthConfig) {
       },
       emailAndPassword: {
          enabled: true,
-         requireEmailVerification: true,
+         requireEmailVerification: isProduction,
       },
       emailVerification: {
          autoSignInAfterVerification: true,
-         sendOnSignUp: true,
+         sendOnSignUp: isProduction,
       },
       experimental: {
          joins: true,

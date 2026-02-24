@@ -27,9 +27,6 @@ export function WriterForm({ mode, writer, onSuccess }: WriterFormProps) {
    const [description, setDescription] = useState(
       writer?.personaConfig.metadata.description ?? "",
    );
-   const [profilePhotoUrl, setProfilePhotoUrl] = useState(
-      writer?.profilePhotoUrl ?? "",
-   );
 
    const createMutation = useMutation(
       orpc.writer.create.mutationOptions({
@@ -79,24 +76,15 @@ export function WriterForm({ mode, writer, onSuccess }: WriterFormProps) {
       };
 
       if (mode === "create") {
-         createMutation.mutate({
-            personaConfig,
-            ...(profilePhotoUrl.trim() ? { profilePhotoUrl: profilePhotoUrl.trim() } : {}),
-         });
+         createMutation.mutate({ personaConfig });
       } else if (writer) {
-         updateMutation.mutate({
-            id: writer.id,
-            personaConfig,
-            ...(profilePhotoUrl !== undefined
-               ? { profilePhotoUrl: profilePhotoUrl || null }
-               : {}),
-         });
+         updateMutation.mutate({ id: writer.id, personaConfig });
       }
    }
 
    return (
       <form className="flex flex-col h-full" onSubmit={handleSubmit}>
-         <SheetHeader className="px-6 pt-6 pb-4 border-b">
+         <SheetHeader className="px-4 pt-4 pb-4 border-b">
             <SheetTitle>
                {mode === "create" ? "Novo escritor" : "Editar escritor"}
             </SheetTitle>
@@ -107,8 +95,7 @@ export function WriterForm({ mode, writer, onSuccess }: WriterFormProps) {
             </SheetDescription>
          </SheetHeader>
 
-         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-            {/* Identity */}
+         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
             <div className="space-y-4">
                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                   Identidade
@@ -135,23 +122,12 @@ export function WriterForm({ mode, writer, onSuccess }: WriterFormProps) {
                      value={description}
                   />
                </div>
-
-               <div className="space-y-2">
-                  <Label htmlFor="writer-photo">URL da foto de perfil</Label>
-                  <Input
-                     id="writer-photo"
-                     onChange={(e) => setProfilePhotoUrl(e.target.value)}
-                     placeholder="https://..."
-                     type="url"
-                     value={profilePhotoUrl}
-                  />
-               </div>
             </div>
          </div>
 
-         <div className="px-6 py-4 border-t flex items-center justify-end gap-2">
+         <div className="px-4 py-4 border-t flex items-center justify-end gap-2">
             <Button disabled={isPending} type="submit">
-               {isPending && <Spinner className="size-4 mr-2" />}
+               {isPending && <Spinner className="size-4" />}
                {mode === "create" ? "Criar escritor" : "Salvar alterações"}
             </Button>
          </div>
