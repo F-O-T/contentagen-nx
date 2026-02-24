@@ -13,6 +13,7 @@ import { FORM_EVENTS } from "@packages/events/forms";
 import { INSIGHT_EVENTS } from "@packages/events/insight";
 import { SEO_EVENTS } from "@packages/events/seo";
 import { WEBHOOK_EVENTS } from "@packages/events/webhook";
+import { WRITER_EVENTS } from "@packages/events/writer";
 import chalk from "chalk";
 import { Command } from "commander";
 import { config } from "dotenv";
@@ -83,6 +84,10 @@ const EVENT_PRICING: EventPricing[] = [
    { eventName: ASSET_EVENTS["asset.upload_completed"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000500", freeTierLimit: 500, displayName: "Asset Uploaded", description: "Fired when a file asset is uploaded and processing completes.", isBillable: true },
    { eventName: ASSET_EVENTS["asset.deleted"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Asset Deleted", description: "Fired when a file asset is permanently deleted.", isBillable: false },
    { eventName: ASSET_EVENTS["asset.thumbnail_generated"], category: EVENT_CATEGORIES.content, pricePerEvent: "0.000100", freeTierLimit: 1_000, displayName: "Thumbnail Generated", description: "Fired when an image thumbnail is generated for an uploaded asset.", isBillable: true },
+   // Writers
+   { eventName: WRITER_EVENTS["writer.created"], category: EVENT_CATEGORIES.writer, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Writer Created", description: "Fired when a new writer persona is created.", isBillable: false },
+   { eventName: WRITER_EVENTS["writer.updated"], category: EVENT_CATEGORIES.writer, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Writer Updated", description: "Fired when a writer persona configuration is updated.", isBillable: false },
+   { eventName: WRITER_EVENTS["writer.deleted"], category: EVENT_CATEGORIES.writer, pricePerEvent: "0.000000", freeTierLimit: 0, displayName: "Writer Deleted", description: "Fired when a writer persona is permanently deleted.", isBillable: false },
 ];
 
 function toSeedEntry(pricing: EventPricing) {

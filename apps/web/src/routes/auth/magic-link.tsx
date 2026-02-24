@@ -31,7 +31,7 @@ function MagicLinkPage() {
       await authClient.signIn.magicLink(
          {
             email,
-            callbackURL: `${window.location.origin}/auth/sign-in`,
+            callbackURL: `${window.location.origin}/auth/callback`,
          },
          {
             onError: ({ error }) => {
@@ -40,7 +40,19 @@ function MagicLinkPage() {
             onRequest: () => {
                toast.loading("Enviando link de acesso...");
             },
-            onSuccess: () => {
+            onSuccess: async () => {
+               try {
+                  const res = await fetch(
+                     `/api/auth/dev/magic-link?email=${encodeURIComponent(email)}`,
+                  );
+                  const data = await res.json();
+                  if (data.url) {
+                     window.location.href = data.url;
+                     return;
+                  }
+               } catch {
+                  // Not in dev mode or endpoint unavailable — fall through
+               }
                setIsSent(true);
                toast.success("Link enviado! Verifique seu e-mail.");
             },

@@ -3,11 +3,10 @@
    "compilerOptions": {
       "jsx": "react-jsx"
    },
-   "include": ["src"],
-   "exclude": ["node_modules"],
-   "references": [
-      {
-         "path": "../redis"
-      }
+   "include": [
+      "src"
+   ],
+   "exclude": [
+      "node_modules"
    ]
 }

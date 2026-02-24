@@ -11,6 +11,7 @@ import {
    Library,
    Lightbulb,
    Network,
+   PenLine,
 } from "lucide-react";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
 
@@ -82,6 +83,14 @@ export const navGroups: NavGroupDef[] = [
             icon: FileText,
             route: "/$slug/$teamSlug/content",
             quickAction: { type: "create", target: "navigate" },
+            earlyAccessFlag: "content",
+            earlyAccessStage: "alpha" as const,
+         },
+         {
+            id: "writers",
+            label: "Escritores",
+            icon: PenLine,
+            route: "/$slug/$teamSlug/writers",
             earlyAccessFlag: "content",
             earlyAccessStage: "alpha" as const,
          },
