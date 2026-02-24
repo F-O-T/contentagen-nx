@@ -12,8 +12,8 @@ import { Label } from "@packages/ui/components/label";
 import { Switch } from "@packages/ui/components/switch";
 import { Textarea } from "@packages/ui/components/textarea";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, MoreHorizontal, Trash2, XCircle } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { CheckCircle2, Loader2, MoreHorizontal, Trash2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
@@ -69,16 +69,12 @@ function InstructionGuide() {
 }
 
 function AddInstructionForm({ writerId }: { writerId: string }) {
-   const queryClient = useQueryClient();
    const [title, setTitle] = useState("");
    const [content, setContent] = useState("");
 
    const mutation = useMutation(
       orpc.writer.addInstruction.mutationOptions({
          onSuccess: () => {
-            queryClient.invalidateQueries({
-               queryKey: orpc.writer.getById.queryOptions({ input: { id: writerId } }).queryKey,
-            });
             toast.success("Instrução adicionada");
             setTitle("");
             setContent("");
@@ -89,9 +85,11 @@ function AddInstructionForm({ writerId }: { writerId: string }) {
       }),
    );
 
+   const canSubmit = title.trim().length > 0 && content.trim().length > 0;
+
    function handleSubmit(e: React.FormEvent) {
       e.preventDefault();
-      if (!title.trim() || !content.trim()) return;
+      if (!canSubmit) return;
       mutation.mutate({ writerId, instruction: { title, content, enabled: true } });
    }
 
@@ -119,10 +117,8 @@ function AddInstructionForm({ writerId }: { writerId: string }) {
                   />
                </div>
                <div className="flex justify-end">
-                  <Button
-                     disabled={mutation.isPending || !title.trim() || !content.trim()}
-                     type="submit"
-                  >
+                  <Button disabled={mutation.isPending || !canSubmit} type="submit">
+                     {mutation.isPending && <Loader2 className="size-4 mr-2 animate-spin" />}
                      {mutation.isPending ? "Adicionando..." : "Adicionar instrução"}
                   </Button>
                </div>
@@ -133,16 +129,10 @@ function AddInstructionForm({ writerId }: { writerId: string }) {
 }
 
 export function WriterInstructionsSection({ writerId, instructions }: WriterInstructionsSectionProps) {
-   const queryClient = useQueryClient();
    const { openAlertDialog } = useAlertDialog();
 
    const toggleMutation = useMutation(
       orpc.writer.toggleInstruction.mutationOptions({
-         onSuccess: () => {
-            queryClient.invalidateQueries({
-               queryKey: orpc.writer.getById.queryOptions({ input: { id: writerId } }).queryKey,
-            });
-         },
          onError: (error) => {
             toast.error(error.message ?? "Erro ao atualizar instrução");
          },
@@ -152,9 +142,6 @@ export function WriterInstructionsSection({ writerId, instructions }: WriterInst
    const deleteMutation = useMutation(
       orpc.writer.deleteInstruction.mutationOptions({
          onSuccess: () => {
-            queryClient.invalidateQueries({
-               queryKey: orpc.writer.getById.queryOptions({ input: { id: writerId } }).queryKey,
-            });
             toast.success("Instrução removida");
          },
          onError: (error) => {
@@ -210,8 +197,9 @@ export function WriterInstructionsSection({ writerId, instructions }: WriterInst
                         key={instruction.id}
                      >
                         <Switch
+                           aria-label={`${instruction.enabled ? "Desativar" : "Ativar"} instrução "${instruction.title}"`}
                            checked={instruction.enabled}
-                           disabled={toggleMutation.isPending}
+                           disabled={toggleMutation.isPending && toggleMutation.variables?.instructionId === instruction.id}
                            onCheckedChange={() =>
                               toggleMutation.mutate({ writerId, instructionId: instruction.id })
                            }
