@@ -218,7 +218,7 @@ export const aiCommandStream = protectedProcedure
             where: and(eq(writer.id, input.writerId), eq(writer.teamId, teamId)),
          });
          if (writerRecord?.instructionMemories) {
-            writerInstructions = (writerRecord.instructionMemories as InstructionMemoryItem[]).slice(0, 10);
+            writerInstructions = writerRecord.instructionMemories.slice(0, 10);
          }
       }
 
