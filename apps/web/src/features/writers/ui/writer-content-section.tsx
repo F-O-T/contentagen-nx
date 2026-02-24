@@ -10,7 +10,7 @@ import { ptBR } from "date-fns/locale";
 import { FileText } from "lucide-react";
 import { useMemo } from "react";
 
-interface ContentItem {
+export interface ContentItem {
    id: string;
    meta: ContentMeta | null;
    status: ContentStatus | null;
