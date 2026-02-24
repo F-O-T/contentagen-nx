@@ -1,4 +1,3 @@
-import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { Skeleton } from "@packages/ui/components/skeleton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";

@@ -19,16 +19,16 @@ import {
    WriterConfigSchema,
 } from "@packages/database/schemas/writer";
 import { env as serverEnv } from "@packages/environment/server";
-import {
-   generatePresignedPutUrl,
-   getMinioClient,
-} from "@packages/files/client";
 import { createEmitFn } from "@packages/events/emit";
 import {
    emitWriterCreated,
    emitWriterDeleted,
    emitWriterUpdated,
 } from "@packages/events/writer";
+import {
+   generatePresignedPutUrl,
+   getMinioClient,
+} from "@packages/files/client";
 import { count, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
@@ -128,7 +128,9 @@ export const create = protectedProcedure
             { organizationId, userId, teamId },
             { writerId: newWriter.id, name: input.personaConfig.metadata.name },
          );
-      } catch { /* never break main flow */ }
+      } catch {
+         /* never break main flow */
+      }
 
       return newWriter;
    });
@@ -157,7 +159,9 @@ export const update = protectedProcedure
             { organizationId, userId, teamId },
             { writerId: id, changedFields: Object.keys(updates) },
          );
-      } catch { /* never break main flow */ }
+      } catch {
+         /* never break main flow */
+      }
 
       return updated;
    });
@@ -184,7 +188,9 @@ export const remove = protectedProcedure
             { organizationId, userId, teamId },
             { writerId: input.id },
          );
-      } catch { /* never break main flow */ }
+      } catch {
+         /* never break main flow */
+      }
 
       return deleted;
    });
