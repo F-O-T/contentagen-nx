@@ -131,6 +131,11 @@ vi.mock("@packages/ui/components/tooltip", () => ({
    TooltipProvider: ({ children }: { children: React.ReactNode }) => (
       <>{children}</>
    ),
+   Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+   TooltipTrigger: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+   ),
+   TooltipContent: () => null,
 }));
 
 vi.mock("@tanstack/react-router", () => ({

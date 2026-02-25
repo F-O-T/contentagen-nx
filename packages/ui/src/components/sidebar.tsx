@@ -111,7 +111,8 @@ function SidebarManagerProvider({ children }: { children: React.ReactNode }) {
    );
 }
 
-function SidebarManager({
+// Registers the parent SidebarProvider's context under a name.
+function SidebarManagerShared({
    children,
    name,
 }: {
@@ -139,6 +140,138 @@ function SidebarManager({
    }, [name, sidebarContext]);
 
    return <>{children}</>;
+}
+
+// Creates an isolated SidebarContext with its own open/closed state,
+// independent of any parent SidebarProvider.
+function SidebarManagerIsolated({
+   children,
+   name,
+   defaultOpen = true,
+   open: openProp,
+   onOpenChange: setOpenProp,
+   style,
+}: {
+   children: React.ReactNode;
+   name: string;
+   defaultOpen?: boolean;
+   open?: boolean;
+   onOpenChange?: (open: boolean) => void;
+   style?: React.CSSProperties;
+}) {
+   const isMobile = useIsMobile();
+   const [openMobile, setOpenMobile] = React.useState(false);
+   const [_open, _setOpen] = React.useState(defaultOpen);
+   const manager = useSidebarManager();
+
+   const open = openProp ?? _open;
+   const openRef = React.useRef(open);
+   React.useLayoutEffect(() => {
+      openRef.current = open;
+   });
+
+   const setOpen = React.useCallback(
+      (value: boolean | ((value: boolean) => boolean)) => {
+         const openState =
+            typeof value === "function" ? value(openRef.current) : value;
+         setOpenProp?.(openState);
+         if (openProp === undefined) {
+            _setOpen(openState);
+         }
+      },
+      [setOpenProp, openProp],
+   );
+
+   const toggleSidebar = React.useCallback(
+      () => (isMobile ? setOpenMobile((o) => !o) : setOpen((o) => !o)),
+      [isMobile, setOpen],
+   );
+
+   const state = open ? "expanded" : "collapsed";
+
+   const contextValue = React.useMemo<SidebarContextProps>(
+      () => ({
+         isMobile,
+         open,
+         openMobile,
+         setOpen,
+         setOpenMobile,
+         state,
+         toggleSidebar,
+      }),
+      [
+         isMobile,
+         open,
+         openMobile,
+         setOpen,
+         setOpenMobile,
+         state,
+         toggleSidebar,
+      ],
+   );
+
+   const managerRef = React.useRef(manager);
+   const contextRef = React.useRef(contextValue);
+   React.useLayoutEffect(() => {
+      managerRef.current = manager;
+      contextRef.current = contextValue;
+   });
+
+   React.useEffect(() => {
+      managerRef.current.register(name, contextRef.current);
+      return () => managerRef.current.unregister(name);
+   }, [name]);
+
+   React.useEffect(() => {
+      managerRef.current.register(name, contextValue);
+   }, [name, contextValue]);
+
+   return (
+      <SidebarContext.Provider value={contextValue}>
+         {style ? (
+            // display:contents lets CSS vars cascade without adding a layout box
+            <div style={{ display: "contents", ...style }}>{children}</div>
+         ) : (
+            children
+         )}
+      </SidebarContext.Provider>
+   );
+}
+
+function SidebarManager({
+   children,
+   name,
+   open,
+   onOpenChange,
+   defaultOpen,
+   style,
+}: {
+   children: React.ReactNode;
+   name: string;
+   open?: boolean;
+   onOpenChange?: (open: boolean) => void;
+   defaultOpen?: boolean;
+   style?: React.CSSProperties;
+}) {
+   if (
+      open !== undefined ||
+      onOpenChange !== undefined ||
+      defaultOpen !== undefined
+   ) {
+      return (
+         <SidebarManagerIsolated
+            defaultOpen={defaultOpen}
+            name={name}
+            onOpenChange={onOpenChange}
+            open={open}
+            style={style}
+         >
+            {children}
+         </SidebarManagerIsolated>
+      );
+   }
+
+   return <SidebarManagerShared name={name}>{children}</SidebarManagerShared>;
 }
 
 function SidebarManagerTrigger({

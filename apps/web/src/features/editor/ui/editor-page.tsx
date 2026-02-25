@@ -7,6 +7,7 @@ import type { Value } from "platejs";
 import { useCallback, useRef, useState } from "react";
 import { orpc } from "@/integrations/orpc/client";
 import { PlateEditor } from "../plate/plate-editor";
+import { EditorContextPanelTabs } from "../plate/ui/editor-context-panel-tabs";
 
 type ContentStatus = "draft" | "published" | "archived";
 
@@ -28,7 +29,6 @@ export function EditorPage({ contentId }: EditorPageProps) {
       () => content.meta ?? { title: "", description: "", slug: "" },
    );
    const [isSaving, setIsSaving] = useState(false);
-   const [showSidebar, setShowSidebar] = useState(true);
 
    const editorValueRef = useRef<Value | undefined>(undefined);
 
@@ -76,7 +76,13 @@ export function EditorPage({ contentId }: EditorPageProps) {
    }, [navigate, slug, teamSlug]);
 
    return (
-      <div className="flex h-screen flex-col overflow-hidden bg-background">
+      <div className="flex flex-col h-full">
+         <EditorContextPanelTabs
+            contentId={contentId}
+            meta={meta}
+            onChange={setMeta}
+            readOnly={content.status === "archived"}
+         />
          <PlateEditor
             contentId={contentId}
             editable={content.status !== "archived"}
@@ -85,16 +91,12 @@ export function EditorPage({ contentId }: EditorPageProps) {
             }
             isSaving={isSaving}
             key={contentId}
-            meta={meta}
             onBack={handleBack}
             onChange={(value) => {
                editorValueRef.current = value;
             }}
-            onMetaChange={setMeta}
             onSave={handleSave}
             onStatusChange={handleStatusChange}
-            onToggleSidebar={() => setShowSidebar((v) => !v)}
-            showLinksSidebar={showSidebar}
             status={content.status as ContentStatus}
             teamId={content.teamId ?? undefined}
             writerId={content.writerId ?? undefined}

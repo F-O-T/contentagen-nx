@@ -30,7 +30,6 @@ import {
    Globe,
    Italic,
    Link2,
-   Link2Off,
    Loader2,
    Save,
    Underline,
@@ -45,8 +44,6 @@ interface EditorFixedToolbarProps {
    onSave?: () => void;
    onBack?: () => void;
    onStatusChange?: (status: ContentStatus) => void;
-   showSidebar?: boolean;
-   onToggleSidebar?: () => void;
 }
 
 const STATUS_CONFIG: Record<
@@ -112,8 +109,6 @@ export function EditorFixedToolbar({
    onSave,
    onBack,
    onStatusChange,
-   showSidebar,
-   onToggleSidebar,
 }: EditorFixedToolbarProps) {
    const editor = useEditorRef();
    const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.draft;
@@ -176,29 +171,6 @@ export function EditorFixedToolbar({
                   <TooltipContent>Link ⌘K</TooltipContent>
                </Tooltip>
             </div>
-
-            <Separator className="h-4 mx-0.5" orientation="vertical" />
-
-            {/* Sidebar toggle */}
-            {onToggleSidebar && (
-               <Tooltip>
-                  <TooltipTrigger asChild>
-                     <Button
-                        className={cn(
-                           "size-8 rounded",
-                           showSidebar && "bg-accent text-accent-foreground",
-                        )}
-                        onClick={onToggleSidebar}
-                        size="icon"
-                        type="button"
-                        variant="ghost"
-                     >
-                        <Link2Off className="size-4" />
-                     </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Links do cluster</TooltipContent>
-               </Tooltip>
-            )}
 
             {/* Spacer */}
             <div className="flex-1" />

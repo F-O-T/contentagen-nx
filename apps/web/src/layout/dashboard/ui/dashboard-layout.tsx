@@ -10,6 +10,7 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import type * as React from "react";
 import { useEffect, useRef } from "react";
+import { GlobalContextPanel } from "@/features/context-panel/context-panel";
 import { FeedbackFab } from "@/features/feedback/ui/feedback-fab";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
@@ -49,6 +50,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
    // Disable scroll on main when in settings
    const isSettingsPage = pathname.includes("/settings");
+   const isEditorPage =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+         pathname.split("/").at(-1) ?? "",
+      );
 
    const orgSlug = activeOrganization?.slug ?? "";
    const teamId = activeTeam?.id ?? "";
@@ -142,11 +147,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                onOpenChange={handleSidebarChange}
                open={sidebarOpen}
             >
-               <SidebarManager name="main">
+               <SidebarManager
+                  name="main"
+                  style={{ "--sidebar-width": "28rem" } as React.CSSProperties}
+               >
                   <AppSidebar />
                </SidebarManager>
 
-               <SidebarInset className="flex flex-col overflow-hidden">
+               <SidebarInset className="flex flex-col overflow-hidden bg-sidebar">
                   <SidebarSubPanel />
                   <div className="shrink-0">
                      <TabBar
@@ -155,16 +163,23 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         onTabFocus={navigateToTab}
                      />
                   </div>
-                  <main
-                     className={cn(
-                        "relative flex-1 bg-background p-4 border-white/10 border-t-1",
-                        isSettingsPage ? "overflow-hidden" : "overflow-y-auto",
-                     )}
-                  >
-                     {children}
-                  </main>
+                  <div className=" flex flex-1 flex-col overflow-hidden rounded-xl bg-background">
+                     <main
+                        className={cn(
+                           "relative flex-1",
+                           isEditorPage
+                              ? "overflow-hidden p-0"
+                              : isSettingsPage
+                                ? "overflow-hidden p-4"
+                                : "overflow-y-auto p-4",
+                        )}
+                     >
+                        {children}
+                     </main>
+                  </div>
                   <FeedbackFab />
                </SidebarInset>
+               <GlobalContextPanel />
             </SidebarProvider>
          </SidebarManagerProvider>
       </EarlyAccessProvider>

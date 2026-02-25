@@ -22,6 +22,11 @@ import { Archive, FileText, Plus, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-header";
+import {
+   ContextPanelAction,
+   ContextPanelSection,
+} from "@/features/context-panel/context-panel-info";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { orpc } from "@/integrations/orpc/client";
 import { ContentMobileCard } from "./content-mobile-card";
 import type { ContentItem } from "./content-table-columns";
@@ -172,6 +177,16 @@ export function ContentListSection() {
          title: "Sem título",
       });
    };
+
+   useContextPanelInfo(
+      <ContextPanelSection title="Ações">
+         <ContextPanelAction
+            icon={Plus}
+            label="Novo conteúdo"
+            onClick={handleCreateNew}
+         />
+      </ContextPanelSection>,
+   );
 
    // Table columns
    const columns = useMemo(

@@ -7,7 +7,7 @@ import { EditorPage } from "@/features/editor/ui/editor-page";
 import { orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
-   "/_authenticated/$slug/$teamSlug/_editor/$contentId",
+   "/_authenticated/$slug/$teamSlug/_dashboard/$contentId",
 )({
    ssr: false,
    beforeLoad: async ({ context, params }) => {
@@ -22,7 +22,7 @@ export const Route = createFileRoute(
 
 function EditorErrorFallback(props: FallbackProps) {
    return createErrorFallback({
-      errorDescription: "Nao foi possivel carregar o editor de conteudo",
+      errorDescription: "Não foi possível carregar o editor de conteúdo",
       errorTitle: "Erro ao carregar editor",
       retryText: "Tentar novamente",
    })(props);

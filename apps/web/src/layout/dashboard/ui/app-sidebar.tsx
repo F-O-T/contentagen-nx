@@ -23,18 +23,14 @@ import { SidebarScopeSwitcher } from "./sidebar-scope-switcher";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
    return (
-      <Sidebar
-         className="border-r-0 group-data-[side=left]:border-r-0"
-         collapsible="icon"
-         {...props}
-      >
+      <Sidebar collapsible="icon" variant="inset" {...props}>
          <SidebarHeader>
             <SidebarScopeSwitcher />
+            <Separator />
          </SidebarHeader>
 
          <SidebarContent>
             <SidebarSearchButton />
-            <Separator />
 
             <SidebarNav />
          </SidebarContent>

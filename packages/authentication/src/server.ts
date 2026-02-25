@@ -401,6 +401,7 @@ export function createAuth(config: SimplifiedAuthConfig) {
    ];
 
    return betterAuth({
+      baseURL: env.BETTER_AUTH_URL,
       account: {
          accountLinking: {
             enabled: true,
