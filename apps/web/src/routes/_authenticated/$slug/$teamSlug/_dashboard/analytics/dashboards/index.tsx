@@ -82,7 +82,7 @@ function DashboardsPage() {
             icon={Plus}
             label="Novo dashboard"
             onClick={() => {
-               /* handled by header button for now */
+               // TODO: Wire to create dashboard action
             }}
          />
       </ContextPanelSection>,

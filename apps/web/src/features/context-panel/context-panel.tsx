@@ -75,7 +75,7 @@ function ContextPanelInner() {
          side="right"
          variant="inset"
       >
-         <SidebarHeader className=" bg-muted">
+         <SidebarHeader className="bg-muted">
             <div className="flex-row flex items-center gap-2 ">
                <TooltipProvider>
                   {allTabs.map((tab) => (
@@ -116,7 +116,7 @@ function ContextPanelInner() {
          </SidebarHeader>
 
          {/* Active tab content — inset rounded card on bg-muted */}
-         <SidebarContent className="  rounded-xl bg-background/50  h-full overflow-auto">
+         <SidebarContent className="rounded-xl bg-background/50 h-full overflow-auto">
             <div>{activeTab?.content}</div>
          </SidebarContent>
       </Sidebar>

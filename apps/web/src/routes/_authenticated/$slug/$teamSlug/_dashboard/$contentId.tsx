@@ -22,7 +22,7 @@ export const Route = createFileRoute(
 
 function EditorErrorFallback(props: FallbackProps) {
    return createErrorFallback({
-      errorDescription: "Nao foi possivel carregar o editor de conteudo",
+      errorDescription: "Não foi possível carregar o editor de conteúdo",
       errorTitle: "Erro ao carregar editor",
       retryText: "Tentar novamente",
    })(props);
