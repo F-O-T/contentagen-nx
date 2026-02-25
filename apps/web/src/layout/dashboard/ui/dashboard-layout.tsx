@@ -50,9 +50,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
    // Disable scroll on main when in settings
    const isSettingsPage = pathname.includes("/settings");
-   const isEditorPage = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      pathname.split("/").at(-1) ?? "",
-   );
+   const isEditorPage =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+         pathname.split("/").at(-1) ?? "",
+      );
 
    const orgSlug = activeOrganization?.slug ?? "";
    const teamId = activeTeam?.id ?? "";
@@ -150,7 +151,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <AppSidebar />
                </SidebarManager>
 
-               <SidebarInset className="flex flex-col overflow-hidden">
+               <SidebarInset className="flex flex-col overflow-hidden bg-sidebar">
                   <SidebarSubPanel />
                   <GlobalContextPanel />
                   <div className="shrink-0">
@@ -160,18 +161,20 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         onTabFocus={navigateToTab}
                      />
                   </div>
-                  <main
-                     className={cn(
-                        "relative flex-1 bg-background border-white/10 border-t-1",
-                        isEditorPage
-                           ? "overflow-hidden p-0"
-                           : isSettingsPage
-                             ? "overflow-hidden p-4"
-                             : "overflow-y-auto p-4",
-                     )}
-                  >
-                     {children}
-                  </main>
+                  <div className="mx-2 mb-2 mt-1.5 flex flex-1 flex-col overflow-hidden rounded-xl bg-background">
+                     <main
+                        className={cn(
+                           "relative flex-1",
+                           isEditorPage
+                              ? "overflow-hidden p-0"
+                              : isSettingsPage
+                                ? "overflow-hidden p-4"
+                                : "overflow-y-auto p-4",
+                        )}
+                     >
+                        {children}
+                     </main>
+                  </div>
                   <FeedbackFab />
                </SidebarInset>
             </SidebarProvider>
