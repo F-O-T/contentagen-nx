@@ -12,25 +12,22 @@ import {
    Sidebar,
    SidebarContent,
    SidebarFooter,
-   SidebarGroup,
-   SidebarGroupContent,
    SidebarHeader,
    SidebarMenu,
    SidebarMenuButton,
    SidebarMenuItem,
    useSidebar,
 } from "@packages/ui/components/sidebar";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import { Bug, ExternalLink, Lightbulb, MessageSquarePlus, PanelLeft, PanelLeftClose, Search, Settings } from "lucide-react";
+import { Link, useParams } from "@tanstack/react-router";
+import { Bug, ExternalLink, Lightbulb, MessageSquarePlus, PanelLeft, PanelLeftClose, Settings } from "lucide-react";
 import type * as React from "react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useCredenza } from "@/hooks/use-credenza";
 import { BugReportForm } from "@/features/feedback/ui/bug-report-form";
 import { FeatureRequestForm } from "@/features/feedback/ui/feature-request-form";
-import { replaceCurrentTab, tabStore } from "@/hooks/use-tab-store";
 import { EarlyAccessSidebarBanner } from "./early-access-sidebar-banner";
 import { NavUser } from "./nav-user";
-import { SidebarNav } from "./sidebar-nav";
+import { SidebarDefaultItems, SidebarNav } from "./sidebar-nav";
 import { SidebarScopeSwitcher } from "./sidebar-scope-switcher";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
@@ -38,12 +35,12 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <Sidebar collapsible="icon" variant="inset" {...props}>
          <SidebarHeader>
             <SidebarScopeSwitcher />
-            <Separator />
+
          </SidebarHeader>
 
          <SidebarContent>
-            <SidebarSearchButton />
-
+            <SidebarDefaultItems />
+            <Separator />
             <SidebarNav />
          </SidebarContent>
 
@@ -57,49 +54,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
    );
 }
 
-function SidebarSearchButton() {
-   const params = useParams({
-      from: "/_authenticated/$slug/$teamSlug/_dashboard",
-   });
-   const slug = params.slug ?? "";
-   const teamSlug = params.teamSlug ?? "";
-   const navigate = useNavigate();
-
-   const handleSearch = useCallback(() => {
-      const route = "/$slug/$teamSlug/search";
-      const params = { slug, teamSlug };
-
-      // Replace current tab with search (don't open a new tab)
-      if (tabStore.state.activeTabId) {
-         replaceCurrentTab({
-            route,
-            params,
-            label: "Pesquisar",
-            icon: "Search",
-            type: "search",
-         });
-      }
-
-      navigate({ to: route, params });
-   }, [navigate, slug, teamSlug]);
-
-   return (
-      <SidebarGroup className="py-0">
-         <SidebarGroupContent>
-            <SidebarMenu>
-               <SidebarMenuItem>
-                  <SidebarMenuButton onClick={handleSearch} tooltip="Pesquisar">
-                     <Search />
-                     <span>Pesquisar</span>
-                  </SidebarMenuButton>
-               </SidebarMenuItem>
-            </SidebarMenu>
-         </SidebarGroupContent>
-      </SidebarGroup>
-   );
-}
-
-const DOCS_URL = "https://docs.contentta.com";
+const DOCS_URL = "https://contentta.co/docs";
 
 function SidebarFeedbackButton() {
    const [open, setOpen] = useState(false);
