@@ -73,6 +73,26 @@ export async function getFolderById(db: DatabaseInstance, folderId: string) {
    }
 }
 
+async function isDescendant(
+   db: DatabaseInstance,
+   folderId: string,
+   candidateParentId: string,
+): Promise<boolean> {
+   let current: string | null = candidateParentId;
+   const visited = new Set<string>();
+   while (current !== null) {
+      if (current === folderId) return true;
+      if (visited.has(current)) break; // cycle guard
+      visited.add(current);
+      const [row] = await db
+         .select({ parentId: folders.parentId })
+         .from(folders)
+         .where(eq(folders.id, current));
+      current = row?.parentId ?? null;
+   }
+   return false;
+}
+
 export async function updateFolder(
    db: DatabaseInstance,
    folderId: string,
@@ -81,6 +101,14 @@ export async function updateFolder(
    >,
 ) {
    try {
+      if (data.parentId != null) {
+         if (data.parentId === folderId) {
+            throw AppError.validation("A folder cannot be its own parent");
+         }
+         if (await isDescendant(db, folderId, data.parentId)) {
+            throw AppError.validation("Cannot move a folder into its own descendant");
+         }
+      }
       const [updated] = await db
          .update(folders)
          .set(data)

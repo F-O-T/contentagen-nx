@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/server";
+import { AppError } from "@packages/utils/errors";
 import {
    createFolder,
    deleteFolder,
@@ -38,6 +39,13 @@ export const create = protectedProcedure
    .input(createFolderSchema)
    .handler(async ({ context, input }) => {
       const { organizationId, userId, db, teamId } = context;
+
+      if (input.parentId != null) {
+         const parent = await getFolderById(db, input.parentId);
+         if (!parent || parent.organizationId !== organizationId || parent.teamId !== teamId) {
+            throw new ORPCError("NOT_FOUND", { message: "Parent folder not found" });
+         }
+      }
 
       const folder = await createFolder(db, {
          organizationId,
@@ -82,7 +90,15 @@ export const update = protectedProcedure
       }
 
       const { id: _, ...data } = input;
-      const updated = await updateFolder(db, input.id, data);
+      let updated;
+      try {
+         updated = await updateFolder(db, input.id, data);
+      } catch (err) {
+         if (err instanceof AppError && err.type === "validation") {
+            throw new ORPCError("BAD_REQUEST", { message: err.message });
+         }
+         throw err;
+      }
       if (!updated) {
          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message: "Failed to update folder",

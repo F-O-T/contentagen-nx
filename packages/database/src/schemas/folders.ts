@@ -17,7 +17,7 @@ export const folders = pgTable(
       organizationId: uuid("organization_id")
          .notNull()
          .references(() => organization.id, { onDelete: "cascade" }),
-      teamId: uuid("team_id").references(() => team.id, { onDelete: "cascade" }),
+      teamId: uuid("team_id").notNull().references(() => team.id, { onDelete: "cascade" }),
       name: text("name").notNull(),
       description: text("description"),
       parentId: uuid("parent_id").references(

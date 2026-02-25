@@ -52,7 +52,7 @@
       "lodash": "^4.17.23",
       "lowlight": "^3.3.0",
       "lucide-react": "^0.575.0",
-      "motion": "catalog:ui",
+      "motion": "^12.34.3",
       "radix-ui": "^1.4.3",
       "react": "catalog:react",
       "react-day-picker": "^9.13.2",

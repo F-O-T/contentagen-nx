@@ -8,23 +8,11 @@ import {
    SelectTrigger,
    SelectValue,
 } from "@packages/ui/components/select";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useCallback, useRef, useTransition } from "react";
 import { toast } from "sonner";
 import { orpc } from "@/integrations/orpc/client";
-import type { FolderWithChildren } from "@packages/database/repositories/folder-repository";
-import { useFoldersQuery } from "@/features/analytics/hooks/use-folders";
-
-function flattenForParent(
-   nodes: FolderWithChildren[],
-   out: { id: string; name: string }[] = [],
-): { id: string; name: string }[] {
-   for (const node of nodes) {
-      out.push({ id: node.id, name: node.name });
-      flattenForParent(node.children, out);
-   }
-   return out;
-}
+import { flattenFolders } from "@/features/analytics/hooks/use-folders";
 
 interface NewFolderSheetContentProps {
    teamId: string;
@@ -35,33 +23,16 @@ export function NewFolderSheetContent({
    teamId,
    onSuccess,
 }: NewFolderSheetContentProps) {
-   const queryClient = useQueryClient();
    const parentIdRef = useRef<HTMLInputElement>(null);
-   const { data: folders, isLoading } = useFoldersQuery(teamId);
+   const { data: folders } = useSuspenseQuery(orpc.folders.list.queryOptions({ input: { teamId } }));
    const [isPending, startTransition] = useTransition();
 
-   const createMutation = useMutation(
-      orpc.folders.create.mutationOptions({
-         onSuccess: () => {
-            queryClient.invalidateQueries({
-               queryKey: orpc.folders.list.queryKey({ input: { teamId } }),
-            });
-            queryClient.invalidateQueries({
-               queryKey: orpc.dashboards.list.queryKey({}),
-            });
-            queryClient.invalidateQueries({
-               queryKey: orpc.insights.list.queryKey({}),
-            });
-         },
-      }),
-   );
+   const createMutation = useMutation(orpc.folders.create.mutationOptions());
 
-   const parentOptions = folders
-      ? [
-           { id: null as string | null, name: "Nenhuma (raiz)" },
-           ...flattenForParent(folders).map((f) => ({ id: f.id, name: f.name })),
-        ]
-      : [];
+   const parentOptions = [
+      { id: null as string | null, name: "Nenhuma (raiz)" },
+      ...flattenFolders(folders).map((f) => ({ id: f.id, name: f.name })),
+   ];
 
    const handleSubmit = useCallback(
       (e: React.FormEvent<HTMLFormElement>) => {
@@ -106,7 +77,7 @@ export function NewFolderSheetContent({
                required
             />
          </div>
-         {!isLoading && parentOptions.length > 1 && (
+         {parentOptions.length > 1 && (
             <div className="grid gap-2">
                <Label htmlFor="folder-parent">Pasta pai</Label>
                <input
