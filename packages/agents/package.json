@@ -1,9 +1,10 @@
 {
    "dependencies": {
       "@f-o-t/markdown": "catalog:fot",
-      "@mastra/rag": "catalog:mastra",
+      "@mastra/ai-sdk": "catalog:mastra",
       "@mastra/core": "catalog:mastra",
       "@mastra/pg": "catalog:mastra",
+      "@mastra/rag": "catalog:mastra",
       "@packages/database": "workspace:*",
       "@packages/environment": "workspace:*",
       "@packages/files": "workspace:*",

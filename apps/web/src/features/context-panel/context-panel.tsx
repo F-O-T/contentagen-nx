@@ -106,8 +106,8 @@ function ContextPanelInner() {
          </SidebarHeader>
 
          {/* Active tab content — inset rounded card on bg-muted */}
-         <SidebarContent className="rounded-xl bg-background/50 h-full overflow-auto">
-            <div>{activeTab?.content}</div>
+         <SidebarContent className="rounded-xl bg-background/50 h-full overflow-hidden">
+            <div className="h-full">{activeTab?.content}</div>
          </SidebarContent>
       </Sidebar>
    );

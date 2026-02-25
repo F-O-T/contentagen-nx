@@ -1,9 +1,9 @@
-import { mastra } from "@packages/agents";
+import { mastra,toAISdkStream } from "@packages/agents";
 import { createAuth } from "@packages/authentication/server";
 import { createDb } from "@packages/database/client";
 import { env } from "@packages/environment/server";
 import { createFileRoute } from "@tanstack/react-router";
-import { createUIMessageStreamResponse } from "ai";
+import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
 
 const db = createDb({ databaseUrl: env.DATABASE_URL });
 const auth = createAuth({ db, env });
@@ -21,11 +21,22 @@ export const Route = createFileRoute("/api/chat/$")({
             const resourceId = `${teamId}:${session.user.id}`;
 
             const agent = mastra.getAgent("unifiedContent");
-            const result = await agent.stream(messages, {
+            const stream = await agent.stream(messages, {
                memory: { resource: resourceId, thread: threadId },
             });
 
-            return createUIMessageStreamResponse(result.toAISdkFormat());
+            const uiMessageStream = createUIMessageStream({
+               originalMessages: messages,
+               execute: async ({ writer }) => {
+                  for await (const part of toAISdkStream(stream, { from: "agent" })) {
+                     await writer.write(part);
+                  }
+               },
+            });
+
+            return createUIMessageStreamResponse({
+               stream: uiMessageStream,
+            });
          },
       },
    },

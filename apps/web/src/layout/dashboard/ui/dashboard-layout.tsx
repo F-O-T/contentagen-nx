@@ -11,8 +11,10 @@ import { useLocation } from "@tanstack/react-router";
 import type * as React from "react";
 import { useEffect, useRef } from "react";
 import { GlobalContextPanel } from "@/features/context-panel/context-panel";
-import { FeedbackFab } from "@/features/feedback/ui/feedback-fab";
+import { useApiErrorTracker } from "@/features/feedback/hooks/use-api-error-tracker";
+import { BugReportForm } from "@/features/feedback/ui/bug-report-form";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
+import { useCredenza } from "@/hooks/use-credenza";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { EarlyAccessProvider } from "@/hooks/use-early-access";
 import { useLastOrganization } from "@/hooks/use-last-organization";
@@ -25,6 +27,28 @@ import { useTabRouterSync } from "../hooks/use-tab-router-sync";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarSubPanel } from "./sidebar-sub-panel";
 import { TabBar } from "./tab-bar";
+
+function AutoBugReporter() {
+   const { openCredenza, closeCredenza } = useCredenza();
+   const { shouldShowBugReport, dismiss } = useApiErrorTracker();
+
+   useEffect(() => {
+      if (shouldShowBugReport) {
+         openCredenza({
+            children: (
+               <BugReportForm
+                  onSuccess={() => {
+                     dismiss();
+                     closeCredenza();
+                  }}
+               />
+            ),
+         });
+      }
+   }, [shouldShowBugReport, openCredenza, closeCredenza, dismiss]);
+
+   return null;
+}
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
    const { activeOrganization } = useActiveOrganization();
@@ -177,7 +201,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         {children}
                      </main>
                   </div>
-                  <FeedbackFab />
+                  <AutoBugReporter />
                </SidebarInset>
                <GlobalContextPanel />
             </SidebarProvider>
