@@ -1,11 +1,12 @@
 "use client";
 
 import { Button } from "@packages/ui/components/button";
+import { Separator } from "@packages/ui/components/separator";
 import {
    Sidebar,
    SidebarContent,
+   SidebarHeader,
    SidebarManager,
-   SidebarProvider,
 } from "@packages/ui/components/sidebar";
 import {
    Tooltip,
@@ -15,7 +16,7 @@ import {
 } from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
 import { useStore } from "@tanstack/react-store";
-import { MessageSquare, X } from "lucide-react";
+import { Info, MessageSquare, X } from "lucide-react";
 import type React from "react";
 import { type ContextPanelTab, contextPanelStore } from "./context-panel-store";
 import {
@@ -40,6 +41,19 @@ const CHAT_TAB: ContextPanelTab = {
    icon: MessageSquare,
    label: "Chat IA",
    content: <ChatPlaceholder />,
+   order: 1,
+};
+
+function InfoContent() {
+   const { infoContent } = useStore(contextPanelStore);
+   return <>{infoContent}</>;
+}
+
+const INFO_TAB: ContextPanelTab = {
+   id: "info",
+   icon: Info,
+   label: "Informações",
+   content: <InfoContent />,
    order: 0,
 };
 
@@ -47,6 +61,7 @@ function ContextPanelInner() {
    const { activeTabId, dynamicTabs } = useStore(contextPanelStore);
 
    const allTabs: ContextPanelTab[] = [
+      INFO_TAB,
       CHAT_TAB,
       ...dynamicTabs.sort((a, b) => (a.order ?? 99) - (b.order ?? 99)),
    ];
@@ -54,45 +69,56 @@ function ContextPanelInner() {
    const activeTab = allTabs.find((t) => t.id === activeTabId) ?? allTabs[0];
 
    return (
-      <Sidebar collapsible="offcanvas" side="right" variant="inset">
-         {/* Tab icons header — h-12 aligns vertically with TabBar */}
-         <div className="flex h-12 shrink-0 items-center gap-0.5 border-b px-2">
-            <TooltipProvider>
-               {allTabs.map((tab) => (
-                  <Tooltip key={tab.id}>
-                     <TooltipTrigger asChild>
-                        <Button
-                           className={cn(
-                              "size-7 rounded",
-                              activeTabId === tab.id &&
+      <Sidebar
+         collapsible="offcanvas"
+         className="bg-muted rounded-xl"
+         variant="inset"
+         side="right"
+      >
+         <SidebarHeader className=" bg-muted">
+            <div className="flex-row flex items-center gap-2 ">
+               <TooltipProvider>
+                  {allTabs.map((tab) => (
+                     <Tooltip key={tab.id}>
+                        <TooltipTrigger asChild>
+                           <Button
+                              className={cn(
+                                 "size-7 rounded",
+                                 activeTabId === tab.id &&
                                  "bg-accent text-accent-foreground",
-                           )}
-                           onClick={() => setActiveTab(tab.id)}
-                           size="icon"
-                           type="button"
-                           variant="ghost"
-                        >
-                           <tab.icon className="size-4" />
-                        </Button>
-                     </TooltipTrigger>
-                     <TooltipContent side="bottom">{tab.label}</TooltipContent>
-                  </Tooltip>
-               ))}
-               <div className="flex-1" />
-               <Button
-                  className="size-7 rounded text-muted-foreground"
-                  onClick={closeContextPanel}
-                  size="icon"
-                  type="button"
-                  variant="ghost"
-               >
-                  <X className="size-3.5" />
-               </Button>
-            </TooltipProvider>
-         </div>
+                              )}
+                              onClick={() => setActiveTab(tab.id)}
+                              size="icon"
+                              type="button"
+                              variant="ghost"
+                           >
+                              <tab.icon className="size-4" />
+                           </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                           {tab.label}
+                        </TooltipContent>
+                     </Tooltip>
+                  ))}
+                  <div className="flex-1" />
+                  <Button
+                     className="size-7 rounded text-muted-foreground"
+                     onClick={closeContextPanel}
+                     size="icon"
+                     type="button"
+                     variant="ghost"
+                  >
+                     <X className="size-3.5" />
+                  </Button>
+               </TooltipProvider>
+            </div>
+            <Separator />
+         </SidebarHeader>
 
-         {/* Active tab content */}
-         <SidebarContent>{activeTab?.content}</SidebarContent>
+         {/* Active tab content — inset rounded card on bg-muted */}
+         <SidebarContent className="  rounded-xl bg-background/50  h-full overflow-auto">
+            <div>{activeTab?.content}</div>
+         </SidebarContent>
       </Sidebar>
    );
 }
@@ -101,18 +127,15 @@ export function GlobalContextPanel() {
    const { isOpen } = useStore(contextPanelStore);
 
    return (
-      <SidebarProvider
-         className="min-h-0"
-         defaultOpen={false}
+      <SidebarManager
+         name="context-panel"
+         open={isOpen}
          onOpenChange={(open) =>
             open ? openContextPanel() : closeContextPanel()
          }
-         open={isOpen}
-         style={{ "--sidebar-width": "20rem" } as React.CSSProperties}
+         style={{ "--sidebar-width": "28rem" } as React.CSSProperties}
       >
-         <SidebarManager name="context-panel">
-            <ContextPanelInner />
-         </SidebarManager>
-      </SidebarProvider>
+         <ContextPanelInner />
+      </SidebarManager>
    );
 }

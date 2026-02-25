@@ -7,6 +7,8 @@ import {
 } from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
 import { Check, Pencil, X } from "lucide-react";
+import { ContextPanelHeaderActions } from "@/features/context-panel/context-panel-header-actions";
+import { useContextPanel } from "@/features/context-panel/use-context-panel";
 import {
    type ReactNode,
    useCallback,
@@ -166,6 +168,7 @@ export function PageHeader({
    actions,
    className,
 }: PageHeaderProps) {
+   const { isOpen } = useContextPanel();
    const hasEditableDescription = editable && onDescriptionChange != null;
    const showDescription = description != null || hasEditableDescription;
 
@@ -207,9 +210,10 @@ export function PageHeader({
                ) : null}
             </div>
          </div>
-         {actions != null && (
-            <div className="flex items-center gap-2 shrink-0">{actions}</div>
-         )}
+         <div className="flex items-center gap-2 shrink-0">
+            {actions}
+            {!isOpen && <ContextPanelHeaderActions />}
+         </div>
       </header>
    );
 }

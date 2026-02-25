@@ -1,12 +1,16 @@
 import { Button } from "@packages/ui/components/button";
 import { createErrorFallback } from "@packages/ui/components/error-fallback";
 import { Skeleton } from "@packages/ui/components/skeleton";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { PageHeader } from "@/components/page-header";
-import { ContextPanelHeaderActions } from "@/features/context-panel/context-panel-header-actions";
+import {
+   ContextPanelAction,
+   ContextPanelSection,
+} from "@/features/context-panel/context-panel-info";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { FormsList } from "@/features/forms/ui/forms-list";
 
 export const Route = createFileRoute(
@@ -37,23 +41,36 @@ function FormsPageSkeleton() {
 
 function FormsPage() {
    const { slug, teamSlug } = Route.useParams();
+   const navigate = useNavigate();
+
+   useContextPanelInfo(
+      <ContextPanelSection title="Ações">
+         <ContextPanelAction
+            icon={Plus}
+            label="Novo formulário"
+            onClick={() =>
+               navigate({
+                  to: "/$slug/$teamSlug/forms/$formId",
+                  params: { slug, teamSlug, formId: "new" },
+               })
+            }
+         />
+      </ContextPanelSection>,
+   );
 
    return (
       <main className="flex flex-col gap-4">
          <PageHeader
             actions={
-               <>
-                  <Button asChild>
-                     <Link
-                        params={{ slug, teamSlug, formId: "new" }}
-                        to="/$slug/$teamSlug/forms/$formId"
-                     >
-                        <Plus className="size-4 mr-1" />
-                        Novo formulário
-                     </Link>
-                  </Button>
-                  <ContextPanelHeaderActions />
-               </>
+               <Button asChild>
+                  <Link
+                     params={{ slug, teamSlug, formId: "new" }}
+                     to="/$slug/$teamSlug/forms/$formId"
+                  >
+                     <Plus className="size-4 mr-1" />
+                     Novo formulário
+                  </Link>
+               </Button>
             }
             description="Crie e gerencie formulários para coletar dados dos visitantes"
             title="Formulários"

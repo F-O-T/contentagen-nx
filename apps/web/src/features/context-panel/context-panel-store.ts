@@ -13,10 +13,12 @@ interface ContextPanelState {
    isOpen: boolean;
    activeTabId: string;
    dynamicTabs: ContextPanelTab[];
+   infoContent: React.ReactNode;
 }
 
 export const contextPanelStore = new Store<ContextPanelState>({
    isOpen: false,
-   activeTabId: "chat",
+   activeTabId: "info",
    dynamicTabs: [],
+   infoContent: null,
 });

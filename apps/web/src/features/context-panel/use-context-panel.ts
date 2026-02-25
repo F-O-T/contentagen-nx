@@ -1,4 +1,6 @@
 import { useStore } from "@tanstack/react-store";
+import { useEffect } from "react";
+import type React from "react";
 import { contextPanelStore, type ContextPanelTab } from "./context-panel-store";
 
 export const openContextPanel = () =>
@@ -25,22 +27,38 @@ export const registerTab = (tab: ContextPanelTab) =>
 export const unregisterTab = (id: string) =>
    contextPanelStore.setState((s) => {
       const remaining = s.dynamicTabs.filter((t) => t.id !== id);
-      const activeTabId =
-         s.activeTabId === id ? "chat" : s.activeTabId;
+      const activeTabId = s.activeTabId === id ? "info" : s.activeTabId;
       return { ...s, dynamicTabs: remaining, activeTabId };
    });
 
+export const setInfoContent = (content: React.ReactNode) =>
+   contextPanelStore.setState((s) => ({ ...s, infoContent: content }));
+
+export const clearInfoContent = () =>
+   contextPanelStore.setState((s) => ({ ...s, infoContent: null }));
+
+export const useContextPanelInfo = (content: React.ReactNode) => {
+   // biome-ignore lint/correctness/useExhaustiveDependencies: content is intentionally stable on mount
+   useEffect(() => {
+      setInfoContent(content);
+      return () => clearInfoContent();
+   }, []);
+};
+
 export const useContextPanel = () => {
-   const { isOpen, activeTabId, dynamicTabs } = useStore(contextPanelStore);
+   const { isOpen, activeTabId, dynamicTabs, infoContent } = useStore(contextPanelStore);
    return {
       isOpen,
       activeTabId,
       dynamicTabs,
+      infoContent,
       openContextPanel,
       closeContextPanel,
       toggleContextPanel,
       setActiveTab,
       registerTab,
       unregisterTab,
+      setInfoContent,
+      clearInfoContent,
    };
 };

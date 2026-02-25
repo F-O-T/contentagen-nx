@@ -147,13 +147,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                onOpenChange={handleSidebarChange}
                open={sidebarOpen}
             >
-               <SidebarManager name="main">
+               <SidebarManager
+                  name="main"
+                  style={{ "--sidebar-width": "28rem" } as React.CSSProperties}
+               >
                   <AppSidebar />
                </SidebarManager>
 
                <SidebarInset className="flex flex-col overflow-hidden bg-sidebar">
                   <SidebarSubPanel />
-                  <GlobalContextPanel />
                   <div className="shrink-0">
                      <TabBar
                         onNewTab={openNewSearchTab}
@@ -161,15 +163,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         onTabFocus={navigateToTab}
                      />
                   </div>
-                  <div className="mx-2 mb-2 mt-1.5 flex flex-1 flex-col overflow-hidden rounded-xl bg-background">
+                  <div className=" flex flex-1 flex-col overflow-hidden rounded-xl bg-background">
                      <main
                         className={cn(
                            "relative flex-1",
                            isEditorPage
                               ? "overflow-hidden p-0"
                               : isSettingsPage
-                                ? "overflow-hidden p-4"
-                                : "overflow-y-auto p-4",
+                                 ? "overflow-hidden p-4"
+                                 : "overflow-y-auto p-4",
                         )}
                      >
                         {children}
@@ -177,6 +179,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   </div>
                   <FeedbackFab />
                </SidebarInset>
+               <GlobalContextPanel />
             </SidebarProvider>
          </SidebarManagerProvider>
       </EarlyAccessProvider>

@@ -5,6 +5,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LayoutDashboard, Plus } from "lucide-react";
 import { Suspense } from "react";
 import { PageHeader } from "@/components/page-header";
+import {
+   ContextPanelAction,
+   ContextPanelSection,
+} from "@/features/context-panel/context-panel-info";
+import { useContextPanelInfo } from "@/features/context-panel/use-context-panel";
 import { DashboardListCard } from "@/features/analytics/ui/dashboard-list-card";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -71,6 +76,18 @@ function DashboardsList() {
 }
 
 function DashboardsPage() {
+   useContextPanelInfo(
+      <ContextPanelSection title="Ações">
+         <ContextPanelAction
+            icon={Plus}
+            label="Novo dashboard"
+            onClick={() => {
+               /* handled by header button for now */
+            }}
+         />
+      </ContextPanelSection>,
+   );
+
    return (
       <main className="flex flex-col gap-4">
          <PageHeader

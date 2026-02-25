@@ -5,20 +5,17 @@ import {
    TooltipProvider,
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
-import { cn } from "@packages/ui/lib/utils";
 import { PanelRight, Sparkles } from "lucide-react";
-import {
-   openContextPanel,
-   setActiveTab,
-   toggleContextPanel,
-   useContextPanel,
-} from "./use-context-panel";
+import { openContextPanel, setActiveTab } from "./use-context-panel";
 
 export function ContextPanelHeaderActions() {
-   const { isOpen } = useContextPanel();
-
    const handleOpenAI = () => {
       setActiveTab("chat");
+      openContextPanel();
+   };
+
+   const handleOpenPanel = () => {
+      setActiveTab("info");
       openContextPanel();
    };
 
@@ -28,10 +25,7 @@ export function ContextPanelHeaderActions() {
             <Tooltip>
                <TooltipTrigger asChild>
                   <Button
-                     className={cn(
-                        "size-8 rounded",
-                        isOpen && "bg-accent text-accent-foreground",
-                     )}
+                     className="size-8 rounded"
                      onClick={handleOpenAI}
                      size="icon"
                      type="button"
@@ -46,11 +40,8 @@ export function ContextPanelHeaderActions() {
             <Tooltip>
                <TooltipTrigger asChild>
                   <Button
-                     className={cn(
-                        "size-8 rounded",
-                        isOpen && "bg-accent text-accent-foreground",
-                     )}
-                     onClick={toggleContextPanel}
+                     className="size-8 rounded"
+                     onClick={handleOpenPanel}
                      size="icon"
                      type="button"
                      variant="ghost"
@@ -58,9 +49,7 @@ export function ContextPanelHeaderActions() {
                      <PanelRight className="size-4" />
                   </Button>
                </TooltipTrigger>
-               <TooltipContent>
-                  {isOpen ? "Fechar painel" : "Abrir painel"}
-               </TooltipContent>
+               <TooltipContent>Abrir painel</TooltipContent>
             </Tooltip>
          </div>
       </TooltipProvider>
