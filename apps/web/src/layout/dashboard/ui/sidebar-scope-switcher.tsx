@@ -296,37 +296,36 @@ function SidebarScopeSwitcherContent() {
 
    return (
       <SidebarMenu>
-         <SidebarMenuItem>
-            <div
-               className={`flex items-center ${isCollapsed ? "size-8 justify-center" : "gap-1.5"}`}
-            >
-               <Popover onOpenChange={setOrgOpen} open={orgOpen}>
-                  <PopoverTrigger asChild>
-                     <button
-                        aria-label="Organizacao"
-                        className={`flex shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent ${isCollapsed ? "size-8 p-0" : "p-1.5"}`}
-                        type="button"
-                     >
-                        <Avatar
-                           className={`${isCollapsed ? "size-6" : "size-8"} rounded-md`}
-                        >
-                           <AvatarImage
-                              alt={activeOrganization.name}
-                              src={activeOrganization.logo ?? undefined}
-                           />
-                           <AvatarFallback
-                              className={`rounded-md text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
-                           >
-                              {getInitials(activeOrganization.name)}
-                           </AvatarFallback>
-                        </Avatar>
-                     </button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                     align="start"
-                     className="w-72 p-0"
-                     sideOffset={8}
+         <SidebarMenuItem
+            className={!isCollapsed ? "flex items-center gap-1.5" : undefined}
+         >
+            <Popover onOpenChange={setOrgOpen} open={orgOpen}>
+               <PopoverTrigger asChild>
+                  <button
+                     aria-label="Organizacao"
+                     className={`flex shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent ${isCollapsed ? "w-full p-2" : "p-1.5"}`}
+                     type="button"
                   >
+                     <Avatar
+                        className={`${isCollapsed ? "size-6" : "size-8"} rounded-md`}
+                     >
+                        <AvatarImage
+                           alt={activeOrganization.name}
+                           src={activeOrganization.logo ?? undefined}
+                        />
+                        <AvatarFallback
+                           className={`rounded-md text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
+                        >
+                           {getInitials(activeOrganization.name)}
+                        </AvatarFallback>
+                     </Avatar>
+                  </button>
+               </PopoverTrigger>
+               <PopoverContent
+                  align="start"
+                  className="w-72 p-0"
+                  sideOffset={8}
+               >
                      <Command>
                         <CommandInput placeholder="Filtrar organizacoes..." />
                         <CommandList>
@@ -400,77 +399,76 @@ function SidebarScopeSwitcherContent() {
                            </CommandGroup>
                         </CommandList>
                      </Command>
-                  </PopoverContent>
-               </Popover>
+               </PopoverContent>
+            </Popover>
 
-               {!isCollapsed && (
-                  <Popover onOpenChange={setTeamOpen} open={teamOpen}>
-                     <PopoverTrigger asChild>
-                        <button
-                           aria-label="Projeto"
-                           className="flex min-w-0 flex-1 items-center gap-2 rounded-md border bg-muted/50 px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-accent"
-                           type="button"
-                        >
-                           <span className="truncate font-medium flex-1">
-                              {activeTeam?.name ?? "Sem projeto"}
-                           </span>
-                           <ChevronDown className="ml-auto size-4" />
-                        </button>
-                     </PopoverTrigger>
-                     <PopoverContent
-                        align="start"
-                        className="w-72 p-0"
-                        sideOffset={8}
+            {!isCollapsed && (
+               <Popover onOpenChange={setTeamOpen} open={teamOpen}>
+                  <PopoverTrigger asChild>
+                     <button
+                        aria-label="Projeto"
+                        className="flex min-w-0 flex-1 items-center gap-2 rounded-md border bg-muted/50 px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-accent"
+                        type="button"
                      >
-                        <Command>
-                           <CommandInput placeholder="Filtrar projetos..." />
-                           <CommandList>
-                              <CommandEmpty>
-                                 Nenhum resultado encontrado.
-                              </CommandEmpty>
-                              <CommandGroup heading="Projetos">
-                                 {activeTeam && (
-                                    <CommandItem
-                                       disabled
-                                       value={activeTeam.name}
-                                    >
-                                       <Check className="size-4" />
-                                       <span className="truncate">
-                                          {activeTeam.name}
-                                       </span>
-                                    </CommandItem>
-                                 )}
-                                 {otherTeams.map((team, index) => (
-                                    <CommandItem
-                                       key={`team-${index + 1}`}
-                                       onSelect={() => handleTeamSwitch(team)}
-                                       value={team.name}
-                                    >
-                                       <span className="size-4" />
-                                       <span className="truncate">
-                                          {team.name}
-                                       </span>
-                                    </CommandItem>
-                                 ))}
+                        <span className="truncate font-medium flex-1">
+                           {activeTeam?.name ?? "Sem projeto"}
+                        </span>
+                        <ChevronDown className="ml-auto size-4" />
+                     </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                     align="start"
+                     className="w-72 p-0"
+                     sideOffset={8}
+                  >
+                     <Command>
+                        <CommandInput placeholder="Filtrar projetos..." />
+                        <CommandList>
+                           <CommandEmpty>
+                              Nenhum resultado encontrado.
+                           </CommandEmpty>
+                           <CommandGroup heading="Projetos">
+                              {activeTeam && (
                                  <CommandItem
-                                    onSelect={handleNewProject}
-                                    value="Novo projeto"
+                                    disabled
+                                    value={activeTeam.name}
                                  >
-                                    <Plus className="size-4" />
-                                    <span>
-                                       {projectLimit !== null &&
-                                       projectLimit !== Number.POSITIVE_INFINITY
-                                          ? `Novo projeto (${projectCount}/${projectLimit})`
-                                          : "Novo projeto"}
+                                    <Check className="size-4" />
+                                    <span className="truncate">
+                                       {activeTeam.name}
                                     </span>
                                  </CommandItem>
-                              </CommandGroup>
-                           </CommandList>
-                        </Command>
-                     </PopoverContent>
-                  </Popover>
-               )}
-            </div>
+                              )}
+                              {otherTeams.map((team, index) => (
+                                 <CommandItem
+                                    key={`team-${index + 1}`}
+                                    onSelect={() => handleTeamSwitch(team)}
+                                    value={team.name}
+                                 >
+                                    <span className="size-4" />
+                                    <span className="truncate">
+                                       {team.name}
+                                    </span>
+                                 </CommandItem>
+                              ))}
+                              <CommandItem
+                                 onSelect={handleNewProject}
+                                 value="Novo projeto"
+                              >
+                                 <Plus className="size-4" />
+                                 <span>
+                                    {projectLimit !== null &&
+                                    projectLimit !== Number.POSITIVE_INFINITY
+                                       ? `Novo projeto (${projectCount}/${projectLimit})`
+                                       : "Novo projeto"}
+                                 </span>
+                              </CommandItem>
+                           </CommandGroup>
+                        </CommandList>
+                     </Command>
+                  </PopoverContent>
+               </Popover>
+            )}
          </SidebarMenuItem>
       </SidebarMenu>
    );

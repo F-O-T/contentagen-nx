@@ -108,12 +108,9 @@ function NavItem({
 
 function useNavHandlers() {
    const { pathname, searchStr } = useLocation();
-   const params = useParams({
+   const { slug, teamSlug } = useParams({
       from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
-   const slug = params.slug ?? pathname.split("/")[1] ?? "";
-   const { activeTeamId } = useActiveTeam();
-   const teamSlug = params.teamSlug ?? activeTeamId ?? null;
    const { activeSection } = useSidebarNav();
    const router = useRouter();
    const manager = useSidebarManager();

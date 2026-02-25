@@ -8,16 +8,29 @@ import {
 import { Button } from "@packages/ui/components/button";
 import { cn } from "@packages/ui/lib/utils";
 import { MessageSquarePlusIcon, Trash2Icon } from "lucide-react";
-import type { FC } from "react";
+import type { FC, ReactNode } from "react";
 
 export interface ThreadListProps {
    welcomeIconUrl?: string;
    className?: string;
+   /**
+    * Optional render function for thread item trigger.
+    * Receives the thread's externalId and title, plus the default children.
+    * If not provided, the default button trigger is used.
+    *
+    * Use this to inject routing (e.g. TanStack Link) from the app layer.
+    */
+   renderThreadTrigger?: (props: {
+      externalId: string | undefined;
+      title: string | undefined;
+      children: ReactNode;
+   }) => ReactNode;
 }
 
 export const ThreadList: FC<ThreadListProps> = ({
    welcomeIconUrl,
    className,
+   renderThreadTrigger,
 }) => {
    return (
       <ThreadListPrimitive.Root
@@ -33,7 +46,14 @@ export const ThreadList: FC<ThreadListProps> = ({
                Conversas
             </p>
             <ThreadListPrimitive.Items
-               components={{ ThreadListItem: ThreadListItemComponent }}
+               components={{
+                  ThreadListItem: (props) => (
+                     <ThreadListItemComponent
+                        {...props}
+                        renderThreadTrigger={renderThreadTrigger}
+                     />
+                  ),
+               }}
             />
          </div>
       </ThreadListPrimitive.Root>
@@ -54,8 +74,30 @@ const ThreadListNew: FC<{ welcomeIconUrl?: string }> = () => {
    );
 };
 
-const ThreadListItemComponent: FC = () => {
+const ThreadListItemComponent: FC<{
+   renderThreadTrigger?: ThreadListProps["renderThreadTrigger"];
+}> = ({ renderThreadTrigger }) => {
    const title = useAuiState((s) => s.threadListItem.title);
+   const externalId = useAuiState((s) => s.threadListItem.externalId);
+
+   const triggerContent = (
+      <span className="flex-1 truncate text-foreground/80">
+         {title ?? "Nova conversa"}
+      </span>
+   );
+
+   const trigger = renderThreadTrigger ? (
+      renderThreadTrigger({ externalId, title: title ?? undefined, children: triggerContent })
+   ) : (
+      <ThreadListItemPrimitive.Trigger asChild>
+         <button
+            className="flex min-w-0 flex-1 items-center gap-2 text-left"
+            type="button"
+         >
+            {triggerContent}
+         </button>
+      </ThreadListItemPrimitive.Trigger>
+   );
 
    return (
       <ThreadListItemPrimitive.Root
@@ -64,16 +106,7 @@ const ThreadListItemComponent: FC = () => {
             "data-[active=true]:bg-accent/80 data-[active=true]:font-medium",
          )}
       >
-         <ThreadListItemPrimitive.Trigger asChild>
-            <button
-               className="flex flex-1 min-w-0 items-center gap-2 text-left"
-               type="button"
-            >
-               <span className="flex-1 truncate text-foreground/80">
-                  {title ?? "Nova conversa"}
-               </span>
-            </button>
-         </ThreadListItemPrimitive.Trigger>
+         {trigger}
 
          <ThreadListItemPrimitive.Delete asChild>
             <button

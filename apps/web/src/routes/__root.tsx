@@ -40,7 +40,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       ],
       links: [
          {
-            href: "/favicon.svg",
+            href: "/arandu.svg",
             rel: "icon",
          },
 

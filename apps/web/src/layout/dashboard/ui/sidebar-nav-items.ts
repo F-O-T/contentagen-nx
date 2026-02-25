@@ -55,7 +55,7 @@ export const navGroups: NavGroupDef[] = [
          },
          {
             id: "chat",
-            label: "Arandu",
+            label: "Contentta AI",
             icon: Sparkles,
             route: "/$slug/$teamSlug/chat",
          },

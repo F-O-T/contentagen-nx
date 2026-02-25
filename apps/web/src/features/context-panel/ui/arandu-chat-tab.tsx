@@ -6,8 +6,8 @@ import {
 import type {
    QuickSuggestion,
    RecentThread,
-} from "@packages/ui/components/assistant-ui/thread";
-import { Thread } from "@packages/ui/components/assistant-ui/thread";
+} from "@/features/arandu-chat/ui/thread";
+import { Thread } from "@/features/arandu-chat/ui/thread";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useActiveTeam } from "@/hooks/use-active-team";
