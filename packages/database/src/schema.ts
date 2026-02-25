@@ -20,6 +20,7 @@ export * from "./schemas/data-sources";
 export * from "./schemas/discussions";
 export * from "./schemas/event-catalog";
 export * from "./schemas/event-views";
+export * from "./schemas/folders";
 // Events
 export * from "./schemas/events";
 // Experiments

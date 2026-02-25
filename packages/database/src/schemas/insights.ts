@@ -8,6 +8,7 @@ import {
    uuid,
 } from "drizzle-orm/pg-core";
 import { organization, team, user } from "./auth";
+import { folders } from "./folders";
 
 export const insights = pgTable(
    "insights",
@@ -22,6 +23,9 @@ export const insights = pgTable(
       createdBy: uuid("created_by")
          .notNull()
          .references(() => user.id, { onDelete: "cascade" }),
+      folderId: uuid("folder_id").references(() => folders.id, {
+         onDelete: "set null",
+      }),
       name: text("name").notNull(),
       description: text("description"),
       type: text("type").notNull(), // 'trends' | 'funnels' | 'retention'
@@ -46,6 +50,10 @@ export const insightsRelations = relations(insights, ({ one }) => ({
    team: one(team, {
       fields: [insights.teamId],
       references: [team.id],
+   }),
+   folder: one(folders, {
+      fields: [insights.folderId],
+      references: [folders.id],
    }),
    createdByUser: one(user, {
       fields: [insights.createdBy],
