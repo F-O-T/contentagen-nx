@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@packages/ui/components/button";
-import { Separator } from "@packages/ui/components/separator";
 import {
    Sidebar,
    SidebarContent,
@@ -60,13 +59,13 @@ function ContextPanelInner() {
 
    return (
       <Sidebar
-         className="bg-muted rounded-xl"
+         className="px-0"
          collapsible="offcanvas"
          side="right"
          variant="inset"
       >
-         <SidebarHeader className="bg-muted">
-            <div className="flex-row flex items-center gap-2 ">
+         <SidebarHeader className="bg-background rounded-t-xl">
+            <div className="flex-row flex  items-center gap-2 ">
                <TooltipProvider>
                   {allTabs.map((tab) => (
                      <Tooltip key={tab.id}>
@@ -102,12 +101,13 @@ function ContextPanelInner() {
                   </Button>
                </TooltipProvider>
             </div>
-            <Separator />
          </SidebarHeader>
 
          {/* Active tab content — inset rounded card on bg-muted */}
-         <SidebarContent className="rounded-xl bg-background/50 h-full overflow-hidden">
-            <div className="h-full">{activeTab?.content}</div>
+         <SidebarContent className=" overflow-hidden h-full">
+            <div className="h-full rounded-b-xl bg-muted ">
+               {activeTab?.content}
+            </div>
          </SidebarContent>
       </Sidebar>
    );
