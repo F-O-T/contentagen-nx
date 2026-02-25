@@ -7,11 +7,6 @@ import {
    DropdownMenuSeparator,
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
-import {
-   Tooltip,
-   TooltipContent,
-   TooltipTrigger,
-} from "@packages/ui/components/tooltip";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
    Copy,
@@ -22,7 +17,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
+import { useCredenza } from "@/hooks/use-credenza";
+import { useActiveTeam } from "@/hooks/use-active-team";
 import { orpc } from "@/integrations/orpc/client";
+import { MoveToFolderCredenzaContent } from "@/features/analytics/ui/move-to-folder-credenza";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
 
 interface SubSidebarContextMenuProps {
@@ -35,7 +33,10 @@ export function SubSidebarContextMenu({
    section,
 }: SubSidebarContextMenuProps) {
    const { openAlertDialog } = useAlertDialog();
+   const { openCredenza } = useCredenza();
+   const { activeTeam } = useActiveTeam();
    const queryClient = useQueryClient();
+   const teamId = activeTeam?.id ?? "";
 
    const deleteDashboardMutation = useMutation(
       orpc.dashboards.remove.mutationOptions({
@@ -133,17 +134,27 @@ export function SubSidebarContextMenu({
                <Pencil className="size-4" />
                Renomear
             </DropdownMenuItem>
-            <Tooltip>
-               <TooltipTrigger asChild>
-                  <div>
-                     <DropdownMenuItem disabled>
-                        <FolderInput className="size-4" />
-                        Mover para pasta
-                     </DropdownMenuItem>
-                  </div>
-               </TooltipTrigger>
-               <TooltipContent side="right">(em breve)</TooltipContent>
-            </Tooltip>
+            <DropdownMenuItem
+               disabled={!teamId}
+               onClick={() => {
+                  if (!teamId) return;
+                  openCredenza({
+                     children: (
+                        <MoveToFolderCredenzaContent
+                           itemName={item.name}
+                           resourceId={item.id}
+                           resourceType={
+                              section === "dashboards" ? "dashboard" : "insight"
+                           }
+                           teamId={teamId}
+                        />
+                     ),
+                  });
+               }}
+            >
+               <FolderInput className="size-4" />
+               Mover para pasta
+            </DropdownMenuItem>
             <DropdownMenuItem
                disabled={
                   section === "dashboards"

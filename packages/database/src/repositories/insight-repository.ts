@@ -1,5 +1,5 @@
 import { AppError, propagateError } from "@packages/utils/errors";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
 import { insights, type NewInsight } from "../schemas/insights";
 
@@ -39,13 +39,20 @@ export async function listInsightsByTeam(
    db: DatabaseInstance,
    teamId: string,
    type?: string,
+   folderId?: string | null,
 ) {
    try {
       const conditions = [eq(insights.teamId, teamId)];
       if (type) {
          conditions.push(eq(insights.type, type));
       }
-
+      if (folderId !== undefined) {
+         conditions.push(
+            folderId === null
+               ? isNull(insights.folderId)
+               : eq(insights.folderId, folderId),
+         );
+      }
       return await db
          .select()
          .from(insights)
@@ -93,7 +100,10 @@ export async function updateInsight(
    db: DatabaseInstance,
    insightId: string,
    data: Partial<
-      Pick<NewInsight, "name" | "description" | "config" | "defaultSize">
+      Pick<
+         NewInsight,
+         "name" | "description" | "config" | "defaultSize" | "folderId"
+      >
    >,
 ) {
    try {

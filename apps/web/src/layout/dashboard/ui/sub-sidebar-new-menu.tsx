@@ -6,16 +6,14 @@ import {
    DropdownMenuSeparator,
    DropdownMenuTrigger,
 } from "@packages/ui/components/dropdown-menu";
-import {
-   Tooltip,
-   TooltipContent,
-   TooltipTrigger,
-} from "@packages/ui/components/tooltip";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { FolderPlus, LayoutDashboard, Lightbulb, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useActiveTeam } from "@/hooks/use-active-team";
+import { useSheet } from "@/hooks/use-sheet";
 import { orpc } from "@/integrations/orpc/client";
+import { NewFolderSheetContent } from "@/features/analytics/ui/new-folder-sheet";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
 
 interface SubSidebarNewMenuProps {
@@ -32,6 +30,9 @@ export function SubSidebarNewMenu({
       from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    const queryClient = useQueryClient();
+   const { openSheet, closeSheet } = useSheet();
+   const { activeTeam } = useActiveTeam();
+   const teamId = activeTeam?.id ?? "";
 
    const createDashboardMutation = useMutation(
       orpc.dashboards.create.mutationOptions({
@@ -88,9 +89,37 @@ export function SubSidebarNewMenu({
                <DashboardMenuItems
                   isPending={createDashboardMutation.isPending}
                   onCreateDashboard={handleCreateDashboard}
+                  onCreateFolder={
+                     teamId
+                        ? () =>
+                             openSheet({
+                                children: (
+                                   <NewFolderSheetContent
+                                      onSuccess={closeSheet}
+                                      teamId={teamId}
+                                   />
+                                ),
+                             })
+                        : undefined
+                  }
                />
             ) : (
-               <InsightMenuItems onCreateInsight={handleCreateInsight} />
+               <InsightMenuItems
+                  onCreateFolder={
+                     teamId
+                        ? () =>
+                             openSheet({
+                                children: (
+                                   <NewFolderSheetContent
+                                      onSuccess={closeSheet}
+                                      teamId={teamId}
+                                   />
+                                ),
+                             })
+                        : undefined
+                  }
+                  onCreateInsight={handleCreateInsight}
+               />
             )}
          </DropdownMenuContent>
       </DropdownMenu>
@@ -99,9 +128,11 @@ export function SubSidebarNewMenu({
 
 function DashboardMenuItems({
    onCreateDashboard,
+   onCreateFolder,
    isPending,
 }: {
    onCreateDashboard: () => void;
+   onCreateFolder?: () => void;
    isPending: boolean;
 }) {
    return (
@@ -111,25 +142,23 @@ function DashboardMenuItems({
             Novo dashboard
          </DropdownMenuItem>
          <DropdownMenuSeparator />
-         <Tooltip>
-            <TooltipTrigger asChild>
-               <div>
-                  <DropdownMenuItem disabled>
-                     <FolderPlus className="size-4" />
-                     Nova pasta
-                  </DropdownMenuItem>
-               </div>
-            </TooltipTrigger>
-            <TooltipContent side="right">(em breve)</TooltipContent>
-         </Tooltip>
+         <DropdownMenuItem
+            disabled={!onCreateFolder}
+            onClick={onCreateFolder}
+         >
+            <FolderPlus className="size-4" />
+            Nova pasta
+         </DropdownMenuItem>
       </>
    );
 }
 
 function InsightMenuItems({
    onCreateInsight,
+   onCreateFolder,
 }: {
    onCreateInsight: () => void;
+   onCreateFolder?: () => void;
 }) {
    return (
       <>
@@ -138,17 +167,13 @@ function InsightMenuItems({
             Novo insight
          </DropdownMenuItem>
          <DropdownMenuSeparator />
-         <Tooltip>
-            <TooltipTrigger asChild>
-               <div>
-                  <DropdownMenuItem disabled>
-                     <FolderPlus className="size-4" />
-                     Nova pasta
-                  </DropdownMenuItem>
-               </div>
-            </TooltipTrigger>
-            <TooltipContent side="right">(em breve)</TooltipContent>
-         </Tooltip>
+         <DropdownMenuItem
+            disabled={!onCreateFolder}
+            onClick={onCreateFolder}
+         >
+            <FolderPlus className="size-4" />
+            Nova pasta
+         </DropdownMenuItem>
       </>
    );
 }

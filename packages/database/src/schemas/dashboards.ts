@@ -12,6 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { organization, team, user } from "./auth";
+import { folders } from "./folders";
 
 export interface DashboardTile {
    insightId: string;
@@ -46,6 +47,9 @@ export const dashboards = pgTable(
       createdBy: uuid("created_by")
          .notNull()
          .references(() => user.id, { onDelete: "cascade" }),
+      folderId: uuid("folder_id").references(() => folders.id, {
+         onDelete: "set null",
+      }),
       name: text("name").notNull(),
       description: text("description"),
       isDefault: boolean("is_default").default(false).notNull(),
@@ -76,6 +80,10 @@ export const dashboardsRelations = relations(dashboards, ({ one }) => ({
    team: one(team, {
       fields: [dashboards.teamId],
       references: [team.id],
+   }),
+   folder: one(folders, {
+      fields: [dashboards.folderId],
+      references: [folders.id],
    }),
    createdByUser: one(user, {
       fields: [dashboards.createdBy],

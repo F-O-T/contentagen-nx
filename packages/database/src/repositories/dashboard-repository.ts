@@ -1,5 +1,5 @@
 import { AppError, propagateError } from "@packages/utils/errors";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import type { DatabaseInstance } from "../client";
 import { DEFAULT_INSIGHTS } from "../default-insights";
 import {
@@ -42,12 +42,21 @@ export async function listDashboards(
 export async function listDashboardsByTeam(
    db: DatabaseInstance,
    teamId: string,
+   folderId?: string | null,
 ) {
    try {
+      const conditions = [eq(dashboards.teamId, teamId)];
+      if (folderId !== undefined) {
+         conditions.push(
+            folderId === null
+               ? isNull(dashboards.folderId)
+               : eq(dashboards.folderId, folderId),
+         );
+      }
       return await db
          .select()
          .from(dashboards)
-         .where(eq(dashboards.teamId, teamId))
+         .where(and(...conditions))
          .orderBy(desc(dashboards.updatedAt));
    } catch (err) {
       propagateError(err);
@@ -74,7 +83,9 @@ export async function getDashboardById(
 export async function updateDashboard(
    db: DatabaseInstance,
    dashboardId: string,
-   data: Partial<Pick<NewDashboard, "name" | "description">>,
+   data: Partial<
+      Pick<NewDashboard, "name" | "description" | "folderId">
+   >,
 ) {
    try {
       const [updated] = await db

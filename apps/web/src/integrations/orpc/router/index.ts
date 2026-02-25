@@ -18,6 +18,7 @@ import * as eventCatalogRouter from "./event-catalog";
 import * as experimentsRouter from "./experiments";
 import * as feedbackRouter from "./feedback";
 import * as formsRouter from "./forms";
+import * as foldersRouter from "./folders";
 import * as insightsRouter from "./insights";
 import * as onboardingRouter from "./onboarding";
 import * as organizationRouter from "./organization";
@@ -55,6 +56,7 @@ export default {
    experiments: experimentsRouter,
    feedback: feedbackRouter,
    forms: formsRouter,
+   folders: foldersRouter,
    insights: insightsRouter,
    onboarding: onboardingRouter,
    personalApiKey: personalApiKeyRouter,
