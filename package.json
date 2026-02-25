@@ -120,6 +120,7 @@
          },
          "mastra": {
             "@mastra/ai-sdk": "^1.0.5",
+            "@mastra/memory": "1.5.1",
             "@mastra/rag": "2.1.1",
             "@mastra/core": "1.7.0",
             "@mastra/pg": "1.6.1",

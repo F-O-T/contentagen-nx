@@ -189,6 +189,7 @@
         "@f-o-t/markdown": "catalog:fot",
         "@mastra/ai-sdk": "catalog:mastra",
         "@mastra/core": "catalog:mastra",
+        "@mastra/memory": "catalog:mastra",
         "@mastra/pg": "catalog:mastra",
         "@mastra/rag": "catalog:mastra",
         "@packages/database": "workspace:*",
@@ -620,6 +621,7 @@
     "mastra": {
       "@mastra/ai-sdk": "^1.0.5",
       "@mastra/core": "1.7.0",
+      "@mastra/memory": "1.5.1",
       "@mastra/pg": "1.6.1",
       "@mastra/rag": "2.1.1",
       "ai": "6.0.100",
@@ -1298,6 +1300,8 @@
     "@mastra/ai-sdk": ["@mastra/ai-sdk@1.0.5", "", { "peerDependencies": { "@mastra/core": ">=1.0.0-0 <2.0.0-0", "zod": "^3.25.0 || ^4.0.0" } }, "sha512-ApezR259f5CtNNwIvbzE+GzwMKWEA1mUvXVLgbZ4cDz376oGxZYjrdvlOPgIXAezQYggg1US89LRFfOK8unnhg=="],
 
     "@mastra/core": ["@mastra/core@1.7.0", "", { "dependencies": { "@a2a-js/sdk": "~0.2.4", "@ai-sdk/provider-utils-v5": "npm:@ai-sdk/provider-utils@3.0.20", "@ai-sdk/provider-utils-v6": "npm:@ai-sdk/provider-utils@4.0.0", "@ai-sdk/provider-v5": "npm:@ai-sdk/provider@2.0.0", "@ai-sdk/provider-v6": "npm:@ai-sdk/provider@3.0.0", "@ai-sdk/ui-utils-v5": "npm:@ai-sdk/ui-utils@1.2.11", "@isaacs/ttlcache": "^2.1.4", "@lukeed/uuid": "^2.0.1", "@mastra/schema-compat": "1.1.2", "@modelcontextprotocol/sdk": "^1.17.5", "@sindresorhus/slugify": "^2.2.1", "dotenv": "^17.2.3", "gray-matter": "^4.0.3", "hono": "^4.11.9", "hono-openapi": "^1.1.1", "js-tiktoken": "^1.0.21", "json-schema": "^0.4.0", "lru-cache": "^11.2.6", "p-map": "^7.0.3", "p-retry": "^7.1.0", "picomatch": "^4.0.3", "radash": "^12.1.1", "xxhash-wasm": "^1.1.0" }, "peerDependencies": { "zod": "^3.25.0 || ^4.0.0" } }, "sha512-ht6g6Wxfd4GXnrr2tLkwJqlAKkWxjC80kJP62eKqC7SHo6t15t3N9LIb5i6wxBKW+1RWLfXgzAZz5PTdyyVuug=="],
+
+    "@mastra/memory": ["@mastra/memory@1.5.1", "", { "dependencies": { "@mastra/schema-compat": "1.1.2", "async-mutex": "^0.5.0", "js-tiktoken": "^1.0.21", "json-schema": "^0.4.0", "lru-cache": "^11.2.6", "xxhash-wasm": "^1.1.0" }, "peerDependencies": { "@mastra/core": ">=1.4.1-0 <2.0.0-0", "zod": "^3.25.0 || ^4.0.0" } }, "sha512-mfpOOSPLHzw5Pxy5gxJZnIxIhqhlIviK9FNRtu7/hcz/n4Zxkl38AGzqYaWfEqW44R+QrlilJIS4snZ8H5Ha6A=="],
 
     "@mastra/pg": ["@mastra/pg@1.6.1", "", { "dependencies": { "async-mutex": "^0.5.0", "pg": "^8.16.3", "xxhash-wasm": "^1.1.0" }, "peerDependencies": { "@mastra/core": ">=1.4.0-0 <2.0.0-0" } }, "sha512-gmIemtepNJUoj8aSrXgEWAE71Gr/lq0YLDugYQTznf3H875yzvd/6dEpz9375n//KH7EKP6b4m2ZsxTqtEN+WQ=="],
 

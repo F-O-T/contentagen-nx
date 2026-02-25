@@ -3,6 +3,7 @@
       "@f-o-t/markdown": "catalog:fot",
       "@mastra/ai-sdk": "catalog:mastra",
       "@mastra/core": "catalog:mastra",
+      "@mastra/memory": "catalog:mastra",
       "@mastra/pg": "catalog:mastra",
       "@mastra/rag": "catalog:mastra",
       "@packages/database": "workspace:*",
