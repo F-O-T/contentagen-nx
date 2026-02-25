@@ -9,7 +9,7 @@ import { protectedProcedure } from "../server";
 export const getRecentThreads = protectedProcedure
    .input(
       z.object({
-         teamId: z.string().uuid(),
+         teamId: z.uuid(),
          limit: z.number().int().min(1).max(20).default(5),
       }),
    )

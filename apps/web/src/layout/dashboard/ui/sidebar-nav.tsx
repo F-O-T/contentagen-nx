@@ -162,11 +162,23 @@ function useNavHandlers() {
       [router, slug, teamSlug, pathname, searchStr, activeSection],
    );
 
-   return { slug, teamSlug, handleSubPanelToggle, handleMainItemClick, isItemActive };
+   return {
+      slug,
+      teamSlug,
+      handleSubPanelToggle,
+      handleMainItemClick,
+      isItemActive,
+   };
 }
 
 export function SidebarDefaultItems() {
-   const { slug, teamSlug, handleSubPanelToggle, handleMainItemClick, isItemActive } = useNavHandlers();
+   const {
+      slug,
+      teamSlug,
+      handleSubPanelToggle,
+      handleMainItemClick,
+      isItemActive,
+   } = useNavHandlers();
    const { pathname } = useLocation();
    const navigate = useNavigate();
    const { isEnrolled } = useEarlyAccess();
@@ -271,7 +283,13 @@ function NavGroup({
 }
 
 export function SidebarNav() {
-   const { slug, teamSlug, handleSubPanelToggle, handleMainItemClick, isItemActive } = useNavHandlers();
+   const {
+      slug,
+      teamSlug,
+      handleSubPanelToggle,
+      handleMainItemClick,
+      isItemActive,
+   } = useNavHandlers();
 
    const labeledGroups = navGroups.filter((g) => g.label);
 

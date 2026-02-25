@@ -1,15 +1,24 @@
-import { Thread } from "@packages/ui/components/assistant-ui/thread";
-import type { QuickSuggestion, RecentThread } from "@packages/ui/components/assistant-ui/thread";
-import { useActiveTeam } from "@/hooks/use-active-team";
-import { orpc } from "@/integrations/orpc/client";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
-import { AssistantChatTransport, useChatRuntime } from "@assistant-ui/react-ai-sdk";
+import {
+   AssistantChatTransport,
+   useChatRuntime,
+} from "@assistant-ui/react-ai-sdk";
+import type {
+   QuickSuggestion,
+   RecentThread,
+} from "@packages/ui/components/assistant-ui/thread";
+import { Thread } from "@packages/ui/components/assistant-ui/thread";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useActiveTeam } from "@/hooks/use-active-team";
+import { orpc } from "@/integrations/orpc/client";
 
 const QUICK_SUGGESTIONS: QuickSuggestion[] = [
    { label: "Criar artigo", prompt: "Crie um artigo completo sobre " },
-   { label: "Analisar SEO", prompt: "Analise o SEO deste conteúdo e sugira melhorias: " },
+   {
+      label: "Analisar SEO",
+      prompt: "Analise o SEO deste conteúdo e sugira melhorias: ",
+   },
    { label: "Pesquisar", prompt: "Pesquise sobre " },
    { label: "Otimizar texto", prompt: "Otimize este texto para SEO: " },
    { label: "Estratégia", prompt: "Crie uma estratégia de conteúdo para " },
@@ -19,10 +28,12 @@ function AranduThread({
    teamId,
    threadId,
    recentThreads,
+   onNewThread,
 }: {
    teamId: string;
    threadId: string;
    recentThreads: RecentThread[];
+   onNewThread: () => void;
 }) {
    const runtime = useChatRuntime({
       transport: new AssistantChatTransport({
@@ -34,10 +45,12 @@ function AranduThread({
    return (
       <AssistantRuntimeProvider runtime={runtime}>
          <Thread
-            welcomeTitle="Como posso te ajudar?"
-            welcomeSubtitle="Seu assistente de conteúdo com IA."
+            onNewThread={onNewThread}
             quickSuggestions={QUICK_SUGGESTIONS}
             recentThreads={recentThreads}
+            welcomeIconUrl="/arandu.svg"
+            welcomeSubtitle="Seu assistente de conteúdo com IA."
+            welcomeTitle="Como posso te ajudar?"
          />
       </AssistantRuntimeProvider>
    );
@@ -66,9 +79,10 @@ export function AranduChatTab() {
    return (
       <AranduThread
          key={threadId}
+         onNewThread={() => setThreadId(crypto.randomUUID())}
+         recentThreads={recentThreads}
          teamId={activeTeamId}
          threadId={threadId}
-         recentThreads={recentThreads}
       />
    );
 }

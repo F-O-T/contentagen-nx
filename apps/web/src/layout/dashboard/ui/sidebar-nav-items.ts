@@ -11,6 +11,7 @@ import {
    Lightbulb,
    Network,
    PenLine,
+   Sparkles,
 } from "lucide-react";
 import type { SubSidebarSection } from "../hooks/use-sidebar-nav";
 
@@ -51,6 +52,12 @@ export const navGroups: NavGroupDef[] = [
             label: "Inicio",
             icon: House,
             route: "/$slug/$teamSlug/home",
+         },
+         {
+            id: "chat",
+            label: "Arandu",
+            icon: Sparkles,
+            route: "/$slug/$teamSlug/chat",
          },
          {
             id: "dashboards",

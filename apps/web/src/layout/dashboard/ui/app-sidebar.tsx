@@ -19,12 +19,20 @@ import {
    useSidebar,
 } from "@packages/ui/components/sidebar";
 import { Link, useParams } from "@tanstack/react-router";
-import { Bug, ExternalLink, Lightbulb, MessageSquarePlus, PanelLeft, PanelLeftClose, Settings } from "lucide-react";
+import {
+   Bug,
+   ExternalLink,
+   Lightbulb,
+   MessageSquarePlus,
+   PanelLeft,
+   PanelLeftClose,
+   Settings,
+} from "lucide-react";
 import type * as React from "react";
 import { useState } from "react";
-import { useCredenza } from "@/hooks/use-credenza";
 import { BugReportForm } from "@/features/feedback/ui/bug-report-form";
 import { FeatureRequestForm } from "@/features/feedback/ui/feature-request-form";
+import { useCredenza } from "@/hooks/use-credenza";
 import { EarlyAccessSidebarBanner } from "./early-access-sidebar-banner";
 import { NavUser } from "./nav-user";
 import { SidebarDefaultItems, SidebarNav } from "./sidebar-nav";
@@ -32,10 +40,9 @@ import { SidebarScopeSwitcher } from "./sidebar-scope-switcher";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
    return (
-      <Sidebar collapsible="icon" variant="inset" {...props}>
+      <Sidebar className="px-0" collapsible="icon" variant="inset" {...props}>
          <SidebarHeader>
             <SidebarScopeSwitcher />
-
          </SidebarHeader>
 
          <SidebarContent>
@@ -47,7 +54,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
          <SidebarFooter>
             <EarlyAccessSidebarBanner />
             <Separator />
-
             <SidebarFooterContent />
          </SidebarFooter>
       </Sidebar>
@@ -69,17 +75,28 @@ function SidebarFeedbackButton() {
                   <span>Feedback</span>
                </SidebarMenuButton>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-56 p-2" side="right" sideOffset={8}>
+            <PopoverContent
+               align="end"
+               className="w-56 p-2"
+               side="right"
+               sideOffset={8}
+            >
                <PopoverHeader className="mb-2">
                   <PopoverTitle>Feedback</PopoverTitle>
-                  <PopoverDescription>Reporte bugs ou sugira melhorias.</PopoverDescription>
+                  <PopoverDescription>
+                     Reporte bugs ou sugira melhorias.
+                  </PopoverDescription>
                </PopoverHeader>
                <div className="flex flex-col gap-1">
                   <Button
                      className="justify-start gap-3"
                      onClick={() => {
                         setOpen(false);
-                        openCredenza({ children: <BugReportForm onSuccess={closeCredenza} /> });
+                        openCredenza({
+                           children: (
+                              <BugReportForm onSuccess={closeCredenza} />
+                           ),
+                        });
                      }}
                      variant="ghost"
                   >
@@ -90,15 +107,27 @@ function SidebarFeedbackButton() {
                      className="justify-start gap-3"
                      onClick={() => {
                         setOpen(false);
-                        openCredenza({ children: <FeatureRequestForm onSuccess={closeCredenza} /> });
+                        openCredenza({
+                           children: (
+                              <FeatureRequestForm onSuccess={closeCredenza} />
+                           ),
+                        });
                      }}
                      variant="ghost"
                   >
                      <Lightbulb className="size-4 text-amber-500" />
                      <span>Sugerir Feature</span>
                   </Button>
-                  <Button asChild className="justify-start gap-3" variant="ghost">
-                     <a href={DOCS_URL} rel="noopener noreferrer" target="_blank">
+                  <Button
+                     asChild
+                     className="justify-start gap-3"
+                     variant="ghost"
+                  >
+                     <a
+                        href={DOCS_URL}
+                        rel="noopener noreferrer"
+                        target="_blank"
+                     >
                         <ExternalLink className="size-4 text-blue-500" />
                         <span>Documentação</span>
                      </a>

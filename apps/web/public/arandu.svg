@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="200 250 600 500" fill="currentColor">
+  <!-- Barras do corpo -->
+  <rect x="275" y="370" width="280" height="50" />
+  <rect x="245" y="440" width="410" height="50" />
+  <rect x="235" y="510" width="460" height="50" />
+
+  <!-- Barra inferior com corte diagonal -->
+  <polygon points="235,580 375,580 425,630 235,630" />
+  <polygon points="405,580 665,580 665,630 455,630" />
+
+  <!-- Patas -->
+  <polygon points="255,650 315,650 335,700 275,700" />
+  <polygon points="565,650 625,650 645,700 585,700" />
+
+  <!-- Cabeça com olho vazado (transparente) -->
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M505 300 L605 300 L765 360 L755 430 L625 420 Z M675 331 a14 14 0 1 0 0 28 a14 14 0 1 0 0 -28" />
+</svg>

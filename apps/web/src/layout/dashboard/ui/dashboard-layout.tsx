@@ -14,8 +14,8 @@ import { GlobalContextPanel } from "@/features/context-panel/context-panel";
 import { useApiErrorTracker } from "@/features/feedback/hooks/use-api-error-tracker";
 import { BugReportForm } from "@/features/feedback/ui/bug-report-form";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
-import { useCredenza } from "@/hooks/use-credenza";
 import { useActiveTeam } from "@/hooks/use-active-team";
+import { useCredenza } from "@/hooks/use-credenza";
 import { EarlyAccessProvider } from "@/hooks/use-early-access";
 import { useLastOrganization } from "@/hooks/use-last-organization";
 import { useSafeLocalStorage } from "@/hooks/use-local-storage";
@@ -78,6 +78,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
          pathname.split("/").at(-1) ?? "",
       );
+   const isChatPage = pathname.includes("/chat");
 
    const orgSlug = activeOrganization?.slug ?? "";
    const teamId = activeTeam?.id ?? "";
@@ -191,7 +192,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                      <main
                         className={cn(
                            "relative flex-1",
-                           isEditorPage
+                           isEditorPage || isChatPage
                               ? "overflow-hidden p-0"
                               : isSettingsPage
                                 ? "overflow-hidden p-4"

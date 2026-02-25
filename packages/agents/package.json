@@ -48,7 +48,7 @@
       "build": "tsc --build",
       "check": "biome check --write ./src",
       "dev": "dotenv -e .env -- bunx mastra dev",
-      "typecheck": "tsc --noEmit"
+      "typecheck": "tsgo"
    },
    "type": "module",
    "version": "0.25.1"

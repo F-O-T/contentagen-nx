@@ -304,7 +304,7 @@ function SidebarScopeSwitcherContent() {
                   <PopoverTrigger asChild>
                      <button
                         aria-label="Organizacao"
-                        className={`flex shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent ${isCollapsed ? "w-full p-0" : "p-1.5"}`}
+                        className={`flex shrink-0 items-center justify-center rounded-md transition-colors hover:bg-accent ${isCollapsed ? "size-8 p-0" : "p-1.5"}`}
                         type="button"
                      >
                         <Avatar
