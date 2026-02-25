@@ -7,8 +7,6 @@ import {
 } from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
 import { Check, Pencil, X } from "lucide-react";
-import { ContextPanelHeaderActions } from "@/features/context-panel/context-panel-header-actions";
-import { useContextPanel } from "@/features/context-panel/use-context-panel";
 import {
    type ReactNode,
    useCallback,
@@ -16,6 +14,8 @@ import {
    useRef,
    useState,
 } from "react";
+import { ContextPanelHeaderActions } from "@/features/context-panel/context-panel-header-actions";
+import { useContextPanel } from "@/features/context-panel/use-context-panel";
 
 export interface PageHeaderProps {
    title: string;

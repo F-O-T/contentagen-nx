@@ -1,7 +1,7 @@
 import { useStore } from "@tanstack/react-store";
-import { useEffect } from "react";
 import type React from "react";
-import { contextPanelStore, type ContextPanelTab } from "./context-panel-store";
+import { useEffect } from "react";
+import { type ContextPanelTab, contextPanelStore } from "./context-panel-store";
 
 export const openContextPanel = () =>
    contextPanelStore.setState((s) => ({ ...s, isOpen: true }));
@@ -46,7 +46,8 @@ export const useContextPanelInfo = (content: React.ReactNode) => {
 };
 
 export const useContextPanel = () => {
-   const { isOpen, activeTabId, dynamicTabs, infoContent } = useStore(contextPanelStore);
+   const { isOpen, activeTabId, dynamicTabs, infoContent } =
+      useStore(contextPanelStore);
    return {
       isOpen,
       activeTabId,

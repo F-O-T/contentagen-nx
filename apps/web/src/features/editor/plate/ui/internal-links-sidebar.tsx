@@ -265,9 +265,7 @@ export function InternalLinksSidebar({
 }: InternalLinksSidebarProps) {
    return (
       <TooltipProvider>
-         <div
-            className={cn("flex flex-col", className)}
-         >
+         <div className={cn("flex flex-col", className)}>
             <ScrollArea className="flex-1">
                <ErrorBoundary FallbackComponent={SuggestionsErrorFallback}>
                   <Suspense

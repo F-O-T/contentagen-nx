@@ -199,7 +199,15 @@ function SidebarManagerIsolated({
          state,
          toggleSidebar,
       }),
-      [isMobile, open, openMobile, setOpen, setOpenMobile, state, toggleSidebar],
+      [
+         isMobile,
+         open,
+         openMobile,
+         setOpen,
+         setOpenMobile,
+         state,
+         toggleSidebar,
+      ],
    );
 
    const managerRef = React.useRef(manager);
@@ -245,7 +253,11 @@ function SidebarManager({
    defaultOpen?: boolean;
    style?: React.CSSProperties;
 }) {
-   if (open !== undefined || onOpenChange !== undefined || defaultOpen !== undefined) {
+   if (
+      open !== undefined ||
+      onOpenChange !== undefined ||
+      defaultOpen !== undefined
+   ) {
       return (
          <SidebarManagerIsolated
             defaultOpen={defaultOpen}

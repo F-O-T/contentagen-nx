@@ -10,6 +10,7 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import type * as React from "react";
 import { useEffect, useRef } from "react";
+import { GlobalContextPanel } from "@/features/context-panel/context-panel";
 import { FeedbackFab } from "@/features/feedback/ui/feedback-fab";
 import { useActiveOrganization } from "@/hooks/use-active-organization";
 import { useActiveTeam } from "@/hooks/use-active-team";
@@ -21,7 +22,6 @@ import { orpc } from "@/integrations/orpc/client";
 import { setActiveSection } from "../hooks/use-sidebar-nav";
 import { useTabKeyboardShortcuts } from "../hooks/use-tab-keyboard-shortcuts";
 import { useTabRouterSync } from "../hooks/use-tab-router-sync";
-import { GlobalContextPanel } from "@/features/context-panel/context-panel";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarSubPanel } from "./sidebar-sub-panel";
 import { TabBar } from "./tab-bar";
@@ -170,8 +170,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                            isEditorPage
                               ? "overflow-hidden p-0"
                               : isSettingsPage
-                                 ? "overflow-hidden p-4"
-                                 : "overflow-y-auto p-4",
+                                ? "overflow-hidden p-4"
+                                : "overflow-y-auto p-4",
                         )}
                      >
                         {children}

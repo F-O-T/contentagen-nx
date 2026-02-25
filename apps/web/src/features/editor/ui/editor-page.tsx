@@ -6,8 +6,8 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import type { Value } from "platejs";
 import { useCallback, useRef, useState } from "react";
 import { orpc } from "@/integrations/orpc/client";
-import { EditorContextPanelTabs } from "../plate/ui/editor-context-panel-tabs";
 import { PlateEditor } from "../plate/plate-editor";
+import { EditorContextPanelTabs } from "../plate/ui/editor-context-panel-tabs";
 
 type ContentStatus = "draft" | "published" | "archived";
 

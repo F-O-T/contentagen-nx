@@ -70,10 +70,10 @@ function ContextPanelInner() {
 
    return (
       <Sidebar
-         collapsible="offcanvas"
          className="bg-muted rounded-xl"
-         variant="inset"
+         collapsible="offcanvas"
          side="right"
+         variant="inset"
       >
          <SidebarHeader className=" bg-muted">
             <div className="flex-row flex items-center gap-2 ">
@@ -85,7 +85,7 @@ function ContextPanelInner() {
                               className={cn(
                                  "size-7 rounded",
                                  activeTabId === tab.id &&
-                                 "bg-accent text-accent-foreground",
+                                    "bg-accent text-accent-foreground",
                               )}
                               onClick={() => setActiveTab(tab.id)}
                               size="icon"
@@ -129,10 +129,10 @@ export function GlobalContextPanel() {
    return (
       <SidebarManager
          name="context-panel"
-         open={isOpen}
          onOpenChange={(open) =>
             open ? openContextPanel() : closeContextPanel()
          }
+         open={isOpen}
          style={{ "--sidebar-width": "28rem" } as React.CSSProperties}
       >
          <ContextPanelInner />
