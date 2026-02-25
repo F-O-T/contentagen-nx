@@ -152,6 +152,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
                <SidebarInset className="flex flex-col overflow-hidden">
                   <SidebarSubPanel />
+                  <GlobalContextPanel />
                   <div className="shrink-0">
                      <TabBar
                         onNewTab={openNewSearchTab}
@@ -159,21 +160,18 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         onTabFocus={navigateToTab}
                      />
                   </div>
-                  <div className="flex flex-1 overflow-hidden">
-                     <main
-                        className={cn(
-                           "relative flex-1 bg-background border-white/10 border-t-1",
-                           isEditorPage
-                              ? "overflow-hidden p-0"
-                              : isSettingsPage
-                                ? "overflow-hidden p-4"
-                                : "overflow-y-auto p-4",
-                        )}
-                     >
-                        {children}
-                     </main>
-                     <GlobalContextPanel />
-                  </div>
+                  <main
+                     className={cn(
+                        "relative flex-1 bg-background border-white/10 border-t-1",
+                        isEditorPage
+                           ? "overflow-hidden p-0"
+                           : isSettingsPage
+                             ? "overflow-hidden p-4"
+                             : "overflow-y-auto p-4",
+                     )}
+                  >
+                     {children}
+                  </main>
                   <FeedbackFab />
                </SidebarInset>
             </SidebarProvider>

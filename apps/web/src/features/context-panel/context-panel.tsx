@@ -1,7 +1,12 @@
 "use client";
 
 import { Button } from "@packages/ui/components/button";
-import { ScrollArea } from "@packages/ui/components/scroll-area";
+import {
+   Sidebar,
+   SidebarContent,
+   SidebarManager,
+   SidebarProvider,
+} from "@packages/ui/components/sidebar";
 import {
    Tooltip,
    TooltipContent,
@@ -11,8 +16,13 @@ import {
 import { cn } from "@packages/ui/lib/utils";
 import { useStore } from "@tanstack/react-store";
 import { MessageSquare, X } from "lucide-react";
-import { contextPanelStore, type ContextPanelTab } from "./context-panel-store";
-import { closeContextPanel, setActiveTab } from "./use-context-panel";
+import type React from "react";
+import { type ContextPanelTab, contextPanelStore } from "./context-panel-store";
+import {
+   closeContextPanel,
+   openContextPanel,
+   setActiveTab,
+} from "./use-context-panel";
 
 function ChatPlaceholder() {
    return (
@@ -33,8 +43,8 @@ const CHAT_TAB: ContextPanelTab = {
    order: 0,
 };
 
-export function GlobalContextPanel() {
-   const { isOpen, activeTabId, dynamicTabs } = useStore(contextPanelStore);
+function ContextPanelInner() {
+   const { activeTabId, dynamicTabs } = useStore(contextPanelStore);
 
    const allTabs: ContextPanelTab[] = [
       CHAT_TAB,
@@ -43,13 +53,11 @@ export function GlobalContextPanel() {
 
    const activeTab = allTabs.find((t) => t.id === activeTabId) ?? allTabs[0];
 
-   if (!isOpen) return null;
-
    return (
-      <TooltipProvider>
-         <div className="flex w-80 shrink-0 flex-col border-l bg-background">
-            {/* Icon tab row */}
-            <div className="flex h-10 shrink-0 items-center gap-0.5 border-b px-2">
+      <Sidebar collapsible="offcanvas" side="right" variant="inset">
+         {/* Tab icons header — h-12 aligns vertically with TabBar */}
+         <div className="flex h-12 shrink-0 items-center gap-0.5 border-b px-2">
+            <TooltipProvider>
                {allTabs.map((tab) => (
                   <Tooltip key={tab.id}>
                      <TooltipTrigger asChild>
@@ -80,13 +88,31 @@ export function GlobalContextPanel() {
                >
                   <X className="size-3.5" />
                </Button>
-            </div>
-
-            {/* Active tab content */}
-            <ScrollArea className="flex-1">
-               {activeTab?.content}
-            </ScrollArea>
+            </TooltipProvider>
          </div>
-      </TooltipProvider>
+
+         {/* Active tab content */}
+         <SidebarContent>{activeTab?.content}</SidebarContent>
+      </Sidebar>
+   );
+}
+
+export function GlobalContextPanel() {
+   const { isOpen } = useStore(contextPanelStore);
+
+   return (
+      <SidebarProvider
+         className="min-h-0"
+         defaultOpen={false}
+         onOpenChange={(open) =>
+            open ? openContextPanel() : closeContextPanel()
+         }
+         open={isOpen}
+         style={{ "--sidebar-width": "20rem" } as React.CSSProperties}
+      >
+         <SidebarManager name="context-panel">
+            <ContextPanelInner />
+         </SidebarManager>
+      </SidebarProvider>
    );
 }

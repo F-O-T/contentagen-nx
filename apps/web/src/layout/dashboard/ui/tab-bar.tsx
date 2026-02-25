@@ -1,8 +1,6 @@
 import { Button } from "@packages/ui/components/button";
-import { cn } from "@packages/ui/lib/utils";
-import { PanelRight, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { toggleContextPanel, useContextPanel } from "@/features/context-panel/use-context-panel";
 import { useEventListener } from "@/hooks/use-event-listener";
 import {
    closeAllTabs,
@@ -22,7 +20,6 @@ interface TabBarProps {
 
 export function TabBar({ onTabFocus, onTabClose, onNewTab }: TabBarProps) {
    const { tabs, activeTabId, isHydrated } = useTabStore();
-   const { isOpen: isPanelOpen } = useContextPanel();
    const scrollRef = useRef<HTMLDivElement>(null);
    const [_showLeftShadow, setShowLeftShadow] = useState(false);
    const [_showRightShadow, setShowRightShadow] = useState(false);
@@ -142,23 +139,6 @@ export function TabBar({ onTabFocus, onTabClose, onNewTab }: TabBarProps) {
                variant="ghost"
             >
                <Plus className="size-4" />
-            </Button>
-         </div>
-
-         {/* Context panel toggle */}
-         <div className="flex shrink-0 items-center border-l border-border/30 px-1">
-            <Button
-               className={cn(
-                  "size-8 rounded-md text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
-                  isPanelOpen && "bg-sidebar-accent text-foreground",
-               )}
-               onClick={toggleContextPanel}
-               size="icon"
-               title="Painel de contexto"
-               type="button"
-               variant="ghost"
-            >
-               <PanelRight className="size-4" />
             </Button>
          </div>
       </div>
