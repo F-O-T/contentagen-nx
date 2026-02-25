@@ -298,7 +298,7 @@ function SidebarScopeSwitcherContent() {
       <SidebarMenu>
          <SidebarMenuItem>
             <div
-               className={`flex items-center ${isCollapsed ? "justify-center" : "gap-1.5"}`}
+               className={`flex items-center ${isCollapsed ? "size-8 justify-center" : "gap-1.5"}`}
             >
                <Popover onOpenChange={setOrgOpen} open={orgOpen}>
                   <PopoverTrigger asChild>
