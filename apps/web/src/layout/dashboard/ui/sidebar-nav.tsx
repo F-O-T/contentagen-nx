@@ -19,7 +19,6 @@ import {
 } from "@tanstack/react-router";
 import { ChevronRight, Search } from "lucide-react";
 import { useCallback } from "react";
-import { useActiveTeam } from "@/hooks/use-active-team";
 import { useEarlyAccess } from "@/hooks/use-early-access";
 import { replaceCurrentTab, tabStore } from "@/hooks/use-tab-store";
 import type { SubSidebarSection } from "@/layout/dashboard/hooks/use-sidebar-nav";

@@ -1,4 +1,4 @@
-import { useAui } from "@assistant-ui/react";
+import { useAssistantRuntime } from "@assistant-ui/react";
 import { Thread } from "@/features/arandu-chat/ui/thread";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -22,11 +22,11 @@ const QUICK_SUGGESTIONS = [
 
 function ChatThreadPage() {
 	const { threadId } = Route.useParams();
-	const api = useAui();
+	const runtime = useAssistantRuntime();
 
 	useEffect(() => {
-		api.threads.switchToThread(threadId);
-	}, [api, threadId]);
+		runtime.threads.switchToThread(threadId);
+	}, [runtime, threadId]);
 
 	return (
 		<Thread
