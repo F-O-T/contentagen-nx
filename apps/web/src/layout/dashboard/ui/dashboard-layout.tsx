@@ -21,6 +21,7 @@ import { orpc } from "@/integrations/orpc/client";
 import { setActiveSection } from "../hooks/use-sidebar-nav";
 import { useTabKeyboardShortcuts } from "../hooks/use-tab-keyboard-shortcuts";
 import { useTabRouterSync } from "../hooks/use-tab-router-sync";
+import { GlobalContextPanel } from "@/features/context-panel/context-panel";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarSubPanel } from "./sidebar-sub-panel";
 import { TabBar } from "./tab-bar";
@@ -49,6 +50,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
    // Disable scroll on main when in settings
    const isSettingsPage = pathname.includes("/settings");
+   const isEditorPage = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      pathname.split("/").at(-1) ?? "",
+   );
 
    const orgSlug = activeOrganization?.slug ?? "";
    const teamId = activeTeam?.id ?? "";
@@ -155,14 +159,21 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         onTabFocus={navigateToTab}
                      />
                   </div>
-                  <main
-                     className={cn(
-                        "relative flex-1 bg-background p-4 border-white/10 border-t-1",
-                        isSettingsPage ? "overflow-hidden" : "overflow-y-auto",
-                     )}
-                  >
-                     {children}
-                  </main>
+                  <div className="flex flex-1 overflow-hidden">
+                     <main
+                        className={cn(
+                           "relative flex-1 bg-background border-white/10 border-t-1",
+                           isEditorPage
+                              ? "overflow-hidden p-0"
+                              : isSettingsPage
+                                ? "overflow-hidden p-4"
+                                : "overflow-y-auto p-4",
+                        )}
+                     >
+                        {children}
+                     </main>
+                     <GlobalContextPanel />
+                  </div>
                   <FeedbackFab />
                </SidebarInset>
             </SidebarProvider>

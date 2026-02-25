@@ -1,0 +1,22 @@
+import { Store } from "@tanstack/react-store";
+import type React from "react";
+
+export interface ContextPanelTab {
+   id: string;
+   icon: React.ElementType;
+   label: string;
+   content: React.ReactNode;
+   order?: number;
+}
+
+interface ContextPanelState {
+   isOpen: boolean;
+   activeTabId: string;
+   dynamicTabs: ContextPanelTab[];
+}
+
+export const contextPanelStore = new Store<ContextPanelState>({
+   isOpen: false,
+   activeTabId: "chat",
+   dynamicTabs: [],
+});

@@ -22,7 +22,7 @@ import { cn } from "@packages/ui/lib/utils";
 import { insertLink } from "@platejs/link";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "@tanstack/react-router";
-import { ExternalLink, Link2, Link2Off, Pencil, X } from "lucide-react";
+import { ExternalLink, Link2, Link2Off, Pencil } from "lucide-react";
 import { useEditorRef } from "platejs/react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
@@ -79,7 +79,7 @@ function SuggestionsTable({
    const editor = useEditorRef();
    const { navigate } = useRouter();
    const params = useParams({
-      from: "/_authenticated/$slug/$teamSlug/_editor/$contentId",
+      from: "/_authenticated/$slug/$teamSlug/_dashboard/$contentId",
    });
    function handleInsertLink(suggestion: Suggestion) {
       if (!editor.selection) {
@@ -256,42 +256,18 @@ function SuggestionsList({ contentId }: { contentId: string }) {
 
 interface InternalLinksSidebarProps {
    contentId: string;
-   onClose?: () => void;
    className?: string;
 }
 
 export function InternalLinksSidebar({
    contentId,
-   onClose,
    className,
 }: InternalLinksSidebarProps) {
    return (
       <TooltipProvider>
          <div
-            className={cn(
-               "flex h-full w-72 flex-col border-l bg-background shrink-0",
-               className,
-            )}
+            className={cn("flex flex-col", className)}
          >
-            {/* Header */}
-            <div className="flex items-center gap-2 px-3 py-2.5 border-b">
-               <Link2 className="size-3.5 text-muted-foreground/60 shrink-0" />
-               <span className="text-sm font-semibold flex-1">
-                  Links do Cluster
-               </span>
-               {onClose && (
-                  <Button
-                     className="size-6 rounded text-muted-foreground"
-                     onClick={onClose}
-                     size="icon"
-                     type="button"
-                     variant="ghost"
-                  >
-                     <X className="size-3.5" />
-                  </Button>
-               )}
-            </div>
-
             <ScrollArea className="flex-1">
                <ErrorBoundary FallbackComponent={SuggestionsErrorFallback}>
                   <Suspense
