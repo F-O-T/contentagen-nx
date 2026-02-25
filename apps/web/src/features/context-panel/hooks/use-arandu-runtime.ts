@@ -51,8 +51,9 @@ class MastraThreadListAdapter implements RemoteThreadListAdapter {
       }
    }
 
-   async initialize(threadId: string): Promise<RemoteThreadInitializeResponse> {
-      return { remoteId: threadId, externalId: threadId };
+   async initialize(_threadId: string): Promise<RemoteThreadInitializeResponse> {
+      const id = crypto.randomUUID();
+      return { remoteId: id, externalId: id };
    }
 
    async rename(): Promise<void> {}
