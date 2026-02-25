@@ -27,6 +27,7 @@ import { Route as AuthSignInIndexRouteImport } from './routes/auth/sign-in/index
 import { Route as AuthSignInEmailRouteImport } from './routes/auth/sign-in/email'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc/$'
 import { Route as ApiFilesSplatRouteImport } from './routes/api/files/$'
+import { Route as ApiChatSplatRouteImport } from './routes/api/chat/$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthenticatedSlugTeamSlugRouteImport } from './routes/_authenticated/$slug/$teamSlug'
 import { Route as DotwellKnownOauthAuthorizationServerSplatRouteImport } from './routes/[.]well-known.oauth-authorization-server.$'
@@ -177,6 +178,11 @@ const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
 const ApiFilesSplatRoute = ApiFilesSplatRouteImport.update({
   id: '/api/files/$',
   path: '/api/files/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatSplatRoute = ApiChatSplatRouteImport.update({
+  id: '/api/chat/$',
+  path: '/api/chat/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -616,6 +622,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/$slug/$teamSlug': typeof AuthenticatedSlugTeamSlugDashboardRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/$': typeof ApiChatSplatRoute
   '/api/files/$': typeof ApiFilesSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
@@ -694,6 +701,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/$slug/$teamSlug': typeof AuthenticatedSlugTeamSlugDashboardRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/$': typeof ApiChatSplatRoute
   '/api/files/$': typeof ApiFilesSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
@@ -773,6 +781,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-authorization-server/$': typeof DotwellKnownOauthAuthorizationServerSplatRoute
   '/_authenticated/$slug/$teamSlug': typeof AuthenticatedSlugTeamSlugRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/chat/$': typeof ApiChatSplatRoute
   '/api/files/$': typeof ApiFilesSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/auth/sign-in/email': typeof AuthSignInEmailRoute
@@ -855,6 +864,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-authorization-server/$'
     | '/$slug/$teamSlug'
     | '/api/auth/$'
+    | '/api/chat/$'
     | '/api/files/$'
     | '/api/rpc/$'
     | '/auth/sign-in/email'
@@ -933,6 +943,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-authorization-server/$'
     | '/$slug/$teamSlug'
     | '/api/auth/$'
+    | '/api/chat/$'
     | '/api/files/$'
     | '/api/rpc/$'
     | '/auth/sign-in/email'
@@ -1011,6 +1022,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-authorization-server/$'
     | '/_authenticated/$slug/$teamSlug'
     | '/api/auth/$'
+    | '/api/chat/$'
     | '/api/files/$'
     | '/api/rpc/$'
     | '/auth/sign-in/email'
@@ -1084,6 +1096,7 @@ export interface RootRouteChildren {
   OauthConsentRoute: typeof OauthConsentRoute
   DotwellKnownOauthAuthorizationServerSplatRoute: typeof DotwellKnownOauthAuthorizationServerSplatRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiChatSplatRoute: typeof ApiChatSplatRoute
   ApiFilesSplatRoute: typeof ApiFilesSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
 }
@@ -1214,6 +1227,13 @@ declare module '@tanstack/react-router' {
       path: '/api/files/$'
       fullPath: '/api/files/$'
       preLoaderRoute: typeof ApiFilesSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat/$': {
+      id: '/api/chat/$'
+      path: '/api/chat/$'
+      fullPath: '/api/chat/$'
+      preLoaderRoute: typeof ApiChatSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -1937,6 +1957,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotwellKnownOauthAuthorizationServerSplatRoute:
     DotwellKnownOauthAuthorizationServerSplatRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiChatSplatRoute: ApiChatSplatRoute,
   ApiFilesSplatRoute: ApiFilesSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
 }

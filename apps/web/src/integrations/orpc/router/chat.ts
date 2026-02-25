@@ -1,93 +1,41 @@
-import { getChatSessionWithMessages } from "@packages/database/repositories/chat-repository";
+import { mastra } from "@packages/agents";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
 
 /**
- * Get chat history for a content document
- * Returns chat session with messages converted to assistant-ui format
+ * Get recent Mastra memory threads for the current user within a team context.
+ * Threads are keyed by resourceId = `${teamId}:${userId}`.
  */
-export const getChatHistory = protectedProcedure
+export const getRecentThreads = protectedProcedure
    .input(
       z.object({
-         contentId: z.string().uuid(),
+         teamId: z.string().uuid(),
+         limit: z.number().int().min(1).max(20).default(5),
       }),
    )
    .handler(async ({ context, input }) => {
-      const { db, organizationId } = context;
+      const { userId } = context;
+      const resourceId = `${input.teamId}:${userId}`;
 
-      // Get session with messages from database
-      const session = await getChatSessionWithMessages(
-         db,
-         input.contentId,
-         organizationId,
-      );
-
-      if (!session) {
-         return {
-            sessionId: null,
-            messages: [],
-         };
+      const storage = mastra.getStorage();
+      if (!storage) {
+         return [];
       }
 
-      // Convert database messages to assistant-ui ThreadMessage format
-      const messages = session.messages.map((msg) => {
-         if (msg.role === "user") {
-            return {
-               id: msg.id,
-               role: "user" as const,
-               content: [
-                  {
-                     type: "text" as const,
-                     text: msg.content,
-                  },
-               ],
-               createdAt: msg.createdAt,
-            };
-         }
+      const memoryStore = await storage.getStore("memory");
+      if (!memoryStore) {
+         return [];
+      }
 
-         // Assistant message with potential tool calls
-         const contentParts: Array<
-            | { type: "text"; text: string }
-            | {
-                 type: "tool-call";
-                 toolCallId: string;
-                 toolName: string;
-                 args: Record<string, unknown>;
-                 result?: unknown;
-              }
-         > = [];
-
-         // Add text content if present
-         if (msg.content) {
-            contentParts.push({
-               type: "text" as const,
-               text: msg.content,
-            });
-         }
-
-         // Add tool calls if present
-         if (msg.toolCalls && msg.toolCalls.length > 0) {
-            for (const toolCall of msg.toolCalls) {
-               contentParts.push({
-                  type: "tool-call" as const,
-                  toolCallId: toolCall.id,
-                  toolName: toolCall.name,
-                  args: toolCall.args,
-                  result: toolCall.result,
-               });
-            }
-         }
-
-         return {
-            id: msg.id,
-            role: "assistant" as const,
-            content: contentParts,
-            createdAt: msg.createdAt,
-         };
+      const result = await memoryStore.listThreads({
+         filter: { resourceId },
+         perPage: input.limit,
+         orderBy: { field: "updatedAt", direction: "DESC" },
       });
 
-      return {
-         sessionId: session.id,
-         messages,
-      };
+      return result.threads.slice(0, input.limit).map((thread) => ({
+         id: thread.id,
+         title: thread.title ?? "Nova conversa",
+         updatedAt: thread.updatedAt,
+      }));
    });
