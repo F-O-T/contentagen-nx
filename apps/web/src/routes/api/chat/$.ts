@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/chat/$")({
 
             const stream = await handleChatStream({
                mastra,
-               agentId: "content-network-agent",
+               agentId: "contentNetworkAgent",
                params: {
                   messages,
                   memory: { resource: resourceId, thread: threadId },

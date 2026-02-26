@@ -66,7 +66,7 @@ export const copilotStream = protectedProcedure
          contentId: z.string().optional(),
       }),
    )
-   .handler(async function* ({ context, input }) {
+   .handler(async function*({ context, input }) {
       const { userId, db, organizationId, posthog, teamId, headers } = context;
 
       await enforceCreditBudget(db, organizationId, "ai");
@@ -190,7 +190,7 @@ export const aiCommandStream = protectedProcedure
          language: z.string().optional(),
       }),
    )
-   .handler(async function* ({ context, input }) {
+   .handler(async function*({ context, input }) {
       const { userId, db, organizationId, posthog, teamId, headers } = context;
 
       await enforceCreditBudget(db, organizationId, "ai");
@@ -200,7 +200,7 @@ export const aiCommandStream = protectedProcedure
       const aiDefaults = settings?.aiDefaults ?? {};
 
       // Get the unified content agent from Mastra
-      const unifiedAgent = mastra.getAgent("unifiedContent");
+      const unifiedAgent = mastra.getAgent("contentNetworkAgent");
 
       const contentModelId = (input.model ??
          aiDefaults.contentModel ??
@@ -470,7 +470,7 @@ export const executeUnifiedAgent = protectedProcedure
       const startTime = Date.now();
 
       // Execute unified agent
-      const agent = mastra.getAgent("unifiedContent");
+      const agent = mastra.getAgent("contentNetworkAgent");
       const result = await agent.generate(prompt, {
          requestContext: requestContext as RequestContext<unknown>,
       });
