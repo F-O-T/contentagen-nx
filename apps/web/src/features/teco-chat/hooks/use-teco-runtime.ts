@@ -104,7 +104,7 @@ export function useTecoRuntime({
                return { teamId, threadId };
             },
          }),
-      [teamId],
+      [teamId, ensureThread],
    );
 
    return unstable_useRemoteThreadListRuntime({
