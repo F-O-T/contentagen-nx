@@ -2,9 +2,9 @@ import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { Suspense } from "react";
-import { useAranduRuntime } from "@/features/arandu-chat/hooks/use-arandu-runtime";
-import type { QuickSuggestion } from "@/features/arandu-chat/ui/thread";
-import { formatTimeAgo, Thread } from "@/features/arandu-chat/ui/thread";
+import { useTecoRuntime } from "@/features/teco-chat/hooks/use-teco-runtime";
+import type { QuickSuggestion } from "@/features/teco-chat/ui/thread";
+import { formatTimeAgo, Thread } from "@/features/teco-chat/ui/thread";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -50,31 +50,33 @@ function RecentThreadsList({ teamId }: { teamId: string }) {
    );
 }
 
-function AranduChatTabInner({ teamId }: { teamId: string }) {
+function TecoChatTabInner({ teamId }: { teamId: string }) {
    return (
-      <Thread
-         quickSuggestions={QUICK_SUGGESTIONS}
-         recentThreadsSlot={
-            <Suspense fallback={null}>
-               <RecentThreadsList teamId={teamId} />
-            </Suspense>
-         }
-         welcomeIconUrl="/arandu.svg"
-         welcomeSubtitle="Seu assistente de conteúdo com IA."
-         welcomeTitle="Como posso te ajudar?"
-      />
+      <div className="h-full [&_.aui-user-message-content]:bg-background [&_.aui-user-message-content]:text-foreground">
+         <Thread
+            quickSuggestions={QUICK_SUGGESTIONS}
+            recentThreadsSlot={
+               <Suspense fallback={null}>
+                  <RecentThreadsList teamId={teamId} />
+               </Suspense>
+            }
+            welcomeIconUrl="/mascot.svg"
+            welcomeSubtitle="Seu assistente de conteúdo com IA."
+            welcomeTitle="Como posso te ajudar?"
+         />
+      </div>
    );
 }
 
-export function AranduChatTab() {
+export function TecoChatTab() {
    const { activeTeamId } = useActiveTeam();
-   const runtime = useAranduRuntime({ teamId: activeTeamId ?? "" });
+   const runtime = useTecoRuntime({ teamId: activeTeamId ?? "" });
 
    if (!activeTeamId) return null;
 
    return (
       <AssistantRuntimeProvider runtime={runtime}>
-         <AranduChatTabInner teamId={activeTeamId} />
+         <TecoChatTabInner teamId={activeTeamId} />
       </AssistantRuntimeProvider>
    );
 }

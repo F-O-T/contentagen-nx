@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <!-- Mask to create the precise geometric slices and eye cutout -->
+    <mask id="tech-slices">
+      <!-- Base mask: keep everything -->
+      <rect width="100%" height="100%" fill="white" />
+      
+      <!-- Slices: Parallel 45-degree cuts (top-left to bottom-right) -->
+      <!-- Cut 1: Slices the rump perfectly at the corner -->
+      <line x1="-15" y1="40" x2="85" y2="140" stroke="black" stroke-width="8" stroke-linecap="square" />
+      
+      <!-- Cut 2: Slices the torso -->
+      <line x1="25" y1="40" x2="125" y2="140" stroke="black" stroke-width="8" stroke-linecap="square" />
+      
+      <!-- Cut 3: Slices the neck, isolating the head perfectly at the back corner -->
+      <line x1="65" y1="40" x2="165" y2="140" stroke="black" stroke-width="8" stroke-linecap="square" />
+      
+      <!-- Minimalist geometric eye cutout -->
+      <circle cx="142" cy="102" r="4.5" fill="black" />
+    </mask>
+  </defs>
+
+  <!-- Dark background (Remove this line if you want it transparent) -->
+
+  <!-- The High-Tech Geometric Mocó Mascot -->
+  <g mask="url(#tech-slices)" fill="#F4F5F6">
+    
+    <!-- 
+      Main Body Silhouette 
+      Constructed exclusively with 0, 45, and 90 degree angles.
+      The front snout slope is mathematically parallel to the cut slices.
+    -->
+    <path d="M 35 140 
+             L 165 140 
+             L 165 110 
+             L 135 80 
+             L 105 80 
+             L 85 60 
+             L 65 60 
+             L 35 90 
+             Z" />
+
+    <!-- 
+      High-tech ear
+      A distinct geometric diamond sitting flush on the head block
+    -->
+    <polygon points="110,60 120,70 110,80 100,70" />
+    
+  </g>
+</svg>

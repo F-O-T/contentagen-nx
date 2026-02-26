@@ -191,7 +191,9 @@
         "@mastra/ai-sdk": "catalog:mastra",
         "@mastra/core": "catalog:mastra",
         "@mastra/memory": "catalog:mastra",
+        "@mastra/observability": "catalog:mastra",
         "@mastra/pg": "catalog:mastra",
+        "@mastra/posthog": "catalog:mastra",
         "@mastra/rag": "catalog:mastra",
         "@packages/database": "workspace:*",
         "@packages/environment": "workspace:*",
@@ -623,7 +625,9 @@
       "@mastra/ai-sdk": "^1.0.5",
       "@mastra/core": "1.7.0",
       "@mastra/memory": "1.5.1",
+      "@mastra/observability": "1.2.1",
       "@mastra/pg": "1.6.1",
+      "@mastra/posthog": "1.0.4",
       "@mastra/rag": "2.1.1",
       "ai": "6.0.100",
     },
@@ -1306,7 +1310,11 @@
 
     "@mastra/memory": ["@mastra/memory@1.5.1", "", { "dependencies": { "@mastra/schema-compat": "1.1.2", "async-mutex": "^0.5.0", "js-tiktoken": "^1.0.21", "json-schema": "^0.4.0", "lru-cache": "^11.2.6", "xxhash-wasm": "^1.1.0" }, "peerDependencies": { "@mastra/core": ">=1.4.1-0 <2.0.0-0", "zod": "^3.25.0 || ^4.0.0" } }, "sha512-mfpOOSPLHzw5Pxy5gxJZnIxIhqhlIviK9FNRtu7/hcz/n4Zxkl38AGzqYaWfEqW44R+QrlilJIS4snZ8H5Ha6A=="],
 
+    "@mastra/observability": ["@mastra/observability@1.2.1", "", { "peerDependencies": { "@mastra/core": ">=1.1.0-0 <2.0.0-0" } }, "sha512-XogyAgXPnojehAo85ypXzGyofgDaEcqbI8YPP27npGfNDtx+9jxetyCYJMzDi56VodxIl/8JgNph4uWNBZasyg=="],
+
     "@mastra/pg": ["@mastra/pg@1.6.1", "", { "dependencies": { "async-mutex": "^0.5.0", "pg": "^8.16.3", "xxhash-wasm": "^1.1.0" }, "peerDependencies": { "@mastra/core": ">=1.4.0-0 <2.0.0-0" } }, "sha512-gmIemtepNJUoj8aSrXgEWAE71Gr/lq0YLDugYQTznf3H875yzvd/6dEpz9375n//KH7EKP6b4m2ZsxTqtEN+WQ=="],
+
+    "@mastra/posthog": ["@mastra/posthog@1.0.4", "", { "dependencies": { "@mastra/observability": "1.2.1", "posthog-node": "^4.18.0" }, "peerDependencies": { "@mastra/core": ">=1.0.0-0 <2.0.0-0" } }, "sha512-tMMvLEEAkxADMUv0yQE0kKtGu1+WlYTPZ76GxdRwd9oNZ79f3COF/0tWEaH+U3fNI95s/q3aGtnMIS3M7uPU4g=="],
 
     "@mastra/rag": ["@mastra/rag@2.1.1", "", { "dependencies": { "@paralleldrive/cuid2": "^2.3.1", "big.js": "^7.0.1", "js-tiktoken": "^1.0.21", "node-html-better-parser": "^1.5.8", "pathe": "^2.0.3", "zeroentropy": "0.1.0-alpha.7" }, "peerDependencies": { "@mastra/core": ">=1.0.0-0 <2.0.0-0", "zod": "^3.25.0 || ^4.0.0" } }, "sha512-HP7X6r59suDOcyW7aFKNKE4Fh7CP3b2BnUfXKMlvA2kO8i8Hwt3AYeipE/+lXOwuXprfqGWo0XuXttaB5S72vA=="],
 
@@ -4398,6 +4406,8 @@
 
     "@mastra/core/picomatch": ["picomatch@4.0.3", "", {}, "sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q=="],
 
+    "@mastra/posthog/posthog-node": ["posthog-node@4.18.0", "", { "dependencies": { "axios": "^1.8.2" } }, "sha512-XROs1h+DNatgKh/AlIlCtDxWzwrKdYDb2mOs58n4yN8BkGN9ewqeQwG5ApS4/IzwCb7HPttUkOVulkYatd2PIw=="],
+
     "@mendable/firecrawl-js/axios": ["axios@1.13.5", "", { "dependencies": { "follow-redirects": "^1.15.11", "form-data": "^4.0.5", "proxy-from-env": "^1.1.0" } }, "sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q=="],
 
     "@mendable/firecrawl-js/zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
@@ -5081,6 +5091,8 @@
     "@isaacs/cliui/wrap-ansi/ansi-styles": ["ansi-styles@6.2.3", "", {}, "sha512-4Dj6M28JB+oAH8kFkTLUo+a2jwOFkuqb3yucU0CANcRRUbxS0cP0nZYCGjcc3BNXwRIsUVmDGgzawme7zvJHvg=="],
 
     "@logtail/pino/pino-abstract-transport/readable-stream": ["readable-stream@4.7.0", "", { "dependencies": { "abort-controller": "^3.0.0", "buffer": "^6.0.3", "events": "^3.3.0", "process": "^0.11.10", "string_decoder": "^1.3.0" } }, "sha512-oIGGmcpTLwPga8Bn6/Z75SVaH1z5dUut2ibSyAMVhmUggWpmDn2dapB0n7f8nwaSiRtepAsfJyfXIO5DCVAODg=="],
+
+    "@mastra/posthog/posthog-node/axios": ["axios@1.13.5", "", { "dependencies": { "follow-redirects": "^1.15.11", "form-data": "^4.0.5", "proxy-from-env": "^1.1.0" } }, "sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q=="],
 
     "@octokit/plugin-paginate-rest/@octokit/types/@octokit/openapi-types": ["@octokit/openapi-types@24.2.0", "", {}, "sha512-9sIH3nSUttelJSXUrmGzl7QUBFul0/mB8HRYl3fOlgHbIWG+WnYDXU3v/2zMtAvuzZ/ed00Ei6on975FhBfzrg=="],
 

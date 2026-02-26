@@ -8,8 +8,8 @@ import {
 } from "@tanstack/react-router";
 import { MessageSquarePlusIcon } from "lucide-react";
 import { useEffect } from "react";
-import { useAranduRuntime } from "@/features/arandu-chat/hooks/use-arandu-runtime";
-import { ThreadList } from "@/features/arandu-chat/ui/thread-list";
+import { useTecoRuntime } from "@/features/teco-chat/hooks/use-teco-runtime";
+import { ThreadList } from "@/features/teco-chat/ui/thread-list";
 import { closeContextPanel } from "@/features/context-panel/use-context-panel";
 import { useActiveTeam } from "@/hooks/use-active-team";
 
@@ -24,7 +24,7 @@ function ChatLayoutContent({ teamId }: { teamId: string }) {
       from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
 
-   const runtime = useAranduRuntime({ teamId });
+   const runtime = useTecoRuntime({ teamId });
 
    return (
       <AssistantRuntimeProvider runtime={runtime}>
@@ -66,7 +66,7 @@ function ChatLayoutContent({ teamId }: { teamId: string }) {
                         </Link>
                      );
                   }}
-                  welcomeIconUrl="/arandu.svg"
+                  welcomeIconUrl="/mascot.svg"
                />
             </div>
 
