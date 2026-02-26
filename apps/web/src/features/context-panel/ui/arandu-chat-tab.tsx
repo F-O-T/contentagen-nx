@@ -1,10 +1,11 @@
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { Thread, formatTimeAgo } from "@/features/arandu-chat/ui/thread";
 import { useAranduRuntime } from "@/features/arandu-chat/hooks/use-arandu-runtime";
-import { useThreadList } from "@/features/arandu-chat/hooks/use-thread-list";
 import type { QuickSuggestion } from "@/features/arandu-chat/ui/thread";
 import { useActiveTeam } from "@/hooks/use-active-team";
+import { orpc } from "@/integrations/orpc/client";
 import { Link, useParams } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 
 const QUICK_SUGGESTIONS: QuickSuggestion[] = [
@@ -16,12 +17,14 @@ const QUICK_SUGGESTIONS: QuickSuggestion[] = [
 ];
 
 function RecentThreadsList({ teamId }: { teamId: string }) {
-	const threads = useThreadList({ teamId, perPage: 5 });
+	const { data } = useSuspenseQuery(
+		orpc.chat.listThreads.queryOptions({ input: { teamId, page: 0, perPage: 5 } }),
+	);
 	const { slug, teamSlug } = useParams({ from: "/_authenticated/$slug/$teamSlug/_dashboard" });
 
 	return (
 		<>
-			{threads.map((t) => (
+			{data.threads.map((t) => (
 				<Link
 					className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent/60"
 					key={t.id}
