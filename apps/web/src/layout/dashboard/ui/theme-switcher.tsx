@@ -8,7 +8,7 @@ import { useTheme } from "@packages/ui/lib/theme-provider";
 import { cn } from "@packages/ui/lib/utils";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 
 export type ThemeSwitcherProps = {
    className?: string;
@@ -34,7 +34,6 @@ export const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
    ];
 
    const { theme, setTheme } = useTheme();
-   const [mounted, setMounted] = useState(false);
 
    const handleThemeClick = useCallback(
       (themeKey: "light" | "dark" | "system") => {
@@ -45,15 +44,6 @@ export const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
       },
       [setTheme],
    );
-
-   // Prevent hydration mismatch
-   useEffect(() => {
-      setMounted(true);
-   }, []);
-
-   if (!mounted) {
-      return null;
-   }
 
    return (
       <TooltipProvider>
