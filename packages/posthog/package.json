@@ -1,5 +1,6 @@
 {
    "dependencies": {
+      "@mastra/core": "catalog:mastra",
       "@packages/environment": "workspace:*",
       "posthog-js": "catalog:analytics-client",
       "posthog-node": "catalog:analytics-client"
@@ -44,6 +45,10 @@
       "./llm/ai-span": {
          "default": "./src/llm/ai-span.ts",
          "types": "./dist/src/llm/ai-span.d.ts"
+      },
+      "./llm/posthog-exporter": {
+         "default": "./src/llm/posthog-exporter.ts",
+         "types": "./dist/src/llm/posthog-exporter.d.ts"
       }
    },
    "files": [
