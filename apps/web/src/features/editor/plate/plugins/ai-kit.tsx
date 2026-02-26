@@ -9,6 +9,12 @@
  */
 
 import { AILoadingBar, AIMenu } from "@packages/ui/components/ai-menu";
+import {
+	NETWORK_AGENT_IDS,
+	completeNetworkAgent,
+	resetAgentNetwork,
+	startNetworkAgent,
+} from "@/features/editor/stores/agent-network-store";
 import { AIAnchorElement, AILeaf } from "@packages/ui/components/ai-node";
 import { CursorOverlayKit } from "@packages/ui/components/editor/plugins/cursor-overlay-kit";
 import { MarkdownKit } from "@packages/ui/components/editor/plugins/markdown-kit";
@@ -93,6 +99,8 @@ export class ORPCChatTransport implements ChatTransport<UIMessage> {
       const model = this.model;
       const language = this.language;
 
+      resetAgentNetwork();
+
       return new ReadableStream<UIMessageChunk>({
          async start(controller) {
             try {
@@ -123,9 +131,17 @@ export class ORPCChatTransport implements ChatTransport<UIMessage> {
                            id: messageId,
                            delta: chunk.text,
                         } as UIMessageChunk);
+                     } else if (
+                        chunk.type === "tool_call_start" &&
+                        NETWORK_AGENT_IDS.has(chunk.toolCall.name)
+                     ) {
+                        startNetworkAgent(chunk.toolCall.name);
+                     } else if (
+                        chunk.type === "tool_call_complete" &&
+                        NETWORK_AGENT_IDS.has(chunk.toolName)
+                     ) {
+                        completeNetworkAgent(chunk.toolName);
                      }
-                     // step_start, step_complete, tool_call_start, tool_call_complete
-                     // are internal tracking events — AIChatPlugin renders text only.
                   }
                }
 

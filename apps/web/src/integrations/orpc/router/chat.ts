@@ -5,7 +5,7 @@ import { z } from "zod";
 import { protectedProcedure } from "../server";
 
 const getMemory = async () => {
-   const memory = await mastra.getAgent("unifiedContent").getMemory();
+   const memory = await mastra.getAgent("contentNetworkAgent").getMemory();
    if (!memory)
       throw new ORPCError("INTERNAL_SERVER_ERROR", {
          message: "Memory not configured",

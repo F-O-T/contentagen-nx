@@ -62,11 +62,9 @@ export interface PlateEditorProps {
    language?: string;
    /** Team ID used to scope uploaded media assets. */
    teamId?: string;
-   // NEW: toolbar
    status?: string;
    isSaving?: boolean;
    onSave?: () => void;
-   onBack?: () => void;
    onStatusChange?: (status: "draft" | "published" | "archived") => void;
 }
 
@@ -207,7 +205,6 @@ export function PlateEditor({
    status,
    isSaving,
    onSave,
-   onBack,
    onStatusChange,
 }: PlateEditorProps) {
    // Inject per-content context into the ORPCChatTransport singleton so every
@@ -270,7 +267,6 @@ export function PlateEditor({
                {/* Fixed toolbar — INSIDE <Plate> so useEditorRef() works */}
                <EditorFixedToolbar
                   isSaving={isSaving}
-                  onBack={onBack}
                   onSave={onSave}
                   onStatusChange={onStatusChange}
                   status={

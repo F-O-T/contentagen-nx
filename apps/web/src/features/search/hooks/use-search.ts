@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
-import type { TabType } from "@/hooks/use-tab-store";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -9,7 +8,6 @@ export type SearchResultItem = {
    title: string;
    description?: string;
    type: SearchResultType;
-   tabType: TabType;
    icon: string;
    /** The route path with $param placeholders */
    route: string;
@@ -119,7 +117,6 @@ export function useSearch(
                title: item.meta?.title || "Sem titulo",
                description: item.meta?.description,
                type: "content" as const,
-               tabType: "content-editor" as const,
                icon: "FileText",
                route: "/$slug/$teamSlug/$contentId",
                params: { slug: orgSlug, teamSlug: teamId, contentId: item.id },
@@ -155,7 +152,6 @@ export function useSearch(
                title: item.name,
                description: item.description ?? undefined,
                type: "dashboard" as const,
-               tabType: "dashboard" as const,
                icon: "LayoutDashboard",
                route: "/$slug/$teamSlug/analytics/dashboards/$dashboardId",
                params: {
@@ -196,7 +192,6 @@ export function useSearch(
                title: item.name,
                description: item.description ?? undefined,
                type: "insight" as const,
-               tabType: "insight" as const,
                icon: "Lightbulb",
                route: "/$slug/$teamSlug/analytics/insights/$insightId",
                params: { slug: orgSlug, teamSlug: teamId, insightId: item.id },
@@ -232,7 +227,6 @@ export function useSearch(
                title: item.name,
                description: item.description ?? undefined,
                type: "form" as const,
-               tabType: "form" as const,
                icon: "ClipboardList",
                route: "/$slug/$teamSlug/forms/$formId",
                params: { slug: orgSlug, teamSlug: teamId, formId: item.id },

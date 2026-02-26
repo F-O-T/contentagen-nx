@@ -65,7 +65,6 @@ import { Route as AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementRoute
 import { Route as AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsIndexRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/index'
 import { Route as AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementIndexRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management/index'
 import { Route as AuthenticatedSlugTeamSlugDashboardAnalyticsDashboardsIndexRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/analytics/dashboards/index'
-import { Route as AuthenticatedSlugTeamSlugDashboardSettingsProjectWritersRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings/project/writers'
 import { Route as AuthenticatedSlugTeamSlugDashboardSettingsProjectWebhooksRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings/project/webhooks'
 import { Route as AuthenticatedSlugTeamSlugDashboardSettingsProjectIntegrationsRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings/project/integrations'
 import { Route as AuthenticatedSlugTeamSlugDashboardSettingsProjectGeneralRouteImport } from './routes/_authenticated/$slug/$teamSlug/_dashboard/settings/project/general'
@@ -411,12 +410,6 @@ const AuthenticatedSlugTeamSlugDashboardAnalyticsDashboardsIndexRoute =
     path: '/analytics/dashboards/',
     getParentRoute: () => AuthenticatedSlugTeamSlugDashboardRoute,
   } as any)
-const AuthenticatedSlugTeamSlugDashboardSettingsProjectWritersRoute =
-  AuthenticatedSlugTeamSlugDashboardSettingsProjectWritersRouteImport.update({
-    id: '/project/writers',
-    path: '/project/writers',
-    getParentRoute: () => AuthenticatedSlugTeamSlugDashboardSettingsRoute,
-  } as any)
 const AuthenticatedSlugTeamSlugDashboardSettingsProjectWebhooksRoute =
   AuthenticatedSlugTeamSlugDashboardSettingsProjectWebhooksRouteImport.update({
     id: '/project/webhooks',
@@ -699,7 +692,6 @@ export interface FileRoutesByFullPath {
   '/$slug/$teamSlug/settings/project/general': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectGeneralRoute
   '/$slug/$teamSlug/settings/project/integrations': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectIntegrationsRoute
   '/$slug/$teamSlug/settings/project/webhooks': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectWebhooksRoute
-  '/$slug/$teamSlug/settings/project/writers': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectWritersRoute
   '/$slug/$teamSlug/analytics/dashboards/': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDashboardsIndexRoute
   '/$slug/$teamSlug/analytics/data-management/': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementIndexRoute
   '/$slug/$teamSlug/analytics/insights/': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsIndexRoute
@@ -778,7 +770,6 @@ export interface FileRoutesByTo {
   '/$slug/$teamSlug/settings/project/general': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectGeneralRoute
   '/$slug/$teamSlug/settings/project/integrations': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectIntegrationsRoute
   '/$slug/$teamSlug/settings/project/webhooks': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectWebhooksRoute
-  '/$slug/$teamSlug/settings/project/writers': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectWritersRoute
   '/$slug/$teamSlug/analytics/dashboards': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDashboardsIndexRoute
   '/$slug/$teamSlug/analytics/data-management': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementIndexRoute
   '/$slug/$teamSlug/analytics/insights': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsIndexRoute
@@ -864,7 +855,6 @@ export interface FileRoutesById {
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/general': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectGeneralRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/integrations': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectIntegrationsRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/webhooks': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectWebhooksRoute
-  '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/writers': typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectWritersRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/analytics/dashboards/': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDashboardsIndexRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management/': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDataManagementIndexRoute
   '/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/': typeof AuthenticatedSlugTeamSlugDashboardAnalyticsInsightsIndexRoute
@@ -949,7 +939,6 @@ export interface FileRouteTypes {
     | '/$slug/$teamSlug/settings/project/general'
     | '/$slug/$teamSlug/settings/project/integrations'
     | '/$slug/$teamSlug/settings/project/webhooks'
-    | '/$slug/$teamSlug/settings/project/writers'
     | '/$slug/$teamSlug/analytics/dashboards/'
     | '/$slug/$teamSlug/analytics/data-management/'
     | '/$slug/$teamSlug/analytics/insights/'
@@ -1028,7 +1017,6 @@ export interface FileRouteTypes {
     | '/$slug/$teamSlug/settings/project/general'
     | '/$slug/$teamSlug/settings/project/integrations'
     | '/$slug/$teamSlug/settings/project/webhooks'
-    | '/$slug/$teamSlug/settings/project/writers'
     | '/$slug/$teamSlug/analytics/dashboards'
     | '/$slug/$teamSlug/analytics/data-management'
     | '/$slug/$teamSlug/analytics/insights'
@@ -1113,7 +1101,6 @@ export interface FileRouteTypes {
     | '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/general'
     | '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/integrations'
     | '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/webhooks'
-    | '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/writers'
     | '/_authenticated/$slug/$teamSlug/_dashboard/analytics/dashboards/'
     | '/_authenticated/$slug/$teamSlug/_dashboard/analytics/data-management/'
     | '/_authenticated/$slug/$teamSlug/_dashboard/analytics/insights/'
@@ -1532,13 +1519,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSlugTeamSlugDashboardAnalyticsDashboardsIndexRouteImport
       parentRoute: typeof AuthenticatedSlugTeamSlugDashboardRoute
     }
-    '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/writers': {
-      id: '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/writers'
-      path: '/project/writers'
-      fullPath: '/$slug/$teamSlug/settings/project/writers'
-      preLoaderRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectWritersRouteImport
-      parentRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsRoute
-    }
     '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/webhooks': {
       id: '/_authenticated/$slug/$teamSlug/_dashboard/settings/project/webhooks'
       path: '/project/webhooks'
@@ -1762,7 +1742,6 @@ interface AuthenticatedSlugTeamSlugDashboardSettingsRouteChildren {
   AuthenticatedSlugTeamSlugDashboardSettingsProjectGeneralRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectGeneralRoute
   AuthenticatedSlugTeamSlugDashboardSettingsProjectIntegrationsRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectIntegrationsRoute
   AuthenticatedSlugTeamSlugDashboardSettingsProjectWebhooksRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectWebhooksRoute
-  AuthenticatedSlugTeamSlugDashboardSettingsProjectWritersRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectWritersRoute
   AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAiAgentsRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAiAgentsRoute
   AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRoute
   AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRoute: typeof AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsClustersRoute
@@ -1810,8 +1789,6 @@ const AuthenticatedSlugTeamSlugDashboardSettingsRouteChildren: AuthenticatedSlug
       AuthenticatedSlugTeamSlugDashboardSettingsProjectIntegrationsRoute,
     AuthenticatedSlugTeamSlugDashboardSettingsProjectWebhooksRoute:
       AuthenticatedSlugTeamSlugDashboardSettingsProjectWebhooksRoute,
-    AuthenticatedSlugTeamSlugDashboardSettingsProjectWritersRoute:
-      AuthenticatedSlugTeamSlugDashboardSettingsProjectWritersRoute,
     AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAiAgentsRoute:
       AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAiAgentsRoute,
     AuthenticatedSlugTeamSlugDashboardSettingsProjectProductsAssetBankRoute:
