@@ -1,34 +1,9 @@
-import { beforeAll, describe, expect, it, mock } from "bun:test";
+import { beforeAll, describe, expect, it } from "bun:test";
+import { workspace } from "../mastra/workspace";
 
-// Mock heavy env/DB dependencies before any workspace import
-mock.module("@packages/environment/server", () => ({
-	env: {
-		PG_VECTOR_URL: "postgresql://localhost/test",
-		OPENROUTER_API_KEY: "test-key",
-	},
-}));
-
-mock.module("@mastra/pg", () => ({
-	PgVector: class {
-		constructor() {}
-	},
-	PostgresStore: class {
-		constructor() {}
-	},
-}));
-
-mock.module("../utils", () => ({
-	pgVectorStore: {},
-	embeddingModel: {},
-	disconnectVectorStore: async () => {},
-	buildLanguageInstruction: () => "",
-	compileInstructionMemories: () => "",
-}));
-
-// Dynamically import workspace after mocks are in place
-const { workspace } = (await import(
-	"../mastra/workspace"
-)) as typeof import("../mastra/workspace");
+// Mocks are registered in workspace-mocks.ts (preloaded via bunfig.toml [test] preload)
+// before this file's static imports are resolved, so ../mastra/workspace loads
+// with all heavy env/DB dependencies already stubbed out.
 
 describe("workspace skill discovery", () => {
 	beforeAll(async () => {
