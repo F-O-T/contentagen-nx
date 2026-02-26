@@ -11,6 +11,9 @@ import { pgVectorStore } from "../utils";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
 import { unifiedContentAgent } from "./agents/unified-content-agent";
+import { researchCompletenessScorer } from "./evals/research-completeness-scorer";
+import { seoQualityScorer } from "./evals/seo-quality-scorer";
+import { writingQualityScorer } from "./evals/writing-quality-scorer";
 import { workspace } from "./workspace";
 
 /**
@@ -65,6 +68,20 @@ export const mastra: Mastra = new Mastra({
    storage: mastraStorage,
    workspace,
    observability,
+   scorers: {
+      writingQuality: {
+         scorer: writingQualityScorer,
+         sampling: { type: "ratio", rate: 0.1 },
+      },
+      seoQuality: {
+         scorer: seoQualityScorer,
+         sampling: { type: "ratio", rate: 0.1 },
+      },
+      researchCompleteness: {
+         scorer: researchCompletenessScorer,
+         sampling: { type: "ratio", rate: 0.1 },
+      },
+   },
 });
 
 export function createRequestContext(context: CustomRequestContext) {
