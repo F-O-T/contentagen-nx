@@ -54,9 +54,6 @@ import { type ContextItem, ContextPicker } from "./context-picker";
 const MODES = [
    { value: "auto", label: "Auto" },
    { value: "content", label: "Conteúdo" },
-   { value: "research", label: "Pesquisa" },
-   { value: "seo", label: "SEO" },
-   { value: "review", label: "Revisão" },
 ] as const;
 
 export interface QuickSuggestion {

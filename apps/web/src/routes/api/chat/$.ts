@@ -7,10 +7,7 @@ import { auth } from "@/integrations/orpc/server-instances";
 
 const MODE_ROUTING_PREFIX: Record<string, string> = {
    auto: "",
-   content: "[Usar writer-agent]:",
-   research: "[Usar research-agent]:",
-   seo: "[Usar seo-auditor-agent]:",
-   review: "[Usar reviewer-agent]:",
+   content: "[Usar content-agent]:",
 };
 
 export const Route = createFileRoute("/api/chat/$")({
