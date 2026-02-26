@@ -52,17 +52,19 @@ function RecentThreadsList({ teamId }: { teamId: string }) {
 
 function TecoChatTabInner({ teamId }: { teamId: string }) {
    return (
-      <Thread
-         quickSuggestions={QUICK_SUGGESTIONS}
-         recentThreadsSlot={
-            <Suspense fallback={null}>
-               <RecentThreadsList teamId={teamId} />
-            </Suspense>
-         }
-         welcomeIconUrl="/mascot.svg"
-         welcomeSubtitle="Seu assistente de conteúdo com IA."
-         welcomeTitle="Como posso te ajudar?"
-      />
+      <div className="h-full [&_.aui-user-message-content]:bg-background [&_.aui-user-message-content]:text-foreground">
+         <Thread
+            quickSuggestions={QUICK_SUGGESTIONS}
+            recentThreadsSlot={
+               <Suspense fallback={null}>
+                  <RecentThreadsList teamId={teamId} />
+               </Suspense>
+            }
+            welcomeIconUrl="/mascot.svg"
+            welcomeSubtitle="Seu assistente de conteúdo com IA."
+            welcomeTitle="Como posso te ajudar?"
+         />
+      </div>
    );
 }
 

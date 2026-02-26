@@ -1,24 +1,17 @@
+import path from "node:path";
 import { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
+import { LocalFilesystem, Workspace } from "@mastra/core/workspace";
 import { Observability } from "@mastra/observability";
 import { PostgresStore } from "@mastra/pg";
+import { PosthogExporter } from "@mastra/posthog";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { env as serverEnv } from "@packages/environment/server";
-import { PostHog } from "posthog-node";
-import { PosthogExporter } from "@packages/posthog/llm/posthog-exporter";
 import type { ModelId } from "../models";
 import { pgVectorStore } from "../utils";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
 import { unifiedContentAgent } from "./agents/unified-content-agent";
-import { researchCompletenessScorer } from "./evals/research-completeness-scorer";
-import { seoQualityScorer } from "./evals/seo-quality-scorer";
-import { writingQualityScorer } from "./evals/writing-quality-scorer";
-import { workspace } from "./workspace";
-
-/**
- * Re-export RequestContext so consumers don't need to depend on @mastra/core directly.
- */
 export type { RequestContext };
 
 export type CustomRequestContext = {
@@ -40,17 +33,24 @@ const mastraStorage = new PostgresStore({
    connectionString: serverEnv.PG_VECTOR_URL,
 });
 
-const posthogClient = new PostHog(serverEnv.POSTHOG_KEY, {
-   flushAt: 20,
-   flushInterval: 10000,
-   host: serverEnv.POSTHOG_HOST,
+const workspace = new Workspace({
+   filesystem: new LocalFilesystem({
+      basePath: path.resolve(import.meta.dirname, "./workspace"),
+   }),
+   skills: ["/skills"],
+   bm25: true,
 });
-
 const observability = new Observability({
    configs: {
-      default: {
+      posthog: {
          serviceName: "contentta-agents",
-         exporters: [new PosthogExporter(posthogClient, "system")],
+         exporters: [
+            new PosthogExporter({
+               apiKey: serverEnv.POSTHOG_KEY,
+               host: serverEnv.POSTHOG_HOST,
+               defaultDistinctId: "system",
+            }),
+         ],
       },
    },
 });
@@ -68,20 +68,6 @@ export const mastra: Mastra = new Mastra({
    storage: mastraStorage,
    workspace,
    observability,
-   scorers: {
-      writingQuality: {
-         scorer: writingQualityScorer,
-         sampling: { type: "ratio", rate: 0.1 },
-      },
-      seoQuality: {
-         scorer: seoQualityScorer,
-         sampling: { type: "ratio", rate: 0.1 },
-      },
-      researchCompleteness: {
-         scorer: researchCompletenessScorer,
-         sampling: { type: "ratio", rate: 0.1 },
-      },
-   },
 });
 
 export function createRequestContext(context: CustomRequestContext) {
