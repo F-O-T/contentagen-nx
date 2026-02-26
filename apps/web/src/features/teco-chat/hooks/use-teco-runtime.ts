@@ -7,7 +7,7 @@ import {
    useChatRuntime,
 } from "@assistant-ui/react-ai-sdk";
 import { useMutation } from "@tanstack/react-query";
-import { useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { client, orpc } from "@/integrations/orpc/client";
 
 type RemoteThreadInitializeResponse = Awaited<
@@ -25,11 +25,29 @@ export function useTecoRuntime({
    onThreadCreated?: (threadId: string) => void;
 }) {
    const createThread = useMutation(orpc.chat.createThread.mutationOptions({}));
+   const teamIdRef = useRef(teamId);
+   teamIdRef.current = teamId;
    const activeThreadIdRef = useRef<string | undefined>(undefined);
+   const pendingThreadRef = useRef<Promise<string> | undefined>(undefined);
    const onThreadCreatedRef = useRef(onThreadCreated);
    onThreadCreatedRef.current = onThreadCreated;
    const createThreadRef = useRef(createThread.mutateAsync);
    createThreadRef.current = createThread.mutateAsync;
+
+   const ensureThread = useCallback(async (): Promise<string> => {
+      if (activeThreadIdRef.current) return activeThreadIdRef.current;
+      pendingThreadRef.current ??= createThreadRef
+         .current({ teamId: teamIdRef.current })
+         .then((thread) => {
+            activeThreadIdRef.current = thread.id;
+            onThreadCreatedRef.current?.(thread.id);
+            return thread.id;
+         })
+         .finally(() => {
+            pendingThreadRef.current = undefined;
+         });
+      return pendingThreadRef.current;
+   }, []);
 
    const adapter = useMemo(
       (): RemoteThreadListAdapter => ({
@@ -55,15 +73,8 @@ export function useTecoRuntime({
          initialize: async (
             _threadId: string,
          ): Promise<RemoteThreadInitializeResponse> => {
-            if (!activeThreadIdRef.current) {
-               const thread = await createThreadRef.current({ teamId });
-               activeThreadIdRef.current = thread.id;
-               onThreadCreatedRef.current?.(thread.id);
-            }
-            return {
-               remoteId: activeThreadIdRef.current,
-               externalId: activeThreadIdRef.current,
-            };
+            const id = await ensureThread();
+            return { remoteId: id, externalId: id };
          },
          fetch: async (threadId: string) => {
             activeThreadIdRef.current = threadId;
@@ -81,7 +92,7 @@ export function useTecoRuntime({
          },
          generateTitle: async () => new ReadableStream(),
       }),
-      [teamId, createThread.mutateAsync],
+      [teamId, ensureThread],
    );
 
    const transport = useMemo(
@@ -89,11 +100,8 @@ export function useTecoRuntime({
          new AssistantChatTransport({
             api: "/api/chat",
             body: async () => {
-               if (!activeThreadIdRef.current) {
-                  const thread = await createThreadRef.current({ teamId });
-                  activeThreadIdRef.current = thread.id;
-               }
-               return { teamId, threadId: activeThreadIdRef.current };
+               const threadId = await ensureThread();
+               return { teamId, threadId };
             },
          }),
       [teamId],

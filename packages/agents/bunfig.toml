@@ -1,6 +1,0 @@
-# Global test preload: mocks heavy deps (DB, env, vector store) that are
-# transitively required by workspace/index.ts. Applies to all test files in
-# this package. Any test that also mocks these modules must provide complete
-# stubs to avoid overriding the preload with a partial mock.
-[test]
-preload = ["./src/__tests__/workspace-mocks.ts"]
