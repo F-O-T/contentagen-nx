@@ -14,9 +14,17 @@ import {
    TooltipTrigger,
 } from "@packages/ui/components/tooltip";
 import { cn } from "@packages/ui/lib/utils";
+import {
+	ContextPanel,
+	ContextPanelContent,
+	ContextPanelHeader,
+	ContextPanelHeaderActions,
+	ContextPanelTitle,
+} from "@packages/ui/components/context-panel";
 import { useStore } from "@tanstack/react-store";
-import { Info, MessageSquare, X } from "lucide-react";
+import { ArrowUpRight, Info, MessageSquare, X } from "lucide-react";
 import type React from "react";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { type ContextPanelTab, contextPanelStore } from "./context-panel-store";
 import { TecoChatTab } from "./ui/teco-chat-tab";
 import {
@@ -25,18 +33,61 @@ import {
    setActiveTab,
 } from "./use-context-panel";
 
+function InfoContent() {
+   const { infoContent } = useStore(contextPanelStore);
+   if (!infoContent) {
+      return (
+         <ContextPanel>
+            <ContextPanelContent className="flex items-center justify-center p-6">
+               <p className="text-sm text-muted-foreground/50">Sem informações</p>
+            </ContextPanelContent>
+         </ContextPanel>
+      );
+   }
+   return <>{infoContent}</>;
+}
+
+function ChatContent() {
+   const navigate = useNavigate();
+   const { slug, teamSlug } = useParams({
+      from: "/_authenticated/$slug/$teamSlug/_dashboard",
+   });
+
+   return (
+      <ContextPanel>
+         <ContextPanelHeader>
+            <ContextPanelTitle>Chat IA</ContextPanelTitle>
+            <ContextPanelHeaderActions>
+               <Button
+                  className="size-6 rounded"
+                  onClick={() =>
+                     navigate({
+                        to: "/$slug/$teamSlug/chat",
+                        params: { slug, teamSlug },
+                     })
+                  }
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+               >
+                  <ArrowUpRight className="size-3.5" />
+               </Button>
+            </ContextPanelHeaderActions>
+         </ContextPanelHeader>
+         <ContextPanelContent>
+            <TecoChatTab />
+         </ContextPanelContent>
+      </ContextPanel>
+   );
+}
+
 const CHAT_TAB: ContextPanelTab = {
    id: "chat",
    icon: MessageSquare,
    label: "Chat IA",
-   content: <TecoChatTab />,
+   content: <ChatContent />,
    order: 1,
 };
-
-function InfoContent() {
-   const { infoContent } = useStore(contextPanelStore);
-   return <>{infoContent}</>;
-}
 
 const INFO_TAB: ContextPanelTab = {
    id: "info",
@@ -104,10 +155,8 @@ function ContextPanelInner() {
          </SidebarHeader>
 
          {/* Active tab content — inset rounded card on bg-muted */}
-         <SidebarContent className=" overflow-hidden h-full">
-            <div className="h-full rounded-b-xl bg-muted ">
-               {activeTab?.content}
-            </div>
+         <SidebarContent className="h-full overflow-hidden rounded-b-xl bg-muted">
+            {activeTab?.content}
          </SidebarContent>
       </Sidebar>
    );
