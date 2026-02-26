@@ -75,8 +75,8 @@ export interface ThreadProps {
 }
 
 export const Thread: FC<ThreadProps> = ({
-   welcomeTitle = "Hello there!",
-   welcomeSubtitle = "How can I help you today?",
+   welcomeTitle = "O que você quer criar?",
+   welcomeSubtitle = "Pesquise, escreva, audite SEO ou revise conteúdos.",
    welcomeIconUrl,
    quickSuggestions,
    recentThreadsSlot,
@@ -104,8 +104,6 @@ export const Thread: FC<ThreadProps> = ({
             <AuiIf condition={(s) => s.thread.isEmpty}>
                <ThreadWelcome
                   iconUrl={welcomeIconUrl}
-                  mode={mode}
-                  onModeChange={handleModeChange}
                   quickSuggestions={quickSuggestions}
                   recentThreadsSlot={recentThreadsSlot}
                   subtitle={welcomeSubtitle}
@@ -121,13 +119,13 @@ export const Thread: FC<ThreadProps> = ({
                }}
             />
 
-            <AuiIf condition={(s) => !s.thread.isEmpty}>
-               <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-transparent pb-4 md:pb-6">
+            <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-transparent pb-4 md:pb-6">
+               <AuiIf condition={(s) => !s.thread.isEmpty}>
                   <ThreadScrollToBottom />
                   <AgentNetworkStatus />
-                  <Composer mode={mode} onModeChange={handleModeChange} />
-               </ThreadPrimitive.ViewportFooter>
-            </AuiIf>
+               </AuiIf>
+               <Composer mode={mode} onModeChange={handleModeChange} />
+            </ThreadPrimitive.ViewportFooter>
          </ThreadPrimitive.Viewport>
       </ThreadPrimitive.Root>
    );
@@ -164,8 +162,6 @@ interface ThreadWelcomeProps {
    iconUrl?: string;
    quickSuggestions?: QuickSuggestion[];
    recentThreadsSlot?: ReactNode;
-   mode: string;
-   onModeChange: (value: string) => void;
 }
 
 const ThreadWelcome: FC<ThreadWelcomeProps> = ({
@@ -174,15 +170,13 @@ const ThreadWelcome: FC<ThreadWelcomeProps> = ({
    iconUrl,
    quickSuggestions,
    recentThreadsSlot,
-   mode,
-   onModeChange,
 }) => {
    return (
       <div className="aui-thread-welcome-root mx-auto flex w-full max-w-(--thread-max-width) grow flex-col">
          {/* Centered main content */}
          <div className="flex flex-1 flex-col items-center justify-center px-3 py-8">
             {/* Icon + title + subtitle */}
-            <div className="flex flex-col items-center gap-3 px-3 pb-5">
+            <div className="flex flex-col items-center gap-3 px-3 pb-6 text-center">
                <div className="relative flex items-center justify-center">
                   <div className="absolute size-24 rounded-full bg-primary/10 blur-xl" />
                   {iconUrl ? (
@@ -199,29 +193,17 @@ const ThreadWelcome: FC<ThreadWelcomeProps> = ({
                      <SparklesIcon className="relative size-10 text-foreground" />
                   )}
                </div>
-               <div className="text-center">
-                  <h2 className="text-lg font-semibold tracking-tight">
+               <div className="flex flex-col items-center gap-1.5">
+                  <h2 className="text-2xl font-semibold tracking-tight">
                      {title}
                   </h2>
-                  <p className="mt-0.5 text-sm italic text-muted-foreground">
-                     {subtitle}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{subtitle}</p>
                </div>
             </div>
 
-            {/* Composer inline */}
-            <div className="w-full pb-2">
-               <Composer mode={mode} onModeChange={onModeChange} />
-            </div>
-
-            {/* Disclaimer */}
-            <p className="pb-3 text-center text-[11px] text-muted-foreground/60">
-               Teco pode cometer erros. Verifique as respostas.
-            </p>
-
-            {/* Quick suggestion chips — flex wrap */}
+            {/* Quick suggestion chips — flex wrap, centered */}
             {quickSuggestions && quickSuggestions.length > 0 && (
-               <div className="flex w-full flex-wrap gap-1.5">
+               <div className="flex flex-wrap justify-center gap-2">
                   {quickSuggestions.map((s) => (
                      <QuickChip
                         key={s.label}
@@ -253,13 +235,10 @@ const QuickChip: FC<{ label: string; prompt: string }> = ({
    const api = useAui();
    return (
       <button
-         className="inline-flex items-center rounded-md border border-border/60 bg-background/60 px-2.5 py-1 text-xs font-medium text-foreground/70 transition-colors hover:border-border hover:bg-accent hover:text-accent-foreground"
-         onClick={() =>
-            api.thread().append({
-               role: "user",
-               content: [{ type: "text", text: prompt }],
-            })
-         }
+         className="rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
+         onClick={() => {
+            api.composer().setText(prompt);
+         }}
          type="button"
       >
          {label}
