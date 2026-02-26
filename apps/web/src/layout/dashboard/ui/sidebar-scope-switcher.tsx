@@ -328,7 +328,7 @@ function SidebarScopeSwitcherContent() {
    }, [openAlertDialog, handleLogout]);
 
    return (
-      <SidebarMenu className="group-data-[collapsible=icon]:w-8">
+      <SidebarMenu>
          <SidebarMenuItem>
             <DropdownMenu>
                <DropdownMenuTrigger asChild>
