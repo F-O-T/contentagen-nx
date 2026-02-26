@@ -21,11 +21,18 @@ export const Route = createFileRoute("/api/chat/$")({
             const resourceId = `${teamId}:${userId}`;
 
             if (threadId) {
-               const memory = await mastra.getAgent("unifiedContent").getMemory();
-               if (!memory) return new Response("Memory not configured", { status: 500 });
-               const thread = await memory.getThread(threadId);
+               const memory = await mastra
+                  .getAgent("unifiedContent")
+                  .getMemory();
+               if (!memory)
+                  return new Response("Memory not configured", { status: 500 });
+               const thread = await memory.getThreadById({
+                  threadId: threadId,
+               });
                if (thread?.resourceId !== resourceId) {
-                  return new Response("Thread not found or access denied", { status: 403 });
+                  return new Response("Thread not found or access denied", {
+                     status: 403,
+                  });
                }
             }
 

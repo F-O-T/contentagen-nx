@@ -67,7 +67,7 @@ export const deleteThread = protectedProcedure
    .input(z.object({ threadId: z.string() }))
    .handler(async ({ input, context }) => {
       const memory = await getMemory();
-      const thread = await memory.getThread(input.threadId);
+      const thread = await memory.getThreadById({ threadId: input.threadId });
       if (!thread?.resourceId?.endsWith(`:${context.userId}`)) {
          throw new ORPCError("FORBIDDEN", {
             message: "Thread not found or access denied",
@@ -78,8 +78,14 @@ export const deleteThread = protectedProcedure
 
 export const getThreadMessages = protectedProcedure
    .input(z.object({ threadId: z.string() }))
-   .handler(async ({ input }) => {
+   .handler(async ({ input, context }) => {
       const memory = await getMemory();
+      const thread = await memory.getThreadById({ threadId: input.threadId });
+      if (!thread?.resourceId?.endsWith(`:${context.userId}`)) {
+         throw new ORPCError("FORBIDDEN", {
+            message: "Thread not found or access denied",
+         });
+      }
       const { messages } = await memory.recall({
          threadId: input.threadId,
          perPage: false,
