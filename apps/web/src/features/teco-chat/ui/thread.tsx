@@ -18,6 +18,13 @@ import { MarkdownText } from "@packages/ui/components/assistant-ui/markdown-text
 import { ToolFallback } from "@packages/ui/components/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@packages/ui/components/assistant-ui/tooltip-icon-button";
 import { Button } from "@packages/ui/components/button";
+import {
+   Select,
+   SelectContent,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from "@packages/ui/components/select";
 import { cn } from "@packages/ui/lib/utils";
 import { useStore } from "@tanstack/react-store";
 import {
@@ -36,11 +43,20 @@ import {
    SquareIcon,
 } from "lucide-react";
 import type { FC, ReactNode } from "react";
+import { useState } from "react";
 import {
    AGENT_DISPLAY_NAMES,
    agentNetworkStore,
    type AgentStatus,
 } from "@/features/editor/stores/agent-network-store";
+
+const MODES = [
+   { value: "auto", label: "Auto" },
+   { value: "content", label: "Conteúdo" },
+   { value: "research", label: "Pesquisa" },
+   { value: "seo", label: "SEO" },
+   { value: "review", label: "Revisão" },
+] as const;
 
 export interface QuickSuggestion {
    label: string;
@@ -53,6 +69,8 @@ export interface ThreadProps {
    welcomeIconUrl?: string;
    quickSuggestions?: QuickSuggestion[];
    recentThreadsSlot?: ReactNode;
+   onModeChange?: (mode: string) => void;
+   defaultMode?: string;
 }
 
 export const Thread: FC<ThreadProps> = ({
@@ -61,7 +79,16 @@ export const Thread: FC<ThreadProps> = ({
    welcomeIconUrl,
    quickSuggestions,
    recentThreadsSlot,
+   onModeChange,
+   defaultMode = "auto",
 }) => {
+   const [mode, setMode] = useState<string>(defaultMode);
+
+   const handleModeChange = (value: string) => {
+      setMode(value);
+      onModeChange?.(value);
+   };
+
    return (
       <ThreadPrimitive.Root
          className="aui-root aui-thread-root @container flex h-full w-full flex-col bg-transparent"
@@ -80,6 +107,8 @@ export const Thread: FC<ThreadProps> = ({
                   recentThreadsSlot={recentThreadsSlot}
                   subtitle={welcomeSubtitle}
                   title={welcomeTitle}
+                  mode={mode}
+                  onModeChange={handleModeChange}
                />
             </AuiIf>
 
@@ -95,7 +124,7 @@ export const Thread: FC<ThreadProps> = ({
                <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-transparent pb-4 md:pb-6">
                   <ThreadScrollToBottom />
                   <AgentNetworkStatus />
-                  <Composer />
+                  <Composer mode={mode} onModeChange={handleModeChange} />
                </ThreadPrimitive.ViewportFooter>
             </AuiIf>
          </ThreadPrimitive.Viewport>
@@ -134,6 +163,8 @@ interface ThreadWelcomeProps {
    iconUrl?: string;
    quickSuggestions?: QuickSuggestion[];
    recentThreadsSlot?: ReactNode;
+   mode: string;
+   onModeChange: (value: string) => void;
 }
 
 const ThreadWelcome: FC<ThreadWelcomeProps> = ({
@@ -142,6 +173,8 @@ const ThreadWelcome: FC<ThreadWelcomeProps> = ({
    iconUrl,
    quickSuggestions,
    recentThreadsSlot,
+   mode,
+   onModeChange,
 }) => {
    return (
       <div className="aui-thread-welcome-root mx-auto flex w-full max-w-(--thread-max-width) grow flex-col">
@@ -177,7 +210,7 @@ const ThreadWelcome: FC<ThreadWelcomeProps> = ({
 
             {/* Composer inline */}
             <div className="w-full pb-2">
-               <Composer />
+               <Composer mode={mode} onModeChange={onModeChange} />
             </div>
 
             {/* Disclaimer */}
@@ -233,7 +266,12 @@ const QuickChip: FC<{ label: string; prompt: string }> = ({
    );
 };
 
-const Composer: FC = () => {
+interface ComposerProps {
+   mode: string;
+   onModeChange: (value: string) => void;
+}
+
+const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
    return (
       <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col">
          <ComposerPrimitive.AttachmentDropzone className="aui-composer-attachment-dropzone flex w-full flex-col rounded-xl border border-border/60 bg-background/80 px-1 pt-2 shadow-sm outline-none backdrop-blur-sm transition-all has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:shadow-md has-[textarea:focus-visible]:ring-1 has-[textarea:focus-visible]:ring-ring/20 data-[dragging=true]:border-ring data-[dragging=true]:border-dashed data-[dragging=true]:bg-accent/50">
@@ -245,7 +283,27 @@ const Composer: FC = () => {
                placeholder="Envie uma mensagem..."
                rows={1}
             />
-            <ComposerAction />
+            <div className="flex items-center justify-between">
+               <div className="flex items-center gap-2 px-1 pb-2">
+                  <Select value={mode} onValueChange={onModeChange}>
+                     <SelectTrigger className="h-7 w-auto gap-1 border-none bg-transparent px-2 text-xs text-muted-foreground shadow-none hover:bg-accent">
+                        <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent align="start">
+                        {MODES.map((m) => (
+                           <SelectItem
+                              key={m.value}
+                              value={m.value}
+                              className="text-xs"
+                           >
+                              {m.label}
+                           </SelectItem>
+                        ))}
+                     </SelectContent>
+                  </Select>
+               </div>
+               <ComposerAction />
+            </div>
          </ComposerPrimitive.AttachmentDropzone>
       </ComposerPrimitive.Root>
    );
