@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/server";
+import { toAISdkV5Messages } from "@mastra/ai-sdk/ui";
 import { mastra } from "@packages/agents";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
@@ -42,7 +43,7 @@ export const createThread = protectedProcedure
 		z.object({
 			teamId: z.uuid(),
 			title: z.string().optional(),
-			metadata: z.record(z.unknown()).optional(),
+			metadata: z.record(z.string(), z.unknown()).optional(),
 		}),
 	)
 	.handler(async ({ context, input }) => {
@@ -55,37 +56,19 @@ export const createThread = protectedProcedure
 		return { id: thread.id, title: thread.title ?? "Nova conversa", createdAt: thread.createdAt };
 	});
 
-export const getThread = protectedProcedure
+
+export const deleteThread = protectedProcedure
 	.input(z.object({ threadId: z.string() }))
 	.handler(async ({ input }) => {
 		const memory = await getMemory();
-		const thread = await memory.getThreadById({ threadId: input.threadId });
-		if (!thread) throw new ORPCError("NOT_FOUND", { message: "Thread not found" });
-		return {
-			id: thread.id,
-			title: thread.title ?? "Nova conversa",
-			createdAt: thread.createdAt,
-			updatedAt: thread.updatedAt,
-			resourceId: thread.resourceId,
-		};
+		await memory.deleteThread(input.threadId);
 	});
 
-export const cloneThread = protectedProcedure
-	.input(
-		z.object({
-			sourceThreadId: z.string(),
-			teamId: z.uuid(),
-			title: z.string().optional(),
-			messageLimit: z.number().int().min(1).optional(),
-		}),
-	)
-	.handler(async ({ context, input }) => {
+export const getThreadMessages = protectedProcedure
+	.input(z.object({ threadId: z.string() }))
+	.handler(async ({ input }) => {
 		const memory = await getMemory();
-		const { thread } = await memory.cloneThread({
-			sourceThreadId: input.sourceThreadId,
-			resourceId: `${input.teamId}:${context.userId}`,
-			title: input.title,
-			options: input.messageLimit ? { messageLimit: input.messageLimit } : undefined,
-		});
-		return { id: thread.id, title: thread.title ?? "Nova conversa", createdAt: thread.createdAt };
+		const { messages } = await memory.recall({ threadId: input.threadId, perPage: false });
+		return toAISdkV5Messages(messages);
 	});
+

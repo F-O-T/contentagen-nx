@@ -34,7 +34,6 @@ import { BugReportForm } from "@/features/feedback/ui/bug-report-form";
 import { FeatureRequestForm } from "@/features/feedback/ui/feature-request-form";
 import { useCredenza } from "@/hooks/use-credenza";
 import { EarlyAccessSidebarBanner } from "./early-access-sidebar-banner";
-import { NavUser } from "./nav-user";
 import { SidebarDefaultItems, SidebarNav } from "./sidebar-nav";
 import { SidebarScopeSwitcher } from "./sidebar-scope-switcher";
 
@@ -167,7 +166,6 @@ function SidebarFooterContent() {
             </SidebarMenuButton>
          </SidebarMenuItem>
          <SidebarFeedbackButton />
-         <NavUser />
       </SidebarMenu>
    );
 }

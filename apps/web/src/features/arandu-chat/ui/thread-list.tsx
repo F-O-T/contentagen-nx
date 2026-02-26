@@ -14,6 +14,11 @@ export interface ThreadListProps {
    welcomeIconUrl?: string;
    className?: string;
    /**
+    * Optional slot to replace the default "Nova conversa" button.
+    * Use this to inject a router Link from the app layer.
+    */
+   newThreadTrigger?: ReactNode;
+   /**
     * Optional render function for thread item trigger.
     * Receives the thread's externalId and title, plus the default children.
     * If not provided, the default button trigger is used.
@@ -30,6 +35,7 @@ export interface ThreadListProps {
 export const ThreadList: FC<ThreadListProps> = ({
    welcomeIconUrl,
    className,
+   newThreadTrigger,
    renderThreadTrigger,
 }) => {
    return (
@@ -39,7 +45,7 @@ export const ThreadList: FC<ThreadListProps> = ({
             className,
          )}
       >
-         <ThreadListNew welcomeIconUrl={welcomeIconUrl} />
+         {newThreadTrigger ?? <ThreadListNew welcomeIconUrl={welcomeIconUrl} />}
 
          <div className="mt-2">
             <p className="mb-1 px-2 text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wide">
@@ -86,16 +92,18 @@ const ThreadListItemComponent: FC<{
       </span>
    );
 
-   const trigger = renderThreadTrigger ? (
-      renderThreadTrigger({ externalId, title: title ?? undefined, children: triggerContent })
-   ) : (
+   const trigger = (
       <ThreadListItemPrimitive.Trigger asChild>
-         <button
-            className="flex min-w-0 flex-1 items-center gap-2 text-left"
-            type="button"
-         >
-            {triggerContent}
-         </button>
+         {renderThreadTrigger ? (
+            renderThreadTrigger({ externalId, title: title ?? undefined, children: triggerContent })
+         ) : (
+            <button
+               className="flex min-w-0 flex-1 items-center gap-2 text-left"
+               type="button"
+            >
+               {triggerContent}
+            </button>
+         )}
       </ThreadListItemPrimitive.Trigger>
    );
 

@@ -1,9 +1,12 @@
-import { useAssistantRuntime } from "@assistant-ui/react";
+import { AssistantRuntimeProvider, useAssistantRuntime } from "@assistant-ui/react";
+import { AssistantChatTransport, useChatRuntime } from "@assistant-ui/react-ai-sdk";
 import { Thread } from "@/features/arandu-chat/ui/thread";
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useActiveTeam } from "@/hooks/use-active-team";
 import { orpc } from "@/integrations/orpc/client";
+import { createFileRoute } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import type { UIMessage } from "ai";
+import { useEffect, useMemo } from "react";
 
 export const Route = createFileRoute(
 	"/_authenticated/$slug/$teamSlug/_dashboard/chat/$threadId",
@@ -24,20 +27,42 @@ const QUICK_SUGGESTIONS = [
 
 function ChatThreadPage() {
 	const { threadId } = Route.useParams();
-	const runtime = useAssistantRuntime();
+	const { activeTeamId } = useActiveTeam();
 
-	useSuspenseQuery(orpc.chat.getThread.queryOptions({ input: { threadId } }));
-
+	// Sync the outer runtime's active thread state with the current URL param.
+	// This makes the sidebar thread list highlight the active thread correctly,
+	// and also adds newly-created threads (from chat/index.tsx) to the list.
+	const outerRuntime = useAssistantRuntime();
 	useEffect(() => {
-		runtime.threads.switchToThread(threadId);
-	}, [runtime, threadId]);
+		outerRuntime.threads.switchToThread(threadId);
+	}, [outerRuntime, threadId]);
+
+	const { data: messages } = useSuspenseQuery(
+		orpc.chat.getThreadMessages.queryOptions({ input: { threadId } }),
+	);
+
+	const transport = useMemo(
+		() =>
+			new AssistantChatTransport({
+				api: "/api/chat",
+				body: { teamId: activeTeamId, threadId },
+			}),
+		[activeTeamId, threadId],
+	);
+
+	const runtime = useChatRuntime({
+		transport,
+		messages: messages as UIMessage[],
+	});
 
 	return (
-		<Thread
-			quickSuggestions={QUICK_SUGGESTIONS}
-			welcomeIconUrl="/arandu.svg"
-			welcomeSubtitle="Seu assistente de conteúdo com IA."
-			welcomeTitle="Como posso te ajudar?"
-		/>
+		<AssistantRuntimeProvider runtime={runtime}>
+			<Thread
+				quickSuggestions={QUICK_SUGGESTIONS}
+				welcomeIconUrl="/arandu.svg"
+				welcomeSubtitle="Seu assistente de conteúdo com IA."
+				welcomeTitle="Como posso te ajudar?"
+			/>
+		</AssistantRuntimeProvider>
 	);
 }

@@ -1,5 +1,11 @@
 import { Thread } from "@/features/arandu-chat/ui/thread";
-import { createFileRoute } from "@tanstack/react-router";
+import { useActiveTeam } from "@/hooks/use-active-team";
+import { orpc } from "@/integrations/orpc/client";
+import { AssistantRuntimeProvider } from "@assistant-ui/react";
+import { AssistantChatTransport, useChatRuntime } from "@assistant-ui/react-ai-sdk";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
+import { useMemo, useRef } from "react";
 
 export const Route = createFileRoute(
 	"/_authenticated/$slug/$teamSlug/_dashboard/chat/",
@@ -18,13 +24,64 @@ const QUICK_SUGGESTIONS = [
 	{ label: "Estratégia", prompt: "Crie uma estratégia de conteúdo para " },
 ];
 
-function ChatIndexPage() {
-	return (
-		<Thread
-			quickSuggestions={QUICK_SUGGESTIONS}
-			welcomeIconUrl="/arandu.svg"
-			welcomeSubtitle="Seu assistente de conteúdo com IA."
-			welcomeTitle="Como posso te ajudar?"
-		/>
+function ChatIndexPageContent({ teamId }: { teamId: string }) {
+	const { slug, teamSlug } = useParams({
+		from: "/_authenticated/$slug/$teamSlug/_dashboard",
+	});
+	const navigate = useNavigate();
+	const queryClient = useQueryClient();
+
+	const threadIdRef = useRef<string | undefined>(undefined);
+	const hasNavigated = useRef(false);
+	const createThread = useMutation(orpc.chat.createThread.mutationOptions({}));
+
+	// Transport lazily creates a thread on the first message send
+	const transport = useMemo(
+		() =>
+			new AssistantChatTransport({
+				api: "/api/chat",
+				body: async () => {
+					if (!threadIdRef.current) {
+						const thread = await createThread.mutateAsync({ teamId });
+						threadIdRef.current = thread.id;
+					}
+					return { teamId, threadId: threadIdRef.current };
+				},
+			}),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[teamId],
 	);
+
+	const runtime = useChatRuntime({
+		transport,
+		onFinish: () => {
+			if (threadIdRef.current && !hasNavigated.current) {
+				hasNavigated.current = true;
+				// Invalidate so $threadId.tsx fetches fresh data after navigation
+				queryClient.invalidateQueries();
+				navigate({
+					to: "/$slug/$teamSlug/chat/$threadId",
+					params: { slug, teamSlug, threadId: threadIdRef.current },
+					replace: true,
+				});
+			}
+		},
+	});
+
+	return (
+		<AssistantRuntimeProvider runtime={runtime}>
+			<Thread
+				quickSuggestions={QUICK_SUGGESTIONS}
+				welcomeIconUrl="/arandu.svg"
+				welcomeSubtitle="Seu assistente de conteúdo com IA."
+				welcomeTitle="Como posso te ajudar?"
+			/>
+		</AssistantRuntimeProvider>
+	);
+}
+
+function ChatIndexPage() {
+	const { activeTeamId } = useActiveTeam();
+	if (!activeTeamId) return null;
+	return <ChatIndexPageContent teamId={activeTeamId} />;
 }
