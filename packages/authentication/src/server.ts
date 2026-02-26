@@ -201,6 +201,12 @@ export function createAuth(config: SimplifiedAuthConfig) {
                         input: z.record(z.string(), z.boolean()).nullable(),
                      },
                   },
+                  logo: {
+                     defaultValue: null,
+                     input: true,
+                     required: false,
+                     type: "string",
+                  },
                },
             },
          },

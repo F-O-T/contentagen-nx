@@ -63,6 +63,7 @@ type Team = {
    id: string;
    name: string;
    slug: string;
+   logo?: string | null;
 };
 
 const ORG_AVATAR_COLORS = [
@@ -411,6 +412,17 @@ function SidebarScopeSwitcherContent() {
                            className="flex min-w-0 flex-1 items-center gap-2 rounded-md border bg-muted/50 px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-accent"
                            type="button"
                         >
+                           <Avatar className="size-6 shrink-0 rounded-md">
+                              <AvatarImage
+                                 alt={activeTeam?.name ?? "Projeto"}
+                                 src={activeTeam?.logo ?? undefined}
+                              />
+                              <AvatarFallback
+                                 className={`rounded-md text-xs font-bold text-white ${getOrgColor(activeTeam?.name ?? "")}`}
+                              >
+                                 {getInitials(activeTeam?.name ?? "?")}
+                              </AvatarFallback>
+                           </Avatar>
                            <span className="truncate font-medium flex-1">
                               {activeTeam?.name ?? "Sem projeto"}
                            </span>
@@ -434,10 +446,21 @@ function SidebarScopeSwitcherContent() {
                                        disabled
                                        value={activeTeam.name}
                                     >
-                                       <Check className="size-4" />
+                                       <Avatar className="size-5 rounded-md">
+                                          <AvatarImage
+                                             alt={activeTeam.name}
+                                             src={activeTeam.logo ?? undefined}
+                                          />
+                                          <AvatarFallback
+                                             className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(activeTeam.name)}`}
+                                          >
+                                             {getInitials(activeTeam.name)}
+                                          </AvatarFallback>
+                                       </Avatar>
                                        <span className="truncate">
                                           {activeTeam.name}
                                        </span>
+                                       <Check className="ml-1 size-4 shrink-0" />
                                     </CommandItem>
                                  )}
                                  {otherTeams.map((team, index) => (
@@ -446,7 +469,17 @@ function SidebarScopeSwitcherContent() {
                                        onSelect={() => handleTeamSwitch(team)}
                                        value={team.name}
                                     >
-                                       <span className="size-4" />
+                                       <Avatar className="size-5 rounded-md">
+                                          <AvatarImage
+                                             alt={team.name}
+                                             src={team.logo ?? undefined}
+                                          />
+                                          <AvatarFallback
+                                             className={`rounded-md text-[10px] font-bold text-white ${getOrgColor(team.name)}`}
+                                          >
+                                             {getInitials(team.name)}
+                                          </AvatarFallback>
+                                       </Avatar>
                                        <span className="truncate">
                                           {team.name}
                                        </span>

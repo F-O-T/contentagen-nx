@@ -1,5 +1,15 @@
+import {
+   Avatar,
+   AvatarFallback,
+   AvatarImage,
+} from "@packages/ui/components/avatar";
 import { Badge } from "@packages/ui/components/badge";
 import { Button } from "@packages/ui/components/button";
+import {
+   Dropzone,
+   DropzoneContent,
+   DropzoneEmptyState,
+} from "@packages/ui/components/dropzone";
 import { Input } from "@packages/ui/components/input";
 import {
    Item,
@@ -29,6 +39,7 @@ import {
    Calendar,
    Check,
    Copy,
+   FolderKanban,
    Globe,
    Hash,
    Key,
@@ -40,6 +51,8 @@ import {
 import { Suspense, useState } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { toast } from "sonner";
+import { useFileUpload } from "@/features/file-upload/lib/use-file-upload";
+import { usePresignedUpload } from "@/features/file-upload/lib/use-presigned-upload";
 import { useAlertDialog } from "@/hooks/use-alert-dialog";
 import { orpc } from "@/integrations/orpc/client";
 
@@ -50,6 +63,131 @@ export const Route = createFileRoute(
 });
 
 // TODO: Add team.updateName procedure when Better Auth supports it
+
+// ============================================
+// Team Logo Section
+// ============================================
+
+function TeamLogoSection({
+   teamId,
+   currentLogo,
+   teamName,
+}: {
+   teamId: string;
+   currentLogo: string | null;
+   teamName: string;
+}) {
+   const queryClient = useQueryClient();
+   const fileUpload = useFileUpload({
+      acceptedTypes: ["image/*"],
+      maxSize: 5 * 1024 * 1024,
+   });
+   const presignedUpload = usePresignedUpload();
+
+   const saveMutation = useMutation({
+      mutationFn: async () => {
+         if (!fileUpload.selectedFile) throw new Error("No file selected");
+         const fileExtension =
+            fileUpload.selectedFile.name.split(".").pop() ?? "png";
+         const contentType = fileUpload.selectedFile.type;
+         const uploadData = await orpc.team.generateLogoUploadUrl.call({
+            teamId,
+            fileExtension,
+            contentType,
+         });
+         await presignedUpload.uploadToPresignedUrl(
+            uploadData.presignedUrl,
+            fileUpload.selectedFile,
+            contentType,
+         );
+         await orpc.team.updateTeamLogo.call({
+            teamId,
+            logoUrl: uploadData.publicUrl,
+         });
+      },
+      onSuccess: () => {
+         toast.success("Logo atualizado com sucesso!");
+         fileUpload.clearFile();
+         queryClient.invalidateQueries({
+            queryKey: orpc.team.get.queryOptions({ input: { teamId } })
+               .queryKey,
+         });
+         queryClient.invalidateQueries({
+            queryKey: orpc.organization.getOrganizationTeams.queryOptions({})
+               .queryKey,
+         });
+      },
+      onError: () => {
+         toast.error("Erro ao atualizar logo");
+      },
+   });
+
+   return (
+      <section className="space-y-3">
+         <div>
+            <h2 className="text-lg font-medium">Logo do projeto</h2>
+            <p className="text-sm text-muted-foreground">
+               A imagem do seu projeto. Recomendamos 192x192 px ou maior.
+            </p>
+         </div>
+         <div className="flex items-start gap-4">
+            <Avatar className="size-16 rounded-lg">
+               <AvatarImage
+                  alt={teamName}
+                  src={fileUpload.filePreview || currentLogo || undefined}
+               />
+               <AvatarFallback className="rounded-lg">
+                  <FolderKanban className="size-6" />
+               </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 max-w-xs">
+               <Dropzone
+                  accept={{
+                     "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
+                  }}
+                  className="h-20"
+                  maxFiles={1}
+                  maxSize={5 * 1024 * 1024}
+                  onDrop={(files) =>
+                     fileUpload.handleFileSelect(files, () => {})
+                  }
+               >
+                  <DropzoneEmptyState>
+                     <p className="text-xs text-muted-foreground">
+                        Clique ou arraste para enviar
+                     </p>
+                  </DropzoneEmptyState>
+                  <DropzoneContent>
+                     <p className="text-xs text-muted-foreground">
+                        Imagem selecionada
+                     </p>
+                  </DropzoneContent>
+               </Dropzone>
+            </div>
+         </div>
+         {fileUpload.filePreview && (
+            <Button
+               disabled={saveMutation.isPending || presignedUpload.isUploading}
+               onClick={() => saveMutation.mutate()}
+               size="sm"
+            >
+               {(saveMutation.isPending || presignedUpload.isUploading) && (
+                  <Loader2 className="size-4 mr-2 animate-spin" />
+               )}
+               Salvar logo
+            </Button>
+         )}
+         {fileUpload.error && (
+            <p className="text-sm text-destructive">{fileUpload.error}</p>
+         )}
+         {presignedUpload.error && (
+            <p className="text-sm text-destructive">
+               {presignedUpload.error}
+            </p>
+         )}
+      </section>
+   );
+}
 
 // ============================================
 // Skeleton
@@ -262,6 +400,12 @@ function ProjectGeneralContent() {
                   Gerencie o nome, slug e configurações padrão do projeto.
                </p>
             </div>
+
+            <TeamLogoSection
+               currentLogo={teamData.logo ?? null}
+               teamId={teamId}
+               teamName={teamData.name}
+            />
 
             {/* ── Project Settings ─────────────────────────────────── */}
             <section className="space-y-3">

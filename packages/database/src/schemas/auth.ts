@@ -129,6 +129,7 @@ export const team = pgTable(
       onboardingCompleted: boolean("onboarding_completed").default(false),
       onboardingProducts: jsonb("onboarding_products"),
       onboardingTasks: jsonb("onboarding_tasks"),
+      logo: text("logo"),
    },
    (table) => [index("team_organizationId_idx").on(table.organizationId)],
 );

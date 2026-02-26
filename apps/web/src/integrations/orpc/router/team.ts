@@ -2,7 +2,12 @@ import { ORPCError } from "@orpc/server";
 import type { DatabaseInstance } from "@packages/database/client";
 import { isOrganizationOwner } from "@packages/database/repositories/auth-repository";
 import { team, teamMember } from "@packages/database/schemas/auth";
+import { env as serverEnv } from "@packages/environment/server";
 import { resolveOrganizationPlan } from "@packages/events/credits";
+import {
+   generatePresignedPutUrl,
+   getMinioClient,
+} from "@packages/files/client";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure } from "../server";
@@ -52,6 +57,7 @@ async function verifyTeamOwnership(
          publicApiKey: team.publicApiKey,
          createdAt: team.createdAt,
          updatedAt: team.updatedAt,
+         logo: team.logo,
       })
       .from(team)
       .where(and(eq(team.id, teamId), eq(team.organizationId, organizationId)))
@@ -308,6 +314,71 @@ export const updateAllowedDomains = protectedProcedure
       }
 
       return { allowedDomains: updated.allowedDomains };
+   });
+
+export const generateLogoUploadUrl = protectedProcedure
+   .input(
+      z.object({
+         teamId: z.string().uuid(),
+         fileExtension: z.string(),
+         contentType: z.string(),
+      }),
+   )
+   .handler(async ({ context, input }) => {
+      const { organizationId } = context;
+
+      await verifyTeamOwnership(context.db, input.teamId, organizationId);
+
+      try {
+         const minioClient = getMinioClient(serverEnv);
+         const bucketName = "team-logos";
+         const fileName = `team-${input.teamId}-${crypto.randomUUID()}.${input.fileExtension}`;
+
+         const presignedUrl = await generatePresignedPutUrl(
+            fileName,
+            bucketName,
+            minioClient,
+            300,
+         );
+
+         return {
+            presignedUrl,
+            fileName,
+            publicUrl: `/api/files/${bucketName}/${fileName}`,
+         };
+      } catch (error) {
+         console.error("Failed to generate presigned URL:", error);
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to generate upload URL",
+         });
+      }
+   });
+
+export const updateTeamLogo = protectedProcedure
+   .input(
+      z.object({
+         teamId: z.string().uuid(),
+         logoUrl: z.string(),
+      }),
+   )
+   .handler(async ({ context, input }) => {
+      const { db, organizationId } = context;
+
+      await verifyTeamOwnership(db, input.teamId, organizationId);
+
+      try {
+         await db
+            .update(team)
+            .set({ logo: input.logoUrl })
+            .where(eq(team.id, input.teamId));
+
+         return { success: true };
+      } catch (error) {
+         console.error("Failed to update team logo:", error);
+         throw new ORPCError("INTERNAL_SERVER_ERROR", {
+            message: "Failed to update logo",
+         });
+      }
    });
 
 /**
