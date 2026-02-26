@@ -19,6 +19,7 @@ const embedder = async (text: string): Promise<number[]> => {
  * - filesystem: LocalFilesystem pointing to src/skills/
  * - skills: ["/"] — indexes all subdirectories as skills from the root
  * - bm25: BM25 text index for keyword search
+ * - autoIndexPaths: ["/"] — auto-indexes all skill files on init() for BM25 search
  * - vectorStore + embedder: semantic search via pgvector
  * - searchIndexName: SQL-safe index name for PgVector
  */
@@ -28,6 +29,7 @@ export const workspace = new Workspace({
    }),
    skills: ["/"],
    bm25: true,
+   autoIndexPaths: ["/"],
    vectorStore: pgVectorStore,
    embedder,
    searchIndexName: "agents_workspace_skills",
