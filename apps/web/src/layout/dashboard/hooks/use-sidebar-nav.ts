@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Store, useStore } from "@tanstack/react-store";
 
 export type SubSidebarSection = "dashboards" | "insights" | "data-management";
@@ -70,4 +71,11 @@ export function useSidebarNav() {
       pinnedItems: state.pinnedItems,
       setSearchQuery,
    };
+}
+
+export function useSidebarSection(section: SubSidebarSection) {
+   useEffect(() => {
+      setActiveSection(section);
+      return () => setActiveSection(null);
+   }, [section]);
 }
