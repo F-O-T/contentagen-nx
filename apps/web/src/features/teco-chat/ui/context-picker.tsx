@@ -5,7 +5,7 @@ import {
    PopoverContent,
    PopoverTrigger,
 } from "@packages/ui/components/popover";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { AtSign, FileText, Search } from "lucide-react";
 import { useState } from "react";
 import { orpc } from "@/integrations/orpc/client";
@@ -30,9 +30,10 @@ function ContextPickerInner({
    const [open, setOpen] = useState(false);
    const [search, setSearch] = useState("");
 
-   const { data } = useSuspenseQuery(
-      orpc.content.listAllContent.queryOptions({ input: { limit: 50 } }),
-   );
+   const { data, isLoading } = useQuery({
+      ...orpc.content.listAllContent.queryOptions({ input: { limit: 50 } }),
+      enabled: open,
+   });
 
    const items = data?.items ?? [];
    const filtered = items.filter((c) =>
@@ -98,7 +99,12 @@ function ContextPickerInner({
                <p className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                   Conteúdos
                </p>
-               {filtered.length === 0 && (
+               {isLoading && (
+                  <p className="px-3 py-2 text-xs text-muted-foreground">
+                     Carregando...
+                  </p>
+               )}
+               {!isLoading && filtered.length === 0 && (
                   <p className="px-3 py-2 text-xs text-muted-foreground">
                      Nenhum conteúdo encontrado.
                   </p>

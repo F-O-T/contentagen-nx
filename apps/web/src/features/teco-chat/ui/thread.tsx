@@ -43,7 +43,7 @@ import {
    SquareIcon,
 } from "lucide-react";
 import type { FC, ReactNode } from "react";
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import {
    AGENT_DISPLAY_NAMES,
    type AgentStatus,
@@ -351,9 +351,7 @@ const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
                         ))}
                      </SelectContent>
                   </Select>
-                  <Suspense fallback={null}>
-                     <ContextPicker onSelect={handleContextSelect} />
-                  </Suspense>
+                  <ContextPicker onSelect={handleContextSelect} />
                </div>
                <ComposerAction />
             </div>
