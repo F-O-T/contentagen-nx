@@ -1,20 +1,10 @@
-// packages/agents/src/mastra/workspace/index.ts
 import path from "node:path";
 import { Workspace, LocalFilesystem } from "@mastra/core/workspace";
 import { embed } from "ai";
 import { embeddingModel, pgVectorStore } from "../../utils";
 
-/**
- * Absolute path to the skills directory.
- * Resolves to: packages/agents/src/skills/
- */
-const SKILLS_DIR = path.resolve(import.meta.dirname, "../../skills");
+const skillsDir = path.resolve(import.meta.dirname, "../../skills");
 
-/**
- * Wrapper that adapts Mastra's embeddingModel (ModelRouterEmbeddingModel)
- * to the plain async (text: string) => Promise<number[]> interface
- * expected by Workspace.
- */
 const embedder = async (text: string): Promise<number[]> => {
    const { embedding } = await embed({
       model: embeddingModel,
@@ -34,7 +24,7 @@ const embedder = async (text: string): Promise<number[]> => {
  */
 export const workspace = new Workspace({
    filesystem: new LocalFilesystem({
-      basePath: SKILLS_DIR,
+      basePath: skillsDir,
    }),
    skills: ["/"],
    bm25: true,
