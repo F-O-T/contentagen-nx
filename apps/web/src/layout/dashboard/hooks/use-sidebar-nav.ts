@@ -24,11 +24,13 @@ function savePinnedItems(items: string[]) {
 
 interface SidebarNavState {
    activeSection: SubSidebarSection | null;
+   searchQuery: string;
    pinnedItems: string[];
 }
 
 const initialState: SidebarNavState = {
    activeSection: null,
+   searchQuery: "",
    pinnedItems: loadPinnedItems(),
 };
 
@@ -38,6 +40,14 @@ export function setActiveSection(section: SubSidebarSection | null) {
    sidebarNavStore.setState((state) => ({
       ...state,
       activeSection: section,
+      searchQuery: "",
+   }));
+}
+
+export function setSearchQuery(query: string) {
+   sidebarNavStore.setState((state) => ({
+      ...state,
+      searchQuery: query,
    }));
 }
 
@@ -56,6 +66,8 @@ export function useSidebarNav() {
 
    return {
       activeSection: state.activeSection,
+      searchQuery: state.searchQuery,
       pinnedItems: state.pinnedItems,
+      setSearchQuery,
    };
 }
