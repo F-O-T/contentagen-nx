@@ -213,9 +213,9 @@ function SidebarScopeSwitcherContent() {
             if (pathname.startsWith(`${prefix}/`)) {
                nextPath = params.teamSlug
                   ? pathname.replace(
-                       `${prefix}/${params.teamSlug}`,
-                       `${prefix}/${teamParam}`,
-                    )
+                     `${prefix}/${params.teamSlug}`,
+                     `${prefix}/${teamParam}`,
+                  )
                   : `/${currentSlug}/${teamParam}${pathname.slice(prefix.length)}`;
             }
 
@@ -336,13 +336,13 @@ function SidebarScopeSwitcherContent() {
                      className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                      size="lg"
                   >
-                     <Avatar className="size-8 shrink-0 rounded-lg">
+                     <Avatar className="aspect-square size-8 shrink-0 rounded-lg">
                         <AvatarImage
                            alt={activeOrganization.name}
                            src={activeOrganization.logo ?? undefined}
                         />
                         <AvatarFallback
-                           className={`rounded-lg text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
+                           className={`rounded-lg  text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
                         >
                            {getInitials(activeOrganization.name)}
                         </AvatarFallback>
@@ -403,7 +403,7 @@ function SidebarScopeSwitcherContent() {
                            <Plus className="size-4" />
                            <span>
                               {projectLimit !== null &&
-                              projectLimit !== Number.POSITIVE_INFINITY
+                                 projectLimit !== Number.POSITIVE_INFINITY
                                  ? `Novo projeto (${projectCount}/${projectLimit})`
                                  : "Novo projeto"}
                            </span>

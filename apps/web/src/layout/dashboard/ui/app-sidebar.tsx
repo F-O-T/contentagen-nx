@@ -24,7 +24,6 @@ import {
    ExternalLink,
    Lightbulb,
    MessageSquarePlus,
-   PanelLeft,
    PanelLeftClose,
    Settings,
 } from "lucide-react";
@@ -40,13 +39,15 @@ import { SidebarScopeSwitcher } from "./sidebar-scope-switcher";
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
    return (
       <Sidebar className="px-0" collapsible="icon" variant="inset" {...props}>
-         <SidebarHeader>
+         <SidebarHeader className="">
             <SidebarScopeSwitcher />
          </SidebarHeader>
 
          <SidebarContent>
             <SidebarDefaultItems />
-            <Separator />
+            <div className="px-2">
+               <Separator />
+            </div>
             <SidebarNav />
          </SidebarContent>
 
@@ -153,7 +154,9 @@ function SidebarFooterContent() {
                onClick={toggleSidebar}
                tooltip={state === "expanded" ? "Ocultar" : "Abrir"}
             >
-               {state === "expanded" ? <PanelLeftClose /> : <PanelLeft />}
+               <PanelLeftClose
+                  className={state === "collapsed" ? "rotate-180" : ""}
+               />
                <span>Ocultar</span>
             </SidebarMenuButton>
          </SidebarMenuItem>
