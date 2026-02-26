@@ -8,6 +8,7 @@ import { pgVectorStore } from "../utils";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
 import { unifiedContentAgent } from "./agents/unified-content-agent";
+import { workspace } from "./workspace";
 
 /**
  * Re-export RequestContext so consumers don't need to depend on @mastra/core directly.
@@ -44,6 +45,7 @@ export const mastra: Mastra = new Mastra({
    },
    vectors: { pgVector: pgVectorStore },
    storage: mastraStorage,
+   workspace,
 });
 
 export function createRequestContext(context: CustomRequestContext) {
