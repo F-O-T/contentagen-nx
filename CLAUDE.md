@@ -179,15 +179,24 @@ Common patterns: `.` (root), `./client`, `./server`, `./schemas/*`, `./repositor
 
 ## AI Agents (packages/agents/)
 
-### Unified Content Agent
+### Agent Network Hierarchy
 
-Single agent combining planning, research, writing, SEO auditing, and review workflows. Replaces the old orchestrator + sub-agent pattern.
+```
+platform-router-agent (top-level)
+└── content-agent (content domain)
+    ├── research-agent
+    ├── writer-agent
+    ├── seo-auditor-agent
+    └── reviewer-agent
+```
+
+`platform-router-agent` is the entry point for all chat interactions. It routes requests to the appropriate domain agent (`content-agent`), which in turn delegates to specialized sub-agents.
 
 **Usage in routers:**
 ```typescript
 import { mastra, createRequestContext } from "@packages/agents";
 
-const agent = mastra.getAgent("unifiedContent");
+const agent = mastra.getAgent("platformRouterAgent");
 const context = createRequestContext({
    userId: "user-id",
    brandId: "brand-id",
@@ -197,39 +206,20 @@ const context = createRequestContext({
    writerInstructions: [...],
 });
 
-const result = await agent.generate("Write a post about TypeScript", { 
-   requestContext: context 
+const result = await agent.generate("Write a post about TypeScript", {
+   requestContext: context
 });
 ```
 
-**Frontend usage:**
-```typescript
-import { useUnifiedAgent } from "@/features/content/hooks/use-unified-agent";
-
-const unifiedAgent = useUnifiedAgent();
-
-unifiedAgent.mutate({
-   teamId: "...",
-   contentId: "...",
-   prompt: "Write an article about TypeScript generics",
-   writerId: "...",
-   model: "openrouter/moonshotai/kimi-k2.5",
-});
-```
-
-**Workflows:**
-1. **Planning** - Structure, outlines, metadata
-2. **Research** - SERPs, competitors, facts
-3. **Writing** - Complete articles with YAML frontmatter (800+ words default, flexible on request)
-4. **SEO Audit** - Analysis and optimization
-5. **Review** - Quality checks and feedback
-
-**Tools:** 40+ tools organized by category:
-- Memory & RAG (3): getInstructionMemories, searchPreviousContent, graphSearch
-- Research (8): webSearch, serpAnalysis, competitorContent, factFinder, contentGap, relatedKeywords, semanticAnalysis, searchIntent
-- Analysis (13): seoScore, readability, keywordDensity, contentStructure, badPatterns, titleMeta, quickAnswerAnalysis, imageSeo, linkDensity, duplicateContent, toneAnalysis, citation, originality
-- Frontmatter (4): editTitle, editDescription, editKeywords, editSlug
-- Editor (17): insertText, replaceText, deleteText, formatText, insertHeading, insertList, insertCodeBlock, insertTable, insertImage, optimizeTitle, optimizeMeta, injectKeywords, addInternalLinks, addExternalLinks, improveReadability, generateQuickAnswer, suggestImages
+**Agent IDs (Mastra registration):**
+- `platformRouterAgent` — top-level router
+- `contentAgent` — content domain coordinator
+- `researchAgent` — SERP, competitor, and fact research
+- `writerAgent` — article writing and editing
+- `seoAuditorAgent` — SEO analysis and optimization
+- `reviewerAgent` — quality checks and feedback
+- `fimAgent` — fill-in-the-middle autocomplete
+- `inlineEditAgent` — real-time inline editing
 
 ### Specialized Agents
 
