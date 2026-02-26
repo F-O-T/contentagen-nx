@@ -184,7 +184,7 @@ export const create = protectedProcedure
 export const suggestStructure = protectedProcedure
    .input(z.object({ description: z.string().min(1) }))
    .handler(async ({ context, input }) => {
-      const agent = mastra.getAgent("contentNetworkAgent");
+      const agent = mastra.getAgent("platformRouterAgent");
 
       const prompt = `You are helping a content strategist design a Content Cluster.
 

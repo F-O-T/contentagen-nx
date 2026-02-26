@@ -22,7 +22,7 @@ export const Route = createFileRoute("/api/chat/$")({
 
             if (threadId) {
                const memory = await mastra
-                  .getAgent("contentNetworkAgent")
+                  .getAgent("platformRouterAgent")
                   .getMemory();
                if (!memory)
                   return new Response("Memory not configured", { status: 500 });
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/chat/$")({
 
             const stream = await handleChatStream({
                mastra,
-               agentId: "contentNetworkAgent",
+               agentId: "platformRouterAgent",
                params: {
                   messages,
                   memory: { resource: resourceId, thread: threadId },

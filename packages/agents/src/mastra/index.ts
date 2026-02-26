@@ -9,7 +9,8 @@ import type { InstructionMemoryItem } from "@packages/database/schemas/instructi
 import { env as serverEnv } from "@packages/environment/server";
 import type { ModelId } from "../models";
 import { pgVectorStore } from "../utils";
-import { contentNetworkAgent } from "./agents/content-network-agent";
+import { platformRouterAgent } from "./agents/platform-router-agent";
+import { contentAgent } from "./agents/content-agent";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
 import { researchAgent } from "./agents/research-agent";
@@ -61,7 +62,8 @@ const observability = new Observability({
 
 export const mastra: Mastra = new Mastra({
    agents: {
-      contentNetworkAgent,
+      platformRouterAgent,
+      contentAgent,
       researchAgent,
       writerAgent,
       seoAuditorAgent,
