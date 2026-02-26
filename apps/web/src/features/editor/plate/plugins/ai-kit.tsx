@@ -8,8 +8,7 @@
  * objects without going through an HTTP endpoint.
  */
 
-import { AIMenu } from "@packages/ui/components/ai-menu";
-import { AgentNetworkBar } from "@/features/editor/ui/agent-network-bar";
+import { AILoadingBar, AIMenu } from "@packages/ui/components/ai-menu";
 import {
 	NETWORK_AGENT_IDS,
 	completeNetworkAgent,
@@ -193,7 +192,7 @@ export const aiChatPlugin = AIChatPlugin.extend({
       },
    },
    render: {
-      afterContainer: AgentNetworkBar,
+      afterContainer: AILoadingBar,
       afterEditable: AIMenu,
       node: AIAnchorElement,
    },

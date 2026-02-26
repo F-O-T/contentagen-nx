@@ -19,6 +19,7 @@ import { ToolFallback } from "@packages/ui/components/assistant-ui/tool-fallback
 import { TooltipIconButton } from "@packages/ui/components/assistant-ui/tooltip-icon-button";
 import { Button } from "@packages/ui/components/button";
 import { cn } from "@packages/ui/lib/utils";
+import { useStore } from "@tanstack/react-store";
 import {
    ArrowDownIcon,
    ArrowUpIcon,
@@ -27,6 +28,7 @@ import {
    ChevronRightIcon,
    CopyIcon,
    DownloadIcon,
+   Loader2,
    MoreHorizontalIcon,
    PencilIcon,
    RefreshCwIcon,
@@ -34,6 +36,11 @@ import {
    SquareIcon,
 } from "lucide-react";
 import type { FC, ReactNode } from "react";
+import {
+   AGENT_DISPLAY_NAMES,
+   agentNetworkStore,
+   type AgentStatus,
+} from "@/features/editor/stores/agent-network-store";
 
 export interface QuickSuggestion {
    label: string;
@@ -87,6 +94,7 @@ export const Thread: FC<ThreadProps> = ({
             <AuiIf condition={(s) => !s.thread.isEmpty}>
                <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-transparent pb-4 md:pb-6">
                   <ThreadScrollToBottom />
+                  <AgentNetworkStatus />
                   <Composer />
                </ThreadPrimitive.ViewportFooter>
             </AuiIf>
@@ -455,3 +463,63 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
       </BranchPickerPrimitive.Root>
    );
 };
+
+const AgentNetworkStatus: FC = () => {
+   const { isActive, agents } = useStore(agentNetworkStore);
+
+   if (!isActive || agents.length === 0) return null;
+
+   const activeAgent = agents.find((a) => a.status === "running");
+   const routerDone = agents.length > 0;
+
+   return (
+      <div className="w-full rounded-lg border border-border bg-muted/50 px-3 py-2.5">
+         <div className="mb-2 flex items-center gap-2">
+            <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+            <span className="text-xs font-medium text-muted-foreground">
+               Agent Network
+            </span>
+            {activeAgent && (
+               <>
+                  <span className="text-muted-foreground/40">·</span>
+                  <span className="text-xs text-foreground">
+                     {AGENT_DISPLAY_NAMES[activeAgent.id] ?? activeAgent.id}
+                  </span>
+               </>
+            )}
+         </div>
+
+         <div className="mb-1.5 flex items-center gap-2 text-xs">
+            {routerDone ? (
+               <CheckIcon className="h-3 w-3 shrink-0 text-green-500" />
+            ) : (
+               <Loader2 className="h-3 w-3 shrink-0 animate-spin text-primary" />
+            )}
+            <span className="text-muted-foreground">Content Router</span>
+         </div>
+
+         <div className="ml-3 flex flex-col gap-1 border-l border-border/40 pl-2.5">
+            {agents.map((agent) => (
+               <AgentRow key={agent.id} id={agent.id} status={agent.status} />
+            ))}
+         </div>
+      </div>
+   );
+};
+
+const AgentRow: FC<{ id: string; status: AgentStatus }> = ({ id, status }) => (
+   <div className="flex items-center gap-2 text-xs">
+      {status === "running" ? (
+         <Loader2 className="h-3 w-3 shrink-0 animate-spin text-primary" />
+      ) : (
+         <CheckIcon className="h-3 w-3 shrink-0 text-green-500" />
+      )}
+      <span
+         className={
+            status === "running" ? "text-foreground" : "text-muted-foreground"
+         }
+      >
+         {AGENT_DISPLAY_NAMES[id] ?? id}
+      </span>
+   </div>
+);
