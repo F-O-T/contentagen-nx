@@ -1,4 +1,4 @@
-// packages/agents/src/mastra/agents/content-network-agent.ts
+// packages/agents/src/mastra/agents/content-agent.ts
 import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
@@ -21,7 +21,7 @@ const memory = new Memory({
 	},
 });
 
-const getRouterInstructions = (
+const getContentAgentInstructions = (
 	language: string,
 	writerInstructions?: InstructionMemoryItem[],
 ): string => {
@@ -33,10 +33,10 @@ ${languageInstruction}
 
 ${compiledMemories}
 
-# CONTENT NETWORK ROUTER
+# CONTENT AGENT — DOMAIN ROUTER
 
-You are the orchestration layer for a network of specialized content agents.
-Your job: understand what the user wants and route to the right specialist.
+You are the content domain orchestrator. You receive tasks from the platform router.
+When you receive a prefix like "[Usar writer-agent]:", route directly to that agent without your own reasoning.
 
 ## YOUR SPECIALISTS
 
@@ -93,7 +93,7 @@ Respond in the same language as the user request.
 };
 
 /**
- * Content Network Agent (Router)
+ * Content Agent (Domain Router)
  *
  * Orchestrates a network of specialized content agents:
  * - Research & Planning Agent
@@ -107,11 +107,11 @@ Respond in the same language as the user request.
  * Uses Mastra's native agent network pattern: the `agents` config makes
  * sub-agents available to the router, which delegates via the network loop.
  */
-export const contentNetworkAgent: Agent = new Agent({
-	id: "content-network-agent",
-	name: "Content Network Agent",
+export const contentAgent: Agent = new Agent({
+	id: "content-agent",
+	name: "Content Agent",
 	description:
-		"Orchestration agent that routes content tasks to specialized agents for research, writing, SEO auditing, and review.",
+		"Content domain orchestrator that routes to research, writing, SEO, and review agents.",
 
 	model: ({ requestContext }) => {
 		const maybeModel = requestContext?.get("model");
@@ -125,7 +125,7 @@ export const contentNetworkAgent: Agent = new Agent({
 			| InstructionMemoryItem[]
 			| undefined;
 		const language = (requestContext?.get("language") as string) ?? "pt-BR";
-		return getRouterInstructions(language, writerInstructions);
+		return getContentAgentInstructions(language, writerInstructions);
 	},
 
 	memory,
