@@ -1,8 +1,11 @@
 import { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
+import { Observability } from "@mastra/observability";
 import { PostgresStore } from "@mastra/pg";
 import type { InstructionMemoryItem } from "@packages/database/schemas/instruction-memory";
 import { env as serverEnv } from "@packages/environment/server";
+import { PostHog } from "posthog-node";
+import { PosthogExporter } from "@packages/posthog/llm/posthog-exporter";
 import type { ModelId } from "../models";
 import { pgVectorStore } from "../utils";
 import { fimAgent } from "./agents/fim-agent";
@@ -34,6 +37,21 @@ const mastraStorage = new PostgresStore({
    connectionString: serverEnv.PG_VECTOR_URL,
 });
 
+const posthogClient = new PostHog(serverEnv.POSTHOG_KEY, {
+   flushAt: 20,
+   flushInterval: 10000,
+   host: serverEnv.POSTHOG_HOST,
+});
+
+const observability = new Observability({
+   configs: {
+      default: {
+         serviceName: "contentta-agents",
+         exporters: [new PosthogExporter(posthogClient, "system")],
+      },
+   },
+});
+
 export const mastra: Mastra = new Mastra({
    agents: {
       // Unified content agent (combines all workflows)
@@ -46,6 +64,7 @@ export const mastra: Mastra = new Mastra({
    vectors: { pgVector: pgVectorStore },
    storage: mastraStorage,
    workspace,
+   observability,
 });
 
 export function createRequestContext(context: CustomRequestContext) {
