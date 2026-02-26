@@ -66,7 +66,7 @@ export const copilotStream = protectedProcedure
          contentId: z.string().optional(),
       }),
    )
-   .handler(async function* ({ context, input }) {
+   .handler(async function*({ context, input }) {
       const { userId, db, organizationId, posthog, teamId, headers } = context;
 
       await enforceCreditBudget(db, organizationId, "ai");
@@ -190,7 +190,7 @@ export const aiCommandStream = protectedProcedure
          language: z.string().optional(),
       }),
    )
-   .handler(async function* ({ context, input }) {
+   .handler(async function*({ context, input }) {
       const { userId, db, organizationId, posthog, teamId, headers } = context;
 
       await enforceCreditBudget(db, organizationId, "ai");
