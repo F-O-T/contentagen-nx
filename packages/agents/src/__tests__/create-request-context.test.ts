@@ -27,6 +27,10 @@ mock.module("../mastra/agents/unified-content-agent", () => ({
 
 mock.module("../utils", () => ({
    pgVectorStore: {},
+   embeddingModel: {},
+   disconnectVectorStore: async () => {},
+   buildLanguageInstruction: () => "",
+   compileInstructionMemories: () => "",
 }));
 
 mock.module("@mastra/core/mastra", () => ({
