@@ -20,7 +20,6 @@ import {
 import { ChevronRight, Search } from "lucide-react";
 import { useCallback } from "react";
 import { useEarlyAccess } from "@/hooks/use-early-access";
-import { replaceCurrentTab, tabStore } from "@/hooks/use-tab-store";
 import type { SubSidebarSection } from "@/layout/dashboard/hooks/use-sidebar-nav";
 import {
    setActiveSection,
@@ -188,20 +187,10 @@ export function SidebarDefaultItems() {
    const resolvedSlug = slug || pathname.split("/")[1] || "";
 
    const handleSearch = useCallback(() => {
-      const route = "/$slug/$teamSlug/search";
-      const searchParams = { slug: resolvedSlug, teamSlug: teamSlug ?? "" };
-
-      if (tabStore.state.activeTabId) {
-         replaceCurrentTab({
-            route,
-            params: searchParams,
-            label: "Pesquisar",
-            icon: "Search",
-            type: "search",
-         });
-      }
-
-      navigate({ to: route, params: searchParams });
+      navigate({
+         to: "/$slug/$teamSlug/search",
+         params: { slug: resolvedSlug, teamSlug: teamSlug ?? "" },
+      });
    }, [navigate, resolvedSlug, teamSlug]);
 
    return (

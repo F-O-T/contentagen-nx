@@ -2,77 +2,81 @@
 
 ## Overview
 
-Contentta is migrating from an orchestrator + sub-agent pattern to a unified agent architecture.
+Contentta uses a two-phase agent architecture strategy.
 
-**Before:**
+---
+
+## Phase 1: Monolith → Unified Agent (Completed)
+
+**Before (deprecated):**
 - 1 orchestrator agent
 - 5 sub-agents (planner, researcher, writer, seoAuditor, reviewer)
 - ~30% overhead from delegation and coordination
 
-**After:**
+**After (current in packages/):**
 - 1 unified content agent with all workflows
 - Direct access to 40+ tools
 - 30% faster, simpler to maintain
 
-## Timeline
+---
 
-### Phase 1: Parallel Operation (Current)
-- Both agents available
-- `orchestratorAgent` marked deprecated
-- `unifiedContentAgent` available for testing
-- Frontend can switch between agents via feature flag
+## Phase 2: Unified Agent → Specialized Network (Current)
 
-### Phase 2: Migration (2 weeks)
-- Monitor unified agent performance
-- Migrate all frontend calls to unified agent
-- Update documentation and examples
+**Architecture:**
+- 1 router agent (`contentNetworkAgent`) registered as `"unifiedContent"`
+- 4 specialized sub-agents via Mastra's native `agents` config + `.network()` API
+- Public API unchanged: `mastra.getAgent("unifiedContent")` still works
 
-### Phase 3: Cleanup (After 2 weeks)
-- Remove orchestrator and sub-agents
-- Remove old agent files
-- Update all references
+**Agents:**
 
-## Usage
+| Agent | Key | Workflows |
+|-------|-----|-----------|
+| Content Network Agent (router) | `unifiedContent` | Routes to specialists |
+| Research & Planning Agent | `researchAgent` | Research, Planning |
+| Writer & Editor Agent | `writerAgent` | Writing, Editing |
+| SEO Auditor Agent | `seoAuditorAgent` | SEO Audit |
+| Content Reviewer Agent | `reviewerAgent` | Review |
 
-### Old Pattern (Deprecated)
-
+**How Mastra network works:**
 ```typescript
-const agent = mastra.getAgent("orchestratorAgent");
-const result = await agent.generate("Write a post about X", { requestContext });
+// Router agent config:
+const contentNetworkAgent = new Agent({
+  agents: { "research-agent": researchAgent, ... },
+  // No tools — delegates to sub-agents
+});
+
+// Called via standard .stream() / .generate() — no API change needed
+const agent = mastra.getAgent("unifiedContent");
+const result = await agent.stream([...], { requestContext });
 ```
 
-### New Pattern (Recommended)
-
-```typescript
-const agent = mastra.getAgent("unifiedContent");
-const result = await agent.generate("Write a post about X", { requestContext });
+**Files:**
+```
+packages/agents/src/mastra/
+├── agents/
+│   ├── content-network-agent.ts        ← Router (registered as "unifiedContent")
+│   ├── specialized/
+│   │   ├── research-agent.ts           ← Research + Planning
+│   │   ├── writer-agent.ts             ← Writing + Editing
+│   │   ├── seo-auditor-agent.ts        ← SEO Audit
+│   │   └── reviewer-agent.ts           ← Review
+│   ├── unified-content-agent.ts        ← Kept as reference (not imported)
+│   ├── fim-agent.ts                    ← Unchanged
+│   └── inline-edit-agent.ts            ← Unchanged
+└── index.ts                            ← Mastra instance
 ```
 
 ## Benefits
 
-| Aspect | Before | After |
-|--------|--------|-------|
-| **Latency** | 2-3 roundtrips | 1 roundtrip |
-| **Token Usage** | +30% overhead | 30% reduction |
-| **Maintenance** | 6 files | 1 file |
-| **Debugging** | Track delegation chain | Linear flow |
-| **Tool Access** | Limited by sub-agent | All tools available |
+| Aspect | Unified Agent | Network |
+|--------|--------------|---------|
+| **Context window** | 40+ tools always loaded | 10-15 tools per specialist |
+| **Focus** | Generic | Domain-specific |
+| **Maintenance** | 1 large file | 4 focused files |
+| **Debugging** | Linear flow | Clear agent boundaries |
+| **Extensibility** | Harder (one agent) | Add new specialist easily |
 
-## Workflows
+## Specialized Agents (Always Separate)
 
-The unified agent supports 5 workflows:
-
-1. **Planning** - Structure, outlines, briefings
-2. **Research** - SERPs, competitors, data collection
-3. **Writing** - Complete articles with frontmatter
-4. **SEO Audit** - Analysis and optimization
-5. **Review** - Quality checks and feedback
-
-See `unified-content-agent.ts` for detailed workflow instructions.
-
-## Specialized Agents (Kept Separate)
-
-- **FIM Agent** - Autocomplete and fill-in-the-middle
-- **Inline Edit Agent** - Real-time inline editing
-
-These remain separate as they serve different contexts.
+- **FIM Agent** (`fimAgent`) — Autocomplete and fill-in-the-middle
+- **Inline Edit Agent** (`inlineEditAgent`) — Real-time inline editing

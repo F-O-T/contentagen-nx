@@ -9,9 +9,13 @@ import type { InstructionMemoryItem } from "@packages/database/schemas/instructi
 import { env as serverEnv } from "@packages/environment/server";
 import type { ModelId } from "../models";
 import { pgVectorStore } from "../utils";
+import { contentNetworkAgent } from "./agents/content-network-agent";
+import { researchAgent } from "./agents/research-agent";
+import { writerAgent } from "./agents/writer-agent";
+import { seoAuditorAgent } from "./agents/seo-auditor-agent";
+import { reviewerAgent } from "./agents/reviewer-agent";
 import { fimAgent } from "./agents/fim-agent";
 import { inlineEditAgent } from "./agents/inline-edit-agent";
-import { unifiedContentAgent } from "./agents/unified-content-agent";
 export type { RequestContext };
 
 export type CustomRequestContext = {
@@ -57,10 +61,17 @@ const observability = new Observability({
 
 export const mastra: Mastra = new Mastra({
    agents: {
-      // Unified content agent (combines all workflows)
-      unifiedContent: unifiedContentAgent,
+      // Content network agent (router → specialized agents)
+      // Registered under "unifiedContent" to preserve the public API surface
+      unifiedContent: contentNetworkAgent,
 
-      // Specialized agents (kept separate)
+      // Specialized agents (registered for direct access if needed)
+      researchAgent,
+      writerAgent,
+      seoAuditorAgent,
+      reviewerAgent,
+
+      // Kept separate — different contexts
       fimAgent,
       inlineEditAgent,
    },

@@ -1,6 +1,6 @@
 import { Input } from "@packages/ui/components/input";
 import { cn } from "@packages/ui/lib/utils";
-import { useNavigate, useParams, useRouter } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import {
    ClipboardList,
    FileText,
@@ -18,8 +18,6 @@ import {
    useState,
 } from "react";
 import { useEarlyAccess } from "@/hooks/use-early-access";
-import { replaceCurrentTab } from "@/hooks/use-tab-store";
-import { resolveTabMetadata } from "@/layout/dashboard/utils/route-to-tab";
 import {
    type SearchResultItem,
    type SearchResultType,
@@ -80,7 +78,6 @@ export function SearchPage() {
       from: "/_authenticated/$slug/$teamSlug/_dashboard",
    });
    const navigate = useNavigate();
-   const router = useRouter();
    const inputRef = useRef<HTMLInputElement>(null);
    const [selectedIndex, setSelectedIndex] = useState(-1);
    const { isEnrolled } = useEarlyAccess();
@@ -130,22 +127,9 @@ export function SearchPage() {
 
    const navigateToResult = useCallback(
       (item: SearchResultItem) => {
-         const { pathname: resolvedPath } = router.buildLocation({
-            to: item.route,
-            params: item.params,
-         });
-         const metadata = resolveTabMetadata(resolvedPath, item.params);
-         replaceCurrentTab({
-            route: item.route,
-            params: item.params,
-            label: item.title,
-            icon: metadata.icon,
-            type: metadata.type,
-         });
-
          navigate({ to: item.route, params: item.params });
       },
-      [navigate, router],
+      [navigate],
    );
 
    const navigateToQuickAction = useCallback(

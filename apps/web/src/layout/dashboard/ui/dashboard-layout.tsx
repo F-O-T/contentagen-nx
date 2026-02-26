@@ -22,11 +22,8 @@ import { useSafeLocalStorage } from "@/hooks/use-local-storage";
 import { authClient } from "@/integrations/better-auth/auth-client";
 import { orpc } from "@/integrations/orpc/client";
 import { setActiveSection } from "../hooks/use-sidebar-nav";
-import { useTabKeyboardShortcuts } from "../hooks/use-tab-keyboard-shortcuts";
-import { useTabRouterSync } from "../hooks/use-tab-router-sync";
 import { AppSidebar } from "./app-sidebar";
 import { SidebarSubPanel } from "./sidebar-sub-panel";
-import { TabBar } from "./tab-bar";
 
 function AutoBugReporter() {
    const { openCredenza, closeCredenza } = useCredenza();
@@ -79,26 +76,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
          pathname.split("/").at(-1) ?? "",
       );
    const isChatPage = pathname.includes("/chat");
-
-   const orgSlug = activeOrganization?.slug ?? "";
-   const teamId = activeTeam?.id ?? "";
-
-   // ── Tab system ───────────────────────────────────────────────────────────
-
-   const homeRoute = `/${orgSlug}/${teamId}/home`;
-   const homeParams = { slug: orgSlug, teamId };
-
-   const { navigateToTab, handleCloseTab, openNewSearchTab } = useTabRouterSync(
-      orgSlug,
-      teamId,
-   );
-
-   useTabKeyboardShortcuts({
-      onNewTab: openNewSearchTab,
-      onTabFocus: navigateToTab,
-      homeRoute,
-      homeParams,
-   });
 
    // ── Existing effects ─────────────────────────────────────────────────────
 
@@ -185,13 +162,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
                <SidebarInset className="flex flex-col overflow-hidden bg-sidebar">
                   <SidebarSubPanel />
-                  <div className="shrink-0">
-                     <TabBar
-                        onNewTab={openNewSearchTab}
-                        onTabClose={handleCloseTab}
-                        onTabFocus={navigateToTab}
-                     />
-                  </div>
                   <div className=" flex flex-1 flex-col overflow-hidden rounded-xl bg-background">
                      <main
                         className={cn(
