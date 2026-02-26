@@ -200,7 +200,7 @@ export const aiCommandStream = protectedProcedure
       const aiDefaults = settings?.aiDefaults ?? {};
 
       // Get the unified content agent from Mastra
-      const unifiedAgent = mastra.getAgent("contentNetworkAgent");
+      const unifiedAgent = mastra.getAgent("platformRouterAgent");
 
       const contentModelId = (input.model ??
          aiDefaults.contentModel ??
@@ -470,7 +470,7 @@ export const executeUnifiedAgent = protectedProcedure
       const startTime = Date.now();
 
       // Execute unified agent
-      const agent = mastra.getAgent("contentNetworkAgent");
+      const agent = mastra.getAgent("platformRouterAgent");
       const result = await agent.generate(prompt, {
          requestContext: requestContext as RequestContext<unknown>,
       });

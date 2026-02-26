@@ -9,7 +9,7 @@ import {
    useNavigate,
    useParams,
 } from "@tanstack/react-router";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Thread } from "@/features/teco-chat/ui/thread";
 import { useActiveTeam } from "@/hooks/use-active-team";
 import { orpc } from "@/integrations/orpc/client";
@@ -37,12 +37,15 @@ function ChatIndexPageContent({ teamId }: { teamId: string }) {
    });
    const navigate = useNavigate();
    const queryClient = useQueryClient();
+   const [mode, setMode] = useState<string>("auto");
 
    const threadIdRef = useRef<string | undefined>(undefined);
    const hasNavigated = useRef(false);
    const createThread = useMutation(orpc.chat.createThread.mutationOptions({}));
    const createThreadRef = useRef(createThread.mutateAsync);
    createThreadRef.current = createThread.mutateAsync;
+   const modeRef = useRef(mode);
+   modeRef.current = mode;
 
    // Transport lazily creates a thread on the first message send
    const transport = useMemo(
@@ -54,7 +57,11 @@ function ChatIndexPageContent({ teamId }: { teamId: string }) {
                   const thread = await createThreadRef.current({ teamId });
                   threadIdRef.current = thread.id;
                }
-               return { teamId, threadId: threadIdRef.current };
+               return {
+                  teamId,
+                  threadId: threadIdRef.current,
+                  mode: modeRef.current,
+               };
             },
          }),
       [teamId],
@@ -83,6 +90,7 @@ function ChatIndexPageContent({ teamId }: { teamId: string }) {
             welcomeIconUrl="/mascot.svg"
             welcomeSubtitle="Seu assistente de conteúdo com IA."
             welcomeTitle="Como posso te ajudar?"
+            onModeChange={setMode}
          />
       </AssistantRuntimeProvider>
    );

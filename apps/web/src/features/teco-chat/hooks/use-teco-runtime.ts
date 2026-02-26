@@ -7,7 +7,7 @@ import {
    useChatRuntime,
 } from "@assistant-ui/react-ai-sdk";
 import { useMutation } from "@tanstack/react-query";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { client, orpc } from "@/integrations/orpc/client";
 
 type RemoteThreadInitializeResponse = Awaited<
@@ -17,16 +17,24 @@ type RemoteThreadListResponse = Awaited<
    ReturnType<RemoteThreadListAdapter["list"]>
 >;
 
+interface UseTecoRuntimeOptions {
+   teamId: string;
+   mode?: string;
+   onThreadCreated?: (threadId: string) => void;
+}
+
 export function useTecoRuntime({
    teamId,
+   mode = "auto",
    onThreadCreated,
-}: {
-   teamId: string;
-   onThreadCreated?: (threadId: string) => void;
-}) {
+}: UseTecoRuntimeOptions) {
    const createThread = useMutation(orpc.chat.createThread.mutationOptions({}));
    const teamIdRef = useRef(teamId);
    teamIdRef.current = teamId;
+   const modeRef = useRef(mode);
+   useEffect(() => {
+      modeRef.current = mode;
+   }, [mode]);
    const activeThreadIdRef = useRef<string | undefined>(undefined);
    const pendingThreadRef = useRef<Promise<string> | undefined>(undefined);
    const onThreadCreatedRef = useRef(onThreadCreated);
@@ -101,7 +109,7 @@ export function useTecoRuntime({
             api: "/api/chat",
             body: async () => {
                const threadId = await ensureThread();
-               return { teamId, threadId };
+               return { teamId, threadId, mode: modeRef.current };
             },
          }),
       [teamId, ensureThread],

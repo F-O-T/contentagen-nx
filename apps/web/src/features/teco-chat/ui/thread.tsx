@@ -18,6 +18,13 @@ import { MarkdownText } from "@packages/ui/components/assistant-ui/markdown-text
 import { ToolFallback } from "@packages/ui/components/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@packages/ui/components/assistant-ui/tooltip-icon-button";
 import { Button } from "@packages/ui/components/button";
+import {
+   Select,
+   SelectContent,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from "@packages/ui/components/select";
 import { cn } from "@packages/ui/lib/utils";
 import { useStore } from "@tanstack/react-store";
 import {
@@ -36,11 +43,18 @@ import {
    SquareIcon,
 } from "lucide-react";
 import type { FC, ReactNode } from "react";
+import { useState } from "react";
 import {
    AGENT_DISPLAY_NAMES,
-   agentNetworkStore,
    type AgentStatus,
+   agentNetworkStore,
 } from "@/features/editor/stores/agent-network-store";
+import { type ContextItem, ContextPicker } from "./context-picker";
+
+const MODES = [
+   { value: "auto", label: "Auto" },
+   { value: "content", label: "Conteúdo" },
+] as const;
 
 export interface QuickSuggestion {
    label: string;
@@ -53,15 +67,26 @@ export interface ThreadProps {
    welcomeIconUrl?: string;
    quickSuggestions?: QuickSuggestion[];
    recentThreadsSlot?: ReactNode;
+   onModeChange?: (mode: string) => void;
+   defaultMode?: string;
 }
 
 export const Thread: FC<ThreadProps> = ({
-   welcomeTitle = "Hello there!",
-   welcomeSubtitle = "How can I help you today?",
+   welcomeTitle = "O que você quer criar?",
+   welcomeSubtitle = "Pesquise, escreva, audite SEO ou revise conteúdos.",
    welcomeIconUrl,
    quickSuggestions,
    recentThreadsSlot,
+   onModeChange,
+   defaultMode = "auto",
 }) => {
+   const [mode, setMode] = useState<string>(defaultMode);
+
+   const handleModeChange = (value: string) => {
+      setMode(value);
+      onModeChange?.(value);
+   };
+
    return (
       <ThreadPrimitive.Root
          className="aui-root aui-thread-root @container flex h-full w-full flex-col bg-transparent"
@@ -91,13 +116,13 @@ export const Thread: FC<ThreadProps> = ({
                }}
             />
 
-            <AuiIf condition={(s) => !s.thread.isEmpty}>
-               <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-transparent pb-4 md:pb-6">
+            <ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-3xl bg-transparent pb-4 md:pb-6">
+               <AuiIf condition={(s) => !s.thread.isEmpty}>
                   <ThreadScrollToBottom />
                   <AgentNetworkStatus />
-                  <Composer />
-               </ThreadPrimitive.ViewportFooter>
-            </AuiIf>
+               </AuiIf>
+               <Composer mode={mode} onModeChange={handleModeChange} />
+            </ThreadPrimitive.ViewportFooter>
          </ThreadPrimitive.Viewport>
       </ThreadPrimitive.Root>
    );
@@ -148,7 +173,7 @@ const ThreadWelcome: FC<ThreadWelcomeProps> = ({
          {/* Centered main content */}
          <div className="flex flex-1 flex-col items-center justify-center px-3 py-8">
             {/* Icon + title + subtitle */}
-            <div className="flex flex-col items-center gap-3 px-3 pb-5">
+            <div className="flex flex-col items-center gap-3 px-3 pb-6 text-center">
                <div className="relative flex items-center justify-center">
                   <div className="absolute size-24 rounded-full bg-primary/10 blur-xl" />
                   {iconUrl ? (
@@ -165,29 +190,17 @@ const ThreadWelcome: FC<ThreadWelcomeProps> = ({
                      <SparklesIcon className="relative size-10 text-foreground" />
                   )}
                </div>
-               <div className="text-center">
-                  <h2 className="text-lg font-semibold tracking-tight">
+               <div className="flex flex-col items-center gap-1.5">
+                  <h2 className="text-2xl font-semibold tracking-tight">
                      {title}
                   </h2>
-                  <p className="mt-0.5 text-sm italic text-muted-foreground">
-                     {subtitle}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{subtitle}</p>
                </div>
             </div>
 
-            {/* Composer inline */}
-            <div className="w-full pb-2">
-               <Composer />
-            </div>
-
-            {/* Disclaimer */}
-            <p className="pb-3 text-center text-[11px] text-muted-foreground/60">
-               Teco pode cometer erros. Verifique as respostas.
-            </p>
-
-            {/* Quick suggestion chips — flex wrap */}
+            {/* Quick suggestion chips — flex wrap, centered */}
             {quickSuggestions && quickSuggestions.length > 0 && (
-               <div className="flex w-full flex-wrap gap-1.5">
+               <div className="flex flex-wrap justify-center gap-2">
                   {quickSuggestions.map((s) => (
                      <QuickChip
                         key={s.label}
@@ -219,13 +232,10 @@ const QuickChip: FC<{ label: string; prompt: string }> = ({
    const api = useAui();
    return (
       <button
-         className="inline-flex items-center rounded-md border border-border/60 bg-background/60 px-2.5 py-1 text-xs font-medium text-foreground/70 transition-colors hover:border-border hover:bg-accent hover:text-accent-foreground"
-         onClick={() =>
-            api.thread().append({
-               role: "user",
-               content: [{ type: "text", text: prompt }],
-            })
-         }
+         className="rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
+         onClick={() => {
+            api.composer().setText(prompt);
+         }}
          type="button"
       >
          {label}
@@ -233,11 +243,65 @@ const QuickChip: FC<{ label: string; prompt: string }> = ({
    );
 };
 
-const Composer: FC = () => {
+interface ComposerProps {
+   mode: string;
+   onModeChange: (value: string) => void;
+}
+
+const Composer: FC<ComposerProps> = ({ mode, onModeChange }) => {
+   const [contextItems, setContextItems] = useState<ContextItem[]>([]);
+   const aui = useAui();
+
+   const handleContextSelect = (item: ContextItem) => {
+      setContextItems((prev) =>
+         prev.some((i) => i.id === item.id) ? prev : [...prev, item],
+      );
+   };
+
+   const removeContextItem = (id: string) => {
+      setContextItems((prev) => prev.filter((i) => i.id !== id));
+   };
+
+   const handleSubmit = () => {
+      if (contextItems.length === 0) return;
+      const contextBlock = contextItems
+         .map((item) => `@${item.label}`)
+         .join(", ");
+      const currentText = aui.composer().getState().text;
+      const separator = currentText.trim() ? "\n\n" : "";
+      aui.composer().setText(
+         `[Contexto: ${contextBlock}]${separator}${currentText}`,
+      );
+      setContextItems([]);
+   };
+
    return (
-      <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col">
+      <ComposerPrimitive.Root
+         className="aui-composer-root relative flex w-full flex-col"
+         onSubmit={handleSubmit}
+      >
          <ComposerPrimitive.AttachmentDropzone className="aui-composer-attachment-dropzone flex w-full flex-col rounded-xl border border-border/60 bg-background/80 px-1 pt-2 shadow-sm outline-none backdrop-blur-sm transition-all has-[textarea:focus-visible]:border-ring has-[textarea:focus-visible]:shadow-md has-[textarea:focus-visible]:ring-1 has-[textarea:focus-visible]:ring-ring/20 data-[dragging=true]:border-ring data-[dragging=true]:border-dashed data-[dragging=true]:bg-accent/50">
             <ComposerAttachments />
+            {contextItems.length > 0 && (
+               <div className="flex flex-wrap gap-1 px-3 pt-2">
+                  {contextItems.map((item) => (
+                     <span
+                        className="flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs"
+                        key={item.id}
+                     >
+                        @{item.label}
+                        <button
+                           aria-label="Remover contexto"
+                           className="ml-0.5 text-muted-foreground hover:text-foreground"
+                           onClick={() => removeContextItem(item.id)}
+                           type="button"
+                        >
+                           &times;
+                        </button>
+                     </span>
+                  ))}
+               </div>
+            )}
             <ComposerPrimitive.Input
                aria-label="Campo de mensagem"
                autoFocus
@@ -245,7 +309,28 @@ const Composer: FC = () => {
                placeholder="Envie uma mensagem..."
                rows={1}
             />
-            <ComposerAction />
+            <div className="flex items-center justify-between">
+               <div className="flex items-center gap-2 px-1 pb-2">
+                  <Select onValueChange={onModeChange} value={mode}>
+                     <SelectTrigger className="h-7 w-auto gap-1 border-none bg-transparent px-2 text-xs text-muted-foreground shadow-none hover:bg-accent">
+                        <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent align="start">
+                        {MODES.map((m) => (
+                           <SelectItem
+                              className="text-xs"
+                              key={m.value}
+                              value={m.value}
+                           >
+                              {m.label}
+                           </SelectItem>
+                        ))}
+                     </SelectContent>
+                  </Select>
+                  <ContextPicker onSelect={handleContextSelect} />
+               </div>
+               <ComposerAction />
+            </div>
          </ComposerPrimitive.AttachmentDropzone>
       </ComposerPrimitive.Root>
    );
@@ -500,7 +585,7 @@ const AgentNetworkStatus: FC = () => {
 
          <div className="ml-3 flex flex-col gap-1 border-l border-border/40 pl-2.5">
             {agents.map((agent) => (
-               <AgentRow key={agent.id} id={agent.id} status={agent.status} />
+               <AgentRow id={agent.id} key={agent.id} status={agent.status} />
             ))}
          </div>
       </div>

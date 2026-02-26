@@ -1,7 +1,7 @@
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useTecoRuntime } from "@/features/teco-chat/hooks/use-teco-runtime";
 import type { QuickSuggestion } from "@/features/teco-chat/ui/thread";
 import { formatTimeAgo, Thread } from "@/features/teco-chat/ui/thread";
@@ -50,7 +50,13 @@ function RecentThreadsList({ teamId }: { teamId: string }) {
    );
 }
 
-function TecoChatTabInner({ teamId }: { teamId: string }) {
+function TecoChatTabInner({
+   teamId,
+   onModeChange,
+}: {
+   teamId: string;
+   onModeChange: (mode: string) => void;
+}) {
    return (
       <div className="h-full [&_.aui-user-message-content]:bg-background [&_.aui-user-message-content]:text-foreground">
          <Thread
@@ -63,6 +69,7 @@ function TecoChatTabInner({ teamId }: { teamId: string }) {
             welcomeIconUrl="/mascot.svg"
             welcomeSubtitle="Seu assistente de conteúdo com IA."
             welcomeTitle="Como posso te ajudar?"
+            onModeChange={onModeChange}
          />
       </div>
    );
@@ -70,13 +77,14 @@ function TecoChatTabInner({ teamId }: { teamId: string }) {
 
 export function TecoChatTab() {
    const { activeTeamId } = useActiveTeam();
-   const runtime = useTecoRuntime({ teamId: activeTeamId ?? "" });
+   const [mode, setMode] = useState<string>("auto");
+   const runtime = useTecoRuntime({ teamId: activeTeamId ?? "", mode });
 
    if (!activeTeamId) return null;
 
    return (
       <AssistantRuntimeProvider runtime={runtime}>
-         <TecoChatTabInner teamId={activeTeamId} />
+         <TecoChatTabInner teamId={activeTeamId} onModeChange={setMode} />
       </AssistantRuntimeProvider>
    );
 }
