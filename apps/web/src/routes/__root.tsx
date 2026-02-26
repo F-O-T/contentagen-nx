@@ -47,6 +47,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
          {
             rel: "stylesheet",
             href: appCss,
+            precedence: "default",
          },
       ],
    }),
