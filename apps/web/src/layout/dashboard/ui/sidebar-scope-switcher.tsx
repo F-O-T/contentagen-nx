@@ -222,7 +222,14 @@ function SidebarScopeSwitcherContent() {
             router.navigate({ to: nextPath });
          }
       },
-      [activeTeam?.id, currentSlug, params.teamSlug, pathname, queryClient, router],
+      [
+         activeTeam?.id,
+         currentSlug,
+         params.teamSlug,
+         pathname,
+         queryClient,
+         router,
+      ],
    );
 
    const handleNewProject = useCallback(
@@ -474,7 +481,9 @@ function SidebarScopeSwitcherContent() {
                            </DropdownMenuItem>
                         ))}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onSelect={() => handleNewOrganization()}>
+                        <DropdownMenuItem
+                           onSelect={() => handleNewOrganization()}
+                        >
                            <Plus className="size-4" />
                            Nova organização
                         </DropdownMenuItem>

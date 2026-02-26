@@ -95,7 +95,11 @@ const ThreadListItemComponent: FC<{
    const trigger = (
       <ThreadListItemPrimitive.Trigger asChild>
          {renderThreadTrigger ? (
-            renderThreadTrigger({ externalId, title: title ?? undefined, children: triggerContent })
+            renderThreadTrigger({
+               externalId,
+               title: title ?? undefined,
+               children: triggerContent,
+            })
          ) : (
             <button
                className="flex min-w-0 flex-1 items-center gap-2 text-left"
