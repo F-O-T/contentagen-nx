@@ -1,88 +1,66 @@
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
-import {
-   AssistantChatTransport,
-   useChatRuntime,
-} from "@assistant-ui/react-ai-sdk";
-import type {
-   QuickSuggestion,
-   RecentThread,
-} from "@/features/arandu-chat/ui/thread";
-import { Thread } from "@/features/arandu-chat/ui/thread";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { Thread, formatTimeAgo } from "@/features/arandu-chat/ui/thread";
+import { useAranduRuntime } from "@/features/arandu-chat/hooks/use-arandu-runtime";
+import { useThreadList } from "@/features/arandu-chat/hooks/use-thread-list";
+import type { QuickSuggestion } from "@/features/arandu-chat/ui/thread";
 import { useActiveTeam } from "@/hooks/use-active-team";
-import { orpc } from "@/integrations/orpc/client";
+import { Link, useParams } from "@tanstack/react-router";
+import { Suspense } from "react";
 
 const QUICK_SUGGESTIONS: QuickSuggestion[] = [
-   { label: "Criar artigo", prompt: "Crie um artigo completo sobre " },
-   {
-      label: "Analisar SEO",
-      prompt: "Analise o SEO deste conteúdo e sugira melhorias: ",
-   },
-   { label: "Pesquisar", prompt: "Pesquise sobre " },
-   { label: "Otimizar texto", prompt: "Otimize este texto para SEO: " },
-   { label: "Estratégia", prompt: "Crie uma estratégia de conteúdo para " },
+	{ label: "Criar artigo", prompt: "Crie um artigo completo sobre " },
+	{ label: "Analisar SEO", prompt: "Analise o SEO deste conteúdo e sugira melhorias: " },
+	{ label: "Pesquisar", prompt: "Pesquise sobre " },
+	{ label: "Otimizar texto", prompt: "Otimize este texto para SEO: " },
+	{ label: "Estratégia", prompt: "Crie uma estratégia de conteúdo para " },
 ];
 
-function AranduThread({
-   teamId,
-   threadId,
-   recentThreads,
-   onNewThread,
-}: {
-   teamId: string;
-   threadId: string;
-   recentThreads: RecentThread[];
-   onNewThread: () => void;
-}) {
-   const runtime = useChatRuntime({
-      transport: new AssistantChatTransport({
-         api: "/api/chat",
-         body: { teamId, threadId },
-      }),
-   });
+function RecentThreadsList({ teamId }: { teamId: string }) {
+	const threads = useThreadList({ teamId, perPage: 5 });
+	const { slug, teamSlug } = useParams({ from: "/_authenticated/$slug/$teamSlug/_dashboard" });
 
-   return (
-      <AssistantRuntimeProvider runtime={runtime}>
-         <Thread
-            onNewThread={onNewThread}
-            quickSuggestions={QUICK_SUGGESTIONS}
-            recentThreads={recentThreads}
-            welcomeIconUrl="/arandu.svg"
-            welcomeSubtitle="Seu assistente de conteúdo com IA."
-            welcomeTitle="Como posso te ajudar?"
-         />
-      </AssistantRuntimeProvider>
-   );
+	return (
+		<>
+			{threads.map((t) => (
+				<Link
+					className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent/60"
+					key={t.id}
+					params={{ slug, teamSlug, threadId: t.id }}
+					to="/$slug/$teamSlug/chat/$threadId"
+				>
+					<span className="flex-1 truncate text-sm text-foreground/80">{t.title}</span>
+					<span className="shrink-0 text-xs text-muted-foreground/60">{formatTimeAgo(t.updatedAt)}</span>
+				</Link>
+			))}
+		</>
+	);
+}
+
+function AranduChatTabInner({ teamId }: { teamId: string }) {
+	return (
+		<Thread
+			quickSuggestions={QUICK_SUGGESTIONS}
+			welcomeIconUrl="/arandu.svg"
+			welcomeSubtitle="Seu assistente de conteúdo com IA."
+			welcomeTitle="Como posso te ajudar?"
+			recentThreadsSlot={
+				<Suspense fallback={null}>
+					<RecentThreadsList teamId={teamId} />
+				</Suspense>
+			}
+		/>
+	);
 }
 
 export function AranduChatTab() {
-   const { activeTeamId } = useActiveTeam();
-   const [threadId, setThreadId] = useState<string>(() => crypto.randomUUID());
+	const { activeTeamId } = useActiveTeam();
+	const runtime = useAranduRuntime({ teamId: activeTeamId ?? "" });
 
-   const { data: rawThreads = [] } = useQuery(
-      orpc.chat.getRecentThreads.queryOptions({
-         input: { teamId: activeTeamId ?? "", limit: 5 },
-         enabled: !!activeTeamId,
-      }),
-   );
+	if (!activeTeamId) return null;
 
-   const recentThreads: RecentThread[] = rawThreads.map((t) => ({
-      id: t.id,
-      title: t.title,
-      updatedAt: t.updatedAt,
-      onClick: () => setThreadId(t.id),
-   }));
-
-   if (!activeTeamId) return null;
-
-   return (
-      <AranduThread
-         key={threadId}
-         onNewThread={() => setThreadId(crypto.randomUUID())}
-         recentThreads={recentThreads}
-         teamId={activeTeamId}
-         threadId={threadId}
-      />
-   );
+	return (
+		<AssistantRuntimeProvider runtime={runtime}>
+			<AranduChatTabInner teamId={activeTeamId} />
+		</AssistantRuntimeProvider>
+	);
 }

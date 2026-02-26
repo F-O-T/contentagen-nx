@@ -2,6 +2,8 @@ import { useAssistantRuntime } from "@assistant-ui/react";
 import { Thread } from "@/features/arandu-chat/ui/thread";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { orpc } from "@/integrations/orpc/client";
 
 export const Route = createFileRoute(
 	"/_authenticated/$slug/$teamSlug/_dashboard/chat/$threadId",
@@ -23,6 +25,8 @@ const QUICK_SUGGESTIONS = [
 function ChatThreadPage() {
 	const { threadId } = Route.useParams();
 	const runtime = useAssistantRuntime();
+
+	useSuspenseQuery(orpc.chat.getThread.queryOptions({ input: { threadId } }));
 
 	useEffect(() => {
 		runtime.threads.switchToThread(threadId);

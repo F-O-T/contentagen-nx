@@ -3,7 +3,7 @@ import { ThreadList } from "@/features/arandu-chat/ui/thread-list";
 import { createFileRoute, Link, Outlet, useParams } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { closeContextPanel } from "@/features/context-panel/use-context-panel";
-import { useAranduRuntime } from "@/features/context-panel/hooks/use-arandu-runtime";
+import { useAranduRuntime } from "@/features/arandu-chat/hooks/use-arandu-runtime";
 import { useActiveTeam } from "@/hooks/use-active-team";
 
 export const Route = createFileRoute(

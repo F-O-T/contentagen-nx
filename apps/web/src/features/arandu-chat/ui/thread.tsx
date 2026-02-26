@@ -33,14 +33,7 @@ import {
    SparklesIcon,
    SquareIcon,
 } from "lucide-react";
-import type { FC } from "react";
-
-export interface RecentThread {
-   id: string;
-   title: string;
-   updatedAt: Date | string;
-   onClick: () => void;
-}
+import type { FC, ReactNode } from "react";
 
 export interface QuickSuggestion {
    label: string;
@@ -52,8 +45,7 @@ export interface ThreadProps {
    welcomeSubtitle?: string;
    welcomeIconUrl?: string;
    quickSuggestions?: QuickSuggestion[];
-   recentThreads?: RecentThread[];
-   onNewThread?: () => void;
+   recentThreadsSlot?: ReactNode;
 }
 
 export const Thread: FC<ThreadProps> = ({
@@ -61,8 +53,7 @@ export const Thread: FC<ThreadProps> = ({
    welcomeSubtitle = "How can I help you today?",
    welcomeIconUrl,
    quickSuggestions,
-   recentThreads,
-   onNewThread,
+   recentThreadsSlot,
 }) => {
    return (
       <ThreadPrimitive.Root
@@ -78,9 +69,8 @@ export const Thread: FC<ThreadProps> = ({
             <AuiIf condition={(s) => s.thread.isEmpty}>
                <ThreadWelcome
                   iconUrl={welcomeIconUrl}
-                  onNewThread={onNewThread}
                   quickSuggestions={quickSuggestions}
-                  recentThreads={recentThreads}
+                  recentThreadsSlot={recentThreadsSlot}
                   subtitle={welcomeSubtitle}
                   title={welcomeTitle}
                />
@@ -119,7 +109,7 @@ const ThreadScrollToBottom: FC = () => {
    );
 };
 
-function formatTimeAgo(date: Date | string): string {
+export function formatTimeAgo(date: Date | string): string {
    const d = typeof date === "string" ? new Date(date) : date;
    const diffMs = Date.now() - d.getTime();
    const diffDays = Math.floor(diffMs / 86400000);
@@ -135,8 +125,7 @@ interface ThreadWelcomeProps {
    subtitle: string;
    iconUrl?: string;
    quickSuggestions?: QuickSuggestion[];
-   recentThreads?: RecentThread[];
-   onNewThread?: () => void;
+   recentThreadsSlot?: ReactNode;
 }
 
 const ThreadWelcome: FC<ThreadWelcomeProps> = ({
@@ -144,8 +133,7 @@ const ThreadWelcome: FC<ThreadWelcomeProps> = ({
    subtitle,
    iconUrl,
    quickSuggestions,
-   recentThreads,
-   onNewThread,
+   recentThreadsSlot,
 }) => {
    return (
       <div className="aui-thread-welcome-root mx-auto flex w-full max-w-(--thread-max-width) grow flex-col">
@@ -204,39 +192,12 @@ const ThreadWelcome: FC<ThreadWelcomeProps> = ({
          </div>
 
          {/* Recent threads — pushed to bottom */}
-         {recentThreads && recentThreads.length > 0 && (
+         {recentThreadsSlot && (
             <div className="w-full border-t border-border/60 px-3 pt-3 pb-2">
-               <div className="mb-1.5 flex items-center justify-between">
-                  <p className="text-xs font-medium text-muted-foreground">
-                     Conversas recentes
-                  </p>
-                  {onNewThread && (
-                     <button
-                        className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-                        onClick={onNewThread}
-                        type="button"
-                     >
-                        Ver todas
-                     </button>
-                  )}
-               </div>
-               <div className="flex flex-col">
-                  {recentThreads.map((thread) => (
-                     <button
-                        className="group flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent/60"
-                        key={thread.id}
-                        onClick={thread.onClick}
-                        type="button"
-                     >
-                        <span className="flex-1 truncate text-sm text-foreground/80">
-                           {thread.title}
-                        </span>
-                        <span className="shrink-0 text-xs text-muted-foreground/60">
-                           {formatTimeAgo(thread.updatedAt)}
-                        </span>
-                     </button>
-                  ))}
-               </div>
+               <p className="mb-1.5 text-xs font-medium text-muted-foreground">
+                  Conversas recentes
+               </p>
+               <div className="flex flex-col">{recentThreadsSlot}</div>
             </div>
          )}
       </div>
