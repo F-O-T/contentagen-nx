@@ -7,7 +7,7 @@ import {
 } from "@packages/ui/components/sidebar";
 import { cn } from "@packages/ui/lib/utils";
 import { Search, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import {
    type SubSidebarSection,
    setActiveSection,
@@ -25,8 +25,16 @@ const SECTION_TITLES: Record<string, string> = {
 export function SidebarSubPanel() {
    const { activeSection } = useSidebarNav();
 
+   const handleOpenChange = useCallback((open: boolean) => {
+      if (!open) setActiveSection(null);
+   }, []);
+
    return (
-      <SidebarProvider className="min-h-0" defaultOpen={false}>
+      <SidebarProvider
+         className="min-h-0"
+         onOpenChange={handleOpenChange}
+         open={activeSection !== null}
+      >
          <SidebarManager name="sub-panel">
             <SubPanelSidebar activeSection={activeSection} />
          </SidebarManager>
@@ -39,31 +47,18 @@ function SubPanelSidebar({
 }: {
    activeSection: SubSidebarSection | null;
 }) {
-   const { open, setOpen } = useSidebar();
+   const { open } = useSidebar();
+   const { searchQuery, setSearchQuery } = useSidebarNav();
    const manager = useSidebarManager();
    const mainSidebar = manager.use("main");
    const panelLeft =
       mainSidebar?.state === "collapsed"
          ? "calc(var(--sidebar-width-icon) - 1px)"
          : "calc(var(--sidebar-width) - 1px)";
-   const [searchQuery, setSearchQuery] = useState("");
 
    const handleItemClick = useCallback(() => {
-      setOpen(false);
       setActiveSection(null);
-   }, [setOpen]);
-
-   // Reset search when section changes
-   useEffect(() => {
-      setSearchQuery("");
-   }, [activeSection]);
-
-   // Close when no active section
-   useEffect(() => {
-      if (!activeSection && open) {
-         setOpen(false);
-      }
-   }, [activeSection, open, setOpen]);
+   }, []);
 
    if (!open || !activeSection) return null;
 
@@ -72,7 +67,7 @@ function SubPanelSidebar({
          <button
             aria-label="Fechar painel"
             className="fixed inset-y-0 right-0 z-[900] bg-background/35 backdrop-blur-md backdrop-saturate-150"
-            onClick={() => setOpen(false)}
+            onClick={() => setActiveSection(null)}
             style={{ left: `calc(${panelLeft} + 280px)` }}
             type="button"
          />
@@ -101,7 +96,7 @@ function SubPanelSidebar({
                      <button
                         aria-label="Fechar painel"
                         className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                        onClick={() => setOpen(false)}
+                        onClick={() => setActiveSection(null)}
                         type="button"
                      >
                         <X className="size-4" />
