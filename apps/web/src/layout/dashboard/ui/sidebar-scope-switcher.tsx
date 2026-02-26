@@ -328,7 +328,7 @@ function SidebarScopeSwitcherContent() {
    }, [openAlertDialog, handleLogout]);
 
    return (
-      <SidebarMenu>
+      <SidebarMenu className="group-data-[collapsible=icon]:w-8">
          <SidebarMenuItem>
             <DropdownMenu>
                <DropdownMenuTrigger asChild>
@@ -342,7 +342,7 @@ function SidebarScopeSwitcherContent() {
                            src={activeOrganization.logo ?? undefined}
                         />
                         <AvatarFallback
-                           className={`rounded-lg  text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
+                           className={`rounded-lg text-xs font-bold text-white ${getOrgColor(activeOrganization.name)}`}
                         >
                            {getInitials(activeOrganization.name)}
                         </AvatarFallback>

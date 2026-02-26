@@ -174,7 +174,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             >
                <SidebarManager
                   name="main"
-                  style={{ "--sidebar-width": "28rem" } as React.CSSProperties}
+                  style={
+                     {
+                        "--sidebar-width": "28rem",
+                     } as React.CSSProperties
+                  }
                >
                   <AppSidebar />
                </SidebarManager>
@@ -195,8 +199,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                            isEditorPage || isChatPage
                               ? "overflow-hidden p-0"
                               : isSettingsPage
-                                ? "overflow-hidden p-4"
-                                : "overflow-y-auto p-4",
+                                 ? "overflow-hidden p-4"
+                                 : "overflow-y-auto p-4",
                         )}
                      >
                         {children}

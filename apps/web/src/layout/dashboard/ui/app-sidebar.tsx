@@ -39,7 +39,7 @@ import { SidebarScopeSwitcher } from "./sidebar-scope-switcher";
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
    return (
       <Sidebar className="px-0" collapsible="icon" variant="inset" {...props}>
-         <SidebarHeader className="">
+         <SidebarHeader>
             <SidebarScopeSwitcher />
          </SidebarHeader>
 
